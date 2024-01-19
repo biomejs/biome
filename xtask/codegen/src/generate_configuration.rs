@@ -70,7 +70,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let mut line_groups = Vec::new();
     let mut default_for_groups = Vec::new();
     let mut group_as_default_rules = Vec::new();
-    let mut group_as_disabled_rules = Vec::new();
     let mut group_match_code = Vec::new();
     let mut group_get_severity = Vec::new();
     let mut group_name_list = vec!["recommended", "all"];
@@ -109,12 +108,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 disabled_rules.extend(#group_struct_name::all_rules_as_filters());
             } else if #global_recommended {
                 enabled_rules.extend(#group_struct_name::recommended_rules_as_filters());
-            }
-        });
-
-        group_as_disabled_rules.push(quote! {
-            if let Some(group) = self.#property_group_name.as_ref() {
-                disabled_rules.extend(&group.get_disabled_rules());
             }
         });
 
@@ -264,14 +257,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 #( #group_as_default_rules )*
 
                 enabled_rules.difference(&disabled_rules).copied().collect()
-            }
-
-            /// It returns only the disabled rules
-            pub fn as_disabled_rules(&self) -> IndexSet<RuleFilter> {
-                let mut disabled_rules = IndexSet::new();
-                #( #group_as_disabled_rules )*
-
-                disabled_rules
             }
         }
 

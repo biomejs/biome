@@ -385,3 +385,284 @@ fn does_not_change_linting_settings() {
         result,
     ));
 }
+
+#[test]
+fn does_override_recommended() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "linter": {
+                "rules": {
+                    "recommended": true
+                }
+            },
+            "overrides": [
+                {
+                    "include": ["test.js"],
+                    "linter": {
+                        "rules": {
+                            "recommended": false
+                        }
+                    }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let test2 = Path::new("test2.js");
+    fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, DEBUGGER_BEFORE);
+    assert_file_contents(&fs, test2, DEBUGGER_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_override_recommended",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_override_groupe_recommended() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "recommended": true
+                    }
+                }
+            },
+            "overrides": [
+                {
+                    "include": ["test.js"],
+                    "linter": {
+                        "rules": {
+                            "suspicious": {
+                                "recommended": false
+                            }
+                        }
+                    }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let test2 = Path::new("test2.js");
+    fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, DEBUGGER_BEFORE);
+    assert_file_contents(&fs, test2, DEBUGGER_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_override_groupe_recommended",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_preserve_group_recommended_when_override_global_recommened() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "recommended": false
+                    }
+                }
+            },
+            "overrides": [
+                {
+                    "include": ["test.js"],
+                    "linter": {
+                        "rules": {
+                            "recommended": true
+                        }
+                    }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let test2 = Path::new("test2.js");
+    fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, DEBUGGER_BEFORE);
+    assert_file_contents(&fs, test2, DEBUGGER_BEFORE);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_preserve_group_recommended_when_override_global_recommened",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_preserve_individually_diabled_rules_in_overrides() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noDebugger": "off"
+                    }
+                }
+            },
+            "overrides": [
+                {
+                    "include": ["test.js"],
+                    "linter": {
+                        "rules": {
+                            "suspicious": {}
+                        }
+                    }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let test2 = Path::new("test2.js");
+    fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, DEBUGGER_BEFORE);
+    assert_file_contents(&fs, test2, DEBUGGER_BEFORE);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_preserve_individually_diabled_rules_in_overrides",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_merge_all_overrides() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noDebugger": "error"
+                    }
+                }
+            },
+            "overrides": [
+                {
+                    "include": ["*.js"],
+                    "linter": {
+                        "rules": {
+                            "suspicious": {
+                                "noDebugger": "warn"
+                            }
+                        }
+                    }
+                }, {
+                    "include": ["test.js"],
+                    "linter": {
+                        "rules": {
+                            "suspicious": {
+                                "noDebugger": "off"
+                            }
+                        }
+                    }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let test2 = Path::new("test2.js");
+    fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, DEBUGGER_BEFORE);
+    assert_file_contents(&fs, test2, DEBUGGER_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_merge_all_overrides",
+        fs,
+        console,
+        result,
+    ));
+}
