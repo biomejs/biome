@@ -210,7 +210,7 @@ Some examples of shells scripts:
   set -eu
 
   git diff -z --staged --name-only --diff-filter=ACMR | \
-      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched $STAGED_FILES
+      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched
   ```
 
 - Format, lint, and apply safe code fixes before committing
@@ -225,7 +225,7 @@ Some examples of shells scripts:
   fi
 
   git diff -z --staged --name-only --diff-filter=ACMR | \
-      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched
+      xargs -0 npx biome check --apply --files-ignore-unknown=true --no-errors-on-unmatched
 
   git update-index --again
   ```
