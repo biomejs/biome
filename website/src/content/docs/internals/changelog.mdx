@@ -42,6 +42,12 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   Contributed by @Conaclos
 
+- Don't format **ignored** files that are well-known JSONC files when `files.ignoreUnknown` is enabled ([#1607](https://github.com/biomejs/biome/issues/1607)).
+
+  Previously, Biome always formatted files that are known to be JSONC files (e.g. `.eslintrc`) when `files.ignoreUnknown` was enabled.
+
+  Contributed by @Conaclos
+
 ### Editors
 
 ### Formatter
