@@ -24,6 +24,18 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Configuration
 
+#### Bug fixes
+
+- Override correctly the recommended preset ([#1349](https://github.com/biomejs/biome/issues/1349)).
+
+  Previously, if unspecified, Biome turned on the recommended preset in overrides.
+  This resulted in reporting diagnostics with a severity level set to `off`.
+  This in turn caused Biome to fail.
+
+  Now Biome won't switch on the recommended preset in `overrides` unless told to do so.
+
+  Contributed by @Conaclos
+
 ### Editors
 
 ### Formatter
