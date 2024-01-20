@@ -20,6 +20,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#1584](https://github.com/biomejs/biome/issues/1584). Ensure the LSP only registers the formatter once. Contributed by @nhedger
 
+- Fix [#1589](https://github.com/biomejs/biome/issues/1589). Fix invalid formatting of own line comments when they were at the end of an import/export list. Contributed by @spanishpear
+
 ### Configuration
 
 ### Editors
