@@ -9,7 +9,7 @@ use crate::{
     configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, Matcher, Rules,
     WorkspaceError,
 };
-use biome_analyze::{AnalyzerRules, RuleFilter};
+use biome_analyze::AnalyzerRules;
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
@@ -25,7 +25,7 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use indexmap::IndexSet;
-use std::ops::{BitOr, Sub};
+use std::borrow::Cow;
 use std::path::{Path, PathBuf};
 use std::{
     num::NonZeroU64,
@@ -175,13 +175,26 @@ impl WorkspaceSettings {
         }
     }
 
-    /// Returns rules
-    pub fn as_rules(&self, path: &Path) -> Option<Rules> {
+    /// Returns rules taking overrides into account.
+    pub fn as_rules(&self, path: &Path) -> Option<Cow<Rules>> {
+        let mut result = self.linter.rules.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
-        self.linter
-            .rules
-            .as_ref()
-            .map(|rules| overrides.override_as_rules(path, rules.clone()))
+        for pattern in overrides.patterns.iter() {
+            let excluded = pattern.exclude.matches_path(path);
+            if !excluded && !pattern.include.is_empty() && pattern.include.matches_path(path) {
+                let pattern_rules = pattern.linter.rules.as_ref();
+                if let Some(pattern_rules) = pattern_rules {
+                    result = if let Some(mut result) = result.take() {
+                        // Override rules
+                        result.to_mut().merge_with(pattern_rules.clone());
+                        Some(result)
+                    } else {
+                        Some(Cow::Borrowed(pattern_rules))
+                    };
+                }
+            }
+        }
+        result
     }
 }
 
@@ -758,45 +771,10 @@ impl OverrideSettings {
             })
     }
 
-    /// Retrieves the enabled rules that match the given `path`
-    pub fn overrides_enabled_rules<'a>(
-        &'a self,
-        path: &Path,
-        rules: IndexSet<RuleFilter<'a>>,
-    ) -> IndexSet<RuleFilter> {
-        self.patterns.iter().fold(rules, move |mut rules, pattern| {
-            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
-            if !excluded && !pattern.include.is_empty() && pattern.include.matches_path(path) {
-                if let Some(pattern_rules) = pattern.linter.rules.as_ref() {
-                    let disabled_rules = pattern_rules.as_disabled_rules();
-                    let enabled_rules = pattern_rules.as_enabled_rules();
-
-                    rules = rules.bitor(&enabled_rules).sub(&disabled_rules);
-                }
-            }
-
-            rules
-        })
-    }
-
-    pub fn override_as_rules(&self, path: &Path, rules: Rules) -> Rules {
-        self.patterns.iter().fold(rules, |mut rules, pattern| {
-            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
-            if !excluded && !pattern.include.is_empty() && pattern.include.matches_path(path) {
-                let pattern_rules = pattern.linter.rules.as_ref();
-                if let Some(patter_rules) = pattern_rules {
-                    rules.merge_with(patter_rules.clone())
-                }
-            }
-
-            rules
-        })
-    }
-
     /// Scans the overrides and checks if there's an override that disable the formatter for `path`
     pub fn formatter_disabled(&self, path: &Path) -> Option<bool> {
         for pattern in &self.patterns {
-            if !pattern.exclude.is_empty() && pattern.exclude.matches_path(path) {
+            if pattern.exclude.matches_path(path) {
                 continue;
             }
             if !pattern.include.is_empty() && pattern.include.matches_path(path) {
@@ -812,7 +790,7 @@ impl OverrideSettings {
     /// Scans the overrides and checks if there's an override that disable the linter for `path`
     pub fn linter_disabled(&self, path: &Path) -> Option<bool> {
         for pattern in &self.patterns {
-            if !pattern.exclude.is_empty() && pattern.exclude.matches_path(path) {
+            if pattern.exclude.matches_path(path) {
                 continue;
             }
             if !pattern.include.is_empty() && pattern.include.matches_path(path) {
@@ -828,7 +806,7 @@ impl OverrideSettings {
     /// Scans the overrides and checks if there's an override that disable the organize imports for `path`
     pub fn organize_imports_disabled(&self, path: &Path) -> Option<bool> {
         for pattern in &self.patterns {
-            if !pattern.exclude.is_empty() && pattern.exclude.matches_path(path) {
+            if pattern.exclude.matches_path(path) {
                 continue;
             }
             if !pattern.include.is_empty() && pattern.include.matches_path(path) {

@@ -7,7 +7,6 @@ use super::{
 };
 use crate::file_handlers::{Capabilities, FixAllParams, Language, LintParams};
 use crate::project_handlers::{ProjectCapabilities, ProjectHandlers};
-use crate::settings::OverrideSettings;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
     OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
@@ -15,7 +14,7 @@ use crate::workspace::{
 use crate::{
     file_handlers::Features,
     settings::{SettingsHandle, WorkspaceSettings},
-    Rules, Workspace, WorkspaceError,
+    Workspace, WorkspaceError,
 };
 use biome_analyze::{AnalysisFilter, RuleFilter};
 use biome_diagnostics::{
@@ -26,6 +25,7 @@ use biome_fs::{RomePath, BIOME_JSON};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
+use std::borrow::Borrow;
 use std::ffi::OsStr;
 use std::path::Path;
 use std::{panic::RefUnwindSafe, sync::RwLock};
@@ -128,22 +128,6 @@ impl WorkspaceServer {
                     .and_then(OsStr::to_str)
                     .map(|s| s.to_string()),
             )
-        }
-    }
-
-    fn build_rule_filter_list<'a>(
-        &'a self,
-        rules: Option<&'a Rules>,
-        overrides: &'a OverrideSettings,
-        path: &'a Path,
-    ) -> Vec<RuleFilter> {
-        let enabled_rules =
-            rules.map(|rules| overrides.overrides_enabled_rules(path, rules.as_enabled_rules()));
-
-        if let Some(enabled_rules) = enabled_rules {
-            enabled_rules.into_iter().collect::<Vec<RuleFilter>>()
-        } else {
-            vec![]
         }
     }
 
@@ -438,10 +422,14 @@ impl Workspace for WorkspaceServer {
         let (diagnostics, errors, skipped_diagnostics) = if let Some(lint) =
             self.get_file_capabilities(&params.path).analyzer.lint
         {
-            let rules = settings.linter().rules.as_ref();
-            let overrides = &settings.override_settings;
-            let mut rule_filter_list =
-                self.build_rule_filter_list(rules, overrides, params.path.as_path());
+            // Compite final rules (taking `overrides` into account)
+            let rules = settings.as_rules(params.path.as_path());
+            let mut rule_filter_list = rules
+                .as_ref()
+                .map(|rules| rules.as_enabled_rules())
+                .unwrap_or_default()
+                .into_iter()
+                .collect::<Vec<_>>();
             if settings.organize_imports.enabled && !params.categories.is_syntax() {
                 rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
             }
@@ -454,7 +442,7 @@ impl Workspace for WorkspaceServer {
                 let results = lint(LintParams {
                     parse,
                     filter,
-                    rules,
+                    rules: rules.as_ref().map(|x| x.borrow()),
                     settings: self.settings(),
                     max_diagnostics: params.max_diagnostics,
                     path: &params.path,
@@ -571,15 +559,18 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
         let settings = self.settings.read().unwrap();
         let parse = self.get_parse(params.path.clone(), Some(FeatureName::Lint))?;
-
+        // Compite final rules (taking `overrides` into account)
         let rules = settings.as_rules(params.path.as_path());
-        let overrides = &settings.override_settings;
-        let rule_filter_list =
-            self.build_rule_filter_list(rules.as_ref(), overrides, params.path.as_path());
+        let rule_filter_list = rules
+            .as_ref()
+            .map(|rules| rules.as_enabled_rules())
+            .unwrap_or_default()
+            .into_iter()
+            .collect::<Vec<_>>();
         let filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
         fix_all(FixAllParams {
             parse,
-            rules: rules.as_ref(),
+            rules: rules.as_ref().map(|x| x.borrow()),
             fix_file_mode: params.fix_file_mode,
             filter,
             settings: self.settings(),
