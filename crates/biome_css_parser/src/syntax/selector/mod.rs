@@ -148,7 +148,7 @@ impl ParseRecovery for SelectorListParseRecovery {
     /// the start of a new selector, or a preceding line break.
     /// # CSS Examples
     ///
-    /// - Recovery at `end_kind_ts` (e.g., `{`):
+    /// - Recovery at `recovery_ts` (e.g., `{`):
     ///   ```css
     ///   .class1, { }
     ///   /*       ^                   */
