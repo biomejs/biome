@@ -1262,19 +1262,15 @@ fn handle_import_export_specifier_comment(
                 //   MULTI,
                 //   LINE,
                 //   THING,
-                //   // some comment here   
+                //   // some comment here
                 // } from 'foo'
                 // - then attach it as a trailing comment to `THING`
-                if matches!(
-                    following_token.kind(),
-                    JsSyntaxKind::R_CURLY
-                ) {
+                if matches!(following_token.kind(), JsSyntaxKind::R_CURLY) {
                     if let Some(preceding) = comment.preceding_node() {
                         return CommentPlacement::trailing(preceding.clone(), comment);
                     }
                 }
-
-            } 
+            }
             CommentPlacement::Default(comment)
         }
 
