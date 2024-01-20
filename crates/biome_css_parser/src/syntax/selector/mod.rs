@@ -144,7 +144,7 @@ impl ParseRecovery for SelectorListParseRecovery {
     ///
     /// This method checks if the parser is currently positioned at a token that
     /// indicates a safe point to resume parsing after encountering an error in a
-    /// selector list. The recovery points are identified by `end_kind_ts`, a comma,
+    /// selector list. The recovery points are identified by `recovery_ts`, a comma,
     /// the start of a new selector, or a preceding line break.
     /// # CSS Examples
     ///
