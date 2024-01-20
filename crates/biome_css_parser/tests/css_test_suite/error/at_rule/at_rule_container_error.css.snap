@@ -222,26 +222,37 @@ CssRoot {
         },
         CssQualifiedRule {
             prelude: CssSelectorList [
-                CssComplexSelector {
-                    left: CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: CssTypeSelector {
-                            namespace: missing (optional),
-                            ident: CssIdentifier {
-                                value_token: IDENT@221..226 "width" [] [],
-                            },
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@221..227 "width" [] [Whitespace(" ")],
                         },
-                        sub_selectors: CssSubSelectorList [],
                     },
-                    combinator: CSS_SPACE_LITERAL@226..227 " " [] [],
-                    right: missing (required),
+                    sub_selectors: CssSubSelectorList [],
                 },
                 missing separator,
                 CssBogusSelector {
                     items: [
                         LTEQ@227..230 "<=" [] [Whitespace(" ")],
                         CSS_DIMENSION_VALUE@230..233 "500" [] [],
-                        PX_KW@233..235 "px" [] [],
+                    ],
+                },
+                missing separator,
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@233..235 "px" [] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+                missing separator,
+                CssBogusSelector {
+                    items: [
                         R_PAREN@235..237 ")" [] [Whitespace(" ")],
                     ],
                 },
@@ -265,26 +276,37 @@ CssRoot {
         },
         CssQualifiedRule {
             prelude: CssSelectorList [
-                CssComplexSelector {
-                    left: CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: CssTypeSelector {
-                            namespace: missing (optional),
-                            ident: CssIdentifier {
-                                value_token: IDENT@257..262 "width" [] [],
-                            },
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@257..263 "width" [] [Whitespace(" ")],
                         },
-                        sub_selectors: CssSubSelectorList [],
                     },
-                    combinator: CSS_SPACE_LITERAL@262..263 " " [] [],
-                    right: missing (required),
+                    sub_selectors: CssSubSelectorList [],
                 },
                 missing separator,
                 CssBogusSelector {
                     items: [
                         LTEQ@263..266 "<=" [] [Whitespace(" ")],
                         CSS_DIMENSION_VALUE@266..269 "500" [] [],
-                        PX_KW@269..271 "px" [] [],
+                    ],
+                },
+                missing separator,
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@269..271 "px" [] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+                missing separator,
+                CssBogusSelector {
+                    items: [
                         R_PAREN@271..273 ")" [] [Whitespace(" ")],
                     ],
                 },
@@ -614,22 +636,28 @@ CssRoot {
           0: INHERIT_KW@213..221 "inherit" [] [Whitespace(" ")]
     6: CSS_QUALIFIED_RULE@221..240
       0: CSS_SELECTOR_LIST@221..237
-        0: CSS_COMPLEX_SELECTOR@221..227
-          0: CSS_COMPOUND_SELECTOR@221..226
+        0: CSS_COMPOUND_SELECTOR@221..227
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@221..227
             0: (empty)
-            1: CSS_TYPE_SELECTOR@221..226
-              0: (empty)
-              1: CSS_IDENTIFIER@221..226
-                0: IDENT@221..226 "width" [] []
-            2: CSS_SUB_SELECTOR_LIST@226..226
-          1: CSS_SPACE_LITERAL@226..227 " " [] []
-          2: (empty)
+            1: CSS_IDENTIFIER@221..227
+              0: IDENT@221..227 "width" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@227..227
         1: (empty)
-        2: CSS_BOGUS_SELECTOR@227..237
+        2: CSS_BOGUS_SELECTOR@227..233
           0: LTEQ@227..230 "<=" [] [Whitespace(" ")]
           1: CSS_DIMENSION_VALUE@230..233 "500" [] []
-          2: PX_KW@233..235 "px" [] []
-          3: R_PAREN@235..237 ")" [] [Whitespace(" ")]
+        3: (empty)
+        4: CSS_COMPOUND_SELECTOR@233..235
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@233..235
+            0: (empty)
+            1: CSS_IDENTIFIER@233..235
+              0: IDENT@233..235 "px" [] []
+          2: CSS_SUB_SELECTOR_LIST@235..235
+        5: (empty)
+        6: CSS_BOGUS_SELECTOR@235..237
+          0: R_PAREN@235..237 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@237..240
         0: L_CURLY@237..239 "{" [] [Whitespace(" ")]
         1: CSS_DECLARATION_LIST@239..239
@@ -642,22 +670,28 @@ CssRoot {
           0: IDENT@253..257 "not" [] [Whitespace(" ")]
     8: CSS_QUALIFIED_RULE@257..277
       0: CSS_SELECTOR_LIST@257..273
-        0: CSS_COMPLEX_SELECTOR@257..263
-          0: CSS_COMPOUND_SELECTOR@257..262
+        0: CSS_COMPOUND_SELECTOR@257..263
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@257..263
             0: (empty)
-            1: CSS_TYPE_SELECTOR@257..262
-              0: (empty)
-              1: CSS_IDENTIFIER@257..262
-                0: IDENT@257..262 "width" [] []
-            2: CSS_SUB_SELECTOR_LIST@262..262
-          1: CSS_SPACE_LITERAL@262..263 " " [] []
-          2: (empty)
+            1: CSS_IDENTIFIER@257..263
+              0: IDENT@257..263 "width" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@263..263
         1: (empty)
-        2: CSS_BOGUS_SELECTOR@263..273
+        2: CSS_BOGUS_SELECTOR@263..269
           0: LTEQ@263..266 "<=" [] [Whitespace(" ")]
           1: CSS_DIMENSION_VALUE@266..269 "500" [] []
-          2: PX_KW@269..271 "px" [] []
-          3: R_PAREN@271..273 ")" [] [Whitespace(" ")]
+        3: (empty)
+        4: CSS_COMPOUND_SELECTOR@269..271
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@269..271
+            0: (empty)
+            1: CSS_IDENTIFIER@269..271
+              0: IDENT@269..271 "px" [] []
+          2: CSS_SUB_SELECTOR_LIST@271..271
+        5: (empty)
+        6: CSS_BOGUS_SELECTOR@271..273
+          0: R_PAREN@271..273 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@273..277
         0: L_CURLY@273..276 "{" [] [Whitespace("  ")]
         1: CSS_DECLARATION_LIST@276..276
@@ -902,7 +936,7 @@ at_rule_container_error.css:6:20 parse ━━━━━━━━━━━━━�
   
 at_rule_container_error.css:6:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '<='.
+  × expected `,` but instead found `<=`
   
     4 │ @container revert (width <= 500px) { }
     5 │ @container revert-layer (width <= 500px) { }
@@ -911,14 +945,33 @@ at_rule_container_error.css:6:26 parse ━━━━━━━━━━━━━�
     7 │ 
     8 │ @container not width <= 500px) {  }
   
-  i Expected a compound selector here.
+  i Remove <=
+  
+at_rule_container_error.css:6:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `px`
   
     4 │ @container revert (width <= 500px) { }
     5 │ @container revert-layer (width <= 500px) { }
   > 6 │ @container inherit width <= 500px) { }
-      │                          ^^
+      │                                ^^
     7 │ 
     8 │ @container not width <= 500px) {  }
+  
+  i Remove px
+  
+at_rule_container_error.css:6:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    4 │ @container revert (width <= 500px) { }
+    5 │ @container revert-layer (width <= 500px) { }
+  > 6 │ @container inherit width <= 500px) { }
+      │                                  ^
+    7 │ 
+    8 │ @container not width <= 500px) {  }
+  
+  i Remove )
   
 at_rule_container_error.css:8:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -942,7 +995,7 @@ at_rule_container_error.css:8:16 parse ━━━━━━━━━━━━━�
   
 at_rule_container_error.css:8:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a compound selector but instead found '<='.
+  × expected `,` but instead found `<=`
   
      6 │ @container inherit width <= 500px) { }
      7 │ 
@@ -951,14 +1004,33 @@ at_rule_container_error.css:8:22 parse ━━━━━━━━━━━━━�
      9 │ 
     10 │ @container not (width <= 500px {  }
   
-  i Expected a compound selector here.
+  i Remove <=
+  
+at_rule_container_error.css:8:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `px`
   
      6 │ @container inherit width <= 500px) { }
      7 │ 
    > 8 │ @container not width <= 500px) {  }
-       │                      ^^
+       │                            ^^
      9 │ 
     10 │ @container not (width <= 500px {  }
+  
+  i Remove px
+  
+at_rule_container_error.css:8:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+     6 │ @container inherit width <= 500px) { }
+     7 │ 
+   > 8 │ @container not width <= 500px) {  }
+       │                              ^
+     9 │ 
+    10 │ @container not (width <= 500px {  }
+  
+  i Remove )
   
 at_rule_container_error.css:10:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
