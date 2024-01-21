@@ -14,11 +14,7 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
-
-### Analyzer
-
-### CLI
+## 1.5.3 (2024-01-22)
 
 ### LSP
 
@@ -48,22 +44,14 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   Contributed by @Conaclos
 
-### Editors
-
 ### Formatter
 
-#### Bug fixed
+#### Bug fixes
 
 - Fix [#1178](https://github.com/biomejs/biome/issues/1178), where the line ending option wasn't correctly applied. Contributed by @ematipico
 - Fix [#1571](https://github.com/biomejs/biome/issues/1571). Fix invalid formatting of nested multiline comments. Contributed by @ah-yu
 
-### JavaScript APIs
-
 ### Linter
-
-#### New features
-
-#### Enhancements
 
 #### Bug fixes
 
@@ -85,7 +73,38 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - [useExhaustiveDependencies](https://biomejs.dev/linter/use-exhaustive-dependencies) no longer made Biome errors in code TypeScript import equal declarations ([#1194](https://github.com/biomejs/biome/issues/1194)). Contributed by @Conaclos
 
+- Fix typo in the diagnostic of [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules). Contributed by @huseeiin
+
 ### Parser
+
+#### Bug fixes
+
+- Accept the `const` modifier for type parameter in method type signature ([#1624](https://github.com/biomejs/biome/issues/1624)).
+
+  The following code is now correctly parsed:
+
+  ```ts
+  type Foo = {
+    <const T>();
+    method<const T>();
+  };
+  ```
+
+  Contributed by @magic-akari
+
+### Website
+
+#### New
+
+- Add a [page that maps the Biome rule to its source](https://biomejs.dev/linter/rules-sources/). Contributed by @ematipico
+
+#### Fixes
+
+- Generate Open Graph images based on the linked page. Contributed by @ematipico
+
+- Fix examples of the [git hook page](https://biomejs.dev/recipes/git-hooks/). Contributed by @9renpoto, @lmauromb, and @Conaclos
+
+- Fix dead and erroneous hyperlinks. Contributed by @Sec-ant and Conaclos
 
 
 ## 1.5.2 (2024-01-15)
