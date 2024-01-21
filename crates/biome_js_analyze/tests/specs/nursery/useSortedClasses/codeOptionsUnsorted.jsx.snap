@@ -1,0 +1,483 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: codeOptionsUnsorted.jsx
+---
+# Input
+```jsx
+<>
+	{/* attributes */}
+	<div class="px-2 foo p-4 bar" />
+	<div className="px-2 foo p-4 bar" />
+	<div customClassAttribute="px-2 foo p-4 bar" />
+	<div notClassAttribute="px-2 foo p-4 bar" />
+	{/* utility sorting */}
+	<div class="text-center custom-style1 p-4 bg-blue-500 hover:bg-blue-700 text-white foo rounded-lg shadow-lg" />
+	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
+	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
+	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
+	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
+	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
+	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
+	<div class="underline custom-text hover:text-red-500 foo text-2xl font-semibold my-2" />
+	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
+	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
+</>;
+
+// functions
+clsx("px-2 foo p-4 bar");
+// TODO: tagged template literals are not supported yet
+tw`px-2 foo p-4 bar`;
+tw.div`px-2 foo p-4 bar`;
+notClassFunction("px-2 foo p-4 bar");
+notTemplateFunction`px-2 foo p-4 bar`;
+notTemplateFunction.div`px-2 foo p-4 bar`;
+
+// nested values
+<div class={"px-2 foo p-4 bar"} />;
+<div class={["px-2 foo p-4 bar"]} />;
+<div
+	class={{
+		"px-2 foo p-4 bar": [
+			"px-2 foo p-4 bar",
+			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+		],
+	}}
+/>;
+clsx(["px-2 foo p-4 bar"]);
+clsx({
+	"px-2 foo p-4 bar": [
+		"px-2 foo p-4 bar",
+		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+	],
+});
+
+```
+
+# Diagnostics
+```
+codeOptionsUnsorted.options:8:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The rule useSortedClasses doesn't accept any options.
+  
+     6 │ 				"useSortedClasses": {
+     7 │ 					"level": "error",
+   > 8 │ 					"options": {
+       │ 					           ^
+   > 9 │ 						"attributes": ["customClassAttribute"],
+  > 10 │ 						"functions": ["clsx", "tw"]
+  > 11 │ 					}
+       │ 					^
+    12 │ 				}
+    13 │ 			}
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:3:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    1 │ <>
+    2 │ 	{/* attributes */}
+  > 3 │ 	<div class="px-2 foo p-4 bar" />
+      │ 	           ^^^^^^^^^^^^^^^^^^
+    4 │ 	<div className="px-2 foo p-4 bar" />
+    5 │ 	<div customClassAttribute="px-2 foo p-4 bar" />
+  
+  i Unsafe fix: Sort the classes.
+  
+     1  1 │   <>
+     2  2 │   	{/* attributes */}
+     3    │ - → <div·class="px-2·foo·p-4·bar"·/>
+        3 │ + → <div·class="foo·bar·p-4·px-2"·/>
+     4  4 │   	<div className="px-2 foo p-4 bar" />
+     5  5 │   	<div customClassAttribute="px-2 foo p-4 bar" />
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:4:17 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    2 │ 	{/* attributes */}
+    3 │ 	<div class="px-2 foo p-4 bar" />
+  > 4 │ 	<div className="px-2 foo p-4 bar" />
+      │ 	               ^^^^^^^^^^^^^^^^^^
+    5 │ 	<div customClassAttribute="px-2 foo p-4 bar" />
+    6 │ 	<div notClassAttribute="px-2 foo p-4 bar" />
+  
+  i Unsafe fix: Sort the classes.
+  
+     2  2 │   	{/* attributes */}
+     3  3 │   	<div class="px-2 foo p-4 bar" />
+     4    │ - → <div·className="px-2·foo·p-4·bar"·/>
+        4 │ + → <div·className="foo·bar·p-4·px-2"·/>
+     5  5 │   	<div customClassAttribute="px-2 foo p-4 bar" />
+     6  6 │   	<div notClassAttribute="px-2 foo p-4 bar" />
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:8:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+     6 │ 	<div notClassAttribute="px-2 foo p-4 bar" />
+     7 │ 	{/* utility sorting */}
+   > 8 │ 	<div class="text-center custom-style1 p-4 bg-blue-500 hover:bg-blue-700 text-white foo rounded-lg shadow-lg" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
+    10 │ 	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
+  
+  i Unsafe fix: Sort the classes.
+  
+     6  6 │   	<div notClassAttribute="px-2 foo p-4 bar" />
+     7  7 │   	{/* utility sorting */}
+     8    │ - → <div·class="text-center·custom-style1·p-4·bg-blue-500·hover:bg-blue-700·text-white·foo·rounded-lg·shadow-lg"·/>
+        8 │ + → <div·class="custom-style1·foo·rounded-lg·bg-blue-500·p-4·text-center·text-white·shadow-lg·hover:bg-blue-700"·/>
+     9  9 │   	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
+    10 10 │   	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:9:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+     7 │ 	{/* utility sorting */}
+     8 │ 	<div class="text-center custom-style1 p-4 bg-blue-500 hover:bg-blue-700 text-white foo rounded-lg shadow-lg" />
+   > 9 │ 	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
+    11 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
+  
+  i Unsafe fix: Sort the classes.
+  
+     7  7 │   	{/* utility sorting */}
+     8  8 │   	<div class="text-center custom-style1 p-4 bg-blue-500 hover:bg-blue-700 text-white foo rounded-lg shadow-lg" />
+     9    │ - → <div·class="flex·custom-layout·items-center·justify-center·h-screen·bg-gray-200·bar·text-lg·font-bold"·/>
+        9 │ + → <div·class="custom-layout·bar·flex·h-screen·items-center·justify-center·bg-gray-200·font-bold·text-lg"·/>
+    10 10 │   	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
+    11 11 │   	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:10:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+     8 │ 	<div class="text-center custom-style1 p-4 bg-blue-500 hover:bg-blue-700 text-white foo rounded-lg shadow-lg" />
+     9 │ 	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
+  > 10 │ 	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
+    12 │ 	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
+  
+  i Unsafe fix: Sort the classes.
+  
+     8  8 │   	<div class="text-center custom-style1 p-4 bg-blue-500 hover:bg-blue-700 text-white foo rounded-lg shadow-lg" />
+     9  9 │   	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
+    10    │ - → <div·class="grid·custom-grid·grid-cols-3·gap-4·p-6·m-6·border·border-gray-300·shadow-md·rounded-md"·/>
+       10 │ + → <div·class="custom-grid·m-6·grid·grid-cols-3·gap-4·rounded-md·border·border-gray-300·p-6·shadow-md"·/>
+    11 11 │   	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
+    12 12 │   	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:11:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+     9 │ 	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
+    10 │ 	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
+  > 11 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
+    13 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
+  
+  i Unsafe fix: Sort the classes.
+  
+     9  9 │   	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
+    10 10 │   	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
+    11    │ - → <div·class="absolute·top-0·right-0·m-4·p-2·text-sm·bg-red-600·text-white·rounded-full·custom-alert"·/>
+       11 │ + → <div·class="custom-alert·absolute·top-0·right-0·m-4·rounded-full·bg-red-600·p-2·text-sm·text-white"·/>
+    12 12 │   	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
+    13 13 │   	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:12:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    10 │ 	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
+    11 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
+  > 12 │ 	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
+    14 │ 	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
+  
+  i Unsafe fix: Sort the classes.
+  
+    10 10 │   	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
+    11 11 │   	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
+    12    │ - → <div·class="inline-block·bar·bg-green-300·text-green-800·p-2·rounded·border·border-green-500·custom-button"·/>
+       12 │ + → <div·class="bar·custom-button·inline-block·rounded·border·border-green-500·bg-green-300·p-2·text-green-800"·/>
+    13 13 │   	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
+    14 14 │   	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:13:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    11 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
+    12 │ 	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
+  > 13 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
+    15 │ 	<div class="underline custom-text hover:text-red-500 foo text-2xl font-semibold my-2" />
+  
+  i Unsafe fix: Sort the classes.
+  
+    11 11 │   	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
+    12 12 │   	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
+    13    │ - → <div·class="flex-col·custom-list·space-y-4·p-6·bg-white·shadow-md·rounded-lg·divide-y·divide-gray-200"·/>
+       13 │ + → <div·class="custom-list·flex-col·space-y-4·divide-y·divide-gray-200·rounded-lg·bg-white·p-6·shadow-md"·/>
+    14 14 │   	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
+    15 15 │   	<div class="underline custom-text hover:text-red-500 foo text-2xl font-semibold my-2" />
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:14:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    12 │ 	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
+    13 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
+  > 14 │ 	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	<div class="underline custom-text hover:text-red-500 foo text-2xl font-semibold my-2" />
+    16 │ 	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
+  
+  i Unsafe fix: Sort the classes.
+  
+    12 12 │   	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
+    13 13 │   	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
+    14    │ - → <div·class="relative·overflow-hidden·custom-background·bg-no-repeat·bg-cover·h-64·w-full·foo·m-2"·/>
+       14 │ + → <div·class="custom-background·foo·relative·m-2·h-64·w-full·overflow-hidden·bg-cover·bg-no-repeat"·/>
+    15 15 │   	<div class="underline custom-text hover:text-red-500 foo text-2xl font-semibold my-2" />
+    16 16 │   	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:15:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    13 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
+    14 │ 	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
+  > 15 │ 	<div class="underline custom-text hover:text-red-500 foo text-2xl font-semibold my-2" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
+    17 │ 	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
+  
+  i Unsafe fix: Sort the classes.
+  
+    13 13 │   	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
+    14 14 │   	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
+    15    │ - → <div·class="underline·custom-text·hover:text-red-500·foo·text-2xl·font-semibold·my-2"·/>
+       15 │ + → <div·class="custom-text·foo·my-2·font-semibold·text-2xl·underline·hover:text-red-500"·/>
+    16 16 │   	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
+    17 17 │   	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:16:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    14 │ 	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
+    15 │ 	<div class="underline custom-text hover:text-red-500 foo text-2xl font-semibold my-2" />
+  > 16 │ 	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
+    18 │ </>;
+  
+  i Unsafe fix: Sort the classes.
+  
+    14 14 │   	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
+    15 15 │   	<div class="underline custom-text hover:text-red-500 foo text-2xl font-semibold my-2" />
+    16    │ - → <div·class="flex-wrap·custom-container·justify-between·items-start·bar·bg-purple-200·p-5·text-purple-700"·/>
+       16 │ + → <div·class="custom-container·bar·flex-wrap·items-start·justify-between·bg-purple-200·p-5·text-purple-700"·/>
+    17 17 │   	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
+    18 18 │   </>;
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:17:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    15 │ 	<div class="underline custom-text hover:text-red-500 foo text-2xl font-semibold my-2" />
+    16 │ 	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
+  > 17 │ 	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ </>;
+    19 │ 
+  
+  i Unsafe fix: Sort the classes.
+  
+    15 15 │   	<div class="underline custom-text hover:text-red-500 foo text-2xl font-semibold my-2" />
+    16 16 │   	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
+    17    │ - → <div·class="gap-8·bg-indigo-100·text-indigo-900·p-3·border-l-4·border-indigo-500·custom-border"·/>
+       17 │ + → <div·class="custom-border·gap-8·border-indigo-500·border-l-4·bg-indigo-100·p-3·text-indigo-900"·/>
+    18 18 │   </>;
+    19 19 │   
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:30:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    29 │ // nested values
+  > 30 │ <div class={"px-2 foo p-4 bar"} />;
+       │             ^^^^^^^^^^^^^^^^^^
+    31 │ <div class={["px-2 foo p-4 bar"]} />;
+    32 │ <div
+  
+  i Unsafe fix: Sort the classes.
+  
+    28 28 │   
+    29 29 │   // nested values
+    30    │ - <div·class={"px-2·foo·p-4·bar"}·/>;
+       30 │ + <div·class={"foo·bar·p-4·px-2"}·/>;
+    31 31 │   <div class={["px-2 foo p-4 bar"]} />;
+    32 32 │   <div
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:31:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    29 │ // nested values
+    30 │ <div class={"px-2 foo p-4 bar"} />;
+  > 31 │ <div class={["px-2 foo p-4 bar"]} />;
+       │              ^^^^^^^^^^^^^^^^^^
+    32 │ <div
+    33 │ 	class={{
+  
+  i Unsafe fix: Sort the classes.
+  
+    29 29 │   // nested values
+    30 30 │   <div class={"px-2 foo p-4 bar"} />;
+    31    │ - <div·class={["px-2·foo·p-4·bar"]}·/>;
+       31 │ + <div·class={["foo·bar·p-4·px-2"]}·/>;
+    32 32 │   <div
+    33 33 │   	class={{
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:35:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    33 │ 	class={{
+    34 │ 		"px-2 foo p-4 bar": [
+  > 35 │ 			"px-2 foo p-4 bar",
+       │ 			^^^^^^^^^^^^^^^^^^
+    36 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+    37 │ 		],
+  
+  i Unsafe fix: Sort the classes.
+  
+    33 33 │   	class={{
+    34 34 │   		"px-2 foo p-4 bar": [
+    35    │ - → → → "px-2·foo·p-4·bar",
+       35 │ + → → → "foo·bar·p-4·px-2",
+    36 36 │   			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+    37 37 │   		],
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:36:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    34 │ 		"px-2 foo p-4 bar": [
+    35 │ 			"px-2 foo p-4 bar",
+  > 36 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+       │ 			                      ^^^^^^^^^^^^^^^^^^
+    37 │ 		],
+    38 │ 	}}
+  
+  i Unsafe fix: Sort the classes.
+  
+    34 34 │   		"px-2 foo p-4 bar": [
+    35 35 │   			"px-2 foo p-4 bar",
+    36    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
+       36 │ + → → → {·"px-2·foo·p-4·bar":·"foo·bar·p-4·px-2",·custom:·["px-2·foo·p-4·bar"]·},
+    37 37 │   		],
+    38 38 │   	}}
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:36:55 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    34 │ 		"px-2 foo p-4 bar": [
+    35 │ 			"px-2 foo p-4 bar",
+  > 36 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+       │ 			                                                   ^^^^^^^^^^^^^^^^^^
+    37 │ 		],
+    38 │ 	}}
+  
+  i Unsafe fix: Sort the classes.
+  
+    34 34 │   		"px-2 foo p-4 bar": [
+    35 35 │   			"px-2 foo p-4 bar",
+    36    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
+       36 │ + → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["foo·bar·p-4·px-2"]·},
+    37 37 │   		],
+    38 38 │   	}}
+  
+
+```
+
+
