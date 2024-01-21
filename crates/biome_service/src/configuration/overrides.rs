@@ -1,7 +1,10 @@
+use super::javascript::PartialJavascriptConfiguration;
+use super::json::PartialJsonConfiguration;
+use super::PartialCssConfiguration;
 use crate::configuration::formatter::{deserialize_line_width, serialize_line_width};
 use crate::configuration::{
-    css_configuration, javascript_configuration, json_configuration, CssConfiguration,
-    JavascriptConfiguration, JsonConfiguration, PlainIndentStyle,
+    partial_css_configuration, partial_javascript_configuration, partial_json_configuration,
+    CssConfiguration, JavascriptConfiguration, JsonConfiguration, PlainIndentStyle,
 };
 use crate::settings::{
     to_matcher, FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings,
@@ -55,18 +58,18 @@ pub struct OverridePattern {
 
     /// Specific configuration for the JavaScript language
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(javascript_configuration), optional, hide)]
-    pub javascript: Option<JavascriptConfiguration>,
+    #[bpaf(external(partial_javascript_configuration), optional, hide)]
+    pub javascript: Option<PartialJavascriptConfiguration>,
 
     /// Specific configuration for the Json language
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(json_configuration), optional, hide)]
-    pub json: Option<JsonConfiguration>,
+    #[bpaf(external(partial_json_configuration), optional, hide)]
+    pub json: Option<PartialJsonConfiguration>,
 
     /// Specific configuration for the Css language
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(css_configuration), optional, hide)]
-    pub css: Option<CssConfiguration>,
+    #[bpaf(external(partial_css_configuration), optional, hide)]
+    pub css: Option<PartialCssConfiguration>,
 
     /// Specific configuration for the Json language
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -380,7 +383,7 @@ fn to_override_linter_settings(
 ) -> OverrideLinterSettings {
     OverrideLinterSettings {
         enabled: conf.enabled.or(Some(lint_settings.enabled)),
-        rules: conf.rules.or(lint_settings.rules.clone()),
+        rules: conf.rules.or(Some(lint_settings.rules.clone())),
     }
 }
 

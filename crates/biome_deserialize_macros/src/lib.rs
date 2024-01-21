@@ -1,6 +1,6 @@
 mod deserializable_derive;
 mod merge_derive;
-mod none_state_derive;
+mod partial_derive;
 
 use proc_macro::TokenStream;
 use proc_macro_error::*;
@@ -260,14 +260,14 @@ pub fn derive_mergeable(input: TokenStream) -> TokenStream {
     TokenStream::from(tokens)
 }
 
-#[proc_macro_derive(NoneState)]
+#[proc_macro_derive(Partial, attributes(partial))]
 #[proc_macro_error]
-pub fn derive_none_state(input: TokenStream) -> TokenStream {
+pub fn derive_partial(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
-    let input = none_state_derive::DeriveInput::parse(input);
+    let input = partial_derive::DeriveInput::parse(input);
 
-    let tokens = none_state_derive::generate_none_state(input);
+    let tokens = partial_derive::generate_partial(input);
 
     if false {
         panic!("{tokens}");

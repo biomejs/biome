@@ -4,15 +4,15 @@ use crate::RuleConfiguration;
 use biome_analyze::RuleFilter;
 use biome_console::markup;
 use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
-use biome_deserialize_macros::{Deserializable, Merge, NoneState};
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
 use biome_rowan::TextRange;
 use indexmap::IndexSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize)]
-#[deserializable(from_none, with_validator)]
+#[derive(Clone, Debug, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Rules {
@@ -382,10 +382,8 @@ impl Rules {
         disabled_rules
     }
 }
-#[derive(
-    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
-)]
-#[deserializable(from_none, with_validator)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -1026,10 +1024,8 @@ impl A11y {
         }
     }
 }
-#[derive(
-    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
-)]
-#[deserializable(from_none, with_validator)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -1576,10 +1572,8 @@ impl Complexity {
         }
     }
 }
-#[derive(
-    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
-)]
-#[deserializable(from_none, with_validator)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -2260,10 +2254,8 @@ impl Correctness {
         }
     }
 }
-#[derive(
-    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
-)]
-#[deserializable(from_none, with_validator)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -2764,10 +2756,8 @@ impl Nursery {
         }
     }
 }
-#[derive(
-    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
-)]
-#[deserializable(from_none, with_validator)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -2892,10 +2882,8 @@ impl Performance {
         }
     }
 }
-#[derive(
-    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
-)]
-#[deserializable(from_none, with_validator)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -3028,10 +3016,8 @@ impl Security {
         }
     }
 }
-#[derive(
-    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
-)]
-#[deserializable(from_none, with_validator)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -3692,10 +3678,8 @@ impl Style {
         }
     }
 }
-#[derive(
-    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
-)]
-#[deserializable(from_none, with_validator)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]

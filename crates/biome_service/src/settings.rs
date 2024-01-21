@@ -93,67 +93,53 @@ impl WorkspaceSettings {
         gitignore_matches: &[String],
     ) -> Result<(), WorkspaceError> {
         // formatter part
-        if let Some(formatter) = configuration.formatter {
-            self.formatter = to_format_settings(
-                working_directory.clone(),
-                formatter,
-                vcs_path.clone(),
-                gitignore_matches,
-            )?;
-        }
+        self.formatter = to_format_settings(
+            working_directory.clone(),
+            configuration.formatter,
+            vcs_path.clone(),
+            gitignore_matches,
+        )?;
 
         // linter part
-        if let Some(linter) = configuration.linter {
-            self.linter = to_linter_settings(
-                working_directory.clone(),
-                linter,
-                vcs_path.clone(),
-                gitignore_matches,
-            )?;
-        }
+        self.linter = to_linter_settings(
+            working_directory.clone(),
+            configuration.linter,
+            vcs_path.clone(),
+            gitignore_matches,
+        )?;
 
         // Filesystem settings
         if let Some(files) = to_file_settings(
             working_directory.clone(),
-            configuration.files,
+            Some(configuration.files),
             vcs_path.clone(),
             gitignore_matches,
         )? {
             self.files = files;
         }
 
-        if let Some(organize_imports) = configuration.organize_imports {
-            self.organize_imports = to_organize_imports_settings(
-                working_directory.clone(),
-                organize_imports,
-                vcs_path.clone(),
-                gitignore_matches,
-            )?;
-        }
+        self.organize_imports = to_organize_imports_settings(
+            working_directory.clone(),
+            configuration.organize_imports,
+            vcs_path.clone(),
+            gitignore_matches,
+        )?;
 
         // javascript settings
-        if let Some(javascript) = configuration.javascript {
-            self.languages.javascript = javascript.into();
-        }
+        self.languages.javascript = configuration.javascript.into();
         // json settings
-        if let Some(json) = configuration.json {
-            self.languages.json = json.into();
-        }
+        self.languages.json = configuration.json.into();
         // css settings
-        if let Some(css) = configuration.css {
-            self.languages.css = css.into();
-        }
+        self.languages.css = configuration.css.into();
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
-        if let Some(overrides) = configuration.overrides {
-            self.override_settings = to_override_settings(
-                working_directory.clone(),
-                overrides,
-                vcs_path,
-                gitignore_matches,
-                self,
-            )?;
-        }
+        self.override_settings = to_override_settings(
+            working_directory.clone(),
+            configuration.overrides,
+            vcs_path,
+            gitignore_matches,
+            self,
+        )?;
 
         Ok(())
     }
@@ -311,35 +297,23 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
     fn from(javascript: JavascriptConfiguration) -> Self {
         let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
         let formatter = javascript.formatter;
-        if let Some(formatter) = formatter {
-            language_setting.formatter.quote_style = formatter.quote_style;
-            language_setting.formatter.jsx_quote_style = formatter.jsx_quote_style;
-            language_setting.formatter.quote_properties = formatter.quote_properties;
-            language_setting.formatter.trailing_comma = formatter.trailing_comma;
-            language_setting.formatter.semicolons = formatter.semicolons;
-            language_setting.formatter.arrow_parentheses = formatter.arrow_parentheses;
-            language_setting.formatter.bracket_spacing = formatter.bracket_spacing.map(Into::into);
-            language_setting.formatter.bracket_same_line =
-                formatter.bracket_same_line.map(Into::into);
-            language_setting.formatter.enabled = formatter.enabled;
-            language_setting.formatter.line_width = formatter.line_width;
-            language_setting.formatter.indent_width = formatter
-                .indent_width
-                .map(Into::into)
-                .or(formatter.indent_size.map(Into::into));
-            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
-        }
+        language_setting.formatter.quote_style = Some(formatter.quote_style);
+        language_setting.formatter.jsx_quote_style = Some(formatter.jsx_quote_style);
+        language_setting.formatter.quote_properties = Some(formatter.quote_properties);
+        language_setting.formatter.trailing_comma = Some(formatter.trailing_comma);
+        language_setting.formatter.semicolons = Some(formatter.semicolons);
+        language_setting.formatter.arrow_parentheses = Some(formatter.arrow_parentheses);
+        language_setting.formatter.bracket_spacing = Some(formatter.bracket_spacing.into());
+        language_setting.formatter.bracket_same_line = Some(formatter.bracket_same_line.into());
+        language_setting.formatter.enabled = Some(formatter.enabled);
+        language_setting.formatter.line_width = Some(formatter.line_width);
+        language_setting.formatter.indent_width = Some(formatter.indent_width.into());
+        language_setting.formatter.indent_style = Some(formatter.indent_style.into());
 
-        if let Some(parser) = javascript.parser {
-            language_setting.parser.parse_class_parameter_decorators = parser
-                .unsafe_parameter_decorators_enabled
-                .unwrap_or_default();
-        }
+        language_setting.parser.parse_class_parameter_decorators =
+            javascript.parser.unsafe_parameter_decorators_enabled;
 
-        let organize_imports = javascript.organize_imports;
-        if let Some(_organize_imports) = organize_imports {}
-
-        language_setting.globals = javascript.globals.map(|global| global.into_index_set());
+        language_setting.globals = Some(javascript.globals.into_index_set());
 
         language_setting
     }
@@ -348,20 +322,15 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
 impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
     fn from(json: JsonConfiguration) -> Self {
         let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
-        if let Some(parser) = json.parser {
-            language_setting.parser.allow_comments = parser.allow_comments.unwrap_or_default();
-            language_setting.parser.allow_trailing_commas =
-                parser.allow_trailing_commas.unwrap_or_default();
-        }
-        if let Some(formatter) = json.formatter {
-            language_setting.formatter.enabled = formatter.enabled;
-            language_setting.formatter.line_width = formatter.line_width;
-            language_setting.formatter.indent_width = formatter
-                .indent_width
-                .map(Into::into)
-                .or(formatter.indent_size.map(Into::into));
-            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
-        }
+
+        language_setting.parser.allow_comments = json.parser.allow_comments;
+        language_setting.parser.allow_trailing_commas = json.parser.allow_trailing_commas;
+
+        language_setting.formatter.enabled = Some(json.formatter.enabled);
+        language_setting.formatter.line_width = Some(json.formatter.line_width);
+        language_setting.formatter.indent_width = Some(json.formatter.indent_width.into());
+        language_setting.formatter.indent_style = Some(json.formatter.indent_style.into());
+
         language_setting
     }
 }
@@ -369,16 +338,13 @@ impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
 impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
     fn from(css: CssConfiguration) -> Self {
         let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
-        if let Some(formatter) = css.formatter {
-            language_setting.formatter.enabled = formatter.enabled;
-            language_setting.formatter.line_width = formatter.line_width;
-            language_setting.formatter.indent_width = formatter
-                .indent_width
-                .map(Into::into)
-                .or(formatter.indent_size.map(Into::into));
-            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
-            language_setting.formatter.quote_style = formatter.quote_style;
-        }
+
+        language_setting.formatter.enabled = Some(css.formatter.enabled);
+        language_setting.formatter.line_width = Some(css.formatter.line_width);
+        language_setting.formatter.indent_width = Some(css.formatter.indent_width.into());
+        language_setting.formatter.indent_style = Some(css.formatter.indent_style.into());
+        language_setting.formatter.quote_style = Some(css.formatter.quote_style);
+
         language_setting
     }
 }
@@ -446,7 +412,7 @@ pub struct FilesSettings {
 }
 
 /// Limit the size of files to 1.0 MiB by default
-const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
+pub(crate) const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
     // SAFETY: This constant is initialized with a non-zero value
     unsafe { NonZeroU64::new_unchecked(1024 * 1024) };
 
@@ -477,15 +443,15 @@ fn to_file_settings(
 
     Ok(if let Some(config) = config {
         Some(FilesSettings {
-            max_size: config.max_size.unwrap_or(DEFAULT_FILE_SIZE_LIMIT),
+            max_size: config.max_size,
             ignored_files: to_matcher(
                 working_directory.clone(),
-                config.ignore.as_ref(),
+                Some(&config.ignore),
                 vcs_config_path.clone(),
                 gitignore_matches,
             )?,
-            included_files: to_matcher(working_directory, config.include.as_ref(), None, &[])?,
-            ignore_unknown: config.ignore_unknown.unwrap_or_default(),
+            included_files: to_matcher(working_directory, Some(&config.include), None, &[])?,
+            ignore_unknown: config.ignore_unknown,
         })
     } else {
         None
