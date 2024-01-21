@@ -1,7 +1,17 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
+};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, JsConditionalExpression, JsSyntaxKind};
-use biome_rowan::AstNode;
+use biome_diagnostics::Applicability;
+use biome_js_factory::make;
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsLiteralExpression, JsConditionalExpression, JsSyntaxKind,
+    OperatorPrecedence, T,
+};
+use biome_rowan::{AstNode, BatchMutationExt};
+
+use crate::JsRuleAction;
 
 declare_rule! {
     /// Disallow ternary operators when simpler alternatives exist.
@@ -14,29 +24,29 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = x ? true : true;
+    /// var a = x? true : true;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// var a = foo === 1 ? false : true;
+    /// var a = foo===1? false : true;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// var a = foo + 1 ? false : true;
+    /// var a = foo + 1? false : true;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// var a = foo + 1 ? true : false;
+    /// var a = foo + 1? true : false;
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// var a = x === 2 ? 'Yes' : 'No';
+    /// var a = x === 2? 'Yes' : 'No';
     /// ```
     ///
     /// ```js
-    /// var a = x === 2 ? 'Yes' : false;
+    /// var a = x === 2? 'Yes' : false;
     /// ```
     ///
     /// ## Resources
@@ -48,8 +58,22 @@ declare_rule! {
         name: "noUselessTernary",
         source: RuleSource::Eslint("no-unneeded-ternary"),
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
+
+const BOOLEAN_OPERATORS: [&str; 10] = [
+    "==",
+    "===",
+    "!=",
+    "!==",
+    ">",
+    ">=",
+    "<",
+    "<=",
+    "in",
+    "instanceof",
+];
 
 impl Rule for NoUselessTernary {
     type Query = Ast<JsConditionalExpression>;
@@ -88,6 +112,89 @@ impl Rule for NoUselessTernary {
             }),
         )
     }
+
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let node_expression_kind = node.test().ok()?.syntax().kind();
+        let alternate = node
+            .alternate()
+            .ok()?
+            .as_any_js_literal_expression()?
+            .as_js_boolean_literal_expression()?
+            .value_token()
+            .ok()?;
+        let consequent = node
+            .consequent()
+            .ok()?
+            .as_any_js_literal_expression()?
+            .as_js_boolean_literal_expression()?
+            .value_token()
+            .ok()?;
+
+        let new_node;
+        let mut mutation = ctx.root().begin();
+
+        if alternate.text_trimmed() == consequent.text_trimmed() {
+            if node_expression_kind == JsSyntaxKind::JS_IDENTIFIER_EXPRESSION {
+                let res_boolean_value = if consequent.text_trimmed() == "true" {
+                    T![true]
+                } else {
+                    T![false]
+                };
+
+                new_node = biome_js_syntax::AnyJsExpression::AnyJsLiteralExpression(
+                    AnyJsLiteralExpression::JsBooleanLiteralExpression(
+                        make::js_boolean_literal_expression(make::token(res_boolean_value)),
+                    ),
+                );
+            } else {
+                return None;
+            }
+        } else if alternate.text_trimmed() == "true" {
+            new_node = invert_expression(&node.test().ok()?)?;
+        } else if is_boolean_expression(&node.test().ok()?)? {
+            match node_expression_kind {
+                JsSyntaxKind::JS_BINARY_EXPRESSION => {
+                    let left = node.test().ok()?.as_js_binary_expression()?.left().ok()?;
+                    let right = node.test().ok()?.as_js_binary_expression()?.right().ok()?;
+                    let operator = node
+                        .test()
+                        .ok()?
+                        .as_js_binary_expression()?
+                        .operator_token()
+                        .ok()?
+                        .kind();
+
+                    new_node = AnyJsExpression::from(make::js_binary_expression(
+                        left,
+                        make::token_decorated_with_space(operator),
+                        right,
+                    ));
+                }
+                JsSyntaxKind::JS_UNARY_EXPRESSION => {
+                    let argument = node
+                        .test()
+                        .ok()?
+                        .as_js_unary_expression()?
+                        .argument()
+                        .ok()?;
+                    new_node = make::js_unary_expression(make::token(T![!]), argument).into();
+                }
+                _ => return None,
+            }
+        } else {
+            let new_expression = invert_expression(&node.test().ok()?)?;
+            new_node = make::js_unary_expression(make::token(T![!]), new_expression).into();
+        }
+
+        mutation.replace_element(node.clone().into(), new_node.into());
+        return Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message: markup! { "Replace the above code with," }.to_owned(),
+            mutation,
+        });
+    }
 }
 
 fn is_boolean_literal(expression: &AnyJsExpression) -> bool {
@@ -96,4 +203,67 @@ fn is_boolean_literal(expression: &AnyJsExpression) -> bool {
         return true;
     }
     false
+}
+
+fn is_boolean_expression(expression: &AnyJsExpression) -> Option<bool> {
+    match expression.syntax().kind() {
+        JsSyntaxKind::JS_BINARY_EXPRESSION => {
+            let operator = expression
+                .as_js_binary_expression()?
+                .operator_token()
+                .ok()?;
+            let operator = operator.text_trimmed();
+            if BOOLEAN_OPERATORS.contains(&operator) {
+                return Some(true);
+            }
+        }
+        JsSyntaxKind::JS_UNARY_EXPRESSION => {
+            let operator = expression.as_js_unary_expression()?.operator_token().ok()?;
+            let operator = operator.text_trimmed();
+            if operator == "!" {
+                return Some(true);
+            }
+        }
+        _ => return Some(false),
+    };
+
+    Some(false)
+}
+
+fn invert_expression(expression: &AnyJsExpression) -> Option<AnyJsExpression> {
+    if expression.syntax().kind() == JsSyntaxKind::JS_BINARY_EXPRESSION {
+        let operator = expression
+            .as_js_binary_expression()?
+            .operator_token()
+            .ok()?;
+        let suggested_operator = match operator.kind() {
+            JsSyntaxKind::EQ2 => Some(T![!=]),
+            JsSyntaxKind::EQ3 => Some(T![!==]),
+            JsSyntaxKind::NEQ => Some(T![==]),
+            JsSyntaxKind::NEQ2 => Some(T![===]),
+            _ => None,
+        };
+
+        if let Some(operator) = suggested_operator {
+            let left = expression.as_js_binary_expression()?.left().ok()?;
+            let right = expression.as_js_binary_expression()?.right().ok()?;
+            let new_node = AnyJsExpression::from(make::js_binary_expression(
+                left,
+                make::token(operator),
+                right,
+            ));
+
+            return Some(new_node);
+        }
+    }
+
+    if expression.precedence().ok()? < OperatorPrecedence::Unary {
+        let new_node = make::parenthesized(expression.clone()).into();
+        let new_node = make::js_unary_expression(make::token(T![!]), new_node).into();
+        return Some(new_node);
+    }
+
+    let new_node = make::js_unary_expression(make::token(T![!]), expression.clone()).into();
+
+    Some(new_node)
 }
