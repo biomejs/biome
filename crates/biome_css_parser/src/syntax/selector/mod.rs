@@ -30,7 +30,7 @@ use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet}
 /// This function is applied when lexing CSS selectors. It decides whether the
 /// current context should be treated as a regular context or a selector-specific
 /// context. The distinction is important for handling whitespaces, especially
-/// around combinators in CSS selectors. It's inverted logic for `is_nth_at_selector(p, 1)`.
+/// around combinators in CSS selectors. It's an inverted logic for `is_nth_at_selector(p, 1)`.
 const SELECTOR_LEX_SET: TokenSet<CssSyntaxKind> =
     COMPLEX_SELECTOR_COMBINATOR_SET.union(token_set![T!['{'], T![,], T![')']]);
 #[inline]
