@@ -1232,6 +1232,7 @@ fn parse_ts_type_member(p: &mut JsParser, context: TypeContext) -> ParsedSyntax 
 // type C = { m(a: string, b: number, c: string): any }
 // type D = { readonly: string, readonly a: number }
 // type E = { m<A, B>(a: A, b: B): never }
+// type F = { m<const A>(a: A): never }
 fn parse_ts_property_or_method_signature_type_member(
     p: &mut JsParser,
     context: TypeContext,
@@ -1254,7 +1255,7 @@ fn parse_ts_property_or_method_signature_type_member(
     p.eat(T![?]);
 
     if p.at(T!['(']) || p.at(T![<]) {
-        parse_ts_call_signature(p, context);
+        parse_ts_call_signature(p, context.and_allow_const_modifier(true));
         parse_ts_type_member_semi(p);
         let method = m.complete(p, TS_METHOD_SIGNATURE_TYPE_MEMBER);
 
