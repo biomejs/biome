@@ -13,7 +13,7 @@ const path = require('node:path');
 ```
 invalid-cjs.cjs:1:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Node.js modules are forbidden.
+  ! Using Node.js modules is forbidden.
   
   > 1 │ const fs = require('fs');
       │                    ^^^^
@@ -30,7 +30,7 @@ invalid-cjs.cjs:1:20 lint/nursery/noNodejsModules ━━━━━━━━━━
 ```
 invalid-cjs.cjs:2:22 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Node.js modules are forbidden.
+  ! Using Node.js modules is forbidden.
   
     1 │ const fs = require('fs');
   > 2 │ const path = require('node:path');

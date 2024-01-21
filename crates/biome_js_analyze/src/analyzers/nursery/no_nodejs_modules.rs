@@ -54,7 +54,7 @@ impl Rule for NoNodejsModules {
                 rule_category!(),
                 range,
                 markup! {
-                    "Using Node.js modules are forbidden."
+                    "Using Node.js modules is forbidden."
                 },
             )
             .note(markup! {
