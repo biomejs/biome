@@ -135,11 +135,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 pub fn quick_test() {
     let code = r#"
 
-.div ""
-    color: red;
-}
-
-div {}
+.div () 12321 "string", span {}
 
     "#;
 

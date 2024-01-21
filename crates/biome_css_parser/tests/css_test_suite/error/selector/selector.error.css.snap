@@ -33,17 +33,21 @@ CssRoot {
     rules: CssRuleList [
         CssQualifiedRule {
             prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssClassSelector {
-                            dot_token: DOT@0..1 "." [] [],
-                            name: CssCustomIdentifier {
-                                value_token: IDENT@1..5 "div" [] [Whitespace(" ")],
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@0..1 "." [] [],
+                                name: CssCustomIdentifier {
+                                    value_token: IDENT@1..4 "div" [] [],
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@4..5 " " [] [],
+                    right: missing (required),
                 },
                 missing separator,
                 CssBogusSelector {
@@ -119,17 +123,21 @@ CssRoot {
         },
         CssQualifiedRule {
             prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssClassSelector {
-                            dot_token: DOT@42..45 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssCustomIdentifier {
-                                value_token: IDENT@45..49 "div" [] [Whitespace(" ")],
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@42..45 "." [Newline("\n"), Newline("\n")] [],
+                                name: CssCustomIdentifier {
+                                    value_token: IDENT@45..48 "div" [] [],
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@48..49 " " [] [],
+                    right: missing (required),
                 },
                 missing separator,
                 CssBogusSelector {
@@ -195,17 +203,21 @@ CssRoot {
         },
         CssQualifiedRule {
             prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssClassSelector {
-                            dot_token: DOT@90..93 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssCustomIdentifier {
-                                value_token: IDENT@93..97 "div" [] [Whitespace(" ")],
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@90..93 "." [Newline("\n"), Newline("\n")] [],
+                                name: CssCustomIdentifier {
+                                    value_token: IDENT@93..96 "div" [] [],
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@96..97 " " [] [],
+                    right: missing (required),
                 },
                 missing separator,
                 CssBogusSelector {
@@ -271,17 +283,21 @@ CssRoot {
         },
         CssQualifiedRule {
             prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssClassSelector {
-                            dot_token: DOT@133..136 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssCustomIdentifier {
-                                value_token: IDENT@136..140 "div" [] [Whitespace(" ")],
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@133..136 "." [Newline("\n"), Newline("\n")] [],
+                                name: CssCustomIdentifier {
+                                    value_token: IDENT@136..139 "div" [] [],
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@139..140 " " [] [],
+                    right: missing (required),
                 },
                 missing separator,
                 CssBogusSelector {
@@ -376,17 +392,21 @@ CssRoot {
         },
         CssQualifiedRule {
             prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssClassSelector {
-                            dot_token: DOT@208..210 "." [Newline("\n")] [],
-                            name: CssCustomIdentifier {
-                                value_token: IDENT@210..214 "div" [] [Whitespace(" ")],
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@208..210 "." [Newline("\n")] [],
+                                name: CssCustomIdentifier {
+                                    value_token: IDENT@210..213 "div" [] [],
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@213..214 " " [] [],
+                    right: missing (required),
                 },
             ],
             block: CssBogusBlock {
@@ -441,14 +461,17 @@ CssRoot {
   1: CSS_RULE_LIST@0..232
     0: CSS_QUALIFIED_RULE@0..20
       0: CSS_SELECTOR_LIST@0..18
-        0: CSS_COMPOUND_SELECTOR@0..5
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@0..5
-            0: CSS_CLASS_SELECTOR@0..5
-              0: DOT@0..1 "." [] []
-              1: CSS_CUSTOM_IDENTIFIER@1..5
-                0: IDENT@1..5 "div" [] [Whitespace(" ")]
+        0: CSS_COMPLEX_SELECTOR@0..5
+          0: CSS_COMPOUND_SELECTOR@0..4
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@0..4
+              0: CSS_CLASS_SELECTOR@0..4
+                0: DOT@0..1 "." [] []
+                1: CSS_CUSTOM_IDENTIFIER@1..4
+                  0: IDENT@1..4 "div" [] []
+          1: CSS_SPACE_LITERAL@4..5 " " [] []
+          2: (empty)
         1: (empty)
         2: CSS_BOGUS_SELECTOR@5..11
           0: L_PAREN@5..6 "(" [] []
@@ -501,14 +524,17 @@ CssRoot {
         2: R_CURLY@41..42 "}" [] []
     2: CSS_QUALIFIED_RULE@42..66
       0: CSS_SELECTOR_LIST@42..64
-        0: CSS_COMPOUND_SELECTOR@42..49
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@42..49
-            0: CSS_CLASS_SELECTOR@42..49
-              0: DOT@42..45 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_CUSTOM_IDENTIFIER@45..49
-                0: IDENT@45..49 "div" [] [Whitespace(" ")]
+        0: CSS_COMPLEX_SELECTOR@42..49
+          0: CSS_COMPOUND_SELECTOR@42..48
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@42..48
+              0: CSS_CLASS_SELECTOR@42..48
+                0: DOT@42..45 "." [Newline("\n"), Newline("\n")] []
+                1: CSS_CUSTOM_IDENTIFIER@45..48
+                  0: IDENT@45..48 "div" [] []
+          1: CSS_SPACE_LITERAL@48..49 " " [] []
+          2: (empty)
         1: (empty)
         2: CSS_BOGUS_SELECTOR@49..57
           0: CSS_STRING_LITERAL@49..57 "\"string\"" [] []
@@ -551,14 +577,17 @@ CssRoot {
         2: R_CURLY@89..90 "}" [] []
     4: CSS_QUALIFIED_RULE@90..111
       0: CSS_SELECTOR_LIST@90..109
-        0: CSS_COMPOUND_SELECTOR@90..97
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@90..97
-            0: CSS_CLASS_SELECTOR@90..97
-              0: DOT@90..93 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_CUSTOM_IDENTIFIER@93..97
-                0: IDENT@93..97 "div" [] [Whitespace(" ")]
+        0: CSS_COMPLEX_SELECTOR@90..97
+          0: CSS_COMPOUND_SELECTOR@90..96
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@90..96
+              0: CSS_CLASS_SELECTOR@90..96
+                0: DOT@90..93 "." [Newline("\n"), Newline("\n")] []
+                1: CSS_CUSTOM_IDENTIFIER@93..96
+                  0: IDENT@93..96 "div" [] []
+          1: CSS_SPACE_LITERAL@96..97 " " [] []
+          2: (empty)
         1: (empty)
         2: CSS_BOGUS_SELECTOR@97..102
           0: CSS_NUMBER_LITERAL@97..102 "21312" [] []
@@ -601,14 +630,17 @@ CssRoot {
         2: R_CURLY@132..133 "}" [] []
     6: CSS_QUALIFIED_RULE@133..166
       0: CSS_SELECTOR_LIST@133..164
-        0: CSS_COMPOUND_SELECTOR@133..140
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@133..140
-            0: CSS_CLASS_SELECTOR@133..140
-              0: DOT@133..136 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_CUSTOM_IDENTIFIER@136..140
-                0: IDENT@136..140 "div" [] [Whitespace(" ")]
+        0: CSS_COMPLEX_SELECTOR@133..140
+          0: CSS_COMPOUND_SELECTOR@133..139
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@133..139
+              0: CSS_CLASS_SELECTOR@133..139
+                0: DOT@133..136 "." [Newline("\n"), Newline("\n")] []
+                1: CSS_CUSTOM_IDENTIFIER@136..139
+                  0: IDENT@136..139 "div" [] []
+          1: CSS_SPACE_LITERAL@139..140 " " [] []
+          2: (empty)
         1: (empty)
         2: CSS_BOGUS_SELECTOR@140..157
           0: L_PAREN@140..141 "(" [] []
@@ -673,14 +705,17 @@ CssRoot {
         2: R_CURLY@207..208 "}" [] []
     9: CSS_QUALIFIED_RULE@208..216
       0: CSS_SELECTOR_LIST@208..214
-        0: CSS_COMPOUND_SELECTOR@208..214
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@208..214
-            0: CSS_CLASS_SELECTOR@208..214
-              0: DOT@208..210 "." [Newline("\n")] []
-              1: CSS_CUSTOM_IDENTIFIER@210..214
-                0: IDENT@210..214 "div" [] [Whitespace(" ")]
+        0: CSS_COMPLEX_SELECTOR@208..214
+          0: CSS_COMPOUND_SELECTOR@208..213
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@208..213
+              0: CSS_CLASS_SELECTOR@208..213
+                0: DOT@208..210 "." [Newline("\n")] []
+                1: CSS_CUSTOM_IDENTIFIER@210..213
+                  0: IDENT@210..213 "div" [] []
+          1: CSS_SPACE_LITERAL@213..214 " " [] []
+          2: (empty)
       1: CSS_BOGUS_BLOCK@214..216
         0: CSS_STRING_LITERAL@214..216 "\"\"" [] []
     10: CSS_QUALIFIED_RULE@216..230
@@ -710,14 +745,19 @@ CssRoot {
 ```
 selector.error.css:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
   > 1 │ .div ())))), span {}
       │      ^
     2 │ .div, ())))), span {}
     3 │ 
   
-  i Remove (
+  i Expected a compound selector here.
+  
+  > 1 │ .div ())))), span {}
+      │      ^
+    2 │ .div, ())))), span {}
+    3 │ 
   
 selector.error.css:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -739,7 +779,7 @@ selector.error.css:2:7 parse ━━━━━━━━━━━━━━━━━
   
 selector.error.css:4:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `"string"`
+  × Expected a compound selector but instead found '"string"'.
   
     2 │ .div, ())))), span {}
     3 │ 
@@ -748,7 +788,14 @@ selector.error.css:4:6 parse ━━━━━━━━━━━━━━━━━
     5 │ .div, "string", span {}
     6 │ 
   
-  i Remove "string"
+  i Expected a compound selector here.
+  
+    2 │ .div, ())))), span {}
+    3 │ 
+  > 4 │ .div "string", span {}
+      │      ^^^^^^^^
+    5 │ .div, "string", span {}
+    6 │ 
   
 selector.error.css:5:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -770,7 +817,7 @@ selector.error.css:5:7 parse ━━━━━━━━━━━━━━━━━
   
 selector.error.css:7:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `21312`
+  × Expected a compound selector but instead found '21312'.
   
     5 │ .div, "string", span {}
     6 │ 
@@ -779,7 +826,14 @@ selector.error.css:7:6 parse ━━━━━━━━━━━━━━━━━
     8 │ .div, 123213, span {}
     9 │ 
   
-  i Remove 21312
+  i Expected a compound selector here.
+  
+    5 │ .div, "string", span {}
+    6 │ 
+  > 7 │ .div 21312, span {}
+      │      ^^^^^
+    8 │ .div, 123213, span {}
+    9 │ 
   
 selector.error.css:8:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -801,7 +855,7 @@ selector.error.css:8:7 parse ━━━━━━━━━━━━━━━━━
   
 selector.error.css:10:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
      8 │ .div, 123213, span {}
      9 │ 
@@ -810,7 +864,14 @@ selector.error.css:10:6 parse ━━━━━━━━━━━━━━━━�
     11 │ .div, () 12321 "string", span {}
     12 │ .div, {}
   
-  i Remove (
+  i Expected a compound selector here.
+  
+     8 │ .div, 123213, span {}
+     9 │ 
+  > 10 │ .div () 12321 "string", span {}
+       │      ^
+    11 │ .div, () 12321 "string", span {}
+    12 │ .div, {}
   
 selector.error.css:11:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -852,7 +913,7 @@ selector.error.css:12:7 parse ━━━━━━━━━━━━━━━━�
   
 selector.error.css:13:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `""`
+  × Expected a compound selector but instead found '""'.
   
     11 │ .div, () 12321 "string", span {}
     12 │ .div, {}
@@ -861,7 +922,14 @@ selector.error.css:13:6 parse ━━━━━━━━━━━━━━━━�
     14 │   color: red;
     15 │ }
   
-  i Remove ""
+  i Expected a compound selector here.
+  
+    11 │ .div, () 12321 "string", span {}
+    12 │ .div, {}
+  > 13 │ .div ""
+       │      ^^
+    14 │   color: red;
+    15 │ }
   
 selector.error.css:14:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

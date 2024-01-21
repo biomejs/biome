@@ -120,29 +120,33 @@ CssRoot {
                         l_paren_token: L_PAREN@75..76 "(" [] [],
                         selectors: CssSelectorList [
                             CssComplexSelector {
-                                left: CssCompoundSelector {
-                                    nesting_selector_token: missing (optional),
-                                    simple_selector: missing (optional),
-                                    sub_selectors: CssSubSelectorList [
-                                        CssClassSelector {
-                                            dot_token: DOT@76..77 "." [] [],
-                                            name: CssCustomIdentifier {
-                                                value_token: IDENT@77..89 "media-object" [] [],
+                                left: CssComplexSelector {
+                                    left: CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@76..77 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@77..89 "media-object" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    combinator: CSS_SPACE_LITERAL@89..90 " " [] [],
+                                    right: CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
+                                            ident: CssIdentifier {
+                                                value_token: IDENT@90..92 "to" [] [],
                                             },
                                         },
-                                    ],
-                                },
-                                combinator: CSS_SPACE_LITERAL@89..90 " " [] [],
-                                right: CssCompoundSelector {
-                                    nesting_selector_token: missing (optional),
-                                    simple_selector: CssTypeSelector {
-                                        namespace: missing (optional),
-                                        ident: CssIdentifier {
-                                            value_token: IDENT@90..93 "to" [] [Whitespace(" ")],
-                                        },
+                                        sub_selectors: CssSubSelectorList [],
                                     },
-                                    sub_selectors: CssSubSelectorList [],
                                 },
+                                combinator: CSS_SPACE_LITERAL@92..93 " " [] [],
+                                right: missing (required),
                             },
                             missing separator,
                             CssBogusSelector {
@@ -268,22 +272,25 @@ CssRoot {
             0: L_PAREN@75..76 "(" [] []
             1: CSS_SELECTOR_LIST@76..106
               0: CSS_COMPLEX_SELECTOR@76..93
-                0: CSS_COMPOUND_SELECTOR@76..89
-                  0: (empty)
-                  1: (empty)
-                  2: CSS_SUB_SELECTOR_LIST@76..89
-                    0: CSS_CLASS_SELECTOR@76..89
-                      0: DOT@76..77 "." [] []
-                      1: CSS_CUSTOM_IDENTIFIER@77..89
-                        0: IDENT@77..89 "media-object" [] []
-                1: CSS_SPACE_LITERAL@89..90 " " [] []
-                2: CSS_COMPOUND_SELECTOR@90..93
-                  0: (empty)
-                  1: CSS_TYPE_SELECTOR@90..93
+                0: CSS_COMPLEX_SELECTOR@76..92
+                  0: CSS_COMPOUND_SELECTOR@76..89
                     0: (empty)
-                    1: CSS_IDENTIFIER@90..93
-                      0: IDENT@90..93 "to" [] [Whitespace(" ")]
-                  2: CSS_SUB_SELECTOR_LIST@93..93
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@76..89
+                      0: CSS_CLASS_SELECTOR@76..89
+                        0: DOT@76..77 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@77..89
+                          0: IDENT@77..89 "media-object" [] []
+                  1: CSS_SPACE_LITERAL@89..90 " " [] []
+                  2: CSS_COMPOUND_SELECTOR@90..92
+                    0: (empty)
+                    1: CSS_TYPE_SELECTOR@90..92
+                      0: (empty)
+                      1: CSS_IDENTIFIER@90..92
+                        0: IDENT@90..92 "to" [] []
+                    2: CSS_SUB_SELECTOR_LIST@92..92
+                1: CSS_SPACE_LITERAL@92..93 " " [] []
+                2: (empty)
               1: (empty)
               2: CSS_BOGUS_SELECTOR@93..94
                 0: L_PAREN@93..94 "(" [] []
@@ -341,7 +348,7 @@ at_rule_scope_error.css:2:23 parse ━━━━━━━━━━━━━━━
   
 at_rule_scope_error.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     1 │ @scope (.media-object) to (.content > * {}
     2 │ @scope (.media-object {}
@@ -349,7 +356,13 @@ at_rule_scope_error.css:3:26 parse ━━━━━━━━━━━━━━━
       │                          ^
     4 │ 
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    1 │ @scope (.media-object) to (.content > * {}
+    2 │ @scope (.media-object {}
+  > 3 │ @scope (.media-object to (.content > *) {}
+      │                          ^
+    4 │ 
   
 at_rule_scope_error.css:3:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

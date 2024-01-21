@@ -21,15 +21,19 @@ CssRoot {
         CssBogusRule {
             items: [
                 CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: CssTypeSelector {
-                            namespace: missing (optional),
-                            ident: CssIdentifier {
-                                value_token: IDENT@0..4 "div" [] [Whitespace(" ")],
+                    CssComplexSelector {
+                        left: CssCompoundSelector {
+                            nesting_selector_token: missing (optional),
+                            simple_selector: CssTypeSelector {
+                                namespace: missing (optional),
+                                ident: CssIdentifier {
+                                    value_token: IDENT@0..3 "div" [] [],
+                                },
                             },
+                            sub_selectors: CssSubSelectorList [],
                         },
-                        sub_selectors: CssSubSelectorList [],
+                        combinator: CSS_SPACE_LITERAL@3..4 " " [] [],
+                        right: missing (required),
                     },
                 ],
             ],
@@ -73,13 +77,16 @@ CssRoot {
   1: CSS_RULE_LIST@0..15
     0: CSS_BOGUS_RULE@0..4
       0: CSS_SELECTOR_LIST@0..4
-        0: CSS_COMPOUND_SELECTOR@0..4
-          0: (empty)
-          1: CSS_TYPE_SELECTOR@0..4
+        0: CSS_COMPLEX_SELECTOR@0..4
+          0: CSS_COMPOUND_SELECTOR@0..3
             0: (empty)
-            1: CSS_IDENTIFIER@0..4
-              0: IDENT@0..4 "div" [] [Whitespace(" ")]
-          2: CSS_SUB_SELECTOR_LIST@4..4
+            1: CSS_TYPE_SELECTOR@0..3
+              0: (empty)
+              1: CSS_IDENTIFIER@0..3
+                0: IDENT@0..3 "div" [] []
+            2: CSS_SUB_SELECTOR_LIST@3..3
+          1: CSS_SPACE_LITERAL@3..4 " " [] []
+          2: (empty)
     1: CSS_BOGUS_RULE@4..5
       0: R_CURLY@4..5 "}" [] []
     2: CSS_QUALIFIED_RULE@5..15
@@ -105,14 +112,19 @@ CssRoot {
 ```
 css_unfinished_block.css:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `}`
+  × Expected a compound selector but instead found '}'.
   
   > 1 │ div }
       │     ^
     2 │ .action {
     3 │ 
   
-  i Remove }
+  i Expected a compound selector here.
+  
+  > 1 │ div }
+      │     ^
+    2 │ .action {
+    3 │ 
   
 css_unfinished_block.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
