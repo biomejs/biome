@@ -24,29 +24,29 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = x? true : true;
+    /// var a = x ? true : true;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// var a = foo===1? false : true;
+    /// var a = foo === 1 ? false : true;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// var a = foo + 1? false : true;
+    /// var a = foo + 1 ? false : true;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// var a = foo + 1? true : false;
+    /// var a = foo + 1 ? true : false;
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// var a = x === 2? 'Yes' : 'No';
+    /// var a = x === 2 ? 'Yes' : 'No';
     /// ```
     ///
     /// ```js
-    /// var a = x === 2? 'Yes' : false;
+    /// var a = x === 2 ? 'Yes' : false;
     /// ```
     ///
     /// ## Resources
