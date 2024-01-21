@@ -1327,7 +1327,7 @@ AnyCssSupportsInParens =
 	CssSupportsConditionInParens
 	| CssSupportsFeatureDeclaration
 	| CssSupportsFeatureSelector
-	| CssSimpleFunction
+	| CssFunction
 	| AnyCssValue // general-enclosed
 
 // @supports (transition-property: color) or (not (animation-name: foo)) {}
@@ -1557,12 +1557,12 @@ CssRatio =
 
 
 AnyCssFunction =
-	CssSimpleFunction
+	CssFunction
 	| CssUrlFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
-CssSimpleFunction =
+CssFunction =
 	name: CssIdentifier
 	'('
 	items: CssParameterList
@@ -1589,7 +1589,7 @@ CssUrlModifierList = AnyCssUrlModifier*
 
 AnyCssUrlModifier =
 	CssIdentifier
-	| CssSimpleFunction
+	| CssFunction
 	| CssBogusUrlModifier
 
 AnyCssUrlValue =

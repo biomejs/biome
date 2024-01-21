@@ -1,4 +1,4 @@
-use crate::file_handlers::{Features, Language};
+use crate::file_handlers::Language;
 use crate::ConfigurationDiagnostic;
 use biome_console::fmt::Bytes;
 use biome_console::markup;
@@ -510,7 +510,7 @@ impl Diagnostic for SourceFileNotSupported {
 }
 
 pub fn extension_error(path: &RomePath) -> WorkspaceError {
-    let language = Features::get_language(path).or(Language::from_path(path));
+    let language = Language::from_path_and_known_filename(path).or(Language::from_path(path));
     WorkspaceError::source_file_not_supported(
         language,
         path.clone().display().to_string(),

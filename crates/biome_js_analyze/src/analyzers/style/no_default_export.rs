@@ -44,7 +44,7 @@ declare_rule! {
     /// export { X as default };
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// export function f () {};

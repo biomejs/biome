@@ -77,9 +77,16 @@ impl Language for JsonLanguage {
             global.indent_width.unwrap_or_default()
         };
 
+        let line_ending = if let Some(line_ending) = language.line_ending {
+            line_ending
+        } else {
+            global.line_ending.unwrap_or_default()
+        };
+
         overrides.override_json_format_options(
             path,
             JsonFormatOptions::new(path.as_path().try_into().unwrap_or_default())
+                .with_line_ending(line_ending)
                 .with_indent_style(indent_style)
                 .with_indent_width(indent_width)
                 .with_line_width(line_width),
@@ -130,7 +137,11 @@ impl ExtensionHandler for JsonFileHandler {
 fn is_file_allowed(path: &Path) -> bool {
     path.file_name()
         .and_then(|f| f.to_str())
-        .map(|f| super::Language::KNOWN_FILES_AS_JSONC.contains(&f))
+        .map(|f| {
+            super::Language::KNOWN_FILES_AS_JSONC
+                .binary_search(&f)
+                .is_ok()
+        })
         // default is false
         .unwrap_or_default()
 }

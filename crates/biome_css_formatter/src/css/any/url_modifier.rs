@@ -9,7 +9,7 @@ impl FormatRule<AnyCssUrlModifier> for FormatAnyCssUrlModifier {
     fn fmt(&self, node: &AnyCssUrlModifier, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssUrlModifier::CssIdentifier(node) => node.format().fmt(f),
-            AnyCssUrlModifier::CssSimpleFunction(node) => node.format().fmt(f),
+            AnyCssUrlModifier::CssFunction(node) => node.format().fmt(f),
             AnyCssUrlModifier::CssBogusUrlModifier(node) => node.format().fmt(f),
         }
     }

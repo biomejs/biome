@@ -30,7 +30,7 @@ declare_rule! {
     /// undefined = true;
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// a = 0;

@@ -38,7 +38,7 @@ declare_rule! {
     /// <div aria-activedescendant={someID} />
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```jsx
     /// <div aria-activedescendant={someID} tabIndex={0} />

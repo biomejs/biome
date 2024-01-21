@@ -1778,6 +1778,57 @@ pub struct CssFontPaletteValuesAtRuleFields {
     pub block: SyntaxResult<AnyCssDeclarationListBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssFunction {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssFunction {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssFunctionFields {
+        CssFunctionFields {
+            name: self.name(),
+            l_paren_token: self.l_paren_token(),
+            items: self.items(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn items(&self) -> CssParameterList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssFunction {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssFunctionFields {
+    pub name: SyntaxResult<CssIdentifier>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub items: CssParameterList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssGenericDelimiter {
     pub(crate) syntax: SyntaxNode,
 }
@@ -5158,57 +5209,6 @@ pub struct CssScopeRangeStartFields {
     pub start: SyntaxResult<CssScopeEdge>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssSimpleFunction {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssSimpleFunction {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssSimpleFunctionFields {
-        CssSimpleFunctionFields {
-            name: self.name(),
-            l_paren_token: self.l_paren_token(),
-            items: self.items(),
-            r_paren_token: self.r_paren_token(),
-        }
-    }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn items(&self) -> CssParameterList {
-        support::list(&self.syntax, 2usize)
-    }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssSimpleFunction {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssSimpleFunctionFields {
-    pub name: SyntaxResult<CssIdentifier>,
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub items: CssParameterList,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssStartingStyleAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -6554,13 +6554,13 @@ impl AnyCssExpression {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssFunction {
-    CssSimpleFunction(CssSimpleFunction),
+    CssFunction(CssFunction),
     CssUrlFunction(CssUrlFunction),
 }
 impl AnyCssFunction {
-    pub fn as_css_simple_function(&self) -> Option<&CssSimpleFunction> {
+    pub fn as_css_function(&self) -> Option<&CssFunction> {
         match &self {
-            AnyCssFunction::CssSimpleFunction(item) => Some(item),
+            AnyCssFunction::CssFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -7677,7 +7677,7 @@ impl AnyCssSupportsCondition {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssSupportsInParens {
     AnyCssValue(AnyCssValue),
-    CssSimpleFunction(CssSimpleFunction),
+    CssFunction(CssFunction),
     CssSupportsConditionInParens(CssSupportsConditionInParens),
     CssSupportsFeatureDeclaration(CssSupportsFeatureDeclaration),
     CssSupportsFeatureSelector(CssSupportsFeatureSelector),
@@ -7689,9 +7689,9 @@ impl AnyCssSupportsInParens {
             _ => None,
         }
     }
-    pub fn as_css_simple_function(&self) -> Option<&CssSimpleFunction> {
+    pub fn as_css_function(&self) -> Option<&CssFunction> {
         match &self {
-            AnyCssSupportsInParens::CssSimpleFunction(item) => Some(item),
+            AnyCssSupportsInParens::CssFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -7738,8 +7738,8 @@ impl AnyCssSupportsOrCombinableCondition {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssUrlModifier {
     CssBogusUrlModifier(CssBogusUrlModifier),
+    CssFunction(CssFunction),
     CssIdentifier(CssIdentifier),
-    CssSimpleFunction(CssSimpleFunction),
 }
 impl AnyCssUrlModifier {
     pub fn as_css_bogus_url_modifier(&self) -> Option<&CssBogusUrlModifier> {
@@ -7748,15 +7748,15 @@ impl AnyCssUrlModifier {
             _ => None,
         }
     }
-    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+    pub fn as_css_function(&self) -> Option<&CssFunction> {
         match &self {
-            AnyCssUrlModifier::CssIdentifier(item) => Some(item),
+            AnyCssUrlModifier::CssFunction(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_css_simple_function(&self) -> Option<&CssSimpleFunction> {
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
-            AnyCssUrlModifier::CssSimpleFunction(item) => Some(item),
+            AnyCssUrlModifier::CssIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -9563,6 +9563,53 @@ impl From<CssFontPaletteValuesAtRule> for SyntaxNode {
 }
 impl From<CssFontPaletteValuesAtRule> for SyntaxElement {
     fn from(n: CssFontPaletteValuesAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssFunction {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_FUNCTION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_FUNCTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssFunction")
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field(
+                "l_paren_token",
+                &support::DebugSyntaxResult(self.l_paren_token()),
+            )
+            .field("items", &self.items())
+            .field(
+                "r_paren_token",
+                &support::DebugSyntaxResult(self.r_paren_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssFunction> for SyntaxNode {
+    fn from(n: CssFunction) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssFunction> for SyntaxElement {
+    fn from(n: CssFunction) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -12864,53 +12911,6 @@ impl From<CssScopeRangeStart> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssSimpleFunction {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SIMPLE_FUNCTION as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_SIMPLE_FUNCTION
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssSimpleFunction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSimpleFunction")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("items", &self.items())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
-    }
-}
-impl From<CssSimpleFunction> for SyntaxNode {
-    fn from(n: CssSimpleFunction) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssSimpleFunction> for SyntaxElement {
-    fn from(n: CssSimpleFunction) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for CssStartingStyleAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -15339,9 +15339,9 @@ impl From<AnyCssExpression> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssSimpleFunction> for AnyCssFunction {
-    fn from(node: CssSimpleFunction) -> AnyCssFunction {
-        AnyCssFunction::CssSimpleFunction(node)
+impl From<CssFunction> for AnyCssFunction {
+    fn from(node: CssFunction) -> AnyCssFunction {
+        AnyCssFunction::CssFunction(node)
     }
 }
 impl From<CssUrlFunction> for AnyCssFunction {
@@ -15351,14 +15351,13 @@ impl From<CssUrlFunction> for AnyCssFunction {
 }
 impl AstNode for AnyCssFunction {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssSimpleFunction::KIND_SET.union(CssUrlFunction::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssFunction::KIND_SET.union(CssUrlFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_SIMPLE_FUNCTION | CSS_URL_FUNCTION)
+        matches!(kind, CSS_FUNCTION | CSS_URL_FUNCTION)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_SIMPLE_FUNCTION => AnyCssFunction::CssSimpleFunction(CssSimpleFunction { syntax }),
+            CSS_FUNCTION => AnyCssFunction::CssFunction(CssFunction { syntax }),
             CSS_URL_FUNCTION => AnyCssFunction::CssUrlFunction(CssUrlFunction { syntax }),
             _ => return None,
         };
@@ -15366,13 +15365,13 @@ impl AstNode for AnyCssFunction {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyCssFunction::CssSimpleFunction(it) => &it.syntax,
+            AnyCssFunction::CssFunction(it) => &it.syntax,
             AnyCssFunction::CssUrlFunction(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyCssFunction::CssSimpleFunction(it) => it.syntax,
+            AnyCssFunction::CssFunction(it) => it.syntax,
             AnyCssFunction::CssUrlFunction(it) => it.syntax,
         }
     }
@@ -15380,7 +15379,7 @@ impl AstNode for AnyCssFunction {
 impl std::fmt::Debug for AnyCssFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyCssFunction::CssSimpleFunction(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssFunction::CssFunction(it) => std::fmt::Debug::fmt(it, f),
             AnyCssFunction::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -15388,7 +15387,7 @@ impl std::fmt::Debug for AnyCssFunction {
 impl From<AnyCssFunction> for SyntaxNode {
     fn from(n: AnyCssFunction) -> SyntaxNode {
         match n {
-            AnyCssFunction::CssSimpleFunction(it) => it.into(),
+            AnyCssFunction::CssFunction(it) => it.into(),
             AnyCssFunction::CssUrlFunction(it) => it.into(),
         }
     }
@@ -18625,9 +18624,9 @@ impl From<AnyCssSupportsCondition> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssSimpleFunction> for AnyCssSupportsInParens {
-    fn from(node: CssSimpleFunction) -> AnyCssSupportsInParens {
-        AnyCssSupportsInParens::CssSimpleFunction(node)
+impl From<CssFunction> for AnyCssSupportsInParens {
+    fn from(node: CssFunction) -> AnyCssSupportsInParens {
+        AnyCssSupportsInParens::CssFunction(node)
     }
 }
 impl From<CssSupportsConditionInParens> for AnyCssSupportsInParens {
@@ -18648,13 +18647,13 @@ impl From<CssSupportsFeatureSelector> for AnyCssSupportsInParens {
 impl AstNode for AnyCssSupportsInParens {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssValue::KIND_SET
-        .union(CssSimpleFunction::KIND_SET)
+        .union(CssFunction::KIND_SET)
         .union(CssSupportsConditionInParens::KIND_SET)
         .union(CssSupportsFeatureDeclaration::KIND_SET)
         .union(CssSupportsFeatureSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_SIMPLE_FUNCTION
+            CSS_FUNCTION
             | CSS_SUPPORTS_CONDITION_IN_PARENS
             | CSS_SUPPORTS_FEATURE_DECLARATION
             | CSS_SUPPORTS_FEATURE_SELECTOR => true,
@@ -18664,9 +18663,7 @@ impl AstNode for AnyCssSupportsInParens {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_SIMPLE_FUNCTION => {
-                AnyCssSupportsInParens::CssSimpleFunction(CssSimpleFunction { syntax })
-            }
+            CSS_FUNCTION => AnyCssSupportsInParens::CssFunction(CssFunction { syntax }),
             CSS_SUPPORTS_CONDITION_IN_PARENS => {
                 AnyCssSupportsInParens::CssSupportsConditionInParens(CssSupportsConditionInParens {
                     syntax,
@@ -18693,7 +18690,7 @@ impl AstNode for AnyCssSupportsInParens {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyCssSupportsInParens::CssSimpleFunction(it) => &it.syntax,
+            AnyCssSupportsInParens::CssFunction(it) => &it.syntax,
             AnyCssSupportsInParens::CssSupportsConditionInParens(it) => &it.syntax,
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => &it.syntax,
             AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => &it.syntax,
@@ -18702,7 +18699,7 @@ impl AstNode for AnyCssSupportsInParens {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyCssSupportsInParens::CssSimpleFunction(it) => it.syntax,
+            AnyCssSupportsInParens::CssFunction(it) => it.syntax,
             AnyCssSupportsInParens::CssSupportsConditionInParens(it) => it.syntax,
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => it.syntax,
             AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => it.syntax,
@@ -18714,7 +18711,7 @@ impl std::fmt::Debug for AnyCssSupportsInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyCssSupportsInParens::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssSupportsInParens::CssSimpleFunction(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssSupportsInParens::CssFunction(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSupportsInParens::CssSupportsConditionInParens(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => {
                 std::fmt::Debug::fmt(it, f)
@@ -18727,7 +18724,7 @@ impl From<AnyCssSupportsInParens> for SyntaxNode {
     fn from(n: AnyCssSupportsInParens) -> SyntaxNode {
         match n {
             AnyCssSupportsInParens::AnyCssValue(it) => it.into(),
-            AnyCssSupportsInParens::CssSimpleFunction(it) => it.into(),
+            AnyCssSupportsInParens::CssFunction(it) => it.into(),
             AnyCssSupportsInParens::CssSupportsConditionInParens(it) => it.into(),
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => it.into(),
             AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => it.into(),
@@ -18818,36 +18815,31 @@ impl From<CssBogusUrlModifier> for AnyCssUrlModifier {
         AnyCssUrlModifier::CssBogusUrlModifier(node)
     }
 }
+impl From<CssFunction> for AnyCssUrlModifier {
+    fn from(node: CssFunction) -> AnyCssUrlModifier {
+        AnyCssUrlModifier::CssFunction(node)
+    }
+}
 impl From<CssIdentifier> for AnyCssUrlModifier {
     fn from(node: CssIdentifier) -> AnyCssUrlModifier {
         AnyCssUrlModifier::CssIdentifier(node)
     }
 }
-impl From<CssSimpleFunction> for AnyCssUrlModifier {
-    fn from(node: CssSimpleFunction) -> AnyCssUrlModifier {
-        AnyCssUrlModifier::CssSimpleFunction(node)
-    }
-}
 impl AstNode for AnyCssUrlModifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusUrlModifier::KIND_SET
-        .union(CssIdentifier::KIND_SET)
-        .union(CssSimpleFunction::KIND_SET);
+        .union(CssFunction::KIND_SET)
+        .union(CssIdentifier::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_BOGUS_URL_MODIFIER | CSS_IDENTIFIER | CSS_SIMPLE_FUNCTION
-        )
+        matches!(kind, CSS_BOGUS_URL_MODIFIER | CSS_FUNCTION | CSS_IDENTIFIER)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_URL_MODIFIER => {
                 AnyCssUrlModifier::CssBogusUrlModifier(CssBogusUrlModifier { syntax })
             }
+            CSS_FUNCTION => AnyCssUrlModifier::CssFunction(CssFunction { syntax }),
             CSS_IDENTIFIER => AnyCssUrlModifier::CssIdentifier(CssIdentifier { syntax }),
-            CSS_SIMPLE_FUNCTION => {
-                AnyCssUrlModifier::CssSimpleFunction(CssSimpleFunction { syntax })
-            }
             _ => return None,
         };
         Some(res)
@@ -18855,15 +18847,15 @@ impl AstNode for AnyCssUrlModifier {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyCssUrlModifier::CssBogusUrlModifier(it) => &it.syntax,
+            AnyCssUrlModifier::CssFunction(it) => &it.syntax,
             AnyCssUrlModifier::CssIdentifier(it) => &it.syntax,
-            AnyCssUrlModifier::CssSimpleFunction(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyCssUrlModifier::CssBogusUrlModifier(it) => it.syntax,
+            AnyCssUrlModifier::CssFunction(it) => it.syntax,
             AnyCssUrlModifier::CssIdentifier(it) => it.syntax,
-            AnyCssUrlModifier::CssSimpleFunction(it) => it.syntax,
         }
     }
 }
@@ -18871,8 +18863,8 @@ impl std::fmt::Debug for AnyCssUrlModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyCssUrlModifier::CssBogusUrlModifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssUrlModifier::CssFunction(it) => std::fmt::Debug::fmt(it, f),
             AnyCssUrlModifier::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssUrlModifier::CssSimpleFunction(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -18880,8 +18872,8 @@ impl From<AnyCssUrlModifier> for SyntaxNode {
     fn from(n: AnyCssUrlModifier) -> SyntaxNode {
         match n {
             AnyCssUrlModifier::CssBogusUrlModifier(it) => it.into(),
+            AnyCssUrlModifier::CssFunction(it) => it.into(),
             AnyCssUrlModifier::CssIdentifier(it) => it.into(),
-            AnyCssUrlModifier::CssSimpleFunction(it) => it.into(),
         }
     }
 }
@@ -19736,6 +19728,11 @@ impl std::fmt::Display for CssFontPaletteValuesAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssGenericDelimiter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -20122,11 +20119,6 @@ impl std::fmt::Display for CssScopeRangeInterval {
     }
 }
 impl std::fmt::Display for CssScopeRangeStart {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssSimpleFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

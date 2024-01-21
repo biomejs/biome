@@ -1,13 +1,15 @@
 mod formatter;
 
-pub use crate::configuration::javascript::formatter::{javascript_formatter, JavascriptFormatter};
 use biome_deserialize::StringSet;
-use biome_deserialize_macros::{Merge, NoneState};
+use biome_deserialize_macros::{Deserializable, Merge};
 use bpaf::Bpaf;
+pub use formatter::{javascript_formatter, JavascriptFormatter};
 use serde::{Deserialize, Serialize};
 
 /// A set of options applied to the JavaScript files
-#[derive(Bpaf, Clone, Default, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Default, Debug, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default, deny_unknown_fields)]
 pub struct JavascriptConfiguration {
@@ -42,13 +44,17 @@ impl JavascriptConfiguration {
     }
 }
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default, deny_unknown_fields)]
 pub struct JavascriptOrganizeImports {}
 
 /// Options that changes how the JavaScript parser behaves
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JavascriptParser {

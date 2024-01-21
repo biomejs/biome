@@ -1,0 +1,47 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "recommended": false
+      }
+    }
+  },
+  "overrides": [
+    {
+      "include": ["test.js"],
+      "linter": {
+        "rules": {
+          "recommended": true
+        }
+      }
+    }
+  ]
+}
+```
+
+## `test.js`
+
+```js
+debugger
+```
+
+## `test2.js`
+
+```js
+debugger
+```
+
+# Emitted Messages
+
+```block
+Fixed 3 file(s) in <TIME>
+```
+
+

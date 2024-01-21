@@ -53,7 +53,7 @@ declare_rule! {
     /// a['b'].foo = a['b'].foo;
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// a &= a;

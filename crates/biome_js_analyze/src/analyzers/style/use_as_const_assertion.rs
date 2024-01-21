@@ -36,7 +36,7 @@ declare_rule! {
     /// let foo = { bar: 'baz' as 'baz' };
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```ts
     /// let foo = 'bar';

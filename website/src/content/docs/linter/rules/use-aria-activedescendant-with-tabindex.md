@@ -52,7 +52,7 @@ it must either have an inherent tabIndex of zero or declare a tabIndex attribute
 <strong>  </strong><strong>    │ </strong>                                   <span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span>   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 <div aria-activedescendant={someID} tabIndex={0} />

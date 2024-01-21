@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: emptyHookNameInOptions.js
+---
+# Input
+```jsx
+
+```
+
+# Diagnostics
+```
+emptyHookNameInOptions.options:11:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × name may not be empty
+  
+     9 │ 						"hooks": [
+    10 │ 							{
+  > 11 │ 								"name": "",
+       │ 								        ^^
+    12 │ 								"closureIndex": 0,
+    13 │ 								"dependenciesIndex": 1
+  
+
+```
+
+

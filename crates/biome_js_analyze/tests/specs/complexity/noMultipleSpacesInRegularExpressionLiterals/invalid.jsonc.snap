@@ -578,4 +578,28 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 
 ```
 
+# Input
+```cjs
+/‎⁦⁩   /gu;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /���   /gu;
+      │  ^^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /���···/gu;
+  + /���·{3}/gu;
+  
+
+```
+
 

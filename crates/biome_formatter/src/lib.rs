@@ -56,8 +56,9 @@ use crate::printer::{Printer, PrinterOptions};
 use crate::trivia::{format_skipped_token_trivia, format_trimmed_token};
 pub use arguments::{Argument, Arguments};
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, Text, TextNumber,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, TextNumber,
 };
+use biome_deserialize_macros::Deserializable;
 use biome_deserialize_macros::Merge;
 use biome_rowan::{
     Language, NodeOrToken, SyntaxElement, SyntaxNode, SyntaxResult, SyntaxToken, SyntaxTriviaPiece,
@@ -126,7 +127,7 @@ impl std::fmt::Display for IndentStyle {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -191,27 +192,6 @@ impl std::fmt::Display for LineEnding {
             LineEnding::Lf => std::write!(f, "LF"),
             LineEnding::Crlf => std::write!(f, "CRLF"),
             LineEnding::Cr => std::write!(f, "CR"),
-        }
-    }
-}
-
-impl Deserializable for LineEnding {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        let value_text = Text::deserialize(value, name, diagnostics)?;
-        if let Ok(value) = value_text.parse::<Self>() {
-            Some(value)
-        } else {
-            const ALLOWED_VARIANTS: &[&str] = &["lf", "crlf", "cr"];
-            diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                &value_text,
-                value.range(),
-                ALLOWED_VARIANTS,
-            ));
-            None
         }
     }
 }
@@ -357,7 +337,7 @@ impl From<LineWidth> for u16 {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -440,28 +420,6 @@ impl From<QuoteStyle> for Quote {
         match quote {
             QuoteStyle::Double => Self::Double,
             QuoteStyle::Single => Self::Single,
-        }
-    }
-}
-
-impl Deserializable for QuoteStyle {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        const ALLOWED_VARIANTS: &[&str] = &["double", "single"];
-        match Text::deserialize(value, name, diagnostics)?.text() {
-            "double" => Some(QuoteStyle::Double),
-            "single" => Some(QuoteStyle::Single),
-            unknown_variant => {
-                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    unknown_variant,
-                    value.range(),
-                    ALLOWED_VARIANTS,
-                ));
-                None
-            }
         }
     }
 }
@@ -1772,4 +1730,52 @@ where
 pub struct FormatStateSnapshot {
     #[cfg(debug_assertions)]
     printed_tokens: printed_tokens::PrintedTokensSnapshot,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::LineWidth;
+    use biome_deserialize::json::deserialize_from_json_str;
+    use biome_deserialize_macros::Deserializable;
+    use biome_diagnostics::Error;
+
+    #[test]
+    fn test_out_of_range_line_width() {
+        #[derive(Debug, Default, Deserializable, Eq, PartialEq)]
+        struct TestConfig {
+            line_width: LineWidth,
+        }
+
+        struct DiagnosticPrinter<'a> {
+            diagnostics: &'a [Error],
+        }
+
+        impl<'a> DiagnosticPrinter<'a> {
+            fn new(diagnostics: &'a [Error]) -> Self {
+                Self { diagnostics }
+            }
+        }
+
+        impl<'a> std::fmt::Display for DiagnosticPrinter<'a> {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                for diagnostic in self.diagnostics {
+                    diagnostic.description(f)?;
+                }
+                Ok(())
+            }
+        }
+
+        let source = r#"{ "lineWidth": 500 }"#;
+        let deserialized = deserialize_from_json_str::<TestConfig>(source, Default::default(), "");
+        assert_eq!(
+            format!("{}", DiagnosticPrinter::new(deserialized.diagnostics())),
+            "The number should be an integer between 1 and 320."
+        );
+        assert_eq!(
+            deserialized.into_deserialized().unwrap(),
+            TestConfig {
+                line_width: LineWidth(80)
+            }
+        );
+    }
 }

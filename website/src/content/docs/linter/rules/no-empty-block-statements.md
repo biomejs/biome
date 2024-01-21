@@ -82,7 +82,7 @@ class Foo {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 function foo () {

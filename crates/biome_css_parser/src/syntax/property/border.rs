@@ -1,5 +1,5 @@
 use crate::parser::CssParser;
-use crate::syntax::css_dimension::{is_at_length_dimension, parse_regular_dimension};
+use crate::syntax::value::dimension::{is_at_length_dimension, parse_regular_dimension};
 use crate::syntax::{is_at_color, parse_color, parse_regular_identifier};
 use biome_css_syntax::{
     CssSyntaxKind::{self, *},
@@ -17,14 +17,14 @@ use super::parse_property_value_with_fallbacks;
 ///  border =
 ///      <line-width>  ||
 ///      <line-style>  ||
-///      <color>       
-///  
+///      <color>
+///
 ///  <line-width> =
 ///      <length [0,∞]>  |
 ///      thin            |
 ///      medium          |
-///      thick           
-///  
+///      thick
+///
 ///  <line-style> =
 ///      none    |
 ///      hidden  |
@@ -52,7 +52,7 @@ pub(crate) fn parse_border_property(p: &mut CssParser) -> ParsedSyntax {
 /// Parse a complete border shorthand value:
 ///     <line-width>  ||
 ///     <line-style>  ||
-///     <color>     
+///     <color>
 fn parse_css_border(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
     let mut map = [false; 3];

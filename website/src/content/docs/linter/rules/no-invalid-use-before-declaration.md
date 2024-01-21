@@ -91,7 +91,7 @@ function f(a = b, b = 0) {}
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 f();

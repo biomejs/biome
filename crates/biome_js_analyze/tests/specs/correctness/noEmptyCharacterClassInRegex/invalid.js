@@ -18,3 +18,4 @@ if (/^abc[]/.test(foo)) {}
 // negated empty class
 /[^]/;
 /\[][^]/;
+/[\u200E\u2066-\u2069][]/gu;

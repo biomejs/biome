@@ -43,7 +43,7 @@ declare_rule! {
     /// const x = "Don't use \9 escape.";
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// const x = "8";

@@ -52,7 +52,7 @@ declare_rule! {
     /// export { B }
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```ts
     /// import { A, type B } from 'mod';
