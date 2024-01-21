@@ -15,7 +15,7 @@ var a = foo + 1 ? false : true;
 var a = foo() ? true : false;
 var a = foo ? true : false;
 var a = foo === 1 ? true : false;
-var a = foo + 1? true : false;
+var a = foo + 1 ? true : false;
 
 var a= !foo? true : false;
 ```
@@ -219,7 +219,7 @@ invalid.js:10:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━
   > 10 │ var a = foo ? true : false;
        │         ^^^^^^^^^^^^^^^^^^
     11 │ var a = foo === 1 ? true : false;
-    12 │ var a = foo + 1? true : false;
+    12 │ var a = foo + 1 ? true : false;
   
   i Simplify your code by directly assigning the result without using a ternary operator.
   
@@ -233,7 +233,7 @@ invalid.js:10:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━
     10    │ - var·a·=·foo·?·true·:·false;
        10 │ + var·a·=·!!foo;
     11 11 │   var a = foo === 1 ? true : false;
-    12 12 │   var a = foo + 1? true : false;
+    12 12 │   var a = foo + 1 ? true : false;
   
 
 ```
@@ -247,7 +247,7 @@ invalid.js:11:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━
     10 │ var a = foo ? true : false;
   > 11 │ var a = foo === 1 ? true : false;
        │         ^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ var a = foo + 1? true : false;
+    12 │ var a = foo + 1 ? true : false;
     13 │ 
   
   i Simplify your code by directly assigning the result without using a ternary operator.
@@ -261,7 +261,7 @@ invalid.js:11:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━
     10 10 │   var a = foo ? true : false;
     11    │ - var·a·=·foo·===·1·?·true·:·false;
        11 │ + var·a·=·foo··===·1;
-    12 12 │   var a = foo + 1? true : false;
+    12 12 │   var a = foo + 1 ? true : false;
     13 13 │   
   
 
@@ -274,8 +274,8 @@ invalid.js:12:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━
   
     10 │ var a = foo ? true : false;
     11 │ var a = foo === 1 ? true : false;
-  > 12 │ var a = foo + 1? true : false;
-       │         ^^^^^^^^^^^^^^^^^^^^^
+  > 12 │ var a = foo + 1 ? true : false;
+       │         ^^^^^^^^^^^^^^^^^^^^^^
     13 │ 
     14 │ var a= !foo? true : false;
   
@@ -288,8 +288,8 @@ invalid.js:12:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━
   
     10 10 │   var a = foo ? true : false;
     11 11 │   var a = foo === 1 ? true : false;
-    12    │ - var·a·=·foo·+·1?·true·:·false;
-       12 │ + var·a·=·!!(foo·+·1);
+    12    │ - var·a·=·foo·+·1·?·true·:·false;
+       12 │ + var·a·=·!!(foo·+·1·);
     13 13 │   
     14 14 │   var a= !foo? true : false;
   
@@ -301,7 +301,7 @@ invalid.js:14:8 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━
 
   ! Unnecessary use of boolean literals in conditional expression.
   
-    12 │ var a = foo + 1? true : false;
+    12 │ var a = foo + 1 ? true : false;
     13 │ 
   > 14 │ var a= !foo? true : false;
        │        ^^^^^^^^^^^^^^^^^^
