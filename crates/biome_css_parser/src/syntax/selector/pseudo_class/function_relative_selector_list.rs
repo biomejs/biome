@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_relative_selector;
 use crate::syntax::selector::{
-    eat_or_recover_selector_function_close_token, is_at_compound_selector, parse_selector,
+    eat_or_recover_selector_function_close_token, is_nth_at_compound_selector, parse_selector,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::CssSyntaxKind::{
@@ -94,7 +94,7 @@ fn is_at_relative_selector_combinator(p: &mut CssParser) -> bool {
 
 #[inline]
 fn is_at_relative_selector(p: &mut CssParser) -> bool {
-    is_at_relative_selector_combinator(p) || is_at_compound_selector(p)
+    is_at_relative_selector_combinator(p) || is_nth_at_compound_selector(p, 0)
 }
 
 #[inline]
