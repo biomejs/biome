@@ -110,7 +110,7 @@ This rule reports the regular expressions which include multiple code point char
 <strong>  </strong><strong>    │ </strong>        <span style="color: MediumSeaGreen;">+</span>                                  
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 /^[abc]$/;

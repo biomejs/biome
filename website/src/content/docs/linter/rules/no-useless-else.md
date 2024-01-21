@@ -138,7 +138,7 @@ function f(x) {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 function f(x) {

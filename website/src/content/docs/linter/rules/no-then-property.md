@@ -137,7 +137,7 @@ class Foo {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 export {then as success};

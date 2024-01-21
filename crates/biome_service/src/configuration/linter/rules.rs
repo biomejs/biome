@@ -2,13 +2,17 @@
 
 use crate::RuleConfiguration;
 use biome_analyze::RuleFilter;
-use biome_deserialize_macros::{Merge, NoneState};
+use biome_console::markup;
+use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
+use biome_deserialize_macros::{Deserializable, Merge, NoneState};
 use biome_diagnostics::{Category, Severity};
+use biome_rowan::TextRange;
 use indexmap::IndexSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-#[derive(Clone, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[deserializable(from_none, with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Rules {
@@ -18,20 +22,28 @@ pub struct Rules {
     #[doc = r" It enables ALL rules. The rules that belong to `nursery` won't be enabled."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub all: Option<bool>,
+    #[deserializable(rename = "a11y")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub a11y: Option<A11y>,
+    #[deserializable(rename = "complexity")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub complexity: Option<Complexity>,
+    #[deserializable(rename = "correctness")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub correctness: Option<Correctness>,
+    #[deserializable(rename = "nursery")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub nursery: Option<Nursery>,
+    #[deserializable(rename = "performance")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub performance: Option<Performance>,
+    #[deserializable(rename = "security")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub security: Option<Security>,
+    #[deserializable(rename = "style")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub style: Option<Style>,
+    #[deserializable(rename = "suspicious")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub suspicious: Option<Suspicious>,
 }
@@ -49,6 +61,20 @@ impl Default for Rules {
             style: None,
             suspicious: None,
         }
+    }
+}
+impl DeserializableValidator for Rules {
+    fn validate(
+        &self,
+        _name: &str,
+        range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> bool {
+        if self.recommended == Some(true) && self.all == Some(true) {
+            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            return false;
+        }
+        true
     }
 }
 impl Rules {
@@ -326,37 +352,11 @@ impl Rules {
         }
         enabled_rules.difference(&disabled_rules).copied().collect()
     }
-    #[doc = r" It returns only the disabled rules"]
-    pub fn as_disabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut disabled_rules = IndexSet::new();
-        if let Some(group) = self.a11y.as_ref() {
-            disabled_rules.extend(&group.get_disabled_rules());
-        }
-        if let Some(group) = self.complexity.as_ref() {
-            disabled_rules.extend(&group.get_disabled_rules());
-        }
-        if let Some(group) = self.correctness.as_ref() {
-            disabled_rules.extend(&group.get_disabled_rules());
-        }
-        if let Some(group) = self.nursery.as_ref() {
-            disabled_rules.extend(&group.get_disabled_rules());
-        }
-        if let Some(group) = self.performance.as_ref() {
-            disabled_rules.extend(&group.get_disabled_rules());
-        }
-        if let Some(group) = self.security.as_ref() {
-            disabled_rules.extend(&group.get_disabled_rules());
-        }
-        if let Some(group) = self.style.as_ref() {
-            disabled_rules.extend(&group.get_disabled_rules());
-        }
-        if let Some(group) = self.suspicious.as_ref() {
-            disabled_rules.extend(&group.get_disabled_rules());
-        }
-        disabled_rules
-    }
 }
-#[derive(Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
+)]
+#[deserializable(from_none, with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -457,6 +457,20 @@ pub struct A11y {
     #[doc = "Ensure that the attribute passed to the lang attribute is a correct ISO language and/or country."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_lang: Option<RuleConfiguration>,
+}
+impl DeserializableValidator for A11y {
+    fn validate(
+        &self,
+        _name: &str,
+        range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> bool {
+        if self.recommended == Some(true) && self.all == Some(true) {
+            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            return false;
+        }
+        true
+    }
 }
 impl A11y {
     const GROUP_NAME: &'static str = "a11y";
@@ -983,7 +997,10 @@ impl A11y {
         }
     }
 }
-#[derive(Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
+)]
+#[deserializable(from_none, with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -1069,6 +1086,20 @@ pub struct Complexity {
     #[doc = "Discard redundant terms from logical expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_simplified_logic_expression: Option<RuleConfiguration>,
+}
+impl DeserializableValidator for Complexity {
+    fn validate(
+        &self,
+        _name: &str,
+        range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> bool {
+        if self.recommended == Some(true) && self.all == Some(true) {
+            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            return false;
+        }
+        true
+    }
 }
 impl Complexity {
     const GROUP_NAME: &'static str = "complexity";
@@ -1516,7 +1547,10 @@ impl Complexity {
         }
     }
 }
-#[derive(Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
+)]
+#[deserializable(from_none, with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -1626,6 +1660,20 @@ pub struct Correctness {
     #[doc = "Require generator functions to contain yield."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_yield: Option<RuleConfiguration>,
+}
+impl DeserializableValidator for Correctness {
+    fn validate(
+        &self,
+        _name: &str,
+        range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> bool {
+        if self.recommended == Some(true) && self.all == Some(true) {
+            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            return false;
+        }
+        true
+    }
 }
 impl Correctness {
     const GROUP_NAME: &'static str = "correctness";
@@ -2183,7 +2231,10 @@ impl Correctness {
         }
     }
 }
-#[derive(Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
+)]
+#[deserializable(from_none, with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -2266,6 +2317,20 @@ pub struct Nursery {
     #[doc = "Enforce using function types instead of object type with call signatures."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_shorthand_function_type: Option<RuleConfiguration>,
+}
+impl DeserializableValidator for Nursery {
+    fn validate(
+        &self,
+        _name: &str,
+        range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> bool {
+        if self.recommended == Some(true) && self.all == Some(true) {
+            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            return false;
+        }
+        true
+    }
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
@@ -2670,7 +2735,10 @@ impl Nursery {
         }
     }
 }
-#[derive(Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
+)]
+#[deserializable(from_none, with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -2687,6 +2755,20 @@ pub struct Performance {
     #[doc = "Disallow the use of the delete operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_delete: Option<RuleConfiguration>,
+}
+impl DeserializableValidator for Performance {
+    fn validate(
+        &self,
+        _name: &str,
+        range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> bool {
+        if self.recommended == Some(true) && self.all == Some(true) {
+            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            return false;
+        }
+        true
+    }
 }
 impl Performance {
     const GROUP_NAME: &'static str = "performance";
@@ -2781,7 +2863,10 @@ impl Performance {
         }
     }
 }
-#[derive(Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
+)]
+#[deserializable(from_none, with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -2798,6 +2883,20 @@ pub struct Security {
     #[doc = "Report when a DOM element or a component uses both children and dangerouslySetInnerHTML prop."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_dangerously_set_inner_html_with_children: Option<RuleConfiguration>,
+}
+impl DeserializableValidator for Security {
+    fn validate(
+        &self,
+        _name: &str,
+        range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> bool {
+        if self.recommended == Some(true) && self.all == Some(true) {
+            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            return false;
+        }
+        true
+    }
 }
 impl Security {
     const GROUP_NAME: &'static str = "security";
@@ -2900,7 +2999,10 @@ impl Security {
         }
     }
 }
-#[derive(Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
+)]
+#[deserializable(from_none, with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -3010,6 +3112,20 @@ pub struct Style {
     #[doc = "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_while: Option<RuleConfiguration>,
+}
+impl DeserializableValidator for Style {
+    fn validate(
+        &self,
+        _name: &str,
+        range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> bool {
+        if self.recommended == Some(true) && self.all == Some(true) {
+            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            return false;
+        }
+        true
+    }
 }
 impl Style {
     const GROUP_NAME: &'static str = "style";
@@ -3547,7 +3663,10 @@ impl Style {
         }
     }
 }
-#[derive(Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
+)]
+#[deserializable(from_none, with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -3693,6 +3812,20 @@ pub struct Suspicious {
     #[doc = "This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_typeof: Option<RuleConfiguration>,
+}
+impl DeserializableValidator for Suspicious {
+    fn validate(
+        &self,
+        _name: &str,
+        range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> bool {
+        if self.recommended == Some(true) && self.all == Some(true) {
+            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            return false;
+        }
+        true
+    }
 }
 impl Suspicious {
     const GROUP_NAME: &'static str = "suspicious";

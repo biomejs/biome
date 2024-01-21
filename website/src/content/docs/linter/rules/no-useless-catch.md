@@ -69,7 +69,7 @@ try {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 try {

@@ -160,7 +160,7 @@ const { bar } = obj?.foo;
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 (obj?.foo)?.();

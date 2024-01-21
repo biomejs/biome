@@ -233,14 +233,18 @@ export default defineConfig({
 									},
 								},
 								{
-									label: "Lint rules",
+									label: "Rules",
 									link: "/linter/rules",
 									translations: {
-										ja: "Lintルール",
-										"zh-CN": "Lint 规则",
-										"pt-BR": "Regras do Linter",
-										es: "Reglas del Linter",
+										ja: "ルール",
+										"zh-CN": "规则",
+										"pt-BR": "Regras",
+										es: "Reglas",
 									},
+								},
+								{
+									label: "Rules sources",
+									link: "/linter/rules-sources",
 								},
 							],
 						},

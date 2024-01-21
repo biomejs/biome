@@ -50,7 +50,7 @@ type Bar<> = {};
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```ts
 interface Foo {}

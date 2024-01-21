@@ -68,7 +68,7 @@ let foo = { bar: 'baz' as 'baz' };
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```ts
 let foo = 'bar';

@@ -68,7 +68,7 @@ import { type A, type B } from "./mod.js";
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```ts
 import type { A } from "./mod.js";

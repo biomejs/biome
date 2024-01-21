@@ -37,7 +37,7 @@ declare_rule! {
     /// function f(a = b, b = 0) {}
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// f();

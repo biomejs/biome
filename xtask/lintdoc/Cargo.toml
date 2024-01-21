@@ -16,7 +16,7 @@ biome_json_analyze = { workspace = true }
 biome_json_parser  = { workspace = true }
 biome_json_syntax  = { workspace = true }
 biome_service      = { workspace = true }
-convert_case       = "0.6.0"
+convert_case       = { workspace = true }
 pulldown-cmark     = { version = "0.9", default-features = false }
 xtask              = { path = '../', version = "0.0" }
 

@@ -19,7 +19,7 @@ declare_rule! {
     /// let x = 2.302;
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// let x = Math.PI;

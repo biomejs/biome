@@ -20,7 +20,33 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+### LSP
+
+#### Bug fixes
+
+- Fix [#1584](https://github.com/biomejs/biome/issues/1584). Ensure the LSP only registers the formatter once. Contributed by @nhedger
+
+- Fix [#1589](https://github.com/biomejs/biome/issues/1589). Fix invalid formatting of own line comments when they were at the end of an import/export list. Contributed by @spanishpear
+
 ### Configuration
+
+#### Bug fixes
+
+- Override correctly the recommended preset ([#1349](https://github.com/biomejs/biome/issues/1349)).
+
+  Previously, if unspecified, Biome turned on the recommended preset in overrides.
+  This resulted in reporting diagnostics with a severity level set to `off`.
+  This in turn caused Biome to fail.
+
+  Now Biome won't switch on the recommended preset in `overrides` unless told to do so.
+
+  Contributed by @Conaclos
+
+- Don't format **ignored** files that are well-known JSONC files when `files.ignoreUnknown` is enabled ([#1607](https://github.com/biomejs/biome/issues/1607)).
+
+  Previously, Biome always formatted files that are known to be JSONC files (e.g. `.eslintrc`) when `files.ignoreUnknown` was enabled.
+
+  Contributed by @Conaclos
 
 ### Editors
 
@@ -28,6 +54,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixed
 
+- Fix [#1178](https://github.com/biomejs/biome/issues/1178), where the line ending option wasn't correctly applied. Contributed by @ematipico
 - Fix [#1571](https://github.com/biomejs/biome/issues/1571). Fix invalid formatting of nested multiline comments. Contributed by @ah-yu
 
 ### JavaScript APIs
@@ -39,6 +66,24 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Enhancements
 
 #### Bug fixes
+
+- Fix [#1575](https://github.com/biomejs/biome/issues/1575). [noArrayIndexKey](https://biomejs.dev/linter/rules/no-array-index-key/) now captures array index value inside template literals and with string concatination. Contributed by @vasucp1207
+
+- Linter rules that inspect regexes now handle multibyte characters correctly ([#1522](https://github.com/biomejs/biome/issues/1522)).
+
+  Previously, [noMisleadingCharacterClass](https://biomejs.dev/linter/no-misleading-character-class), [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/no-multiple-spaces-in-regular-expression-literals), and [noEmptyCharacterClassInRegex](https://biomejs.dev/linter/no-empty-character-class-in-regex) made Biome errors on multi-bytes characters.
+  Multibyte characters are now handled correctly.
+
+  The following code no longer raises an internal error:
+
+  ```js
+  // Cyrillic characters
+  /[\u200E\u2066-\u2069]/gu;
+  ```
+
+  Contributed by @Conaclos
+
+- [useExhaustiveDependencies](https://biomejs.dev/linter/use-exhaustive-dependencies) no longer made Biome errors in code TypeScript import equal declarations ([#1194](https://github.com/biomejs/biome/issues/1194)). Contributed by @Conaclos
 
 ### Parser
 

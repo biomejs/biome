@@ -35,15 +35,17 @@ pub mod json;
 mod merge;
 mod none_state;
 pub mod string_set;
+mod validator;
 
 use biome_diagnostics::{Error, Severity};
-use biome_rowan::TextRange;
+pub use biome_rowan::TextRange;
 pub use diagnostics::{DeserializationAdvice, DeserializationDiagnostic, VisitableType};
 pub use impls::*;
 pub use merge::Merge;
 pub use none_state::NoneState;
 use std::fmt::Debug;
 pub use string_set::StringSet;
+pub use validator::*;
 
 /// Implemented by data structures that can deserialize any [DeserializableValue].
 ///
@@ -51,46 +53,25 @@ pub use string_set::StringSet;
 /// To implement [Deserializable], you can reuse a type that implements [Deserializable] and
 /// turn the obtained value into what you want.
 ///
-/// When deserializing more complex types, such as a `struct`,
-/// you have to use a type that implements [DeserializationVisitor].
+/// When deserializing more complex types, such as a `struct` or `enum`, you can use the
+/// [Deserializable] derive macro.
 ///
 /// ## Example
 ///
 /// ```
-/// use biome_deserialize::{DeserializationDiagnostic,  Deserializable, Text, DeserializableValue};
+/// use biome_deserialize_macros::Deserializable;
 /// use biome_rowan::TextRange;
 ///
+/// #[derive(Deserializable)]
 /// pub enum Variant {
 ///     A,
 ///     B,
 /// }
 ///
-/// impl Deserializable for Variant {
-///     fn deserialize(
-///         value: &impl DeserializableValue,
-///         name: &str,
-///         diagnostics: &mut Vec<DeserializationDiagnostic>,
-///     ) -> Option<Self> {
-///         match Text::deserialize(value, name, diagnostics)?.text() {
-///             "A" => Some(Variant::A),
-///             "B" => Some(Variant::B),
-///             unknown_variant => {
-///                 const ALLOWED_VARIANTS: &[&str] = &["A", "B"];
-///                 diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-///                     unknown_variant,
-///                     value.range(),
-///                     ALLOWED_VARIANTS,
-///                 ));
-///                 None
-///             }
-///         }
-///     }
-/// }
-///
 /// use biome_deserialize::json::deserialize_from_json_str;
 /// use biome_json_parser::JsonParserOptions;
 ///
-/// let source = r#""A""#;
+/// let source = r#""a""#;
 /// let deserialized = deserialize_from_json_str::<Variant>(&source, JsonParserOptions::default(), "");
 /// assert!(!deserialized.has_errors());
 /// assert!(matches!(deserialized.into_deserialized(), Some(Variant::A)));
@@ -123,6 +104,9 @@ pub trait DeserializableValue: Sized {
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<V::Output>;
+
+    /// Returns whether the value is of the given type.
+    fn is_type(&self, ty: VisitableType) -> bool;
 }
 
 /// This trait represents a visitor that walks through a [DeserializableValue].

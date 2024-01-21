@@ -41,7 +41,7 @@ isNaN({}); // true
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 Number.isNaN({}); // false

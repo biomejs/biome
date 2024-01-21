@@ -44,7 +44,7 @@ declare_rule! {
     /// import { type A, type B } from "./mod.js";
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```ts
     /// import type { A } from "./mod.js";

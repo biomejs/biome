@@ -19,7 +19,7 @@ declare_rule! {
     /// console.log()
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// console.info("info");

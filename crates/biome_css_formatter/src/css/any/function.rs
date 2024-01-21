@@ -8,7 +8,7 @@ impl FormatRule<AnyCssFunction> for FormatAnyCssFunction {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssFunction, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssFunction::CssSimpleFunction(node) => node.format().fmt(f),
+            AnyCssFunction::CssFunction(node) => node.format().fmt(f),
             AnyCssFunction::CssUrlFunction(node) => node.format().fmt(f),
         }
     }

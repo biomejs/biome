@@ -32,7 +32,7 @@ declare_rule! {
     /// let bar = new BigInt(9007199254740991);
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// let foo = Symbol('foo');

@@ -26,7 +26,7 @@ declare_rule! {
     /// <input role="img" />;
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```jsx
     /// <input role="button" />;

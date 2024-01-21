@@ -22,7 +22,7 @@ declare_rule! {
     /// <html aria-required="true" />
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```jsx
     /// <meta charset="UTF-8" />

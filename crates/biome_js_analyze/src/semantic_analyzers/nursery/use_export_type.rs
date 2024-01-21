@@ -43,7 +43,7 @@ declare_rule! {
     /// export { type X, type Y };
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// class C {}

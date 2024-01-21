@@ -95,7 +95,7 @@ var a = foo + 1 ? true : false;
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 var a = x === 2 ? 'Yes' : 'No';

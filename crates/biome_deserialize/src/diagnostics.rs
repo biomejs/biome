@@ -100,6 +100,19 @@ impl DeserializationDiagnostic {
         .with_range(range)
     }
 
+    /// Emitted when a key is missing, against a set of required ones
+    pub fn new_missing_key(key_name: &str, range: impl AsSpan, required_keys: &[&str]) -> Self {
+        let diagnostic =
+            Self::new(markup!("The key `"<Emphasis>{key_name}</Emphasis>"` is missing." ))
+                .with_range(range);
+
+        if required_keys.len() > 1 {
+            diagnostic.note_with_list("Required keys", required_keys)
+        } else {
+            diagnostic
+        }
+    }
+
     /// Emitted when a generic node has an incorrect type
     pub fn new_out_of_bound_integer(
         min: impl std::fmt::Display,

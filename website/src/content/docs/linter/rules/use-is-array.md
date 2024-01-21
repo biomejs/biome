@@ -48,7 +48,7 @@ if (xs instanceof Array) {}
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 const xs = [];

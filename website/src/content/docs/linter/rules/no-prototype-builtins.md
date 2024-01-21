@@ -71,7 +71,7 @@ var invalid = foo.propertyIsEnumerable("bar");
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 var valid = Object.hasOwn(foo, "bar");

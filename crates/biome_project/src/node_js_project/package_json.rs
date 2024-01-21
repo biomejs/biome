@@ -28,7 +28,7 @@ impl Manifest for PackageJson {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, biome_deserialize_macros::Deserializable)]
 pub struct Dependencies(FxHashMap<String, Version>);
 
 #[derive(Debug)]
@@ -104,20 +104,6 @@ impl DeserializationVisitor for PackageJsonVisitor {
             }
         }
         Some(result)
-    }
-}
-
-impl Deserializable for Dependencies {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        Some(Dependencies(Deserializable::deserialize(
-            value,
-            name,
-            diagnostics,
-        )?))
     }
 }
 

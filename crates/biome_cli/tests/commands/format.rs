@@ -2689,3 +2689,88 @@ fn override_don_t_affect_ignored_files() {
         result,
     ));
 }
+
+#[test]
+fn format_with_configured_line_ending() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    let config = r#"{
+        "formatter": {
+            "lineEnding": "crlf",
+            "lineWidth": 20
+        }
+    }"#;
+    let code_json = r#"{ "name": "mike", "surname": "ross" }"#;
+    let code_js = r#"const b = { "name": "mike", "surname": "ross" }"#;
+    let json_file = Path::new("input.json");
+    fs.insert(json_file.into(), code_json.as_bytes());
+
+    let js_file = Path::new("input.js");
+    fs.insert(js_file.into(), code_js.as_bytes());
+
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config);
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("."), ("--write")].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(
+        &fs,
+        json_file,
+        "{\r\n\t\"name\": \"mike\",\r\n\t\"surname\": \"ross\"\r\n}\r\n",
+    );
+    assert_file_contents(
+        &fs,
+        js_file,
+        "const b = {\r\n\tname: \"mike\",\r\n\tsurname: \"ross\",\r\n};\r\n",
+    );
+}
+
+#[test]
+fn don_t_format_ignored_known_jsonc_files() {
+    let config = r#"{
+        "files": {
+            "ignoreUnknown": true,
+            "ignore": [".eslintrc"]
+        }
+    }"#;
+    let files = [(".eslintrc", false)];
+
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config);
+    for (file_path, _) in files {
+        let file_path = Path::new(file_path);
+        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+    }
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("."), ("--write")].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    for (file_path, expect_formatted) in files {
+        let expected = if expect_formatted {
+            FORMATTED
+        } else {
+            UNFORMATTED
+        };
+        assert_file_contents(&fs, Path::new(file_path), expected);
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "don_t_format_ignored_known_jsonc_files",
+        fs,
+        console,
+        result,
+    ));
+}

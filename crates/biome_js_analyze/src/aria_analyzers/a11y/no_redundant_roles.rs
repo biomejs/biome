@@ -29,7 +29,7 @@ declare_rule! {
     /// <h1 role='heading' aria-level='1'>title</h1>
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```jsx
     /// <article role='presentation'></article>

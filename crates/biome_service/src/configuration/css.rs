@@ -1,11 +1,13 @@
 use crate::configuration::{deserialize_line_width, serialize_line_width, PlainIndentStyle};
-use biome_deserialize_macros::{Merge, NoneState};
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// Options applied to CSS files
-#[derive(Bpaf, Clone, Default, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Default, Debug, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default, deny_unknown_fields)]
 pub struct CssConfiguration {
@@ -21,7 +23,9 @@ pub struct CssConfiguration {
 }
 
 /// Options that changes how the CSS parser behaves
-#[derive(Bpaf, Clone, Default, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Default, Debug, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssParser {
@@ -31,7 +35,9 @@ pub struct CssParser {
     pub allow_wrong_line_comments: Option<bool>,
 }
 
-#[derive(Bpaf, Clone, Default, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Default, Debug, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssFormatter {
@@ -53,6 +59,7 @@ pub struct CssFormatter {
     /// The size of the indentation applied to CSS (and its super languages) files. Default to 2.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("css-formatter-indent-size"), argument("NUMBER"), optional)]
+    #[deserializable(deprecated(use_instead = "css.formatter.indentWidth"))]
     pub indent_size: Option<u8>,
 
     /// The type of line ending applied to CSS (and its super languages) files.

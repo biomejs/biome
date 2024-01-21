@@ -11,7 +11,6 @@ pub mod json;
 pub mod linter;
 pub mod organize_imports;
 mod overrides;
-mod parse;
 pub mod vcs;
 
 use crate::configuration::diagnostics::CantLoadExtendFile;
@@ -26,7 +25,7 @@ use biome_analyze::AnalyzerRules;
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge, StringSet};
-use biome_deserialize_macros::{Merge, NoneState};
+use biome_deserialize_macros::{Deserializable, Merge, NoneState};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
 use biome_js_analyze::metadata;
@@ -50,13 +49,15 @@ use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
 
 /// The configuration that is contained inside the file `biome.json`
-#[derive(Bpaf, Clone, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Debug, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[deserializable(from_none)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Configuration {
     /// A field for the [JSON schema](https://json-schema.org/) specification
-    #[serde(rename(serialize = "$schema", deserialize = "$schema"))]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "$schema", skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub schema: Option<String>,
 
@@ -207,7 +208,9 @@ impl Configuration {
 }
 
 /// The configuration of the filesystem
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FilesConfiguration {
@@ -276,6 +279,7 @@ pub fn load_configuration(
     let config = load_config(fs, config_path)?;
     let mut loaded_configuration = LoadedConfiguration::from(config);
     loaded_configuration.apply_extends(fs)?;
+    loaded_configuration.migrate_deprecated_fields();
     loaded_configuration.configuration.merge_in_defaults();
     Ok(loaded_configuration)
 }
@@ -534,6 +538,48 @@ impl LoadedConfiguration {
     /// It return an iterator over the diagnostics emitted during the resolution of the configuration file
     pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
         ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
+    }
+
+    /// Checks for the presence of deprecated fields and updates the
+    /// configuration to apply them to the new schema.
+    fn migrate_deprecated_fields(&mut self) {
+        let config = &mut self.configuration;
+
+        // TODO: remove in biome 2.0
+        if let Some(formatter) = config.css.as_mut().and_then(|css| css.formatter.as_mut()) {
+            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
+                formatter.indent_width = formatter.indent_size;
+            }
+        }
+
+        // TODO: remove in biome 2.0
+        if let Some(formatter) = config.formatter.as_mut() {
+            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
+                formatter.indent_width = formatter.indent_size;
+            }
+        }
+
+        // TODO: remove in biome 2.0
+        if let Some(formatter) = config
+            .javascript
+            .as_mut()
+            .and_then(|js| js.formatter.as_mut())
+        {
+            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
+                formatter.indent_width = formatter.indent_size;
+            }
+        }
+
+        // TODO: remove in biome 2.0
+        if let Some(formatter) = config
+            .json
+            .as_mut()
+            .and_then(|json| json.formatter.as_mut())
+        {
+            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
+                formatter.indent_width = formatter.indent_size;
+            }
+        }
     }
 }
 

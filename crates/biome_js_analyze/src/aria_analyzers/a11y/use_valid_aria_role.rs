@@ -3,9 +3,7 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_deserialize::{
-    Deserializable, DeserializationDiagnostic, DeserializationVisitor, Text, VisitableType,
-};
+use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -75,72 +73,12 @@ declare_rule! {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ValidAriaRoleOptions {
-    allowed_invalid_roles: Vec<String>,
+    allow_invalid_roles: Vec<String>,
     ignore_non_dom: bool,
-}
-
-impl Deserializable for ValidAriaRoleOptions {
-    fn deserialize(
-        value: &impl biome_deserialize::DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        value.deserialize(ValidAriaRoleOptionsVisitor, name, diagnostics)
-    }
-}
-
-struct ValidAriaRoleOptionsVisitor;
-impl DeserializationVisitor for ValidAriaRoleOptionsVisitor {
-    type Output = ValidAriaRoleOptions;
-
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
-
-    fn visit_map(
-        self,
-        members: impl Iterator<
-            Item = Option<(
-                impl biome_deserialize::DeserializableValue,
-                impl biome_deserialize::DeserializableValue,
-            )>,
-        >,
-        _range: biome_rowan::TextRange,
-        _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self::Output> {
-        let mut result = Self::Output::default();
-        for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
-                continue;
-            };
-            match key_text.text() {
-                "allowInvalidRoles" => {
-                    if let Some(roles) = Deserializable::deserialize(&value, &key_text, diagnostics)
-                    {
-                        result.allowed_invalid_roles = roles;
-                    }
-                }
-                "ignoreNonDom" => {
-                    if let Some(value) = Deserializable::deserialize(&value, &key_text, diagnostics)
-                    {
-                        result.ignore_non_dom = value;
-                    }
-                }
-                unknown_key => {
-                    const ALLOWED_KEYS: &[&str] = &["allowInvalidRoles", "ignoreNonDom"];
-                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        unknown_key,
-                        key.range(),
-                        ALLOWED_KEYS,
-                    ));
-                }
-            }
-        }
-        Some(result)
-    }
 }
 
 impl Rule for UseValidAriaRole {
@@ -155,7 +93,7 @@ impl Rule for UseValidAriaRole {
         let aria_roles = ctx.aria_roles();
 
         let ignore_non_dom = options.ignore_non_dom;
-        let allowed_invalid_roles = &options.allowed_invalid_roles;
+        let allowed_invalid_roles = &options.allow_invalid_roles;
 
         if ignore_non_dom && node.is_custom_component() {
             return None;

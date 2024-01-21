@@ -52,3 +52,6 @@ var r = new window.RegExp(/[👍]/u);
 var r = new global.RegExp(/[👍]/u);
 var r = new globalThis.RegExp(/[👍]/u);
 var r = new globalThis.globalThis.globalThis.RegExp(/[👍]/u);
+
+// Issue: https://github.com/biomejs/biome/issues/1522
+var cyrillicChars = /[\u200E\u2066-\u2069]/gu;

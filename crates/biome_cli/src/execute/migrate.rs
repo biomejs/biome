@@ -138,7 +138,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     formatter: Some(formatter_configuration.clone()),
                     javascript: Some(JavascriptConfiguration {
                         formatter: Some(javascript_configuration.clone()),
-                        ..NoneState::none()
+                        ..Default::default()
                     }),
                     ..NoneState::none()
                 });

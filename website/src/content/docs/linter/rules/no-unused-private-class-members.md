@@ -98,7 +98,7 @@ class OnlyWrite {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 class UsedMember {

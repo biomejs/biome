@@ -2,10 +2,7 @@ use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
 use biome_console::{markup, Console, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
-};
+use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
 use biome_fs::{FileSystem, OpenOptions};
@@ -13,10 +10,9 @@ use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons,
 use biome_json_parser::JsonParserOptions;
 use biome_service::configuration::{FormatterConfiguration, PlainIndentStyle};
 use biome_service::{DynRef, JavascriptFormatter};
-use biome_text_size::TextRange;
 use std::path::{Path, PathBuf};
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Clone, Debug, Deserializable, Eq, PartialEq)]
 pub(crate) struct PrettierConfiguration {
     /// https://prettier.io/docs/en/options#print-width
     print_width: u16,
@@ -64,7 +60,7 @@ impl Default for PrettierConfiguration {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Default, Clone)]
+#[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
 enum EndOfLine {
     #[default]
     Lf,
@@ -72,59 +68,14 @@ enum EndOfLine {
     Cr,
 }
 
-impl Deserializable for EndOfLine {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        match String::deserialize(value, name, diagnostics)?.as_str() {
-            "lf" => Some(Self::Lf),
-            "crlf" => Some(Self::Crlf),
-            "cr" => Some(Self::Cr),
-            unknown_variant => {
-                const ALLOWED_VARIANTS: &[&str] = &["lf", "crlf", "cr"];
-                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    unknown_variant,
-                    value.range(),
-                    ALLOWED_VARIANTS,
-                ));
-                None
-            }
-        }
-    }
-}
-
-#[derive(Debug, Eq, PartialEq, Default, Clone)]
+#[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
 enum ArrowParens {
     #[default]
     Always,
     Avoid,
 }
 
-impl Deserializable for ArrowParens {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        match String::deserialize(value, name, diagnostics)?.as_str() {
-            "always" => Some(Self::Always),
-            "avoid" => Some(Self::Avoid),
-            unknown_variant => {
-                const ALLOWED_VARIANTS: &[&str] = &["always", "avoid"];
-                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    unknown_variant,
-                    value.range(),
-                    ALLOWED_VARIANTS,
-                ));
-                None
-            }
-        }
-    }
-}
-
-#[derive(Debug, Default, Eq, PartialEq, Clone)]
+#[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
 enum PrettierTrailingComma {
     #[default]
     All,
@@ -132,56 +83,12 @@ enum PrettierTrailingComma {
     Es5,
 }
 
-impl Deserializable for PrettierTrailingComma {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        match String::deserialize(value, name, diagnostics)?.as_str() {
-            "all" => Some(Self::All),
-            "none" => Some(Self::None),
-            "es5" => Some(Self::Es5),
-            unknown_variant => {
-                const ALLOWED_VARIANTS: &[&str] = &["all", "none", "es5"];
-                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    unknown_variant,
-                    value.range(),
-                    ALLOWED_VARIANTS,
-                ));
-                None
-            }
-        }
-    }
-}
-
-#[derive(Debug, Eq, Default, PartialEq, Clone)]
+#[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
 enum QuoteProps {
     #[default]
+    #[deserializable(rename = "as-needed")]
     AsNeeded,
     Preserve,
-}
-
-impl Deserializable for QuoteProps {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        match String::deserialize(value, name, diagnostics)?.as_str() {
-            "as-needed" => Some(Self::AsNeeded),
-            "preserve" => Some(Self::Preserve),
-            unknown_variant => {
-                const ALLOWED_VARIANTS: &[&str] = &["as-needed", "preserve"];
-                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    unknown_variant,
-                    value.range(),
-                    ALLOWED_VARIANTS,
-                ));
-                None
-            }
-        }
-    }
 }
 
 impl TryFrom<&str> for PrettierTrailingComma {
@@ -193,113 +100,6 @@ impl TryFrom<&str> for PrettierTrailingComma {
             "es5" => Ok(Self::Es5),
             _ => Err("Option not supported".to_string()),
         }
-    }
-}
-
-impl Deserializable for PrettierConfiguration {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        value.deserialize(PrettierVisitor, name, diagnostics)
-    }
-}
-
-struct PrettierVisitor;
-
-impl DeserializationVisitor for PrettierVisitor {
-    type Output = PrettierConfiguration;
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
-
-    fn visit_map(
-        self,
-        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
-        _range: TextRange,
-        _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self::Output> {
-        let mut result = PrettierConfiguration::default();
-        for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
-                continue;
-            };
-            match key_text.text() {
-                "endOfLine" => {
-                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-                        result.end_of_line = val;
-                    }
-                }
-                "arrowParens" => {
-                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-                        result.arrow_parens = val;
-                    }
-                }
-                "useTabs" => {
-                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-                        result.use_tabs = val;
-                    }
-                }
-
-                "printWidth" => {
-                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-                        result.print_width = val;
-                    }
-                }
-
-                "trailingComma" => {
-                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-                        result.trailing_comma = val;
-                    }
-                }
-
-                "quoteProps" => {
-                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-                        result.quote_props = val;
-                    }
-                }
-
-                "semi" => {
-                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-                        result.semi = val;
-                    }
-                }
-
-                "bracketSpacing" => {
-                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-                        result.bracket_spacing = val;
-                    }
-                }
-
-                "bracketLine" => {
-                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-                        result.bracket_line = val;
-                    }
-                }
-
-                "jsxSingleQuote" => {
-                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-                        result.jsx_single_quote = val;
-                    }
-                }
-
-                "singleQuote" => {
-                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-                        result.single_quote = val;
-                    }
-                }
-
-                "tabWidth" => {
-                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-                        result.tab_width = val;
-                    }
-                }
-
-                _ => {}
-            }
-        }
-
-        Some(result)
     }
 }
 

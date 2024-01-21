@@ -44,7 +44,7 @@ enum Computed {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```ts
 enum Direction {
