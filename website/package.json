@@ -66,6 +66,8 @@
 		"pnpm": "^8.0.0"
 	},
 	"dependencies": {
-		"astro": "^3.6.0"
+		"astro": "^3.6.0",
+		"astro-og-canvas": "^0.4.2",
+		"canvaskit-wasm": "^0.39.1"
 	}
 }
