@@ -18,6 +18,12 @@ var a = foo === 1 ? true : false;
 var a = foo + 1 ? true : false;
 
 var a= !foo? true : false;
+
+var a = x instanceof foo ? false : true;
+var a = x instanceof foo ? true : false;
+
+var a = 'make' in car ? true : false;
+var a = 'make' in car ? false : true;
 ```
 
 # Diagnostics
@@ -305,6 +311,8 @@ invalid.js:14:8 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━
     13 │ 
   > 14 │ var a= !foo? true : false;
        │        ^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ var a = x instanceof foo ? false : true;
   
   i Simplify your code by directly assigning the result without using a ternary operator.
   
@@ -315,6 +323,114 @@ invalid.js:14:8 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━
   
     14 │ var·a=·!foo?·true·:·false;
        │            -------------- 
+
+```
+
+```
+invalid.js:16:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+    14 │ var a= !foo? true : false;
+    15 │ 
+  > 16 │ var a = x instanceof foo ? false : true;
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ var a = x instanceof foo ? true : false;
+    18 │ 
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+  i Unsafe fix: Replace the above code with,
+  
+    14 14 │   var a= !foo? true : false;
+    15 15 │   
+    16    │ - var·a·=·x·instanceof·foo·?·false·:·true;
+       16 │ + var·a·=·!(x·instanceof·foo·);
+    17 17 │   var a = x instanceof foo ? true : false;
+    18 18 │   
+  
+
+```
+
+```
+invalid.js:17:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+    16 │ var a = x instanceof foo ? false : true;
+  > 17 │ var a = x instanceof foo ? true : false;
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ var a = 'make' in car ? true : false;
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+  i Unsafe fix: Replace the above code with,
+  
+    15 15 │   
+    16 16 │   var a = x instanceof foo ? false : true;
+    17    │ - var·a·=·x·instanceof·foo·?·true·:·false;
+       17 │ + var·a·=·x··instanceof·foo;
+    18 18 │   
+    19 19 │   var a = 'make' in car ? true : false;
+  
+
+```
+
+```
+invalid.js:19:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+    17 │ var a = x instanceof foo ? true : false;
+    18 │ 
+  > 19 │ var a = 'make' in car ? true : false;
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ var a = 'make' in car ? false : true;
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+  i Unsafe fix: Replace the above code with,
+  
+    17 17 │   var a = x instanceof foo ? true : false;
+    18 18 │   
+    19    │ - var·a·=·'make'·in·car·?·true·:·false;
+       19 │ + var·a·=·'make'··in·car;
+    20 20 │   var a = 'make' in car ? false : true;
+  
+
+```
+
+```
+invalid.js:20:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+    19 │ var a = 'make' in car ? true : false;
+  > 20 │ var a = 'make' in car ? false : true;
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+  i Unsafe fix: Replace the above code with,
+  
+    18 18 │   
+    19 19 │   var a = 'make' in car ? true : false;
+    20    │ - var·a·=·'make'·in·car·?·false·:·true;
+       20 │ + var·a·=·!('make'·in·car·);
+  
 
 ```
 

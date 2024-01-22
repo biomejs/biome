@@ -12,3 +12,9 @@ var a = foo === 1 ? true : false;
 var a = foo + 1 ? true : false;
 
 var a= !foo? true : false;
+
+var a = x instanceof foo ? false : true;
+var a = x instanceof foo ? true : false;
+
+var a = 'make' in car ? true : false;
+var a = 'make' in car ? false : true;

@@ -62,19 +62,6 @@ declare_rule! {
     }
 }
 
-const BOOLEAN_OPERATORS: [&str; 10] = [
-    "==",
-    "===",
-    "!=",
-    "!==",
-    ">",
-    ">=",
-    "<",
-    "<=",
-    "in",
-    "instanceof",
-];
-
 impl Rule for NoUselessTernary {
     type Query = Ast<JsConditionalExpression>;
     type State = ();
@@ -171,6 +158,36 @@ impl Rule for NoUselessTernary {
                         right,
                     ));
                 }
+                JsSyntaxKind::JS_INSTANCEOF_EXPRESSION => {
+                    let left = node
+                        .test()
+                        .ok()?
+                        .as_js_instanceof_expression()?
+                        .left()
+                        .ok()?;
+                    let right = node
+                        .test()
+                        .ok()?
+                        .as_js_instanceof_expression()?
+                        .right()
+                        .ok()?;
+                    new_node = make::js_instanceof_expression(
+                        left,
+                        make::token_decorated_with_space(T![instanceof]),
+                        right,
+                    )
+                    .into();
+                }
+                JsSyntaxKind::JS_IN_EXPRESSION => {
+                    let property = node.test().ok()?.as_js_in_expression()?.property().ok()?;
+                    let object = node.test().ok()?.as_js_in_expression()?.object().ok()?;
+                    new_node = make::js_in_expression(
+                        property,
+                        make::token_decorated_with_space(T![in]),
+                        object,
+                    )
+                    .into();
+                }
                 JsSyntaxKind::JS_UNARY_EXPRESSION => {
                     let argument = node
                         .test()
@@ -191,7 +208,7 @@ impl Rule for NoUselessTernary {
         return Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Replace the above code with," }.to_owned(),
+            message: markup! { "Replace the conditional expression with" }.to_owned(),
             mutation,
         });
     }
@@ -208,21 +225,21 @@ fn is_boolean_literal(expression: &AnyJsExpression) -> bool {
 fn is_boolean_expression(expression: &AnyJsExpression) -> Option<bool> {
     match expression.syntax().kind() {
         JsSyntaxKind::JS_BINARY_EXPRESSION => {
-            let operator = expression
+            if expression
                 .as_js_binary_expression()?
-                .operator_token()
-                .ok()?;
-            let operator = operator.text_trimmed();
-            if BOOLEAN_OPERATORS.contains(&operator) {
+                .is_comparison_operator()
+            {
                 return Some(true);
             }
         }
         JsSyntaxKind::JS_UNARY_EXPRESSION => {
             let operator = expression.as_js_unary_expression()?.operator_token().ok()?;
-            let operator = operator.text_trimmed();
-            if operator == "!" {
+            if operator.kind() == JsSyntaxKind::BANG {
                 return Some(true);
             }
+        }
+        JsSyntaxKind::JS_INSTANCEOF_EXPRESSION | JsSyntaxKind::JS_IN_EXPRESSION => {
+            return Some(true);
         }
         _ => return Some(false),
     };
