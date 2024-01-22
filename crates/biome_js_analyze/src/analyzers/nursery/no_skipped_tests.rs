@@ -29,9 +29,9 @@ declare_rule! {
     /// test("test", () => {});
     /// ```
     ///
-    pub(crate) NoDisabledTests {
+    pub(crate) NoSkippedTests {
         version: "next",
-        name: "noDisabledTests",
+        name: "noSkippedTests",
         recommended: false,
         source: RuleSource::EslintJest("no-disabled-tests"),
         source_kind: RuleSourceKind::Inspired,
@@ -40,7 +40,7 @@ declare_rule! {
 
 const FUNCTION_NAMES: [&str; 4] = ["skip", "xdescribe", "xit", "xtest"];
 
-impl Rule for NoDisabledTests {
+impl Rule for NoSkippedTests {
     type Query = Ast<JsCallExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;

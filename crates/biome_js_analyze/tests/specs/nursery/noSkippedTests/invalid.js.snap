@@ -15,9 +15,9 @@ xtest('foo', () => {});
 
 # Diagnostics
 ```
-invalid.js:1:10 lint/nursery/noDisabledTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:10 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't skip tests.
+  ! Don't disable tests.
   
   > 1 │ describe.skip("test", () => {});
       │          ^^^^
@@ -32,9 +32,9 @@ invalid.js:1:10 lint/nursery/noDisabledTests ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:2:4 lint/nursery/noDisabledTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:4 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't skip tests.
+  ! Don't disable tests.
   
     1 │ describe.skip("test", () => {});
   > 2 │ it.skip("test", () => {});
@@ -50,9 +50,9 @@ invalid.js:2:4 lint/nursery/noDisabledTests ━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:3:6 lint/nursery/noDisabledTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:6 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't skip tests.
+  ! Don't disable tests.
   
     1 │ describe.skip("test", () => {});
     2 │ it.skip("test", () => {});
@@ -69,9 +69,9 @@ invalid.js:3:6 lint/nursery/noDisabledTests ━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:4:1 lint/nursery/noDisabledTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:1 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't skip tests.
+  ! Don't disable tests.
   
     2 │ it.skip("test", () => {});
     3 │ test.skip("test", () => {});
@@ -88,9 +88,9 @@ invalid.js:4:1 lint/nursery/noDisabledTests ━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:5:1 lint/nursery/noDisabledTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't skip tests.
+  ! Don't disable tests.
   
     3 │ test.skip("test", () => {});
     4 │ xdescribe('foo', () => {});
@@ -107,9 +107,9 @@ invalid.js:5:1 lint/nursery/noDisabledTests ━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:6:1 lint/nursery/noDisabledTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't skip tests.
+  ! Don't disable tests.
   
     4 │ xdescribe('foo', () => {});
     5 │ xit('foo', () => {});
