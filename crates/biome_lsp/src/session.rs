@@ -8,7 +8,7 @@ use biome_analyze::RuleCategories;
 use biome_console::markup;
 use biome_diagnostics::PrintDescription;
 use biome_fs::{FileSystem, OsFileSystem, RomePath};
-use biome_service::configuration::{load_partial_configuration, LoadedPartialConfiguration};
+use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, PullDiagnosticsParams, SupportsFeatureParams,
 };
@@ -407,7 +407,7 @@ impl Session {
             }
         };
 
-        let status = match load_partial_configuration(&self.fs, base_path) {
+        let status = match load_configuration(&self.fs, base_path) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.has_errors() {
                     error!("Couldn't load the configuration file, reasons:");
@@ -417,23 +417,23 @@ impl Session {
                     }
                     ConfigurationStatus::Error
                 } else {
-                    let LoadedPartialConfiguration {
-                        partial_configuration,
+                    let LoadedConfiguration {
+                        configuration,
                         directory_path: configuration_path,
                         ..
                     } = loaded_configuration;
                     info!("Loaded workspace setting");
-                    debug!("{partial_configuration:#?}");
+                    debug!("{configuration:#?}");
                     let fs = &self.fs;
 
-                    let result = partial_configuration
-                        .retrieve_gitignore_matches(fs, configuration_path.as_deref());
+                    let result =
+                        configuration.retrieve_gitignore_matches(fs, configuration_path.as_deref());
 
                     match result {
                         Ok((vcs_base_path, gitignore_matches)) => {
                             let result = self.workspace.update_settings(UpdateSettingsParams {
                                 working_directory: fs.working_directory(),
-                                configuration: partial_configuration,
+                                configuration,
                                 vcs_base_path,
                                 gitignore_matches,
                             });

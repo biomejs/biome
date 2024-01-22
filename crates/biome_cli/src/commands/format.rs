@@ -11,9 +11,8 @@ use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::vcs::PartialVcsConfiguration;
 use biome_service::configuration::{
-    load_partial_configuration, LoadedPartialConfiguration, PartialCssFormatter,
-    PartialFilesConfiguration, PartialFormatterConfiguration, PartialJavascriptFormatter,
-    PartialJsonFormatter,
+    load_configuration, LoadedConfiguration, PartialCssFormatter, PartialFilesConfiguration,
+    PartialFormatterConfiguration, PartialJavascriptFormatter, PartialJsonFormatter,
 };
 use biome_service::workspace::UpdateSettingsParams;
 use std::ffi::OsString;
@@ -55,14 +54,14 @@ pub(crate) fn format(
     setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
 
     let loaded_configuration =
-        load_partial_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
+        load_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
     validate_configuration_diagnostics(
         &loaded_configuration,
         session.app.console,
         cli_options.verbose,
     )?;
-    let LoadedPartialConfiguration {
-        partial_configuration: mut configuration,
+    let LoadedConfiguration {
+        mut configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;

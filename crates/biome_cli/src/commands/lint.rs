@@ -7,8 +7,7 @@ use crate::{
 use biome_deserialize::Merge;
 use biome_service::configuration::vcs::PartialVcsConfiguration;
 use biome_service::configuration::{
-    load_partial_configuration, LoadedPartialConfiguration, PartialFilesConfiguration,
-    PartialLinterConfiguration,
+    load_configuration, LoadedConfiguration, PartialFilesConfiguration, PartialLinterConfiguration,
 };
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
 use biome_service::PartialConfiguration;
@@ -57,15 +56,15 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     };
 
     let loaded_configuration =
-        load_partial_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
+        load_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
     validate_configuration_diagnostics(
         &loaded_configuration,
         session.app.console,
         cli_options.verbose,
     )?;
 
-    let LoadedPartialConfiguration {
-        partial_configuration: mut fs_configuration,
+    let LoadedConfiguration {
+        configuration: mut fs_configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;

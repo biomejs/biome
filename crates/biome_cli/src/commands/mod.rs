@@ -12,7 +12,7 @@ use biome_service::configuration::{
     partial_formatter_configuration, partial_linter_configuration, vcs::partial_vcs_configuration,
 };
 use biome_service::configuration::{
-    LoadedPartialConfiguration, PartialCssFormatter, PartialFilesConfiguration,
+    LoadedConfiguration, PartialCssFormatter, PartialFilesConfiguration,
     PartialFormatterConfiguration, PartialJavascriptFormatter, PartialJsonFormatter,
     PartialLinterConfiguration,
 };
@@ -398,7 +398,7 @@ impl BiomeCommand {
 ///
 /// If it contains errors, it return an error.
 pub(crate) fn validate_configuration_diagnostics(
-    loaded_configuration: &LoadedPartialConfiguration,
+    loaded_configuration: &LoadedConfiguration,
     console: &mut dyn Console,
     verbose: bool,
 ) -> Result<(), CliDiagnostic> {

@@ -5,7 +5,7 @@ use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execu
 use biome_deserialize::Merge;
 use biome_service::configuration::organize_imports::PartialOrganizeImports;
 use biome_service::configuration::{
-    load_partial_configuration, LoadedPartialConfiguration, PartialFormatterConfiguration,
+    load_configuration, LoadedConfiguration, PartialFormatterConfiguration,
     PartialLinterConfiguration,
 };
 use biome_service::workspace::UpdateSettingsParams;
@@ -30,7 +30,7 @@ pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(
         payload.cli_options.log_kind.clone(),
     );
 
-    let loaded_configuration = load_partial_configuration(
+    let loaded_configuration = load_configuration(
         &session.app.fs,
         payload.cli_options.as_configuration_base_path(),
     )?;
@@ -41,8 +41,8 @@ pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(
         payload.cli_options.verbose,
     )?;
 
-    let LoadedPartialConfiguration {
-        partial_configuration: mut configuration,
+    let LoadedConfiguration {
+        mut configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;

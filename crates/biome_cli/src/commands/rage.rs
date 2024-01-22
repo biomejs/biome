@@ -3,7 +3,7 @@ use biome_console::{fmt, markup, ConsoleExt, HorizontalLine, Markup};
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
 use biome_diagnostics::{termcolor, PrintDescription};
 use biome_fs::FileSystem;
-use biome_service::configuration::{load_partial_configuration, LoadedPartialConfiguration};
+use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{client, RageEntry, RageParams};
 use biome_service::{ConfigurationBasePath, DynRef, Workspace};
 use std::{env, io, ops::Deref};
@@ -171,13 +171,13 @@ impl Display for RageConfiguration<'_, '_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         Section("Biome Configuration").fmt(fmt)?;
 
-        match load_partial_configuration(self.0, ConfigurationBasePath::default()) {
+        match load_configuration(self.0, ConfigurationBasePath::default()) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.directory_path.is_none() {
                     KeyValuePair("Status", markup!(<Dim>"unset"</Dim>)).fmt(fmt)?;
                 } else {
-                    let LoadedPartialConfiguration {
-                        partial_configuration: configuration,
+                    let LoadedConfiguration {
+                        configuration,
                         diagnostics,
                         ..
                     } = loaded_configuration;

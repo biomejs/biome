@@ -241,21 +241,13 @@ impl ConfigurationBasePath {
     }
 }
 
-/// Load the expanded configuration for this session of the CLI.
+/// Load the partial configuration for this session of the CLI.
 pub fn load_configuration(
     fs: &DynRef<'_, dyn FileSystem>,
     config_path: ConfigurationBasePath,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
-    load_partial_configuration(fs, config_path).map(Into::into)
-}
-
-/// Load the partial configuration for this session of the CLI.
-pub fn load_partial_configuration(
-    fs: &DynRef<'_, dyn FileSystem>,
-    config_path: ConfigurationBasePath,
-) -> Result<LoadedPartialConfiguration, WorkspaceError> {
     let config = load_config(fs, config_path)?;
-    LoadedPartialConfiguration::try_from_payload(config, fs)
+    LoadedConfiguration::try_from_payload(config, fs)
 }
 
 /// Load the configuration from the file system.
@@ -401,20 +393,9 @@ pub struct LoadedConfiguration {
     /// If present, the path of the file where it was found
     pub file_path: Option<PathBuf>,
     /// The Deserialized configuration
-    pub configuration: Configuration,
+    pub configuration: PartialConfiguration,
     /// All diagnostics that were emitted during parsing and deserialization
     pub diagnostics: Vec<Error>,
-}
-
-impl From<LoadedPartialConfiguration> for LoadedConfiguration {
-    fn from(partial: LoadedPartialConfiguration) -> Self {
-        Self {
-            directory_path: partial.directory_path,
-            file_path: partial.file_path,
-            configuration: partial.partial_configuration.into(),
-            diagnostics: partial.diagnostics,
-        }
-    }
 }
 
 impl LoadedConfiguration {
@@ -473,51 +454,13 @@ impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
 
 impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
 
-/// Information regarding the configuration that was found.
-///
-/// This contains only the configuration from the configuration file(s) without
-/// expanding any default values.
-#[derive(Default, Debug)]
-pub struct LoadedPartialConfiguration {
-    /// If present, the path of the directory where it was found
-    pub directory_path: Option<PathBuf>,
-    /// If present, the path of the file where it was found
-    pub file_path: Option<PathBuf>,
-    /// The Deserialized partial configuration
-    pub partial_configuration: PartialConfiguration,
-    /// All diagnostics that were emitted during parsing and deserialization
-    pub diagnostics: Vec<Error>,
-}
-
-impl LoadedPartialConfiguration {
-    /// Return the path of the **directory** where the configuration is
-    pub fn directory_path(&self) -> Option<&Path> {
-        self.directory_path.as_deref()
-    }
-
-    /// Return the path of the **file** where the configuration is
-    pub fn file_path(&self) -> Option<&Path> {
-        self.file_path.as_deref()
-    }
-
-    /// Whether the are errors emitted. Error are [Severity::Error] or greater.
-    pub fn has_errors(&self) -> bool {
-        self.diagnostics
-            .iter()
-            .any(|diagnostic| diagnostic.severity() >= Severity::Error)
-    }
-
-    /// It return an iterator over the diagnostics emitted during the resolution of the configuration file
-    pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
-        ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
-    }
-
+impl LoadedConfiguration {
     fn try_from_payload(
         value: Option<ConfigurationPayload>,
         fs: &DynRef<'_, dyn FileSystem>,
     ) -> Result<Self, WorkspaceError> {
         let Some(value) = value else {
-            return Ok(LoadedPartialConfiguration::default());
+            return Ok(LoadedConfiguration::default());
         };
 
         let ConfigurationPayload {
@@ -528,7 +471,7 @@ impl LoadedPartialConfiguration {
         let (partial_configuration, mut diagnostics) = deserialized.consume();
 
         Ok(Self {
-            partial_configuration: match partial_configuration {
+            configuration: match partial_configuration {
                 Some(mut partial_configuration) => {
                     partial_configuration.apply_extends(
                         fs,
