@@ -74,6 +74,7 @@ struct StringLiteralInAttributeVisitor {
 }
 
 // Finds class-like strings in JSX attributes, including class, className, and others defined in the options.
+// TODO: match object properties too
 impl Visitor for StringLiteralInAttributeVisitor {
     type Language = JsLanguage;
     fn visit(
@@ -129,6 +130,7 @@ struct StringLiteralInCallExpressionVisitor {
 }
 
 // Finds class-like strings inside function calls defined in the options, e.g. clsx(classes).
+// TODO: match object properties too
 impl Visitor for StringLiteralInCallExpressionVisitor {
     type Language = JsLanguage;
 

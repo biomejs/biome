@@ -51,6 +51,8 @@ impl ClassInfo {
     }
 }
 
+// TODO: implement through Ord/PartialOrd trait.
+
 // See: https://github.com/tailwindlabs/tailwindcss/blob/970f2ca704dda95cf328addfe67b81d6679c8755/src/lib/offsets.js#L206
 // This comparison function follows a very similar logic to the one in Tailwind CSS, with some
 // simplifications and necessary differences.
@@ -99,6 +101,8 @@ pub fn sort_class_name(class_name: &TokenText, sort_config: &SortConfig) -> Stri
                 sorted_classes.push(class);
             }
         });
+
+    // TODO: make this the last step of compare instead?
 
     // Pre-sort the recognized classes lexico-graphically.
     classes_info.sort_unstable_by(|a, b| a.text.cmp(&b.text));
