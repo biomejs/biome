@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 83
 expression: invalid_without_trivia.js
 ---
 # Input
@@ -36,7 +37,7 @@ invalid_without_trivia.js:1:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
   i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
      Check for more details about NOT operator.
   
-  i Unsafe fix: Remove the conditional expression with
+  i Unsafe fix: Replace the conditional expression with
   
      1    │ - var·a·=·x?true:true;
         1 │ + var·a·=·true;
@@ -62,7 +63,7 @@ invalid_without_trivia.js:2:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
   i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
      Check for more details about NOT operator.
   
-  i Unsafe fix: Remove the conditional expression with
+  i Unsafe fix: Replace the conditional expression with
   
      1  1 │   var a = x?true:true;
      2    │ - var·a·=·x?false:false;
@@ -90,7 +91,7 @@ invalid_without_trivia.js:4:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
   i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
      Check for more details about NOT operator.
   
-  i Unsafe fix: Remove the conditional expression with
+  i Unsafe fix: Replace the conditional expression with
   
      2  2 │   var a = x?false:false;
      3  3 │   
@@ -118,7 +119,7 @@ invalid_without_trivia.js:5:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
   i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
      Check for more details about NOT operator.
   
-  i Unsafe fix: Remove the conditional expression with
+  i Unsafe fix: Replace the conditional expression with
   
      3  3 │   
      4  4 │   var a = foo()?false:true;
@@ -147,7 +148,7 @@ invalid_without_trivia.js:6:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
   i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
      Check for more details about NOT operator.
   
-  i Unsafe fix: Remove the conditional expression with
+  i Unsafe fix: Replace the conditional expression with
   
      4  4 │   var a = foo()?false:true;
      5  5 │   var a = foo?false:true;
@@ -176,7 +177,7 @@ invalid_without_trivia.js:7:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
   i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
      Check for more details about NOT operator.
   
-  i Unsafe fix: Remove the conditional expression with
+  i Unsafe fix: Replace the conditional expression with
   
      5  5 │   var a = foo?false:true;
      6  6 │   var a = foo===1?false:true;
@@ -205,7 +206,7 @@ invalid_without_trivia.js:9:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
   i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
      Check for more details about NOT operator.
   
-  i Unsafe fix: Remove the conditional expression with
+  i Unsafe fix: Replace the conditional expression with
   
      7  7 │   var a = foo+1?false:true;
      8  8 │   
@@ -233,7 +234,7 @@ invalid_without_trivia.js:10:9 lint/nursery/noUselessTernary  FIXABLE  ━━━
   i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
      Check for more details about NOT operator.
   
-  i Unsafe fix: Remove the conditional expression with
+  i Unsafe fix: Replace the conditional expression with
   
      8  8 │   
      9  9 │   var a = foo()?true:false;
@@ -262,7 +263,7 @@ invalid_without_trivia.js:11:9 lint/nursery/noUselessTernary  FIXABLE  ━━━
   i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
      Check for more details about NOT operator.
   
-  i Unsafe fix: Remove the conditional expression with
+  i Unsafe fix: Replace the conditional expression with
   
      9  9 │   var a = foo()?true:false;
     10 10 │   var a = foo?true:false;
@@ -291,7 +292,7 @@ invalid_without_trivia.js:12:9 lint/nursery/noUselessTernary  FIXABLE  ━━━
   i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
      Check for more details about NOT operator.
   
-  i Unsafe fix: Remove the conditional expression with
+  i Unsafe fix: Replace the conditional expression with
   
     10 10 │   var a = foo?true:false;
     11 11 │   var a = foo===1?true:false;
@@ -318,7 +319,7 @@ invalid_without_trivia.js:14:8 lint/nursery/noUselessTernary  FIXABLE  ━━━
   i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
      Check for more details about NOT operator.
   
-  i Unsafe fix: Remove the conditional expression with
+  i Unsafe fix: Replace the conditional expression with
   
     14 │ var·a=·!foo?true:false;
        │            ----------- 
