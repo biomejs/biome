@@ -12,7 +12,7 @@ This rule hasn't been released yet.
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-Source: <a href="https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-disabled-tests.md" target="_blank"><code>no-disabled-tests</code></a>
+Inspired from: <a href="https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-disabled-tests.md" target="_blank"><code>no-disabled-tests</code></a>
 
 Disallow disabled tests.
 
