@@ -19,6 +19,7 @@ use super::{
 // ---------
 
 /// The result of matching a utility against a target.
+#[derive(Debug, Eq, PartialEq)]
 enum UtilityMatch {
     /// The utility matches an exact target.
     Exact,
@@ -48,9 +49,49 @@ impl UtilityMatch {
     }
 }
 
-// TODO: unit tests.
+// unit test
+#[cfg(test)]
+mod utility_match_tests {
+    use super::*;
+
+    #[test]
+    fn test_exact_match() {
+        assert_eq!(UtilityMatch::from("px-2$", "px-2"), UtilityMatch::Exact);
+        // TODO: support negative values
+        // assert_eq!(UtilityMatch::from("px-2$", "-px-2"), UtilityMatch::Exact);
+        assert_eq!(UtilityMatch::from("px-2$", "not-px-2"), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from("px-2$", "px-2-"), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from("px-2$", "px-4"), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from("px-2$", "px-2$"), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from("px-2$", "px-2-"), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from("px-2$", "px-2.5"), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from("px-2$", "px-2.5$"), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from("px-2$", "px-2.5-"), UtilityMatch::None);
+    }
+
+    #[test]
+    fn test_partial_match() {
+        assert_eq!(UtilityMatch::from("px-", "px-2"), UtilityMatch::Partial);
+        // TODO: support negative values
+        // assert_eq!(UtilityMatch::from("px-", "-px-2"), UtilityMatch::Partial);
+        assert_eq!(UtilityMatch::from("px-", "px-2.5"), UtilityMatch::Partial);
+        assert_eq!(
+            UtilityMatch::from("px-", "px-anything"),
+            UtilityMatch::Partial
+        );
+        assert_eq!(
+            UtilityMatch::from("px-", "px-%$>?+=-"),
+            UtilityMatch::Partial
+        );
+        assert_eq!(UtilityMatch::from("px-", "px-"), UtilityMatch::None);
+        // TODO: support negative values
+        // assert_eq!(UtilityMatch::from("px-", "-px-"), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from("px-", "not-px-2"), UtilityMatch::None);
+    }
+}
 
 /// Sort-related information about a utility.
+#[derive(Debug, Eq, PartialEq)]
 struct UtilityInfo {
     /// The layer the utility belongs to.
     layer: String,
@@ -117,7 +158,117 @@ fn get_utility_info(
     None
 }
 
-// TODO: unit tests.
+// unit test
+#[cfg(test)]
+mod get_utility_info_tests {
+    use super::*;
+    use crate::semantic_analyzers::nursery::use_sorted_classes::sort_config::UtilityLayer;
+
+    #[test]
+    fn test_exact_match() {
+        let utility_config = vec![UtilityLayer {
+            name: "layer".to_string(),
+            classes: &["px-2$"],
+        }];
+        let utility_data = ClassSegmentStructure {
+            text: "px-2".to_string(),
+            arbitrary: false,
+        };
+        assert_eq!(
+            get_utility_info(&utility_config, &utility_data),
+            Some(UtilityInfo {
+                layer: "layer".to_string(),
+                index: 0,
+            })
+        );
+        let utility_data = ClassSegmentStructure {
+            text: "px-4".to_string(),
+            arbitrary: false,
+        };
+        assert_eq!(get_utility_info(&utility_config, &utility_data), None);
+    }
+
+    #[test]
+    fn test_partial_match() {
+        let utility_config = vec![UtilityLayer {
+            name: "layer".to_string(),
+            classes: &["px-"],
+        }];
+        let utility_data = ClassSegmentStructure {
+            text: "px-2".to_string(),
+            arbitrary: false,
+        };
+        assert_eq!(
+            get_utility_info(&utility_config, &utility_data),
+            Some(UtilityInfo {
+                layer: "layer".to_string(),
+                index: 0,
+            })
+        );
+        let utility_data = ClassSegmentStructure {
+            text: "not-px-2".to_string(),
+            arbitrary: false,
+        };
+        assert_eq!(get_utility_info(&utility_config, &utility_data), None);
+    }
+
+    #[test]
+    fn test_partial_match_longest() {
+        let utility_config = vec![UtilityLayer {
+            name: "layer".to_string(),
+            classes: &["border-", "border-t-"],
+        }];
+        let utility_data = ClassSegmentStructure {
+            text: "border-t-2".to_string(),
+            arbitrary: false,
+        };
+        assert_eq!(
+            get_utility_info(&utility_config, &utility_data),
+            Some(UtilityInfo {
+                layer: "layer".to_string(),
+                index: 1,
+            })
+        );
+    }
+
+    #[test]
+    fn test_partial_match_longest_first() {
+        let utility_config = vec![UtilityLayer {
+            name: "layer".to_string(),
+            classes: &["border-t-", "border-"],
+        }];
+        let utility_data = ClassSegmentStructure {
+            text: "border-t-2".to_string(),
+            arbitrary: false,
+        };
+        assert_eq!(
+            get_utility_info(&utility_config, &utility_data),
+            Some(UtilityInfo {
+                layer: "layer".to_string(),
+                index: 0,
+            })
+        );
+    }
+
+    #[test]
+    fn test_arbitrary_layer() {
+        let utility_config = vec![UtilityLayer {
+            name: "layer".to_string(),
+            classes: &["border-t-", "border-"],
+        }];
+        let utility_data = ClassSegmentStructure {
+            text: "[arbitrary:css]".to_string(),
+            arbitrary: true,
+        };
+        assert_eq!(
+            get_utility_info(&utility_config, &utility_data),
+            Some(UtilityInfo {
+                layer: "arbitrary".to_string(),
+                index: 0,
+            })
+        );
+    }
+}
 
 // classes
 // -------
