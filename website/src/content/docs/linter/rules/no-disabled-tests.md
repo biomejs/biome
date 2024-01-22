@@ -12,44 +12,57 @@ This rule hasn't been released yet.
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-Succinct description of the rule.
+Source: <a href="https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-disabled-tests.md" target="_blank"><code>no-disabled-tests</code></a>
 
-Put context and details about the rule.
-As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+Disallow disabled tests.
 
-Try to stay consistent with the descriptions of implemented rules.
-
-Add a link to the corresponding ESLint rule (if any):
-
-Source: https://eslint.org/docs/latest/rules/rule-name
+Disabled test are useful when developing and debugging, although they should not be committed in production.
 
 ## Examples
 
 ### Invalid
 
 ```jsx
-var a = 1;
-a = 2;
+describe.skip("test", () => {});
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noDisabledTests.js:1:11 <a href="https://biomejs.dev/linter/rules/no-disabled-tests">lint/nursery/noDisabledTests</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noDisabledTests.js:1:10 <a href="https://biomejs.dev/linter/rules/no-disabled-tests">lint/nursery/noDisabledTests</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable is read here.</span>
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't disable tests.</span>
   
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>var a = 1;
-   <strong>   │ </strong>          
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>a = 2;
-   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>3 │ </strong>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>describe.skip(&quot;test&quot;, () =&gt; {});
+   <strong>   │ </strong>         <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This note will give you more information.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Disabling tests is useful when debugging or creating placeholder while working.</span>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If this is intentional, and you want to commit a disabled test, add a suppression comment.</span>
+  
+</code></pre>
+
+```jsx
+test.skip("test", () => {});
+```
+
+<pre class="language-text"><code class="language-text">nursery/noDisabledTests.js:1:6 <a href="https://biomejs.dev/linter/rules/no-disabled-tests">lint/nursery/noDisabledTests</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't disable tests.</span>
+  
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>test.skip(&quot;test&quot;, () =&gt; {});
+   <strong>   │ </strong>     <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Disabling tests is useful when debugging or creating placeholder while working.</span>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If this is intentional, and you want to commit a disabled test, add a suppression comment.</span>
   
 </code></pre>
 
 ## Valid
 
 ```jsx
-var a = 1;
+test.only("test", () => {});
+test("test", () => {});
 ```
 
 ## Related links

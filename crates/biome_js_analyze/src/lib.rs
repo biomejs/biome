@@ -243,17 +243,7 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"
-        import { useEffect } from "react";
-        function MyComponent7() {
-    let someObj = getObj();
-    useEffect(() => {
-        console.log(
-					someObj
-							.name
-				);
-    }, [someObj]);
-}
+        const SOURCE: &str = r#"xdescribe('foo', () => {});
         "#;
         // const SOURCE: &str = r#"document.querySelector("foo").value = document.querySelector("foo").value
         //
@@ -268,7 +258,7 @@ mod tests {
             closure_index: Some(0),
             dependencies_index: Some(1),
         };
-        let rule_filter = RuleFilter::Rule("correctness", "useExhaustiveDependencies");
+        let rule_filter = RuleFilter::Rule("nursery", "noDisabledTests");
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
             RuleOptions::new(HooksOptions { hooks: vec![hook] }),

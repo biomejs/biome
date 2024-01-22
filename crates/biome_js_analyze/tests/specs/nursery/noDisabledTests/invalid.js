@@ -1,5 +1,6 @@
-
-
- var a = 1;
-a = 2;
- a = 3;
+describe.skip("test", () => {});
+it.skip("test", () => {});
+test.skip("test", () => {});
+xdescribe('foo', () => {});
+xit('foo', () => {});
+xtest('foo', () => {});

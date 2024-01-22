@@ -8,7 +8,6 @@ use crate::js::lists::array_element_list::can_concisely_print_array_list;
 use crate::prelude::*;
 use crate::utils::function_body::FunctionBodyCacheMode;
 use crate::utils::member_chain::SimpleArgument;
-use crate::utils::test_call::is_test_call_expression;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
 use biome_formatter::{format_args, format_element, write, VecBuffer};
 use biome_js_syntax::{
@@ -50,7 +49,7 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
                 .map_or((Ok(false), Ok(false)), |call| {
                     (
                         is_commonjs_or_amd_call(node, call),
-                        is_test_call_expression(call),
+                        call.is_test_call_expression(),
                     )
                 });
 

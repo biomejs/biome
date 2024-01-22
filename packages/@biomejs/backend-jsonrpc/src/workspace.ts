@@ -855,7 +855,7 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow disabled tests.
 	 */
 	noDisabledTests?: RuleConfiguration;
 	/**

@@ -1,72 +1,88 @@
-use crate::semantic_services::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_js_semantic::{Reference, ReferencesExtensions};
-use biome_js_syntax::JsIdentifierBinding;
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsSyntaxToken};
+use biome_rowan::TextRange;
 
 declare_rule! {
-    /// Succinct description of the rule.
+    /// Disallow disabled tests.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding ESLint rule (if any):
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/rule-name
+    /// Disabled test are useful when developing and debugging, although they should not be committed in production.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// describe.skip("test", () => {});
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// test.skip("test", () => {});
     /// ```
     ///
     /// ## Valid
     ///
     /// ```js
-    /// var a = 1;
+    /// test.only("test", () => {});
+    /// test("test", () => {});
     /// ```
     ///
     pub(crate) NoDisabledTests {
         version: "next",
         name: "noDisabledTests",
         recommended: false,
-        source: RuleSource::Eslint("dot-notation"),
+        source: RuleSource::EslintJest("no-disabled-tests"),
     }
 }
 
+const FUNCTION_NAMES: [&str; 4] = ["skip", "xdescribe", "xit", "xtest"];
+
 impl Rule for NoDisabledTests {
-    type Query = Semantic<JsIdentifierBinding>;
-    type State = Reference;
-    type Signals = Vec<Self::State>;
+    type Query = Ast<JsCallExpression>;
+    type State = TextRange;
+    type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let binding = ctx.query();
-        let model = ctx.model();
-        binding.all_references(model).collect()
+        let node = ctx.query();
+
+        if node.is_test_call_expression().ok()? {
+            let callee = node.callee().ok()?;
+            if callee.contains_a_test_pattern().ok()? {
+                let function_name = get_function_name(&callee)?;
+
+                if FUNCTION_NAMES.contains(&function_name.text_trimmed()) {
+                    return Some(function_name.text_trimmed_range());
+                }
+            }
+        }
+
+        None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
+    fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                reference.range(),
+                range,
                 markup! {
-                    "Variable is read here."
+                    "Don't disable tests."
                 },
             )
-            .note(markup! {
-                "This note will give you more information."
-            }),
+            .note("Disabling tests is useful when debugging or creating placeholder while working.")
+            .note("If this is intentional, and you want to commit a disabled test, add a suppression comment.")
         )
+    }
+}
+
+fn get_function_name(callee: &AnyJsExpression) -> Option<JsSyntaxToken> {
+    match callee {
+        AnyJsExpression::JsStaticMemberExpression(node) => {
+            let member = node.member().ok()?;
+            let member = member.as_js_name()?;
+            member.value_token().ok()
+        }
+        AnyJsExpression::JsIdentifierExpression(node) => node.name().ok()?.value_token().ok(),
+        _ => None,
     }
 }

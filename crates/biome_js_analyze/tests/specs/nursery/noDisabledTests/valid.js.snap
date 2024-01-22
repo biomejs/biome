@@ -1,3 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```jsx
 describe('foo', () => {});
 it('foo', () => {});
 test('foo', () => {});
@@ -5,3 +11,7 @@ test('foo', () => {});
 describe.only('bar', () => {});
 it.only('bar', () => {});
 test.only('bar', () => {});
+
+```
+
+

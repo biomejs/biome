@@ -1283,7 +1283,7 @@
 					"type": ["boolean", "null"]
 				},
 				"noDisabledTests": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow disabled tests.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
