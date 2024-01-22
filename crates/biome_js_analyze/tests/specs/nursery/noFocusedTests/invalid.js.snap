@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+describe.only("test", () => {});
+it.only("test", () => {});
+test.only("test", () => {});
+fdescribe('foo', () => {});
+fit('foo', () => {});
+
+```
+
+# Diagnostics
+```
+invalid.js:1:10 lint/nursery/noFocusedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+  > 1 │ describe.only("test", () => {});
+      │          ^^^^
+    2 │ it.only("test", () => {});
+    3 │ test.only("test", () => {});
+  
+  i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
+  
+  i Remove it.
+  
+
+```
+
+```
+invalid.js:2:4 lint/nursery/noFocusedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    1 │ describe.only("test", () => {});
+  > 2 │ it.only("test", () => {});
+      │    ^^^^
+    3 │ test.only("test", () => {});
+    4 │ fdescribe('foo', () => {});
+  
+  i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
+  
+  i Remove it.
+  
+
+```
+
+```
+invalid.js:3:6 lint/nursery/noFocusedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    1 │ describe.only("test", () => {});
+    2 │ it.only("test", () => {});
+  > 3 │ test.only("test", () => {});
+      │      ^^^^
+    4 │ fdescribe('foo', () => {});
+    5 │ fit('foo', () => {});
+  
+  i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
+  
+  i Remove it.
+  
+
+```
+
+

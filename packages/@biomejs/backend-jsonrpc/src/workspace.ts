@@ -867,6 +867,10 @@ export interface Nursery {
 	 */
 	noEmptyTypeParameters?: RuleConfiguration;
 	/**
+	 * Disallow focused tests.
+	 */
+	noFocusedTests?: RuleConfiguration;
+	/**
 	 * Disallow assignments to native objects and read-only global variables.
 	 */
 	noGlobalAssign?: RuleConfiguration;
@@ -1668,15 +1672,16 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
-	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyTypeParameters"
+	| "lint/nursery/noFocusedTests"
 	| "lint/nursery/noGlobalAssign"
 	| "lint/nursery/noGlobalEval"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNodejsModules"
+	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
