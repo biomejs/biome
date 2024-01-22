@@ -11,7 +11,7 @@ use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::blocks::parse_or_recover_declaration_list_block;
 use crate::syntax::parse_error::expected_any_rule;
 use crate::syntax::property::{is_at_any_property, parse_any_property};
-use crate::syntax::selector::is_at_selector;
+use crate::syntax::selector::is_nth_at_selector;
 use crate::syntax::selector::SelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -100,7 +100,7 @@ impl ParseNodeList for RuleList {
 
 #[inline]
 pub(crate) fn is_at_qualified_rule(p: &mut CssParser) -> bool {
-    is_at_selector(p)
+    is_nth_at_selector(p, 0)
 }
 
 #[inline]

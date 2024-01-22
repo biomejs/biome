@@ -53,27 +53,24 @@ CssRoot {
                 ],
             },
         },
-        CssBogusRule {
-            items: [
-                CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: CssTypeSelector {
-                            namespace: missing (optional),
-                            ident: CssIdentifier {
-                                value_token: IDENT@29..32 "foo" [] [],
-                            },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@29..32 "foo" [] [],
                         },
-                        sub_selectors: CssSubSelectorList [],
                     },
-                    missing separator,
-                    CssBogusSelector {
-                        items: [
-                            SEMICOLON@32..33 ";" [] [],
-                        ],
-                    },
-                ],
+                    sub_selectors: CssSubSelectorList [],
+                },
             ],
+            block: CssBogusBlock {
+                items: [
+                    SEMICOLON@32..33 ";" [] [],
+                ],
+            },
         },
         CssAtRule {
             at_token: AT@33..35 "@" [Newline("\n")] [],
@@ -118,8 +115,8 @@ CssRoot {
       0: AT@17..19 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@19..29
         0: FONT_FACE_KW@19..29 "font-face" [] [Whitespace(" ")]
-    3: CSS_BOGUS_RULE@29..33
-      0: CSS_SELECTOR_LIST@29..33
+    3: CSS_QUALIFIED_RULE@29..33
+      0: CSS_SELECTOR_LIST@29..32
         0: CSS_COMPOUND_SELECTOR@29..32
           0: (empty)
           1: CSS_TYPE_SELECTOR@29..32
@@ -127,9 +124,8 @@ CssRoot {
             1: CSS_IDENTIFIER@29..32
               0: IDENT@29..32 "foo" [] []
           2: CSS_SUB_SELECTOR_LIST@32..32
-        1: (empty)
-        2: CSS_BOGUS_SELECTOR@32..33
-          0: SEMICOLON@32..33 ";" [] []
+      1: CSS_BOGUS_BLOCK@32..33
+        0: SEMICOLON@32..33 ";" [] []
     4: CSS_AT_RULE@33..46
       0: AT@33..35 "@" [Newline("\n")] []
       1: CSS_FONT_FACE_AT_RULE@35..46
@@ -185,17 +181,6 @@ at_rule_font_face_error.css:2:15 parse ━━━━━━━━━━━━━�
     3 │ @font-face ;
   
   i Remove ;
-  
-at_rule_font_face_error.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `@`
-  
-    1 │ @font-face foo {}
-    2 │ @font-face foo;
-  > 3 │ @font-face ;
-      │ ^
-  
-  i Remove @
   
 at_rule_font_face_error.css:3:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
