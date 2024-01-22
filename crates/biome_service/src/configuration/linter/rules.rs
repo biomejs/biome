@@ -2245,7 +2245,7 @@ pub struct Nursery {
     #[doc = r" It enables ALL rules for this group."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub all: Option<bool>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow disabled tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_disabled_tests: Option<RuleConfiguration>,
     #[doc = "Disallow two keys with the same name inside a JSON object."]
