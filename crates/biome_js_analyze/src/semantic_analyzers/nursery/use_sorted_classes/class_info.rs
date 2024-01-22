@@ -49,7 +49,6 @@ impl UtilityMatch {
     }
 }
 
-// unit test
 #[cfg(test)]
 mod utility_match_tests {
     use super::*;
@@ -158,7 +157,6 @@ fn get_utility_info(
     None
 }
 
-// unit test
 #[cfg(test)]
 mod get_utility_info_tests {
     use super::*;
@@ -274,7 +272,7 @@ mod get_utility_info_tests {
 // -------
 
 /// Sort-related information about a CSS class.
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct ClassInfo {
     /// The full text of the class itself.
     pub text: String,
@@ -308,4 +306,87 @@ pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<Clas
     None
 }
 
-// TODO: unit tests.
+#[cfg(test)]
+mod get_class_info_tests {
+    use super::*;
+    use crate::semantic_analyzers::nursery::use_sorted_classes::sort_config::UtilityLayer;
+
+    #[test]
+    fn test_get_class_info() {
+        let utilities_config = vec![
+            UtilityLayer {
+                name: "layer0".to_string(),
+                classes: &["px-", "py-", "block$"],
+            },
+            UtilityLayer {
+                name: "layer1".to_string(),
+                classes: &["mx-", "my-", "inline$"],
+            },
+        ];
+        let sort_config = SortConfig::new(utilities_config, vec![]);
+        assert_eq!(
+            get_class_info("px-2", &sort_config),
+            Some(ClassInfo {
+                text: "px-2".to_string(),
+                variant_weight: None,
+                layer_index: 0,
+                utility_index: 0,
+            })
+        );
+        assert_eq!(
+            get_class_info("py-2", &sort_config),
+            Some(ClassInfo {
+                text: "py-2".to_string(),
+                variant_weight: None,
+                layer_index: 0,
+                utility_index: 1,
+            })
+        );
+        assert_eq!(
+            get_class_info("block", &sort_config),
+            Some(ClassInfo {
+                text: "block".to_string(),
+                variant_weight: None,
+                layer_index: 0,
+                utility_index: 2,
+            })
+        );
+        assert_eq!(
+            get_class_info("mx-2", &sort_config),
+            Some(ClassInfo {
+                text: "mx-2".to_string(),
+                variant_weight: None,
+                layer_index: 1,
+                utility_index: 0,
+            })
+        );
+        assert_eq!(
+            get_class_info("my-2", &sort_config),
+            Some(ClassInfo {
+                text: "my-2".to_string(),
+                variant_weight: None,
+                layer_index: 1,
+                utility_index: 1,
+            })
+        );
+        assert_eq!(
+            get_class_info("inline", &sort_config),
+            Some(ClassInfo {
+                text: "inline".to_string(),
+                variant_weight: None,
+                layer_index: 1,
+                utility_index: 2,
+            })
+        );
+        assert_eq!(
+            get_class_info("[arbitrary:css]", &sort_config),
+            Some(ClassInfo {
+                text: "[arbitrary:css]".to_string(),
+                variant_weight: None,
+                layer_index: 2,
+                utility_index: 0,
+            })
+        );
+        assert_eq!(get_class_info("unknown", &sort_config), None);
+    }
+}
