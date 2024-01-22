@@ -1,5 +1,5 @@
-// Presets contain pre-defined sort configurations, notably from Tailwind CSS. They are a
-// starting point that can be extended (e.g. by adding custom utilities or variants).
+//! Presets contain pre-defined sort configurations, notably from Tailwind CSS. They are a
+//! starting point that can be extended (e.g. by adding custom utilities or variants).
 
 use super::sort_config::{UtilitiesConfig, UtilityLayer};
 

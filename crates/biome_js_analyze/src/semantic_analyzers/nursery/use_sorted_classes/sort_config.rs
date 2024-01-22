@@ -31,13 +31,12 @@ impl SortConfig {
     pub fn new(utilities_config: UtilitiesConfig, variants: VariantsConfig) -> Self {
         // Compute the layer index map.
         let mut layer_index_map: HashMap<String, usize> = HashMap::new();
-        let mut last_index = 0;
-        layer_index_map.insert("parasite".to_string(), last_index);
+        let mut index = 0;
         for layer in utilities_config.iter() {
-            last_index += 1;
-            layer_index_map.insert(layer.name.clone(), last_index);
+            layer_index_map.insert(layer.name.clone(), index);
+            index += 1;
         }
-        layer_index_map.insert("arbitrary".to_string(), last_index + 1);
+        layer_index_map.insert("arbitrary".to_string(), index);
 
         Self {
             utilities: utilities_config,
