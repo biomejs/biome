@@ -1,8 +1,8 @@
 ---
-title: noDisabledTests (not released)
+title: noSkippedTests (not released)
 ---
 
-**Diagnostic Category: `lint/nursery/noDisabledTests`**
+**Diagnostic Category: `lint/nursery/noSkippedTests`**
 
 :::danger
 This rule hasn't been released yet.
@@ -26,7 +26,7 @@ Disabled test are useful when developing and debugging, although they should not
 describe.skip("test", () => {});
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noDisabledTests.js:1:10 <a href="https://biomejs.dev/linter/rules/no-disabled-tests">lint/nursery/noDisabledTests</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noSkippedTests.js:1:10 <a href="https://biomejs.dev/linter/rules/no-skipped-tests">lint/nursery/noSkippedTests</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't disable tests.</span>
   
@@ -44,7 +44,7 @@ describe.skip("test", () => {});
 test.skip("test", () => {});
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noDisabledTests.js:1:6 <a href="https://biomejs.dev/linter/rules/no-disabled-tests">lint/nursery/noDisabledTests</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noSkippedTests.js:1:6 <a href="https://biomejs.dev/linter/rules/no-skipped-tests">lint/nursery/noSkippedTests</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't disable tests.</span>
   

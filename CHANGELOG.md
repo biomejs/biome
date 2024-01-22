@@ -26,10 +26,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### New features
 
-- Add the rule [noDisabledTest](https://biomejs.dev/linter/rules/no-disabled-tests), to disallow disabled tests:
+- Add the rule [noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests), to disallow skipped tests:
 
   ```js
-  describe.skie("test", () => {});
+  describe.skip("test", () => {});
   it.skip("test", () => {});
   ```
 

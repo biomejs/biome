@@ -855,10 +855,6 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Disallow disabled tests.
-	 */
-	noDisabledTests?: RuleConfiguration;
-	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration;
@@ -890,6 +886,10 @@ export interface Nursery {
 	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration;
+	/**
+	 * Disallow disabled tests.
+	 */
+	noSkippedTests?: RuleConfiguration;
 	/**
 	 * Disallow then property.
 	 */
@@ -1668,7 +1668,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
-	| "lint/nursery/noDisabledTests"
+	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyTypeParameters"
