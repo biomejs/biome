@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsSyntaxToken};
 use biome_rowan::TextRange;
@@ -32,6 +34,7 @@ declare_rule! {
         name: "noDisabledTests",
         recommended: false,
         source: RuleSource::EslintJest("no-disabled-tests"),
+        source_kind: RuleSourceKind::Inspired,
     }
 }
 
