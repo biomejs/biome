@@ -34,6 +34,14 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Linter
 
+#### New features
+
+- Add the rule [noDisabledTest](https://biomejs.dev/linter/rules/no-disabled-tests), to disallow disabled tests:
+
+  ```js
+  describe.skie("test", () => {});
+  it.skip("test", () => {});
+  ```
 ### Parser
 
 ## 1.5.3 (2024-01-22)
