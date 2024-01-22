@@ -1727,20 +1727,14 @@ impl TsStringLiteralType {
 
 #[cfg(test)]
 mod test {
-    use crate::{JsCallExpression, JsFileSource, JsTemplateExpression};
-    use biome_js_parser::{parse, JsParserOptions};
+    use biome_js_factory::syntax::{JsCallExpression, JsTemplateExpression};
+    use biome_js_parser::parse_module;
+    use biome_js_parser::JsParserOptions;
     use biome_rowan::AstNodeList;
 
     fn extract_call_expression(src: &str) -> JsCallExpression {
-        let source_type = JsFileSource::js_module();
-        let result = parse(src, source_type, JsParserOptions::default());
-        let module = result
-            .tree()
-            .as_js_module()
-            .unwrap()
-            .items()
-            .first()
-            .unwrap();
+        let result = parse_module(src, JsParserOptions::default());
+        let module = result.tree().items().first().unwrap();
 
         module
             .as_any_js_statement()
@@ -1755,15 +1749,8 @@ mod test {
     }
 
     fn extract_template(src: &str) -> JsTemplateExpression {
-        let source_type = JsFileSource::js_module();
-        let result = parse(src, source_type, JsParserOptions::default());
-        let module = result
-            .tree()
-            .as_js_module()
-            .unwrap()
-            .items()
-            .first()
-            .unwrap();
+        let result = parse_module(src, JsParserOptions::default());
+        let module = result.tree().items().first().unwrap();
 
         module
             .as_any_js_statement()
