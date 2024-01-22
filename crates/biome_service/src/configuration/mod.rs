@@ -66,7 +66,7 @@ use std::path::{Path, PathBuf};
 
 /// The configuration that is contained inside the file `biome.json`
 #[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(deny_unknown_fields, rename_all = "camelCase"))]
 pub struct Configuration {
@@ -140,63 +140,34 @@ impl Default for Configuration {
     }
 }
 
-impl Configuration {
+impl PartialConfiguration {
     pub fn is_formatter_disabled(&self) -> bool {
-        self.formatter.is_disabled()
+        self.formatter
+            .as_ref()
+            .map(|f| f.is_disabled())
+            .unwrap_or(false)
     }
 
     pub fn is_linter_disabled(&self) -> bool {
-        self.linter.is_disabled()
+        self.linter
+            .as_ref()
+            .map(|f| f.is_disabled())
+            .unwrap_or(false)
     }
 
     pub fn is_organize_imports_disabled(&self) -> bool {
-        self.organize_imports.is_disabled()
+        self.organize_imports
+            .as_ref()
+            .map(|f| f.is_disabled())
+            .unwrap_or(false)
     }
 
     pub fn is_vcs_disabled(&self) -> bool {
-        !self.vcs.enabled
+        self.vcs.as_ref().map(|f| f.is_disabled()).unwrap_or(true)
     }
 
     pub fn is_vcs_enabled(&self) -> bool {
         !self.is_vcs_disabled()
-    }
-
-    /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
-    /// VCS root directory and the `.gitignore` file.
-    ///
-    /// ## Returns
-    ///
-    /// A tuple with VCS root folder and the contents of the `.gitignore` file
-    pub fn retrieve_gitignore_matches(
-        &self,
-        file_system: &DynRef<'_, dyn FileSystem>,
-        vcs_base_path: Option<&Path>,
-    ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError> {
-        if self.vcs.enabled {
-            let vcs_base_path = match (vcs_base_path, self.vcs.root.is_empty()) {
-                (Some(vcs_base_path), true) => PathBuf::from(vcs_base_path),
-                (Some(vcs_base_path), false) => vcs_base_path.join(&self.vcs.root),
-                (None, true) => return Err(WorkspaceError::vcs_disabled()),
-                (None, false) => PathBuf::from(&self.vcs.root),
-            };
-            if !self.vcs.use_ignore_file {
-                let result = file_system
-                    .auto_search(vcs_base_path, self.vcs.client_kind.ignore_file(), false)
-                    .map_err(WorkspaceError::from)?;
-
-                if let Some(result) = result {
-                    return Ok((
-                        Some(result.directory_path),
-                        result
-                            .content
-                            .lines()
-                            .map(String::from)
-                            .collect::<Vec<String>>(),
-                    ));
-                }
-            }
-        }
-        Ok((None, vec![]))
     }
 }
 
@@ -270,14 +241,21 @@ impl ConfigurationBasePath {
     }
 }
 
-/// Load the configuration for this session of the CLI, merging the content of
-/// the `biome.json` file if it exists on disk with common command line options
+/// Load the expanded configuration for this session of the CLI.
 pub fn load_configuration(
     fs: &DynRef<'_, dyn FileSystem>,
     config_path: ConfigurationBasePath,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
+    load_partial_configuration(fs, config_path).map(Into::into)
+}
+
+/// Load the partial configuration for this session of the CLI.
+pub fn load_partial_configuration(
+    fs: &DynRef<'_, dyn FileSystem>,
+    config_path: ConfigurationBasePath,
+) -> Result<LoadedPartialConfiguration, WorkspaceError> {
     let config = load_config(fs, config_path)?;
-    LoadedConfiguration::try_from_payload(config, fs)
+    LoadedPartialConfiguration::try_from_payload(config, fs)
 }
 
 /// Load the configuration from the file system.
@@ -412,7 +390,10 @@ pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerR
     overrides.override_analyzer_rules(path, analyzer_rules)
 }
 
-/// Yield information regarding the configuration that was found
+/// Information regarding the configuration that was found.
+///
+/// This contains the expanded configuration including default values where no
+/// configuration was present.
 #[derive(Default, Debug)]
 pub struct LoadedConfiguration {
     /// If present, the path of the directory where it was found
@@ -423,6 +404,17 @@ pub struct LoadedConfiguration {
     pub configuration: Configuration,
     /// All diagnostics that were emitted during parsing and deserialization
     pub diagnostics: Vec<Error>,
+}
+
+impl From<LoadedPartialConfiguration> for LoadedConfiguration {
+    fn from(partial: LoadedPartialConfiguration) -> Self {
+        Self {
+            directory_path: partial.directory_path,
+            file_path: partial.file_path,
+            configuration: partial.partial_configuration.into(),
+            diagnostics: partial.diagnostics,
+        }
+    }
 }
 
 impl LoadedConfiguration {
@@ -481,13 +473,51 @@ impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
 
 impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
 
-impl LoadedConfiguration {
+/// Information regarding the configuration that was found.
+///
+/// This contains only the configuration from the configuration file(s) without
+/// expanding any default values.
+#[derive(Default, Debug)]
+pub struct LoadedPartialConfiguration {
+    /// If present, the path of the directory where it was found
+    pub directory_path: Option<PathBuf>,
+    /// If present, the path of the file where it was found
+    pub file_path: Option<PathBuf>,
+    /// The Deserialized partial configuration
+    pub partial_configuration: PartialConfiguration,
+    /// All diagnostics that were emitted during parsing and deserialization
+    pub diagnostics: Vec<Error>,
+}
+
+impl LoadedPartialConfiguration {
+    /// Return the path of the **directory** where the configuration is
+    pub fn directory_path(&self) -> Option<&Path> {
+        self.directory_path.as_deref()
+    }
+
+    /// Return the path of the **file** where the configuration is
+    pub fn file_path(&self) -> Option<&Path> {
+        self.file_path.as_deref()
+    }
+
+    /// Whether the are errors emitted. Error are [Severity::Error] or greater.
+    pub fn has_errors(&self) -> bool {
+        self.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.severity() >= Severity::Error)
+    }
+
+    /// It return an iterator over the diagnostics emitted during the resolution of the configuration file
+    pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
+        ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
+    }
+
     fn try_from_payload(
         value: Option<ConfigurationPayload>,
         fs: &DynRef<'_, dyn FileSystem>,
     ) -> Result<Self, WorkspaceError> {
         let Some(value) = value else {
-            return Ok(LoadedConfiguration::default());
+            return Ok(LoadedPartialConfiguration::default());
         };
 
         let ConfigurationPayload {
@@ -497,22 +527,20 @@ impl LoadedConfiguration {
         } = value;
         let (partial_configuration, mut diagnostics) = deserialized.consume();
 
-        let configuration = match partial_configuration {
-            Some(mut partial_configuration) => {
-                partial_configuration.apply_extends(
-                    fs,
-                    &configuration_file_path,
-                    &configuration_directory_path,
-                    &mut diagnostics,
-                )?;
-                partial_configuration.migrate_deprecated_fields();
-                Configuration::from(partial_configuration)
-            }
-            None => Configuration::default(),
-        };
-
-        Ok(LoadedConfiguration {
-            configuration,
+        Ok(Self {
+            partial_configuration: match partial_configuration {
+                Some(mut partial_configuration) => {
+                    partial_configuration.apply_extends(
+                        fs,
+                        &configuration_file_path,
+                        &configuration_directory_path,
+                        &mut diagnostics,
+                    )?;
+                    partial_configuration.migrate_deprecated_fields();
+                    partial_configuration
+                }
+                None => PartialConfiguration::default(),
+            },
             diagnostics: diagnostics
                 .into_iter()
                 .map(|diagnostic| {
@@ -644,5 +672,48 @@ impl PartialConfiguration {
                 formatter.indent_width = formatter.indent_size;
             }
         }
+    }
+
+    /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
+    /// VCS root directory and the `.gitignore` file.
+    ///
+    /// ## Returns
+    ///
+    /// A tuple with VCS root folder and the contents of the `.gitignore` file
+    pub fn retrieve_gitignore_matches(
+        &self,
+        file_system: &DynRef<'_, dyn FileSystem>,
+        vcs_base_path: Option<&Path>,
+    ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError> {
+        let Some(vcs) = &self.vcs else {
+            return Ok((None, vec![]));
+        };
+        if vcs.is_enabled() {
+            let vcs_base_path = match (vcs_base_path, &vcs.root) {
+                (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
+                (None, Some(root)) => PathBuf::from(root),
+                (Some(vcs_base_path), None) => PathBuf::from(vcs_base_path),
+                (None, None) => return Err(WorkspaceError::vcs_disabled()),
+            };
+            if let Some(client_kind) = &vcs.client_kind {
+                if !vcs.ignore_file_disabled() {
+                    let result = file_system
+                        .auto_search(vcs_base_path, client_kind.ignore_file(), false)
+                        .map_err(WorkspaceError::from)?;
+
+                    if let Some(result) = result {
+                        return Ok((
+                            Some(result.directory_path),
+                            result
+                                .content
+                                .lines()
+                                .map(String::from)
+                                .collect::<Vec<String>>(),
+                        ));
+                    }
+                }
+            }
+        }
+        Ok((None, vec![]))
     }
 }

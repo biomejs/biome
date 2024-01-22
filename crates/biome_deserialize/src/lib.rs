@@ -33,7 +33,6 @@ mod diagnostics;
 mod impls;
 pub mod json;
 mod merge;
-mod none_state;
 pub mod string_set;
 mod validator;
 
@@ -42,7 +41,6 @@ pub use biome_rowan::TextRange;
 pub use diagnostics::{DeserializationAdvice, DeserializationDiagnostic, VisitableType};
 pub use impls::*;
 pub use merge::Merge;
-pub use none_state::NoneState;
 use std::fmt::Debug;
 pub use string_set::StringSet;
 pub use validator::*;

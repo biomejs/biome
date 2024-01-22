@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct OrganizeImports {
@@ -37,9 +37,9 @@ impl Default for OrganizeImports {
     }
 }
 
-impl OrganizeImports {
+impl PartialOrganizeImports {
     pub const fn is_disabled(&self) -> bool {
-        self.enabled == false
+        matches!(self.enabled, Some(false))
     }
 
     pub const fn is_enabled(&self) -> bool {

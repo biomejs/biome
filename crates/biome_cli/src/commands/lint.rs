@@ -4,22 +4,23 @@ use crate::commands::{get_stdin, validate_configuration_diagnostics};
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
-use biome_deserialize::{Merge, NoneState};
-use biome_service::configuration::vcs::VcsConfiguration;
+use biome_deserialize::Merge;
+use biome_service::configuration::vcs::PartialVcsConfiguration;
 use biome_service::configuration::{
-    load_configuration, FilesConfiguration, LinterConfiguration, LoadedConfiguration,
+    load_partial_configuration, LoadedPartialConfiguration, PartialFilesConfiguration,
+    PartialLinterConfiguration,
 };
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::Configuration;
+use biome_service::PartialConfiguration;
 use std::ffi::OsString;
 
 pub(crate) struct LintCommandPayload {
     pub(crate) apply: bool,
     pub(crate) apply_unsafe: bool,
     pub(crate) cli_options: CliOptions,
-    pub(crate) linter_configuration: Option<LinterConfiguration>,
-    pub(crate) vcs_configuration: Option<VcsConfiguration>,
-    pub(crate) files_configuration: Option<FilesConfiguration>,
+    pub(crate) linter_configuration: Option<PartialLinterConfiguration>,
+    pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
+    pub(crate) files_configuration: Option<PartialFilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) changed: bool,
@@ -56,23 +57,23 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     };
 
     let loaded_configuration =
-        load_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
+        load_partial_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
     validate_configuration_diagnostics(
         &loaded_configuration,
         session.app.console,
         cli_options.verbose,
     )?;
 
-    let LoadedConfiguration {
-        configuration: mut fs_configuration,
+    let LoadedPartialConfiguration {
+        partial_configuration: mut fs_configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
-    fs_configuration.merge_with(Configuration {
+    fs_configuration.merge_with(PartialConfiguration {
         linter: if fs_configuration
             .linter
             .as_ref()
-            .is_some_and(LinterConfiguration::is_disabled)
+            .is_some_and(PartialLinterConfiguration::is_disabled)
         {
             None
         } else {
@@ -84,7 +85,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         },
         files: files_configuration,
         vcs: vcs_configuration,
-        ..NoneState::none()
+        ..Default::default()
     });
 
     // check if support of git ignore files is enabled

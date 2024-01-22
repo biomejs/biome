@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 /// Options applied to JSON files
 #[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(default, deny_unknown_fields))]
 pub struct JsonConfiguration {
@@ -21,7 +21,7 @@ pub struct JsonConfiguration {
 
 /// Options that changes how the JSON parser behaves
 #[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct JsonParser {
@@ -35,7 +35,7 @@ pub struct JsonParser {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct JsonFormatter {

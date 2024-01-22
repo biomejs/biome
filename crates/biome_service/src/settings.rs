@@ -1,13 +1,12 @@
 use crate::configuration::formatter::to_format_settings;
 use crate::configuration::linter::to_linter_settings;
-use crate::configuration::organize_imports::to_organize_imports_settings;
+use crate::configuration::organize_imports::{to_organize_imports_settings, OrganizeImports};
 use crate::configuration::{
-    push_to_analyzer_rules, to_override_settings, CssConfiguration, JavascriptConfiguration,
-    JsonConfiguration,
+    push_to_analyzer_rules, to_override_settings, CssConfiguration, FormatterConfiguration,
+    JavascriptConfiguration, JsonConfiguration, LinterConfiguration, PartialConfiguration,
 };
 use crate::{
-    configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, Matcher, Rules,
-    WorkspaceError,
+    configuration::FilesConfiguration, ConfigurationDiagnostic, Matcher, Rules, WorkspaceError,
 };
 use biome_analyze::{AnalyzerRules, RuleFilter};
 use biome_css_formatter::context::CssFormatOptions;
@@ -87,59 +86,73 @@ impl WorkspaceSettings {
     #[tracing::instrument(level = "trace", skip(self))]
     pub fn merge_with_configuration(
         &mut self,
-        configuration: Configuration,
+        configuration: PartialConfiguration,
         working_directory: Option<PathBuf>,
         vcs_path: Option<PathBuf>,
         gitignore_matches: &[String],
     ) -> Result<(), WorkspaceError> {
         // formatter part
-        self.formatter = to_format_settings(
-            working_directory.clone(),
-            configuration.formatter,
-            vcs_path.clone(),
-            gitignore_matches,
-        )?;
+        if let Some(formatter) = configuration.formatter {
+            self.formatter = to_format_settings(
+                working_directory.clone(),
+                FormatterConfiguration::from(formatter),
+                vcs_path.clone(),
+                gitignore_matches,
+            )?;
+        }
 
         // linter part
-        self.linter = to_linter_settings(
-            working_directory.clone(),
-            configuration.linter,
-            vcs_path.clone(),
-            gitignore_matches,
-        )?;
+        if let Some(linter) = configuration.linter {
+            self.linter = to_linter_settings(
+                working_directory.clone(),
+                LinterConfiguration::from(linter),
+                vcs_path.clone(),
+                gitignore_matches,
+            )?;
+        }
 
         // Filesystem settings
         if let Some(files) = to_file_settings(
             working_directory.clone(),
-            Some(configuration.files),
+            configuration.files.map(FilesConfiguration::from),
             vcs_path.clone(),
             gitignore_matches,
         )? {
             self.files = files;
         }
 
-        self.organize_imports = to_organize_imports_settings(
-            working_directory.clone(),
-            configuration.organize_imports,
-            vcs_path.clone(),
-            gitignore_matches,
-        )?;
+        if let Some(organize_imports) = configuration.organize_imports {
+            self.organize_imports = to_organize_imports_settings(
+                working_directory.clone(),
+                OrganizeImports::from(organize_imports),
+                vcs_path.clone(),
+                gitignore_matches,
+            )?;
+        }
 
         // javascript settings
-        self.languages.javascript = configuration.javascript.into();
+        if let Some(javascript) = configuration.javascript {
+            self.languages.javascript = JavascriptConfiguration::from(javascript).into();
+        }
         // json settings
-        self.languages.json = configuration.json.into();
+        if let Some(json) = configuration.json {
+            self.languages.json = JsonConfiguration::from(json).into();
+        }
         // css settings
-        self.languages.css = configuration.css.into();
+        if let Some(css) = configuration.css {
+            self.languages.css = CssConfiguration::from(css).into();
+        }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
-        self.override_settings = to_override_settings(
-            working_directory.clone(),
-            configuration.overrides,
-            vcs_path,
-            gitignore_matches,
-            self,
-        )?;
+        if let Some(overrides) = configuration.overrides {
+            self.override_settings = to_override_settings(
+                working_directory.clone(),
+                overrides,
+                vcs_path,
+                gitignore_matches,
+                self,
+            )?;
+        }
 
         Ok(())
     }

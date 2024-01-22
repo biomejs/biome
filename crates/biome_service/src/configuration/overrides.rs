@@ -4,7 +4,7 @@ use super::PartialCssConfiguration;
 use crate::configuration::formatter::{deserialize_line_width, serialize_line_width};
 use crate::configuration::{
     partial_css_configuration, partial_javascript_configuration, partial_json_configuration,
-    CssConfiguration, JavascriptConfiguration, JsonConfiguration, PlainIndentStyle,
+    PlainIndentStyle,
 };
 use crate::settings::{
     to_matcher, FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings,
@@ -255,7 +255,7 @@ pub(crate) fn to_format_settings(
 }
 
 fn to_javascript_language_settings(
-    mut conf: JavascriptConfiguration,
+    mut conf: PartialJavascriptConfiguration,
     parent_settings: &LanguageSettings<JsLanguage>,
 ) -> LanguageSettings<JsLanguage> {
     let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
@@ -313,7 +313,7 @@ fn to_javascript_language_settings(
 }
 
 fn to_json_language_settings(
-    mut conf: JsonConfiguration,
+    mut conf: PartialJsonConfiguration,
     parent_settings: &LanguageSettings<JsonLanguage>,
 ) -> LanguageSettings<JsonLanguage> {
     let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
@@ -347,7 +347,7 @@ fn to_json_language_settings(
 }
 
 fn to_css_language_settings(
-    mut conf: CssConfiguration,
+    mut conf: PartialCssConfiguration,
     parent_settings: &LanguageSettings<CssLanguage>,
 ) -> LanguageSettings<CssLanguage> {
     let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
@@ -383,7 +383,7 @@ fn to_override_linter_settings(
 ) -> OverrideLinterSettings {
     OverrideLinterSettings {
         enabled: conf.enabled.or(Some(lint_settings.enabled)),
-        rules: conf.rules.or(Some(lint_settings.rules.clone())),
+        rules: conf.rules.or(lint_settings.rules.clone()),
     }
 }
 

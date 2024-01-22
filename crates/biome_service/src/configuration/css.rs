@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 /// Options applied to CSS files
 #[derive(Clone, Default, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(default, deny_unknown_fields))]
 pub struct CssConfiguration {
@@ -21,7 +21,7 @@ pub struct CssConfiguration {
 
 /// Options that changes how the CSS parser behaves
 #[derive(Clone, Default, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct CssParser {
@@ -31,7 +31,7 @@ pub struct CssParser {
 }
 
 #[derive(Clone, Default, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct CssFormatter {

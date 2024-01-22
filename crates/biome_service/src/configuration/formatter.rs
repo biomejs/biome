@@ -11,7 +11,7 @@ use std::str::FromStr;
 
 /// Generic options applied to all files
 #[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct FormatterConfiguration {
@@ -60,9 +60,9 @@ pub struct FormatterConfiguration {
     pub include: StringSet,
 }
 
-impl FormatterConfiguration {
+impl PartialFormatterConfiguration {
     pub const fn is_disabled(&self) -> bool {
-        self.enabled == false
+        matches!(self.enabled, Some(false))
     }
 }
 

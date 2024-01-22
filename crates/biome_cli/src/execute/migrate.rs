@@ -7,7 +7,6 @@ use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Merge;
-use biome_deserialize::NoneState;
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{category, PrintDiagnostic};
 use biome_fs::{FileSystemExt, OpenOptions, RomePath};
@@ -15,11 +14,11 @@ use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonRoot;
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::{AstNode, NodeCache};
-use biome_service::configuration::JavascriptConfiguration;
+use biome_service::configuration::PartialJavascriptConfiguration;
 use biome_service::workspace::{
     ChangeFileParams, FixAction, FormatFileParams, Language, OpenFileParams,
 };
-use biome_service::{Configuration, VERSION};
+use biome_service::{PartialConfiguration, VERSION};
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -127,20 +126,20 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         if let Some((formatter_configuration, javascript_configuration)) =
             prettier_configuration.get_biome_configuration()
         {
-            let configuration = deserialize_from_json_str::<Configuration>(
+            let configuration = deserialize_from_json_str::<PartialConfiguration>(
                 configuration_content.as_str(),
                 JsonParserOptions::default(),
                 "",
             )
             .into_deserialized();
             if let Some(mut configuration) = configuration {
-                configuration.merge_with(Configuration {
+                configuration.merge_with(PartialConfiguration {
                     formatter: Some(formatter_configuration.clone()),
-                    javascript: Some(JavascriptConfiguration {
+                    javascript: Some(PartialJavascriptConfiguration {
                         formatter: Some(javascript_configuration.clone()),
                         ..Default::default()
                     }),
-                    ..NoneState::none()
+                    ..Default::default()
                 });
 
                 let new_content = serde_json::to_string(&configuration).map_err(|err| {

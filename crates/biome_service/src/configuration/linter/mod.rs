@@ -45,7 +45,7 @@ pub struct LinterConfiguration {
 
 impl LinterConfiguration {
     pub const fn is_disabled(&self) -> bool {
-        self.enabled == false
+        !self.enabled
     }
 }
 
@@ -57,6 +57,12 @@ impl Default for LinterConfiguration {
             ignore: Default::default(),
             include: Default::default(),
         }
+    }
+}
+
+impl PartialLinterConfiguration {
+    pub const fn is_disabled(&self) -> bool {
+        matches!(self.enabled, Some(false))
     }
 }
 

@@ -8,7 +8,7 @@ const GIT_IGNORE_FILE_NAME: &str = ".gitignore";
 
 /// Set of properties to integrate Biome with a VCS software.
 #[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(deserializable(with_validator))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(deny_unknown_fields, rename_all = "camelCase"))]
@@ -53,6 +53,18 @@ impl Default for VcsConfiguration {
     }
 }
 
+impl PartialVcsConfiguration {
+    pub const fn is_enabled(&self) -> bool {
+        matches!(self.enabled, Some(true))
+    }
+    pub const fn is_disabled(&self) -> bool {
+        !self.is_enabled()
+    }
+    pub const fn ignore_file_disabled(&self) -> bool {
+        matches!(self.use_ignore_file, Some(false))
+    }
+}
+
 impl DeserializableValidator for PartialVcsConfiguration {
     fn validate(
         &self,
@@ -60,7 +72,7 @@ impl DeserializableValidator for PartialVcsConfiguration {
         range: biome_rowan::TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
-        if self.client_kind.is_none() && matches!(self.enabled, Some(true)) {
+        if self.client_kind.is_none() && self.is_enabled() {
             diagnostics.push(
                 DeserializationDiagnostic::new(
                     "You enabled the VCS integration, but you didn't specify a client.",

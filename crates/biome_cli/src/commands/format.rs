@@ -9,23 +9,22 @@ use crate::{
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
-use biome_service::configuration::css::CssFormatter;
-use biome_service::configuration::json::JsonFormatter;
-use biome_service::configuration::vcs::VcsConfiguration;
+use biome_service::configuration::vcs::PartialVcsConfiguration;
 use biome_service::configuration::{
-    load_configuration, FilesConfiguration, FormatterConfiguration, LoadedConfiguration,
+    load_partial_configuration, LoadedPartialConfiguration, PartialCssFormatter,
+    PartialFilesConfiguration, PartialFormatterConfiguration, PartialJavascriptFormatter,
+    PartialJsonFormatter,
 };
 use biome_service::workspace::UpdateSettingsParams;
-use biome_service::JavascriptFormatter;
 use std::ffi::OsString;
 
 pub(crate) struct FormatCommandPayload {
-    pub(crate) javascript_formatter: Option<JavascriptFormatter>,
-    pub(crate) json_formatter: Option<JsonFormatter>,
-    pub(crate) css_formatter: Option<CssFormatter>,
-    pub(crate) formatter_configuration: Option<FormatterConfiguration>,
-    pub(crate) vcs_configuration: Option<VcsConfiguration>,
-    pub(crate) files_configuration: Option<FilesConfiguration>,
+    pub(crate) javascript_formatter: Option<PartialJavascriptFormatter>,
+    pub(crate) json_formatter: Option<PartialJsonFormatter>,
+    pub(crate) css_formatter: Option<PartialCssFormatter>,
+    pub(crate) formatter_configuration: Option<PartialFormatterConfiguration>,
+    pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
+    pub(crate) files_configuration: Option<PartialFilesConfiguration>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) write: bool,
     pub(crate) cli_options: CliOptions,
@@ -56,14 +55,14 @@ pub(crate) fn format(
     setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
 
     let loaded_configuration =
-        load_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
+        load_partial_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
     validate_configuration_diagnostics(
         &loaded_configuration,
         session.app.console,
         cli_options.verbose,
     )?;
-    let LoadedConfiguration {
-        mut configuration,
+    let LoadedPartialConfiguration {
+        partial_configuration: mut configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
@@ -132,7 +131,7 @@ pub(crate) fn format(
     if !configuration
         .formatter
         .as_ref()
-        .is_some_and(FormatterConfiguration::is_disabled)
+        .is_some_and(PartialFormatterConfiguration::is_disabled)
     {
         let formatter = configuration.formatter.get_or_insert_with(Default::default);
         if let Some(formatter_configuration) = formatter_configuration {

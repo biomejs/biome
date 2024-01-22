@@ -5,19 +5,20 @@ use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
 use biome_deserialize::Merge;
-use biome_service::configuration::organize_imports::OrganizeImports;
+use biome_service::configuration::organize_imports::PartialOrganizeImports;
 use biome_service::configuration::{
-    load_configuration, FormatterConfiguration, LinterConfiguration, LoadedConfiguration,
+    load_partial_configuration, LoadedPartialConfiguration, PartialFormatterConfiguration,
+    PartialLinterConfiguration,
 };
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::Configuration;
+use biome_service::PartialConfiguration;
 use std::ffi::OsString;
 
 pub(crate) struct CheckCommandPayload {
     pub(crate) apply: bool,
     pub(crate) apply_unsafe: bool,
     pub(crate) cli_options: CliOptions,
-    pub(crate) configuration: Option<Configuration>,
+    pub(crate) configuration: Option<PartialConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) formatter_enabled: Option<bool>,
@@ -61,22 +62,22 @@ pub(crate) fn check(
     };
 
     let loaded_configuration =
-        load_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
+        load_partial_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
     validate_configuration_diagnostics(
         &loaded_configuration,
         session.app.console,
         cli_options.verbose,
     )?;
 
-    let LoadedConfiguration {
-        configuration: mut fs_configuration,
+    let LoadedPartialConfiguration {
+        partial_configuration: mut fs_configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
 
     let formatter = fs_configuration
         .formatter
-        .get_or_insert_with(FormatterConfiguration::default);
+        .get_or_insert_with(PartialFormatterConfiguration::default);
 
     if formatter_enabled.is_some() {
         formatter.enabled = formatter_enabled;
@@ -84,7 +85,7 @@ pub(crate) fn check(
 
     let linter = fs_configuration
         .linter
-        .get_or_insert_with(LinterConfiguration::default);
+        .get_or_insert_with(PartialLinterConfiguration::default);
 
     if linter_enabled.is_some() {
         linter.enabled = linter_enabled;
@@ -92,7 +93,7 @@ pub(crate) fn check(
 
     let organize_imports = fs_configuration
         .organize_imports
-        .get_or_insert_with(OrganizeImports::default);
+        .get_or_insert_with(PartialOrganizeImports::default);
 
     if organize_imports_enabled.is_some() {
         organize_imports.enabled = organize_imports_enabled;
