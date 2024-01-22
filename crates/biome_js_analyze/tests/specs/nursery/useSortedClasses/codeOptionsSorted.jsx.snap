@@ -53,24 +53,4 @@ clsx({
 
 ```
 
-# Diagnostics
-```
-codeOptionsSorted.options:8:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The rule useSortedClasses doesn't accept any options.
-  
-     6 │ 				"useSortedClasses": {
-     7 │ 					"level": "error",
-   > 8 │ 					"options": {
-       │ 					           ^
-   > 9 │ 						"attributes": ["customClassAttribute"],
-  > 10 │ 						"functions": ["clsx", "tw"]
-  > 11 │ 					}
-       │ 					^
-    12 │ 				}
-    13 │ 			}
-  
-
-```
-
 

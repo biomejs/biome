@@ -16,7 +16,7 @@ use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
 
-pub use self::options::UseSortedClassesOptions;
+pub use self::options::UtilityClassSortingOptions;
 use self::{
     any_class_string_like::AnyClassStringLike,
     presets::{get_utilities_preset, UseSortedClassesPreset},
@@ -109,7 +109,7 @@ impl Rule for UseSortedClasses {
     type Query = AnyClassStringLike;
     type State = String;
     type Signals = Option<Self::State>;
-    type Options = UseSortedClassesOptions;
+    type Options = UtilityClassSortingOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         // TODO: unsure if options are needed here. The sort config should ideally be created once

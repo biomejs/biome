@@ -10,16 +10,19 @@ use biome_rowan::{
     declare_node_union, AstNode, Language, SyntaxNode, TextRange, TokenText, WalkEvent,
 };
 
-use super::UseSortedClassesOptions;
+use super::UtilityClassSortingOptions;
 
 // utils
 // -----
 
-fn get_options_from_analyzer(analyzer_options: &AnalyzerOptions) -> UseSortedClassesOptions {
+fn get_options_from_analyzer(analyzer_options: &AnalyzerOptions) -> UtilityClassSortingOptions {
     analyzer_options
         .configuration
         .rules
-        .get_rule_options::<UseSortedClassesOptions>(&RuleKey::new("nursery", "useSortedClasses"))
+        .get_rule_options::<UtilityClassSortingOptions>(&RuleKey::new(
+            "nursery",
+            "useSortedClasses",
+        ))
         .cloned()
         .unwrap_or_default()
 }
@@ -79,11 +82,15 @@ impl Visitor for StringLiteralInAttributeVisitor {
         mut ctx: VisitorContext<Self::Language>,
     ) {
         let options = get_options_from_analyzer(ctx.options);
+        let attributes = match &options.attributes {
+            Some(attributes) => attributes,
+            None => return,
+        };
         match event {
             WalkEvent::Enter(node) => {
                 // When entering an attribute node, track if we are in a target attribute.
                 if let Some(attribute) = JsxAttribute::cast_ref(node) {
-                    self.in_target_attribute = is_target_attribute(&attribute, &options.attributes);
+                    self.in_target_attribute = is_target_attribute(&attribute, attributes);
                 }
 
                 // When entering a JSX string node, and we are in a target attribute, emit.
@@ -131,16 +138,17 @@ impl Visitor for StringLiteralInCallExpressionVisitor {
         mut ctx: VisitorContext<Self::Language>,
     ) {
         let options = get_options_from_analyzer(ctx.options);
-        if options.functions.is_empty() {
-            return;
-        }
+        let functions = match &options.functions {
+            Some(functions) => functions,
+            None => return,
+        };
         match event {
             WalkEvent::Enter(node) => {
                 // When entering a call expression node, track if we are in a target function and reset
                 // in_arguments.
                 if let Some(call_expression) = JsCallExpression::cast_ref(node) {
                     self.in_target_function =
-                        is_call_expression_of_target_function(&call_expression, &options.functions);
+                        is_call_expression_of_target_function(&call_expression, functions);
                     self.in_arguments = false;
                 }
 

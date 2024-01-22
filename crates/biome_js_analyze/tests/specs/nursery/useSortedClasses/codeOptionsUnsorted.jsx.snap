@@ -55,25 +55,6 @@ clsx({
 
 # Diagnostics
 ```
-codeOptionsUnsorted.options:8:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The rule useSortedClasses doesn't accept any options.
-  
-     6 │ 				"useSortedClasses": {
-     7 │ 					"level": "error",
-   > 8 │ 					"options": {
-       │ 					           ^
-   > 9 │ 						"attributes": ["customClassAttribute"],
-  > 10 │ 						"functions": ["clsx", "tw"]
-  > 11 │ 					}
-       │ 					^
-    12 │ 				}
-    13 │ 			}
-  
-
-```
-
-```
 codeOptionsUnsorted.jsx:3:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! These CSS classes should be sorted.
@@ -117,6 +98,30 @@ codeOptionsUnsorted.jsx:4:17 lint/nursery/useSortedClasses  FIXABLE  ━━━�
         4 │ + → <div·className="foo·bar·p-4·px-2"·/>
      5  5 │   	<div customClassAttribute="px-2 foo p-4 bar" />
      6  6 │   	<div notClassAttribute="px-2 foo p-4 bar" />
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:5:28 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    3 │ 	<div class="px-2 foo p-4 bar" />
+    4 │ 	<div className="px-2 foo p-4 bar" />
+  > 5 │ 	<div customClassAttribute="px-2 foo p-4 bar" />
+      │ 	                          ^^^^^^^^^^^^^^^^^^
+    6 │ 	<div notClassAttribute="px-2 foo p-4 bar" />
+    7 │ 	{/* utility sorting */}
+  
+  i Unsafe fix: Sort the classes.
+  
+     3  3 │   	<div class="px-2 foo p-4 bar" />
+     4  4 │   	<div className="px-2 foo p-4 bar" />
+     5    │ - → <div·customClassAttribute="px-2·foo·p-4·bar"·/>
+        5 │ + → <div·customClassAttribute="foo·bar·p-4·px-2"·/>
+     6  6 │   	<div notClassAttribute="px-2 foo p-4 bar" />
+     7  7 │   	{/* utility sorting */}
   
 
 ```
@@ -362,6 +367,29 @@ codeOptionsUnsorted.jsx:17:13 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
+codeOptionsUnsorted.jsx:21:6 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    20 │ // functions
+  > 21 │ clsx("px-2 foo p-4 bar");
+       │      ^^^^^^^^^^^^^^^^^^
+    22 │ // TODO: tagged template literals are not supported yet
+    23 │ tw`px-2 foo p-4 bar`;
+  
+  i Unsafe fix: Sort the classes.
+  
+    19 19 │   
+    20 20 │   // functions
+    21    │ - clsx("px-2·foo·p-4·bar");
+       21 │ + clsx("foo·bar·p-4·px-2");
+    22 22 │   // TODO: tagged template literals are not supported yet
+    23 23 │   tw`px-2 foo p-4 bar`;
+  
+
+```
+
+```
 codeOptionsUnsorted.jsx:30:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! These CSS classes should be sorted.
@@ -476,6 +504,102 @@ codeOptionsUnsorted.jsx:36:55 lint/nursery/useSortedClasses  FIXABLE  ━━━�
        36 │ + → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["foo·bar·p-4·px-2"]·},
     37 37 │   		],
     38 38 │   	}}
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:40:7 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    38 │ 	}}
+    39 │ />;
+  > 40 │ clsx(["px-2 foo p-4 bar"]);
+       │       ^^^^^^^^^^^^^^^^^^
+    41 │ clsx({
+    42 │ 	"px-2 foo p-4 bar": [
+  
+  i Unsafe fix: Sort the classes.
+  
+    38 38 │   	}}
+    39 39 │   />;
+    40    │ - clsx(["px-2·foo·p-4·bar"]);
+       40 │ + clsx(["foo·bar·p-4·px-2"]);
+    41 41 │   clsx({
+    42 42 │   	"px-2 foo p-4 bar": [
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:43:3 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    41 │ clsx({
+    42 │ 	"px-2 foo p-4 bar": [
+  > 43 │ 		"px-2 foo p-4 bar",
+       │ 		^^^^^^^^^^^^^^^^^^
+    44 │ 		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+    45 │ 	],
+  
+  i Unsafe fix: Sort the classes.
+  
+    41 41 │   clsx({
+    42 42 │   	"px-2 foo p-4 bar": [
+    43    │ - → → "px-2·foo·p-4·bar",
+       43 │ + → → "foo·bar·p-4·px-2",
+    44 44 │   		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+    45 45 │   	],
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:44:25 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    42 │ 	"px-2 foo p-4 bar": [
+    43 │ 		"px-2 foo p-4 bar",
+  > 44 │ 		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+       │ 		                      ^^^^^^^^^^^^^^^^^^
+    45 │ 	],
+    46 │ });
+  
+  i Unsafe fix: Sort the classes.
+  
+    42 42 │   	"px-2 foo p-4 bar": [
+    43 43 │   		"px-2 foo p-4 bar",
+    44    │ - → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
+       44 │ + → → {·"px-2·foo·p-4·bar":·"foo·bar·p-4·px-2",·custom:·["px-2·foo·p-4·bar"]·},
+    45 45 │   	],
+    46 46 │   });
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:44:54 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    42 │ 	"px-2 foo p-4 bar": [
+    43 │ 		"px-2 foo p-4 bar",
+  > 44 │ 		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+       │ 		                                                   ^^^^^^^^^^^^^^^^^^
+    45 │ 	],
+    46 │ });
+  
+  i Unsafe fix: Sort the classes.
+  
+    42 42 │   	"px-2 foo p-4 bar": [
+    43 43 │   		"px-2 foo p-4 bar",
+    44    │ - → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
+       44 │ + → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["foo·bar·p-4·px-2"]·},
+    45 45 │   	],
+    46 46 │   });
   
 
 ```

@@ -1673,6 +1673,10 @@
 				{
 					"description": "Options for `useValidAriaRole` rule",
 					"allOf": [{ "$ref": "#/definitions/ValidAriaRoleOptions" }]
+				},
+				{
+					"description": "Options for `useSortedClasses` rule",
+					"allOf": [{ "$ref": "#/definitions/UtilityClassSortingOptions" }]
 				}
 			]
 		},
@@ -2379,6 +2383,22 @@
 					"enum": ["none"]
 				}
 			]
+		},
+		"UtilityClassSortingOptions": {
+			"type": "object",
+			"properties": {
+				"attributes": {
+					"description": "Additional attributes that will be sorted.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"functions": {
+					"description": "Names of the functions or tagged templates that will be sorted.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
 		},
 		"ValidAriaRoleOptions": {
 			"type": "object",

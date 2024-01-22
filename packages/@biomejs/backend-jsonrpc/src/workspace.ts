@@ -1396,7 +1396,8 @@ export type PossibleOptions =
 	| DeprecatedHooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
-	| ValidAriaRoleOptions;
+	| ValidAriaRoleOptions
+	| UtilityClassSortingOptions;
 /**
  * Options for the rule `noExcessiveCognitiveComplexity`.
  */
@@ -1460,6 +1461,16 @@ export interface RestrictedGlobalsOptions {
 export interface ValidAriaRoleOptions {
 	allowedInvalidRoles: string[];
 	ignoreNonDom: boolean;
+}
+export interface UtilityClassSortingOptions {
+	/**
+	 * Additional attributes that will be sorted.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be sorted.
+	 */
+	functions?: string[];
 }
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
