@@ -208,7 +208,7 @@ impl Rule for NoUselessTernary {
         return Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Replace the conditional expression with" }.to_owned(),
+            message: markup! { "Remove the conditional expression with" }.to_owned(),
             mutation,
         });
     }
