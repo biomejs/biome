@@ -8,6 +8,33 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+- Add the rule [noDisabledTest](https://biomejs.dev/linter/rules/no-disabled-tests), to disallow disabled tests:
+
+  ```js
+  describe.skie("test", () => {});
+  it.skip("test", () => {});
+  ```
+
+### Parser
+
 ## 1.5.3 (2024-01-22)
 
 ### LSP
