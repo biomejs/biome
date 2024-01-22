@@ -8,10 +8,19 @@ pub enum UseSortedClassesPreset {
     #[allow(unused)]
     None,
     #[default]
-    TailwindCSS, // TODO: should this be the default?
+    TailwindCSS,
 }
 
-const TAILWIND_PRESETS: [&str; 567] = [
+// TAILWIND-COMPONENTS-LAYER-CLASSES-START
+const UTILITIES_COMPONENTS_CLASSES: [&str; 1] = [
+    // TODO: auto-generated message
+    "container$",
+];
+// TAILWIND-COMPONENTS-LAYER-CLASSES-END
+
+// TAILWIND-UTILITIES-LAYER-CLASSES-START
+const UTILITIES_LAYER_CLASSES: [&str; 567] = [
+    // TODO: auto-generated message
     "sr-only$",
     "not-sr-only$",
     "pointer-events-none$",
@@ -580,8 +589,8 @@ const TAILWIND_PRESETS: [&str; 567] = [
     "forced-color-adjust-auto$",
     "forced-color-adjust-none$",
 ];
+// TAILWIND-UTILITIES-LAYER-CLASSES-END
 
-// TODO: make this static
 pub fn get_utilities_preset(preset: &UseSortedClassesPreset) -> UtilitiesConfig {
     match preset {
         UseSortedClassesPreset::None => {
@@ -592,11 +601,11 @@ pub fn get_utilities_preset(preset: &UseSortedClassesPreset) -> UtilitiesConfig 
             vec![
                 UtilityLayer {
                     name: String::from("components"),
-                    classes: ["container$"].as_slice(),
+                    classes: UTILITIES_COMPONENTS_CLASSES.as_slice(),
                 },
                 UtilityLayer {
                     name: String::from("utilities"),
-                    classes: TAILWIND_PRESETS.as_slice(),
+                    classes: UTILITIES_LAYER_CLASSES.as_slice(),
                 },
             ]
             // TAILWIND-UTILITIES-PRESET-END
