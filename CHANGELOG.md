@@ -24,11 +24,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#1039](https://github.com/biomejs/biome/issues/1039). Check unicode width instead of number of bytes when checking if regex expression is a simple argument. Contributed by @kalleep
 
-This no longer breaks.
-```js
-s(/🚀🚀/).s().s();
-```
+  This no longer breaks.
 
+  ```js
+  s(/🚀🚀/).s().s();
 ### JavaScript APIs
 
 ### Linter
