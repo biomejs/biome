@@ -28,6 +28,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   ```js
   s(/🚀🚀/).s().s();
+  ```
+
 ### JavaScript APIs
 
 ### Linter
