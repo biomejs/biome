@@ -33,7 +33,27 @@ fn split_at_indexes<'a>(s: &'a str, indexes: &[usize]) -> Vec<&'a str> {
     segments
 }
 
-// TODO: unit tests.
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_split_at_indexes() {
+        assert_eq!(
+            split_at_indexes("foo:bar:baz", &[3, 7]),
+            vec!["foo", "bar", "baz"]
+        );
+        assert_eq!(split_at_indexes("foobar:baz", &[6]), vec!["foobar", "baz"]);
+        assert_eq!(split_at_indexes("foobarbaz", &[]), vec!["foobarbaz"]);
+        assert_eq!(
+            split_at_indexes("foo_bar_baz", &[3, 7]),
+            vec!["foo", "bar", "baz"]
+        );
+        assert_eq!(split_at_indexes(":", &[0]), Vec::<&str>::new());
+        assert_eq!(split_at_indexes(":::", &[0]), vec!["::"]);
+        assert_eq!(split_at_indexes(":::", &[1]), vec![":", ":"]);
+    }
+}
 
 #[derive(Debug, Clone, PartialEq)]
 enum Quote {
@@ -61,14 +81,14 @@ enum CharKind {
 }
 
 /// Information about the structure of a segment of a CSS class (variant or utility).
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct ClassSegmentStructure {
     pub arbitrary: bool,
     pub text: String,
 }
 
 /// Information about the structure of a CSS class.
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct ClassStructure {
     pub variants: Vec<ClassSegmentStructure>,
     pub utility: ClassSegmentStructure,
@@ -87,6 +107,7 @@ pub fn tokenize_class(class_name: &str) -> Option<ClassStructure> {
     for (index, c) in class_name.char_indices() {
         let mut next_last_char = CharKind::Other;
         let mut is_start_of_arbitrary_block = false;
+
         match c {
             '[' => {
                 if arbitrary_block_depth == 0 {
@@ -135,6 +156,8 @@ pub fn tokenize_class(class_name: &str) -> Option<ClassStructure> {
                             quoted_arbitrary_block_type = None;
                         }
                     }
+                } else {
+                    return None;
                 }
             }
             ':' => {
@@ -164,4 +187,211 @@ pub fn tokenize_class(class_name: &str) -> Option<ClassStructure> {
     Some(ClassStructure { variants, utility })
 }
 
-// TODO: unit tests.
+#[cfg(test)]
+mod tests_tokenize_class {
+    use super::*;
+
+    #[test]
+    fn test_tokenize_class() {
+        assert_eq!(
+            tokenize_class("px-2"),
+            Some(ClassStructure {
+                variants: Vec::new(),
+                utility: ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "px-2".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("hover:px-2"),
+            Some(ClassStructure {
+                variants: vec![ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "hover".to_string(),
+                }],
+                utility: ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "px-2".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("sm:hover:px-2"),
+            Some(ClassStructure {
+                variants: vec![
+                    ClassSegmentStructure {
+                        arbitrary: false,
+                        text: "sm".to_string(),
+                    },
+                    ClassSegmentStructure {
+                        arbitrary: false,
+                        text: "hover".to_string(),
+                    },
+                ],
+                utility: ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "px-2".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("hover:[mask:circle]"),
+            Some(ClassStructure {
+                variants: vec![ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "hover".to_string(),
+                }],
+                utility: ClassSegmentStructure {
+                    arbitrary: true,
+                    text: "[mask:circle]".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("[&:nth-child(3)]:px-2"),
+            Some(ClassStructure {
+                variants: vec![ClassSegmentStructure {
+                    arbitrary: true,
+                    text: "[&:nth-child(3)]".to_string(),
+                }],
+                utility: ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "px-2".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("hover:[mask:circle]"),
+            Some(ClassStructure {
+                variants: vec![ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "hover".to_string(),
+                },],
+                utility: ClassSegmentStructure {
+                    arbitrary: true,
+                    text: "[mask:circle]".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("[&:nth-child(3)]:[mask:circle]"),
+            Some(ClassStructure {
+                variants: vec![ClassSegmentStructure {
+                    arbitrary: true,
+                    text: "[&:nth-child(3)]".to_string(),
+                },],
+                utility: ClassSegmentStructure {
+                    arbitrary: true,
+                    text: "[mask:circle]".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("font-[Roboto]:[mask:circle]"),
+            Some(ClassStructure {
+                variants: vec![ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "font-[Roboto]".to_string(),
+                },],
+                utility: ClassSegmentStructure {
+                    arbitrary: true,
+                    text: "[mask:circle]".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("font-['Roboto']:[mask:circle]"),
+            Some(ClassStructure {
+                variants: vec![ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "font-['Roboto']".to_string(),
+                },],
+                utility: ClassSegmentStructure {
+                    arbitrary: true,
+                    text: "[mask:circle]".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("quotes-['Ro'b\"`oto']:block"),
+            Some(ClassStructure {
+                variants: vec![ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "quotes-['Ro'b\"`oto']".to_string(),
+                },],
+                utility: ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "block".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("quotes-[']']:block"),
+            Some(ClassStructure {
+                variants: vec![ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "quotes-[']']".to_string(),
+                },],
+                utility: ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "block".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("quotes-[\"]\"]"),
+            Some(ClassStructure {
+                variants: Vec::new(),
+                utility: ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "quotes-[\"]\"]".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("quotes-[`]`]"),
+            Some(ClassStructure {
+                variants: Vec::new(),
+                utility: ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "quotes-[`]`]".to_string(),
+                },
+            })
+        );
+        assert_eq!(tokenize_class("no-quotes-[]]:block"), None);
+        assert_eq!(
+            tokenize_class("escaped-quotes-[']\\']:block"),
+            Some(ClassStructure {
+                variants: Vec::new(),
+                utility: ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "escaped-quotes-[']\\']:block".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("double-escaped-quotes-[']\\\\']:block"),
+            Some(ClassStructure {
+                variants: vec![ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "double-escaped-quotes-[']\\\\']".to_string(),
+                },],
+                utility: ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "block".to_string(),
+                },
+            })
+        );
+        assert_eq!(
+            tokenize_class("triple-escaped-quotes-[']\\\\\\']:block"),
+            Some(ClassStructure {
+                variants: Vec::new(),
+                utility: ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "triple-escaped-quotes-[']\\\\\\']:block".to_string(),
+                },
+            })
+        );
+    }
+}
