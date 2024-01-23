@@ -124,8 +124,7 @@ pub fn tokenize_class(class_name: &str) -> Option<ClassStructure> {
                 } else if let CharKind::Backslash = last_char {
                     // Escaped, ignore.
                 } else {
-                    let quote = Quote::from_char(c)
-                        .expect("TODO: error message (this should never happen)");
+                    let quote = Quote::from_char(c)?;
                     next_last_char = CharKind::Quote(quote);
                 }
             }
@@ -166,9 +165,6 @@ pub fn tokenize_class(class_name: &str) -> Option<ClassStructure> {
                 }
             }
             _ => {}
-        };
-        if arbitrary_block_depth < 0 {
-            panic!("TODO: error message (this should never happen)");
         };
         if at_arbitrary_block_start && !is_start_of_arbitrary_block {
             at_arbitrary_block_start = false;
