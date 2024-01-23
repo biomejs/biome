@@ -121,5 +121,3 @@ pub fn sort_class_name(class_name: &TokenText, sort_config: &SortConfig) -> Stri
     // Join the classes back into a string.
     sorted_classes.join(" ")
 }
-
-// TODO: unit tests.
