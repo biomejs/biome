@@ -18,260 +18,85 @@ export type SupportKind =
 	| "FeatureNotEnabled"
 	| "FileNotSupported";
 export interface UpdateSettingsParams {
-	configuration: Configuration;
+	configuration: PartialConfiguration;
 	gitignore_matches: string[];
 	vcs_base_path?: string;
 	working_directory?: string;
 }
-/**
- * The configuration that is contained inside the file `biome.json`
- */
-export interface Configuration {
-	/**
-	 * A field for the [JSON schema](https://json-schema.org/) specification
-	 */
+export interface PartialConfiguration {
 	$schema?: string;
-	/**
-	 * Specific configuration for the Css language
-	 */
-	css?: CssConfiguration;
-	/**
-	 * A list of paths to other JSON files, used to extends the current configuration.
-	 */
+	css?: PartialCssConfiguration;
 	extends?: StringSet;
-	/**
-	 * The configuration of the filesystem
-	 */
-	files?: FilesConfiguration;
-	/**
-	 * The configuration of the formatter
-	 */
-	formatter?: FormatterConfiguration;
-	/**
-	 * Specific configuration for the JavaScript language
-	 */
-	javascript?: JavascriptConfiguration;
-	/**
-	 * Specific configuration for the Json language
-	 */
-	json?: JsonConfiguration;
-	/**
-	 * The configuration for the linter
-	 */
-	linter?: LinterConfiguration;
-	/**
-	 * The configuration of the import sorting
-	 */
-	organizeImports?: OrganizeImports;
-	/**
-	 * A list of granular patterns that should be applied only to a sub set of files
-	 */
+	files?: PartialFilesConfiguration;
+	formatter?: PartialFormatterConfiguration;
+	javascript?: PartialJavascriptConfiguration;
+	json?: PartialJsonConfiguration;
+	linter?: PartialLinterConfiguration;
+	organizeImports?: PartialOrganizeImports;
 	overrides?: Overrides;
-	/**
-	 * The configuration of the VCS integration
-	 */
-	vcs?: VcsConfiguration;
+	vcs?: PartialVcsConfiguration;
 }
-/**
- * Options applied to CSS files
- */
-export interface CssConfiguration {
-	/**
-	 * Formatting options
-	 */
-	formatter?: CssFormatter;
-	/**
-	 * Parsing options
-	 */
-	parser?: CssParser;
+export interface PartialCssConfiguration {
+	formatter?: PartialCssFormatter;
+	parser?: PartialCssParser;
 }
 export type StringSet = string[];
-/**
- * The configuration of the filesystem
- */
-export interface FilesConfiguration {
-	/**
-	 * A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.
-	 */
+export interface PartialFilesConfiguration {
 	ignore?: StringSet;
-	/**
-	 * Tells Biome to not emit diagnostics when handling files that doesn't know
-	 */
 	ignoreUnknown?: boolean;
-	/**
-	 * A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.
-	 */
 	include?: StringSet;
-	/**
-	 * The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
-	 */
 	maxSize?: number;
 }
-/**
- * Generic options applied to all files
- */
-export interface FormatterConfiguration {
+export interface PartialFormatterConfiguration {
 	enabled?: boolean;
-	/**
-	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
-	 */
 	formatWithErrors?: boolean;
-	/**
-	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
-	 */
 	ignore?: StringSet;
-	/**
-	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
-	 */
 	include?: StringSet;
-	/**
-	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
-	 */
 	indentSize?: number;
-	/**
-	 * The indent style.
-	 */
 	indentStyle?: PlainIndentStyle;
-	/**
-	 * The size of the indentation, 2 by default
-	 */
 	indentWidth?: number;
-	/**
-	 * The type of line ending.
-	 */
 	lineEnding?: LineEnding;
-	/**
-	 * What's the max width of a line. Defaults to 80.
-	 */
 	lineWidth?: LineWidth;
 }
-/**
- * A set of options applied to the JavaScript files
- */
-export interface JavascriptConfiguration {
-	/**
-	 * Formatting options
-	 */
-	formatter?: JavascriptFormatter;
-	/**
-	* A list of global bindings that should be ignored by the analyzers
-
-If defined here, they should not emit diagnostics. 
-	 */
+export interface PartialJavascriptConfiguration {
+	formatter?: PartialJavascriptFormatter;
 	globals?: StringSet;
-	organize_imports?: JavascriptOrganizeImports;
-	/**
-	 * Parsing options
-	 */
-	parser?: JavascriptParser;
+	organize_imports?: PartialJavascriptOrganizeImports;
+	parser?: PartialJavascriptParser;
 }
-/**
- * Options applied to JSON files
- */
-export interface JsonConfiguration {
-	/**
-	 * Formatting options
-	 */
-	formatter?: JsonFormatter;
-	/**
-	 * Parsing options
-	 */
-	parser?: JsonParser;
+export interface PartialJsonConfiguration {
+	formatter?: PartialJsonFormatter;
+	parser?: PartialJsonParser;
 }
-export interface LinterConfiguration {
-	/**
-	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
-	 */
+export interface PartialLinterConfiguration {
 	enabled?: boolean;
-	/**
-	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
-	 */
 	ignore?: StringSet;
-	/**
-	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
-	 */
 	include?: StringSet;
-	/**
-	 * List of rules
-	 */
 	rules?: Rules;
 }
-export interface OrganizeImports {
-	/**
-	 * Enables the organization of imports
-	 */
+export interface PartialOrganizeImports {
 	enabled?: boolean;
-	/**
-	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
-	 */
 	ignore?: StringSet;
-	/**
-	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
-	 */
 	include?: StringSet;
 }
 export type Overrides = OverridePattern[];
-/**
- * Set of properties to integrate Biome with a VCS software.
- */
-export interface VcsConfiguration {
-	/**
-	 * The kind of client.
-	 */
+export interface PartialVcsConfiguration {
 	clientKind?: VcsClientKind;
-	/**
-	 * The main branch of the project
-	 */
 	defaultBranch?: string;
-	/**
-	 * Whether Biome should integrate itself with the VCS client
-	 */
 	enabled?: boolean;
-	/**
-	* The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
-
-If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted 
-	 */
 	root?: string;
-	/**
-	 * Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
-	 */
 	useIgnoreFile?: boolean;
 }
-export interface CssFormatter {
-	/**
-	 * Control the formatter for CSS (and its super languages) files.
-	 */
+export interface PartialCssFormatter {
 	enabled?: boolean;
-	/**
-	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
-	 */
 	indentSize?: number;
-	/**
-	 * The indent style applied to CSS (and its super languages) files.
-	 */
 	indentStyle?: PlainIndentStyle;
-	/**
-	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
-	 */
 	indentWidth?: number;
-	/**
-	 * The type of line ending applied to CSS (and its super languages) files.
-	 */
 	lineEnding?: LineEnding;
-	/**
-	 * What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
-	 */
 	lineWidth?: LineWidth;
 	quoteStyle?: QuoteStyle;
 }
-/**
- * Options that changes how the CSS parser behaves
- */
-export interface CssParser {
-	/**
-	 * Allow comments to appear on incorrect lines in `.css` files
-	 */
+export interface PartialCssParser {
 	allowWrongLineComments?: boolean;
 }
 export type PlainIndentStyle = "tab" | "space";
@@ -282,116 +107,36 @@ export type LineEnding = "lf" | "crlf" | "cr";
 The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
-/**
- * Formatting options specific to the JavaScript files
- */
-export interface JavascriptFormatter {
-	/**
-	 * Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
-	 */
+export interface PartialJavascriptFormatter {
 	arrowParentheses?: ArrowParentheses;
-	/**
-	 * Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
-	 */
 	bracketSameLine?: boolean;
-	/**
-	 * Whether to insert spaces around brackets in object literals. Defaults to true.
-	 */
 	bracketSpacing?: boolean;
-	/**
-	 * Control the formatter for JavaScript (and its super languages) files.
-	 */
 	enabled?: boolean;
-	/**
-	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
-	 */
 	indentSize?: number;
-	/**
-	 * The indent style applied to JavaScript (and its super languages) files.
-	 */
 	indentStyle?: PlainIndentStyle;
-	/**
-	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
-	 */
 	indentWidth?: number;
-	/**
-	 * The type of quotes used in JSX. Defaults to double.
-	 */
 	jsxQuoteStyle?: QuoteStyle;
-	/**
-	 * The type of line ending applied to JavaScript (and its super languages) files.
-	 */
 	lineEnding?: LineEnding;
-	/**
-	 * What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
-	 */
 	lineWidth?: LineWidth;
-	/**
-	 * When properties in objects are quoted. Defaults to asNeeded.
-	 */
 	quoteProperties?: QuoteProperties;
-	/**
-	 * The type of quotes used in JavaScript code. Defaults to double.
-	 */
 	quoteStyle?: QuoteStyle;
-	/**
-	 * Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.
-	 */
 	semicolons?: Semicolons;
-	/**
-	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
-	 */
 	trailingComma?: TrailingComma;
 }
-export interface JavascriptOrganizeImports {}
-/**
- * Options that changes how the JavaScript parser behaves
- */
-export interface JavascriptParser {
-	/**
-	* It enables the experimental and unsafe parsing of parameter decorators
-
-These decorators belong to an old proposal, and they are subject to change. 
-	 */
+export interface PartialJavascriptOrganizeImports {}
+export interface PartialJavascriptParser {
 	unsafeParameterDecoratorsEnabled?: boolean;
 }
-export interface JsonFormatter {
-	/**
-	 * Control the formatter for JSON (and its super languages) files.
-	 */
+export interface PartialJsonFormatter {
 	enabled?: boolean;
-	/**
-	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
-	 */
 	indentSize?: number;
-	/**
-	 * The indent style applied to JSON (and its super languages) files.
-	 */
 	indentStyle?: PlainIndentStyle;
-	/**
-	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
-	 */
 	indentWidth?: number;
-	/**
-	 * The type of line ending applied to JSON (and its super languages) files.
-	 */
 	lineEnding?: LineEnding;
-	/**
-	 * What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
-	 */
 	lineWidth?: LineWidth;
 }
-/**
- * Options that changes how the JSON parser behaves
- */
-export interface JsonParser {
-	/**
-	 * Allow parsing comments in `.json` files
-	 */
+export interface PartialJsonParser {
 	allowComments?: boolean;
-	/**
-	 * Allow parsing trailing commas in `.json` files
-	 */
 	allowTrailingCommas?: boolean;
 }
 export interface Rules {
@@ -416,7 +161,7 @@ export interface OverridePattern {
 	/**
 	 * Specific configuration for the Css language
 	 */
-	css?: CssConfiguration;
+	css?: PartialCssConfiguration;
 	/**
 	 * Specific configuration for the Json language
 	 */
@@ -432,11 +177,11 @@ export interface OverridePattern {
 	/**
 	 * Specific configuration for the JavaScript language
 	 */
-	javascript?: JavascriptConfiguration;
+	javascript?: PartialJavascriptConfiguration;
 	/**
 	 * Specific configuration for the Json language
 	 */
-	json?: JsonConfiguration;
+	json?: PartialJsonConfiguration;
 	/**
 	 * Specific configuration for the Json language
 	 */
