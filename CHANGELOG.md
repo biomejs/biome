@@ -29,7 +29,6 @@ This no longer breaks.
 s(/🚀🚀/).s().s();
 ```
 
-
 ### JavaScript APIs
 
 ### Linter
