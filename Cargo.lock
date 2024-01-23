@@ -575,6 +575,7 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_js_factory",
+ "biome_js_parser",
  "biome_rowan",
  "schemars",
  "serde",

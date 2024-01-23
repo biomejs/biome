@@ -3,11 +3,10 @@ use biome_formatter::{write, CstFormatContext};
 
 use crate::js::expressions::arrow_function_expression::can_avoid_parentheses;
 use crate::js::lists::parameter_list::FormatJsAnyParameterList;
-use crate::utils::test_call::is_test_call_argument;
 use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyParameter};
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsBindingPattern, AnyJsConstructorParameter, AnyJsExpression,
-    AnyJsFormalParameter, AnyJsParameter, AnyTsType, JsArrowFunctionExpression,
+    is_test_call_argument, AnyJsBinding, AnyJsBindingPattern, AnyJsConstructorParameter,
+    AnyJsExpression, AnyJsFormalParameter, AnyJsParameter, AnyTsType, JsArrowFunctionExpression,
     JsConstructorParameters, JsParameters, JsSyntaxNode, JsSyntaxToken,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxResult};

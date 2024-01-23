@@ -8,6 +8,53 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+#### Bug fixes
+
+- Fix [#1039](https://github.com/biomejs/biome/issues/1039). Check unicode width instead of number of bytes when checking if regex expression is a simple argument. Contributed by @kalleep
+
+  This no longer breaks.
+
+  ```js
+  s(/🚀🚀/).s().s();
+  ```
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+- Add the rule [noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests), to disallow skipped tests:
+
+  ```js
+  describe.skip("test", () => {});
+  it.skip("test", () => {});
+  ```
+<<<<<<< HEAD
+=======
+
+- Add the rule [noFocusedTests](https://biomejs.dev/linter/rules/no-focused-tests), to disallow skipped tests:
+
+  ```js
+  describe.only("test", () => {});
+  it.only("test", () => {});
+  ```
+
+>>>>>>> fd3de977d1 (feat(linter): new rule noFocusedTests (#1641))
+### Parser
+
 ## 1.5.3 (2024-01-22)
 
 ### LSP

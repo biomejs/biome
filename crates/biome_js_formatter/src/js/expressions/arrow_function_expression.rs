@@ -12,12 +12,11 @@ use crate::parentheses::{
     update_or_lower_expression_needs_parentheses, AnyJsExpressionLeftSide, NeedsParentheses,
 };
 use crate::utils::function_body::{FormatMaybeCachedFunctionBody, FunctionBodyCacheMode};
-use crate::utils::test_call::is_test_call_argument;
 use crate::utils::{resolve_left_most_expression, AssignmentLikeLayout};
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsFunctionBody, AnyJsParameter, AnyJsTemplateElement, JsArrowFunctionExpression,
-    JsFormalParameter, JsSyntaxKind, JsSyntaxNode, JsTemplateExpression,
+    is_test_call_argument, AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsExpression,
+    AnyJsFormalParameter, AnyJsFunctionBody, AnyJsParameter, AnyJsTemplateElement,
+    JsArrowFunctionExpression, JsFormalParameter, JsSyntaxKind, JsSyntaxNode, JsTemplateExpression,
 };
 use biome_rowan::{SyntaxNodeOptionExt, SyntaxResult};
 

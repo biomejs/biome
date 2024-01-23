@@ -19,6 +19,7 @@ serde             = { version = "1.0.136", features = ["derive"], optional = tru
 
 [dev-dependencies]
 biome_js_factory = { path = "../biome_js_factory" }
+biome_js_parser  = { path = "../biome_js_parser" }
 
 [features]
 serde = ["dep:serde", "schemars", "biome_rowan/serde"]

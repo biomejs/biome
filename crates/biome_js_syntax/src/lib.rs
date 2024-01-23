@@ -39,7 +39,7 @@ pub use stmt_ext::*;
 pub use syntax_node::*;
 
 use crate::JsSyntaxKind::*;
-use biome_rowan::{AstNode, RawSyntaxKind};
+use biome_rowan::{AstNode, RawSyntaxKind, SyntaxResult};
 
 impl From<u16> for JsSyntaxKind {
     fn from(d: u16) -> JsSyntaxKind {
@@ -307,4 +307,15 @@ pub fn inner_string_text(token: &JsSyntaxToken) -> TokenText {
         text = text.slice(range);
     }
     text
+}
+
+/// Returns `Ok(true)` if `maybe_argument` is an argument of a [test call expression](is_test_call_expression).
+pub fn is_test_call_argument(maybe_argument: &JsSyntaxNode) -> SyntaxResult<bool> {
+    let call_expression = maybe_argument
+        .parent()
+        .and_then(JsCallArgumentList::cast)
+        .and_then(|args| args.syntax().grand_parent())
+        .and_then(JsCallExpression::cast);
+
+    call_expression.map_or(Ok(false), |call| call.is_test_call_expression())
 }
