@@ -4,11 +4,14 @@ use std::collections::{BTreeMap, HashSet};
 use syn::buffer::Cursor;
 use syn::ext::IdentExt;
 use syn::parse::{Parse, ParseStream, Result};
-use syn::{parenthesized, parse_quote, parse_str, token, Attribute, Error, LitStr, Token, Type};
+use syn::{
+    parenthesized, parse_quote, parse_str, token, AttrStyle, Attribute, Error, LitStr, Token, Type,
+};
 
 #[derive(Clone, Debug)]
 pub struct Attrs {
     pub derives: HashSet<Type>,
+    pub doc_lines: Vec<TokenStream>,
     pub nested_attrs: BTreeMap<Ident, NestedAttrs>,
 }
 
@@ -21,6 +24,7 @@ impl Default for Attrs {
                 parse_quote!(serde::Deserialize),
                 parse_quote!(serde::Serialize),
             ]),
+            doc_lines: Default::default(),
             nested_attrs: Default::default(),
         }
     }
@@ -34,6 +38,8 @@ impl Attrs {
                 opts.merge_with(
                     syn::parse2::<Self>(attr.tokens.clone()).expect("Could not parse attributes"),
                 );
+            } else if attr.style == AttrStyle::Outer && attr.path.is_ident("doc") {
+                opts.doc_lines.push(attr.tokens.clone());
             }
         }
         opts
@@ -113,6 +119,7 @@ impl Parse for Derives {
 #[derive(Clone, Debug, Default)]
 pub struct FieldAttrs {
     pub ty: Option<PartialType>,
+    pub doc_lines: Vec<TokenStream>,
     pub nested_attrs: BTreeMap<Ident, NestedAttrs>,
 }
 
@@ -125,6 +132,8 @@ impl FieldAttrs {
                     syn::parse2::<Self>(attr.tokens.clone())
                         .expect("Could not parse field attributes"),
                 );
+            } else if attr.style == AttrStyle::Outer && attr.path.is_ident("doc") {
+                opts.doc_lines.push(attr.tokens.clone());
             }
         }
         opts

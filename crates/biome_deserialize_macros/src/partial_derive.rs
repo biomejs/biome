@@ -41,6 +41,10 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
 
     let derives = input.attrs.derives.iter();
 
+    let doc_lines = input.attrs.doc_lines.iter().map(|tokens| {
+        quote! { #[doc #tokens] }
+    });
+
     let attrs = input.attrs.nested_attrs.iter().map(|(ident, nested)| {
         quote! {
             #[#ident #nested]
@@ -52,6 +56,10 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
              ident, attrs, ty, ..
          }| {
             let attrs = FieldAttrs::from_attrs(attrs);
+
+            let doc_lines = attrs.doc_lines.iter().map(|tokens| {
+                quote! { #[doc #tokens] }
+            });
 
             let ty = match attrs.ty.as_ref() {
                 Some(PartialType::Literal(ty)) => ty.clone(),
@@ -75,6 +83,7 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
             });
 
             quote! {
+                #( #doc_lines )*
                 #( #attrs )*
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub #ident: Option<#ty>
@@ -89,6 +98,7 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
     });
 
     quote! {
+        #( #doc_lines )*
         #[derive(#(#derives),*)]
         #( #attrs )*
         pub struct #partial_ident {
