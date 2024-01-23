@@ -91,9 +91,15 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
         },
     );
 
-    let from_fields = input.fields.iter().map(|Field { ident, ty, .. }| {
+    let from_partial_fields = input.fields.iter().map(|Field { ident, ty, .. }| {
         quote! {
             #ident: partial.#ident.map(#ty::from).unwrap_or(default.#ident)
+        }
+    });
+
+    let to_partial_fields = input.fields.iter().map(|Field { ident, ty, .. }| {
+        quote! {
+            #ident: (other.#ident != default.#ident).then_some(other.#ident).map(#ty::into)
         }
     });
 
@@ -109,7 +115,16 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
             fn from(partial: #partial_ident) -> Self {
                 let default = Self::default();
                 Self {
-                    #( #from_fields ),*
+                    #( #from_partial_fields ),*
+                }
+            }
+        }
+
+        impl From<#ident> for #partial_ident {
+            fn from(other: #ident) -> Self {
+                let default = #ident::default();
+                Self {
+                    #( #to_partial_fields ),*
                 }
             }
         }
