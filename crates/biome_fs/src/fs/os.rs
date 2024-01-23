@@ -57,12 +57,27 @@ impl FileSystem for OsFileSystem {
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
         let output = Command::new("git")
             .arg("diff")
-            .arg("--name-only")
+            .arg("--name-status")
             .arg(format!("{}...HEAD", base))
             .output()?;
 
         Ok(String::from_utf8_lossy(&output.stdout)
             .lines()
+            // --name-status argument show output like this:
+            // M       biome.json
+            // M       crates/biome_cli/src/changed.rs
+            // M       website/src/playground/CodeMirror.tsx
+            // D       website/src/playground/Collapsible.tsx
+            //
+            // We check the first char, and if has a `D` - deleted -, remove it from the files to process.
+            // Then, we take each line and we clean it by remove the letters at the beginning and remove additional whitespaces.
+            .filter_map(|l| {
+                if l.starts_with('D') {
+                    None
+                } else {
+                    Some(l.split_at(1).1.trim_start().to_string())
+                }
+            })
             .map(|l| l.to_string())
             .collect())
     }

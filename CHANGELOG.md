@@ -14,6 +14,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+#### Bug fixes
+
+- Fix [#1508](https://github.com/biomejs/biome/issues/1508) by excluding deleted files from being processed. Contributed by @ematipico
+
 ### Configuration
 
 ### Editors
