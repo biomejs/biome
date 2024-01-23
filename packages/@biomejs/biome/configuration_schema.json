@@ -1303,6 +1303,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noFocusedTests": {
+					"description": "Disallow focused tests.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noGlobalAssign": {
 					"description": "Disallow assignments to native objects and read-only global variables.",
 					"anyOf": [

@@ -42,6 +42,17 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   describe.skip("test", () => {});
   it.skip("test", () => {});
   ```
+<<<<<<< HEAD
+=======
+
+- Add the rule [noFocusedTests](https://biomejs.dev/linter/rules/no-focused-tests), to disallow skipped tests:
+
+  ```js
+  describe.only("test", () => {});
+  it.only("test", () => {});
+  ```
+
+>>>>>>> fd3de977d1 (feat(linter): new rule noFocusedTests (#1641))
 ### Parser
 
 ## 1.5.3 (2024-01-22)
