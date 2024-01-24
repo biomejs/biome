@@ -174,7 +174,7 @@ mod get_utility_info_tests {
             arbitrary: false,
         };
         assert_eq!(
-            get_utility_info(&utility_config.as_slice(), &utility_data),
+            get_utility_info(utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
                 layer: "layer",
                 index: 0,
@@ -185,7 +185,7 @@ mod get_utility_info_tests {
             arbitrary: false,
         };
         assert_eq!(
-            get_utility_info(&utility_config.as_slice(), &utility_data),
+            get_utility_info(utility_config.as_slice(), &utility_data),
             None
         );
     }
@@ -201,7 +201,7 @@ mod get_utility_info_tests {
             arbitrary: false,
         };
         assert_eq!(
-            get_utility_info(&utility_config.as_slice(), &utility_data),
+            get_utility_info(utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
                 layer: "layer",
                 index: 0,
@@ -212,7 +212,7 @@ mod get_utility_info_tests {
             arbitrary: false,
         };
         assert_eq!(
-            get_utility_info(&utility_config.as_slice(), &utility_data),
+            get_utility_info(utility_config.as_slice(), &utility_data),
             None
         );
     }
@@ -247,7 +247,7 @@ mod get_utility_info_tests {
             arbitrary: false,
         };
         assert_eq!(
-            get_utility_info(&utility_config.as_slice(), &utility_data),
+            get_utility_info(utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
                 layer: "layer",
                 index: 0,
@@ -266,7 +266,7 @@ mod get_utility_info_tests {
             arbitrary: true,
         };
         assert_eq!(
-            get_utility_info(&utility_config.as_slice(), &utility_data),
+            get_utility_info(utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
                 layer: "arbitrary",
                 index: 0,
@@ -295,7 +295,7 @@ pub struct ClassInfo {
 /// it is considered a custom class instead and `None` is returned.
 pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<ClassInfo> {
     let utility_data = tokenize_class(class_name)?;
-    let utility_info = get_utility_info(&sort_config.utilities, &utility_data.utility);
+    let utility_info = get_utility_info(sort_config.utilities, &utility_data.utility);
     if let Some(utility_info) = utility_info {
         return Some(ClassInfo {
             text: class_name.to_string(),
