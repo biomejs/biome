@@ -14,6 +14,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+#### Bug fixes
+
+- Fix [#1508](https://github.com/biomejs/biome/issues/1508) by excluding deleted files from being processed. Contributed by @ematipico
+
 ### Configuration
 
 ### Editors
@@ -42,8 +46,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   describe.skip("test", () => {});
   it.skip("test", () => {});
   ```
-<<<<<<< HEAD
-=======
+  Contributed by @ematipico
 
 - Add the rule [noFocusedTests](https://biomejs.dev/linter/rules/no-focused-tests), to disallow skipped tests:
 
@@ -51,8 +54,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   describe.only("test", () => {});
   it.only("test", () => {});
   ```
+  Contributed by @ematipico
 
->>>>>>> fd3de977d1 (feat(linter): new rule noFocusedTests (#1641))
+- Add rule [noSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes), to sort CSS utility classes:
+
+  ```diff
+  - <div class="px-2 foo p-4 bar" />
+  + <div class="foo·bar·p-4·px-2" />
+  ```
+  Contributed by @DaniGuardiola
+
 ### Parser
 
 ## 1.5.3 (2024-01-22)
@@ -132,6 +143,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```
 
   Contributed by @magic-akari
+
+- Correctly parse type arguments in expression([#1184](https://github.com/biomejs/biome/issues/1184)).
+
+  The following code is now correctly parsed in typescript:
+
+  ```ts
+  0 < (0 >= 1);
+  ```
+
+  Contributed by @ah-yu
 
 ### Website
 

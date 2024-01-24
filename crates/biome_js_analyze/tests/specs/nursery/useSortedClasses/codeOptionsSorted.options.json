@@ -2,15 +2,12 @@
 	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
 	"linter": {
 		"rules": {
-			"correctness": {
-				"useHookAtTopLevel": {
+			"nursery": {
+				"useSortedClasses": {
 					"level": "error",
 					"options": {
-						"hooks": [
-							{
-								"name": "useCustomHook"
-							}
-						]
+						"attributes": ["customClassAttribute"],
+						"functions": ["clsx", "tw"]
 					}
 				}
 			}

@@ -130,6 +130,7 @@ define_categories! {
     "lint/nursery/useNodejsImportProtocol": "https://biomejs.dev/linter/rules/use-nodejs-import-protocol",
     "lint/nursery/useNumberNamespace": "https://biomejs.dev/linter/rules/use-number-namespace",
     "lint/nursery/useShorthandFunctionType": "https://biomejs.dev/linter/rules/use-shorthand-function-type",
+    "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noDelete": "https://biomejs.dev/linter/rules/no-delete",
     "lint/security/noDangerouslySetInnerHtml": "https://biomejs.dev/linter/rules/no-dangerously-set-inner-html",
