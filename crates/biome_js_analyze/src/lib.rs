@@ -259,6 +259,7 @@ mod tests {
             dependencies_index: Some(1),
         };
         let rule_filter = RuleFilter::Rule("nursery", "noDisabledTests");
+
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
             RuleOptions::new(HooksOptions { hooks: vec![hook] }),
