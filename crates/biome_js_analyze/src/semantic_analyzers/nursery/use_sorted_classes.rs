@@ -62,6 +62,23 @@ declare_rule! {
     /// <div class="px-2 foo p-4 bar" />;
     /// ```
     ///
+    /// ```jsx,expect_diagnostic
+    /// <div className="px-2 foo p-4 bar" />
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```jsx
+    /// <div class="foo bar p-4 px-2"></div>
+    /// clsx("px-2 foo p-4 bar");
+    /// clsx({
+    /// 	"px-2 foo p-4 bar": [
+    /// 		"px-2 foo p-4 bar",
+    /// 		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+    /// 	],
+    /// });
+    /// ```
+    ///
     /// ## Options
     ///
     /// ### Code-related
@@ -91,7 +108,7 @@ declare_rule! {
     ///
     /// Tagged template literals are also supported, for example:
     ///
-    /// ```js
+    /// ```js,ignore
     /// tw`px-2`;
     /// tw.div`px-2`;
     /// ```
