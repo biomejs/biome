@@ -1,5 +1,3 @@
-use std::i64;
-
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
