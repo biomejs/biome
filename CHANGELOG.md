@@ -42,8 +42,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   describe.skip("test", () => {});
   it.skip("test", () => {});
   ```
-<<<<<<< HEAD
-=======
 
 - Add the rule [noFocusedTests](https://biomejs.dev/linter/rules/no-focused-tests), to disallow skipped tests:
 
@@ -52,7 +50,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   it.only("test", () => {});
   ```
 
->>>>>>> fd3de977d1 (feat(linter): new rule noFocusedTests (#1641))
 ### Parser
 
 ## 1.5.3 (2024-01-22)
@@ -132,6 +129,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```
 
   Contributed by @magic-akari
+
+- Correctly parse type arguments in expression([#1184](https://github.com/biomejs/biome/issues/1184)). 
+
+  The following code is now correctly parsed in typescript:
+
+  ```ts
+  0 < (0 >= 1);
+  ```
+
+  Contributed by @ah-yu
 
 ### Website
 
