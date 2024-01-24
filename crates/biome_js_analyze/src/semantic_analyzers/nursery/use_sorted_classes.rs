@@ -13,6 +13,7 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{js_string_literal, js_string_literal_expression, jsx_string};
 use biome_rowan::{AstNode, BatchMutationExt};
+use lazy_static::lazy_static;
 
 use crate::JsRuleAction;
 
@@ -141,6 +142,13 @@ declare_rule! {
     }
 }
 
+lazy_static! {
+    static ref SORT_CONFIG: SortConfig = SortConfig::new(
+        get_utilities_preset(&UseSortedClassesPreset::default()),
+        Vec::new(),
+    );
+}
+
 impl Rule for UseSortedClasses {
     type Query = AnyClassStringLike;
     type State = String;
@@ -151,15 +159,11 @@ impl Rule for UseSortedClasses {
         // TODO: unsure if options are needed here. The sort config should ideally be created once
         // from the options and then reused for all queries.
         // let options = &ctx.options();
-        // TODO: the sort config should already exist at this point, and be generated from the options,
-        // including the preset and extended options as well.
-        let sort_config = SortConfig::new(
-            get_utilities_preset(&UseSortedClassesPreset::default()),
-            Vec::new(),
-        );
 
         let value = ctx.query().value()?;
-        let sorted_value = sort_class_name(&value, &sort_config);
+        // TODO: the sort config should already exist at this point, and be generated from the options,
+        // including the preset and extended options as well.
+        let sorted_value = sort_class_name(&value, &SORT_CONFIG);
         if value.text() != sorted_value {
             Some(sorted_value)
         } else {
