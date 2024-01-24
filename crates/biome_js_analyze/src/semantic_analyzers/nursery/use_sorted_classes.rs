@@ -83,7 +83,7 @@ declare_rule! {
     ///
     /// If specified, strings in the indicated functions will be sorted. This is useful when working with libraries like [`clsx`](https://github.com/lukeed/clsx) or [`cva`](https://cva.style/).
     ///
-    /// ```js
+    /// ```js,ignore
     /// clsx("px-2 foo p-4 bar", {
     ///     "block mx-4": condition,
     /// });
@@ -91,7 +91,7 @@ declare_rule! {
     ///
     /// Tagged template literals are also supported, for example:
     ///
-    /// ```js
+    /// ```js,ignore
     /// tw`px-2`;
     /// tw.div`px-2`;
     /// ```
