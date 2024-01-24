@@ -12,8 +12,9 @@
 
 use super::{
     class_lexer::{tokenize_class, ClassSegmentStructure},
-    sort_config::{SortConfig, UtilitiesConfig},
+    sort_config::SortConfig,
 };
+use crate::semantic_analyzers::nursery::use_sorted_classes::sort_config::UtilityLayer;
 
 // utilities
 // ---------
@@ -93,7 +94,7 @@ mod utility_match_tests {
 #[derive(Debug, Eq, PartialEq)]
 struct UtilityInfo {
     /// The layer the utility belongs to.
-    layer: String,
+    layer: &'static str,
     /// The index of the utility within the layer.
     index: usize,
 }
@@ -101,7 +102,7 @@ struct UtilityInfo {
 /// Computes sort-related information about a CSS utility. If the utility is not recognized,
 /// `None` is returned.
 fn get_utility_info(
-    utility_config: &UtilitiesConfig,
+    utility_config: &[UtilityLayer],
     utility_data: &ClassSegmentStructure,
 ) -> Option<UtilityInfo> {
     // Arbitrary CSS utilities always go in the "arbitrary" layer, at index 0.
@@ -109,7 +110,7 @@ fn get_utility_info(
     // determined at this point, so they all have the same index.
     if utility_data.arbitrary {
         return Some(UtilityInfo {
-            layer: "arbitrary".to_string(),
+            layer: "arbitrary",
             index: 0,
         });
     }
@@ -127,7 +128,7 @@ fn get_utility_info(
                 UtilityMatch::Exact => {
                     // Exact matches can be returned immediately.
                     return Some(UtilityInfo {
-                        layer: layer_data.name.clone(),
+                        layer: layer_data.name,
                         index,
                     });
                 }
@@ -150,7 +151,7 @@ fn get_utility_info(
     }
     if layer != "<no match>" {
         return Some(UtilityInfo {
-            layer: layer.to_string(),
+            layer,
             index: match_index,
         });
     }
@@ -165,7 +166,7 @@ mod get_utility_info_tests {
     #[test]
     fn test_exact_match() {
         let utility_config = vec![UtilityLayer {
-            name: "layer".to_string(),
+            name: "layer",
             classes: &["px-2$"],
         }];
         let utility_data = ClassSegmentStructure {
@@ -173,9 +174,9 @@ mod get_utility_info_tests {
             arbitrary: false,
         };
         assert_eq!(
-            get_utility_info(&utility_config, &utility_data),
+            get_utility_info(&utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
-                layer: "layer".to_string(),
+                layer: "layer",
                 index: 0,
             })
         );
@@ -183,13 +184,16 @@ mod get_utility_info_tests {
             text: "px-4".to_string(),
             arbitrary: false,
         };
-        assert_eq!(get_utility_info(&utility_config, &utility_data), None);
+        assert_eq!(
+            get_utility_info(&utility_config.as_slice(), &utility_data),
+            None
+        );
     }
 
     #[test]
     fn test_partial_match() {
         let utility_config = vec![UtilityLayer {
-            name: "layer".to_string(),
+            name: "layer",
             classes: &["px-"],
         }];
         let utility_data = ClassSegmentStructure {
@@ -197,9 +201,9 @@ mod get_utility_info_tests {
             arbitrary: false,
         };
         assert_eq!(
-            get_utility_info(&utility_config, &utility_data),
+            get_utility_info(&utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
-                layer: "layer".to_string(),
+                layer: "layer",
                 index: 0,
             })
         );
@@ -207,13 +211,16 @@ mod get_utility_info_tests {
             text: "not-px-2".to_string(),
             arbitrary: false,
         };
-        assert_eq!(get_utility_info(&utility_config, &utility_data), None);
+        assert_eq!(
+            get_utility_info(&utility_config.as_slice(), &utility_data),
+            None
+        );
     }
 
     #[test]
     fn test_partial_match_longest() {
         let utility_config = vec![UtilityLayer {
-            name: "layer".to_string(),
+            name: "layer",
             classes: &["border-", "border-t-"],
         }];
         let utility_data = ClassSegmentStructure {
@@ -221,9 +228,9 @@ mod get_utility_info_tests {
             arbitrary: false,
         };
         assert_eq!(
-            get_utility_info(&utility_config, &utility_data),
+            get_utility_info(utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
-                layer: "layer".to_string(),
+                layer: "layer",
                 index: 1,
             })
         );
@@ -232,7 +239,7 @@ mod get_utility_info_tests {
     #[test]
     fn test_partial_match_longest_first() {
         let utility_config = vec![UtilityLayer {
-            name: "layer".to_string(),
+            name: "layer",
             classes: &["border-t-", "border-"],
         }];
         let utility_data = ClassSegmentStructure {
@@ -240,9 +247,9 @@ mod get_utility_info_tests {
             arbitrary: false,
         };
         assert_eq!(
-            get_utility_info(&utility_config, &utility_data),
+            get_utility_info(&utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
-                layer: "layer".to_string(),
+                layer: "layer",
                 index: 0,
             })
         );
@@ -251,7 +258,7 @@ mod get_utility_info_tests {
     #[test]
     fn test_arbitrary_layer() {
         let utility_config = vec![UtilityLayer {
-            name: "layer".to_string(),
+            name: "layer",
             classes: &["border-t-", "border-"],
         }];
         let utility_data = ClassSegmentStructure {
@@ -259,9 +266,9 @@ mod get_utility_info_tests {
             arbitrary: true,
         };
         assert_eq!(
-            get_utility_info(&utility_config, &utility_data),
+            get_utility_info(&utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
-                layer: "arbitrary".to_string(),
+                layer: "arbitrary",
                 index: 0,
             })
         );
@@ -313,17 +320,17 @@ mod get_class_info_tests {
 
     #[test]
     fn test_get_class_info() {
-        let utilities_config = vec![
+        const UTILITIES_CONFIG: [UtilityLayer; 2] = [
             UtilityLayer {
-                name: "layer0".to_string(),
+                name: "layer0",
                 classes: &["px-", "py-", "block$"],
             },
             UtilityLayer {
-                name: "layer1".to_string(),
+                name: "layer1",
                 classes: &["mx-", "my-", "inline$"],
             },
         ];
-        let sort_config = SortConfig::new(utilities_config, vec![]);
+        let sort_config = SortConfig::new(UTILITIES_CONFIG.as_slice(), vec![]);
         assert_eq!(
             get_class_info("px-2", &sort_config),
             Some(ClassInfo {
