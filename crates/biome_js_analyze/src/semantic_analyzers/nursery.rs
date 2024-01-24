@@ -12,6 +12,7 @@ pub(crate) mod use_export_type;
 pub(crate) mod use_for_of;
 pub(crate) mod use_import_type;
 pub(crate) mod use_number_namespace;
+pub(crate) mod use_sorted_classes;
 
 declare_group! {
     pub (crate) Nursery {
@@ -27,6 +28,7 @@ declare_group! {
             self :: use_for_of :: UseForOf ,
             self :: use_import_type :: UseImportType ,
             self :: use_number_namespace :: UseNumberNamespace ,
+            self :: use_sorted_classes :: UseSortedClasses ,
         ]
      }
 }

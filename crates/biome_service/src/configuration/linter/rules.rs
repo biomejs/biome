@@ -2323,6 +2323,9 @@ pub struct Nursery {
     #[doc = "Enforce using function types instead of object type with call signatures."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_shorthand_function_type: Option<RuleConfiguration>,
+    #[doc = "Enforce the sorting of CSS utility classes."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_sorted_classes: Option<RuleConfiguration>,
 }
 impl DeserializableValidator for Nursery {
     fn validate(
@@ -2340,7 +2343,7 @@ impl DeserializableValidator for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 26] = [
+    pub(crate) const GROUP_RULES: [&'static str; 27] = [
         "noDuplicateJsonKeys",
         "noEmptyBlockStatements",
         "noEmptyTypeParameters",
@@ -2367,6 +2370,7 @@ impl Nursery {
         "useNodejsImportProtocol",
         "useNumberNamespace",
         "useShorthandFunctionType",
+        "useSortedClasses",
     ];
     const RECOMMENDED_RULES: [&'static str; 12] = [
         "noDuplicateJsonKeys",
@@ -2396,7 +2400,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 26] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 27] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2423,6 +2427,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended(&self) -> bool {
@@ -2569,6 +2574,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
+            }
+        }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -2703,6 +2713,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
+            }
+        }
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
@@ -2716,7 +2731,7 @@ impl Nursery {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 12] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 26] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 27] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -2765,6 +2780,7 @@ impl Nursery {
             "useNodejsImportProtocol" => self.use_nodejs_import_protocol.as_ref(),
             "useNumberNamespace" => self.use_number_namespace.as_ref(),
             "useShorthandFunctionType" => self.use_shorthand_function_type.as_ref(),
+            "useSortedClasses" => self.use_sorted_classes.as_ref(),
             _ => None,
         }
     }

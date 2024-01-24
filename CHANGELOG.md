@@ -56,6 +56,14 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```
   Contributed by @ematipico
 
+- Add rule [noSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes), to sort CSS utility classes:
+
+  ```diff
+  - <div class="px-2 foo p-4 bar" />
+  + <div class="foo·bar·p-4·px-2" />
+  ```
+  Contributed by @DaniGuardiola
+
 ### Parser
 
 ## 1.5.3 (2024-01-22)
