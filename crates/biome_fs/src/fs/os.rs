@@ -57,12 +57,13 @@ impl FileSystem for OsFileSystem {
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
         let output = Command::new("git")
             .arg("diff")
+            .arg("--name-only")
             // A: added
             // C: copied
             // M: modified
             // R: renamed
             // Source: https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203
-            .arg("--name-only --diff-filter=ACMR")
+            .arg("--diff-filter=ACMR")
             .arg(format!("{}...HEAD", base))
             .output()?;
 
