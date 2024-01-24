@@ -2004,9 +2004,20 @@ pub(crate) fn parse_ts_type_arguments_in_expression(
         return Absent;
     }
 
+    // test ts ts_type_arguments_like_expression
+    // 0 < (0 >= 1);
     try_parse(p, |p| {
         p.re_lex(JsReLexContext::TypeArgumentLessThan);
-        let arguments = parse_ts_type_arguments_impl(p, TypeContext::default(), false);
+        let m = p.start();
+        p.bump(T![<]);
+
+        if p.at(T![>]) {
+            p.error(expected_ts_type_parameter(p, p.cur_range()));
+        }
+        TypeArgumentsList::new(TypeContext::default(), false).parse_list(p);
+        p.re_lex(JsReLexContext::BinaryOperator);
+        p.expect(T![>]);
+        let arguments = m.complete(p, TS_TYPE_ARGUMENTS);
 
         if p.last() == Some(T![>]) && can_follow_type_arguments_in_expr(p, context) {
             Ok(Present(arguments))
