@@ -17,6 +17,15 @@
 	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
 </>;
 
+// functions
+clsx("px-2 foo p-4 bar");
+// TODO: tagged template literals are not supported yet
+tw`px-2 foo p-4 bar`;
+tw.div`px-2 foo p-4 bar`;
+notClassFunction("px-2 foo p-4 bar");
+notTemplateFunction`px-2 foo p-4 bar`;
+notTemplateFunction.div`px-2 foo p-4 bar`;
+
 // nested values
 <div class={"px-2 foo p-4 bar"} />;
 <div class={["px-2 foo p-4 bar"]} />;

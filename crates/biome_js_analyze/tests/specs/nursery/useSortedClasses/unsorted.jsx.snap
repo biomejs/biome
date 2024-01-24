@@ -23,6 +23,15 @@ expression: unsorted.jsx
 	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
 </>;
 
+// functions
+clsx("px-2 foo p-4 bar");
+// TODO: tagged template literals are not supported yet
+tw`px-2 foo p-4 bar`;
+tw.div`px-2 foo p-4 bar`;
+notClassFunction("px-2 foo p-4 bar");
+notTemplateFunction`px-2 foo p-4 bar`;
+notTemplateFunction.div`px-2 foo p-4 bar`;
+
 // nested values
 <div class={"px-2 foo p-4 bar"} />;
 <div class={["px-2 foo p-4 bar"]} />;
@@ -336,120 +345,120 @@ unsorted.jsx:17:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:21:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:30:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! These CSS classes should be sorted.
   
-    20 │ // nested values
-  > 21 │ <div class={"px-2 foo p-4 bar"} />;
+    29 │ // nested values
+  > 30 │ <div class={"px-2 foo p-4 bar"} />;
        │             ^^^^^^^^^^^^^^^^^^
-    22 │ <div class={["px-2 foo p-4 bar"]} />;
-    23 │ <div
+    31 │ <div class={["px-2 foo p-4 bar"]} />;
+    32 │ <div
   
   i Unsafe fix: Sort the classes.
   
-    19 19 │   
-    20 20 │   // nested values
-    21    │ - <div·class={"px-2·foo·p-4·bar"}·/>;
-       21 │ + <div·class={"foo·bar·p-4·px-2"}·/>;
-    22 22 │   <div class={["px-2 foo p-4 bar"]} />;
-    23 23 │   <div
+    28 28 │   
+    29 29 │   // nested values
+    30    │ - <div·class={"px-2·foo·p-4·bar"}·/>;
+       30 │ + <div·class={"foo·bar·p-4·px-2"}·/>;
+    31 31 │   <div class={["px-2 foo p-4 bar"]} />;
+    32 32 │   <div
   
 
 ```
 
 ```
-unsorted.jsx:22:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:31:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! These CSS classes should be sorted.
   
-    20 │ // nested values
-    21 │ <div class={"px-2 foo p-4 bar"} />;
-  > 22 │ <div class={["px-2 foo p-4 bar"]} />;
+    29 │ // nested values
+    30 │ <div class={"px-2 foo p-4 bar"} />;
+  > 31 │ <div class={["px-2 foo p-4 bar"]} />;
        │              ^^^^^^^^^^^^^^^^^^
-    23 │ <div
-    24 │ 	class={{
+    32 │ <div
+    33 │ 	class={{
   
   i Unsafe fix: Sort the classes.
   
-    20 20 │   // nested values
-    21 21 │   <div class={"px-2 foo p-4 bar"} />;
-    22    │ - <div·class={["px-2·foo·p-4·bar"]}·/>;
-       22 │ + <div·class={["foo·bar·p-4·px-2"]}·/>;
-    23 23 │   <div
-    24 24 │   	class={{
+    29 29 │   // nested values
+    30 30 │   <div class={"px-2 foo p-4 bar"} />;
+    31    │ - <div·class={["px-2·foo·p-4·bar"]}·/>;
+       31 │ + <div·class={["foo·bar·p-4·px-2"]}·/>;
+    32 32 │   <div
+    33 33 │   	class={{
   
 
 ```
 
 ```
-unsorted.jsx:27:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:36:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! These CSS classes should be sorted.
   
-    25 │ 		// TODO: property should be sorted
-    26 │ 		"px-2 foo p-4 bar": [
-  > 27 │ 			"px-2 foo p-4 bar",
+    34 │ 		// TODO: property should be sorted
+    35 │ 		"px-2 foo p-4 bar": [
+  > 36 │ 			"px-2 foo p-4 bar",
        │ 			^^^^^^^^^^^^^^^^^^
-    28 │ 			// TODO: property should be sorted
-    29 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+    37 │ 			// TODO: property should be sorted
+    38 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
   
   i Unsafe fix: Sort the classes.
   
-    25 25 │   		// TODO: property should be sorted
-    26 26 │   		"px-2 foo p-4 bar": [
-    27    │ - → → → "px-2·foo·p-4·bar",
-       27 │ + → → → "foo·bar·p-4·px-2",
-    28 28 │   			// TODO: property should be sorted
-    29 29 │   			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+    34 34 │   		// TODO: property should be sorted
+    35 35 │   		"px-2 foo p-4 bar": [
+    36    │ - → → → "px-2·foo·p-4·bar",
+       36 │ + → → → "foo·bar·p-4·px-2",
+    37 37 │   			// TODO: property should be sorted
+    38 38 │   			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
   
 
 ```
 
 ```
-unsorted.jsx:29:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:38:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! These CSS classes should be sorted.
   
-    27 │ 			"px-2 foo p-4 bar",
-    28 │ 			// TODO: property should be sorted
-  > 29 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+    36 │ 			"px-2 foo p-4 bar",
+    37 │ 			// TODO: property should be sorted
+  > 38 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
        │ 			                      ^^^^^^^^^^^^^^^^^^
-    30 │ 		],
-    31 │ 	}}
+    39 │ 		],
+    40 │ 	}}
   
   i Unsafe fix: Sort the classes.
   
-    27 27 │   			"px-2 foo p-4 bar",
-    28 28 │   			// TODO: property should be sorted
-    29    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-       29 │ + → → → {·"px-2·foo·p-4·bar":·"foo·bar·p-4·px-2",·custom:·["px-2·foo·p-4·bar"]·},
-    30 30 │   		],
-    31 31 │   	}}
+    36 36 │   			"px-2 foo p-4 bar",
+    37 37 │   			// TODO: property should be sorted
+    38    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
+       38 │ + → → → {·"px-2·foo·p-4·bar":·"foo·bar·p-4·px-2",·custom:·["px-2·foo·p-4·bar"]·},
+    39 39 │   		],
+    40 40 │   	}}
   
 
 ```
 
 ```
-unsorted.jsx:29:55 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:38:55 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! These CSS classes should be sorted.
   
-    27 │ 			"px-2 foo p-4 bar",
-    28 │ 			// TODO: property should be sorted
-  > 29 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+    36 │ 			"px-2 foo p-4 bar",
+    37 │ 			// TODO: property should be sorted
+  > 38 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
        │ 			                                                   ^^^^^^^^^^^^^^^^^^
-    30 │ 		],
-    31 │ 	}}
+    39 │ 		],
+    40 │ 	}}
   
   i Unsafe fix: Sort the classes.
   
-    27 27 │   			"px-2 foo p-4 bar",
-    28 28 │   			// TODO: property should be sorted
-    29    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-       29 │ + → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["foo·bar·p-4·px-2"]·},
-    30 30 │   		],
-    31 31 │   	}}
+    36 36 │   			"px-2 foo p-4 bar",
+    37 37 │   			// TODO: property should be sorted
+    38    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
+       38 │ + → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["foo·bar·p-4·px-2"]·},
+    39 39 │   		],
+    40 40 │   	}}
   
 
 ```
