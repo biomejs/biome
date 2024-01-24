@@ -133,13 +133,15 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   Contributed by @magic-akari
 
-- Correctly parse type arguments in expression. The following code is now correctly parsed in typescript:
+- Correctly parse type arguments in expression([#1184](https://github.com/biomejs/biome/issues/1184)). 
 
-```ts
-0 < (0 >= 1);
-```
+  The following code is now correctly parsed in typescript:
 
-Contributed by @ah-yu
+  ```ts
+  0 < (0 >= 1);
+  ```
+
+  Contributed by @ah-yu
 
 ### Website
 
