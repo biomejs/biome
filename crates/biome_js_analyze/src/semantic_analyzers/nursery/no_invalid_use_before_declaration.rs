@@ -2,8 +2,7 @@ use crate::{control_flow::AnyJsControlFlowRoot, semantic_services::SemanticServi
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
-    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
-    AnyJsExportNamedSpecifier, AnyJsIdentifierUsage,
+    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding}, AnyJsExportNamedSpecifier, AnyJsIdentifierUsage, JsObjectBindingPatternShorthandProperty
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 
@@ -135,6 +134,20 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                     // ```js
                     // type Y = typeof X;
                     // const X = 0;
+                    // ```
+                    && reference
+                        .syntax()
+                        .ancestors()
+                        .nth(3)
+                        .filter(|ancestor| JsObjectBindingPatternShorthandProperty::can_cast(ancestor.kind()))
+                        .is_none()
+                    // ignore when identifier destructured in function params
+                    // For example:
+                    //
+                    // ```js
+                    // const aFunction = ({a = '111', b = a}) => {
+                    //  console.info(a,b);
+                    // }
                     // ```
                     && !AnyJsIdentifierUsage::cast_ref(reference.syntax())
                         .is_some_and(|usage| usage.is_only_type())

@@ -70,6 +70,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
+- Fix [#1648](https://github.com/biomejs/biome/issues/1648). [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration/) now ignores when identifier destructured in function params. Contributed by @vasucp1207
+
 - Fix [#1640](https://github.com/biomejs/biome/issues/1640). [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers) code action now generates valid code when last member has a comment but no comma. Contributed by @kalleep
 
 ### Parser
