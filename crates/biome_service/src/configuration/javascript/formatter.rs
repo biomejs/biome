@@ -8,7 +8,7 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// Formatting options specific to the JavaScript files
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
@@ -87,4 +87,25 @@ pub struct JavascriptFormatter {
     /// The type of quotes used in JavaScript code. Defaults to double.
     #[partial(bpaf(long("quote-style"), argument("double|single"), optional))]
     pub quote_style: QuoteStyle,
+}
+
+impl Default for JavascriptFormatter {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            jsx_quote_style: Default::default(),
+            quote_properties: Default::default(),
+            trailing_comma: Default::default(),
+            semicolons: Default::default(),
+            arrow_parentheses: Default::default(),
+            bracket_spacing: Default::default(),
+            bracket_same_line: Default::default(),
+            indent_style: Default::default(),
+            indent_size: Default::default(),
+            indent_width: Default::default(),
+            line_ending: Default::default(),
+            line_width: Default::default(),
+            quote_style: Default::default(),
+        }
+    }
 }

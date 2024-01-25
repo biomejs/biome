@@ -30,7 +30,7 @@ pub struct CssParser {
     pub allow_wrong_line_comments: bool,
 }
 
-#[derive(Clone, Default, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
@@ -66,4 +66,18 @@ pub struct CssFormatter {
 
     #[partial(bpaf(long("css-formatter-quote-style"), argument("double|single"), optional))]
     pub quote_style: QuoteStyle,
+}
+
+impl Default for CssFormatter {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            indent_style: Default::default(),
+            indent_width: Default::default(),
+            indent_size: Default::default(),
+            line_ending: Default::default(),
+            line_width: Default::default(),
+            quote_style: Default::default(),
+        }
+    }
 }

@@ -65,7 +65,7 @@ use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
 
 /// The configuration that is contained inside the file `biome.json`
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(deny_unknown_fields, rename_all = "camelCase"))]
@@ -117,27 +117,6 @@ pub struct Configuration {
     /// A list of granular patterns that should be applied only to a sub set of files
     #[partial(bpaf(hide))]
     pub overrides: Overrides,
-}
-
-impl Default for Configuration {
-    fn default() -> Self {
-        Self {
-            files: Default::default(),
-            linter: LinterConfiguration {
-                enabled: true,
-                ..LinterConfiguration::default()
-            },
-            organize_imports: Default::default(),
-            formatter: Default::default(),
-            css: Default::default(),
-            javascript: Default::default(),
-            json: Default::default(),
-            schema: Default::default(),
-            vcs: Default::default(),
-            extends: Default::default(),
-            overrides: Default::default(),
-        }
-    }
 }
 
 impl PartialConfiguration {
@@ -328,7 +307,7 @@ fn load_config(
 /// - the program doesn't have the write rights
 pub fn create_config(
     fs: &mut DynRef<dyn FileSystem>,
-    mut configuration: Configuration,
+    mut configuration: PartialConfiguration,
 ) -> Result<(), WorkspaceError> {
     let path = PathBuf::from(fs.config_name());
 
@@ -347,10 +326,10 @@ pub fn create_config(
         let schema_path = Path::new("./node_modules/@biomejs/biome/configuration_schema.json");
         let options = OpenOptions::default().read(true);
         if fs.open_with_options(schema_path, options).is_ok() {
-            configuration.schema = schema_path.to_str().map(String::from).unwrap_or_default();
+            configuration.schema = schema_path.to_str().map(String::from);
         }
     } else {
-        configuration.schema = format!("https://biomejs.dev/schemas/{VERSION}/schema.json");
+        configuration.schema = Some(format!("https://biomejs.dev/schemas/{VERSION}/schema.json"));
     }
 
     let contents = serde_json::to_string_pretty(&configuration).map_err(|_| {

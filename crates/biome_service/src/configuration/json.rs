@@ -34,7 +34,7 @@ pub struct JsonParser {
     pub allow_trailing_commas: bool,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
@@ -67,4 +67,17 @@ pub struct JsonFormatter {
     ))]
     #[partial(bpaf(long("json-formatter-line-width"), argument("NUMBER"), optional))]
     pub line_width: LineWidth,
+}
+
+impl Default for JsonFormatter {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            indent_style: Default::default(),
+            indent_width: Default::default(),
+            indent_size: Default::default(),
+            line_ending: Default::default(),
+            line_width: Default::default(),
+        }
+    }
 }
