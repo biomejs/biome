@@ -72,6 +72,13 @@ export enum RgbColor3 {
 	Blue,
 }
 
+// https://github.com/biomejs/biome/issues/1640
+export enum WithComment {
+  First = 1, // Comment1
+  Second, // Comment2
+  Third // Comment3
+}
+
 ```
 
 # Diagnostics
@@ -112,7 +119,7 @@ invalid.ts:1:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━�
      3  3 │   	MidClose = 1,
      4  4 │   	MidOpen = 10,
      5    │ - → /*·implicit·*/·Open·/*·11·*/,
-        5 │ + → /*·implicit·*/·Open·/*·11·*/·=·11,
+        5 │ + → /*·implicit·*/·Open·=·11·/*·11·*/,
      6  6 │   }
      7  7 │   
   
@@ -448,6 +455,51 @@ invalid.ts:63:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━�
   
     64 │ → Red·=·0,
        │      ++++ 
+
+```
+
+```
+invalid.ts:70:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+    69 │ // https://github.com/biomejs/biome/issues/1640
+  > 70 │ export enum WithComment {
+       │             ^^^^^^^^^^^
+    71 │   First = 1, // Comment1
+    72 │   Second, // Comment2
+  
+  i This enum member should be explicitly initialized.
+  
+    70 │ export enum WithComment {
+    71 │   First = 1, // Comment1
+  > 72 │   Second, // Comment2
+       │   ^^^^^^
+    73 │   Third // Comment3
+    74 │ }
+  
+  i This enum member should be explicitly initialized.
+  
+    71 │   First = 1, // Comment1
+    72 │   Second, // Comment2
+  > 73 │   Third // Comment3
+       │   ^^^^^
+    74 │ }
+    75 │ 
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+  i Safe fix: Initialize all enum members.
+  
+    70 70 │   export enum WithComment {
+    71 71 │     First = 1, // Comment1
+    72    │ - ··Second,·//·Comment2
+    73    │ - ··Third·//·Comment3
+       72 │ + ··Second·=·2,·//·Comment2
+       73 │ + ··Third·=·3·//·Comment3
+    74 74 │   }
+    75 75 │   
+  
 
 ```
 
