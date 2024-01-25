@@ -85,14 +85,13 @@ for (const f in {}) break
 label1: for (;;) continue label1 /* comment */
 ;
 
-// FIXME: TODO: reformat issue
-// label1: for (;;) continue label1
-// /* comment */
-// ;
+label1: for (;;) continue label1
+/* comment */
+;
 
-// label1: for (;;) continue label1 // comment
-// ;
+label1: for (;;) continue label1 // comment
+;
 
-// label1: for (;;) continue label1
-// // comment
-// ;
+label1: for (;;) continue label1
+// comment
+;
