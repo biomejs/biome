@@ -246,6 +246,20 @@ function MyComponent22() {
   }, [])
 }
 
+// Dynamic computed property access
+// https://github.com/biomejs/biome/issues/1637
+function MyComponent23 ({ arr })  {
+  useMemo(() => {
+    for (let i = 0; i < arr.length; i++) {
+       if (i + 1 === arr.length) {
+          // Do something with the last item
+       } else {
+           const _nextItem = arr[i + 1]
+       }
+    }
+  }, [arr])
+}
+
 ```
 
 
