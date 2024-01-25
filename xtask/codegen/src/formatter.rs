@@ -785,6 +785,11 @@ fn get_node_concept(
                 _ if name.ends_with("Value") => NodeConcept::Value,
                 _ => NodeConcept::Auxiliary,
             },
+
+            LanguageKind::Php => match name {
+                _ if name.ends_with("Value") => NodeConcept::Value,
+                _ => NodeConcept::Auxiliary,
+            },
         }
     }
 }

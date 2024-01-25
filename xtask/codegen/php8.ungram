@@ -59,7 +59,7 @@ PhpScript = PhpScriptSection | (PhpScript PhpScriptSection)
 // - `<?php echo "Hello World"; ?><div></div>` (one statement, end tag, arbitrary text)
 // - `<?php echo "Hello World"; echo "Hello Earth"; ?>` (two statements, end tag)
 PhpScriptSection =
-    ArbitraryText* PhpStartTag PhpStatementList* PhpEndTag*
+    ArbitraryText* PhpStartTag PhpStatementList* PhpEndTag* ArbitraryText*
 
 // PHP recognizes several types of start tags. The most common is '<?php',
 // also known as the standard start tag. A short echo tag '<?=' is also
@@ -73,19 +73,3 @@ PhpEndTag = '?>'
 
 // Arbitrary text is any text that does not contain a start tag.
 ArbitraryText = value: 'php_arbitrary_text'
-
-//*****************************************************************************
-// LEXICAL GRAMMAR
-//*****************************************************************************
-
-PhpInputFile = 
-
-PhpInputElement =
-
-PhpComment = 
-
-PhpSingleLineComment = '//' PhpInputCharacters
-
-PhpInputCharacters = 
-
-PhpInputCharacter = 

@@ -1,0 +1,30 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "SyntaxKind and common rowan definitions for biome_php_parser"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_php_syntax"
+repository.workspace = true
+version              = "0.4.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_console     = { workspace = true }
+biome_diagnostics = { workspace = true }
+biome_rowan       = { workspace = true }
+schemars          = { version = "0.8.10", optional = true }
+serde             = { version = "1.0.136", features = ["derive"], optional = true }
+
+[dev-dependencies]
+biome_php_factory = { path = "../biome_php_factory" }
+
+[features]
+serde = ["dep:serde", "schemars", "biome_rowan/serde"]
+
+
+[lints]
+workspace = true

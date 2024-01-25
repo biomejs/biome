@@ -45,6 +45,7 @@ pub enum LanguageKind {
     Css,
     Json,
     Html,
+    Php,
 }
 
 impl std::fmt::Display for LanguageKind {
@@ -54,15 +55,17 @@ impl std::fmt::Display for LanguageKind {
             LanguageKind::Css => write!(f, "css"),
             LanguageKind::Json => write!(f, "json"),
             LanguageKind::Html => write!(f, "html"),
+            LanguageKind::Php => write!(f, "php"),
         }
     }
 }
 
-pub const ALL_LANGUAGE_KIND: [LanguageKind; 4] = [
+pub const ALL_LANGUAGE_KIND: [LanguageKind; 5] = [
     LanguageKind::Js,
     LanguageKind::Css,
     LanguageKind::Json,
     LanguageKind::Html,
+    LanguageKind::Php,
 ];
 
 impl FromStr for LanguageKind {
@@ -74,6 +77,7 @@ impl FromStr for LanguageKind {
             "css" => Ok(LanguageKind::Css),
             "json" => Ok(LanguageKind::Json),
             "html" => Ok(LanguageKind::Html),
+            "php" => Ok(LanguageKind::Php),
             _ => Err(format!(
                 "Language {} not supported, please use: `js`, `css` or `json`",
                 kind
@@ -93,6 +97,7 @@ impl LanguageKind {
             LanguageKind::Css => quote! { CssSyntaxKind },
             LanguageKind::Json => quote! { JsonSyntaxKind },
             LanguageKind::Html => quote! { HtmlSyntaxKind },
+            LanguageKind::Php => quote! { PhpSyntaxKind },
         }
     }
 
@@ -102,6 +107,7 @@ impl LanguageKind {
             LanguageKind::Css => quote! { CssSyntaxNode },
             LanguageKind::Json => quote! { JsonSyntaxNode },
             LanguageKind::Html => quote! { HtmlSyntaxNode },
+            LanguageKind::Php => quote! { PhpSyntaxNode },
         }
     }
 
@@ -111,6 +117,7 @@ impl LanguageKind {
             LanguageKind::Css => quote! { CssSyntaxElement },
             LanguageKind::Json => quote! { JsonSyntaxElement },
             LanguageKind::Html => quote! { HtmlSyntaxElement },
+            LanguageKind::Php => quote! { PhpSyntaxElement },
         }
     }
 
@@ -120,6 +127,7 @@ impl LanguageKind {
             LanguageKind::Css => quote! { CssSyntaxToken },
             LanguageKind::Json => quote! { JsonSyntaxToken },
             LanguageKind::Html => quote! { HtmlSyntaxToken },
+            LanguageKind::Php => quote! { PhpSyntaxToken },
         }
     }
 
@@ -129,6 +137,7 @@ impl LanguageKind {
             LanguageKind::Css => quote! { CssSyntaxElementChildren },
             LanguageKind::Json => quote! { JsonSyntaxElementChildren },
             LanguageKind::Html => quote! { HtmlSyntaxElementChildren },
+            LanguageKind::Php => quote! { PhpSyntaxElementChildren },
         }
     }
 
@@ -138,6 +147,7 @@ impl LanguageKind {
             LanguageKind::Css => quote! { CssSyntaxList },
             LanguageKind::Json => quote! { JsonSyntaxList },
             LanguageKind::Html => quote! { HtmlSyntaxList },
+            LanguageKind::Php => quote! { PhpSyntaxList },
         }
     }
 
@@ -147,6 +157,7 @@ impl LanguageKind {
             LanguageKind::Css => quote! { CssLanguage },
             LanguageKind::Json => quote! { JsonLanguage },
             LanguageKind::Html => quote! { HtmlLanguage },
+            LanguageKind::Php => quote! { PhpLanguage },
         }
     }
 
@@ -156,6 +167,7 @@ impl LanguageKind {
             LanguageKind::Css => "biome_css_formatter",
             LanguageKind::Json => "biome_json_formatter",
             LanguageKind::Html => "biome_html_formatter",
+            LanguageKind::Php => "biome_php_formatter",
         }
     }
 
@@ -165,6 +177,7 @@ impl LanguageKind {
             LanguageKind::Css => "biome_css_syntax",
             LanguageKind::Json => "biome_json_syntax",
             LanguageKind::Html => "biome_html_syntax",
+            LanguageKind::Php => "biome_php_syntax",
         }
     }
 
@@ -174,6 +187,7 @@ impl LanguageKind {
             LanguageKind::Css => "biome_css_factory",
             LanguageKind::Json => "biome_json_factory",
             LanguageKind::Html => "biome_html_factory",
+            LanguageKind::Php => "biome_php_factory",
         }
     }
 }

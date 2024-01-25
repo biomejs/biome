@@ -17,6 +17,7 @@ use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::js_kinds_src::{
     AstEnumSrc, AstListSeparatorConfiguration, AstListSrc, AstNodeSrc, TokenKind, JS_KINDS_SRC,
 };
+use crate::php_kinds_src::PHP_KINDS_SRC;
 use crate::json_kinds_src::JSON_KINDS_SRC;
 use crate::termcolorful::{println_string_with_fg_color, Color};
 use crate::ALL_LANGUAGE_KIND;
@@ -68,6 +69,7 @@ pub(crate) fn load_ast(language: LanguageKind) -> AstSrc {
         LanguageKind::Css => load_css_ast(),
         LanguageKind::Json => load_json_ast(),
         LanguageKind::Html => load_html_ast(),
+        LanguageKind::Php => load_php_ast(),
     }
 }
 
@@ -86,6 +88,7 @@ pub(crate) fn generate_syntax(ast: AstSrc, mode: &Mode, language_kind: LanguageK
         LanguageKind::Css => CSS_KINDS_SRC,
         LanguageKind::Json => JSON_KINDS_SRC,
         LanguageKind::Html => HTML_KINDS_SRC,
+        LanguageKind::Php => PHP_KINDS_SRC,
     };
 
     let ast_nodes_file = syntax_generated_path.join("nodes.rs");
@@ -188,6 +191,12 @@ pub(crate) fn load_json_ast() -> AstSrc {
 
 pub(crate) fn load_html_ast() -> AstSrc {
     let grammar_src = include_str!("../html.ungram");
+    let grammar: Grammar = grammar_src.parse().unwrap();
+    make_ast(&grammar)
+}
+
+pub(crate) fn load_php_ast() -> AstSrc {
+    let grammar_src = include_str!("../php8.ungram");
     let grammar: Grammar = grammar_src.parse().unwrap();
     make_ast(&grammar)
 }

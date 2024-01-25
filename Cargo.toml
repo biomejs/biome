@@ -101,6 +101,8 @@ biome_json_factory           = { version = "0.4.0", path = "./crates/biome_json_
 biome_json_formatter         = { version = "0.4.0", path = "./crates/biome_json_formatter" }
 biome_json_parser            = { version = "0.4.0", path = "./crates/biome_json_parser" }
 biome_json_syntax            = { version = "0.4.0", path = "./crates/biome_json_syntax" }
+biome_php_factory            = { version = "0.4.0", path = "./crates/biome_php_factory" }
+biome_php_syntax             = { version = "0.4.0", path = "./crates/biome_php_syntax" }
 
 biome_markup        = { version = "0.4.0", path = "./crates/biome_markup" }
 biome_parser        = { version = "0.4.0", path = "./crates/biome_parser" }

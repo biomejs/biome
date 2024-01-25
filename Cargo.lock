@@ -737,6 +737,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_php_factory"
+version = "0.4.0"
+dependencies = [
+ "biome_php_syntax",
+ "biome_rowan",
+]
+
+[[package]]
+name = "biome_php_syntax"
+version = "0.4.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_php_factory",
+ "biome_rowan",
+ "schemars",
+ "serde",
+]
+
+[[package]]
 name = "biome_project"
 version = "0.0.0"
 dependencies = [
