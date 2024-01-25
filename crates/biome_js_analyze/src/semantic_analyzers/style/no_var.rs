@@ -5,7 +5,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsVariableDeclaration, JsModule, JsScript, JsSyntaxKind};
+use biome_js_syntax::{
+    AnyJsVariableDeclaration, JsModule, JsScript, JsSyntaxKind, TsGlobalDeclaration,
+};
 
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -49,6 +51,14 @@ impl Rule for NoVar {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let declaration = ctx.query();
+        let ts_global_declaratio = &declaration
+            .syntax()
+            .ancestors()
+            .find_map(TsGlobalDeclaration::cast);
+
+        if ts_global_declaratio.is_some() {
+            return None;
+        }
         declaration.is_var().then_some(())
     }
 
