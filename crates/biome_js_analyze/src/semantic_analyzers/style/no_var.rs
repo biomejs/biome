@@ -51,15 +51,18 @@ impl Rule for NoVar {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let declaration = ctx.query();
-        let ts_global_declaratio = &declaration
-            .syntax()
-            .ancestors()
-            .find_map(TsGlobalDeclaration::cast);
+        if declaration.is_var() {
+            let ts_global_declaratio = &declaration
+                .syntax()
+                .ancestors()
+                .find_map(TsGlobalDeclaration::cast);
 
-        if ts_global_declaratio.is_some() {
-            return None;
+            if ts_global_declaratio.is_some() {
+                return None;
+            }
+            return Some(());
         }
-        declaration.is_var().then_some(())
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
