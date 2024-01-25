@@ -2,7 +2,8 @@ use crate::{control_flow::AnyJsControlFlowRoot, semantic_services::SemanticServi
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
-    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding}, AnyJsExportNamedSpecifier, AnyJsIdentifierUsage, JsObjectBindingPatternShorthandProperty
+    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
+    AnyJsExportNamedSpecifier, AnyJsIdentifierUsage, JsObjectBindingPatternShorthandProperty,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 
