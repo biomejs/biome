@@ -1,6 +1,5 @@
-use std::cmp::Ordering;
-
 use biome_rowan::TokenText;
+use std::cmp::Ordering;
 
 use super::{
     class_info::{get_class_info, ClassInfo},
@@ -91,16 +90,16 @@ pub fn sort_class_name(class_name: &TokenText, sort_config: &SortConfig) -> Stri
     // Custom classes always go first, in the order that they appear in.
     let mut sorted_classes: Vec<&str> = Vec::new();
     let mut classes_info: Vec<ClassInfo> = Vec::new();
-    classes
-        .iter()
-        .for_each(|&class| match get_class_info(class, sort_config) {
+    for class in classes {
+        match get_class_info(class, sort_config) {
             Some(class_info) => {
                 classes_info.push(class_info);
             }
             None => {
                 sorted_classes.push(class);
             }
-        });
+        }
+    }
 
     // TODO: make this the last step of compare instead?
 
