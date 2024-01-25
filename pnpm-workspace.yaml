@@ -1,4 +1,3 @@
 packages:
-  - "editors/intellij/src/test"
   - "packages/**"
   - "website"
