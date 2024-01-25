@@ -7,7 +7,7 @@ mod sort;
 mod sort_config;
 
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -150,25 +150,24 @@ lazy_static! {
 }
 
 impl Rule for UseSortedClasses {
-    type Query = AnyClassStringLike;
+    type Query = Ast<AnyClassStringLike>;
     type State = String;
     type Signals = Option<Self::State>;
     type Options = UtilityClassSortingOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        // TODO: unsure if options are needed here. The sort config should ideally be created once
-        // from the options and then reused for all queries.
-        // let options = &ctx.options();
+        let options = ctx.options();
+        let node = ctx.query();
 
-        let value = ctx.query().value()?;
-        // TODO: the sort config should already exist at this point, and be generated from the options,
-        // including the preset and extended options as well.
-        let sorted_value = sort_class_name(&value, &SORT_CONFIG);
-        if value.text() != sorted_value {
-            Some(sorted_value)
-        } else {
-            None
+        if node.should_visit(options).is_some() {
+            if let Some(value) = node.value() {
+                let sorted_value = sort_class_name(&value, &SORT_CONFIG);
+                if value.text() != sorted_value {
+                    return Some(sorted_value);
+                }
+            }
         }
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
