@@ -1,0 +1,91 @@
+// PHP Un-Grammar
+//
+// Reference document: https://github.com/php/php-langspec/blob/4c19272d1f832faba8c7bc808bf4a2db4412a6c4/spec/19-grammar.md
+//
+// This grammar specifies the structure of PHP 8's concrete syntax tree.
+// It does not specify parsing rules (ambiguities, precedence, etc. are out of scope).
+//
+// Legend:
+//
+//   //          				-- comment
+//   Name =      				-- non-terminal definition
+//   'ident'     				-- token (terminal)
+//   A B         				-- sequence
+//   A | B       				-- alternation
+//   A*          				-- zero or more repetition
+//   (A (',' A)* ','?)	        -- repetition of node A separated by ',' and allowing a trailing comma
+//   (A (',' A)*)	            -- repetition of node A separated by ',' without a trailing comma
+//   A?          				-- zero or one repetition
+//   (A)         				-- same as A
+//   label:A     				-- suggested name for field of AST node
+
+// NOTES
+//
+// - SyntaxNode, SyntaxToken and SyntaxElement will be stripped from the codegen
+// - Bogus nodes are special nodes used to keep track of broken code; they are
+//   not part of the grammar but they will appear inside the green tree
+
+///////////////
+// BOGUS NODES
+///////////////
+// SyntaxElement is a generic data structure that is meant to track nodes and tokens
+// in cases where we care about both types
+//
+// As Bogus* node will need to yield both tokens and nodes without discrimination,
+// and their children will need to yield nodes and tokens as well.
+// For this reason, SyntaxElement = SyntaxElement
+
+SyntaxElement = SyntaxElement
+
+PhpBogus = SyntaxElement*
+PhpBogusValue = SyntaxElement*
+
+PhpRoot =
+    bom: 'UNICODE_BOM'?
+    script: PhpScript
+    eof: 'EOF'
+
+PhpScript = PhpScriptSection | (PhpScript PhpScriptSection)
+
+// A PHP script section is sequence of optional arbitrary text, followed by a mandatory
+// start tag, followed by a sequence of optional statements, followed by an optional
+// end tag.
+//
+// Examples of valid script sections:
+// 
+// - `<?php` (no arbitrary text, no statements, no end tag)
+// - `<?php echo "Hello World";` (no arbitrary text, one statement, no end tag)
+// - `<?php echo "Hello World"; ?>` (no arbitrary text, one statement, end tag)
+// - `<?php echo "Hello World"; ?><div></div>` (one statement, end tag, arbitrary text)
+// - `<?php echo "Hello World"; echo "Hello Earth"; ?>` (two statements, end tag)
+PhpScriptSection =
+    ArbitraryText* PhpStartTag PhpStatementList* PhpEndTag*
+
+// PHP recognizes several types of start tags. The most common is '<?php',
+// also known as the standard start tag. A short echo tag '<?=' is also
+// recognized.
+PhpStartTag = '<?php' | '<?='
+
+// PHP has a single end tag, '?>'. This tag is optional, and its usage is
+// discouraged in files that contain only PHP code. However, they are used
+// in files that contain a mixture of PHP and other languages, such as HTML.
+PhpEndTag = '?>'
+
+// Arbitrary text is any text that does not contain a start tag.
+ArbitraryText = value: 'php_arbitrary_text'
+
+//*****************************************************************************
+// LEXICAL GRAMMAR
+//*****************************************************************************
+
+PhpInputFile = 
+
+PhpInputElement =
+
+PhpComment = 
+
+PhpSingleLineComment = '//' PhpInputCharacters
+
+PhpInputCharacters = 
+
+PhpInputCharacter = 
