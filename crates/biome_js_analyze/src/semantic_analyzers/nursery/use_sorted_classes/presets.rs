@@ -591,24 +591,20 @@ const UTILITIES_LAYER_CLASSES: [&str; 567] = [
 ];
 // TAILWIND-UTILITIES-LAYER-CLASSES-END
 
+const TAILWIND_LAYERS: [UtilityLayer; 2] = [
+    UtilityLayer {
+        name: "components",
+        classes: UTILITIES_COMPONENTS_CLASSES.as_slice(),
+    },
+    UtilityLayer {
+        name: "utilities",
+        classes: UTILITIES_LAYER_CLASSES.as_slice(),
+    },
+];
+
 pub fn get_utilities_preset(preset: &UseSortedClassesPreset) -> UtilitiesConfig {
     match preset {
-        UseSortedClassesPreset::None => {
-            vec![]
-        }
-        UseSortedClassesPreset::TailwindCSS => {
-            // TAILWIND-UTILITIES-PRESET-START
-            vec![
-                UtilityLayer {
-                    name: String::from("components"),
-                    classes: UTILITIES_COMPONENTS_CLASSES.as_slice(),
-                },
-                UtilityLayer {
-                    name: String::from("utilities"),
-                    classes: UTILITIES_LAYER_CLASSES.as_slice(),
-                },
-            ]
-            // TAILWIND-UTILITIES-PRESET-END
-        }
+        UseSortedClassesPreset::None => [].as_slice(),
+        UseSortedClassesPreset::TailwindCSS => TAILWIND_LAYERS.as_slice(),
     }
 }

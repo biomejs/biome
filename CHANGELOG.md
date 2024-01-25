@@ -38,6 +38,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Linter
 
+#### Enhancements
+
+- [noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary/) now provides unsafe code fixes. Contributed by @vasucp1207
+
 #### New features
 
 - Add the rule [noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests), to disallow skipped tests:
@@ -63,6 +67,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   + <div class="foo·bar·p-4·px-2" />
   ```
   Contributed by @DaniGuardiola
+
+#### Bug fixes
+
+- Fix [#1640](https://github.com/biomejs/biome/issues/1640). [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers) code action now generates valid code when last member has a comment but no comma. Contributed by @kalleep
 
 ### Parser
 
