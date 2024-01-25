@@ -1,0 +1,15 @@
+.div ())))), span {}
+.div, ())))), span {}
+
+.div "string", span {}
+.div, "string", span {}
+
+.div 21312, span {}
+.div, 123213, span {}
+
+.div () 12321 "string", span {}
+.div, () 12321 "string", span {}
+.div, {}
+.div ""
+  color: red;
+}

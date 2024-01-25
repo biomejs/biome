@@ -389,17 +389,17 @@ export default defineConfig({
 			},
 			favicon: "/img/favicon.svg",
 			head: [
-				{
-					tag: "meta",
-					attrs: { property: "og:image", content: `${site}/img/og.png?v=1` },
-				},
-				{
-					tag: "meta",
-					attrs: {
-						property: "twitter:image",
-						content: `${site}/img/og.png?v=1`,
-					},
-				},
+				// {
+				// 	tag: "meta",
+				// 	attrs: { property: "og:image", content: `${site}/img/og.png?v=1` },
+				// },
+				// {
+				// 	tag: "meta",
+				// 	attrs: {
+				// 		property: "twitter:image",
+				// 		content: `${site}/img/og.png?v=1`,
+				// 	},
+				// },
 				{
 					tag: "link",
 					attrs: {
@@ -426,6 +426,7 @@ export default defineConfig({
 				SiteTitle: "./src/components/starlight/SiteTitle.astro",
 				Sidebar: "./src/components/starlight/Sidebar.astro",
 				Hero: "./src/components/starlight/Hero.astro",
+				Head: "./src/components/starlight/Head.astro",
 			},
 		}),
 	],

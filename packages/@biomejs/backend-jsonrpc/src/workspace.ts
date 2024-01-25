@@ -867,6 +867,10 @@ export interface Nursery {
 	 */
 	noEmptyTypeParameters?: RuleConfiguration;
 	/**
+	 * Disallow focused tests.
+	 */
+	noFocusedTests?: RuleConfiguration;
+	/**
 	 * Disallow assignments to native objects and read-only global variables.
 	 */
 	noGlobalAssign?: RuleConfiguration;
@@ -886,6 +890,10 @@ export interface Nursery {
 	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration;
+	/**
+	 * Disallow disabled tests.
+	 */
+	noSkippedTests?: RuleConfiguration;
 	/**
 	 * Disallow then property.
 	 */
@@ -954,6 +962,10 @@ export interface Nursery {
 	 * Enforce using function types instead of object type with call signatures.
 	 */
 	useShorthandFunctionType?: RuleConfiguration;
+	/**
+	 * Enforce the sorting of CSS utility classes.
+	 */
+	useSortedClasses?: RuleConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -1392,7 +1404,8 @@ export type PossibleOptions =
 	| DeprecatedHooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
-	| ValidAriaRoleOptions;
+	| ValidAriaRoleOptions
+	| UtilityClassSortingOptions;
 /**
  * Options for the rule `noExcessiveCognitiveComplexity`.
  */
@@ -1456,6 +1469,16 @@ export interface RestrictedGlobalsOptions {
 export interface ValidAriaRoleOptions {
 	allowInvalidRoles: string[];
 	ignoreNonDom: boolean;
+}
+export interface UtilityClassSortingOptions {
+	/**
+	 * Additional attributes that will be sorted.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be sorted.
+	 */
+	functions?: string[];
 }
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
@@ -1667,11 +1690,13 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyTypeParameters"
+	| "lint/nursery/noFocusedTests"
 	| "lint/nursery/noGlobalAssign"
 	| "lint/nursery/noGlobalEval"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNodejsModules"
+	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
@@ -1690,6 +1715,7 @@ export type Category =
 	| "lint/nursery/useNodejsImportProtocol"
 	| "lint/nursery/useNumberNamespace"
 	| "lint/nursery/useShorthandFunctionType"
+	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"

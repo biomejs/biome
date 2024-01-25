@@ -2,7 +2,7 @@ use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_any_attribute_matcher_name, expected_any_attribute_modifier, expected_identifier,
 };
-use crate::syntax::selector::{is_at_namespace, parse_namespace, selector_lex_context};
+use crate::syntax::selector::{is_nth_at_namespace, parse_namespace, selector_lex_context};
 use crate::syntax::{is_at_identifier, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -42,7 +42,7 @@ pub(crate) fn parse_attribute_selector(p: &mut CssParser) -> ParsedSyntax {
 }
 
 fn is_at_attribute_name(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || is_at_namespace(p)
+    is_at_identifier(p) || is_nth_at_namespace(p, 0)
 }
 
 #[inline]

@@ -14,6 +14,70 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+#### Bug fixes
+
+- Fix [#1508](https://github.com/biomejs/biome/issues/1508) by excluding deleted files from being processed. Contributed by @ematipico
+
+- Fix [#1173](https://github.com/biomejs/biome/issues/1173). Fix the formatting of a single instruction with commented in a control flow body to ensure consistency. Contributed by @mdm317
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+#### Bug fixes
+
+- Fix [#1039](https://github.com/biomejs/biome/issues/1039). Check unicode width instead of number of bytes when checking if regex expression is a simple argument. Contributed by @kalleep
+
+  This no longer breaks.
+
+  ```js
+  s(/🚀🚀/).s().s();
+  ```
+
+### JavaScript APIs
+
+### Linter
+
+#### Enhancements
+
+- [noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary/) now provides unsafe code fixes. Contributed by @vasucp1207
+
+#### New features
+
+- Add the rule [noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests), to disallow skipped tests:
+
+  ```js
+  describe.skip("test", () => {});
+  it.skip("test", () => {});
+  ```
+  Contributed by @ematipico
+
+- Add the rule [noFocusedTests](https://biomejs.dev/linter/rules/no-focused-tests), to disallow skipped tests:
+
+  ```js
+  describe.only("test", () => {});
+  it.only("test", () => {});
+  ```
+  Contributed by @ematipico
+
+- Add rule [noSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes), to sort CSS utility classes:
+
+  ```diff
+  - <div class="px-2 foo p-4 bar" />
+  + <div class="foo·bar·p-4·px-2" />
+  ```
+  Contributed by @DaniGuardiola
+
+#### Bug fixes
+
+- Fix [#1640](https://github.com/biomejs/biome/issues/1640). [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers) code action now generates valid code when last member has a comment but no comma. Contributed by @kalleep
+
+### Parser
+
+## 1.5.3 (2024-01-22)
+
 ### LSP
 
 #### Bug fixes
@@ -42,22 +106,14 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   Contributed by @Conaclos
 
-### Editors
-
 ### Formatter
 
-#### Bug fixed
+#### Bug fixes
 
 - Fix [#1178](https://github.com/biomejs/biome/issues/1178), where the line ending option wasn't correctly applied. Contributed by @ematipico
 - Fix [#1571](https://github.com/biomejs/biome/issues/1571). Fix invalid formatting of nested multiline comments. Contributed by @ah-yu
 
-### JavaScript APIs
-
 ### Linter
-
-#### New features
-
-#### Enhancements
 
 #### Bug fixes
 
@@ -79,7 +135,48 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - [useExhaustiveDependencies](https://biomejs.dev/linter/use-exhaustive-dependencies) no longer made Biome errors in code TypeScript import equal declarations ([#1194](https://github.com/biomejs/biome/issues/1194)). Contributed by @Conaclos
 
+- Fix typo in the diagnostic of [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules). Contributed by @huseeiin
+
 ### Parser
+
+#### Bug fixes
+
+- Accept the `const` modifier for type parameter in method type signature ([#1624](https://github.com/biomejs/biome/issues/1624)).
+
+  The following code is now correctly parsed:
+
+  ```ts
+  type Foo = {
+    <const T>();
+    method<const T>();
+  };
+  ```
+
+  Contributed by @magic-akari
+
+- Correctly parse type arguments in expression([#1184](https://github.com/biomejs/biome/issues/1184)).
+
+  The following code is now correctly parsed in typescript:
+
+  ```ts
+  0 < (0 >= 1);
+  ```
+
+  Contributed by @ah-yu
+
+### Website
+
+#### New
+
+- Add a [page that maps the Biome rule to its source](https://biomejs.dev/linter/rules-sources/). Contributed by @ematipico
+
+#### Fixes
+
+- Generate Open Graph images based on the linked page. Contributed by @ematipico
+
+- Fix examples of the [git hook page](https://biomejs.dev/recipes/git-hooks/). Contributed by @9renpoto, @lmauromb, and @Conaclos
+
+- Fix dead and erroneous hyperlinks. Contributed by @Sec-ant and Conaclos
 
 
 ## 1.5.2 (2024-01-15)

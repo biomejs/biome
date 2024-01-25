@@ -4,6 +4,7 @@ use crate::analyzers::nursery::use_consistent_array_type::ConsistentArrayTypeOpt
 use crate::analyzers::nursery::use_filenaming_convention::FilenamingConventionOptions;
 use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::HooksOptions;
 use crate::semantic_analyzers::correctness::use_hook_at_top_level::DeprecatedHooksOptions;
+use crate::semantic_analyzers::nursery::use_sorted_classes::UtilityClassSortingOptions;
 use crate::semantic_analyzers::style::no_restricted_globals::RestrictedGlobalsOptions;
 use crate::semantic_analyzers::style::use_naming_convention::NamingConventionOptions;
 use crate::{
@@ -38,6 +39,8 @@ pub enum PossibleOptions {
     RestrictedGlobals(RestrictedGlobalsOptions),
     /// Options for `useValidAriaRole` rule
     ValidAriaRole(ValidAriaRoleOptions),
+    /// Options for `useSortedClasses` rule
+    UtilityClassSorting(UtilityClassSortingOptions),
 }
 
 impl Default for PossibleOptions {
@@ -105,6 +108,13 @@ impl PossibleOptions {
                 };
                 RuleOptions::new(options)
             }
+            "useSortedClasses" => {
+                let options = match self {
+                    PossibleOptions::UtilityClassSorting(options) => options.clone(),
+                    _ => UtilityClassSortingOptions::default(),
+                };
+                RuleOptions::new(options)
+            }
             // TODO: review error
             _ => panic!("This rule {:?} doesn't have options", rule_key),
         }
@@ -137,6 +147,8 @@ impl Deserializable for PossibleOptions {
             "useValidAriaRole" => {
                 Deserializable::deserialize(value, "options", diagnostics).map(Self::ValidAriaRole)
             }
+            "useSortedClasses" => Deserializable::deserialize(value, "options", diagnostics)
+                .map(Self::UtilityClassSorting),
             _ => {
                 diagnostics.push(
                     DeserializationDiagnostic::new(markup! {

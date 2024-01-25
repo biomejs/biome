@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```jsx
+describe.skip("test", () => {});
+it.skip("test", () => {});
+test.skip("test", () => {});
+fdescribe('foo', () => {});
+fit('foo', () => {});
+
+```
+
+

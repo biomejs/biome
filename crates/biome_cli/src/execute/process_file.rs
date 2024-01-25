@@ -11,7 +11,7 @@ use crate::execute::process_file::lint::lint;
 use crate::execute::traverse::TraversalOptions;
 use crate::execute::TraversalMode;
 use crate::CliDiagnostic;
-use biome_diagnostics::{category, DiagnosticExt, Error};
+use biome_diagnostics::{category, DiagnosticExt, DiagnosticTags, Error};
 use biome_fs::RomePath;
 use biome_service::workspace::{FeatureName, FeaturesBuilder, SupportKind, SupportsFeatureParams};
 use std::marker::PhantomData;
@@ -125,9 +125,10 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
                     .with_organize_imports()
                     .build(),
             })
-            .with_file_path_and_code(
+            .with_file_path_and_code_and_tags(
                 path.display().to_string(),
                 category!("files/missingHandler"),
+                DiagnosticTags::VERBOSE,
             )?;
 
         // first we stop if there are some files that don't have ALL features enabled, e.g. images, fonts, etc.
