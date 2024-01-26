@@ -16,6 +16,12 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
+- Don't process files under an ignored directory.
+
+  Previously, Biome processed all files in the traversed hierarchy,
+  even the files under an ignored directory.
+  Now, it completly skip the content of ignored directories.
+
 - Fix [#1508](https://github.com/biomejs/biome/issues/1508) by excluding deleted files from being processed. Contributed by @ematipico
 
 - Fix [#1173](https://github.com/biomejs/biome/issues/1173). Fix the formatting of a single instruction with commented in a control flow body to ensure consistency. Contributed by @mdm317

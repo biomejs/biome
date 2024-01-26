@@ -54,6 +54,10 @@ impl FileSystem for OsFileSystem {
         path.exists()
     }
 
+    fn path_is_file(&self, path: &Path) -> bool {
+        path.is_file()
+    }
+
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
         let output = Command::new("git")
             .arg("diff")
@@ -131,8 +135,8 @@ impl<'scope> OsTraversalScope<'scope> {
 }
 
 impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
-    fn spawn(&self, ctx: &'scope dyn TraversalContext, mut path: PathBuf) {
-        let mut file_type = match path.metadata() {
+    fn spawn(&self, ctx: &'scope dyn TraversalContext, path: PathBuf) {
+        let file_type = match path.metadata() {
             Ok(meta) => meta.file_type(),
             Err(err) => {
                 ctx.push_diagnostic(
@@ -141,44 +145,7 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
                 return;
             }
         };
-
-        if file_type.is_symlink() {
-            if !ctx.can_handle(&RomePath::new(path.clone())) {
-                return;
-            }
-            let Ok((target_path, target_file_type)) = expand_symbolic_link(path, ctx) else {
-                return;
-            };
-
-            path = target_path;
-            file_type = target_file_type;
-        }
-
-        let _ = ctx.interner().intern_path(path.clone());
-
-        if file_type.is_dir() {
-            if ctx.can_handle(&RomePath::new(path.clone())) {
-                self.scope.spawn(move |scope| {
-                    handle_dir(scope, ctx, &path, None);
-                });
-            }
-            return;
-        }
-
-        if file_type.is_file() {
-            if ctx.can_handle(&RomePath::new(path.clone())) {
-                self.scope.spawn(move |_| {
-                    ctx.handle_file(&path);
-                });
-            }
-            return;
-        }
-
-        ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
-            path: path.to_string_lossy().to_string(),
-            error_kind: ErrorKind::from(file_type),
-            severity: Severity::Warning,
-        }));
+        handle_any_file(&self.scope, ctx, path, file_type, None);
     }
 }
 
@@ -225,11 +192,10 @@ fn handle_dir_entry<'scope>(
     ctx: &'scope dyn TraversalContext,
     entry: DirEntry,
     // The unresolved origin path in case the directory is behind a symbolic link
-    mut origin_path: Option<PathBuf>,
+    origin_path: Option<PathBuf>,
 ) {
-    let mut path = entry.path();
-
-    let mut file_type = match entry.file_type() {
+    let path = entry.path();
+    let file_type = match entry.file_type() {
         Ok(file_type) => file_type,
         Err(err) => {
             ctx.push_diagnostic(
@@ -238,7 +204,17 @@ fn handle_dir_entry<'scope>(
             return;
         }
     };
+    handle_any_file(scope, ctx, path, file_type, origin_path);
+}
 
+fn handle_any_file<'scope>(
+    scope: &Scope<'scope>,
+    ctx: &'scope dyn TraversalContext,
+    mut path: PathBuf,
+    mut file_type: FileType,
+    // The unresolved origin path in case the directory is behind a symbolic link
+    mut origin_path: Option<PathBuf>,
+) {
     if file_type.is_symlink() {
         if !ctx.can_handle(&RomePath::new(path.clone())) {
             return;
@@ -257,52 +233,58 @@ fn handle_dir_entry<'scope>(
     }
 
     let inserted = ctx.interner().intern_path(path.clone());
-
     if !inserted {
         // If the path was already inserted, it could have been pointed at by
         // multiple symlinks. No need to traverse again.
         return;
     }
 
-    if file_type.is_dir() {
-        if ctx.can_handle(&RomePath::new(path.clone())) {
-            scope.spawn(move |scope| {
-                handle_dir(scope, ctx, &path, origin_path);
-            });
+    // In case the file is inside a directory that is behind a symbolic link,
+    // the unresolved origin path is used to construct a new path.
+    // This is required to support ignore patterns to symbolic links.
+    let rome_path = if let Some(origin_path) = &origin_path {
+        if let Some(file_name) = path.file_name() {
+            RomePath::new(origin_path.join(file_name))
+        } else {
+            ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
+                path: path.to_string_lossy().to_string(),
+                error_kind: ErrorKind::UnknownFileType,
+                severity: Severity::Warning,
+            }));
+            return;
         }
+    } else {
+        RomePath::new(&path)
+    };
+
+    // Performing this check here let's us skip unsupported
+    // files entirely, as well as silently ignore unsupported files when
+    // doing a directory traversal, but printing an error message if the
+    // user explicitly requests an unsupported file to be handled.
+    // This check also works for symbolic links.
+    if !ctx.can_handle(&rome_path) {
+        return;
+    }
+
+    if file_type.is_dir() {
+        scope.spawn(move |scope| {
+            handle_dir(scope, ctx, &path, origin_path);
+        });
         return;
     }
 
     if file_type.is_file() {
-        // In case the file is inside a directory that is behind a symbolic link,
-        // the unresolved origin path is used to construct a new path.
-        // This is required to support ignore patterns to symbolic links.
-        let rome_path = if let Some(origin_path) = origin_path {
-            if let Some(file_name) = path.file_name() {
-                RomePath::new(origin_path.join(file_name))
-            } else {
-                ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
-                    path: path.to_string_lossy().to_string(),
-                    error_kind: ErrorKind::UnknownFileType,
-                    severity: Severity::Warning,
-                }));
-                return;
-            }
-        } else {
-            RomePath::new(&path)
-        };
-
-        // Performing this check here let's us skip skip unsupported
-        // files entirely, as well as silently ignore unsupported files when
-        // doing a directory traversal, but printing an error message if the
-        // user explicitly requests an unsupported file to be handled.
-        // This check also works for symbolic links.
-        if ctx.can_handle(&rome_path) {
-            scope.spawn(move |_| {
-                ctx.handle_file(&path);
-            });
-        }
+        scope.spawn(move |_| {
+            ctx.handle_file(&path);
+        });
+        return;
     }
+
+    ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
+        path: path.to_string_lossy().to_string(),
+        error_kind: ErrorKind::from(file_type),
+        severity: Severity::Warning,
+    }));
 }
 
 /// Indicates a symbolic link could not be expanded.

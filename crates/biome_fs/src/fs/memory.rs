@@ -180,6 +180,10 @@ impl FileSystem for MemoryFileSystem {
     }
 
     fn path_exists(&self, path: &Path) -> bool {
+        self.path_is_file(path)
+    }
+
+    fn path_is_file(&self, path: &Path) -> bool {
         let files = self.files.0.read();
         files.get(path).is_some()
     }
