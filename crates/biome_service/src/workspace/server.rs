@@ -291,7 +291,7 @@ impl Workspace for WorkspaceServer {
     /// ## Panics
     /// This function may panic if the internal settings mutex has been poisoned
     /// by another thread having previously panicked while holding the lock
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "trace", skip(self))]
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
         let mut settings = self.settings.write().unwrap();
 
@@ -405,7 +405,7 @@ impl Workspace for WorkspaceServer {
     }
 
     /// Retrieves the list of diagnostics associated with a file
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "trace", skip(self))]
     fn pull_diagnostics(
         &self,
         params: PullDiagnosticsParams,
@@ -481,7 +481,7 @@ impl Workspace for WorkspaceServer {
 
     /// Retrieves the list of code actions available for a given cursor
     /// position within a file
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "trace", skip(self))]
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
         let capabilities = self.get_file_capabilities(&params.path);
         let code_actions = capabilities
