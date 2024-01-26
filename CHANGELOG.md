@@ -24,6 +24,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Editors
 
+#### Bug fixes
+
+- Fix a regression where ignored files where formatted in the editor. Contributed by @ematipico
+
 ### Formatter
 
 #### Bug fixes
