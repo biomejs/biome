@@ -66,7 +66,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```
   Contributed by @ematipico
 
-- Add rule [noSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes), to sort CSS utility classes:
+- Add rule [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes), to sort CSS utility classes:
 
   ```diff
   - <div class="px-2 foo p-4 bar" />
