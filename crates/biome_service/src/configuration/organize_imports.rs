@@ -55,23 +55,11 @@ impl OrganizeImports {
 pub fn to_organize_imports_settings(
     working_directory: Option<PathBuf>,
     organize_imports: OrganizeImports,
-    _vcs_base_path: Option<PathBuf>,
-    _gitignore_matches: &[String],
 ) -> Result<OrganizeImportsSettings, WorkspaceError> {
     Ok(OrganizeImportsSettings {
         enabled: organize_imports.enabled.unwrap_or_default(),
-        ignored_files: to_matcher(
-            working_directory.clone(),
-            organize_imports.ignore.as_ref(),
-            None,
-            &[],
-        )?,
-        included_files: to_matcher(
-            working_directory,
-            organize_imports.include.as_ref(),
-            None,
-            &[],
-        )?,
+        ignored_files: to_matcher(working_directory.clone(), organize_imports.ignore.as_ref())?,
+        included_files: to_matcher(working_directory, organize_imports.include.as_ref())?,
     })
 }
 
