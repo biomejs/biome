@@ -2,12 +2,13 @@ use anyhow::bail;
 use anyhow::Context;
 use anyhow::Error;
 use anyhow::Result;
-use biome_fs::RomePath;
+use biome_fs::{MemoryFileSystem, RomePath};
 use biome_lsp::LSPServer;
 use biome_lsp::ServerFactory;
 use biome_lsp::WorkspaceSettings;
 use biome_service::workspace::GetSyntaxTreeResult;
 use biome_service::workspace::{GetFileContentParams, GetSyntaxTreeParams};
+use biome_service::DynRef;
 use futures::channel::mpsc::{channel, Sender};
 use futures::Sink;
 use futures::SinkExt;
@@ -27,7 +28,6 @@ use tower::{Service, ServiceExt};
 use tower_lsp::jsonrpc;
 use tower_lsp::jsonrpc::Response;
 use tower_lsp::lsp_types as lsp;
-use tower_lsp::lsp_types::DidChangeTextDocumentParams;
 use tower_lsp::lsp_types::DidCloseTextDocumentParams;
 use tower_lsp::lsp_types::DidOpenTextDocumentParams;
 use tower_lsp::lsp_types::DocumentFormattingParams;
@@ -44,6 +44,7 @@ use tower_lsp::lsp_types::TextEdit;
 use tower_lsp::lsp_types::VersionedTextDocumentIdentifier;
 use tower_lsp::lsp_types::WorkDoneProgressParams;
 use tower_lsp::lsp_types::{ClientCapabilities, CodeDescription, Url};
+use tower_lsp::lsp_types::{DidChangeConfigurationParams, DidChangeTextDocumentParams};
 use tower_lsp::LspService;
 use tower_lsp::{jsonrpc::Request, lsp_types::InitializeParams};
 
@@ -239,6 +240,15 @@ impl Server {
         )
         .await
     }
+    async fn load_configuration(&mut self) -> Result<()> {
+        self.notify(
+            "workspace/didChangeConfiguration",
+            DidChangeConfigurationParams {
+                settings: to_value(()).unwrap(),
+            },
+        )
+        .await
+    }
 
     async fn change_document(
         &mut self,
@@ -320,7 +330,6 @@ where
                 let settings = WorkspaceSettings {
                     ..WorkspaceSettings::default()
                 };
-
                 let result =
                     to_value(slice::from_ref(&settings)).context("failed to serialize settings")?;
 
@@ -1832,6 +1841,73 @@ async fn format_with_syntax_errors() -> Result<()> {
     server.initialized().await?;
 
     server.open_document("expression(").await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: url!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(res.is_none());
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn does_not_format_ignored_files() -> Result<()> {
+    let factory = ServerFactory::default();
+    let mut fs = MemoryFileSystem::default();
+    let config = r#"{
+        "files": {
+            "ignore": ["document.js"]
+        }
+    }"#;
+
+    fs.insert(url!("biome.json").to_file_path().unwrap(), config);
+    let (service, client) = factory
+        .create_with_fs(None, DynRef::Owned(Box::new(fs)))
+        .into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(config, url!("biome.json"), "json")
+        .await?;
+
+    server
+        .open_named_document("statement (   );", url!("document.js"), "js")
+        .await?;
+
+    server.load_configuration().await?;
 
     let res: Option<Vec<TextEdit>> = server
         .request(
