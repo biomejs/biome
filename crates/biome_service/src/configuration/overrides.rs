@@ -169,8 +169,6 @@ pub struct OverrideOrganizeImportsConfiguration {
 pub fn to_override_settings(
     working_directory: Option<PathBuf>,
     overrides: Overrides,
-    _vcs_base_path: Option<PathBuf>,
-    _gitignore_matches: &[String],
     current_settings: &WorkspaceSettings,
 ) -> Result<OverrideSettings, WorkspaceError> {
     let mut override_settings = OverrideSettings::default();
@@ -196,18 +194,8 @@ pub fn to_override_settings(
         languages.css = to_css_language_settings(css, &current_settings.languages.css);
 
         let pattern_setting = OverrideSettingPattern {
-            include: to_matcher(
-                working_directory.clone(),
-                pattern.include.as_ref(),
-                None,
-                &[],
-            )?,
-            exclude: to_matcher(
-                working_directory.clone(),
-                pattern.ignore.as_ref(),
-                None,
-                &[],
-            )?,
+            include: to_matcher(working_directory.clone(), pattern.include.as_ref())?,
+            exclude: to_matcher(working_directory.clone(), pattern.ignore.as_ref())?,
             formatter,
             linter,
             organize_imports,

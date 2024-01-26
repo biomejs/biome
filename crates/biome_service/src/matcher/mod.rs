@@ -1,10 +1,7 @@
 pub mod pattern;
 
-use crate::configuration::diagnostics::InvalidIgnorePattern;
-use crate::{ConfigurationDiagnostic, WorkspaceError};
 use biome_console::markup;
 use biome_diagnostics::Diagnostic;
-use ignore::gitignore::{Gitignore, GitignoreBuilder};
 pub use pattern::{MatchOptions, Pattern, PatternError};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -15,7 +12,6 @@ use std::sync::RwLock;
 #[derive(Debug)]
 pub struct Matcher {
     root: Option<PathBuf>,
-    git_ignore: Option<Gitignore>,
     patterns: Vec<Pattern>,
     options: MatchOptions,
     /// Whether the string was already checked
@@ -29,7 +25,6 @@ impl Matcher {
     pub fn new(options: MatchOptions) -> Self {
         Self {
             root: None,
-            git_ignore: None,
             patterns: Vec::new(),
             options,
             already_checked: RwLock::new(HashMap::default()),
@@ -39,7 +34,6 @@ impl Matcher {
     pub fn empty() -> Self {
         Self {
             root: None,
-            git_ignore: None,
             patterns: Vec::new(),
             options: MatchOptions::default(),
             already_checked: RwLock::new(HashMap::default()),
@@ -48,36 +42,6 @@ impl Matcher {
 
     pub fn set_root(&mut self, root: PathBuf) {
         self.root = Some(root);
-    }
-
-    pub fn add_gitignore_matches(
-        &mut self,
-        path: PathBuf,
-        matches: &[String],
-    ) -> Result<(), WorkspaceError> {
-        let mut gitignore_builder = GitignoreBuilder::new(path.clone());
-
-        for the_match in matches {
-            gitignore_builder
-                .add_line(Some(path.clone()), the_match)
-                .map_err(|err| {
-                    WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
-                        InvalidIgnorePattern {
-                            message: err.to_string(),
-                        },
-                    ))
-                })?;
-        }
-        let gitignore = gitignore_builder.build().map_err(|err| {
-            WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
-                InvalidIgnorePattern {
-                    message: err.to_string(),
-                },
-            ))
-        })?;
-        self.git_ignore = Some(gitignore);
-
-        Ok(())
     }
 
     /// It adds a unix shell style pattern
@@ -107,11 +71,6 @@ impl Matcher {
 
     pub fn is_empty(&self) -> bool {
         self.patterns.is_empty()
-            && self
-                .git_ignore
-                .as_ref()
-                .map(|ignore| ignore.is_empty())
-                .unwrap_or(true)
     }
 
     /// It matches the given path against the stored patterns
@@ -160,23 +119,7 @@ impl Matcher {
                 return true;
             }
         }
-
-        self.git_ignore
-            .as_ref()
-            .map(|ignore| {
-                // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
-                // This checks excludes absolute paths that are not a prefix of the base root.
-                if !source.has_root() || source.starts_with(ignore.path()) {
-                    // Because Biome passes a list of paths,
-                    // we use `matched_path_or_any_parents` instead of `matched`.
-                    ignore
-                        .matched_path_or_any_parents(source, source.is_dir())
-                        .is_ignore()
-                } else {
-                    false
-                }
-            })
-            .unwrap_or_default()
+        false
     }
 }
 

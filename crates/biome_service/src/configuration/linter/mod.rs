@@ -69,14 +69,12 @@ impl Default for LinterConfiguration {
 pub fn to_linter_settings(
     working_directory: Option<PathBuf>,
     conf: LinterConfiguration,
-    _vcs_path: Option<PathBuf>,
-    _gitignore_matches: &[String],
 ) -> Result<LinterSettings, WorkspaceError> {
     Ok(LinterSettings {
         enabled: conf.enabled.unwrap_or_default(),
         rules: conf.rules,
-        ignored_files: to_matcher(working_directory.clone(), conf.ignore.as_ref(), None, &[])?,
-        included_files: to_matcher(working_directory.clone(), conf.include.as_ref(), None, &[])?,
+        ignored_files: to_matcher(working_directory.clone(), conf.ignore.as_ref())?,
+        included_files: to_matcher(working_directory.clone(), conf.include.as_ref())?,
     })
 }
 

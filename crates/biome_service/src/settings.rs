@@ -1,3 +1,4 @@
+use crate::configuration::diagnostics::InvalidIgnorePattern;
 use crate::configuration::formatter::to_format_settings;
 use crate::configuration::linter::to_linter_settings;
 use crate::configuration::organize_imports::to_organize_imports_settings;
@@ -24,6 +25,7 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use indexmap::IndexSet;
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
@@ -94,41 +96,27 @@ impl WorkspaceSettings {
     ) -> Result<(), WorkspaceError> {
         // formatter part
         if let Some(formatter) = configuration.formatter {
-            self.formatter = to_format_settings(
-                working_directory.clone(),
-                formatter,
-                vcs_path.clone(),
-                gitignore_matches,
-            )?;
+            self.formatter = to_format_settings(working_directory.clone(), formatter)?;
         }
 
         // linter part
         if let Some(linter) = configuration.linter {
-            self.linter = to_linter_settings(
-                working_directory.clone(),
-                linter,
-                vcs_path.clone(),
-                gitignore_matches,
-            )?;
+            self.linter = to_linter_settings(working_directory.clone(), linter)?;
         }
 
         // Filesystem settings
         if let Some(files) = to_file_settings(
             working_directory.clone(),
             configuration.files,
-            vcs_path.clone(),
+            vcs_path,
             gitignore_matches,
         )? {
             self.files = files;
         }
 
         if let Some(organize_imports) = configuration.organize_imports {
-            self.organize_imports = to_organize_imports_settings(
-                working_directory.clone(),
-                organize_imports,
-                vcs_path.clone(),
-                gitignore_matches,
-            )?;
+            self.organize_imports =
+                to_organize_imports_settings(working_directory.clone(), organize_imports)?;
         }
 
         // javascript settings
@@ -146,13 +134,8 @@ impl WorkspaceSettings {
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
         if let Some(overrides) = configuration.overrides {
-            self.override_settings = to_override_settings(
-                working_directory.clone(),
-                overrides,
-                vcs_path,
-                gitignore_matches,
-                self,
-            )?;
+            self.override_settings =
+                to_override_settings(working_directory.clone(), overrides, self)?;
         }
 
         Ok(())
@@ -448,6 +431,9 @@ pub struct FilesSettings {
     /// File size limit in bytes
     pub max_size: NonZeroU64,
 
+    /// gitignore file patterns
+    pub git_ignore: Option<Gitignore>,
+
     /// List of paths/files to matcher
     pub ignored_files: Matcher,
 
@@ -467,6 +453,7 @@ impl Default for FilesSettings {
     fn default() -> Self {
         Self {
             max_size: DEFAULT_FILE_SIZE_LIMIT,
+            git_ignore: None,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
             ignore_unknown: false,
@@ -487,17 +474,17 @@ fn to_file_settings(
     } else {
         None
     };
-
+    let git_ignore = if let Some(vcs_config_path) = vcs_config_path {
+        Some(to_git_ignore(vcs_config_path, gitignore_matches)?)
+    } else {
+        None
+    };
     Ok(if let Some(config) = config {
         Some(FilesSettings {
             max_size: config.max_size.unwrap_or(DEFAULT_FILE_SIZE_LIMIT),
-            ignored_files: to_matcher(
-                working_directory.clone(),
-                config.ignore.as_ref(),
-                vcs_config_path.clone(),
-                gitignore_matches,
-            )?,
-            included_files: to_matcher(working_directory, config.include.as_ref(), None, &[])?,
+            git_ignore,
+            ignored_files: to_matcher(working_directory.clone(), config.ignore.as_ref())?,
+            included_files: to_matcher(working_directory, config.include.as_ref())?,
             ignore_unknown: config.ignore_unknown.unwrap_or_default(),
         })
     } else {
@@ -841,8 +828,6 @@ pub struct OverrideSettingPattern {
 pub fn to_matcher(
     working_directory: Option<PathBuf>,
     string_set: Option<&StringSet>,
-    vcs_path: Option<PathBuf>,
-    git_ignore_matches: &[String],
 ) -> Result<Matcher, WorkspaceError> {
     let mut matcher = Matcher::empty();
     if let Some(working_directory) = working_directory {
@@ -858,8 +843,29 @@ pub fn to_matcher(
             })?;
         }
     }
-    if let Some(vcs_path) = vcs_path {
-        matcher.add_gitignore_matches(vcs_path, git_ignore_matches)?;
-    }
     Ok(matcher)
+}
+
+fn to_git_ignore(path: PathBuf, matches: &[String]) -> Result<Gitignore, WorkspaceError> {
+    let mut gitignore_builder = GitignoreBuilder::new(path.clone());
+
+    for the_match in matches {
+        gitignore_builder
+            .add_line(Some(path.clone()), the_match)
+            .map_err(|err| {
+                WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
+                    InvalidIgnorePattern {
+                        message: err.to_string(),
+                    },
+                ))
+            })?;
+    }
+    let gitignore = gitignore_builder.build().map_err(|err| {
+        WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
+            InvalidIgnorePattern {
+                message: err.to_string(),
+            },
+        ))
+    })?;
+    Ok(gitignore)
 }
