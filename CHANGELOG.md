@@ -72,6 +72,13 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#1640](https://github.com/biomejs/biome/issues/1640). [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers) code action now generates valid code when last member has a comment but no comma. Contributed by @kalleep
 
+- Fix [#1656](https://github.com/biomejs/biome/issues/1656). [useOptionalChain](https://biomejs.dev/linter/rules/use-optional-chain/) code action now correctly handles logical and chains where methods with the same name are invoked with different arguments:
+  ```diff
+  - tags·&&·tags.includes('a')·&&·tags.includes('b')
+  + tags?.includes('a') && tags.includes('b')
+  ```
+  Contributed by @lucasweng
+
 ### Parser
 
 ## 1.5.3 (2024-01-22)
