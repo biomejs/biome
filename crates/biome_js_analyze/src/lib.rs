@@ -243,9 +243,8 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"for (let i = 0; i < array.length; i++) {
-            console.log({ i });
-          }"#;
+        const SOURCE: &str = r#"xdescribe('foo', () => {});
+        "#;
         // const SOURCE: &str = r#"document.querySelector("foo").value = document.querySelector("foo").value
         //
         // "#;
@@ -259,7 +258,7 @@ mod tests {
             closure_index: Some(0),
             dependencies_index: Some(1),
         };
-        let rule_filter = RuleFilter::Rule("nursery", "useForOf");
+        let rule_filter = RuleFilter::Rule("nursery", "noDisabledTests");
 
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
