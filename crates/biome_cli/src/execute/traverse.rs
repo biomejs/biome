@@ -632,7 +632,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
     }
 
     fn can_handle(&self, rome_path: &RomePath) -> bool {
-        if rome_path.is_dir() {
+        if rome_path.is_dir() || rome_path.is_symlink() {
             let can_handle = !self
                 .workspace
                 .is_path_ignored(IsPathIgnoredParams {

@@ -143,6 +143,9 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
         };
 
         if file_type.is_symlink() {
+            if !ctx.can_handle(&RomePath::new(path.clone())) {
+                return;
+            }
             let Ok((target_path, target_file_type)) = expand_symbolic_link(path, ctx) else {
                 return;
             };
@@ -154,16 +157,20 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
         let _ = ctx.interner().intern_path(path.clone());
 
         if file_type.is_dir() {
-            self.scope.spawn(move |scope| {
-                handle_dir(scope, ctx, &path, None);
-            });
+            if ctx.can_handle(&RomePath::new(path.clone())) {
+                self.scope.spawn(move |scope| {
+                    handle_dir(scope, ctx, &path, None);
+                });
+            }
             return;
         }
 
         if file_type.is_file() {
-            self.scope.spawn(move |_| {
-                ctx.handle_file(&path);
-            });
+            if ctx.can_handle(&RomePath::new(path.clone())) {
+                self.scope.spawn(move |_| {
+                    ctx.handle_file(&path);
+                });
+            }
             return;
         }
 
@@ -233,6 +240,9 @@ fn handle_dir_entry<'scope>(
     };
 
     if file_type.is_symlink() {
+        if !ctx.can_handle(&RomePath::new(path.clone())) {
+            return;
+        }
         let Ok((target_path, target_file_type)) = expand_symbolic_link(path.clone(), ctx) else {
             return;
         };
@@ -255,9 +265,11 @@ fn handle_dir_entry<'scope>(
     }
 
     if file_type.is_dir() {
-        scope.spawn(move |scope| {
-            handle_dir(scope, ctx, &path, origin_path);
-        });
+        if ctx.can_handle(&RomePath::new(path.clone())) {
+            scope.spawn(move |scope| {
+                handle_dir(scope, ctx, &path, origin_path);
+            });
+        }
         return;
     }
 
