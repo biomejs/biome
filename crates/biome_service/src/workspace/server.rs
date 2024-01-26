@@ -135,11 +135,7 @@ impl WorkspaceServer {
     ///
     /// Returns and error if no file exists in the workspace with this path or
     /// if the language associated with the file has no parser capability
-    fn get_parse(
-        &self,
-        rome_path: RomePath,
-        _feature: Option<FeatureName>,
-    ) -> Result<AnyParse, WorkspaceError> {
+    fn get_parse(&self, rome_path: RomePath) -> Result<AnyParse, WorkspaceError> {
         match self.syntax.entry(rome_path) {
             Entry::Occupied(entry) => Ok(entry.get().clone()),
             Entry::Vacant(entry) => {
@@ -188,6 +184,17 @@ impl WorkspaceServer {
     }
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
+    /// or in the feature `ignore`/`include`
+    fn is_ignored(&self, path: &Path, feature: FeatureName) -> bool {
+        // Never ignore Biome's config file regardless `include`/`ignore`
+        path.file_name().and_then(|s| s.to_str()) != Some(BIOME_JSON) &&
+        // Apply top-level `include`/`ignore`
+        (self.is_ignored_by_top_level_config(path) ||
+        // Apply feature-level `include`/`ignore`
+        self.is_ignored_by_feature_config(path, feature))
+    }
+
+    /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
     fn is_ignored_by_top_level_config(&self, path: &Path) -> bool {
         let settings = self.settings();
         let is_included = settings.as_ref().files.included_files.is_empty()
@@ -195,7 +202,8 @@ impl WorkspaceServer {
         !is_included || settings.as_ref().files.ignored_files.matches_path(path)
     }
 
-    fn is_ignored_by_feature_config(&self, path: &Path, feature: &FeatureName) -> bool {
+    /// Check whether a file is ignored in the feature `ignore`/`include`
+    fn is_ignored_by_feature_config(&self, path: &Path, feature: FeatureName) -> bool {
         let settings = self.settings();
         let (feature_included_files, feature_ignored_files) = match feature {
             FeatureName::Format => {
@@ -253,7 +261,7 @@ impl Workspace for WorkspaceServer {
                     file_features.set_ignored_for_all_features();
                 } else {
                     for feature in params.feature {
-                        if self.is_ignored_by_feature_config(path, &feature) {
+                        if self.is_ignored_by_feature_config(path, feature) {
                             file_features.ignored(feature);
                         }
                     }
@@ -273,17 +281,7 @@ impl Workspace for WorkspaceServer {
     }
 
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        let path = params.rome_path.as_path();
-        // Never ignore Biome's config file regardless `include`/`ignore`
-        if path.file_name().and_then(|s| s.to_str()) == Some(BIOME_JSON) {
-            return Ok(false);
-        }
-        // Apply top-level `include`/`ignore`
-        if self.is_ignored_by_top_level_config(path) {
-            return Ok(true);
-        }
-        // Apply feature-level `include`/`ignore`
-        Ok(self.is_ignored_by_feature_config(path, &params.feature))
+        Ok(self.is_ignored(params.rome_path.as_path(), params.feature))
     }
 
     /// Update the global settings for this workspace
@@ -333,7 +331,7 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
 
         // The feature name here can be any feature, in theory
-        let parse = self.get_parse(params.path.clone(), None)?;
+        let parse = self.get_parse(params.path.clone())?;
         let printed = debug_syntax_tree(&params.path, parse);
 
         Ok(printed)
@@ -349,7 +347,7 @@ impl Workspace for WorkspaceServer {
             .debug_control_flow
             .ok_or_else(self.build_capability_error(&params.path))?;
 
-        let parse = self.get_parse(params.path.clone(), None)?;
+        let parse = self.get_parse(params.path.clone())?;
         let printed = debug_control_flow(parse, params.cursor);
 
         Ok(printed)
@@ -362,7 +360,7 @@ impl Workspace for WorkspaceServer {
             .debug_formatter_ir
             .ok_or_else(self.build_capability_error(&params.path))?;
         let settings = self.settings();
-        let parse = self.get_parse(params.path.clone(), Some(FeatureName::Format))?;
+        let parse = self.get_parse(params.path.clone())?;
 
         if !settings.as_ref().formatter().format_with_errors && parse.has_errors() {
             return Err(WorkspaceError::format_with_errors_disabled());
@@ -410,13 +408,7 @@ impl Workspace for WorkspaceServer {
         &self,
         params: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
-        let feature = if params.categories.is_syntax() {
-            FeatureName::Format
-        } else {
-            FeatureName::Lint
-        };
-
-        let parse = self.get_parse(params.path.clone(), Some(feature))?;
+        let parse = self.get_parse(params.path.clone())?;
         let settings = self.settings.read().unwrap();
 
         let (diagnostics, errors, skipped_diagnostics) = if let Some(lint) =
@@ -489,7 +481,7 @@ impl Workspace for WorkspaceServer {
             .code_actions
             .ok_or_else(self.build_capability_error(&params.path))?;
 
-        let parse = self.get_parse(params.path.clone(), Some(FeatureName::Lint))?;
+        let parse = self.get_parse(params.path.clone())?;
         let settings = self.settings.read().unwrap();
         let rules = settings.linter().rules.as_ref();
         Ok(code_actions(
@@ -510,7 +502,7 @@ impl Workspace for WorkspaceServer {
             .format
             .ok_or_else(self.build_capability_error(&params.path))?;
         let settings = self.settings();
-        let parse = self.get_parse(params.path.clone(), Some(FeatureName::Format))?;
+        let parse = self.get_parse(params.path.clone())?;
 
         if !settings.as_ref().formatter().format_with_errors && parse.has_errors() {
             return Err(WorkspaceError::format_with_errors_disabled());
@@ -526,7 +518,7 @@ impl Workspace for WorkspaceServer {
             .format_range
             .ok_or_else(self.build_capability_error(&params.path))?;
         let settings = self.settings();
-        let parse = self.get_parse(params.path.clone(), Some(FeatureName::Format))?;
+        let parse = self.get_parse(params.path.clone())?;
 
         if !settings.as_ref().formatter().format_with_errors && parse.has_errors() {
             return Err(WorkspaceError::format_with_errors_disabled());
@@ -543,7 +535,7 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
 
         let settings = self.settings();
-        let parse = self.get_parse(params.path.clone(), Some(FeatureName::Format))?;
+        let parse = self.get_parse(params.path.clone())?;
         if !settings.as_ref().formatter().format_with_errors && parse.has_errors() {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
@@ -558,7 +550,7 @@ impl Workspace for WorkspaceServer {
             .fix_all
             .ok_or_else(self.build_capability_error(&params.path))?;
         let settings = self.settings.read().unwrap();
-        let parse = self.get_parse(params.path.clone(), Some(FeatureName::Lint))?;
+        let parse = self.get_parse(params.path.clone())?;
         // Compite final rules (taking `overrides` into account)
         let rules = settings.as_rules(params.path.as_path());
         let rule_filter_list = rules
@@ -586,7 +578,7 @@ impl Workspace for WorkspaceServer {
             .rename
             .ok_or_else(self.build_capability_error(&params.path))?;
 
-        let parse = self.get_parse(params.path.clone(), None)?;
+        let parse = self.get_parse(params.path.clone())?;
         let result = rename(&params.path, parse, params.symbol_at, params.new_name)?;
 
         Ok(result)
@@ -615,7 +607,7 @@ impl Workspace for WorkspaceServer {
             .organize_imports
             .ok_or_else(self.build_capability_error(&params.path))?;
 
-        let parse = self.get_parse(params.path, None)?;
+        let parse = self.get_parse(params.path)?;
         let result = organize_imports(parse)?;
 
         Ok(result)
