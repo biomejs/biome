@@ -31,6 +31,28 @@ impl Default for UtilityClassSortingOptions {
     }
 }
 
+impl UtilityClassSortingOptions {
+    pub(crate) fn has_function(&self, name: &str) -> bool {
+        let iter = self.functions.iter().flatten();
+        for v in iter {
+            if v.as_str() == name {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub(crate) fn has_attribute(&self, name: &str) -> bool {
+        let iter = self.attributes.iter().flatten();
+        for v in iter {
+            if v.as_str() == name {
+                return true;
+            }
+        }
+        false
+    }
+}
+
 const ALLOWED_OPTIONS: &[&str] = &["attributes", "functions"];
 
 impl Deserializable for UtilityClassSortingOptions {
