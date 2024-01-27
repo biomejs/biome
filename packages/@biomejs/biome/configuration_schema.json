@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "PartialConfiguration",
+	"title": "Configuration",
 	"description": "The configuration that is contained inside the file `biome.json`",
 	"type": "object",
 	"properties": {
@@ -11,7 +11,7 @@
 		"css": {
 			"description": "Specific configuration for the Css language",
 			"anyOf": [
-				{ "$ref": "#/definitions/PartialCssConfiguration" },
+				{ "$ref": "#/definitions/CssConfiguration" },
 				{ "type": "null" }
 			]
 		},
@@ -22,44 +22,41 @@
 		"files": {
 			"description": "The configuration of the filesystem",
 			"anyOf": [
-				{ "$ref": "#/definitions/PartialFilesConfiguration" },
+				{ "$ref": "#/definitions/FilesConfiguration" },
 				{ "type": "null" }
 			]
 		},
 		"formatter": {
 			"description": "The configuration of the formatter",
 			"anyOf": [
-				{ "$ref": "#/definitions/PartialFormatterConfiguration" },
+				{ "$ref": "#/definitions/FormatterConfiguration" },
 				{ "type": "null" }
 			]
 		},
 		"javascript": {
 			"description": "Specific configuration for the JavaScript language",
 			"anyOf": [
-				{ "$ref": "#/definitions/PartialJavascriptConfiguration" },
+				{ "$ref": "#/definitions/JavascriptConfiguration" },
 				{ "type": "null" }
 			]
 		},
 		"json": {
 			"description": "Specific configuration for the Json language",
 			"anyOf": [
-				{ "$ref": "#/definitions/PartialJsonConfiguration" },
+				{ "$ref": "#/definitions/JsonConfiguration" },
 				{ "type": "null" }
 			]
 		},
 		"linter": {
 			"description": "The configuration for the linter",
 			"anyOf": [
-				{ "$ref": "#/definitions/PartialLinterConfiguration" },
+				{ "$ref": "#/definitions/LinterConfiguration" },
 				{ "type": "null" }
 			]
 		},
 		"organizeImports": {
 			"description": "The configuration of the import sorting",
-			"anyOf": [
-				{ "$ref": "#/definitions/PartialOrganizeImports" },
-				{ "type": "null" }
-			]
+			"anyOf": [{ "$ref": "#/definitions/OrganizeImports" }, { "type": "null" }]
 		},
 		"overrides": {
 			"description": "A list of granular patterns that should be applied only to a sub set of files",
@@ -68,7 +65,7 @@
 		"vcs": {
 			"description": "The configuration of the VCS integration",
 			"anyOf": [
-				{ "$ref": "#/definitions/PartialVcsConfiguration" },
+				{ "$ref": "#/definitions/VcsConfiguration" },
 				{ "type": "null" }
 			]
 		}
@@ -770,6 +767,75 @@
 				}
 			}
 		},
+		"CssConfiguration": {
+			"description": "Options applied to CSS files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "Formatting options",
+					"anyOf": [
+						{ "$ref": "#/definitions/CssFormatter" },
+						{ "type": "null" }
+					]
+				},
+				"parser": {
+					"description": "Parsing options",
+					"anyOf": [{ "$ref": "#/definitions/CssParser" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"CssFormatter": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for CSS (and its super languages) files.",
+					"type": ["boolean", "null"]
+				},
+				"indentSize": {
+					"description": "The size of the indentation applied to CSS (and its super languages) files. Default to 2.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"indentStyle": {
+					"description": "The indent style applied to CSS (and its super languages) files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/PlainIndentStyle" },
+						{ "type": "null" }
+					]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to CSS (and its super languages) files. Default to 2.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to CSS (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"quoteStyle": {
+					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"CssParser": {
+			"description": "Options that changes how the CSS parser behaves",
+			"type": "object",
+			"properties": {
+				"allowWrongLineComments": {
+					"description": "Allow comments to appear on incorrect lines in `.css` files",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"DeprecatedHooksOptions": {
 			"description": "Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.",
 			"type": "object",
@@ -837,6 +903,78 @@
 			},
 			"additionalProperties": false
 		},
+		"FilesConfiguration": {
+			"description": "The configuration of the filesystem",
+			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"ignoreUnknown": {
+					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
+					"type": ["boolean", "null"]
+				},
+				"include": {
+					"description": "A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"maxSize": {
+					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
+					"type": ["integer", "null"],
+					"format": "uint64",
+					"minimum": 1.0
+				}
+			},
+			"additionalProperties": false
+		},
+		"FormatterConfiguration": {
+			"description": "Generic options applied to all files",
+			"type": "object",
+			"properties": {
+				"enabled": { "type": ["boolean", "null"] },
+				"formatWithErrors": {
+					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
+					"type": ["boolean", "null"]
+				},
+				"ignore": {
+					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"include": {
+					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"indentSize": {
+					"description": "The size of the indentation, 2 by default (deprecated, use `indent-width`)",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"indentStyle": {
+					"description": "The indent style.",
+					"anyOf": [
+						{ "$ref": "#/definitions/PlainIndentStyle" },
+						{ "type": "null" }
+					]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation, 2 by default",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"lineEnding": {
+					"description": "The type of line ending.",
+					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"Hooks": {
 			"type": "object",
 			"required": ["name"],
@@ -870,6 +1008,201 @@
 			},
 			"additionalProperties": false
 		},
+		"JavascriptConfiguration": {
+			"description": "A set of options applied to the JavaScript files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "Formatting options",
+					"anyOf": [
+						{ "$ref": "#/definitions/JavascriptFormatter" },
+						{ "type": "null" }
+					]
+				},
+				"globals": {
+					"description": "A list of global bindings that should be ignored by the analyzers\n\nIf defined here, they should not emit diagnostics.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"organize_imports": {
+					"anyOf": [
+						{ "$ref": "#/definitions/JavascriptOrganizeImports" },
+						{ "type": "null" }
+					]
+				},
+				"parser": {
+					"description": "Parsing options",
+					"anyOf": [
+						{ "$ref": "#/definitions/JavascriptParser" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"JavascriptFormatter": {
+			"description": "Formatting options specific to the JavaScript files",
+			"type": "object",
+			"properties": {
+				"arrowParentheses": {
+					"description": "Whether to add non-necessary parentheses to arrow functions. Defaults to \"always\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/ArrowParentheses" },
+						{ "type": "null" }
+					]
+				},
+				"bracketSameLine": {
+					"description": "Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.",
+					"type": ["boolean", "null"]
+				},
+				"bracketSpacing": {
+					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"type": ["boolean", "null"]
+				},
+				"enabled": {
+					"description": "Control the formatter for JavaScript (and its super languages) files.",
+					"type": ["boolean", "null"]
+				},
+				"indentSize": {
+					"description": "The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"indentStyle": {
+					"description": "The indent style applied to JavaScript (and its super languages) files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/PlainIndentStyle" },
+						{ "type": "null" }
+					]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"jsxQuoteStyle": {
+					"description": "The type of quotes used in JSX. Defaults to double.",
+					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to JavaScript (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"quoteProperties": {
+					"description": "When properties in objects are quoted. Defaults to asNeeded.",
+					"anyOf": [
+						{ "$ref": "#/definitions/QuoteProperties" },
+						{ "type": "null" }
+					]
+				},
+				"quoteStyle": {
+					"description": "The type of quotes used in JavaScript code. Defaults to double.",
+					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
+				},
+				"semicolons": {
+					"description": "Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.",
+					"anyOf": [{ "$ref": "#/definitions/Semicolons" }, { "type": "null" }]
+				},
+				"trailingComma": {
+					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/TrailingComma" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"JavascriptOrganizeImports": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"JavascriptParser": {
+			"description": "Options that changes how the JavaScript parser behaves",
+			"type": "object",
+			"properties": {
+				"unsafeParameterDecoratorsEnabled": {
+					"description": "It enables the experimental and unsafe parsing of parameter decorators\n\nThese decorators belong to an old proposal, and they are subject to change.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"JsonConfiguration": {
+			"description": "Options applied to JSON files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "Formatting options",
+					"anyOf": [
+						{ "$ref": "#/definitions/JsonFormatter" },
+						{ "type": "null" }
+					]
+				},
+				"parser": {
+					"description": "Parsing options",
+					"anyOf": [{ "$ref": "#/definitions/JsonParser" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"JsonFormatter": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for JSON (and its super languages) files.",
+					"type": ["boolean", "null"]
+				},
+				"indentSize": {
+					"description": "The size of the indentation applied to JSON (and its super languages) files. Default to 2.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"indentStyle": {
+					"description": "The indent style applied to JSON (and its super languages) files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/PlainIndentStyle" },
+						{ "type": "null" }
+					]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to JSON (and its super languages) files. Default to 2.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to JSON (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"JsonParser": {
+			"description": "Options that changes how the JSON parser behaves",
+			"type": "object",
+			"properties": {
+				"allowComments": {
+					"description": "Allow parsing comments in `.json` files",
+					"type": ["boolean", "null"]
+				},
+				"allowTrailingCommas": {
+					"description": "Allow parsing trailing commas in `.json` files",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"LineEnding": {
 			"oneOf": [
 				{
@@ -894,6 +1227,28 @@
 			"type": "integer",
 			"format": "uint16",
 			"minimum": 0.0
+		},
+		"LinterConfiguration": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
+					"type": ["boolean", "null"]
+				},
+				"ignore": {
+					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"include": {
+					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"rules": {
+					"description": "List of rules",
+					"anyOf": [{ "$ref": "#/definitions/Rules" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
 		},
 		"NamingConventionOptions": {
 			"description": "Rule's options.",
@@ -1113,6 +1468,24 @@
 				}
 			}
 		},
+		"OrganizeImports": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Enables the organization of imports",
+					"type": ["boolean", "null"]
+				},
+				"ignore": {
+					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"include": {
+					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"OverrideFormatterConfiguration": {
 			"type": "object",
 			"properties": {
@@ -1183,7 +1556,7 @@
 				"css": {
 					"description": "Specific configuration for the Css language",
 					"anyOf": [
-						{ "$ref": "#/definitions/PartialCssConfiguration" },
+						{ "$ref": "#/definitions/CssConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1205,14 +1578,14 @@
 				"javascript": {
 					"description": "Specific configuration for the JavaScript language",
 					"anyOf": [
-						{ "$ref": "#/definitions/PartialJavascriptConfiguration" },
+						{ "$ref": "#/definitions/JavascriptConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"json": {
 					"description": "Specific configuration for the Json language",
 					"anyOf": [
-						{ "$ref": "#/definitions/PartialJsonConfiguration" },
+						{ "$ref": "#/definitions/JsonConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1236,418 +1609,6 @@
 		"Overrides": {
 			"type": "array",
 			"items": { "$ref": "#/definitions/OverridePattern" }
-		},
-		"PartialCssConfiguration": {
-			"description": "Options applied to CSS files",
-			"type": "object",
-			"properties": {
-				"formatter": {
-					"description": "Formatting options",
-					"anyOf": [
-						{ "$ref": "#/definitions/PartialCssFormatter" },
-						{ "type": "null" }
-					]
-				},
-				"parser": {
-					"description": "Parsing options",
-					"anyOf": [
-						{ "$ref": "#/definitions/PartialCssParser" },
-						{ "type": "null" }
-					]
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialCssFormatter": {
-			"type": "object",
-			"properties": {
-				"enabled": {
-					"description": "Control the formatter for CSS (and its super languages) files.",
-					"type": ["boolean", "null"]
-				},
-				"indentSize": {
-					"description": "The size of the indentation applied to CSS (and its super languages) files. Default to 2.",
-					"type": ["integer", "null"],
-					"format": "uint8",
-					"minimum": 0.0
-				},
-				"indentStyle": {
-					"description": "The indent style applied to CSS (and its super languages) files.",
-					"anyOf": [
-						{ "$ref": "#/definitions/PlainIndentStyle" },
-						{ "type": "null" }
-					]
-				},
-				"indentWidth": {
-					"description": "The size of the indentation applied to CSS (and its super languages) files. Default to 2.",
-					"type": ["integer", "null"],
-					"format": "uint8",
-					"minimum": 0.0
-				},
-				"lineEnding": {
-					"description": "The type of line ending applied to CSS (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
-				},
-				"lineWidth": {
-					"description": "What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.",
-					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
-				},
-				"quoteStyle": {
-					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialCssParser": {
-			"description": "Options that changes how the CSS parser behaves",
-			"type": "object",
-			"properties": {
-				"allowWrongLineComments": {
-					"description": "Allow comments to appear on incorrect lines in `.css` files",
-					"type": ["boolean", "null"]
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialFilesConfiguration": {
-			"description": "The configuration of the filesystem",
-			"type": "object",
-			"properties": {
-				"ignore": {
-					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"ignoreUnknown": {
-					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
-					"type": ["boolean", "null"]
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"maxSize": {
-					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
-					"type": ["integer", "null"],
-					"format": "uint64",
-					"minimum": 1.0
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialFormatterConfiguration": {
-			"description": "Generic options applied to all files",
-			"type": "object",
-			"properties": {
-				"enabled": { "type": ["boolean", "null"] },
-				"formatWithErrors": {
-					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
-					"type": ["boolean", "null"]
-				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"indentSize": {
-					"description": "The size of the indentation, 2 by default (deprecated, use `indent-width`)",
-					"type": ["integer", "null"],
-					"format": "uint8",
-					"minimum": 0.0
-				},
-				"indentStyle": {
-					"description": "The indent style.",
-					"anyOf": [
-						{ "$ref": "#/definitions/PlainIndentStyle" },
-						{ "type": "null" }
-					]
-				},
-				"indentWidth": {
-					"description": "The size of the indentation, 2 by default",
-					"type": ["integer", "null"],
-					"format": "uint8",
-					"minimum": 0.0
-				},
-				"lineEnding": {
-					"description": "The type of line ending.",
-					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
-				},
-				"lineWidth": {
-					"description": "What's the max width of a line. Defaults to 80.",
-					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialJavascriptConfiguration": {
-			"description": "A set of options applied to the JavaScript files",
-			"type": "object",
-			"properties": {
-				"formatter": {
-					"description": "Formatting options",
-					"anyOf": [
-						{ "$ref": "#/definitions/PartialJavascriptFormatter" },
-						{ "type": "null" }
-					]
-				},
-				"globals": {
-					"description": "A list of global bindings that should be ignored by the analyzers\n\nIf defined here, they should not emit diagnostics.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"organize_imports": {
-					"anyOf": [
-						{ "$ref": "#/definitions/PartialJavascriptOrganizeImports" },
-						{ "type": "null" }
-					]
-				},
-				"parser": {
-					"description": "Parsing options",
-					"anyOf": [
-						{ "$ref": "#/definitions/PartialJavascriptParser" },
-						{ "type": "null" }
-					]
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialJavascriptFormatter": {
-			"description": "Formatting options specific to the JavaScript files",
-			"type": "object",
-			"properties": {
-				"arrowParentheses": {
-					"description": "Whether to add non-necessary parentheses to arrow functions. Defaults to \"always\".",
-					"anyOf": [
-						{ "$ref": "#/definitions/ArrowParentheses" },
-						{ "type": "null" }
-					]
-				},
-				"bracketSameLine": {
-					"description": "Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.",
-					"type": ["boolean", "null"]
-				},
-				"bracketSpacing": {
-					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
-					"type": ["boolean", "null"]
-				},
-				"enabled": {
-					"description": "Control the formatter for JavaScript (and its super languages) files.",
-					"type": ["boolean", "null"]
-				},
-				"indentSize": {
-					"description": "The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.",
-					"type": ["integer", "null"],
-					"format": "uint8",
-					"minimum": 0.0
-				},
-				"indentStyle": {
-					"description": "The indent style applied to JavaScript (and its super languages) files.",
-					"anyOf": [
-						{ "$ref": "#/definitions/PlainIndentStyle" },
-						{ "type": "null" }
-					]
-				},
-				"indentWidth": {
-					"description": "The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.",
-					"type": ["integer", "null"],
-					"format": "uint8",
-					"minimum": 0.0
-				},
-				"jsxQuoteStyle": {
-					"description": "The type of quotes used in JSX. Defaults to double.",
-					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
-				},
-				"lineEnding": {
-					"description": "The type of line ending applied to JavaScript (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
-				},
-				"lineWidth": {
-					"description": "What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.",
-					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
-				},
-				"quoteProperties": {
-					"description": "When properties in objects are quoted. Defaults to asNeeded.",
-					"anyOf": [
-						{ "$ref": "#/definitions/QuoteProperties" },
-						{ "type": "null" }
-					]
-				},
-				"quoteStyle": {
-					"description": "The type of quotes used in JavaScript code. Defaults to double.",
-					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
-				},
-				"semicolons": {
-					"description": "Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.",
-					"anyOf": [{ "$ref": "#/definitions/Semicolons" }, { "type": "null" }]
-				},
-				"trailingComma": {
-					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
-					"anyOf": [
-						{ "$ref": "#/definitions/TrailingComma" },
-						{ "type": "null" }
-					]
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialJavascriptOrganizeImports": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"PartialJavascriptParser": {
-			"description": "Options that changes how the JavaScript parser behaves",
-			"type": "object",
-			"properties": {
-				"unsafeParameterDecoratorsEnabled": {
-					"description": "It enables the experimental and unsafe parsing of parameter decorators\n\nThese decorators belong to an old proposal, and they are subject to change.",
-					"type": ["boolean", "null"]
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialJsonConfiguration": {
-			"description": "Options applied to JSON files",
-			"type": "object",
-			"properties": {
-				"formatter": {
-					"description": "Formatting options",
-					"anyOf": [
-						{ "$ref": "#/definitions/PartialJsonFormatter" },
-						{ "type": "null" }
-					]
-				},
-				"parser": {
-					"description": "Parsing options",
-					"anyOf": [
-						{ "$ref": "#/definitions/PartialJsonParser" },
-						{ "type": "null" }
-					]
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialJsonFormatter": {
-			"type": "object",
-			"properties": {
-				"enabled": {
-					"description": "Control the formatter for JSON (and its super languages) files.",
-					"type": ["boolean", "null"]
-				},
-				"indentSize": {
-					"description": "The size of the indentation applied to JSON (and its super languages) files. Default to 2.",
-					"type": ["integer", "null"],
-					"format": "uint8",
-					"minimum": 0.0
-				},
-				"indentStyle": {
-					"description": "The indent style applied to JSON (and its super languages) files.",
-					"anyOf": [
-						{ "$ref": "#/definitions/PlainIndentStyle" },
-						{ "type": "null" }
-					]
-				},
-				"indentWidth": {
-					"description": "The size of the indentation applied to JSON (and its super languages) files. Default to 2.",
-					"type": ["integer", "null"],
-					"format": "uint8",
-					"minimum": 0.0
-				},
-				"lineEnding": {
-					"description": "The type of line ending applied to JSON (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
-				},
-				"lineWidth": {
-					"description": "What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.",
-					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialJsonParser": {
-			"description": "Options that changes how the JSON parser behaves",
-			"type": "object",
-			"properties": {
-				"allowComments": {
-					"description": "Allow parsing comments in `.json` files",
-					"type": ["boolean", "null"]
-				},
-				"allowTrailingCommas": {
-					"description": "Allow parsing trailing commas in `.json` files",
-					"type": ["boolean", "null"]
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialLinterConfiguration": {
-			"type": "object",
-			"properties": {
-				"enabled": {
-					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
-					"type": ["boolean", "null"]
-				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"rules": {
-					"description": "List of rules",
-					"anyOf": [{ "$ref": "#/definitions/Rules" }, { "type": "null" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialOrganizeImports": {
-			"type": "object",
-			"properties": {
-				"enabled": {
-					"description": "Enables the organization of imports",
-					"type": ["boolean", "null"]
-				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"PartialVcsConfiguration": {
-			"description": "Set of properties to integrate Biome with a VCS software.",
-			"type": "object",
-			"properties": {
-				"clientKind": {
-					"description": "The kind of client.",
-					"anyOf": [
-						{ "$ref": "#/definitions/VcsClientKind" },
-						{ "type": "null" }
-					]
-				},
-				"defaultBranch": {
-					"description": "The main branch of the project",
-					"type": ["string", "null"]
-				},
-				"enabled": {
-					"description": "Whether Biome should integrate itself with the VCS client",
-					"type": ["boolean", "null"]
-				},
-				"root": {
-					"description": "The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.\n\nIf Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted",
-					"type": ["string", "null"]
-				},
-				"useIgnoreFile": {
-					"description": "Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.",
-					"type": ["boolean", "null"]
-				}
-			},
-			"additionalProperties": false
 		},
 		"Performance": {
 			"description": "A list of rules that belong to this group",
@@ -2461,6 +2422,36 @@
 					"enum": ["git"]
 				}
 			]
+		},
+		"VcsConfiguration": {
+			"description": "Set of properties to integrate Biome with a VCS software.",
+			"type": "object",
+			"properties": {
+				"clientKind": {
+					"description": "The kind of client.",
+					"anyOf": [
+						{ "$ref": "#/definitions/VcsClientKind" },
+						{ "type": "null" }
+					]
+				},
+				"defaultBranch": {
+					"description": "The main branch of the project",
+					"type": ["string", "null"]
+				},
+				"enabled": {
+					"description": "Whether Biome should integrate itself with the VCS client",
+					"type": ["boolean", "null"]
+				},
+				"root": {
+					"description": "The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.\n\nIf Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted",
+					"type": ["string", "null"]
+				},
+				"useIgnoreFile": {
+					"description": "Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
 		}
 	}
 }
