@@ -1,29 +1,10 @@
 use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt, HorizontalLine};
-use biome_service::configuration::organize_imports::PartialOrganizeImports;
-use biome_service::configuration::PartialLinterConfiguration;
-use biome_service::{create_config, PartialConfiguration, Rules};
+use biome_service::{create_config, PartialConfiguration};
 
 pub(crate) fn init(mut session: CliSession) -> Result<(), CliDiagnostic> {
     let fs = &mut session.app.fs;
-    create_config(
-        fs,
-        PartialConfiguration {
-            organize_imports: Some(PartialOrganizeImports {
-                enabled: Some(true),
-                ..Default::default()
-            }),
-            linter: Some(PartialLinterConfiguration {
-                enabled: Some(true),
-                rules: Some(Rules {
-                    recommended: Some(true),
-                    ..Default::default()
-                }),
-                ..Default::default()
-            }),
-            ..Default::default()
-        },
-    )?;
+    create_config(fs, PartialConfiguration::init())?;
 
     session.app.console.log(markup! {
 "\n"<Inverse>"Welcome to Biome! Let's get you started..."</Inverse>"

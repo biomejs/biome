@@ -2056,6 +2056,7 @@ export interface RenameResult {
 	 */
 	range: TextRange;
 }
+export type Configuration = PartialConfiguration;
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<SupportsFeatureResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;

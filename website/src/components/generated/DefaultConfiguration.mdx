@@ -1,93 +1,11 @@
 
 ```json title="biome.json"
 {
-	"schema": "",
-	"vcs": {
-		"client_kind": "git",
-		"enabled": false,
-		"use_ignore_file": true,
-		"root": "",
-		"default_branch": ""
-	},
-	"files": {
-		"max_size": 1048576,
-		"ignore": [],
-		"include": [],
-		"ignore_unknown": false
-	},
-	"formatter": {
-		"enabled": true,
-		"format_with_errors": false,
-		"indent_style": "tab",
-		"indent_size": 2,
-		"indent_width": 2,
-		"line_ending": "lf",
-		"line_width": 80,
-		"ignore": [],
-		"include": []
-	},
-	"organize_imports": {
-		"enabled": true,
-		"ignore": [],
-		"include": []
-	},
+	"organizeImports": { "enabled": true },
 	"linter": {
 		"enabled": true,
-		"rules": {},
-		"ignore": [],
-		"include": []
-	},
-	"javascript": {
-		"formatter": {
-			"jsx_quote_style": "double",
-			"quote_properties": "asNeeded",
-			"trailing_comma": "all",
-			"semicolons": "always",
-			"arrow_parentheses": "always",
-			"bracket_spacing": true,
-			"bracket_same_line": false,
-			"enabled": true,
-			"indent_style": null,
-			"indent_size": null,
-			"indent_width": null,
-			"line_ending": null,
-			"line_width": null,
-			"quote_style": "double"
-		},
-		"parser": {
-			"unsafe_parameter_decorators_enabled": false
-		},
-		"globals": [],
-		"organize_imports": {}
-	},
-	"json": {
-		"parser": {
-			"allow_comments": false,
-			"allow_trailing_commas": false
-		},
-		"formatter": {
-			"enabled": true,
-			"indent_style": null,
-			"indent_width": null,
-			"indent_size": null,
-			"line_ending": null,
-			"line_width": null
-		}
-	},
-	"css": {
-		"parser": { "allow_wrong_line_comments": false },
-		"formatter": {
-			"enabled": true,
-			"indent_style": null,
-			"indent_width": null,
-			"indent_size": null,
-			"line_ending": null,
-			"line_width": null,
-			"quote_style": "double"
-		}
-	},
-	"extends": [],
-	"overrides": []
+		"rules": { "recommended": true }
+	}
 }
 
 ```
