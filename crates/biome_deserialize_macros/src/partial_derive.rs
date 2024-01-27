@@ -5,13 +5,20 @@ use attrs::{Attrs, FieldAttrs};
 use proc_macro2::{Ident, Span, TokenStream};
 use proc_macro_error::*;
 use quote::quote;
-use syn::{Data, Field, Fields, Type};
+use syn::{Data, Field, Type};
 
 pub(crate) struct DeriveInput {
     pub ident: Ident,
     pub partial_ident: Ident,
     pub attrs: Attrs,
-    pub fields: Fields,
+    pub fields: Vec<FieldData>,
+}
+
+pub(crate) struct FieldData {
+    ident: Ident,
+    ty: Type,
+    should_wrap: bool,
+    attrs: FieldAttrs,
 }
 
 impl DeriveInput {
@@ -22,7 +29,34 @@ impl DeriveInput {
         let attrs = Attrs::from_attrs(&input.attrs);
 
         let fields = match input.data {
-            Data::Struct(data) => data.fields,
+            Data::Struct(data) => data
+                .fields
+                .iter()
+                .map(
+                    |Field {
+                         ident, ty, attrs, ..
+                     }| {
+                        let Some(ident) = ident else {
+                            abort!(data.fields, "Partial derive requires named fields");
+                        };
+
+                        let should_wrap = !matches!(ty, Type::Path(path)
+                            if path
+                                .path
+                                .segments
+                                .last()
+                                .is_some_and(|segment| segment.ident == "Option")
+                        );
+
+                        FieldData {
+                            ident: ident.clone(),
+                            ty: ty.clone(),
+                            should_wrap,
+                            attrs: FieldAttrs::from_attrs(attrs),
+                        }
+                    },
+                )
+                .collect(),
             _ => abort!(input, "Partial can only be derived for structs"),
         };
 
@@ -52,11 +86,12 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
     });
 
     let fields = input.fields.iter().map(
-        |Field {
-             ident, attrs, ty, ..
+        |FieldData {
+             ident,
+             attrs,
+             ty,
+             should_wrap,
          }| {
-            let attrs = FieldAttrs::from_attrs(attrs);
-
             let doc_lines = attrs.doc_lines.iter().map(|tokens| {
                 quote! { #[doc #tokens] }
             });
@@ -75,6 +110,11 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
                 }
                 None => ty.clone(),
             };
+            let ty = if *should_wrap {
+                quote! { Option<#ty> }
+            } else {
+                quote! { #ty }
+            };
 
             let attrs = attrs.nested_attrs.iter().map(|(ident, nested)| {
                 quote! {
@@ -86,22 +126,48 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
                 #( #doc_lines )*
                 #( #attrs )*
                 #[serde(skip_serializing_if = "Option::is_none")]
-                pub #ident: Option<#ty>
+                pub #ident: #ty
             }
         },
     );
 
-    let from_partial_fields = input.fields.iter().map(|Field { ident, ty, .. }| {
-        quote! {
-            #ident: partial.#ident.map(#ty::from).unwrap_or(default.#ident)
-        }
-    });
+    let from_partial_fields = input.fields.iter().map(
+        |FieldData {
+             ident,
+             ty,
+             should_wrap,
+             ..
+         }| {
+            if *should_wrap {
+                quote! {
+                    #ident: partial.#ident.map(#ty::from).unwrap_or(default.#ident)
+                }
+            } else {
+                quote! {
+                    #ident: partial.#ident
+                }
+            }
+        },
+    );
 
-    let to_partial_fields = input.fields.iter().map(|Field { ident, ty, .. }| {
-        quote! {
-            #ident: (other.#ident != default.#ident).then_some(other.#ident).map(#ty::into)
-        }
-    });
+    let to_partial_fields = input.fields.iter().map(
+        |FieldData {
+             ident,
+             ty,
+             should_wrap,
+             ..
+         }| {
+            if *should_wrap {
+                quote! {
+                    #ident: (other.#ident != default.#ident).then_some(other.#ident).map(#ty::into)
+                }
+            } else {
+                quote! {
+                    #ident: other.#ident
+                }
+            }
+        },
+    );
 
     quote! {
         #( #doc_lines )*

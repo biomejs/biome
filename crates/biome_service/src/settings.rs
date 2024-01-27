@@ -321,9 +321,9 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.formatter.bracket_spacing = Some(formatter.bracket_spacing.into());
         language_setting.formatter.bracket_same_line = Some(formatter.bracket_same_line.into());
         language_setting.formatter.enabled = Some(formatter.enabled);
-        language_setting.formatter.line_width = Some(formatter.line_width);
-        language_setting.formatter.indent_width = Some(formatter.indent_width.into());
-        language_setting.formatter.indent_style = Some(formatter.indent_style.into());
+        language_setting.formatter.line_width = formatter.line_width;
+        language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
+        language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
 
         language_setting.parser.parse_class_parameter_decorators =
             javascript.parser.unsafe_parameter_decorators_enabled;
@@ -355,9 +355,9 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
         let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
 
         language_setting.formatter.enabled = Some(css.formatter.enabled);
-        language_setting.formatter.line_width = Some(css.formatter.line_width);
-        language_setting.formatter.indent_width = Some(css.formatter.indent_width.into());
-        language_setting.formatter.indent_style = Some(css.formatter.indent_style.into());
+        language_setting.formatter.line_width = css.formatter.line_width;
+        language_setting.formatter.indent_width = css.formatter.indent_width.map(Into::into);
+        language_setting.formatter.indent_style = css.formatter.indent_style.map(Into::into);
         language_setting.formatter.quote_style = Some(css.formatter.quote_style);
 
         language_setting

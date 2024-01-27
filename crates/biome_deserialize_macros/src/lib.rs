@@ -260,6 +260,28 @@ pub fn derive_mergeable(input: TokenStream) -> TokenStream {
     TokenStream::from(tokens)
 }
 
+/// Generates a "partial" struct from another.
+///
+/// A partial struct has the same shape as the struct is derived from (the
+/// "full" struct), but with all its fields wrapped in `Option`. Fields that
+/// were already wrapped in an `Option` don't get wrapped again.
+///
+/// The name of the generated partial struct is `Partial{FullStruct}`.
+///
+/// ## Conversions
+///
+/// The [`From`] trait is implemented in both directions so that partial structs
+/// can be created from full structs and the other way around. When creating a
+/// full struct from a partial one, default values are used in place of `None`
+/// values. When creating a partial struct from a full one, the partial struct
+/// will only have `Some` values for values that differed from their default.
+///
+/// As a consequence, full structs must implement `Default` to support this
+/// macro.
+///
+/// ## Partial annotations
+///
+///
 #[proc_macro_derive(Partial, attributes(partial))]
 #[proc_macro_error]
 pub fn derive_partial(input: TokenStream) -> TokenStream {

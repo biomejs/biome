@@ -41,20 +41,20 @@ pub struct CssFormatter {
 
     /// The indent style applied to CSS (and its super languages) files.
     #[partial(bpaf(long("css-formatter-indent-style"), argument("tab|space"), optional))]
-    pub indent_style: PlainIndentStyle,
+    pub indent_style: Option<PlainIndentStyle>,
 
     /// The size of the indentation applied to CSS (and its super languages) files. Default to 2.
     #[partial(bpaf(long("css-formatter-indent-width"), argument("NUMBER"), optional))]
-    pub indent_width: u8,
+    pub indent_width: Option<u8>,
 
     /// The size of the indentation applied to CSS (and its super languages) files. Default to 2.
     #[partial(bpaf(long("css-formatter-indent-size"), argument("NUMBER"), optional))]
     #[partial(deserializable(deprecated(use_instead = "css.formatter.indentWidth")))]
-    pub indent_size: u8,
+    pub indent_size: Option<u8>,
 
     /// The type of line ending applied to CSS (and its super languages) files.
     #[partial(bpaf(long("css-formatter-line-ending"), argument("lf|crlf|cr"), optional))]
-    pub line_ending: LineEnding,
+    pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
     #[partial(serde(
@@ -62,7 +62,7 @@ pub struct CssFormatter {
         serialize_with = "serialize_line_width"
     ))]
     #[partial(bpaf(long("css-formatter-line-width"), argument("NUMBER"), optional))]
-    pub line_width: LineWidth,
+    pub line_width: Option<LineWidth>,
 
     #[partial(bpaf(long("css-formatter-quote-style"), argument("double|single"), optional))]
     pub quote_style: QuoteStyle,
