@@ -45,20 +45,20 @@ pub struct JsonFormatter {
 
     /// The indent style applied to JSON (and its super languages) files.
     #[partial(bpaf(long("json-formatter-indent-style"), argument("tab|space"), optional))]
-    pub indent_style: PlainIndentStyle,
+    pub indent_style: Option<PlainIndentStyle>,
 
     /// The size of the indentation applied to JSON (and its super languages) files. Default to 2.
     #[partial(bpaf(long("json-formatter-indent-width"), argument("NUMBER"), optional))]
-    pub indent_width: u8,
+    pub indent_width: Option<u8>,
 
     /// The size of the indentation applied to JSON (and its super languages) files. Default to 2.
     #[partial(bpaf(long("json-formatter-indent-size"), argument("NUMBER"), optional))]
     #[partial(deserializable(deprecated(use_instead = "json.formatter.indentWidth")))]
-    pub indent_size: u8,
+    pub indent_size: Option<u8>,
 
     /// The type of line ending applied to JSON (and its super languages) files.
     #[partial(bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr"), optional))]
-    pub line_ending: LineEnding,
+    pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
     #[partial(serde(
@@ -66,7 +66,7 @@ pub struct JsonFormatter {
         serialize_with = "serialize_line_width"
     ))]
     #[partial(bpaf(long("json-formatter-line-width"), argument("NUMBER"), optional))]
-    pub line_width: LineWidth,
+    pub line_width: Option<LineWidth>,
 }
 
 impl Default for JsonFormatter {

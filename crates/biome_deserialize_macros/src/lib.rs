@@ -281,7 +281,42 @@ pub fn derive_mergeable(input: TokenStream) -> TokenStream {
 ///
 /// ## Partial annotations
 ///
+/// The generated partial struct can receive macro annotations, including
+/// derives, just like a regular struct. In order to pass macro annotations to
+/// the partial struct, you need to wrap them in `#[partial(...)]`. This works
+/// for both struct annotations and field annotations.
 ///
+/// Example:
+///
+/// ```rs
+/// #[derive(Clone, Default, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+/// #[partial(derive(Clone, Deserializable, Eq, Merge, PartialEq))]
+/// pub struct CssConfiguration {
+///     #[partial(type)]
+///     pub parser: CssParser,
+///
+///     #[partial(type)]
+///     pub formatter: CssFormatter,
+/// }
+/// ```
+///
+/// Partial structs always derive `Default`, `serde::Serialize` and
+/// `serde::Deserialize`, so you should not specify those anymore. In addition,
+/// all the fields of a partial struct are automatically annotated with
+/// `#[serde(skip_serializing_if = "Option::is_none")]`.
+///
+/// ### `#[partial(type)]`
+///
+/// If one of the fields of a partial struct uses a type that itself also has
+/// a derived partial struct, you can tell the macro to use that type instead
+/// using the `#[partial(type)]`.
+///
+/// In the example above, where `CssConfiguration` has a field of type
+/// `CssParser`, this will make sure the `PartialCssConfiguration` uses
+/// `PartialCssParser` instead.
+///
+/// If you need to use a fully custom in the partial struct instead, you can do
+/// so using `#[partial(type = "MyPartialType")]`.
 #[proc_macro_derive(Partial, attributes(partial))]
 #[proc_macro_error]
 pub fn derive_partial(input: TokenStream) -> TokenStream {
