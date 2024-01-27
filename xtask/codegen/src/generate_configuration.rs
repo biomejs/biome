@@ -143,7 +143,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         #[cfg(feature = "schema")]
         use schemars::JsonSchema;
 
-        #[derive(Clone, Debug, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+        #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
         #[deserializable(with_validator)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
         #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -157,16 +157,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
             pub all: Option<bool>,
 
             #( #line_groups ),*
-        }
-
-        impl Default for Rules {
-            fn default() -> Self {
-                Self {
-                    recommended: Some(true),
-                    all: None,
-                    #( #default_for_groups ),*
-                }
-            }
         }
 
         impl DeserializableValidator for Rules {

@@ -11,7 +11,7 @@ use indexmap::IndexSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -46,22 +46,6 @@ pub struct Rules {
     #[deserializable(rename = "suspicious")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub suspicious: Option<Suspicious>,
-}
-impl Default for Rules {
-    fn default() -> Self {
-        Self {
-            recommended: Some(true),
-            all: None,
-            a11y: None,
-            complexity: None,
-            correctness: None,
-            nursery: None,
-            performance: None,
-            security: None,
-            style: None,
-            suspicious: None,
-        }
-    }
 }
 impl DeserializableValidator for Rules {
     fn validate(
