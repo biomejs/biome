@@ -1232,6 +1232,7 @@ fn parse_ts_type_member(p: &mut JsParser, context: TypeContext) -> ParsedSyntax 
 // type C = { m(a: string, b: number, c: string): any }
 // type D = { readonly: string, readonly a: number }
 // type E = { m<A, B>(a: A, b: B): never }
+// type F = { m<const A>(a: A): never }
 fn parse_ts_property_or_method_signature_type_member(
     p: &mut JsParser,
     context: TypeContext,
@@ -1254,7 +1255,7 @@ fn parse_ts_property_or_method_signature_type_member(
     p.eat(T![?]);
 
     if p.at(T!['(']) || p.at(T![<]) {
-        parse_ts_call_signature(p, context);
+        parse_ts_call_signature(p, context.and_allow_const_modifier(true));
         parse_ts_type_member_semi(p);
         let method = m.complete(p, TS_METHOD_SIGNATURE_TYPE_MEMBER);
 
@@ -1277,13 +1278,14 @@ fn parse_ts_property_or_method_signature_type_member(
 // type A = { (): string; }
 // type B = { (a, b, c): number }
 // type C = { <A, B>(a: A, b: B): number }
+// type D = { <const A>(a: A): number }
 fn parse_ts_call_signature_type_member(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !(p.at(T!['(']) || p.at(T![<])) {
         return Absent;
     }
 
     let m = p.start();
-    parse_ts_call_signature(p, context);
+    parse_ts_call_signature(p, context.and_allow_const_modifier(true));
     parse_ts_type_member_semi(p);
     Present(m.complete(p, TS_CALL_SIGNATURE_TYPE_MEMBER))
 }
@@ -2002,9 +2004,20 @@ pub(crate) fn parse_ts_type_arguments_in_expression(
         return Absent;
     }
 
+    // test ts ts_type_arguments_like_expression
+    // 0 < (0 >= 1);
     try_parse(p, |p| {
         p.re_lex(JsReLexContext::TypeArgumentLessThan);
-        let arguments = parse_ts_type_arguments_impl(p, TypeContext::default(), false);
+        let m = p.start();
+        p.bump(T![<]);
+
+        if p.at(T![>]) {
+            p.error(expected_ts_type_parameter(p, p.cur_range()));
+        }
+        TypeArgumentsList::new(TypeContext::default(), false).parse_list(p);
+        p.re_lex(JsReLexContext::BinaryOperator);
+        p.expect(T![>]);
+        let arguments = m.complete(p, TS_TYPE_ARGUMENTS);
 
         if p.last() == Some(T![>]) && can_follow_type_arguments_in_expr(p, context) {
             Ok(Present(arguments))

@@ -69,14 +69,12 @@ impl PartialLinterConfiguration {
 pub fn to_linter_settings(
     working_directory: Option<PathBuf>,
     conf: LinterConfiguration,
-    _vcs_path: Option<PathBuf>,
-    _gitignore_matches: &[String],
 ) -> Result<LinterSettings, WorkspaceError> {
     Ok(LinterSettings {
         enabled: conf.enabled,
         rules: Some(conf.rules),
-        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore), None, &[])?,
-        included_files: to_matcher(working_directory.clone(), Some(&conf.include), None, &[])?,
+        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
+        included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
     })
 }
 

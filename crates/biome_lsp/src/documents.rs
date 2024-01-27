@@ -2,7 +2,7 @@ use crate::converters::line_index::LineIndex;
 
 /// Represents an open [`textDocument`]. Can be cheaply cloned.
 ///
-/// [`textDocument`]: https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#textDocumentItem
+/// [`textDocument`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
 #[derive(Clone)]
 pub(crate) struct Document {
     pub(crate) version: i32,

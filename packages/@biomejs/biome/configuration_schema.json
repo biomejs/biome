@@ -925,6 +925,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noFocusedTests": {
+					"description": "Disallow focused tests.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noGlobalAssign": {
 					"description": "Disallow assignments to native objects and read-only global variables.",
 					"anyOf": [
@@ -955,6 +962,13 @@
 				},
 				"noNodejsModules": {
 					"description": "Forbid the use of Node.js builtin modules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSkippedTests": {
+					"description": "Disallow disabled tests.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1071,6 +1085,13 @@
 				},
 				"useShorthandFunctionType": {
 					"description": "Enforce using function types instead of object type with call signatures.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSortedClasses": {
+					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1576,6 +1597,10 @@
 				{
 					"description": "Options for `useValidAriaRole` rule",
 					"allOf": [{ "$ref": "#/definitions/ValidAriaRoleOptions" }]
+				},
+				{
+					"description": "Options for `useSortedClasses` rule",
+					"allOf": [{ "$ref": "#/definitions/UtilityClassSortingOptions" }]
 				}
 			]
 		},
@@ -2283,6 +2308,22 @@
 					"enum": ["none"]
 				}
 			]
+		},
+		"UtilityClassSortingOptions": {
+			"type": "object",
+			"properties": {
+				"attributes": {
+					"description": "Additional attributes that will be sorted.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"functions": {
+					"description": "Names of the functions or tagged templates that will be sorted.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
 		},
 		"ValidAriaRoleOptions": {
 			"type": "object",

@@ -2730,3 +2730,47 @@ fn format_with_configured_line_ending() {
         "const b = {\r\n\tname: \"mike\",\r\n\tsurname: \"ross\",\r\n};\r\n",
     );
 }
+
+#[test]
+fn don_t_format_ignored_known_jsonc_files() {
+    let config = r#"{
+        "files": {
+            "ignoreUnknown": true,
+            "ignore": [".eslintrc"]
+        }
+    }"#;
+    let files = [(".eslintrc", false)];
+
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config);
+    for (file_path, _) in files {
+        let file_path = Path::new(file_path);
+        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+    }
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("."), ("--write")].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    for (file_path, expect_formatted) in files {
+        let expected = if expect_formatted {
+            FORMATTED
+        } else {
+            UNFORMATTED
+        };
+        assert_file_contents(&fs, Path::new(file_path), expected);
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "don_t_format_ignored_known_jsonc_files",
+        fs,
+        console,
+        result,
+    ));
+}

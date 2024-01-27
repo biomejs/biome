@@ -425,13 +425,10 @@ fn into_member_vec(node: &JsSyntaxNode) -> Vec<String> {
                 let member_name = member_expr
                     .member_name()
                     .and_then(|it| it.as_string_constant().map(|it| it.to_owned()));
-                match member_name {
-                    Some(name) => {
-                        vec.insert(0, name);
-                        next = member_expr.object().ok().map(AstNode::into_syntax);
-                    }
-                    None => break,
+                if let Some(member_name) = member_name {
+                    vec.insert(0, member_name);
                 }
+                next = member_expr.object().ok().map(AstNode::into_syntax);
             }
             None => {
                 vec.insert(0, node.text_trimmed().to_string());

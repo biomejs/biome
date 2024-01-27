@@ -50,23 +50,11 @@ impl PartialOrganizeImports {
 pub fn to_organize_imports_settings(
     working_directory: Option<PathBuf>,
     organize_imports: OrganizeImports,
-    _vcs_base_path: Option<PathBuf>,
-    _gitignore_matches: &[String],
 ) -> Result<OrganizeImportsSettings, WorkspaceError> {
     Ok(OrganizeImportsSettings {
         enabled: organize_imports.enabled,
-        ignored_files: to_matcher(
-            working_directory.clone(),
-            Some(&organize_imports.ignore),
-            None,
-            &[],
-        )?,
-        included_files: to_matcher(
-            working_directory,
-            Some(&organize_imports.include),
-            None,
-            &[],
-        )?,
+        ignored_files: to_matcher(working_directory.clone(), Some(&organize_imports.ignore))?,
+        included_files: to_matcher(working_directory, Some(&organize_imports.include))?,
     })
 }
 

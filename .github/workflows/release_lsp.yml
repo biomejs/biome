@@ -6,8 +6,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - editors/intellij/gradle.properties
 
 jobs:
   check:
@@ -16,13 +14,11 @@ jobs:
     outputs:
       # LSP Extension Version
       version: ${{ env.version }}
-      intellij_version: ${{ env.intellij_version }}
 
       # Version of the Biome binary
       biome_version: ${{ env.biome_version }}
       prerelease: ${{ env.prerelease }}
       nightly: ${{ env.nightly }}
-      intellij_version_changed: ${{ steps.intellij_version.outputs.changed }}
     steps:
       - uses: actions/checkout@v4
 
@@ -30,14 +26,6 @@ jobs:
         id: nightly
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: echo "nightly=true" >> $GITHUB_ENV
-
-      - name: Check intellij plugin version changes
-        uses: victor-teles/gradle-properties-diff-checker@v1
-        if: env.nightly != 'true'
-        id: intellij_version
-        with:
-          file-name: editors/intellij/gradle.properties
-          property: pluginVersion
 
       - name: Check Biome version changes
         uses: EndBug/version-check@v2
@@ -50,7 +38,6 @@ jobs:
       - name: Set version name
         run: |
           echo "biome_version=${{ steps.biome_version.outputs.version }}" >> $GITHUB_ENV
-          echo "intellij_version=${{ steps.intellij_version.outputs.version }}" >> $GITHUB_ENV
 
       - name: Check prerelease status
         id: prerelease
@@ -58,133 +45,7 @@ jobs:
         run: |
           echo "prerelease=true" >> $GITHUB_ENV
           echo "biome_version=$(node packages/@biomejs/biome/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
-          echo "intellij_version=$(node ./editors/intellij/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
-
-      - name: Check intellij version status
-        if: steps.intellij_version.outputs.changed == 'true'
-        run: 'echo "Intellij Version change found! New version: ${{ steps.intellij_version.outputs.version }}"'
 
       - name: Biome Check version status
         if: steps.biome_version.outputs.changed == 'true'
         run: 'echo "Biome Version change found! New version: ${{ steps.biome_version.outputs.version }} (${{ steps.biome_version.outputs.version_type }})"'
-
-  build-intellij:
-    name: Build Intellij LSP
-    runs-on: ubuntu-latest
-    needs: [check]
-    env:
-      version: ${{ needs.check.outputs.intellij_version }}
-      prerelease: ${{ needs.check.outputs.prerelease }}
-
-    if: needs.check.outputs.intellij_version_changed == 'true' || needs.check.outputs.nightly == 'true'
-    outputs:
-      version: ${{ env.version }}
-      prerelease: ${{ env.prerelease }}
-      filename: ${{ env.filename }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: zulu
-          java-version: 17
-
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-        with:
-          gradle-home-cache-cleanup: true
-
-      - name: Update plugin version
-        if: needs.check.outputs.prerelease == 'true'
-        working-directory: editors/intellij
-        run: |
-          echo "version=$(node ./scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
-
-      - name: Build plugin
-        working-directory: editors/intellij
-        run: ./gradlew buildPlugin
-
-      - name: Get build file name
-        working-directory: editors/intellij
-        run: |
-          cd ./build/distributions
-          FILENAME=`ls *.zip`
-
-          echo "filename=${FILENAME}" >> $GITHUB_ENV
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: intellij_package
-          path: ./editors/intellij/build/distributions/Biome-*.zip
-          if-no-files-found: error
-
-      - name: Upload gradle properties file
-        uses: actions/upload-artifact@v3
-        with:
-          name: gradle_properties
-          path: ./editors/intellij/gradle.properties
-          if-no-files-found: error
-
-  publish-intellij:
-    name: Publish Intellij LSP
-    runs-on: ubuntu-latest
-    needs: build-intellij
-    environment: intellij-plugin
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download gradle properties file
-        uses: actions/download-artifact@v3
-        with:
-          name: gradle_properties
-          path: ./editors/intellij
-
-      - name: Download extension artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: intellij_package
-          path: ./editors/intellij/build/distributions
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: zulu
-          java-version: 17
-
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-        with:
-          gradle-home-cache-cleanup: true
-
-      - name: Publish Plugin
-        env:
-          PUBLISH_TOKEN: ${{ secrets.JETBRAINS_PUBLISH_TOKEN }}
-          CERTIFICATE_CHAIN: ${{ secrets.JETBRAINS_CERTIFICATE_CHAIN }}
-          PRIVATE_KEY: ${{ secrets.JETBRAINS_PRIVATE_KEY }}
-          PRIVATE_KEY_PASSWORD: ${{ secrets.JETBRAINS_PRIVATE_KEY_PASSWORD }}
-        run: ./gradlew publishPlugin -PdistributionFile=./build/distributions/${{ needs.build-intellij.outputs.filename }}
-        working-directory: editors/intellij
-
-      - name: Extract changelog
-        run: |
-          bash scripts/print-changelog.sh ${{ needs.build-intellij.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
-      - name: Create GitHub release and tag
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          name: Intellij Plugin v${{ needs.build-intellij.outputs.version }}
-          tag_name: lsp-intellij/v${{ needs.build-intellij.outputs.version }}
-          draft: false
-          prerelease: ${{ needs.build-intellij.outputs.prerelease == 'true' }}
-          body_path: ${{ github.workspace }}/RELEASE_NOTES
-          files: |
-            ./editors/intellij/build/distributions/Biome-*.zip
-          fail_on_unmatched_files: true
-          generate_release_notes: true

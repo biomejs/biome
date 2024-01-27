@@ -103,7 +103,7 @@ Here's some example of commands that you could find useful when running the Git 
 {
   "lint-staged": {
     // Run Biome on staged files that have the following extensions: js, ts, jsx, tsx, json and jsonc
-    "**.{js|ts|cjs|mjs|d.cts|d.mts|jsx|tsx|json|jsonc}": [
+    "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
       "biome check --files-ignore-unknown=true", // Check formatting and lint
       "biome check --apply --no-errors-on-unmatched", // Format, sort imports, lint, and apply safe fixes
       "biome check --apply --organize-imports-enabled=false --no-errors-on-unmatched", // format and apply safe fixes
@@ -162,7 +162,7 @@ if you want to use the `biome-check` hook, add the following pre-commit configur
 ```yaml title=".pre-commit-config.yaml"
 repos:
 -   repo: https://github.com/biomejs/pre-commit
-    rev: "0.1.0"  # Use the sha / tag you want to point at
+    rev: "v0.1.0"  # Use the sha / tag you want to point at
     hooks:
     -   id: biome-check
         additional_dependencies: ["@biomejs/biome@1.4.1"]
@@ -210,7 +210,7 @@ Some examples of shells scripts:
   set -eu
 
   git diff -z --staged --name-only --diff-filter=ACMR | \
-      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched $STAGED_FILES
+      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched
   ```
 
 - Format, lint, and apply safe code fixes before committing
@@ -225,7 +225,7 @@ Some examples of shells scripts:
   fi
 
   git diff -z --staged --name-only --diff-filter=ACMR | \
-      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched
+      xargs -0 npx biome check --apply --files-ignore-unknown=true --no-errors-on-unmatched
 
   git update-index --again
   ```

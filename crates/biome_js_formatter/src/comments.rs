@@ -280,8 +280,12 @@ fn handle_continue_break_comment(
 
     let enclosing = comment.enclosing_node();
 
-    if let Some(preceding) = comment.preceding_node() {
-        if preceding.kind() == JsSyntaxKind::JS_LABEL {
+    if let (Some(preceding), Some(parent)) =
+        (comment.preceding_node(), comment.enclosing_node().parent())
+    {
+        if preceding.kind() == JsSyntaxKind::JS_LABEL
+            && parent.kind() != JsSyntaxKind::JS_FOR_STATEMENT
+        {
             return CommentPlacement::trailing(preceding.clone(), comment);
         }
     }
@@ -1251,6 +1255,27 @@ fn handle_import_export_specifier_comment(
             } else {
                 CommentPlacement::Default(comment)
             }
+        }
+
+        JsSyntaxKind::JS_EXPORT_NAMED_FROM_CLAUSE => {
+            if let Some(following_token) = comment.following_token() {
+                // if we are at the end of a list of import specifiers
+                // and encounter a comment
+                // ```javascript
+                // import {
+                //   MULTI,
+                //   LINE,
+                //   THING,
+                //   // some comment here
+                // } from 'foo'
+                // - then attach it as a trailing comment to `THING`
+                if matches!(following_token.kind(), JsSyntaxKind::R_CURLY) {
+                    if let Some(preceding) = comment.preceding_node() {
+                        return CommentPlacement::trailing(preceding.clone(), comment);
+                    }
+                }
+            }
+            CommentPlacement::Default(comment)
         }
 
         _ => CommentPlacement::Default(comment),

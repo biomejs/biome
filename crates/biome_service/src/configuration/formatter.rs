@@ -94,8 +94,6 @@ impl FromStr for FormatterConfiguration {
 pub fn to_format_settings(
     working_directory: Option<PathBuf>,
     conf: FormatterConfiguration,
-    _vcs_path: Option<PathBuf>,
-    _gitignore_matches: &[String],
 ) -> Result<FormatSettings, WorkspaceError> {
     let indent_style = match conf.indent_style {
         PlainIndentStyle::Tab => IndentStyle::Tab,
@@ -110,8 +108,8 @@ pub fn to_format_settings(
         line_ending: Some(conf.line_ending),
         line_width: Some(conf.line_width),
         format_with_errors: conf.format_with_errors,
-        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore), None, &[])?,
-        included_files: to_matcher(working_directory, Some(&conf.include), None, &[])?,
+        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
+        included_files: to_matcher(working_directory, Some(&conf.include))?,
     })
 }
 
