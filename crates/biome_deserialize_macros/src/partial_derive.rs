@@ -5,7 +5,7 @@ use attrs::{Attrs, FieldAttrs};
 use proc_macro2::{Ident, Span, TokenStream};
 use proc_macro_error::*;
 use quote::quote;
-use syn::{Data, Field, Type};
+use syn::{Data, Field, GenericArgument, PathArguments, Type};
 
 pub(crate) struct DeriveInput {
     pub ident: Ident,
@@ -40,13 +40,26 @@ impl DeriveInput {
                             abort!(data.fields, "Partial derive requires named fields");
                         };
 
-                        let should_wrap = !matches!(ty, Type::Path(path)
-                            if path
-                                .path
-                                .segments
-                                .last()
-                                .is_some_and(|segment| segment.ident == "Option")
-                        );
+                        let (ty, should_wrap) = match ty {
+                            Type::Path(path) => match path.path.segments.last() {
+                                Some(segment) if segment.ident == "Option" => {
+                                    match &segment.arguments {
+                                        PathArguments::AngleBracketed(args) => {
+                                            match args.args.first() {
+                                                Some(GenericArgument::Type(ty)) => (ty, false),
+                                                _ => abort!(
+                                                    segment,
+                                                    "Expected type argument in Option"
+                                                ),
+                                            }
+                                        }
+                                        _ => abort!(segment, "Expected argument in Option type"),
+                                    }
+                                }
+                                _ => (ty, true),
+                            },
+                            _ => (ty, true),
+                        };
 
                         FieldData {
                             ident: ident.clone(),
@@ -87,10 +100,7 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
 
     let fields = input.fields.iter().map(
         |FieldData {
-             ident,
-             attrs,
-             ty,
-             should_wrap,
+             ident, attrs, ty, ..
          }| {
             let doc_lines = attrs.doc_lines.iter().map(|tokens| {
                 quote! { #[doc #tokens] }
@@ -110,11 +120,6 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
                 }
                 None => ty.clone(),
             };
-            let ty = if *should_wrap {
-                quote! { Option<#ty> }
-            } else {
-                quote! { #ty }
-            };
 
             let attrs = attrs.nested_attrs.iter().map(|(ident, nested)| {
                 quote! {
@@ -126,7 +131,7 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
                 #( #doc_lines )*
                 #( #attrs )*
                 #[serde(skip_serializing_if = "Option::is_none")]
-                pub #ident: #ty
+                pub #ident: Option<#ty>
             }
         },
     );
@@ -144,7 +149,7 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
                 }
             } else {
                 quote! {
-                    #ident: partial.#ident
+                    #ident: partial.#ident.map(#ty::from)
                 }
             }
         },
@@ -163,7 +168,7 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
                 }
             } else {
                 quote! {
-                    #ident: other.#ident
+                    #ident: other.#ident.map(#ty::into)
                 }
             }
         },
