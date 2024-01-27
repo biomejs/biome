@@ -632,7 +632,13 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
     }
 
     fn can_handle(&self, rome_path: &RomePath) -> bool {
-        if rome_path.is_dir() {
+        if !self.fs.path_is_file(rome_path.as_path()) {
+            // handle:
+            // - directories
+            // - symlinks
+            // - unresolved symlinks
+            //   e.g `symlink/subdir` where symlink points to a directory that includes `subdir`.
+            //   Note that `symlink/subdir` is not an existing file.
             let can_handle = !self
                 .workspace
                 .is_path_ignored(IsPathIgnoredParams {

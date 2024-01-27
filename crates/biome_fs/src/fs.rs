@@ -43,6 +43,9 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// Checks if the given path exists in the file system
     fn path_exists(&self, path: &Path) -> bool;
 
+    /// Checks if the given path is a regular file
+    fn path_is_file(&self, path: &Path) -> bool;
+
     /// Method that takes a path to a folder `file_path`, and a `file_name`. It attempts to find
     /// and read the file from that folder and if not found, it reads the parent directories recursively
     /// until:
@@ -292,6 +295,10 @@ where
 
     fn path_exists(&self, path: &Path) -> bool {
         T::path_exists(self, path)
+    }
+
+    fn path_is_file(&self, path: &Path) -> bool {
+        T::path_is_file(self, path)
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {

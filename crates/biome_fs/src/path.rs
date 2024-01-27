@@ -1,6 +1,6 @@
 //! This module is responsible to manage paths inside Biome.
 //! It is a small wrapper around [path::PathBuf] but it is also able to
-//! give additional information around the the file that holds:
+//! give additional information around the file that holds:
 //! - the [FileHandlers] for the specific file
 //! - shortcuts to open/write to the file
 use std::fs::read_to_string;
