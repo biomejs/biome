@@ -169,20 +169,6 @@ impl Merge for RuleConfiguration {
             (_, other) => other,
         };
     }
-
-    fn merge_in_defaults(&mut self) {
-        match (&self, Self::default()) {
-            (Self::Plain(this), Self::WithOptions(default)) => {
-                *self = Self::WithOptions(Box::new(RuleWithOptions {
-                    level: this.clone(),
-                    options: default.options,
-                }));
-            }
-            (_, _) => {
-                // Don't overwrite other values with default.
-            }
-        }
-    }
 }
 
 impl From<&RuleConfiguration> for Severity {

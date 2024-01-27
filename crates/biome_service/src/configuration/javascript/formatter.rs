@@ -98,7 +98,7 @@ impl Default for JavascriptFormatter {
             trailing_comma: Default::default(),
             semicolons: Default::default(),
             arrow_parentheses: Default::default(),
-            bracket_spacing: Default::default(),
+            bracket_spacing: true,
             bracket_same_line: Default::default(),
             indent_style: Default::default(),
             indent_size: Default::default(),

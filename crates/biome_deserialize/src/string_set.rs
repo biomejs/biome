@@ -99,10 +99,6 @@ impl Merge for StringSet {
     fn merge_with(&mut self, other: Self) {
         self.extend(other)
     }
-
-    fn merge_in_defaults(&mut self) {
-        // Default is an empty set, so nothing to do.
-    }
 }
 
 impl Serialize for StringSet {

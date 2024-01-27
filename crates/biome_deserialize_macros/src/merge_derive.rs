@@ -49,10 +49,6 @@ fn generate_merge_enum(ident: Ident) -> TokenStream {
             fn merge_with(&mut self, other: Self) {
                 *self = other;
             }
-
-            fn merge_in_defaults(&mut self) {
-                // Enums shouldn't be overwritten by the default.
-            }
         }
     }
 }
@@ -62,10 +58,6 @@ fn generate_merge_newtype(ident: Ident) -> TokenStream {
         impl biome_deserialize::Merge for #ident {
             fn merge_with(&mut self, other: Self) {
                 self.0 = other.0;
-            }
-
-            fn merge_in_defaults(&mut self) {
-                // Newtypes shouldn't be overwritten by the default.
             }
         }
     }
@@ -89,30 +81,10 @@ fn generate_merge_struct(ident: Ident, fields: Fields) -> TokenStream {
         })
         .collect();
 
-    let default_fields: Vec<_> = fields
-        .iter()
-        .filter_map(|field| field.ident.as_ref())
-        .map(|field_ident| {
-            quote! {
-                match self.#field_ident.as_mut() {
-                    Some(value) => biome_deserialize::Merge::merge_in_defaults(value),
-                    None => {
-                        self.#field_ident = default.#field_ident;
-                    }
-                }
-            }
-        })
-        .collect();
-
     quote! {
         impl biome_deserialize::Merge for #ident {
             fn merge_with(&mut self, other: Self) {
                 #( #merge_fields )*
-            }
-
-            fn merge_in_defaults(&mut self) {
-                let default = Self::default();
-                #( #default_fields )*
             }
         }
     }
