@@ -15687,6 +15687,211 @@ impl From<AnyCssExpression> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssCustomIdentifier> for AnyCssFontFamilyName {
+    fn from(node: CssCustomIdentifier) -> AnyCssFontFamilyName {
+        AnyCssFontFamilyName::CssCustomIdentifier(node)
+    }
+}
+impl From<CssString> for AnyCssFontFamilyName {
+    fn from(node: CssString) -> AnyCssFontFamilyName {
+        AnyCssFontFamilyName::CssString(node)
+    }
+}
+impl AstNode for AnyCssFontFamilyName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssCustomIdentifier::KIND_SET.union(CssString::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_CUSTOM_IDENTIFIER | CSS_STRING)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_CUSTOM_IDENTIFIER => {
+                AnyCssFontFamilyName::CssCustomIdentifier(CssCustomIdentifier { syntax })
+            }
+            CSS_STRING => AnyCssFontFamilyName::CssString(CssString { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssFontFamilyName::CssCustomIdentifier(it) => &it.syntax,
+            AnyCssFontFamilyName::CssString(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssFontFamilyName::CssCustomIdentifier(it) => it.syntax,
+            AnyCssFontFamilyName::CssString(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssFontFamilyName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssFontFamilyName::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssFontFamilyName::CssString(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssFontFamilyName> for SyntaxNode {
+    fn from(n: AnyCssFontFamilyName) -> SyntaxNode {
+        match n {
+            AnyCssFontFamilyName::CssCustomIdentifier(it) => it.into(),
+            AnyCssFontFamilyName::CssString(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssFontFamilyName> for SyntaxElement {
+    fn from(n: AnyCssFontFamilyName) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssBogusBlock> for AnyCssFontFeatureValuesBlock {
+    fn from(node: CssBogusBlock) -> AnyCssFontFeatureValuesBlock {
+        AnyCssFontFeatureValuesBlock::CssBogusBlock(node)
+    }
+}
+impl From<CssFontFeatureValuesBlock> for AnyCssFontFeatureValuesBlock {
+    fn from(node: CssFontFeatureValuesBlock) -> AnyCssFontFeatureValuesBlock {
+        AnyCssFontFeatureValuesBlock::CssFontFeatureValuesBlock(node)
+    }
+}
+impl AstNode for AnyCssFontFeatureValuesBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssBogusBlock::KIND_SET.union(CssFontFeatureValuesBlock::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_BOGUS_BLOCK | CSS_FONT_FEATURE_VALUES_BLOCK)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_BLOCK => {
+                AnyCssFontFeatureValuesBlock::CssBogusBlock(CssBogusBlock { syntax })
+            }
+            CSS_FONT_FEATURE_VALUES_BLOCK => {
+                AnyCssFontFeatureValuesBlock::CssFontFeatureValuesBlock(CssFontFeatureValuesBlock {
+                    syntax,
+                })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssFontFeatureValuesBlock::CssBogusBlock(it) => &it.syntax,
+            AnyCssFontFeatureValuesBlock::CssFontFeatureValuesBlock(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssFontFeatureValuesBlock::CssBogusBlock(it) => it.syntax,
+            AnyCssFontFeatureValuesBlock::CssFontFeatureValuesBlock(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssFontFeatureValuesBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssFontFeatureValuesBlock::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssFontFeatureValuesBlock::CssFontFeatureValuesBlock(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+        }
+    }
+}
+impl From<AnyCssFontFeatureValuesBlock> for SyntaxNode {
+    fn from(n: AnyCssFontFeatureValuesBlock) -> SyntaxNode {
+        match n {
+            AnyCssFontFeatureValuesBlock::CssBogusBlock(it) => it.into(),
+            AnyCssFontFeatureValuesBlock::CssFontFeatureValuesBlock(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssFontFeatureValuesBlock> for SyntaxElement {
+    fn from(n: AnyCssFontFeatureValuesBlock) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssBogusFontFeatureValuesItem> for AnyCssFontFeatureValuesItem {
+    fn from(node: CssBogusFontFeatureValuesItem) -> AnyCssFontFeatureValuesItem {
+        AnyCssFontFeatureValuesItem::CssBogusFontFeatureValuesItem(node)
+    }
+}
+impl From<CssFontFeatureValuesItem> for AnyCssFontFeatureValuesItem {
+    fn from(node: CssFontFeatureValuesItem) -> AnyCssFontFeatureValuesItem {
+        AnyCssFontFeatureValuesItem::CssFontFeatureValuesItem(node)
+    }
+}
+impl AstNode for AnyCssFontFeatureValuesItem {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssBogusFontFeatureValuesItem::KIND_SET.union(CssFontFeatureValuesItem::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_BOGUS_FONT_FEATURE_VALUES_ITEM | CSS_FONT_FEATURE_VALUES_ITEM
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_FONT_FEATURE_VALUES_ITEM => {
+                AnyCssFontFeatureValuesItem::CssBogusFontFeatureValuesItem(
+                    CssBogusFontFeatureValuesItem { syntax },
+                )
+            }
+            CSS_FONT_FEATURE_VALUES_ITEM => {
+                AnyCssFontFeatureValuesItem::CssFontFeatureValuesItem(CssFontFeatureValuesItem {
+                    syntax,
+                })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssFontFeatureValuesItem::CssBogusFontFeatureValuesItem(it) => &it.syntax,
+            AnyCssFontFeatureValuesItem::CssFontFeatureValuesItem(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssFontFeatureValuesItem::CssBogusFontFeatureValuesItem(it) => it.syntax,
+            AnyCssFontFeatureValuesItem::CssFontFeatureValuesItem(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssFontFeatureValuesItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssFontFeatureValuesItem::CssBogusFontFeatureValuesItem(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyCssFontFeatureValuesItem::CssFontFeatureValuesItem(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+        }
+    }
+}
+impl From<AnyCssFontFeatureValuesItem> for SyntaxNode {
+    fn from(n: AnyCssFontFeatureValuesItem) -> SyntaxNode {
+        match n {
+            AnyCssFontFeatureValuesItem::CssBogusFontFeatureValuesItem(it) => it.into(),
+            AnyCssFontFeatureValuesItem::CssFontFeatureValuesItem(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssFontFeatureValuesItem> for SyntaxElement {
+    fn from(n: AnyCssFontFeatureValuesItem) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssFunction> for AnyCssFunction {
     fn from(node: CssFunction) -> AnyCssFunction {
         AnyCssFunction::CssFunction(node)
@@ -20878,6 +21083,63 @@ impl From<CssBogusDocumentMatcher> for SyntaxElement {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusFontFeatureValuesItem {
+    syntax: SyntaxNode,
+}
+impl CssBogusFontFeatureValuesItem {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusFontFeatureValuesItem {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_FONT_FEATURE_VALUES_ITEM as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_FONT_FEATURE_VALUES_ITEM
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusFontFeatureValuesItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusFontFeatureValuesItem")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusFontFeatureValuesItem> for SyntaxNode {
+    fn from(n: CssBogusFontFeatureValuesItem) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusFontFeatureValuesItem> for SyntaxElement {
+    fn from(n: CssBogusFontFeatureValuesItem) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssBogusKeyframesItem {
     syntax: SyntaxNode,
 }
@@ -22085,6 +22347,89 @@ impl IntoIterator for CssDocumentMatcherList {
 impl IntoIterator for &CssDocumentMatcherList {
     type Item = SyntaxResult<AnyCssDocumentMatcher>;
     type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssDocumentMatcher>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssFontFeatureValuesItemList {
+    syntax_list: SyntaxList,
+}
+impl CssFontFeatureValuesItemList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssFontFeatureValuesItemList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_FONT_FEATURE_VALUES_ITEM_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_FONT_FEATURE_VALUES_ITEM_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<CssFontFeatureValuesItemList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(CssFontFeatureValuesItemList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssFontFeatureValuesItemList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for CssFontFeatureValuesItemList {
+    type Language = Language;
+    type Node = AnyCssFontFeatureValuesItem;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssFontFeatureValuesItemList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssFontFeatureValuesItemList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &CssFontFeatureValuesItemList {
+    type Item = AnyCssFontFeatureValuesItem;
+    type IntoIter = AstNodeListIterator<Language, AnyCssFontFeatureValuesItem>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for CssFontFeatureValuesItemList {
+    type Item = AnyCssFontFeatureValuesItem;
+    type IntoIter = AstNodeListIterator<Language, AnyCssFontFeatureValuesItem>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

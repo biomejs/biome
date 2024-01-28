@@ -2170,6 +2170,18 @@ where
         }),
     ))
 }
+pub fn css_font_feature_values_item_list<I>(items: I) -> CssFontFeatureValuesItemList
+where
+    I: IntoIterator<Item = AnyCssFontFeatureValuesItem>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssFontFeatureValuesItemList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FEATURE_VALUES_ITEM_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_generic_component_value_list<I>(items: I) -> CssGenericComponentValueList
 where
     I: IntoIterator<Item = AnyCssGenericComponentValue>,
@@ -2487,6 +2499,16 @@ where
 {
     CssBogusDocumentMatcher::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_DOCUMENT_MATCHER,
+        slots,
+    ))
+}
+pub fn css_bogus_font_feature_values_item<I>(slots: I) -> CssBogusFontFeatureValuesItem
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusFontFeatureValuesItem::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_FONT_FEATURE_VALUES_ITEM,
         slots,
     ))
 }

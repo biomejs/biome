@@ -19,6 +19,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_BLOCK
             | CSS_BOGUS_DECLARATION_ITEM
             | CSS_BOGUS_DOCUMENT_MATCHER
+            | CSS_BOGUS_FONT_FEATURE_VALUES_ITEM
             | CSS_BOGUS_KEYFRAMES_ITEM
             | CSS_BOGUS_LAYER
             | CSS_BOGUS_MEDIA_QUERY
@@ -4258,6 +4259,9 @@ impl SyntaxFactory for CssSyntaxFactory {
                 T ! [,],
                 true,
             ),
+            CSS_FONT_FEATURE_VALUES_ITEM_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyCssFontFeatureValuesItem::can_cast)
+            }
             CSS_GENERIC_COMPONENT_VALUE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssGenericComponentValue::can_cast)
             }
