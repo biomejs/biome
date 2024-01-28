@@ -97,7 +97,7 @@ pub struct FileFeaturesResult {
 impl FileFeaturesResult {
     /// Sorted array of files that should not be processed no matter the cases.
     /// These files are handled by other tools.
-    const PROTECTED_FILES: &'static [&'static str; 11] = &[
+    const PROTECTED_FILES: &'static [&'static str; 10] = &[
         // Composer
         "composer.json",
         "composer.lock",
@@ -109,7 +109,6 @@ impl FileFeaturesResult {
         // NPM
         "npm-shrinkwrap.json",
         "package-lock.json",
-        "package.json",
         // TSC
         "tsconfig.json",
         "typescript.json",
