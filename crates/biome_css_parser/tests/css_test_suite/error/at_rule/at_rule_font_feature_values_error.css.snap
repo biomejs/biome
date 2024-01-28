@@ -343,7 +343,7 @@ at_rule_font_feature_values_error.css:10:2 parse ━━━━━━━━━━�
   
 at_rule_font_feature_values_error.css:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a rule, or an at rule but instead found '}'.
+  × Expected a qualified rule, or an at rule but instead found '}'.
   
      9 │ @font-feature-values ident {
     10 │ 	{ }
@@ -352,7 +352,7 @@ at_rule_font_feature_values_error.css:11:1 parse ━━━━━━━━━━�
     12 │ 
     13 │ @font-feature-values ident {
   
-  i Expected a rule, or an at rule here.
+  i Expected a qualified rule, or an at rule here.
   
      9 │ @font-feature-values ident {
     10 │ 	{ }
@@ -383,7 +383,7 @@ at_rule_font_feature_values_error.css:14:3 parse ━━━━━━━━━━�
   
 at_rule_font_feature_values_error.css:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a rule, or an at rule but instead found '}'.
+  × Expected a qualified rule, or an at rule but instead found '}'.
   
     13 │ @font-feature-values ident {
     14 │ 	@xxx { }
@@ -391,7 +391,7 @@ at_rule_font_feature_values_error.css:15:1 parse ━━━━━━━━━━�
        │ ^
     16 │ 
   
-  i Expected a rule, or an at rule here.
+  i Expected a qualified rule, or an at rule here.
   
     13 │ @font-feature-values ident {
     14 │ 	@xxx { }
