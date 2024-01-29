@@ -302,8 +302,7 @@ impl MemberChain {
             .tail
             .iter()
             .skip(1)
-            .find(|group| group.needs_empty_line_before())
-            .is_some();
+            .any(|group| group.needs_empty_line_before());
 
         if has_empty_line_inside_tail {
             return Ok(true);
