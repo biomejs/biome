@@ -26,6 +26,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#1173](https://github.com/biomejs/biome/issues/1173). Fix the formatting of a single instruction with commented in a control flow body to ensure consistency. Contributed by @mdm317
 
+- Fix overriding of `javascript.globals`. Contributed by @arendjr
+
 ### Configuration
 
 ### Editors

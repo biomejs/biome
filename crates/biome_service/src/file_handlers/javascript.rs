@@ -96,32 +96,31 @@ impl Language for JsLanguage {
         language: &JsFormatterSettings,
         path: &RomePath,
     ) -> JsFormatOptions {
-        let indent_style = if let Some(indent_style) = language.indent_style {
-            indent_style
-        } else {
-            global.indent_style.unwrap_or_default()
-        };
-        let line_width = if let Some(line_width) = language.line_width {
-            line_width
-        } else {
-            global.line_width.unwrap_or_default()
-        };
-        let indent_width = if let Some(indent_width) = language.indent_width {
-            indent_width
-        } else {
-            global.indent_width.unwrap_or_default()
-        };
-
-        let line_ending = if let Some(line_ending) = language.line_ending {
-            line_ending
-        } else {
-            global.line_ending.unwrap_or_default()
-        };
         let options = JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width)
-            .with_line_ending(line_ending)
+            .with_indent_style(
+                language
+                    .indent_style
+                    .or(global.indent_style)
+                    .unwrap_or_default(),
+            )
+            .with_indent_width(
+                language
+                    .indent_width
+                    .or(global.indent_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_width(
+                language
+                    .line_width
+                    .or(global.line_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_ending(
+                language
+                    .line_ending
+                    .or(global.line_ending)
+                    .unwrap_or_default(),
+            )
             .with_quote_style(language.quote_style.unwrap_or_default())
             .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
             .with_quote_properties(language.quote_properties.unwrap_or_default())
@@ -738,16 +737,17 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
 }
 
 fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> AnalyzerOptions {
+    let settings = settings.as_ref();
     let configuration = AnalyzerConfiguration {
-        rules: to_analyzer_rules(settings.as_ref(), file_path.as_path()),
-        globals: if let Some(globals) = settings.as_ref().languages.javascript.globals.as_ref() {
-            globals
-                .iter()
-                .map(|global| global.to_string())
-                .collect::<Vec<_>>()
-        } else {
-            vec![]
-        },
+        rules: to_analyzer_rules(settings, file_path.as_path()),
+        globals: settings
+            .override_settings
+            .override_js_globals(
+                &RomePath::new(file_path.as_path()),
+                &settings.languages.javascript.globals,
+            )
+            .into_iter()
+            .collect(),
     };
 
     AnalyzerOptions {

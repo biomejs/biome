@@ -294,8 +294,8 @@ fn to_javascript_language_settings(
 
     language_setting.globals = conf
         .globals
-        .map(|global| global.into_index_set())
-        .or(parent_settings.globals.clone());
+        .map(StringSet::into_index_set)
+        .or_else(|| parent_settings.globals.clone());
 
     language_setting
 }
