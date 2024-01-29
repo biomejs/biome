@@ -75,7 +75,7 @@ impl Matcher {
 
     /// It matches the given path against the stored patterns
     ///
-    /// It returns [true] if there's a lest a match
+    /// It returns [true] if there's at least one match
     pub fn matches_path(&self, source: &Path) -> bool {
         if self.is_empty() {
             return false;

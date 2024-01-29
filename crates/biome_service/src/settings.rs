@@ -522,7 +522,7 @@ impl OverrideSettings {
     /// Checks whether at least one override excludes the provided `path`
     pub fn is_path_excluded(&self, path: &Path) -> Option<bool> {
         for pattern in &self.patterns {
-            if !pattern.exclude.is_empty() && pattern.exclude.matches_path(path) {
+            if pattern.exclude.matches_path(path) {
                 return Some(true);
             }
         }
@@ -531,7 +531,7 @@ impl OverrideSettings {
     /// Checks whether at least one override include the provided `path`
     pub fn is_path_included(&self, path: &Path) -> Option<bool> {
         for pattern in &self.patterns {
-            if !pattern.include.is_empty() && pattern.include.matches_path(path) {
+            if pattern.include.matches_path(path) {
                 return Some(true);
             }
         }
@@ -545,8 +545,8 @@ impl OverrideSettings {
         options: JsFormatOptions,
     ) -> JsFormatOptions {
         self.patterns.iter().fold(options, |mut options, pattern| {
-            let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
-            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
+            let included = pattern.include.matches_path(path);
+            let excluded = pattern.exclude.matches_path(path);
 
             if excluded {
                 return options;
@@ -593,6 +593,27 @@ impl OverrideSettings {
 
             options
         })
+    }
+
+    pub fn override_js_globals(
+        &self,
+        path: &RomePath,
+        base_set: &Option<IndexSet<String>>,
+    ) -> IndexSet<String> {
+        self.patterns
+            .iter()
+            .fold(base_set.as_ref(), |globals, pattern| {
+                let included = pattern.include.matches_path(path);
+                let excluded = pattern.exclude.matches_path(path);
+
+                if included && !excluded {
+                    pattern.languages.javascript.globals.as_ref()
+                } else {
+                    globals
+                }
+            })
+            .cloned()
+            .unwrap_or_default()
     }
 
     /// It scans the current override rules and return the formatting options that of the first override is matched
