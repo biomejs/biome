@@ -1,5 +1,5 @@
 import init, {
-	type Configuration,
+	type PartialConfiguration as Configuration,
 	DiagnosticPrinter,
 	type RomePath as BiomePath,
 	type RuleCategories,

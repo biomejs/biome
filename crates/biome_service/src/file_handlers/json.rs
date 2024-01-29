@@ -1,5 +1,5 @@
 use super::{ExtensionHandler, Mime};
-use crate::configuration::to_analyzer_rules;
+use crate::configuration::{to_analyzer_rules, PartialConfiguration};
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FixAllParams, FormatterCapabilities, LintParams,
     LintResults, ParserCapabilities,
@@ -12,7 +12,7 @@ use crate::settings::{
 use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
 };
-use crate::{Configuration, Rules, WorkspaceError};
+use crate::{Rules, WorkspaceError};
 use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
@@ -280,7 +280,7 @@ fn lint(params: LintParams) -> LintResults {
             // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
             // malformed configuration
             if params.path.ends_with(ROME_JSON) || params.path.ends_with(BIOME_JSON) {
-                let deserialized = deserialize_from_json_ast::<Configuration>(&root, "");
+                let deserialized = deserialize_from_json_ast::<PartialConfiguration>(&root, "");
                 diagnostics.extend(
                     deserialized
                         .into_diagnostics()

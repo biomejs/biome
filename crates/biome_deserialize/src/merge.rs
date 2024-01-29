@@ -8,11 +8,6 @@ pub trait Merge {
     /// in `self`. Complex types may get recursively merged instead of
     /// overwritten.
     fn merge_with(&mut self, other: Self);
-
-    /// Merges defaults into `self` for any fields that were not set.
-    ///
-    /// For types that don't have nested fields, this does nothing.
-    fn merge_in_defaults(&mut self);
 }
 
 impl<T> Merge for Option<T>
@@ -27,11 +22,6 @@ where
             }
         }
     }
-
-    fn merge_in_defaults(&mut self) {
-        // The default for an `Option` is always `None`, for which
-        // there is no reason to merge it in.
-    }
 }
 
 /// This macro is used to implement [Merge] for all (primitive) types where
@@ -41,10 +31,6 @@ macro_rules! overwrite_on_merge {
         impl Merge for $ty {
             fn merge_with(&mut self, other: Self) {
                 *self = other
-            }
-
-            fn merge_in_defaults(&mut self) {
-                // Defaults shouldn't overwrite set values.
             }
         }
     };

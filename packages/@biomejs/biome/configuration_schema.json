@@ -921,7 +921,6 @@
 				},
 				"maxSize": {
 					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
-					"default": null,
 					"type": ["integer", "null"],
 					"format": "uint64",
 					"minimum": 1.0
@@ -933,10 +932,9 @@
 			"description": "Generic options applied to all files",
 			"type": "object",
 			"properties": {
-				"enabled": { "default": true, "type": ["boolean", "null"] },
+				"enabled": { "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
-					"default": false,
 					"type": ["boolean", "null"]
 				},
 				"ignore": {
@@ -949,14 +947,12 @@
 				},
 				"indentSize": {
 					"description": "The size of the indentation, 2 by default (deprecated, use `indent-width`)",
-					"default": 2,
 					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 0.0
 				},
 				"indentStyle": {
 					"description": "The indent style.",
-					"default": "tab",
 					"anyOf": [
 						{ "$ref": "#/definitions/PlainIndentStyle" },
 						{ "type": "null" }
@@ -964,19 +960,16 @@
 				},
 				"indentWidth": {
 					"description": "The size of the indentation, 2 by default",
-					"default": 2,
 					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 0.0
 				},
 				"lineEnding": {
 					"description": "The type of line ending.",
-					"default": "lf",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
-					"default": 80,
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				}
 			},
@@ -1240,7 +1233,6 @@
 			"properties": {
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
-					"default": true,
 					"type": ["boolean", "null"]
 				},
 				"ignore": {
@@ -1253,7 +1245,6 @@
 				},
 				"rules": {
 					"description": "List of rules",
-					"default": { "recommended": true },
 					"anyOf": [{ "$ref": "#/definitions/Rules" }, { "type": "null" }]
 				}
 			},
@@ -1482,7 +1473,6 @@
 			"properties": {
 				"enabled": {
 					"description": "Enables the organization of imports",
-					"default": true,
 					"type": ["boolean", "null"]
 				},
 				"ignore": {

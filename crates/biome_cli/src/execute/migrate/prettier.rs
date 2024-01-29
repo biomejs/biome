@@ -8,8 +8,10 @@ use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
 use biome_json_parser::JsonParserOptions;
-use biome_service::configuration::{FormatterConfiguration, PlainIndentStyle};
-use biome_service::{DynRef, JavascriptFormatter};
+use biome_service::configuration::{
+    PartialFormatterConfiguration, PartialJavascriptFormatter, PlainIndentStyle,
+};
+use biome_service::DynRef;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug, Deserializable, Eq, PartialEq)]
@@ -141,7 +143,7 @@ impl From<QuoteProps> for QuoteProperties {
     }
 }
 
-impl TryFrom<PrettierConfiguration> for FormatterConfiguration {
+impl TryFrom<PrettierConfiguration> for PartialFormatterConfiguration {
     type Error = String;
     fn try_from(value: PrettierConfiguration) -> Result<Self, Self::Error> {
         let line_width = LineWidth::try_from(value.print_width).map_err(|err| err.to_string())?;
@@ -165,7 +167,7 @@ impl TryFrom<PrettierConfiguration> for FormatterConfiguration {
     }
 }
 
-impl From<PrettierConfiguration> for JavascriptFormatter {
+impl From<PrettierConfiguration> for PartialJavascriptFormatter {
     fn from(value: PrettierConfiguration) -> Self {
         let semicolons = if value.semi {
             Semicolons::Always
@@ -213,13 +215,13 @@ pub(crate) struct FromPrettierConfiguration {
     ignore_path: Option<PathBuf>,
 
     /// The translated Biome configuration, from the Prettier configuration
-    biome_configuration: Option<(FormatterConfiguration, JavascriptFormatter)>,
+    biome_configuration: Option<(PartialFormatterConfiguration, PartialJavascriptFormatter)>,
 }
 
 impl FromPrettierConfiguration {
     pub(crate) fn store_configuration(
         &mut self,
-        configuration: (FormatterConfiguration, JavascriptFormatter),
+        configuration: (PartialFormatterConfiguration, PartialJavascriptFormatter),
     ) {
         self.biome_configuration = Some(configuration);
     }
@@ -235,7 +237,7 @@ impl FromPrettierConfiguration {
 
     pub(crate) fn get_biome_configuration(
         &self,
-    ) -> Option<&(FormatterConfiguration, JavascriptFormatter)> {
+    ) -> Option<&(PartialFormatterConfiguration, PartialJavascriptFormatter)> {
         self.biome_configuration.as_ref()
     }
 }

@@ -1,7 +1,7 @@
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt};
 use biome_json_parser::JsonParserOptions;
-use biome_service::Configuration;
+use biome_service::configuration::PartialConfiguration;
 use std::ffi::OsStr;
 use std::fs::read_to_string;
 use std::path::Path;
@@ -17,12 +17,12 @@ fn run_invalid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
         .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
 
     let result = match extension {
-        "json" => deserialize_from_json_str::<Configuration>(
+        "json" => deserialize_from_json_str::<PartialConfiguration>(
             input_code.as_str(),
             JsonParserOptions::default(),
             "",
         ),
-        "jsonc" => deserialize_from_json_str::<Configuration>(
+        "jsonc" => deserialize_from_json_str::<PartialConfiguration>(
             input_code.as_str(),
             JsonParserOptions::default()
                 .with_allow_comments()
@@ -68,12 +68,12 @@ fn run_valid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
         .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
 
     let result = match extension {
-        "json" => deserialize_from_json_str::<Configuration>(
+        "json" => deserialize_from_json_str::<PartialConfiguration>(
             input_code.as_str(),
             JsonParserOptions::default(),
             "",
         ),
-        "jsonc" => deserialize_from_json_str::<Configuration>(
+        "jsonc" => deserialize_from_json_str::<PartialConfiguration>(
             input_code.as_str(),
             JsonParserOptions::default().with_allow_comments(),
             "",
@@ -121,7 +121,7 @@ fn quick_test() {
         }
     }"#;
     let result =
-        deserialize_from_json_str::<Configuration>(source, JsonParserOptions::default(), "");
+        deserialize_from_json_str::<PartialConfiguration>(source, JsonParserOptions::default(), "");
 
     dbg!(result.diagnostics());
     assert!(!result.has_errors());

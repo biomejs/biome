@@ -1,11 +1,10 @@
 use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt, HorizontalLine};
-use biome_service::configuration::Configuration;
-use biome_service::create_config;
+use biome_service::{create_config, PartialConfiguration};
 
 pub(crate) fn init(mut session: CliSession) -> Result<(), CliDiagnostic> {
     let fs = &mut session.app.fs;
-    create_config(fs, Configuration::default())?;
+    create_config(fs, PartialConfiguration::init())?;
 
     session.app.console.log(markup! {
 "\n"<Inverse>"Welcome to Biome! Let's get you started..."</Inverse>"

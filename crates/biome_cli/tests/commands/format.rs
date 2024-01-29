@@ -241,7 +241,7 @@ fn write_only_files_in_correct_base() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), ("--write"), ("./src")].as_slice()),
+        Args::from(&["format", "--write", "./src"]),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2715,7 +2715,7 @@ fn format_with_configured_line_ending() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), ("."), ("--write")].as_slice()),
+        Args::from(&["format", ".", "--write"]),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 

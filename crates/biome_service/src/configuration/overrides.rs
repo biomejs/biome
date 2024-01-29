@@ -1,7 +1,10 @@
+use super::javascript::PartialJavascriptConfiguration;
+use super::json::PartialJsonConfiguration;
+use super::PartialCssConfiguration;
 use crate::configuration::formatter::{deserialize_line_width, serialize_line_width};
 use crate::configuration::{
-    css_configuration, javascript_configuration, json_configuration, CssConfiguration,
-    JavascriptConfiguration, JsonConfiguration, PlainIndentStyle,
+    partial_css_configuration, partial_javascript_configuration, partial_json_configuration,
+    PlainIndentStyle,
 };
 use crate::settings::{
     to_matcher, FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings,
@@ -55,18 +58,18 @@ pub struct OverridePattern {
 
     /// Specific configuration for the JavaScript language
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(javascript_configuration), optional, hide)]
-    pub javascript: Option<JavascriptConfiguration>,
+    #[bpaf(external(partial_javascript_configuration), optional, hide)]
+    pub javascript: Option<PartialJavascriptConfiguration>,
 
     /// Specific configuration for the Json language
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(json_configuration), optional, hide)]
-    pub json: Option<JsonConfiguration>,
+    #[bpaf(external(partial_json_configuration), optional, hide)]
+    pub json: Option<PartialJsonConfiguration>,
 
     /// Specific configuration for the Css language
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(css_configuration), optional, hide)]
-    pub css: Option<CssConfiguration>,
+    #[bpaf(external(partial_css_configuration), optional, hide)]
+    pub css: Option<PartialCssConfiguration>,
 
     /// Specific configuration for the Json language
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -240,7 +243,7 @@ pub(crate) fn to_format_settings(
 }
 
 fn to_javascript_language_settings(
-    mut conf: JavascriptConfiguration,
+    mut conf: PartialJavascriptConfiguration,
     parent_settings: &LanguageSettings<JsLanguage>,
 ) -> LanguageSettings<JsLanguage> {
     let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
@@ -298,7 +301,7 @@ fn to_javascript_language_settings(
 }
 
 fn to_json_language_settings(
-    mut conf: JsonConfiguration,
+    mut conf: PartialJsonConfiguration,
     parent_settings: &LanguageSettings<JsonLanguage>,
 ) -> LanguageSettings<JsonLanguage> {
     let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
@@ -332,7 +335,7 @@ fn to_json_language_settings(
 }
 
 fn to_css_language_settings(
-    mut conf: CssConfiguration,
+    mut conf: PartialCssConfiguration,
     parent_settings: &LanguageSettings<CssLanguage>,
 ) -> LanguageSettings<CssLanguage> {
     let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
