@@ -46,6 +46,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   s(/🚀🚀/).s().s();
   ```
 
+- Fix [#1218](https://github.com/biomejs/biome/issues/1218). Fix invalid formatting of multiline member chain. Contributed by @ah-yu
+
 ### JavaScript APIs
 
 ### Linter
