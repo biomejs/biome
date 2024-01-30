@@ -348,9 +348,6 @@ pub(crate) fn read_prettier_files(
         }
     }
 
-    // to be safe, let's drop this content
-    drop(prettier_config_content);
-
     let mut ignore_file_content = String::new();
     let open_options = OpenOptions::default().read(true);
     let path = Path::new(PRETTIER_IGNORE_FILE);
