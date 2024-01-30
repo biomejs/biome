@@ -14,7 +14,6 @@ use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonRoot;
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::{AstNode, NodeCache};
-use biome_service::configuration::PartialJavascriptConfiguration;
 use biome_service::workspace::{
     ChangeFileParams, FixAction, FormatFileParams, Language, OpenFileParams,
 };

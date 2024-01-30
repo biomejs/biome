@@ -2,10 +2,7 @@ use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
 use biome_console::{markup, Console, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    StringSet, Text,
-};
+use biome_deserialize::StringSet;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
@@ -16,7 +13,7 @@ use biome_service::configuration::{
     PartialFormatterConfiguration, PartialJavascriptConfiguration, PartialJavascriptFormatter,
     PlainIndentStyle,
 };
-use biome_service::{Configuration, DynRef, PartialConfiguration};
+use biome_service::{DynRef, PartialConfiguration};
 use indexmap::IndexSet;
 use std::path::{Path, PathBuf};
 
@@ -256,8 +253,10 @@ impl FromPrettierConfiguration {
     }
 
     pub(crate) fn as_biome_configuration(&self) -> PartialConfiguration {
-        let mut configuration = PartialConfiguration::default();
-        configuration.formatter = self.formatter_configuration.clone();
+        let mut configuration = PartialConfiguration {
+            formatter: self.formatter_configuration.clone(),
+            ..Default::default()
+        };
         if self.javascript_formatter_configuration.is_some() {
             configuration.javascript = Some(PartialJavascriptConfiguration {
                 formatter: self.javascript_formatter_configuration.clone(),
