@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `package.json`
+
+```json
+{
+  "name": "@foo/package",
+  "dependencies": { "foo": "latest" }
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file(s) in <TIME>
+```
+
+
