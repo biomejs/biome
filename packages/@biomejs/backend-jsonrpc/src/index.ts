@@ -1,11 +1,7 @@
 import { getCommand } from "./command";
 import { createSocket } from "./socket";
 import { Transport } from "./transport";
-import {
-	createWorkspace as wrapTransport,
-	type Workspace,
-	type RomePath,
-} from "./workspace";
+import { type Workspace, createWorkspace as wrapTransport } from "./workspace";
 
 /**
  * Create an instance of the Workspace client connected to a remote daemon
