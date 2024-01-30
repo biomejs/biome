@@ -34,7 +34,7 @@ impl ConfigName {
 }
 
 lazy_static::lazy_static! {
-    static ref CONFIG_NAME: ConfigName = ConfigName {};
+    pub static ref CONFIG_NAME: ConfigName = ConfigName {};
 }
 
 type AutoSearchResultAlias = Result<Option<AutoSearchResult>, FileSystemDiagnostic>;
@@ -55,8 +55,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
         ROME_JSON
     }
 
-    /// Returns the name of the main configuration file
-    fn config_name(&self) -> &CONFIG_NAME {
+    fn config_name(&self) -> &ConfigName {
         &CONFIG_NAME
     }
 
