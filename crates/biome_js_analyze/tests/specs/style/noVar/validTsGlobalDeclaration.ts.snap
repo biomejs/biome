@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validTsGlobalDeclaration.ts
+---
+# Input
+```ts
+declare global {
+    var Txt: CustomWindow['Txt'];
+}
+```
+
+

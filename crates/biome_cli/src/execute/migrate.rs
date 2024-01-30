@@ -14,10 +14,11 @@ use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonRoot;
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::{AstNode, NodeCache};
+use biome_service::configuration::PartialJavascriptConfiguration;
 use biome_service::workspace::{
     ChangeFileParams, FixAction, FormatFileParams, Language, OpenFileParams,
 };
-use biome_service::{Configuration, VERSION};
+use biome_service::{PartialConfiguration, VERSION};
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -123,7 +124,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         let prettier_configuration = read_prettier_files(fs, console)?;
 
         if prettier_configuration.has_configuration() {
-            let configuration = deserialize_from_json_str::<Configuration>(
+            let configuration = deserialize_from_json_str::<PartialConfiguration>(
                 configuration_content.as_str(),
                 JsonParserOptions::default(),
                 "",

@@ -52,7 +52,7 @@
 //! format a file with a language that does not have a formatter
 
 use crate::file_handlers::Capabilities;
-use crate::{Configuration, Deserialize, Serialize, WorkspaceError};
+use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
 use biome_console::{markup, Markup, MarkupBuf};
@@ -69,6 +69,7 @@ use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 use tracing::debug;
 
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
+use crate::configuration::PartialConfiguration;
 pub use crate::file_handlers::Language;
 use crate::settings::WorkspaceSettings;
 
@@ -355,7 +356,7 @@ impl SupportKind {
     }
 }
 
-#[derive(Debug, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum FeatureName {
     Format,
@@ -392,7 +393,7 @@ impl FeaturesBuilder {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct UpdateSettingsParams {
-    pub configuration: Configuration,
+    pub configuration: PartialConfiguration,
     // @ematipico TODO: have a better data structure for this
     pub vcs_base_path: Option<PathBuf>,
     // @ematipico TODO: have a better data structure for this

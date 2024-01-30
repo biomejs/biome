@@ -78,7 +78,7 @@ To make svg accessible, the following methods are available:
 </svg>
 ```
 
-## Valid
+### Valid
 
 ```jsx
 <svg>

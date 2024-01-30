@@ -1230,6 +1230,46 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_FONT_PALETTE_VALUES_AT_RULE, children)
             }
+            CSS_FUNCTION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['('] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssParameterList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![')'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_FUNCTION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_FUNCTION, children)
+            }
             CSS_GENERIC_DELIMITER => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -3564,46 +3604,6 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_SCOPE_RANGE_START, children)
-            }
-            CSS_SIMPLE_FUNCTION => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T!['('] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssParameterList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![')'] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        CSS_SIMPLE_FUNCTION.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(CSS_SIMPLE_FUNCTION, children)
             }
             CSS_STARTING_STYLE_AT_RULE => {
                 let mut elements = (&children).into_iter();

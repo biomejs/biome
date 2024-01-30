@@ -1402,6 +1402,29 @@ a"#,
     }
 
     #[test]
+    fn it_converts_line_endings_to_cr() {
+        let options = PrinterOptions {
+            line_ending: LineEnding::Cr,
+            ..PrinterOptions::default()
+        };
+
+        let result = format_with_options(
+            &format_args![
+                text("function main() {"),
+                block_indent(&text("let x = `This is a multiline\nstring`;")),
+                text("}"),
+                hard_line_break()
+            ],
+            options,
+        );
+
+        assert_eq!(
+            "function main() {\r\tlet x = `This is a multiline\rstring`;\r}\r",
+            result.as_code()
+        );
+    }
+
+    #[test]
     fn it_breaks_a_group_if_a_string_contains_a_newline() {
         let result = format(&FormatArrayElements {
             items: vec![

@@ -14,6 +14,7 @@ use biome_diagnostics::{
     Visit,
 };
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
+use std::cmp::Ordering;
 use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
@@ -56,7 +57,7 @@ impl Display for FixKind {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq)]
 pub enum RuleSource {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
     Clippy(&'static str),
@@ -86,6 +87,54 @@ pub enum RuleSource {
     EslintMysticatea(&'static str),
 }
 
+impl PartialEq for RuleSource {
+    fn eq(&self, other: &Self) -> bool {
+        std::mem::discriminant(self) == std::mem::discriminant(other)
+    }
+}
+
+impl std::fmt::Display for RuleSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RuleSource::Clippy(_) => write!(f, "Clippy"),
+            RuleSource::Eslint(_) => write!(f, "ESLint"),
+            RuleSource::EslintImport(_) => write!(f, "eslint-plugin-import"),
+            RuleSource::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
+            RuleSource::EslintJest(_) => write!(f, "eslint-plugin-jest"),
+            RuleSource::EslintJsxA11y(_) => write!(f, "eslint-plugin-jsx-a11y"),
+            RuleSource::EslintReact(_) => write!(f, "eslint-plugin-react"),
+            RuleSource::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
+            RuleSource::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
+            RuleSource::EslintStylistic(_) => write!(f, "eslint-plugin-stylistic"),
+            RuleSource::EslintTypeScript(_) => write!(f, "eslint-plugin-typescript"),
+            RuleSource::EslintUnicorn(_) => write!(f, "eslint-plugin-unicorn"),
+            RuleSource::EslintMysticatea(_) => write!(f, "eslint-plugin-mysticates"),
+        }
+    }
+}
+
+impl PartialOrd for RuleSource {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for RuleSource {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if let (RuleSource::Eslint(self_rule), RuleSource::Eslint(other_rule)) = (self, other) {
+            self_rule.cmp(other_rule)
+        } else if self.is_eslint() {
+            Ordering::Greater
+        } else if other.is_eslint() {
+            Ordering::Less
+        } else {
+            let self_rule = self.as_rule_name();
+            let other_rule = other.as_rule_name();
+            self_rule.cmp(other_rule)
+        }
+    }
+}
+
 impl RuleSource {
     pub fn as_rule_name(&self) -> &'static str {
         match self {
@@ -105,7 +154,7 @@ impl RuleSource {
         }
     }
 
-    pub fn as_rule_url(&self) -> String {
+    pub fn to_rule_url(&self) -> String {
         match self {
             Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
@@ -124,7 +173,37 @@ impl RuleSource {
     }
 
     pub fn as_url_and_rule_name(&self) -> (String, &'static str) {
-        (self.as_rule_url(), self.as_rule_name())
+        (self.to_rule_url(), self.as_rule_name())
+    }
+
+    /// Original ESLint rule
+    pub const fn is_eslint(&self) -> bool {
+        matches!(self, Self::Eslint(_))
+    }
+
+    /// TypeScript plugin
+    pub const fn is_eslint_typescript(&self) -> bool {
+        matches!(self, Self::EslintTypeScript(_))
+    }
+
+    /// All ESLint plugins, exception for the TypeScript one
+    pub const fn is_eslint_plugin(&self) -> bool {
+        matches!(
+            self,
+            Self::EslintImport(_)
+                | Self::EslintImportAccess(_)
+                | Self::EslintJest(_)
+                | Self::EslintStylistic(_)
+                | Self::EslintJsxA11y(_)
+                | Self::EslintReact(_)
+                | Self::EslintReactHooks(_)
+                | Self::EslintSonarJs(_)
+                | Self::EslintUnicorn(_)
+        )
+    }
+
+    pub const fn is_clippy(&self) -> bool {
+        matches!(self, Self::Clippy(_))
     }
 }
 
@@ -135,6 +214,12 @@ pub enum RuleSourceKind {
     SameLogic,
     /// The rule deviate of the logic of the source
     Inspired,
+}
+
+impl RuleSourceKind {
+    pub const fn is_inspired(&self) -> bool {
+        matches!(self, Self::Inspired)
+    }
 }
 
 impl RuleMetadata {

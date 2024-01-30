@@ -18,7 +18,7 @@ export type SupportKind =
 	| "FeatureNotEnabled"
 	| "FileNotSupported";
 export interface UpdateSettingsParams {
-	configuration: Configuration;
+	configuration: PartialConfiguration;
 	gitignore_matches: string[];
 	vcs_base_path?: string;
 	working_directory?: string;
@@ -26,7 +26,7 @@ export interface UpdateSettingsParams {
 /**
  * The configuration that is contained inside the file `biome.json`
  */
-export interface Configuration {
+export interface PartialConfiguration {
 	/**
 	 * A field for the [JSON schema](https://json-schema.org/) specification
 	 */
@@ -34,7 +34,7 @@ export interface Configuration {
 	/**
 	 * Specific configuration for the Css language
 	 */
-	css?: CssConfiguration;
+	css?: PartialCssConfiguration;
 	/**
 	 * A list of paths to other JSON files, used to extends the current configuration.
 	 */
@@ -42,27 +42,27 @@ export interface Configuration {
 	/**
 	 * The configuration of the filesystem
 	 */
-	files?: FilesConfiguration;
+	files?: PartialFilesConfiguration;
 	/**
 	 * The configuration of the formatter
 	 */
-	formatter?: FormatterConfiguration;
+	formatter?: PartialFormatterConfiguration;
 	/**
 	 * Specific configuration for the JavaScript language
 	 */
-	javascript?: JavascriptConfiguration;
+	javascript?: PartialJavascriptConfiguration;
 	/**
 	 * Specific configuration for the Json language
 	 */
-	json?: JsonConfiguration;
+	json?: PartialJsonConfiguration;
 	/**
 	 * The configuration for the linter
 	 */
-	linter?: LinterConfiguration;
+	linter?: PartialLinterConfiguration;
 	/**
 	 * The configuration of the import sorting
 	 */
-	organizeImports?: OrganizeImports;
+	organizeImports?: PartialOrganizeImports;
 	/**
 	 * A list of granular patterns that should be applied only to a sub set of files
 	 */
@@ -70,26 +70,26 @@ export interface Configuration {
 	/**
 	 * The configuration of the VCS integration
 	 */
-	vcs?: VcsConfiguration;
+	vcs?: PartialVcsConfiguration;
 }
 /**
  * Options applied to CSS files
  */
-export interface CssConfiguration {
+export interface PartialCssConfiguration {
 	/**
 	 * Formatting options
 	 */
-	formatter?: CssFormatter;
+	formatter?: PartialCssFormatter;
 	/**
 	 * Parsing options
 	 */
-	parser?: CssParser;
+	parser?: PartialCssParser;
 }
 export type StringSet = string[];
 /**
  * The configuration of the filesystem
  */
-export interface FilesConfiguration {
+export interface PartialFilesConfiguration {
 	/**
 	 * A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.
 	 */
@@ -110,7 +110,7 @@ export interface FilesConfiguration {
 /**
  * Generic options applied to all files
  */
-export interface FormatterConfiguration {
+export interface PartialFormatterConfiguration {
 	enabled?: boolean;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
@@ -148,37 +148,37 @@ export interface FormatterConfiguration {
 /**
  * A set of options applied to the JavaScript files
  */
-export interface JavascriptConfiguration {
+export interface PartialJavascriptConfiguration {
 	/**
 	 * Formatting options
 	 */
-	formatter?: JavascriptFormatter;
+	formatter?: PartialJavascriptFormatter;
 	/**
 	* A list of global bindings that should be ignored by the analyzers
 
 If defined here, they should not emit diagnostics. 
 	 */
 	globals?: StringSet;
-	organize_imports?: JavascriptOrganizeImports;
+	organize_imports?: PartialJavascriptOrganizeImports;
 	/**
 	 * Parsing options
 	 */
-	parser?: JavascriptParser;
+	parser?: PartialJavascriptParser;
 }
 /**
  * Options applied to JSON files
  */
-export interface JsonConfiguration {
+export interface PartialJsonConfiguration {
 	/**
 	 * Formatting options
 	 */
-	formatter?: JsonFormatter;
+	formatter?: PartialJsonFormatter;
 	/**
 	 * Parsing options
 	 */
-	parser?: JsonParser;
+	parser?: PartialJsonParser;
 }
-export interface LinterConfiguration {
+export interface PartialLinterConfiguration {
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
@@ -196,7 +196,7 @@ export interface LinterConfiguration {
 	 */
 	rules?: Rules;
 }
-export interface OrganizeImports {
+export interface PartialOrganizeImports {
 	/**
 	 * Enables the organization of imports
 	 */
@@ -214,7 +214,7 @@ export type Overrides = OverridePattern[];
 /**
  * Set of properties to integrate Biome with a VCS software.
  */
-export interface VcsConfiguration {
+export interface PartialVcsConfiguration {
 	/**
 	 * The kind of client.
 	 */
@@ -238,7 +238,7 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	 */
 	useIgnoreFile?: boolean;
 }
-export interface CssFormatter {
+export interface PartialCssFormatter {
 	/**
 	 * Control the formatter for CSS (and its super languages) files.
 	 */
@@ -268,7 +268,7 @@ export interface CssFormatter {
 /**
  * Options that changes how the CSS parser behaves
  */
-export interface CssParser {
+export interface PartialCssParser {
 	/**
 	 * Allow comments to appear on incorrect lines in `.css` files
 	 */
@@ -285,7 +285,7 @@ export type LineWidth = number;
 /**
  * Formatting options specific to the JavaScript files
  */
-export interface JavascriptFormatter {
+export interface PartialJavascriptFormatter {
 	/**
 	 * Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
 	 */
@@ -343,11 +343,11 @@ export interface JavascriptFormatter {
 	 */
 	trailingComma?: TrailingComma;
 }
-export interface JavascriptOrganizeImports {}
+export interface PartialJavascriptOrganizeImports {}
 /**
  * Options that changes how the JavaScript parser behaves
  */
-export interface JavascriptParser {
+export interface PartialJavascriptParser {
 	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
@@ -355,7 +355,7 @@ These decorators belong to an old proposal, and they are subject to change.
 	 */
 	unsafeParameterDecoratorsEnabled?: boolean;
 }
-export interface JsonFormatter {
+export interface PartialJsonFormatter {
 	/**
 	 * Control the formatter for JSON (and its super languages) files.
 	 */
@@ -384,7 +384,7 @@ export interface JsonFormatter {
 /**
  * Options that changes how the JSON parser behaves
  */
-export interface JsonParser {
+export interface PartialJsonParser {
 	/**
 	 * Allow parsing comments in `.json` files
 	 */
@@ -416,7 +416,7 @@ export interface OverridePattern {
 	/**
 	 * Specific configuration for the Css language
 	 */
-	css?: CssConfiguration;
+	css?: PartialCssConfiguration;
 	/**
 	 * Specific configuration for the Json language
 	 */
@@ -432,11 +432,11 @@ export interface OverridePattern {
 	/**
 	 * Specific configuration for the JavaScript language
 	 */
-	javascript?: JavascriptConfiguration;
+	javascript?: PartialJavascriptConfiguration;
 	/**
 	 * Specific configuration for the Json language
 	 */
-	json?: JsonConfiguration;
+	json?: PartialJsonConfiguration;
 	/**
 	 * Specific configuration for the Json language
 	 */
@@ -867,6 +867,10 @@ export interface Nursery {
 	 */
 	noEmptyTypeParameters?: RuleConfiguration;
 	/**
+	 * Disallow focused tests.
+	 */
+	noFocusedTests?: RuleConfiguration;
+	/**
 	 * Disallow assignments to native objects and read-only global variables.
 	 */
 	noGlobalAssign?: RuleConfiguration;
@@ -886,6 +890,10 @@ export interface Nursery {
 	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration;
+	/**
+	 * Disallow disabled tests.
+	 */
+	noSkippedTests?: RuleConfiguration;
 	/**
 	 * Disallow then property.
 	 */
@@ -954,6 +962,10 @@ export interface Nursery {
 	 * Enforce using function types instead of object type with call signatures.
 	 */
 	useShorthandFunctionType?: RuleConfiguration;
+	/**
+	 * Enforce the sorting of CSS utility classes.
+	 */
+	useSortedClasses?: RuleConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -1392,7 +1404,8 @@ export type PossibleOptions =
 	| DeprecatedHooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
-	| ValidAriaRoleOptions;
+	| ValidAriaRoleOptions
+	| UtilityClassSortingOptions;
 /**
  * Options for the rule `noExcessiveCognitiveComplexity`.
  */
@@ -1451,11 +1464,21 @@ export interface RestrictedGlobalsOptions {
 	/**
 	 * A list of names that should trigger the rule
 	 */
-	deniedGlobals?: string[];
+	deniedGlobals: string[];
 }
 export interface ValidAriaRoleOptions {
-	allowedInvalidRoles: string[];
+	allowInvalidRoles: string[];
 	ignoreNonDom: boolean;
+}
+export interface UtilityClassSortingOptions {
+	/**
+	 * Additional attributes that will be sorted.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be sorted.
+	 */
+	functions?: string[];
 }
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
@@ -1667,11 +1690,13 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyTypeParameters"
+	| "lint/nursery/noFocusedTests"
 	| "lint/nursery/noGlobalAssign"
 	| "lint/nursery/noGlobalEval"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNodejsModules"
+	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
@@ -1690,6 +1715,7 @@ export type Category =
 	| "lint/nursery/useNodejsImportProtocol"
 	| "lint/nursery/useNumberNamespace"
 	| "lint/nursery/useShorthandFunctionType"
+	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
@@ -2030,6 +2056,7 @@ export interface RenameResult {
 	 */
 	range: TextRange;
 }
+export type Configuration = PartialConfiguration;
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<SupportsFeatureResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;

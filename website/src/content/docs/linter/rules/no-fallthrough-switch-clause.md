@@ -44,7 +44,7 @@ switch (bar) {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 switch (foo) {

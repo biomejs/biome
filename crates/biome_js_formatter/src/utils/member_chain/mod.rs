@@ -114,7 +114,6 @@ use crate::utils::member_chain::groups::{
     MemberChainGroup, MemberChainGroupsBuilder, TailChainGroups,
 };
 pub use crate::utils::member_chain::simple_argument::SimpleArgument;
-use crate::utils::test_call::is_test_call_expression;
 use crate::JsLabels;
 use biome_formatter::{write, Buffer};
 use biome_js_syntax::{
@@ -299,6 +298,16 @@ impl MemberChain {
             return Ok(true);
         }
 
+        let has_empty_line_inside_tail = self
+            .tail
+            .iter()
+            .skip(1)
+            .any(|group| group.needs_empty_line_before());
+
+        if has_empty_line_inside_tail {
+            return Ok(true);
+        }
+
         Ok(false)
     }
 
@@ -363,26 +372,23 @@ impl Format<JsFormatContext> for MemberChain {
         if self.tail.len() <= 1 && !has_comments {
             return if is_long_curried_call(Some(&self.root)) {
                 write!(f, [format_one_line])
-            } else if is_test_call_expression(&self.root)? && self.head.members().len() >= 2 {
+            } else if self.root.is_test_call_expression()? && self.head.members().len() >= 2 {
                 write!(f, [self.head, soft_line_indent_or_space(&self.tail)])
             } else {
                 write!(f, [group(&format_one_line)])
             };
         }
 
-        let has_empty_line = match self.tail.members().next() {
-            Some(member) => member.needs_empty_line_before(),
-            None => false,
-        };
-
         let format_tail = format_with(|f| {
-            if !has_empty_line {
-                write!(f, [hard_line_break()])?;
+            for group in self.tail.iter() {
+                if group.needs_empty_line_before() {
+                    write!(f, [empty_line()])?;
+                } else {
+                    write!(f, [hard_line_break()])?;
+                }
+                write!(f, [group])?;
             }
-
-            f.join_with(hard_line_break())
-                .entries(self.tail.iter())
-                .finish()
+            Ok(())
         });
 
         let format_expanded = format_with(|f| write!(f, [self.head, indent(&group(&format_tail))]));
@@ -391,7 +397,12 @@ impl Format<JsFormatContext> for MemberChain {
             if self.groups_should_break(f)? {
                 write!(f, [group(&format_expanded)])
             } else {
-                if has_empty_line || self.last_group().will_break(f)? {
+                let has_empty_line_before_tail = self
+                    .tail
+                    .first()
+                    .map_or(false, |group| group.needs_empty_line_before());
+
+                if has_empty_line_before_tail || self.last_group().will_break(f)? {
                     write!(f, [expand_parent()])?;
                 }
 

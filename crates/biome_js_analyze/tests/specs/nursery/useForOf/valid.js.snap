@@ -18,6 +18,10 @@ for (let i = 0; i < arr.length; i++) {
   arr[i] = 0;
 }
 
+for (let i = 0; i < array.length; i++) {
+  console.log({ i });
+}
+
 for (var c = 0; c < arr.length; c++) {
   doMath(c);
 }

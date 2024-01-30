@@ -13,8 +13,6 @@ use xtask_codegen::{to_lower_snake_case, update};
 
 pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let config_root = project_root().join("crates/biome_service/src/configuration/linter");
-    let config_parsing_root =
-        project_root().join("crates/biome_service/src/configuration/parse/json/");
     let push_rules_directory = project_root().join("crates/biome_service/src/configuration");
 
     #[derive(Default)]
@@ -72,12 +70,9 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let mut line_groups = Vec::new();
     let mut default_for_groups = Vec::new();
     let mut group_as_default_rules = Vec::new();
-    let mut group_as_disabled_rules = Vec::new();
     let mut group_match_code = Vec::new();
     let mut group_get_severity = Vec::new();
     let mut group_name_list = vec!["recommended", "all"];
-    let mut rule_visitor_call = Vec::new();
-    let mut visitor_rule_list = Vec::new();
     let mut push_rule_list = Vec::new();
     for (group, rules) in groups {
         group_name_list.push(group);
@@ -86,9 +81,9 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         let group_name_string_literal = Literal::string(group);
 
         struct_groups.push(generate_struct(group, &rules));
-        visitor_rule_list.push(generate_visitor(group, &rules));
         push_rule_list.push(generate_push_to_analyzer_rules(group));
         line_groups.push(quote! {
+            #[deserializable(rename = #group_name_string_literal)]
             #[serde(skip_serializing_if = "Option::is_none")]
             pub #property_group_name: Option<#group_struct_name>
         });
@@ -116,12 +111,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
             }
         });
 
-        group_as_disabled_rules.push(quote! {
-            if let Some(group) = self.#property_group_name.as_ref() {
-                disabled_rules.extend(&group.get_disabled_rules());
-            }
-        });
-
         group_get_severity.push(quote! {
             #group => self
                 .#property_group_name
@@ -139,25 +128,23 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         group_match_code.push(quote! {
            #group => #group_struct_name::has_rule(rule_name).then_some((category, rule_name))
         });
-
-        rule_visitor_call.push(quote! {
-            #group_name_string_literal => {
-                result.#property_group_name = Deserializable::deserialize(&value, &key_text, diagnostics);
-            }
-        });
     }
 
     let groups = quote! {
+        use crate::RuleConfiguration;
+        use biome_analyze::RuleFilter;
+        use biome_console::markup;
+        use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
+        use biome_deserialize_macros::{Deserializable, Merge};
+        use biome_diagnostics::{Category, Severity};
+        use biome_rowan::TextRange;
+        use indexmap::IndexSet;
         use serde::{Deserialize, Serialize};
         #[cfg(feature = "schema")]
         use schemars::JsonSchema;
-        use crate::RuleConfiguration;
-        use biome_analyze::RuleFilter;
-        use indexmap::IndexSet;
-        use biome_diagnostics::{Category, Severity};
-        use biome_deserialize_macros::{Merge, NoneState};
 
-        #[derive(Clone, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+        #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+        #[deserializable(with_validator)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
         #[serde(rename_all = "camelCase", deny_unknown_fields)]
         pub struct Rules {
@@ -172,18 +159,28 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
             #( #line_groups ),*
         }
 
-        impl Default for Rules {
-            fn default() -> Self {
-                Self {
-                    recommended: Some(true),
-                    all: None,
-                    #( #default_for_groups ),*
+        impl DeserializableValidator for Rules {
+            fn validate(
+                &self,
+                _name: &str,
+                range: TextRange,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> bool {
+                if self.recommended == Some(true) && self.all == Some(true) {
+                    diagnostics
+                        .push(DeserializationDiagnostic::new(markup!(
+                            <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
+                        ))
+                        .with_range(range)
+                        .with_note(markup!("Biome will fallback to its defaults for this section.")));
+                    return false;
                 }
+
+                true
             }
         }
 
         impl Rules {
-
             /// Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule.
             /// Usually the code is built like {category}/{rule_name}
             pub fn matches_diagnostic_code<'a>(
@@ -251,84 +248,9 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
 
                 enabled_rules.difference(&disabled_rules).copied().collect()
             }
-
-            /// It returns only the disabled rules
-            pub fn as_disabled_rules(&self) -> IndexSet<RuleFilter> {
-                let mut disabled_rules = IndexSet::new();
-                #( #group_as_disabled_rules )*
-
-                disabled_rules
-            }
-
         }
 
         #( #struct_groups )*
-    };
-
-    let visitors = quote! {
-        use crate::configuration::linter::*;
-        use crate::Rules;
-        use biome_console::markup;
-        use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, NoneState, Text, VisitableType};
-        use biome_rowan::TextRange;
-
-        impl Deserializable for Rules {
-            fn deserialize(
-                value: &impl DeserializableValue,
-                name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
-            ) -> Option<Self> {
-                struct Visitor;
-                impl DeserializationVisitor for Visitor  {
-                    type Output = Rules;
-                    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
-                    fn visit_map(
-                        self,
-                        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
-                        range: TextRange,
-                        _name: &str,
-                        diagnostics: &mut Vec<DeserializationDiagnostic>,
-                    ) -> Option<Self::Output> {
-                        let mut recommended_is_set = false;
-                        let mut result = Self::Output::none();
-                        for (key, value) in members.flatten() {
-                            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
-                                continue;
-                            };
-                            match key_text.text() {
-                                "recommended" => {
-                                    recommended_is_set = true;
-                                    result.recommended = Deserializable::deserialize(&value, &key_text, diagnostics);
-                                }
-                                "all" => {
-                                    result.all = Deserializable::deserialize(&value, &key_text, diagnostics);
-                                }
-                                #( #rule_visitor_call ),*,
-                                unknown_key => {
-                                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                                        unknown_key,
-                                        key.range(),
-                                        &[#( #group_name_list ),*],
-                                    ));
-                                }
-                            }
-                        }
-                        if recommended_is_set && matches!(result.recommended, Some(true)) && matches!(result.all, Some(true)) {
-                            diagnostics
-                                .push(DeserializationDiagnostic::new(markup!(
-                                    <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
-                                ))
-                                .with_range(range)
-                                .with_note(markup!("Biome will fallback to its defaults for this section.")));
-                            return Some(Self::Output::none());
-                        }
-                        Some(result)
-                    }
-                }
-                value.deserialize(Visitor, name, diagnostics)
-            }
-        }
-        #( #visitor_rule_list )*
     };
 
     let push_rules = quote! {
@@ -346,18 +268,11 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     };
 
     let configuration = groups.to_string();
-    let visitors = visitors.to_string();
     let push_rules = push_rules.to_string();
 
     update(
         &config_root.join("rules.rs"),
         &xtask::reformat(configuration)?,
-        &mode,
-    )?;
-
-    update(
-        &config_parsing_root.join("rules.rs"),
-        &xtask::reformat(visitors)?,
         &mode,
     )?;
 
@@ -497,7 +412,8 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         )
     };
     quote! {
-        #[derive(Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+        #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+        #[deserializable(with_validator)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
         #[serde(rename_all = "camelCase", default)]
         /// A list of rules that belong to this group
@@ -511,6 +427,27 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             pub all: Option<bool>,
 
             #( #schema_lines_rules ),*
+        }
+
+        impl DeserializableValidator for #group_struct_name {
+            fn validate(
+                &self,
+                _name: &str,
+                range: TextRange,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> bool {
+                if self.recommended == Some(true) && self.all == Some(true) {
+                    diagnostics
+                        .push(DeserializationDiagnostic::new(markup!(
+                            <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
+                        ))
+                        .with_range(range)
+                        .with_note(markup!("Biome will fallback to its defaults for this section.")));
+                    return false;
+                }
+
+                true
+            }
         }
 
         impl #group_struct_name {
@@ -604,81 +541,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                     #( #get_rule_configuration_line ),*,
                     _ => None
                 }
-            }
-        }
-    }
-}
-
-fn generate_visitor(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) -> TokenStream {
-    let group_struct_name = Ident::new(&group.to_capitalized(), Span::call_site());
-    let mut group_rules = vec![Literal::string("recommended"), Literal::string("all")];
-    let mut visitor_rule_line = Vec::new();
-
-    for rule_name in rules.keys() {
-        let rule_identifier = Ident::new(&to_lower_snake_case(rule_name), Span::call_site());
-        group_rules.push(Literal::string(rule_name));
-        visitor_rule_line.push(quote! {
-            #rule_name => {
-                result.#rule_identifier = Deserializable::deserialize(&value, #rule_name, diagnostics);
-            }
-        });
-    }
-
-    quote! {
-        impl Deserializable for #group_struct_name {
-            fn deserialize(
-                value: &impl DeserializableValue,
-                name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
-            ) -> Option<Self> {
-                struct Visitor;
-                impl DeserializationVisitor for Visitor  {
-                    type Output =#group_struct_name;
-                    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
-                    fn visit_map(
-                        self,
-                        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
-                        range: TextRange,
-                        _name: &str,
-                        diagnostics: &mut Vec<DeserializationDiagnostic>,
-                    ) -> Option<Self::Output> {
-                        let mut recommended_is_set = false;
-                        let mut result = Self::Output::none();
-                        for (key, value) in members.flatten() {
-                            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
-                                continue;
-                            };
-                            match key_text.text() {
-                                "recommended" => {
-                                    recommended_is_set = true;
-                                    result.recommended = Deserializable::deserialize(&value, &key_text, diagnostics);
-                                }
-                                "all" => {
-                                    result.all = Deserializable::deserialize(&value, &key_text, diagnostics);
-                                }
-                                #( #visitor_rule_line ),*,
-                                unknown_key => {
-                                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                                        unknown_key,
-                                        key.range(),
-                                        &[#( #group_rules ),*],
-                                    ));
-                                }
-                            }
-                        }
-                        if recommended_is_set && matches!(result.recommended, Some(true)) && matches!(result.all, Some(true)) {
-                            diagnostics
-                                .push(DeserializationDiagnostic::new(markup!(
-                                    <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
-                                ))
-                                .with_range(range)
-                                .with_note(markup!("Biome will fallback to its defaults for this section.")));
-                            return Some(Self::Output::none());
-                        }
-                        Some(result)
-                    }
-                }
-                value.deserialize(Visitor, name, diagnostics)
             }
         }
     }

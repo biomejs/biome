@@ -65,3 +65,10 @@ export enum RgbColor3 {
 	Green = GREEN,
 	Blue,
 }
+
+// https://github.com/biomejs/biome/issues/1640
+export enum WithComment {
+  First = 1, // Comment1
+  Second, // Comment2
+  Third // Comment3
+}

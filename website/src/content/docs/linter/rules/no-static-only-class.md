@@ -71,7 +71,7 @@ class StaticConstants {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 const X = {

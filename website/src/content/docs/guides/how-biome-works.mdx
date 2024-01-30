@@ -154,7 +154,6 @@ When both `include` and `ignore` are specified, Biome gives **precedence** to `i
 The syntax and meaning of these two options loosely follow the [globset rules](https://docs.rs/globset/latest/globset/#syntax) but without the ability to set options.
 
 
-> - `?` matches any single character.
 > - `*` matches zero or more characters.
 > - `**` recursively matches directories but are only legal in three situations.
 > First, if the glob starts with <code>\*\*&#x2F;</code>, then it matches
@@ -166,11 +165,7 @@ The syntax and meaning of these two options loosely follow the [globset rules](h
   > the pattern, then it matches zero or more directories. Using `**` anywhere
   > else is illegal (N.B. the glob `**` is allowed and means "match everything").
 >
-> - `{a,b}` matches `a` or `b` where `a` and `b` are arbitrary glob patterns.
-> (N.B. Nesting `{...}` is not currently allowed.)
-> - `[ab]` matches `a` or `b` where `a` and `b` are characters. Use
-> `[!ab]` to match any character except for `a` and `b`.
 > - Metacharacters such as `*` and `?` can be escaped with character class
 > notation. e.g., `[*]` matches `*`.
 
-
+Check the [wikipedia page](https://en.wikipedia.org/wiki/Glob_(programming)) for more information.

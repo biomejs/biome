@@ -26,7 +26,7 @@ declare_rule! {
     /// <a href="/" aria-hidden="true" />
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// <button aria-hidden="true" tabIndex="-1" />

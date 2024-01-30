@@ -1,6 +1,5 @@
 mod at_rule;
 mod blocks;
-mod css_dimension;
 mod parse_error;
 mod property;
 mod selector;
@@ -10,14 +9,10 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::blocks::parse_or_recover_declaration_list_block;
-use crate::syntax::css_dimension::{is_at_any_dimension, parse_any_dimension};
 use crate::syntax::parse_error::expected_any_rule;
-use crate::syntax::parse_error::expected_expression;
-use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::property::{is_at_any_property, parse_any_property};
-use crate::syntax::selector::is_at_selector;
+use crate::syntax::selector::is_nth_at_selector;
 use crate::syntax::selector::SelectorList;
-use crate::syntax::value::url::{is_at_url_function, parse_url_function};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -25,6 +20,8 @@ use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, Recover
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
+use value::dimension::{is_at_any_dimension, parse_any_dimension};
+use value::function::{is_at_any_function, parse_any_function};
 
 use self::parse_error::{expected_component_value, expected_declaration_item, expected_number};
 
@@ -41,7 +38,6 @@ const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![
 const SELECTOR_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{'], T!['}'],];
 const BODY_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     SELECTOR_LIST_RECOVERY_SET.union(RULE_RECOVERY_SET);
-const BINARY_OPERATION_TOKEN: TokenSet<CssSyntaxKind> = token_set![T![+], T![-], T![*], T![/]];
 
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
@@ -104,7 +100,7 @@ impl ParseNodeList for RuleList {
 
 #[inline]
 pub(crate) fn is_at_qualified_rule(p: &mut CssParser) -> bool {
-    is_at_selector(p)
+    is_nth_at_selector(p, 0)
 }
 
 #[inline]
@@ -259,92 +255,6 @@ pub(crate) fn parse_color(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_COLOR))
 }
 
-#[inline]
-pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
-    is_nth_at_any_function(p, 0)
-}
-
-#[inline]
-pub(crate) fn is_nth_at_any_function(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_identifier(p, n) && p.nth_at(n + 1, T!['('])
-}
-
-pub(crate) struct ParameterList;
-
-impl ParseSeparatedList for ParameterList {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_PARAMETER_LIST;
-
-    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_parameter(p)
-    }
-
-    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')'])
-    }
-
-    fn recover(
-        &mut self,
-        p: &mut Self::Parser<'_>,
-        parsed_element: ParsedSyntax,
-    ) -> RecoveryResult {
-        parsed_element.or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_PARAMETER, token_set!(T![,], T![')'])),
-            expected_declaration_item,
-        )
-    }
-
-    fn separating_element_kind(&mut self) -> Self::Kind {
-        T![,]
-    }
-
-    fn allow_trailing_separating_element(&self) -> bool {
-        true
-    }
-}
-#[inline]
-pub(crate) fn is_at_parameter(p: &mut CssParser) -> bool {
-    is_at_parenthesized(p) || is_at_any_value(p)
-}
-#[inline]
-pub(crate) fn is_at_parenthesized(p: &mut CssParser) -> bool {
-    p.at(T!['('])
-}
-
-#[inline]
-pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_parameter(p) {
-        return Absent;
-    }
-    let param = p.start();
-    parse_any_expression(p).ok();
-    Present(param.complete(p, CSS_PARAMETER))
-}
-#[inline]
-pub(crate) fn is_at_any_expression(p: &mut CssParser) -> bool {
-    is_at_parenthesized(p) || is_at_any_value(p)
-}
-#[inline]
-pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_any_expression(p) {
-        return Absent;
-    }
-    let param = if is_at_parenthesized(p) {
-        parse_parenthesized_expression(p)
-    } else {
-        parse_list_of_component_values_expression(p)
-    };
-    if is_at_binary_operator(p) {
-        let binary_expression = param.precede(p);
-        bump_operator_token(p);
-        parse_any_expression(p).or_add_diagnostic(p, expected_expression);
-        return Present(binary_expression.complete(p, CSS_BINARY_EXPRESSION));
-    }
-    param
-}
-
 struct CssComponentValueList;
 impl ParseNodeList for CssComponentValueList {
     type Kind = CssSyntaxKind;
@@ -370,61 +280,6 @@ impl ParseNodeList for CssComponentValueList {
             expected_component_value,
         )
     }
-}
-
-#[inline]
-pub(crate) fn parse_list_of_component_values_expression(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_any_value(p) {
-        return Absent;
-    }
-    let m = p.start();
-    CssComponentValueList.parse_list(p);
-    Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION))
-}
-
-#[inline]
-pub(crate) fn is_at_binary_operator(p: &mut CssParser) -> bool {
-    p.at_ts(BINARY_OPERATION_TOKEN)
-}
-
-#[inline]
-pub(crate) fn bump_operator_token(p: &mut CssParser) {
-    p.bump_ts(BINARY_OPERATION_TOKEN);
-}
-
-#[inline]
-pub(crate) fn parse_parenthesized_expression(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_parenthesized(p) {
-        return Absent;
-    }
-    let m = p.start();
-    p.expect(T!['(']);
-    parse_any_expression(p).ok();
-    p.expect(T![')']);
-    Present(m.complete(p, CSS_PARENTHESIZED_EXPRESSION))
-}
-
-#[inline]
-pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_any_function(p) {
-        return Absent;
-    }
-    if is_at_url_function(p) {
-        return parse_url_function(p);
-    }
-    parse_simple_function(p)
-}
-
-fn parse_simple_function(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_any_function(p) {
-        return Absent;
-    }
-    let simple_fn = p.start();
-    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-    p.expect(T!['(']);
-    ParameterList.parse_list(p);
-    p.expect(T![')']);
-    Present(simple_fn.complete(p, CSS_SIMPLE_FUNCTION))
 }
 
 #[inline]

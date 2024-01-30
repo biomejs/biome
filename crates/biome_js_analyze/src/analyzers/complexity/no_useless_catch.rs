@@ -31,7 +31,7 @@ declare_rule! {
     ///     doCleanUp();
     /// }
     /// ```
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// try {

@@ -115,7 +115,7 @@ foo
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 <>

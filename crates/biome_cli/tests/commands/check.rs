@@ -1560,14 +1560,7 @@ import * as something from "../something";
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from(
-            [
-                ("check"),
-                ("--apply"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--apply", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

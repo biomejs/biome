@@ -169,6 +169,7 @@ dependencies = [
  "biome_console",
  "biome_css_formatter",
  "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_flags",
  "biome_formatter",
@@ -306,6 +307,7 @@ name = "biome_deserialize"
 version = "0.4.0"
 dependencies = [
  "biome_console",
+ "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_json_parser",
  "biome_json_syntax",
@@ -320,8 +322,9 @@ dependencies = [
 
 [[package]]
 name = "biome_deserialize_macros"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
+ "convert_case",
  "proc-macro-error",
  "proc-macro2",
  "quote",
@@ -454,6 +457,7 @@ dependencies = [
  "biome_console",
  "biome_control_flow",
  "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_js_factory",
  "biome_js_parser",
@@ -571,6 +575,7 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_js_factory",
+ "biome_js_parser",
  "biome_rowan",
  "schemars",
  "serde",
@@ -737,6 +742,7 @@ version = "0.0.0"
 dependencies = [
  "biome_console",
  "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_json_parser",
  "biome_json_syntax",

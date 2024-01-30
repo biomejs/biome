@@ -20,23 +20,194 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+#### Bug fixes
+
+- Don't process files under an ignored directory.
+
+  Previously, Biome processed all files in the traversed hierarchy,
+  even the files under an ignored directory.
+  Now, it completly skip the content of ignored directories.
+
+- Fix [#1508](https://github.com/biomejs/biome/issues/1508) by excluding deleted files from being processed. Contributed by @ematipico
+
+- Fix [#1173](https://github.com/biomejs/biome/issues/1173). Fix the formatting of a single instruction with commented in a control flow body to ensure consistency. Contributed by @mdm317
+
+- Fix overriding of `javascript.globals`. Contributed by @arendjr
+
 ### Configuration
 
 ### Editors
 
+#### Bug fixes
+
+- Fix a regression where ignored files where formatted in the editor. Contributed by @ematipico
+
 ### Formatter
+
+#### Bug fixes
+
+- Fix [#1039](https://github.com/biomejs/biome/issues/1039). Check unicode width instead of number of bytes when checking if regex expression is a simple argument. Contributed by @kalleep
+
+  This no longer breaks.
+
+  ```js
+  s(/🚀🚀/).s().s();
+  ```
+
+- Fix [#1218](https://github.com/biomejs/biome/issues/1218), by correctly preserving empty lines in member chains. Contributed by @ah-yu
 
 ### JavaScript APIs
 
 ### Linter
 
+#### Enhancements
+
+- [noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary/) now provides unsafe code fixes. Contributed by @vasucp1207
+
 #### New features
 
-#### Enhancements
+- Add the rule [noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests), to disallow skipped tests:
+
+  ```js
+  describe.skip("test", () => {});
+  it.skip("test", () => {});
+  ```
+  Contributed by @ematipico
+
+- Add the rule [noFocusedTests](https://biomejs.dev/linter/rules/no-focused-tests), to disallow skipped tests:
+
+  ```js
+  describe.only("test", () => {});
+  it.only("test", () => {});
+  ```
+  Contributed by @ematipico
+
+- Add rule [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes), to sort CSS utility classes:
+
+  ```diff
+  - <div class="px-2 foo p-4 bar" />
+  + <div class="foo·bar·p-4·px-2" />
+  ```
+  Contributed by @DaniGuardiola
 
 #### Bug fixes
 
+- Fix [#1651](https://github.com/biomejs/biome/issues/1651). [noVar](https://biomejs.dev/linter/rules/no-var/) now ignores TsGlobalDeclaration. Contributed by @vasucp1207
+
+- Fix [#1640](https://github.com/biomejs/biome/issues/1640). [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers) code action now generates valid code when last member has a comment but no comma. Contributed by @kalleep
+
+- Fix [#1653](https://github.com/biomejs/biome/issues/1653). Handle a shorthand value in `useForOf` to avoid the false-positive case. Contributed by @togami2864
+
+- Fix [#1656](https://github.com/biomejs/biome/issues/1656). [useOptionalChain](https://biomejs.dev/linter/rules/use-optional-chain/) code action now correctly handles logical and chains where methods with the same name are invoked with different arguments:
+  ```diff
+  - tags·&&·tags.includes('a')·&&·tags.includes('b')
+  + tags?.includes('a') && tags.includes('b')
+  ```
+  Contributed by @lucasweng
+
 ### Parser
+
+## 1.5.3 (2024-01-22)
+
+### LSP
+
+#### Bug fixes
+
+- Fix [#1584](https://github.com/biomejs/biome/issues/1584). Ensure the LSP only registers the formatter once. Contributed by @nhedger
+
+- Fix [#1589](https://github.com/biomejs/biome/issues/1589). Fix invalid formatting of own line comments when they were at the end of an import/export list. Contributed by @spanishpear
+
+### Configuration
+
+#### Bug fixes
+
+- Override correctly the recommended preset ([#1349](https://github.com/biomejs/biome/issues/1349)).
+
+  Previously, if unspecified, Biome turned on the recommended preset in overrides.
+  This resulted in reporting diagnostics with a severity level set to `off`.
+  This in turn caused Biome to fail.
+
+  Now Biome won't switch on the recommended preset in `overrides` unless told to do so.
+
+  Contributed by @Conaclos
+
+- Don't format **ignored** files that are well-known JSONC files when `files.ignoreUnknown` is enabled ([#1607](https://github.com/biomejs/biome/issues/1607)).
+
+  Previously, Biome always formatted files that are known to be JSONC files (e.g. `.eslintrc`) when `files.ignoreUnknown` was enabled.
+
+  Contributed by @Conaclos
+
+### Formatter
+
+#### Bug fixes
+
+- Fix [#1178](https://github.com/biomejs/biome/issues/1178), where the line ending option wasn't correctly applied. Contributed by @ematipico
+- Fix [#1571](https://github.com/biomejs/biome/issues/1571). Fix invalid formatting of nested multiline comments. Contributed by @ah-yu
+
+### Linter
+
+#### Bug fixes
+
+- Fix [#1575](https://github.com/biomejs/biome/issues/1575). [noArrayIndexKey](https://biomejs.dev/linter/rules/no-array-index-key/) now captures array index value inside template literals and with string concatination. Contributed by @vasucp1207
+
+- Linter rules that inspect regexes now handle multibyte characters correctly ([#1522](https://github.com/biomejs/biome/issues/1522)).
+
+  Previously, [noMisleadingCharacterClass](https://biomejs.dev/linter/no-misleading-character-class), [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/no-multiple-spaces-in-regular-expression-literals), and [noEmptyCharacterClassInRegex](https://biomejs.dev/linter/no-empty-character-class-in-regex) made Biome errors on multi-bytes characters.
+  Multibyte characters are now handled correctly.
+
+  The following code no longer raises an internal error:
+
+  ```js
+  // Cyrillic characters
+  /[\u200E\u2066-\u2069]/gu;
+  ```
+
+  Contributed by @Conaclos
+
+- [useExhaustiveDependencies](https://biomejs.dev/linter/use-exhaustive-dependencies) no longer made Biome errors in code TypeScript import equal declarations ([#1194](https://github.com/biomejs/biome/issues/1194)). Contributed by @Conaclos
+
+- Fix typo in the diagnostic of [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules). Contributed by @huseeiin
+
+### Parser
+
+#### Bug fixes
+
+- Accept the `const` modifier for type parameter in method type signature ([#1624](https://github.com/biomejs/biome/issues/1624)).
+
+  The following code is now correctly parsed:
+
+  ```ts
+  type Foo = {
+    <const T>();
+    method<const T>();
+  };
+  ```
+
+  Contributed by @magic-akari
+
+- Correctly parse type arguments in expression([#1184](https://github.com/biomejs/biome/issues/1184)).
+
+  The following code is now correctly parsed in typescript:
+
+  ```ts
+  0 < (0 >= 1);
+  ```
+
+  Contributed by @ah-yu
+
+### Website
+
+#### New
+
+- Add a [page that maps the Biome rule to its source](https://biomejs.dev/linter/rules-sources/). Contributed by @ematipico
+
+#### Fixes
+
+- Generate Open Graph images based on the linked page. Contributed by @ematipico
+
+- Fix examples of the [git hook page](https://biomejs.dev/recipes/git-hooks/). Contributed by @9renpoto, @lmauromb, and @Conaclos
+
+- Fix dead and erroneous hyperlinks. Contributed by @Sec-ant and Conaclos
 
 
 ## 1.5.2 (2024-01-15)
@@ -120,6 +291,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function) no longer reports function in `extends` clauses or in a `new` expression. Contributed by @Conaclos
 
   These cases require the presence of a prototype.
+
+- Add dependency variable names on error message when useExhaustiveDependencies rule shows errors. Contributed by @mehm8128
 
 #### Bug fixes
 

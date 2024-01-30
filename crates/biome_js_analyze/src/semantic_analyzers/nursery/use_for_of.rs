@@ -2,10 +2,11 @@ use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, Ru
 use biome_console::markup;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsForInitializer, AnyJsStatement, JsAssignmentExpression,
-    JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator, JsForStatement,
-    JsIdentifierBinding, JsIdentifierExpression, JsPostUpdateExpression, JsPostUpdateOperator,
-    JsPreUpdateExpression, JsPreUpdateOperator, JsSyntaxKind, JsSyntaxToken, JsUnaryOperator,
+    AnyJsExpression, AnyJsForInitializer, AnyJsObjectMember, AnyJsStatement,
+    JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator,
+    JsForStatement, JsIdentifierBinding, JsIdentifierExpression, JsPostUpdateExpression,
+    JsPostUpdateOperator, JsPreUpdateExpression, JsPreUpdateOperator,
+    JsShorthandPropertyObjectMember, JsSyntaxKind, JsSyntaxToken, JsUnaryOperator,
     JsVariableDeclarator,
 };
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
@@ -25,7 +26,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// for (let i = 0; i < array.length; i++) {
@@ -52,7 +53,7 @@ declare_node_union! {
 }
 
 declare_node_union! {
-    pub(crate) AnyBindingExpression = JsPostUpdateExpression | JsPreUpdateExpression | JsIdentifierExpression
+    pub(crate) AnyBindingExpression = JsPostUpdateExpression | JsPreUpdateExpression | JsIdentifierExpression | JsShorthandPropertyObjectMember
 }
 
 impl Rule for UseForOf {
@@ -99,7 +100,6 @@ impl Rule for UseForOf {
             .as_js_static_member_expression()?
             .object()
             .ok()?;
-
         let index_only_used_with_array = |reference| {
             let array_in_use = reference_being_used_by_array(reference, &array_used_in_for)
                 .is_some_and(|array_in_use| array_in_use);
@@ -107,7 +107,6 @@ impl Rule for UseForOf {
 
             array_in_use && !is_delete
         };
-
         if references.iter().all(index_only_used_with_array) {
             Some(())
         } else {
@@ -145,6 +144,12 @@ fn list_initializer_references(
             // We only want references within this block / for body
             if reference.range().start() < body_range.start() {
                 return None;
+            }
+
+            if let Some(AnyJsObjectMember::JsShorthandPropertyObjectMember(expr)) =
+                AnyJsObjectMember::cast(reference.syntax().parent()?)
+            {
+                return Some(AnyBindingExpression::from(expr));
             }
 
             AnyBindingExpression::try_from(AnyJsExpression::cast(reference.syntax().parent()?)?)

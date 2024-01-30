@@ -30,3 +30,27 @@ jobs:
       - name: Run Biome
         run: biome ci .
 ```
+
+### Third-party actions
+
+These are actions maintained by other communities, that you use in your runner:
+
+- [reviewdog-action-biome](https://github.com/marketplace/actions/run-biome-with-reviewdog): run Biome with reviewdog and make comments and commit suggestions on the pull request.
+
+```yaml title="pull_request.yml"
+name: reviewdog
+on: [pull_request]
+jobs:
+  biome:
+    name: runner / Biome
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mongolyy/reviewdog-action-biome@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+```

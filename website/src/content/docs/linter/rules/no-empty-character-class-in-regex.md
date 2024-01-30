@@ -56,7 +56,7 @@ They are often the result of a typing mistake.
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 /^a[xy]/.test("ay"); // true

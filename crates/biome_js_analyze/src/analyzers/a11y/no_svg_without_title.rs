@@ -36,7 +36,7 @@ declare_rule! {
     /// </svg>
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// <svg>

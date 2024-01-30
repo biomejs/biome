@@ -2,5 +2,6 @@
     "/foo {2}bar/;",
     "/foo bar baz/;",
     "/foo bar\tbaz/;",
-    "/foo /;"
+    "/foo /;",
+	"/\u200E\u2066\u2069/gu;"
 ]

@@ -114,17 +114,23 @@ function MyComponent6() {
 function MyComponent7() {
     let someObj = getObj();
     useEffect(() => {
-        console.log(someObj.name);
-        console.log(someObj.age)
+        console.log(
+					someObj
+							.name
+				);
+        console.log(someObj["age"])
     }, [someObj.name, someObj.age]);
 }
 
 // Specified dependency cover captures
 function MyComponent8({ a }) {
     useEffect(() => {
-      console.log(a.b);
+      console.log(
+				a
+			  		.b
+			);
     }, [a]);
-}
+}l
 
 // Capturing const outside of component
 // https://github.com/rome/tools/issues/3727
@@ -238,6 +244,20 @@ function MyComponent22() {
   useEffect(() => {
     outer = true;
   }, [])
+}
+
+// Dynamic computed property access
+// https://github.com/biomejs/biome/issues/1637
+function MyComponent23 ({ arr })  {
+  useMemo(() => {
+    for (let i = 0; i < arr.length; i++) {
+       if (i + 1 === arr.length) {
+          // Do something with the last item
+       } else {
+           const _nextItem = arr[i + 1]
+       }
+    }
+  }, [arr])
 }
 
 ```

@@ -24,6 +24,7 @@ if (/^abc[]/.test(foo)) {}
 // negated empty class
 /[^]/;
 /\[][^]/;
+/[\u200E\u2066-\u2069][]/gu;
 ```
 
 # Diagnostics
@@ -357,6 +358,7 @@ invalid.js:19:2 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
   > 19 │ /[^]/;
        │  ^^^
     20 │ /\[][^]/;
+    21 │ /[\u200E\u2066-\u2069][]/gu;
   
   i Negated empty character classes match anything.
     If you want to match against [, escape it \[.
@@ -374,8 +376,26 @@ invalid.js:20:5 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━
     19 │ /[^]/;
   > 20 │ /\[][^]/;
        │     ^^^
+    21 │ /[\u200E\u2066-\u2069][]/gu;
   
   i Negated empty character classes match anything.
+    If you want to match against [, escape it \[.
+    Otherwise, remove the character class or fill it.
+  
+
+```
+
+```
+invalid.js:21:23 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The regular expression includes this empty character class.
+  
+    19 │ /[^]/;
+    20 │ /\[][^]/;
+  > 21 │ /[\u200E\u2066-\u2069][]/gu;
+       │                       ^^
+  
+  i Empty character classes don't match anything.
     If you want to match against [, escape it \[.
     Otherwise, remove the character class or fill it.
   

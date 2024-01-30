@@ -1,0 +1,127 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+describe.skip("test", () => {});
+it.skip("test", () => {});
+test.skip("test", () => {});
+xdescribe('foo', () => {});
+xit('foo', () => {});
+xtest('foo', () => {});
+
+```
+
+# Diagnostics
+```
+invalid.js:1:10 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+  > 1 │ describe.skip("test", () => {});
+      │          ^^^^
+    2 │ it.skip("test", () => {});
+    3 │ test.skip("test", () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+
+```
+
+```
+invalid.js:2:4 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    1 │ describe.skip("test", () => {});
+  > 2 │ it.skip("test", () => {});
+      │    ^^^^
+    3 │ test.skip("test", () => {});
+    4 │ xdescribe('foo', () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+
+```
+
+```
+invalid.js:3:6 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    1 │ describe.skip("test", () => {});
+    2 │ it.skip("test", () => {});
+  > 3 │ test.skip("test", () => {});
+      │      ^^^^
+    4 │ xdescribe('foo', () => {});
+    5 │ xit('foo', () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    2 │ it.skip("test", () => {});
+    3 │ test.skip("test", () => {});
+  > 4 │ xdescribe('foo', () => {});
+      │ ^^^^^^^^^
+    5 │ xit('foo', () => {});
+    6 │ xtest('foo', () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    3 │ test.skip("test", () => {});
+    4 │ xdescribe('foo', () => {});
+  > 5 │ xit('foo', () => {});
+      │ ^^^
+    6 │ xtest('foo', () => {});
+    7 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    4 │ xdescribe('foo', () => {});
+    5 │ xit('foo', () => {});
+  > 6 │ xtest('foo', () => {});
+      │ ^^^^^
+    7 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+
+```
+
+

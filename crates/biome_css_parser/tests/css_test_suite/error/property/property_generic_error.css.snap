@@ -37,50 +37,67 @@ CssRoot {
                 l_curly_token: L_CURLY@4..5 "{" [] [],
                 declarations: CssDeclarationList [
                     CssDeclaration {
-                        property: CssBogusProperty {
-                            items: [
-                                CssIdentifier {
-                                    value_token: IDENT@5..17 "unknown" [Newline("\n"), Whitespace("    ")] [],
-                                },
-                                COLON@17..19 ":" [] [Whitespace(" ")],
-                                CssBogus {
-                                    items: [
-                                        CssBogus {
-                                            items: [
-                                                CssIdentifier {
-                                                    value_token: IDENT@19..23 "calc" [] [],
-                                                },
-                                                L_PAREN@23..24 "(" [] [],
-                                                CssBogus {
-                                                    items: [
-                                                        CssBogusParameter {
-                                                            items: [
-                                                                SEMICOLON@24..25 ";" [] [],
-                                                                IDENT@25..35 "width" [Newline("\n"), Whitespace("    ")] [],
-                                                                COLON@35..37 ":" [] [Whitespace(" ")],
-                                                                IDENT@37..41 "calc" [] [],
-                                                                L_PAREN@41..42 "(" [] [],
-                                                                SEMICOLON@42..43 ";" [] [],
-                                                                IDENT@43..56 "--custom" [Newline("\n"), Whitespace("    ")] [],
-                                                                COLON@56..58 ":" [] [Whitespace(" ")],
-                                                                IDENT@58..62 "calc" [] [],
-                                                                L_PAREN@62..63 "(" [] [],
-                                                                SEMICOLON@63..64 ";" [] [],
-                                                                R_CURLY@64..66 "}" [Newline("\n")] [],
-                                                            ],
-                                                        },
-                                                    ],
-                                                },
-                                            ],
-                                        },
-                                    ],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@5..17 "unknown" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@17..19 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssFunction {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@19..23 "calc" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@23..24 "(" [] [],
+                                    items: CssParameterList [],
+                                    r_paren_token: missing (required),
                                 },
                             ],
                         },
                         important: missing (optional),
                     },
+                    SEMICOLON@24..25 ";" [] [],
+                    CssDeclaration {
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@25..35 "width" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@35..37 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssFunction {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@37..41 "calc" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@41..42 "(" [] [],
+                                    items: CssParameterList [],
+                                    r_paren_token: missing (required),
+                                },
+                            ],
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@42..43 ";" [] [],
+                    CssDeclaration {
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@43..56 "--custom" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@56..58 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssFunction {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@58..62 "calc" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@62..63 "(" [] [],
+                                    items: CssParameterList [],
+                                    r_paren_token: missing (required),
+                                },
+                            ],
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@63..64 ";" [] [],
                 ],
-                r_curly_token: missing (required),
+                r_curly_token: R_CURLY@64..66 "}" [Newline("\n")] [],
             },
         },
     ],
@@ -105,33 +122,50 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@4..4
       1: CSS_DECLARATION_LIST_BLOCK@4..66
         0: L_CURLY@4..5 "{" [] []
-        1: CSS_DECLARATION_LIST@5..66
-          0: CSS_DECLARATION@5..66
-            0: CSS_BOGUS_PROPERTY@5..66
+        1: CSS_DECLARATION_LIST@5..64
+          0: CSS_DECLARATION@5..24
+            0: CSS_GENERIC_PROPERTY@5..24
               0: CSS_IDENTIFIER@5..17
                 0: IDENT@5..17 "unknown" [Newline("\n"), Whitespace("    ")] []
               1: COLON@17..19 ":" [] [Whitespace(" ")]
-              2: CSS_BOGUS@19..66
-                0: CSS_BOGUS@19..66
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@19..24
+                0: CSS_FUNCTION@19..24
                   0: CSS_IDENTIFIER@19..23
                     0: IDENT@19..23 "calc" [] []
                   1: L_PAREN@23..24 "(" [] []
-                  2: CSS_BOGUS@24..66
-                    0: CSS_BOGUS_PARAMETER@24..66
-                      0: SEMICOLON@24..25 ";" [] []
-                      1: IDENT@25..35 "width" [Newline("\n"), Whitespace("    ")] []
-                      2: COLON@35..37 ":" [] [Whitespace(" ")]
-                      3: IDENT@37..41 "calc" [] []
-                      4: L_PAREN@41..42 "(" [] []
-                      5: SEMICOLON@42..43 ";" [] []
-                      6: IDENT@43..56 "--custom" [Newline("\n"), Whitespace("    ")] []
-                      7: COLON@56..58 ":" [] [Whitespace(" ")]
-                      8: IDENT@58..62 "calc" [] []
-                      9: L_PAREN@62..63 "(" [] []
-                      10: SEMICOLON@63..64 ";" [] []
-                      11: R_CURLY@64..66 "}" [Newline("\n")] []
+                  2: CSS_PARAMETER_LIST@24..24
+                  3: (empty)
             1: (empty)
-        2: (empty)
+          1: SEMICOLON@24..25 ";" [] []
+          2: CSS_DECLARATION@25..42
+            0: CSS_GENERIC_PROPERTY@25..42
+              0: CSS_IDENTIFIER@25..35
+                0: IDENT@25..35 "width" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@35..37 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@37..42
+                0: CSS_FUNCTION@37..42
+                  0: CSS_IDENTIFIER@37..41
+                    0: IDENT@37..41 "calc" [] []
+                  1: L_PAREN@41..42 "(" [] []
+                  2: CSS_PARAMETER_LIST@42..42
+                  3: (empty)
+            1: (empty)
+          3: SEMICOLON@42..43 ";" [] []
+          4: CSS_DECLARATION@43..63
+            0: CSS_GENERIC_PROPERTY@43..63
+              0: CSS_IDENTIFIER@43..56
+                0: IDENT@43..56 "--custom" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@56..58 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@58..63
+                0: CSS_FUNCTION@58..63
+                  0: CSS_IDENTIFIER@58..62
+                    0: IDENT@58..62 "calc" [] []
+                  1: L_PAREN@62..63 "(" [] []
+                  2: CSS_PARAMETER_LIST@63..63
+                  3: (empty)
+            1: (empty)
+          5: SEMICOLON@63..64 ";" [] []
+        2: R_CURLY@64..66 "}" [Newline("\n")] []
   2: EOF@66..66 "" [] []
 
 ```
@@ -141,44 +175,59 @@ CssRoot {
 ```
 property_generic_error.css:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a declaration item but instead found ';
-        width: calc(;
-        --custom: calc(;
-    }'.
+  × Expected a declaration item but instead found ';'.
   
     1 │ div {
   > 2 │     unknown: calc(;
       │                   ^
-  > 3 │     width: calc(;
-  > 4 │     --custom: calc(;
-  > 5 │ }
-      │ ^
+    3 │     width: calc(;
+    4 │     --custom: calc(;
   
   i Expected a declaration item here.
   
     1 │ div {
   > 2 │     unknown: calc(;
       │                   ^
-  > 3 │     width: calc(;
-  > 4 │     --custom: calc(;
-  > 5 │ }
-      │ ^
+    3 │     width: calc(;
+    4 │     --custom: calc(;
   
-property_generic_error.css:5:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+property_generic_error.css:3:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `)` but instead the file ends
+  × Expected a declaration item but instead found ';'.
   
-    3 │     width: calc(;
+    1 │ div {
+    2 │     unknown: calc(;
+  > 3 │     width: calc(;
+      │                 ^
     4 │     --custom: calc(;
-  > 5 │ }
-      │  
+    5 │ }
   
-  i the file ends here
+  i Expected a declaration item here.
   
-    3 │     width: calc(;
+    1 │ div {
+    2 │     unknown: calc(;
+  > 3 │     width: calc(;
+      │                 ^
     4 │     --custom: calc(;
-  > 5 │ }
-      │  
+    5 │ }
+  
+property_generic_error.css:4:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found ';'.
+  
+    2 │     unknown: calc(;
+    3 │     width: calc(;
+  > 4 │     --custom: calc(;
+      │                    ^
+    5 │ }
+  
+  i Expected a declaration item here.
+  
+    2 │     unknown: calc(;
+    3 │     width: calc(;
+  > 4 │     --custom: calc(;
+      │                    ^
+    5 │ }
   
 ```
 

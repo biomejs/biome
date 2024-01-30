@@ -36,7 +36,7 @@ declare_rule! {
     /// a *= a * b
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// a += b

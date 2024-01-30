@@ -115,7 +115,7 @@ CssRoot {
                                                 },
                                                 colon_token: COLON@32..34 ":" [] [Whitespace(" ")],
                                                 value: CssGenericComponentValueList [
-                                                    CssSimpleFunction {
+                                                    CssFunction {
                                                         name: CssIdentifier {
                                                             value_token: IDENT@34..44 "translateX" [] [],
                                                         },
@@ -159,7 +159,7 @@ CssRoot {
                                                 },
                                                 colon_token: COLON@71..73 ":" [] [Whitespace(" ")],
                                                 value: CssGenericComponentValueList [
-                                                    CssSimpleFunction {
+                                                    CssFunction {
                                                         name: CssIdentifier {
                                                             value_token: IDENT@73..83 "translateX" [] [],
                                                         },
@@ -215,7 +215,7 @@ CssRoot {
                                             },
                                             colon_token: COLON@132..134 ":" [] [Whitespace(" ")],
                                             value: CssGenericComponentValueList [
-                                                CssSimpleFunction {
+                                                CssFunction {
                                                     name: CssIdentifier {
                                                         value_token: IDENT@134..144 "translateX" [] [],
                                                     },
@@ -278,7 +278,7 @@ CssRoot {
                                             },
                                             colon_token: COLON@199..201 ":" [] [Whitespace(" ")],
                                             value: CssGenericComponentValueList [
-                                                CssSimpleFunction {
+                                                CssFunction {
                                                     name: CssIdentifier {
                                                         value_token: IDENT@201..211 "translateX" [] [],
                                                     },
@@ -340,7 +340,7 @@ CssRoot {
                                             },
                                             colon_token: COLON@266..268 ":" [] [Whitespace(" ")],
                                             value: CssGenericComponentValueList [
-                                                CssSimpleFunction {
+                                                CssFunction {
                                                     name: CssIdentifier {
                                                         value_token: IDENT@268..278 "translateX" [] [],
                                                     },
@@ -401,7 +401,7 @@ CssRoot {
                                                     },
                                                     colon_token: COLON@330..332 ":" [] [Whitespace(" ")],
                                                     value: CssGenericComponentValueList [
-                                                        CssSimpleFunction {
+                                                        CssFunction {
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@332..342 "translateX" [] [],
                                                             },
@@ -524,7 +524,7 @@ CssRoot {
                             },
                             colon_token: COLON@470..472 ":" [] [Whitespace(" ")],
                             value: CssGenericComponentValueList [
-                                CssSimpleFunction {
+                                CssFunction {
                                     name: CssIdentifier {
                                         value_token: IDENT@472..482 "translateX" [] [],
                                     },
@@ -583,7 +583,7 @@ CssRoot {
                                             },
                                             colon_token: COLON@536..538 ":" [] [Whitespace(" ")],
                                             value: CssGenericComponentValueList [
-                                                CssSimpleFunction {
+                                                CssFunction {
                                                     name: CssIdentifier {
                                                         value_token: IDENT@538..548 "translateX" [] [],
                                                     },
@@ -683,7 +683,7 @@ CssRoot {
                                             },
                                             colon_token: COLON@639..641 ":" [] [Whitespace(" ")],
                                             value: CssGenericComponentValueList [
-                                                CssSimpleFunction {
+                                                CssFunction {
                                                     name: CssIdentifier {
                                                         value_token: IDENT@641..651 "translateX" [] [],
                                                     },
@@ -727,7 +727,7 @@ CssRoot {
                                             },
                                             colon_token: COLON@678..680 ":" [] [Whitespace(" ")],
                                             value: CssGenericComponentValueList [
-                                                CssSimpleFunction {
+                                                CssFunction {
                                                     name: CssIdentifier {
                                                         value_token: IDENT@680..690 "translateX" [] [],
                                                     },
@@ -884,7 +884,7 @@ CssRoot {
                         0: IDENT@20..32 "transform" [Newline("\n"), Whitespace("\t\t")] []
                       1: COLON@32..34 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@34..48
-                        0: CSS_SIMPLE_FUNCTION@34..48
+                        0: CSS_FUNCTION@34..48
                           0: CSS_IDENTIFIER@34..44
                             0: IDENT@34..44 "translateX" [] []
                           1: L_PAREN@44..45 "(" [] []
@@ -912,7 +912,7 @@ CssRoot {
                         0: IDENT@59..71 "transform" [Newline("\n"), Whitespace("\t\t")] []
                       1: COLON@71..73 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@73..89
-                        0: CSS_SIMPLE_FUNCTION@73..89
+                        0: CSS_FUNCTION@73..89
                           0: CSS_IDENTIFIER@73..83
                             0: IDENT@73..83 "translateX" [] []
                           1: L_PAREN@83..84 "(" [] []
@@ -948,7 +948,7 @@ CssRoot {
                         0: IDENT@120..132 "transform" [Newline("\n"), Whitespace("\t\t")] []
                       1: COLON@132..134 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@134..148
-                        0: CSS_SIMPLE_FUNCTION@134..148
+                        0: CSS_FUNCTION@134..148
                           0: CSS_IDENTIFIER@134..144
                             0: IDENT@134..144 "translateX" [] []
                           1: L_PAREN@144..145 "(" [] []
@@ -989,7 +989,7 @@ CssRoot {
                         0: IDENT@187..199 "transform" [Newline("\n"), Whitespace("\t\t")] []
                       1: COLON@199..201 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@201..217
-                        0: CSS_SIMPLE_FUNCTION@201..217
+                        0: CSS_FUNCTION@201..217
                           0: CSS_IDENTIFIER@201..211
                             0: IDENT@201..211 "translateX" [] []
                           1: L_PAREN@211..212 "(" [] []
@@ -1028,7 +1028,7 @@ CssRoot {
                         0: IDENT@254..266 "transform" [Newline("\n"), Whitespace("\t\t")] []
                       1: COLON@266..268 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@268..282
-                        0: CSS_SIMPLE_FUNCTION@268..282
+                        0: CSS_FUNCTION@268..282
                           0: CSS_IDENTIFIER@268..278
                             0: IDENT@268..278 "translateX" [] []
                           1: L_PAREN@278..279 "(" [] []
@@ -1066,7 +1066,7 @@ CssRoot {
                         0: IDENT@318..330 "transform" [Newline("\n"), Whitespace("\t\t")] []
                       1: COLON@330..332 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@332..346
-                        0: CSS_SIMPLE_FUNCTION@332..346
+                        0: CSS_FUNCTION@332..346
                           0: CSS_IDENTIFIER@332..342
                             0: IDENT@332..342 "translateX" [] []
                           1: L_PAREN@342..343 "(" [] []
@@ -1140,7 +1140,7 @@ CssRoot {
                 0: IDENT@458..470 "transform" [Newline("\n"), Whitespace("\t\t")] []
               1: COLON@470..472 ":" [] [Whitespace(" ")]
               2: CSS_GENERIC_COMPONENT_VALUE_LIST@472..488
-                0: CSS_SIMPLE_FUNCTION@472..488
+                0: CSS_FUNCTION@472..488
                   0: CSS_IDENTIFIER@472..482
                     0: IDENT@472..482 "translateX" [] []
                   1: L_PAREN@482..483 "(" [] []
@@ -1179,7 +1179,7 @@ CssRoot {
                         0: IDENT@524..536 "transform" [Newline("\n"), Whitespace("\t\t")] []
                       1: COLON@536..538 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@538..552
-                        0: CSS_SIMPLE_FUNCTION@538..552
+                        0: CSS_FUNCTION@538..552
                           0: CSS_IDENTIFIER@538..548
                             0: IDENT@538..548 "translateX" [] []
                           1: L_PAREN@548..549 "(" [] []
@@ -1238,7 +1238,7 @@ CssRoot {
                         0: IDENT@627..639 "transform" [Newline("\n"), Whitespace("\t\t")] []
                       1: COLON@639..641 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@641..655
-                        0: CSS_SIMPLE_FUNCTION@641..655
+                        0: CSS_FUNCTION@641..655
                           0: CSS_IDENTIFIER@641..651
                             0: IDENT@641..651 "translateX" [] []
                           1: L_PAREN@651..652 "(" [] []
@@ -1266,7 +1266,7 @@ CssRoot {
                         0: IDENT@666..678 "transform" [Newline("\n"), Whitespace("\t\t")] []
                       1: COLON@678..680 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@680..696
-                        0: CSS_SIMPLE_FUNCTION@680..696
+                        0: CSS_FUNCTION@680..696
                           0: CSS_IDENTIFIER@680..690
                             0: IDENT@680..690 "translateX" [] []
                           1: L_PAREN@690..691 "(" [] []

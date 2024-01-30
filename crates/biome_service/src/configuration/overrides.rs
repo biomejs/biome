@@ -1,7 +1,10 @@
+use super::javascript::PartialJavascriptConfiguration;
+use super::json::PartialJsonConfiguration;
+use super::PartialCssConfiguration;
 use crate::configuration::formatter::{deserialize_line_width, serialize_line_width};
 use crate::configuration::{
-    css_configuration, javascript_configuration, json_configuration, CssConfiguration,
-    JavascriptConfiguration, JsonConfiguration, PlainIndentStyle,
+    partial_css_configuration, partial_javascript_configuration, partial_json_configuration,
+    PlainIndentStyle,
 };
 use crate::settings::{
     to_matcher, FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings,
@@ -11,7 +14,7 @@ use crate::settings::{
 use crate::{Rules, WorkspaceError};
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::StringSet;
-use biome_deserialize_macros::{Merge, NoneState};
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{LineEnding, LineWidth};
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
@@ -20,7 +23,9 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Overrides(#[bpaf(hide)] pub Vec<OverridePattern>);
@@ -33,7 +38,9 @@ impl FromStr for Overrides {
     }
 }
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverridePattern {
@@ -51,18 +58,18 @@ pub struct OverridePattern {
 
     /// Specific configuration for the JavaScript language
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(javascript_configuration), optional, hide)]
-    pub javascript: Option<JavascriptConfiguration>,
+    #[bpaf(external(partial_javascript_configuration), optional, hide)]
+    pub javascript: Option<PartialJavascriptConfiguration>,
 
     /// Specific configuration for the Json language
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(json_configuration), optional, hide)]
-    pub json: Option<JsonConfiguration>,
+    #[bpaf(external(partial_json_configuration), optional, hide)]
+    pub json: Option<PartialJsonConfiguration>,
 
     /// Specific configuration for the Css language
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(css_configuration), optional, hide)]
-    pub css: Option<CssConfiguration>,
+    #[bpaf(external(partial_css_configuration), optional, hide)]
+    pub css: Option<PartialCssConfiguration>,
 
     /// Specific configuration for the Json language
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -88,7 +95,9 @@ impl FromStr for OverridePattern {
     }
 }
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideFormatterConfiguration {
@@ -108,6 +117,7 @@ pub struct OverrideFormatterConfiguration {
 
     /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[deserializable(deprecated(use_instead = "formatter.indentWidth"))]
     #[bpaf(long("indent-size"), argument("NUMBER"), optional)]
     pub indent_size: Option<u8>,
 
@@ -130,7 +140,9 @@ pub struct OverrideFormatterConfiguration {
     pub line_width: Option<LineWidth>,
 }
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideLinterConfiguration {
@@ -145,7 +157,9 @@ pub struct OverrideLinterConfiguration {
     pub rules: Option<Rules>,
 }
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideOrganizeImportsConfiguration {
@@ -158,8 +172,6 @@ pub struct OverrideOrganizeImportsConfiguration {
 pub fn to_override_settings(
     working_directory: Option<PathBuf>,
     overrides: Overrides,
-    _vcs_base_path: Option<PathBuf>,
-    _gitignore_matches: &[String],
     current_settings: &WorkspaceSettings,
 ) -> Result<OverrideSettings, WorkspaceError> {
     let mut override_settings = OverrideSettings::default();
@@ -185,18 +197,8 @@ pub fn to_override_settings(
         languages.css = to_css_language_settings(css, &current_settings.languages.css);
 
         let pattern_setting = OverrideSettingPattern {
-            include: to_matcher(
-                working_directory.clone(),
-                pattern.include.as_ref(),
-                None,
-                &[],
-            )?,
-            exclude: to_matcher(
-                working_directory.clone(),
-                pattern.ignore.as_ref(),
-                None,
-                &[],
-            )?,
+            include: to_matcher(working_directory.clone(), pattern.include.as_ref())?,
+            exclude: to_matcher(working_directory.clone(), pattern.ignore.as_ref())?,
             formatter,
             linter,
             organize_imports,
@@ -241,7 +243,7 @@ pub(crate) fn to_format_settings(
 }
 
 fn to_javascript_language_settings(
-    mut conf: JavascriptConfiguration,
+    mut conf: PartialJavascriptConfiguration,
     parent_settings: &LanguageSettings<JsLanguage>,
 ) -> LanguageSettings<JsLanguage> {
     let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
@@ -292,14 +294,14 @@ fn to_javascript_language_settings(
 
     language_setting.globals = conf
         .globals
-        .map(|global| global.into_index_set())
-        .or(parent_settings.globals.clone());
+        .map(StringSet::into_index_set)
+        .or_else(|| parent_settings.globals.clone());
 
     language_setting
 }
 
 fn to_json_language_settings(
-    mut conf: JsonConfiguration,
+    mut conf: PartialJsonConfiguration,
     parent_settings: &LanguageSettings<JsonLanguage>,
 ) -> LanguageSettings<JsonLanguage> {
     let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
@@ -333,7 +335,7 @@ fn to_json_language_settings(
 }
 
 fn to_css_language_settings(
-    mut conf: CssConfiguration,
+    mut conf: PartialCssConfiguration,
     parent_settings: &LanguageSettings<CssLanguage>,
 ) -> LanguageSettings<CssLanguage> {
     let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();

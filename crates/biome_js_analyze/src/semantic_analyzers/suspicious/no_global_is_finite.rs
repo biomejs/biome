@@ -24,7 +24,7 @@ declare_rule! {
     /// isFinite(false); // true
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// Number.isFinite(false); // false

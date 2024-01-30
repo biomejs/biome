@@ -4,8 +4,8 @@ use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
 };
 use crate::syntax::blocks::{parse_block_body, parse_declaration_list_block};
-use crate::syntax::css_dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::parse_error::{expected_block, expected_non_css_wide_keyword_identifier};
+use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::{
     is_at_declaration, is_at_identifier, parse_custom_identifier, parse_string, BODY_RECOVERY_SET,
 };

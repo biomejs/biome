@@ -50,20 +50,20 @@ pub enum Language {
 }
 
 impl Language {
-    /// Files that can be bypassed, because correctly handled by the JSON parser
+    /// Sorted array of files that are known as JSONC (JSON with comments).
     pub(crate) const KNOWN_FILES_AS_JSONC: &'static [&'static str; 12] = &[
-        "tslint.json",
-        "babel.config.json",
+        ".babelrc",
         ".babelrc.json",
         ".ember-cli",
-        "typedoc.json",
-        ".eslintrc.json",
         ".eslintrc",
+        ".eslintrc.json",
+        ".hintrc",
         ".jsfmtrc",
         ".jshintrc",
         ".swcrc",
-        ".hintrc",
-        ".babelrc",
+        "babel.config.json",
+        "tslint.json",
+        "typedoc.json",
     ];
 
     /// Returns the language corresponding to this file extension
@@ -81,7 +81,10 @@ impl Language {
     }
 
     pub fn from_known_filename(s: &str) -> Self {
-        if Self::KNOWN_FILES_AS_JSONC.contains(&s.to_lowercase().as_str()) {
+        if Self::KNOWN_FILES_AS_JSONC
+            .binary_search(&s.to_lowercase().as_str())
+            .is_ok()
+        {
             Language::Jsonc
         } else {
             Language::Unknown
@@ -94,6 +97,19 @@ impl Language {
             .and_then(|path| path.to_str())
             .map(Language::from_extension)
             .unwrap_or(Language::Unknown)
+    }
+
+    /// Returns the language corresponding to the file path
+    /// relying on the file extension and the known files.
+    pub fn from_path_and_known_filename(path: &Path) -> Self {
+        path.extension()
+            .and_then(OsStr::to_str)
+            .map(Language::from_extension)
+            .or(path
+                .file_name()
+                .and_then(OsStr::to_str)
+                .map(Language::from_known_filename))
+            .unwrap_or_default()
     }
 
     /// Returns the language corresponding to this language ID
@@ -357,26 +373,13 @@ impl Features {
         }
     }
 
-    /// Return a [Language] from a string
-    pub(crate) fn get_language(rome_path: &RomePath) -> Language {
-        rome_path
-            .extension()
-            .and_then(OsStr::to_str)
-            .map(Language::from_extension)
-            .or(rome_path
-                .file_name()
-                .and_then(OsStr::to_str)
-                .map(Language::from_known_filename))
-            .unwrap_or_default()
-    }
-
     /// Returns the [Capabilities] associated with a [RomePath]
     pub(crate) fn get_capabilities(
         &self,
         rome_path: &RomePath,
         language_hint: Language,
     ) -> Capabilities {
-        match Self::get_language(rome_path).or(language_hint) {
+        match Language::from_path_and_known_filename(rome_path).or(language_hint) {
             Language::JavaScript
             | Language::JavaScriptReact
             | Language::TypeScript
@@ -407,4 +410,11 @@ pub(crate) fn is_diagnostic_error(
         .unwrap_or_else(|| diagnostic.severity());
 
     severity >= Severity::Error
+}
+
+#[test]
+fn test_order() {
+    for items in Language::KNOWN_FILES_AS_JSONC.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
 }

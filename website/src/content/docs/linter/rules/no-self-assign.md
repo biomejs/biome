@@ -158,7 +158,7 @@ a['b'].foo = a['b'].foo;
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 a &= a;

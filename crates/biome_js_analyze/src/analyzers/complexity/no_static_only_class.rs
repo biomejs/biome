@@ -40,7 +40,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// const X = {

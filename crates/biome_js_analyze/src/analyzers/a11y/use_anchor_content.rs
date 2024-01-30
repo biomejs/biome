@@ -38,7 +38,7 @@ declare_rule! {
     /// <a><span aria-hidden="true">content</span></a>
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```jsx
     /// <a>content</a>

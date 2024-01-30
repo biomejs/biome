@@ -210,13 +210,17 @@ export default defineConfig({
 									},
 								},
 								{
-									label: "Lint rules",
+									label: "Rules",
 									link: "/linter/rules",
 									translations: {
-										ja: "Lintルール",
-										"zh-CN": "Lint 规则",
-										"pt-BR": "Regras do Linter",
+										ja: "ルール",
+										"zh-CN": "规则",
+										"pt-BR": "Regras",
 									},
+								},
+								{
+									label: "Rules sources",
+									link: "/linter/rules-sources",
 								},
 							],
 						},
@@ -345,17 +349,17 @@ export default defineConfig({
 			},
 			favicon: "/img/favicon.svg",
 			head: [
-				{
-					tag: "meta",
-					attrs: { property: "og:image", content: `${site}/img/og.png?v=1` },
-				},
-				{
-					tag: "meta",
-					attrs: {
-						property: "twitter:image",
-						content: `${site}/img/og.png?v=1`,
-					},
-				},
+				// {
+				// 	tag: "meta",
+				// 	attrs: { property: "og:image", content: `${site}/img/og.png?v=1` },
+				// },
+				// {
+				// 	tag: "meta",
+				// 	attrs: {
+				// 		property: "twitter:image",
+				// 		content: `${site}/img/og.png?v=1`,
+				// 	},
+				// },
 				{
 					tag: "link",
 					attrs: {
@@ -382,6 +386,7 @@ export default defineConfig({
 				SiteTitle: "./src/components/starlight/SiteTitle.astro",
 				Sidebar: "./src/components/starlight/Sidebar.astro",
 				Hero: "./src/components/starlight/Hero.astro",
+				Head: "./src/components/starlight/Head.astro",
 			},
 		}),
 	],

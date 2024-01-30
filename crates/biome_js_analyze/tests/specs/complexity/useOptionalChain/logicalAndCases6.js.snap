@@ -68,6 +68,10 @@ foo && foo.bar && /*0*/foo/*1*/./*2*/bar/*3*/./*4*/baz/*5*/;
 foo && foo[bar] && /*0*/foo/*1*/[/*2*/bar/*3*/]/*4*/[/*5*/baz/*6*/]/*7*/;
 
 foo && foo[bar] && /*0*/foo/*1*/?./*2*/[/*3*/bar/*4*/]/*5*/?./*6*/[/*7*/baz/*8*/]/*9*/;
+
+// call expressions with the same member name but different arguments
+foo && foo.bar('a') && foo.bar('b')
+
 ```
 
 # Diagnostics
@@ -858,11 +862,34 @@ logicalAndCases6.js:64:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     63 │ 
   > 64 │ foo && foo[bar] && /*0*/foo/*1*/?./*2*/[/*3*/bar/*4*/]/*5*/?./*6*/[/*7*/baz/*8*/]/*9*/;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ 
+    66 │ // call expressions with the same member name but different arguments
   
   i Unsafe fix: Change to an optional chain.
   
     64 │ foo·&&·foo[bar]·&&·/*0*/foo/*1*/?./*2*/[/*3*/bar/*4*/]/*5*/?./*6*/[/*7*/baz/*8*/]/*9*/;
        │    ------------------------                                                            
+
+```
+
+```
+logicalAndCases6.js:67:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    66 │ // call expressions with the same member name but different arguments
+  > 67 │ foo && foo.bar('a') && foo.bar('b')
+       │ ^^^^^^^^^^^^^^^^^^^
+    68 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    65 65 │   
+    66 66 │   // call expressions with the same member name but different arguments
+    67    │ - foo·&&·foo.bar('a')·&&·foo.bar('b')
+       67 │ + foo?.bar('a')·&&·foo.bar('b')
+    68 68 │   
+  
 
 ```
 

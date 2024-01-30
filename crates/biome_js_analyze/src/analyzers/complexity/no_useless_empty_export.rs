@@ -36,7 +36,7 @@ declare_rule! {
     /// export {};
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// export {};

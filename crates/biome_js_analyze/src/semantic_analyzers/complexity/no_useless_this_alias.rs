@@ -10,7 +10,7 @@ use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, JsArrowFunctionExpression,
     JsAssignmentExpression, JsExpressionStatement, JsIdentifierBinding, JsIdentifierExpression,
-    JsThisExpression, JsVariableDeclaration, JsVariableDeclarator, T,
+    JsThisExpression, JsVariableDeclaration, JsVariableDeclarator, JsVariableStatement, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
@@ -35,7 +35,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// class A {
@@ -159,6 +159,11 @@ impl Rule for NoUselessThisAlias {
         }
         let var_declarator_list = var_decl.declarators();
         if var_declarator_list.len() == 1 {
+            if let Some(statement) = JsVariableStatement::cast(var_decl.syntax().parent()?) {
+                if statement.semicolon_token().is_some() {
+                    mutation.remove_token(statement.semicolon_token()?);
+                }
+            }
             mutation.remove_node(var_decl);
         } else {
             let mut deleted_comma = None;

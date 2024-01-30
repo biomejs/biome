@@ -630,6 +630,22 @@ pub fn css_font_palette_values_at_rule(
         ],
     ))
 }
+pub fn css_function(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    items: CssParameterList,
+    r_paren_token: SyntaxToken,
+) -> CssFunction {
+    CssFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FUNCTION,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_generic_delimiter(value_token: SyntaxToken) -> CssGenericDelimiter {
     CssGenericDelimiter::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_GENERIC_DELIMITER,
@@ -1761,22 +1777,6 @@ pub fn css_scope_range_start(start: CssScopeEdge) -> CssScopeRangeStart {
     CssScopeRangeStart::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_SCOPE_RANGE_START,
         [Some(SyntaxElement::Node(start.into_syntax()))],
-    ))
-}
-pub fn css_simple_function(
-    name: CssIdentifier,
-    l_paren_token: SyntaxToken,
-    items: CssParameterList,
-    r_paren_token: SyntaxToken,
-) -> CssSimpleFunction {
-    CssSimpleFunction::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_SIMPLE_FUNCTION,
-        [
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(items.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
     ))
 }
 pub fn css_starting_style_at_rule(

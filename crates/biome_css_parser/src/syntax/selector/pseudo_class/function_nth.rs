@@ -176,7 +176,10 @@ fn parse_pseudo_class_of_nth_selector(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(OF_KW);
 
-    SelectorList::default().with_end_kind(T![')']).parse_list(p);
+    SelectorList::default()
+        .with_end_kind_ts(token_set!(T![')']))
+        .with_recovery_ts(token_set!(T![')'], T!['{']))
+        .parse_list(p);
 
     Present(m.complete(p, CSS_PSEUDO_CLASS_OF_NTH_SELECTOR))
 }

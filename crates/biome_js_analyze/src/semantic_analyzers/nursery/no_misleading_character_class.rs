@@ -51,7 +51,7 @@ declare_rule! {
     /// /^[👍]$/; // surrogate pair without u flag
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// /^[abc]$/;
@@ -293,10 +293,11 @@ fn diagnostic_regex_pattern(
     has_u_flag: bool,
     range: TextRange,
 ) -> Option<RuleState> {
+    let regex_bytes_len = regex_pattern.as_bytes().len();
     let mut is_in_character_class = false;
     let mut escape_next = false;
-    let char_iter = regex_pattern.chars().peekable();
-    for (i, ch) in char_iter.enumerate() {
+    // We use `char_indices` to get the byte index of every character
+    for (i, ch) in regex_pattern.char_indices() {
         if escape_next {
             escape_next = false;
             continue;
@@ -305,7 +306,7 @@ fn diagnostic_regex_pattern(
             '\\' => escape_next = true,
             '[' => is_in_character_class = true,
             ']' => is_in_character_class = false,
-            _ if is_in_character_class && i < regex_pattern.len() => {
+            _ if is_in_character_class && i < regex_bytes_len => {
                 if !has_u_flag && has_surrogate_pair(&regex_pattern[i..]) {
                     return Some(RuleState {
                         range,

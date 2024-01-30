@@ -220,6 +220,33 @@ impl MemberChainGroup {
             }
         })
     }
+
+    pub(super) fn needs_empty_line_before(&self) -> bool {
+        let first = self.members.first();
+        first.map_or(false, |first| match first {
+            ChainMember::StaticMember { expression } => {
+                let operator = expression.operator_token();
+
+                match operator {
+                    Ok(operator) => get_lines_before_token(&operator) > 1,
+                    _ => false,
+                }
+            }
+            ChainMember::ComputedMember { expression } => {
+                let l_brack_token = expression.l_brack_token();
+
+                match l_brack_token {
+                    Ok(l_brack_token) => {
+                        get_lines_before_token(
+                            &expression.optional_chain_token().unwrap_or(l_brack_token),
+                        ) > 1
+                    }
+                    _ => false,
+                }
+            }
+            _ => false,
+        })
+    }
 }
 
 impl From<Vec<ChainMember>> for MemberChainGroup {

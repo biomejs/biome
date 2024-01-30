@@ -35,7 +35,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// while (foo) {

@@ -36,8 +36,6 @@ declare_rule! {{
     ///
     /// Add a link to the corresponding ESLint rule (if any):
     ///
-    /// Source: https://eslint.org/docs/latest/rules/rule-name
-    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -47,7 +45,7 @@ declare_rule! {{
     /// a = 2;
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// var a = 1;

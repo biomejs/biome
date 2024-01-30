@@ -308,6 +308,26 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
         .build(),
     ));
 
+    // Export `PartialConfiguration` as `Configuration` for backwards compatibility.
+    items.push(AnyJsModuleItem::JsExport(make::js_export(
+        make::js_decorator_list([]),
+        make::token(T![export]),
+        AnyJsExportClause::AnyJsDeclarationClause(AnyJsDeclarationClause::TsTypeAliasDeclaration(
+            make::ts_type_alias_declaration(
+                make::token(T![type]),
+                make::ts_identifier_binding(make::ident("Configuration")),
+                make::token(T![=]),
+                AnyTsType::TsReferenceType(
+                    make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
+                        make::js_reference_identifier(make::ident("PartialConfiguration")),
+                    ))
+                    .build(),
+                ),
+            )
+            .build(),
+        )),
+    )));
+
     items.push(AnyJsModuleItem::JsExport(make::js_export(
         make::js_decorator_list([]),
         make::token(T![export]),

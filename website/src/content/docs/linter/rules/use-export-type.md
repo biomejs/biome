@@ -110,7 +110,7 @@ export { type X, type Y };
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 class C {}

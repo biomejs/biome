@@ -990,6 +990,7 @@ fn fs_error_unknown() {
 // │   └── test.js  // ok
 // └── src
 //     ├── symlink_testcase1_1 -> hidden_nested
+//     ├── symlink_testcase1_3 -> hidden_testcase1/test/test.js
 //     └── symlink_testcase2 -> hidden_testcase2
 #[test]
 #[ignore = "It regresses on linux since we added the ignore crate, to understand why"]

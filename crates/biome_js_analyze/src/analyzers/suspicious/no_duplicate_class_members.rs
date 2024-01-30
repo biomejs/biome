@@ -47,7 +47,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// class Foo {

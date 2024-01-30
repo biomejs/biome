@@ -78,7 +78,7 @@ els["forEach"](el => {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 els.forEach((el, i) => {
