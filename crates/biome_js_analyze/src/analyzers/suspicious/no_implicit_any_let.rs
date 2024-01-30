@@ -81,7 +81,7 @@ impl Rule for NoImplicitAnyLet {
                 rule_category!(),
                 variable.text_range(),
                 markup! {
-                    "This variable has implicitly the " <Emphasis>"any"</Emphasis> " type."
+                    "This variable implicitly has the " <Emphasis>"any"</Emphasis> " type."
                 },
             )
             .note(markup! {
