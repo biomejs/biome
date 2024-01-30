@@ -145,5 +145,8 @@
 	// ES2024
 	"new RegExp('[[A--B]]', 'v')",
 	"new RegExp('[[A--B]]', 'v')",
-	"new RegExp('[[A&&&]]', 'v')"
+	"new RegExp('[[A&&&]]', 'v')",
+
+	// https://github.com/biomejs/biome/issues/1704
+	"new RegExp('://[^:/]*')"
 ]
