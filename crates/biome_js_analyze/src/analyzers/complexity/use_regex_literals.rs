@@ -173,6 +173,9 @@ fn create_pattern(
     let pattern = extract_literal_string(pattern)?;
     let pattern = pattern.replace("\\\\", "\\");
 
+    // Convert slash to "\/" to avoid parsing error in autofix.
+    let pattern = pattern.replace('/', "\\/");
+
     // If pattern is empty, (?:) is used instead.
     if pattern.is_empty() {
         return Some("(?:)".to_string());
