@@ -21,7 +21,7 @@ use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
 use biome_formatter::Printed;
-use biome_fs::{RomePath, BIOME_JSON};
+use biome_fs::{ConfigName, RomePath};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
@@ -186,8 +186,9 @@ impl WorkspaceServer {
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
     /// or in the feature `ignore`/`include`
     fn is_ignored(&self, path: &Path, feature: FeatureName) -> bool {
+        let file_name = path.file_name().and_then(|s| s.to_str());
         // Never ignore Biome's config file regardless `include`/`ignore`
-        path.file_name().and_then(|s| s.to_str()) != Some(BIOME_JSON) &&
+        (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
         // Apply top-level `include`/`ignore`
         (self.is_ignored_by_top_level_config(path) ||
         // Apply feature-level `include`/`ignore`
@@ -265,7 +266,7 @@ impl Workspace for WorkspaceServer {
                 let path = params.path.as_path();
                 let settings = self.settings.read().unwrap();
                 let mut file_features = FileFeaturesResult::new();
-
+                let file_name = path.file_name().and_then(|s| s.to_str());
                 file_features = file_features
                     .with_capabilities(&capabilities)
                     .with_settings_and_language(&settings, &language, path);
@@ -275,7 +276,9 @@ impl Workspace for WorkspaceServer {
                     && self.get_language(&params.path) == Language::Unknown
                 {
                     file_features.ignore_not_supported();
-                } else if path.file_name().and_then(|s| s.to_str()) == Some(BIOME_JSON) {
+                } else if file_name == Some(ConfigName::biome_json())
+                    || file_name == Some(ConfigName::biome_jsonc())
+                {
                     // Never ignore Biome's config file
                 } else if self.is_ignored_by_top_level_config(path) {
                     file_features.set_ignored_for_all_features();

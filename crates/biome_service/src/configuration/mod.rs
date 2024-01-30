@@ -641,7 +641,7 @@ impl PartialConfiguration {
             if let Some(client_kind) = &vcs.client_kind {
                 if !vcs.ignore_file_disabled() {
                     let result = file_system
-                        .auto_search(vcs_base_path, client_kind.ignore_file(), false)
+                        .auto_search(vcs_base_path, &[client_kind.ignore_file()], false)
                         .map_err(WorkspaceError::from)?;
 
                     if let Some(result) = result {
