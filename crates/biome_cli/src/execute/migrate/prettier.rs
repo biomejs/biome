@@ -2,25 +2,21 @@ use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
 use biome_console::{markup, Console, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_deserialize_macros::Deserializable;
 use biome_deserialize::{
     Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    NoneState, StringSet, Text, VisitableType,
+    StringSet, Text,
 };
+use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
 use biome_json_parser::JsonParserOptions;
 use biome_service::configuration::{
-    PartialFormatterConfiguration, PartialJavascriptFormatter, PlainIndentStyle,
+    PartialFormatterConfiguration, PartialJavascriptConfiguration, PartialJavascriptFormatter,
+    PlainIndentStyle,
 };
-use biome_service::DynRef;
-use biome_service::configuration::{
-    FormatterConfiguration, JavascriptConfiguration, PlainIndentStyle,
-};
-use biome_service::{Configuration, DynRef, JavascriptFormatter};
-use biome_text_size::TextRange;
+use biome_service::{Configuration, DynRef, PartialConfiguration};
 use indexmap::IndexSet;
 use std::path::{Path, PathBuf};
 
@@ -225,27 +221,28 @@ pub(crate) struct FromPrettierConfiguration {
     ignore_path: Option<PathBuf>,
 
     /// The translated Biome configuration, from the Prettier configuration
-    formatter_configuration: Option<FormatterConfiguration>,
+    formatter_configuration: Option<PartialFormatterConfiguration>,
 
     /// The translated Biome configuration, from the Prettier configuration
-    javascript_formatter_configuration: Option<JavascriptFormatter>,
+    javascript_formatter_configuration: Option<PartialJavascriptFormatter>,
 }
 
 impl FromPrettierConfiguration {
     pub(crate) fn store_configuration(
         &mut self,
-        (formatter, javascript_formatter): (PartialFormatterConfiguration, PartialJavascriptFormatter),
+        (formatter, javascript_formatter): (
+            PartialFormatterConfiguration,
+            PartialJavascriptFormatter,
+        ),
     ) {
         self.formatter_configuration = Some(formatter);
         self.javascript_formatter_configuration = Some(javascript_formatter);
     }
 
     pub(crate) fn store_ignored_globs(&mut self, value: StringSet) {
-        let formatter_configuration =
-            self.formatter_configuration
-                .get_or_insert(FormatterConfiguration {
-                    ..NoneState::none()
-                });
+        let formatter_configuration = self
+            .formatter_configuration
+            .get_or_insert(PartialFormatterConfiguration::default());
 
         formatter_configuration.ignore = Some(value);
     }
@@ -258,15 +255,13 @@ impl FromPrettierConfiguration {
         self.ignore_path = Some(path.into())
     }
 
-    pub(crate) fn as_biome_configuration(&self) -> Configuration {
-        let mut configuration = Configuration {
-            ..NoneState::none()
-        };
+    pub(crate) fn as_biome_configuration(&self) -> PartialConfiguration {
+        let mut configuration = PartialConfiguration::default();
         configuration.formatter = self.formatter_configuration.clone();
         if self.javascript_formatter_configuration.is_some() {
-            configuration.javascript = Some(JavascriptConfiguration {
+            configuration.javascript = Some(PartialJavascriptConfiguration {
                 formatter: self.javascript_formatter_configuration.clone(),
-                ..NoneState::none()
+                ..Default::default()
             });
         }
 
