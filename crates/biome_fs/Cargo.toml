@@ -24,6 +24,7 @@ rustc-hash        = { workspace = true }
 schemars          = { workspace = true, optional = true }
 serde             = { workspace = true }
 tracing           = { workspace = true }
+dashmap =  { workspace = true}
 
 [features]
 serde = ["schemars", "biome_diagnostics/schema"]

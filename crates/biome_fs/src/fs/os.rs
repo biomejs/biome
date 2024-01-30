@@ -1,5 +1,5 @@
 //! Implementation of the [FileSystem] and related traits for the underlying OS filesystem
-use super::{BoxedTraversal, ErrorKind, File, FileSystemDiagnostic};
+use super::{BoxedTraversal, ErrorKind, File, FileSystemDiagnostic, ForEachPath};
 use crate::fs::OpenOptions;
 use crate::{
     fs::{TraversalContext, TraversalScope},
@@ -53,6 +53,7 @@ impl Default for OsFileSystem {
     }
 }
 
+
 impl FileSystem for OsFileSystem {
     fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>> {
         tracing::debug_span!("OsFileSystem::open_with_options", path = ?path, options = ?options)
@@ -69,6 +70,16 @@ impl FileSystem for OsFileSystem {
         OsTraversalScope::with(move |scope| {
             func(scope);
         })
+    }
+
+    fn for_each_path(&self,  func: ForEachPath) {
+        let paths = self.paths.0.read();
+        let iter = paths.iter();
+        for path in iter {
+            OsTraversalScope::with(|_| {
+                func(path.as_path())
+            })
+        }
     }
 
     fn working_directory(&self) -> Option<PathBuf> {
@@ -345,9 +356,10 @@ fn handle_any_file<'scope>(
     }
 
     if file_type.is_file() {
-        scope.spawn(move |_| {
-            ctx.handle_file(&path);
-        });
+            scope.spawn(move |_| {
+                ctx.handle_file(&path);
+                // ctx.store_file(&path);
+            });
         return;
     }
 

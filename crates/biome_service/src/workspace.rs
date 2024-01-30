@@ -272,6 +272,29 @@ impl FileFeaturesResult {
         }
     }
 
+    pub fn as_format_support(&self) -> Option<&SupportKind> {
+        self.support_kind_for(&FeatureName::Format)
+    }
+
+    pub fn as_lint_support(&self) -> Option<&SupportKind> {
+        self.support_kind_for(&FeatureName::Lint)
+    }
+    pub fn as_organize_imports_support(&self) -> Option<&SupportKind> {
+        self.support_kind_for(&FeatureName::OrganizeImports)
+    }
+
+    pub fn supports_lint(&self) -> bool {
+        self.supports_for(&FeatureName::Lint)
+    }
+
+    pub fn supports_format(&self) -> bool {
+        self.supports_for(&FeatureName::Format)
+    }
+
+    pub fn supports_organize_imports(&self) -> bool {
+        self.supports_for(&FeatureName::OrganizeImports)
+    }
+
     pub fn support_kind_for(&self, feature: &FeatureKind) -> Option<&SupportKind> {
         self.features_supported.get(feature)
     }

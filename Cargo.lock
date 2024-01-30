@@ -454,6 +454,7 @@ version = "0.5.7"
 dependencies = [
  "biome_diagnostics",
  "crossbeam",
+ "dashmap",
  "directories",
  "indexmap 2.2.6",
  "oxc_resolver",
