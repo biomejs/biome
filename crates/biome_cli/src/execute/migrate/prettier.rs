@@ -40,6 +40,8 @@ pub(crate) struct PrettierConfiguration {
     arrow_parens: ArrowParens,
     /// https://prettier.io/docs/en/options#end-of-line
     end_of_line: EndOfLine,
+    /// https://prettier.io/docs/en/options#single-attribute-per-line
+    single_attribute_per_line: bool,
 }
 
 impl Default for PrettierConfiguration {
@@ -58,6 +60,7 @@ impl Default for PrettierConfiguration {
             jsx_single_quote: false,
             arrow_parens: ArrowParens::default(),
             end_of_line: EndOfLine::default(),
+            single_attribute_per_line: false,
         }
     }
 }
@@ -202,6 +205,7 @@ impl From<PrettierConfiguration> for PartialJavascriptFormatter {
             quote_properties: Some(value.quote_props.into()),
             bracket_spacing: Some(value.bracket_spacing),
             jsx_quote_style: Some(jsx_quote_style),
+            single_attribute_per_line: Some(value.single_attribute_per_line),
         }
     }
 }

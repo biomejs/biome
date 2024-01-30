@@ -339,6 +339,10 @@ export interface PartialJavascriptFormatter {
 	 */
 	semicolons?: Semicolons;
 	/**
+	 * Enforce single attribute per line in HTML, Vue and JSX.
+	 */
+	singleAttributePerLine?: boolean;
+	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
 	 */
 	trailingComma?: TrailingComma;

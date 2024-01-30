@@ -30,7 +30,8 @@ use biome_js_analyze::{
 };
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{
-    ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatOptions, QuoteProperties, Semicolons,
+    ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatOptions, QuoteProperties,
+    Semicolons, SingleAttributePerLine,
 };
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
@@ -61,6 +62,7 @@ pub struct JsFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub enabled: Option<bool>,
+    pub single_attribute_per_line: Option<SingleAttributePerLine>,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -128,7 +130,8 @@ impl Language for JsLanguage {
             .with_semicolons(language.semicolons.unwrap_or_default())
             .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
             .with_bracket_spacing(language.bracket_spacing.unwrap_or_default())
-            .with_bracket_same_line(language.bracket_same_line.unwrap_or_default());
+            .with_bracket_same_line(language.bracket_same_line.unwrap_or_default())
+            .with_single_attribute_per_line(language.single_attribute_per_line.unwrap_or_default());
 
         overrides.override_js_format_options(path, options)
     }

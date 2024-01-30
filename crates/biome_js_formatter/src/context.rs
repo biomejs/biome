@@ -169,6 +169,9 @@ pub struct JsFormatOptions {
 
     /// Information related to the current file
     source_type: JsFileSource,
+
+    /// Enforce single attribute per line in HTML, Vue and JSX. Defaults to false
+    single_attribute_per_line: SingleAttributePerLine,
 }
 
 impl JsFormatOptions {
@@ -187,6 +190,7 @@ impl JsFormatOptions {
             arrow_parentheses: ArrowParentheses::default(),
             bracket_spacing: BracketSpacing::default(),
             bracket_same_line: BracketSameLine::default(),
+            single_attribute_per_line: SingleAttributePerLine::default(),
         }
     }
 
@@ -250,6 +254,14 @@ impl JsFormatOptions {
         self
     }
 
+    pub fn with_single_attribute_per_line(
+        mut self,
+        single_attribute_per_line: SingleAttributePerLine,
+    ) -> Self {
+        self.single_attribute_per_line = single_attribute_per_line;
+        self
+    }
+
     pub fn set_arrow_parentheses(&mut self, arrow_parentheses: ArrowParentheses) {
         self.arrow_parentheses = arrow_parentheses;
     }
@@ -292,6 +304,12 @@ impl JsFormatOptions {
 
     pub fn set_trailing_comma(&mut self, trailing_comma: TrailingComma) {
         self.trailing_comma = trailing_comma;
+    }
+    pub fn set_single_attribute_per_line(
+        &mut self,
+        single_attribute_per_line: SingleAttributePerLine,
+    ) {
+        self.single_attribute_per_line = single_attribute_per_line;
     }
 
     pub fn set_semicolons(&mut self, semicolons: Semicolons) {
@@ -337,6 +355,10 @@ impl JsFormatOptions {
     pub fn tab_width(&self) -> TabWidth {
         self.indent_width.value().into()
     }
+
+    pub fn single_attribute_per_line(&self) -> SingleAttributePerLine {
+        self.single_attribute_per_line
+    }
 }
 
 impl FormatOptions for JsFormatOptions {
@@ -374,7 +396,12 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Semicolons: {}", self.semicolons)?;
         writeln!(f, "Arrow parentheses: {}", self.arrow_parentheses)?;
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
-        writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())
+        writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())?;
+        writeln!(
+            f,
+            "Single Attribute Per Line: {}",
+            self.single_attribute_per_line.value()
+        )
     }
 }
 
@@ -542,6 +569,27 @@ impl BracketSameLine {
 }
 
 impl From<bool> for BracketSameLine {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+pub struct SingleAttributePerLine(bool);
+
+impl SingleAttributePerLine {
+    /// Return the boolean value for this [SingleAttributePerLine]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl From<bool> for SingleAttributePerLine {
     fn from(value: bool) -> Self {
         Self(value)
     }

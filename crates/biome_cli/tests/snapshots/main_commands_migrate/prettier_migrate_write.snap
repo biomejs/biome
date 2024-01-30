@@ -24,7 +24,8 @@ expression: content
       "arrowParentheses": "always",
       "bracketSpacing": true,
       "bracketSameLine": false,
-      "quoteStyle": "single"
+      "quoteStyle": "single",
+      "singleAttributePerLine": false
     }
   }
 }

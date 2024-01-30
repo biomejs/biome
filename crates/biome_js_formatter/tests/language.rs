@@ -5,7 +5,7 @@ use biome_formatter_test::TestFormatLanguage;
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{
     ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatContext, JsFormatOptions,
-    QuoteProperties, Semicolons,
+    QuoteProperties, Semicolons, SingleAttributePerLine,
 };
 use biome_js_formatter::{format_node, format_range, JsFormatLanguage};
 use biome_js_parser::{parse, JsParserOptions};
@@ -231,6 +231,9 @@ pub struct JsSerializableFormatOptions {
 
     /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
     pub bracket_same_line: Option<bool>,
+
+    /// Enforce single attribute per line in HTML, Vue and JSX. Defaults to false
+    pub single_attribute_per_line: Option<bool>,
 }
 
 impl JsSerializableFormatOptions {
@@ -279,6 +282,10 @@ impl JsSerializableFormatOptions {
             .with_bracket_same_line(
                 self.bracket_same_line
                     .map_or_else(BracketSameLine::default, |value| value.into()),
+            )
+            .with_single_attribute_per_line(
+                self.single_attribute_per_line
+                    .map_or_else(SingleAttributePerLine::default, |value| value.into()),
             )
     }
 }

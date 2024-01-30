@@ -41,11 +41,12 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
       17 │ + → → → "arrowParentheses":·"always",
       18 │ + → → → "bracketSpacing":·true,
       19 │ + → → → "bracketSameLine":·false,
-      20 │ + → → → "quoteStyle":·"single"
-      21 │ + → → }
-      22 │ + → }
-      23 │ + }
-      24 │ + 
+      20 │ + → → → "quoteStyle":·"single",
+      21 │ + → → → "singleAttributePerLine":·false
+      22 │ + → → }
+      23 │ + → }
+      24 │ + }
+      25 │ + 
   
 
 ```

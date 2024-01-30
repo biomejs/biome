@@ -87,6 +87,14 @@ pub struct JavascriptFormatter {
     /// The type of quotes used in JavaScript code. Defaults to double.
     #[partial(bpaf(long("quote-style"), argument("double|single"), optional))]
     pub quote_style: QuoteStyle,
+
+    /// Enforce single attribute per line in HTML, Vue and JSX.
+    #[partial(bpaf(
+        long("javascript-formatter-single-attribute-per-line"),
+        argument("true|false"),
+        optional
+    ))]
+    pub single_attribute_per_line: bool,
 }
 
 impl Default for JavascriptFormatter {
@@ -106,6 +114,7 @@ impl Default for JavascriptFormatter {
             line_ending: Default::default(),
             line_width: Default::default(),
             quote_style: Default::default(),
+            single_attribute_per_line: false,
         }
     }
 }

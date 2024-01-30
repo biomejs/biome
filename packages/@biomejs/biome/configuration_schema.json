@@ -1108,6 +1108,10 @@
 					"description": "Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.",
 					"anyOf": [{ "$ref": "#/definitions/Semicolons" }, { "type": "null" }]
 				},
+				"singleAttributePerLine": {
+					"description": "Enforce single attribute per line in HTML, Vue and JSX.",
+					"type": ["boolean", "null"]
+				},
 				"trailingComma": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
 					"anyOf": [
