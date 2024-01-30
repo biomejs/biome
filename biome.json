@@ -13,21 +13,7 @@
 			"public/**",
 			"**/__snapshots__",
 			"**/editors/intellij/**",
-			"*.astro",
-			"*.mdx",
-			"*.md",
-			"*.css",
-			"*.scss",
-			"*.svg",
-			"*.png",
-			"*.yml",
-			"*.yaml",
-			"*.snap",
-			"**/undefined/**",
-			"LICENSE-MIT",
-			"LICENSE-APACHE",
-			"ROME_LICENSE",
-			"ROME-LICENSE-MIT"
+			"**/undefined/**"
 		]
 	},
 	"formatter": {
