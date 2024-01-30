@@ -99,6 +99,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```
   Contributed by @lucasweng
 
+- Fix [#1704](https://github.com/biomejs/biome/issues/1704). Convert `/` to escaped slash `\/` to avoid parsing error in the result of autofix. Contributed by @togami2864
+
 ### Parser
 
 ## 1.5.3 (2024-01-22)
