@@ -75,13 +75,10 @@ pub(crate) fn format_with_guard<'ctx>(
                 } else {
                     if workspace_file.as_extension() == Some("astro") {
                         let mut matches = ASTRO_FENCE.find_iter(&input);
-                        match (matches.next(), matches.next()) {
-                            (Some(start), Some(end)) => {
-                                let mut tmp = input.clone();
-                                tmp.replace_range(start.end()..end.start(), output.as_str());
-                                output = tmp
-                            }
-                            _ => {}
+                        if let (Some(start), Some(end)) = (matches.next(), matches.next()) {
+                            let mut tmp = input.clone();
+                            tmp.replace_range(start.end()..end.start(), output.as_str());
+                            output = tmp
                         }
                     }
                     return Ok(FileStatus::Message(Message::Diff {

@@ -71,13 +71,10 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         let mut new_content = new_content.into();
         if self.as_extension() == Some("astro") {
             let mut edges = ASTRO_FENCE.find_iter(&self.input);
-            match (edges.next(), edges.next()) {
-                (Some(start), Some(end)) => {
-                    let mut tmp = self.input.clone();
-                    tmp.replace_range(start.end()..end.start(), new_content.as_str());
-                    new_content = tmp;
-                }
-                _ => {}
+            if let (Some(start), Some(end)) = (edges.next(), edges.next()) {
+                let mut tmp = self.input.clone();
+                tmp.replace_range(start.end()..end.start(), new_content.as_str());
+                new_content = tmp;
             }
         }
 
