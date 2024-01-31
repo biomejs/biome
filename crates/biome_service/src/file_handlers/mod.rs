@@ -2,6 +2,8 @@ use self::{
     css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
     unknown::UnknownFileHandler,
 };
+use crate::file_handlers::astro::AstroFileHandler;
+pub use crate::file_handlers::astro::ASTRO_FENCE;
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
     settings::SettingsHandle,
@@ -21,6 +23,7 @@ pub use javascript::JsFormatterSettings;
 use std::ffi::OsStr;
 use std::path::Path;
 
+mod astro;
 mod css;
 mod javascript;
 mod json;
@@ -44,6 +47,8 @@ pub enum Language {
     Jsonc,
     /// CSS
     Css,
+    ///
+    Astro,
     /// Any language that is not supported
     #[default]
     Unknown,
@@ -75,6 +80,7 @@ impl Language {
             "tsx" => Language::TypeScriptReact,
             "json" => Language::Json,
             "jsonc" => Language::Jsonc,
+            "astro" => Language::Astro,
             "css" => Language::Css,
             _ => Language::Unknown,
         }
@@ -126,6 +132,7 @@ impl Language {
             "typescriptreact" => Language::TypeScriptReact,
             "json" => Language::Json,
             "jsonc" => Language::Jsonc,
+            "astro" => Language::Astro,
             // TODO: remove this when we are ready to handle CSS files
             "css" => Language::Unknown,
             _ => Language::Unknown,
@@ -186,6 +193,7 @@ impl Language {
             Language::JavaScriptReact => Some(JsFileSource::jsx()),
             Language::TypeScript => Some(JsFileSource::tsx()),
             Language::TypeScriptReact => Some(JsFileSource::tsx()),
+            Language::Astro => Some(JsFileSource::ts()),
             Language::Json | Language::Jsonc | Language::Css | Language::Unknown => None,
         }
     }
@@ -201,6 +209,7 @@ impl biome_console::fmt::Display for Language {
             Language::Json => fmt.write_markup(markup! { "JSON" }),
             Language::Jsonc => fmt.write_markup(markup! { "JSONC" }),
             Language::Css => fmt.write_markup(markup! { "CSS" }),
+            Language::Astro => fmt.write_markup(markup! { "Astro" }),
             Language::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -360,6 +369,7 @@ pub(crate) struct Features {
     json: JsonFileHandler,
     #[allow(unused)]
     css: CssFileHandler,
+    astro: AstroFileHandler,
     unknown: UnknownFileHandler,
 }
 
@@ -369,6 +379,7 @@ impl Features {
             js: JsFileHandler {},
             json: JsonFileHandler {},
             css: CssFileHandler {},
+            astro: AstroFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
@@ -387,6 +398,7 @@ impl Features {
             Language::Json | Language::Jsonc => self.json.capabilities(),
             // TODO: change this when we are ready to handle CSS files
             Language::Css => self.unknown.capabilities(),
+            Language::Astro => self.astro.capabilities(),
             Language::Unknown => self.unknown.capabilities(),
         }
     }

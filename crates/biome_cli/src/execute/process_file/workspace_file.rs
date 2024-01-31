@@ -2,7 +2,7 @@ use crate::execute::diagnostics::{ResultExt, ResultIoExt};
 use crate::execute::process_file::SharedTraversalOptions;
 use biome_diagnostics::{category, Error};
 use biome_fs::{File, OpenOptions, RomePath};
-use biome_service::file_handlers::Language;
+use biome_service::file_handlers::{Language, ASTRO_FENCE};
 use biome_service::workspace::{FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
 use std::path::{Path, PathBuf};
@@ -12,6 +12,7 @@ pub(crate) struct WorkspaceFile<'ctx, 'app> {
     guard: FileGuard<'app, dyn Workspace + 'ctx>,
     file: Box<dyn File>,
     pub(crate) path: PathBuf,
+    input: String,
 }
 
 impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
@@ -49,6 +50,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
             file,
             guard,
             path: PathBuf::from(path),
+            input,
         })
     }
 
@@ -60,9 +62,25 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         self.guard().get_file_content()
     }
 
+    pub(crate) fn as_extension(&self) -> Option<&str> {
+        self.path.extension().and_then(|s| s.to_str())
+    }
+
     /// It updates the workspace file with `new_content`
     pub(crate) fn update_file(&mut self, new_content: impl Into<String>) -> Result<(), Error> {
-        let new_content = new_content.into();
+        let mut new_content = new_content.into();
+        if self.as_extension() == Some("astro") {
+            let mut edges = ASTRO_FENCE.find_iter(&self.input);
+            match (edges.next(), edges.next()) {
+                (Some(start), Some(end)) => {
+                    let mut tmp = self.input.clone();
+                    tmp.replace_range(start.end()..end.start(), new_content.as_str());
+                    new_content = tmp;
+                }
+                _ => {}
+            }
+        }
+
         self.file
             .set_content(new_content.as_bytes())
             .with_file_path(self.path.display().to_string())?;
