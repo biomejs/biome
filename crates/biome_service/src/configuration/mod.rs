@@ -304,11 +304,16 @@ fn load_config(
             directory_path,
             file_path,
         } = auto_search_result;
-        let deserialized = deserialize_from_json_str::<PartialConfiguration>(
-            &content,
-            JsonParserOptions::default(),
-            "",
-        );
+        let parser_options =
+            if file_path.file_name().and_then(|s| s.to_str()) == Some(ConfigName::biome_jsonc()) {
+                JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas()
+            } else {
+                JsonParserOptions::default()
+            };
+        let deserialized =
+            deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
         Ok(Some(ConfigurationPayload {
             deserialized,
             configuration_file_path: file_path,
@@ -329,8 +334,13 @@ fn load_config(
 pub fn create_config(
     fs: &mut DynRef<dyn FileSystem>,
     mut configuration: PartialConfiguration,
+    emit_jsonc: bool,
 ) -> Result<(), WorkspaceError> {
-    let path = PathBuf::from(ConfigName::biome_json());
+    let path = if emit_jsonc {
+        PathBuf::from(ConfigName::biome_jsonc())
+    } else {
+        PathBuf::from(ConfigName::biome_json())
+    };
 
     let options = OpenOptions::default().write(true).create_new(true);
 

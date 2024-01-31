@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 
 use crate::configs::{
     CONFIG_FILE_SIZE_LIMIT, CONFIG_IGNORE_SYMLINK, CONFIG_LINTER_DISABLED,
-    CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC, CONFIG_LINTER_IGNORED_FILES,
+    CONFIG_LINTER_DISABLED_JSONC, CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC, CONFIG_LINTER_IGNORED_FILES,
     CONFIG_LINTER_SUPPRESSED_GROUP, CONFIG_LINTER_SUPPRESSED_RULE,
     CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
 };
@@ -438,6 +438,49 @@ fn no_lint_if_linter_is_disabled_when_run_apply() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "no_lint_if_linter_is_disabled_when_run_apply",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_lint_if_linter_is_disabled_when_run_apply_biome_jsonc() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("fix.js");
+    fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
+
+    let config_path = Path::new("biome.jsonc");
+    fs.insert(config_path.into(), CONFIG_LINTER_DISABLED_JSONC.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("check"),
+                ("--apply"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    assert_eq!(buffer, CHECK_FORMAT_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_lint_if_linter_is_disabled_when_run_apply_biome_jsonc",
         fs,
         console,
         result,

@@ -240,7 +240,11 @@ pub enum BiomeCommand {
 
     /// Bootstraps a new biome project. Creates a configuration file with some defaults.
     #[bpaf(command)]
-    Init,
+    Init(
+        /// Tells Biome to emit a `biome.jsonc` file.
+        #[bpaf(long("jsonc"), switch)]
+        bool,
+    ),
     /// Acts as a server for the Language Server Protocol over stdin/stdout
     #[bpaf(command("lsp-proxy"))]
     LspProxy(
@@ -307,7 +311,7 @@ impl BiomeCommand {
             BiomeCommand::LspProxy(_)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::Init
+            | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => None,
@@ -323,7 +327,7 @@ impl BiomeCommand {
             | BiomeCommand::Ci { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Migrate { cli_options, .. } => cli_options.use_server,
-            BiomeCommand::Init
+            BiomeCommand::Init(_)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Explain { .. }
@@ -348,7 +352,7 @@ impl BiomeCommand {
             | BiomeCommand::Rage(..)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::Init
+            | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
@@ -368,7 +372,7 @@ impl BiomeCommand {
             | BiomeCommand::Rage(..)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::Init
+            | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => LoggingLevel::default(),
@@ -386,7 +390,7 @@ impl BiomeCommand {
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::Init
+            | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => LoggingKind::default(),

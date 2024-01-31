@@ -1,7 +1,7 @@
 use crate::configs::{
     CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FORMAT,
     CONFIG_FORMATTER_AND_FILES_IGNORE, CONFIG_FORMATTER_IGNORED_DIRECTORIES,
-    CONFIG_FORMATTER_IGNORED_FILES, CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
+    CONFIG_FORMATTER_IGNORED_FILES, CONFIG_FORMAT_JSONC, CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
 };
 use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
 use crate::{
@@ -2769,6 +2769,43 @@ fn don_t_format_ignored_known_jsonc_files() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "don_t_format_ignored_known_jsonc_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn applies_configuration_from_biome_jsonc() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("biome.jsonc");
+    fs.insert(file_path.into(), CONFIG_FORMAT_JSONC.as_bytes());
+
+    let file_path = Path::new("file.js");
+    fs.insert(file_path.into(), CUSTOM_CONFIGURATION_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--write"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, CUSTOM_CONFIGURATION_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_configuration_from_biome_jsonc",
         fs,
         console,
         result,

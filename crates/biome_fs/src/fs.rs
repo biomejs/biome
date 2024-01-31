@@ -20,21 +20,17 @@ pub struct ConfigName;
 impl ConfigName {
     const BIOME_JSON: [&'static str; 2] = ["biome.json", "biome.jsonc"];
 
-    pub fn biome_json() -> &'static str {
+    pub const fn biome_json() -> &'static str {
         Self::BIOME_JSON[0]
     }
 
-    pub fn biome_jsonc() -> &'static str {
+    pub const fn biome_jsonc() -> &'static str {
         Self::BIOME_JSON[1]
     }
 
-    pub fn file_names() -> [&'static str; 2] {
+    pub const fn file_names() -> [&'static str; 2] {
         Self::BIOME_JSON
     }
-}
-
-lazy_static::lazy_static! {
-    pub static ref CONFIG_NAME: ConfigName = ConfigName {};
 }
 
 type AutoSearchResultAlias = Result<Option<AutoSearchResult>, FileSystemDiagnostic>;
@@ -53,10 +49,6 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// Returns the temporary configuration files that are supported
     fn deprecated_config_name(&self) -> &str {
         ROME_JSON
-    }
-
-    fn config_name(&self) -> &ConfigName {
-        &CONFIG_NAME
     }
 
     /// Return the path to the working directory

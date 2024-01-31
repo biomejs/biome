@@ -321,7 +321,7 @@ impl LanguageServer for LSPServer {
                         if let Ok(possible_rome_json) = possible_rome_json {
                             if possible_rome_json.display().to_string() == ROME_JSON
                                 || ConfigName::file_names()
-                                    .contains(&&**&possible_rome_json.display().to_string())
+                                    .contains(&&*possible_rome_json.display().to_string())
                             {
                                 self.session.load_workspace_settings().await;
                                 self.setup_capabilities().await;

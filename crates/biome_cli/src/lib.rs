@@ -185,7 +185,7 @@ impl<'app> CliSession<'app> {
                 },
             ),
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
-            BiomeCommand::Init => commands::init::init(self),
+            BiomeCommand::Init(emit_jsonc) => commands::init::init(self, emit_jsonc),
             BiomeCommand::LspProxy(config_path) => commands::daemon::lsp_proxy(config_path),
             BiomeCommand::Migrate {
                 cli_options,
