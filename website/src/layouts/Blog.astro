@@ -4,7 +4,7 @@ import BlogPostInfo from "@src/components/BlogPostInfo.astro";
 import { Image } from "astro:assets";
 
 export interface Props {
-  post: CollectionEntry<"blog">["data"];
+	post: CollectionEntry<"blog">["data"];
 }
 
 const { post } = Astro.props;
