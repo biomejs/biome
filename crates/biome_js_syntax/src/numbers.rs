@@ -1,17 +1,21 @@
 //! JS Number parsing.
 
-use std::str::FromStr;
+use std::{borrow::Cow, str::FromStr};
 
 /// Split given string into radix and number string.
 ///
 /// It also removes any underscores.
-pub fn split_into_radix_and_number(num: &str) -> (u32, String) {
+pub fn split_into_radix_and_number(num: &str) -> (u8, Cow<str>) {
     let (radix, raw) = parse_js_number_prefix(num).unwrap_or((10, num));
-    let raw = raw.replace('_', "");
+    let raw = if raw.contains('_') {
+        Cow::Owned(raw.replace('_', ""))
+    } else {
+        Cow::Borrowed(raw)
+    };
     (radix, raw)
 }
 
-fn parse_js_number_prefix(num: &str) -> Option<(u32, &str)> {
+fn parse_js_number_prefix(num: &str) -> Option<(u8, &str)> {
     let mut chars = num.chars();
     let c = chars.next()?;
     if c != '0' {
@@ -34,7 +38,9 @@ pub fn parse_js_number(num: &str) -> Option<f64> {
     if radix == 10 {
         f64::from_str(&raw).ok()
     } else {
-        i64::from_str_radix(&raw, radix).map(|num| num as f64).ok()
+        i64::from_str_radix(&raw, radix as u32)
+            .map(|num| num as f64)
+            .ok()
     }
 }
 
@@ -95,7 +101,7 @@ mod tests {
         assert_float("058", 58.0);
     }
 
-    fn assert_split(raw: &str, expected_radix: u32, expected_num: &str) {
+    fn assert_split(raw: &str, expected_radix: u8, expected_num: &str) {
         let (radix, num) = split_into_radix_and_number(raw);
         assert_eq!(radix, expected_radix);
         assert_eq!(num, expected_num);

@@ -59,10 +59,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Linter
 
-#### Enhancements
-
-- [noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary/) now provides unsafe code fixes. Contributed by @vasucp1207
-
 #### New features
 
 - Add the rule [noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests), to disallow skipped tests:
@@ -88,6 +84,32 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   + <div class="foo·bar·p-4·px-2" />
   ```
   Contributed by @DaniGuardiola
+
+#### Enhancements
+
+- [noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary) now provides unsafe code fixes. Contributed by @vasucp1207
+
+- [noApproximativeNumericConstant](https://biomejs.dev/linter/rules/no-approximative-numeric-constant) now provides unsafe code fixes and handle numbers without leading zero and numbers with digit separators.
+
+  The following numbers are now reported as approximated constants.
+
+  ```js
+  3.14_15; // PI
+  .4342; // LOG10E
+  ```
+
+  Contributed by @Conaclos
+
+- [noPrecisionLoss](https://biomejs.dev/linter/rules/no-precision-loss) no longer reports number with extra zeros.
+
+  The following numbers are now valid.
+
+  ```js
+  .1230000000000000000000000;
+  1230000000000000000000000.0;
+  ```
+
+  Contributed by @Conaclos
 
 #### Bug fixes
 
