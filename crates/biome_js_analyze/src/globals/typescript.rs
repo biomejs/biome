@@ -1,5 +1,5 @@
 /// Sorted array of TypeScript builtin
-pub const TYPESCRIPT_BUILTIN: [&str; 964] = [
+pub const TYPESCRIPT_BUILTIN: [&str; 965] = [
     "ANGLE_instanced_arrays",
     "ARIAMixin",
     "AbortSignalEventMap",
@@ -511,6 +511,7 @@ pub const TYPESCRIPT_BUILTIN: [&str; 964] = [
     "NavigatorPlugins",
     "NavigatorStorage",
     "NewableFunction",
+    "NoInfer",
     "NodeJS",
     "NodeListOf",
     "NodeRequire",
