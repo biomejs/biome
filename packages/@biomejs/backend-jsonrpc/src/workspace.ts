@@ -891,6 +891,10 @@ export interface Nursery {
 	 */
 	noNodejsModules?: RuleConfiguration;
 	/**
+	 * Disallow specified modules when loaded by import or require.
+	 */
+	noRestrictedImports?: RuleConfiguration;
+	/**
 	 * Disallow disabled tests.
 	 */
 	noSkippedTests?: RuleConfiguration;
@@ -1404,6 +1408,7 @@ export type PossibleOptions =
 	| DeprecatedHooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
+	| RestrictedImportsOptions
 	| ValidAriaRoleOptions
 	| UtilityClassSortingOptions;
 /**
@@ -1465,6 +1470,15 @@ export interface RestrictedGlobalsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	deniedGlobals: string[];
+}
+/**
+ * Options for the rule `noRestrictedImports`.
+ */
+export interface RestrictedImportsOptions {
+	/**
+	 * A list of names that should trigger the rule
+	 */
+	paths: {};
 }
 export interface ValidAriaRoleOptions {
 	allowInvalidRoles: string[];
@@ -1696,6 +1710,7 @@ export type Category =
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNodejsModules"
+	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
