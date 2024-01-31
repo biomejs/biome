@@ -1542,6 +1542,7 @@ export interface OpenFileParams {
  * Supported languages by Biome
  */
 export type Language =
+	| "Astro"
 	| "JavaScript"
 	| "JavaScriptReact"
 	| "TypeScript"
