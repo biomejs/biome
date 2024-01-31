@@ -42,6 +42,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Biome now allows to format the `package.json` file. This is now the default behaviour and users can remove their workarounds.
   If you rely on other tools to format `package.json`, you'll have to ignore it via configuration. Contributed by @pattrickrice
+- Add partial for `.astro` files. Biome is able to format the frontmatter of the Astro files. Contributed by @ematipico
 
 #### Bug fixes
 
