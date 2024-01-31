@@ -7,6 +7,7 @@ use crate::execute::TraversalMode;
 use biome_diagnostics::{category, DiagnosticExt};
 use biome_service::file_handlers::ASTRO_FENCE;
 use biome_service::workspace::RuleCategories;
+use biome_service::WorkspaceError;
 use std::path::Path;
 use std::sync::atomic::Ordering;
 use tracing::debug;
@@ -26,11 +27,14 @@ pub(crate) fn format_with_guard<'ctx>(
             debug!("Pulling diagnostics from parsed file");
             let diagnostics_result = workspace_file
                 .guard()
-                .pull_diagnostics(RuleCategories::SYNTAX, max_diagnostics.into())
-                .with_file_path_and_code(
-                    workspace_file.path.display().to_string(),
-                    category!("format"),
-                )?;
+                .pull_diagnostics(RuleCategories::SYNTAX, max_diagnostics.into());
+            if let Err(WorkspaceError::FileIgnored(_err)) = diagnostics_result {
+                return Ok(FileStatus::Success);
+            }
+            let diagnostics_result = diagnostics_result.with_file_path_and_code(
+                workspace_file.path.display().to_string(),
+                category!("format"),
+            )?;
 
             let input = workspace_file.input()?;
             let (should_write, ignore_errors) = match ctx.execution.traversal_mode {
@@ -54,13 +58,15 @@ pub(crate) fn format_with_guard<'ctx>(
                 ));
             }
 
-            let printed = workspace_file
-                .guard()
-                .format_file()
-                .with_file_path_and_code(
-                    workspace_file.path.display().to_string(),
-                    category!("format"),
-                )?;
+            let printed = workspace_file.guard().format_file();
+            if let Err(WorkspaceError::FileIgnored(_err)) = printed {
+                return Ok(FileStatus::Success);
+            }
+
+            let printed = printed.with_file_path_and_code(
+                workspace_file.path.display().to_string(),
+                category!("format"),
+            )?;
 
             let mut output = printed.into_code();
 
