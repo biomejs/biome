@@ -407,6 +407,7 @@ fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> An
     let configuration = AnalyzerConfiguration {
         rules: to_analyzer_rules(settings.as_ref(), file_path.as_path()),
         globals: vec![],
+        dependencies: vec![],
     };
     AnalyzerOptions {
         configuration,

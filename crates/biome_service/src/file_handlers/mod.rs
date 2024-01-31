@@ -266,6 +266,7 @@ pub struct FixAllParams<'a> {
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) rome_path: &'a RomePath,
+    pub(crate) dependencies: Vec<String>,
 }
 
 #[derive(Default)]
@@ -306,6 +307,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) max_diagnostics: u64,
     pub(crate) path: &'a RomePath,
     pub(crate) categories: RuleCategories,
+    pub(crate) dependencies: Vec<String>,
 }
 
 pub(crate) struct LintResults {
@@ -315,8 +317,14 @@ pub(crate) struct LintResults {
 }
 
 type Lint = fn(LintParams) -> LintResults;
-type CodeActions =
-    fn(AnyParse, TextRange, Option<&Rules>, SettingsHandle, &RomePath) -> PullActionsResult;
+type CodeActions = fn(
+    AnyParse,
+    TextRange,
+    Option<&Rules>,
+    SettingsHandle,
+    &RomePath,
+    Vec<String>,
+) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&RomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
 type OrganizeImports = fn(AnyParse) -> Result<OrganizeImportsResult, WorkspaceError>;

@@ -31,6 +31,12 @@ impl Manifest for PackageJson {
 #[derive(Debug, Default, biome_deserialize_macros::Deserializable)]
 pub struct Dependencies(FxHashMap<String, Version>);
 
+impl Dependencies {
+    pub fn to_keys(&self) -> Vec<String> {
+        self.0.keys().cloned().collect()
+    }
+}
+
 #[derive(Debug)]
 pub struct Version(node_semver::Version);
 

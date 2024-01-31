@@ -29,6 +29,7 @@ use std::borrow::Borrow;
 use std::ffi::OsStr;
 use std::path::Path;
 use std::{panic::RefUnwindSafe, sync::RwLock};
+use std::any::Any;
 use tracing::{debug, info, info_span};
 
 pub(super) struct WorkspaceServer {
@@ -44,6 +45,8 @@ pub(super) struct WorkspaceServer {
     file_features: DashMap<RomePath, FileFeaturesResult>,
     /// Handlers that know how to handle a specific project
     project_handlers: ProjectHandlers,
+    /// Stores the parsed manifests
+    manifests: DashMap<RomePath, AnyParse>
 }
 
 /// The `Workspace` object is long lived, so we want it to be able to cross
@@ -92,7 +95,6 @@ impl WorkspaceServer {
     }
 
     /// Get the supported manifest capabilities for a given file path
-    #[allow(unused)]
     fn get_project_capabilities(&self, path: &RomePath) -> ProjectCapabilities {
         self.project_handlers
             .get_capabilities(path, ProjectHandlers::get_manifest(path))
@@ -128,6 +130,18 @@ impl WorkspaceServer {
                     .and_then(OsStr::to_str)
                     .map(|s| s.to_string()),
             )
+        }
+    }
+
+    fn get_project_parse(&self, path: RomePath) -> Result<AnyParse, WorkspaceError> {
+        match self.manifests.entry(path) {
+            Entry::Occupied(entry) => Ok(entry.get().clone()),
+            Entry::Vacant(entry) => {
+                let path = entry.key();
+                let capabilities = self.get_project_capabilities(path);
+
+
+            }
         }
     }
 
@@ -480,6 +494,7 @@ impl Workspace for WorkspaceServer {
     #[tracing::instrument(level = "trace", skip(self))]
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
         let capabilities = self.get_file_capabilities(&params.path);
+        let project_capabilities = self.get_project_capabilities(&params.path);
         let code_actions = capabilities
             .analyzer
             .code_actions
@@ -488,6 +503,11 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(params.path.clone())?;
         let settings = self.settings.read().unwrap();
         let rules = settings.linter().rules.as_ref();
+        let dependencies = project_capabilities.analyzer.dependencies;
+        self.get_parse()
+        let dependencies = if let Some(dependencies) = dependencies {
+            dependencies(self)
+        }
         Ok(code_actions(
             parse,
             params.range,
@@ -572,6 +592,7 @@ impl Workspace for WorkspaceServer {
             settings: self.settings(),
             should_format: params.should_format,
             rome_path: &params.path,
+
         })
     }
 

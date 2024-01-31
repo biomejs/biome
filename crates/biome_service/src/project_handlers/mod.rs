@@ -51,9 +51,11 @@ pub(crate) struct ProjectCapabilities {
 pub(crate) struct ProjectAnalyzerCapabilities {
     #[allow(dead_code)]
     pub(crate) lint: Option<Lint>,
+    pub(crate) dependencies: Option<Dependencies>,
 }
 
 type Lint = fn(&RomePath, AnyParse) -> Result<ProjectLintResult, WorkspaceError>;
+type Dependencies = fn(AnyParse) -> Result<ProjectDependenciesResult, WorkspaceError>;
 
 pub(crate) struct ProjectHandlers {
     node: NodeProjectHandler,
@@ -72,6 +74,13 @@ pub(crate) struct ProjectLintResult {
     pub(crate) diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub(crate) errors: usize,
     pub(crate) skipped_diagnostics: u64,
+}
+
+#[derive(Default, Debug)]
+pub(crate) struct ProjectDependenciesResult {
+    pub(crate) dependencies: Vec<String>,
+    pub(crate) dev_dependencies: Vec<String>,
+    pub(crate) optional_dependencies: Vec<String>,
 }
 
 impl ProjectHandlers {

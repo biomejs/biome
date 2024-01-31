@@ -300,8 +300,11 @@ fn lint(params: LintParams) -> LintResults {
             };
             let tree = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
-            let analyzer_options =
-                compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
+            let analyzer_options = compute_analyzer_options(
+                &params.settings,
+                params.dependencies,
+                PathBuf::from(params.path.as_path()),
+            );
 
             // Compute final rules (taking `overrides` into account)
             let rules = settings.as_rules(params.path.as_path());
@@ -431,6 +434,7 @@ fn code_actions(
     rules: Option<&Rules>,
     settings: SettingsHandle,
     path: &RomePath,
+    dependencies: Vec<String>,
 ) -> PullActionsResult {
     let tree = parse.tree();
 
@@ -466,7 +470,8 @@ fn code_actions(
     filter.range = Some(range);
 
     trace!("Filter applied for code actions: {:?}", &filter);
-    let analyzer_options = compute_analyzer_options(&settings, PathBuf::from(path.as_path()));
+    let analyzer_options =
+        compute_analyzer_options(&settings, dependencies, PathBuf::from(path.as_path()));
     let Ok(source_type) = parse.file_source(path) else {
         return PullActionsResult { actions: vec![] };
     };
@@ -500,6 +505,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         should_format,
         rome_path,
         mut filter,
+        dependencies,
     } = params;
 
     let file_source = parse
@@ -512,7 +518,8 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
 
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
-    let analyzer_options = compute_analyzer_options(&settings, PathBuf::from(rome_path.as_path()));
+    let analyzer_options =
+        compute_analyzer_options(&settings, dependencies, PathBuf::from(rome_path.as_path()));
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, file_source, |signal| {
             let current_diagnostic = signal.diagnostic();
@@ -762,7 +769,11 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
     }
 }
 
-fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> AnalyzerOptions {
+fn compute_analyzer_options(
+    settings: &SettingsHandle,
+    dependencies: Vec<String>,
+    file_path: PathBuf,
+) -> AnalyzerOptions {
     let settings = settings.as_ref();
     let configuration = AnalyzerConfiguration {
         rules: to_analyzer_rules(settings, file_path.as_path()),
@@ -774,6 +785,7 @@ fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> An
             )
             .into_iter()
             .collect(),
+        dependencies,
     };
 
     AnalyzerOptions {
