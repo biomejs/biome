@@ -44,6 +44,7 @@ dashmap                  = { workspace = true }
 ignore                   = { workspace = true }
 indexmap                 = { workspace = true, features = ["serde"] }
 lazy_static              = { workspace = true }
+regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, features = ["indexmap1"], optional = true }
 serde                    = { workspace = true, features = ["derive"] }

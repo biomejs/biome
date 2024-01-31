@@ -5,6 +5,7 @@ use crate::execute::process_file::{
 };
 use crate::execute::TraversalMode;
 use biome_diagnostics::{category, DiagnosticExt};
+use biome_service::file_handlers::ASTRO_FENCE;
 use biome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;
@@ -61,7 +62,7 @@ pub(crate) fn format_with_guard<'ctx>(
                     category!("format"),
                 )?;
 
-            let output = printed.into_code();
+            let mut output = printed.into_code();
 
             // NOTE: ignoring the
             if ignore_errors {
@@ -72,6 +73,17 @@ pub(crate) fn format_with_guard<'ctx>(
                 if should_write {
                     workspace_file.update_file(output)?;
                 } else {
+                    if workspace_file.as_extension() == Some("astro") {
+                        let mut matches = ASTRO_FENCE.find_iter(&input);
+                        match (matches.next(), matches.next()) {
+                            (Some(start), Some(end)) => {
+                                let mut tmp = input.clone();
+                                tmp.replace_range(start.end()..end.start(), output.as_str());
+                                output = tmp
+                            }
+                            _ => {}
+                        }
+                    }
                     return Ok(FileStatus::Message(Message::Diff {
                         file_name: workspace_file.path.display().to_string(),
                         old: input,
