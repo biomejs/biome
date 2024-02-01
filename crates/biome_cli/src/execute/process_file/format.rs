@@ -70,7 +70,7 @@ pub(crate) fn format_with_guard<'ctx>(
             }
 
             if workspace_file.as_extension() == Some("astro") {
-                if output == "" {
+                if output.is_empty() {
                     return Ok(FileStatus::Ignored);
                 }
                 let mut matches = ASTRO_FENCE.find_iter(&input);
