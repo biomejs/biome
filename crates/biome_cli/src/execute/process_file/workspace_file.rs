@@ -12,7 +12,6 @@ pub(crate) struct WorkspaceFile<'ctx, 'app> {
     guard: FileGuard<'app, dyn Workspace + 'ctx>,
     file: Box<dyn File>,
     pub(crate) path: PathBuf,
-    input: String,
 }
 
 impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
@@ -50,7 +49,6 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
             file,
             guard,
             path: PathBuf::from(path),
-            input,
         })
     }
 

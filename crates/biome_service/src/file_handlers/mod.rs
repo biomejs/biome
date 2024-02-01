@@ -198,21 +198,19 @@ impl Language {
             Language::Json | Language::Jsonc | Language::Css | Language::Unknown => None,
         }
     }
-    
+
     pub fn can_parse(path: &Path, content: &str) -> bool {
         let language = Language::from_path(path);
         match language {
-            Language::JavaScript |
-            Language::JavaScriptReact |
-            Language::TypeScript |
-            Language::TypeScriptReact |
-            Language::Json |
-            Language::Css |
-            Language::Jsonc => true,
-            Language::Astro => {
-                ASTRO_FENCE.is_match(content)
-            }
-            Language::Unknown => false
+            Language::JavaScript
+            | Language::JavaScriptReact
+            | Language::TypeScript
+            | Language::TypeScriptReact
+            | Language::Json
+            | Language::Css
+            | Language::Jsonc => true,
+            Language::Astro => ASTRO_FENCE.is_match(content),
+            Language::Unknown => false,
         }
     }
 }
