@@ -1163,7 +1163,7 @@ export interface Suspicious {
 	 */
 	all?: boolean;
 	/**
-	 * Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
+	 * Use standard constants instead of approximated literals.
 	 */
 	noApproximativeNumericConstant?: RuleConfiguration;
 	/**
