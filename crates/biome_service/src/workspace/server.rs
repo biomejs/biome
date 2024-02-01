@@ -170,21 +170,15 @@ impl WorkspaceServer {
                 }
 
                 let settings = self.settings();
-                if Language::can_parse(&rome_path, document.content.as_str()) {
-                    let parsed = parse(
-                        rome_path,
-                        document.language_hint,
-                        document.content.as_str(),
-                        settings,
-                        &mut document.node_cache,
-                    );
+                let parsed = parse(
+                    rome_path,
+                    document.language_hint,
+                    document.content.as_str(),
+                    settings,
+                    &mut document.node_cache,
+                );
 
-                    Ok(entry.insert(parsed).clone())
-                } else {
-                    Err(WorkspaceError::file_ignored(
-                        rome_path.display().to_string(),
-                    ))
-                }
+                Ok(entry.insert(parsed).clone())
             }
         }
     }
