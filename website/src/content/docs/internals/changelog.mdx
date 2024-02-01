@@ -80,6 +80,15 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - New formatter option `attributePosition` that have similar behavior as Prettier `singleAttributePerLine` [#1706](https://github.com/biomejs/biome/issues/1706). Contributed by @octoshikari
 - Add partial for `.astro` files. Biome is able to format the frontmatter of the Astro files. Contributed by @ematipico
 
+  ```diff
+  ---
+  - statement ( );
+  + statement();
+  ---
+
+  <div></div>
+  ```
+
 #### Bug fixes
 
 - Fix [#1039](https://github.com/biomejs/biome/issues/1039). Check unicode width instead of number of bytes when checking if regex expression is a simple argument. Contributed by @kalleep
