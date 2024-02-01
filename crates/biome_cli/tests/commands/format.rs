@@ -2902,3 +2902,37 @@ fn format_astro_files_write() {
         result,
     ));
 }
+
+#[test]
+fn format_empty_astro_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let astro_file_path = Path::new("file.astro");
+    fs.insert(astro_file_path.into(), "<div></div>".as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                astro_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, astro_file_path, "<div></div>");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_empty_astro_files_write",
+        fs,
+        console,
+        result,
+    ));
+}

@@ -2,7 +2,7 @@ use crate::execute::diagnostics::{ResultExt, ResultIoExt};
 use crate::execute::process_file::SharedTraversalOptions;
 use biome_diagnostics::{category, Error};
 use biome_fs::{File, OpenOptions, RomePath};
-use biome_service::file_handlers::{Language, ASTRO_FENCE};
+use biome_service::file_handlers::Language;
 use biome_service::workspace::{FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
 use std::path::{Path, PathBuf};
@@ -68,15 +68,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
 
     /// It updates the workspace file with `new_content`
     pub(crate) fn update_file(&mut self, new_content: impl Into<String>) -> Result<(), Error> {
-        let mut new_content = new_content.into();
-        if self.as_extension() == Some("astro") {
-            let mut edges = ASTRO_FENCE.find_iter(&self.input);
-            if let (Some(start), Some(end)) = (edges.next(), edges.next()) {
-                let mut tmp = self.input.clone();
-                tmp.replace_range(start.end()..end.start(), new_content.as_str());
-                new_content = tmp;
-            }
-        }
+        let new_content = new_content.into();
 
         self.file
             .set_content(new_content.as_bytes())
