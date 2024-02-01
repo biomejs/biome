@@ -426,7 +426,6 @@ pub struct CantReadFile {
         description = "The file {path} was ignored."
     ),
     severity = Warning,
-    tags(VERBOSE)
 )]
 pub struct FileIgnored {
     #[location(resource)]
