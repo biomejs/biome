@@ -44,6 +44,15 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   If you rely on other tools to format `package.json`, you'll have to ignore it via configuration. Contributed by @pattrickrice
 - Add partial for `.astro` files. Biome is able to format the frontmatter of the Astro files. Contributed by @ematipico
 
+  ```diff
+  ---
+  - statement ( );
+  + statement();
+  ---
+
+  <div></div>
+  ```
+
 #### Bug fixes
 
 - Fix [#1039](https://github.com/biomejs/biome/issues/1039). Check unicode width instead of number of bytes when checking if regex expression is a simple argument. Contributed by @kalleep
