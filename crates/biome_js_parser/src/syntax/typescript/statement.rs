@@ -376,16 +376,16 @@ fn parse_ts_extends_clause(p: &mut JsParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn is_at_any_ts_namespace_declaration(p: &mut JsParser) -> bool {
+    if p.at(T![global]) {
+        return p.nth_at(1, T!['{']);
+    }
+
     if p.has_nth_preceding_line_break(1) {
         return false;
     }
 
     if matches!(p.cur(), T![namespace] | T![module]) {
         return is_nth_at_identifier(p, 1) || p.nth_at(1, JS_STRING_LITERAL);
-    }
-
-    if p.at(T![global]) {
-        return p.nth_at(1, T!['{']);
     }
 
     false
