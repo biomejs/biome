@@ -393,16 +393,16 @@ pub(crate) fn is_at_any_ts_namespace_declaration(p: &mut JsParser) -> bool {
 
 #[inline]
 pub(crate) fn is_nth_at_any_ts_namespace_declaration(p: &mut JsParser, n: usize) -> bool {
+    if p.nth_at(n, T![global]) {
+        return p.nth_at(n + 1, T!['{']);
+    }
+
     if p.has_nth_preceding_line_break(n + 1) {
         return false;
     }
 
     if matches!(p.nth(n), T![namespace] | T![module]) {
         return is_nth_at_identifier(p, n + 1) || p.nth_at(n + 1, JS_STRING_LITERAL);
-    }
-
-    if p.nth_at(n, T![global]) {
-        return p.nth_at(n + 1, T!['{']);
     }
 
     false
