@@ -389,7 +389,7 @@ pub struct ReportNotSerializable {
 pub struct NotFound;
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
-#[diagnostic(category = "format", message = "Format with errors is disabled.")]
+#[diagnostic(category = "format", message = "Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithError' option.")]
 pub struct FormatWithErrorsDisabled;
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
