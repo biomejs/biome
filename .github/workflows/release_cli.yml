@@ -93,7 +93,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install Rust toolchain
         run: rustup target add ${{ matrix.target }}
@@ -103,7 +103,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
-        
+
       - name: Install musl toolchain
         if: matrix.code-target == 'linux-x64-musl' || matrix.code-target == 'linux-arm64-musl'
         run: |
@@ -199,7 +199,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           registry-url: 'https://registry.npmjs.org'
 
       - name: Set release infos
