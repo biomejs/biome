@@ -130,6 +130,18 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Parser
 
+#### Bug fixes
+- Fix [#1728]([text](https://github.com/biomejs/biome/issues/1728)). Correctly parse the global declaration when the `}` token is on the line following the `global` keyword.
+
+  Now the following code is correctly parsed:
+
+  ```ts
+  declare global 
+  { }
+  ```
+
+  Contributed by @ah-yu 
+
 ## 1.5.3 (2024-01-22)
 
 ### LSP
