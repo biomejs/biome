@@ -71,15 +71,37 @@ JsModule {
                 },
             },
         },
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@104..113 "declare" [Newline("\n")] [Whitespace(" ")],
+            declaration: TsGlobalDeclaration {
+                global_token: GLOBAL_KW@113..120 "global" [] [Whitespace(" ")],
+                body: TsModuleBlock {
+                    l_curly_token: L_CURLY@120..121 "{" [] [],
+                    items: JsModuleItemList [],
+                    r_curly_token: R_CURLY@121..122 "}" [] [],
+                },
+            },
+        },
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@122..131 "declare" [Newline("\n")] [Whitespace(" ")],
+            declaration: TsGlobalDeclaration {
+                global_token: GLOBAL_KW@131..137 "global" [] [],
+                body: TsModuleBlock {
+                    l_curly_token: L_CURLY@137..140 "{" [Newline("\n")] [Whitespace(" ")],
+                    items: JsModuleItemList [],
+                    r_curly_token: R_CURLY@140..141 "}" [] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@104..105 "" [Newline("\n")] [],
+    eof_token: EOF@141..142 "" [Newline("\n")] [],
 }
 
-0: JS_MODULE@0..105
+0: JS_MODULE@0..142
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..104
+  3: JS_MODULE_ITEM_LIST@0..141
     0: TS_DECLARE_STATEMENT@0..66
       0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
       1: TS_EXTERNAL_MODULE_DECLARATION@8..66
@@ -126,4 +148,20 @@ JsModule {
                 1: JS_MODULE_ITEM_LIST@101..101
                 2: R_CURLY@101..102 "}" [] []
           2: R_CURLY@102..104 "}" [Newline("\n")] []
-  4: EOF@104..105 "" [Newline("\n")] []
+    2: TS_DECLARE_STATEMENT@104..122
+      0: DECLARE_KW@104..113 "declare" [Newline("\n")] [Whitespace(" ")]
+      1: TS_GLOBAL_DECLARATION@113..122
+        0: GLOBAL_KW@113..120 "global" [] [Whitespace(" ")]
+        1: TS_MODULE_BLOCK@120..122
+          0: L_CURLY@120..121 "{" [] []
+          1: JS_MODULE_ITEM_LIST@121..121
+          2: R_CURLY@121..122 "}" [] []
+    3: TS_DECLARE_STATEMENT@122..141
+      0: DECLARE_KW@122..131 "declare" [Newline("\n")] [Whitespace(" ")]
+      1: TS_GLOBAL_DECLARATION@131..141
+        0: GLOBAL_KW@131..137 "global" [] []
+        1: TS_MODULE_BLOCK@137..141
+          0: L_CURLY@137..140 "{" [Newline("\n")] [Whitespace(" ")]
+          1: JS_MODULE_ITEM_LIST@140..140
+          2: R_CURLY@140..141 "}" [] []
+  4: EOF@141..142 "" [Newline("\n")] []

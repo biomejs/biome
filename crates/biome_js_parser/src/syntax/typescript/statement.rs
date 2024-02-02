@@ -224,9 +224,6 @@ pub(crate) fn parse_ts_type_alias_declaration(p: &mut JsParser) -> ParsedSyntax 
 
 // test ts ts_declare_const_initializer
 // declare module test { const X; }
-// declare global {}
-// declare global
-// { }
 pub(crate) fn parse_ts_declare_statement(p: &mut JsParser) -> ParsedSyntax {
     if !is_at_ts_declare_statement(p) {
         return Absent;
@@ -528,6 +525,9 @@ fn parse_ts_module_block(p: &mut JsParser) -> ParsedSyntax {
 //  global
 //  { }
 // }
+// declare global {}
+// declare global
+// { }
 //
 // test ts ts_global_variable
 // let global;
