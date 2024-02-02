@@ -300,7 +300,7 @@ pub enum MigrateSubCommand {
 }
 
 impl MigrateSubCommand {
-    pub const fn is_prettier(self) -> bool {
+    pub const fn is_prettier(&self) -> bool {
         matches!(self, MigrateSubCommand::Prettier)
     }
 }

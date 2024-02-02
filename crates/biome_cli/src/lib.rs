@@ -40,7 +40,6 @@ pub use service::{open_transport, SocketTransport};
 
 #[cfg(debug_assertions)]
 pub use crate::commands::daemon::biome_log_dir;
-use crate::commands::MigrateSubCommand;
 
 pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,
@@ -197,7 +196,7 @@ impl<'app> CliSession<'app> {
                 cli_options,
                 write,
                 sub_command
-                    .map(MigrateSubCommand::is_prettier)
+                    .map(|sub_command| sub_command.is_prettier())
                     .unwrap_or_default(),
             ),
             BiomeCommand::RunServer {
