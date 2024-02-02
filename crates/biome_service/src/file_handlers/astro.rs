@@ -12,14 +12,17 @@ use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::{FileSource, NodeCache};
 use lazy_static::lazy_static;
-use regex::Regex;
+use regex::{Regex, RegexBuilder};
 use tracing::{debug, error, info};
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub(crate) struct AstroFileHandler;
 
 lazy_static! {
-    pub static ref ASTRO_FENCE: Regex = Regex::new(r#"---\s*\n"#).unwrap();
+    pub static ref ASTRO_FENCE: Regex = RegexBuilder::new(r#"^---\s*$"#)
+        .multi_line(true)
+        .build()
+        .unwrap();
 }
 
 impl ExtensionHandler for AstroFileHandler {
