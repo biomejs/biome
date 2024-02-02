@@ -77,7 +77,7 @@ pub(crate) fn format_with_guard<'ctx>(
                 if let (Some(start), Some(end)) = (matches.next(), matches.next()) {
                     output = format!(
                         "{}{}{}",
-                        &input[..start.end()],
+                        &input[..start.end() + 1],
                         output.as_str(),
                         &input[end.start()..]
                     );
