@@ -153,6 +153,11 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     console.log(markup!{
                         <Info>"The configuration "<Emphasis>{{configuration_file_path.display().to_string()}}</Emphasis>" has been successfully migrated."</Info>
                     });
+                    if prettier_configuration.has_ignore_file() {
+                        console.log(markup!{
+                            <Warn>"Please make sure that the globs of the "<Emphasis>".prettierignore"</Emphasis>" file still work in Biome. Prettier's globs use git globs, while Biome's globs use uni-style globs. They both seem similar, but their semantics differ."</Warn>
+                        })
+                    }
                 } else {
                     let file_name = configuration_file_path.display().to_string();
                     let diagnostic = MigrateDiffDiagnostic {
