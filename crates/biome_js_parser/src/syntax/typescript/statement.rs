@@ -525,6 +525,8 @@ fn parse_ts_module_block(p: &mut JsParser) -> ParsedSyntax {
 //  global
 //  { }
 // }
+// declare global
+// { }
 //
 // test ts ts_global_variable
 // let global;
