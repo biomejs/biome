@@ -138,6 +138,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```ts
   declare global 
   { }
+
+  declare module foo {
+    global 
+    { }
+  }
   ```
 
   Contributed by @ah-yu 
