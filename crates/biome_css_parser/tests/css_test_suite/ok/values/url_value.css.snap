@@ -69,612 +69,662 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@4..5 "{" [] [],
-                declarations: CssDeclarationList [
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@5..17 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@17..19 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@19..22 "url" [] [],
-                                    l_paren_token: L_PAREN@22..23 "(" [] [],
-                                    value: CssUrlValueRaw {
-                                        value_token: CSS_URL_VALUE_RAW_LITERAL@23..52 "https://example.com/image.png" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@52..53 ")" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@5..17 "background" [Newline("\n"), Whitespace("\t")] [],
                                 },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@53..54 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@54..66 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@66..68 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@68..71 "URL" [] [],
-                                    l_paren_token: L_PAREN@71..72 "(" [] [],
-                                    value: CssUrlValueRaw {
-                                        value_token: CSS_URL_VALUE_RAW_LITERAL@72..101 "https://example.com/image.png" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@101..102 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@102..103 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@103..115 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@115..117 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@117..121 "\\URL" [] [],
-                                    l_paren_token: L_PAREN@121..122 "(" [] [],
-                                    value: CssUrlValueRaw {
-                                        value_token: CSS_URL_VALUE_RAW_LITERAL@122..151 "https://example.com/image.png" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@151..152 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@152..153 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@153..165 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@165..167 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@167..170 "url" [] [],
-                                    l_paren_token: L_PAREN@170..171 "(" [] [],
-                                    value: CssString {
-                                        value_token: CSS_STRING_LITERAL@171..202 "\"https://example.com/image.png\"" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@202..203 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@203..204 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@204..216 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@216..218 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@218..221 "url" [] [],
-                                    l_paren_token: L_PAREN@221..222 "(" [] [],
-                                    value: CssString {
-                                        value_token: CSS_STRING_LITERAL@222..253 "'https://example.com/image.png'" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@253..254 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@254..255 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@255..267 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@267..269 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@269..272 "URL" [] [],
-                                    l_paren_token: L_PAREN@272..273 "(" [] [],
-                                    value: CssString {
-                                        value_token: CSS_STRING_LITERAL@273..304 "'https://example.com/image.png'" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@304..305 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@305..306 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@306..318 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@318..320 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@320..324 "\\URL" [] [],
-                                    l_paren_token: L_PAREN@324..325 "(" [] [],
-                                    value: CssString {
-                                        value_token: CSS_STRING_LITERAL@325..356 "'https://example.com/image.png'" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@356..357 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@357..358 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@358..370 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@370..372 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@372..375 "url" [] [],
-                                    l_paren_token: L_PAREN@375..376 "(" [] [],
-                                    value: CssUrlValueRaw {
-                                        value_token: CSS_URL_VALUE_RAW_LITERAL@376..404 "data:image/png;base64,iRxVB0" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@404..405 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@405..406 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@406..418 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@418..420 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@420..423 "url" [] [],
-                                    l_paren_token: L_PAREN@423..424 "(" [] [],
-                                    value: CssUrlValueRaw {
-                                        value_token: CSS_URL_VALUE_RAW_LITERAL@424..436 "#IDofSVGpath" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@436..437 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@437..438 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@438..522 "background" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("/* A <url-modifier> i ..."), Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@522..524 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@524..527 "url" [] [],
-                                    l_paren_token: L_PAREN@527..528 "(" [] [],
-                                    value: CssString {
-                                        value_token: CSS_STRING_LITERAL@528..547 "\"//aa.com/img.svg\"" [] [Whitespace(" ")],
-                                    },
-                                    modifiers: CssUrlModifierList [
-                                        CssIdentifier {
-                                            value_token: IDENT@547..555 "prefetch" [] [],
+                                colon_token: COLON@17..19 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@19..22 "url" [] [],
+                                        l_paren_token: L_PAREN@22..23 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@23..52 "https://example.com/image.png" [] [],
                                         },
-                                    ],
-                                    r_paren_token: R_PAREN@555..556 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@556..557 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@557..569 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@569..571 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@571..574 "url" [] [],
-                                    l_paren_token: L_PAREN@574..575 "(" [] [],
-                                    value: CssString {
-                                        value_token: CSS_STRING_LITERAL@575..594 "\"//aa.com/img.svg\"" [] [Whitespace(" ")],
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@52..53 ")" [] [],
                                     },
-                                    modifiers: CssUrlModifierList [
-                                        CssIdentifier {
-                                            value_token: IDENT@594..598 "foo" [] [Whitespace(" ")],
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@53..54 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@54..66 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@66..68 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@68..71 "URL" [] [],
+                                        l_paren_token: L_PAREN@71..72 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@72..101 "https://example.com/image.png" [] [],
                                         },
-                                        CssIdentifier {
-                                            value_token: IDENT@598..602 "bar" [] [Whitespace(" ")],
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@101..102 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@102..103 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@103..115 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@115..117 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@117..121 "\\URL" [] [],
+                                        l_paren_token: L_PAREN@121..122 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@122..151 "https://example.com/image.png" [] [],
                                         },
-                                        CssIdentifier {
-                                            value_token: IDENT@602..606 "baz" [] [Whitespace(" ")],
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@151..152 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@152..153 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@153..165 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@165..167 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@167..170 "url" [] [],
+                                        l_paren_token: L_PAREN@170..171 "(" [] [],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@171..202 "\"https://example.com/image.png\"" [] [],
                                         },
-                                        CssFunction {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@606..610 "func" [] [],
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@202..203 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@203..204 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@204..216 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@216..218 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@218..221 "url" [] [],
+                                        l_paren_token: L_PAREN@221..222 "(" [] [],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@222..253 "'https://example.com/image.png'" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@253..254 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@254..255 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@255..267 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@267..269 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@269..272 "URL" [] [],
+                                        l_paren_token: L_PAREN@272..273 "(" [] [],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@273..304 "'https://example.com/image.png'" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@304..305 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@305..306 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@306..318 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@318..320 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@320..324 "\\URL" [] [],
+                                        l_paren_token: L_PAREN@324..325 "(" [] [],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@325..356 "'https://example.com/image.png'" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@356..357 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@357..358 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@358..370 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@370..372 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@372..375 "url" [] [],
+                                        l_paren_token: L_PAREN@375..376 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@376..404 "data:image/png;base64,iRxVB0" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@404..405 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@405..406 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@406..418 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@418..420 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@420..423 "url" [] [],
+                                        l_paren_token: L_PAREN@423..424 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@424..436 "#IDofSVGpath" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@436..437 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@437..438 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@438..522 "background" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("/* A <url-modifier> i ..."), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@522..524 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@524..527 "url" [] [],
+                                        l_paren_token: L_PAREN@527..528 "(" [] [],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@528..547 "\"//aa.com/img.svg\"" [] [Whitespace(" ")],
+                                        },
+                                        modifiers: CssUrlModifierList [
+                                            CssIdentifier {
+                                                value_token: IDENT@547..555 "prefetch" [] [],
                                             },
-                                            l_paren_token: L_PAREN@610..611 "(" [] [],
-                                            items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssIdentifier {
-                                                                value_token: IDENT@611..615 "test" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                        ],
+                                        r_paren_token: R_PAREN@555..556 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@556..557 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@557..569 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@569..571 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@571..574 "url" [] [],
+                                        l_paren_token: L_PAREN@574..575 "(" [] [],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@575..594 "\"//aa.com/img.svg\"" [] [Whitespace(" ")],
+                                        },
+                                        modifiers: CssUrlModifierList [
+                                            CssIdentifier {
+                                                value_token: IDENT@594..598 "foo" [] [Whitespace(" ")],
+                                            },
+                                            CssIdentifier {
+                                                value_token: IDENT@598..602 "bar" [] [Whitespace(" ")],
+                                            },
+                                            CssIdentifier {
+                                                value_token: IDENT@602..606 "baz" [] [Whitespace(" ")],
+                                            },
+                                            CssFunction {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@606..610 "func" [] [],
                                                 },
-                                            ],
-                                            r_paren_token: R_PAREN@615..616 ")" [] [],
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@616..617 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@617..618 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@618..630 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@630..632 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@632..635 "url" [] [],
-                                    l_paren_token: L_PAREN@635..636 "(" [] [],
-                                    value: CssString {
-                                        value_token: CSS_STRING_LITERAL@636..667 "\"http://example.com/image.svg\"" [] [Whitespace(" ")],
-                                    },
-                                    modifiers: CssUrlModifierList [
-                                        CssFunction {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@667..672 "param" [] [],
-                                            },
-                                            l_paren_token: L_PAREN@672..673 "(" [] [],
-                                            items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssDashedIdentifier {
-                                                                value_token: IDENT@673..681 "--color" [] [Whitespace(" ")],
-                                                            },
-                                                            CssFunction {
-                                                                name: CssIdentifier {
-                                                                    value_token: IDENT@681..684 "var" [] [],
+                                                l_paren_token: L_PAREN@610..611 "(" [] [],
+                                                items: CssParameterList [
+                                                    CssParameter {
+                                                        any_css_expression: CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@611..615 "test" [] [],
                                                                 },
-                                                                l_paren_token: L_PAREN@684..685 "(" [] [],
-                                                                items: CssParameterList [
-                                                                    CssParameter {
-                                                                        any_css_expression: CssListOfComponentValuesExpression {
-                                                                            css_component_value_list: CssComponentValueList [
-                                                                                CssDashedIdentifier {
-                                                                                    value_token: IDENT@685..700 "--primary-color" [] [],
-                                                                                },
-                                                                            ],
-                                                                        },
-                                                                    },
-                                                                ],
-                                                                r_paren_token: R_PAREN@700..701 ")" [] [],
-                                                            },
-                                                        ],
+                                                            ],
+                                                        },
                                                     },
-                                                },
-                                            ],
-                                            r_paren_token: R_PAREN@701..702 ")" [] [],
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@702..703 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@703..704 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@704..717 "background" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@717..719 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@719..722 "url" [] [],
-                                    l_paren_token: L_PAREN@722..723 "(" [] [],
-                                    value: missing (optional),
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@723..724 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@724..725 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@725..737 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@737..739 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@739..742 "url" [] [],
-                                    l_paren_token: L_PAREN@742..743 "(" [] [],
-                                    value: CssString {
-                                        value_token: CSS_STRING_LITERAL@743..745 "\"\"" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@745..746 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@746..747 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@747..759 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@759..761 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@761..764 "url" [] [],
-                                    l_paren_token: L_PAREN@764..765 "(" [] [],
-                                    value: CssString {
-                                        value_token: CSS_STRING_LITERAL@765..767 "''" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@767..768 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@768..769 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@769..777 "--foo" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@777..779 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssString {
-                                    value_token: CSS_STRING_LITERAL@779..815 "\"http://www.example.com/pinkish.gif\"" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@815..816 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@816..829 "background" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@829..831 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: SRC_KW@831..834 "src" [] [],
-                                    l_paren_token: L_PAREN@834..835 "(" [] [],
-                                    value: CssString {
-                                        value_token: CSS_STRING_LITERAL@835..871 "\"http://www.example.com/pinkish.gif\"" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@871..872 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@872..873 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@873..885 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@885..887 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: SRC_KW@887..890 "SRC" [] [],
-                                    l_paren_token: L_PAREN@890..891 "(" [] [],
-                                    value: CssString {
-                                        value_token: CSS_STRING_LITERAL@891..927 "\"http://www.example.com/pinkish.gif\"" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@927..928 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@928..929 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@929..941 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@941..943 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: SRC_KW@943..946 "src" [] [],
-                                    l_paren_token: L_PAREN@946..947 "(" [] [],
-                                    value: missing (optional),
-                                    modifiers: CssUrlModifierList [
-                                        CssFunction {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@947..950 "var" [] [],
+                                                ],
+                                                r_paren_token: R_PAREN@615..616 ")" [] [],
                                             },
-                                            l_paren_token: L_PAREN@950..951 "(" [] [],
-                                            items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssDashedIdentifier {
-                                                                value_token: IDENT@951..956 "--foo" [] [],
-                                                            },
-                                                        ],
-                                                    },
-                                                },
-                                            ],
-                                            r_paren_token: R_PAREN@956..957 ")" [] [],
+                                        ],
+                                        r_paren_token: R_PAREN@616..617 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@617..618 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@618..630 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@630..632 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@632..635 "url" [] [],
+                                        l_paren_token: L_PAREN@635..636 "(" [] [],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@636..667 "\"http://example.com/image.svg\"" [] [Whitespace(" ")],
                                         },
-                                    ],
-                                    r_paren_token: R_PAREN@957..958 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@958..959 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@959..971 "background" [Newline("\n"), Whitespace("\t")] [],
-                            },
-                            colon_token: COLON@971..973 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@973..976 "url" [] [],
-                                    l_paren_token: L_PAREN@976..980 "(" [] [Whitespace("   ")],
-                                    value: CssUrlValueRaw {
-                                        value_token: CSS_URL_VALUE_RAW_LITERAL@980..1012 "https://example.com/image.png   " [] [],
+                                        modifiers: CssUrlModifierList [
+                                            CssFunction {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@667..672 "param" [] [],
+                                                },
+                                                l_paren_token: L_PAREN@672..673 "(" [] [],
+                                                items: CssParameterList [
+                                                    CssParameter {
+                                                        any_css_expression: CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssDashedIdentifier {
+                                                                    value_token: IDENT@673..681 "--color" [] [Whitespace(" ")],
+                                                                },
+                                                                CssFunction {
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@681..684 "var" [] [],
+                                                                    },
+                                                                    l_paren_token: L_PAREN@684..685 "(" [] [],
+                                                                    items: CssParameterList [
+                                                                        CssParameter {
+                                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                                css_component_value_list: CssComponentValueList [
+                                                                                    CssDashedIdentifier {
+                                                                                        value_token: IDENT@685..700 "--primary-color" [] [],
+                                                                                    },
+                                                                                ],
+                                                                            },
+                                                                        },
+                                                                    ],
+                                                                    r_paren_token: R_PAREN@700..701 ")" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    },
+                                                ],
+                                                r_paren_token: R_PAREN@701..702 ")" [] [],
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@702..703 ")" [] [],
                                     },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@1012..1013 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@1013..1014 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@1014..1026 "background" [Newline("\n"), Whitespace("\t")] [],
+                                ],
                             },
-                            colon_token: COLON@1026..1028 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@1028..1032 "u\\rl" [] [],
-                                    l_paren_token: L_PAREN@1032..1036 "(" [] [Whitespace("   ")],
-                                    value: CssUrlValueRaw {
-                                        value_token: CSS_URL_VALUE_RAW_LITERAL@1036..1068 "https://example.com/image.png   " [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@1068..1069 ")" [] [],
-                                },
-                            ],
+                            important: missing (optional),
                         },
-                        important: missing (optional),
+                        semicolon_token: SEMICOLON@703..704 ";" [] [],
                     },
-                    SEMICOLON@1069..1070 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@1070..1082 "background" [Newline("\n"), Whitespace("\t")] [],
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@704..717 "background" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@717..719 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@719..722 "url" [] [],
+                                        l_paren_token: L_PAREN@722..723 "(" [] [],
+                                        value: missing (optional),
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@723..724 ")" [] [],
+                                    },
+                                ],
                             },
-                            colon_token: COLON@1082..1084 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@1084..1087 "url" [] [],
-                                    l_paren_token: L_PAREN@1087..1088 "(" [] [],
-                                    value: CssUrlValueRaw {
-                                        value_token: CSS_URL_VALUE_RAW_LITERAL@1088..1121 "https://example.com/image.png\n\t" [Newline("\n"), Whitespace("\t")] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@1121..1122 ")" [] [],
-                                },
-                            ],
+                            important: missing (optional),
                         },
-                        important: missing (optional),
+                        semicolon_token: SEMICOLON@724..725 ";" [] [],
                     },
-                    SEMICOLON@1122..1123 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@1123..1135 "background" [Newline("\n"), Whitespace("\t")] [],
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@725..737 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@737..739 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@739..742 "url" [] [],
+                                        l_paren_token: L_PAREN@742..743 "(" [] [],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@743..745 "\"\"" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@745..746 ")" [] [],
+                                    },
+                                ],
                             },
-                            colon_token: COLON@1135..1137 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@1137..1140 "url" [] [],
-                                    l_paren_token: L_PAREN@1140..1141 "(" [] [],
-                                    value: CssUrlValueRaw {
-                                        value_token: CSS_URL_VALUE_RAW_LITERAL@1141..1178 "https://example.com/image.png\n\n\n\t" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@1178..1179 ")" [] [],
-                                },
-                            ],
+                            important: missing (optional),
                         },
-                        important: missing (optional),
+                        semicolon_token: SEMICOLON@746..747 ";" [] [],
                     },
-                    SEMICOLON@1179..1180 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@1180..1192 "background" [Newline("\n"), Whitespace("\t")] [],
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@747..759 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@759..761 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@761..764 "url" [] [],
+                                        l_paren_token: L_PAREN@764..765 "(" [] [],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@765..767 "''" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@767..768 ")" [] [],
+                                    },
+                                ],
                             },
-                            colon_token: COLON@1192..1194 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@1194..1197 "URL" [] [],
-                                    l_paren_token: L_PAREN@1197..1198 "(" [] [],
-                                    value: CssUrlValueRaw {
-                                        value_token: CSS_URL_VALUE_RAW_LITERAL@1198..1229 "https://example.com/ima\\)ge.png" [] [],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@1229..1230 ")" [] [],
-                                },
-                            ],
+                            important: missing (optional),
                         },
-                        important: missing (optional),
+                        semicolon_token: SEMICOLON@768..769 ";" [] [],
                     },
-                    SEMICOLON@1230..1231 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@1231..1243 "background" [Newline("\n"), Whitespace("\t")] [],
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@769..777 "--foo" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@777..779 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@779..815 "\"http://www.example.com/pinkish.gif\"" [] [],
+                                    },
+                                ],
                             },
-                            colon_token: COLON@1243..1245 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssUrlFunction {
-                                    name: URL_KW@1245..1248 "url" [] [],
-                                    l_paren_token: L_PAREN@1248..1252 "(" [] [Whitespace("   ")],
-                                    value: CssString {
-                                        value_token: CSS_STRING_LITERAL@1252..1286 "\"https://example.com/image.png\"" [] [Whitespace("   ")],
-                                    },
-                                    modifiers: CssUrlModifierList [],
-                                    r_paren_token: R_PAREN@1286..1287 ")" [] [],
-                                },
-                            ],
+                            important: missing (optional),
                         },
-                        important: missing (optional),
+                        semicolon_token: SEMICOLON@815..816 ";" [] [],
                     },
-                    SEMICOLON@1287..1288 ";" [] [],
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@816..829 "background" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@829..831 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: SRC_KW@831..834 "src" [] [],
+                                        l_paren_token: L_PAREN@834..835 "(" [] [],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@835..871 "\"http://www.example.com/pinkish.gif\"" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@871..872 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@872..873 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@873..885 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@885..887 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: SRC_KW@887..890 "SRC" [] [],
+                                        l_paren_token: L_PAREN@890..891 "(" [] [],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@891..927 "\"http://www.example.com/pinkish.gif\"" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@927..928 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@928..929 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@929..941 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@941..943 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: SRC_KW@943..946 "src" [] [],
+                                        l_paren_token: L_PAREN@946..947 "(" [] [],
+                                        value: missing (optional),
+                                        modifiers: CssUrlModifierList [
+                                            CssFunction {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@947..950 "var" [] [],
+                                                },
+                                                l_paren_token: L_PAREN@950..951 "(" [] [],
+                                                items: CssParameterList [
+                                                    CssParameter {
+                                                        any_css_expression: CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssDashedIdentifier {
+                                                                    value_token: IDENT@951..956 "--foo" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    },
+                                                ],
+                                                r_paren_token: R_PAREN@956..957 ")" [] [],
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@957..958 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@958..959 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@959..971 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@971..973 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@973..976 "url" [] [],
+                                        l_paren_token: L_PAREN@976..980 "(" [] [Whitespace("   ")],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@980..1012 "https://example.com/image.png   " [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@1012..1013 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1013..1014 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1014..1026 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1026..1028 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@1028..1032 "u\\rl" [] [],
+                                        l_paren_token: L_PAREN@1032..1036 "(" [] [Whitespace("   ")],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@1036..1068 "https://example.com/image.png   " [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@1068..1069 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1069..1070 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1070..1082 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1082..1084 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@1084..1087 "url" [] [],
+                                        l_paren_token: L_PAREN@1087..1088 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@1088..1121 "https://example.com/image.png\n\t" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@1121..1122 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1122..1123 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1123..1135 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1135..1137 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@1137..1140 "url" [] [],
+                                        l_paren_token: L_PAREN@1140..1141 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@1141..1178 "https://example.com/image.png\n\n\n\t" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@1178..1179 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1179..1180 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1180..1192 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1192..1194 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@1194..1197 "URL" [] [],
+                                        l_paren_token: L_PAREN@1197..1198 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@1198..1229 "https://example.com/ima\\)ge.png" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@1229..1230 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1230..1231 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1231..1243 "background" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1243..1245 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@1245..1248 "url" [] [],
+                                        l_paren_token: L_PAREN@1248..1252 "(" [] [Whitespace("   ")],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@1252..1286 "\"https://example.com/image.png\"" [] [Whitespace("   ")],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@1286..1287 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1287..1288 ";" [] [],
+                    },
                 ],
                 r_curly_token: R_CURLY@1288..1290 "}" [Newline("\n")] [],
             },
@@ -699,429 +749,454 @@ CssRoot {
             1: CSS_IDENTIFIER@0..4
               0: IDENT@0..4 "div" [] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@4..4
-      1: CSS_DECLARATION_LIST_BLOCK@4..1290
+      1: CSS_DECLARATION_OR_RULE_BLOCK@4..1290
         0: L_CURLY@4..5 "{" [] []
-        1: CSS_DECLARATION_LIST@5..1288
-          0: CSS_DECLARATION@5..53
-            0: CSS_GENERIC_PROPERTY@5..53
-              0: CSS_IDENTIFIER@5..17
-                0: IDENT@5..17 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@17..19 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@19..53
-                0: CSS_URL_FUNCTION@19..53
-                  0: URL_KW@19..22 "url" [] []
-                  1: L_PAREN@22..23 "(" [] []
-                  2: CSS_URL_VALUE_RAW@23..52
-                    0: CSS_URL_VALUE_RAW_LITERAL@23..52 "https://example.com/image.png" [] []
-                  3: CSS_URL_MODIFIER_LIST@52..52
-                  4: R_PAREN@52..53 ")" [] []
-            1: (empty)
-          1: SEMICOLON@53..54 ";" [] []
-          2: CSS_DECLARATION@54..102
-            0: CSS_GENERIC_PROPERTY@54..102
-              0: CSS_IDENTIFIER@54..66
-                0: IDENT@54..66 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@66..68 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@68..102
-                0: CSS_URL_FUNCTION@68..102
-                  0: URL_KW@68..71 "URL" [] []
-                  1: L_PAREN@71..72 "(" [] []
-                  2: CSS_URL_VALUE_RAW@72..101
-                    0: CSS_URL_VALUE_RAW_LITERAL@72..101 "https://example.com/image.png" [] []
-                  3: CSS_URL_MODIFIER_LIST@101..101
-                  4: R_PAREN@101..102 ")" [] []
-            1: (empty)
-          3: SEMICOLON@102..103 ";" [] []
-          4: CSS_DECLARATION@103..152
-            0: CSS_GENERIC_PROPERTY@103..152
-              0: CSS_IDENTIFIER@103..115
-                0: IDENT@103..115 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@115..117 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@117..152
-                0: CSS_URL_FUNCTION@117..152
-                  0: URL_KW@117..121 "\\URL" [] []
-                  1: L_PAREN@121..122 "(" [] []
-                  2: CSS_URL_VALUE_RAW@122..151
-                    0: CSS_URL_VALUE_RAW_LITERAL@122..151 "https://example.com/image.png" [] []
-                  3: CSS_URL_MODIFIER_LIST@151..151
-                  4: R_PAREN@151..152 ")" [] []
-            1: (empty)
-          5: SEMICOLON@152..153 ";" [] []
-          6: CSS_DECLARATION@153..203
-            0: CSS_GENERIC_PROPERTY@153..203
-              0: CSS_IDENTIFIER@153..165
-                0: IDENT@153..165 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@165..167 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@167..203
-                0: CSS_URL_FUNCTION@167..203
-                  0: URL_KW@167..170 "url" [] []
-                  1: L_PAREN@170..171 "(" [] []
-                  2: CSS_STRING@171..202
-                    0: CSS_STRING_LITERAL@171..202 "\"https://example.com/image.png\"" [] []
-                  3: CSS_URL_MODIFIER_LIST@202..202
-                  4: R_PAREN@202..203 ")" [] []
-            1: (empty)
-          7: SEMICOLON@203..204 ";" [] []
-          8: CSS_DECLARATION@204..254
-            0: CSS_GENERIC_PROPERTY@204..254
-              0: CSS_IDENTIFIER@204..216
-                0: IDENT@204..216 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@216..218 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@218..254
-                0: CSS_URL_FUNCTION@218..254
-                  0: URL_KW@218..221 "url" [] []
-                  1: L_PAREN@221..222 "(" [] []
-                  2: CSS_STRING@222..253
-                    0: CSS_STRING_LITERAL@222..253 "'https://example.com/image.png'" [] []
-                  3: CSS_URL_MODIFIER_LIST@253..253
-                  4: R_PAREN@253..254 ")" [] []
-            1: (empty)
-          9: SEMICOLON@254..255 ";" [] []
-          10: CSS_DECLARATION@255..305
-            0: CSS_GENERIC_PROPERTY@255..305
-              0: CSS_IDENTIFIER@255..267
-                0: IDENT@255..267 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@267..269 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@269..305
-                0: CSS_URL_FUNCTION@269..305
-                  0: URL_KW@269..272 "URL" [] []
-                  1: L_PAREN@272..273 "(" [] []
-                  2: CSS_STRING@273..304
-                    0: CSS_STRING_LITERAL@273..304 "'https://example.com/image.png'" [] []
-                  3: CSS_URL_MODIFIER_LIST@304..304
-                  4: R_PAREN@304..305 ")" [] []
-            1: (empty)
-          11: SEMICOLON@305..306 ";" [] []
-          12: CSS_DECLARATION@306..357
-            0: CSS_GENERIC_PROPERTY@306..357
-              0: CSS_IDENTIFIER@306..318
-                0: IDENT@306..318 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@318..320 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@320..357
-                0: CSS_URL_FUNCTION@320..357
-                  0: URL_KW@320..324 "\\URL" [] []
-                  1: L_PAREN@324..325 "(" [] []
-                  2: CSS_STRING@325..356
-                    0: CSS_STRING_LITERAL@325..356 "'https://example.com/image.png'" [] []
-                  3: CSS_URL_MODIFIER_LIST@356..356
-                  4: R_PAREN@356..357 ")" [] []
-            1: (empty)
-          13: SEMICOLON@357..358 ";" [] []
-          14: CSS_DECLARATION@358..405
-            0: CSS_GENERIC_PROPERTY@358..405
-              0: CSS_IDENTIFIER@358..370
-                0: IDENT@358..370 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@370..372 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@372..405
-                0: CSS_URL_FUNCTION@372..405
-                  0: URL_KW@372..375 "url" [] []
-                  1: L_PAREN@375..376 "(" [] []
-                  2: CSS_URL_VALUE_RAW@376..404
-                    0: CSS_URL_VALUE_RAW_LITERAL@376..404 "data:image/png;base64,iRxVB0" [] []
-                  3: CSS_URL_MODIFIER_LIST@404..404
-                  4: R_PAREN@404..405 ")" [] []
-            1: (empty)
-          15: SEMICOLON@405..406 ";" [] []
-          16: CSS_DECLARATION@406..437
-            0: CSS_GENERIC_PROPERTY@406..437
-              0: CSS_IDENTIFIER@406..418
-                0: IDENT@406..418 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@418..420 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@420..437
-                0: CSS_URL_FUNCTION@420..437
-                  0: URL_KW@420..423 "url" [] []
-                  1: L_PAREN@423..424 "(" [] []
-                  2: CSS_URL_VALUE_RAW@424..436
-                    0: CSS_URL_VALUE_RAW_LITERAL@424..436 "#IDofSVGpath" [] []
-                  3: CSS_URL_MODIFIER_LIST@436..436
-                  4: R_PAREN@436..437 ")" [] []
-            1: (empty)
-          17: SEMICOLON@437..438 ";" [] []
-          18: CSS_DECLARATION@438..556
-            0: CSS_GENERIC_PROPERTY@438..556
-              0: CSS_IDENTIFIER@438..522
-                0: IDENT@438..522 "background" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("/* A <url-modifier> i ..."), Newline("\n"), Whitespace("\t")] []
-              1: COLON@522..524 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@524..556
-                0: CSS_URL_FUNCTION@524..556
-                  0: URL_KW@524..527 "url" [] []
-                  1: L_PAREN@527..528 "(" [] []
-                  2: CSS_STRING@528..547
-                    0: CSS_STRING_LITERAL@528..547 "\"//aa.com/img.svg\"" [] [Whitespace(" ")]
-                  3: CSS_URL_MODIFIER_LIST@547..555
-                    0: CSS_IDENTIFIER@547..555
-                      0: IDENT@547..555 "prefetch" [] []
-                  4: R_PAREN@555..556 ")" [] []
-            1: (empty)
-          19: SEMICOLON@556..557 ";" [] []
-          20: CSS_DECLARATION@557..617
-            0: CSS_GENERIC_PROPERTY@557..617
-              0: CSS_IDENTIFIER@557..569
-                0: IDENT@557..569 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@569..571 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@571..617
-                0: CSS_URL_FUNCTION@571..617
-                  0: URL_KW@571..574 "url" [] []
-                  1: L_PAREN@574..575 "(" [] []
-                  2: CSS_STRING@575..594
-                    0: CSS_STRING_LITERAL@575..594 "\"//aa.com/img.svg\"" [] [Whitespace(" ")]
-                  3: CSS_URL_MODIFIER_LIST@594..616
-                    0: CSS_IDENTIFIER@594..598
-                      0: IDENT@594..598 "foo" [] [Whitespace(" ")]
-                    1: CSS_IDENTIFIER@598..602
-                      0: IDENT@598..602 "bar" [] [Whitespace(" ")]
-                    2: CSS_IDENTIFIER@602..606
-                      0: IDENT@602..606 "baz" [] [Whitespace(" ")]
-                    3: CSS_FUNCTION@606..616
-                      0: CSS_IDENTIFIER@606..610
-                        0: IDENT@606..610 "func" [] []
-                      1: L_PAREN@610..611 "(" [] []
-                      2: CSS_PARAMETER_LIST@611..615
-                        0: CSS_PARAMETER@611..615
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@611..615
-                            0: CSS_COMPONENT_VALUE_LIST@611..615
-                              0: CSS_IDENTIFIER@611..615
-                                0: IDENT@611..615 "test" [] []
-                      3: R_PAREN@615..616 ")" [] []
-                  4: R_PAREN@616..617 ")" [] []
-            1: (empty)
-          21: SEMICOLON@617..618 ";" [] []
-          22: CSS_DECLARATION@618..703
-            0: CSS_GENERIC_PROPERTY@618..703
-              0: CSS_IDENTIFIER@618..630
-                0: IDENT@618..630 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@630..632 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@632..703
-                0: CSS_URL_FUNCTION@632..703
-                  0: URL_KW@632..635 "url" [] []
-                  1: L_PAREN@635..636 "(" [] []
-                  2: CSS_STRING@636..667
-                    0: CSS_STRING_LITERAL@636..667 "\"http://example.com/image.svg\"" [] [Whitespace(" ")]
-                  3: CSS_URL_MODIFIER_LIST@667..702
-                    0: CSS_FUNCTION@667..702
-                      0: CSS_IDENTIFIER@667..672
-                        0: IDENT@667..672 "param" [] []
-                      1: L_PAREN@672..673 "(" [] []
-                      2: CSS_PARAMETER_LIST@673..701
-                        0: CSS_PARAMETER@673..701
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@673..701
-                            0: CSS_COMPONENT_VALUE_LIST@673..701
-                              0: CSS_DASHED_IDENTIFIER@673..681
-                                0: IDENT@673..681 "--color" [] [Whitespace(" ")]
-                              1: CSS_FUNCTION@681..701
-                                0: CSS_IDENTIFIER@681..684
-                                  0: IDENT@681..684 "var" [] []
-                                1: L_PAREN@684..685 "(" [] []
-                                2: CSS_PARAMETER_LIST@685..700
-                                  0: CSS_PARAMETER@685..700
-                                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@685..700
-                                      0: CSS_COMPONENT_VALUE_LIST@685..700
-                                        0: CSS_DASHED_IDENTIFIER@685..700
-                                          0: IDENT@685..700 "--primary-color" [] []
-                                3: R_PAREN@700..701 ")" [] []
-                      3: R_PAREN@701..702 ")" [] []
-                  4: R_PAREN@702..703 ")" [] []
-            1: (empty)
-          23: SEMICOLON@703..704 ";" [] []
-          24: CSS_DECLARATION@704..724
-            0: CSS_GENERIC_PROPERTY@704..724
-              0: CSS_IDENTIFIER@704..717
-                0: IDENT@704..717 "background" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
-              1: COLON@717..719 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@719..724
-                0: CSS_URL_FUNCTION@719..724
-                  0: URL_KW@719..722 "url" [] []
-                  1: L_PAREN@722..723 "(" [] []
-                  2: (empty)
-                  3: CSS_URL_MODIFIER_LIST@723..723
-                  4: R_PAREN@723..724 ")" [] []
-            1: (empty)
-          25: SEMICOLON@724..725 ";" [] []
-          26: CSS_DECLARATION@725..746
-            0: CSS_GENERIC_PROPERTY@725..746
-              0: CSS_IDENTIFIER@725..737
-                0: IDENT@725..737 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@737..739 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@739..746
-                0: CSS_URL_FUNCTION@739..746
-                  0: URL_KW@739..742 "url" [] []
-                  1: L_PAREN@742..743 "(" [] []
-                  2: CSS_STRING@743..745
-                    0: CSS_STRING_LITERAL@743..745 "\"\"" [] []
-                  3: CSS_URL_MODIFIER_LIST@745..745
-                  4: R_PAREN@745..746 ")" [] []
-            1: (empty)
-          27: SEMICOLON@746..747 ";" [] []
-          28: CSS_DECLARATION@747..768
-            0: CSS_GENERIC_PROPERTY@747..768
-              0: CSS_IDENTIFIER@747..759
-                0: IDENT@747..759 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@759..761 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@761..768
-                0: CSS_URL_FUNCTION@761..768
-                  0: URL_KW@761..764 "url" [] []
-                  1: L_PAREN@764..765 "(" [] []
-                  2: CSS_STRING@765..767
-                    0: CSS_STRING_LITERAL@765..767 "''" [] []
-                  3: CSS_URL_MODIFIER_LIST@767..767
-                  4: R_PAREN@767..768 ")" [] []
-            1: (empty)
-          29: SEMICOLON@768..769 ";" [] []
-          30: CSS_DECLARATION@769..815
-            0: CSS_GENERIC_PROPERTY@769..815
-              0: CSS_IDENTIFIER@769..777
-                0: IDENT@769..777 "--foo" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
-              1: COLON@777..779 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@779..815
-                0: CSS_STRING@779..815
-                  0: CSS_STRING_LITERAL@779..815 "\"http://www.example.com/pinkish.gif\"" [] []
-            1: (empty)
-          31: SEMICOLON@815..816 ";" [] []
-          32: CSS_DECLARATION@816..872
-            0: CSS_GENERIC_PROPERTY@816..872
-              0: CSS_IDENTIFIER@816..829
-                0: IDENT@816..829 "background" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
-              1: COLON@829..831 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@831..872
-                0: CSS_URL_FUNCTION@831..872
-                  0: SRC_KW@831..834 "src" [] []
-                  1: L_PAREN@834..835 "(" [] []
-                  2: CSS_STRING@835..871
-                    0: CSS_STRING_LITERAL@835..871 "\"http://www.example.com/pinkish.gif\"" [] []
-                  3: CSS_URL_MODIFIER_LIST@871..871
-                  4: R_PAREN@871..872 ")" [] []
-            1: (empty)
-          33: SEMICOLON@872..873 ";" [] []
-          34: CSS_DECLARATION@873..928
-            0: CSS_GENERIC_PROPERTY@873..928
-              0: CSS_IDENTIFIER@873..885
-                0: IDENT@873..885 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@885..887 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@887..928
-                0: CSS_URL_FUNCTION@887..928
-                  0: SRC_KW@887..890 "SRC" [] []
-                  1: L_PAREN@890..891 "(" [] []
-                  2: CSS_STRING@891..927
-                    0: CSS_STRING_LITERAL@891..927 "\"http://www.example.com/pinkish.gif\"" [] []
-                  3: CSS_URL_MODIFIER_LIST@927..927
-                  4: R_PAREN@927..928 ")" [] []
-            1: (empty)
-          35: SEMICOLON@928..929 ";" [] []
-          36: CSS_DECLARATION@929..958
-            0: CSS_GENERIC_PROPERTY@929..958
-              0: CSS_IDENTIFIER@929..941
-                0: IDENT@929..941 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@941..943 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@943..958
-                0: CSS_URL_FUNCTION@943..958
-                  0: SRC_KW@943..946 "src" [] []
-                  1: L_PAREN@946..947 "(" [] []
-                  2: (empty)
-                  3: CSS_URL_MODIFIER_LIST@947..957
-                    0: CSS_FUNCTION@947..957
-                      0: CSS_IDENTIFIER@947..950
-                        0: IDENT@947..950 "var" [] []
-                      1: L_PAREN@950..951 "(" [] []
-                      2: CSS_PARAMETER_LIST@951..956
-                        0: CSS_PARAMETER@951..956
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@951..956
-                            0: CSS_COMPONENT_VALUE_LIST@951..956
-                              0: CSS_DASHED_IDENTIFIER@951..956
-                                0: IDENT@951..956 "--foo" [] []
-                      3: R_PAREN@956..957 ")" [] []
-                  4: R_PAREN@957..958 ")" [] []
-            1: (empty)
-          37: SEMICOLON@958..959 ";" [] []
-          38: CSS_DECLARATION@959..1013
-            0: CSS_GENERIC_PROPERTY@959..1013
-              0: CSS_IDENTIFIER@959..971
-                0: IDENT@959..971 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@971..973 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@973..1013
-                0: CSS_URL_FUNCTION@973..1013
-                  0: URL_KW@973..976 "url" [] []
-                  1: L_PAREN@976..980 "(" [] [Whitespace("   ")]
-                  2: CSS_URL_VALUE_RAW@980..1012
-                    0: CSS_URL_VALUE_RAW_LITERAL@980..1012 "https://example.com/image.png   " [] []
-                  3: CSS_URL_MODIFIER_LIST@1012..1012
-                  4: R_PAREN@1012..1013 ")" [] []
-            1: (empty)
-          39: SEMICOLON@1013..1014 ";" [] []
-          40: CSS_DECLARATION@1014..1069
-            0: CSS_GENERIC_PROPERTY@1014..1069
-              0: CSS_IDENTIFIER@1014..1026
-                0: IDENT@1014..1026 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@1026..1028 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@1028..1069
-                0: CSS_URL_FUNCTION@1028..1069
-                  0: URL_KW@1028..1032 "u\\rl" [] []
-                  1: L_PAREN@1032..1036 "(" [] [Whitespace("   ")]
-                  2: CSS_URL_VALUE_RAW@1036..1068
-                    0: CSS_URL_VALUE_RAW_LITERAL@1036..1068 "https://example.com/image.png   " [] []
-                  3: CSS_URL_MODIFIER_LIST@1068..1068
-                  4: R_PAREN@1068..1069 ")" [] []
-            1: (empty)
-          41: SEMICOLON@1069..1070 ";" [] []
-          42: CSS_DECLARATION@1070..1122
-            0: CSS_GENERIC_PROPERTY@1070..1122
-              0: CSS_IDENTIFIER@1070..1082
-                0: IDENT@1070..1082 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@1082..1084 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@1084..1122
-                0: CSS_URL_FUNCTION@1084..1122
-                  0: URL_KW@1084..1087 "url" [] []
-                  1: L_PAREN@1087..1088 "(" [] []
-                  2: CSS_URL_VALUE_RAW@1088..1121
-                    0: CSS_URL_VALUE_RAW_LITERAL@1088..1121 "https://example.com/image.png\n\t" [Newline("\n"), Whitespace("\t")] []
-                  3: CSS_URL_MODIFIER_LIST@1121..1121
-                  4: R_PAREN@1121..1122 ")" [] []
-            1: (empty)
-          43: SEMICOLON@1122..1123 ";" [] []
-          44: CSS_DECLARATION@1123..1179
-            0: CSS_GENERIC_PROPERTY@1123..1179
-              0: CSS_IDENTIFIER@1123..1135
-                0: IDENT@1123..1135 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@1135..1137 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@1137..1179
-                0: CSS_URL_FUNCTION@1137..1179
-                  0: URL_KW@1137..1140 "url" [] []
-                  1: L_PAREN@1140..1141 "(" [] []
-                  2: CSS_URL_VALUE_RAW@1141..1178
-                    0: CSS_URL_VALUE_RAW_LITERAL@1141..1178 "https://example.com/image.png\n\n\n\t" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] []
-                  3: CSS_URL_MODIFIER_LIST@1178..1178
-                  4: R_PAREN@1178..1179 ")" [] []
-            1: (empty)
-          45: SEMICOLON@1179..1180 ";" [] []
-          46: CSS_DECLARATION@1180..1230
-            0: CSS_GENERIC_PROPERTY@1180..1230
-              0: CSS_IDENTIFIER@1180..1192
-                0: IDENT@1180..1192 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@1192..1194 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@1194..1230
-                0: CSS_URL_FUNCTION@1194..1230
-                  0: URL_KW@1194..1197 "URL" [] []
-                  1: L_PAREN@1197..1198 "(" [] []
-                  2: CSS_URL_VALUE_RAW@1198..1229
-                    0: CSS_URL_VALUE_RAW_LITERAL@1198..1229 "https://example.com/ima\\)ge.png" [] []
-                  3: CSS_URL_MODIFIER_LIST@1229..1229
-                  4: R_PAREN@1229..1230 ")" [] []
-            1: (empty)
-          47: SEMICOLON@1230..1231 ";" [] []
-          48: CSS_DECLARATION@1231..1287
-            0: CSS_GENERIC_PROPERTY@1231..1287
-              0: CSS_IDENTIFIER@1231..1243
-                0: IDENT@1231..1243 "background" [Newline("\n"), Whitespace("\t")] []
-              1: COLON@1243..1245 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@1245..1287
-                0: CSS_URL_FUNCTION@1245..1287
-                  0: URL_KW@1245..1248 "url" [] []
-                  1: L_PAREN@1248..1252 "(" [] [Whitespace("   ")]
-                  2: CSS_STRING@1252..1286
-                    0: CSS_STRING_LITERAL@1252..1286 "\"https://example.com/image.png\"" [] [Whitespace("   ")]
-                  3: CSS_URL_MODIFIER_LIST@1286..1286
-                  4: R_PAREN@1286..1287 ")" [] []
-            1: (empty)
-          49: SEMICOLON@1287..1288 ";" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@5..1288
+          0: CSS_DECLARATION_WITH_SEMICOLON@5..54
+            0: CSS_DECLARATION@5..53
+              0: CSS_GENERIC_PROPERTY@5..53
+                0: CSS_IDENTIFIER@5..17
+                  0: IDENT@5..17 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@17..19 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@19..53
+                  0: CSS_URL_FUNCTION@19..53
+                    0: URL_KW@19..22 "url" [] []
+                    1: L_PAREN@22..23 "(" [] []
+                    2: CSS_URL_VALUE_RAW@23..52
+                      0: CSS_URL_VALUE_RAW_LITERAL@23..52 "https://example.com/image.png" [] []
+                    3: CSS_URL_MODIFIER_LIST@52..52
+                    4: R_PAREN@52..53 ")" [] []
+              1: (empty)
+            1: SEMICOLON@53..54 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@54..103
+            0: CSS_DECLARATION@54..102
+              0: CSS_GENERIC_PROPERTY@54..102
+                0: CSS_IDENTIFIER@54..66
+                  0: IDENT@54..66 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@66..68 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@68..102
+                  0: CSS_URL_FUNCTION@68..102
+                    0: URL_KW@68..71 "URL" [] []
+                    1: L_PAREN@71..72 "(" [] []
+                    2: CSS_URL_VALUE_RAW@72..101
+                      0: CSS_URL_VALUE_RAW_LITERAL@72..101 "https://example.com/image.png" [] []
+                    3: CSS_URL_MODIFIER_LIST@101..101
+                    4: R_PAREN@101..102 ")" [] []
+              1: (empty)
+            1: SEMICOLON@102..103 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@103..153
+            0: CSS_DECLARATION@103..152
+              0: CSS_GENERIC_PROPERTY@103..152
+                0: CSS_IDENTIFIER@103..115
+                  0: IDENT@103..115 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@115..117 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@117..152
+                  0: CSS_URL_FUNCTION@117..152
+                    0: URL_KW@117..121 "\\URL" [] []
+                    1: L_PAREN@121..122 "(" [] []
+                    2: CSS_URL_VALUE_RAW@122..151
+                      0: CSS_URL_VALUE_RAW_LITERAL@122..151 "https://example.com/image.png" [] []
+                    3: CSS_URL_MODIFIER_LIST@151..151
+                    4: R_PAREN@151..152 ")" [] []
+              1: (empty)
+            1: SEMICOLON@152..153 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@153..204
+            0: CSS_DECLARATION@153..203
+              0: CSS_GENERIC_PROPERTY@153..203
+                0: CSS_IDENTIFIER@153..165
+                  0: IDENT@153..165 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@165..167 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@167..203
+                  0: CSS_URL_FUNCTION@167..203
+                    0: URL_KW@167..170 "url" [] []
+                    1: L_PAREN@170..171 "(" [] []
+                    2: CSS_STRING@171..202
+                      0: CSS_STRING_LITERAL@171..202 "\"https://example.com/image.png\"" [] []
+                    3: CSS_URL_MODIFIER_LIST@202..202
+                    4: R_PAREN@202..203 ")" [] []
+              1: (empty)
+            1: SEMICOLON@203..204 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@204..255
+            0: CSS_DECLARATION@204..254
+              0: CSS_GENERIC_PROPERTY@204..254
+                0: CSS_IDENTIFIER@204..216
+                  0: IDENT@204..216 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@216..218 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@218..254
+                  0: CSS_URL_FUNCTION@218..254
+                    0: URL_KW@218..221 "url" [] []
+                    1: L_PAREN@221..222 "(" [] []
+                    2: CSS_STRING@222..253
+                      0: CSS_STRING_LITERAL@222..253 "'https://example.com/image.png'" [] []
+                    3: CSS_URL_MODIFIER_LIST@253..253
+                    4: R_PAREN@253..254 ")" [] []
+              1: (empty)
+            1: SEMICOLON@254..255 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@255..306
+            0: CSS_DECLARATION@255..305
+              0: CSS_GENERIC_PROPERTY@255..305
+                0: CSS_IDENTIFIER@255..267
+                  0: IDENT@255..267 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@267..269 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@269..305
+                  0: CSS_URL_FUNCTION@269..305
+                    0: URL_KW@269..272 "URL" [] []
+                    1: L_PAREN@272..273 "(" [] []
+                    2: CSS_STRING@273..304
+                      0: CSS_STRING_LITERAL@273..304 "'https://example.com/image.png'" [] []
+                    3: CSS_URL_MODIFIER_LIST@304..304
+                    4: R_PAREN@304..305 ")" [] []
+              1: (empty)
+            1: SEMICOLON@305..306 ";" [] []
+          6: CSS_DECLARATION_WITH_SEMICOLON@306..358
+            0: CSS_DECLARATION@306..357
+              0: CSS_GENERIC_PROPERTY@306..357
+                0: CSS_IDENTIFIER@306..318
+                  0: IDENT@306..318 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@318..320 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@320..357
+                  0: CSS_URL_FUNCTION@320..357
+                    0: URL_KW@320..324 "\\URL" [] []
+                    1: L_PAREN@324..325 "(" [] []
+                    2: CSS_STRING@325..356
+                      0: CSS_STRING_LITERAL@325..356 "'https://example.com/image.png'" [] []
+                    3: CSS_URL_MODIFIER_LIST@356..356
+                    4: R_PAREN@356..357 ")" [] []
+              1: (empty)
+            1: SEMICOLON@357..358 ";" [] []
+          7: CSS_DECLARATION_WITH_SEMICOLON@358..406
+            0: CSS_DECLARATION@358..405
+              0: CSS_GENERIC_PROPERTY@358..405
+                0: CSS_IDENTIFIER@358..370
+                  0: IDENT@358..370 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@370..372 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@372..405
+                  0: CSS_URL_FUNCTION@372..405
+                    0: URL_KW@372..375 "url" [] []
+                    1: L_PAREN@375..376 "(" [] []
+                    2: CSS_URL_VALUE_RAW@376..404
+                      0: CSS_URL_VALUE_RAW_LITERAL@376..404 "data:image/png;base64,iRxVB0" [] []
+                    3: CSS_URL_MODIFIER_LIST@404..404
+                    4: R_PAREN@404..405 ")" [] []
+              1: (empty)
+            1: SEMICOLON@405..406 ";" [] []
+          8: CSS_DECLARATION_WITH_SEMICOLON@406..438
+            0: CSS_DECLARATION@406..437
+              0: CSS_GENERIC_PROPERTY@406..437
+                0: CSS_IDENTIFIER@406..418
+                  0: IDENT@406..418 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@418..420 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@420..437
+                  0: CSS_URL_FUNCTION@420..437
+                    0: URL_KW@420..423 "url" [] []
+                    1: L_PAREN@423..424 "(" [] []
+                    2: CSS_URL_VALUE_RAW@424..436
+                      0: CSS_URL_VALUE_RAW_LITERAL@424..436 "#IDofSVGpath" [] []
+                    3: CSS_URL_MODIFIER_LIST@436..436
+                    4: R_PAREN@436..437 ")" [] []
+              1: (empty)
+            1: SEMICOLON@437..438 ";" [] []
+          9: CSS_DECLARATION_WITH_SEMICOLON@438..557
+            0: CSS_DECLARATION@438..556
+              0: CSS_GENERIC_PROPERTY@438..556
+                0: CSS_IDENTIFIER@438..522
+                  0: IDENT@438..522 "background" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("/* A <url-modifier> i ..."), Newline("\n"), Whitespace("\t")] []
+                1: COLON@522..524 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@524..556
+                  0: CSS_URL_FUNCTION@524..556
+                    0: URL_KW@524..527 "url" [] []
+                    1: L_PAREN@527..528 "(" [] []
+                    2: CSS_STRING@528..547
+                      0: CSS_STRING_LITERAL@528..547 "\"//aa.com/img.svg\"" [] [Whitespace(" ")]
+                    3: CSS_URL_MODIFIER_LIST@547..555
+                      0: CSS_IDENTIFIER@547..555
+                        0: IDENT@547..555 "prefetch" [] []
+                    4: R_PAREN@555..556 ")" [] []
+              1: (empty)
+            1: SEMICOLON@556..557 ";" [] []
+          10: CSS_DECLARATION_WITH_SEMICOLON@557..618
+            0: CSS_DECLARATION@557..617
+              0: CSS_GENERIC_PROPERTY@557..617
+                0: CSS_IDENTIFIER@557..569
+                  0: IDENT@557..569 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@569..571 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@571..617
+                  0: CSS_URL_FUNCTION@571..617
+                    0: URL_KW@571..574 "url" [] []
+                    1: L_PAREN@574..575 "(" [] []
+                    2: CSS_STRING@575..594
+                      0: CSS_STRING_LITERAL@575..594 "\"//aa.com/img.svg\"" [] [Whitespace(" ")]
+                    3: CSS_URL_MODIFIER_LIST@594..616
+                      0: CSS_IDENTIFIER@594..598
+                        0: IDENT@594..598 "foo" [] [Whitespace(" ")]
+                      1: CSS_IDENTIFIER@598..602
+                        0: IDENT@598..602 "bar" [] [Whitespace(" ")]
+                      2: CSS_IDENTIFIER@602..606
+                        0: IDENT@602..606 "baz" [] [Whitespace(" ")]
+                      3: CSS_FUNCTION@606..616
+                        0: CSS_IDENTIFIER@606..610
+                          0: IDENT@606..610 "func" [] []
+                        1: L_PAREN@610..611 "(" [] []
+                        2: CSS_PARAMETER_LIST@611..615
+                          0: CSS_PARAMETER@611..615
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@611..615
+                              0: CSS_COMPONENT_VALUE_LIST@611..615
+                                0: CSS_IDENTIFIER@611..615
+                                  0: IDENT@611..615 "test" [] []
+                        3: R_PAREN@615..616 ")" [] []
+                    4: R_PAREN@616..617 ")" [] []
+              1: (empty)
+            1: SEMICOLON@617..618 ";" [] []
+          11: CSS_DECLARATION_WITH_SEMICOLON@618..704
+            0: CSS_DECLARATION@618..703
+              0: CSS_GENERIC_PROPERTY@618..703
+                0: CSS_IDENTIFIER@618..630
+                  0: IDENT@618..630 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@630..632 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@632..703
+                  0: CSS_URL_FUNCTION@632..703
+                    0: URL_KW@632..635 "url" [] []
+                    1: L_PAREN@635..636 "(" [] []
+                    2: CSS_STRING@636..667
+                      0: CSS_STRING_LITERAL@636..667 "\"http://example.com/image.svg\"" [] [Whitespace(" ")]
+                    3: CSS_URL_MODIFIER_LIST@667..702
+                      0: CSS_FUNCTION@667..702
+                        0: CSS_IDENTIFIER@667..672
+                          0: IDENT@667..672 "param" [] []
+                        1: L_PAREN@672..673 "(" [] []
+                        2: CSS_PARAMETER_LIST@673..701
+                          0: CSS_PARAMETER@673..701
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@673..701
+                              0: CSS_COMPONENT_VALUE_LIST@673..701
+                                0: CSS_DASHED_IDENTIFIER@673..681
+                                  0: IDENT@673..681 "--color" [] [Whitespace(" ")]
+                                1: CSS_FUNCTION@681..701
+                                  0: CSS_IDENTIFIER@681..684
+                                    0: IDENT@681..684 "var" [] []
+                                  1: L_PAREN@684..685 "(" [] []
+                                  2: CSS_PARAMETER_LIST@685..700
+                                    0: CSS_PARAMETER@685..700
+                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@685..700
+                                        0: CSS_COMPONENT_VALUE_LIST@685..700
+                                          0: CSS_DASHED_IDENTIFIER@685..700
+                                            0: IDENT@685..700 "--primary-color" [] []
+                                  3: R_PAREN@700..701 ")" [] []
+                        3: R_PAREN@701..702 ")" [] []
+                    4: R_PAREN@702..703 ")" [] []
+              1: (empty)
+            1: SEMICOLON@703..704 ";" [] []
+          12: CSS_DECLARATION_WITH_SEMICOLON@704..725
+            0: CSS_DECLARATION@704..724
+              0: CSS_GENERIC_PROPERTY@704..724
+                0: CSS_IDENTIFIER@704..717
+                  0: IDENT@704..717 "background" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@717..719 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@719..724
+                  0: CSS_URL_FUNCTION@719..724
+                    0: URL_KW@719..722 "url" [] []
+                    1: L_PAREN@722..723 "(" [] []
+                    2: (empty)
+                    3: CSS_URL_MODIFIER_LIST@723..723
+                    4: R_PAREN@723..724 ")" [] []
+              1: (empty)
+            1: SEMICOLON@724..725 ";" [] []
+          13: CSS_DECLARATION_WITH_SEMICOLON@725..747
+            0: CSS_DECLARATION@725..746
+              0: CSS_GENERIC_PROPERTY@725..746
+                0: CSS_IDENTIFIER@725..737
+                  0: IDENT@725..737 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@737..739 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@739..746
+                  0: CSS_URL_FUNCTION@739..746
+                    0: URL_KW@739..742 "url" [] []
+                    1: L_PAREN@742..743 "(" [] []
+                    2: CSS_STRING@743..745
+                      0: CSS_STRING_LITERAL@743..745 "\"\"" [] []
+                    3: CSS_URL_MODIFIER_LIST@745..745
+                    4: R_PAREN@745..746 ")" [] []
+              1: (empty)
+            1: SEMICOLON@746..747 ";" [] []
+          14: CSS_DECLARATION_WITH_SEMICOLON@747..769
+            0: CSS_DECLARATION@747..768
+              0: CSS_GENERIC_PROPERTY@747..768
+                0: CSS_IDENTIFIER@747..759
+                  0: IDENT@747..759 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@759..761 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@761..768
+                  0: CSS_URL_FUNCTION@761..768
+                    0: URL_KW@761..764 "url" [] []
+                    1: L_PAREN@764..765 "(" [] []
+                    2: CSS_STRING@765..767
+                      0: CSS_STRING_LITERAL@765..767 "''" [] []
+                    3: CSS_URL_MODIFIER_LIST@767..767
+                    4: R_PAREN@767..768 ")" [] []
+              1: (empty)
+            1: SEMICOLON@768..769 ";" [] []
+          15: CSS_DECLARATION_WITH_SEMICOLON@769..816
+            0: CSS_DECLARATION@769..815
+              0: CSS_GENERIC_PROPERTY@769..815
+                0: CSS_IDENTIFIER@769..777
+                  0: IDENT@769..777 "--foo" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@777..779 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@779..815
+                  0: CSS_STRING@779..815
+                    0: CSS_STRING_LITERAL@779..815 "\"http://www.example.com/pinkish.gif\"" [] []
+              1: (empty)
+            1: SEMICOLON@815..816 ";" [] []
+          16: CSS_DECLARATION_WITH_SEMICOLON@816..873
+            0: CSS_DECLARATION@816..872
+              0: CSS_GENERIC_PROPERTY@816..872
+                0: CSS_IDENTIFIER@816..829
+                  0: IDENT@816..829 "background" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@829..831 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@831..872
+                  0: CSS_URL_FUNCTION@831..872
+                    0: SRC_KW@831..834 "src" [] []
+                    1: L_PAREN@834..835 "(" [] []
+                    2: CSS_STRING@835..871
+                      0: CSS_STRING_LITERAL@835..871 "\"http://www.example.com/pinkish.gif\"" [] []
+                    3: CSS_URL_MODIFIER_LIST@871..871
+                    4: R_PAREN@871..872 ")" [] []
+              1: (empty)
+            1: SEMICOLON@872..873 ";" [] []
+          17: CSS_DECLARATION_WITH_SEMICOLON@873..929
+            0: CSS_DECLARATION@873..928
+              0: CSS_GENERIC_PROPERTY@873..928
+                0: CSS_IDENTIFIER@873..885
+                  0: IDENT@873..885 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@885..887 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@887..928
+                  0: CSS_URL_FUNCTION@887..928
+                    0: SRC_KW@887..890 "SRC" [] []
+                    1: L_PAREN@890..891 "(" [] []
+                    2: CSS_STRING@891..927
+                      0: CSS_STRING_LITERAL@891..927 "\"http://www.example.com/pinkish.gif\"" [] []
+                    3: CSS_URL_MODIFIER_LIST@927..927
+                    4: R_PAREN@927..928 ")" [] []
+              1: (empty)
+            1: SEMICOLON@928..929 ";" [] []
+          18: CSS_DECLARATION_WITH_SEMICOLON@929..959
+            0: CSS_DECLARATION@929..958
+              0: CSS_GENERIC_PROPERTY@929..958
+                0: CSS_IDENTIFIER@929..941
+                  0: IDENT@929..941 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@941..943 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@943..958
+                  0: CSS_URL_FUNCTION@943..958
+                    0: SRC_KW@943..946 "src" [] []
+                    1: L_PAREN@946..947 "(" [] []
+                    2: (empty)
+                    3: CSS_URL_MODIFIER_LIST@947..957
+                      0: CSS_FUNCTION@947..957
+                        0: CSS_IDENTIFIER@947..950
+                          0: IDENT@947..950 "var" [] []
+                        1: L_PAREN@950..951 "(" [] []
+                        2: CSS_PARAMETER_LIST@951..956
+                          0: CSS_PARAMETER@951..956
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@951..956
+                              0: CSS_COMPONENT_VALUE_LIST@951..956
+                                0: CSS_DASHED_IDENTIFIER@951..956
+                                  0: IDENT@951..956 "--foo" [] []
+                        3: R_PAREN@956..957 ")" [] []
+                    4: R_PAREN@957..958 ")" [] []
+              1: (empty)
+            1: SEMICOLON@958..959 ";" [] []
+          19: CSS_DECLARATION_WITH_SEMICOLON@959..1014
+            0: CSS_DECLARATION@959..1013
+              0: CSS_GENERIC_PROPERTY@959..1013
+                0: CSS_IDENTIFIER@959..971
+                  0: IDENT@959..971 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@971..973 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@973..1013
+                  0: CSS_URL_FUNCTION@973..1013
+                    0: URL_KW@973..976 "url" [] []
+                    1: L_PAREN@976..980 "(" [] [Whitespace("   ")]
+                    2: CSS_URL_VALUE_RAW@980..1012
+                      0: CSS_URL_VALUE_RAW_LITERAL@980..1012 "https://example.com/image.png   " [] []
+                    3: CSS_URL_MODIFIER_LIST@1012..1012
+                    4: R_PAREN@1012..1013 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1013..1014 ";" [] []
+          20: CSS_DECLARATION_WITH_SEMICOLON@1014..1070
+            0: CSS_DECLARATION@1014..1069
+              0: CSS_GENERIC_PROPERTY@1014..1069
+                0: CSS_IDENTIFIER@1014..1026
+                  0: IDENT@1014..1026 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1026..1028 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1028..1069
+                  0: CSS_URL_FUNCTION@1028..1069
+                    0: URL_KW@1028..1032 "u\\rl" [] []
+                    1: L_PAREN@1032..1036 "(" [] [Whitespace("   ")]
+                    2: CSS_URL_VALUE_RAW@1036..1068
+                      0: CSS_URL_VALUE_RAW_LITERAL@1036..1068 "https://example.com/image.png   " [] []
+                    3: CSS_URL_MODIFIER_LIST@1068..1068
+                    4: R_PAREN@1068..1069 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1069..1070 ";" [] []
+          21: CSS_DECLARATION_WITH_SEMICOLON@1070..1123
+            0: CSS_DECLARATION@1070..1122
+              0: CSS_GENERIC_PROPERTY@1070..1122
+                0: CSS_IDENTIFIER@1070..1082
+                  0: IDENT@1070..1082 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1082..1084 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1084..1122
+                  0: CSS_URL_FUNCTION@1084..1122
+                    0: URL_KW@1084..1087 "url" [] []
+                    1: L_PAREN@1087..1088 "(" [] []
+                    2: CSS_URL_VALUE_RAW@1088..1121
+                      0: CSS_URL_VALUE_RAW_LITERAL@1088..1121 "https://example.com/image.png\n\t" [Newline("\n"), Whitespace("\t")] []
+                    3: CSS_URL_MODIFIER_LIST@1121..1121
+                    4: R_PAREN@1121..1122 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1122..1123 ";" [] []
+          22: CSS_DECLARATION_WITH_SEMICOLON@1123..1180
+            0: CSS_DECLARATION@1123..1179
+              0: CSS_GENERIC_PROPERTY@1123..1179
+                0: CSS_IDENTIFIER@1123..1135
+                  0: IDENT@1123..1135 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1135..1137 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1137..1179
+                  0: CSS_URL_FUNCTION@1137..1179
+                    0: URL_KW@1137..1140 "url" [] []
+                    1: L_PAREN@1140..1141 "(" [] []
+                    2: CSS_URL_VALUE_RAW@1141..1178
+                      0: CSS_URL_VALUE_RAW_LITERAL@1141..1178 "https://example.com/image.png\n\n\n\t" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                    3: CSS_URL_MODIFIER_LIST@1178..1178
+                    4: R_PAREN@1178..1179 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1179..1180 ";" [] []
+          23: CSS_DECLARATION_WITH_SEMICOLON@1180..1231
+            0: CSS_DECLARATION@1180..1230
+              0: CSS_GENERIC_PROPERTY@1180..1230
+                0: CSS_IDENTIFIER@1180..1192
+                  0: IDENT@1180..1192 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1192..1194 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1194..1230
+                  0: CSS_URL_FUNCTION@1194..1230
+                    0: URL_KW@1194..1197 "URL" [] []
+                    1: L_PAREN@1197..1198 "(" [] []
+                    2: CSS_URL_VALUE_RAW@1198..1229
+                      0: CSS_URL_VALUE_RAW_LITERAL@1198..1229 "https://example.com/ima\\)ge.png" [] []
+                    3: CSS_URL_MODIFIER_LIST@1229..1229
+                    4: R_PAREN@1229..1230 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1230..1231 ";" [] []
+          24: CSS_DECLARATION_WITH_SEMICOLON@1231..1288
+            0: CSS_DECLARATION@1231..1287
+              0: CSS_GENERIC_PROPERTY@1231..1287
+                0: CSS_IDENTIFIER@1231..1243
+                  0: IDENT@1231..1243 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1243..1245 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1245..1287
+                  0: CSS_URL_FUNCTION@1245..1287
+                    0: URL_KW@1245..1248 "url" [] []
+                    1: L_PAREN@1248..1252 "(" [] [Whitespace("   ")]
+                    2: CSS_STRING@1252..1286
+                      0: CSS_STRING_LITERAL@1252..1286 "\"https://example.com/image.png\"" [] [Whitespace("   ")]
+                    3: CSS_URL_MODIFIER_LIST@1286..1286
+                    4: R_PAREN@1286..1287 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1287..1288 ";" [] []
         2: R_CURLY@1288..1290 "}" [Newline("\n")] []
   2: EOF@1290..1291 "" [Newline("\n")] []
 

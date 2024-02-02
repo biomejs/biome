@@ -2,8 +2,8 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, expected_block};
 use crate::syntax::{
-    is_at_declaration, parse_declaration_with_semicolon, DeclarationList, RuleList,
-    BODY_RECOVERY_SET,
+    is_at_declaration, is_at_nested_qualified_rule, parse_declaration_with_semicolon,
+    parse_nested_qualified_rule, DeclarationList, RuleList, BODY_RECOVERY_SET,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -60,8 +60,10 @@ pub(crate) fn parse_rule_list_block(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(crate) fn parse_or_recover_declaration_or_rule_list_block(p: &mut CssParser) -> RecoveryResult {
-    parse_declaration_or_rule_list_block(p).or_recover_with_token_set(
+pub(crate) fn parse_or_recover_declaration_or_at_rule_list_block(
+    p: &mut CssParser,
+) -> RecoveryResult {
+    parse_declaration_or_at_rule_list_block(p).or_recover_with_token_set(
         p,
         &ParseRecoveryTokenSet::new(CSS_BOGUS_BLOCK, BODY_RECOVERY_SET)
             .enable_recovery_on_line_break(),
@@ -70,7 +72,7 @@ pub(crate) fn parse_or_recover_declaration_or_rule_list_block(p: &mut CssParser)
 }
 
 #[inline]
-pub(crate) fn parse_declaration_or_rule_list_block(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_declaration_or_at_rule_list_block(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T!['{']) {
         return Absent;
     }
@@ -119,6 +121,73 @@ impl ParseNodeList for DeclarationOrAtRuleList {
         parsed_element.or_recover(
             p,
             &DeclarationOrAtRuleListParseRecovery,
+            expected_any_declaration_or_at_rule,
+        )
+    }
+}
+
+#[inline]
+pub(crate) fn parse_or_recover_declaration_or_rule_list_block(p: &mut CssParser) -> RecoveryResult {
+    parse_declaration_or_rule_list_block(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(CSS_BOGUS_BLOCK, BODY_RECOVERY_SET)
+            .enable_recovery_on_line_break(),
+        expected_block,
+    )
+}
+
+#[inline]
+pub(crate) fn parse_declaration_or_rule_list_block(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(T!['{']) {
+        return Absent;
+    }
+
+    let m = parse_block_body(p, |p| {
+        DeclarationOrRuleList.parse_list(p);
+    });
+
+    Present(m.complete(p, CSS_DECLARATION_OR_RULE_BLOCK))
+}
+
+struct DeclarationOrRuleListParseRecovery;
+impl ParseRecovery for DeclarationOrRuleListParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T!['}']) || is_at_nested_qualified_rule(p) || is_at_at_rule(p) || is_at_declaration(p)
+    }
+}
+
+struct DeclarationOrRuleList;
+impl ParseNodeList for DeclarationOrRuleList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_DECLARATION_OR_RULE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if is_at_at_rule(p) {
+            parse_at_rule(p)
+        } else if is_at_declaration(p) {
+            parse_declaration_with_semicolon(p)
+        } else {
+            parse_nested_qualified_rule(p)
+        }
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T!['}'])
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(
+            p,
+            &DeclarationOrRuleListParseRecovery,
             expected_any_declaration_or_at_rule,
         )
     }

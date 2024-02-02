@@ -8,10 +8,11 @@ mod value;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
-use crate::syntax::blocks::parse_or_recover_declaration_list_block;
+use crate::syntax::blocks::parse_or_recover_declaration_or_rule_list_block;
 use crate::syntax::parse_error::expected_any_rule;
 use crate::syntax::property::{is_at_any_property, parse_any_property};
 use crate::syntax::selector::is_nth_at_selector;
+use crate::syntax::selector::relative_selector::{is_at_relative_selector, RelativeSelectorList};
 use crate::syntax::selector::SelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -113,8 +114,32 @@ pub(crate) fn parse_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
 
     SelectorList::default().parse_list(p);
 
-    let kind = if parse_or_recover_declaration_list_block(p).is_ok() {
+    let kind = if parse_or_recover_declaration_or_rule_list_block(p).is_ok() {
         CSS_QUALIFIED_RULE
+    } else {
+        CSS_BOGUS_RULE
+    };
+
+    Present(m.complete(p, kind))
+}
+
+#[inline]
+pub(crate) fn is_at_nested_qualified_rule(p: &mut CssParser) -> bool {
+    is_at_relative_selector(p)
+}
+
+#[inline]
+pub(crate) fn parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_nested_qualified_rule(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    RelativeSelectorList::new(T!['{']).parse_list(p);
+
+    let kind = if parse_or_recover_declaration_or_rule_list_block(p).is_ok() {
+        CSS_NESTED_QUALIFIED_RULE
     } else {
         CSS_BOGUS_RULE
     };
@@ -175,6 +200,14 @@ pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_DECLARATION))
 }
 
+/// Parses a CSS declaration that may optionally end with a semicolon.
+///
+/// This function attempts to parse a single CSS declaration from the current position
+/// of the parser. It handles the optional semicolon (';') at the end of the declaration,
+/// adhering to CSS syntax rules where the semicolon is mandatory for all declarations
+/// except the last one in a block. In the case of the last declaration before a closing
+/// brace ('}'), the semicolon is optional. If the semicolon is omitted for declarations
+/// that are not at the end, the parser will raise an error.
 #[inline]
 pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_declaration(p) {
@@ -184,7 +217,18 @@ pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSynta
     let m = p.start();
 
     parse_declaration(p).ok();
-    p.expect(T![;]);
+
+    // If the next token is a closing brace ('}'), the semicolon is optional.
+    // Otherwise, a semicolon is expected and the parser will enforce its presence.
+    // div { color: red; }
+    // div { color: red }
+    if !p.at(T!['}']) {
+        if p.nth_at(1, T!['}']) {
+            p.eat(T![;]);
+        } else {
+            p.expect(T![;]);
+        }
+    }
 
     Present(m.complete(p, CSS_DECLARATION_WITH_SEMICOLON))
 }

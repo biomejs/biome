@@ -41,9 +41,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@8..9 "{" [] [],
-                declarations: CssDeclarationList [],
+                items: CssDeclarationOrRuleList [],
                 r_curly_token: R_CURLY@9..10 "}" [] [],
             },
         },
@@ -68,9 +68,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@20..21 "{" [] [],
-                declarations: CssDeclarationList [],
+                items: CssDeclarationOrRuleList [],
                 r_curly_token: R_CURLY@21..22 "}" [] [],
             },
         },
@@ -114,9 +114,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@44..45 "{" [] [],
-                declarations: CssDeclarationList [],
+                items: CssDeclarationOrRuleList [],
                 r_curly_token: R_CURLY@45..46 "}" [] [],
             },
         },
@@ -159,9 +159,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@67..68 "{" [] [],
-                declarations: CssDeclarationList [],
+                items: CssDeclarationOrRuleList [],
                 r_curly_token: R_CURLY@68..69 "}" [] [],
             },
         },
@@ -212,9 +212,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@89..90 "{" [] [],
-                declarations: CssDeclarationList [],
+                items: CssDeclarationOrRuleList [],
                 r_curly_token: R_CURLY@90..91 "}" [] [],
             },
         },
@@ -241,9 +241,9 @@ CssRoot {
                 0: CSS_IDENTIFIER@2..6
                   0: IDENT@2..6 "cure" [] []
                 1: L_PAREN@6..8 "(" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_LIST_BLOCK@8..10
+      1: CSS_DECLARATION_OR_RULE_BLOCK@8..10
         0: L_CURLY@8..9 "{" [] []
-        1: CSS_DECLARATION_LIST@9..9
+        1: CSS_DECLARATION_OR_RULE_LIST@9..9
         2: R_CURLY@9..10 "}" [] []
     1: CSS_QUALIFIED_RULE@10..22
       0: CSS_SELECTOR_LIST@10..20
@@ -258,9 +258,9 @@ CssRoot {
                   0: IDENT@13..17 "cure" [] []
                 1: L_PAREN@17..18 "(" [] []
                 2: R_PAREN@18..20 ")" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_LIST_BLOCK@20..22
+      1: CSS_DECLARATION_OR_RULE_BLOCK@20..22
         0: L_CURLY@20..21 "{" [] []
-        1: CSS_DECLARATION_LIST@21..21
+        1: CSS_DECLARATION_OR_RULE_LIST@21..21
         2: R_CURLY@21..22 "}" [] []
     2: CSS_QUALIFIED_RULE@22..46
       0: CSS_SELECTOR_LIST@22..44
@@ -287,9 +287,9 @@ CssRoot {
                   1: DOT@36..37 "." [] []
                   2: IDENT@37..42 "class" [] []
                 4: R_PAREN@42..44 ")" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_LIST_BLOCK@44..46
+      1: CSS_DECLARATION_OR_RULE_BLOCK@44..46
         0: L_CURLY@44..45 "{" [] []
-        1: CSS_DECLARATION_LIST@45..45
+        1: CSS_DECLARATION_OR_RULE_LIST@45..45
         2: R_CURLY@45..46 "}" [] []
     3: CSS_QUALIFIED_RULE@46..69
       0: CSS_SELECTOR_LIST@46..67
@@ -315,9 +315,9 @@ CssRoot {
                   0: COMMA@58..60 "," [] [Whitespace(" ")]
                   1: DOT@60..61 "." [] []
                   2: IDENT@61..67 "class" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_LIST_BLOCK@67..69
+      1: CSS_DECLARATION_OR_RULE_BLOCK@67..69
         0: L_CURLY@67..68 "{" [] []
-        1: CSS_DECLARATION_LIST@68..68
+        1: CSS_DECLARATION_OR_RULE_LIST@68..68
         2: R_CURLY@68..69 "}" [] []
     4: CSS_QUALIFIED_RULE@69..91
       0: CSS_SELECTOR_LIST@69..89
@@ -349,9 +349,9 @@ CssRoot {
                         0: DOT@82..83 "." [] []
                         1: CSS_CUSTOM_IDENTIFIER@83..89
                           0: IDENT@83..89 "class" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_LIST_BLOCK@89..91
+      1: CSS_DECLARATION_OR_RULE_BLOCK@89..91
         0: L_CURLY@89..90 "{" [] []
-        1: CSS_DECLARATION_LIST@90..90
+        1: CSS_DECLARATION_OR_RULE_LIST@90..90
         2: R_CURLY@90..91 "}" [] []
   2: EOF@91..92 "" [Newline("\n")] []
 

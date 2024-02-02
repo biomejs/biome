@@ -159,6 +159,11 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssDeclarationOrAtRuleBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_DECLARATION_OR_RULE_BLOCK => {
+                    let $pattern =
+                        unsafe { $crate::CssDeclarationOrRuleBlock::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_DECLARATION_WITH_SEMICOLON => {
                     let $pattern =
                         unsafe { $crate::CssDeclarationWithSemicolon::new_unchecked(node) };
@@ -333,6 +338,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_NAMESPACE_AT_RULE => {
                     let $pattern = unsafe { $crate::CssNamespaceAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_NESTED_QUALIFIED_RULE => {
+                    let $pattern = unsafe { $crate::CssNestedQualifiedRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_NTH_OFFSET => {
@@ -709,6 +718,10 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_DECLARATION_OR_AT_RULE_LIST => {
                     let $pattern =
                         unsafe { $crate::CssDeclarationOrAtRuleList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST => {
+                    let $pattern = unsafe { $crate::CssDeclarationOrRuleList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_DOCUMENT_MATCHER_LIST => {
