@@ -7,5 +7,3 @@ declare module "foo" {
  global
  { }
 }
-declare global
-{ }
