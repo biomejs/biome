@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 import type React from "react";
 import { useState } from "react";
 import {
-	ArrowParentheses,
+	ArrowParentheses, AttributePosition,
 	IndentStyle,
 	LintRules,
 	type PlaygroundState,
@@ -53,6 +53,7 @@ export default function SettingsTab({
 			importSortingEnabled,
 			unsafeParameterDecoratorsEnabled,
 			allowComments,
+			attributePosition
 		},
 	},
 }: SettingsTabProps) {
@@ -91,6 +92,10 @@ export default function SettingsTab({
 	const setArrowParentheses = createPlaygroundSettingsSetter(
 		setPlaygroundState,
 		"arrowParentheses",
+	);
+	const setAttributePosition = createPlaygroundSettingsSetter(
+		setPlaygroundState,
+		"attributePosition",
 	);
 	const setBracketSpacing = createPlaygroundSettingsSetter(
 		setPlaygroundState,
@@ -263,6 +268,8 @@ export default function SettingsTab({
 				setSemicolons={setSemicolons}
 				arrowParentheses={arrowParentheses}
 				setArrowParentheses={setArrowParentheses}
+				attributePosition={attributePosition}
+				setAttributePosition={setAttributePosition}
 				bracketSpacing={bracketSpacing}
 				setBracketSpacing={setBracketSpacing}
 				bracketSameLine={bracketSameLine}
@@ -596,6 +603,8 @@ function FormatterSettings({
 	setSemicolons,
 	arrowParentheses,
 	setArrowParentheses,
+	attributePosition,
+	setAttributePosition,
 	bracketSpacing,
 	setBracketSpacing,
 	bracketSameLine,
@@ -619,6 +628,8 @@ function FormatterSettings({
 	setSemicolons: (value: Semicolons) => void;
 	arrowParentheses: ArrowParentheses;
 	setArrowParentheses: (value: ArrowParentheses) => void;
+	attributePosition:AttributePosition;
+	setAttributePosition: (value: AttributePosition) => void;
 	bracketSpacing: boolean;
 	setBracketSpacing: (value: boolean) => void;
 	bracketSameLine: boolean;
@@ -628,7 +639,7 @@ function FormatterSettings({
 		<>
 			<h2>Formatter options</h2>
 			<section>
-				<LineWidthInput lineWidth={lineWidth} setLineWidth={setLineWidth} />
+				<LineWidthInput lineWidth={lineWidth} setLineWidth={setLineWidth}/>
 
 				<div className="field-row">
 					<label htmlFor="indentStyle">Indent Style</label>
@@ -741,6 +752,20 @@ function FormatterSettings({
 					</select>
 				</div>
 				<div className="field-row">
+					<label htmlFor="arrowParentheses">Attribute Position</label>
+					<select
+						id="attributePosition"
+						name="attributePosition"
+						value={attributePosition ?? AttributePosition.Auto}
+						onChange={(e) =>
+							setAttributePosition(e.target.value as AttributePosition)
+						}
+					>
+						<option value={AttributePosition.Auto}>Auto</option>
+						<option value={AttributePosition.Multiline}>Multiline</option>
+					</select>
+				</div>
+				<div className="field-row">
 					<label htmlFor="bracketSpacing">Bracket Spacing</label>
 					<input
 						id="bracketSpacing"
@@ -766,11 +791,11 @@ function FormatterSettings({
 }
 
 function LinterSettings({
-	lintRules,
-	setLintRules,
-	enabledLinting,
-	setEnabledLinting,
-}: {
+													lintRules,
+													setLintRules,
+													enabledLinting,
+													setEnabledLinting,
+												}: {
 	lintRules: LintRules;
 	setLintRules: (value: LintRules) => void;
 	enabledLinting: boolean;

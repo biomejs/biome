@@ -12,7 +12,8 @@ expression: content
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
-    "lineWidth": 80
+    "lineWidth": 80,
+    "attributePosition": "auto"
   },
   "linter": { "enabled": true },
   "javascript": {
@@ -25,7 +26,7 @@ expression: content
       "bracketSpacing": true,
       "bracketSameLine": false,
       "quoteStyle": "single",
-      "singleAttributePerLine": false
+      "attributePosition": "auto"
     }
   }
 }

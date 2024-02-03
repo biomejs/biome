@@ -62,7 +62,7 @@ Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
-Single Attribute Per Line: false
+Attribute Position: Auto
 -----
 
 ```ts
@@ -118,7 +118,7 @@ Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
-Single Attribute Per Line: false
+Attribute Position: Auto
 -----
 
 ```ts
@@ -171,7 +171,7 @@ Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
-Single Attribute Per Line: false
+Attribute Position: Auto
 -----
 
 ```ts

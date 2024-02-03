@@ -20,7 +20,7 @@ import {
 	type TrailingComma,
 	defaultPlaygroundState,
 	emptyBiomeOutput,
-	emptyPrettierOutput,
+	emptyPrettierOutput, AttributePosition,
 } from "./types";
 import {
 	createLocalStorage,
@@ -335,6 +335,9 @@ function initState(
 			arrowParentheses:
 				(searchParams.get("arrowParentheses") as ArrowParentheses) ??
 				defaultPlaygroundState.settings.arrowParentheses,
+			attributePosition:
+				(searchParams.get("attributePosition") as AttributePosition) ??
+				defaultPlaygroundState.settings.attributePosition,
 			bracketSpacing:
 				searchParams.get("bracketSpacing") === "true" ||
 				defaultPlaygroundState.settings.bracketSpacing,

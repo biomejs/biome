@@ -1,11 +1,12 @@
 use biome_formatter::{
-    FormatContext, FormatResult, Formatted, IndentStyle, LineEnding, LineWidth, Printed, QuoteStyle,
+    AttributePosition, FormatContext, FormatResult, Formatted, IndentStyle, LineEnding, LineWidth,
+    Printed, QuoteStyle,
 };
 use biome_formatter_test::TestFormatLanguage;
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{
     ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatContext, JsFormatOptions,
-    QuoteProperties, Semicolons, SingleAttributePerLine,
+    QuoteProperties, Semicolons,
 };
 use biome_js_formatter::{format_node, format_range, JsFormatLanguage};
 use biome_js_parser::{parse, JsParserOptions};
@@ -133,6 +134,21 @@ impl From<JsSerializableQuoteStyle> for QuoteStyle {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
+pub enum JsSerializableAttributePosition {
+    Auto,
+    Multiline,
+}
+
+impl From<JsSerializableAttributePosition> for AttributePosition {
+    fn from(test: JsSerializableAttributePosition) -> Self {
+        match test {
+            JsSerializableAttributePosition::Auto => AttributePosition::Auto,
+            JsSerializableAttributePosition::Multiline => AttributePosition::Multiline,
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 pub enum JsSerializableQuoteProperties {
     AsNeeded,
     Preserve,
@@ -232,8 +248,8 @@ pub struct JsSerializableFormatOptions {
     /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
     pub bracket_same_line: Option<bool>,
 
-    /// Enforce single attribute per line in HTML, Vue and JSX. Defaults to false
-    pub single_attribute_per_line: Option<bool>,
+    /// Enforce single attribute per line in JSX. Defaults to false
+    pub attribute_position: Option<JsSerializableAttributePosition>,
 }
 
 impl JsSerializableFormatOptions {
@@ -283,9 +299,9 @@ impl JsSerializableFormatOptions {
                 self.bracket_same_line
                     .map_or_else(BracketSameLine::default, |value| value.into()),
             )
-            .with_single_attribute_per_line(
-                self.single_attribute_per_line
-                    .map_or_else(SingleAttributePerLine::default, |value| value.into()),
+            .with_attribute_position(
+                self.attribute_position
+                    .map_or_else(AttributePosition::default, |value| value.into()),
             )
     }
 }

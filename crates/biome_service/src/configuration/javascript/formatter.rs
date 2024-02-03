@@ -1,7 +1,7 @@
 use crate::configuration::PlainIndentStyle;
 use crate::configuration::{deserialize_line_width, serialize_line_width};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons};
 use bpaf::Bpaf;
@@ -88,13 +88,14 @@ pub struct JavascriptFormatter {
     #[partial(bpaf(long("quote-style"), argument("double|single"), optional))]
     pub quote_style: QuoteStyle,
 
-    /// Enforce single attribute per line in HTML, Vue and JSX.
+    // it's also a top-level configurable property.
+    /// The attribute position style in JavaScript code. Defaults to auto..
     #[partial(bpaf(
-        long("javascript-formatter-single-attribute-per-line"),
-        argument("true|false"),
+        long("javascript-attribute-position"),
+        argument("multiline|auto"),
         optional
     ))]
-    pub single_attribute_per_line: bool,
+    pub attribute_position: AttributePosition,
 }
 
 impl Default for JavascriptFormatter {
@@ -114,7 +115,7 @@ impl Default for JavascriptFormatter {
             line_ending: Default::default(),
             line_width: Default::default(),
             quote_style: Default::default(),
-            single_attribute_per_line: false,
+            attribute_position: Default::default(),
         }
     }
 }

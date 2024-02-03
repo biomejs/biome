@@ -4,7 +4,7 @@ use biome_console::{markup, Console, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
-use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
 use biome_json_parser::JsonParserOptions;
@@ -40,8 +40,6 @@ pub(crate) struct PrettierConfiguration {
     arrow_parens: ArrowParens,
     /// https://prettier.io/docs/en/options#end-of-line
     end_of_line: EndOfLine,
-    /// https://prettier.io/docs/en/options#single-attribute-per-line
-    single_attribute_per_line: bool,
 }
 
 impl Default for PrettierConfiguration {
@@ -60,7 +58,6 @@ impl Default for PrettierConfiguration {
             jsx_single_quote: false,
             arrow_parens: ArrowParens::default(),
             end_of_line: EndOfLine::default(),
-            single_attribute_per_line: false,
         }
     }
 }
@@ -160,6 +157,7 @@ impl TryFrom<PrettierConfiguration> for PartialFormatterConfiguration {
             line_width: Some(line_width),
             indent_style: Some(indent_style),
             line_ending: Some(value.end_of_line.into()),
+            attribute_position: Some(AttributePosition::default()),
             format_with_errors: Some(false),
             ignore: None,
             include: None,
@@ -205,7 +203,7 @@ impl From<PrettierConfiguration> for PartialJavascriptFormatter {
             quote_properties: Some(value.quote_props.into()),
             bracket_spacing: Some(value.bracket_spacing),
             jsx_quote_style: Some(jsx_quote_style),
-            single_attribute_per_line: Some(value.single_attribute_per_line),
+            attribute_position: Some(AttributePosition::default()),
         }
     }
 }

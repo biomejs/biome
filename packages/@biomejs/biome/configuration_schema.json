@@ -297,6 +297,7 @@
 			}
 		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
+		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -932,6 +933,13 @@
 			"description": "Generic options applied to all files",
 			"type": "object",
 			"properties": {
+				"attributePosition": {
+					"description": "The attribute position style. By default auto.",
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": { "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
@@ -1050,6 +1058,13 @@
 						{ "type": "null" }
 					]
 				},
+				"attributePosition": {
+					"description": "The attribute position style in JavaScript code. Defaults to auto..",
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
 				"bracketSameLine": {
 					"description": "Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.",
 					"type": ["boolean", "null"]
@@ -1107,10 +1122,6 @@
 				"semicolons": {
 					"description": "Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.",
 					"anyOf": [{ "$ref": "#/definitions/Semicolons" }, { "type": "null" }]
-				},
-				"singleAttributePerLine": {
-					"description": "Enforce single attribute per line in HTML, Vue and JSX.",
-					"type": ["boolean", "null"]
 				},
 				"trailingComma": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
@@ -1493,6 +1504,14 @@
 		"OverrideFormatterConfiguration": {
 			"type": "object",
 			"properties": {
+				"attributePosition": {
+					"description": "The attribute position style.",
+					"default": null,
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": { "default": null, "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",

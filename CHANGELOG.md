@@ -38,6 +38,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Formatter
 
+#### New features
+- Support Prettier `singleAttributePerLine` option [#1706](https://github.com/biomejs/biome/issues/1706).  Contributed by @octoshikari
+
+
 #### Bug fixes
 
 - Fix [#1039](https://github.com/biomejs/biome/issues/1039). Check unicode width instead of number of bytes when checking if regex expression is a simple argument. Contributed by @kalleep
