@@ -3707,7 +3707,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp("/")
-  + ///
+  + /\//
   
 
 ```
@@ -3924,6 +3924,30 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
   
   - new·RegExp('[[A&&&]]',·'v')
   + /[[A&&&]]/v
+  
+
+```
+
+# Input
+```cjs
+new RegExp('://[^:/]*')
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('://[^:/]*')
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('://[^:/]*')
+  + /:\/\/[^:\/]*/
   
 
 ```

@@ -2829,3 +2829,55 @@ fn don_t_format_ignored_known_jsonc_files() {
         result,
     ));
 }
+
+#[test]
+fn format_package_json() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("package.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+
+    "name":       "@foo/package",
+    "dependencies": { "foo": "latest" }
+
+     }"#
+        .as_bytes(),
+    );
+
+    let expected = r#"{
+  "name": "@foo/package",
+  "dependencies": { "foo": "latest" }
+}
+"#;
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--write"),
+                "--indent-style=space",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, expected);
+
+    assert_eq!(console.out_buffer.len(), 1);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_package_json",
+        fs,
+        console,
+        result,
+    ));
+}

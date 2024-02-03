@@ -47,6 +47,10 @@ pub(crate) fn is_nth_at_declaration_clause(p: &mut JsParser, n: usize) -> bool {
         return true;
     }
 
+    if is_nth_at_any_ts_namespace_declaration(p, n) {
+        return true;
+    }
+
     if p.has_nth_preceding_line_break(n + 1) {
         return false;
     }
@@ -60,10 +64,6 @@ pub(crate) fn is_nth_at_declaration_clause(p: &mut JsParser, n: usize) -> bool {
     }
 
     if p.nth_at(n, T![async]) && p.nth_at(n + 1, T![function]) {
-        return true;
-    }
-
-    if is_nth_at_any_ts_namespace_declaration(p, n) {
         return true;
     }
 

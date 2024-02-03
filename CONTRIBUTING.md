@@ -40,7 +40,7 @@ We can use help in a bunch of areas and any help is greatly appreciated!
 
 ## Asking questions, making proposals
 
-If you have any questions, proposals, or feedbacks, open a [GitHub discussion](https://github.com/bare-ts/tools/discussions).
+If you have any questions, proposals, or feedbacks, open a [GitHub discussion](https://github.com/biomejs/biome/discussions).
 Make sure your comment adds value: [don't post a comment just to get attention](https://jacobtomlinson.dev/posts/2022/dont-be-that-open-source-user-dont-be-me/).
 
 Our [Discord server](https://discord.gg/BypW39g6Yc) is open for help and more ad-hoc discussion.

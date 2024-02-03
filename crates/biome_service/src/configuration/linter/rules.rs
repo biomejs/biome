@@ -3695,7 +3695,7 @@ pub struct Suspicious {
     #[doc = r" It enables ALL rules for this group."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub all: Option<bool>,
-    #[doc = "Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type."]
+    #[doc = "Use standard constants instead of approximated literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_approximative_numeric_constant: Option<RuleConfiguration>,
     #[doc = "Discourage the usage of Array index in keys."]
