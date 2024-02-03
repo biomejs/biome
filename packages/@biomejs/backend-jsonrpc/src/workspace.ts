@@ -296,7 +296,7 @@ export interface PartialJavascriptFormatter {
 	 */
 	arrowParentheses?: ArrowParentheses;
 	/**
-	 * The attribute position style in JavaScript code. Defaults to auto..
+	 * The attribute position style in JavaScript code. Defaults to auto.
 	 */
 	attributePosition?: AttributePosition;
 	/**
