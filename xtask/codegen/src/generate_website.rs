@@ -1,5 +1,6 @@
 use crate::generate_schema::generate_configuration_schema;
 use biome_cli::biome_command;
+use biome_configuration::PartialConfiguration;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::{parse_module, JsParserOptions};
 use biome_js_syntax::JsFileSource;
@@ -7,7 +8,6 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
 use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_rowan::AstNode;
-use biome_configuration::PartialConfiguration;
 use biome_service::VERSION;
 use std::fs;
 use xtask::{project_root, Mode, Result};

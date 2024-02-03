@@ -1,15 +1,14 @@
+use crate::{Matcher, WorkspaceError};
+use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::to_format_settings;
 use biome_configuration::linter::to_linter_settings;
 use biome_configuration::organize_imports::{to_organize_imports_settings, OrganizeImports};
 use biome_configuration::{
-    push_to_analyzer_rules, to_override_settings, CssConfiguration, FormatterConfiguration,
-    JavascriptConfiguration, JsonConfiguration, LinterConfiguration, PartialConfiguration,FilesConfiguration , ConfigurationDiagnostic,Rules
+    push_to_analyzer_rules, to_override_settings, ConfigurationDiagnostic, CssConfiguration,
+    FilesConfiguration, FormatterConfiguration, JavascriptConfiguration, JsonConfiguration,
+    LinterConfiguration, PartialConfiguration, Rules,
 };
-use crate::{
-     Matcher, WorkspaceError,
-};
-use biome_analyze::AnalyzerRules;
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;

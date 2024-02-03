@@ -5,16 +5,16 @@ use crate::extension_settings::CONFIGURATION_SECTION;
 use crate::utils;
 use anyhow::Result;
 use biome_analyze::RuleCategories;
+use biome_configuration::ConfigurationBasePath;
+use biome_configuration::{load_configuration, LoadedConfiguration};
 use biome_console::markup;
 use biome_diagnostics::PrintDescription;
 use biome_fs::{FileSystem, RomePath};
-use biome_configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, PullDiagnosticsParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
-use biome_configuration::ConfigurationBasePath;
-use biome_service::{DynRef, WorkspaceError, Workspace};
+use biome_service::{DynRef, Workspace, WorkspaceError};
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
 use rustc_hash::FxHashMap;

@@ -3,14 +3,14 @@ mod rules;
 
 pub use crate::linter::rules::Rules;
 use crate::overrides::OverrideLinterConfiguration;
-use biome_services::settings::{to_matcher, LinterSettings};
-use biome_services::{Matcher, WorkspaceError};
 use biome_deserialize::{
     DeserializableValue, DeserializationDiagnostic, Merge, StringSet, VisitableType,
 };
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_diagnostics::Severity;
 use biome_js_analyze::options::PossibleOptions;
+use biome_services::settings::{to_matcher, LinterSettings};
+use biome_services::{Matcher, WorkspaceError};
 use bpaf::Bpaf;
 pub use rules::*;
 #[cfg(feature = "schema")]

@@ -8,8 +8,8 @@ use crate::{
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
     WorkspaceError,
 };
-use biome_configuration::Rules;
 use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
+use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::{Diagnostic, Severity};

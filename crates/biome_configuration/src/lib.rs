@@ -16,15 +16,9 @@ pub mod vcs;
 use crate::diagnostics::CantLoadExtendFile;
 pub use crate::diagnostics::ConfigurationDiagnostic;
 pub(crate) use crate::generated::push_to_analyzer_rules;
-use crate::organize_imports::{
-    partial_organize_imports, OrganizeImports, PartialOrganizeImports,
-};
+use crate::organize_imports::{partial_organize_imports, OrganizeImports, PartialOrganizeImports};
 use crate::overrides::Overrides;
-use crate::vcs::{
-    partial_vcs_configuration, PartialVcsConfiguration, VcsConfiguration,
-};
-use biome_services::settings::{WorkspaceSettings, DEFAULT_FILE_SIZE_LIMIT};
-use biome_services::{DynRef, WorkspaceError, VERSION};
+use crate::vcs::{partial_vcs_configuration, PartialVcsConfiguration, VcsConfiguration};
 use biome_analyze::AnalyzerRules;
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
@@ -35,6 +29,8 @@ use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
 use biome_js_analyze::metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_services::settings::{WorkspaceSettings, DEFAULT_FILE_SIZE_LIMIT};
+use biome_services::{DynRef, WorkspaceError, VERSION};
 use bpaf::Bpaf;
 pub use css::{
     partial_css_configuration, CssConfiguration, CssFormatter, PartialCssConfiguration,

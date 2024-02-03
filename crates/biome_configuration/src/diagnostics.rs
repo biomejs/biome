@@ -1,4 +1,3 @@
-use biome_services::WorkspaceError;
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_deserialize::DeserializationDiagnostic;
@@ -7,6 +6,7 @@ use biome_diagnostics::{
     Severity, Visit,
 };
 use biome_rowan::SyntaxError;
+use biome_services::WorkspaceError;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 

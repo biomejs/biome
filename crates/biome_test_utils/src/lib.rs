@@ -1,13 +1,13 @@
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
+use biome_configuration::to_analyzer_rules;
+use biome_configuration::PartialConfiguration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
-use biome_configuration::to_analyzer_rules;
 use biome_service::settings::{Language, WorkspaceSettings};
-use biome_configuration::PartialConfiguration;
 use json_comments::StripComments;
 use similar::TextDiff;
 use std::ffi::{c_int, OsStr};

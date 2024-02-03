@@ -1,8 +1,8 @@
 use crate::overrides::OverrideOrganizeImportsConfiguration;
-use biome_services::settings::{to_matcher, OrganizeImportsSettings};
-use biome_services::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use biome_services::settings::{to_matcher, OrganizeImportsSettings};
+use biome_services::{Matcher, WorkspaceError};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;

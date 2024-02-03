@@ -2,23 +2,23 @@ use super::javascript::PartialJavascriptConfiguration;
 use super::json::PartialJsonConfiguration;
 use super::PartialCssConfiguration;
 use crate::formatter::{deserialize_line_width, serialize_line_width};
+use crate::Rules;
 use crate::{
     partial_css_configuration, partial_javascript_configuration, partial_json_configuration,
     PlainIndentStyle,
 };
-use biome_services::settings::{
-    to_matcher, FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings,
-    OrganizeImportsSettings, OverrideFormatSettings, OverrideLinterSettings,
-    OverrideOrganizeImportsSettings, OverrideSettingPattern, OverrideSettings, WorkspaceSettings,
-};
-use biome_services::WorkspaceError
-use crate::Rules;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{LineEnding, LineWidth};
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
+use biome_services::settings::{
+    to_matcher, FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings,
+    OrganizeImportsSettings, OverrideFormatSettings, OverrideLinterSettings,
+    OverrideOrganizeImportsSettings, OverrideSettingPattern, OverrideSettings, WorkspaceSettings,
+};
+use biome_services::WorkspaceError;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;

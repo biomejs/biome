@@ -4,6 +4,7 @@ use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::execute::migrate::prettier::read_prettier_files;
 use crate::{CliDiagnostic, CliSession};
+use biome_configuration::PartialConfiguration;
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Merge;
@@ -18,7 +19,6 @@ use biome_service::workspace::{
     ChangeFileParams, FixAction, FormatFileParams, Language, OpenFileParams,
 };
 use biome_service::VERSION;
-use biome_configuration::PartialConfiguration;
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::PathBuf;

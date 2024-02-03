@@ -69,9 +69,9 @@ use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 use tracing::debug;
 
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-use biome_configuration::PartialConfiguration;
 pub use crate::file_handlers::Language;
 use crate::settings::WorkspaceSettings;
+use biome_configuration::PartialConfiguration;
 
 mod client;
 mod server;

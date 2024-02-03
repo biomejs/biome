@@ -15,7 +15,6 @@ pub mod diagnostics;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 
-
 pub use crate::matcher::Matcher;
 
 pub use crate::diagnostics::{TransportError, WorkspaceError};
