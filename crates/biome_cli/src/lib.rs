@@ -196,7 +196,9 @@ impl<'app> CliSession<'app> {
                 stop_on_disconnect,
                 config_path,
             } => commands::daemon::run_server(stop_on_disconnect, config_path),
-            BiomeCommand::PrintSocket => commands::daemon::print_socket(),
+            BiomeCommand::PrintSocket { config_path } => {
+                commands::daemon::print_socket(config_path)
+            }
         };
 
         if has_metrics {

@@ -89,9 +89,9 @@ pub(crate) fn run_server(
     })
 }
 
-pub(crate) fn print_socket() -> Result<(), CliDiagnostic> {
+pub(crate) fn print_socket(config_path: Option<PathBuf>) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    rt.block_on(service::print_socket())?;
+    rt.block_on(service::print_socket(config_path))?;
     Ok(())
 }
 
