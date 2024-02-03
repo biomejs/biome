@@ -18,7 +18,7 @@ use biome_configuration::{
 };
 use biome_service::documentation::Doc;
 use biome_configuration::{ConfigurationDiagnostic, PartialConfiguration};
-use biome_service::WorkspaceError
+use biome_service::WorkspaceError;
 use bpaf::Bpaf;
 use std::ffi::OsString;
 use std::path::PathBuf;

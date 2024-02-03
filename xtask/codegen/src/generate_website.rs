@@ -7,7 +7,7 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
 use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_rowan::AstNode;
-use biome_configuration::PartialConfiguration
+use biome_configuration::PartialConfiguration;
 use biome_service::VERSION;
 use std::fs;
 use xtask::{project_root, Mode, Result};

@@ -6,7 +6,7 @@ use biome_fs::FileSystem;
 use biome_configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{client, RageEntry, RageParams};
 use biome_service::{DynRef, Workspace};
-use biome_configuration::ConfigurationBasePath
+use biome_configuration::ConfigurationBasePath;
 use std::{env, io, ops::Deref};
 use tokio::runtime::Runtime;
 
