@@ -297,6 +297,7 @@
 			}
 		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
+		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -932,6 +933,13 @@
 			"description": "Generic options applied to all files",
 			"type": "object",
 			"properties": {
+				"attributePosition": {
+					"description": "The attribute position style. By default auto.",
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": { "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
@@ -1047,6 +1055,13 @@
 					"description": "Whether to add non-necessary parentheses to arrow functions. Defaults to \"always\".",
 					"anyOf": [
 						{ "$ref": "#/definitions/ArrowParentheses" },
+						{ "type": "null" }
+					]
+				},
+				"attributePosition": {
+					"description": "The attribute position style in JavaScript code. Defaults to auto.",
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
 						{ "type": "null" }
 					]
 				},
@@ -1489,6 +1504,14 @@
 		"OverrideFormatterConfiguration": {
 			"type": "object",
 			"properties": {
+				"attributePosition": {
+					"description": "The attribute position style.",
+					"default": null,
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": { "default": null, "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",

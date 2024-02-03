@@ -4,8 +4,8 @@ use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
-    CstFormatContext, FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, QuoteStyle, TransformSourceMap,
+    AttributePosition, CstFormatContext, FormatContext, FormatElement, FormatOptions, IndentStyle,
+    IndentWidth, LineEnding, LineWidth, QuoteStyle, TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
 use std::fmt;
@@ -169,6 +169,9 @@ pub struct JsFormatOptions {
 
     /// Information related to the current file
     source_type: JsFileSource,
+
+    /// Attribute position style. By default auto.
+    attribute_position: AttributePosition,
 }
 
 impl JsFormatOptions {
@@ -187,6 +190,7 @@ impl JsFormatOptions {
             arrow_parentheses: ArrowParentheses::default(),
             bracket_spacing: BracketSpacing::default(),
             bracket_same_line: BracketSameLine::default(),
+            attribute_position: AttributePosition::default(),
         }
     }
 
@@ -250,6 +254,11 @@ impl JsFormatOptions {
         self
     }
 
+    pub fn with_attribute_position(mut self, attribute_position: AttributePosition) -> Self {
+        self.attribute_position = attribute_position;
+        self
+    }
+
     pub fn set_arrow_parentheses(&mut self, arrow_parentheses: ArrowParentheses) {
         self.arrow_parentheses = arrow_parentheses;
     }
@@ -292,6 +301,9 @@ impl JsFormatOptions {
 
     pub fn set_trailing_comma(&mut self, trailing_comma: TrailingComma) {
         self.trailing_comma = trailing_comma;
+    }
+    pub fn set_attribute_position(&mut self, attribute_position: AttributePosition) {
+        self.attribute_position = attribute_position;
     }
 
     pub fn set_semicolons(&mut self, semicolons: Semicolons) {
@@ -337,6 +349,10 @@ impl JsFormatOptions {
     pub fn tab_width(&self) -> TabWidth {
         self.indent_width.value().into()
     }
+
+    pub fn attribute_position(&self) -> AttributePosition {
+        self.attribute_position
+    }
 }
 
 impl FormatOptions for JsFormatOptions {
@@ -354,6 +370,10 @@ impl FormatOptions for JsFormatOptions {
 
     fn line_ending(&self) -> LineEnding {
         self.line_ending
+    }
+
+    fn attribute_position(&self) -> AttributePosition {
+        self.attribute_position
     }
 
     fn as_print_options(&self) -> PrinterOptions {
@@ -374,7 +394,8 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Semicolons: {}", self.semicolons)?;
         writeln!(f, "Arrow parentheses: {}", self.arrow_parentheses)?;
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
-        writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())
+        writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())?;
+        writeln!(f, "Attribute Position: {}", self.attribute_position)
     }
 }
 

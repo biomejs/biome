@@ -21,6 +21,7 @@ formatter_quote_style.json:3:9 deserialize ━━━━━━━━━━━━�
   - indentWidth
   - lineEnding
   - lineWidth
+  - attributePosition
   - ignore
   - include
   

@@ -48,6 +48,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Biome now allows to format the `package.json` file. This is now the default behaviour and users can remove their workarounds.
   If you rely on other tools to format `package.json`, you'll have to ignore it via configuration. Contributed by @pattrickrice
+- New formatter option `attributePosition` that have similar behavior as Prettier `singleAttributePerLine` [#1706](https://github.com/biomejs/biome/issues/1706). Contributed by @octoshikari
 
 #### Bug fixes
 
@@ -142,16 +143,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   Now the following code is correctly parsed:
 
   ```ts
-  declare global 
+  declare global
   { }
 
   declare module foo {
-    global 
+    global
     { }
   }
   ```
 
-  Contributed by @ah-yu 
+  Contributed by @ah-yu
 
 ## 1.5.3 (2024-01-22)
 

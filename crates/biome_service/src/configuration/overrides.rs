@@ -15,7 +15,7 @@ use crate::{Rules, WorkspaceError};
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{LineEnding, LineWidth};
+use biome_formatter::{AttributePosition, LineEnding, LineWidth};
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use bpaf::Bpaf;
@@ -138,6 +138,10 @@ pub struct OverrideFormatterConfiguration {
     )]
     #[bpaf(long("line-width"), argument("NUMBER"), optional)]
     pub line_width: Option<LineWidth>,
+
+    /// The attribute position style.
+    #[bpaf(long("attribute-position"), argument("auto|multiline"), optional)]
+    pub attribute_position: Option<AttributePosition>,
 }
 
 #[derive(
