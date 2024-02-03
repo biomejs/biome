@@ -567,24 +567,3 @@ impl From<bool> for BracketSameLine {
         Self(value)
     }
 }
-
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
-    serde(rename_all = "camelCase")
-)]
-pub struct SingleAttributePerLine(bool);
-
-impl SingleAttributePerLine {
-    /// Return the boolean value for this [SingleAttributePerLine]
-    pub fn value(&self) -> bool {
-        self.0
-    }
-}
-
-impl From<bool> for SingleAttributePerLine {
-    fn from(value: bool) -> Self {
-        Self(value)
-    }
-}

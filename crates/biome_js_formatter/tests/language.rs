@@ -248,7 +248,7 @@ pub struct JsSerializableFormatOptions {
     /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
     pub bracket_same_line: Option<bool>,
 
-    /// Enforce single attribute per line in JSX. Defaults to false
+    /// Attribute position style. Defaults to auto
     pub attribute_position: Option<JsSerializableAttributePosition>,
 }
 
