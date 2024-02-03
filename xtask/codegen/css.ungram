@@ -46,6 +46,7 @@ CssBogusAtRule = SyntaxElement*
 CssBogusLayer = SyntaxElement*
 CssBogusBlock =  SyntaxElement*
 CssBogusScopeRange =  SyntaxElement*
+CssBogusFontFeatureValuesItem = SyntaxElement*
 CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 CssBogusParameter = SyntaxElement*
@@ -691,6 +692,7 @@ AnyCssAtRule =
 	| CssCounterStyleAtRule
 	| CssContainerAtRule
 	| CssFontFaceAtRule
+	| CssFontFeatureValuesAtRule
 	| CssFontPaletteValuesAtRule
 	| CssKeyframesAtRule
 	| CssMediaAtRule
@@ -732,6 +734,63 @@ CssFontFaceAtRule =
 	'font-face'
 	block: AnyCssDeclarationListBlock
 
+
+// https://drafts.csswg.org/css-fonts/#font-feature-values
+// @font-feature-values = @font-feature-values <family-name># { <declaration-rule-list> }
+// font-feature-value-type = <@stylistic> | <@historical-forms> | <@styleset> | <@character-variant>
+//   | <@swash> | <@ornaments> | <@annotation>
+// @stylistic = @stylistic { <declaration-list> }
+// @historical-forms = @historical-forms { <declaration-list> }
+// @styleset = @styleset { <declaration-list> }
+// @character-variant = @character-variant { <declaration-list> }
+// @swash = @swash { <declaration-list> }
+// @ornaments = @ornaments { <declaration-list> }
+// @annotation = @annotation { <declaration-list> }
+
+// @font-feature-values Font One { @styleset { nice-style: 12; } }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssFontFeatureValuesAtRule =
+	'font-feature-values'
+	name: AnyCssFontFamilyName
+	block: AnyCssFontFeatureValuesBlock
+
+// @font-feature-values Font One { @styleset { nice-style: 12; } }
+//                      ^^^^^^^^
+AnyCssFontFamilyName =
+	CssCustomIdentifier
+	| CssString
+
+AnyCssFontFeatureValuesBlock =
+	CssFontFeatureValuesBlock
+	| CssBogusBlock
+
+// @font-feature-values Font One { @styleset { nice-style: 12; } }
+//                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssFontFeatureValuesBlock =
+	'{'
+	items: CssFontFeatureValuesItemList
+	'}'
+
+CssFontFeatureValuesItemList = AnyCssFontFeatureValuesItem*
+
+AnyCssFontFeatureValuesItem =
+	CssFontFeatureValuesItem
+	| CssBogusFontFeatureValuesItem
+
+// @font-feature-values Font One { @styleset { nice-style: 12; } }
+//                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssFontFeatureValuesItem =
+	'@'
+	name: (
+		'stylistic'
+		| 'historical-forms'
+		| 'styleset'
+		| 'character-variant'
+		| 'swash'
+		| 'ornaments'
+		| 'annotation'
+	)
+	block: AnyCssDeclarationListBlock
 
 // @font-palette-values --ident {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

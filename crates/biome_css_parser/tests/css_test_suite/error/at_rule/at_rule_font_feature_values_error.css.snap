@@ -1,0 +1,404 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@font-feature-values  {  }
+
+@font-feature-values 6788 {  }
+
+@font-feature-values ident
+
+@font-feature-values ;
+
+@font-feature-values ident {
+	{ }
+}
+
+@font-feature-values ident {
+	@xxx { }
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_FEATURE_VALUES_KW@1..22 "font-feature-values" [] [Whitespace("  ")],
+                    CssFontFeatureValuesBlock {
+                        l_curly_token: L_CURLY@22..25 "{" [] [Whitespace("  ")],
+                        items: CssFontFeatureValuesItemList [],
+                        r_curly_token: R_CURLY@25..26 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@26..29 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_FEATURE_VALUES_KW@29..49 "font-feature-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            CSS_NUMBER_LITERAL@49..54 "6788" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssFontFeatureValuesBlock {
+                        l_curly_token: L_CURLY@54..57 "{" [] [Whitespace("  ")],
+                        items: CssFontFeatureValuesItemList [],
+                        r_curly_token: R_CURLY@57..58 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@58..61 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_FEATURE_VALUES_KW@61..81 "font-feature-values" [] [Whitespace(" ")],
+                    CssCustomIdentifier {
+                        value_token: IDENT@81..86 "ident" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@86..89 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_FEATURE_VALUES_KW@89..109 "font-feature-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            SEMICOLON@109..110 ";" [] [],
+                        ],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@110..113 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@113..133 "font-feature-values" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@133..139 "ident" [] [Whitespace(" ")],
+                },
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@139..140 "{" [] [],
+                    items: CssFontFeatureValuesItemList [
+                        CssBogusFontFeatureValuesItem {
+                            items: [
+                                L_CURLY@140..144 "{" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@144..145 "}" [] [],
+                },
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_CURLY@145..147 "}" [Newline("\n")] [],
+            ],
+        },
+        CssAtRule {
+            at_token: AT@147..150 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_FEATURE_VALUES_KW@150..170 "font-feature-values" [] [Whitespace(" ")],
+                    CssCustomIdentifier {
+                        value_token: IDENT@170..176 "ident" [] [Whitespace(" ")],
+                    },
+                    CssBogus {
+                        items: [
+                            L_CURLY@176..177 "{" [] [],
+                            CssBogus {
+                                items: [
+                                    CssBogusBlock {
+                                        items: [
+                                            AT@177..180 "@" [Newline("\n"), Whitespace("\t")] [],
+                                        ],
+                                    },
+                                    CssBogusFontFeatureValuesItem {
+                                        items: [
+                                            IDENT@180..184 "xxx" [] [Whitespace(" ")],
+                                            L_CURLY@184..186 "{" [] [Whitespace(" ")],
+                                        ],
+                                    },
+                                ],
+                            },
+                            R_CURLY@186..187 "}" [] [],
+                        ],
+                    },
+                ],
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_CURLY@187..189 "}" [Newline("\n")] [],
+            ],
+        },
+    ],
+    eof_token: EOF@189..190 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..190
+  0: (empty)
+  1: CSS_RULE_LIST@0..189
+    0: CSS_AT_RULE@0..26
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..26
+        0: FONT_FEATURE_VALUES_KW@1..22 "font-feature-values" [] [Whitespace("  ")]
+        1: CSS_FONT_FEATURE_VALUES_BLOCK@22..26
+          0: L_CURLY@22..25 "{" [] [Whitespace("  ")]
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@25..25
+          2: R_CURLY@25..26 "}" [] []
+    1: CSS_AT_RULE@26..58
+      0: AT@26..29 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@29..58
+        0: FONT_FEATURE_VALUES_KW@29..49 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@49..54
+          0: CSS_NUMBER_LITERAL@49..54 "6788" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@54..58
+          0: L_CURLY@54..57 "{" [] [Whitespace("  ")]
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@57..57
+          2: R_CURLY@57..58 "}" [] []
+    2: CSS_AT_RULE@58..86
+      0: AT@58..61 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@61..86
+        0: FONT_FEATURE_VALUES_KW@61..81 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@81..86
+          0: IDENT@81..86 "ident" [] []
+    3: CSS_AT_RULE@86..110
+      0: AT@86..89 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@89..110
+        0: FONT_FEATURE_VALUES_KW@89..109 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@109..110
+          0: SEMICOLON@109..110 ";" [] []
+    4: CSS_AT_RULE@110..145
+      0: AT@110..113 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@113..145
+        0: FONT_FEATURE_VALUES_KW@113..133 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@133..139
+          0: IDENT@133..139 "ident" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@139..145
+          0: L_CURLY@139..140 "{" [] []
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@140..144
+            0: CSS_BOGUS_FONT_FEATURE_VALUES_ITEM@140..144
+              0: L_CURLY@140..144 "{" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+          2: R_CURLY@144..145 "}" [] []
+    5: CSS_BOGUS_RULE@145..147
+      0: R_CURLY@145..147 "}" [Newline("\n")] []
+    6: CSS_AT_RULE@147..187
+      0: AT@147..150 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@150..187
+        0: FONT_FEATURE_VALUES_KW@150..170 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@170..176
+          0: IDENT@170..176 "ident" [] [Whitespace(" ")]
+        2: CSS_BOGUS@176..187
+          0: L_CURLY@176..177 "{" [] []
+          1: CSS_BOGUS@177..186
+            0: CSS_BOGUS_BLOCK@177..180
+              0: AT@177..180 "@" [Newline("\n"), Whitespace("\t")] []
+            1: CSS_BOGUS_FONT_FEATURE_VALUES_ITEM@180..186
+              0: IDENT@180..184 "xxx" [] [Whitespace(" ")]
+              1: L_CURLY@184..186 "{" [] [Whitespace(" ")]
+          2: R_CURLY@186..187 "}" [] []
+    7: CSS_BOGUS_RULE@187..189
+      0: R_CURLY@187..189 "}" [Newline("\n")] []
+  2: EOF@189..190 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_font_feature_values_error.css:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '{'.
+  
+  > 1 │ @font-feature-values  {  }
+      │                       ^
+    2 │ 
+    3 │ @font-feature-values 6788 {  }
+  
+  i Expected an identifier here.
+  
+  > 1 │ @font-feature-values  {  }
+      │                       ^
+    2 │ 
+    3 │ @font-feature-values 6788 {  }
+  
+at_rule_font_feature_values_error.css:3:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '6788'.
+  
+    1 │ @font-feature-values  {  }
+    2 │ 
+  > 3 │ @font-feature-values 6788 {  }
+      │                      ^^^^
+    4 │ 
+    5 │ @font-feature-values ident
+  
+  i Expected an identifier here.
+  
+    1 │ @font-feature-values  {  }
+    2 │ 
+  > 3 │ @font-feature-values 6788 {  }
+      │                      ^^^^
+    4 │ 
+    5 │ @font-feature-values ident
+  
+at_rule_font_feature_values_error.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found '@'.
+  
+    5 │ @font-feature-values ident
+    6 │ 
+  > 7 │ @font-feature-values ;
+      │ ^
+    8 │ 
+    9 │ @font-feature-values ident {
+  
+  i Expected a body here.
+  
+    5 │ @font-feature-values ident
+    6 │ 
+  > 7 │ @font-feature-values ;
+      │ ^
+    8 │ 
+    9 │ @font-feature-values ident {
+  
+at_rule_font_feature_values_error.css:7:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ';'.
+  
+    5 │ @font-feature-values ident
+    6 │ 
+  > 7 │ @font-feature-values ;
+      │                      ^
+    8 │ 
+    9 │ @font-feature-values ident {
+  
+  i Expected an identifier here.
+  
+    5 │ @font-feature-values ident
+    6 │ 
+  > 7 │ @font-feature-values ;
+      │                      ^
+    8 │ 
+    9 │ @font-feature-values ident {
+  
+at_rule_font_feature_values_error.css:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found '@'.
+  
+     7 │ @font-feature-values ;
+     8 │ 
+   > 9 │ @font-feature-values ident {
+       │ ^
+    10 │ 	{ }
+    11 │ }
+  
+  i Expected a body here.
+  
+     7 │ @font-feature-values ;
+     8 │ 
+   > 9 │ @font-feature-values ident {
+       │ ^
+    10 │ 	{ }
+    11 │ }
+  
+at_rule_font_feature_values_error.css:10:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a font-feature-values item but instead found '{'.
+  
+     9 │ @font-feature-values ident {
+  > 10 │ 	{ }
+       │ 	^
+    11 │ }
+    12 │ 
+  
+  i Expected a font-feature-values item here.
+  
+     9 │ @font-feature-values ident {
+  > 10 │ 	{ }
+       │ 	^
+    11 │ }
+    12 │ 
+  
+at_rule_font_feature_values_error.css:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '}'.
+  
+     9 │ @font-feature-values ident {
+    10 │ 	{ }
+  > 11 │ }
+       │ ^
+    12 │ 
+    13 │ @font-feature-values ident {
+  
+  i Expected a qualified rule, or an at rule here.
+  
+     9 │ @font-feature-values ident {
+    10 │ 	{ }
+  > 11 │ }
+       │ ^
+    12 │ 
+    13 │ @font-feature-values ident {
+  
+at_rule_font_feature_values_error.css:14:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    13 │ @font-feature-values ident {
+  > 14 │ 	@xxx { }
+       │ 	 ^^^
+    15 │ }
+    16 │ 
+  
+  i Expected one of:
+  
+  - stylistic
+  - historical_forms
+  - styleset
+  - character_variant
+  - swash
+  - ornaments
+  - annotation
+  
+at_rule_font_feature_values_error.css:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '}'.
+  
+    13 │ @font-feature-values ident {
+    14 │ 	@xxx { }
+  > 15 │ }
+       │ ^
+    16 │ 
+  
+  i Expected a qualified rule, or an at rule here.
+  
+    13 │ @font-feature-values ident {
+    14 │ 	@xxx { }
+  > 15 │ }
+       │ ^
+    16 │ 
+  
+```
+
+

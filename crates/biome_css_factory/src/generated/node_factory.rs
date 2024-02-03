@@ -616,6 +616,48 @@ pub fn css_font_face_at_rule(
         ],
     ))
 }
+pub fn css_font_feature_values_at_rule(
+    font_feature_values_token: SyntaxToken,
+    name: AnyCssFontFamilyName,
+    block: AnyCssFontFeatureValuesBlock,
+) -> CssFontFeatureValuesAtRule {
+    CssFontFeatureValuesAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FEATURE_VALUES_AT_RULE,
+        [
+            Some(SyntaxElement::Token(font_feature_values_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_font_feature_values_block(
+    l_curly_token: SyntaxToken,
+    items: CssFontFeatureValuesItemList,
+    r_curly_token: SyntaxToken,
+) -> CssFontFeatureValuesBlock {
+    CssFontFeatureValuesBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FEATURE_VALUES_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn css_font_feature_values_item(
+    at_token: SyntaxToken,
+    name_token: SyntaxToken,
+    block: AnyCssDeclarationListBlock,
+) -> CssFontFeatureValuesItem {
+    CssFontFeatureValuesItem::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FEATURE_VALUES_ITEM,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_font_palette_values_at_rule(
     font_palette_values_token: SyntaxToken,
     name: CssDashedIdentifier,
@@ -2128,6 +2170,18 @@ where
         }),
     ))
 }
+pub fn css_font_feature_values_item_list<I>(items: I) -> CssFontFeatureValuesItemList
+where
+    I: IntoIterator<Item = AnyCssFontFeatureValuesItem>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssFontFeatureValuesItemList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FEATURE_VALUES_ITEM_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_generic_component_value_list<I>(items: I) -> CssGenericComponentValueList
 where
     I: IntoIterator<Item = AnyCssGenericComponentValue>,
@@ -2445,6 +2499,16 @@ where
 {
     CssBogusDocumentMatcher::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_DOCUMENT_MATCHER,
+        slots,
+    ))
+}
+pub fn css_bogus_font_feature_values_item<I>(slots: I) -> CssBogusFontFeatureValuesItem
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusFontFeatureValuesItem::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_FONT_FEATURE_VALUES_ITEM,
         slots,
     ))
 }
