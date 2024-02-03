@@ -16,7 +16,7 @@ import {
 	Semicolons,
 	type TrailingComma,
 } from "../types";
-import {isJsonFilename, isTypeScriptFilename} from "../utils";
+import { isJsonFilename, isTypeScriptFilename } from "../utils";
 
 let settings = defaultPlaygroundState.settings;
 
@@ -40,7 +40,7 @@ self.addEventListener("message", async (e) => {
 				arrowParentheses,
 				bracketSpacing,
 				bracketSameLine,
-				attributePosition
+				attributePosition,
 			} = settings;
 			const code = e.data.code as string;
 			const filename = e.data.filename as string;
@@ -58,7 +58,8 @@ self.addEventListener("message", async (e) => {
 				arrowParentheses,
 				bracketSpacing,
 				bracketSameLine,
-				singleAttributePerLine: attributePosition === AttributePosition.Multiline,
+				singleAttributePerLine:
+					attributePosition === AttributePosition.Multiline,
 			});
 
 			self.postMessage({
@@ -90,7 +91,7 @@ async function formatWithPrettier(
 		arrowParentheses: ArrowParentheses;
 		bracketSpacing: boolean;
 		bracketSameLine: boolean;
-		singleAttributePerLine?: boolean
+		singleAttributePerLine?: boolean;
 	},
 ): Promise<PrettierOutput> {
 	try {

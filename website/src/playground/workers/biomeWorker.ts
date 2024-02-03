@@ -17,7 +17,7 @@ import {
 	QuoteStyle,
 	Semicolons,
 } from "../types";
-import {isJsonFilename} from "../utils";
+import { isJsonFilename } from "../utils";
 
 let workspace: Workspace | null = null;
 let fileCounter = 0;
@@ -79,7 +79,7 @@ self.addEventListener("message", async (e) => {
 				importSortingEnabled,
 				unsafeParameterDecoratorsEnabled,
 				allowComments,
-				attributePosition
+				attributePosition,
 			} = e.data.settings as PlaygroundSettings;
 
 			configuration = {
@@ -89,7 +89,8 @@ self.addEventListener("message", async (e) => {
 					lineWidth: lineWidth,
 					indentStyle: indentStyle === IndentStyle.Tab ? "tab" : "space",
 					indentWidth,
-					attributePosition: attributePosition === AttributePosition.Auto ? 'auto' : 'multiline',
+					attributePosition:
+						attributePosition === AttributePosition.Auto ? "auto" : "multiline",
 				},
 
 				linter: {
@@ -118,7 +119,10 @@ self.addEventListener("message", async (e) => {
 								: "asNeeded",
 						bracketSpacing,
 						bracketSameLine,
-						attributePosition: attributePosition === AttributePosition.Auto ? "auto" : "multiline",
+						attributePosition:
+							attributePosition === AttributePosition.Auto
+								? "auto"
+								: "multiline",
 					},
 					parser: {
 						unsafeParameterDecoratorsEnabled,

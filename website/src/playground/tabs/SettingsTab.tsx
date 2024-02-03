@@ -2,7 +2,8 @@ import type { Dispatch, SetStateAction } from "react";
 import type React from "react";
 import { useState } from "react";
 import {
-	ArrowParentheses, AttributePosition,
+	ArrowParentheses,
+	AttributePosition,
 	IndentStyle,
 	LintRules,
 	type PlaygroundState,
@@ -53,7 +54,7 @@ export default function SettingsTab({
 			importSortingEnabled,
 			unsafeParameterDecoratorsEnabled,
 			allowComments,
-			attributePosition
+			attributePosition,
 		},
 	},
 }: SettingsTabProps) {
@@ -628,7 +629,7 @@ function FormatterSettings({
 	setSemicolons: (value: Semicolons) => void;
 	arrowParentheses: ArrowParentheses;
 	setArrowParentheses: (value: ArrowParentheses) => void;
-	attributePosition:AttributePosition;
+	attributePosition: AttributePosition;
 	setAttributePosition: (value: AttributePosition) => void;
 	bracketSpacing: boolean;
 	setBracketSpacing: (value: boolean) => void;
@@ -639,7 +640,7 @@ function FormatterSettings({
 		<>
 			<h2>Formatter options</h2>
 			<section>
-				<LineWidthInput lineWidth={lineWidth} setLineWidth={setLineWidth}/>
+				<LineWidthInput lineWidth={lineWidth} setLineWidth={setLineWidth} />
 
 				<div className="field-row">
 					<label htmlFor="indentStyle">Indent Style</label>
@@ -791,11 +792,11 @@ function FormatterSettings({
 }
 
 function LinterSettings({
-													lintRules,
-													setLintRules,
-													enabledLinting,
-													setEnabledLinting,
-												}: {
+	lintRules,
+	setLintRules,
+	enabledLinting,
+	setEnabledLinting,
+}: {
 	lintRules: LintRules;
 	setLintRules: (value: LintRules) => void;
 	enabledLinting: boolean;

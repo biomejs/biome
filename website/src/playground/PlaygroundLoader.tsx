@@ -20,7 +20,8 @@ import {
 	type TrailingComma,
 	defaultPlaygroundState,
 	emptyBiomeOutput,
-	emptyPrettierOutput, AttributePosition,
+	emptyPrettierOutput,
+	AttributePosition,
 } from "./types";
 import {
 	createLocalStorage,
