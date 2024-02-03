@@ -66,6 +66,7 @@ CssRuleList = AnyCssRule*
 
 AnyCssRule =
 	CssQualifiedRule
+	| CssNestedQualifiedRule
 	| CssAtRule
 	| CssBogusRule
 
@@ -73,7 +74,11 @@ AnyCssRule =
 // ^^^^^^^^^^^^^^^^^^^^^
 CssQualifiedRule =
 	prelude: CssSelectorList
-	block: AnyCssDeclarationListBlock
+	block: AnyCssDeclarationOrRuleBlock
+
+CssNestedQualifiedRule =
+	prelude: CssRelativeSelectorList
+	block: AnyCssDeclarationOrRuleBlock
 
 /////////////
 /// SELECTORS
@@ -409,8 +414,28 @@ CssPseudoElementFunctionIdentifier =
 // https://drafts.csswg.org/css-syntax-3/#typedef-declaration-rule-list
 ////////////
 
+AnyCssDeclarationOrRuleBlock =
+	CssDeclarationOrRuleBlock
+	| CssBogusBlock
+
+CssDeclarationOrRuleBlock =
+	'{'
+	items: CssDeclarationOrRuleList
+	'}'
+
+CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
+
+AnyCssDeclarationOrRule =
+	AnyCssRule
+	| CssDeclarationWithSemicolon
+	| CssBogus
+
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AnyCssDeclarationOrAtRuleBlock =
+	CssDeclarationOrAtRuleBlock
+	| CssBogusBlock
+
 CssDeclarationOrAtRuleBlock =
 	'{'
 	items: CssDeclarationOrAtRuleList
@@ -424,9 +449,10 @@ AnyCssDeclarationOrAtRule =
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						   ^^^^^^^^^^^^^^^^
+// NOTE: ';' is optional for the last declaration in a block. For declarations not at the end, the parser will raise an error if ';' is missing.
 CssDeclarationWithSemicolon =
     declaration: CssDeclaration
-    ';'
+    ';'?
 
 AnyCssDeclarationListBlock =
 	CssDeclarationListBlock
@@ -1279,7 +1305,7 @@ CssMarginAtRule =
 		| 'right-middle'
 		| 'right-bottom'
 	)
-	block: CssDeclarationOrAtRuleBlock
+	block: AnyCssDeclarationOrAtRuleBlock
 
 // https://drafts.csswg.org/css-cascade-5/#layering
 // @layer =

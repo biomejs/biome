@@ -1,11 +1,12 @@
 use super::parse_error::{expected_any_font_feature_value_item, expected_font_feature_values_item};
+use crate::syntax::blocks::parse_or_recover_declaration_list_block;
 use crate::{
     lexer::CssLexContext,
     parser::CssParser,
     syntax::{
         is_at_identifier, parse_custom_identifier,
         parse_error::{expected_block, expected_non_css_wide_keyword_identifier},
-        parse_or_recover_declaration_list_block, parse_string, BODY_RECOVERY_SET,
+        parse_string, BODY_RECOVERY_SET,
     },
 };
 use biome_css_syntax::{
