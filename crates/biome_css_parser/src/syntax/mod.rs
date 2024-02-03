@@ -123,11 +123,19 @@ pub(crate) fn parse_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
+/// Checks if the current position in the CSS parser is at the start of a nested qualified rule.
+/// Nested qualified rules are determined by the presence of a relative selector, indicating the
+/// start of a rule that is nested within another rule.
 #[inline]
 pub(crate) fn is_at_nested_qualified_rule(p: &mut CssParser) -> bool {
     is_at_relative_selector(p)
 }
 
+/// Parses a nested qualified rule from the current position in the CSS parser. If the current
+/// position is identified as the start of a nested qualified rule, it proceeds to parse the rule.
+/// This involves parsing the list of relative selectors and then parsing or recovering the declaration
+/// or rule list block. The kind of rule parsed (nested qualified or bogus) is determined based on
+/// the success of parsing the block.
 #[inline]
 pub(crate) fn parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_nested_qualified_rule(p) {
