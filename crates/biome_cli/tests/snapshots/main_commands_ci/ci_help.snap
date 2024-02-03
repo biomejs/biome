@@ -59,7 +59,7 @@ The configuration that is contained inside the file `biome.json`
                               (and its super languages) files. Defaults to 80.
         --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
         --javascript-attribute-position=<multiline|auto>  The attribute position style in JavaScript
-                              code. Defaults to auto..
+                              code. Defaults to auto.
         --json-formatter-enabled=<true|false>  Control the formatter for JSON (and its super languages)
                               files.
         --json-formatter-indent-style=<tab|space>  The indent style applied to JSON (and its super languages)
