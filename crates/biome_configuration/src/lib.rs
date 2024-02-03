@@ -29,8 +29,8 @@ use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
 use biome_js_analyze::metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
-use biome_services::settings::{WorkspaceSettings, DEFAULT_FILE_SIZE_LIMIT};
-use biome_services::{DynRef, WorkspaceError, VERSION};
+use biome_service::settings::{WorkspaceSettings, DEFAULT_FILE_SIZE_LIMIT};
+use biome_service::{DynRef, WorkspaceError, VERSION};
 use bpaf::Bpaf;
 pub use css::{
     partial_css_configuration, CssConfiguration, CssFormatter, PartialCssConfiguration,

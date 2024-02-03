@@ -13,12 +13,12 @@ use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{LineEnding, LineWidth};
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
-use biome_services::settings::{
+use biome_service::settings::{
     to_matcher, FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings,
     OrganizeImportsSettings, OverrideFormatSettings, OverrideLinterSettings,
     OverrideOrganizeImportsSettings, OverrideSettingPattern, OverrideSettings, WorkspaceSettings,
 };
-use biome_services::WorkspaceError;
+use biome_service::WorkspaceError;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;

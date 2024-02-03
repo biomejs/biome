@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_configuration"
 repository.workspace = true
-version              = "0.0.0"
+version              = "0.0.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -27,7 +27,6 @@ biome_js_formatter       = { workspace = true, features = ["serde"] }
 biome_js_syntax          = { workspace = true, features = ["serde"] }
 biome_json_formatter     = { workspace = true }
 biome_json_parser        = { workspace = true }
-biome_service            = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_rowan              = { workspace = true, features = ["serde"] }
 bpaf                     = { workspace = true }
@@ -39,11 +38,7 @@ serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true, features = ["raw_value"] }
 
 [features]
-schema = [
-  "dep:schemars",
-  "biome_js_analyze/schema",
-  "biome_formatter/serde",
-]
+schema = ["dep:schemars", "biome_js_analyze/schema", "biome_formatter/serde"]
 
 [dev-dependencies]
 insta        = { workspace = true }
