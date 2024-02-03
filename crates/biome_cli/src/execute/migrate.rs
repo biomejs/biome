@@ -17,7 +17,8 @@ use biome_rowan::{AstNode, NodeCache};
 use biome_service::workspace::{
     ChangeFileParams, FixAction, FormatFileParams, Language, OpenFileParams,
 };
-use biome_service::{PartialConfiguration, VERSION};
+use biome_service::VERSION;
+use biome_configuration::PartialConfiguration
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::PathBuf;

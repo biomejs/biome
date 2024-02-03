@@ -206,6 +206,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_configuration"
+version = "0.0.0"
+dependencies = [
+ "biome_analyze",
+ "biome_console",
+ "biome_css_syntax",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_flags",
+ "biome_formatter",
+ "biome_fs",
+ "biome_js_analyze",
+ "biome_js_formatter",
+ "biome_js_syntax",
+ "biome_json_formatter",
+ "biome_json_parser",
+ "biome_json_syntax",
+ "biome_rowan",
+ "bpaf",
+ "ignore",
+ "indexmap",
+ "insta",
+ "rustc-hash",
+ "schemars",
+ "serde",
+ "serde_json",
+ "tests_macros",
+]
+
+[[package]]
 name = "biome_console"
 version = "0.4.0"
 dependencies = [

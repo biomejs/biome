@@ -16,6 +16,7 @@ A-Core:
 
 A-Project:
   - crates/biome_service/**
+  - crates/biome_configuration/**
 
 A-Linter:
   - crates/biome_analyze/**

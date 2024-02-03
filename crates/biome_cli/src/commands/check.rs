@@ -5,13 +5,13 @@ use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
 use biome_deserialize::Merge;
-use biome_service::configuration::organize_imports::PartialOrganizeImports;
-use biome_service::configuration::{
+use biome_configuration::organize_imports::PartialOrganizeImports;
+use biome_configuration::{
     load_configuration, LoadedConfiguration, PartialFormatterConfiguration,
     PartialLinterConfiguration,
 };
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::PartialConfiguration;
+use biome_configuration::PartialConfiguration;
 use std::ffi::OsString;
 
 pub(crate) struct CheckCommandPayload {

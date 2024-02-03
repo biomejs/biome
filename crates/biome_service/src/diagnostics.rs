@@ -1,5 +1,5 @@
 use crate::file_handlers::Language;
-use crate::ConfigurationDiagnostic;
+use biome_configuration::ConfigurationDiagnostic;
 use biome_console::fmt::Bytes;
 use biome_console::markup;
 use biome_diagnostics::{

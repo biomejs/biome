@@ -35,6 +35,7 @@ biome_json_parser    = { workspace = true, optional = true }
 biome_json_syntax    = { workspace = true, optional = true }
 biome_rowan          = { workspace = true, optional = true }
 biome_service        = { workspace = true, features = ["schema"], optional = true }
+biome_configuration  = { workspace = true }
 biome_ungrammar      = { workspace = true }
 schemars             = { version = "0.8.10", optional = true }
 serde_json           = { version = "1.0.74", optional = true }

@@ -9,8 +9,8 @@ use crate::{
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
-use biome_service::configuration::vcs::PartialVcsConfiguration;
-use biome_service::configuration::{
+use biome_configuration::vcs::PartialVcsConfiguration;
+use biome_configuration::{
     load_configuration, LoadedConfiguration, PartialCssFormatter, PartialFilesConfiguration,
     PartialFormatterConfiguration, PartialJavascriptFormatter, PartialJsonFormatter,
 };

@@ -5,19 +5,20 @@ use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, LoggingLevel, VERSION};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
-use biome_service::configuration::vcs::PartialVcsConfiguration;
-use biome_service::configuration::{
+use biome_configuration::vcs::PartialVcsConfiguration;
+use biome_configuration::{
     css::partial_css_formatter, javascript::partial_javascript_formatter,
     json::partial_json_formatter, partial_configuration, partial_files_configuration,
     partial_formatter_configuration, partial_linter_configuration, vcs::partial_vcs_configuration,
 };
-use biome_service::configuration::{
+use biome_configuration::{
     LoadedConfiguration, PartialCssFormatter, PartialFilesConfiguration,
     PartialFormatterConfiguration, PartialJavascriptFormatter, PartialJsonFormatter,
     PartialLinterConfiguration,
 };
 use biome_service::documentation::Doc;
-use biome_service::{ConfigurationDiagnostic, PartialConfiguration, WorkspaceError};
+use biome_configuration::{ConfigurationDiagnostic, PartialConfiguration};
+use biome_service::WorkspaceError
 use bpaf::Bpaf;
 use std::ffi::OsString;
 use std::path::PathBuf;

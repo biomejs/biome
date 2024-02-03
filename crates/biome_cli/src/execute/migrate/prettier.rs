@@ -9,11 +9,11 @@ use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
 use biome_json_parser::JsonParserOptions;
-use biome_service::configuration::{
+use biome_configuration::{
     PartialFormatterConfiguration, PartialJavascriptConfiguration, PartialJavascriptFormatter,
-    PlainIndentStyle,
+    PlainIndentStyle, PartialConfiguration
 };
-use biome_service::{DynRef, PartialConfiguration};
+use biome_service::DynRef;
 use indexmap::IndexSet;
 use std::path::{Path, PathBuf};
 

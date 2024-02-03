@@ -2,7 +2,7 @@ use super::{
     AnalyzerCapabilities, DebugCapabilities, ExtensionHandler, FormatterCapabilities, LintParams,
     LintResults, Mime, ParserCapabilities,
 };
-use crate::configuration::to_analyzer_rules;
+use biome_configuration::{to_analyzer_rules,Rules};
 use crate::diagnostics::extension_error;
 use crate::file_handlers::{is_diagnostic_error, FixAllParams, Language as LanguageId};
 use crate::settings::OverrideSettings;
@@ -13,11 +13,11 @@ use crate::{
         CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
         RenameResult,
     },
-    Rules, WorkspaceError,
+     WorkspaceError,
 };
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Never,
-    QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
+    QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{

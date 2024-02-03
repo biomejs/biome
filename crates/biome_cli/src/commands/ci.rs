@@ -3,13 +3,13 @@ use crate::cli_options::CliOptions;
 use crate::commands::validate_configuration_diagnostics;
 use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution};
 use biome_deserialize::Merge;
-use biome_service::configuration::organize_imports::PartialOrganizeImports;
-use biome_service::configuration::{
+use biome_configuration::organize_imports::PartialOrganizeImports;
+use biome_configuration::{
     load_configuration, LoadedConfiguration, PartialFormatterConfiguration,
     PartialLinterConfiguration,
 };
 use biome_service::workspace::UpdateSettingsParams;
-use biome_service::PartialConfiguration;
+use biome_configuration::PartialConfiguration;
 use std::ffi::OsString;
 
 pub(crate) struct CiCommandPayload {

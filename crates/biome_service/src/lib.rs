@@ -3,7 +3,6 @@ use biome_fs::{FileSystem, OsFileSystem};
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
-pub mod configuration;
 pub mod documentation;
 pub mod file_handlers;
 pub mod project_handlers;
@@ -16,10 +15,7 @@ pub mod diagnostics;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 
-pub use crate::configuration::{
-    create_config, Configuration, ConfigurationBasePath, ConfigurationDiagnostic,
-    JavascriptFormatter, PartialConfiguration, RuleConfiguration, Rules,
-};
+
 pub use crate::matcher::Matcher;
 
 pub use crate::diagnostics::{TransportError, WorkspaceError};

@@ -19,6 +19,7 @@ documentation = """
     -p biome_*_factory \
     -p biome_diagnostics \
     -p biome_service \
+    -p biome_configuration \
     -p biome_cli \
     -p biome_console \
     -p biome_*parser \

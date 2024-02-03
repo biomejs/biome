@@ -23,6 +23,7 @@ biome_fs           = { workspace = true }
 biome_js_formatter = { workspace = true }
 biome_rowan        = { workspace = true }
 biome_service      = { workspace = true }
+biome_configuration      = { workspace = true }
 biome_text_edit    = { workspace = true }
 futures            = "0.3"
 indexmap           = { workspace = true }

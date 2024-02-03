@@ -15,7 +15,7 @@ use biome_js_syntax::JsFileSource;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::JsonFormatLanguage;
 use biome_json_parser::parse_json;
-use biome_service::Rules;
+use biome_configuration::Rules;
 use libfuzzer_sys::Corpus;
 use similar::TextDiff;
 use std::fmt::{Display, Formatter};

@@ -8,13 +8,13 @@ use biome_analyze::RuleCategories;
 use biome_console::markup;
 use biome_diagnostics::PrintDescription;
 use biome_fs::{FileSystem, RomePath};
-use biome_service::configuration::{load_configuration, LoadedConfiguration};
+use biome_configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, PullDiagnosticsParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
-use biome_service::{ConfigurationBasePath, Workspace};
-use biome_service::{DynRef, WorkspaceError};
+use biome_configuration::ConfigurationBasePath;
+use biome_service::{DynRef, WorkspaceError, Workspace};
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
 use rustc_hash::FxHashMap;

@@ -1,10 +1,10 @@
 #[rustfmt::skip]
 mod rules;
 
-pub use crate::configuration::linter::rules::Rules;
-use crate::configuration::overrides::OverrideLinterConfiguration;
-use crate::settings::{to_matcher, LinterSettings};
-use crate::{Matcher, WorkspaceError};
+pub use crate::linter::rules::Rules;
+use crate::overrides::OverrideLinterConfiguration;
+use biome_services::settings::{to_matcher, LinterSettings};
+use biome_services::{Matcher, WorkspaceError};
 use biome_deserialize::{
     DeserializableValue, DeserializationDiagnostic, Merge, StringSet, VisitableType,
 };

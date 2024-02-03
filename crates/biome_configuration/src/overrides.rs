@@ -1,17 +1,18 @@
 use super::javascript::PartialJavascriptConfiguration;
 use super::json::PartialJsonConfiguration;
 use super::PartialCssConfiguration;
-use crate::configuration::formatter::{deserialize_line_width, serialize_line_width};
-use crate::configuration::{
+use crate::formatter::{deserialize_line_width, serialize_line_width};
+use crate::{
     partial_css_configuration, partial_javascript_configuration, partial_json_configuration,
     PlainIndentStyle,
 };
-use crate::settings::{
+use biome_services::settings::{
     to_matcher, FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings,
     OrganizeImportsSettings, OverrideFormatSettings, OverrideLinterSettings,
     OverrideOrganizeImportsSettings, OverrideSettingPattern, OverrideSettings, WorkspaceSettings,
 };
-use crate::{Rules, WorkspaceError};
+use biome_services::WorkspaceError
+use crate::Rules;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge};

@@ -1,4 +1,4 @@
-use crate::WorkspaceError;
+use biome_services::WorkspaceError;
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_deserialize::DeserializationDiagnostic;
@@ -285,8 +285,8 @@ pub struct InvalidConfiguration {
 
 #[cfg(test)]
 mod test {
-    use crate::configuration::diagnostics::ConfigurationDiagnostic;
-    use crate::configuration::PartialConfiguration;
+    use crate::diagnostics::ConfigurationDiagnostic;
+    use crate::PartialConfiguration;
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use biome_json_parser::JsonParserOptions;

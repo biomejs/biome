@@ -1,6 +1,6 @@
-use crate::configuration::overrides::OverrideFormatterConfiguration;
-use crate::settings::{to_matcher, FormatSettings};
-use crate::{Matcher, WorkspaceError};
+use crate::overrides::OverrideFormatterConfiguration;
+use biome_services::settings::{to_matcher, FormatSettings};
+use biome_services::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{IndentStyle, LineEnding, LineWidth};

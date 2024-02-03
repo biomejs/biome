@@ -1,7 +1,7 @@
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt};
 use biome_json_parser::JsonParserOptions;
-use biome_service::configuration::PartialConfiguration;
+use biome_configuration::PartialConfiguration;
 use std::ffi::OsStr;
 use std::fs::read_to_string;
 use std::path::Path;

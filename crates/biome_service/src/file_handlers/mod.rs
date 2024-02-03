@@ -6,8 +6,9 @@ use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
     settings::SettingsHandle,
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
-    Rules, WorkspaceError,
+    WorkspaceError,
 };
+use biome_configuration::Rules;
 use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
 use biome_console::fmt::Formatter;
 use biome_console::markup;

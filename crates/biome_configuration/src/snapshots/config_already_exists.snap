@@ -1,7 +1,7 @@
 ---
-source: crates/biome_service/src/configuration/diagnostics.rs
+source: crates/biome_configuration/src/diagnostics.rs
 expression: content
 ---
 biome.json configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Couldn't parse the *******, reason: wildcards are either regular `*` or recursive `**`
+  × It seems that a configuration file already exists

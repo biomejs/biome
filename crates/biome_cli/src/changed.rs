@@ -1,6 +1,7 @@
 use crate::CliDiagnostic;
 use biome_fs::FileSystem;
-use biome_service::{DynRef, PartialConfiguration};
+use biome_service::{DynRef};
+use biome_configuration::PartialConfiguration
 use std::ffi::OsString;
 
 pub(crate) fn get_changed_files(

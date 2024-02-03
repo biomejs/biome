@@ -13,18 +13,18 @@ pub mod organize_imports;
 mod overrides;
 pub mod vcs;
 
-use crate::configuration::diagnostics::CantLoadExtendFile;
-pub use crate::configuration::diagnostics::ConfigurationDiagnostic;
-pub(crate) use crate::configuration::generated::push_to_analyzer_rules;
-use crate::configuration::organize_imports::{
+use crate::diagnostics::CantLoadExtendFile;
+pub use crate::diagnostics::ConfigurationDiagnostic;
+pub(crate) use crate::generated::push_to_analyzer_rules;
+use crate::organize_imports::{
     partial_organize_imports, OrganizeImports, PartialOrganizeImports,
 };
-use crate::configuration::overrides::Overrides;
-use crate::configuration::vcs::{
+use crate::overrides::Overrides;
+use crate::vcs::{
     partial_vcs_configuration, PartialVcsConfiguration, VcsConfiguration,
 };
-use crate::settings::{WorkspaceSettings, DEFAULT_FILE_SIZE_LIMIT};
-use crate::{DynRef, WorkspaceError, VERSION};
+use biome_services::settings::{WorkspaceSettings, DEFAULT_FILE_SIZE_LIMIT};
+use biome_services::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
