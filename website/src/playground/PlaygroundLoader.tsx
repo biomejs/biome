@@ -9,6 +9,7 @@ import Playground from "./Playground";
 import LoadingScreen from "./components/LoadingScreen";
 import {
 	type ArrowParentheses,
+	type AttributePosition,
 	type IndentStyle,
 	type LintRules,
 	LoadingState,
@@ -21,7 +22,6 @@ import {
 	defaultPlaygroundState,
 	emptyBiomeOutput,
 	emptyPrettierOutput,
-	AttributePosition,
 } from "./types";
 import {
 	createLocalStorage,

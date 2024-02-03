@@ -6,7 +6,6 @@ import pluginEstree from "prettier/plugins/estree.mjs";
 import {
 	ArrowParentheses,
 	AttributePosition,
-	defaultPlaygroundState,
 	IndentStyle,
 	type PlaygroundSettings,
 	type PrettierOptions,
@@ -15,6 +14,7 @@ import {
 	QuoteStyle,
 	Semicolons,
 	type TrailingComma,
+	defaultPlaygroundState,
 } from "../types";
 import { isJsonFilename, isTypeScriptFilename } from "../utils";
 
