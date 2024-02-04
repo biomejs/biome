@@ -205,13 +205,7 @@ The tests are run against the compiled files, which means that you need to run t
 ## Website development
 
 The [Biome website](https://biomejs.dev/) is built with [Astro](https://astro.build).
-To start a development server you can run the following commands:
-
-```bash
-cd website
-pnpm install
-pnpm start
-```
+To start a development please check our [README](./website/README.md)
 
 ### Translations
 
