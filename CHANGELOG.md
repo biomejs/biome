@@ -150,6 +150,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   Contributed by @ah-yu
 
+- Fix [#1730](https://github.com/biomejs/biome/issues/1730). Correctly parse `delete` expressions with operands that are not simple member expressions.
+
+  ```js
+  delete(a.b);
+  delete console.log(1);
+  delete(() => {});
+  ```
+
+  Contributed by @printfn
+
 ## 1.5.3 (2024-01-22)
 
 ### LSP
