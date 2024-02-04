@@ -144,13 +144,21 @@ pub(crate) fn apply_suppression_comment(payload: SuppressionCommentEmitterPayloa
                     (TriviaPieceKind::Newline, "\n"),
                 ])
             } else {
-                new_token = new_token.with_leading_trivia([
-                    (
-                        TriviaPieceKind::SingleLineComment,
-                        format!("// {}: <explanation>", suppression_text).as_str(),
-                    ),
+                let comment = format!("// {}: <explanation>", suppression_text);
+                let mut trivia = vec![
+                    (TriviaPieceKind::SingleLineComment, comment.as_str()),
                     (TriviaPieceKind::Newline, "\n"),
-                ])
+                ];
+                let leading_whitespace: Vec<_> = new_token
+                    .leading_trivia()
+                    .pieces()
+                    .filter(|p| p.is_whitespace())
+                    .collect();
+
+                for w in leading_whitespace.iter() {
+                    trivia.push((TriviaPieceKind::Whitespace, w.text()));
+                }
+                new_token = new_token.with_leading_trivia(trivia);
             };
             mutation.replace_token_transfer_trivia(token_to_apply_suppression, new_token);
         }

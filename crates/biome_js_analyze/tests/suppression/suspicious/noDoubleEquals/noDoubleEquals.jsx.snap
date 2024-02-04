@@ -43,7 +43,7 @@ noDoubleEquals.jsx:3:51 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
     2 2 │       className="SomeManyClasses"
     3   │ - ····onClick={(event)·=>·console.log(event.ctrlKey·==·true)}
       3 │ + ····//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
-      4 │ + onClick={(event)·=>·console.log(event.ctrlKey·==·true)}
+      4 │ + ····onClick={(event)·=>·console.log(event.ctrlKey·==·true)}
     4 5 │       style="color: red"
     5 6 │   >
   
