@@ -4,6 +4,7 @@
 	"scripts": {
 		"start": "astro dev",
 		"format": "cargo biome-cli-dev format --write .",
+		"check": "cargo biome-cli-dev check --apply .",
 		"tsc": "tsc --skipLibCheck",
 		"start:playground": "pnpm build:wasm-dev && pnpm start",
 		"build": "pnpm build:wasm && pnpm build:js",

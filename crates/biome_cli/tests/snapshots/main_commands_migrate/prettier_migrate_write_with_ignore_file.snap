@@ -13,6 +13,7 @@ expression: content
     "indentWidth": 2,
     "lineEnding": "lf",
     "lineWidth": 80,
+    "attributePosition": "auto",
     "ignore": ["dist/**", "node_modules/**", "generated/*.spec.js"]
   },
   "linter": { "enabled": true },
@@ -25,7 +26,8 @@ expression: content
       "arrowParentheses": "always",
       "bracketSpacing": true,
       "bracketSameLine": false,
-      "quoteStyle": "single"
+      "quoteStyle": "single",
+      "attributePosition": "auto"
     }
   }
 }

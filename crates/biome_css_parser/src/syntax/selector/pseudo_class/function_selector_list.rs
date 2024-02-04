@@ -29,7 +29,6 @@ pub(crate) fn parse_pseudo_class_function_selector_list(p: &mut CssParser) -> Pa
 
     let list = SelectorList::default()
         .with_end_kind_ts(token_set!(T![')']))
-        .with_recovery_ts(token_set!(T![')'], T!['{']))
         // we don't need to recover here, because we have a better diagnostic message in a close token
         .disable_recovery()
         .parse_list(p);

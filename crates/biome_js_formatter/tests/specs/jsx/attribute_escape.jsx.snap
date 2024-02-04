@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: jsx/attribute_escape.jsx
 ---
 
@@ -45,6 +44,7 @@ Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
+Attribute Position: Auto
 -----
 
 ```jsx

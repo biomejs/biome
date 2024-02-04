@@ -424,6 +424,39 @@ impl From<QuoteStyle> for Quote {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+pub enum AttributePosition {
+    #[default]
+    Auto,
+    Multiline,
+}
+
+impl std::fmt::Display for AttributePosition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AttributePosition::Auto => std::write!(f, "Auto"),
+            AttributePosition::Multiline => std::write!(f, "Multiline"),
+        }
+    }
+}
+
+impl FromStr for AttributePosition {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "multiline" | "Multiline" => Ok(Self::Multiline),
+            "auto" | "Auto" => Ok(Self::Auto),
+            _ => Err("Value not supported for attribute_position. Supported values are 'auto' and 'multiline'."),
+        }
+    }
+}
+
 /// Context object storing data relevant when formatting an object.
 pub trait FormatContext {
     type Options: FormatOptions;
@@ -452,6 +485,9 @@ pub trait FormatOptions {
 
     /// The type of line ending.
     fn line_ending(&self) -> LineEnding;
+
+    /// The attribute position.
+    fn attribute_position(&self) -> AttributePosition;
 
     /// Derives the print options from the these format options
     fn as_print_options(&self) -> PrinterOptions;
@@ -501,6 +537,7 @@ pub struct SimpleFormatOptions {
     pub indent_width: IndentWidth,
     pub line_width: LineWidth,
     pub line_ending: LineEnding,
+    pub attribute_position: AttributePosition,
 }
 
 impl FormatOptions for SimpleFormatOptions {
@@ -520,12 +557,17 @@ impl FormatOptions for SimpleFormatOptions {
         self.line_ending
     }
 
+    fn attribute_position(&self) -> AttributePosition {
+        self.attribute_position
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::default()
             .with_indent_style(self.indent_style)
             .with_indent_width(self.indent_width)
             .with_print_width(self.line_width.into())
             .with_line_ending(self.line_ending)
+            .with_attribute_position(self.attribute_position)
     }
 }
 

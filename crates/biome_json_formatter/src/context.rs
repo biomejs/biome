@@ -1,5 +1,5 @@
 use crate::JsonCommentStyle;
-use biome_formatter::{prelude::*, IndentWidth};
+use biome_formatter::{prelude::*, AttributePosition, IndentWidth};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
@@ -61,6 +61,7 @@ pub struct JsonFormatOptions {
     indent_width: IndentWidth,
     line_ending: LineEnding,
     line_width: LineWidth,
+    attribute_position: AttributePosition,
     _file_source: JsonFileSource,
 }
 
@@ -72,6 +73,7 @@ impl JsonFormatOptions {
             indent_width: IndentWidth::default(),
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
+            attribute_position: AttributePosition::default(),
         }
     }
 
@@ -131,6 +133,10 @@ impl FormatOptions for JsonFormatOptions {
 
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::from(self)
+    }
+
+    fn attribute_position(&self) -> AttributePosition {
+        self.attribute_position
     }
 }
 

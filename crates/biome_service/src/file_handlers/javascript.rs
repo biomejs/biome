@@ -21,7 +21,8 @@ use biome_analyze::{
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
-    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    QuoteStyle,
 };
 use biome_fs::RomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
@@ -61,6 +62,7 @@ pub struct JsFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub enabled: Option<bool>,
+    pub attribute_position: Option<AttributePosition>,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -128,7 +130,13 @@ impl Language for JsLanguage {
             .with_semicolons(language.semicolons.unwrap_or_default())
             .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
             .with_bracket_spacing(language.bracket_spacing.unwrap_or_default())
-            .with_bracket_same_line(language.bracket_same_line.unwrap_or_default());
+            .with_bracket_same_line(language.bracket_same_line.unwrap_or_default())
+            .with_attribute_position(
+                language
+                    .attribute_position
+                    .or(global.attribute_position)
+                    .unwrap_or_default(),
+            );
 
         overrides.override_js_format_options(path, options)
     }

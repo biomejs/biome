@@ -15,7 +15,7 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::{Merge, StringSet};
 use biome_diagnostics::Category;
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{AttributePosition, IndentStyle, IndentWidth, LineEnding, LineWidth};
 use biome_fs::RomePath;
 use biome_js_analyze::metadata;
 use biome_js_formatter::context::JsFormatOptions;
@@ -198,6 +198,7 @@ pub struct FormatSettings {
     pub indent_width: Option<IndentWidth>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
+    pub attribute_position: Option<AttributePosition>,
     /// List of ignore paths/files
     pub ignored_files: Matcher,
     /// List of included paths/files
@@ -213,6 +214,7 @@ impl Default for FormatSettings {
             indent_width: Some(IndentWidth::default()),
             line_ending: Some(LineEnding::default()),
             line_width: Some(LineWidth::default()),
+            attribute_position: Some(AttributePosition::default()),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         }

@@ -114,6 +114,25 @@ const APPLY_BRACKET_SAME_LINE_AFTER: &str = r#"<Foo
 </Foo>;
 "#;
 
+const APPLY_ATTRIBUTE_POSITION_BEFORE: &str = r#"<Foo className={style}	reallyLongAttributeName1={longComplexValue}
+reallyLongAttributeName2={anotherLongValue} />;
+
+<Foo reallyLongAttributeName1={longComplexValue}reallyLongAttributeName2={anotherLongValue}>Hi</Foo>;"#;
+
+const APPLY_ATTRIBUTE_POSITION_AFTER: &str = r#"<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+/>;
+
+<Foo
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+>
+	Hi
+</Foo>;
+"#;
+
 // Without this, Test (windows-latest) fails with: `warning: constant `DEFAULT_CONFIGURATION_BEFORE` is never used`
 #[allow(dead_code)]
 const DEFAULT_CONFIGURATION_BEFORE: &str = r#"function f() {
@@ -692,6 +711,42 @@ fn applies_custom_trailing_comma() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "applies_custom_trailing_comma",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn applies_custom_attribute_position() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("file.js");
+    fs.insert(file_path.into(), APPLY_ATTRIBUTE_POSITION_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--attribute-position"),
+                ("multiline"),
+                ("--write"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, APPLY_ATTRIBUTE_POSITION_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_custom_attribute_position",
         fs,
         console,
         result,

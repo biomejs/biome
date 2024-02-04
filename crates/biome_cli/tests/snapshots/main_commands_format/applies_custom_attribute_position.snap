@@ -1,0 +1,29 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `file.js`
+
+```js
+<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+/>;
+
+<Foo
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+>
+	Hi
+</Foo>;
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file(s) in <TIME>
+```
+
+

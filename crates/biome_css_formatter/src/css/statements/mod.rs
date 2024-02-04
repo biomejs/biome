@@ -7,6 +7,7 @@ pub(crate) mod container_at_rule;
 pub(crate) mod counter_style_at_rule;
 pub(crate) mod document_at_rule;
 pub(crate) mod font_face_at_rule;
+pub(crate) mod font_feature_values_at_rule;
 pub(crate) mod font_palette_values_at_rule;
 pub(crate) mod import_at_rule;
 pub(crate) mod keyframes_at_rule;
