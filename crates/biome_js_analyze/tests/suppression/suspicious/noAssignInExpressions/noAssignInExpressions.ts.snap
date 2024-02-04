@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: noAssignInExpressions.ts
+---
+# Input
+```ts
+export function foo() {
+	let x: number;
+	while ((x = Math.random() > 0.1)) {
+		console.log(x);
+	}
+}
+
+```
+
+# Diagnostics
+```
+noAssignInExpressions.ts:3:10 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The assignment should not be in an expression.
+  
+    1 │ export function foo() {
+    2 │ 	let x: number;
+  > 3 │ 	while ((x = Math.random() > 0.1)) {
+      │ 	        ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 		console.log(x);
+    5 │ 	}
+  
+  i The use of assignments in expressions is confusing.
+    Expressions are often considered as side-effect free.
+  
+  i Safe fix: Suppress rule lint/suspicious/noAssignInExpressions
+  
+    1 1 │   export function foo() {
+    2 2 │   	let x: number;
+    3   │ - → while·((x·=·Math.random()·>·0.1))·{
+      3 │ + → //·biome-ignore·lint/suspicious/noAssignInExpressions:·<explanation>
+      4 │ + → while··((x·=·Math.random()·>·0.1))·{
+    4 5 │   		console.log(x);
+    5 6 │   	}
+  
+
+```
+
+
