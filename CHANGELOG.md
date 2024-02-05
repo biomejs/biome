@@ -14,6 +14,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+#### New features
+
+- Add a new command `biome migrate prettier`. The command will read the file `.prettierrc`/`prettier.json` and `.prettierignore` and map its configuration to Biome's one.
+  Due to the different nature of `.prettierignore` globs and Biome's globs, it's **highly** advised to make sure that those still work under Biome.
+
 #### Bug fixes
 
 - Don't process files under an ignored directory.

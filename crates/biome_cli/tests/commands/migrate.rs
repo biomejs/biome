@@ -150,7 +150,7 @@ fn prettier_migrate() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("migrate"), "--prettier"].as_slice()),
+        Args::from([("migrate"), "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -192,7 +192,7 @@ generated/*.spec.js
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("migrate"), "--prettier"].as_slice()),
+        Args::from([("migrate"), "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -219,7 +219,7 @@ fn prettier_migrate_no_file() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("migrate"), "--prettier"].as_slice()),
+        Args::from([("migrate"), "prettier"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -250,7 +250,7 @@ fn prettier_migrate_yml_file() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("migrate"), "--prettier"].as_slice()),
+        Args::from([("migrate"), "prettier"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -281,7 +281,7 @@ fn prettier_migrate_write() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("migrate"), "--prettier", "--write"].as_slice()),
+        Args::from([("migrate"), "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -323,7 +323,7 @@ generated/*.spec.js
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("migrate"), "--prettier", "--write"].as_slice()),
+        Args::from([("migrate"), "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
