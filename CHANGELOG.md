@@ -32,6 +32,17 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#1173](https://github.com/biomejs/biome/issues/1173). Fix the formatting of a single instruction with commented in a control flow body to ensure consistency. Contributed by @mdm317
 
 - Fix overriding of `javascript.globals`. Contributed by @arendjr
+- Fix a bug where syntax rules weren't run when pulling the diagnostics. Now Biome will emit more parsing diagnostics, e.g.
+  ```
+  check.js:1:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    × Duplicate private class member "#foo"
+
+    > 1 │ class A { #foo; #foo }
+        │                 ^^^^
+
+  ```
+  Contributed by @ematipico
 
 ### Configuration
 
@@ -40,6 +51,19 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Bug fixes
 
 - Fix a regression where ignored files where formatted in the editor. Contributed by @ematipico
+- Fix a bug where syntax rules weren't run when pulling the diagnostics. Now Biome will emit more parsing diagnostics, e.g.
+  ```
+  check.js:1:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    × Duplicate private class member "#foo"
+
+    > 1 │ class A { #foo; #foo }
+        │                 ^^^^
+
+  ```
+  Contributed by @ematipico
+
+
 
 ### Formatter
 

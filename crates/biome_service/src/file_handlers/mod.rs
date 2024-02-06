@@ -8,7 +8,7 @@ use crate::{
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
     Rules, WorkspaceError,
 };
-use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
+use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic, RuleCategories};
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_css_formatter::can_format_css_yet;
@@ -277,12 +277,11 @@ pub struct DebugCapabilities {
 
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) filter: AnalysisFilter<'a>,
-    pub(crate) rules: Option<&'a Rules>,
     pub(crate) settings: SettingsHandle<'a>,
     pub(crate) language: Language,
     pub(crate) max_diagnostics: u64,
     pub(crate) path: &'a RomePath,
+    pub(crate) categories: RuleCategories,
 }
 
 pub(crate) struct LintResults {

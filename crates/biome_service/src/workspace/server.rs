@@ -16,7 +16,7 @@ use crate::{
     settings::{SettingsHandle, WorkspaceSettings},
     Workspace, WorkspaceError,
 };
-use biome_analyze::{AnalysisFilter, RuleFilter};
+use biome_analyze::AnalysisFilter;
 use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
@@ -29,7 +29,7 @@ use std::borrow::Borrow;
 use std::ffi::OsStr;
 use std::path::Path;
 use std::{panic::RefUnwindSafe, sync::RwLock};
-use tracing::{debug, info, info_span, trace};
+use tracing::{debug, info, info_span};
 
 pub(super) struct WorkspaceServer {
     /// features available throughout the application
@@ -429,53 +429,34 @@ impl Workspace for WorkspaceServer {
         params: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         let parse = self.get_parse(params.path.clone())?;
-        let settings = self.settings.read().unwrap();
 
-        let (diagnostics, errors, skipped_diagnostics) = if let Some(lint) =
-            self.get_file_capabilities(&params.path).analyzer.lint
-        {
-            // Compite final rules (taking `overrides` into account)
-            let rules = settings.as_rules(params.path.as_path());
-            let mut rule_filter_list = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
-            if settings.organize_imports.enabled && !params.categories.is_syntax() {
-                rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
-            }
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
-            filter.categories = params.categories;
+        let (diagnostics, errors, skipped_diagnostics) =
+            if let Some(lint) = self.get_file_capabilities(&params.path).analyzer.lint {
+                info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
+                    let results = lint(LintParams {
+                        parse,
+                        settings: self.settings(),
+                        max_diagnostics: params.max_diagnostics,
+                        path: &params.path,
+                        language: self.get_language(&params.path),
+                        categories: params.categories,
+                    });
 
-            info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
-                trace!("Analyzer filter to apply to lint: {:?}", &filter);
+                    (
+                        results.diagnostics,
+                        results.errors,
+                        results.skipped_diagnostics,
+                    )
+                })
+            } else {
+                let parse_diagnostics = parse.into_diagnostics();
+                let errors = parse_diagnostics
+                    .iter()
+                    .filter(|diag| diag.severity() <= Severity::Error)
+                    .count();
 
-                let results = lint(LintParams {
-                    parse,
-                    filter,
-                    rules: rules.as_ref().map(|x| x.borrow()),
-                    settings: self.settings(),
-                    max_diagnostics: params.max_diagnostics,
-                    path: &params.path,
-                    language: self.get_language(&params.path),
-                });
-
-                (
-                    results.diagnostics,
-                    results.errors,
-                    results.skipped_diagnostics,
-                )
-            })
-        } else {
-            let parse_diagnostics = parse.into_diagnostics();
-            let errors = parse_diagnostics
-                .iter()
-                .filter(|diag| diag.severity() <= Severity::Error)
-                .count();
-
-            (parse_diagnostics, errors, 0)
-        };
+                (parse_diagnostics, errors, 0)
+            };
 
         info!("Pulled {:?} diagnostic(s)", diagnostics.len());
         Ok(PullDiagnosticsResult {

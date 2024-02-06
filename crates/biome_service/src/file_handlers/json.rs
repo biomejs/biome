@@ -13,7 +13,9 @@ use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
 };
 use crate::{Rules, WorkspaceError};
-use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
+};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
@@ -276,6 +278,7 @@ fn lint(params: LintParams) -> LintResults {
         .in_scope(move || {
             let root: JsonRoot = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
+            let settings = params.settings.as_ref();
 
             // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
             // malformed configuration
@@ -298,54 +301,62 @@ fn lint(params: LintParams) -> LintResults {
 
             let skipped_diagnostics = diagnostic_count - diagnostics.len() as u64;
 
-            let has_lint = params.filter.categories.contains(RuleCategories::LINT);
+            let rules = settings.as_rules(params.path.as_path());
+            let rule_filter_list = rules
+                .as_ref()
+                .map(|rules| rules.as_enabled_rules())
+                .unwrap_or_default()
+                .into_iter()
+                .collect::<Vec<_>>();
+
             let analyzer_options =
                 compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
+            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
+            filter.categories = params.categories;
+            let has_lint = filter.categories.contains(RuleCategories::LINT);
 
-            let (_, analyze_diagnostics) =
-                analyze(&root, params.filter, &analyzer_options, |signal| {
-                    if let Some(mut diagnostic) = signal.diagnostic() {
-                        // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
-                        if !has_lint
-                            && diagnostic.category() == Some(category!("suppressions/unused"))
-                        {
-                            return ControlFlow::<Never>::Continue(());
-                        }
-
-                        diagnostic_count += 1;
-
-                        // We do now check if the severity of the diagnostics should be changed.
-                        // The configuration allows to change the severity of the diagnostics emitted by rules.
-                        let severity = diagnostic
-                            .category()
-                            .filter(|category| category.name().starts_with("lint/"))
-                            .map(|category| {
-                                params
-                                    .rules
-                                    .and_then(|rules| rules.get_severity_from_code(category))
-                                    .unwrap_or(Severity::Warning)
-                            })
-                            .unwrap_or_else(|| diagnostic.severity());
-
-                        if severity <= Severity::Error {
-                            errors += 1;
-                        }
-
-                        if diagnostic_count <= params.max_diagnostics {
-                            for action in signal.actions() {
-                                if !action.is_suppression() {
-                                    diagnostic = diagnostic.add_code_suggestion(action.into());
-                                }
-                            }
-
-                            let error = diagnostic.with_severity(severity);
-
-                            diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
-                        }
+            let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, |signal| {
+                if let Some(mut diagnostic) = signal.diagnostic() {
+                    // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
+                    if !has_lint && diagnostic.category() == Some(category!("suppressions/unused"))
+                    {
+                        return ControlFlow::<Never>::Continue(());
                     }
 
-                    ControlFlow::<Never>::Continue(())
-                });
+                    diagnostic_count += 1;
+
+                    // We do now check if the severity of the diagnostics should be changed.
+                    // The configuration allows to change the severity of the diagnostics emitted by rules.
+                    let severity = diagnostic
+                        .category()
+                        .filter(|category| category.name().starts_with("lint/"))
+                        .map(|category| {
+                            rules
+                                .as_ref()
+                                .and_then(|rules| rules.get_severity_from_code(category))
+                                .unwrap_or(Severity::Warning)
+                        })
+                        .unwrap_or_else(|| diagnostic.severity());
+
+                    if severity <= Severity::Error {
+                        errors += 1;
+                    }
+
+                    if diagnostic_count <= params.max_diagnostics {
+                        for action in signal.actions() {
+                            if !action.is_suppression() {
+                                diagnostic = diagnostic.add_code_suggestion(action.into());
+                            }
+                        }
+
+                        let error = diagnostic.with_severity(severity);
+
+                        diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
+                    }
+                }
+
+                ControlFlow::<Never>::Continue(())
+            });
 
             diagnostics.extend(
                 analyze_diagnostics
