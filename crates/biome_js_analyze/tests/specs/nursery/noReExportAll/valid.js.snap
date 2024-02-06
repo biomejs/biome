@@ -6,7 +6,6 @@ expression: valid.js
 # Input
 ```jsx
 export { foo } from "foo";
-
 ```
 
 
