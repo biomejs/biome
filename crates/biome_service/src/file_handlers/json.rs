@@ -1,4 +1,4 @@
-use super::{ExtensionHandler, Mime};
+use super::{ExtensionHandler, Mime, PullActions};
 use crate::configuration::{to_analyzer_rules, PartialConfiguration};
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FixAllParams, FormatterCapabilities, LintParams,
@@ -12,7 +12,7 @@ use crate::settings::{
 use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
 };
-use crate::{Rules, WorkspaceError};
+use crate::WorkspaceError;
 use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
@@ -361,13 +361,7 @@ fn lint(params: LintParams) -> LintResults {
             }
         })
 }
-fn code_actions(
-    _parse: AnyParse,
-    _range: TextRange,
-    _rules: Option<&Rules>,
-    _settings: SettingsHandle,
-    _path: &RomePath,
-) -> PullActionsResult {
+fn code_actions(_params: PullActions) -> PullActionsResult {
     PullActionsResult {
         actions: Vec::new(),
     }

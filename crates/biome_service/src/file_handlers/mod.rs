@@ -176,6 +176,7 @@ impl Language {
                 | Language::TypeScript
                 | Language::JavaScriptReact
                 | Language::TypeScriptReact
+                | Language::Astro
         )
     }
 
@@ -298,6 +299,14 @@ pub struct DebugCapabilities {
     pub(crate) debug_formatter_ir: Option<DebugFormatterIR>,
 }
 
+pub struct PullActions<'a> {
+    pub(crate) parse: AnyParse,
+    pub(crate) range: TextRange,
+    pub(crate) rules: Option<&'a Rules>,
+    pub(crate) settings: SettingsHandle<'a>,
+    pub(crate) rome_path: &'a RomePath,
+}
+
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) filter: AnalysisFilter<'a>,
@@ -315,8 +324,7 @@ pub(crate) struct LintResults {
 }
 
 type Lint = fn(LintParams) -> LintResults;
-type CodeActions =
-    fn(AnyParse, TextRange, Option<&Rules>, SettingsHandle, &RomePath) -> PullActionsResult;
+type CodeActions = fn(PullActions) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&RomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
 type OrganizeImports = fn(AnyParse) -> Result<OrganizeImportsResult, WorkspaceError>;

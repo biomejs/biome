@@ -75,7 +75,7 @@ impl AnyFileSource {
     ///
     /// The function will panic if:
     /// - the original type and given type mismatch
-    /// - it's possible to retrieve the correct [FileSource] from the given [Path]
+    /// - it's impossible to retrieve the correct [FileSource] from the given [Path]
     pub fn unwrap_cast_from_path<'a, F, L>(&self, path: &'a Path) -> Result<F, FileSourceError>
     where
         F: FileSource<'a, L> + 'static,

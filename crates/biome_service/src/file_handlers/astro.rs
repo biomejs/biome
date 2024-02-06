@@ -1,8 +1,9 @@
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, DebugCapabilities, ExtensionHandler, FormatterCapabilities,
-    Language, Mime, ParserCapabilities,
+    Language, LintParams, LintResults, Mime, ParserCapabilities, PullActions,
 };
 use crate::settings::SettingsHandle;
+use crate::workspace::PullActionsResult;
 use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
@@ -43,8 +44,8 @@ impl ExtensionHandler for AstroFileHandler {
                 debug_formatter_ir: None,
             },
             analyzer: AnalyzerCapabilities {
-                lint: None,
-                code_actions: None,
+                lint: Some(lint),
+                code_actions: Some(code_actions),
                 rename: None,
                 fix_all: None,
                 organize_imports: None,
@@ -106,4 +107,12 @@ fn format(
             Err(WorkspaceError::FormatError(error.into()))
         }
     }
+}
+
+pub(crate) fn lint(params: LintParams) -> LintResults {
+    crate::file_handlers::javascript::lint(params)
+}
+
+pub(crate) fn code_actions(params: PullActions) -> PullActionsResult {
+    crate::file_handlers::javascript::code_actions(params)
 }

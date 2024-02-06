@@ -5,7 +5,7 @@ use super::{
     PullDiagnosticsParams, PullDiagnosticsResult, RenameResult, SupportsFeatureParams,
     UpdateSettingsParams,
 };
-use crate::file_handlers::{Capabilities, FixAllParams, Language, LintParams};
+use crate::file_handlers::{Capabilities, FixAllParams, Language, LintParams, PullActions};
 use crate::project_handlers::{ProjectCapabilities, ProjectHandlers};
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
@@ -177,7 +177,6 @@ impl WorkspaceServer {
                     settings,
                     &mut document.node_cache,
                 );
-
                 Ok(entry.insert(parsed).clone())
             }
         }
@@ -504,13 +503,13 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(params.path.clone())?;
         let settings = self.settings.read().unwrap();
         let rules = settings.linter().rules.as_ref();
-        Ok(code_actions(
+        Ok(code_actions(PullActions {
             parse,
-            params.range,
+            range: params.range,
             rules,
-            self.settings(),
-            &params.path,
-        ))
+            settings: self.settings(),
+            rome_path: &params.path,
+        }))
     }
 
     /// Runs the given file through the formatter using the provided options
