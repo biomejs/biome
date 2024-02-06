@@ -12,6 +12,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Analyzer
 
+#### Bug fixed
+
+- Fix [#1748](https://github.com/biomejs/biome/issues/1748). Now for the following case we won't provide an unsafe fix for the `noNonNullAssertion` rule:
+
+  ```ts
+  x[y.z!];
+  ```
+
+  Contributed by @ah-yu
+
 ### CLI
 
 #### New features

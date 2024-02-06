@@ -24,6 +24,7 @@ x.y.z!?.();
 x.y.z!!!?.();
 (b! as number) = "test";
 (b!! as number) = "test";
+x[y.z!];
 
 ```
 
@@ -405,7 +406,7 @@ invalid.ts:19:2 lint/style/noNonNullAssertion ━━━━━━━━━━━�
   > 19 │ (b! as number) = "test";
        │  ^^
     20 │ (b!! as number) = "test";
-    21 │ 
+    21 │ x[y.z!];
   
 
 ```
@@ -419,7 +420,22 @@ invalid.ts:20:2 lint/style/noNonNullAssertion ━━━━━━━━━━━�
     19 │ (b! as number) = "test";
   > 20 │ (b!! as number) = "test";
        │  ^^^
-    21 │ 
+    21 │ x[y.z!];
+    22 │ 
+  
+
+```
+
+```
+invalid.ts:21:3 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    19 │ (b! as number) = "test";
+    20 │ (b!! as number) = "test";
+  > 21 │ x[y.z!];
+       │   ^^^^
+    22 │ 
   
 
 ```
