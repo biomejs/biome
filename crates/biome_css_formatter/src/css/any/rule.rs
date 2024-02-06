@@ -9,6 +9,7 @@ impl FormatRule<AnyCssRule> for FormatAnyCssRule {
     fn fmt(&self, node: &AnyCssRule, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssRule::CssQualifiedRule(node) => node.format().fmt(f),
+            AnyCssRule::CssNestedQualifiedRule(node) => node.format().fmt(f),
             AnyCssRule::CssAtRule(node) => node.format().fmt(f),
             AnyCssRule::CssBogusRule(node) => node.format().fmt(f),
         }

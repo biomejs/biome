@@ -111,6 +111,10 @@ export interface PartialFilesConfiguration {
  * Generic options applied to all files
  */
 export interface PartialFormatterConfiguration {
+	/**
+	 * The attribute position style. By default auto.
+	 */
+	attributePosition?: AttributePosition;
 	enabled?: boolean;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
@@ -274,6 +278,7 @@ export interface PartialCssParser {
 	 */
 	allowWrongLineComments?: boolean;
 }
+export type AttributePosition = "auto" | "multiline";
 export type PlainIndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
 /**
@@ -290,6 +295,10 @@ export interface PartialJavascriptFormatter {
 	 * Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
 	 */
 	arrowParentheses?: ArrowParentheses;
+	/**
+	 * The attribute position style in JavaScript code. Defaults to auto.
+	 */
+	attributePosition?: AttributePosition;
 	/**
 	 * Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
 	 */
@@ -891,9 +900,9 @@ export interface Nursery {
 	 */
 	noNodejsModules?: RuleConfiguration;
 	/**
-	 * Disallow specified modules when loaded by import or require.
+	 * Avoid re-export all
 	 */
-	noRestrictedImports?: RuleConfiguration;
+	noReExportAll?: RuleConfiguration;
 	/**
 	 * Disallow disabled tests.
 	 */
@@ -1167,7 +1176,7 @@ export interface Suspicious {
 	 */
 	all?: boolean;
 	/**
-	 * Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
+	 * Use standard constants instead of approximated literals.
 	 */
 	noApproximativeNumericConstant?: RuleConfiguration;
 	/**
@@ -1352,6 +1361,10 @@ export interface Suspicious {
 	useValidTypeof?: RuleConfiguration;
 }
 export interface OverrideFormatterConfiguration {
+	/**
+	 * The attribute position style.
+	 */
+	attributePosition?: AttributePosition;
 	enabled?: boolean;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
@@ -1408,7 +1421,6 @@ export type PossibleOptions =
 	| DeprecatedHooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
-	| RestrictedImportsOptions
 	| ValidAriaRoleOptions
 	| UtilityClassSortingOptions;
 /**
@@ -1470,15 +1482,6 @@ export interface RestrictedGlobalsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	deniedGlobals: string[];
-}
-/**
- * Options for the rule `noRestrictedImports`.
- */
-export interface RestrictedImportsOptions {
-	/**
-	 * A list of names that should trigger the rule
-	 */
-	paths: {};
 }
 export interface ValidAriaRoleOptions {
 	allowInvalidRoles: string[];
@@ -1710,7 +1713,7 @@ export type Category =
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNodejsModules"
-	| "lint/nursery/noRestrictedImports"
+	| "lint/nursery/noReExportAll"
 	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"

@@ -9,6 +9,7 @@ import Playground from "./Playground";
 import LoadingScreen from "./components/LoadingScreen";
 import {
 	type ArrowParentheses,
+	type AttributePosition,
 	type IndentStyle,
 	type LintRules,
 	LoadingState,
@@ -335,6 +336,9 @@ function initState(
 			arrowParentheses:
 				(searchParams.get("arrowParentheses") as ArrowParentheses) ??
 				defaultPlaygroundState.settings.arrowParentheses,
+			attributePosition:
+				(searchParams.get("attributePosition") as AttributePosition) ??
+				defaultPlaygroundState.settings.attributePosition,
 			bracketSpacing:
 				searchParams.get("bracketSpacing") === "true" ||
 				defaultPlaygroundState.settings.bracketSpacing,

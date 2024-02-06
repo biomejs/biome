@@ -297,6 +297,7 @@
 			}
 		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
+		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -932,6 +933,13 @@
 			"description": "Generic options applied to all files",
 			"type": "object",
 			"properties": {
+				"attributePosition": {
+					"description": "The attribute position style. By default auto.",
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": { "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
@@ -1047,6 +1055,13 @@
 					"description": "Whether to add non-necessary parentheses to arrow functions. Defaults to \"always\".",
 					"anyOf": [
 						{ "$ref": "#/definitions/ArrowParentheses" },
+						{ "type": "null" }
+					]
+				},
+				"attributePosition": {
+					"description": "The attribute position style in JavaScript code. Defaults to auto.",
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
 						{ "type": "null" }
 					]
 				},
@@ -1336,8 +1351,8 @@
 						{ "type": "null" }
 					]
 				},
-				"noRestrictedImports": {
-					"description": "Disallow specified modules when loaded by import or require.",
+				"noReExportAll": {
+					"description": "Avoid re-export all",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1496,6 +1511,14 @@
 		"OverrideFormatterConfiguration": {
 			"type": "object",
 			"properties": {
+				"attributePosition": {
+					"description": "The attribute position style.",
+					"default": null,
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": { "default": null, "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
@@ -1682,10 +1705,6 @@
 					"allOf": [{ "$ref": "#/definitions/RestrictedGlobalsOptions" }]
 				},
 				{
-					"description": "Options for `noRestrictedImports` rule",
-					"allOf": [{ "$ref": "#/definitions/RestrictedImportsOptions" }]
-				},
-				{
 					"description": "Options for `useValidAriaRole` rule",
 					"allOf": [{ "$ref": "#/definitions/ValidAriaRoleOptions" }]
 				},
@@ -1706,19 +1725,6 @@
 					"description": "A list of names that should trigger the rule",
 					"type": "array",
 					"items": { "type": "string" }
-				}
-			},
-			"additionalProperties": false
-		},
-		"RestrictedImportsOptions": {
-			"description": "Options for the rule `noRestrictedImports`.",
-			"type": "object",
-			"required": ["paths"],
-			"properties": {
-				"paths": {
-					"description": "A list of names that should trigger the rule",
-					"type": "object",
-					"additionalProperties": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
@@ -2073,7 +2079,7 @@
 					"type": ["boolean", "null"]
 				},
 				"noApproximativeNumericConstant": {
-					"description": "Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.",
+					"description": "Use standard constants instead of approximated literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

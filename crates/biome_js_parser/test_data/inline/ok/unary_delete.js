@@ -20,3 +20,6 @@ delete obj?.inner.#member[key];
 delete (obj?.inner.#member)[key];
 delete (obj.#key, obj.key);
 delete (#key in obj);
+delete (obj.key);
+delete (console.log(1));
+delete (() => {});

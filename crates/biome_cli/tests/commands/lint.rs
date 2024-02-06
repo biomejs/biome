@@ -2639,3 +2639,28 @@ fn should_not_process_ignored_file_even_if_its_changed() {
         result,
     ));
 }
+
+#[test]
+fn lint_syntax_rules() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), r#"class A { #foo; #foo }"#.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_syntax_rules",
+        fs,
+        console,
+        result,
+    ));
+}

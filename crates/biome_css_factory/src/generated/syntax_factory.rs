@@ -19,6 +19,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_BLOCK
             | CSS_BOGUS_DECLARATION_ITEM
             | CSS_BOGUS_DOCUMENT_MATCHER
+            | CSS_BOGUS_FONT_FEATURE_VALUES_ITEM
             | CSS_BOGUS_KEYFRAMES_ITEM
             | CSS_BOGUS_LAYER
             | CSS_BOGUS_MEDIA_QUERY
@@ -1069,6 +1070,39 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_DECLARATION_OR_AT_RULE_BLOCK, children)
             }
+            CSS_DECLARATION_OR_RULE_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['{'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssDeclarationOrRuleList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['}'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_DECLARATION_OR_RULE_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_DECLARATION_OR_RULE_BLOCK, children)
+            }
             CSS_DECLARATION_WITH_SEMICOLON => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -1196,6 +1230,114 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_FONT_FACE_AT_RULE, children)
+            }
+            CSS_FONT_FEATURE_VALUES_AT_RULE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![font_feature_values] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssFontFamilyName::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssFontFeatureValuesBlock::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_FONT_FEATURE_VALUES_AT_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_FONT_FEATURE_VALUES_AT_RULE, children)
+            }
+            CSS_FONT_FEATURE_VALUES_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['{'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssFontFeatureValuesItemList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['}'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_FONT_FEATURE_VALUES_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_FONT_FEATURE_VALUES_BLOCK, children)
+            }
+            CSS_FONT_FEATURE_VALUES_ITEM => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [@] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if matches!(
+                        element.kind(),
+                        T![stylistic]
+                            | T![historical_forms]
+                            | T![styleset]
+                            | T![character_variant]
+                            | T![swash]
+                            | T![ornaments]
+                            | T![annotation]
+                    ) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssDeclarationListBlock::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_FONT_FEATURE_VALUES_ITEM.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_FONT_FEATURE_VALUES_ITEM, children)
             }
             CSS_FONT_PALETTE_VALUES_AT_RULE => {
                 let mut elements = (&children).into_iter();
@@ -1834,7 +1976,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssDeclarationOrAtRuleBlock::can_cast(element.kind()) {
+                    if AnyCssDeclarationOrAtRuleBlock::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2220,6 +2362,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_NAMESPACE_AT_RULE, children)
+            }
+            CSS_NESTED_QUALIFIED_RULE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssRelativeSelectorList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssDeclarationOrRuleBlock::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_NESTED_QUALIFIED_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_NESTED_QUALIFIED_RULE, children)
             }
             CSS_NTH_OFFSET => {
                 let mut elements = (&children).into_iter();
@@ -3112,7 +3280,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyCssDeclarationListBlock::can_cast(element.kind()) {
+                    if AnyCssDeclarationOrRuleBlock::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -4143,6 +4311,9 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_DECLARATION_OR_AT_RULE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssDeclarationOrAtRule::can_cast)
             }
+            CSS_DECLARATION_OR_RULE_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyCssDeclarationOrRule::can_cast)
+            }
             CSS_DOCUMENT_MATCHER_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
@@ -4150,6 +4321,9 @@ impl SyntaxFactory for CssSyntaxFactory {
                 T ! [,],
                 true,
             ),
+            CSS_FONT_FEATURE_VALUES_ITEM_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyCssFontFeatureValuesItem::can_cast)
+            }
             CSS_GENERIC_COMPONENT_VALUE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssGenericComponentValue::can_cast)
             }

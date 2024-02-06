@@ -190,8 +190,15 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Migrate {
                 cli_options,
                 write,
-                prettier,
-            } => commands::migrate::migrate(self, cli_options, write, prettier),
+                sub_command,
+            } => commands::migrate::migrate(
+                self,
+                cli_options,
+                write,
+                sub_command
+                    .map(|sub_command| sub_command.is_prettier())
+                    .unwrap_or_default(),
+            ),
             BiomeCommand::RunServer {
                 stop_on_disconnect,
                 config_path,

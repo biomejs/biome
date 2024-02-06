@@ -8,9 +8,10 @@ use crate::{
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
     Rules, WorkspaceError,
 };
-use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
+use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic, RuleCategories};
 use biome_console::fmt::Formatter;
 use biome_console::markup;
+use biome_css_formatter::can_format_css_yet;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
 use biome_fs::RomePath;
@@ -276,12 +277,11 @@ pub struct DebugCapabilities {
 
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) filter: AnalysisFilter<'a>,
-    pub(crate) rules: Option<&'a Rules>,
     pub(crate) settings: SettingsHandle<'a>,
     pub(crate) language: Language,
     pub(crate) max_diagnostics: u64,
     pub(crate) path: &'a RomePath,
+    pub(crate) categories: RuleCategories,
 }
 
 pub(crate) struct LintResults {
@@ -385,8 +385,14 @@ impl Features {
             | Language::TypeScript
             | Language::TypeScriptReact => self.js.capabilities(),
             Language::Json | Language::Jsonc => self.json.capabilities(),
-            // TODO: change this when we are ready to handle CSS files
-            Language::Css => self.unknown.capabilities(),
+            Language::Css => {
+                // TODO: change this when we are ready to handle CSS files
+                if can_format_css_yet() {
+                    self.css.capabilities()
+                } else {
+                    self.unknown.capabilities()
+                }
+            }
             Language::Unknown => self.unknown.capabilities(),
         }
     }

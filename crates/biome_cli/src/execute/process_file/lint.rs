@@ -45,7 +45,10 @@ pub(crate) fn lint_with_guard<'ctx>(
             let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
             let pull_diagnostics_result = workspace_file
                 .guard()
-                .pull_diagnostics(RuleCategories::LINT, max_diagnostics.into())
+                .pull_diagnostics(
+                    RuleCategories::LINT | RuleCategories::SYNTAX,
+                    max_diagnostics.into(),
+                )
                 .with_file_path_and_code(
                     workspace_file.path.display().to_string(),
                     category!("lint"),

@@ -2248,9 +2248,9 @@ pub struct Nursery {
     #[doc = "Forbid the use of Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_nodejs_modules: Option<RuleConfiguration>,
-    #[doc = "Disallow specified modules when loaded by import or require."]
+    #[doc = "Avoid re-export all"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_restricted_imports: Option<RuleConfiguration>,
+    pub no_re_export_all: Option<RuleConfiguration>,
     #[doc = "Disallow disabled tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_skipped_tests: Option<RuleConfiguration>,
@@ -2332,7 +2332,7 @@ impl Nursery {
         "noInvalidUseBeforeDeclaration",
         "noMisleadingCharacterClass",
         "noNodejsModules",
-        "noRestrictedImports",
+        "noReExportAll",
         "noSkippedTests",
         "noThenProperty",
         "noUnusedImports",
@@ -2470,7 +2470,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.no_re_export_all.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
@@ -2614,7 +2614,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.no_re_export_all.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
@@ -2754,7 +2754,7 @@ impl Nursery {
             "noInvalidUseBeforeDeclaration" => self.no_invalid_use_before_declaration.as_ref(),
             "noMisleadingCharacterClass" => self.no_misleading_character_class.as_ref(),
             "noNodejsModules" => self.no_nodejs_modules.as_ref(),
-            "noRestrictedImports" => self.no_restricted_imports.as_ref(),
+            "noReExportAll" => self.no_re_export_all.as_ref(),
             "noSkippedTests" => self.no_skipped_tests.as_ref(),
             "noThenProperty" => self.no_then_property.as_ref(),
             "noUnusedImports" => self.no_unused_imports.as_ref(),
@@ -3711,7 +3711,7 @@ pub struct Suspicious {
     #[doc = r" It enables ALL rules for this group."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub all: Option<bool>,
-    #[doc = "Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type."]
+    #[doc = "Use standard constants instead of approximated literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_approximative_numeric_constant: Option<RuleConfiguration>,
     #[doc = "Discourage the usage of Array index in keys."]

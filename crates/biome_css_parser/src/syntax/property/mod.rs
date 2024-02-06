@@ -81,7 +81,7 @@ pub(crate) fn parse_generic_property(p: &mut CssParser) -> ParsedSyntax {
 ///   parse_property_value_with_fallbacks(p, |p| {
 ///     parse_length(p).or_else(|| parse_percentage(p))
 ///   }).ok();
-///   
+///
 ///   Present(m.complete(p, CSS_MY_PROPERTY))
 /// }
 /// ```

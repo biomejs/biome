@@ -1,12 +1,25 @@
-use std::f64::consts as f64;
+use std::cmp::Ordering;
 
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
+};
 use biome_console::markup;
-use biome_js_syntax::JsNumberLiteralExpression;
-use biome_rowan::AstNode;
+use biome_diagnostics::Applicability;
+use biome_js_factory::make;
+use biome_js_syntax::{
+    numbers::split_into_radix_and_number, AnyJsExpression, AnyJsLiteralExpression,
+    JsNumberLiteralExpression, T,
+};
+use biome_rowan::{AstNode, BatchMutationExt};
+
+use crate::JsRuleAction;
 
 declare_rule! {
-    /// Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
+    /// Use standard constants instead of approximated literals.
+    ///
+    /// Usually, the definition in the standard library is more precise than
+    /// what people come up with or the used constant exceeds the maximum precision of the number type.
     ///
     /// ## Examples
     ///
@@ -15,6 +28,7 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// let x = 3.141;
     /// ```
+    ///
     /// ```js,expect_diagnostic
     /// let x = 2.302;
     /// ```
@@ -23,7 +37,9 @@ declare_rule! {
     ///
     /// ```js
     /// let x = Math.PI;
+    /// let y = 3.14;
     /// ```
+    ///
     /// ```js
     /// let x = Math.LN10;
     /// ```
@@ -32,81 +48,113 @@ declare_rule! {
         name: "noApproximativeNumericConstant",
         source: RuleSource::Clippy("approx_constant"),
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
 impl Rule for NoApproximativeNumericConstant {
     type Query = Ast<JsNumberLiteralExpression>;
-    type State = ();
+    type State = &'static str;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-
-        if get_approximative_literal_diagnostic(node).is_some() {
-            Some(())
-        } else {
-            None
+        let token = ctx.query().value_token().ok()?;
+        let num = token.text_trimmed();
+        let (10, num) = split_into_radix_and_number(num) else {
+            return None;
+        };
+        let (decimal, fraction) = num.split_once('.')?;
+        if fraction.len() < (MIN_FRACTION_DIGITS as usize)
+            || !matches!(decimal, "" | "0" | "1" | "2" | "3")
+            || fraction.contains(['e', 'E'])
+        {
+            return None;
         }
+        let num = num.trim_matches('0');
+        for (constant, name) in KNOWN_CONSTS {
+            let is_constant_approximated = match constant.len().cmp(&num.len()) {
+                Ordering::Less => is_approx_const(num, constant),
+                Ordering::Equal => constant == num,
+                Ordering::Greater => is_approx_const(constant, num),
+            };
+            if is_constant_approximated {
+                return Some(name);
+            }
+        }
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        get_approximative_literal_diagnostic(node)
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            node.range(),
+            markup! { "Prefer constants from the standard library." },
+        ))
+    }
+
+    fn action(ctx: &RuleContext<Self>, constant_name: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let new_node = make::js_static_member_expression(
+            make::js_identifier_expression(make::js_reference_identifier(make::ident("Math")))
+                .into(),
+            make::token(T![.]),
+            make::js_name(make::ident(constant_name)).into(),
+        );
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node(
+            AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(node.clone())),
+            AnyJsExpression::from(new_node),
+        );
+        Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message: markup! { "Use "<Emphasis>"Math."{ constant_name }</Emphasis>" instead." }
+                .to_owned(),
+            mutation,
+        })
     }
 }
 
-// Tuples are of the form (constant, name, min_digits)
-const KNOWN_CONSTS: [(f64, &str, usize); 8] = [
-    (f64::E, "E", 4),
-    (f64::LN_10, "LN10", 4),
-    (f64::LN_2, "LN2", 4),
-    (f64::LOG10_E, "LOG10E", 4),
-    (f64::LOG2_E, "LOG2E", 4),
-    (f64::PI, "PI", 4),
-    (f64::FRAC_1_SQRT_2, "SQRT1_2", 4),
-    (f64::SQRT_2, "SQRT2", 4),
+const MIN_FRACTION_DIGITS: u8 = 3;
+
+// Tuples are of the form (constant, name)
+const KNOWN_CONSTS: [(&str, &str); 8] = [
+    ("2.718281828459045", "E"),
+    ("2.302585092994046", "LN10"),
+    (".6931471805599453", "LN2"),
+    (".4342944819032518", "LOG10E"),
+    ("1.4426950408889634", "LOG2E"),
+    ("3.141592653589793", "PI"),
+    (".7071067811865476", "SQRT1_2"),
+    ("1.4142135623730951", "SQRT2"),
 ];
 
-fn get_approximative_literal_diagnostic(
-    node: &JsNumberLiteralExpression,
-) -> Option<RuleDiagnostic> {
-    let binding = node.text();
-    let s = binding.trim();
-    if s.parse::<f64>().is_err() {
-        return None;
-    }
-
-    for &(constant, name, min_digits) in &KNOWN_CONSTS {
-        if is_approx_const(constant, s, min_digits) {
-            return Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    node.syntax().text_trimmed_range(),
-                    markup! { "Prefer constants from the standard library." },
-                )
-                .note(markup! { "Use "<Emphasis>"Math."{ name }</Emphasis>" instead." }),
-            );
-        }
-    }
-
-    None
-}
-
-/// Returns `false` if the number of significant figures in `value` are
-/// less than `min_digits`; otherwise, returns true if `value` is equal
-/// to `constant`, rounded to the number of digits present in `value`.
-/// Taken from rust-clippy/clippy_lints:
-/// https://github.com/rust-lang/rust-clippy/blob/9554e477c29e6ddca9e5cdce71524341ef9d48e8/clippy_lints/src/approx_const.rs#L118-L132
-fn is_approx_const(constant: f64, value: &str, min_digits: usize) -> bool {
-    if value.len() <= min_digits {
-        false
-    } else if constant.to_string().starts_with(value) {
+/// Returns true if `value` is equal to `constant`,
+/// or rounded to the number of digits present in `value`.
+fn is_approx_const(constant: &str, value: &str) -> bool {
+    if constant.starts_with(value) {
         // The value is a truncated constant
-        true
-    } else {
-        let round_const = format!("{constant:.*}", value.len() - 2);
-        value == round_const
+        return true;
     }
+    let (digits, last_digit) = value.split_at(value.len() - 1);
+    if constant.starts_with(digits) {
+        let Ok(last_digit) = last_digit.parse::<u8>() else {
+            return false;
+        };
+        let Ok(extra_constant_digit) = constant[value.len()..value.len() + 1].parse::<u8>() else {
+            return false;
+        };
+        let can_be_rounded = extra_constant_digit < 5;
+        if can_be_rounded {
+            return false;
+        }
+        let Ok(constant_digit) = constant[digits.len()..digits.len() + 1].parse::<u8>() else {
+            return false;
+        };
+        let rounded_constant_digit = constant_digit + 1;
+        return last_digit == rounded_constant_digit;
+    }
+    false
 }

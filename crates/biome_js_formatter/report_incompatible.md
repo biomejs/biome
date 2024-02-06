@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 97.03
+**Average compatibility**: 97.13
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 98.01
+**Compatible lines**: 98.20
 
 <details>
     <summary>Definition</summary>
@@ -278,63 +278,6 @@
 ```
 
 **Prettier Similarity**: 97.37%
-
-
-### js/comments/function/between-parentheses-and-function-body.js
-```diff
- function function_declaration() {
-   // this is a function
-   return 42;
- }
- 
--(function named() {
--  // this is a function
--  return 42;
--})();
-+// FIXME
-+// TODO: reformat issue
-+// (function named()
-+// // this is a function
-+// {
-+//   return 42
-+// })();
- 
--(function () {
--  // this is a function
--  return 42;
--})();
-+// FIXME
-+// TODO: reformat issue
-+// (function ()
-+// // this is a function
-+// {
-+//   return 42
-+// })();
- 
- /* anonymous declaration */
- export default function () {
-   // this is a function
-   return 42;
- }
- 
-+// FIXME
-+// TODO: reformat issue
- a = {
-   foo() {
-     // this is a function
-   },
- 
--  bar: function () {
--    // this is a function
--  },
-+  // bar: function()
-+  // // this is a function
-+  // {},
- };
-
-```
-
-**Prettier Similarity**: 50.00%
 
 
 ### js/comments/html-like/comment.js
@@ -1041,92 +984,6 @@
 **Prettier Similarity**: 90.48%
 
 
-### js/for/continue-and-break-comment-without-blocks.js
-```diff
- for (;;) continue;
- // comment
- 
- for (;;) break;
- // comment
- 
- for (const f of []) continue;
- // comment
- 
- for (const f of []) break;
- // comment
- 
- for (const f in {}) continue;
- // comment
- 
- for (const f in {}) break;
- // comment
- 
- for (;;) continue; // comment
- 
- for (;;) break; // comment
- 
- for (const f of []) continue; // comment
- 
- for (const f of []) break; // comment
- 
- for (const f in {}) continue; // comment
- 
- for (const f in {}) break; // comment
- 
- for (;;) continue; /* comment */
- 
- for (;;) break; /* comment */
- 
- for (const f of []) continue; /* comment */
- 
- for (const f of []) break; /* comment */
- 
- for (const f in {}) continue; /* comment */
- 
- for (const f in {}) break; /* comment */
- 
- for (;;) continue;
- /* comment */
- 
- for (;;) break;
- /* comment */
- 
- for (const f of []) continue;
- /* comment */
- 
- for (const f of []) break;
- /* comment */
- 
- for (const f in {}) continue;
- /* comment */
- 
- for (const f in {}) break;
- /* comment */
- 
- label1: for (;;) continue label1 /* comment */;
- 
--label1: for (;;) continue label1;
--/* comment */
-+// FIXME: TODO: reformat issue
-+// label1: for (;;) continue label1
-+// /* comment */
-+// ;
- 
--label1: for (;;) continue label1; // comment
-+// label1: for (;;) continue label1 // comment
-+// ;
- 
--label1: for (;;) continue label1;
--// comment
-+// label1: for (;;) continue label1
-+// // comment
-+// ;
-
-```
-
-**Prettier Similarity**: 87.67%
-
-
 ### js/if/expr_and_same_line_comments.js
 ```diff
  if (a === 0) doSomething(); // comment A1
@@ -1537,48 +1394,6 @@
 ```
 
 **Prettier Similarity**: 0.00%
-
-
-### js/switch/comments2.js
-```diff
- switch (1) {
-   default: // comment1
- }
- 
- switch (2) {
-   default: // comment2
-   //comment2a
- }
- 
- switch (3) {
-   default: // comment3
-     break; // comment3a
- }
- 
- switch (4) {
-   default: // comment4
-     // comment4a
-     break; // comment4b
- }
- 
--switch (5) {
--  default: // comment5
--    // comment5a
--    foo();
--    bar(); //comment5b
--    break; // comment5c
--}
-+// FIXME
-+// TODO: reformat issue
-+// switch(5){default: // comment5
-+// // comment5a
-+// foo();bar();//comment5b
-+// break;// comment5c
-+// }
-
-```
-
-**Prettier Similarity**: 74.07%
 
 
 ### js/test-declarations/angularjs_inject.js
@@ -2753,10 +2568,8 @@
 ```diff
  class Foo1 {
    @foo
--  // comment
--  async method() {}
-+  async // comment
-+  method() {}
+   // comment
+   async method() {}
  }
  
  class Foo2 {
@@ -2767,18 +2580,14 @@
  
  class Foo3 {
    @foo
--  // comment
--  *method() {}
-+  *// comment
-+  method() {}
+   // comment
+   *method() {}
  }
  
  class Foo4 {
    @foo
--  // comment
--  async *method() {}
-+  async *// comment
-+  method() {}
+   // comment
+   async *method() {}
  }
  
  class Something {
@@ -2797,7 +2606,7 @@
 
 ```
 
-**Prettier Similarity**: 77.14%
+**Prettier Similarity**: 94.29%
 
 
 ### typescript/definite/without-annotation.ts
@@ -3538,42 +3347,6 @@
 ```
 
 **Prettier Similarity**: 96.97%
-
-
-### typescript/typeparams/print-width-120/issue-7542.tsx
-```diff
- export const Foo = forwardRef(
-   (props: FooProps, ref: Ref<HTMLElement>): JSX.Element => {
-     return <div />;
-   },
- );
- 
- export const Bar = forwardRef(
-   (props: BarProps, ref: Ref<HTMLElement>): JSX.Element | null => {
-     return <div />;
-   },
- );
- 
- users.map((user: User): User => {
-   return user;
- });
- 
--users.map((user: User): User => {
--  // comment
--});
-+// FIXME
-+// TODO: reformat issue
-+// users.map((user: User): User => {
-+//   ; // comment
-+// })
- 
- users.map((user: User): User => {
-   // comment
- });
-
-```
-
-**Prettier Similarity**: 80.00%
 
 
 ### typescript/union/comments.ts

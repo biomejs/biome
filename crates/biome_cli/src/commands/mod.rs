@@ -251,17 +251,15 @@ pub enum BiomeCommand {
     /// It updates the configuration when there are breaking changes
     #[bpaf(command)]
     Migrate {
-        /// It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`, and map
-        /// Prettier's configuration into `biome.json`
-        #[bpaf(long("prettier"), switch, hide, hide_usage)]
-        prettier: bool,
-
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
         /// Writes the new configuration file to disk
         #[bpaf(long("write"), switch)]
         write: bool,
+
+        #[bpaf(external(migrate_sub_command), optional)]
+        sub_command: Option<MigrateSubCommand>,
     },
 
     /// A command to retrieve the documentation of various aspects of the CLI.
@@ -292,6 +290,19 @@ pub enum BiomeCommand {
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
+}
+
+#[derive(Debug, Bpaf, Clone)]
+pub enum MigrateSubCommand {
+    /// It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`, and map the Prettier's configuration into Biome's configuration file.
+    #[bpaf(command)]
+    Prettier,
+}
+
+impl MigrateSubCommand {
+    pub const fn is_prettier(&self) -> bool {
+        matches!(self, MigrateSubCommand::Prettier)
+    }
 }
 
 impl BiomeCommand {
