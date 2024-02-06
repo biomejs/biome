@@ -900,6 +900,10 @@ export interface Nursery {
 	 */
 	noNodejsModules?: RuleConfiguration;
 	/**
+	 * Avoid re-export all
+	 */
+	noReExportAll?: RuleConfiguration;
+	/**
 	 * Disallow disabled tests.
 	 */
 	noSkippedTests?: RuleConfiguration;
@@ -1709,6 +1713,7 @@ export type Category =
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNodejsModules"
+	| "lint/nursery/noReExportAll"
 	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"

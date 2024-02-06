@@ -1351,6 +1351,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReExportAll": {
+					"description": "Avoid re-export all",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSkippedTests": {
 					"description": "Disallow disabled tests.",
 					"anyOf": [
