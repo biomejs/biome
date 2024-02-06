@@ -371,7 +371,7 @@ fn lint(params: LintParams) -> LintResults {
                                 }
                             }
 
-                            let error = diagnostic.with_severity(severity.clone());
+                            let error = diagnostic.with_severity(severity);
 
                             diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
                         }
