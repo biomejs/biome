@@ -1557,6 +1557,7 @@ export interface OpenFileParams {
  */
 export type Language =
 	| "Astro"
+	| "Vue"
 	| "JavaScript"
 	| "JavaScriptReact"
 	| "TypeScript"
@@ -1564,8 +1565,7 @@ export type Language =
 	| "Json"
 	| "Jsonc"
 	| "Css"
-	| "Unknown"
-	| "Vue";
+	| "Unknown";
 export interface ChangeFileParams {
 	content: string;
 	path: RomePath;
