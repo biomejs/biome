@@ -63,6 +63,42 @@ fn creates_config_file() {
 }
 
 #[test]
+fn creates_config_jsonc_file() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("init"), "--jsonc"].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let file_path = Path::new("biome.jsonc");
+    let parsed = parse_json(
+        CONFIG_INIT_DEFAULT,
+        JsonParserOptions::default()
+            .with_allow_comments()
+            .with_allow_trailing_commas(),
+    );
+    let formatted =
+        biome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())
+            .expect("valid format document")
+            .print()
+            .expect("valid format document");
+
+    assert_file_contents(&fs, file_path, formatted.as_code());
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "creates_config_jsonc_file",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn creates_config_file_when_biome_installed_via_package_manager() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
