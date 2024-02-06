@@ -1,4 +1,5 @@
 use crate::file_handlers::Language;
+use biome_configuration::diagnostics::CantLoadExtendFile;
 use biome_configuration::ConfigurationDiagnostic;
 use biome_console::fmt::Bytes;
 use biome_console::markup;
@@ -358,6 +359,18 @@ impl From<PrintError> for WorkspaceError {
 impl From<FileSystemDiagnostic> for WorkspaceError {
     fn from(err: FileSystemDiagnostic) -> Self {
         Self::FileSystem(err)
+    }
+}
+
+impl From<ConfigurationDiagnostic> for WorkspaceError {
+    fn from(value: ConfigurationDiagnostic) -> Self {
+        Self::Configuration(value)
+    }
+}
+
+impl From<CantLoadExtendFile> for WorkspaceError {
+    fn from(value: CantLoadExtendFile) -> Self {
+        Self::Configuration(ConfigurationDiagnostic::CantLoadExtendFile(value))
     }
 }
 

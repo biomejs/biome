@@ -6,7 +6,6 @@ use biome_diagnostics::{
     Severity, Visit,
 };
 use biome_rowan::SyntaxError;
-use biome_service::WorkspaceError;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
@@ -50,11 +49,11 @@ impl From<DeserializationDiagnostic> for ConfigurationDiagnostic {
 }
 
 impl ConfigurationDiagnostic {
-    pub(crate) fn new_serialization_error() -> Self {
+    pub fn new_serialization_error() -> Self {
         Self::SerializationError(SerializationError)
     }
 
-    pub(crate) fn new_invalid_ignore_pattern(
+    pub fn new_invalid_ignore_pattern(
         pattern: impl Into<String>,
         reason: impl Into<String>,
     ) -> Self {
@@ -230,7 +229,7 @@ pub struct ConfigAlreadyExists {}
 pub struct InvalidIgnorePattern {
     #[message]
     #[description]
-    pub(crate) message: String,
+    pub message: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -263,12 +262,6 @@ impl CantLoadExtendFile {
             .messages
             .push(markup! {{messsage}}.to_owned());
         self
-    }
-}
-
-impl From<CantLoadExtendFile> for WorkspaceError {
-    fn from(value: CantLoadExtendFile) -> Self {
-        WorkspaceError::Configuration(ConfigurationDiagnostic::CantLoadExtendFile(value))
     }
 }
 

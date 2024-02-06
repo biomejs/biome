@@ -11,6 +11,7 @@ pub mod matcher;
 pub mod settings;
 pub mod workspace;
 
+mod configuration;
 pub mod diagnostics;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
