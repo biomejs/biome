@@ -1564,7 +1564,8 @@ export type Language =
 	| "Json"
 	| "Jsonc"
 	| "Css"
-	| "Unknown";
+	| "Unknown"
+	| "Vue";
 export interface ChangeFileParams {
 	content: string;
 	path: RomePath;
