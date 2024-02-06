@@ -112,6 +112,7 @@ define_categories! {
     "lint/nursery/noMisleadingCharacterClass": "https://biomejs.dev/linter/rules/no-misleading-character-class",
     "lint/nursery/noNodejsModules": "https://biomejs.dev/linter/rules/no-nodejs-modules",
     "lint/nursery/noReExportAll": "https://biomejs.dev/linter/rules/no-re-export-all",
+    "lint/nursery/noRestrictedImports": "https://biomejs.dev/linter/rules/no-restricted-imports",
     "lint/nursery/noSkippedTests": "https://biomejs.dev/linter/rules/no-skipped-tests",
     "lint/nursery/noThenProperty": "https://biomejs.dev/linter/rules/no-then-property",
     "lint/nursery/noTypeOnlyImportAttributes": "https://biomejs.dev/linter/rules/no-type-only-import-attributes",

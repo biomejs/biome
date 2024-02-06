@@ -5,16 +5,16 @@ expression: hooks_missing_name.json
 hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Found an unknown key `useExhaustiveDependencies`.
-  
+
     4 │ 		"rules": {
     5 │ 			"nursery": {
   > 6 │ 				"useExhaustiveDependencies": {
       │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ 					"level": "error",
     8 │ 					"options": {
-  
+
   i Accepted keys
-  
+
   - recommended
   - all
   - noDuplicateJsonKeys
@@ -26,6 +26,7 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - noInvalidUseBeforeDeclaration
   - noMisleadingCharacterClass
   - noNodejsModules
+  - noRestrictedImports
   - noReExportAll
   - noSkippedTests
   - noThenProperty
@@ -45,6 +46,6 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - useNumberNamespace
   - useShorthandFunctionType
   - useSortedClasses
-  
+
 
 
