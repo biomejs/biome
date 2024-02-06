@@ -16,8 +16,6 @@ Source: <a href="https://eslint.org/docs/latest/rules/no-restricted-imports" tar
 
 Disallow specified modules when loaded by import or require.
 
-https://eslint.org/docs/latest/rules/no-restricted-imports
-
 ## Options
 
 ```json
