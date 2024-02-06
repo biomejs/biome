@@ -3,13 +3,13 @@ import type { Props } from "@astrojs/starlight/props";
 import AstrolightSiteTitle from "@astrojs/starlight/components/SiteTitle.astro";
 
 const menuItems = [
-  { name: "Docs", href: "/guides/getting-started" },
-  { name: "Blog", href: "/blog" },
-  { name: "Playground", href: "/playground" },
+	{ name: "Docs", href: "/guides/getting-started" },
+	{ name: "Blog", href: "/blog" },
+	{ name: "Playground", href: "/playground" },
 ];
 
 function pathsMatch(pathA: string, pathB: string): boolean {
-  return pathB.includes(pathA);
+	return pathB.includes(pathA);
 }
 ---
 

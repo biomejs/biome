@@ -4,21 +4,21 @@ import { getEntry, type CollectionEntry } from "astro:content";
 import { Image } from "astro:assets";
 
 export interface Props {
-  post: CollectionEntry<"blog">["data"];
+	post: CollectionEntry<"blog">["data"];
 }
 
 async function getAuthorsData(
-  authors: CollectionEntry<"authors">["id"][]
+	authors: CollectionEntry<"authors">["id"][],
 ): Promise<CollectionEntry<"authors">[]> {
-  const authorsData = await Promise.all(
-    authors.map((author) => getEntry("authors", author))
-  );
-  return authorsData;
+	const authorsData = await Promise.all(
+		authors.map((author) => getEntry("authors", author)),
+	);
+	return authorsData;
 }
 
 const { post } = Astro.props;
 const authors = await getAuthorsData(
-  post.authors as CollectionEntry<"authors">["id"][]
+	post.authors as CollectionEntry<"authors">["id"][],
 );
 ---
 
