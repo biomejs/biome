@@ -158,7 +158,8 @@ pub(crate) fn apply_suppression_comment(payload: SuppressionCommentEmitterPayloa
                 for w in leading_whitespace.iter() {
                     trivia.push((TriviaPieceKind::Whitespace, w.text()));
                 }
-                new_token = new_token.with_leading_trivia(trivia);
+                // Trim trailing trivia to prevent double insertion of trailing whitespaces in `replace_token_transfer_trivia`.
+                new_token = new_token.with_leading_trivia(trivia).trim_trailing_trivia();
             };
             mutation.replace_token_transfer_trivia(token_to_apply_suppression, new_token);
         }
