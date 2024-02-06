@@ -223,7 +223,7 @@ fn prettier_migrate_jsonc() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("migrate"), "--prettier"].as_slice()),
+        Args::from([("migrate"), "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -385,7 +385,7 @@ fn prettier_migrate_write_biome_jsonc() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("migrate"), "--prettier", "--write"].as_slice()),
+        Args::from([("migrate"), "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
