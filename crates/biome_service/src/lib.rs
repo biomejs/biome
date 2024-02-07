@@ -16,11 +16,11 @@ pub mod diagnostics;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 
-pub use crate::matcher::Matcher;
-
+pub use crate::configuration::{create_config, load_configuration, LoadedConfiguration , retrieve_gitignore_matches , to_analyzer_rules};
 pub use crate::diagnostics::{TransportError, WorkspaceError};
 /// Exports only for this crate
 pub use crate::file_handlers::JsFormatterSettings;
+pub use crate::matcher::Matcher;
 pub use crate::project_handlers::Manifests;
 pub use crate::workspace::Workspace;
 pub use diagnostics::extension_error;

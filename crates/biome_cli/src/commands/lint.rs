@@ -6,11 +6,10 @@ use crate::{
 };
 use biome_configuration::vcs::PartialVcsConfiguration;
 use biome_configuration::PartialConfiguration;
-use biome_configuration::{
-    load_configuration, LoadedConfiguration, PartialFilesConfiguration, PartialLinterConfiguration,
-};
+use biome_configuration::{PartialFilesConfiguration, PartialLinterConfiguration};
 use biome_deserialize::Merge;
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
+use biome_service::{load_configuration, LoadedConfiguration};
 use std::ffi::OsString;
 
 pub(crate) struct LintCommandPayload {

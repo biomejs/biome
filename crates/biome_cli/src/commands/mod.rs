@@ -11,13 +11,13 @@ use biome_configuration::{
 };
 use biome_configuration::{ConfigurationDiagnostic, PartialConfiguration};
 use biome_configuration::{
-    LoadedConfiguration, PartialCssFormatter, PartialFilesConfiguration,
-    PartialFormatterConfiguration, PartialJavascriptFormatter, PartialJsonFormatter,
-    PartialLinterConfiguration,
+    PartialCssFormatter, PartialFilesConfiguration, PartialFormatterConfiguration,
+    PartialJavascriptFormatter, PartialJsonFormatter, PartialLinterConfiguration,
 };
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_service::documentation::Doc;
+use biome_service::LoadedConfiguration;
 use biome_service::WorkspaceError;
 use bpaf::Bpaf;
 use std::ffi::OsString;

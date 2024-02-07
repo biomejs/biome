@@ -4,12 +4,10 @@ use crate::commands::validate_configuration_diagnostics;
 use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution};
 use biome_configuration::organize_imports::PartialOrganizeImports;
 use biome_configuration::PartialConfiguration;
-use biome_configuration::{
-    load_configuration, LoadedConfiguration, PartialFormatterConfiguration,
-    PartialLinterConfiguration,
-};
+use biome_configuration::{PartialFormatterConfiguration, PartialLinterConfiguration};
 use biome_deserialize::Merge;
 use biome_service::workspace::UpdateSettingsParams;
+use biome_service::{load_configuration, LoadedConfiguration,retrieve_gitignore_matches};
 use std::ffi::OsString;
 
 pub(crate) struct CiCommandPayload {
@@ -83,7 +81,7 @@ pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
     let (vcs_base_path, gitignore_matches) =
-        configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
+        retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
     if payload.since.is_some() && !payload.changed {
         return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
