@@ -6,9 +6,11 @@ use crate::{
     FileSystem, RomePath,
 };
 use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
+use oxc_resolver::{Resolution, ResolveError, ResolveOptions, Resolver};
 use rayon::{scope, Scope};
 use std::ffi::OsStr;
 use std::fs::{DirEntry, FileType};
+use std::panic::AssertUnwindSafe;
 use std::process::Command;
 use std::{
     env, fs,
@@ -20,11 +22,34 @@ use std::{
 const MAX_SYMLINK_DEPTH: u8 = 3;
 
 /// Implementation of [FileSystem] that directly calls through to the underlying OS
-pub struct OsFileSystem(pub Option<PathBuf>);
+pub struct OsFileSystem {
+    pub working_directory: Option<PathBuf>,
+    pub configuration_resolver: AssertUnwindSafe<Resolver>,
+}
+
+impl OsFileSystem {
+    pub fn new(working_directory: PathBuf) -> Self {
+        Self {
+            working_directory: Some(working_directory),
+            configuration_resolver: AssertUnwindSafe(Resolver::new(ResolveOptions {
+                condition_names: vec!["node".to_string(), "import".to_string()],
+                extensions: vec!["*.json".to_string()],
+                ..ResolveOptions::default()
+            })),
+        }
+    }
+}
 
 impl Default for OsFileSystem {
     fn default() -> Self {
-        Self(env::current_dir().ok())
+        Self {
+            working_directory: env::current_dir().ok(),
+            configuration_resolver: AssertUnwindSafe(Resolver::new(ResolveOptions {
+                condition_names: vec!["node".to_string(), "import".to_string()],
+                extensions: vec!["*.json".to_string()],
+                ..ResolveOptions::default()
+            })),
+        }
     }
 }
 
@@ -47,7 +72,7 @@ impl FileSystem for OsFileSystem {
     }
 
     fn working_directory(&self) -> Option<PathBuf> {
-        self.0.clone()
+        self.working_directory.clone()
     }
 
     fn path_exists(&self, path: &Path) -> bool {
@@ -56,6 +81,11 @@ impl FileSystem for OsFileSystem {
 
     fn path_is_file(&self, path: &Path) -> bool {
         path.is_file()
+    }
+
+    fn resolve_configuration(&self, specifier: &str) -> Result<Resolution, ResolveError> {
+        self.configuration_resolver
+            .resolve(self.working_directory().unwrap(), specifier)
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
@@ -95,7 +125,7 @@ impl File for OsFile {
     }
 
     fn set_content(&mut self, content: &[u8]) -> io::Result<()> {
-        tracing::debug_span!("OsFile::set_content").in_scope(move || {
+        tracing::trace_span!("OsFile::set_content").in_scope(move || {
             // Truncate the file
             self.inner.set_len(0)?;
             // Reset the cursor to the starting position
@@ -367,8 +397,8 @@ fn follow_symlink(
     Ok((target_path, target_file_type))
 }
 
-impl From<fs::FileType> for ErrorKind {
-    fn from(_: fs::FileType) -> Self {
+impl From<FileType> for ErrorKind {
+    fn from(_: FileType) -> Self {
         Self::UnknownFileType
     }
 }

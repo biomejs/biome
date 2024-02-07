@@ -38,6 +38,7 @@ bitflags                     = { workspace = true }
 bpaf                         = { workspace = true }
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"] }
+oxc_resolver =  { workspace = true }
 termcolor                    = "1.1.2"
 unicode-width                = "0.1.9"
 

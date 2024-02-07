@@ -3,6 +3,7 @@ use biome_diagnostics::{console, Advices, Diagnostic, LogCategory, Visit};
 use biome_diagnostics::{Error, Severity};
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::OsFileSystem;
+use oxc_resolver::{Resolution, ResolveError};
 use serde::{Deserialize, Serialize};
 use std::io;
 use std::panic::RefUnwindSafe;
@@ -157,6 +158,8 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>>;
+
+    fn resolve_configuration(&self, path: &str) -> Result<Resolution, ResolveError>;
 }
 
 /// Result of the auto search
@@ -323,6 +326,10 @@ where
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
         T::get_changed_files(self, base)
+    }
+
+    fn resolve_configuration(&self, path: &str) -> Result<Resolution, ResolveError> {
+        T::resolve_configuration(self, path)
     }
 }
 

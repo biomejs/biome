@@ -9,6 +9,7 @@
   "keywords": [],
   "author": "",
   "devDependencies": {
+		"shared": "file:./shared",
     "@changesets/cli": "^2.26.2"
   }
 }
