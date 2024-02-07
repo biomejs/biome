@@ -180,6 +180,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix[#1697](https://github.com/biomejs/biome/issues/1697). Preserve leading trivia in autofix of suppression rules. Contributed by @togami2864
 
+- Fix[#603](https://github.com/biomejs/biome/issues/603). Trim trailing whitespace to avoid double insertion. Contributed by @togami2864
+
 ### Parser
 
 #### Bug fixes
