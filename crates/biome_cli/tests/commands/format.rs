@@ -58,15 +58,27 @@ statement();
 ---
 <div></div>"#;
 
-const VUE_FILE_UNFORMATTED: &str = r#"<script>
+const VUE_JS_FILE_UNFORMATTED: &str = r#"<script>
 import {    something } from "file.vue";
 statement ( ) ;
 </script>
 <template></template>"#;
 
-const VUE_FILE_FORMATTED: &str = r#"<script>
+const VUE_JS_FILE_FORMATTED: &str = r#"<script>
 import { something } from "file.vue";
 statement();
+</script>
+<template></template>"#;
+
+const VUE_TS_FILE_UNFORMATTED: &str = r#"<script setup lang="ts">
+import     { type     something } from "file.vue";
+const hello  :      string      = "world";
+</script>
+<template></template>"#;
+
+const VUE_TS_FILE_FORMATTED: &str = r#"<script setup lang="ts">
+import { type something } from "file.vue";
+const hello: string = "world";
 </script>
 <template></template>"#;
 
@@ -3042,12 +3054,12 @@ fn format_empty_astro_files_write() {
 }
 
 #[test]
-fn format_vue_files() {
+fn format_vue_js_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Path::new("file.vue");
-    fs.insert(vue_file_path.into(), VUE_FILE_UNFORMATTED.as_bytes());
+    fs.insert(vue_file_path.into(), VUE_JS_FILE_UNFORMATTED.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -3057,11 +3069,11 @@ fn format_vue_files() {
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, vue_file_path, VUE_FILE_UNFORMATTED);
+    assert_file_contents(&fs, vue_file_path, VUE_JS_FILE_UNFORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "format_vue_files",
+        "format_vue_js_files",
         fs,
         console,
         result,
@@ -3069,12 +3081,12 @@ fn format_vue_files() {
 }
 
 #[test]
-fn format_vue_files_write() {
+fn format_vue_js_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Path::new("file.vue");
-    fs.insert(vue_file_path.into(), VUE_FILE_UNFORMATTED.as_bytes());
+    fs.insert(vue_file_path.into(), VUE_JS_FILE_UNFORMATTED.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -3091,11 +3103,11 @@ fn format_vue_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, vue_file_path, VUE_FILE_FORMATTED);
+    assert_file_contents(&fs, vue_file_path, VUE_JS_FILE_FORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "format_vue_files_write",
+        "format_vue_js_files_write",
         fs,
         console,
         result,
@@ -3103,7 +3115,7 @@ fn format_vue_files_write() {
 }
 
 #[test]
-fn format_empty_vue_files_write() {
+fn format_empty_vue_js_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -3129,7 +3141,102 @@ fn format_empty_vue_files_write() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "format_empty_vue_files_write",
+        "format_empty_vue_js_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_vue_ts_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(vue_file_path.into(), VUE_TS_FILE_UNFORMATTED.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, VUE_TS_FILE_UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_vue_ts_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_vue_ts_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(vue_file_path.into(), VUE_TS_FILE_UNFORMATTED.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                vue_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, VUE_TS_FILE_FORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_vue_ts_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_empty_vue_ts_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(vue_file_path.into(), "<template></template>".as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                vue_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, "<template></template>");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_empty_vue_ts_files_write",
         fs,
         console,
         result,

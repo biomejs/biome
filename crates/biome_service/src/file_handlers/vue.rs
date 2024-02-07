@@ -19,12 +19,13 @@ use tracing::{debug, error, info};
 pub(crate) struct VueFileHandler;
 
 lazy_static! {
+    // https://regex101.com/r/E4n4hh/3
     pub static ref VUE_FENCE: Regex = Regex::new(
-        r#"(?msix)(?:<script[^>]?)
+        r#"(?ixms)(?:<script[^>]?)
             (?:
             (?:(lang)\s*=\s*['"](?P<lang>[^'"]*)['"])
             |
-            (?:(\w+)\s*=\s*['"]([^'"]*)['"])
+            (?:(\w+)\s*(?:=\s*['"]([^'"]*)['"])?)
             )*
         [^>]*>\n(?P<script>(?U:.*))</script>"#
     )
@@ -73,15 +74,24 @@ fn parse(
 ) -> AnyParse {
     let matches = VUE_FENCE.captures(text);
     let script = match matches {
-        Some(captures) => &text[captures.name("script").unwrap().range()],
+        Some(ref captures) => &text[captures.name("script").unwrap().range()],
         _ => "",
     };
-    let parse = parse_js_with_cache(
-        script,
-        JsFileSource::ts(),
-        JsParserOptions::default(),
-        cache,
-    );
+
+    let language = match matches {
+        Some(captures) => match captures.name("lang") {
+            Some(lang) => match lang.as_str() {
+                "ts" => JsFileSource::ts(),
+                _ => JsFileSource::js_module(),
+            },
+            _ => JsFileSource::js_module(),
+        },
+        _ => JsFileSource::js_module(),
+    };
+
+    debug!("Parsing file with language {:?}", language);
+
+    let parse = parse_js_with_cache(script, language, JsParserOptions::default(), cache);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
 
