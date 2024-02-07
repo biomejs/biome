@@ -392,6 +392,8 @@ impl FeaturesBuilder {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct UpdateSettingsParams {
+
+    #[cfg_attr(feature = "schema", serde(skip_serializing, skip_deserializing))]
     pub configuration: PartialConfiguration,
     // @ematipico TODO: have a better data structure for this
     pub vcs_base_path: Option<PathBuf>,

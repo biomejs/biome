@@ -9,7 +9,7 @@ use biome_configuration::PartialConfiguration;
 use biome_configuration::{PartialFormatterConfiguration, PartialLinterConfiguration};
 use biome_deserialize::Merge;
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::{load_configuration, LoadedConfiguration};
+use biome_service::{load_configuration, LoadedConfiguration,retrieve_gitignore_matches};
 use std::ffi::OsString;
 
 pub(crate) struct CheckCommandPayload {
@@ -111,7 +111,7 @@ pub(crate) fn check(
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
     let (vcs_base_path, gitignore_matches) =
-        fs_configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
+        retrieve_gitignore_matches(&fs_configuration, &session.app.fs, vcs_base_path.as_deref())?;
 
     let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "check")?;
 
