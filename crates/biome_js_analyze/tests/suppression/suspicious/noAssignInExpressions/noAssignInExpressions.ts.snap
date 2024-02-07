@@ -35,7 +35,7 @@ noAssignInExpressions.ts:3:10 lint/suspicious/noAssignInExpressions  FIXABLE  �
     2 2 │   	let x: number;
     3   │ - → while·((x·=·Math.random()·>·0.1))·{
       3 │ + → //·biome-ignore·lint/suspicious/noAssignInExpressions:·<explanation>
-      4 │ + → while··((x·=·Math.random()·>·0.1))·{
+      4 │ + → while·((x·=·Math.random()·>·0.1))·{
     4 5 │   		console.log(x);
     5 6 │   	}
   
