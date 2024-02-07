@@ -18,3 +18,4 @@ x.y.z!?.();
 x.y.z!!!?.();
 (b! as number) = "test";
 (b!! as number) = "test";
+x[y.z!];

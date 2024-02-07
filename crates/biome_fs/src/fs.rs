@@ -14,7 +14,26 @@ mod memory;
 mod os;
 
 pub const ROME_JSON: &str = "rome.json";
-pub const BIOME_JSON: &str = "biome.json";
+
+pub struct ConfigName;
+
+impl ConfigName {
+    const BIOME_JSON: [&'static str; 2] = ["biome.json", "biome.jsonc"];
+
+    pub const fn biome_json() -> &'static str {
+        Self::BIOME_JSON[0]
+    }
+
+    pub const fn biome_jsonc() -> &'static str {
+        Self::BIOME_JSON[1]
+    }
+
+    pub const fn file_names() -> [&'static str; 2] {
+        Self::BIOME_JSON
+    }
+}
+
+type AutoSearchResultAlias = Result<Option<AutoSearchResult>, FileSystemDiagnostic>;
 
 pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// It opens a file with the given set of options
@@ -30,11 +49,6 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// Returns the temporary configuration files that are supported
     fn deprecated_config_name(&self) -> &str {
         ROME_JSON
-    }
-
-    /// Returns the name of the main configuration file
-    fn config_name(&self) -> &str {
-        BIOME_JSON
     }
 
     /// Return the path to the working directory
@@ -61,79 +75,85 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     fn auto_search(
         &self,
         mut file_path: PathBuf,
-        file_name: &str,
+        file_names: &[&str],
         should_error_if_file_not_found: bool,
-    ) -> Result<Option<AutoSearchResult>, FileSystemDiagnostic> {
+    ) -> AutoSearchResultAlias {
         let mut from_parent = false;
-        let mut file_directory_path = file_path.join(file_name);
-        loop {
-            let options = OpenOptions::default().read(true);
-            let file = self.open_with_options(&file_directory_path, options);
-            return match file {
-                Ok(mut file) => {
-                    let mut buffer = String::new();
-                    file.read_to_string(&mut buffer)
-                        .map_err(|_| FileSystemDiagnostic {
-                            path: file_directory_path.display().to_string(),
-                            severity: Severity::Error,
-                            error_kind: ErrorKind::CantReadFile(
-                                file_directory_path.display().to_string(),
-                            ),
-                        })?;
+        let mut auto_search_result = None;
+        'alternatives_loop: for file_name in file_names {
+            let mut file_directory_path = file_path.join(file_name);
+            'search: loop {
+                let options = OpenOptions::default().read(true);
+                let file = self.open_with_options(&file_directory_path, options);
+                match file {
+                    Ok(mut file) => {
+                        let mut buffer = String::new();
+                        file.read_to_string(&mut buffer)
+                            .map_err(|_| FileSystemDiagnostic {
+                                path: file_directory_path.display().to_string(),
+                                severity: Severity::Error,
+                                error_kind: ErrorKind::CantReadFile(
+                                    file_directory_path.display().to_string(),
+                                ),
+                            })?;
 
-                    if from_parent {
-                        info!(
-                        "Biome auto discovered the file at following path that wasn't in the working directory: {}",
-                        file_path.display()
-                    );
+                        if from_parent {
+                            info!(
+                            "Biome auto discovered the file at following path that wasn't in the working directory: {}",
+                            file_path.display()
+                        );
+                        }
+
+                        auto_search_result = Some(AutoSearchResult {
+                            content: buffer,
+                            file_path: file_directory_path,
+                            directory_path: file_path,
+                        });
+                        break 'alternatives_loop;
                     }
-
-                    return Ok(Some(AutoSearchResult {
-                        content: buffer,
-                        file_path: file_directory_path,
-                        directory_path: file_path,
-                    }));
-                }
-                Err(err) => {
-                    // base paths from users are not eligible for auto discovery
-                    if !should_error_if_file_not_found {
-                        let parent_directory = if let Some(path) = file_path.parent() {
-                            if path.is_dir() {
-                                Some(PathBuf::from(path))
+                    Err(err) => {
+                        // base paths from users are not eligible for auto discovery
+                        if !should_error_if_file_not_found {
+                            let parent_directory = if let Some(path) = file_path.parent() {
+                                if path.is_dir() {
+                                    Some(PathBuf::from(path))
+                                } else {
+                                    None
+                                }
                             } else {
                                 None
+                            };
+                            if let Some(parent_directory) = parent_directory {
+                                file_path = parent_directory;
+                                file_directory_path = file_path.join(file_name);
+                                from_parent = true;
+                                continue 'search;
                             }
-                        } else {
-                            None
-                        };
-                        if let Some(parent_directory) = parent_directory {
-                            file_path = parent_directory;
-                            file_directory_path = file_path.join(file_name);
-                            from_parent = true;
-                            continue;
                         }
+                        // We skip the error when the configuration file is not found.
+                        // Not having a configuration file is only an error when the `base_path` is
+                        // set to `BasePath::FromUser`.
+                        if should_error_if_file_not_found || err.kind() != io::ErrorKind::NotFound {
+                            return Err(FileSystemDiagnostic {
+                                path: file_directory_path.display().to_string(),
+                                severity: Severity::Error,
+                                error_kind: ErrorKind::CantReadFile(
+                                    file_directory_path.display().to_string(),
+                                ),
+                            });
+                        }
+                        error!(
+                            "Could not read the file from {:?}, reason:\n {}",
+                            file_directory_path.display(),
+                            err
+                        );
+                        continue 'alternatives_loop;
                     }
-                    // We skip the error when the configuration file is not found.
-                    // Not having a configuration file is only an error when the `base_path` is
-                    // set to `BasePath::FromUser`.
-                    if should_error_if_file_not_found || err.kind() != io::ErrorKind::NotFound {
-                        return Err(FileSystemDiagnostic {
-                            path: file_directory_path.display().to_string(),
-                            severity: Severity::Error,
-                            error_kind: ErrorKind::CantReadFile(
-                                file_directory_path.display().to_string(),
-                            ),
-                        });
-                    }
-                    error!(
-                        "Could not read the file from {:?}, reason:\n {}",
-                        file_directory_path.display(),
-                        err
-                    );
-                    Ok(None)
                 }
-            };
+            }
         }
+
+        Ok(auto_search_result)
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>>;

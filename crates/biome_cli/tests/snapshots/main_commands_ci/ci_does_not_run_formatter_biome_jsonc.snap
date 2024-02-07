@@ -1,0 +1,28 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.jsonc`
+
+```json
+{
+ // I am a comment
+  "formatter": {
+    "enabled": false
+  }
+}
+```
+
+## `file.js`
+
+```js
+  statement(  )  
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file(s) in <TIME>
+```
+
+

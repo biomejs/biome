@@ -5,15 +5,15 @@ import StarlightSplashLayout from "@src/layouts/StarlightSplashLayout.astro";
 import { getImage } from "astro:assets";
 
 export async function getStaticPaths() {
-  const blogEntries = await getCollection("blog");
-  return blogEntries.map((entry) => ({
-    params: { slug: entry.slug },
-    props: { entry },
-  }));
+	const blogEntries = await getCollection("blog");
+	return blogEntries.map((entry) => ({
+		params: { slug: entry.slug },
+		props: { entry },
+	}));
 }
 
 interface Props {
-  entry: CollectionEntry<"blog">;
+	entry: CollectionEntry<"blog">;
 }
 
 const { entry } = Astro.props;
@@ -23,25 +23,25 @@ const post = entry.data;
 
 const processedImage = await getImage({ src: post.socialImage });
 const socialImageUrl = new URL(
-  processedImage.src,
-  `${Astro.url.origin}/`
+	processedImage.src,
+	`${Astro.url.origin}/`,
 ).toString();
 
 const head = [
-  {
-    tag: "meta",
-    attrs: {
-      property: "og:image",
-      content: socialImageUrl,
-    },
-  },
-  {
-    tag: "meta",
-    attrs: {
-      property: "twitter:image",
-      content: socialImageUrl,
-    },
-  },
+	{
+		tag: "meta",
+		attrs: {
+			property: "og:image",
+			content: socialImageUrl,
+		},
+	},
+	{
+		tag: "meta",
+		attrs: {
+			property: "twitter:image",
+			content: socialImageUrl,
+		},
+	},
 ];
 ---
 

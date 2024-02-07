@@ -60,9 +60,14 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         self.guard().get_file_content()
     }
 
+    pub(crate) fn as_extension(&self) -> Option<&str> {
+        self.path.extension().and_then(|s| s.to_str())
+    }
+
     /// It updates the workspace file with `new_content`
     pub(crate) fn update_file(&mut self, new_content: impl Into<String>) -> Result<(), Error> {
         let new_content = new_content.into();
+
         self.file
             .set_content(new_content.as_bytes())
             .with_file_path(self.path.display().to_string())?;

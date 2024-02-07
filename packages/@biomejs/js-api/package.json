@@ -47,9 +47,9 @@
 		"@biomejs/wasm-web": "../wasm-web"
 	},
 	"peerDependencies": {
-		"@biomejs/wasm-bundler": "^10.0.0",
-		"@biomejs/wasm-nodejs": "^10.0.0",
-		"@biomejs/wasm-web": "^10.0.0"
+		"@biomejs/wasm-bundler": "^1.5.3",
+		"@biomejs/wasm-nodejs": "^1.5.3",
+		"@biomejs/wasm-web": "^1.5.3"
 	},
 	"peerDependenciesMeta": {
 		"@biomejs/wasm-bundler": {

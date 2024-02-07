@@ -12,6 +12,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Analyzer
 
+#### Bug fixed
+
+- Fix [#1748](https://github.com/biomejs/biome/issues/1748). Now for the following case we won't provide an unsafe fix for the `noNonNullAssertion` rule:
+
+  ```ts
+  x[y.z!];
+  ```
+
+  Contributed by @ah-yu
+
 ### CLI
 
 #### New features
@@ -32,6 +42,17 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#1173](https://github.com/biomejs/biome/issues/1173). Fix the formatting of a single instruction with commented in a control flow body to ensure consistency. Contributed by @mdm317
 
 - Fix overriding of `javascript.globals`. Contributed by @arendjr
+- Fix a bug where syntax rules weren't run when pulling the diagnostics. Now Biome will emit more parsing diagnostics, e.g.
+  ```
+  check.js:1:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    × Duplicate private class member "#foo"
+
+    > 1 │ class A { #foo; #foo }
+        │                 ^^^^
+
+  ```
+  Contributed by @ematipico
 
 ### Configuration
 
@@ -40,6 +61,19 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Bug fixes
 
 - Fix a regression where ignored files where formatted in the editor. Contributed by @ematipico
+- Fix a bug where syntax rules weren't run when pulling the diagnostics. Now Biome will emit more parsing diagnostics, e.g.
+  ```
+  check.js:1:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    × Duplicate private class member "#foo"
+
+    > 1 │ class A { #foo; #foo }
+        │                 ^^^^
+
+  ```
+  Contributed by @ematipico
+
+
 
 ### Formatter
 
@@ -48,6 +82,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Biome now allows to format the `package.json` file. This is now the default behaviour and users can remove their workarounds.
   If you rely on other tools to format `package.json`, you'll have to ignore it via configuration. Contributed by @pattrickrice
 - New formatter option `attributePosition` that have similar behavior as Prettier `singleAttributePerLine` [#1706](https://github.com/biomejs/biome/issues/1706). Contributed by @octoshikari
+- Add partial for `.astro` files. Biome is able to format the frontmatter of the Astro files. Contributed by @ematipico
+
+  ```diff
+  ---
+  - statement ( );
+  + statement();
+  ---
+
+  <div></div>
+  ```
 
 #### Bug fixes
 

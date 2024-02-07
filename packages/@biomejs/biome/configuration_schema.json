@@ -1351,6 +1351,20 @@
 						{ "type": "null" }
 					]
 				},
+				"noReExportAll": {
+					"description": "Avoid re-export all",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRestrictedImports": {
+					"description": "Disallow specified modules when loaded by import or require.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSkippedTests": {
 					"description": "Disallow disabled tests.",
 					"anyOf": [
@@ -1698,6 +1712,10 @@
 					"allOf": [{ "$ref": "#/definitions/RestrictedGlobalsOptions" }]
 				},
 				{
+					"description": "Options for `noRestrictedImports` rule",
+					"allOf": [{ "$ref": "#/definitions/RestrictedImportsOptions" }]
+				},
+				{
 					"description": "Options for `useValidAriaRole` rule",
 					"allOf": [{ "$ref": "#/definitions/ValidAriaRoleOptions" }]
 				},
@@ -1718,6 +1736,19 @@
 					"description": "A list of names that should trigger the rule",
 					"type": "array",
 					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"RestrictedImportsOptions": {
+			"description": "Options for the rule `noRestrictedImports`.",
+			"type": "object",
+			"required": ["paths"],
+			"properties": {
+				"paths": {
+					"description": "A list of names that should trigger the rule",
+					"type": "object",
+					"additionalProperties": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
