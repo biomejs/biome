@@ -1,9 +1,9 @@
 import type { Diagnostic } from "@biomejs/wasm-web";
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { useState } from "react";
-import DiagnosticsConsoleTab from "../tabs/DiagnosticsConsoleTab";
-import DiagnosticsListTab from "../tabs/DiagnosticsListTab";
-import Tabs from "./Tabs";
+import DiagnosticsConsoleTab from "@/playground/tabs/DiagnosticsConsoleTab";
+import DiagnosticsListTab from "@/playground/tabs/DiagnosticsListTab";
+import Tabs from "@/playground/components/Tabs";
 
 interface Props {
 	editorRef: React.RefObject<ReactCodeMirrorRef>;

@@ -9,7 +9,7 @@ import type {
 } from "@uiw/react-codemirror";
 import RealCodeMirror from "@uiw/react-codemirror";
 import { forwardRef, useEffect, useMemo, useState } from "react";
-import { useTheme } from "./utils";
+import { useTheme } from "@/playground/utils";
 
 export type BiomeExtension = Extension;
 

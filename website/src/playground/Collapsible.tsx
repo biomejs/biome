@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { classnames } from "./utils";
+import { classnames } from "@/playground/utils";
 
 interface Props {
 	className?: string;
