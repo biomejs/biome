@@ -1288,6 +1288,13 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
+				"noConsole": {
+					"description": "Disallow the use of console.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateJsonKeys": {
 					"description": "Disallow two keys with the same name inside a JSON object.",
 					"anyOf": [

@@ -864,6 +864,10 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Disallow the use of console.
+	 */
+	noConsole?: RuleConfiguration;
+	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration;
@@ -1719,6 +1723,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
+	| "lint/nursery/noConsole"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyTypeParameters"
