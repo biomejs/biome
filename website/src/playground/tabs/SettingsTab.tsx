@@ -11,7 +11,7 @@ import {
 	Semicolons,
 	SourceType,
 	TrailingComma,
-} from "../types";
+} from "@/playground/types";
 import {
 	classnames,
 	createPlaygroundSettingsSetter,
@@ -21,7 +21,7 @@ import {
 	isTypeScriptFilename,
 	modifyFilename,
 	normalizeFilename,
-} from "../utils";
+} from "@/playground/utils";
 
 export interface SettingsTabProps {
 	state: PlaygroundState;

@@ -14,8 +14,8 @@ import {
 	Semicolons,
 	type TrailingComma,
 	defaultPlaygroundState,
-} from "../types";
-import { isJsonFilename, isTypeScriptFilename } from "../utils";
+} from "@/playground/types";
+import { isJsonFilename, isTypeScriptFilename } from "@/playground/utils";
 
 let settings = defaultPlaygroundState.settings;
 

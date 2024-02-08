@@ -15,8 +15,8 @@ import {
 	QuoteProperties,
 	QuoteStyle,
 	Semicolons,
-} from "../types";
-import { isJsonFilename } from "../utils";
+} from "@/playground/types";
+import { isJsonFilename } from "@/playground/utils";
 
 let workspace: Workspace | null = null;
 let fileCounter = 0;

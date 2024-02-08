@@ -10,10 +10,10 @@ authors:
   - team
 pubDate: 2024-01-08
 coverImage:
-  lightSrc: ../../assets/blog/roadmap-2024/banner-light.png
-  darkSrc: ../../assets/blog/roadmap-2024/banner-dark.png
+  lightSrc: "@/assets/blog/roadmap-2024/banner-light.png"
+  darkSrc: "@/assets/blog/roadmap-2024/banner-dark.png"
   alt: The Prettier challenge banner, with the Biome logo over it
-socialImage: ../../assets/social-logo.png
+socialImage: "@/assets/social-logo.png"
 ---
 
 Along with the [Roadmap for 2024](/blog/roadmap-2024), the [new logo and homepage](/blog/roadmap-2024#new-logo-and-homepage), we also published a new version. This version has few features around the CLI and **many** fixes in our formatter. Our TypeScript, JSX and JavaScript formatting has surpassed the **97% compatibility rate** with Prettier. Biome now provides **over 190 lint rules**.
