@@ -572,7 +572,15 @@ impl PartialConfiguration {
                 directory_path.join(path)
             } else {
                 fs.resolve_configuration(path.as_str())
-                    .map_err(ConfigurationDiagnostic::cant_resolve)?
+                    .map_err(|error| {
+                        ConfigurationDiagnostic::cant_resolve(
+                            fs.working_directory()
+                                .unwrap_or_default()
+                                .display()
+                                .to_string(),
+                            error,
+                        )
+                    })?
                     .into_path_buf()
             };
 

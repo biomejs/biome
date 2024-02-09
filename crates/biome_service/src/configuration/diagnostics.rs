@@ -80,8 +80,14 @@ impl ConfigurationDiagnostic {
         })
     }
 
-    pub fn cant_resolve(source: oxc_resolver::ResolveError) -> Self {
+    pub fn cant_resolve(path: impl Display, source: oxc_resolver::ResolveError) -> Self {
         Self::CantResolve(CantResolve {
+            message: MessageAndDescription::from(
+                markup! {
+                   "Failed to resolve the configuration from "{{path}}
+                }
+                .to_owned(),
+            ),
             source: Some(Error::from(ResolveError::from(source))),
         })
     }
@@ -307,6 +313,10 @@ pub struct InvalidConfiguration {
     severity = Error,
 )]
 pub struct CantResolve {
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+
     #[serde(skip)]
     #[source]
     source: Option<Error>,

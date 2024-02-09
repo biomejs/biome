@@ -9,7 +9,8 @@
 			"public/**",
 			"**/__snapshots__",
 			"**/editors/intellij/**",
-			"**/undefined/**"
+			"**/undefined/**",
+			"_fonts/**"
 		]
 	},
 	"formatter": {
