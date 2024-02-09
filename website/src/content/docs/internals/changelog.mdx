@@ -62,6 +62,30 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Configuration
 
+#### New features
+
+- Add the ability to resolve the configuration files defined inside `extends` from the `node_modules/` directory.
+
+  If you want to resolve a configuration file that matches the specifier `@org/configs/biome`, then your `package.json` file must look this:
+
+  ```json
+  {
+    "name": "@org/configs",
+    "exports": {
+      "./biome": "./biome.json"
+    }
+  }
+  ```
+
+  And the `biome.json` file that "imports" said configuration, will look like this:
+  ```json
+  {
+    "extends": "@org/configs/biome"
+  }
+  ```
+  Read the [documentation](https://biomejs.dev/guides/how-biome-works#the-extends-option) to better understand how it works, expectations and restrictions.
+
+
 ### Editors
 
 #### Bug fixes
