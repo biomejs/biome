@@ -18,13 +18,13 @@ biome_diagnostics = { workspace = true }
 crossbeam         = "0.8.2"
 directories       = "5.0.1"
 indexmap          = { workspace = true }
+oxc_resolver      = { workspace = true }
 parking_lot       = { version = "0.12.0", features = ["arc_lock"] }
 rayon             = "1.7.0"
 rustc-hash        = { workspace = true }
 schemars          = { workspace = true, optional = true }
 serde             = { workspace = true }
 tracing           = { workspace = true }
-oxc_resolver = { workspace = true }
 
 [features]
 serde = ["schemars", "biome_diagnostics/schema"]

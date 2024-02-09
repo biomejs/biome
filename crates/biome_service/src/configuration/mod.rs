@@ -572,7 +572,7 @@ impl PartialConfiguration {
                 directory_path.join(path)
             } else {
                 fs.resolve_configuration(path.as_str())
-                    .map_err(|err| ConfigurationDiagnostic::cant_resolve(err))?
+                    .map_err(ConfigurationDiagnostic::cant_resolve)?
                     .into_path_buf()
             };
 
@@ -696,24 +696,21 @@ mod test {
         struct Test;
 
         impl oxc_resolver::FileSystem for Test {
-            fn read_to_string(&self, path: &Path) -> std::io::Result<String> {
-                dbg!("read to string", &path);
+            fn read_to_string(&self, _path: &Path) -> std::io::Result<String> {
                 Ok(String::from(
                     r#"{ "name": "example", "exports": { "./biome": "./biome.json" }}"#,
                 ))
             }
 
-            fn metadata(&self, path: &Path) -> std::io::Result<FileMetadata> {
-                dbg!(&path);
+            fn metadata(&self, _path: &Path) -> std::io::Result<FileMetadata> {
                 Ok(FileMetadata::new(true, false, false))
             }
 
-            fn symlink_metadata(&self, path: &Path) -> std::io::Result<FileMetadata> {
-                dbg!(&path);
+            fn symlink_metadata(&self, _path: &Path) -> std::io::Result<FileMetadata> {
                 Ok(FileMetadata::new(true, false, false))
             }
 
-            fn canonicalize(&self, path: &Path) -> std::io::Result<PathBuf> {
+            fn canonicalize(&self, _path: &Path) -> std::io::Result<PathBuf> {
                 env::current_dir().unwrap().canonicalize()
             }
         }

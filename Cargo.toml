@@ -131,6 +131,7 @@ ignore            = "0.4.21"
 indexmap          = "1.9.3"
 insta             = "1.29.0"
 lazy_static       = "1.4.0"
+oxc_resolver      = "1.4.0"
 quickcheck        = "1.0.3"
 quickcheck_macros = "1.0.0"
 quote             = { version = "1.0.28" }
@@ -142,7 +143,6 @@ serde_json        = "1.0.96"
 smallvec          = { version = "1.10.0", features = ["union", "const_new"] }
 tracing           = { version = "0.1.37", default-features = false, features = ["std"] }
 unicode-bom       = "2.0.3"
-oxc_resolver = "1.4.0"
 # pinning to version 1.18 to avoid multiple versions of windows-sys as dependency
 tokio = { version = "~1.18.5" }
 

@@ -44,13 +44,13 @@ dashmap                  = { workspace = true }
 ignore                   = { workspace = true }
 indexmap                 = { workspace = true, features = ["serde"] }
 lazy_static              = { workspace = true }
+oxc_resolver             = "1.4.0"
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, features = ["indexmap1"], optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true, features = ["raw_value"] }
 tracing                  = { workspace = true, features = ["attributes", "log"] }
-oxc_resolver = "1.4.0"
 
 [features]
 schema = [
