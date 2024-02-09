@@ -565,7 +565,10 @@ impl PartialConfiguration {
             let as_path = Path::new(path);
             let extension = as_path.extension().and_then(|ext| ext.to_str());
             // TODO: Remove extension in Biome 2.0
-            let config_path = if as_path.starts_with(".") || extension == Some("json") {
+            let config_path = if as_path.starts_with(".")
+                || extension == Some("json")
+                || extension == Some("jsonc")
+            {
                 directory_path.join(path)
             } else {
                 fs.resolve_configuration(path.as_str())
