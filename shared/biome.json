@@ -1,6 +1,5 @@
 {
 	"$schema": "../packages/@biomejs/biome/configuration_schema.json",
-	"extends": ["shared/biome"],
 	"vcs": {
 		"clientKind": "git",
 		"enabled": true,

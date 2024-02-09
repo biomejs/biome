@@ -35,6 +35,7 @@ pub enum ConfigurationDiagnostic {
     /// Thrown when there's something wrong with the files specified inside `"extends"`
     CantLoadExtendFile(CantLoadExtendFile),
 
+    /// Thrown when a configuration file can't be resolved from `node_modules`
     CantResolve(CantResolve),
 }
 
