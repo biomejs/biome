@@ -86,7 +86,7 @@ impl<T: ?Sized> Arc<T> {
     /// allocation
     #[inline]
     pub(crate) fn ptr_eq(this: &Self, other: &Self) -> bool {
-        this.ptr() == other.ptr()
+        std::ptr::addr_eq(this.ptr(), other.ptr())
     }
 
     pub(crate) fn ptr(&self) -> *mut ArcInner<T> {
