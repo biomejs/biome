@@ -120,7 +120,7 @@ jobs:
     needs: build
     environment: npm-publish
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       - uses: actions/checkout@v4
