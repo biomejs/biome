@@ -10,7 +10,7 @@ use crate::{
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
     WorkspaceError,
 };
-use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic,RuleCategories};
+use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic, RuleCategories};
 use biome_configuration::Rules;
 
 use biome_console::fmt::Formatter;

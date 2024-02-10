@@ -13,7 +13,7 @@ use biome_service::workspace::{
     FeatureName, FeaturesBuilder, PullDiagnosticsParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
-use biome_service::{load_configuration, LoadedConfiguration , retrieve_gitignore_matches};
+use biome_service::{load_configuration, retrieve_gitignore_matches, LoadedConfiguration};
 use biome_service::{DynRef, Workspace, WorkspaceError};
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
@@ -427,8 +427,11 @@ impl Session {
                     debug!("{configuration:#?}");
                     let fs = &self.fs;
 
-                    let result =
-                    retrieve_gitignore_matches(&configuration, &fs, configuration_path.as_deref());
+                    let result = retrieve_gitignore_matches(
+                        &configuration,
+                        &fs,
+                        configuration_path.as_deref(),
+                    );
 
                     match result {
                         Ok((vcs_base_path, gitignore_matches)) => {

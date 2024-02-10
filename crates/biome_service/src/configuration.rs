@@ -175,8 +175,11 @@ fn load_config(
     let should_error = base_path.is_from_user();
 
     let auto_search_result;
-    let result =
-        file_system.auto_search(configuration_directory.clone(), &[deprecated_config_name], should_error);
+    let result = file_system.auto_search(
+        configuration_directory.clone(),
+        &[deprecated_config_name],
+        should_error,
+    );
     if let Ok(result) = result {
         if result.is_none() {
             auto_search_result = file_system.auto_search(

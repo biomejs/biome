@@ -15,7 +15,7 @@ use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
 use biome_service::workspace::UpdateSettingsParams;
-use biome_service::{load_configuration, LoadedConfiguration,retrieve_gitignore_matches};
+use biome_service::{load_configuration, retrieve_gitignore_matches, LoadedConfiguration};
 use std::ffi::OsString;
 
 pub(crate) struct FormatCommandPayload {
@@ -155,7 +155,7 @@ pub(crate) fn format(
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
     let (vcs_base_path, gitignore_matches) =
-    retrieve_gitignore_matches(&configuration, &session.app.fs, vcs_base_path.as_deref())?;
+        retrieve_gitignore_matches(&configuration, &session.app.fs, vcs_base_path.as_deref())?;
 
     if since.is_some() && !changed {
         return Err(CliDiagnostic::incompatible_arguments("since", "changed"));

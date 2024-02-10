@@ -9,7 +9,7 @@ use biome_configuration::PartialConfiguration;
 use biome_configuration::{PartialFormatterConfiguration, PartialLinterConfiguration};
 use biome_deserialize::Merge;
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::{load_configuration, LoadedConfiguration,retrieve_gitignore_matches};
+use biome_service::{load_configuration, retrieve_gitignore_matches, LoadedConfiguration};
 use std::ffi::OsString;
 
 pub(crate) struct CheckCommandPayload {
