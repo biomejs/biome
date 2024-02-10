@@ -78,16 +78,13 @@ fn parse(
         _ => "",
     };
 
-    let language = match matches {
-        Some(captures) => match captures.name("lang") {
-            Some(lang) => match lang.as_str() {
-                "ts" => JsFileSource::ts(),
-                _ => JsFileSource::js_module(),
-            },
+    let language = matches
+        .and_then(|captures| captures.name("lang"))
+        .map(|lang| match lang.as_str() {
+            "ts" => JsFileSource::ts(),
             _ => JsFileSource::js_module(),
-        },
-        _ => JsFileSource::js_module(),
-    };
+        })
+        .unwrap_or(JsFileSource::js_module());
 
     debug!("Parsing file with language {:?}", language);
 
