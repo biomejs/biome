@@ -1,18 +1,3 @@
-import { javascript } from "@codemirror/lang-javascript";
-import { json } from "@codemirror/lang-json";
-import { EditorSelection } from "@codemirror/state";
-import type { ViewUpdate } from "@codemirror/view";
-import ImportSortingTab from "@/playground/tabs/ImportSortingTab";
-import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import * as codeMirrorLangBiomeAst from "codemirror-lang-rome-ast";
-import {
-	createRef,
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
 import CodeMirror from "@/playground/CodeMirror";
 import DiagnosticsPane from "@/playground/components/DiagnosticsPane";
 import Resizable from "@/playground/components/Resizable";
@@ -23,9 +8,13 @@ import DiagnosticsConsoleTab from "@/playground/tabs/DiagnosticsConsoleTab";
 import DiagnosticsListTab from "@/playground/tabs/DiagnosticsListTab";
 import FormatterCodeTab from "@/playground/tabs/FormatterCodeTab";
 import FormatterIrTab from "@/playground/tabs/FormatterIrTab";
+import ImportSortingTab from "@/playground/tabs/ImportSortingTab";
 import SettingsTab from "@/playground/tabs/SettingsTab";
 import SyntaxTab from "@/playground/tabs/SyntaxTab";
-import type { BiomeAstSyntacticData, PlaygroundProps } from "@/playground/types";
+import type {
+	BiomeAstSyntacticData,
+	PlaygroundProps,
+} from "@/playground/types";
 import {
 	getCurrentCode,
 	getFileState,
@@ -34,6 +23,20 @@ import {
 	isTypeScriptFilename,
 	useWindowSize,
 } from "@/playground/utils";
+import { javascript } from "@codemirror/lang-javascript";
+import { json } from "@codemirror/lang-json";
+import { EditorSelection } from "@codemirror/state";
+import type { ViewUpdate } from "@codemirror/view";
+import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
+import * as codeMirrorLangBiomeAst from "codemirror-lang-rome-ast";
+import {
+	createRef,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 
 export default function PlaygroundLoader({
 	setPlaygroundState,

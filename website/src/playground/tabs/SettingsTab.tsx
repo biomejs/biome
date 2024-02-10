@@ -1,6 +1,3 @@
-import type { Dispatch, SetStateAction } from "react";
-import type React from "react";
-import { useState } from "react";
 import {
 	ArrowParentheses,
 	AttributePosition,
@@ -23,6 +20,9 @@ import {
 	modifyFilename,
 	normalizeFilename,
 } from "@/playground/utils";
+import type { Dispatch, SetStateAction } from "react";
+import type React from "react";
+import { useState } from "react";
 
 export interface SettingsTabProps {
 	state: PlaygroundState;

@@ -1,9 +1,9 @@
-import { romeAst as BiomeFormatterIr } from "lang-rome-formatter-ir";
 import CodeMirror from "@/playground/CodeMirror";
 import Collapsible from "@/playground/Collapsible";
 import BiomeHeader from "@/playground/components/BiomeHeader";
 import PrettierHeader from "@/playground/components/PrettierHeader";
 import type { PrettierOutput } from "@/playground/types";
+import { romeAst as BiomeFormatterIr } from "lang-rome-formatter-ir";
 
 interface Props {
 	prettier: PrettierOutput;

@@ -1,10 +1,3 @@
-import init, {
-	DiagnosticPrinter,
-	type PartialConfiguration as Configuration,
-	type RomePath as BiomePath,
-	type RuleCategories,
-	Workspace,
-} from "@biomejs/wasm-web";
 import {
 	ArrowParentheses,
 	AttributePosition,
@@ -18,6 +11,13 @@ import {
 	Semicolons,
 } from "@/playground/types";
 import { isJsonFilename } from "@/playground/utils";
+import init, {
+	DiagnosticPrinter,
+	type PartialConfiguration as Configuration,
+	type RomePath as BiomePath,
+	type RuleCategories,
+	Workspace,
+} from "@biomejs/wasm-web";
 
 let workspace: Workspace | null = null;
 let fileCounter = 0;

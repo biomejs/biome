@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import type { SettingsTabProps } from "@/playground/tabs/SettingsTab";
 import SettingsTab from "@/playground/tabs/SettingsTab";
 import { classNames, createLocalStorage } from "@/playground/utils";
+import { useEffect, useState } from "react";
 
 const isCollapsedStore = createLocalStorage("settings-collapsed");
 

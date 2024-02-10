@@ -1,5 +1,5 @@
-import type React from "react";
 import { classnames } from "@/playground/utils";
+import type React from "react";
 
 interface Tab {
 	key: string;

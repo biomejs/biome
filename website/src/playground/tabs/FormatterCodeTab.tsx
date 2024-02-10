@@ -1,9 +1,9 @@
-import fastDiff from "fast-diff";
 import CodeMirror, { type BiomeExtension } from "@/playground/CodeMirror";
 import Collapsible from "@/playground/Collapsible";
 import BiomeHeader from "@/playground/components/BiomeHeader";
 import PrettierHeader from "@/playground/components/PrettierHeader";
 import type { PrettierOutput } from "@/playground/types";
+import fastDiff from "fast-diff";
 
 interface Props {
 	prettier: PrettierOutput;
