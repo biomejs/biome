@@ -15,22 +15,18 @@ version              = "0.0.1"
 [dependencies]
 biome_analyze            = { workspace = true, features = ["serde"] }
 biome_console            = { workspace = true }
-biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
-biome_fs                 = { workspace = true, features = ["serde"] }
 biome_js_analyze         = { workspace = true }
 biome_js_formatter       = { workspace = true, features = ["serde"] }
 biome_js_syntax          = { workspace = true, features = ["serde"] }
-biome_json_formatter     = { workspace = true }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_rowan              = { workspace = true, features = ["serde"] }
 bpaf                     = { workspace = true }
-ignore                   = { workspace = true }
 indexmap                 = { workspace = true, features = ["serde"] }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, features = ["indexmap1"], optional = true }
@@ -41,8 +37,7 @@ serde_json               = { workspace = true, features = ["raw_value"] }
 schema = ["dep:schemars", "biome_js_analyze/schema", "biome_formatter/serde"]
 
 [dev-dependencies]
-insta        = { workspace = true }
-tests_macros = { workspace = true }
+insta = { workspace = true }
 
 [lints]
 workspace = true

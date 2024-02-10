@@ -429,7 +429,7 @@ impl Session {
 
                     let result = retrieve_gitignore_matches(
                         &configuration,
-                        &fs,
+                        fs,
                         configuration_path.as_deref(),
                     );
 

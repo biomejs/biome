@@ -65,7 +65,7 @@ async fn try_connect() -> io::Result<NamedPipeClient> {
 
 /// Process creationg flag from the Win32 API, ensures the process is created
 /// in its own group and will not be killed when the parent process exits
-const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
+const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
 
 /// Spawn the daemon server process in the background
 fn spawn_daemon(stop_on_disconnect: bool, config_path: Option<PathBuf>) -> io::Result<()> {
