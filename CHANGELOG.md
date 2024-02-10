@@ -92,6 +92,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   <div></div>
   ```
+- Add partial for `.vue` files. Biome is able to format the script block of Vue files. Contributed by @nhedger
+
+  ```diff
+  <script setup lang="ts">
+  - statement ( );
+  + statement();
+  </script/>
+
+  <template></template>
+  ```
 
 #### Bug fixes
 
