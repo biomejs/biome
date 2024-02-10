@@ -103,6 +103,7 @@ define_categories! {
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
     "lint/nursery/noApproximativeNumericConstant": "https://biomejs.dev/linter/rules/no-approximative-numeric-constant",
     "lint/nursery/noConsole": "https://biomejs.dev/linter/rules/no-console",
+    "lint/nursery/noDuplicateElseIf": "https://biomejs.dev/linter/rules/no-duplicate-else-if",
     "lint/nursery/noDuplicateJsonKeys": "https://biomejs.dev/linter/rules/no-duplicate-json-keys",
     "lint/nursery/noEmptyBlockStatements": "https://biomejs.dev/linter/rules/no-empty-block-statements",
     "lint/nursery/noEmptyTypeParameters": "https://biomejs.dev/linter/rules/no-empty-type-parameters",

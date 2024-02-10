@@ -1,0 +1,2043 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+if (isA(x)) {
+    foo();
+} else if (isB(x)) {
+    bar();
+}
+
+if (a) {
+    foo();
+} else if (b) {
+    bar();
+} else if (c && d) {
+    baz();
+} else if (c && e) {
+    quux();
+} else {
+    quuux();
+}
+
+if (a) {
+    foo();
+} else if (b) {
+    bar();
+} else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    baz();
+} else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+    quux();
+} else {
+    quuux();
+}
+
+if (n === 1) {
+    foo();
+} else if (n === 2) {
+    bar();
+} else if (n === 3) {
+    baz();
+} else if (n === 4) {
+    quux();
+} else if (n === 5) {
+    quuux();
+}
+
+```
+
+# Diagnostics
+```
+valid.js:15:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    13 │ } else if (c && d) {
+    14 │     baz();
+  > 15 │ } else if (c && e) {
+       │            ^
+    16 │     quux();
+    17 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:15:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    13 │ } else if (c && d) {
+    14 │     baz();
+  > 15 │ } else if (c && e) {
+       │            ^
+    16 │     quux();
+    17 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:15:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    13 │ } else if (c && d) {
+    14 │     baz();
+  > 15 │ } else if (c && e) {
+       │            ^
+    16 │     quux();
+    17 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:15:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    13 │ } else if (c && d) {
+    14 │     baz();
+  > 15 │ } else if (c && e) {
+       │            ^
+    16 │     quux();
+    17 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:15:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    13 │ } else if (c && d) {
+    14 │     baz();
+  > 15 │ } else if (c && e) {
+       │            ^
+    16 │     quux();
+    17 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:17 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                 ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:22 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                      ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:27 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                           ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:32 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:37 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                     ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:42 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                          ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:47 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                               ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:52 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                    ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:57 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                         ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:62 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                              ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:67 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                   ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:72 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                        ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:77 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                             ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:82 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                  ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:87 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                       ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:92 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:97 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                 ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:102 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                      ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:107 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                           ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:112 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                                ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:117 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                                     ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:17 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                 ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:22 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                      ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:27 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                           ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:32 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:37 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                     ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:42 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                          ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:47 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                               ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:52 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                    ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:57 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                         ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:62 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                              ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:67 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                   ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:72 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                        ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:77 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                             ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:82 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                  ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:87 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                       ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:92 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:97 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                 ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:102 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                      ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:107 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                           ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:112 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                                ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:117 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                                     ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:17 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                 ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:22 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                      ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:27 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                           ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:32 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:37 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                     ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:42 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                          ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:47 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                               ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:52 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                    ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:57 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                         ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:62 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                              ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:67 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                   ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:72 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                        ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:77 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                             ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:82 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                  ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:87 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                       ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:92 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                            ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:97 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                 ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:102 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                      ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:107 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                           ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:112 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                                ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+```
+valid.js:27:117 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate else-if condition
+  
+    25 │ } else if (c && d && e && f && g && h && i && j && k && l && m && n && o && p && q && r && s && t && u && v && w && x && y && z) {
+    26 │     baz();
+  > 27 │ } else if (c && e && d && f && h && g && i && j && l && k && n && m && o && p && q && r && s && t && u && v && w && x && y) {
+       │                                                                                                                     ^
+    28 │     quux();
+    29 │ } else {
+  
+  i This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain
+  
+
+```
+
+
