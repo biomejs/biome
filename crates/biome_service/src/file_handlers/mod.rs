@@ -2,6 +2,8 @@ use self::{
     css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
     unknown::UnknownFileHandler,
 };
+use crate::file_handlers::astro::AstroFileHandler;
+pub use crate::file_handlers::astro::ASTRO_FENCE;
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
     settings::SettingsHandle,
@@ -12,6 +14,7 @@ use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
 use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
+use biome_css_formatter::can_format_css_yet;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
 use biome_fs::RomePath;
@@ -22,6 +25,7 @@ pub use javascript::JsFormatterSettings;
 use std::ffi::OsStr;
 use std::path::Path;
 
+mod astro;
 mod css;
 mod javascript;
 mod json;
@@ -45,6 +49,8 @@ pub enum Language {
     Jsonc,
     /// CSS
     Css,
+    ///
+    Astro,
     /// Any language that is not supported
     #[default]
     Unknown,
@@ -76,6 +82,7 @@ impl Language {
             "tsx" => Language::TypeScriptReact,
             "json" => Language::Json,
             "jsonc" => Language::Jsonc,
+            "astro" => Language::Astro,
             "css" => Language::Css,
             _ => Language::Unknown,
         }
@@ -127,6 +134,7 @@ impl Language {
             "typescriptreact" => Language::TypeScriptReact,
             "json" => Language::Json,
             "jsonc" => Language::Jsonc,
+            "astro" => Language::Astro,
             // TODO: remove this when we are ready to handle CSS files
             "css" => Language::Unknown,
             _ => Language::Unknown,
@@ -187,7 +195,23 @@ impl Language {
             Language::JavaScriptReact => Some(JsFileSource::jsx()),
             Language::TypeScript => Some(JsFileSource::tsx()),
             Language::TypeScriptReact => Some(JsFileSource::tsx()),
+            Language::Astro => Some(JsFileSource::ts()),
             Language::Json | Language::Jsonc | Language::Css | Language::Unknown => None,
+        }
+    }
+
+    pub fn can_parse(path: &Path, content: &str) -> bool {
+        let language = Language::from_path(path);
+        match language {
+            Language::JavaScript
+            | Language::JavaScriptReact
+            | Language::TypeScript
+            | Language::TypeScriptReact
+            | Language::Json
+            | Language::Css
+            | Language::Jsonc => true,
+            Language::Astro => ASTRO_FENCE.is_match(content),
+            Language::Unknown => false,
         }
     }
 }
@@ -202,6 +226,7 @@ impl biome_console::fmt::Display for Language {
             Language::Json => fmt.write_markup(markup! { "JSON" }),
             Language::Jsonc => fmt.write_markup(markup! { "JSONC" }),
             Language::Css => fmt.write_markup(markup! { "CSS" }),
+            Language::Astro => fmt.write_markup(markup! { "Astro" }),
             Language::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -277,12 +302,11 @@ pub struct DebugCapabilities {
 
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) filter: AnalysisFilter<'a>,
-    pub(crate) rules: Option<&'a Rules>,
     pub(crate) settings: SettingsHandle<'a>,
     pub(crate) language: Language,
     pub(crate) max_diagnostics: u64,
     pub(crate) path: &'a RomePath,
+    pub(crate) categories: RuleCategories,
 }
 
 pub(crate) struct LintResults {
@@ -361,6 +385,7 @@ pub(crate) struct Features {
     json: JsonFileHandler,
     #[allow(unused)]
     css: CssFileHandler,
+    astro: AstroFileHandler,
     unknown: UnknownFileHandler,
 }
 
@@ -370,6 +395,7 @@ impl Features {
             js: JsFileHandler {},
             json: JsonFileHandler {},
             css: CssFileHandler {},
+            astro: AstroFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
@@ -386,8 +412,15 @@ impl Features {
             | Language::TypeScript
             | Language::TypeScriptReact => self.js.capabilities(),
             Language::Json | Language::Jsonc => self.json.capabilities(),
-            // TODO: change this when we are ready to handle CSS files
-            Language::Css => self.unknown.capabilities(),
+            Language::Css => {
+                // TODO: change this when we are ready to handle CSS files
+                if can_format_css_yet() {
+                    self.css.capabilities()
+                } else {
+                    self.unknown.capabilities()
+                }
+            }
+            Language::Astro => self.astro.capabilities(),
             Language::Unknown => self.unknown.capabilities(),
         }
     }

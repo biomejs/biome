@@ -32,9 +32,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@8..9 "{" [] [],
-                declarations: CssDeclarationList [],
+                items: CssDeclarationOrRuleList [],
                 r_curly_token: R_CURLY@9..10 "}" [] [],
             },
         },
@@ -59,9 +59,9 @@ CssRoot {
               0: DOT@0..1 "." [] []
               1: CSS_CUSTOM_IDENTIFIER@1..8
                 0: IDENT@1..8 "action" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_LIST_BLOCK@8..10
+      1: CSS_DECLARATION_OR_RULE_BLOCK@8..10
         0: L_CURLY@8..9 "{" [] []
-        1: CSS_DECLARATION_LIST@9..9
+        1: CSS_DECLARATION_OR_RULE_LIST@9..9
         2: R_CURLY@9..10 "}" [] []
   2: EOF@10..11 "" [Newline("\n")] []
 

@@ -64,19 +64,12 @@ Quote style: Double Quotes
 }
 
 .whitespace {
-    color: rgba(   51 
-    170
-     51 / 0.4);
-    color: rgba(
+	color: rgba(51 170 51 / 0.4);
+	color: rgba(
         51   170    51  /  40%);
-    color: hsl(270   60%   50% / .15);
-    color: hsla(240 100%   50% 
-    /   .05);
-    color: hsla(
-        240
-        100%
-        50% 
-        / 5%);
+	color: hsl(270 60% 50% / .15);
+	color: hsla(240 100% 50% / .05);
+	color: hsla(240 100% 50% / 5%);
 }
 ```
 

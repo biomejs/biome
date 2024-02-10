@@ -22,7 +22,8 @@ use biome_analyze::{
 use biome_configuration::Rules;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
-    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    QuoteStyle,
 };
 use biome_fs::RomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
@@ -62,6 +63,7 @@ pub struct JsFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub enabled: Option<bool>,
+    pub attribute_position: Option<AttributePosition>,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -129,7 +131,13 @@ impl Language for JsLanguage {
             .with_semicolons(language.semicolons.unwrap_or_default())
             .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
             .with_bracket_spacing(language.bracket_spacing.unwrap_or_default())
-            .with_bracket_same_line(language.bracket_same_line.unwrap_or_default());
+            .with_bracket_same_line(language.bracket_same_line.unwrap_or_default())
+            .with_attribute_position(
+                language
+                    .attribute_position
+                    .or(global.attribute_position)
+                    .unwrap_or_default(),
+            );
 
         overrides.override_js_format_options(path, options)
     }
@@ -276,6 +284,7 @@ fn debug_formatter_ir(
 fn lint(params: LintParams) -> LintResults {
     debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
         .in_scope(move || {
+            let settings = params.settings.as_ref();
             let file_source = match params.parse.file_source(params.path) {
                 Ok(file_source) => file_source,
                 Err(_) => {
@@ -292,9 +301,31 @@ fn lint(params: LintParams) -> LintResults {
             };
             let tree = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
-
             let analyzer_options =
                 compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
+
+            // Compute final rules (taking `overrides` into account)
+            let rules = settings.as_rules(params.path.as_path());
+            let mut rule_filter_list = rules
+                .as_ref()
+                .map(|rules| rules.as_enabled_rules())
+                .unwrap_or_default()
+                .into_iter()
+                .collect::<Vec<_>>();
+            if settings.organize_imports.enabled && !params.categories.is_syntax() {
+                rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
+            }
+
+            rule_filter_list.push(RuleFilter::Rule(
+                "correctness",
+                "noDuplicatePrivateClassMembers",
+            ));
+            rule_filter_list.push(RuleFilter::Rule("correctness", "noInitializerWithDefinite"));
+            rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
+            rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
+
+            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
+            filter.categories = params.categories;
 
             let mut diagnostic_count = diagnostics.len() as u64;
             let mut errors = diagnostics
@@ -302,15 +333,11 @@ fn lint(params: LintParams) -> LintResults {
                 .filter(|diag| diag.severity() <= Severity::Error)
                 .count();
 
-            let has_lint = params.filter.categories.contains(RuleCategories::LINT);
+            let has_lint = filter.categories.contains(RuleCategories::LINT);
 
             info!("Analyze file {}", params.path.display());
-            let (_, analyze_diagnostics) = analyze(
-                &tree,
-                params.filter,
-                &analyzer_options,
-                file_source,
-                |signal| {
+            let (_, analyze_diagnostics) =
+                analyze(&tree, filter, &analyzer_options, file_source, |signal| {
                     if let Some(mut diagnostic) = signal.diagnostic() {
                         // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
                         if !has_lint
@@ -327,8 +354,8 @@ fn lint(params: LintParams) -> LintResults {
                             .category()
                             .filter(|category| category.name().starts_with("lint/"))
                             .map(|category| {
-                                params
-                                    .rules
+                                rules
+                                    .as_ref()
                                     .and_then(|rules| rules.get_severity_from_code(category))
                                     .unwrap_or(Severity::Warning)
                             })
@@ -352,8 +379,7 @@ fn lint(params: LintParams) -> LintResults {
                     }
 
                     ControlFlow::<Never>::Continue(())
-                },
-            );
+                });
 
             diagnostics.extend(
                 analyze_diagnostics

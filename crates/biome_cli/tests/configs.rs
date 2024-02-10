@@ -8,6 +8,16 @@ pub const CONFIG_FORMAT: &str = r#"{
 }
 "#;
 
+pub const CONFIG_FORMAT_JSONC: &str = r#"{
+  // Formatting options
+  "formatter": {
+    "lineWidth": 10,
+    "indentStyle": "space",
+    "indentWidth": 8
+  }
+}
+"#;
+
 pub const CONFIG_INIT_DEFAULT: &str = r#"{
 	"organizeImports": {
 	 	 "enabled": true
@@ -36,6 +46,14 @@ pub const CONFIG_INIT_DEFAULT_WHEN_INSTALLED: &str = r#"{
 "#;
 
 pub const CONFIG_DISABLED_FORMATTER: &str = r#"{
+  "formatter": {
+    "enabled": false
+  }
+}
+"#;
+
+pub const CONFIG_DISABLED_FORMATTER_JSONC: &str = r#"{
+ // I am a comment
   "formatter": {
     "enabled": false
   }
@@ -89,6 +107,13 @@ pub const CONFIG_BAD_LINE_WIDTH: &str = r#"{
 }"#;
 
 pub const CONFIG_LINTER_DISABLED: &str = r#"{
+  "linter": {
+    "enabled": false
+  }
+}"#;
+
+pub const CONFIG_LINTER_DISABLED_JSONC: &str = r#"{
+  // I am a comment
   "linter": {
     "enabled": false
   }

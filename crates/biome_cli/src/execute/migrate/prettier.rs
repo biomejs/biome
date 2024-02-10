@@ -9,7 +9,7 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
-use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
 use biome_json_parser::JsonParserOptions;
@@ -160,6 +160,7 @@ impl TryFrom<PrettierConfiguration> for PartialFormatterConfiguration {
             line_width: Some(line_width),
             indent_style: Some(indent_style),
             line_ending: Some(value.end_of_line.into()),
+            attribute_position: Some(AttributePosition::default()),
             format_with_errors: Some(false),
             ignore: None,
             include: None,
@@ -205,6 +206,7 @@ impl From<PrettierConfiguration> for PartialJavascriptFormatter {
             quote_properties: Some(value.quote_props.into()),
             bracket_spacing: Some(value.bracket_spacing),
             jsx_quote_style: Some(jsx_quote_style),
+            attribute_position: Some(AttributePosition::default()),
         }
     }
 }
@@ -269,6 +271,10 @@ impl FromPrettierConfiguration {
 
     pub(crate) fn has_configuration(&self) -> bool {
         self.formatter_configuration.is_some() || self.javascript_formatter_configuration.is_some()
+    }
+
+    pub(crate) fn has_ignore_file(&self) -> bool {
+        self.ignore_path.is_some()
     }
 
     pub(crate) fn get_configuration_path(&self) -> Option<&Path> {

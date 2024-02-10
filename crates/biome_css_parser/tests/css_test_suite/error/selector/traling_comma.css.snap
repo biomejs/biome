@@ -36,9 +36,9 @@ CssRoot {
                 COMMA@9..11 "," [] [Whitespace(" ")],
                 missing element,
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@11..12 "{" [] [],
-                declarations: CssDeclarationList [],
+                items: CssDeclarationOrRuleList [],
                 r_curly_token: R_CURLY@12..15 "}" [Newline("\n"), Newline("\n")] [],
             },
         },
@@ -65,9 +65,9 @@ CssRoot {
                 0: IDENT@1..9 "selector" [] []
         1: COMMA@9..11 "," [] [Whitespace(" ")]
         2: (empty)
-      1: CSS_DECLARATION_LIST_BLOCK@11..15
+      1: CSS_DECLARATION_OR_RULE_BLOCK@11..15
         0: L_CURLY@11..12 "{" [] []
-        1: CSS_DECLARATION_LIST@12..12
+        1: CSS_DECLARATION_OR_RULE_LIST@12..12
         2: R_CURLY@12..15 "}" [Newline("\n"), Newline("\n")] []
   2: EOF@15..16 "" [Newline("\n")] []
 

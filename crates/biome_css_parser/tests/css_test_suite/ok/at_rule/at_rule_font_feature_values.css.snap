@@ -1,0 +1,391 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@font-feature-values ident {  }
+
+@font-feature-values 'ident' {  }
+
+@font-feature-values ident {
+	@styleset {
+    nice-style: 12;
+  }
+}
+
+@font-feature-values ident {
+	@styleset {
+    nice-style: 12;
+  }
+  @swash {
+		pretty: 1;
+	}
+}
+
+@font-feature-values ident {
+	@historical-forms { }
+	@character-variant { }
+	@swash { }
+	@ornaments { }
+	@annotation { }
+}
+
+
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@1..21 "font-feature-values" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@21..27 "ident" [] [Whitespace(" ")],
+                },
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@27..30 "{" [] [Whitespace("  ")],
+                    items: CssFontFeatureValuesItemList [],
+                    r_curly_token: R_CURLY@30..31 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@31..34 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@34..54 "font-feature-values" [] [Whitespace(" ")],
+                name: CssString {
+                    value_token: CSS_STRING_LITERAL@54..62 "'ident'" [] [Whitespace(" ")],
+                },
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@62..65 "{" [] [Whitespace("  ")],
+                    items: CssFontFeatureValuesItemList [],
+                    r_curly_token: R_CURLY@65..66 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@66..69 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@69..89 "font-feature-values" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@89..95 "ident" [] [Whitespace(" ")],
+                },
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@95..96 "{" [] [],
+                    items: CssFontFeatureValuesItemList [
+                        CssFontFeatureValuesItem {
+                            at_token: AT@96..99 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: STYLESET_KW@99..108 "styleset" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@108..109 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@109..124 "nice-style" [Newline("\n"), Whitespace("    ")] [],
+                                            },
+                                            colon_token: COLON@124..126 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@126..128 "12" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@128..129 ";" [] [],
+                                ],
+                                r_curly_token: R_CURLY@129..133 "}" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@133..135 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@135..138 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@138..158 "font-feature-values" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@158..164 "ident" [] [Whitespace(" ")],
+                },
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@164..165 "{" [] [],
+                    items: CssFontFeatureValuesItemList [
+                        CssFontFeatureValuesItem {
+                            at_token: AT@165..168 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: STYLESET_KW@168..177 "styleset" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@177..178 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@178..193 "nice-style" [Newline("\n"), Whitespace("    ")] [],
+                                            },
+                                            colon_token: COLON@193..195 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@195..197 "12" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@197..198 ";" [] [],
+                                ],
+                                r_curly_token: R_CURLY@198..202 "}" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                        CssFontFeatureValuesItem {
+                            at_token: AT@202..206 "@" [Newline("\n"), Whitespace("  ")] [],
+                            name: SWASH_KW@206..212 "swash" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@212..213 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@213..222 "pretty" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@222..224 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@224..225 "1" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@225..226 ";" [] [],
+                                ],
+                                r_curly_token: R_CURLY@226..229 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@229..231 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@231..234 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@234..254 "font-feature-values" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@254..260 "ident" [] [Whitespace(" ")],
+                },
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@260..261 "{" [] [],
+                    items: CssFontFeatureValuesItemList [
+                        CssFontFeatureValuesItem {
+                            at_token: AT@261..264 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: HISTORICAL_FORMS_KW@264..281 "historical-forms" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@281..283 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [],
+                                r_curly_token: R_CURLY@283..284 "}" [] [],
+                            },
+                        },
+                        CssFontFeatureValuesItem {
+                            at_token: AT@284..287 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: CHARACTER_VARIANT_KW@287..305 "character-variant" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@305..307 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [],
+                                r_curly_token: R_CURLY@307..308 "}" [] [],
+                            },
+                        },
+                        CssFontFeatureValuesItem {
+                            at_token: AT@308..311 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: SWASH_KW@311..317 "swash" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@317..319 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [],
+                                r_curly_token: R_CURLY@319..320 "}" [] [],
+                            },
+                        },
+                        CssFontFeatureValuesItem {
+                            at_token: AT@320..323 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: ORNAMENTS_KW@323..333 "ornaments" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@333..335 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [],
+                                r_curly_token: R_CURLY@335..336 "}" [] [],
+                            },
+                        },
+                        CssFontFeatureValuesItem {
+                            at_token: AT@336..339 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: ANNOTATION_KW@339..350 "annotation" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@350..352 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [],
+                                r_curly_token: R_CURLY@352..353 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@353..355 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@355..358 "" [Newline("\n"), Newline("\n"), Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..358
+  0: (empty)
+  1: CSS_RULE_LIST@0..355
+    0: CSS_AT_RULE@0..31
+      0: AT@0..1 "@" [] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@1..31
+        0: FONT_FEATURE_VALUES_KW@1..21 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@21..27
+          0: IDENT@21..27 "ident" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@27..31
+          0: L_CURLY@27..30 "{" [] [Whitespace("  ")]
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@30..30
+          2: R_CURLY@30..31 "}" [] []
+    1: CSS_AT_RULE@31..66
+      0: AT@31..34 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@34..66
+        0: FONT_FEATURE_VALUES_KW@34..54 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_STRING@54..62
+          0: CSS_STRING_LITERAL@54..62 "'ident'" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@62..66
+          0: L_CURLY@62..65 "{" [] [Whitespace("  ")]
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@65..65
+          2: R_CURLY@65..66 "}" [] []
+    2: CSS_AT_RULE@66..135
+      0: AT@66..69 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@69..135
+        0: FONT_FEATURE_VALUES_KW@69..89 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@89..95
+          0: IDENT@89..95 "ident" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@95..135
+          0: L_CURLY@95..96 "{" [] []
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@96..133
+            0: CSS_FONT_FEATURE_VALUES_ITEM@96..133
+              0: AT@96..99 "@" [Newline("\n"), Whitespace("\t")] []
+              1: STYLESET_KW@99..108 "styleset" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@108..133
+                0: L_CURLY@108..109 "{" [] []
+                1: CSS_DECLARATION_LIST@109..129
+                  0: CSS_DECLARATION@109..128
+                    0: CSS_GENERIC_PROPERTY@109..128
+                      0: CSS_IDENTIFIER@109..124
+                        0: IDENT@109..124 "nice-style" [Newline("\n"), Whitespace("    ")] []
+                      1: COLON@124..126 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@126..128
+                        0: CSS_NUMBER@126..128
+                          0: CSS_NUMBER_LITERAL@126..128 "12" [] []
+                    1: (empty)
+                  1: SEMICOLON@128..129 ";" [] []
+                2: R_CURLY@129..133 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@133..135 "}" [Newline("\n")] []
+    3: CSS_AT_RULE@135..231
+      0: AT@135..138 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@138..231
+        0: FONT_FEATURE_VALUES_KW@138..158 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@158..164
+          0: IDENT@158..164 "ident" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@164..231
+          0: L_CURLY@164..165 "{" [] []
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@165..229
+            0: CSS_FONT_FEATURE_VALUES_ITEM@165..202
+              0: AT@165..168 "@" [Newline("\n"), Whitespace("\t")] []
+              1: STYLESET_KW@168..177 "styleset" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@177..202
+                0: L_CURLY@177..178 "{" [] []
+                1: CSS_DECLARATION_LIST@178..198
+                  0: CSS_DECLARATION@178..197
+                    0: CSS_GENERIC_PROPERTY@178..197
+                      0: CSS_IDENTIFIER@178..193
+                        0: IDENT@178..193 "nice-style" [Newline("\n"), Whitespace("    ")] []
+                      1: COLON@193..195 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@195..197
+                        0: CSS_NUMBER@195..197
+                          0: CSS_NUMBER_LITERAL@195..197 "12" [] []
+                    1: (empty)
+                  1: SEMICOLON@197..198 ";" [] []
+                2: R_CURLY@198..202 "}" [Newline("\n"), Whitespace("  ")] []
+            1: CSS_FONT_FEATURE_VALUES_ITEM@202..229
+              0: AT@202..206 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SWASH_KW@206..212 "swash" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@212..229
+                0: L_CURLY@212..213 "{" [] []
+                1: CSS_DECLARATION_LIST@213..226
+                  0: CSS_DECLARATION@213..225
+                    0: CSS_GENERIC_PROPERTY@213..225
+                      0: CSS_IDENTIFIER@213..222
+                        0: IDENT@213..222 "pretty" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@222..224 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@224..225
+                        0: CSS_NUMBER@224..225
+                          0: CSS_NUMBER_LITERAL@224..225 "1" [] []
+                    1: (empty)
+                  1: SEMICOLON@225..226 ";" [] []
+                2: R_CURLY@226..229 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@229..231 "}" [Newline("\n")] []
+    4: CSS_AT_RULE@231..355
+      0: AT@231..234 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@234..355
+        0: FONT_FEATURE_VALUES_KW@234..254 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@254..260
+          0: IDENT@254..260 "ident" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@260..355
+          0: L_CURLY@260..261 "{" [] []
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@261..353
+            0: CSS_FONT_FEATURE_VALUES_ITEM@261..284
+              0: AT@261..264 "@" [Newline("\n"), Whitespace("\t")] []
+              1: HISTORICAL_FORMS_KW@264..281 "historical-forms" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@281..284
+                0: L_CURLY@281..283 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@283..283
+                2: R_CURLY@283..284 "}" [] []
+            1: CSS_FONT_FEATURE_VALUES_ITEM@284..308
+              0: AT@284..287 "@" [Newline("\n"), Whitespace("\t")] []
+              1: CHARACTER_VARIANT_KW@287..305 "character-variant" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@305..308
+                0: L_CURLY@305..307 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@307..307
+                2: R_CURLY@307..308 "}" [] []
+            2: CSS_FONT_FEATURE_VALUES_ITEM@308..320
+              0: AT@308..311 "@" [Newline("\n"), Whitespace("\t")] []
+              1: SWASH_KW@311..317 "swash" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@317..320
+                0: L_CURLY@317..319 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@319..319
+                2: R_CURLY@319..320 "}" [] []
+            3: CSS_FONT_FEATURE_VALUES_ITEM@320..336
+              0: AT@320..323 "@" [Newline("\n"), Whitespace("\t")] []
+              1: ORNAMENTS_KW@323..333 "ornaments" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@333..336
+                0: L_CURLY@333..335 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@335..335
+                2: R_CURLY@335..336 "}" [] []
+            4: CSS_FONT_FEATURE_VALUES_ITEM@336..353
+              0: AT@336..339 "@" [Newline("\n"), Whitespace("\t")] []
+              1: ANNOTATION_KW@339..350 "annotation" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@350..353
+                0: L_CURLY@350..352 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@352..352
+                2: R_CURLY@352..353 "}" [] []
+          2: R_CURLY@353..355 "}" [Newline("\n")] []
+  2: EOF@355..358 "" [Newline("\n"), Newline("\n"), Newline("\n")] []
+
+```
+
+

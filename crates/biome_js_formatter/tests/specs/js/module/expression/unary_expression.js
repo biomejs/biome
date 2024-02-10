@@ -1,4 +1,7 @@
 delete  a.a
+delete  (a.a)
+delete  console.log(1)
+delete  (() => {})
 void    b
 typeof  c
 x = +1

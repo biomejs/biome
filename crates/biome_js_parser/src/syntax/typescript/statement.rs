@@ -375,34 +375,17 @@ fn parse_ts_extends_clause(p: &mut JsParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(crate) fn is_at_any_ts_namespace_declaration(p: &mut JsParser) -> bool {
-    if p.has_nth_preceding_line_break(1) {
-        return false;
-    }
-
-    if matches!(p.cur(), T![namespace] | T![module]) {
-        return is_nth_at_identifier(p, 1) || p.nth_at(1, JS_STRING_LITERAL);
-    }
-
-    if p.at(T![global]) {
-        return p.nth_at(1, T!['{']);
-    }
-
-    false
-}
-
-#[inline]
 pub(crate) fn is_nth_at_any_ts_namespace_declaration(p: &mut JsParser, n: usize) -> bool {
+    if p.nth_at(n, T![global]) {
+        return p.nth_at(n + 1, T!['{']);
+    }
+
     if p.has_nth_preceding_line_break(n + 1) {
         return false;
     }
 
     if matches!(p.nth(n), T![namespace] | T![module]) {
         return is_nth_at_identifier(p, n + 1) || p.nth_at(n + 1, JS_STRING_LITERAL);
-    }
-
-    if p.nth_at(n, T![global]) {
-        return p.nth_at(n + 1, T!['{']);
     }
 
     false
@@ -521,6 +504,13 @@ fn parse_ts_module_block(p: &mut JsParser) -> ParsedSyntax {
 //      let VERSION: string;
 //  }
 // }
+// declare module "foo" {
+//  global
+//  { }
+// }
+// declare global {}
+// declare global
+// { }
 //
 // test ts ts_global_variable
 // let global;

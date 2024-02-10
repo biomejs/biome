@@ -6,6 +6,7 @@ pub(crate) mod bogus_at_rule;
 pub(crate) mod bogus_block;
 pub(crate) mod bogus_declaration_item;
 pub(crate) mod bogus_document_matcher;
+pub(crate) mod bogus_font_feature_values_item;
 pub(crate) mod bogus_keyframes_item;
 pub(crate) mod bogus_layer;
 pub(crate) mod bogus_media_query;

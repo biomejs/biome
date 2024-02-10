@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+import eslint from 'eslint';
+const l = require('lodash');
+
+```
+
+# Diagnostics
+```
+invalid.js:1:20 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Importing Eslint is forbidden
+  
+  > 1 │ import eslint from 'eslint';
+      │                    ^^^^^^^^
+    2 │ const l = require('lodash');
+    3 │ 
+  
+
+```
+
+```
+invalid.js:2:19 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! It's not recommended to use lodash
+  
+    1 │ import eslint from 'eslint';
+  > 2 │ const l = require('lodash');
+      │                   ^^^^^^^^
+    3 │ 
+  
+
+```
+
+

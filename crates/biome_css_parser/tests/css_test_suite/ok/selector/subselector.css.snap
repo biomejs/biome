@@ -59,9 +59,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@24..25 "{" [] [],
-                declarations: CssDeclarationList [],
+                items: CssDeclarationOrRuleList [],
                 r_curly_token: R_CURLY@25..26 "}" [] [],
             },
         },
@@ -101,9 +101,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@50..51 "{" [] [],
-                declarations: CssDeclarationList [],
+                items: CssDeclarationOrRuleList [],
                 r_curly_token: R_CURLY@51..52 "}" [] [],
             },
         },
@@ -140,9 +140,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@75..76 "{" [] [],
-                declarations: CssDeclarationList [],
+                items: CssDeclarationOrRuleList [],
                 r_curly_token: R_CURLY@76..77 "}" [] [],
             },
         },
@@ -249,9 +249,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@150..151 "{" [] [],
-                declarations: CssDeclarationList [],
+                items: CssDeclarationOrRuleList [],
                 r_curly_token: R_CURLY@151..152 "}" [] [],
             },
         },
@@ -291,9 +291,9 @@ CssRoot {
               0: HASH@20..21 "#" [] []
               1: CSS_CUSTOM_IDENTIFIER@21..24
                 0: IDENT@21..24 "id" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_LIST_BLOCK@24..26
+      1: CSS_DECLARATION_OR_RULE_BLOCK@24..26
         0: L_CURLY@24..25 "{" [] []
-        1: CSS_DECLARATION_LIST@25..25
+        1: CSS_DECLARATION_OR_RULE_LIST@25..25
         2: R_CURLY@25..26 "}" [] []
     1: CSS_QUALIFIED_RULE@26..52
       0: CSS_SELECTOR_LIST@26..50
@@ -319,9 +319,9 @@ CssRoot {
               0: HASH@45..46 "#" [] []
               1: CSS_CUSTOM_IDENTIFIER@46..50
                 0: IDENT@46..50 "id1" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_LIST_BLOCK@50..52
+      1: CSS_DECLARATION_OR_RULE_BLOCK@50..52
         0: L_CURLY@50..51 "{" [] []
-        1: CSS_DECLARATION_LIST@51..51
+        1: CSS_DECLARATION_OR_RULE_LIST@51..51
         2: R_CURLY@51..52 "}" [] []
     2: CSS_QUALIFIED_RULE@52..77
       0: CSS_SELECTOR_LIST@52..75
@@ -345,9 +345,9 @@ CssRoot {
               0: HASH@70..71 "#" [] []
               1: CSS_CUSTOM_IDENTIFIER@71..75
                 0: IDENT@71..75 "id1" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_LIST_BLOCK@75..77
+      1: CSS_DECLARATION_OR_RULE_BLOCK@75..77
         0: L_CURLY@75..76 "{" [] []
-        1: CSS_DECLARATION_LIST@76..76
+        1: CSS_DECLARATION_OR_RULE_LIST@76..76
         2: R_CURLY@76..77 "}" [] []
     3: CSS_QUALIFIED_RULE@77..152
       0: CSS_SELECTOR_LIST@77..150
@@ -418,9 +418,9 @@ CssRoot {
               0: HASH@145..146 "#" [] []
               1: CSS_CUSTOM_IDENTIFIER@146..150
                 0: IDENT@146..150 "id1" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_LIST_BLOCK@150..152
+      1: CSS_DECLARATION_OR_RULE_BLOCK@150..152
         0: L_CURLY@150..151 "{" [] []
-        1: CSS_DECLARATION_LIST@151..151
+        1: CSS_DECLARATION_OR_RULE_LIST@151..151
         2: R_CURLY@151..152 "}" [] []
   2: EOF@152..153 "" [Newline("\n")] []
 

@@ -1,8 +1,12 @@
+use crate::configuration::overrides::OverrideFormatterConfiguration;
+use crate::settings::{to_matcher, FormatSettings};
+use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{IndentStyle, LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 use std::str::FromStr;
 
 /// Generic options applied to all files
@@ -84,6 +88,56 @@ impl FromStr for FormatterConfiguration {
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         Ok(Self::default())
+    }
+}
+
+pub fn to_format_settings(
+    working_directory: Option<PathBuf>,
+    conf: FormatterConfiguration,
+) -> Result<FormatSettings, WorkspaceError> {
+    let indent_style = match conf.indent_style {
+        PlainIndentStyle::Tab => IndentStyle::Tab,
+        PlainIndentStyle::Space => IndentStyle::Space,
+    };
+    let indent_width = conf.indent_width.into();
+
+    Ok(FormatSettings {
+        enabled: conf.enabled,
+        indent_style: Some(indent_style),
+        indent_width: Some(indent_width),
+        line_ending: Some(conf.line_ending),
+        line_width: Some(conf.line_width),
+        format_with_errors: conf.format_with_errors,
+        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
+        included_files: to_matcher(working_directory, Some(&conf.include))?,
+    })
+}
+
+impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(conf: OverrideFormatterConfiguration) -> Result<Self, Self::Error> {
+        let indent_style = match conf.indent_style {
+            Some(PlainIndentStyle::Tab) => IndentStyle::Tab,
+            Some(PlainIndentStyle::Space) => IndentStyle::Space,
+            None => IndentStyle::default(),
+        };
+        let indent_width = conf
+            .indent_width
+            .map(Into::into)
+            .or(conf.indent_size.map(Into::into))
+            .unwrap_or_default();
+
+        Ok(Self {
+            enabled: conf.enabled.unwrap_or_default(),
+            indent_style: Some(indent_style),
+            indent_width: Some(indent_width),
+            line_ending: conf.line_ending,
+            line_width: conf.line_width,
+            format_with_errors: conf.format_with_errors.unwrap_or_default(),
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
+        })
     }
 }
 

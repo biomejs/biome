@@ -135,6 +135,7 @@ lazy_static       = "1.4.0"
 quickcheck        = "1.0.3"
 quickcheck_macros = "1.0.0"
 quote             = { version = "1.0.28" }
+regex             = "1.10.3"
 rustc-hash        = "1.1.0"
 schemars          = { version = "0.8.12" }
 serde             = { version = "1.0.163", features = ["derive"] }

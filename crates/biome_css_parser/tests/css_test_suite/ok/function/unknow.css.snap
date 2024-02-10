@@ -33,102 +33,108 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@4..5 "{" [] [],
-                declarations: CssDeclarationList [
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@5..14 "prod" [Newline("\n"), Whitespace("    ")] [],
-                            },
-                            colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssFunction {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@16..18 "fn" [] [],
-                                    },
-                                    l_paren_token: L_PAREN@18..19 "(" [] [],
-                                    items: CssParameterList [
-                                        CssParameter {
-                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                css_component_value_list: CssComponentValueList [
-                                                    CssRegularDimension {
-                                                        value_token: CSS_NUMBER_LITERAL@19..22 "100" [] [],
-                                                        unit_token: IDENT@22..24 "px" [] [],
-                                                    },
-                                                ],
-                                            },
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@24..25 ")" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@5..14 "prod" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@25..26 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@26..35 "prod" [Newline("\n"), Whitespace("    ")] [],
-                            },
-                            colon_token: COLON@35..37 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssFunction {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@37..41 "--fn" [] [],
-                                    },
-                                    l_paren_token: L_PAREN@41..42 "(" [] [],
-                                    items: CssParameterList [
-                                        CssParameter {
-                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                css_component_value_list: CssComponentValueList [
-                                                    CssRegularDimension {
-                                                        value_token: CSS_NUMBER_LITERAL@42..45 "100" [] [],
-                                                        unit_token: IDENT@45..47 "px" [] [],
-                                                    },
-                                                ],
-                                            },
+                                colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@16..18 "fn" [] [],
                                         },
-                                    ],
-                                    r_paren_token: R_PAREN@47..48 ")" [] [],
-                                },
-                            ],
-                        },
-                        important: missing (optional),
-                    },
-                    SEMICOLON@48..49 ";" [] [],
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@49..58 "prod" [Newline("\n"), Whitespace("    ")] [],
-                            },
-                            colon_token: COLON@58..60 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssFunction {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@60..68 "--fn--fn" [] [],
-                                    },
-                                    l_paren_token: L_PAREN@68..69 "(" [] [],
-                                    items: CssParameterList [
-                                        CssParameter {
-                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                css_component_value_list: CssComponentValueList [
-                                                    CssRegularDimension {
-                                                        value_token: CSS_NUMBER_LITERAL@69..72 "100" [] [],
-                                                        unit_token: IDENT@72..74 "px" [] [],
-                                                    },
-                                                ],
+                                        l_paren_token: L_PAREN@18..19 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@19..22 "100" [] [],
+                                                            unit_token: IDENT@22..24 "px" [] [],
+                                                        },
+                                                    ],
+                                                },
                                             },
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@74..75 ")" [] [],
-                                },
-                            ],
+                                        ],
+                                        r_paren_token: R_PAREN@24..25 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
                         },
-                        important: missing (optional),
+                        semicolon_token: SEMICOLON@25..26 ";" [] [],
                     },
-                    SEMICOLON@75..76 ";" [] [],
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@26..35 "prod" [Newline("\n"), Whitespace("    ")] [],
+                                },
+                                colon_token: COLON@35..37 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@37..41 "--fn" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@41..42 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@42..45 "100" [] [],
+                                                            unit_token: IDENT@45..47 "px" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@47..48 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@48..49 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@49..58 "prod" [Newline("\n"), Whitespace("    ")] [],
+                                },
+                                colon_token: COLON@58..60 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@60..68 "--fn--fn" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@68..69 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@69..72 "100" [] [],
+                                                            unit_token: IDENT@72..74 "px" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@74..75 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@75..76 ";" [] [],
+                    },
                 ],
                 r_curly_token: R_CURLY@76..78 "}" [Newline("\n")] [],
             },
@@ -153,69 +159,72 @@ CssRoot {
             1: CSS_IDENTIFIER@0..4
               0: IDENT@0..4 "div" [] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@4..4
-      1: CSS_DECLARATION_LIST_BLOCK@4..78
+      1: CSS_DECLARATION_OR_RULE_BLOCK@4..78
         0: L_CURLY@4..5 "{" [] []
-        1: CSS_DECLARATION_LIST@5..76
-          0: CSS_DECLARATION@5..25
-            0: CSS_GENERIC_PROPERTY@5..25
-              0: CSS_IDENTIFIER@5..14
-                0: IDENT@5..14 "prod" [Newline("\n"), Whitespace("    ")] []
-              1: COLON@14..16 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@16..25
-                0: CSS_FUNCTION@16..25
-                  0: CSS_IDENTIFIER@16..18
-                    0: IDENT@16..18 "fn" [] []
-                  1: L_PAREN@18..19 "(" [] []
-                  2: CSS_PARAMETER_LIST@19..24
-                    0: CSS_PARAMETER@19..24
-                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@19..24
-                        0: CSS_COMPONENT_VALUE_LIST@19..24
-                          0: CSS_REGULAR_DIMENSION@19..24
-                            0: CSS_NUMBER_LITERAL@19..22 "100" [] []
-                            1: IDENT@22..24 "px" [] []
-                  3: R_PAREN@24..25 ")" [] []
-            1: (empty)
-          1: SEMICOLON@25..26 ";" [] []
-          2: CSS_DECLARATION@26..48
-            0: CSS_GENERIC_PROPERTY@26..48
-              0: CSS_IDENTIFIER@26..35
-                0: IDENT@26..35 "prod" [Newline("\n"), Whitespace("    ")] []
-              1: COLON@35..37 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@37..48
-                0: CSS_FUNCTION@37..48
-                  0: CSS_IDENTIFIER@37..41
-                    0: IDENT@37..41 "--fn" [] []
-                  1: L_PAREN@41..42 "(" [] []
-                  2: CSS_PARAMETER_LIST@42..47
-                    0: CSS_PARAMETER@42..47
-                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@42..47
-                        0: CSS_COMPONENT_VALUE_LIST@42..47
-                          0: CSS_REGULAR_DIMENSION@42..47
-                            0: CSS_NUMBER_LITERAL@42..45 "100" [] []
-                            1: IDENT@45..47 "px" [] []
-                  3: R_PAREN@47..48 ")" [] []
-            1: (empty)
-          3: SEMICOLON@48..49 ";" [] []
-          4: CSS_DECLARATION@49..75
-            0: CSS_GENERIC_PROPERTY@49..75
-              0: CSS_IDENTIFIER@49..58
-                0: IDENT@49..58 "prod" [Newline("\n"), Whitespace("    ")] []
-              1: COLON@58..60 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@60..75
-                0: CSS_FUNCTION@60..75
-                  0: CSS_IDENTIFIER@60..68
-                    0: IDENT@60..68 "--fn--fn" [] []
-                  1: L_PAREN@68..69 "(" [] []
-                  2: CSS_PARAMETER_LIST@69..74
-                    0: CSS_PARAMETER@69..74
-                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@69..74
-                        0: CSS_COMPONENT_VALUE_LIST@69..74
-                          0: CSS_REGULAR_DIMENSION@69..74
-                            0: CSS_NUMBER_LITERAL@69..72 "100" [] []
-                            1: IDENT@72..74 "px" [] []
-                  3: R_PAREN@74..75 ")" [] []
-            1: (empty)
-          5: SEMICOLON@75..76 ";" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@5..76
+          0: CSS_DECLARATION_WITH_SEMICOLON@5..26
+            0: CSS_DECLARATION@5..25
+              0: CSS_GENERIC_PROPERTY@5..25
+                0: CSS_IDENTIFIER@5..14
+                  0: IDENT@5..14 "prod" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@14..16 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@16..25
+                  0: CSS_FUNCTION@16..25
+                    0: CSS_IDENTIFIER@16..18
+                      0: IDENT@16..18 "fn" [] []
+                    1: L_PAREN@18..19 "(" [] []
+                    2: CSS_PARAMETER_LIST@19..24
+                      0: CSS_PARAMETER@19..24
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@19..24
+                          0: CSS_COMPONENT_VALUE_LIST@19..24
+                            0: CSS_REGULAR_DIMENSION@19..24
+                              0: CSS_NUMBER_LITERAL@19..22 "100" [] []
+                              1: IDENT@22..24 "px" [] []
+                    3: R_PAREN@24..25 ")" [] []
+              1: (empty)
+            1: SEMICOLON@25..26 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@26..49
+            0: CSS_DECLARATION@26..48
+              0: CSS_GENERIC_PROPERTY@26..48
+                0: CSS_IDENTIFIER@26..35
+                  0: IDENT@26..35 "prod" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@35..37 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@37..48
+                  0: CSS_FUNCTION@37..48
+                    0: CSS_IDENTIFIER@37..41
+                      0: IDENT@37..41 "--fn" [] []
+                    1: L_PAREN@41..42 "(" [] []
+                    2: CSS_PARAMETER_LIST@42..47
+                      0: CSS_PARAMETER@42..47
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@42..47
+                          0: CSS_COMPONENT_VALUE_LIST@42..47
+                            0: CSS_REGULAR_DIMENSION@42..47
+                              0: CSS_NUMBER_LITERAL@42..45 "100" [] []
+                              1: IDENT@45..47 "px" [] []
+                    3: R_PAREN@47..48 ")" [] []
+              1: (empty)
+            1: SEMICOLON@48..49 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@49..76
+            0: CSS_DECLARATION@49..75
+              0: CSS_GENERIC_PROPERTY@49..75
+                0: CSS_IDENTIFIER@49..58
+                  0: IDENT@49..58 "prod" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@58..60 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@60..75
+                  0: CSS_FUNCTION@60..75
+                    0: CSS_IDENTIFIER@60..68
+                      0: IDENT@60..68 "--fn--fn" [] []
+                    1: L_PAREN@68..69 "(" [] []
+                    2: CSS_PARAMETER_LIST@69..74
+                      0: CSS_PARAMETER@69..74
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@69..74
+                          0: CSS_COMPONENT_VALUE_LIST@69..74
+                            0: CSS_REGULAR_DIMENSION@69..74
+                              0: CSS_NUMBER_LITERAL@69..72 "100" [] []
+                              1: IDENT@72..74 "px" [] []
+                    3: R_PAREN@74..75 ")" [] []
+              1: (empty)
+            1: SEMICOLON@75..76 ";" [] []
         2: R_CURLY@76..78 "}" [Newline("\n")] []
   2: EOF@78..78 "" [] []
 

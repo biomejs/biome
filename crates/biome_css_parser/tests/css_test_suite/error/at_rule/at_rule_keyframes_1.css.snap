@@ -151,24 +151,26 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssDeclarationListBlock {
+            block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@101..102 "{" [] [],
-                declarations: CssDeclarationList [
-                    CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@102..110 "color" [Newline("\n"), Whitespace("\t\t")] [],
-                            },
-                            colon_token: COLON@110..112 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssIdentifier {
-                                    value_token: IDENT@112..116 "blue" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@102..110 "color" [Newline("\n"), Whitespace("\t\t")] [],
                                 },
-                            ],
+                                colon_token: COLON@110..112 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@112..116 "blue" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
                         },
-                        important: missing (optional),
+                        semicolon_token: SEMICOLON@116..117 ";" [] [],
                     },
-                    SEMICOLON@116..117 ";" [] [],
                 ],
                 r_curly_token: R_CURLY@117..120 "}" [Newline("\n"), Whitespace("\t")] [],
             },
@@ -426,19 +428,20 @@ CssRoot {
             1: CSS_IDENTIFIER@96..101
               0: IDENT@96..101 "to" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@101..101
-      1: CSS_DECLARATION_LIST_BLOCK@101..120
+      1: CSS_DECLARATION_OR_RULE_BLOCK@101..120
         0: L_CURLY@101..102 "{" [] []
-        1: CSS_DECLARATION_LIST@102..117
-          0: CSS_DECLARATION@102..116
-            0: CSS_GENERIC_PROPERTY@102..116
-              0: CSS_IDENTIFIER@102..110
-                0: IDENT@102..110 "color" [Newline("\n"), Whitespace("\t\t")] []
-              1: COLON@110..112 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@112..116
-                0: CSS_IDENTIFIER@112..116
-                  0: IDENT@112..116 "blue" [] []
-            1: (empty)
-          1: SEMICOLON@116..117 ";" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@102..117
+          0: CSS_DECLARATION_WITH_SEMICOLON@102..117
+            0: CSS_DECLARATION@102..116
+              0: CSS_GENERIC_PROPERTY@102..116
+                0: CSS_IDENTIFIER@102..110
+                  0: IDENT@102..110 "color" [Newline("\n"), Whitespace("\t\t")] []
+                1: COLON@110..112 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@112..116
+                  0: CSS_IDENTIFIER@112..116
+                    0: IDENT@112..116 "blue" [] []
+              1: (empty)
+            1: SEMICOLON@116..117 ";" [] []
         2: R_CURLY@117..120 "}" [Newline("\n"), Whitespace("\t")] []
     3: CSS_BOGUS_RULE@120..122
       0: R_CURLY@120..122 "}" [Newline("\n")] []

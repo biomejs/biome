@@ -1,0 +1,17 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `file.astro`
+
+```astro
+<div></div>
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file(s) in <TIME>
+```
+
+

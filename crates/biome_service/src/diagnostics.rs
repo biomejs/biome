@@ -441,7 +441,7 @@ pub struct CantReadFile {
         message("The file "{self.path}" was ignored."),
         description = "The file {path} was ignored."
     ),
-    severity = Warning
+    severity = Warning,
 )]
 pub struct FileIgnored {
     #[location(resource)]
@@ -747,7 +747,7 @@ mod test {
 
     #[test]
     fn diagnostic_size() {
-        assert_eq!(std::mem::size_of::<WorkspaceError>(), 104)
+        assert_eq!(std::mem::size_of::<WorkspaceError>(), 96)
     }
 
     #[test]

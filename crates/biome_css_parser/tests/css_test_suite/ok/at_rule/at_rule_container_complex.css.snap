@@ -1195,24 +1195,26 @@ CssRoot {
                                     ],
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationOrRuleBlock {
                                 l_curly_token: L_CURLY@1247..1248 "{" [] [],
-                                declarations: CssDeclarationList [
-                                    CssDeclaration {
-                                        property: CssGenericProperty {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@1248..1267 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
-                                            },
-                                            colon_token: COLON@1267..1269 ":" [] [Whitespace(" ")],
-                                            value: CssGenericComponentValueList [
-                                                CssIdentifier {
-                                                    value_token: IDENT@1269..1276 "skyblue" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1248..1267 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
                                                 },
-                                            ],
+                                                colon_token: COLON@1267..1269 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1269..1276 "skyblue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
                                         },
-                                        important: missing (optional),
+                                        semicolon_token: SEMICOLON@1276..1277 ";" [] [],
                                     },
-                                    SEMICOLON@1276..1277 ";" [] [],
                                 ],
                                 r_curly_token: R_CURLY@1277..1280 "}" [Newline("\n"), Whitespace("\t")] [],
                             },
@@ -1230,24 +1232,26 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [],
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationOrRuleBlock {
                                 l_curly_token: L_CURLY@1286..1287 "{" [] [],
-                                declarations: CssDeclarationList [
-                                    CssDeclaration {
-                                        property: CssGenericProperty {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@1287..1306 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
-                                            },
-                                            colon_token: COLON@1306..1308 ":" [] [Whitespace(" ")],
-                                            value: CssGenericComponentValueList [
-                                                CssIdentifier {
-                                                    value_token: IDENT@1308..1315 "skyblue" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1287..1306 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
                                                 },
-                                            ],
+                                                colon_token: COLON@1306..1308 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1308..1315 "skyblue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
                                         },
-                                        important: missing (optional),
+                                        semicolon_token: SEMICOLON@1315..1316 ";" [] [],
                                     },
-                                    SEMICOLON@1315..1316 ";" [] [],
                                 ],
                                 r_curly_token: R_CURLY@1316..1319 "}" [Newline("\n"), Whitespace("\t")] [],
                             },
@@ -2070,19 +2074,20 @@ CssRoot {
                       0: HASH@1238..1241 "#" [Newline("\n"), Whitespace("\t")] []
                       1: CSS_CUSTOM_IDENTIFIER@1241..1247
                         0: IDENT@1241..1247 "inner" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@1247..1280
+              1: CSS_DECLARATION_OR_RULE_BLOCK@1247..1280
                 0: L_CURLY@1247..1248 "{" [] []
-                1: CSS_DECLARATION_LIST@1248..1277
-                  0: CSS_DECLARATION@1248..1276
-                    0: CSS_GENERIC_PROPERTY@1248..1276
-                      0: CSS_IDENTIFIER@1248..1267
-                        0: IDENT@1248..1267 "background-color" [Newline("\n"), Whitespace("\t\t")] []
-                      1: COLON@1267..1269 ":" [] [Whitespace(" ")]
-                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@1269..1276
-                        0: CSS_IDENTIFIER@1269..1276
-                          0: IDENT@1269..1276 "skyblue" [] []
-                    1: (empty)
-                  1: SEMICOLON@1276..1277 ";" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@1248..1277
+                  0: CSS_DECLARATION_WITH_SEMICOLON@1248..1277
+                    0: CSS_DECLARATION@1248..1276
+                      0: CSS_GENERIC_PROPERTY@1248..1276
+                        0: CSS_IDENTIFIER@1248..1267
+                          0: IDENT@1248..1267 "background-color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1267..1269 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1269..1276
+                          0: CSS_IDENTIFIER@1269..1276
+                            0: IDENT@1269..1276 "skyblue" [] []
+                      1: (empty)
+                    1: SEMICOLON@1276..1277 ";" [] []
                 2: R_CURLY@1277..1280 "}" [Newline("\n"), Whitespace("\t")] []
             1: CSS_QUALIFIED_RULE@1280..1319
               0: CSS_SELECTOR_LIST@1280..1286
@@ -2093,19 +2098,20 @@ CssRoot {
                     1: CSS_IDENTIFIER@1280..1286
                       0: IDENT@1280..1286 "div" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
                   2: CSS_SUB_SELECTOR_LIST@1286..1286
-              1: CSS_DECLARATION_LIST_BLOCK@1286..1319
+              1: CSS_DECLARATION_OR_RULE_BLOCK@1286..1319
                 0: L_CURLY@1286..1287 "{" [] []
-                1: CSS_DECLARATION_LIST@1287..1316
-                  0: CSS_DECLARATION@1287..1315
-                    0: CSS_GENERIC_PROPERTY@1287..1315
-                      0: CSS_IDENTIFIER@1287..1306
-                        0: IDENT@1287..1306 "background-color" [Newline("\n"), Whitespace("\t\t")] []
-                      1: COLON@1306..1308 ":" [] [Whitespace(" ")]
-                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@1308..1315
-                        0: CSS_IDENTIFIER@1308..1315
-                          0: IDENT@1308..1315 "skyblue" [] []
-                    1: (empty)
-                  1: SEMICOLON@1315..1316 ";" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@1287..1316
+                  0: CSS_DECLARATION_WITH_SEMICOLON@1287..1316
+                    0: CSS_DECLARATION@1287..1315
+                      0: CSS_GENERIC_PROPERTY@1287..1315
+                        0: CSS_IDENTIFIER@1287..1306
+                          0: IDENT@1287..1306 "background-color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1306..1308 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1308..1315
+                          0: CSS_IDENTIFIER@1308..1315
+                            0: IDENT@1308..1315 "skyblue" [] []
+                      1: (empty)
+                    1: SEMICOLON@1315..1316 ";" [] []
                 2: R_CURLY@1316..1319 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@1319..1321 "}" [Newline("\n")] []
   2: EOF@1321..1322 "" [Newline("\n")] []

@@ -50,6 +50,10 @@ export enum ArrowParentheses {
 	Always = "always",
 	AsNeeded = "as-needed",
 }
+export enum AttributePosition {
+	Auto = "auto",
+	Multiline = "multiline",
+}
 
 export type PrettierOutput =
 	| { type: "SUCCESS"; code: string; ir: string }
@@ -113,6 +117,7 @@ export interface PlaygroundSettings {
 	trailingComma: TrailingComma;
 	semicolons: Semicolons;
 	arrowParentheses: ArrowParentheses;
+	attributePosition: AttributePosition;
 	bracketSpacing: boolean;
 	bracketSameLine: boolean;
 	lintRules: LintRules;
@@ -159,6 +164,7 @@ export const defaultPlaygroundState: PlaygroundState = {
 		trailingComma: TrailingComma.All,
 		semicolons: Semicolons.Always,
 		arrowParentheses: ArrowParentheses.Always,
+		attributePosition: AttributePosition.Auto,
 		bracketSpacing: true,
 		bracketSameLine: false,
 		lintRules: LintRules.Recommended,

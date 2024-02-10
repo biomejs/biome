@@ -134,7 +134,7 @@ impl TailChainGroups {
     }
 
     /// Returns an iterator over the groups.
-    pub(super) fn iter(&self) -> impl Iterator<Item = &MemberChainGroup> + DoubleEndedIterator {
+    pub(super) fn iter(&self) -> impl DoubleEndedIterator<Item = &MemberChainGroup> {
         self.groups.iter()
     }
 
@@ -150,7 +150,7 @@ impl TailChainGroups {
     }
 
     /// Returns an iterator over all members
-    pub(super) fn members(&self) -> impl Iterator<Item = &ChainMember> + DoubleEndedIterator {
+    pub(super) fn members(&self) -> impl DoubleEndedIterator<Item = &ChainMember> {
         self.groups.iter().flat_map(|group| group.members().iter())
     }
 }
