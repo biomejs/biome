@@ -199,6 +199,7 @@ pub struct FormatSettings {
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     pub attribute_position: Option<AttributePosition>,
+
     /// List of ignore paths/files
     pub ignored_files: Matcher,
     /// List of included paths/files
@@ -890,6 +891,8 @@ pub fn to_format_settings(
         line_ending: Some(conf.line_ending),
         line_width: Some(conf.line_width),
         format_with_errors: conf.format_with_errors,
+        attribute_position: Some(AttributePosition::default()),
+
         ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
         included_files: to_matcher(working_directory, Some(&conf.include))?,
     })
@@ -915,6 +918,8 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             indent_style: Some(indent_style),
             indent_width: Some(indent_width),
             line_ending: conf.line_ending,
+            attribute_position: Some(AttributePosition::default()),
+
             line_width: conf.line_width,
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
             ignored_files: Matcher::empty(),

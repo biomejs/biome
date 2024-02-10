@@ -40,13 +40,36 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+test.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+  > 1 │ debugger; console.log("string");·
+      │ ^^^^^^^^^
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 │ debugger;·console.log("string");·
+      │ ----------                       
+
+```
+
+```block
+test.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file contains diagnostics that needs to be addressed.
+  
+
+```
+
+```block
 test.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Formatter would have printed the following content:
   
     1   │ - debugger;·console.log("string");·
       1 │ + debugger;
-      2 │ + console.log('string');
+      2 │ + console.log("string");
       3 │ + 
   
 

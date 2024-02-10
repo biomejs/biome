@@ -2287,13 +2287,13 @@ fn should_apply_different_formatting() {
         "javascript": {
             "formatter": {
                 "lineWidth": 320,
-                "indentSize": 8
+                "indentWidth": 8
             }
         },
         "json": {
             "formatter": {
                 "lineWidth": 80,
-                "indentSize": 2
+                "indentWidth": 2
             }
         },
         "css": {

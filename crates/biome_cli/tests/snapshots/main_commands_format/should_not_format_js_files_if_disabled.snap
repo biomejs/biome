@@ -17,7 +17,7 @@ expression: content
   "json": {
     "formatter": {
       "lineWidth": 80,
-      "indentSize": 2
+      "indent-width": 2
     }
   }
 }
@@ -59,7 +59,7 @@ biome.json:13:17 deserialize  DEPRECATED  ━━━━━━━━━━━━�
   
     11 │             "formatter": {
     12 │                 "lineWidth": 80,
-  > 13 │                 "indentSize": 2
+  > 13 │                 "indent-width": 2
        │                 ^^^^^^^^^^^^
     14 │             }
     15 │         }

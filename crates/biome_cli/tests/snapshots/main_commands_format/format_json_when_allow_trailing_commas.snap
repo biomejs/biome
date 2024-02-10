@@ -25,9 +25,9 @@ expression: content
 # Termination Message
 
 ```block
-format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some errors were emitted while running checks.
+  × No files were processed in the specified paths.
   
 
 
@@ -38,19 +38,17 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
-  
-    3 3 │           1,
-    4 4 │       ],
-    5   │ - }
-      5 │ + }
-      6 │ + 
+  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
   
 
 ```
 
 ```block
 Compared 1 file(s) in <TIME>
+```
+
+```block
+Skipped 1 file(s)
 ```
 
 

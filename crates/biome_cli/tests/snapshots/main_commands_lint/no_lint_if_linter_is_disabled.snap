@@ -21,9 +21,9 @@ expression: content
 # Termination Message
 
 ```block
-internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × No files were processed in the specified paths.
+  × Some errors were emitted while running checks.
   
 
 
@@ -32,7 +32,30 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-Checked 0 file(s) in <TIME>
+fix.js:1:2 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use the >= operator to compare against -0.
+  
+  > 1 │ (1 >= -0)
+      │  ^^^^^^^
+  
+  i Safe fix: Replace -0 with 0
+  
+    1 │ (1·>=·-0)
+      │       -  
+
+```
+
+```block
+fix.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file contains diagnostics that needs to be addressed.
+  
+
+```
+
+```block
+Checked 1 file(s) in <TIME>
 ```
 
 

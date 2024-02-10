@@ -41,102 +41,73 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-fix.js:2:19 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fix.js:4:5 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The arguments variable is undeclared
+  × Declare variables separately
+  
+    2 │     function f() {arguments;}
+    3 │     const FOO = "FOO";
+  > 4 │     var x, y;
+      │     ^^^^^^^^^
+    5 │     
+  
+  i Unsafe fix: Break out into multiple declarations
+  
+    2 2 │       function f() {arguments;}
+    3 3 │       const FOO = "FOO";
+    4   │ - ····var·x,·y;
+      4 │ + ····var·x;
+      5 │ + ····var·y;
+    5 6 │       
+  
+
+```
+
+```block
+fix.js:2:19 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use the rest parameters instead of arguments.
   
   > 2 │     function f() {arguments;}
       │                   ^^^^^^^^^
     3 │     const FOO = "FOO";
     4 │     var x, y;
   
-
-```
-
-```block
-fix.js:2:14 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This function is unused.
-  
-  > 2 │     function f() {arguments;}
-      │              ^
-    3 │     const FOO = "FOO";
-    4 │     var x, y;
-  
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i arguments does not have Array.prototype methods and can be inconvenient to use.
   
 
 ```
 
 ```block
-fix.js:3:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fix.js:4:5 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
-  
-    2 │     function f() {arguments;}
-  > 3 │     const FOO = "FOO";
-      │           ^^^
-    4 │     var x, y;
-    5 │     
-  
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
-  
-  i Unsafe fix: If this is intentional, prepend FOO with an underscore.
-  
-    1 1 │   
-    2 2 │       function f() {arguments;}
-    3   │ - ····const·FOO·=·"FOO";
-      3 │ + ····const·_FOO·=·"FOO";
-    4 4 │       var x, y;
-    5 5 │       
-  
-
-```
-
-```block
-fix.js:4:9 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This variable is unused.
+  × Use let or const instead of var.
   
     2 │     function f() {arguments;}
     3 │     const FOO = "FOO";
   > 4 │     var x, y;
-      │         ^
+      │     ^^^^^^^^
     5 │     
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
   
-  i Unsafe fix: If this is intentional, prepend x with an underscore.
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'let' instead.
   
     2 2 │       function f() {arguments;}
     3 3 │       const FOO = "FOO";
     4   │ - ····var·x,·y;
-      4 │ + ····var·_x,·y;
+      4 │ + ····let·x,·y;
     5 5 │       
   
 
 ```
 
 ```block
-fix.js:4:12 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fix.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
-  
-    2 │     function f() {arguments;}
-    3 │     const FOO = "FOO";
-  > 4 │     var x, y;
-      │            ^
-    5 │     
-  
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
-  
-  i Unsafe fix: If this is intentional, prepend y with an underscore.
-  
-    2 2 │       function f() {arguments;}
-    3 3 │       const FOO = "FOO";
-    4   │ - ····var·x,·y;
-      4 │ + ····var·x,·_y;
-    5 5 │       
+  × The file contains diagnostics that needs to be addressed.
   
 
 ```

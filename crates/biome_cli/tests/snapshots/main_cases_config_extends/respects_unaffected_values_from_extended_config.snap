@@ -21,10 +21,7 @@ expression: content
 
 ```js
 debugger;
-const a = [
-  "lorem",
-  "ipsum",
-];
+const a = ["lorem", "ipsum"];
 
 ```
 

@@ -24,7 +24,7 @@ html {
 
 ```js
 const a = {
-        array: ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"],
+	array: ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"],
 };
 
 ```
@@ -33,15 +33,15 @@ const a = {
 
 ```json
 {
-  "array": [
-    "lorem ipsum",
-    "lorem ipsum",
-    "lorem ipsum",
-    "lorem ipsum",
-    "lorem ipsum",
-    "lorem ipsum",
-    "lorem ipsum"
-  ]
+	"array": [
+		"lorem ipsum",
+		"lorem ipsum",
+		"lorem ipsum",
+		"lorem ipsum",
+		"lorem ipsum",
+		"lorem ipsum",
+		"lorem ipsum"
+	]
 }
 
 ```

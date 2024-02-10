@@ -10,7 +10,7 @@ expression: content
     "enabled": true,
     "lineWidth": 160,
     "indentStyle": "space",
-    "indentSize": 6
+    "indent-width": 6
   }
 }
 ```
@@ -33,7 +33,7 @@ biome.json:6:5 deserialize  DEPRECATED  ━━━━━━━━━━━━━�
   
     4 │     "lineWidth": 160,
     5 │     "indentStyle": "space",
-  > 6 │     "indentSize": 6
+  > 6 │     "indent-width": 6
       │     ^^^^^^^^^^^^
     7 │   }
     8 │ }

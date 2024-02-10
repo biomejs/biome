@@ -160,7 +160,7 @@ fn load_config(
     file_system: &DynRef<'_, dyn FileSystem>,
     base_path: ConfigurationBasePath,
 ) -> LoadConfig {
-    let config_name = file_system.config_name();
+    // let config_name = file_system.config_name();
     let deprecated_config_name = file_system.deprecated_config_name();
     let working_directory = file_system.working_directory();
     let configuration_directory = match base_path {
@@ -176,12 +176,12 @@ fn load_config(
 
     let auto_search_result;
     let result =
-        file_system.auto_search(configuration_directory.clone(), config_name, should_error);
+        file_system.auto_search(configuration_directory.clone(), &[deprecated_config_name], should_error);
     if let Ok(result) = result {
         if result.is_none() {
             auto_search_result = file_system.auto_search(
                 configuration_directory.clone(),
-                deprecated_config_name,
+                &[deprecated_config_name],
                 should_error,
             )?;
         } else {
@@ -190,7 +190,7 @@ fn load_config(
     } else {
         auto_search_result = file_system.auto_search(
             configuration_directory.clone(),
-            deprecated_config_name,
+            &[deprecated_config_name],
             should_error,
         )?;
     }
@@ -227,7 +227,7 @@ pub fn create_config(
     fs: &mut DynRef<dyn FileSystem>,
     mut configuration: PartialConfiguration,
 ) -> Result<(), WorkspaceError> {
-    let path = PathBuf::from(fs.config_name());
+    let path = PathBuf::from(fs.deprecated_config_name());
 
     let options = OpenOptions::default().write(true).create_new(true);
 
@@ -432,7 +432,7 @@ pub fn retrieve_gitignore_matches(
         if let Some(client_kind) = &vcs.client_kind {
             if !vcs.ignore_file_disabled() {
                 let result = file_system
-                    .auto_search(vcs_base_path, client_kind.ignore_file(), false)
+                    .auto_search(vcs_base_path, &[client_kind.ignore_file()], false)
                     .map_err(WorkspaceError::from)?;
 
                 if let Some(result) = result {

@@ -160,7 +160,6 @@ impl TryFrom<PrettierConfiguration> for PartialFormatterConfiguration {
             line_width: Some(line_width),
             indent_style: Some(indent_style),
             line_ending: Some(value.end_of_line.into()),
-            attribute_position: Some(AttributePosition::default()),
             format_with_errors: Some(false),
             ignore: None,
             include: None,

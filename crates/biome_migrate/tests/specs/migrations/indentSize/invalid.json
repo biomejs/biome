@@ -1,15 +1,15 @@
 {
 	"formatter": {
-		"indentSize": 4
+		"indentWidth": 4
 	},
 	"javascript": {
 		"formatter": {
-			"indentSize": 4
+			"indentWidth": 4
 		}
 	},
 	"json": {
 		"formatter": {
-			"indentSize": 4
+			"indentWidth": 4
 		}
 	}
 }
