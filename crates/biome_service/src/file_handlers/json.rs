@@ -1,4 +1,4 @@
-use super::{ExtensionHandler, Mime};
+use super::{CodeActionsParams, ExtensionHandler, Mime};
 use crate::configuration::{to_analyzer_rules, PartialConfiguration};
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FixAllParams, FormatterCapabilities, LintParams,
@@ -10,9 +10,9 @@ use crate::settings::{
     SettingsHandle,
 };
 use crate::workspace::{
-    FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
+    CodeActionsResult, FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult,
 };
-use crate::{Rules, WorkspaceError};
+use crate::WorkspaceError;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
 };
@@ -375,14 +375,8 @@ fn lint(params: LintParams) -> LintResults {
             }
         })
 }
-fn code_actions(
-    _parse: AnyParse,
-    _range: TextRange,
-    _rules: Option<&Rules>,
-    _settings: SettingsHandle,
-    _path: &RomePath,
-) -> PullActionsResult {
-    PullActionsResult {
+fn code_actions(_: CodeActionsParams) -> CodeActionsResult {
+    CodeActionsResult {
         actions: Vec::new(),
     }
 }

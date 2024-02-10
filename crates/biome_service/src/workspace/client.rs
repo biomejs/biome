@@ -1,7 +1,7 @@
 use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
-    OrganizeImportsResult, ProjectFeaturesParams, ProjectFeaturesResult, RageParams, RageResult,
-    ServerInfo,
+    FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OpenProjectParams,
+    OrganizeImportsParams, OrganizeImportsResult, RageParams, RageResult, ServerInfo,
+    UpdateProjectParams,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -13,10 +13,10 @@ use std::{
 };
 
 use super::{
-    ChangeFileParams, CloseFileParams, FixFileParams, FixFileResult, FormatFileParams,
-    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
+    ChangeFileParams, CloseFileParams, CodeActionsResult, FixFileParams, FixFileResult,
+    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
+    GetFormatterIRParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
+    PullActionsParams, PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
     SupportsFeatureParams, UpdateSettingsParams,
 };
 
@@ -107,7 +107,6 @@ where
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         self.request("biome/file_features", params)
     }
-
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
         self.request("biome/is_path_ignored", params)
     }
@@ -116,15 +115,16 @@ where
         self.request("biome/update_settings", params)
     }
 
-    fn project_features(
-        &self,
-        params: ProjectFeaturesParams,
-    ) -> Result<ProjectFeaturesResult, WorkspaceError> {
-        self.request("rome/project_features", params)
-    }
-
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
         self.request("biome/open_file", params)
+    }
+
+    fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError> {
+        self.request("biome/open_project", params)
+    }
+
+    fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
+        self.request("biome/update_current_project", params)
     }
 
     fn get_syntax_tree(
@@ -164,7 +164,7 @@ where
         self.request("biome/pull_diagnostics", params)
     }
 
-    fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
+    fn pull_actions(&self, params: PullActionsParams) -> Result<CodeActionsResult, WorkspaceError> {
         self.request("biome/pull_actions", params)
     }
 

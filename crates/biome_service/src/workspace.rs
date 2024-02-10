@@ -419,6 +419,19 @@ pub struct OpenFileParams {
     #[serde(default)]
     pub language_hint: Language,
 }
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct OpenProjectParams {
+    pub path: RomePath,
+    pub content: String,
+    pub version: i32,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct UpdateProjectParams {
+    pub path: RomePath,
+}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -491,7 +504,7 @@ pub struct PullActionsParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct PullActionsResult {
+pub struct CodeActionsResult {
     pub actions: Vec<CodeAction>,
 }
 
@@ -661,14 +674,6 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError>;
 
-    /// Given a file, the workspace tries to understand if this file is a "manifest" of a project.
-    fn project_features(
-        &self,
-        _params: ProjectFeaturesParams,
-    ) -> Result<ProjectFeaturesResult, WorkspaceError> {
-        todo!()
-    }
-
     /// Checks if the current path is ignored by the workspace, against a particular feature.
     ///
     /// Takes as input the path of the file that workspace is currently processing and
@@ -682,6 +687,12 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Add a new file to the workspace
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
+
+    /// Add a new project to the workspace
+    fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError>;
+
+    /// Sets the current project path
+    fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError>;
 
     // Return a textual, debug representation of the syntax tree for a given document
     fn get_syntax_tree(
@@ -715,7 +726,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Retrieves the list of code actions available for a given cursor
     /// position within a file
-    fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
+    fn pull_actions(&self, params: PullActionsParams) -> Result<CodeActionsResult, WorkspaceError>;
 
     /// Runs the given file through the formatter using the provided options
     /// and returns the resulting source code
@@ -820,7 +831,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
-    pub fn pull_actions(&self, range: TextRange) -> Result<PullActionsResult, WorkspaceError> {
+    pub fn pull_actions(&self, range: TextRange) -> Result<CodeActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
             path: self.path.clone(),
             range,

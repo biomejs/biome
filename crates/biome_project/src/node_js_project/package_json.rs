@@ -9,7 +9,7 @@ use biome_text_size::{TextRange, TextSize};
 use rustc_hash::FxHashMap;
 use std::ops::Add;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct PackageJson {
     pub version: Option<Version>,
     pub name: Option<String>,
@@ -28,7 +28,7 @@ impl Manifest for PackageJson {
     }
 }
 
-#[derive(Debug, Default, biome_deserialize_macros::Deserializable)]
+#[derive(Debug, Default, Clone, biome_deserialize_macros::Deserializable)]
 pub struct Dependencies(FxHashMap<String, Version>);
 
 impl Dependencies {
@@ -37,7 +37,7 @@ impl Dependencies {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Version(node_semver::Version);
 
 impl Deserializable for PackageJson {

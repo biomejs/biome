@@ -1,6 +1,6 @@
 use super::{
-    AnalyzerCapabilities, DebugCapabilities, ExtensionHandler, FormatterCapabilities, LintParams,
-    LintResults, Mime, ParserCapabilities,
+    AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler,
+    FormatterCapabilities, LintParams, LintResults, Mime, ParserCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -10,10 +10,10 @@ use crate::workspace::OrganizeImportsResult;
 use crate::{
     settings::{FormatSettings, Language, LanguageListSettings, LanguageSettings, SettingsHandle},
     workspace::{
-        CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
+        CodeAction, CodeActionsResult, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
         RenameResult,
     },
-    Rules, WorkspaceError,
+    WorkspaceError,
 };
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Never,
@@ -427,70 +427,73 @@ impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
     }
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings))]
-fn code_actions(
-    parse: AnyParse,
-    range: TextRange,
-    rules: Option<&Rules>,
-    settings: SettingsHandle,
-    path: &RomePath,
-    dependencies: Vec<String>,
-) -> PullActionsResult {
-    let tree = parse.tree();
-
-    let mut actions = Vec::new();
-
-    let mut enabled_rules = vec![];
-    if settings.as_ref().organize_imports.enabled {
-        enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
-    }
-    if let Some(rules) = rules {
-        let rules = rules.as_enabled_rules().into_iter().collect();
-
-        // The rules in the assist category do not have configuration entries,
-        // always add them all to the enabled rules list
-        let mut visitor = ActionsVisitor {
-            enabled_rules: rules,
-        };
-        visit_registry(&mut visitor);
-
-        enabled_rules.extend(visitor.enabled_rules);
-    }
-
-    let mut filter = if !enabled_rules.is_empty() {
-        AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()))
-    } else {
-        AnalysisFilter::default()
-    };
-
-    filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;
-    if settings.as_ref().organize_imports.enabled {
-        filter.categories |= RuleCategories::ACTION;
-    }
-    filter.range = Some(range);
-
-    trace!("Filter applied for code actions: {:?}", &filter);
-    let analyzer_options =
-        compute_analyzer_options(&settings, dependencies, PathBuf::from(path.as_path()));
-    let Ok(source_type) = parse.file_source(path) else {
-        return PullActionsResult { actions: vec![] };
-    };
-
-    analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-        actions.extend(signal.actions().into_code_action_iter().map(|item| {
-            CodeAction {
-                category: item.category.clone(),
-                rule_name: item
-                    .rule_name
-                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                suggestion: item.suggestion,
+#[tracing::instrument(level = "debug", skip(params))]
+fn code_actions(params: CodeActionsParams) -> CodeActionsResult {
+    let CodeActionsParams {
+        parse,
+        range,
+        rules,
+        settings,
+        path,
+        dependencies,
+    } = params;
+    debug_span!("Code actions JavaScript", range =? range, rules =? rules, path =? path).in_scope(
+        move || {
+            let tree = parse.tree();
+            let mut actions = Vec::new();
+            let mut enabled_rules = vec![];
+            if settings.as_ref().organize_imports.enabled {
+                enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
             }
-        }));
+            if let Some(rules) = rules {
+                let rules = rules.as_enabled_rules().into_iter().collect();
 
-        ControlFlow::<Never>::Continue(())
-    });
+                // The rules in the assist category do not have configuration entries,
+                // always add them all to the enabled rules list
+                let mut visitor = ActionsVisitor {
+                    enabled_rules: rules,
+                };
+                visit_registry(&mut visitor);
 
-    PullActionsResult { actions }
+                enabled_rules.extend(visitor.enabled_rules);
+            }
+
+            let mut filter = if !enabled_rules.is_empty() {
+                AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()))
+            } else {
+                AnalysisFilter::default()
+            };
+
+            filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;
+            if settings.as_ref().organize_imports.enabled {
+                filter.categories |= RuleCategories::ACTION;
+            }
+            filter.range = Some(range);
+
+            trace!("Filter applied for code actions: {:?}", &filter);
+            let analyzer_options =
+                compute_analyzer_options(&settings, dependencies, PathBuf::from(path.as_path()));
+            let Ok(source_type) = parse.file_source(path) else {
+                return CodeActionsResult { actions: vec![] };
+            };
+
+            analyze(&tree, filter, &analyzer_options, source_type, |signal| {
+                actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                    CodeAction {
+                        category: item.category.clone(),
+                        rule_name: item
+                            .rule_name
+                            .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                        suggestion: item.suggestion,
+                    }
+                }));
+
+                ControlFlow::<Never>::Continue(())
+            });
+
+            CodeActionsResult { actions }
+        },
+    )
 }
 
 /// If applies all the safe fixes to the given syntax tree.

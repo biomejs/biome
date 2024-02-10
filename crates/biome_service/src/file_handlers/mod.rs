@@ -7,7 +7,7 @@ pub use crate::file_handlers::astro::ASTRO_FENCE;
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
     settings::SettingsHandle,
-    workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
+    workspace::{CodeActionsResult, FixFileResult, GetSyntaxTreeResult, RenameResult},
     Rules, WorkspaceError,
 };
 use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic, RuleCategories};
@@ -316,15 +316,17 @@ pub(crate) struct LintResults {
     pub(crate) skipped_diagnostics: u64,
 }
 
+pub(crate) struct CodeActionsParams<'a> {
+    pub(crate) parse: AnyParse,
+    pub(crate) range: TextRange,
+    pub(crate) rules: Option<&'a Rules>,
+    pub(crate) settings: SettingsHandle<'a>,
+    pub(crate) path: &'a RomePath,
+    pub(crate) dependencies: Vec<String>,
+}
+
 type Lint = fn(LintParams) -> LintResults;
-type CodeActions = fn(
-    AnyParse,
-    TextRange,
-    Option<&Rules>,
-    SettingsHandle,
-    &RomePath,
-    Vec<String>,
-) -> PullActionsResult;
+type CodeActions = fn(CodeActionsParams) -> CodeActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&RomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
 type OrganizeImports = fn(AnyParse) -> Result<OrganizeImportsResult, WorkspaceError>;
