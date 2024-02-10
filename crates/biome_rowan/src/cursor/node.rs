@@ -176,7 +176,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn tokens(&self) -> impl Iterator<Item = SyntaxToken> + DoubleEndedIterator + '_ {
+    pub fn tokens(&self) -> impl DoubleEndedIterator<Item = SyntaxToken> + '_ {
         self.green().children().filter_map(|child| {
             child.element().into_token().map(|token| {
                 SyntaxToken::new(

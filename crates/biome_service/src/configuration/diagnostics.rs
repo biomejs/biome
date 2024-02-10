@@ -304,7 +304,7 @@ mod test {
 
     #[test]
     fn diagnostic_size() {
-        assert_eq!(std::mem::size_of::<ConfigurationDiagnostic>(), 104);
+        assert_eq!(std::mem::size_of::<ConfigurationDiagnostic>(), 96);
     }
 
     #[test]

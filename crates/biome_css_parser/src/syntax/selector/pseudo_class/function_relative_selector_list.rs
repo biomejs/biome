@@ -1,16 +1,11 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_relative_selector;
-use crate::syntax::selector::{
-    eat_or_recover_selector_function_close_token, is_nth_at_compound_selector, parse_selector,
-};
+use crate::syntax::selector::eat_or_recover_selector_function_close_token;
+use crate::syntax::selector::relative_selector::RelativeSelectorList;
+use biome_css_syntax::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST;
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::CssSyntaxKind::{
-    CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST, CSS_RELATIVE_SELECTOR,
-    CSS_RELATIVE_SELECTOR_LIST,
-};
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
-use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
@@ -36,7 +31,10 @@ pub(crate) fn parse_pseudo_class_function_relative_selector_list(
     p.bump_ts(PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST_SET);
     p.bump(T!['(']);
 
-    let list = RelativeSelectorList.parse_list(p);
+    let list = RelativeSelectorList::new(T![')'])
+        // we don't need to recover here, because we have a better diagnostic message in a close token
+        .disable_recovery()
+        .parse_list(p);
     let list_range = list.range(p);
 
     if list_range.is_empty() && p.at(T![')']) {
@@ -53,60 +51,4 @@ pub(crate) fn parse_pseudo_class_function_relative_selector_list(
     };
 
     Present(m.complete(p, kind))
-}
-
-struct RelativeSelectorList;
-
-impl ParseSeparatedList for RelativeSelectorList {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-
-    const LIST_KIND: CssSyntaxKind = CSS_RELATIVE_SELECTOR_LIST;
-
-    fn parse_element(&mut self, p: &mut CssParser) -> ParsedSyntax {
-        parse_relative_selector(p)
-    }
-
-    fn is_at_list_end(&self, p: &mut CssParser) -> bool {
-        p.at(T![')'])
-    }
-
-    fn recover(&mut self, p: &mut CssParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        match parsed_element.or_add_diagnostic(p, expected_relative_selector) {
-            Some(m) => Ok(m),
-            // we don't need to recover here, because we have a better diagnostic message in a close token
-            None => Err(RecoveryError::RecoveryDisabled),
-        }
-    }
-
-    fn separating_element_kind(&mut self) -> CssSyntaxKind {
-        T![,]
-    }
-}
-
-const RELATIVE_SELECTOR_COMBINATOR_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![>], T![+], T![~], T![||]];
-
-#[inline]
-fn is_at_relative_selector_combinator(p: &mut CssParser) -> bool {
-    p.at_ts(RELATIVE_SELECTOR_COMBINATOR_SET)
-}
-
-#[inline]
-fn is_at_relative_selector(p: &mut CssParser) -> bool {
-    is_at_relative_selector_combinator(p) || is_nth_at_compound_selector(p, 0)
-}
-
-#[inline]
-fn parse_relative_selector(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_relative_selector(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-
-    p.eat_ts(RELATIVE_SELECTOR_COMBINATOR_SET);
-    parse_selector(p).or_add_diagnostic(p, expected_relative_selector);
-
-    Present(m.complete(p, CSS_RELATIVE_SELECTOR))
 }

@@ -1,0 +1,17 @@
+div {
+	.class1 , 12312312 {
+		color: red
+	}
+}
+
+div {
+	.class1 , 12312312 , + span {
+		color: red
+	}
+}
+
+div {
+	.class1 , 12312312 + span {
+		color: red
+	}
+}

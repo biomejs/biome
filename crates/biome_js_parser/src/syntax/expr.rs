@@ -2073,6 +2073,9 @@ pub(super) fn parse_unary_expr(p: &mut JsParser, context: ExpressionContext) -> 
         // delete (obj?.inner.#member)[key];
         // delete (obj.#key, obj.key);
         // delete (#key in obj);
+        // delete (obj.key);
+        // delete (console.log(1));
+        // delete (() => {});
 
         // test js unary_delete_nested
         // class TestClass { #member = true; method() { delete func(this.#member) } }
@@ -2101,7 +2104,7 @@ pub(super) fn parse_unary_expr(p: &mut JsParser, context: ExpressionContext) -> 
 
         let mut kind = JS_UNARY_EXPRESSION;
 
-        let res = if is_delete {
+        if is_delete {
             let checkpoint = p.checkpoint();
             parse_unary_expr(p, context).ok();
 
@@ -2132,21 +2135,6 @@ pub(super) fn parse_unary_expr(p: &mut JsParser, context: ExpressionContext) -> 
         } else {
             parse_unary_expr(p, context).ok()
         };
-
-        if is_delete && kind != JS_BOGUS_EXPRESSION && TypeScript.is_supported(p) {
-            if let Some(res) = res {
-                match res.kind(p) {
-                    JS_STATIC_MEMBER_EXPRESSION | JS_COMPUTED_MEMBER_EXPRESSION => {}
-                    _ => {
-                        kind = JS_BOGUS_EXPRESSION;
-                        p.error(p.err_builder(
-                            "the target for a delete operator must be a property access",
-                            res.range(p),
-                        ));
-                    }
-                }
-            }
-        }
 
         return Present(m.complete(p, kind));
     }

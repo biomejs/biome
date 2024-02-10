@@ -85,7 +85,7 @@ impl Rule for NoImplicitAnyLet {
                 },
             )
             .note(markup! {
-                "Variable declarations without type annotation and initialization have implicitly the "<Emphasis>"any"</Emphasis>" type. Declare type or initialize the variable with some value."
+                "Variable declarations without type annotation and initialization implicitly have the "<Emphasis>"any"</Emphasis>" type. Declare a type or initialize the variable with some value."
             }),
         )
     }

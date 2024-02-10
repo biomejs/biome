@@ -4,7 +4,7 @@ use biome_console::{markup, BufferConsole, Markup};
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{print_diagnostic_to_string, Error};
 use biome_formatter::IndentStyle;
-use biome_fs::{FileSystemExt, MemoryFileSystem};
+use biome_fs::{ConfigName, FileSystemExt, MemoryFileSystem};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
 use biome_json_parser::{parse_json, JsonParserOptions};
@@ -23,7 +23,9 @@ pub(crate) struct CliSnapshot {
     /// input messages, coming from different sources
     in_messages: InMessages,
     /// the configuration, if set
-    pub configuration: Option<String>,
+    /// First string is the content
+    /// Second string is the name
+    pub configuration: Option<(String, &'static str)>,
     /// file name -> content
     pub files: BTreeMap<String, String>,
     /// messages written in console
@@ -48,7 +50,7 @@ impl CliSnapshot {
     pub fn emit_content_snapshot(&self) -> String {
         let mut content = String::new();
 
-        if let Some(configuration) = &self.configuration {
+        if let Some((configuration, file_name)) = &self.configuration {
             let redacted = redact_snapshot(configuration).unwrap_or(String::new().into());
 
             let parsed = parse_json(&redacted, JsonParserOptions::default());
@@ -62,7 +64,7 @@ impl CliSnapshot {
             .print()
             .expect("printed JSON");
 
-            content.push_str("## `biome.json`\n\n");
+            content.push_str(&format!("## `{file_name}`\n\n"));
             content.push_str("```json");
             content.push('\n');
             content.push_str(formatted.as_code());
@@ -336,12 +338,15 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
             module_path: _,
         } = payload;
         let mut cli_snapshot = CliSnapshot::from_result(result);
-        let config_path = PathBuf::from("biome.json");
-        let configuration = fs.open(&config_path).ok();
-        if let Some(mut configuration) = configuration {
-            let mut buffer = String::new();
-            if configuration.read_to_string(&mut buffer).is_ok() {
-                cli_snapshot.configuration = Some(buffer);
+
+        for file_name in ConfigName::file_names() {
+            let config_path = PathBuf::from(file_name);
+            let configuration = fs.open(&config_path).ok();
+            if let Some(mut configuration) = configuration {
+                let mut buffer = String::new();
+                if configuration.read_to_string(&mut buffer).is_ok() {
+                    cli_snapshot.configuration = Some((buffer, file_name));
+                }
             }
         }
 

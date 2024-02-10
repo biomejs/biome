@@ -1,0 +1,47 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.jsonc`
+
+```json
+{
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+
+Welcome to Biome! Let's get you started...
+
+Files created ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - biome.jsonc: Your project configuration. Documentation: https://biomejs.dev/reference/configuration
+
+Next Steps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Setup an editor extension
+     Get live errors as you type and format when you save. Learn more: https://biomejs.dev/guides/getting-started#editor-setup
+
+  2. Try a command
+     biome ci checks for lint errors and verifies formatting. Run biome --help for a full list of commands and options.
+
+  3. Read the documentation
+     Our website serves as a comprehensive source of guides and documentation: https://biomejs.dev
+
+  4. Get involved in the community
+     Ask questions, get support, or contribute by participating on GitHub (https://github.com/biomejs/biome),
+     or join our community Discord (https://discord.gg/BypW39g6Yc)
+```
+
+

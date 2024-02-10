@@ -653,15 +653,97 @@ JsModule {
             },
             semicolon_token: SEMICOLON@570..571 ";" [] [],
         },
+        JsExpressionStatement {
+            expression: JsUnaryExpression {
+                operator_token: DELETE_KW@571..579 "delete" [Newline("\n")] [Whitespace(" ")],
+                argument: JsParenthesizedExpression {
+                    l_paren_token: L_PAREN@579..580 "(" [] [],
+                    expression: JsStaticMemberExpression {
+                        object: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@580..583 "obj" [] [],
+                            },
+                        },
+                        operator_token: DOT@583..584 "." [] [],
+                        member: JsName {
+                            value_token: IDENT@584..587 "key" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@587..588 ")" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@588..589 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsUnaryExpression {
+                operator_token: DELETE_KW@589..597 "delete" [Newline("\n")] [Whitespace(" ")],
+                argument: JsParenthesizedExpression {
+                    l_paren_token: L_PAREN@597..598 "(" [] [],
+                    expression: JsCallExpression {
+                        callee: JsStaticMemberExpression {
+                            object: JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@598..605 "console" [] [],
+                                },
+                            },
+                            operator_token: DOT@605..606 "." [] [],
+                            member: JsName {
+                                value_token: IDENT@606..609 "log" [] [],
+                            },
+                        },
+                        optional_chain_token: missing (optional),
+                        type_arguments: missing (optional),
+                        arguments: JsCallArguments {
+                            l_paren_token: L_PAREN@609..610 "(" [] [],
+                            args: JsCallArgumentList [
+                                JsNumberLiteralExpression {
+                                    value_token: JS_NUMBER_LITERAL@610..611 "1" [] [],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@611..612 ")" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@612..613 ")" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@613..614 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsUnaryExpression {
+                operator_token: DELETE_KW@614..622 "delete" [Newline("\n")] [Whitespace(" ")],
+                argument: JsParenthesizedExpression {
+                    l_paren_token: L_PAREN@622..623 "(" [] [],
+                    expression: JsArrowFunctionExpression {
+                        async_token: missing (optional),
+                        type_parameters: missing (optional),
+                        parameters: JsParameters {
+                            l_paren_token: L_PAREN@623..624 "(" [] [],
+                            items: JsParameterList [],
+                            r_paren_token: R_PAREN@624..626 ")" [] [Whitespace(" ")],
+                        },
+                        return_type_annotation: missing (optional),
+                        fat_arrow_token: FAT_ARROW@626..629 "=>" [] [Whitespace(" ")],
+                        body: JsFunctionBody {
+                            l_curly_token: L_CURLY@629..630 "{" [] [],
+                            directives: JsDirectiveList [],
+                            statements: JsStatementList [],
+                            r_curly_token: R_CURLY@630..631 "}" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@631..632 ")" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@632..633 ";" [] [],
+        },
     ],
-    eof_token: EOF@571..572 "" [Newline("\n")] [],
+    eof_token: EOF@633..634 "" [Newline("\n")] [],
 }
 
-0: JS_MODULE@0..572
+0: JS_MODULE@0..634
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..571
+  3: JS_MODULE_ITEM_LIST@0..633
     0: JS_EXPRESSION_STATEMENT@0..15
       0: JS_UNARY_EXPRESSION@0..14
         0: DELETE_KW@0..7 "delete" [] [Whitespace(" ")]
@@ -1105,4 +1187,62 @@ JsModule {
                 0: IDENT@566..569 "obj" [] []
           2: R_PAREN@569..570 ")" [] []
       1: SEMICOLON@570..571 ";" [] []
-  4: EOF@571..572 "" [Newline("\n")] []
+    22: JS_EXPRESSION_STATEMENT@571..589
+      0: JS_UNARY_EXPRESSION@571..588
+        0: DELETE_KW@571..579 "delete" [Newline("\n")] [Whitespace(" ")]
+        1: JS_PARENTHESIZED_EXPRESSION@579..588
+          0: L_PAREN@579..580 "(" [] []
+          1: JS_STATIC_MEMBER_EXPRESSION@580..587
+            0: JS_IDENTIFIER_EXPRESSION@580..583
+              0: JS_REFERENCE_IDENTIFIER@580..583
+                0: IDENT@580..583 "obj" [] []
+            1: DOT@583..584 "." [] []
+            2: JS_NAME@584..587
+              0: IDENT@584..587 "key" [] []
+          2: R_PAREN@587..588 ")" [] []
+      1: SEMICOLON@588..589 ";" [] []
+    23: JS_EXPRESSION_STATEMENT@589..614
+      0: JS_UNARY_EXPRESSION@589..613
+        0: DELETE_KW@589..597 "delete" [Newline("\n")] [Whitespace(" ")]
+        1: JS_PARENTHESIZED_EXPRESSION@597..613
+          0: L_PAREN@597..598 "(" [] []
+          1: JS_CALL_EXPRESSION@598..612
+            0: JS_STATIC_MEMBER_EXPRESSION@598..609
+              0: JS_IDENTIFIER_EXPRESSION@598..605
+                0: JS_REFERENCE_IDENTIFIER@598..605
+                  0: IDENT@598..605 "console" [] []
+              1: DOT@605..606 "." [] []
+              2: JS_NAME@606..609
+                0: IDENT@606..609 "log" [] []
+            1: (empty)
+            2: (empty)
+            3: JS_CALL_ARGUMENTS@609..612
+              0: L_PAREN@609..610 "(" [] []
+              1: JS_CALL_ARGUMENT_LIST@610..611
+                0: JS_NUMBER_LITERAL_EXPRESSION@610..611
+                  0: JS_NUMBER_LITERAL@610..611 "1" [] []
+              2: R_PAREN@611..612 ")" [] []
+          2: R_PAREN@612..613 ")" [] []
+      1: SEMICOLON@613..614 ";" [] []
+    24: JS_EXPRESSION_STATEMENT@614..633
+      0: JS_UNARY_EXPRESSION@614..632
+        0: DELETE_KW@614..622 "delete" [Newline("\n")] [Whitespace(" ")]
+        1: JS_PARENTHESIZED_EXPRESSION@622..632
+          0: L_PAREN@622..623 "(" [] []
+          1: JS_ARROW_FUNCTION_EXPRESSION@623..631
+            0: (empty)
+            1: (empty)
+            2: JS_PARAMETERS@623..626
+              0: L_PAREN@623..624 "(" [] []
+              1: JS_PARAMETER_LIST@624..624
+              2: R_PAREN@624..626 ")" [] [Whitespace(" ")]
+            3: (empty)
+            4: FAT_ARROW@626..629 "=>" [] [Whitespace(" ")]
+            5: JS_FUNCTION_BODY@629..631
+              0: L_CURLY@629..630 "{" [] []
+              1: JS_DIRECTIVE_LIST@630..630
+              2: JS_STATEMENT_LIST@630..630
+              3: R_CURLY@630..631 "}" [] []
+          2: R_PAREN@631..632 ")" [] []
+      1: SEMICOLON@632..633 ";" [] []
+  4: EOF@633..634 "" [Newline("\n")] []

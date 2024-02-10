@@ -185,13 +185,20 @@ impl<'app> CliSession<'app> {
                 },
             ),
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
-            BiomeCommand::Init => commands::init::init(self),
+            BiomeCommand::Init(emit_jsonc) => commands::init::init(self, emit_jsonc),
             BiomeCommand::LspProxy(config_path) => commands::daemon::lsp_proxy(config_path),
             BiomeCommand::Migrate {
                 cli_options,
                 write,
-                prettier,
-            } => commands::migrate::migrate(self, cli_options, write, prettier),
+                sub_command,
+            } => commands::migrate::migrate(
+                self,
+                cli_options,
+                write,
+                sub_command
+                    .map(|sub_command| sub_command.is_prettier())
+                    .unwrap_or_default(),
+            ),
             BiomeCommand::RunServer {
                 stop_on_disconnect,
                 config_path,

@@ -287,7 +287,7 @@ impl<L: Language> SyntaxNode<L> {
         }
     }
 
-    pub fn tokens(&self) -> impl Iterator<Item = SyntaxToken<L>> + DoubleEndedIterator + '_ {
+    pub fn tokens(&self) -> impl DoubleEndedIterator<Item = SyntaxToken<L>> + '_ {
         self.raw.tokens().map(SyntaxToken::from)
     }
 

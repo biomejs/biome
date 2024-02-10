@@ -389,7 +389,10 @@ pub struct ReportNotSerializable {
 pub struct NotFound;
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
-#[diagnostic(category = "format", message = "Format with errors is disabled.")]
+#[diagnostic(
+    category = "format",
+    message = "Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option."
+)]
 pub struct FormatWithErrorsDisabled;
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -425,7 +428,7 @@ pub struct CantReadFile {
         message("The file "{self.path}" was ignored."),
         description = "The file {path} was ignored."
     ),
-    severity = Warning
+    severity = Warning,
 )]
 pub struct FileIgnored {
     #[location(resource)]
@@ -731,7 +734,7 @@ mod test {
 
     #[test]
     fn diagnostic_size() {
-        assert_eq!(std::mem::size_of::<WorkspaceError>(), 104)
+        assert_eq!(std::mem::size_of::<WorkspaceError>(), 96)
     }
 
     #[test]

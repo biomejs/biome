@@ -14,6 +14,12 @@ file to change those defaults.
 The Biome configuration file is named `biome.json` and should be placed in the root directory of your project. The root
 directory is usually the directory containing your project's `package.json`.
 
+Since version `1.6.0`, Biome accepts also the file `biome.jsonc`.
+
+:::note
+If both `biome.json` and `biome.jsonc` are present in the same folder, the priority will be given to `biome.json`
+:::
+
 This configuration file enables the formatter and sets the preferred indent style and width. The linter is disabled:
 
 ```json title="biome.json"

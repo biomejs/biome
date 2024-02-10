@@ -3,7 +3,7 @@ use crate::settings::{to_matcher, FormatSettings};
 use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{IndentStyle, LineEnding, LineWidth};
+use biome_formatter::{AttributePosition, IndentStyle, LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -49,6 +49,10 @@ pub struct FormatterConfiguration {
     ))]
     pub line_width: LineWidth,
 
+    /// The attribute position style. By default auto.
+    #[partial(bpaf(long("attribute-position"), argument("auto|multiline"), optional))]
+    pub attribute_position: AttributePosition,
+
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
     #[partial(bpaf(hide))]
@@ -76,6 +80,7 @@ impl Default for FormatterConfiguration {
             indent_style: PlainIndentStyle::default(),
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
+            attribute_position: AttributePosition::default(),
             ignore: Default::default(),
             include: Default::default(),
         }
@@ -108,6 +113,7 @@ pub fn to_format_settings(
         line_ending: Some(conf.line_ending),
         line_width: Some(conf.line_width),
         format_with_errors: conf.format_with_errors,
+        attribute_position: Some(conf.attribute_position),
         ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
         included_files: to_matcher(working_directory, Some(&conf.include))?,
     })
@@ -134,6 +140,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             indent_width: Some(indent_width),
             line_ending: conf.line_ending,
             line_width: conf.line_width,
+            attribute_position: Some(AttributePosition::default()),
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),

@@ -8,7 +8,7 @@ use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
-use biome_fs::{FileSystem, OsFileSystem, BIOME_JSON, ROME_JSON};
+use biome_fs::{ConfigName, FileSystem, OsFileSystem, ROME_JSON};
 use biome_service::workspace::{RageEntry, RageParams, RageResult};
 use biome_service::{workspace, DynRef, Workspace};
 use futures::future::ready;
@@ -320,7 +320,8 @@ impl LanguageServer for LSPServer {
                         let possible_rome_json = file_path.strip_prefix(&base_path);
                         if let Ok(possible_rome_json) = possible_rome_json {
                             if possible_rome_json.display().to_string() == ROME_JSON
-                                || possible_rome_json.display().to_string() == BIOME_JSON
+                                || ConfigName::file_names()
+                                    .contains(&&*possible_rome_json.display().to_string())
                             {
                                 self.session.load_workspace_settings().await;
                                 self.setup_capabilities().await;

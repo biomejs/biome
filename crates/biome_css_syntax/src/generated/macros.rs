@@ -159,6 +159,11 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssDeclarationOrAtRuleBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_DECLARATION_OR_RULE_BLOCK => {
+                    let $pattern =
+                        unsafe { $crate::CssDeclarationOrRuleBlock::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_DECLARATION_WITH_SEMICOLON => {
                     let $pattern =
                         unsafe { $crate::CssDeclarationWithSemicolon::new_unchecked(node) };
@@ -174,6 +179,20 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_FONT_FACE_AT_RULE => {
                     let $pattern = unsafe { $crate::CssFontFaceAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FONT_FEATURE_VALUES_AT_RULE => {
+                    let $pattern =
+                        unsafe { $crate::CssFontFeatureValuesAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FONT_FEATURE_VALUES_BLOCK => {
+                    let $pattern =
+                        unsafe { $crate::CssFontFeatureValuesBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FONT_FEATURE_VALUES_ITEM => {
+                    let $pattern = unsafe { $crate::CssFontFeatureValuesItem::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_FONT_PALETTE_VALUES_AT_RULE => {
@@ -319,6 +338,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_NAMESPACE_AT_RULE => {
                     let $pattern = unsafe { $crate::CssNamespaceAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_NESTED_QUALIFIED_RULE => {
+                    let $pattern = unsafe { $crate::CssNestedQualifiedRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_NTH_OFFSET => {
@@ -618,6 +641,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusDocumentMatcher::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_FONT_FEATURE_VALUES_ITEM => {
+                    let $pattern =
+                        unsafe { $crate::CssBogusFontFeatureValuesItem::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_KEYFRAMES_ITEM => {
                     let $pattern = unsafe { $crate::CssBogusKeyframesItem::new_unchecked(node) };
                     $body
@@ -692,8 +720,17 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssDeclarationOrAtRuleList::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST => {
+                    let $pattern = unsafe { $crate::CssDeclarationOrRuleList::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_DOCUMENT_MATCHER_LIST => {
                     let $pattern = unsafe { $crate::CssDocumentMatcherList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FONT_FEATURE_VALUES_ITEM_LIST => {
+                    let $pattern =
+                        unsafe { $crate::CssFontFeatureValuesItemList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST => {
