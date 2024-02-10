@@ -1,10 +1,10 @@
+import path from "path";
 import { netlifyStatic } from "@astrojs/netlify";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
 import { h } from "hastscript";
 import { escape as htmlEscape } from "html-escaper";
-import path from "path";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import remarkToc from "remark-toc";
