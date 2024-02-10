@@ -10,8 +10,9 @@ use crate::{
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
     WorkspaceError,
 };
-use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
+use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic,RuleCategories};
 use biome_configuration::Rules;
+
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_css_formatter::can_format_css_yet;
