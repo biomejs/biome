@@ -4,6 +4,8 @@ use self::{
 };
 use crate::file_handlers::astro::AstroFileHandler;
 pub use crate::file_handlers::astro::ASTRO_FENCE;
+use crate::file_handlers::vue::VueFileHandler;
+pub use crate::file_handlers::vue::VUE_FENCE;
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
     settings::SettingsHandle,
@@ -29,6 +31,7 @@ mod css;
 mod javascript;
 mod json;
 mod unknown;
+mod vue;
 
 /// Supported languages by Biome
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Default, serde::Serialize, serde::Deserialize)]
@@ -50,6 +53,8 @@ pub enum Language {
     Css,
     ///
     Astro,
+    ///
+    Vue,
     /// Any language that is not supported
     #[default]
     Unknown,
@@ -82,6 +87,7 @@ impl Language {
             "json" => Language::Json,
             "jsonc" => Language::Jsonc,
             "astro" => Language::Astro,
+            "vue" => Language::Vue,
             "css" => Language::Css,
             _ => Language::Unknown,
         }
@@ -134,6 +140,7 @@ impl Language {
             "json" => Language::Json,
             "jsonc" => Language::Jsonc,
             "astro" => Language::Astro,
+            "vue" => Language::Vue,
             // TODO: remove this when we are ready to handle CSS files
             "css" => Language::Unknown,
             _ => Language::Unknown,
@@ -195,6 +202,7 @@ impl Language {
             Language::TypeScript => Some(JsFileSource::tsx()),
             Language::TypeScriptReact => Some(JsFileSource::tsx()),
             Language::Astro => Some(JsFileSource::ts()),
+            Language::Vue => Some(JsFileSource::ts()),
             Language::Json | Language::Jsonc | Language::Css | Language::Unknown => None,
         }
     }
@@ -210,6 +218,7 @@ impl Language {
             | Language::Css
             | Language::Jsonc => true,
             Language::Astro => ASTRO_FENCE.is_match(content),
+            Language::Vue => VUE_FENCE.is_match(content),
             Language::Unknown => false,
         }
     }
@@ -226,6 +235,7 @@ impl biome_console::fmt::Display for Language {
             Language::Jsonc => fmt.write_markup(markup! { "JSONC" }),
             Language::Css => fmt.write_markup(markup! { "CSS" }),
             Language::Astro => fmt.write_markup(markup! { "Astro" }),
+            Language::Vue => fmt.write_markup(markup! { "Vue" }),
             Language::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -385,6 +395,7 @@ pub(crate) struct Features {
     #[allow(unused)]
     css: CssFileHandler,
     astro: AstroFileHandler,
+    vue: VueFileHandler,
     unknown: UnknownFileHandler,
 }
 
@@ -395,6 +406,7 @@ impl Features {
             json: JsonFileHandler {},
             css: CssFileHandler {},
             astro: AstroFileHandler {},
+            vue: VueFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
@@ -420,6 +432,7 @@ impl Features {
                 }
             }
             Language::Astro => self.astro.capabilities(),
+            Language::Vue => self.vue.capabilities(),
             Language::Unknown => self.unknown.capabilities(),
         }
     }
