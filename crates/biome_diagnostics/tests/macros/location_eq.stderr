@@ -4,7 +4,7 @@ error: failed to parse "location" attribute: expected parentheses
 5 |     #[location = Identifier]
   |                ^
 
-error: unexpected expression: `Identifier`
+error: attribute value must be a literal
  --> tests/macros/location_eq.rs:5:18
   |
 5 |     #[location = Identifier]
