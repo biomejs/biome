@@ -278,7 +278,8 @@ impl LanguageServer for LSPServer {
 
         futures::join!(
             self.session.load_extension_settings(),
-            self.session.load_workspace_settings()
+            self.session.load_workspace_settings(),
+            self.session.load_manifest()
         );
 
         let msg = format!("Server initialized with PID: {}", std::process::id());
@@ -324,6 +325,7 @@ impl LanguageServer for LSPServer {
                                     .contains(&&*possible_rome_json.display().to_string())
                             {
                                 self.session.load_workspace_settings().await;
+                                self.session.load_manifest().await;
                                 self.setup_capabilities().await;
                                 self.session.update_all_diagnostics().await;
                                 // for now we are only interested to the configuration file,

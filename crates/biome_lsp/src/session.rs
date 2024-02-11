@@ -10,7 +10,8 @@ use biome_diagnostics::PrintDescription;
 use biome_fs::{FileSystem, RomePath};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{
-    FeatureName, FeaturesBuilder, PullDiagnosticsParams, SupportsFeatureParams,
+    FeatureName, FeaturesBuilder, OpenProjectParams, PullDiagnosticsParams, SupportsFeatureParams,
+    UpdateProjectParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::{ConfigurationBasePath, Workspace};
@@ -69,6 +70,7 @@ pub(crate) struct Session {
     pub(crate) cancellation: Arc<Notify>,
 
     pub(crate) config_path: Option<PathBuf>,
+    pub(crate) manifest_path: Option<PathBuf>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -151,6 +153,7 @@ impl Session {
             fs,
             cancellation,
             config_path: None,
+            manifest_path: None,
         }
     }
 
@@ -461,6 +464,44 @@ impl Session {
         };
 
         self.set_configuration_status(status);
+    }
+
+    #[tracing::instrument(level = "trace", skip(self))]
+    pub(crate) async fn load_manifest(&self) {
+        let base_path = self
+            .manifest_path
+            .as_deref()
+            .map(PathBuf::from)
+            .or(self.base_path());
+        if let Some(base_path) = base_path {
+            let result = self
+                .fs
+                .auto_search(base_path.to_path_buf(), &["package.json"], false);
+            match result {
+                Ok(result) => {
+                    if let Some(result) = result {
+                        let rome_path = RomePath::new(result.file_path);
+                        let result = self.workspace.open_project(OpenProjectParams {
+                            path: rome_path.clone(),
+                            content: result.content,
+                            version: 0,
+                        });
+                        if let Err(err) = result {
+                            error!("{}", err);
+                        }
+                        let result = self
+                            .workspace
+                            .update_current_project(UpdateProjectParams { path: rome_path });
+                        if let Err(err) = result {
+                            error!("{}", err);
+                        }
+                    }
+                }
+                Err(err) => {
+                    error!("Couldn't load the package.json file, reason:\n {}", err);
+                }
+            }
+        }
     }
 
     /// Requests "workspace/configuration" from client and updates Session config
