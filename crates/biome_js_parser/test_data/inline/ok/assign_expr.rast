@@ -64,12 +64,18 @@ JsModule {
                 left: JsArrayAssignmentPattern {
                     l_brack_token: L_BRACK@46..48 "[" [Newline("\n")] [],
                     elements: JsArrayAssignmentPatternElementList [
-                        JsIdentifierAssignment {
-                            name_token: IDENT@48..51 "foo" [] [],
+                        JsArrayAssignmentPatternElement {
+                            pattern: JsIdentifierAssignment {
+                                name_token: IDENT@48..51 "foo" [] [],
+                            },
+                            init: missing (optional),
                         },
                         COMMA@51..53 "," [] [Whitespace(" ")],
-                        JsIdentifierAssignment {
-                            name_token: IDENT@53..56 "bar" [] [],
+                        JsArrayAssignmentPatternElement {
+                            pattern: JsIdentifierAssignment {
+                                name_token: IDENT@53..56 "bar" [] [],
+                            },
+                            init: missing (optional),
                         },
                     ],
                     r_brack_token: R_BRACK@56..58 "]" [] [Whitespace(" ")],
@@ -88,17 +94,22 @@ JsModule {
                 left: JsArrayAssignmentPattern {
                     l_brack_token: L_BRACK@64..66 "[" [Newline("\n")] [],
                     elements: JsArrayAssignmentPatternElementList [
-                        JsIdentifierAssignment {
-                            name_token: IDENT@66..69 "foo" [] [],
+                        JsArrayAssignmentPatternElement {
+                            pattern: JsIdentifierAssignment {
+                                name_token: IDENT@66..69 "foo" [] [],
+                            },
+                            init: missing (optional),
                         },
                         COMMA@69..71 "," [] [Whitespace(" ")],
-                        JsAssignmentWithDefault {
+                        JsArrayAssignmentPatternElement {
                             pattern: JsIdentifierAssignment {
                                 name_token: IDENT@71..75 "bar" [] [Whitespace(" ")],
                             },
-                            eq_token: EQ@75..77 "=" [] [Whitespace(" ")],
-                            default: JsStringLiteralExpression {
-                                value_token: JS_STRING_LITERAL@77..86 "\"default\"" [] [],
+                            init: JsInitializerClause {
+                                eq_token: EQ@75..77 "=" [] [Whitespace(" ")],
+                                expression: JsStringLiteralExpression {
+                                    value_token: JS_STRING_LITERAL@77..86 "\"default\"" [] [],
+                                },
                             },
                         },
                         COMMA@86..88 "," [] [Whitespace(" ")],
@@ -131,12 +142,18 @@ JsModule {
                         COMMA@106..107 "," [] [],
                         JsArrayHole,
                         COMMA@107..108 "," [] [],
-                        JsIdentifierAssignment {
-                            name_token: IDENT@108..111 "foo" [] [],
+                        JsArrayAssignmentPatternElement {
+                            pattern: JsIdentifierAssignment {
+                                name_token: IDENT@108..111 "foo" [] [],
+                            },
+                            init: missing (optional),
                         },
                         COMMA@111..112 "," [] [],
-                        JsIdentifierAssignment {
-                            name_token: IDENT@112..115 "bar" [] [],
+                        JsArrayAssignmentPatternElement {
+                            pattern: JsIdentifierAssignment {
+                                name_token: IDENT@112..115 "bar" [] [],
+                            },
+                            init: missing (optional),
                         },
                     ],
                     r_brack_token: R_BRACK@115..117 "]" [] [Whitespace(" ")],
@@ -199,13 +216,15 @@ JsModule {
                                 pattern: JsArrayAssignmentPattern {
                                     l_brack_token: L_BRACK@153..154 "[" [] [],
                                     elements: JsArrayAssignmentPatternElementList [
-                                        JsAssignmentWithDefault {
+                                        JsArrayAssignmentPatternElement {
                                             pattern: JsIdentifierAssignment {
                                                 name_token: IDENT@154..158 "baz" [] [Whitespace(" ")],
                                             },
-                                            eq_token: EQ@158..160 "=" [] [Whitespace(" ")],
-                                            default: JsStringLiteralExpression {
-                                                value_token: JS_STRING_LITERAL@160..165 "\"baz\"" [] [],
+                                            init: JsInitializerClause {
+                                                eq_token: EQ@158..160 "=" [] [Whitespace(" ")],
+                                                expression: JsStringLiteralExpression {
+                                                    value_token: JS_STRING_LITERAL@160..165 "\"baz\"" [] [],
+                                                },
                                             },
                                         },
                                     ],
@@ -297,11 +316,15 @@ JsModule {
         0: JS_ARRAY_ASSIGNMENT_PATTERN@46..58
           0: L_BRACK@46..48 "[" [Newline("\n")] []
           1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@48..56
-            0: JS_IDENTIFIER_ASSIGNMENT@48..51
-              0: IDENT@48..51 "foo" [] []
+            0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@48..51
+              0: JS_IDENTIFIER_ASSIGNMENT@48..51
+                0: IDENT@48..51 "foo" [] []
+              1: (empty)
             1: COMMA@51..53 "," [] [Whitespace(" ")]
-            2: JS_IDENTIFIER_ASSIGNMENT@53..56
-              0: IDENT@53..56 "bar" [] []
+            2: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@53..56
+              0: JS_IDENTIFIER_ASSIGNMENT@53..56
+                0: IDENT@53..56 "bar" [] []
+              1: (empty)
           2: R_BRACK@56..58 "]" [] [Whitespace(" ")]
         1: EQ@58..60 "=" [] [Whitespace(" ")]
         2: JS_IDENTIFIER_EXPRESSION@60..63
@@ -313,15 +336,18 @@ JsModule {
         0: JS_ARRAY_ASSIGNMENT_PATTERN@64..97
           0: L_BRACK@64..66 "[" [Newline("\n")] []
           1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@66..95
-            0: JS_IDENTIFIER_ASSIGNMENT@66..69
-              0: IDENT@66..69 "foo" [] []
+            0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@66..69
+              0: JS_IDENTIFIER_ASSIGNMENT@66..69
+                0: IDENT@66..69 "foo" [] []
+              1: (empty)
             1: COMMA@69..71 "," [] [Whitespace(" ")]
-            2: JS_ASSIGNMENT_WITH_DEFAULT@71..86
+            2: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@71..86
               0: JS_IDENTIFIER_ASSIGNMENT@71..75
                 0: IDENT@71..75 "bar" [] [Whitespace(" ")]
-              1: EQ@75..77 "=" [] [Whitespace(" ")]
-              2: JS_STRING_LITERAL_EXPRESSION@77..86
-                0: JS_STRING_LITERAL@77..86 "\"default\"" [] []
+              1: JS_INITIALIZER_CLAUSE@75..86
+                0: EQ@75..77 "=" [] [Whitespace(" ")]
+                1: JS_STRING_LITERAL_EXPRESSION@77..86
+                  0: JS_STRING_LITERAL@77..86 "\"default\"" [] []
             3: COMMA@86..88 "," [] [Whitespace(" ")]
             4: JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT@88..95
               0: DOT3@88..91 "..." [] []
@@ -344,11 +370,15 @@ JsModule {
             3: COMMA@106..107 "," [] []
             4: JS_ARRAY_HOLE@107..107
             5: COMMA@107..108 "," [] []
-            6: JS_IDENTIFIER_ASSIGNMENT@108..111
-              0: IDENT@108..111 "foo" [] []
+            6: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@108..111
+              0: JS_IDENTIFIER_ASSIGNMENT@108..111
+                0: IDENT@108..111 "foo" [] []
+              1: (empty)
             7: COMMA@111..112 "," [] []
-            8: JS_IDENTIFIER_ASSIGNMENT@112..115
-              0: IDENT@112..115 "bar" [] []
+            8: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@112..115
+              0: JS_IDENTIFIER_ASSIGNMENT@112..115
+                0: IDENT@112..115 "bar" [] []
+              1: (empty)
           2: R_BRACK@115..117 "]" [] [Whitespace(" ")]
         1: EQ@117..119 "=" [] [Whitespace(" ")]
         2: JS_IDENTIFIER_EXPRESSION@119..122
@@ -393,12 +423,13 @@ JsModule {
                 2: JS_ARRAY_ASSIGNMENT_PATTERN@153..166
                   0: L_BRACK@153..154 "[" [] []
                   1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@154..165
-                    0: JS_ASSIGNMENT_WITH_DEFAULT@154..165
+                    0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@154..165
                       0: JS_IDENTIFIER_ASSIGNMENT@154..158
                         0: IDENT@154..158 "baz" [] [Whitespace(" ")]
-                      1: EQ@158..160 "=" [] [Whitespace(" ")]
-                      2: JS_STRING_LITERAL_EXPRESSION@160..165
-                        0: JS_STRING_LITERAL@160..165 "\"baz\"" [] []
+                      1: JS_INITIALIZER_CLAUSE@158..165
+                        0: EQ@158..160 "=" [] [Whitespace(" ")]
+                        1: JS_STRING_LITERAL_EXPRESSION@160..165
+                          0: JS_STRING_LITERAL@160..165 "\"baz\"" [] []
                   2: R_BRACK@165..166 "]" [] []
                 3: (empty)
               1: COMMA@166..168 "," [] [Whitespace(" ")]

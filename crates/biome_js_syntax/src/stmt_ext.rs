@@ -144,9 +144,8 @@ impl JsVariableDeclarator {
 impl AnyJsArrayAssignmentPatternElement {
     pub fn pattern(self) -> Option<AnyJsAssignmentPattern> {
         match self {
-            Self::AnyJsAssignmentPattern(p) => Some(p),
+            Self::JsArrayAssignmentPatternElement(p) => p.pattern().ok(),
             Self::JsArrayAssignmentPatternRestElement(p) => p.pattern().ok(),
-            Self::JsAssignmentWithDefault(p) => p.pattern().ok(),
             Self::JsArrayHole(_) => None,
         }
     }

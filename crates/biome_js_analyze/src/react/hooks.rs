@@ -1,13 +1,13 @@
 use crate::react::{is_react_call_api, ReactLibrary};
 
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
-use biome_js_syntax::JsLanguage;
+use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, static_value::StaticValue, AnyJsExpression,
-    AnyJsMemberExpression, JsArrayBindingPattern, JsArrayBindingPatternElementList,
-    JsArrowFunctionExpression, JsCallExpression, JsFunctionExpression, JsVariableDeclarator,
+    AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression, JsFunctionExpression,
     TextRange,
 };
+use biome_js_syntax::{JsArrayBindingPatternElement, JsLanguage};
 use biome_rowan::{AstNode, SyntaxToken};
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
@@ -167,7 +167,7 @@ pub(crate) fn react_hook_with_dependency(
     hooks: &FxHashMap<String, ReactHookConfiguration>,
     model: &SemanticModel,
 ) -> Option<ReactCallWithDependencyResult> {
-    let expression = call.callee().ok()?;
+    let expression = call.callee().ok()?.omit_parentheses();
     let name = if let Some(identifier) = expression.as_js_reference_identifier() {
         Some(StaticValue::String(identifier.value_token().ok()?))
     } else if let Some(member_expr) = AnyJsMemberExpression::cast_ref(expression.syntax()) {
@@ -180,7 +180,7 @@ pub(crate) fn react_hook_with_dependency(
 
     // check if the hooks api is imported from the react library
     if HOOKS_WITH_DEPS_API.contains(&name)
-        && !is_react_call_api(expression, model, ReactLibrary::React, name)
+        && !is_react_call_api(&expression, model, ReactLibrary::React, name)
     {
         return None;
     }
@@ -239,45 +239,24 @@ pub fn is_binding_react_stable(
     model: &SemanticModel,
     stable_config: &FxHashSet<StableReactHookConfiguration>,
 ) -> bool {
-    fn array_binding_declarator_index(
-        binding: &AnyJsIdentifierBinding,
-    ) -> Option<(JsVariableDeclarator, Option<usize>)> {
-        let index = binding.syntax().index() / 2;
-        let declarator = binding
-            .parent::<JsArrayBindingPatternElementList>()?
-            .parent::<JsArrayBindingPattern>()?
-            .parent::<JsVariableDeclarator>()?;
-        Some((declarator, Some(index)))
-    }
-
-    fn assignment_declarator(
-        binding: &AnyJsIdentifierBinding,
-    ) -> Option<(JsVariableDeclarator, Option<usize>)> {
-        let declarator = binding.parent::<JsVariableDeclarator>()?;
-        Some((declarator, None))
-    }
-
-    array_binding_declarator_index(binding)
-        .or_else(|| assignment_declarator(binding))
-        .and_then(|(declarator, index)| {
-            let callee = declarator
-                .initializer()?
-                .expression()
-                .ok()?
-                .as_js_call_expression()?
-                .callee()
-                .ok()?;
-
-            Some(stable_config.iter().any(|config| {
-                is_react_call_api(
-                    callee.clone(),
-                    model,
-                    ReactLibrary::React,
-                    &config.hook_name,
-                ) && index == config.index
-            }))
-        })
-        .unwrap_or(false)
+    let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) = binding.declaration()
+    else {
+        return false;
+    };
+    let index = binding
+        .parent::<JsArrayBindingPatternElement>()
+        .map(|parent| parent.syntax().index() / 2);
+    let Some(callee) = declarator
+        .initializer()
+        .and_then(|initializer| initializer.expression().ok())
+        .and_then(|initializer| initializer.as_js_call_expression()?.callee().ok())
+    else {
+        return false;
+    };
+    stable_config.iter().any(|config| {
+        is_react_call_api(&callee, model, ReactLibrary::React, &config.hook_name)
+            && index == config.index
+    })
 }
 
 #[cfg(test)]

@@ -200,7 +200,7 @@ fn declaration(node: &JsSyntaxNode) -> Option<AnyJsBindingDeclaration> {
     let possible_declarator = node.ancestors().skip(1).find(|x| {
         !matches!(
             x.kind(),
-            JsSyntaxKind::JS_BINDING_PATTERN_WITH_DEFAULT
+            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT
                 | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN
                 | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
                 | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY
@@ -227,7 +227,7 @@ fn is_under_pattern_binding(node: &JsSyntaxNode) -> Option<bool> {
     use JsSyntaxKind::*;
     Some(matches!(
         node.parent()?.kind(),
-        JS_BINDING_PATTERN_WITH_DEFAULT
+        JS_ARRAY_BINDING_PATTERN_ELEMENT
             | JS_OBJECT_BINDING_PATTERN
             | JS_OBJECT_BINDING_PATTERN_REST
             | JS_OBJECT_BINDING_PATTERN_PROPERTY
@@ -246,7 +246,7 @@ fn is_under_array_pattern_binding(node: &JsSyntaxNode) -> Option<bool> {
         JS_ARRAY_BINDING_PATTERN
         | JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
         | JS_ARRAY_BINDING_PATTERN_REST_ELEMENT => Some(true),
-        JS_BINDING_PATTERN_WITH_DEFAULT => is_under_array_pattern_binding(&parent),
+        JS_ARRAY_BINDING_PATTERN_ELEMENT => is_under_array_pattern_binding(&parent),
         _ => Some(false),
     }
 }
@@ -260,7 +260,7 @@ fn is_under_object_pattern_binding(node: &JsSyntaxNode) -> Option<bool> {
         | JS_OBJECT_BINDING_PATTERN_PROPERTY
         | JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
         | JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY => Some(true),
-        JS_BINDING_PATTERN_WITH_DEFAULT => is_under_object_pattern_binding(&parent),
+        JS_ARRAY_BINDING_PATTERN_ELEMENT => is_under_object_pattern_binding(&parent),
         _ => Some(false),
     }
 }

@@ -138,12 +138,12 @@ pub(crate) fn parse_identifier_binding(p: &mut JsParser) -> ParsedSyntax {
     })
 }
 
-struct BindingPatternWithDefault;
+struct ArrayBindingPatternWithDefault;
 
-impl ParseWithDefaultPattern for BindingPatternWithDefault {
+impl ParseWithDefaultPattern for ArrayBindingPatternWithDefault {
     #[inline]
     fn pattern_with_default_kind() -> JsSyntaxKind {
-        JS_BINDING_PATTERN_WITH_DEFAULT
+        JS_ARRAY_BINDING_PATTERN_ELEMENT
     }
 
     #[inline]
@@ -182,7 +182,7 @@ struct ArrayBindingPattern;
 // let [ ... ] = a;
 // let [ ...c = "default" ] = a;
 // let [ ...rest, other_assignment ] = a;
-impl ParseArrayPattern<BindingPatternWithDefault> for ArrayBindingPattern {
+impl ParseArrayPattern<ArrayBindingPatternWithDefault> for ArrayBindingPattern {
     #[inline]
     fn bogus_pattern_kind() -> JsSyntaxKind {
         JS_BOGUS_BINDING
@@ -217,8 +217,8 @@ impl ParseArrayPattern<BindingPatternWithDefault> for ArrayBindingPattern {
     }
 
     #[inline]
-    fn pattern_with_default(&self) -> BindingPatternWithDefault {
-        BindingPatternWithDefault
+    fn pattern_with_default(&self) -> ArrayBindingPatternWithDefault {
+        ArrayBindingPatternWithDefault
     }
 }
 

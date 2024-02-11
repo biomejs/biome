@@ -270,9 +270,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut unmatched_count = 3usize;
                 let mut group_slot_map = [false; 3usize];
                 for _ in 0usize..3usize {
-                    let Some(element) = &current_element else {
-                        break;
-                    };
+                    let Some (element) = & current_element else { break ; } ;
                     if !group_slot_map[0usize] && AnyCssLineWidth::can_cast(element.kind()) {
                         group_slot_map[0usize] = true;
                     } else if !group_slot_map[1usize] && CssLineStyle::can_cast(element.kind()) {

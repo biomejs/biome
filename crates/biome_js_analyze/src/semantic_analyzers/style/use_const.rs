@@ -280,12 +280,11 @@ fn with_array_binding_pat_identifiers(
     pat.elements().into_iter().filter_map(Result::ok).any(|it| {
         use AnyJsArrayBindingPatternElement as P;
         match it {
-            P::AnyJsBindingPattern(p) => with_binding_pat_identifiers(p, f),
             P::JsArrayBindingPatternRestElement(p) => p
                 .pattern()
                 .map_or(false, |it| with_binding_pat_identifiers(it, f)),
             P::JsArrayHole(_) => false,
-            P::JsBindingPatternWithDefault(p) => p
+            P::JsArrayBindingPatternElement(p) => p
                 .pattern()
                 .map_or(false, |it| with_binding_pat_identifiers(it, f)),
         }

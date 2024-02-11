@@ -8,7 +8,7 @@ JsModule {
                 left: JsArrayAssignmentPattern {
                     l_brack_token: L_BRACK@0..1 "[" [] [],
                     elements: JsArrayAssignmentPatternElementList [
-                        JsAssignmentWithDefault {
+                        JsArrayAssignmentPatternElement {
                             pattern: JsStaticMemberAssignment {
                                 object: JsObjectExpression {
                                     l_curly_token: L_CURLY@1..2 "{" [] [],
@@ -98,9 +98,11 @@ JsModule {
                                     value_token: IDENT@129..131 "y" [] [Whitespace(" ")],
                                 },
                             },
-                            eq_token: EQ@131..133 "=" [] [Whitespace(" ")],
-                            default: JsNumberLiteralExpression {
-                                value_token: JS_NUMBER_LITERAL@133..135 "42" [] [],
+                            init: JsInitializerClause {
+                                eq_token: EQ@131..133 "=" [] [Whitespace(" ")],
+                                expression: JsNumberLiteralExpression {
+                                    value_token: JS_NUMBER_LITERAL@133..135 "42" [] [],
+                                },
                             },
                         },
                     ],
@@ -265,7 +267,7 @@ JsModule {
         0: JS_ARRAY_ASSIGNMENT_PATTERN@0..137
           0: L_BRACK@0..1 "[" [] []
           1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@1..135
-            0: JS_ASSIGNMENT_WITH_DEFAULT@1..135
+            0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@1..135
               0: JS_STATIC_MEMBER_ASSIGNMENT@1..131
                 0: JS_OBJECT_EXPRESSION@1..128
                   0: L_CURLY@1..2 "{" [] []
@@ -329,9 +331,10 @@ JsModule {
                 1: DOT@128..129 "." [] []
                 2: JS_NAME@129..131
                   0: IDENT@129..131 "y" [] [Whitespace(" ")]
-              1: EQ@131..133 "=" [] [Whitespace(" ")]
-              2: JS_NUMBER_LITERAL_EXPRESSION@133..135
-                0: JS_NUMBER_LITERAL@133..135 "42" [] []
+              1: JS_INITIALIZER_CLAUSE@131..135
+                0: EQ@131..133 "=" [] [Whitespace(" ")]
+                1: JS_NUMBER_LITERAL_EXPRESSION@133..135
+                  0: JS_NUMBER_LITERAL@133..135 "42" [] []
           2: R_BRACK@135..137 "]" [] [Whitespace(" ")]
         1: EQ@137..139 "=" [] [Whitespace(" ")]
         2: JS_ARRAY_EXPRESSION@139..143

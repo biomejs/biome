@@ -9,20 +9,22 @@ JsModule {
             initializer: JsArrayAssignmentPattern {
                 l_brack_token: L_BRACK@5..6 "[" [] [],
                 elements: JsArrayAssignmentPatternElementList [
-                    JsAssignmentWithDefault {
+                    JsArrayAssignmentPatternElement {
                         pattern: JsIdentifierAssignment {
                             name_token: IDENT@6..8 "a" [] [Whitespace(" ")],
                         },
-                        eq_token: EQ@8..10 "=" [] [Whitespace(" ")],
-                        default: JsInExpression {
-                            property: JsStringLiteralExpression {
-                                value_token: JS_STRING_LITERAL@10..14 "\"a\"" [] [Whitespace(" ")],
-                            },
-                            in_token: IN_KW@14..17 "in" [] [Whitespace(" ")],
-                            object: JsObjectExpression {
-                                l_curly_token: L_CURLY@17..18 "{" [] [],
-                                members: JsObjectMemberList [],
-                                r_curly_token: R_CURLY@18..19 "}" [] [],
+                        init: JsInitializerClause {
+                            eq_token: EQ@8..10 "=" [] [Whitespace(" ")],
+                            expression: JsInExpression {
+                                property: JsStringLiteralExpression {
+                                    value_token: JS_STRING_LITERAL@10..14 "\"a\"" [] [Whitespace(" ")],
+                                },
+                                in_token: IN_KW@14..17 "in" [] [Whitespace(" ")],
+                                object: JsObjectExpression {
+                                    l_curly_token: L_CURLY@17..18 "{" [] [],
+                                    members: JsObjectMemberList [],
+                                    r_curly_token: R_CURLY@18..19 "}" [] [],
+                                },
                             },
                         },
                     },
@@ -57,18 +59,19 @@ JsModule {
       2: JS_ARRAY_ASSIGNMENT_PATTERN@5..21
         0: L_BRACK@5..6 "[" [] []
         1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@6..19
-          0: JS_ASSIGNMENT_WITH_DEFAULT@6..19
+          0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@6..19
             0: JS_IDENTIFIER_ASSIGNMENT@6..8
               0: IDENT@6..8 "a" [] [Whitespace(" ")]
-            1: EQ@8..10 "=" [] [Whitespace(" ")]
-            2: JS_IN_EXPRESSION@10..19
-              0: JS_STRING_LITERAL_EXPRESSION@10..14
-                0: JS_STRING_LITERAL@10..14 "\"a\"" [] [Whitespace(" ")]
-              1: IN_KW@14..17 "in" [] [Whitespace(" ")]
-              2: JS_OBJECT_EXPRESSION@17..19
-                0: L_CURLY@17..18 "{" [] []
-                1: JS_OBJECT_MEMBER_LIST@18..18
-                2: R_CURLY@18..19 "}" [] []
+            1: JS_INITIALIZER_CLAUSE@8..19
+              0: EQ@8..10 "=" [] [Whitespace(" ")]
+              1: JS_IN_EXPRESSION@10..19
+                0: JS_STRING_LITERAL_EXPRESSION@10..14
+                  0: JS_STRING_LITERAL@10..14 "\"a\"" [] [Whitespace(" ")]
+                1: IN_KW@14..17 "in" [] [Whitespace(" ")]
+                2: JS_OBJECT_EXPRESSION@17..19
+                  0: L_CURLY@17..18 "{" [] []
+                  1: JS_OBJECT_MEMBER_LIST@18..18
+                  2: R_CURLY@18..19 "}" [] []
         2: R_BRACK@19..21 "]" [] [Whitespace(" ")]
       3: IN_KW@21..24 "in" [] [Whitespace(" ")]
       4: JS_ARRAY_EXPRESSION@24..26
