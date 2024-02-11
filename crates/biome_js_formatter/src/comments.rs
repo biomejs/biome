@@ -280,8 +280,12 @@ fn handle_continue_break_comment(
 
     let enclosing = comment.enclosing_node();
 
-    if let Some(preceding) = comment.preceding_node() {
-        if preceding.kind() == JsSyntaxKind::JS_LABEL {
+    if let (Some(preceding), Some(parent)) =
+        (comment.preceding_node(), comment.enclosing_node().parent())
+    {
+        if preceding.kind() == JsSyntaxKind::JS_LABEL
+            && parent.kind() != JsSyntaxKind::JS_FOR_STATEMENT
+        {
             return CommentPlacement::trailing(preceding.clone(), comment);
         }
     }
@@ -332,7 +336,7 @@ fn handle_continue_break_comment(
 ///     }
 /// ```
 ///
-/// All other same line comments will use `Default` placement if they have a perceding node.
+/// All other same line comments will use `Default` placement if they have a preceding node.
 /// ```javascript
 /// switch(x) {
 ///     default:

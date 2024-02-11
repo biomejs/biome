@@ -135,7 +135,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use biome_analyze::RuleFilter;
         use biome_console::markup;
         use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
-        use biome_deserialize_macros::{Deserializable, Merge, NoneState};
+        use biome_deserialize_macros::{Deserializable, Merge};
         use biome_diagnostics::{Category, Severity};
         use biome_rowan::TextRange;
         use indexmap::IndexSet;
@@ -143,8 +143,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         #[cfg(feature = "schema")]
         use schemars::JsonSchema;
 
-        #[derive(Clone, Debug, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize)]
-        #[deserializable(from_none, with_validator)]
+        #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+        #[deserializable(with_validator)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
         #[serde(rename_all = "camelCase", deny_unknown_fields)]
         pub struct Rules {
@@ -157,16 +157,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
             pub all: Option<bool>,
 
             #( #line_groups ),*
-        }
-
-        impl Default for Rules {
-            fn default() -> Self {
-                Self {
-                    recommended: Some(true),
-                    all: None,
-                    #( #default_for_groups ),*
-                }
-            }
         }
 
         impl DeserializableValidator for Rules {
@@ -422,8 +412,8 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         )
     };
     quote! {
-        #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize)]
-        #[deserializable(from_none, with_validator)]
+        #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+        #[deserializable(with_validator)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
         #[serde(rename_all = "camelCase", default)]
         /// A list of rules that belong to this group

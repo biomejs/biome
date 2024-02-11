@@ -150,7 +150,7 @@ fn prettier_migrate() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("migrate"), "--prettier"].as_slice()),
+        Args::from([("migrate"), "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -158,6 +158,79 @@ fn prettier_migrate() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "prettier_migrate",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_with_ignore() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "linter": { "enabled": true } }"#;
+    let prettier = r#"{ "useTabs": false, "semi": true, "singleQuote": true }"#;
+    let prettier_ignore = r#"
+dist/**
+
+node_modules/**
+
+# I am a comment
+generated/*.spec.js
+"#;
+
+    let configuration_path = Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let prettier_ignore_path = Path::new(".prettierignore");
+    fs.insert(prettier_ignore_path.into(), prettier_ignore.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("migrate"), "prettier"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_with_ignore",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_jsonc() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "linter": { "enabled": true } }"#;
+    let prettier = r#"{ "useTabs": false, "semi": true, "singleQuote": true }"#;
+
+    let configuration_path = Path::new("biome.jsonc");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("migrate"), "prettier"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_jsonc",
         fs,
         console,
         result,
@@ -177,7 +250,7 @@ fn prettier_migrate_no_file() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("migrate"), "--prettier"].as_slice()),
+        Args::from([("migrate"), "prettier"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -208,7 +281,7 @@ fn prettier_migrate_yml_file() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("migrate"), "--prettier"].as_slice()),
+        Args::from([("migrate"), "prettier"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -239,7 +312,7 @@ fn prettier_migrate_write() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("migrate"), "--prettier", "--write"].as_slice()),
+        Args::from([("migrate"), "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -247,6 +320,79 @@ fn prettier_migrate_write() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "prettier_migrate_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_write_with_ignore_file() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "linter": { "enabled": true } }"#;
+    let prettier = r#"{ "useTabs": false, "semi": true, "singleQuote": true }"#;
+    let prettier_ignore = r#"
+dist/**
+
+node_modules/**
+
+# I am a comment
+generated/*.spec.js
+"#;
+
+    let configuration_path = Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let prettier_ignore_path = Path::new(".prettierignore");
+    fs.insert(prettier_ignore_path.into(), prettier_ignore.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("migrate"), "prettier", "--write"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_write_with_ignore_file",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_write_biome_jsonc() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "linter": { "enabled": true } }"#;
+    let prettier = r#"{ "useTabs": false, "semi": true, "singleQuote": true }"#;
+
+    let configuration_path = Path::new("biome.jsonc");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("migrate"), "prettier", "--write"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_write_biome_jsonc",
         fs,
         console,
         result,

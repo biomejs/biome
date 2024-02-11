@@ -280,10 +280,65 @@ mod configuration {
         let result = run_cli(
             DynRef::Borrowed(&mut fs),
             &mut console,
-            Args::from([("check"), ("file.js")].as_slice()),
+            Args::from(&["check", "file.js"]),
         );
 
         assert!(result.is_err(), "run_cli returned {result:?}");
+    }
+
+    #[test]
+    fn override_globals() {
+        let mut fs = MemoryFileSystem::default();
+        let mut console = BufferConsole::default();
+
+        fs.insert(
+            Path::new("biome.json").into(),
+            r#"{
+                "linter": {
+                    "enabled": true,
+                    "rules": {
+                        "correctness": {
+                            "noUndeclaredVariables": "error"
+                        }
+                    }
+                },
+                "javascript": {
+                    "globals": ["React"]
+                },
+                "overrides": [{
+                    "include": ["tests"],
+                    "javascript": {
+                        "globals": ["test", "it"]
+                    }
+                }]
+            }"#
+            .as_bytes(),
+        );
+        fs.insert(
+            Path::new("tests/test.js").into(),
+            r#"test("globals", () => {
+    it("uses React", () => {
+        React.useMemo();
+    });
+});"#
+                .as_bytes(),
+        );
+
+        let result = run_cli(
+            DynRef::Borrowed(&mut fs),
+            &mut console,
+            Args::from(&["lint", "tests/test.js"]),
+        );
+
+        assert!(result.is_err(), "run_cli returned {result:?}");
+
+        assert_cli_snapshot(SnapshotPayload::new(
+            module_path!(),
+            "override_globals",
+            fs,
+            console,
+            result,
+        ));
     }
 }
 

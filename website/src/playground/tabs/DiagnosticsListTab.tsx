@@ -1,9 +1,9 @@
+import errorIcon from "@/svg/error.svg";
+import infoIcon from "@/svg/info.svg";
+import warningIcon from "@/svg/warning.svg";
 import type { Diagnostic } from "@biomejs/wasm-web";
 import { EditorSelection } from "@codemirror/state";
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import errorIcon from "../../svg/error.svg";
-import infoIcon from "../../svg/info.svg";
-import warningIcon from "../../svg/warning.svg";
 
 interface Props {
 	editorRef: React.RefObject<ReactCodeMirrorRef>;

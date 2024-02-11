@@ -1,4 +1,7 @@
-use crate::configs::{CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_LINTER_DISABLED};
+use crate::configs::{
+    CONFIG_DISABLED_FORMATTER, CONFIG_DISABLED_FORMATTER_JSONC, CONFIG_FILE_SIZE_LIMIT,
+    CONFIG_LINTER_DISABLED,
+};
 use crate::snap_test::{assert_file_contents, SnapshotPayload};
 use crate::{
     assert_cli_snapshot, run_cli, CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, PARSE_ERROR,
@@ -182,6 +185,39 @@ fn ci_does_not_run_formatter() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ci_does_not_run_formatter",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn ci_does_not_run_formatter_biome_jsonc() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        PathBuf::from("biome.jsonc"),
+        CONFIG_DISABLED_FORMATTER_JSONC.as_bytes(),
+    );
+
+    let input_file = Path::new("file.js");
+
+    fs.insert(input_file.into(), UNFORMATTED.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("ci"), input_file.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, input_file, UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "ci_does_not_run_formatter_biome_jsonc",
         fs,
         console,
         result,

@@ -1,4 +1,4 @@
-import biomeIcon from "../../assets/svg/logomark.svg";
+import biomeIcon from "@/assets/svg/logomark.svg";
 
 export default function BiomeHeader() {
 	return (

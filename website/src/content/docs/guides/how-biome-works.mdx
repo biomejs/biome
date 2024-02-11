@@ -2,7 +2,7 @@
 title: How Biome works
 description: Learn how Biome works, like assumptions, configuration and more.
 ---
-import DefaultConfiguration from "@src/components/generated/DefaultConfiguration.mdx";
+import DefaultConfiguration from "@/components/generated/DefaultConfiguration.mdx";
 
 This is a guide that explains how the tool works, assumptions, and internal information useful when setting up the project and the configuration file.
 
@@ -13,6 +13,12 @@ file to change those defaults.
 
 The Biome configuration file is named `biome.json` and should be placed in the root directory of your project. The root
 directory is usually the directory containing your project's `package.json`.
+
+Since version `1.6.0`, Biome accepts also the file `biome.jsonc`.
+
+:::note
+If both `biome.json` and `biome.jsonc` are present in the same folder, the priority will be given to `biome.json`
+:::
 
 This configuration file enables the formatter and sets the preferred indent style and width. The linter is disabled:
 
@@ -154,7 +160,6 @@ When both `include` and `ignore` are specified, Biome gives **precedence** to `i
 The syntax and meaning of these two options loosely follow the [globset rules](https://docs.rs/globset/latest/globset/#syntax) but without the ability to set options.
 
 
-> - `?` matches any single character.
 > - `*` matches zero or more characters.
 > - `**` recursively matches directories but are only legal in three situations.
 > First, if the glob starts with <code>\*\*&#x2F;</code>, then it matches
@@ -166,11 +171,7 @@ The syntax and meaning of these two options loosely follow the [globset rules](h
   > the pattern, then it matches zero or more directories. Using `**` anywhere
   > else is illegal (N.B. the glob `**` is allowed and means "match everything").
 >
-> - `[ab]` matches `a` or `b` where `a` and `b` are characters. Use
-> `[!ab]` to match any character except for `a` and `b`.
 > - Metacharacters such as `*` and `?` can be escaped with character class
 > notation. e.g., `[*]` matches `*`.
 
 Check the [wikipedia page](https://en.wikipedia.org/wiki/Glob_(programming)) for more information.
-
-

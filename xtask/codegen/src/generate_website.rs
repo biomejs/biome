@@ -7,7 +7,7 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
 use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_rowan::AstNode;
-use biome_service::{Configuration, VERSION};
+use biome_service::{PartialConfiguration, VERSION};
 use std::fs;
 use xtask::{project_root, Mode, Result};
 
@@ -29,7 +29,7 @@ pub(crate) fn generate_files() -> Result<()> {
     fs::remove_file(project_root().join("website/src/content/docs/internals/changelog.mdx")).ok();
     let changelog = format!("{CHANGELOG_FRONTMATTER}{changelog}");
 
-    let configuration_content = serde_json::to_string(&Configuration::default()).unwrap();
+    let configuration_content = serde_json::to_string(&PartialConfiguration::init()).unwrap();
     let tree = parse_json(&configuration_content, JsonParserOptions::default());
     let formatted = format_node(
         JsonFormatOptions::default().with_line_width(60.try_into().unwrap()),

@@ -7,19 +7,17 @@ use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Merge;
-use biome_deserialize::NoneState;
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{category, PrintDiagnostic};
-use biome_fs::{FileSystemExt, OpenOptions, RomePath};
+use biome_fs::{ConfigName, FileSystemExt, OpenOptions, RomePath};
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonRoot;
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::{AstNode, NodeCache};
-use biome_service::configuration::JavascriptConfiguration;
 use biome_service::workspace::{
     ChangeFileParams, FixAction, FormatFileParams, Language, OpenFileParams,
 };
-use biome_service::{Configuration, VERSION};
+use biome_service::{PartialConfiguration, VERSION};
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -124,24 +122,15 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     if prettier {
         let prettier_configuration = read_prettier_files(fs, console)?;
 
-        if let Some((formatter_configuration, javascript_configuration)) =
-            prettier_configuration.get_biome_configuration()
-        {
-            let configuration = deserialize_from_json_str::<Configuration>(
+        if prettier_configuration.has_configuration() {
+            let configuration = deserialize_from_json_str::<PartialConfiguration>(
                 configuration_content.as_str(),
                 JsonParserOptions::default(),
                 "",
             )
             .into_deserialized();
             if let Some(mut configuration) = configuration {
-                configuration.merge_with(Configuration {
-                    formatter: Some(formatter_configuration.clone()),
-                    javascript: Some(JavascriptConfiguration {
-                        formatter: Some(javascript_configuration.clone()),
-                        ..Default::default()
-                    }),
-                    ..NoneState::none()
-                });
+                configuration.merge_with(prettier_configuration.as_biome_configuration());
 
                 let new_content = serde_json::to_string(&configuration).map_err(|err| {
                     CliDiagnostic::MigrateError(MigrationDiagnostic {
@@ -164,6 +153,11 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     console.log(markup!{
                         <Info>"The configuration "<Emphasis>{{configuration_file_path.display().to_string()}}</Emphasis>" has been successfully migrated."</Info>
                     });
+                    if prettier_configuration.has_ignore_file() {
+                        console.log(markup!{
+                            <Warn>"Please make sure that the globs of the "<Emphasis>".prettierignore"</Emphasis>" file still work in Biome. Prettier's globs use git globs, while Biome's globs use uni-style globs. They both seem similar, but their semantics differ."</Warn>
+                        })
+                    }
                 } else {
                     let file_name = configuration_file_path.display().to_string();
                     let diagnostic = MigrateDiffDiagnostic {
@@ -184,7 +178,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     } else if configuration_content != new_configuration_content || has_deprecated_configuration {
         if write {
             let mut configuration_file = if has_deprecated_configuration {
-                let biome_file_path = configuration_directory_path.join(fs.config_name());
+                let biome_file_path = configuration_directory_path.join(ConfigName::biome_json());
                 fs.create_new(biome_file_path.as_path())?
             } else {
                 configuration_file

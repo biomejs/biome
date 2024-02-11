@@ -1,5 +1,6 @@
 //! This module contains the rules that have options
 
+use crate::analyzers::nursery::no_restricted_imports::RestrictedImportsOptions;
 use crate::analyzers::nursery::use_consistent_array_type::ConsistentArrayTypeOptions;
 use crate::analyzers::nursery::use_filenaming_convention::FilenamingConventionOptions;
 use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::HooksOptions;
@@ -37,6 +38,8 @@ pub enum PossibleOptions {
     NamingConvention(NamingConventionOptions),
     /// Options for `noRestrictedGlobals` rule
     RestrictedGlobals(RestrictedGlobalsOptions),
+    /// Options for `noRestrictedImports` rule
+    RestrictedImports(RestrictedImportsOptions),
     /// Options for `useValidAriaRole` rule
     ValidAriaRole(ValidAriaRoleOptions),
     /// Options for `useSortedClasses` rule
@@ -101,6 +104,13 @@ impl PossibleOptions {
                 };
                 RuleOptions::new(options)
             }
+            "noRestrictedImports" => {
+                let options = match self {
+                    PossibleOptions::RestrictedImports(options) => options.clone(),
+                    _ => RestrictedImportsOptions::default(),
+                };
+                RuleOptions::new(options)
+            }
             "useValidAriaRole" => {
                 let options = match self {
                     PossibleOptions::ValidAriaRole(options) => options.clone(),
@@ -133,6 +143,8 @@ impl Deserializable for PossibleOptions {
             }
             "noRestrictedGlobals" => Deserializable::deserialize(value, "options", diagnostics)
                 .map(Self::RestrictedGlobals),
+            "noRestrictedImports" => Deserializable::deserialize(value, "options", diagnostics)
+                .map(Self::RestrictedImports),
             "useConsistentArrayType" => Deserializable::deserialize(value, "options", diagnostics)
                 .map(Self::ConsistentArrayType),
             "useExhaustiveDependencies" => {

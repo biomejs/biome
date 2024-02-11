@@ -298,6 +298,16 @@ impl MemberChain {
             return Ok(true);
         }
 
+        let has_empty_line_inside_tail = self
+            .tail
+            .iter()
+            .skip(1)
+            .any(|group| group.needs_empty_line_before());
+
+        if has_empty_line_inside_tail {
+            return Ok(true);
+        }
+
         Ok(false)
     }
 
@@ -318,7 +328,7 @@ impl MemberChain {
     }
 
     /// Returns an iterator over all members in the member chain
-    fn members(&self) -> impl Iterator<Item = &ChainMember> + DoubleEndedIterator {
+    fn members(&self) -> impl DoubleEndedIterator<Item = &ChainMember> {
         self.head.members().iter().chain(self.tail.members())
     }
 
@@ -369,19 +379,16 @@ impl Format<JsFormatContext> for MemberChain {
             };
         }
 
-        let has_empty_line = match self.tail.members().next() {
-            Some(member) => member.needs_empty_line_before(),
-            None => false,
-        };
-
         let format_tail = format_with(|f| {
-            if !has_empty_line {
-                write!(f, [hard_line_break()])?;
+            for group in self.tail.iter() {
+                if group.needs_empty_line_before() {
+                    write!(f, [empty_line()])?;
+                } else {
+                    write!(f, [hard_line_break()])?;
+                }
+                write!(f, [group])?;
             }
-
-            f.join_with(hard_line_break())
-                .entries(self.tail.iter())
-                .finish()
+            Ok(())
         });
 
         let format_expanded = format_with(|f| write!(f, [self.head, indent(&group(&format_tail))]));
@@ -390,7 +397,12 @@ impl Format<JsFormatContext> for MemberChain {
             if self.groups_should_break(f)? {
                 write!(f, [group(&format_expanded)])
             } else {
-                if has_empty_line || self.last_group().will_break(f)? {
+                let has_empty_line_before_tail = self
+                    .tail
+                    .first()
+                    .map_or(false, |group| group.needs_empty_line_before());
+
+                if has_empty_line_before_tail || self.last_group().will_break(f)? {
                     write!(f, [expand_parent()])?;
                 }
 

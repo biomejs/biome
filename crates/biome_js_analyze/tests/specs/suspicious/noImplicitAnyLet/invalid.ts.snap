@@ -26,14 +26,14 @@ function ex() {
 ```
 invalid.ts:1:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable has implicitly the any type.
+  ! This variable implicitly has the any type.
   
   > 1 │ let someVar1;
       │     ^^^^^^^^
     2 │ someVar1 = '123';
     3 │ someVar1 = 123;
   
-  i Variable declarations without type annotation and initialization have implicitly the any type. Declare type or initialize the variable with some value.
+  i Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
   
 
 ```
@@ -41,7 +41,7 @@ invalid.ts:1:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━�
 ```
 invalid.ts:5:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable has implicitly the any type.
+  ! This variable implicitly has the any type.
   
     3 │ someVar1 = 123;
     4 │ 
@@ -50,7 +50,7 @@ invalid.ts:5:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━�
     6 │ someVar1 = '123';
     7 │ someVar1 = 123;
   
-  i Variable declarations without type annotation and initialization have implicitly the any type. Declare type or initialize the variable with some value.
+  i Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
   
 
 ```
@@ -58,7 +58,7 @@ invalid.ts:5:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━�
 ```
 invalid.ts:9:12 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable has implicitly the any type.
+  ! This variable implicitly has the any type.
   
      7 │ someVar1 = 123;
      8 │ 
@@ -67,7 +67,7 @@ invalid.ts:9:12 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━�
     10 │ var x = 0, y, z = 0;
     11 │ for(let a = 0, b; a < 5; a++) {}
   
-  i Variable declarations without type annotation and initialization have implicitly the any type. Declare type or initialize the variable with some value.
+  i Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
   
 
 ```
@@ -75,7 +75,7 @@ invalid.ts:9:12 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━�
 ```
 invalid.ts:10:12 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable has implicitly the any type.
+  ! This variable implicitly has the any type.
   
      9 │ let x = 0, y, z = 0;
   > 10 │ var x = 0, y, z = 0;
@@ -83,7 +83,7 @@ invalid.ts:10:12 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━
     11 │ for(let a = 0, b; a < 5; a++) {}
     12 │ 
   
-  i Variable declarations without type annotation and initialization have implicitly the any type. Declare type or initialize the variable with some value.
+  i Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
   
 
 ```
@@ -91,7 +91,7 @@ invalid.ts:10:12 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━
 ```
 invalid.ts:11:16 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable has implicitly the any type.
+  ! This variable implicitly has the any type.
   
      9 │ let x = 0, y, z = 0;
     10 │ var x = 0, y, z = 0;
@@ -100,7 +100,7 @@ invalid.ts:11:16 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━
     12 │ 
     13 │ function ex() {
   
-  i Variable declarations without type annotation and initialization have implicitly the any type. Declare type or initialize the variable with some value.
+  i Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
   
 
 ```
@@ -108,7 +108,7 @@ invalid.ts:11:16 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━
 ```
 invalid.ts:14:9 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable has implicitly the any type.
+  ! This variable implicitly has the any type.
   
     13 │ function ex() {
   > 14 │     let b;
@@ -116,7 +116,7 @@ invalid.ts:14:9 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━�
     15 │ }
     16 │ 
   
-  i Variable declarations without type annotation and initialization have implicitly the any type. Declare type or initialize the variable with some value.
+  i Variable declarations without type annotation and initialization implicitly have the any type. Declare a type or initialize the variable with some value.
   
 
 ```

@@ -7,10 +7,10 @@ authors:
   - team
 pubDate: 2024-01-08
 coverImage:
-  lightSrc: ../../assets/blog/roadmap-2024/banner-light.png
-  darkSrc: ../../assets/blog/roadmap-2024/banner-dark.png
+  lightSrc: "@/assets/blog/roadmap-2024/banner-light.png"
+  darkSrc: "@/assets/blog/roadmap-2024/banner-dark.png"
   alt: The Prettier challenge banner, with the Biome logo over it
-socialImage: ../../assets/social-logo.png
+socialImage: "@/assets/social-logo.png"
 ---
 
 We are thrilled to share what the Core Contributors and Maintainers would like to focus on in 2024.

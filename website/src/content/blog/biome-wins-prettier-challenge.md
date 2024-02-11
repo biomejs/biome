@@ -7,10 +7,10 @@ authors:
   - team
 pubDate: 2023-11-27
 coverImage:
-  lightSrc: ../../assets/blog/prettier-challenge.png
-  darkSrc: ../../assets/blog/prettier-challenge.png
+  lightSrc: "@/assets/blog/prettier-challenge.png"
+  darkSrc: "@/assets/blog/prettier-challenge.png"
   alt: The Prettier challenge banner, with the Biome logo over it
-socialImage: ../../assets/blog/prettier-challenge.png
+socialImage: "@/assets/blog/prettier-challenge.png"
 ---
 
 With the release of Biome **`v1.4.0`**, we claim the bounty of the [Prettier challenge](https://console.algora.io/challenges/prettier)!
@@ -194,7 +194,7 @@ Biome is a linter too, and it features [177 rules](https://biomejs.dev/linter/ru
 
   <pre class="language-text"><code class="language-text">nursery/noImplicitAnyLet.js:1:5 <a href="https://biomejs.dev/linter/rules/no-implicit-any-let">lint/nursery/noImplicitAnyLet</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable has implicitly the </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> type.</span>
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable implicitly has the </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> type.</span>
 
   <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>var a;
      <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>

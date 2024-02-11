@@ -1,18 +1,23 @@
 use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt, HorizontalLine};
-use biome_service::configuration::Configuration;
-use biome_service::create_config;
+use biome_fs::ConfigName;
+use biome_service::{create_config, PartialConfiguration};
 
-pub(crate) fn init(mut session: CliSession) -> Result<(), CliDiagnostic> {
+pub(crate) fn init(mut session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagnostic> {
     let fs = &mut session.app.fs;
-    create_config(fs, Configuration::default())?;
+    create_config(fs, PartialConfiguration::init(), emit_jsonc)?;
+    let file_created = if emit_jsonc {
+        format!("{}: ", ConfigName::biome_jsonc())
+    } else {
+        format!("{}: ", ConfigName::biome_json())
+    };
 
     session.app.console.log(markup! {
 "\n"<Inverse>"Welcome to Biome! Let's get you started..."</Inverse>"
 
 "<Info><Emphasis>"Files created "</Emphasis></Info>{HorizontalLine::new(106)}"
 
-  "<Dim>"- "</Dim><Emphasis>"biome.json: "</Emphasis>"Your project configuration. Documentation: "<Hyperlink href="https://biomejs.dev/reference/configuration">"https://biomejs.dev/reference/configuration"</Hyperlink>"
+  "<Dim>"- "</Dim><Emphasis>{file_created}</Emphasis>"Your project configuration. Documentation: "<Hyperlink href="https://biomejs.dev/reference/configuration">"https://biomejs.dev/reference/configuration"</Hyperlink>"
 
 "<Info><Emphasis>"Next Steps "</Emphasis></Info>{HorizontalLine::new(109)}"
 

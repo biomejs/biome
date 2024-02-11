@@ -134,7 +134,7 @@ impl TailChainGroups {
     }
 
     /// Returns an iterator over the groups.
-    pub(super) fn iter(&self) -> impl Iterator<Item = &MemberChainGroup> + DoubleEndedIterator {
+    pub(super) fn iter(&self) -> impl DoubleEndedIterator<Item = &MemberChainGroup> {
         self.groups.iter()
     }
 
@@ -150,7 +150,7 @@ impl TailChainGroups {
     }
 
     /// Returns an iterator over all members
-    pub(super) fn members(&self) -> impl Iterator<Item = &ChainMember> + DoubleEndedIterator {
+    pub(super) fn members(&self) -> impl DoubleEndedIterator<Item = &ChainMember> {
         self.groups.iter().flat_map(|group| group.members().iter())
     }
 }
@@ -218,6 +218,33 @@ impl MemberChainGroup {
             } else {
                 false
             }
+        })
+    }
+
+    pub(super) fn needs_empty_line_before(&self) -> bool {
+        let first = self.members.first();
+        first.map_or(false, |first| match first {
+            ChainMember::StaticMember { expression } => {
+                let operator = expression.operator_token();
+
+                match operator {
+                    Ok(operator) => get_lines_before_token(&operator) > 1,
+                    _ => false,
+                }
+            }
+            ChainMember::ComputedMember { expression } => {
+                let l_brack_token = expression.l_brack_token();
+
+                match l_brack_token {
+                    Ok(l_brack_token) => {
+                        get_lines_before_token(
+                            &expression.optional_chain_token().unwrap_or(l_brack_token),
+                        ) > 1
+                    }
+                    _ => false,
+                }
+            }
+            _ => false,
         })
     }
 }

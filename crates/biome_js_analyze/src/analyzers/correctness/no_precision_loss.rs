@@ -22,23 +22,15 @@ declare_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// const x = 5123000000000000000000000000001
+    /// const x = 5.123000000000000000000000000001
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// const x = 1230000000000000000000000.0
+    /// const x = 0x20000000000001
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// const x = .1230000000000000000000000
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// const x = 0X20000000000001
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// const x = 0X2_000000000_0001;
+    /// const x = 0x2_000000000_0001;
     /// ```
     ///
     /// ### Valid
@@ -105,12 +97,13 @@ fn is_precision_lost(node: &JsNumberLiteralExpression) -> Option<bool> {
 }
 
 fn is_precision_lost_in_base_10(num: &str) -> Option<bool> {
+    const MAX_SIGNIFICANT_DIGITS_BASE10: u32 = 17;
     let normalized = NormalizedNumber::new(num);
     let precision = normalized.precision();
     if precision == 0 {
         return Some(false);
     }
-    if precision > 100 {
+    if precision > MAX_SIGNIFICANT_DIGITS_BASE10 as usize {
         return Some(true);
     }
     let parsed = num.parse::<f64>().ok()?;
@@ -118,8 +111,8 @@ fn is_precision_lost_in_base_10(num: &str) -> Option<bool> {
     Some(stored_num != normalized.to_scientific())
 }
 
-fn is_precision_lost_in_base_other(num: &str, radix: u32) -> bool {
-    let parsed = match i64::from_str_radix(num, radix) {
+fn is_precision_lost_in_base_other(num: &str, radix: u8) -> bool {
+    let parsed = match i64::from_str_radix(num, radix as u32) {
         Ok(x) => x,
         Err(e) => {
             return matches!(
@@ -145,7 +138,7 @@ fn remove_trailing_zeros(num: &str) -> &str {
 }
 
 #[derive(Debug)]
-/// Normalized number in the form `0.{digits}.{digits_rest}e{exponent}`
+/// Normalized number in the form `0.{digits}{digits_rest}e{exponent}`
 struct NormalizedNumber<'a> {
     digits: &'a str,
     digits_rest: &'a str,
@@ -155,49 +148,44 @@ struct NormalizedNumber<'a> {
 impl NormalizedNumber<'_> {
     fn new(num: &str) -> NormalizedNumber<'_> {
         let num = remove_leading_zeros(num);
-        let mut split = num.splitn(2, ['e', 'E']);
-
-        // SAFETY: unwrap is ok because even an empty string will produce one part.
-        let mantissa = split.next().unwrap();
-        let exponent = split.next();
-        let mut mantissa_parts = mantissa.splitn(2, '.');
-
-        // SAFETY: unwrap is ok because even an empty string will produce one part.
-        let mut normalized = match (mantissa_parts.next().unwrap(), mantissa_parts.next()) {
-            ("", Some(fraction)) => {
+        let (mantissa, exponent) = num
+            .split_once(['e', 'E'])
+            .and_then(|(mantissa, exponent)| Some((mantissa, exponent.parse::<isize>().ok()?)))
+            .unwrap_or((num, 0));
+        match mantissa.split_once(['.']) {
+            None => NormalizedNumber {
+                digits: remove_trailing_zeros(mantissa),
+                digits_rest: "",
+                exponent: exponent + mantissa.len() as isize,
+            },
+            Some(("", fraction)) => {
                 let digits = remove_leading_zeros(fraction);
                 NormalizedNumber {
-                    digits,
+                    digits: remove_trailing_zeros(digits),
                     digits_rest: "",
-                    exponent: digits.len() as isize - fraction.len() as isize,
+                    exponent: digits.len() as isize - fraction.len() as isize + exponent,
                 }
             }
-            (integer, Some(fraction)) => NormalizedNumber {
-                digits: integer,
-                digits_rest: fraction,
-                exponent: integer.len() as isize,
-            },
-            (integer, None) => {
-                let digits = remove_trailing_zeros(integer);
+            Some((integer, fraction)) => {
+                let fraction = remove_trailing_zeros(fraction);
+                let digits = if fraction.is_empty() {
+                    remove_trailing_zeros(integer)
+                } else {
+                    integer
+                };
                 NormalizedNumber {
                     digits,
-                    digits_rest: "",
-                    exponent: integer.len() as isize,
+                    digits_rest: fraction,
+                    exponent: exponent + integer.len() as isize,
                 }
             }
-        };
-
-        if let Some(exponent) = exponent.and_then(|it| it.parse::<isize>().ok()) {
-            normalized.exponent += exponent;
         }
-
-        normalized
     }
 
     fn to_scientific(&self) -> String {
         let fraction = &self.digits[1..];
         if fraction.is_empty() && self.digits_rest.is_empty() {
-            format!("{}e{}", &self.digits[..1], self.exponent - 1)
+            format!("{}e{}", self.digits, self.exponent - 1)
         } else {
             format!(
                 "{}.{}{}e{}",

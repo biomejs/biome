@@ -1,0 +1,65 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80,
+    "attributePosition": "auto",
+    "ignore": ["dist/**", "node_modules/**", "generated/*.spec.js"]
+  },
+  "linter": { "enabled": true },
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingComma": "all",
+      "semicolons": "always",
+      "arrowParentheses": "always",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "quoteStyle": "single",
+      "attributePosition": "auto"
+    }
+  }
+}
+```
+
+## `.prettierignore`
+
+```prettierignore
+
+dist/**
+
+node_modules/**
+
+# I am a comment
+generated/*.spec.js
+
+```
+
+## `.prettierrc`
+
+```prettierrc
+{ "useTabs": false, "semi": true, "singleQuote": true }
+```
+
+# Emitted Messages
+
+```block
+The configuration biome.json has been successfully migrated.
+```
+
+```block
+Please make sure that the globs of the .prettierignore file still work in Biome. Prettier's globs use git globs, while Biome's globs use uni-style globs. They both seem similar, but their semantics differ.
+```
+
+

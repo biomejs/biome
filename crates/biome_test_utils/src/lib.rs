@@ -7,7 +7,7 @@ use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::settings::{Language, WorkspaceSettings};
-use biome_service::Configuration;
+use biome_service::PartialConfiguration;
 use json_comments::StripComments;
 use similar::TextDiff;
 use std::ffi::{c_int, OsStr};
@@ -38,7 +38,7 @@ pub fn create_analyzer_options(
     // that configures that specific rule.
     let options_file = input_file.with_extension("options.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
-        let deserialized = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
+        let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
             json.as_str(),
             JsonParserOptions::default(),
             "",

@@ -21,7 +21,8 @@ use biome_analyze::{
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
-    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    QuoteStyle,
 };
 use biome_fs::RomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
@@ -61,6 +62,7 @@ pub struct JsFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub enabled: Option<bool>,
+    pub attribute_position: Option<AttributePosition>,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -96,32 +98,31 @@ impl Language for JsLanguage {
         language: &JsFormatterSettings,
         path: &RomePath,
     ) -> JsFormatOptions {
-        let indent_style = if let Some(indent_style) = language.indent_style {
-            indent_style
-        } else {
-            global.indent_style.unwrap_or_default()
-        };
-        let line_width = if let Some(line_width) = language.line_width {
-            line_width
-        } else {
-            global.line_width.unwrap_or_default()
-        };
-        let indent_width = if let Some(indent_width) = language.indent_width {
-            indent_width
-        } else {
-            global.indent_width.unwrap_or_default()
-        };
-
-        let line_ending = if let Some(line_ending) = language.line_ending {
-            line_ending
-        } else {
-            global.line_ending.unwrap_or_default()
-        };
         let options = JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width)
-            .with_line_ending(line_ending)
+            .with_indent_style(
+                language
+                    .indent_style
+                    .or(global.indent_style)
+                    .unwrap_or_default(),
+            )
+            .with_indent_width(
+                language
+                    .indent_width
+                    .or(global.indent_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_width(
+                language
+                    .line_width
+                    .or(global.line_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_ending(
+                language
+                    .line_ending
+                    .or(global.line_ending)
+                    .unwrap_or_default(),
+            )
             .with_quote_style(language.quote_style.unwrap_or_default())
             .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
             .with_quote_properties(language.quote_properties.unwrap_or_default())
@@ -129,7 +130,13 @@ impl Language for JsLanguage {
             .with_semicolons(language.semicolons.unwrap_or_default())
             .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
             .with_bracket_spacing(language.bracket_spacing.unwrap_or_default())
-            .with_bracket_same_line(language.bracket_same_line.unwrap_or_default());
+            .with_bracket_same_line(language.bracket_same_line.unwrap_or_default())
+            .with_attribute_position(
+                language
+                    .attribute_position
+                    .or(global.attribute_position)
+                    .unwrap_or_default(),
+            );
 
         overrides.override_js_format_options(path, options)
     }
@@ -276,6 +283,7 @@ fn debug_formatter_ir(
 fn lint(params: LintParams) -> LintResults {
     debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
         .in_scope(move || {
+            let settings = params.settings.as_ref();
             let file_source = match params.parse.file_source(params.path) {
                 Ok(file_source) => file_source,
                 Err(_) => {
@@ -292,9 +300,31 @@ fn lint(params: LintParams) -> LintResults {
             };
             let tree = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
-
             let analyzer_options =
                 compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
+
+            // Compute final rules (taking `overrides` into account)
+            let rules = settings.as_rules(params.path.as_path());
+            let mut rule_filter_list = rules
+                .as_ref()
+                .map(|rules| rules.as_enabled_rules())
+                .unwrap_or_default()
+                .into_iter()
+                .collect::<Vec<_>>();
+            if settings.organize_imports.enabled && !params.categories.is_syntax() {
+                rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
+            }
+
+            rule_filter_list.push(RuleFilter::Rule(
+                "correctness",
+                "noDuplicatePrivateClassMembers",
+            ));
+            rule_filter_list.push(RuleFilter::Rule("correctness", "noInitializerWithDefinite"));
+            rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
+            rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
+
+            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
+            filter.categories = params.categories;
 
             let mut diagnostic_count = diagnostics.len() as u64;
             let mut errors = diagnostics
@@ -302,15 +332,11 @@ fn lint(params: LintParams) -> LintResults {
                 .filter(|diag| diag.severity() <= Severity::Error)
                 .count();
 
-            let has_lint = params.filter.categories.contains(RuleCategories::LINT);
+            let has_lint = filter.categories.contains(RuleCategories::LINT);
 
             info!("Analyze file {}", params.path.display());
-            let (_, analyze_diagnostics) = analyze(
-                &tree,
-                params.filter,
-                &analyzer_options,
-                file_source,
-                |signal| {
+            let (_, analyze_diagnostics) =
+                analyze(&tree, filter, &analyzer_options, file_source, |signal| {
                     if let Some(mut diagnostic) = signal.diagnostic() {
                         // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
                         if !has_lint
@@ -327,8 +353,8 @@ fn lint(params: LintParams) -> LintResults {
                             .category()
                             .filter(|category| category.name().starts_with("lint/"))
                             .map(|category| {
-                                params
-                                    .rules
+                                rules
+                                    .as_ref()
                                     .and_then(|rules| rules.get_severity_from_code(category))
                                     .unwrap_or(Severity::Warning)
                             })
@@ -352,8 +378,7 @@ fn lint(params: LintParams) -> LintResults {
                     }
 
                     ControlFlow::<Never>::Continue(())
-                },
-            );
+                });
 
             diagnostics.extend(
                 analyze_diagnostics
@@ -738,16 +763,17 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
 }
 
 fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> AnalyzerOptions {
+    let settings = settings.as_ref();
     let configuration = AnalyzerConfiguration {
-        rules: to_analyzer_rules(settings.as_ref(), file_path.as_path()),
-        globals: if let Some(globals) = settings.as_ref().languages.javascript.globals.as_ref() {
-            globals
-                .iter()
-                .map(|global| global.to_string())
-                .collect::<Vec<_>>()
-        } else {
-            vec![]
-        },
+        rules: to_analyzer_rules(settings, file_path.as_path()),
+        globals: settings
+            .override_settings
+            .override_js_globals(
+                &RomePath::new(file_path.as_path()),
+                &settings.languages.javascript.globals,
+            )
+            .into_iter()
+            .collect(),
     };
 
     AnalyzerOptions {

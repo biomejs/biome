@@ -1,4 +1,4 @@
-use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
+use biome_formatter::{AttributePosition, IndentStyle, LineWidth, QuoteStyle};
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, Semicolons};
 use biome_js_formatter::format_node;
@@ -14,8 +14,34 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-    type A2 = {
-        readonly [A in B]: T}
+   import React from "react";
+
+const Component = () => (
+  <div>
+    <div data-a="1">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    </div>
+
+    <div data-a="1" data-b="2" data-c="3">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    </div>
+
+    <div data-a="Lorem ipsum dolor sit amet" data-b="Lorem ipsum dolor sit amet" data-c="Lorem ipsum dolor sit amet">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    </div>
+
+    <div data-long-attribute-a="1" data-long-attribute-b="2" data-long-attribute-c="3">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    </div>
+
+    <img src="/images/foo.png" />
+
+    <img src="/images/foo.png" alt="bar" />
+
+    <img src="/images/foo.png" alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit." />
+  </div>
+);
+
     "#;
     let source_type = JsFileSource::tsx();
     let tree = parse(
@@ -29,7 +55,8 @@ fn quick_test() {
         .with_semicolons(Semicolons::Always)
         .with_quote_style(QuoteStyle::Double)
         .with_jsx_quote_style(QuoteStyle::Single)
-        .with_arrow_parentheses(ArrowParentheses::Always);
+        .with_arrow_parentheses(ArrowParentheses::Always)
+        .with_attribute_position(AttributePosition::Multiline);
 
     let doc = format_node(options.clone(), &tree.syntax()).unwrap();
     let result = doc.print().unwrap();

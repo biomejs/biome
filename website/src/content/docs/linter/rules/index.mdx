@@ -174,7 +174,7 @@ Rules enforcing a consistent and idiomatic way of writing your code.
 Rules that detect code that is likely to be incorrect or useless.
 | Rule name | Description | Properties |
 | --- | --- | --- |
-| [noApproximativeNumericConstant](/linter/rules/no-approximative-numeric-constant) | Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type. |  |
+| [noApproximativeNumericConstant](/linter/rules/no-approximative-numeric-constant) | Use standard constants instead of approximated literals. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noArrayIndexKey](/linter/rules/no-array-index-key) | Discourage the usage of Array index in keys. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noAssignInExpressions](/linter/rules/no-assign-in-expressions) | Disallow assignments in expressions. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noAsyncPromiseExecutor](/linter/rules/no-async-promise-executor) | Disallows using an async function as a Promise executor. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
@@ -232,6 +232,7 @@ Nursery rules get promoted to other groups once they become stable or may be rem
 Rules that belong to this group <strong>are not subject to semantic version</strong>.
 | Rule name | Description | Properties |
 | --- | --- | --- |
+| [noConsole](/linter/rules/no-console) | Disallow the use of <code>console</code>. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noDuplicateJsonKeys](/linter/rules/no-duplicate-json-keys) | Disallow two keys with the same name inside a JSON object. |  |
 | [noEmptyBlockStatements](/linter/rules/no-empty-block-statements) | Disallow empty block statements and static blocks. |  |
 | [noEmptyTypeParameters](/linter/rules/no-empty-type-parameters) | Disallow empty type parameters in type aliases and interfaces. |  |
@@ -241,6 +242,8 @@ Rules that belong to this group <strong>are not subject to semantic version</str
 | [noInvalidUseBeforeDeclaration](/linter/rules/no-invalid-use-before-declaration) | Disallow the use of variables and function parameters before their declaration |  |
 | [noMisleadingCharacterClass](/linter/rules/no-misleading-character-class) | Disallow characters made with multiple code points in character class syntax. | <span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [noNodejsModules](/linter/rules/no-nodejs-modules) | Forbid the use of Node.js builtin modules. |  |
+| [noReExportAll](/linter/rules/no-re-export-all) | Avoid re-export all |  |
+| [noRestrictedImports](/linter/rules/no-restricted-imports) | Disallow specified modules when loaded by import or require. |  |
 | [noSkippedTests](/linter/rules/no-skipped-tests) | Disallow disabled tests. |  |
 | [noThenProperty](/linter/rules/no-then-property) | Disallow <code>then</code> property. |  |
 | [noUnusedImports](/linter/rules/no-unused-imports) | Disallow unused imports. | <span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |

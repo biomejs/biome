@@ -16,30 +16,46 @@ pub mod vcs;
 use crate::configuration::diagnostics::CantLoadExtendFile;
 pub use crate::configuration::diagnostics::ConfigurationDiagnostic;
 pub(crate) use crate::configuration::generated::push_to_analyzer_rules;
-use crate::configuration::organize_imports::{organize_imports, OrganizeImports};
+use crate::configuration::organize_imports::{
+    partial_organize_imports, OrganizeImports, PartialOrganizeImports,
+};
 use crate::configuration::overrides::Overrides;
-use crate::configuration::vcs::{vcs_configuration, VcsConfiguration};
-use crate::settings::WorkspaceSettings;
+use crate::configuration::vcs::{
+    partial_vcs_configuration, PartialVcsConfiguration, VcsConfiguration,
+};
+use crate::settings::{WorkspaceSettings, DEFAULT_FILE_SIZE_LIMIT};
 use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge, StringSet};
-use biome_deserialize_macros::{Deserializable, Merge, NoneState};
+use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
-use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
+use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_js_analyze::metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
 use bpaf::Bpaf;
-pub use css::{css_configuration, CssConfiguration, CssFormatter};
-pub use formatter::{
-    deserialize_line_width, formatter_configuration, serialize_line_width, FormatterConfiguration,
-    PlainIndentStyle,
+pub use css::{
+    partial_css_configuration, CssConfiguration, CssFormatter, PartialCssConfiguration,
+    PartialCssFormatter,
 };
-pub use javascript::{javascript_configuration, JavascriptConfiguration, JavascriptFormatter};
-pub use json::{json_configuration, JsonConfiguration, JsonFormatter};
-pub use linter::{linter_configuration, LinterConfiguration, RuleConfiguration, Rules};
+pub use formatter::{
+    deserialize_line_width, partial_formatter_configuration, serialize_line_width,
+    FormatterConfiguration, PartialFormatterConfiguration, PlainIndentStyle,
+};
+pub use javascript::{
+    partial_javascript_configuration, JavascriptConfiguration, JavascriptFormatter,
+    PartialJavascriptConfiguration, PartialJavascriptFormatter,
+};
+pub use json::{
+    partial_json_configuration, JsonConfiguration, JsonFormatter, PartialJsonConfiguration,
+    PartialJsonFormatter,
+};
+pub use linter::{
+    partial_linter_configuration, LinterConfiguration, PartialLinterConfiguration,
+    RuleConfiguration, Rules,
+};
 pub use overrides::to_override_settings;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
@@ -49,91 +65,80 @@ use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
 
 /// The configuration that is contained inside the file `biome.json`
-#[derive(
-    Bpaf, Clone, Debug, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[deserializable(from_none)]
-#[serde(deny_unknown_fields, rename_all = "camelCase")]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
+#[partial(serde(deny_unknown_fields, rename_all = "camelCase"))]
 pub struct Configuration {
     /// A field for the [JSON schema](https://json-schema.org/) specification
-    #[serde(rename = "$schema", skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub schema: Option<String>,
+    #[partial(serde(rename = "$schema"))]
+    #[partial(bpaf(hide))]
+    pub schema: String,
 
     /// The configuration of the VCS integration
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(vcs_configuration), optional, hide_usage)]
-    pub vcs: Option<VcsConfiguration>,
+    #[partial(type, bpaf(external(partial_vcs_configuration), optional, hide_usage))]
+    pub vcs: VcsConfiguration,
 
     /// The configuration of the filesystem
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(files_configuration), optional, hide_usage)]
-    pub files: Option<FilesConfiguration>,
+    #[partial(
+        type,
+        bpaf(external(partial_files_configuration), optional, hide_usage)
+    )]
+    pub files: FilesConfiguration,
 
     /// The configuration of the formatter
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(formatter_configuration), optional)]
-    pub formatter: Option<FormatterConfiguration>,
+    #[partial(type, bpaf(external(partial_formatter_configuration), optional))]
+    pub formatter: FormatterConfiguration,
 
     /// The configuration of the import sorting
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external, optional)]
-    pub organize_imports: Option<OrganizeImports>,
+    #[partial(type, bpaf(external(partial_organize_imports), optional))]
+    pub organize_imports: OrganizeImports,
 
     /// The configuration for the linter
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(linter_configuration), optional)]
-    pub linter: Option<LinterConfiguration>,
+    #[partial(type, bpaf(external(partial_linter_configuration), optional))]
+    pub linter: LinterConfiguration,
 
     /// Specific configuration for the JavaScript language
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(javascript_configuration), optional)]
-    pub javascript: Option<JavascriptConfiguration>,
+    #[partial(type, bpaf(external(partial_javascript_configuration), optional))]
+    pub javascript: JavascriptConfiguration,
 
     /// Specific configuration for the Json language
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(json_configuration), optional)]
-    pub json: Option<JsonConfiguration>,
+    #[partial(type, bpaf(external(partial_json_configuration), optional))]
+    pub json: JsonConfiguration,
 
     /// Specific configuration for the Css language
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(css_configuration), optional, hide)]
-    pub css: Option<CssConfiguration>,
+    #[partial(type, bpaf(external(partial_css_configuration), optional, hide))]
+    pub css: CssConfiguration,
 
     /// A list of paths to other JSON files, used to extends the current configuration.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub extends: Option<StringSet>,
+    #[partial(bpaf(hide))]
+    pub extends: StringSet,
 
     /// A list of granular patterns that should be applied only to a sub set of files
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub overrides: Option<Overrides>,
+    #[partial(bpaf(hide))]
+    pub overrides: Overrides,
 }
 
-impl Default for Configuration {
-    fn default() -> Self {
+impl PartialConfiguration {
+    /// Returns the initial configuration as generated by `biome init`.
+    pub fn init() -> Self {
         Self {
-            files: None,
-            linter: Some(LinterConfiguration {
+            organize_imports: Some(PartialOrganizeImports {
                 enabled: Some(true),
-                ..LinterConfiguration::default()
+                ..Default::default()
             }),
-            organize_imports: Some(OrganizeImports::default()),
-            formatter: None,
-            css: None,
-            javascript: None,
-            json: None,
-            schema: None,
-            vcs: None,
-            extends: None,
-            overrides: None,
+            linter: Some(PartialLinterConfiguration {
+                enabled: Some(true),
+                rules: Some(Rules {
+                    recommended: Some(true),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
         }
     }
-}
 
-impl Configuration {
     pub fn is_formatter_disabled(&self) -> bool {
         self.formatter
             .as_ref()
@@ -162,79 +167,43 @@ impl Configuration {
     pub fn is_vcs_enabled(&self) -> bool {
         !self.is_vcs_disabled()
     }
-
-    /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
-    /// VCS root directory and the `.gitignore` file.
-    ///
-    /// ## Returns
-    ///
-    /// A tuple with VCS root folder and the contents of the `.gitignore` file
-    pub fn retrieve_gitignore_matches(
-        &self,
-        file_system: &DynRef<'_, dyn FileSystem>,
-        vcs_base_path: Option<&Path>,
-    ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError> {
-        let Some(vcs) = &self.vcs else {
-            return Ok((None, vec![]));
-        };
-        if vcs.is_enabled() {
-            let vcs_base_path = match (vcs_base_path, &vcs.root) {
-                (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
-                (None, Some(root)) => PathBuf::from(root),
-                (Some(vcs_base_path), None) => PathBuf::from(vcs_base_path),
-                (None, None) => return Err(WorkspaceError::vcs_disabled()),
-            };
-            if let Some(client_kind) = &vcs.client_kind {
-                if !vcs.ignore_file_disabled() {
-                    let result = file_system
-                        .auto_search(vcs_base_path, client_kind.ignore_file(), false)
-                        .map_err(WorkspaceError::from)?;
-
-                    if let Some(result) = result {
-                        return Ok((
-                            Some(result.directory_path),
-                            result
-                                .content
-                                .lines()
-                                .map(String::from)
-                                .collect::<Vec<String>>(),
-                        ));
-                    }
-                }
-            }
-        }
-        Ok((None, vec![]))
-    }
 }
 
 /// The configuration of the filesystem
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
+#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct FilesConfiguration {
     /// The maximum allowed size for source code files in bytes. Files above
     /// this limit will be ignored for performance reasons. Defaults to 1 MiB
-    #[bpaf(long("files-max-size"), argument("NUMBER"))]
-    pub max_size: Option<NonZeroU64>,
+    #[partial(bpaf(long("files-max-size"), argument("NUMBER")))]
+    pub max_size: NonZeroU64,
 
     /// A list of Unix shell style patterns. Biome will ignore files/folders that will
     /// match these patterns.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub ignore: Option<StringSet>,
+    #[partial(bpaf(hide))]
+    pub ignore: StringSet,
 
     /// A list of Unix shell style patterns. Biome will handle only those files/folders that will
     /// match these patterns.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub include: Option<StringSet>,
+    #[partial(bpaf(hide))]
+    pub include: StringSet,
 
     /// Tells Biome to not emit diagnostics when handling files that doesn't know
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("files-ignore-unknown"), argument("true|false"), optional)]
-    pub ignore_unknown: Option<bool>,
+    #[partial(bpaf(long("files-ignore-unknown"), argument("true|false"), optional))]
+    pub ignore_unknown: bool,
+}
+
+impl Default for FilesConfiguration {
+    fn default() -> Self {
+        Self {
+            max_size: DEFAULT_FILE_SIZE_LIMIT,
+            ignore: Default::default(),
+            include: Default::default(),
+            ignore_unknown: false,
+        }
+    }
 }
 
 /// - [Result]: if an error occurred while loading the configuration file.
@@ -244,7 +213,7 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 
 pub struct ConfigurationPayload {
     /// The result of the deserialization
-    pub deserialized: Deserialized<Configuration>,
+    pub deserialized: Deserialized<PartialConfiguration>,
     /// The path of where the `biome.json` file was found. This contains the `biome.json` name.
     pub configuration_file_path: PathBuf,
     /// The base path of where the `biome.json` file was found.
@@ -270,18 +239,13 @@ impl ConfigurationBasePath {
     }
 }
 
-/// Load the configuration for this session of the CLI, merging the content of
-/// the `biome.json` file if it exists on disk with common command line options
+/// Load the partial configuration for this session of the CLI.
 pub fn load_configuration(
     fs: &DynRef<'_, dyn FileSystem>,
     config_path: ConfigurationBasePath,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
     let config = load_config(fs, config_path)?;
-    let mut loaded_configuration = LoadedConfiguration::from(config);
-    loaded_configuration.apply_extends(fs)?;
-    loaded_configuration.migrate_deprecated_fields();
-    loaded_configuration.configuration.merge_in_defaults();
-    Ok(loaded_configuration)
+    LoadedConfiguration::try_from_payload(config, fs)
 }
 
 /// Load the configuration from the file system.
@@ -297,7 +261,6 @@ fn load_config(
     file_system: &DynRef<'_, dyn FileSystem>,
     base_path: ConfigurationBasePath,
 ) -> LoadConfig {
-    let config_name = file_system.config_name();
     let deprecated_config_name = file_system.deprecated_config_name();
     let working_directory = file_system.working_directory();
     let configuration_directory = match base_path {
@@ -312,13 +275,16 @@ fn load_config(
     let should_error = base_path.is_from_user();
 
     let auto_search_result;
-    let result =
-        file_system.auto_search(configuration_directory.clone(), config_name, should_error);
+    let result = file_system.auto_search(
+        configuration_directory.clone(),
+        ConfigName::file_names().as_slice(),
+        should_error,
+    );
     if let Ok(result) = result {
         if result.is_none() {
             auto_search_result = file_system.auto_search(
                 configuration_directory.clone(),
-                deprecated_config_name,
+                [deprecated_config_name].as_slice(),
                 should_error,
             )?;
         } else {
@@ -327,7 +293,7 @@ fn load_config(
     } else {
         auto_search_result = file_system.auto_search(
             configuration_directory.clone(),
-            deprecated_config_name,
+            [deprecated_config_name].as_slice(),
             should_error,
         )?;
     }
@@ -338,8 +304,16 @@ fn load_config(
             directory_path,
             file_path,
         } = auto_search_result;
+        let parser_options =
+            if file_path.file_name().and_then(|s| s.to_str()) == Some(ConfigName::biome_jsonc()) {
+                JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas()
+            } else {
+                JsonParserOptions::default()
+            };
         let deserialized =
-            deserialize_from_json_str::<Configuration>(&content, JsonParserOptions::default(), "");
+            deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
         Ok(Some(ConfigurationPayload {
             deserialized,
             configuration_file_path: file_path,
@@ -359,9 +333,14 @@ fn load_config(
 /// - the program doesn't have the write rights
 pub fn create_config(
     fs: &mut DynRef<dyn FileSystem>,
-    mut configuration: Configuration,
+    mut configuration: PartialConfiguration,
+    emit_jsonc: bool,
 ) -> Result<(), WorkspaceError> {
-    let path = PathBuf::from(fs.config_name());
+    let path = if emit_jsonc {
+        PathBuf::from(ConfigName::biome_jsonc())
+    } else {
+        PathBuf::from(ConfigName::biome_json())
+    };
 
     let options = OpenOptions::default().write(true).create_new(true);
 
@@ -381,10 +360,7 @@ pub fn create_config(
             configuration.schema = schema_path.to_str().map(String::from);
         }
     } else {
-        configuration.schema = Some(format!(
-            "https://biomejs.dev/schemas/{}/schema.json",
-            VERSION
-        ));
+        configuration.schema = Some(format!("https://biomejs.dev/schemas/{VERSION}/schema.json"));
     }
 
     let contents = serde_json::to_string_pretty(&configuration).map_err(|_| {
@@ -416,7 +392,10 @@ pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerR
     overrides.override_analyzer_rules(path, analyzer_rules)
 }
 
-/// Yield information regarding the configuration that was found
+/// Information regarding the configuration that was found.
+///
+/// This contains the expanded configuration including default values where no
+/// configuration was present.
 #[derive(Default, Debug)]
 pub struct LoadedConfiguration {
     /// If present, the path of the directory where it was found
@@ -424,100 +403,12 @@ pub struct LoadedConfiguration {
     /// If present, the path of the file where it was found
     pub file_path: Option<PathBuf>,
     /// The Deserialized configuration
-    pub configuration: Configuration,
+    pub configuration: PartialConfiguration,
     /// All diagnostics that were emitted during parsing and deserialization
     pub diagnostics: Vec<Error>,
 }
 
 impl LoadedConfiguration {
-    /// Mutates the configuration so that any fields that have not been configured explicitly are
-    /// filled in with their values from configs listed in the `extends` field.
-    ///
-    /// The `extends` configs are applied from left to right.
-    ///
-    /// If a configuration can't be resolved from the file system, the operation will fail.
-    fn apply_extends(&mut self, fs: &DynRef<'_, dyn FileSystem>) -> Result<(), WorkspaceError> {
-        let deserialized = self.deserialize_extends(fs)?;
-        let (configurations, errors): (Vec<_>, Vec<_>) = deserialized
-            .into_iter()
-            .map(|d| d.consume())
-            .map(|(config, diagnostics)| (config.unwrap_or_default(), diagnostics))
-            .unzip();
-
-        let extended_configuration = configurations.into_iter().reduce(
-            |mut previous_configuration, current_configuration| {
-                previous_configuration.merge_with(current_configuration);
-                previous_configuration
-            },
-        );
-        if let Some(mut extended_configuration) = extended_configuration {
-            // We swap them to avoid having to clone `self.configuration` to merge it.
-            std::mem::swap(&mut self.configuration, &mut extended_configuration);
-            self.configuration.merge_with(extended_configuration)
-        }
-
-        self.diagnostics.extend(
-            errors
-                .into_iter()
-                .flatten()
-                .map(|diagnostic| {
-                    diagnostic.with_file_path(
-                        self.file_path
-                            .as_ref()
-                            .map(|path| path.display().to_string()),
-                    )
-                })
-                .collect::<Vec<_>>(),
-        );
-
-        Ok(())
-    }
-
-    /// It attempts to deserialize all the configuration files that were specified in the `extends` property
-    fn deserialize_extends(
-        &mut self,
-        fs: &DynRef<'_, dyn FileSystem>,
-    ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError> {
-        let Some(extends) = &self.configuration.extends else {
-            return Ok(vec![]);
-        };
-
-        let directory_path = self
-            .directory_path
-            .as_ref()
-            .cloned()
-            .unwrap_or(fs.working_directory().unwrap_or(PathBuf::from("./")));
-        let mut deserialized_configurations = vec![];
-        for path in extends.iter() {
-            let config_path = directory_path.join(path);
-            let mut file = fs
-                .open_with_options(config_path.as_path(), OpenOptions::default().read(true))
-                .map_err(|err| {
-                    CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
-                        markup!{
-								"Biome tried to load the configuration file "<Emphasis>{directory_path.display().to_string()}</Emphasis>" using "<Emphasis>{config_path.display().to_string()}</Emphasis>" as base path."
-							}
-                    )
-                })?;
-            let mut content = String::new();
-            file.read_to_string(&mut content).map_err(|err| {
-                CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
-                    markup!{
-							"It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
-						}
-                )
-
-            })?;
-            let deserialized = deserialize_from_json_str::<Configuration>(
-                content.as_str(),
-                JsonParserOptions::default(),
-                "",
-            );
-            deserialized_configurations.push(deserialized)
-        }
-        Ok(deserialized_configurations)
-    }
-
     /// Return the path of the **directory** where the configuration is
     pub fn directory_path(&self) -> Option<&Path> {
         self.directory_path.as_deref()
@@ -538,48 +429,6 @@ impl LoadedConfiguration {
     /// It return an iterator over the diagnostics emitted during the resolution of the configuration file
     pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
         ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
-    }
-
-    /// Checks for the presence of deprecated fields and updates the
-    /// configuration to apply them to the new schema.
-    fn migrate_deprecated_fields(&mut self) {
-        let config = &mut self.configuration;
-
-        // TODO: remove in biome 2.0
-        if let Some(formatter) = config.css.as_mut().and_then(|css| css.formatter.as_mut()) {
-            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
-                formatter.indent_width = formatter.indent_size;
-            }
-        }
-
-        // TODO: remove in biome 2.0
-        if let Some(formatter) = config.formatter.as_mut() {
-            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
-                formatter.indent_width = formatter.indent_size;
-            }
-        }
-
-        // TODO: remove in biome 2.0
-        if let Some(formatter) = config
-            .javascript
-            .as_mut()
-            .and_then(|js| js.formatter.as_mut())
-        {
-            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
-                formatter.indent_width = formatter.indent_size;
-            }
-        }
-
-        // TODO: remove in biome 2.0
-        if let Some(formatter) = config
-            .json
-            .as_mut()
-            .and_then(|json| json.formatter.as_mut())
-        {
-            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
-                formatter.indent_width = formatter.indent_size;
-            }
-        }
     }
 }
 
@@ -615,28 +464,209 @@ impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
 
 impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
 
-impl From<Option<ConfigurationPayload>> for LoadedConfiguration {
-    fn from(value: Option<ConfigurationPayload>) -> Self {
-        if let Some(value) = value {
-            let ConfigurationPayload {
-                configuration_directory_path,
-                configuration_file_path,
-                deserialized,
-            } = value;
-            let (configuration, diagnostics) = deserialized.consume();
-            LoadedConfiguration {
-                configuration: configuration.unwrap_or_default(),
-                diagnostics: diagnostics
-                    .into_iter()
-                    .map(|diagnostic| {
-                        diagnostic.with_file_path(configuration_file_path.display().to_string())
-                    })
-                    .collect(),
-                directory_path: Some(configuration_directory_path),
-                file_path: Some(configuration_file_path),
-            }
-        } else {
-            LoadedConfiguration::default()
+impl LoadedConfiguration {
+    fn try_from_payload(
+        value: Option<ConfigurationPayload>,
+        fs: &DynRef<'_, dyn FileSystem>,
+    ) -> Result<Self, WorkspaceError> {
+        let Some(value) = value else {
+            return Ok(LoadedConfiguration::default());
+        };
+
+        let ConfigurationPayload {
+            configuration_directory_path,
+            configuration_file_path,
+            deserialized,
+        } = value;
+        let (partial_configuration, mut diagnostics) = deserialized.consume();
+
+        Ok(Self {
+            configuration: match partial_configuration {
+                Some(mut partial_configuration) => {
+                    partial_configuration.apply_extends(
+                        fs,
+                        &configuration_file_path,
+                        &configuration_directory_path,
+                        &mut diagnostics,
+                    )?;
+                    partial_configuration.migrate_deprecated_fields();
+                    partial_configuration
+                }
+                None => PartialConfiguration::default(),
+            },
+            diagnostics: diagnostics
+                .into_iter()
+                .map(|diagnostic| {
+                    diagnostic.with_file_path(configuration_file_path.display().to_string())
+                })
+                .collect(),
+            directory_path: Some(configuration_directory_path),
+            file_path: Some(configuration_file_path),
+        })
+    }
+}
+
+impl PartialConfiguration {
+    /// Mutates the configuration so that any fields that have not been configured explicitly are
+    /// filled in with their values from configs listed in the `extends` field.
+    ///
+    /// The `extends` configs are applied from left to right.
+    ///
+    /// If a configuration can't be resolved from the file system, the operation will fail.
+    fn apply_extends(
+        &mut self,
+        fs: &DynRef<'_, dyn FileSystem>,
+        file_path: &Path,
+        directory_path: &Path,
+        diagnostics: &mut Vec<Error>,
+    ) -> Result<(), WorkspaceError> {
+        let deserialized = self.deserialize_extends(fs, directory_path)?;
+        let (configurations, errors): (Vec<_>, Vec<_>) = deserialized
+            .into_iter()
+            .map(|d| d.consume())
+            .map(|(config, diagnostics)| (config.unwrap_or_default(), diagnostics))
+            .unzip();
+
+        let extended_configuration = configurations.into_iter().reduce(
+            |mut previous_configuration, current_configuration| {
+                previous_configuration.merge_with(current_configuration);
+                previous_configuration
+            },
+        );
+        if let Some(mut extended_configuration) = extended_configuration {
+            // We swap them to avoid having to clone `self.configuration` to merge it.
+            std::mem::swap(self, &mut extended_configuration);
+            self.merge_with(extended_configuration)
         }
+
+        diagnostics.extend(
+            errors
+                .into_iter()
+                .flatten()
+                .map(|diagnostic| diagnostic.with_file_path(file_path.display().to_string()))
+                .collect::<Vec<_>>(),
+        );
+
+        Ok(())
+    }
+
+    /// It attempts to deserialize all the configuration files that were specified in the `extends` property
+    fn deserialize_extends(
+        &mut self,
+        fs: &DynRef<'_, dyn FileSystem>,
+        directory_path: &Path,
+    ) -> Result<Vec<Deserialized<PartialConfiguration>>, WorkspaceError> {
+        let Some(extends) = &self.extends else {
+            return Ok(Vec::new());
+        };
+
+        let mut deserialized_configurations = vec![];
+        for path in extends.iter() {
+            let config_path = directory_path.join(path);
+            let mut file = fs
+                .open_with_options(config_path.as_path(), OpenOptions::default().read(true))
+                .map_err(|err| {
+                    CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
+                        markup!{
+                            "Biome tried to load the configuration file "<Emphasis>{directory_path.display().to_string()}</Emphasis>" using "<Emphasis>{config_path.display().to_string()}</Emphasis>" as base path."
+                        }
+                    )
+                })?;
+            let mut content = String::new();
+            file.read_to_string(&mut content).map_err(|err| {
+                CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
+                    markup!{
+                        "It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
+                    }
+                )
+
+            })?;
+            let deserialized = deserialize_from_json_str::<PartialConfiguration>(
+                content.as_str(),
+                JsonParserOptions::default(),
+                "",
+            );
+            deserialized_configurations.push(deserialized)
+        }
+        Ok(deserialized_configurations)
+    }
+
+    /// Checks for the presence of deprecated fields and updates the
+    /// configuration to apply them to the new schema.
+    fn migrate_deprecated_fields(&mut self) {
+        // TODO: remove in biome 2.0
+        if let Some(formatter) = self.css.as_mut().and_then(|css| css.formatter.as_mut()) {
+            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
+                formatter.indent_width = formatter.indent_size;
+            }
+        }
+
+        // TODO: remove in biome 2.0
+        if let Some(formatter) = self.formatter.as_mut() {
+            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
+                formatter.indent_width = formatter.indent_size;
+            }
+        }
+
+        // TODO: remove in biome 2.0
+        if let Some(formatter) = self
+            .javascript
+            .as_mut()
+            .and_then(|js| js.formatter.as_mut())
+        {
+            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
+                formatter.indent_width = formatter.indent_size;
+            }
+        }
+
+        // TODO: remove in biome 2.0
+        if let Some(formatter) = self.json.as_mut().and_then(|json| json.formatter.as_mut()) {
+            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
+                formatter.indent_width = formatter.indent_size;
+            }
+        }
+    }
+
+    /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
+    /// VCS root directory and the `.gitignore` file.
+    ///
+    /// ## Returns
+    ///
+    /// A tuple with VCS root folder and the contents of the `.gitignore` file
+    pub fn retrieve_gitignore_matches(
+        &self,
+        file_system: &DynRef<'_, dyn FileSystem>,
+        vcs_base_path: Option<&Path>,
+    ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError> {
+        let Some(vcs) = &self.vcs else {
+            return Ok((None, vec![]));
+        };
+        if vcs.is_enabled() {
+            let vcs_base_path = match (vcs_base_path, &vcs.root) {
+                (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
+                (None, Some(root)) => PathBuf::from(root),
+                (Some(vcs_base_path), None) => PathBuf::from(vcs_base_path),
+                (None, None) => return Err(WorkspaceError::vcs_disabled()),
+            };
+            if let Some(client_kind) = &vcs.client_kind {
+                if !vcs.ignore_file_disabled() {
+                    let result = file_system
+                        .auto_search(vcs_base_path, &[client_kind.ignore_file()], false)
+                        .map_err(WorkspaceError::from)?;
+
+                    if let Some(result) = result {
+                        return Ok((
+                            Some(result.directory_path),
+                            result
+                                .content
+                                .lines()
+                                .map(String::from)
+                                .collect::<Vec<String>>(),
+                        ));
+                    }
+                }
+            }
+        }
+        Ok((None, vec![]))
     }
 }

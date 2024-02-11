@@ -297,6 +297,7 @@
 			}
 		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
+		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -921,7 +922,6 @@
 				},
 				"maxSize": {
 					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
-					"default": null,
 					"type": ["integer", "null"],
 					"format": "uint64",
 					"minimum": 1.0
@@ -933,10 +933,16 @@
 			"description": "Generic options applied to all files",
 			"type": "object",
 			"properties": {
-				"enabled": { "default": true, "type": ["boolean", "null"] },
+				"attributePosition": {
+					"description": "The attribute position style. By default auto.",
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
+				"enabled": { "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
-					"default": false,
 					"type": ["boolean", "null"]
 				},
 				"ignore": {
@@ -949,14 +955,12 @@
 				},
 				"indentSize": {
 					"description": "The size of the indentation, 2 by default (deprecated, use `indent-width`)",
-					"default": 2,
 					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 0.0
 				},
 				"indentStyle": {
 					"description": "The indent style.",
-					"default": "tab",
 					"anyOf": [
 						{ "$ref": "#/definitions/PlainIndentStyle" },
 						{ "type": "null" }
@@ -964,19 +968,16 @@
 				},
 				"indentWidth": {
 					"description": "The size of the indentation, 2 by default",
-					"default": 2,
 					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 0.0
 				},
 				"lineEnding": {
 					"description": "The type of line ending.",
-					"default": "lf",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
-					"default": 80,
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				}
 			},
@@ -1054,6 +1055,13 @@
 					"description": "Whether to add non-necessary parentheses to arrow functions. Defaults to \"always\".",
 					"anyOf": [
 						{ "$ref": "#/definitions/ArrowParentheses" },
+						{ "type": "null" }
+					]
+				},
+				"attributePosition": {
+					"description": "The attribute position style in JavaScript code. Defaults to auto.",
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
 						{ "type": "null" }
 					]
 				},
@@ -1240,7 +1248,6 @@
 			"properties": {
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
-					"default": true,
 					"type": ["boolean", "null"]
 				},
 				"ignore": {
@@ -1253,7 +1260,6 @@
 				},
 				"rules": {
 					"description": "List of rules",
-					"default": { "recommended": true },
 					"anyOf": [{ "$ref": "#/definitions/Rules" }, { "type": "null" }]
 				}
 			},
@@ -1281,6 +1287,13 @@
 				"all": {
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
+				},
+				"noConsole": {
+					"description": "Disallow the use of console.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"noDuplicateJsonKeys": {
 					"description": "Disallow two keys with the same name inside a JSON object.",
@@ -1340,6 +1353,20 @@
 				},
 				"noNodejsModules": {
 					"description": "Forbid the use of Node.js builtin modules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReExportAll": {
+					"description": "Avoid re-export all",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRestrictedImports": {
+					"description": "Disallow specified modules when loaded by import or require.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1482,7 +1509,6 @@
 			"properties": {
 				"enabled": {
 					"description": "Enables the organization of imports",
-					"default": true,
 					"type": ["boolean", "null"]
 				},
 				"ignore": {
@@ -1499,6 +1525,14 @@
 		"OverrideFormatterConfiguration": {
 			"type": "object",
 			"properties": {
+				"attributePosition": {
+					"description": "The attribute position style.",
+					"default": null,
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": { "default": null, "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
@@ -1685,6 +1719,10 @@
 					"allOf": [{ "$ref": "#/definitions/RestrictedGlobalsOptions" }]
 				},
 				{
+					"description": "Options for `noRestrictedImports` rule",
+					"allOf": [{ "$ref": "#/definitions/RestrictedImportsOptions" }]
+				},
+				{
 					"description": "Options for `useValidAriaRole` rule",
 					"allOf": [{ "$ref": "#/definitions/ValidAriaRoleOptions" }]
 				},
@@ -1705,6 +1743,19 @@
 					"description": "A list of names that should trigger the rule",
 					"type": "array",
 					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"RestrictedImportsOptions": {
+			"description": "Options for the rule `noRestrictedImports`.",
+			"type": "object",
+			"required": ["paths"],
+			"properties": {
+				"paths": {
+					"description": "A list of names that should trigger the rule",
+					"type": "object",
+					"additionalProperties": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
@@ -2059,7 +2110,7 @@
 					"type": ["boolean", "null"]
 				},
 				"noApproximativeNumericConstant": {
-					"description": "Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.",
+					"description": "Use standard constants instead of approximated literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

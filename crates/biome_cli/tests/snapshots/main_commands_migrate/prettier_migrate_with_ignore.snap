@@ -1,0 +1,73 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.prettierignore`
+
+```prettierignore
+
+dist/**
+
+node_modules/**
+
+# I am a comment
+generated/*.spec.js
+
+```
+
+## `.prettierrc`
+
+```prettierrc
+{ "useTabs": false, "semi": true, "singleQuote": true }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "formatter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "formatWithErrors":·false,
+       5 │ + → → "indentStyle":·"space",
+       6 │ + → → "indentWidth":·2,
+       7 │ + → → "lineEnding":·"lf",
+       8 │ + → → "lineWidth":·80,
+       9 │ + → → "attributePosition":·"auto",
+      10 │ + → → "ignore":·["dist/**",·"node_modules/**",·"generated/*.spec.js"]
+      11 │ + → },
+      12 │ + → "linter":·{·"enabled":·true·},
+      13 │ + → "javascript":·{
+      14 │ + → → "formatter":·{
+      15 │ + → → → "jsxQuoteStyle":·"double",
+      16 │ + → → → "quoteProperties":·"asNeeded",
+      17 │ + → → → "trailingComma":·"all",
+      18 │ + → → → "semicolons":·"always",
+      19 │ + → → → "arrowParentheses":·"always",
+      20 │ + → → → "bracketSpacing":·true,
+      21 │ + → → → "bracketSameLine":·false,
+      22 │ + → → → "quoteStyle":·"single",
+      23 │ + → → → "attributePosition":·"auto"
+      24 │ + → → }
+      25 │ + → }
+      26 │ + }
+      27 │ + 
+  
+
+```
+
+```block
+Run the command with the option --write to apply the changes.
+```
+
+

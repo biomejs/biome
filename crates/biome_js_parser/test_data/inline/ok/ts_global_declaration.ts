@@ -3,3 +3,10 @@ declare module "./test" {
      let VERSION: string;
  }
 }
+declare module "foo" {
+ global
+ { }
+}
+declare global {}
+declare global
+{ }

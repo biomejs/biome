@@ -4,7 +4,7 @@ use crate::syntax::at_rule::parse_error::{
     expected_any_page_at_rule_item, expected_page_selector, expected_page_selector_pseudo,
 };
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
-use crate::syntax::blocks::{parse_block_body, parse_or_recover_declaration_or_rule_list_block};
+use crate::syntax::blocks::{parse_block_body, parse_or_recover_declaration_or_at_rule_list_block};
 use crate::syntax::parse_error::expected_block;
 use crate::syntax::{
     is_at_identifier, parse_custom_identifier_with_keywords, parse_declaration_with_semicolon,
@@ -253,7 +253,7 @@ pub(crate) fn parse_margin_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![@]);
     p.bump_ts(PAGE_MARGIN_AT_RULE_NAME_SET);
 
-    if parse_or_recover_declaration_or_rule_list_block(p).is_err() {
+    if parse_or_recover_declaration_or_at_rule_list_block(p).is_err() {
         return Present(m.complete(p, CSS_BOGUS_AT_RULE));
     };
 

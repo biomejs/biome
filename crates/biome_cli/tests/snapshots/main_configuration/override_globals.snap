@@ -1,0 +1,81 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "noUndeclaredVariables": "error"
+      }
+    }
+  },
+  "javascript": {
+    "globals": ["React"]
+  },
+  "overrides": [
+    {
+      "include": ["tests"],
+      "javascript": {
+        "globals": ["test", "it"]
+      }
+    }
+  ]
+}
+```
+
+## `tests/test.js`
+
+```js
+test("globals", () => {
+    it("uses React", () => {
+        React.useMemo();
+    });
+});
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+tests/test.js:3:9 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The React variable is undeclared
+  
+    1 │ test("globals", () => {
+    2 │     it("uses React", () => {
+  > 3 │         React.useMemo();
+      │         ^^^^^
+    4 │     });
+    5 │ });
+  
+
+```
+
+```block
+tests/test.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file contains diagnostics that needs to be addressed.
+  
+
+```
+
+```block
+Checked 1 file(s) in <TIME>
+```
+
+

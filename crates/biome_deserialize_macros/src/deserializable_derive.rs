@@ -78,7 +78,6 @@ impl DeriveInput {
 
                     DeserializableData::Struct(DeserializableStructData {
                         fields,
-                        from_none: attrs.from_none,
                         with_validator: attrs.with_validator,
                     })
                 } else if data.fields.len() == 1 {
@@ -123,7 +122,6 @@ pub struct DeserializableNewtypeData {
 #[derive(Debug)]
 pub struct DeserializableStructData {
     fields: Vec<DeserializableFieldData>,
-    from_none: bool,
     with_validator: bool,
 }
 
@@ -396,11 +394,6 @@ fn generate_deserializable_struct(
     };
 
     let visitor_ident = Ident::new(&format!("{ident}Visitor"), Span::call_site());
-    let result_init = if data.from_none {
-        quote! { biome_deserialize::NoneState::none() }
-    } else {
-        quote! { Self::Output::default() }
-    };
 
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
@@ -427,7 +420,7 @@ fn generate_deserializable_struct(
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 use biome_deserialize::{Deserializable, DeserializationDiagnostic, Text};
-                let mut result: Self::Output = #result_init;
+                let mut result: Self::Output = Self::Output::default();
                 for (key, value) in members.flatten() {
                     let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                         continue;

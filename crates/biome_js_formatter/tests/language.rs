@@ -1,5 +1,6 @@
 use biome_formatter::{
-    FormatContext, FormatResult, Formatted, IndentStyle, LineEnding, LineWidth, Printed, QuoteStyle,
+    AttributePosition, FormatContext, FormatResult, Formatted, IndentStyle, LineEnding, LineWidth,
+    Printed, QuoteStyle,
 };
 use biome_formatter_test::TestFormatLanguage;
 use biome_js_formatter::context::trailing_comma::TrailingComma;
@@ -133,6 +134,21 @@ impl From<JsSerializableQuoteStyle> for QuoteStyle {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
+pub enum JsSerializableAttributePosition {
+    Auto,
+    Multiline,
+}
+
+impl From<JsSerializableAttributePosition> for AttributePosition {
+    fn from(test: JsSerializableAttributePosition) -> Self {
+        match test {
+            JsSerializableAttributePosition::Auto => AttributePosition::Auto,
+            JsSerializableAttributePosition::Multiline => AttributePosition::Multiline,
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 pub enum JsSerializableQuoteProperties {
     AsNeeded,
     Preserve,
@@ -231,6 +247,9 @@ pub struct JsSerializableFormatOptions {
 
     /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
     pub bracket_same_line: Option<bool>,
+
+    /// Attribute position style. Defaults to auto
+    pub attribute_position: Option<JsSerializableAttributePosition>,
 }
 
 impl JsSerializableFormatOptions {
@@ -279,6 +298,10 @@ impl JsSerializableFormatOptions {
             .with_bracket_same_line(
                 self.bracket_same_line
                     .map_or_else(BracketSameLine::default, |value| value.into()),
+            )
+            .with_attribute_position(
+                self.attribute_position
+                    .map_or_else(AttributePosition::default, |value| value.into()),
             )
     }
 }

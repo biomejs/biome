@@ -5,7 +5,7 @@ category: reference
 description: How to customize and configure Biome with biome.json.
 ---
 
-import LintGroups from "@src/components/generated/Groups.astro";
+import LintGroups from "@/components/generated/Groups.astro";
 
 {/** Make sure to update the redirect in `static/_redirects` when changing the configuration title --> **/}
 
@@ -454,18 +454,6 @@ The type of line ending.
 How many characters can be written on a single line.
 
 > Default: `80`
-
-### `formatter.bracketSameLine`
-
-Choose whether the ending `>` of a multi-line JSX element should be on the last attribute line or not
-
-> Default: false
-
-### `formatter.bracketSpacing`
-
-Choose whether spaces should be added between brackets and inner values
-
-> Default: true
 
 ## `organizeImports`
 

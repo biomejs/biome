@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: noExplicitAny.ts
+---
+# Input
+```ts
+export function test(arg: any) {
+  const a: any = arg;
+  return { a };
+}
+```
+
+# Diagnostics
+```
+noExplicitAny.ts:1:27 lint/suspicious/noExplicitAny  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+  > 1 │ export function test(arg: any) {
+      │                           ^^^
+    2 │   const a: any = arg;
+    3 │   return { a };
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+  i Safe fix: Suppress rule lint/suspicious/noExplicitAny
+  
+      1 │ + //·biome-ignore·lint/suspicious/noExplicitAny:·<explanation>
+    1 2 │   export function test(arg: any) {
+    2 3 │     const a: any = arg;
+  
+
+```
+
+```
+noExplicitAny.ts:2:12 lint/suspicious/noExplicitAny  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    1 │ export function test(arg: any) {
+  > 2 │   const a: any = arg;
+      │            ^^^
+    3 │   return { a };
+    4 │ }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+  i Safe fix: Suppress rule lint/suspicious/noExplicitAny
+  
+    1 1 │   export function test(arg: any) {
+    2   │ - ··const·a:·any·=·arg;
+      2 │ + ··//·biome-ignore·lint/suspicious/noExplicitAny:·<explanation>
+      3 │ + ··const·a:·any·=·arg;
+    3 4 │     return { a };
+    4 5 │   }
+  
+
+```
+
+

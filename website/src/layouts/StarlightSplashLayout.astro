@@ -4,84 +4,84 @@ import type { LocaleData } from "@astrojs/starlight/utils/slugs";
 import Page from "@astrojs/starlight/components/Page.astro";
 
 export interface Props {
-  title: string;
-  description: string;
-  slug: string;
-  head?: Array<{
-    tag: string;
-    attrs?: Record<string, string | boolean | undefined>;
-    content?: string;
-  }>;
-  editUrl?: string;
+	title: string;
+	description: string;
+	slug: string;
+	head?: Array<{
+		tag: string;
+		attrs?: Record<string, string | boolean | undefined>;
+		content?: string;
+	}>;
+	editUrl?: string;
 }
 
 function getPageProps({ title, description, slug, head = [], editUrl }: Props) {
-  const entryMeta = { dir: "ltr", lang: "en", locale: undefined } as LocaleData;
+	const entryMeta = { dir: "ltr", lang: "en", locale: undefined } as LocaleData;
 
-  return {
-    ...entryMeta,
-    editUrl: editUrl ? new URL(editUrl) : undefined,
-    entry: {
-      data: {
-        head: [
-          {
-            tag: "title",
-            content: `${title} | Biome`,
-          },
-          ...head,
-        ],
-        pagefind: false,
-        title,
-        description,
-        template: "splash",
-      },
-      slug,
-    },
-    entryMeta,
-    hasSidebar: true,
-    headings: [],
-    id: slug,
-    lastUpdated: undefined,
-    pagination: {
-      next: undefined,
-      prev: undefined,
-    },
-    sidebar: [
-      {
-        type: "link",
-        label: "Docs",
-        href: "/guides/getting-started",
-        isCurrent: Astro.url.pathname.includes("/guides/getting-started"),
-        attrs: {
-          class: "",
-        },
-      },
-      {
-        type: "link",
-        label: "Blog",
-        href: "/blog",
-        isCurrent: Astro.url.pathname.includes("/blog"),
-        attrs: {
-          class: "",
-        },
-      },
-      {
-        type: "link",
-        label: "Playground",
-        href: "/playground",
-        isCurrent: Astro.url.pathname.includes("/playground"),
-        attrs: {
-          class: "",
-        },
-      },
-    ],
-    slug,
-    toc: {
-      items: [],
-      maxHeadingLevel: 0,
-      minHeadingLevel: 0,
-    },
-  };
+	return {
+		...entryMeta,
+		editUrl: editUrl ? new URL(editUrl) : undefined,
+		entry: {
+			data: {
+				head: [
+					{
+						tag: "title",
+						content: `${title} | Biome`,
+					},
+					...head,
+				],
+				pagefind: false,
+				title,
+				description,
+				template: "splash",
+			},
+			slug,
+		},
+		entryMeta,
+		hasSidebar: true,
+		headings: [],
+		id: slug,
+		lastUpdated: undefined,
+		pagination: {
+			next: undefined,
+			prev: undefined,
+		},
+		sidebar: [
+			{
+				type: "link",
+				label: "Docs",
+				href: "/guides/getting-started",
+				isCurrent: Astro.url.pathname.includes("/guides/getting-started"),
+				attrs: {
+					class: "",
+				},
+			},
+			{
+				type: "link",
+				label: "Blog",
+				href: "/blog",
+				isCurrent: Astro.url.pathname.includes("/blog"),
+				attrs: {
+					class: "",
+				},
+			},
+			{
+				type: "link",
+				label: "Playground",
+				href: "/playground",
+				isCurrent: Astro.url.pathname.includes("/playground"),
+				attrs: {
+					class: "",
+				},
+			},
+		],
+		slug,
+		toc: {
+			items: [],
+			maxHeadingLevel: 0,
+			minHeadingLevel: 0,
+		},
+	};
 }
 
 const pageProps = getPageProps(Astro.props);

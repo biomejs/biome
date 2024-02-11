@@ -8,9 +8,9 @@ use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
-use biome_fs::{BIOME_JSON, ROME_JSON};
+use biome_fs::{ConfigName, FileSystem, OsFileSystem, ROME_JSON};
 use biome_service::workspace::{RageEntry, RageParams, RageResult};
-use biome_service::{workspace, Workspace};
+use biome_service::{workspace, DynRef, Workspace};
 use futures::future::ready;
 use futures::FutureExt;
 use rustc_hash::FxHashMap;
@@ -270,7 +270,7 @@ impl LanguageServer for LSPServer {
         Ok(init)
     }
 
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "trace", skip(self))]
     async fn initialized(&self, params: InitializedParams) {
         let _ = params;
 
@@ -297,16 +297,16 @@ impl LanguageServer for LSPServer {
         Ok(())
     }
 
-    /// Called when the user changed the editor settings.
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "trace", skip(self))]
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
         let _ = params;
+        self.session.load_workspace_settings().await;
         self.session.load_extension_settings().await;
         self.setup_capabilities().await;
         self.session.update_all_diagnostics().await;
     }
 
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "trace", skip(self))]
     async fn did_change_watched_files(&self, params: DidChangeWatchedFilesParams) {
         let file_paths = params
             .changes
@@ -320,7 +320,8 @@ impl LanguageServer for LSPServer {
                         let possible_rome_json = file_path.strip_prefix(&base_path);
                         if let Ok(possible_rome_json) = possible_rome_json {
                             if possible_rome_json.display().to_string() == ROME_JSON
-                                || possible_rome_json.display().to_string() == BIOME_JSON
+                                || ConfigName::file_names()
+                                    .contains(&&*possible_rome_json.display().to_string())
                             {
                                 self.session.load_workspace_settings().await;
                                 self.setup_capabilities().await;
@@ -510,8 +511,16 @@ impl ServerFactory {
         }
     }
 
-    /// Create a new [ServerConnection] from this factory
     pub fn create(&self, config_path: Option<PathBuf>) -> ServerConnection {
+        self.create_with_fs(config_path, DynRef::Owned(Box::<OsFileSystem>::default()))
+    }
+
+    /// Create a new [ServerConnection] from this factory
+    pub fn create_with_fs(
+        &self,
+        config_path: Option<PathBuf>,
+        fs: DynRef<'static, dyn FileSystem>,
+    ) -> ServerConnection {
         let workspace = self
             .workspace
             .clone()
@@ -520,8 +529,13 @@ impl ServerFactory {
         let session_key = SessionKey(self.next_session_key.fetch_add(1, Ordering::Relaxed));
 
         let mut builder = LspService::build(move |client| {
-            let mut session =
-                Session::new(session_key, client, workspace, self.cancellation.clone());
+            let mut session = Session::new(
+                session_key,
+                client,
+                workspace,
+                self.cancellation.clone(),
+                fs,
+            );
             if let Some(path) = config_path {
                 session.set_config_path(path);
             }
