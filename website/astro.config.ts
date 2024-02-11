@@ -1,4 +1,3 @@
-import path from "path";
 import { netlifyStatic } from "@astrojs/netlify";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
@@ -8,11 +7,6 @@ import { escape as htmlEscape } from "html-escaper";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import remarkToc from "remark-toc";
-
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const anchorLinkIcon = h(
 	"span",
@@ -412,7 +406,7 @@ export default defineConfig({
 	vite: {
 		resolve: {
 			alias: {
-				"@": path.resolve(__dirname, "./src"),
+				"@": new URL("./src", import.meta.url).pathname,
 			},
 		},
 		plugins: [],
