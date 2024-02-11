@@ -1,8 +1,9 @@
 ---
-import InlineSVG from "@src/components/InlineSVG.astro";
+import InlineSVG from "@/components/InlineSVG.astro";
 ---
+
 <script>
-  import "@src/frontend-scripts/package-manager-commands"
+  import "@/frontend-scripts/package-manager-commands";
 </script>
 
 <ul class="package-manager-selector">
@@ -23,6 +24,7 @@ import InlineSVG from "@src/components/InlineSVG.astro";
     <span>bun</span>
   </li>
 </ul>
+
 
 <pre data-name="npm" class="package-manager-command language-shellsession active"><code>{Astro.props.npx ? "npx" : "npm"} {Astro.props.npx ?? Astro.props.npm ?? Astro.props.command}</code><button><InlineSVG src="copy-icon" /><InlineSVG src="tick-icon" /></button></pre>
 <pre data-name="yarn" class="package-manager-command language-shellsession"><code>yarn {Astro.props.yarn ?? Astro.props.command}</code><button><InlineSVG src="copy-icon" /><InlineSVG src="tick-icon" /></button></pre>

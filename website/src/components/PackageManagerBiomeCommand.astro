@@ -1,5 +1,5 @@
 ---
-import InlineSVG from "@src/components/InlineSVG.astro";
+import InlineSVG from "@/components/InlineSVG.astro";
 interface Props {
 	command: string;
 }
@@ -7,32 +7,34 @@ interface Props {
 const { command } = Astro.props;
 const biome = "@biomejs/biome";
 ---
+
 <script>
-	import "@src/frontend-scripts/package-manager-commands"
+  import "@/frontend-scripts/package-manager-commands";
 </script>
 
 <ul class="package-manager-selector">
-	<li data-name="npm" class="active">
-		<InlineSVG src="npm" />
-		<span>npm</span>
-	</li>
-	<li data-name="yarn">
-		<InlineSVG src="yarn" />
-		<span>yarn</span>
-	</li>
-	<li data-name="pnpm">
-		<InlineSVG src="pnpm" />
-		<span>pnpm</span>
-	</li>
-	<li data-name="bun">
-		<InlineSVG src="bun" />
-		<span>bun</span>
-	</li>
-	<li data-name="deno">
-		<InlineSVG src="deno" />
-		<span>deno</span>
-	</li>
+  <li data-name="npm" class="active">
+    <InlineSVG src="npm" />
+    <span>npm</span>
+  </li>
+  <li data-name="yarn">
+    <InlineSVG src="yarn" />
+    <span>yarn</span>
+  </li>
+  <li data-name="pnpm">
+    <InlineSVG src="pnpm" />
+    <span>pnpm</span>
+  </li>
+  <li data-name="bun">
+    <InlineSVG src="bun" />
+    <span>bun</span>
+  </li>
+  <li data-name="deno">
+    <InlineSVG src="deno" />
+    <span>deno</span>
+  </li>
 </ul>
+
 
 <pre data-name="npm" class="package-manager-command language-shellsession active"><code>npx {biome} {command}</code><button><InlineSVG src="copy-icon" /><InlineSVG src="tick-icon" /></button></pre>
 <pre data-name="yarn" class="package-manager-command language-shellsession"><code>yarn dlx {biome} {command}</code><button><InlineSVG src="copy-icon" /><InlineSVG src="tick-icon" /></button></pre>

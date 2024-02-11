@@ -1,8 +1,8 @@
+import CodeMirror from "@/playground/CodeMirror";
+import Collapsible from "@/playground/Collapsible";
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { romeAst as biomeAst } from "codemirror-lang-rome-ast";
 import React from "react";
-import CodeMirror from "../CodeMirror";
-import Collapsible from "../Collapsible";
 
 interface Props {
 	ast: string;

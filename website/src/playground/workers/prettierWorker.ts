@@ -1,8 +1,3 @@
-import * as prettier from "prettier";
-// @ts-expect-error
-import parserBabel from "prettier/esm/parser-babel.mjs";
-// @ts-expect-error
-import pluginEstree from "prettier/plugins/estree.mjs";
 import {
 	ArrowParentheses,
 	AttributePosition,
@@ -15,8 +10,13 @@ import {
 	Semicolons,
 	type TrailingComma,
 	defaultPlaygroundState,
-} from "../types";
-import { isJsonFilename, isTypeScriptFilename } from "../utils";
+} from "@/playground/types";
+import { isJsonFilename, isTypeScriptFilename } from "@/playground/utils";
+import * as prettier from "prettier";
+// @ts-expect-error
+import parserBabel from "prettier/esm/parser-babel.mjs";
+// @ts-expect-error
+import pluginEstree from "prettier/plugins/estree.mjs";
 
 let settings = defaultPlaygroundState.settings;
 

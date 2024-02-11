@@ -1,4 +1,4 @@
-import prettierIcon from "../../assets/svg/prettier-icon-dark.svg";
+import prettierIcon from "@/assets/svg/prettier-icon-dark.svg";
 
 export default function PrettierHeader() {
 	return (

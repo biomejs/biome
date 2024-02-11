@@ -1,8 +1,32 @@
+import CodeMirror from "@/playground/CodeMirror";
+import DiagnosticsPane from "@/playground/components/DiagnosticsPane";
+import Resizable from "@/playground/components/Resizable";
+import SettingsPanel from "@/playground/components/SettingsPanel";
+import Tabs from "@/playground/components/Tabs";
+import ControlFlowTab from "@/playground/tabs/ControlFlowTab";
+import DiagnosticsConsoleTab from "@/playground/tabs/DiagnosticsConsoleTab";
+import DiagnosticsListTab from "@/playground/tabs/DiagnosticsListTab";
+import FormatterCodeTab from "@/playground/tabs/FormatterCodeTab";
+import FormatterIrTab from "@/playground/tabs/FormatterIrTab";
+import ImportSortingTab from "@/playground/tabs/ImportSortingTab";
+import SettingsTab from "@/playground/tabs/SettingsTab";
+import SyntaxTab from "@/playground/tabs/SyntaxTab";
+import type {
+	BiomeAstSyntacticData,
+	PlaygroundProps,
+} from "@/playground/types";
+import {
+	getCurrentCode,
+	getFileState,
+	isJsonFilename,
+	isJsxFilename,
+	isTypeScriptFilename,
+	useWindowSize,
+} from "@/playground/utils";
 import { javascript } from "@codemirror/lang-javascript";
 import { json } from "@codemirror/lang-json";
 import { EditorSelection } from "@codemirror/state";
 import type { ViewUpdate } from "@codemirror/view";
-import ImportSortingTab from "@src/playground/tabs/ImportSortingTab";
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import * as codeMirrorLangBiomeAst from "codemirror-lang-rome-ast";
 import {
@@ -13,27 +37,6 @@ import {
 	useRef,
 	useState,
 } from "react";
-import CodeMirror from "./CodeMirror";
-import DiagnosticsPane from "./components/DiagnosticsPane";
-import Resizable from "./components/Resizable";
-import SettingsPanel from "./components/SettingsPanel";
-import Tabs from "./components/Tabs";
-import ControlFlowTab from "./tabs/ControlFlowTab";
-import DiagnosticsConsoleTab from "./tabs/DiagnosticsConsoleTab";
-import DiagnosticsListTab from "./tabs/DiagnosticsListTab";
-import FormatterCodeTab from "./tabs/FormatterCodeTab";
-import FormatterIrTab from "./tabs/FormatterIrTab";
-import SettingsTab from "./tabs/SettingsTab";
-import SyntaxTab from "./tabs/SyntaxTab";
-import type { BiomeAstSyntacticData, PlaygroundProps } from "./types";
-import {
-	getCurrentCode,
-	getFileState,
-	isJsonFilename,
-	isJsxFilename,
-	isTypeScriptFilename,
-	useWindowSize,
-} from "./utils";
 
 export default function PlaygroundLoader({
 	setPlaygroundState,

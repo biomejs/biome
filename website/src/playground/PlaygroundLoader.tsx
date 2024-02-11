@@ -1,12 +1,5 @@
-import {
-	type Dispatch,
-	type SetStateAction,
-	useEffect,
-	useRef,
-	useState,
-} from "react";
-import Playground from "./Playground";
-import LoadingScreen from "./components/LoadingScreen";
+import Playground from "@/playground/Playground";
+import LoadingScreen from "@/playground/components/LoadingScreen";
 import {
 	type ArrowParentheses,
 	type AttributePosition,
@@ -22,7 +15,7 @@ import {
 	defaultPlaygroundState,
 	emptyBiomeOutput,
 	emptyPrettierOutput,
-} from "./types";
+} from "@/playground/types";
 import {
 	createLocalStorage,
 	decodeCode,
@@ -34,7 +27,14 @@ import {
 	isScriptFilename,
 	isTypeScriptFilename,
 	normalizeFilename,
-} from "./utils";
+} from "@/playground/utils";
+import {
+	type Dispatch,
+	type SetStateAction,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 
 function throttle(callback: () => void): () => void {
 	const timeout = setTimeout(callback, 100);
