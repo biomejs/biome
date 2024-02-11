@@ -34,7 +34,7 @@ pub struct LSPServer {
     /// If this is true the server will broadcast a shutdown signal once the
     /// last client disconnected
     stop_on_disconnect: bool,
-    /// This shared flag is set to true once at least one sessions has been
+    /// This shared flag is set to true once at least one session has been
     /// initialized on this server instance
     is_initialized: Arc<AtomicBool>,
 }
@@ -564,11 +564,11 @@ impl ServerFactory {
         builder = builder.custom_method("biome/rage", LSPServer::rage);
 
         workspace_method!(builder, file_features);
-        workspace_method!(builder, project_features);
         workspace_method!(builder, is_path_ignored);
         workspace_method!(builder, update_settings);
-        workspace_method!(builder, project_features);
         workspace_method!(builder, open_file);
+        workspace_method!(builder, open_project);
+        workspace_method!(builder, update_current_project);
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);

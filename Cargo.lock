@@ -840,6 +840,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_project",
  "biome_rowan",
  "biome_service",
  "countme",

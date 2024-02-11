@@ -10,7 +10,7 @@ use crate::settings::{
     SettingsHandle,
 };
 use crate::workspace::{
-    CodeActionsResult, FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult,
+    FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
 };
 use crate::WorkspaceError;
 use biome_analyze::{
@@ -375,8 +375,8 @@ fn lint(params: LintParams) -> LintResults {
             }
         })
 }
-fn code_actions(_: CodeActionsParams) -> CodeActionsResult {
-    CodeActionsResult {
+fn code_actions(_: CodeActionsParams) -> PullActionsResult {
+    PullActionsResult {
         actions: Vec::new(),
     }
 }

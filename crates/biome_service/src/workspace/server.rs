@@ -1,9 +1,9 @@
 use super::{
-    ChangeFileParams, CloseFileParams, CodeActionsResult, FeatureName, FixFileResult,
-    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
-    GetFormatterIRParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
-    OpenProjectParams, PullActionsParams, PullDiagnosticsParams, PullDiagnosticsResult,
-    RenameResult, SupportsFeatureParams, UpdateProjectParams, UpdateSettingsParams,
+    ChangeFileParams, CloseFileParams, FeatureName, FixFileResult, FormatFileParams,
+    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
+    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams, PullActionsParams,
+    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
+    SupportsFeatureParams, UpdateProjectParams, UpdateSettingsParams,
 };
 use crate::file_handlers::{Capabilities, CodeActionsParams, FixAllParams, Language, LintParams};
 use crate::workspace::{
@@ -527,7 +527,7 @@ impl Workspace for WorkspaceServer {
     /// Retrieves the list of code actions available for a given cursor
     /// position within a file
     #[tracing::instrument(level = "trace", skip(self))]
-    fn pull_actions(&self, params: PullActionsParams) -> Result<CodeActionsResult, WorkspaceError> {
+    fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
         let capabilities = self.get_file_capabilities(&params.path);
         let code_actions = capabilities
             .analyzer

@@ -10,7 +10,7 @@ use crate::workspace::OrganizeImportsResult;
 use crate::{
     settings::{FormatSettings, Language, LanguageListSettings, LanguageSettings, SettingsHandle},
     workspace::{
-        CodeAction, CodeActionsResult, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
+        CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
         RenameResult,
     },
     WorkspaceError,
@@ -428,7 +428,7 @@ impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
-fn code_actions(params: CodeActionsParams) -> CodeActionsResult {
+fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let CodeActionsParams {
         parse,
         range,
@@ -474,7 +474,7 @@ fn code_actions(params: CodeActionsParams) -> CodeActionsResult {
             let analyzer_options =
                 compute_analyzer_options(&settings, dependencies, PathBuf::from(path.as_path()));
             let Ok(source_type) = parse.file_source(path) else {
-                return CodeActionsResult { actions: vec![] };
+                return PullActionsResult { actions: vec![] };
             };
 
             analyze(&tree, filter, &analyzer_options, source_type, |signal| {
@@ -491,7 +491,7 @@ fn code_actions(params: CodeActionsParams) -> CodeActionsResult {
                 ControlFlow::<Never>::Continue(())
             });
 
-            CodeActionsResult { actions }
+            PullActionsResult { actions }
         },
     )
 }

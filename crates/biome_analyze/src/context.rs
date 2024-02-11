@@ -15,6 +15,7 @@ where
     bag: &'a ServiceBag,
     services: RuleServiceBag<R>,
     globals: &'a [&'a str],
+    dependencies: &'a [&'a str],
     file_path: &'a Path,
     options: &'a R::Options,
 }
@@ -30,6 +31,7 @@ where
         globals: &'a [&'a str],
         file_path: &'a Path,
         options: &'a R::Options,
+        dependencies: &'a [&'a str],
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
@@ -40,6 +42,7 @@ where
             globals,
             file_path,
             options,
+            dependencies,
         })
     }
 
@@ -96,6 +99,10 @@ where
     /// Checks whether the provided text belongs to globals
     pub fn is_global(&self, text: &str) -> bool {
         self.globals.contains(&text)
+    }
+    /// Checks whether the specifier is a dependency
+    pub fn is_dependency(&self, specifier: &str) -> bool {
+        self.dependencies.contains(&specifier)
     }
 
     /// Returns the source type of the current file

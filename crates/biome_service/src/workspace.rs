@@ -504,7 +504,7 @@ pub struct PullActionsParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct CodeActionsResult {
+pub struct PullActionsResult {
     pub actions: Vec<CodeAction>,
 }
 
@@ -726,7 +726,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Retrieves the list of code actions available for a given cursor
     /// position within a file
-    fn pull_actions(&self, params: PullActionsParams) -> Result<CodeActionsResult, WorkspaceError>;
+    fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
 
     /// Runs the given file through the formatter using the provided options
     /// and returns the resulting source code
@@ -831,7 +831,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
-    pub fn pull_actions(&self, range: TextRange) -> Result<CodeActionsResult, WorkspaceError> {
+    pub fn pull_actions(&self, range: TextRange) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
             path: self.path.clone(),
             range,

@@ -1386,6 +1386,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnusedDependencies": {
+					"description": "Disallow the use of dependencies that aren't specified in the package.json",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [

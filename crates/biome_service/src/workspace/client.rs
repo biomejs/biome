@@ -13,10 +13,10 @@ use std::{
 };
 
 use super::{
-    ChangeFileParams, CloseFileParams, CodeActionsResult, FixFileParams, FixFileResult,
-    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
-    GetFormatterIRParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
-    PullActionsParams, PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
+    ChangeFileParams, CloseFileParams, FixFileParams, FixFileResult, FormatFileParams,
+    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
+    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
+    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
     SupportsFeatureParams, UpdateSettingsParams,
 };
 
@@ -164,7 +164,7 @@ where
         self.request("biome/pull_diagnostics", params)
     }
 
-    fn pull_actions(&self, params: PullActionsParams) -> Result<CodeActionsResult, WorkspaceError> {
+    fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
         self.request("biome/pull_actions", params)
     }
 

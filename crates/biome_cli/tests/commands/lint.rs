@@ -2707,3 +2707,54 @@ fn lint_syntax_rules() {
         result,
     ));
 }
+
+#[test]
+fn no_unused_dependencies() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"	{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "all": false,
+      "nursery": {
+        "noUnusedDependencies": "error"
+      }
+    }
+  }
+}"#;
+
+    let configuration_path = Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let package_json = r#"	{
+  "dependencies": { "react": "latest", "react-dom": "^17.0.0" }
+}"#;
+    let package_json_path = Path::new("package.json");
+    fs.insert(package_json_path.into(), package_json.as_bytes());
+
+    let file_path = Path::new("fix.js");
+    fs.insert(
+        file_path.into(),
+        r#"import "react";
+import "lodash";
+		"#,
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_dependencies",
+        fs,
+        console,
+        result,
+    ));
+}

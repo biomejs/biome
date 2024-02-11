@@ -76,6 +76,14 @@ impl AnalyzerOptions {
             .collect()
     }
 
+    pub fn dependencies(&self) -> Vec<&str> {
+        self.configuration
+            .dependencies
+            .iter()
+            .map(|global| global.as_str())
+            .collect()
+    }
+
     pub fn rule_options<R: 'static>(&self) -> Option<R::Options>
     where
         R: Rule,

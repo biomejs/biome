@@ -347,6 +347,7 @@ where
 {
     fn diagnostic(&self) -> Option<AnalyzerDiagnostic> {
         let globals = self.options.globals();
+        let dependencies = self.options.dependencies();
         let options = self.options.rule_options::<R>().unwrap_or_default();
         let ctx = RuleContext::new(
             &self.query_result,
@@ -355,6 +356,7 @@ where
             &globals,
             &self.options.file_path,
             &options,
+            &dependencies,
         )
         .ok()?;
 
@@ -363,6 +365,8 @@ where
 
     fn actions(&self) -> AnalyzerActionIter<RuleLanguage<R>> {
         let globals = self.options.globals();
+        let dependencies = self.options.dependencies();
+
         let options = self.options.rule_options::<R>().unwrap_or_default();
         let ctx = RuleContext::new(
             &self.query_result,
@@ -371,6 +375,7 @@ where
             &globals,
             &self.options.file_path,
             &options,
+            &dependencies,
         )
         .ok();
         if let Some(ctx) = ctx {
@@ -407,6 +412,7 @@ where
 
     fn transformations(&self) -> AnalyzerTransformationIter<RuleLanguage<R>> {
         let globals = self.options.globals();
+        let dependencies = self.options.dependencies();
         let options = self.options.rule_options::<R>().unwrap_or_default();
         let ctx = RuleContext::new(
             &self.query_result,
@@ -415,6 +421,7 @@ where
             &globals,
             &self.options.file_path,
             &options,
+            &dependencies,
         )
         .ok();
         if let Some(ctx) = ctx {

@@ -7,7 +7,7 @@ pub use crate::file_handlers::astro::ASTRO_FENCE;
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
     settings::SettingsHandle,
-    workspace::{CodeActionsResult, FixFileResult, GetSyntaxTreeResult, RenameResult},
+    workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
     Rules, WorkspaceError,
 };
 use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic, RuleCategories};
@@ -326,7 +326,7 @@ pub(crate) struct CodeActionsParams<'a> {
 }
 
 type Lint = fn(LintParams) -> LintResults;
-type CodeActions = fn(CodeActionsParams) -> CodeActionsResult;
+type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&RomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
 type OrganizeImports = fn(AnyParse) -> Result<OrganizeImportsResult, WorkspaceError>;

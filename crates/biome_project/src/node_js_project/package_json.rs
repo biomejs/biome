@@ -5,9 +5,8 @@ use biome_deserialize::{
     Deserialized, Text, VisitableType,
 };
 use biome_json_syntax::JsonLanguage;
-use biome_text_size::{TextRange, TextSize};
+use biome_text_size::TextRange;
 use rustc_hash::FxHashMap;
-use std::ops::Add;
 
 #[derive(Debug, Default, Clone)]
 pub struct PackageJson {
@@ -38,7 +37,10 @@ impl Dependencies {
 }
 
 #[derive(Debug, Clone)]
-pub struct Version(node_semver::Version);
+pub enum Version {
+    SemVer(node_semver::Version),
+    Literal(String),
+}
 
 impl Deserializable for PackageJson {
     fn deserialize(
@@ -119,22 +121,10 @@ impl Deserializable for Version {
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let range = value.range();
         let value = Text::deserialize(value, name, diagnostics)?;
         match value.text().parse() {
-            Ok(version) => Some(Version(version)),
-            Err(err) => {
-                let (start, end) = err.location();
-                let start_range = range.start();
-                let end_range = range.end();
-                let range = TextRange::new(
-                    start_range.add(TextSize::from(start as u32)),
-                    end_range.add(TextSize::from(end as u32)),
-                );
-                diagnostics
-                    .push(DeserializationDiagnostic::new(err.kind().to_string()).with_range(range));
-                None
-            }
+            Ok(version) => Some(Version::SemVer(version)),
+            Err(_) => Some(Version::Literal(value.text().to_string())),
         }
     }
 }
