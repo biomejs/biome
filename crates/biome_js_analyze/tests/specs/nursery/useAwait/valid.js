@@ -50,10 +50,11 @@ async function wrapperFetchData() {
 	return await fetchDataAsync();
 }
 
-async () => {
-  let sum = 0;
-  for await (const n of [1, 2, 3]) {
+async function forAwaitOf () {
+	let sum = 0;
+	for await (const n of [1, 2, 3]) {
 		sum += n
-  }
-  return sum;
+	}
+	return sum;
 };
+
