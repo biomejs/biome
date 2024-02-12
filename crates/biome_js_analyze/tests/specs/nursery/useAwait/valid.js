@@ -58,3 +58,11 @@ async function forAwaitOf () {
 	return sum;
 };
 
+async function awaitExpressionWithForOf () {
+	let sum = await initialSum();
+	for (const n of [1, 2, 3]) {
+		sum += n
+	}
+	return sum;
+};
+
