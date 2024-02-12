@@ -239,7 +239,9 @@ pub fn is_binding_react_stable(
     model: &SemanticModel,
     stable_config: &FxHashSet<StableReactHookConfiguration>,
 ) -> bool {
-    let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) = binding.declaration()
+    let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) = binding
+        .declaration()
+        .map(|decl| decl.parent_binding_pattern_declaration().unwrap_or(decl))
     else {
         return false;
     };

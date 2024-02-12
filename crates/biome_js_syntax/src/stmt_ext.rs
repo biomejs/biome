@@ -122,10 +122,10 @@ impl AnyJsVariableDeclaration {
         }
     }
 
-    pub fn kind_token(&self) -> Option<SyntaxToken> {
+    pub fn kind_token(&self) -> SyntaxResult<SyntaxToken> {
         match self {
-            AnyJsVariableDeclaration::JsVariableDeclaration(x) => x.kind().ok(),
-            AnyJsVariableDeclaration::JsForVariableDeclaration(x) => x.kind_token().ok(),
+            AnyJsVariableDeclaration::JsVariableDeclaration(x) => x.kind(),
+            AnyJsVariableDeclaration::JsForVariableDeclaration(x) => x.kind_token(),
         }
     }
 }

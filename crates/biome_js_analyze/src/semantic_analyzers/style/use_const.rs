@@ -85,7 +85,7 @@ impl Rule for UseConst {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let declaration = ctx.query();
-        let kind = declaration.kind_token()?;
+        let kind = declaration.kind_token().ok()?;
         let title_end = if state.can_be_const.len() == 1 {
             "a variable which is never re-assigned."
         } else {
@@ -117,7 +117,7 @@ impl Rule for UseConst {
         if state.can_fix {
             let mut batch = ctx.root().begin();
             batch.replace_token(
-                declaration.kind_token()?,
+                declaration.kind_token().ok()?,
                 make::token(JsSyntaxKind::CONST_KW),
             );
             Some(JsRuleAction {

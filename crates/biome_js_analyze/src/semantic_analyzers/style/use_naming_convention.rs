@@ -567,6 +567,7 @@ enum Named {
     LocalLet,
     LocalVar,
     LocalUsing,
+    LocalVariable,
     Namespace,
     ObjectGetter,
     ObjectMethod,
@@ -742,6 +743,13 @@ impl Named {
 
     fn from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<Named> {
         match decl {
+            AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
+            | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+                Self::from_parent_binding_pattern_declaration(decl.parent_binding_pattern_declaration()?)
+            }
             AnyJsBindingDeclaration::JsVariableDeclarator(var) => {
                 Named::from_variable_declarator(var)
             }
@@ -778,6 +786,14 @@ impl Named {
             | AnyJsBindingDeclaration::TsInferType(_)
             | AnyJsBindingDeclaration::TsMappedType(_)
             | AnyJsBindingDeclaration::TsTypeParameter(_) => None,
+        }
+    }
+
+    fn from_parent_binding_pattern_declaration(decl: AnyJsBindingDeclaration) -> Option<Named> {
+        if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = decl {
+            Named::from_variable_declarator(&declarator)
+        } else {
+            Some(Named::LocalVariable)
         }
     }
 
@@ -858,6 +874,7 @@ impl Named {
             | Named::LocalConst
             | Named::LocalLet
             | Named::LocalVar
+            | Named::LocalVariable
             | Named::LocalUsing
             | Named::ObjectGetter
             | Named::ObjectMethod
@@ -918,6 +935,7 @@ impl std::fmt::Display for Named {
             Named::LocalConst => "local const",
             Named::LocalLet => "local let",
             Named::LocalVar => "local var",
+            Named::LocalVariable => "local variable",
             Named::LocalUsing => "local using",
             Named::Namespace => "namespace",
             Named::ObjectGetter => "object getter",

@@ -65,10 +65,10 @@ impl Rule for NoConstAssign {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        let declared_binding = model.binding(node)?;
-        let id_binding = declared_binding.tree();
-        if let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
-            id_binding.declaration()
+        let id_binding = model.binding(node)?.tree();
+        let decl = id_binding.declaration()?;
+        if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
+            decl.parent_binding_pattern_declaration().unwrap_or(decl)
         {
             if declarator.declaration()?.is_const() {
                 return Some(id_binding.range());
@@ -98,14 +98,11 @@ impl Rule for NoConstAssign {
         let node = ctx.query();
         let model = ctx.model();
         let mut mutation = ctx.root().begin();
-
-        let declared_binding = model.binding(node)?;
-
-        if let AnyJsBindingDeclaration::JsVariableDeclarator(possible_declarator) =
-            declared_binding.tree().declaration()?
+        let decl = model.binding(node)?.tree().declaration()?;
+        if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
+            decl.parent_binding_pattern_declaration().unwrap_or(decl)
         {
-            let declaration = possible_declarator.declaration()?;
-            let const_token = declaration.kind_token()?;
+            let const_token = declarator.declaration()?.kind_token().ok()?;
             let let_token = make::token(JsSyntaxKind::LET_KW);
             mutation.replace_token(const_token, let_token);
             return Some(JsRuleAction {
