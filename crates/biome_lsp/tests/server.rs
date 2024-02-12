@@ -2006,6 +2006,112 @@ async fn does_not_format_ignored_files() -> Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "Find a way to retrieve the last notification sent"]
+async fn pull_diagnostics_from_manifest() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create(None).into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    let config = r#"{
+        "linter": {
+            "rules": {
+                "all": false,
+                "nursery": { "noUnusedDependencies": "error" }
+            }
+        }
+    }"#;
+    server
+        .open_named_document(config, url!("biome.json"), "json")
+        .await?;
+
+    let manifest = r#"{
+        "dependencies": { "react": "latest" }
+    }"#;
+    server
+        .open_named_document(manifest, url!("package.json"), "json")
+        .await?;
+
+    server.load_configuration().await?;
+
+    server
+        .open_document(r#"import "lodash"; import "react"; "#)
+        .await?;
+
+    let notification = tokio::select! {
+        msg = receiver.next() => msg,
+        _ = sleep(Duration::from_secs(1)) => {
+            panic!("timed out waiting for the server to send diagnostics")
+        }
+    };
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: url!("document.js"),
+                version: Some(0),
+                diagnostics: vec![lsp::Diagnostic {
+                    range: Range {
+                        start: Position {
+                            line: 0,
+                            character: 5,
+                        },
+                        end: Position {
+                            line: 0,
+                            character: 7,
+                        },
+                    },
+                    severity: Some(lsp::DiagnosticSeverity::ERROR),
+                    code: Some(lsp::NumberOrString::String(String::from(
+                        "lint/suspicious/noDoubleEquals",
+                    ))),
+                    code_description: Some(CodeDescription {
+                        href: Url::parse("https://biomejs.dev/linter/rules/no-double-equals")
+                            .unwrap()
+                    }),
+                    source: Some(String::from("biome")),
+                    message: String::from(
+                        "Use === instead of ==.\n== is only allowed when comparing against `null`",
+                    ),
+                    related_information: Some(vec![lsp::DiagnosticRelatedInformation {
+                        location: lsp::Location {
+                            uri: url!("untitled-1"),
+                            range: Range {
+                                start: Position {
+                                    line: 0,
+                                    character: 5,
+                                },
+                                end: Position {
+                                    line: 0,
+                                    character: 7,
+                                },
+                            },
+                        },
+                        message: String::new(),
+                    }]),
+                    tags: None,
+                    data: None,
+                }],
+            }
+        ))
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn server_shutdown() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create(None).into_inner();
