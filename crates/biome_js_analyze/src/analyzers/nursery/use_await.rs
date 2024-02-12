@@ -75,14 +75,11 @@ impl Visitor for MissingAwaitVisitor {
                         self.stack.push((node.range().start(), false));
                     }
                 }
-                // Check `await` expression
                 if JsAwaitExpression::can_cast(node.kind()) {
                     if let Some((_, has_await)) = self.stack.last_mut() {
                         *has_await = true;
                     }
-                }
-                // Check `for await...of`
-                if let Some(for_of) = JsForOfStatement::cast_ref(node) {
+                } else if let Some(for_of) = JsForOfStatement::cast_ref(node) {
                     if let Some((_, has_await)) = self.stack.last_mut() {
                         *has_await = for_of.await_token().is_some();
                     }
