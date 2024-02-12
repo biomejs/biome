@@ -10,6 +10,7 @@ use biome_aria::{AriaProperties, AriaRoles};
 use biome_diagnostics::{category, Diagnostic, Error as DiagnosticError};
 use biome_js_syntax::suppression::SuppressionDiagnostic;
 use biome_js_syntax::{suppression::parse_suppression_comment, JsFileSource, JsLanguage};
+use biome_project::PackageJson;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::{borrow::Cow, error::Error};
@@ -21,6 +22,7 @@ mod assists;
 mod ast_utils;
 mod control_flow;
 pub mod globals;
+mod manifest_services;
 pub mod options;
 mod react;
 mod registry;
@@ -60,6 +62,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
     source_type: JsFileSource,
+    manifest: Option<PackageJson>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -129,6 +132,9 @@ where
 
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(Arc::new(AriaProperties));
+    if let Some(manifest) = manifest {
+        services.insert_service(Arc::new(manifest));
+    }
     services.insert_service(source_type);
     (
         analyzer.run(AnalyzerContext {
@@ -149,13 +155,22 @@ pub fn analyze<'a, F, B>(
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
     source_type: JsFileSource,
+    manifest: Option<PackageJson>,
     emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
     F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, filter, |_| {}, options, source_type, emit_signal)
+    analyze_with_inspect_matcher(
+        root,
+        filter,
+        |_| {},
+        options,
+        source_type,
+        manifest,
+        emit_signal,
+    )
 }
 
 /// Series of errors encountered when running rules on a file
@@ -273,6 +288,7 @@ mod tests {
             },
             &options,
             JsFileSource::tsx(),
+            None,
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());
@@ -364,6 +380,7 @@ mod tests {
             AnalysisFilter::default(),
             &options,
             JsFileSource::js_module(),
+            None,
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let span = diag.get_span();
@@ -449,6 +466,7 @@ mod tests {
             filter,
             &options,
             JsFileSource::js_module(),
+            None,
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let code = diag.category().unwrap();

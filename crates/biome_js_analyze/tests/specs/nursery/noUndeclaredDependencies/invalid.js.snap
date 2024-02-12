@@ -10,7 +10,7 @@ import "notInstalled";
 
 # Diagnostics
 ```
-invalid.js:1:8 lint/nursery/noUnusedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:8 lint/nursery/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The current dependency isn't specified in your package.json.
   

@@ -1,8 +1,8 @@
 ---
-title: noUnusedDependencies (not released)
+title: noUndeclaredDependencies (not released)
 ---
 
-**Diagnostic Category: `lint/nursery/noUnusedDependencies`**
+**Diagnostic Category: `lint/nursery/noUndeclaredDependencies`**
 
 :::danger
 This rule hasn't been released yet.
@@ -22,7 +22,7 @@ Disallow the use of dependencies that aren't specified in the `package.json`
 import "vite";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUnusedDependencies.js:1:8 <a href="https://biomejs.dev/linter/rules/no-unused-dependencies">lint/nursery/noUnusedDependencies</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noUndeclaredDependencies.js:1:8 <a href="https://biomejs.dev/linter/rules/no-undeclared-dependencies">lint/nursery/noUndeclaredDependencies</a> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The current dependency isn't specified in your package.json.</span>
   

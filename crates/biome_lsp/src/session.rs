@@ -476,7 +476,7 @@ impl Session {
         if let Some(base_path) = base_path {
             let result = self
                 .fs
-                .auto_search(base_path.to_path_buf(), &["package.json"], false);
+                .auto_search(base_path.clone(), &["package.json"], false);
             match result {
                 Ok(result) => {
                     if let Some(result) = result {

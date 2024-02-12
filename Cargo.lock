@@ -465,6 +465,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_json_factory",
  "biome_json_syntax",
+ "biome_project",
  "biome_rowan",
  "biome_test_utils",
  "biome_text_edit",

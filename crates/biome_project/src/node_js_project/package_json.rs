@@ -34,6 +34,10 @@ impl Dependencies {
     pub fn to_keys(&self) -> Vec<String> {
         self.0.keys().cloned().collect()
     }
+
+    pub fn contains(&self, specifier: &str) -> bool {
+        self.0.contains_key(specifier)
+    }
 }
 
 #[derive(Debug, Clone)]

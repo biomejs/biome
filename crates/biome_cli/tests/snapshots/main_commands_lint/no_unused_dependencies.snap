@@ -37,9 +37,9 @@ import "lodash";
 # Termination Message
 
 ```block
-lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some errors were emitted while running checks.
+  × Biome exited because the configuration resulted in errors. Please fix them.
   
 
 
@@ -48,30 +48,54 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-fix.js:2:8 lint/nursery/noUnusedDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+biome.json:7:9 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The current dependency isn't specified in your package.json.
+  × Found an unknown key `noUnusedDependencies`.
   
-    1 │ import "react";
-  > 2 │ import "lodash";
-      │        ^^^^^^^^
-    3 │ 		
+    5 │       "all": false,
+    6 │       "nursery": {
+  > 7 │         "noUnusedDependencies": "error"
+      │         ^^^^^^^^^^^^^^^^^^^^^^
+    8 │       }
+    9 │     }
   
-  i Add the dependency in your manifest.
+  i Accepted keys
+  
+  - recommended
+  - all
+  - noConsole
+  - noDuplicateJsonKeys
+  - noEmptyBlockStatements
+  - noEmptyTypeParameters
+  - noFocusedTests
+  - noGlobalAssign
+  - noGlobalEval
+  - noInvalidUseBeforeDeclaration
+  - noMisleadingCharacterClass
+  - noNodejsModules
+  - noReExportAll
+  - noRestrictedImports
+  - noSkippedTests
+  - noThenProperty
+  - noUndeclaredDependencies
+  - noUnusedImports
+  - noUnusedPrivateClassMembers
+  - noUselessLoneBlockStatements
+  - noUselessTernary
+  - useAwait
+  - useConsistentArrayType
+  - useExportType
+  - useFilenamingConvention
+  - useForOf
+  - useGroupedTypeImport
+  - useImportRestrictions
+  - useImportType
+  - useNodejsImportProtocol
+  - useNumberNamespace
+  - useShorthandFunctionType
+  - useSortedClasses
   
 
-```
-
-```block
-fix.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The file contains diagnostics that needs to be addressed.
-  
-
-```
-
-```block
-Checked 1 file(s) in <TIME>
 ```
 
 

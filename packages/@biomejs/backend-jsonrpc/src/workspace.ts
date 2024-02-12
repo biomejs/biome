@@ -922,7 +922,7 @@ export interface Nursery {
 	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json
 	 */
-	noUnusedDependencies?: RuleConfiguration;
+	noUndeclaredDependencies?: RuleConfiguration;
 	/**
 	 * Disallow unused imports.
 	 */
@@ -1746,7 +1746,7 @@ export type Category =
 	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
-	| "lint/nursery/noUnusedDependencies"
+	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
 	| "lint/nursery/noUselessLoneBlockStatements"

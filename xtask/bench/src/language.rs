@@ -161,11 +161,18 @@ impl Analyze {
                     ..AnalysisFilter::default()
                 };
                 let options = AnalyzerOptions::default();
-                analyze(root, filter, &options, JsFileSource::default(), |event| {
-                    black_box(event.diagnostic());
-                    black_box(event.actions());
-                    ControlFlow::<Never>::Continue(())
-                });
+                analyze(
+                    root,
+                    filter,
+                    &options,
+                    JsFileSource::default(),
+                    None,
+                    |event| {
+                        black_box(event.diagnostic());
+                        black_box(event.actions());
+                        ControlFlow::<Never>::Continue(())
+                    },
+                );
             }
         }
     }

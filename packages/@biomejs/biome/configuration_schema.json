@@ -1386,7 +1386,7 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnusedDependencies": {
+				"noUndeclaredDependencies": {
 					"description": "Disallow the use of dependencies that aren't specified in the package.json",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },

@@ -53,9 +53,6 @@ pub struct AnalyzerConfiguration {
     ///
     /// For example, lint rules should ignore them.
     pub globals: Vec<String>,
-
-    /// A list of dependencies that belong to a project
-    pub dependencies: Vec<String>,
 }
 
 /// A set of information useful to the analyzer infrastructure
@@ -71,14 +68,6 @@ impl AnalyzerOptions {
     pub fn globals(&self) -> Vec<&str> {
         self.configuration
             .globals
-            .iter()
-            .map(|global| global.as_str())
-            .collect()
-    }
-
-    pub fn dependencies(&self) -> Vec<&str> {
-        self.configuration
-            .dependencies
             .iter()
             .map(|global| global.as_str())
             .collect()

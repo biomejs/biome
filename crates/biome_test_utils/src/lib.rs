@@ -40,7 +40,6 @@ pub fn create_analyzer_options(
     let mut analyzer_configuration = AnalyzerConfiguration {
         rules: AnalyzerRules::default(),
         globals: vec![],
-        dependencies: vec![],
     };
     let options_file = input_file.with_extension("options.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
@@ -73,22 +72,13 @@ pub fn create_analyzer_options(
         }
     }
 
-    if let Some(package_json) = load_manifest(input_file, diagnostics) {
-        analyzer_configuration
-            .dependencies
-            .extend(package_json.dependencies.to_keys());
-        analyzer_configuration
-            .dependencies
-            .extend(package_json.dev_dependencies.to_keys());
-    }
-
     AnalyzerOptions {
         configuration: analyzer_configuration,
         ..options
     }
 }
 
-fn load_manifest(input_file: &Path, diagnostics: &mut Vec<String>) -> Option<PackageJson> {
+pub fn load_manifest(input_file: &Path, diagnostics: &mut Vec<String>) -> Option<PackageJson> {
     let options_file = input_file.with_extension("package.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
         let deserialized = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(

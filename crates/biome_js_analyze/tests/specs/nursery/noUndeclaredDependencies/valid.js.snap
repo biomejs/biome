@@ -6,6 +6,7 @@ expression: valid.js
 ```jsx
 import "./valid";
 import "react";
+import "@testing-library/react";
 
 ```
 

@@ -481,10 +481,7 @@ impl Workspace for WorkspaceServer {
         params: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         let parse = self.get_parse(params.path.clone())?;
-        let project = self
-            .get_current_project()?
-            .map(|pr| pr.manifest.dependencies.to_keys())
-            .unwrap_or_default();
+        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
         let (diagnostics, errors, skipped_diagnostics) =
             if let Some(lint) = self.get_file_capabilities(&params.path).analyzer.lint {
                 info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
@@ -495,7 +492,7 @@ impl Workspace for WorkspaceServer {
                         path: &params.path,
                         language: self.get_language(&params.path),
                         categories: params.categories,
-                        dependencies: project,
+                        manifest,
                     });
 
                     (
@@ -541,17 +538,14 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(params.path.clone())?;
         let settings = self.settings.read().unwrap();
         let rules = settings.linter().rules.as_ref();
-        let dependencies = self
-            .get_current_project()?
-            .map(|pr| pr.manifest.dependencies.to_keys())
-            .unwrap_or_default();
+        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
         Ok(code_actions(CodeActionsParams {
             parse,
             range: params.range,
             rules,
             settings: self.settings(),
             path: &params.path,
-            dependencies,
+            manifest,
         }))
     }
 
@@ -623,10 +617,7 @@ impl Workspace for WorkspaceServer {
             .into_iter()
             .collect::<Vec<_>>();
         let filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
-        let dependencies = self
-            .get_current_project()?
-            .map(|pr| pr.manifest.dependencies.to_keys())
-            .unwrap_or_default();
+        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
         fix_all(FixAllParams {
             parse,
             rules: rules.as_ref().map(|x| x.borrow()),
@@ -635,7 +626,7 @@ impl Workspace for WorkspaceServer {
             settings: self.settings(),
             should_format: params.should_format,
             rome_path: &params.path,
-            dependencies,
+            manifest,
         })
     }
 

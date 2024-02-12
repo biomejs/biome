@@ -411,7 +411,6 @@ impl<L: Language + Default> RegistryRule<L> {
             let query_result = params.query.downcast_ref().unwrap();
             let query_result = <R::Query as Queryable>::unwrap_match(params.services, query_result);
             let globals = params.options.globals();
-            let dependencies = params.options.dependencies();
             let options = params.options.rule_options::<R>().unwrap_or_default();
             let ctx = match RuleContext::new(
                 &query_result,
@@ -420,7 +419,6 @@ impl<L: Language + Default> RegistryRule<L> {
                 &globals,
                 &params.options.file_path,
                 &options,
-                &dependencies,
             ) {
                 Ok(ctx) => ctx,
                 Err(error) => return Err(error),

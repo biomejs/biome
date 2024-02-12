@@ -2265,7 +2265,7 @@ pub struct Nursery {
     pub no_then_property: Option<RuleConfiguration>,
     #[doc = "Disallow the use of dependencies that aren't specified in the package.json"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_dependencies: Option<RuleConfiguration>,
+    pub no_undeclared_dependencies: Option<RuleConfiguration>,
     #[doc = "Disallow unused imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unused_imports: Option<RuleConfiguration>,
@@ -2346,7 +2346,7 @@ impl Nursery {
         "noRestrictedImports",
         "noSkippedTests",
         "noThenProperty",
-        "noUnusedDependencies",
+        "noUndeclaredDependencies",
         "noUnusedImports",
         "noUnusedPrivateClassMembers",
         "noUselessLoneBlockStatements",
@@ -2510,7 +2510,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_unused_dependencies.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
@@ -2669,7 +2669,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_unused_dependencies.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
@@ -2804,7 +2804,7 @@ impl Nursery {
             "noRestrictedImports" => self.no_restricted_imports.as_ref(),
             "noSkippedTests" => self.no_skipped_tests.as_ref(),
             "noThenProperty" => self.no_then_property.as_ref(),
-            "noUnusedDependencies" => self.no_unused_dependencies.as_ref(),
+            "noUndeclaredDependencies" => self.no_undeclared_dependencies.as_ref(),
             "noUnusedImports" => self.no_unused_imports.as_ref(),
             "noUnusedPrivateClassMembers" => self.no_unused_private_class_members.as_ref(),
             "noUselessLoneBlockStatements" => self.no_useless_lone_block_statements.as_ref(),
