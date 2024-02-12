@@ -16,12 +16,12 @@ use crate::{
     settings::{SettingsHandle, WorkspaceSettings},
     Workspace, WorkspaceError,
 };
-use biome_analyze::{AnalysisFilter, RuleFilter};
+use biome_analyze::AnalysisFilter;
 use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
 use biome_formatter::Printed;
-use biome_fs::{RomePath, BIOME_JSON};
+use biome_fs::{ConfigName, RomePath};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
@@ -29,7 +29,7 @@ use std::borrow::Borrow;
 use std::ffi::OsStr;
 use std::path::Path;
 use std::{panic::RefUnwindSafe, sync::RwLock};
-use tracing::{debug, info, info_span, trace};
+use tracing::{debug, info, info_span};
 
 pub(super) struct WorkspaceServer {
     /// features available throughout the application
@@ -186,8 +186,9 @@ impl WorkspaceServer {
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
     /// or in the feature `ignore`/`include`
     fn is_ignored(&self, path: &Path, feature: FeatureName) -> bool {
+        let file_name = path.file_name().and_then(|s| s.to_str());
         // Never ignore Biome's config file regardless `include`/`ignore`
-        path.file_name().and_then(|s| s.to_str()) != Some(BIOME_JSON) &&
+        (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
         // Apply top-level `include`/`ignore`
         (self.is_ignored_by_top_level_config(path) ||
         // Apply feature-level `include`/`ignore`
@@ -265,7 +266,7 @@ impl Workspace for WorkspaceServer {
                 let path = params.path.as_path();
                 let settings = self.settings.read().unwrap();
                 let mut file_features = FileFeaturesResult::new();
-
+                let file_name = path.file_name().and_then(|s| s.to_str());
                 file_features = file_features
                     .with_capabilities(&capabilities)
                     .with_settings_and_language(&settings, &language, path);
@@ -275,7 +276,9 @@ impl Workspace for WorkspaceServer {
                     && self.get_language(&params.path) == Language::Unknown
                 {
                     file_features.ignore_not_supported();
-                } else if path.file_name().and_then(|s| s.to_str()) == Some(BIOME_JSON) {
+                } else if file_name == Some(ConfigName::biome_json())
+                    || file_name == Some(ConfigName::biome_jsonc())
+                {
                     // Never ignore Biome's config file
                 } else if self.is_ignored_by_top_level_config(path) {
                     file_features.set_ignored_for_all_features();
@@ -429,53 +432,34 @@ impl Workspace for WorkspaceServer {
         params: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         let parse = self.get_parse(params.path.clone())?;
-        let settings = self.settings.read().unwrap();
 
-        let (diagnostics, errors, skipped_diagnostics) = if let Some(lint) =
-            self.get_file_capabilities(&params.path).analyzer.lint
-        {
-            // Compite final rules (taking `overrides` into account)
-            let rules = settings.as_rules(params.path.as_path());
-            let mut rule_filter_list = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
-            if settings.organize_imports.enabled && !params.categories.is_syntax() {
-                rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
-            }
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
-            filter.categories = params.categories;
+        let (diagnostics, errors, skipped_diagnostics) =
+            if let Some(lint) = self.get_file_capabilities(&params.path).analyzer.lint {
+                info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
+                    let results = lint(LintParams {
+                        parse,
+                        settings: self.settings(),
+                        max_diagnostics: params.max_diagnostics,
+                        path: &params.path,
+                        language: self.get_language(&params.path),
+                        categories: params.categories,
+                    });
 
-            info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
-                trace!("Analyzer filter to apply to lint: {:?}", &filter);
+                    (
+                        results.diagnostics,
+                        results.errors,
+                        results.skipped_diagnostics,
+                    )
+                })
+            } else {
+                let parse_diagnostics = parse.into_diagnostics();
+                let errors = parse_diagnostics
+                    .iter()
+                    .filter(|diag| diag.severity() <= Severity::Error)
+                    .count();
 
-                let results = lint(LintParams {
-                    parse,
-                    filter,
-                    rules: rules.as_ref().map(|x| x.borrow()),
-                    settings: self.settings(),
-                    max_diagnostics: params.max_diagnostics,
-                    path: &params.path,
-                    language: self.get_language(&params.path),
-                });
-
-                (
-                    results.diagnostics,
-                    results.errors,
-                    results.skipped_diagnostics,
-                )
-            })
-        } else {
-            let parse_diagnostics = parse.into_diagnostics();
-            let errors = parse_diagnostics
-                .iter()
-                .filter(|diag| diag.severity() <= Severity::Error)
-                .count();
-
-            (parse_diagnostics, errors, 0)
-        };
+                (parse_diagnostics, errors, 0)
+            };
 
         info!("Pulled {:?} diagnostic(s)", diagnostics.len());
         Ok(PullDiagnosticsResult {

@@ -1,4 +1,4 @@
-import CodeMirror, { type BiomeExtension } from "../CodeMirror";
+import CodeMirror, { type BiomeExtension } from "@/playground/CodeMirror";
 interface Props {
 	code: string;
 	extensions: BiomeExtension[];

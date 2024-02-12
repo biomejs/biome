@@ -240,7 +240,11 @@ pub enum BiomeCommand {
 
     /// Bootstraps a new biome project. Creates a configuration file with some defaults.
     #[bpaf(command)]
-    Init,
+    Init(
+        /// Tells Biome to emit a `biome.jsonc` file.
+        #[bpaf(long("jsonc"), switch)]
+        bool,
+    ),
     /// Acts as a server for the Language Server Protocol over stdin/stdout
     #[bpaf(command("lsp-proxy"))]
     LspProxy(
@@ -251,17 +255,15 @@ pub enum BiomeCommand {
     /// It updates the configuration when there are breaking changes
     #[bpaf(command)]
     Migrate {
-        /// It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`, and map
-        /// Prettier's configuration into `biome.json`
-        #[bpaf(long("prettier"), switch, hide, hide_usage)]
-        prettier: bool,
-
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
         /// Writes the new configuration file to disk
         #[bpaf(long("write"), switch)]
         write: bool,
+
+        #[bpaf(external(migrate_sub_command), optional)]
+        sub_command: Option<MigrateSubCommand>,
     },
 
     /// A command to retrieve the documentation of various aspects of the CLI.
@@ -294,6 +296,19 @@ pub enum BiomeCommand {
     PrintSocket,
 }
 
+#[derive(Debug, Bpaf, Clone)]
+pub enum MigrateSubCommand {
+    /// It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`, and map the Prettier's configuration into Biome's configuration file.
+    #[bpaf(command)]
+    Prettier,
+}
+
+impl MigrateSubCommand {
+    pub const fn is_prettier(&self) -> bool {
+        matches!(self, MigrateSubCommand::Prettier)
+    }
+}
+
 impl BiomeCommand {
     pub const fn get_color(&self) -> Option<&ColorsArg> {
         match self {
@@ -307,7 +322,7 @@ impl BiomeCommand {
             BiomeCommand::LspProxy(_)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::Init
+            | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => None,
@@ -323,7 +338,7 @@ impl BiomeCommand {
             | BiomeCommand::Ci { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Migrate { cli_options, .. } => cli_options.use_server,
-            BiomeCommand::Init
+            BiomeCommand::Init(_)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Explain { .. }
@@ -348,7 +363,7 @@ impl BiomeCommand {
             | BiomeCommand::Rage(..)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::Init
+            | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
@@ -368,7 +383,7 @@ impl BiomeCommand {
             | BiomeCommand::Rage(..)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::Init
+            | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => LoggingLevel::default(),
@@ -386,7 +401,7 @@ impl BiomeCommand {
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::Init
+            | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => LoggingKind::default(),

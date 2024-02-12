@@ -3,6 +3,7 @@
 ## Installation
 
 ```
+$ cd website
 $ pnpm install
 ```
 

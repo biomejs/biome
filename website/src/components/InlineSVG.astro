@@ -1,18 +1,18 @@
 ---
 export interface Props {
-  src: string;
+	src: string;
 }
 
 const { src } = Astro.props as Props;
 
 const files = await import.meta.glob<string>("/src/assets/svg/**/*.svg", {
-  as: "raw",
+	as: "raw",
 });
 
 const path = `/src/assets/svg/${src}.svg`;
 const getHTML = files[path];
 if (getHTML === undefined) {
-  throw new Error(`${src} is not valid`);
+	throw new Error(`${src} is not valid`);
 }
 const innerHTML = await getHTML();
 ---

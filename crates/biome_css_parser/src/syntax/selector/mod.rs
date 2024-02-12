@@ -1,6 +1,7 @@
 mod attribute;
 mod pseudo_class;
 mod pseudo_element;
+pub(crate) mod relative_selector;
 
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;

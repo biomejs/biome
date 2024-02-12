@@ -1,10 +1,6 @@
-import * as prettier from "prettier";
-// @ts-expect-error
-import parserBabel from "prettier/esm/parser-babel.mjs";
-// @ts-expect-error
-import pluginEstree from "prettier/plugins/estree.mjs";
 import {
 	ArrowParentheses,
+	AttributePosition,
 	IndentStyle,
 	type PlaygroundSettings,
 	type PrettierOptions,
@@ -14,8 +10,13 @@ import {
 	Semicolons,
 	type TrailingComma,
 	defaultPlaygroundState,
-} from "../types";
-import { isJsonFilename, isTypeScriptFilename } from "../utils";
+} from "@/playground/types";
+import { isJsonFilename, isTypeScriptFilename } from "@/playground/utils";
+import * as prettier from "prettier";
+// @ts-expect-error
+import parserBabel from "prettier/esm/parser-babel.mjs";
+// @ts-expect-error
+import pluginEstree from "prettier/plugins/estree.mjs";
 
 let settings = defaultPlaygroundState.settings;
 
@@ -39,6 +40,7 @@ self.addEventListener("message", async (e) => {
 				arrowParentheses,
 				bracketSpacing,
 				bracketSameLine,
+				attributePosition,
 			} = settings;
 			const code = e.data.code as string;
 			const filename = e.data.filename as string;
@@ -56,6 +58,8 @@ self.addEventListener("message", async (e) => {
 				arrowParentheses,
 				bracketSpacing,
 				bracketSameLine,
+				singleAttributePerLine:
+					attributePosition === AttributePosition.Multiline,
 			});
 
 			self.postMessage({
@@ -87,6 +91,7 @@ async function formatWithPrettier(
 		arrowParentheses: ArrowParentheses;
 		bracketSpacing: boolean;
 		bracketSameLine: boolean;
+		singleAttributePerLine?: boolean;
 	},
 ): Promise<PrettierOutput> {
 	try {
@@ -108,6 +113,7 @@ async function formatWithPrettier(
 					: "avoid",
 			bracketSpacing: options.bracketSpacing,
 			bracketSameLine: options.bracketSameLine,
+			singleAttributePerLine: options.singleAttributePerLine ?? false,
 		};
 
 		// @ts-expect-error

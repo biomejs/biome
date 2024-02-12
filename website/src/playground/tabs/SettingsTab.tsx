@@ -1,8 +1,6 @@
-import type { Dispatch, SetStateAction } from "react";
-import type React from "react";
-import { useState } from "react";
 import {
 	ArrowParentheses,
+	AttributePosition,
 	IndentStyle,
 	LintRules,
 	type PlaygroundState,
@@ -11,7 +9,7 @@ import {
 	Semicolons,
 	SourceType,
 	TrailingComma,
-} from "../types";
+} from "@/playground/types";
 import {
 	classnames,
 	createPlaygroundSettingsSetter,
@@ -21,7 +19,10 @@ import {
 	isTypeScriptFilename,
 	modifyFilename,
 	normalizeFilename,
-} from "../utils";
+} from "@/playground/utils";
+import type { Dispatch, SetStateAction } from "react";
+import type React from "react";
+import { useState } from "react";
 
 export interface SettingsTabProps {
 	state: PlaygroundState;
@@ -53,6 +54,7 @@ export default function SettingsTab({
 			importSortingEnabled,
 			unsafeParameterDecoratorsEnabled,
 			allowComments,
+			attributePosition,
 		},
 	},
 }: SettingsTabProps) {
@@ -91,6 +93,10 @@ export default function SettingsTab({
 	const setArrowParentheses = createPlaygroundSettingsSetter(
 		setPlaygroundState,
 		"arrowParentheses",
+	);
+	const setAttributePosition = createPlaygroundSettingsSetter(
+		setPlaygroundState,
+		"attributePosition",
 	);
 	const setBracketSpacing = createPlaygroundSettingsSetter(
 		setPlaygroundState,
@@ -263,6 +269,8 @@ export default function SettingsTab({
 				setSemicolons={setSemicolons}
 				arrowParentheses={arrowParentheses}
 				setArrowParentheses={setArrowParentheses}
+				attributePosition={attributePosition}
+				setAttributePosition={setAttributePosition}
 				bracketSpacing={bracketSpacing}
 				setBracketSpacing={setBracketSpacing}
 				bracketSameLine={bracketSameLine}
@@ -596,6 +604,8 @@ function FormatterSettings({
 	setSemicolons,
 	arrowParentheses,
 	setArrowParentheses,
+	attributePosition,
+	setAttributePosition,
 	bracketSpacing,
 	setBracketSpacing,
 	bracketSameLine,
@@ -619,6 +629,8 @@ function FormatterSettings({
 	setSemicolons: (value: Semicolons) => void;
 	arrowParentheses: ArrowParentheses;
 	setArrowParentheses: (value: ArrowParentheses) => void;
+	attributePosition: AttributePosition;
+	setAttributePosition: (value: AttributePosition) => void;
 	bracketSpacing: boolean;
 	setBracketSpacing: (value: boolean) => void;
 	bracketSameLine: boolean;
@@ -738,6 +750,20 @@ function FormatterSettings({
 					>
 						<option value={ArrowParentheses.Always}>Always</option>
 						<option value={ArrowParentheses.AsNeeded}>As needed</option>
+					</select>
+				</div>
+				<div className="field-row">
+					<label htmlFor="arrowParentheses">Attribute Position</label>
+					<select
+						id="attributePosition"
+						name="attributePosition"
+						value={attributePosition ?? AttributePosition.Auto}
+						onChange={(e) =>
+							setAttributePosition(e.target.value as AttributePosition)
+						}
+					>
+						<option value={AttributePosition.Auto}>Auto</option>
+						<option value={AttributePosition.Multiline}>Multiline</option>
 					</select>
 				</div>
 				<div className="field-row">

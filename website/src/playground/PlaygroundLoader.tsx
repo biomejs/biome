@@ -1,14 +1,8 @@
-import {
-	type Dispatch,
-	type SetStateAction,
-	useEffect,
-	useRef,
-	useState,
-} from "react";
-import Playground from "./Playground";
-import LoadingScreen from "./components/LoadingScreen";
+import Playground from "@/playground/Playground";
+import LoadingScreen from "@/playground/components/LoadingScreen";
 import {
 	type ArrowParentheses,
+	type AttributePosition,
 	type IndentStyle,
 	type LintRules,
 	LoadingState,
@@ -21,7 +15,7 @@ import {
 	defaultPlaygroundState,
 	emptyBiomeOutput,
 	emptyPrettierOutput,
-} from "./types";
+} from "@/playground/types";
 import {
 	createLocalStorage,
 	decodeCode,
@@ -33,7 +27,14 @@ import {
 	isScriptFilename,
 	isTypeScriptFilename,
 	normalizeFilename,
-} from "./utils";
+} from "@/playground/utils";
+import {
+	type Dispatch,
+	type SetStateAction,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 
 function throttle(callback: () => void): () => void {
 	const timeout = setTimeout(callback, 100);
@@ -335,6 +336,9 @@ function initState(
 			arrowParentheses:
 				(searchParams.get("arrowParentheses") as ArrowParentheses) ??
 				defaultPlaygroundState.settings.arrowParentheses,
+			attributePosition:
+				(searchParams.get("attributePosition") as AttributePosition) ??
+				defaultPlaygroundState.settings.attributePosition,
 			bracketSpacing:
 				searchParams.get("bracketSpacing") === "true" ||
 				defaultPlaygroundState.settings.bracketSpacing,

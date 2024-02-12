@@ -58,7 +58,9 @@ pre.package-manager-command {
   display: none;
 
   &.active {
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 }
 
@@ -67,3 +69,49 @@ pre.package-manager-command {
   border-top-right-radius: 0;
   margin-top: 0 !important;
 }
+
+pre.package-manager-command button {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  margin: 0;
+  min-width: 20px;
+  height: 20px;
+  width: 20px;
+  border: none;
+  background-color: transparent;
+
+  @include mobile-only {
+    margin-left: 20px;
+  }
+}
+
+pre.package-manager-command button #tick-icon, 
+pre.package-manager-command button #copy-icon {
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  margin: 0;
+  padding: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity .3s ease-in-out;
+  stroke: var(--sl-color-gray-4);
+}
+
+pre.package-manager-command button #tick-icon {
+  opacity: 0;
+  scale: 0;
+}
+
+pre.package-manager-command button.copied #copy-icon {
+  opacity: 0;
+  scale: 0;
+}
+
+pre.package-manager-command button.copied #tick-icon {
+  opacity: 1;
+  scale: 1;
+}
+

@@ -20,9 +20,8 @@ simple.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━
   
   i Safe fix: Suppress rule lint/correctness/noUnusedVariables
   
-    1   │ - let·c·=·!a·||·!b;
       1 │ + //·biome-ignore·lint/correctness/noUnusedVariables:·<explanation>
-      2 │ + let··c·=·!a·||·!b;
+    1 2 │   let c = !a || !b;
   
 
 ```

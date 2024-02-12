@@ -9,7 +9,7 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Merge;
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{category, PrintDiagnostic};
-use biome_fs::{FileSystemExt, OpenOptions, RomePath};
+use biome_fs::{ConfigName, FileSystemExt, OpenOptions, RomePath};
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonRoot;
 use biome_migrate::{migrate_configuration, ControlFlow};
@@ -153,6 +153,11 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     console.log(markup!{
                         <Info>"The configuration "<Emphasis>{{configuration_file_path.display().to_string()}}</Emphasis>" has been successfully migrated."</Info>
                     });
+                    if prettier_configuration.has_ignore_file() {
+                        console.log(markup!{
+                            <Warn>"Please make sure that the globs of the "<Emphasis>".prettierignore"</Emphasis>" file still work in Biome. Prettier's globs use git globs, while Biome's globs use uni-style globs. They both seem similar, but their semantics differ."</Warn>
+                        })
+                    }
                 } else {
                     let file_name = configuration_file_path.display().to_string();
                     let diagnostic = MigrateDiffDiagnostic {
@@ -173,7 +178,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     } else if configuration_content != new_configuration_content || has_deprecated_configuration {
         if write {
             let mut configuration_file = if has_deprecated_configuration {
-                let biome_file_path = configuration_directory_path.join(fs.config_name());
+                let biome_file_path = configuration_directory_path.join(ConfigName::biome_json());
                 fs.create_new(biome_file_path.as_path())?
             } else {
                 configuration_file

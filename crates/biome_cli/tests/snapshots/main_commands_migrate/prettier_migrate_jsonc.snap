@@ -1,0 +1,59 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.jsonc`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.prettierrc`
+
+```prettierrc
+{ "useTabs": false, "semi": true, "singleQuote": true }
+```
+
+# Emitted Messages
+
+```block
+biome.jsonc migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "formatter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "formatWithErrors":·false,
+       5 │ + → → "indentStyle":·"space",
+       6 │ + → → "indentWidth":·2,
+       7 │ + → → "lineEnding":·"lf",
+       8 │ + → → "lineWidth":·80,
+       9 │ + → → "attributePosition":·"auto"
+      10 │ + → },
+      11 │ + → "linter":·{·"enabled":·true·},
+      12 │ + → "javascript":·{
+      13 │ + → → "formatter":·{
+      14 │ + → → → "jsxQuoteStyle":·"double",
+      15 │ + → → → "quoteProperties":·"asNeeded",
+      16 │ + → → → "trailingComma":·"all",
+      17 │ + → → → "semicolons":·"always",
+      18 │ + → → → "arrowParentheses":·"always",
+      19 │ + → → → "bracketSpacing":·true,
+      20 │ + → → → "bracketSameLine":·false,
+      21 │ + → → → "quoteStyle":·"single",
+      22 │ + → → → "attributePosition":·"auto"
+      23 │ + → → }
+      24 │ + → }
+      25 │ + }
+      26 │ + 
+  
+
+```
+
+```block
+Run the command with the option --write to apply the changes.
+```
+
+

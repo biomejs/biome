@@ -359,7 +359,7 @@ pub(crate) fn parse_statement(p: &mut JsParser, context: StatementContext) -> Pa
         T![async] if is_at_async_function(p, LineBreak::DoNotCheck) => {
             parse_function_declaration(p, context)
         }
-        T![module] | T![namespace] | T![global] if is_at_any_ts_namespace_declaration(p) => {
+        T![module] | T![namespace] | T![global] if is_nth_at_any_ts_namespace_declaration(p, 0) => {
             let name = p.cur_range();
             TypeScript.parse_exclusive_syntax(
                 p,

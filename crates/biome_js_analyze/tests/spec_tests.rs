@@ -2,7 +2,7 @@ use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilt
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_syntax::{JsFileSource, JsLanguage, ModuleKind};
 use biome_rowan::AstNode;
 use biome_test_utils::{
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
@@ -218,6 +218,16 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
 
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let file_ext = match input_file.extension().and_then(OsStr::to_str).unwrap() {
+        "cjs" => JsFileSource::js_module().with_module_kind(ModuleKind::Script),
+        "js" | "mjs" | "jsx" => JsFileSource::jsx(),
+        "ts" => JsFileSource::ts(),
+        "mts" | "cts" => JsFileSource::ts_restricted(),
+        "tsx" => JsFileSource::tsx(),
+        _ => {
+            panic!("Unknown file extension: {:?}", input_file.extension());
+        }
+    };
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
 
@@ -233,7 +243,7 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
     analyze_and_snap(
         &mut snapshot,
         &input_code,
-        JsFileSource::jsx(),
+        file_ext,
         filter,
         file_name,
         input_file,

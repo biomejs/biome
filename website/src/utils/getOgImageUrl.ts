@@ -1,4 +1,4 @@
-import { getStaticPaths } from "@src/pages/og/[...path].ts";
+import { getStaticPaths } from "@/pages/og/[...path]";
 import type { GetStaticPathsOptions, GetStaticPathsResult } from "astro";
 
 const routes = (await getStaticPaths(
