@@ -3,7 +3,9 @@ use biome_analyze::{
     RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyFunctionLike, JsAwaitExpression, JsLanguage, TextRange, WalkEvent};
+use biome_js_syntax::{
+    AnyFunctionLike, JsAwaitExpression, JsForOfStatement, JsLanguage, TextRange, WalkEvent,
+};
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
 
 declare_rule! {
@@ -73,10 +75,16 @@ impl Visitor for MissingAwaitVisitor {
                         self.stack.push((node.range().start(), false));
                     }
                 }
-
+                // Check `await` expression
                 if JsAwaitExpression::can_cast(node.kind()) {
                     if let Some((_, has_await)) = self.stack.last_mut() {
                         *has_await = true;
+                    }
+                }
+                // Check `for await...of`
+                if let Some(for_of) = JsForOfStatement::cast_ref(node) {
+                    if let Some((_, has_await)) = self.stack.last_mut() {
+                        *has_await = for_of.await_token().is_some();
                     }
                 }
             }
