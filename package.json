@@ -4,11 +4,13 @@
   "version": "0.0.0",
   "scripts": {
     "check:apply": "cargo biome-cli-dev check --apply-unsafe editors website packages/@biomejs/js-api",
-		"check": "cargo biome-cli-dev check editors website packages/@biomejs/js-api --verbose"
+		"check": "cargo biome-cli-dev check editors website packages/@biomejs/js-api",
+		"ci": "cargo biome-cli-dev ci editors website packages/@biomejs/js-api"
 	},
   "keywords": [],
   "author": "",
   "devDependencies": {
+		"shared": "file:./shared",
     "@changesets/cli": "^2.26.2"
   }
 }

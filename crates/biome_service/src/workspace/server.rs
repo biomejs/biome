@@ -46,12 +46,12 @@ pub(super) struct WorkspaceServer {
     project_handlers: ProjectHandlers,
 }
 
-/// The `Workspace` object is long lived, so we want it to be able to cross
+/// The `Workspace` object is long-lived, so we want it to be able to cross
 /// unwind boundaries.
-/// In return we have to make sure operations on the workspace either do not
+/// In return, we have to make sure operations on the workspace either do not
 /// panic, of that panicking will not result in any broken invariant (it would
 /// not result in any undefined behavior as catching an unwind is safe, but it
-/// could lead to hard to debug issues)
+/// could lead too hard to debug issues)
 impl RefUnwindSafe for WorkspaceServer {}
 
 #[derive(Debug)]
