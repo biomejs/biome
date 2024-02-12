@@ -166,6 +166,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "biome_analyze",
+ "biome_configuration",
  "biome_console",
  "biome_css_formatter",
  "biome_deserialize",
@@ -203,6 +204,32 @@ dependencies = [
  "tracing-appender",
  "tracing-subscriber",
  "tracing-tree",
+]
+
+[[package]]
+name = "biome_configuration"
+version = "0.0.1"
+dependencies = [
+ "biome_analyze",
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_flags",
+ "biome_formatter",
+ "biome_js_analyze",
+ "biome_js_formatter",
+ "biome_js_syntax",
+ "biome_json_parser",
+ "biome_json_syntax",
+ "biome_rowan",
+ "bpaf",
+ "indexmap",
+ "insta",
+ "rustc-hash",
+ "schemars",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -679,6 +706,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "biome_analyze",
+ "biome_configuration",
  "biome_console",
  "biome_diagnostics",
  "biome_formatter",
@@ -780,6 +808,7 @@ name = "biome_service"
 version = "0.0.0"
 dependencies = [
  "biome_analyze",
+ "biome_configuration",
  "biome_console",
  "biome_css_formatter",
  "biome_css_parser",
@@ -833,6 +862,7 @@ name = "biome_test_utils"
 version = "0.0.0"
 dependencies = [
  "biome_analyze",
+ "biome_configuration",
  "biome_console",
  "biome_deserialize",
  "biome_diagnostics",
@@ -3672,6 +3702,7 @@ dependencies = [
  "biome_analyze",
  "biome_aria",
  "biome_cli",
+ "biome_configuration",
  "biome_diagnostics",
  "biome_js_analyze",
  "biome_js_factory",

@@ -1,6 +1,6 @@
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
-use biome_service::PartialConfiguration;
+use biome_configuration::PartialConfiguration;
 use schemars::schema::{RootSchema, Schema, SchemaObject};
 use schemars::schema_for;
 use serde_json::to_string;

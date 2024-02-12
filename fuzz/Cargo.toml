@@ -24,6 +24,7 @@ biome_js_analyze = { path = "../crates/biome_js_analyze" }
 biome_js_formatter = { path = "../crates/biome_js_formatter" }
 biome_js_parser = { path = "../crates/biome_js_parser" }
 biome_js_syntax = { path = "../crates/biome_js_syntax" }
+biome_configuration = { path = "../crates/biome_configuration"}
 biome_json_formatter = { path = "../crates/biome_json_formatter" }
 biome_json_parser = { path = "../crates/biome_json_parser" }
 biome_json_syntax = { path = "../crates/biome_json_syntax" }

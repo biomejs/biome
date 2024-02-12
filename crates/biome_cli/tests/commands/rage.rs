@@ -127,9 +127,9 @@ fn with_server_logs() {
 ├─2547ms INFO biome_lsp::server Starting Biome Language Server...
 ├─15333ms INFO biome_lsp::server Starting Biome Language Server...
 ├─15347ms INFO biome_lsp::server Attempting to load the configuration from 'biome.json' file
-├─15347ms INFO biome_service::configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/biome.json"
-├─15347ms ERROR biome_service::configuration Could not find the file configuration at "/home/micha/git/ant-design/biome.json"
-├─15347ms ERROR biome_service::configuration Reason: Os { code: 2, kind: NotFound, message: "No such file or directory" }
+├─15347ms INFO biome_configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/biome.json"
+├─15347ms ERROR biome_configuration Could not find the file configuration at "/home/micha/git/ant-design/biome.json"
+├─15347ms ERROR biome_configuration Reason: Os { code: 2, kind: NotFound, message: "No such file or directory" }
 ├─┐biome_js_parser::parse::parse{file_id=FileId(0)}
 ├─┘
 ├─┐biome_js_parser::parse::parse{file_id=FileId(1)}
@@ -144,9 +144,9 @@ INFO biome_cli::commands::daemon Received shutdown signal
 ├─2822ms INFO biome_lsp::server Starting Biome Language Server...
 ├─7550ms INFO biome_lsp::server Starting Biome Language Server...
 ├─7551ms INFO biome_lsp::server Attempting to load the configuration from 'biome.json' file
-├─7551ms INFO biome_service::configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/biome.json"
-├─7551ms ERROR biome_service::configuration Could not find the file configuration at "/home/micha/git/ant-design/biome.json"
-├─7551ms ERROR biome_service::configuration Reason: Os { code: 2, kind: NotFound, message: "No such file or directory" }
+├─7551ms INFO biome_configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/biome.json"
+├─7551ms ERROR biome_configuration Could not find the file configuration at "/home/micha/git/ant-design/biome.json"
+├─7551ms ERROR biome_configuration Reason: Os { code: 2, kind: NotFound, message: "No such file or directory" }
 ├─┐biome_js_parser::parse::parse{file_id=FileId(0)}
 ├─┘
 ├─┐biome_js_parser::parse::parse{file_id=FileId(1)}

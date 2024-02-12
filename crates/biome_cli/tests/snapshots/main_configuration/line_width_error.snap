@@ -15,9 +15,9 @@ expression: content
 # Termination Message
 
 ```block
-configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome exited because the configuration resulted in errors. Please fix them.
+  × No files were processed in the specified paths.
   
 
 
@@ -26,18 +26,7 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-biome.json:3:18 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The number should be an integer between 1 and 320.
-  
-    1 │ {
-    2 │   "formatter": {
-  > 3 │     "lineWidth": 500
-      │                  ^^^
-    4 │   }
-    5 │ }
-  
-
+Compared 0 file(s) in <TIME>
 ```
 
 

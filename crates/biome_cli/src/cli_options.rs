@@ -1,7 +1,7 @@
 use crate::logging::LoggingKind;
 use crate::LoggingLevel;
+use biome_configuration::ConfigurationBasePath;
 use biome_diagnostics::Severity;
-use biome_service::ConfigurationBasePath;
 use bpaf::Bpaf;
 use std::path::PathBuf;
 use std::str::FromStr;

@@ -12,7 +12,7 @@ expression: content
   "javascript": {
     "formatter": {
       "lineWidth": 80,
-      "indentSize": 4
+      "indent-width": 4
     }
   },
   "css": {
@@ -58,7 +58,7 @@ biome.json:8:17 deserialize  DEPRECATED  ━━━━━━━━━━━━━
   
      6 │             "formatter": {
      7 │                 "lineWidth": 80,
-   > 8 │                 "indentSize": 4
+   > 8 │                 "indent-width": 4
        │                 ^^^^^^^^^^^^
      9 │             }
     10 │         },

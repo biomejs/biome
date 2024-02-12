@@ -1,5 +1,5 @@
 use super::{ExtensionHandler, Mime};
-use crate::configuration::{to_analyzer_rules, PartialConfiguration};
+use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FixAllParams, FormatterCapabilities, LintParams,
     LintResults, ParserCapabilities,
@@ -12,10 +12,11 @@ use crate::settings::{
 use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
 };
-use crate::{Rules, WorkspaceError};
+use crate::WorkspaceError;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
 };
+use biome_configuration::{PartialConfiguration, Rules};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};

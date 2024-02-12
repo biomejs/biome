@@ -10,7 +10,7 @@ use biome_rowan::{AstNode, BatchMutationExt};
 declare_migration! {
     pub(crate) IndentSize {
         version: "1.3.0",
-        name: "indentSize",
+        name: "indentWidth",
     }
 }
 
@@ -24,7 +24,7 @@ impl Rule for IndentSize {
         let node = ctx.query();
 
         let node_text = node.inner_string_text().ok()?;
-        if node_text.text() == "indentSize" {
+        if node_text.text() == "indentWidth" {
             return Some(());
         }
         None
@@ -37,7 +37,7 @@ impl Rule for IndentSize {
                 category!("migrate"),
                 node.range(),
                 markup! {
-                    "The option "<Emphasis>"indentSize"</Emphasis>" is deprecated."
+                    "The option "<Emphasis>"indent-width"</Emphasis>" is deprecated."
                 }
                 .to_owned(),
             )

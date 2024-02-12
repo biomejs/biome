@@ -22,7 +22,19 @@ expression: content
 # Emitted Messages
 
 ```block
-Formatted 1 file(s) in <TIME>
+.eslintrc format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  
+
+```
+
+```block
+Formatted 2 file(s) in <TIME>
+```
+
+```block
+Skipped 1 file(s)
 ```
 
 

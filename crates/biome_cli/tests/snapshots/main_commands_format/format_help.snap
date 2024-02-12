@@ -15,7 +15,6 @@ Generic options applied to all files
         --indent-width=NUMBER  The size of the indentation, 2 by default
         --line-ending=<lf|crlf|cr>  The type of line ending.
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
-        --attribute-position=<auto|multiline>  The attribute position style. By default auto.
 
 Formatting options specific to the JavaScript files
         --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.

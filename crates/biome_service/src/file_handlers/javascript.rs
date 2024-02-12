@@ -13,12 +13,13 @@ use crate::{
         CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
         RenameResult,
     },
-    Rules, WorkspaceError,
+    WorkspaceError,
 };
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Never,
     QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
+use biome_configuration::Rules;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
     AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,

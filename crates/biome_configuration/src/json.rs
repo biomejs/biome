@@ -1,4 +1,4 @@
-use crate::configuration::{deserialize_line_width, serialize_line_width, PlainIndentStyle};
+use crate::{deserialize_line_width, serialize_line_width, PlainIndentStyle};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{LineEnding, LineWidth};
 use bpaf::Bpaf;

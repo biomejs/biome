@@ -1,11 +1,7 @@
-use crate::configuration::overrides::OverrideOrganizeImportsConfiguration;
-use crate::settings::{to_matcher, OrganizeImportsSettings};
-use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 
 #[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
@@ -44,30 +40,5 @@ impl PartialOrganizeImports {
 
     pub const fn is_enabled(&self) -> bool {
         !self.is_disabled()
-    }
-}
-
-pub fn to_organize_imports_settings(
-    working_directory: Option<PathBuf>,
-    organize_imports: OrganizeImports,
-) -> Result<OrganizeImportsSettings, WorkspaceError> {
-    Ok(OrganizeImportsSettings {
-        enabled: organize_imports.enabled,
-        ignored_files: to_matcher(working_directory.clone(), Some(&organize_imports.ignore))?,
-        included_files: to_matcher(working_directory, Some(&organize_imports.include))?,
-    })
-}
-
-impl TryFrom<OverrideOrganizeImportsConfiguration> for OrganizeImportsSettings {
-    type Error = WorkspaceError;
-
-    fn try_from(
-        organize_imports: OverrideOrganizeImportsConfiguration,
-    ) -> Result<Self, Self::Error> {
-        Ok(Self {
-            enabled: organize_imports.enabled.unwrap_or_default(),
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
-        })
     }
 }

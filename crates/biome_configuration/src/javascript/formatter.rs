@@ -1,5 +1,5 @@
-use crate::configuration::PlainIndentStyle;
-use crate::configuration::{deserialize_line_width, serialize_line_width};
+use crate::PlainIndentStyle;
+use crate::{deserialize_line_width, serialize_line_width};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
 use biome_js_formatter::context::trailing_comma::TrailingComma;

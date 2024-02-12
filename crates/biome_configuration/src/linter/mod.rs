@@ -1,10 +1,7 @@
 #[rustfmt::skip]
 mod rules;
 
-pub use crate::configuration::linter::rules::Rules;
-use crate::configuration::overrides::OverrideLinterConfiguration;
-use crate::settings::{to_matcher, LinterSettings};
-use crate::{Matcher, WorkspaceError};
+pub use crate::linter::rules::Rules;
 use biome_deserialize::{
     DeserializableValue, DeserializationDiagnostic, Merge, StringSet, VisitableType,
 };
@@ -16,7 +13,6 @@ pub use rules::*;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 use std::str::FromStr;
 
 #[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
@@ -63,31 +59,6 @@ impl Default for LinterConfiguration {
 impl PartialLinterConfiguration {
     pub const fn is_disabled(&self) -> bool {
         matches!(self.enabled, Some(false))
-    }
-}
-
-pub fn to_linter_settings(
-    working_directory: Option<PathBuf>,
-    conf: LinterConfiguration,
-) -> Result<LinterSettings, WorkspaceError> {
-    Ok(LinterSettings {
-        enabled: conf.enabled,
-        rules: Some(conf.rules),
-        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
-        included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
-    })
-}
-
-impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
-    type Error = WorkspaceError;
-
-    fn try_from(conf: OverrideLinterConfiguration) -> Result<Self, Self::Error> {
-        Ok(Self {
-            enabled: conf.enabled.unwrap_or_default(),
-            rules: conf.rules,
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
-        })
     }
 }
 

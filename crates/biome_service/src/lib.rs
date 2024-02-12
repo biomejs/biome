@@ -3,7 +3,6 @@ use biome_fs::{FileSystem, OsFileSystem};
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
-pub mod configuration;
 pub mod documentation;
 pub mod file_handlers;
 pub mod project_handlers;
@@ -12,19 +11,19 @@ pub mod matcher;
 pub mod settings;
 pub mod workspace;
 
+mod configuration;
 pub mod diagnostics;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 
 pub use crate::configuration::{
-    create_config, Configuration, ConfigurationBasePath, ConfigurationDiagnostic,
-    JavascriptFormatter, PartialConfiguration, RuleConfiguration, Rules,
+    create_config, load_configuration, retrieve_gitignore_matches, to_analyzer_rules,
+    LoadedConfiguration,
 };
-pub use crate::matcher::Matcher;
-
 pub use crate::diagnostics::{TransportError, WorkspaceError};
 /// Exports only for this crate
 pub use crate::file_handlers::JsFormatterSettings;
+pub use crate::matcher::Matcher;
 pub use crate::project_handlers::Manifests;
 pub use crate::workspace::Workspace;
 pub use diagnostics::extension_error;

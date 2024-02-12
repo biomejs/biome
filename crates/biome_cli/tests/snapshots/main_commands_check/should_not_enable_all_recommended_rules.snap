@@ -52,6 +52,33 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+fix.js:2:7 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unused label.
+  
+  > 2 │     		LOOP: for (const x of xs) {
+      │     		^^^^
+    3 │     		    if (x > 0) {
+    4 │     		        break;
+  
+  i The label is not used by any break statement and continue statement.
+  
+  i Safe fix: Remove the unused label.
+  
+    2 │ ····→ → LOOP:·for·(const·x·of·xs)·{
+      │         ------                     
+
+```
+
+```block
+fix.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file contains diagnostics that needs to be addressed.
+  
+
+```
+
+```block
 fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Formatter would have printed the following content:

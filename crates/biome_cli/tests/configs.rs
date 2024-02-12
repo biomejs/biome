@@ -3,7 +3,7 @@ pub const CONFIG_FORMAT: &str = r#"{
     "enabled": true,
     "lineWidth": 160,
     "indentStyle": "space",
-    "indentSize": 6
+    "indentWidth": 6
   }
 }
 "#;
@@ -65,7 +65,7 @@ pub const CONFIG_ALL_FIELDS: &str = r#"{
     "enabled": true,
     "formatWithErrors": true,
     "indentStyle": "tab",
-    "indentSize": 2,
+    "indentWidth": 2,
     "lineWidth": 80
   },
   "linter": {
@@ -208,7 +208,7 @@ pub const CONFIG_INCORRECT_GLOBALS_V2: &str = r#"{
 pub const CONFIG_ISSUE_3175_1: &str = r#"{
   "formatter": {
     "indentStyle": "space",
-    "indentSize": 2,
+    "indentWidth": 2,
     "lineWidth": 120
   }
 }"#;

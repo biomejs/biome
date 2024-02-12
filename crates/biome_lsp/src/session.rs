@@ -5,16 +5,16 @@ use crate::extension_settings::CONFIGURATION_SECTION;
 use crate::utils;
 use anyhow::Result;
 use biome_analyze::RuleCategories;
+use biome_configuration::ConfigurationBasePath;
 use biome_console::markup;
 use biome_diagnostics::PrintDescription;
 use biome_fs::{FileSystem, RomePath};
-use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, PullDiagnosticsParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
-use biome_service::{ConfigurationBasePath, Workspace};
-use biome_service::{DynRef, WorkspaceError};
+use biome_service::{load_configuration, retrieve_gitignore_matches, LoadedConfiguration};
+use biome_service::{DynRef, Workspace, WorkspaceError};
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
 use rustc_hash::FxHashMap;
@@ -427,8 +427,11 @@ impl Session {
                     debug!("{configuration:#?}");
                     let fs = &self.fs;
 
-                    let result =
-                        configuration.retrieve_gitignore_matches(fs, configuration_path.as_deref());
+                    let result = retrieve_gitignore_matches(
+                        &configuration,
+                        fs,
+                        configuration_path.as_deref(),
+                    );
 
                     match result {
                         Ok((vcs_base_path, gitignore_matches)) => {

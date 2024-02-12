@@ -34,14 +34,14 @@ array.map((sentence) => sentence.split(" ")).flat();
 ```js
 foo.call();
 
+bar.call();
 
-	bar.call();
 ```
 
 # Emitted Messages
 
 ```block
-Formatted 1 file(s) in <TIME>
+Formatted 2 file(s) in <TIME>
 ```
 
 

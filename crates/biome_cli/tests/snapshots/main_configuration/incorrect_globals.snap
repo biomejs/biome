@@ -18,9 +18,9 @@ expression: content
 # Termination Message
 
 ```block
-configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome exited because the configuration resulted in errors. Please fix them.
+  × No files were processed in the specified paths.
   
 
 
@@ -29,18 +29,7 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-biome.json:6:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Incorrect type, expected a string, but received a boolean.
-  
-    4 │   },
-    5 │   "javascript": {
-  > 6 │     "globals": [false]
-      │                 ^^^^^
-    7 │   }
-    8 │ }
-  
-
+Checked 0 file(s) in <TIME>
 ```
 
 
