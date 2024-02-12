@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUsedBindingPattern.js
+---
+# Input
+```jsx
+export function f({ a, b }) {
+	console.info(b);
+}
+
+```
+
+# Diagnostics
+```
+invalidUsedBindingPattern.js:1:21 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+  > 1 │ export function f({ a, b }) {
+      │                     ^
+    2 │ 	console.info(b);
+    3 │ }
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+
