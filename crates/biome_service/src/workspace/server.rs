@@ -128,7 +128,11 @@ impl WorkspaceServer {
         }
     }
 
-    /// Returns
+    /// Returns the current project. The information of this project depend on path set by [WorkspaceServer::update_current_project]
+    ///
+    /// ## Errors
+    ///
+    /// - If no document is found in the workspace. Usually, you'll have to call [WorkspaceServer::open_project] to store said document.
     fn get_current_project(&self) -> Result<Option<NodeJsProject>, WorkspaceError> {
         let path = self.current_project_path.read().unwrap();
         if let Some(path) = path.as_ref() {
