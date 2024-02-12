@@ -920,7 +920,7 @@ export interface Nursery {
 	 */
 	noThenProperty?: RuleConfiguration;
 	/**
-	 * Disallow the use of dependencies that aren't specified in the package.json
+	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
 	noUndeclaredDependencies?: RuleConfiguration;
 	/**

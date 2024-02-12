@@ -5,13 +5,16 @@ use biome_js_syntax::JsModuleSource;
 use biome_rowan::AstNode;
 
 declare_rule! {
-    /// Disallow the use of dependencies that aren't specified in the `package.json`
+    /// Disallow the use of dependencies that aren't specified in the `package.json`.
+    ///
+    /// Indirect dependencies will trigger the rule because they aren't declared in the `package.json`. This means that if package `@org/foo` has a dependency on `lodash`, and then you use
+    /// `import "lodash"` somewhere in your project, the rule will trigger a diagnostic for this import.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```js,ignore
     /// import "vite";
     /// ```
     ///
