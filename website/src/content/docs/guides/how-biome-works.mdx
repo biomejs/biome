@@ -150,6 +150,8 @@ Biome will attempt to **resolve** your library `@org/shared-configs/` from your 
 To avoid a breaking change with how the existing resolution works, paths that start with a dot `.` or contains `.json`/`.jsonc` in their name, they **won't** be resolved from `node_modules/`.
 :::
 
+For more information about the resolution algorithm, read the [Node.js documentation](https://nodejs.org/api/esm.html#resolution-and-loading-algorithm).
+
 ## Protected Files
 
 The following files are currently ignored by Biome. This means that no diagnostics will be ever emitted by Biome for those files.
