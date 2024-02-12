@@ -11,6 +11,9 @@ importers:
       '@changesets/cli':
         specifier: ^2.26.2
         version: 2.26.2
+      shared:
+        specifier: file:./shared
+        version: file:shared
 
   packages/@biomejs/backend-jsonrpc:
     devDependencies:
@@ -8949,3 +8952,8 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
+
+  file:shared:
+    resolution: {directory: shared, type: directory}
+    name: shared
+    dev: true

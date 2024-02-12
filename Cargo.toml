@@ -131,6 +131,7 @@ ignore            = "0.4.21"
 indexmap          = "1.9.3"
 insta             = "1.29.0"
 lazy_static       = "1.4.0"
+oxc_resolver      = "1.4.0"
 quickcheck        = "1.0.3"
 quickcheck_macros = "1.0.0"
 quote             = { version = "1.0.28" }

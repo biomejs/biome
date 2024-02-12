@@ -43,7 +43,7 @@ declare_rule! {
     /// - `useDeferredValue`
     /// - `useTransition`
     ///
-    /// If you want to add more hooks to the rule, check the [#options](options).
+    /// If you want to add more hooks to the rule, check the [options](#options).
     ///
     /// ## Examples
     ///
