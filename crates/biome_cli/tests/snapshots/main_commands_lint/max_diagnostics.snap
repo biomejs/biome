@@ -157,7 +157,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ```block
 The number of diagnostics exceeds the number allowed by Biome.
-Diagnostics not shown: 50.
+Diagnostics not shown: 30.
 ```
 
 ```block

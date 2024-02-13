@@ -65,14 +65,6 @@ fix.js:2:8 lint/nursery/noUndeclaredDependencies ━━━━━━━━━━�
 ```
 
 ```block
-fix.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The file contains diagnostics that needs to be addressed.
-  
-
-```
-
-```block
 Checked 1 file(s) in <TIME>
 ```
 

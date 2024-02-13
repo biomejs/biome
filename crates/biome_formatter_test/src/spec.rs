@@ -45,7 +45,7 @@ impl<'a> SpecTestFile<'a> {
             })
             .unwrap();
 
-        if can_format.supports_for(&FeatureName::Format) {
+        if can_format.supports_format() {
             let mut input_code = input_file.get_buffer_from_file();
 
             let (_, range_start_index, range_end_index) = strip_rome_placeholders(&mut input_code);

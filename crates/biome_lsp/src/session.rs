@@ -10,7 +10,7 @@ use biome_diagnostics::PrintDescription;
 use biome_fs::{FileSystem, RomePath};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{
-    FeatureName, FeaturesBuilder, OpenProjectParams, PullDiagnosticsParams, SupportsFeatureParams,
+    FeaturesBuilder, OpenProjectParams, PullDiagnosticsParams, SupportsFeatureParams,
     UpdateProjectParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
@@ -295,18 +295,16 @@ impl Session {
         let diagnostics = if self.is_linting_and_formatting_disabled() {
             tracing::trace!("Linting disabled because Biome configuration is missing and `requireConfiguration` is true.");
             vec![]
-        } else if !file_features.supports_for(&FeatureName::Lint)
-            && !file_features.supports_for(&FeatureName::OrganizeImports)
-        {
+        } else if !file_features.supports_lint() && !file_features.supports_organize_imports() {
             tracing::trace!("linting and import sorting are not supported: {file_features:?}");
             // Sending empty vector clears published diagnostics
             vec![]
         } else {
             let mut categories = RuleCategories::SYNTAX;
-            if file_features.supports_for(&FeatureName::Lint) {
+            if file_features.supports_lint() {
                 categories |= RuleCategories::LINT
             }
-            if file_features.supports_for(&FeatureName::OrganizeImports) {
+            if file_features.supports_organize_imports() {
                 categories |= RuleCategories::ACTION
             }
             let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
