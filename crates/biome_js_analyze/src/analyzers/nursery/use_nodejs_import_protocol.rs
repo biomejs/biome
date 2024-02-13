@@ -5,10 +5,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{
-    inner_string_text, JsCallExpression, JsImportCallExpression, JsModuleSource, JsSyntaxKind,
-    JsSyntaxToken,
+    inner_string_text, AnyJsImportSpecifierLike, JsSyntaxKind, JsSyntaxToken,
 };
-use biome_rowan::{declare_node_union, BatchMutationExt};
+use biome_rowan::BatchMutationExt;
 
 use crate::{globals::node::is_node_builtin_module, JsRuleAction};
 
@@ -54,7 +53,7 @@ declare_rule! {
 }
 
 impl Rule for UseNodejsImportProtocol {
-    type Query = Ast<AnyJsImportLike>;
+    type Query = Ast<AnyJsImportSpecifierLike>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -103,46 +102,4 @@ impl Rule for UseNodejsImportProtocol {
 
 fn is_node_module_without_protocol(module_name: &str) -> bool {
     !module_name.starts_with("node:") && is_node_builtin_module(module_name)
-}
-
-declare_node_union! {
-    pub(crate) AnyJsImportLike = JsModuleSource | JsCallExpression |  JsImportCallExpression
-}
-
-impl AnyJsImportLike {
-    pub fn module_name_token(&self) -> Option<JsSyntaxToken> {
-        match self {
-            AnyJsImportLike::JsModuleSource(source) => source.value_token().ok(),
-            AnyJsImportLike::JsCallExpression(expression) => {
-                let callee = expression.callee().ok()?;
-                let name = callee.as_js_reference_identifier()?.value_token().ok()?;
-                if name.text_trimmed() == "require" {
-                    let [Some(argument)] = expression.arguments().ok()?.get_arguments_by_index([0])
-                    else {
-                        return None;
-                    };
-                    argument
-                        .as_any_js_expression()?
-                        .as_any_js_literal_expression()?
-                        .as_js_string_literal_expression()?
-                        .value_token()
-                        .ok()
-                } else {
-                    None
-                }
-            }
-            AnyJsImportLike::JsImportCallExpression(import_call) => {
-                let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
-                else {
-                    return None;
-                };
-                argument
-                    .as_any_js_expression()?
-                    .as_any_js_literal_expression()?
-                    .as_js_string_literal_expression()?
-                    .value_token()
-                    .ok()
-            }
-        }
-    }
 }

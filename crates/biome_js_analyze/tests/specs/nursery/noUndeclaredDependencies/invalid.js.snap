@@ -5,6 +5,8 @@ expression: invalid.js
 # Input
 ```jsx
 import "notInstalled";
+import("notInstalled");
+require("notInstalled")
 
 ```
 
@@ -16,7 +18,44 @@ invalid.js:1:8 lint/nursery/noUndeclaredDependencies ━━━━━━━━━
   
   > 1 │ import "notInstalled";
       │        ^^^^^^^^^^^^^^
-    2 │ 
+    2 │ import("notInstalled");
+    3 │ require("notInstalled")
+  
+  i This could lead to errors.
+  
+  i Add the dependency in your manifest.
+  
+
+```
+
+```
+invalid.js:2:1 lint/nursery/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The current dependency isn't specified in your package.json.
+  
+    1 │ import "notInstalled";
+  > 2 │ import("notInstalled");
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ require("notInstalled")
+    4 │ 
+  
+  i This could lead to errors.
+  
+  i Add the dependency in your manifest.
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The current dependency isn't specified in your package.json.
+  
+    1 │ import "notInstalled";
+    2 │ import("notInstalled");
+  > 3 │ require("notInstalled")
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
   
   i This could lead to errors.
   
