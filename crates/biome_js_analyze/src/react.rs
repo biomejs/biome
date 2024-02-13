@@ -53,9 +53,9 @@ impl ReactCreateElementCall {
         call_expression: &JsCallExpression,
         model: &SemanticModel,
     ) -> Option<Self> {
-        let callee = call_expression.callee().ok()?;
+        let callee = call_expression.callee().ok()?.omit_parentheses();
         let is_react_create_element =
-            is_react_call_api(callee, model, ReactLibrary::React, "createElement");
+            is_react_call_api(&callee, model, ReactLibrary::React, "createElement");
 
         if is_react_create_element {
             let arguments = call_expression.arguments().ok()?.args();
@@ -179,7 +179,7 @@ const VALID_REACT_API: [&str; 29] = [
 ///
 /// [`React` API]: https://reactjs.org/docs/react-api.html
 pub(crate) fn is_react_call_api(
-    expression: AnyJsExpression,
+    expr: &AnyJsExpression,
     model: &SemanticModel,
     lib: ReactLibrary,
     api_name: &str,
@@ -189,7 +189,6 @@ pub(crate) fn is_react_call_api(
         debug_assert!(VALID_REACT_API.contains(&api_name));
     }
 
-    let expr = expression.omit_parentheses();
     if let Some(callee) = AnyJsMemberExpression::cast_ref(expr.syntax()) {
         let Some(object) = callee.object().ok() else {
             return false;

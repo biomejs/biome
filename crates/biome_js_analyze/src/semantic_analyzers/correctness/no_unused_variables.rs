@@ -147,7 +147,8 @@ fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedF
 // It is ok in some Typescripts constructs for a parameter to be unused.
 // Returning None means is ok to be unused
 fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
-    match binding.declaration()? {
+    let decl = binding.declaration()?;
+    match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
         // ok to not be used
         AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
         | AnyJsBindingDeclaration::JsClassExpression(_)
@@ -174,8 +175,14 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
                 suggestion_for_binding(binding)
             }
         }
-
         // declarations need to be check if they are under `declare`
+        AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
+        | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+            unreachable!("The declaration should be resolved to its prent declaration");
+        }
         node @ AnyJsBindingDeclaration::JsVariableDeclarator(_) => {
             if is_in_ambient_context(node.syntax()) {
                 None

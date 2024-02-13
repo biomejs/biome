@@ -154,8 +154,11 @@ JsModule {
                             binding: JsArrayBindingPattern {
                                 l_brack_token: L_BRACK@124..125 "[" [] [],
                                 elements: JsArrayBindingPatternElementList [
-                                    JsIdentifierBinding {
-                                        name_token: IDENT@125..126 "a" [] [],
+                                    JsArrayBindingPatternElement {
+                                        pattern: JsIdentifierBinding {
+                                            name_token: IDENT@125..126 "a" [] [],
+                                        },
+                                        init: missing (optional),
                                     },
                                 ],
                                 r_brack_token: R_BRACK@126..127 "]" [] [],
@@ -506,8 +509,10 @@ JsModule {
               1: JS_ARRAY_BINDING_PATTERN@124..127
                 0: L_BRACK@124..125 "[" [] []
                 1: JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST@125..126
-                  0: JS_IDENTIFIER_BINDING@125..126
-                    0: IDENT@125..126 "a" [] []
+                  0: JS_ARRAY_BINDING_PATTERN_ELEMENT@125..126
+                    0: JS_IDENTIFIER_BINDING@125..126
+                      0: IDENT@125..126 "a" [] []
+                    1: (empty)
                 2: R_BRACK@126..127 "]" [] []
               2: (empty)
               3: (empty)

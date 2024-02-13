@@ -26,6 +26,34 @@ pub fn js_array_assignment_pattern(
         ],
     ))
 }
+pub fn js_array_assignment_pattern_element(
+    pattern: AnyJsAssignmentPattern,
+) -> JsArrayAssignmentPatternElementBuilder {
+    JsArrayAssignmentPatternElementBuilder {
+        pattern,
+        init: None,
+    }
+}
+pub struct JsArrayAssignmentPatternElementBuilder {
+    pattern: AnyJsAssignmentPattern,
+    init: Option<JsInitializerClause>,
+}
+impl JsArrayAssignmentPatternElementBuilder {
+    pub fn with_init(mut self, init: JsInitializerClause) -> Self {
+        self.init = Some(init);
+        self
+    }
+    pub fn build(self) -> JsArrayAssignmentPatternElement {
+        JsArrayAssignmentPatternElement::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT,
+            [
+                Some(SyntaxElement::Node(self.pattern.into_syntax())),
+                self.init
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn js_array_assignment_pattern_rest_element(
     dotdotdot_token: SyntaxToken,
     pattern: AnyJsAssignmentPattern,
@@ -51,6 +79,34 @@ pub fn js_array_binding_pattern(
             Some(SyntaxElement::Token(r_brack_token)),
         ],
     ))
+}
+pub fn js_array_binding_pattern_element(
+    pattern: AnyJsBindingPattern,
+) -> JsArrayBindingPatternElementBuilder {
+    JsArrayBindingPatternElementBuilder {
+        pattern,
+        init: None,
+    }
+}
+pub struct JsArrayBindingPatternElementBuilder {
+    pattern: AnyJsBindingPattern,
+    init: Option<JsInitializerClause>,
+}
+impl JsArrayBindingPatternElementBuilder {
+    pub fn with_init(mut self, init: JsInitializerClause) -> Self {
+        self.init = Some(init);
+        self
+    }
+    pub fn build(self) -> JsArrayBindingPatternElement {
+        JsArrayBindingPatternElement::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT,
+            [
+                Some(SyntaxElement::Node(self.pattern.into_syntax())),
+                self.init
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn js_array_binding_pattern_rest_element(
     dotdotdot_token: SyntaxToken,
@@ -149,20 +205,6 @@ pub fn js_assignment_expression(
         ],
     ))
 }
-pub fn js_assignment_with_default(
-    pattern: AnyJsAssignmentPattern,
-    eq_token: SyntaxToken,
-    default: AnyJsExpression,
-) -> JsAssignmentWithDefault {
-    JsAssignmentWithDefault::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_ASSIGNMENT_WITH_DEFAULT,
-        [
-            Some(SyntaxElement::Node(pattern.into_syntax())),
-            Some(SyntaxElement::Token(eq_token)),
-            Some(SyntaxElement::Node(default.into_syntax())),
-        ],
-    ))
-}
 pub fn js_await_expression(
     await_token: SyntaxToken,
     argument: AnyJsExpression,
@@ -192,20 +234,6 @@ pub fn js_binary_expression(
             Some(SyntaxElement::Node(left.into_syntax())),
             Some(SyntaxElement::Token(operator_token_token)),
             Some(SyntaxElement::Node(right.into_syntax())),
-        ],
-    ))
-}
-pub fn js_binding_pattern_with_default(
-    pattern: AnyJsBindingPattern,
-    eq_token: SyntaxToken,
-    default: AnyJsExpression,
-) -> JsBindingPatternWithDefault {
-    JsBindingPatternWithDefault::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_BINDING_PATTERN_WITH_DEFAULT,
-        [
-            Some(SyntaxElement::Node(pattern.into_syntax())),
-            Some(SyntaxElement::Token(eq_token)),
-            Some(SyntaxElement::Node(default.into_syntax())),
         ],
     ))
 }
