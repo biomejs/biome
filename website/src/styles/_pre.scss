@@ -85,13 +85,12 @@ pre.package-manager-command {
     cursor: pointer;
     margin: 0;
     min-width: $button-size;
-    height: $button-size;
-    width: $button-size;
     border: none;
     background-color: transparent;
     position: sticky;
     top: 50%;
     right: 0;
+    transform:translateY(-50%);
     box-shadow: 4px 12px 10px 21px $button-bg-color;
     background: $button-bg-color;
 
