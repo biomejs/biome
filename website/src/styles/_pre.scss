@@ -17,101 +17,116 @@ ul.package-manager-selector, .pre-header {
     margin: 0 -20px;
     padding: 0 10px;
   }
-}
 
-.pre-header  {
-  padding: 0 10px;
+  &.pre-header {
+    padding: 0 10px;
 
-  code {
-    background: none;
-    padding: 0;
+    code {
+      background: none;
+      padding: 0;
+    }
   }
 }
 
-ul.package-manager-selector li {
-  padding: 0 10px;
-  list-style: none;
-  cursor: pointer;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+ul.package-manager-selector {
+  li {
+    padding: 0 10px;
+    list-style: none;
+    cursor: pointer;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  svg {
-    vertical-align: middle;
-    height: 16px;
-    width: 16px;
-    margin-right: 4px;
-  }
+    svg {
+      vertical-align: middle;
+      height: 16px;
+      width: 16px;
+      margin-right: 4px;
+    }
 
-  &.active {
-    font-weight: bold;
-    border-bottom: 2px solid black;
+    &.active {
+      font-weight: bold;
+      border-bottom: 2px solid black;
 
-    @include dark-mode {
-      border-color: white;
+      @include dark-mode {
+        border-color: white;
+      }
     }
   }
 }
 
 pre.package-manager-command {
+  $button-size: 20px;
+  $button-bg-color: #1d2026;
+  $icon-size: $button-size;
+  $transition-duration: 0.3s;
+  $icon-color: var(--sl-color-gray-4);
+  $border-radius-reset: 0;
+  $margin-top-reset: 0 !important;
+
   display: none;
+  position: relative;
 
   &.active {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-}
 
-.pre-header + pre, pre.package-manager-command {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  margin-top: 0 !important;
-}
-
-pre.package-manager-command button {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-  margin: 0;
-  min-width: 20px;
-  height: 20px;
-  width: 20px;
-  border: none;
-  background-color: transparent;
-
-  @include mobile-only {
-    margin-left: 20px;
+  + .pre-header, & {
+    border-top-left-radius: $border-radius-reset;
+    border-top-right-radius: $border-radius-reset;
+    margin-top: $margin-top-reset;
   }
-}
 
-pre.package-manager-command button #tick-icon, 
-pre.package-manager-command button #copy-icon {
-  position: absolute;
-  height: 20px;
-  width: 20px;
-  margin: 0;
-  padding: 0;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  transition: opacity .3s ease-in-out;
-  stroke: var(--sl-color-gray-4);
-}
+  button {
+    display: inline-block;
+    cursor: pointer;
+    margin: 0;
+    min-width: $button-size;
+    border: none;
+    position: sticky;
+    top: 50%;
+    right: 0;
+    transform:translateY(-50%);
+    box-shadow: 4px 12px 10px 21px $button-bg-color;
+    background: $button-bg-color;
 
-pre.package-manager-command button #tick-icon {
-  opacity: 0;
-  scale: 0;
-}
+    @include mobile-only {
+      margin-left: 20px;
+    }
 
-pre.package-manager-command button.copied #copy-icon {
-  opacity: 0;
-  scale: 0;
-}
+    #tick-icon, 
+    #copy-icon {
+      position: absolute;
+      height: $icon-size;
+      width: $icon-size;
+      margin: 0;
+      padding: 0;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: opacity $transition-duration ease-in-out;
+      stroke: $icon-color;
+    }
 
-pre.package-manager-command button.copied #tick-icon {
-  opacity: 1;
-  scale: 1;
+    #tick-icon {
+      opacity: 0;
+      scale: 0;
+    }
+
+    &.copied {
+      #copy-icon {
+        opacity: 0;
+        scale: 0;
+      }
+
+      #tick-icon {
+        opacity: 1;
+        scale: 1;
+      }
+    }
+  }
 }
 
