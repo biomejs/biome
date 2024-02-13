@@ -201,6 +201,27 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
+- [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) no longer reports valid use of binding patterns ([#1648](https://github.com/biomejs/biome/issues/1648)).
+
+  The rule no longer reports the following code:
+
+  ```js
+  const { a = 0, b = a } = {};
+  ```
+
+  Contributed by @Conaclos
+
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) no longer reports used binding patterns ([#1652](https://github.com/biomejs/biome/issues/1652)).
+
+  The rule no longer reports `a` as unused the following code:
+
+  ```js
+  const { a = 0, b = a } = {};
+  export { b };
+  ```
+
+  Contributed by @Conaclos
+
 - Fix [#1651](https://github.com/biomejs/biome/issues/1651). [noVar](https://biomejs.dev/linter/rules/no-var/) now ignores TsGlobalDeclaration. Contributed by @vasucp1207
 
 - Fix [#1640](https://github.com/biomejs/biome/issues/1640). [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers) code action now generates valid code when last member has a comment but no comma. Contributed by @kalleep
