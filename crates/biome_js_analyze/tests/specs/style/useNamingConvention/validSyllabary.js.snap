@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validSyllabary.js
+---
+# Input
+```jsx
+{
+    const 안녕하세요 = 0;
+}
+{
+    const x = {
+        안녕하세요: 0,
+    }
+}
+{
+    class 안녕하세요 {}
+}
+```
+
+
