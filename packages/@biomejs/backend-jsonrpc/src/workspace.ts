@@ -920,6 +920,10 @@ export interface Nursery {
 	 */
 	noThenProperty?: RuleConfiguration;
 	/**
+	 * Disallow the use of dependencies that aren't specified in the package.json.
+	 */
+	noUndeclaredDependencies?: RuleConfiguration;
+	/**
 	 * Disallow unused imports.
 	 */
 	noUnusedImports?: RuleConfiguration;
@@ -1546,10 +1550,14 @@ export type FilenameCase =
 	| "kebab-case"
 	| "PascalCase"
 	| "snake_case";
-export interface ProjectFeaturesParams {
-	manifest_path: RomePath;
+export interface UpdateProjectParams {
+	path: RomePath;
 }
-export interface ProjectFeaturesResult {}
+export interface OpenProjectParams {
+	content: string;
+	path: RomePath;
+	version: number;
+}
 export interface OpenFileParams {
 	content: string;
 	language_hint?: Language;
@@ -1739,6 +1747,7 @@ export type Category =
 	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
+	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
 	| "lint/nursery/noUselessLoneBlockStatements"
@@ -2100,9 +2109,8 @@ export type Configuration = PartialConfiguration;
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<SupportsFeatureResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
-	projectFeatures(
-		params: ProjectFeaturesParams,
-	): Promise<ProjectFeaturesResult>;
+	updateCurrentProject(params: UpdateProjectParams): Promise<void>;
+	openProject(params: OpenProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
@@ -2132,8 +2140,11 @@ export function createWorkspace(transport: Transport): Workspace {
 		updateSettings(params) {
 			return transport.request("biome/update_settings", params);
 		},
-		projectFeatures(params) {
-			return transport.request("biome/project_features", params);
+		updateCurrentProject(params) {
+			return transport.request("biome/update_current_project", params);
+		},
+		openProject(params) {
+			return transport.request("biome/open_project", params);
 		},
 		openFile(params) {
 			return transport.request("biome/open_file", params);

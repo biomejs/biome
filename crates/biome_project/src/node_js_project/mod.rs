@@ -2,20 +2,19 @@ mod package_json;
 
 pub use crate::node_js_project::package_json::PackageJson;
 use crate::{Manifest, Project, ProjectAnalyzeDiagnostic, ProjectAnalyzeResult, LICENSE_LIST};
-use biome_diagnostics::Error;
 use biome_json_syntax::JsonRoot;
 use biome_rowan::Language;
 use std::path::{Path, PathBuf};
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 /// A Node.js project.
 pub struct NodeJsProject {
     /// The path where the project
-    manifest_path: PathBuf,
+    pub manifest_path: PathBuf,
     /// The `package.json` manifest
-    manifest: PackageJson,
+    pub manifest: PackageJson,
     /// Diagnostics emitted during the operations
-    pub diagnostics: Vec<Error>,
+    pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
 }
 
 impl NodeJsProject {
@@ -33,7 +32,10 @@ impl Project for NodeJsProject {
         let manifest = Self::Manifest::deserialize_manifest(content);
         let (package, deserialize_diagnostics) = manifest.consume();
         self.manifest = package.unwrap_or_default();
-        self.diagnostics = deserialize_diagnostics;
+        self.diagnostics = deserialize_diagnostics
+            .into_iter()
+            .map(biome_diagnostics::serde::Diagnostic::new)
+            .collect();
     }
 
     fn project_path(&self) -> &Path {

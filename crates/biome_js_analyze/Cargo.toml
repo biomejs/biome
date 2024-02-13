@@ -23,6 +23,7 @@ biome_js_semantic        = { workspace = true }
 biome_js_syntax          = { workspace = true }
 biome_json_factory       = { workspace = true }
 biome_json_syntax        = { workspace = true }
+biome_project            = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_unicode_table      = { workspace = true }
 lazy_static              = { workspace = true }

@@ -2,9 +2,10 @@ use crate::cli_options::{cli_options, CliOptions, ColorsArg};
 use crate::diagnostics::DeprecatedConfigurationFile;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
-use crate::{CliDiagnostic, LoggingLevel, VERSION};
+use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
+use biome_fs::RomePath;
 use biome_service::configuration::vcs::PartialVcsConfiguration;
 use biome_service::configuration::{
     css::partial_css_formatter, javascript::partial_javascript_formatter,
@@ -17,6 +18,7 @@ use biome_service::configuration::{
     PartialLinterConfiguration,
 };
 use biome_service::documentation::Doc;
+use biome_service::workspace::{OpenProjectParams, UpdateProjectParams};
 use biome_service::{ConfigurationDiagnostic, PartialConfiguration, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
@@ -447,6 +449,29 @@ pub(crate) fn validate_configuration_diagnostics(
                 "Biome exited because the configuration resulted in errors. Please fix them.",
             )),
         ));
+    }
+
+    Ok(())
+}
+
+fn resolve_manifest(cli_session: &CliSession) -> Result<(), WorkspaceError> {
+    let fs = &*cli_session.app.fs;
+    let workspace = &*cli_session.app.workspace;
+
+    let result = fs.auto_search(
+        fs.working_directory().unwrap_or_default(),
+        &["package.json"],
+        false,
+    )?;
+
+    if let Some(result) = result {
+        let rome_path = RomePath::new(result.file_path);
+        workspace.open_project(OpenProjectParams {
+            path: rome_path.clone(),
+            content: result.content,
+            version: 0,
+        })?;
+        workspace.update_current_project(UpdateProjectParams { path: rome_path })?;
     }
 
     Ok(())

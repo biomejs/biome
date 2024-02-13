@@ -21,6 +21,7 @@ use biome_formatter::Printed;
 use biome_fs::RomePath;
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
+use biome_project::PackageJson;
 use biome_rowan::NodeCache;
 pub use javascript::JsFormatterSettings;
 use std::ffi::OsStr;
@@ -276,6 +277,7 @@ pub struct FixAllParams<'a> {
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) rome_path: &'a RomePath,
+    pub(crate) manifest: Option<PackageJson>,
 }
 
 #[derive(Default)]
@@ -316,6 +318,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) max_diagnostics: u64,
     pub(crate) path: &'a RomePath,
     pub(crate) categories: RuleCategories,
+    pub(crate) manifest: Option<PackageJson>,
 }
 
 pub(crate) struct LintResults {
@@ -324,9 +327,17 @@ pub(crate) struct LintResults {
     pub(crate) skipped_diagnostics: u64,
 }
 
+pub(crate) struct CodeActionsParams<'a> {
+    pub(crate) parse: AnyParse,
+    pub(crate) range: TextRange,
+    pub(crate) rules: Option<&'a Rules>,
+    pub(crate) settings: SettingsHandle<'a>,
+    pub(crate) path: &'a RomePath,
+    pub(crate) manifest: Option<PackageJson>,
+}
+
 type Lint = fn(LintParams) -> LintResults;
-type CodeActions =
-    fn(AnyParse, TextRange, Option<&Rules>, SettingsHandle, &RomePath) -> PullActionsResult;
+type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&RomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
 type OrganizeImports = fn(AnyParse) -> Result<OrganizeImportsResult, WorkspaceError>;

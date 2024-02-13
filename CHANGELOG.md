@@ -171,6 +171,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```
   Contributed by @DaniGuardiola
 
+- Add rule [noUndeclaredependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies), to detect the use of dependencies that aren't present in the `package.json`
+
 #### Enhancements
 
 - [noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary) now provides unsafe code fixes. Contributed by @vasucp1207
