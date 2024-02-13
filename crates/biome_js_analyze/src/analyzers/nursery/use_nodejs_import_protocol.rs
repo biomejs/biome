@@ -4,9 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_syntax::{
-    inner_string_text, AnyJsImportSpecifierLike, JsSyntaxKind, JsSyntaxToken,
-};
+use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike, JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::BatchMutationExt;
 
 use crate::{globals::node::is_node_builtin_module, JsRuleAction};

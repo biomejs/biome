@@ -1,7 +1,7 @@
 use crate::globals::node::is_node_builtin_module;
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsImportSpecifierLike, inner_string_text};
+use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike};
 use biome_rowan::TextRange;
 
 declare_rule! {
