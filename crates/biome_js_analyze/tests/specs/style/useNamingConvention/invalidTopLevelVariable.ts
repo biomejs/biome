@@ -1,4 +1,5 @@
 export const Unknown_Style = 0
+export const MY__CONSTANT = 0
 
 export var Unknown_Style_1 = 0
 

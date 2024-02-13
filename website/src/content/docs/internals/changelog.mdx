@@ -151,6 +151,38 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Linter
 
+#### BREAKING CHANGES
+
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention) and [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now require identifiers to be in ASCII and without consecutive delimiters.
+
+  Set the `requireAscii` rule option to `false` to allow non-ASCII identifiers.
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "style": {
+          "useNamingConvention": { "options": { "requireAscii": false } }
+        },
+        "nursery": {
+          "useFilenamingConvention": { "options": { "requireAscii": false } }
+        }
+      }
+    }
+  }
+
+  ```
+
+  The following name is now invalid because it includes two underscores:
+
+  ```js
+  export const MY__CONSTANT = 0;
+  ```
+
+  Note that we still allow consecutive leading and consecutive trailing underscores.
+
+  Contributed by @Conaclos
+
 #### New features
 
 - Add the rule [noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests), to disallow skipped tests:
@@ -863,7 +895,7 @@ The following rules are promoted:
   export default function(a: boolean): boolean;
   export default function(a: number): number;
   export default function(a: number | boolean): number | boolean {
-  	return a;
+    return a;
   }
   ```
 

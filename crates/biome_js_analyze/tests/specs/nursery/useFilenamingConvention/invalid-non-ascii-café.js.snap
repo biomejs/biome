@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-non-ascii-café.js
+---
+# Input
+```jsx
+
+```
+
+# Diagnostics
+```
+invalid-non-ascii-café.js lint/nursery/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The filename should be in ASCII because requireAscii is set to `true`.
+  
+  i If you want to use non-ASCII filenames, then set the requireAscii option to `false`.
+    See the rule options for more details.
+  
+
+```
+
+
