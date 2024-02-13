@@ -175,22 +175,11 @@ impl SemanticModelBuilder {
             }
             Read {
                 range,
-                declared_at: declaration_at, //TODO change to binding_id like we do with scope_id
+                binding_index,
                 scope_id,
+                ..
             } => {
-                let binding_id = match self.bindings_by_start.entry(declaration_at.start()) {
-                    Entry::Occupied(entry) => *entry.get(),
-                    Entry::Vacant(entry) => {
-                        let id = self.bindings.len();
-                        self.bindings.push(SemanticModelBindingData {
-                            id: id.into(),
-                            range,
-                            references: vec![],
-                        });
-                        *entry.insert(id)
-                    }
-                };
-                let binding = &mut self.bindings[binding_id];
+                let binding = &mut self.bindings[binding_index];
                 let reference_index = binding.references.len();
 
                 binding.references.push(SemanticModelReference {
@@ -201,19 +190,20 @@ impl SemanticModelBuilder {
 
                 let scope = &mut self.scopes[scope_id];
                 scope.read_references.push(SemanticModelScopeReference {
-                    binding_id,
+                    binding_id: binding_index,
                     reference_id: reference_index,
                 });
 
-                self.declared_at_by_start.insert(range.start(), binding_id);
+                self.declared_at_by_start
+                    .insert(range.start(), binding_index);
             }
             HoistedRead {
                 range,
-                declared_at: declaration_at,
+                binding_index,
                 scope_id,
+                ..
             } => {
-                let binding_id = self.bindings_by_start[&declaration_at.start()];
-                let binding = &mut self.bindings[binding_id];
+                let binding = &mut self.bindings[binding_index];
 
                 let reference_index = binding.references.len();
                 binding.references.push(SemanticModelReference {
@@ -224,19 +214,20 @@ impl SemanticModelBuilder {
 
                 let scope = &mut self.scopes[scope_id];
                 scope.read_references.push(SemanticModelScopeReference {
-                    binding_id,
+                    binding_id: binding_index,
                     reference_id: reference_index,
                 });
 
-                self.declared_at_by_start.insert(range.start(), binding_id);
+                self.declared_at_by_start
+                    .insert(range.start(), binding_index);
             }
             Write {
                 range,
-                declared_at: declaration_at,
+                binding_index,
                 scope_id,
+                ..
             } => {
-                let binding_id = self.bindings_by_start[&declaration_at.start()];
-                let binding = &mut self.bindings[binding_id];
+                let binding = &mut self.bindings[binding_index];
 
                 let reference_index = binding.references.len();
                 binding.references.push(SemanticModelReference {
@@ -247,19 +238,20 @@ impl SemanticModelBuilder {
 
                 let scope = &mut self.scopes[scope_id];
                 scope.read_references.push(SemanticModelScopeReference {
-                    binding_id,
+                    binding_id: binding_index,
                     reference_id: reference_index,
                 });
 
-                self.declared_at_by_start.insert(range.start(), binding_id);
+                self.declared_at_by_start
+                    .insert(range.start(), binding_index);
             }
             HoistedWrite {
                 range,
-                declared_at: declaration_at,
+                binding_index,
                 scope_id,
+                ..
             } => {
-                let binding_id = self.bindings_by_start[&declaration_at.start()];
-                let binding = &mut self.bindings[binding_id];
+                let binding = &mut self.bindings[binding_index];
 
                 let reference_index = binding.references.len();
                 binding.references.push(SemanticModelReference {
@@ -270,11 +262,12 @@ impl SemanticModelBuilder {
 
                 let scope = &mut self.scopes[scope_id];
                 scope.read_references.push(SemanticModelScopeReference {
-                    binding_id,
+                    binding_id: binding_index,
                     reference_id: reference_index,
                 });
 
-                self.declared_at_by_start.insert(range.start(), binding_id);
+                self.declared_at_by_start
+                    .insert(range.start(), binding_index);
             }
             UnresolvedReference { is_read, range } => {
                 let ty = if is_read {
@@ -312,8 +305,10 @@ impl SemanticModelBuilder {
                         .push(SemanticModelUnresolvedReference { range }),
                 }
             }
-            Exported { range } => {
-                self.exported.insert(range.start());
+            Exported {
+                declaration_start, ..
+            } => {
+                self.exported.insert(declaration_start);
             }
         }
     }
