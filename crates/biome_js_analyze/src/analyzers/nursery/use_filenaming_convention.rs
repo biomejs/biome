@@ -53,6 +53,16 @@ declare_rule! {
     ///
     /// Default: `true`
     ///
+    /// ### requireAscii
+    ///
+    /// When this option is set to `true`, it forbids names that include non-ASCII characters.
+    /// For instance,  when the option is set to `true`, `café` or `안녕하세요` will throw an error.
+    ///
+    /// When the option is set to `false`, anames may include non-ASCII characters.
+    /// `café` and `안녕하세요` are so valid.
+    ///
+    /// Default: `true`
+    ///
     /// ### filenameCases
     ///
     /// By default, the rule enforces that the filename  is either in [`camelCase`], [`kebab-case`], [`snake_case`], or equal to the name of one export in the file.
@@ -82,11 +92,11 @@ impl Rule for UseFilenamingConvention {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let file_name = ctx.file_path().file_name()?.to_str()?;
-        let FilenamingConventionOptions {
-            strict_case,
-            filename_cases,
-        } = ctx.options();
-        let allowed_cases = filename_cases.cases();
+        let options = ctx.options();
+        if options.require_ascii && !file_name.is_ascii() {
+            return Some(FileNamingConventionState::Ascii);
+        }
+        let allowed_cases = options.filename_cases.cases();
         let mut splitted = file_name.split('.');
         let name = splitted.next()?;
         let name = if name.is_empty() {
@@ -105,14 +115,14 @@ impl Rule for UseFilenamingConvention {
         // Check filename case
         if !allowed_cases.is_empty() {
             let trimmed_name = name.trim_matches('_');
-            let case = Case::identify(trimmed_name, *strict_case);
+            let case = Case::identify(trimmed_name, options.strict_case);
             for allowed_case in allowed_cases {
                 if case.is_compatible_with(allowed_case) {
                     return None;
                 }
             }
         }
-        if filename_cases.0.contains(&FilenameCase::Export) {
+        if options.filename_cases.0.contains(&FilenameCase::Export) {
             // If no exported binding has the file name, then reports the filename
             let model = ctx.model();
             model
@@ -129,84 +139,99 @@ impl Rule for UseFilenamingConvention {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let file_name = ctx.file_path().file_name()?.to_str()?;
-        let FilenamingConventionOptions {
-            strict_case,
-            filename_cases,
-        } = ctx.options();
-        if matches!(state, FileNamingConventionState::Filename) {
-            let allowed_cases = filename_cases.cases();
-            let allowed_case_names = allowed_cases.iter().map(|style| style.to_string());
-            let allowed_case_names = if filename_cases.0.contains(&FilenameCase::Export) {
-                allowed_case_names
-                    .chain(["equal to the name of an export".to_string()])
-                    .collect::<SmallVec<[_; 4]>>()
-                    .join(" or ")
-            } else {
-                allowed_case_names
-                    .collect::<SmallVec<[_; 3]>>()
-                    .join(" or ")
-            };
-            let mut splitted = file_name.split('.');
-            let name = splitted.next()?;
-            let name = if name.is_empty() {
-                // The filename starts with a dot
-                splitted.next()?
-            } else {
-                name
-            };
-            let trimmed_name = name.trim_matches('_');
-            let trimmed_info = if name != trimmed_name {
-                markup! {" trimmed as `"{trimmed_name}"`"}.to_owned()
-            } else {
-                markup! {""}.to_owned()
-            };
-            if *strict_case && filename_cases.0.contains(&FilenameCase::Camel) {
-                let case_type = Case::identify(trimmed_name, false);
-                let case_strict = Case::identify(trimmed_name, true);
-                if case_type == Case::Camel && case_strict == Case::Unknown {
-                    return Some(RuleDiagnostic::new(
-                        rule_category!(),
-                        None as Option<TextRange>,
-                        markup! {
-                            "The filename"{trimmed_info}" is in camelCase, however, two consecutive uppercase characters are not allowed because `strictCase` is set to `true`."
-                        },
-                    ).note(markup! {
-                        "If you want to use consecutive uppercase characters in camelCase then consider setting `strictCase` option to `false`.\n Check rule "<Hyperlink href="https://biomejs.dev/linter/rules/use-filenaming-convention#options">"options"</Hyperlink>" for more information."
-                    }));
+        let options = ctx.options();
+        match state {
+            FileNamingConventionState::Ascii => {
+                Some(RuleDiagnostic::new(
+                    rule_category!(),
+                    None as Option<TextRange>,
+                    markup! {
+                        "The filename should be in ASCII because "<Emphasis>"requireAscii"</Emphasis>" is set to `true`."
+                    },
+                ).note(markup! {
+                    "If you want to use non-ASCII filenames, then set the "<Emphasis>"requireAscii"</Emphasis>" option to `false`.\nSee the rule "<Hyperlink href="https://biomejs.dev/linter/rules/use-filenaming-convention#options">"options"</Hyperlink>" for more details."
+                }))
+            },
+            FileNamingConventionState::Filename => {
+                let allowed_cases = options.filename_cases.cases();
+                let allowed_case_names = allowed_cases.iter().map(|style| style.to_string());
+                let allowed_case_names = if options.filename_cases.0.contains(&FilenameCase::Export) {
+                    allowed_case_names
+                        .chain(["equal to the name of an export".to_string()])
+                        .collect::<SmallVec<[_; 4]>>()
+                        .join(" or ")
+                } else {
+                    allowed_case_names
+                        .collect::<SmallVec<[_; 3]>>()
+                        .join(" or ")
+                };
+                let mut splitted = file_name.split('.');
+                let name = splitted.next()?;
+                let name = if name.is_empty() {
+                    // The filename starts with a dot
+                    splitted.next()?
+                } else {
+                    name
+                };
+                let trimmed_name = name.trim_matches('_');
+                let trimmed_info = if name != trimmed_name {
+                    markup! {" trimmed as `"{trimmed_name}"`"}.to_owned()
+                } else {
+                    markup! {""}.to_owned()
+                };
+                if options.strict_case && options.filename_cases.0.contains(&FilenameCase::Camel) {
+                    let case_type = Case::identify(trimmed_name, false);
+                    let case_strict = Case::identify(trimmed_name, true);
+                    if case_type == Case::Camel && case_strict == Case::Unknown {
+                        return Some(RuleDiagnostic::new(
+                            rule_category!(),
+                            None as Option<TextRange>,
+                            markup! {
+                                "The filename"{trimmed_info}" is in camelCase, however, two consecutive uppercase characters are not allowed because `strictCase` is set to `true`."
+                            },
+                        ).note(markup! {
+                            "If you want to use consecutive uppercase characters in camelCase then consider setting `strictCase` option to `false`.\n Check rule "<Hyperlink href="https://biomejs.dev/linter/rules/use-filenaming-convention#options">"options"</Hyperlink>" for more information."
+                        }));
+                    }
                 }
-            }
-            let suggested_filenames = allowed_cases
-                .iter()
-                .map(|case| file_name.replacen(trimmed_name, &case.convert(trimmed_name), 1))
-                // Deduplicate suggestions
-                .collect::<FxHashSet<_>>()
-                .into_iter()
-                .collect::<SmallVec<[_; 3]>>()
-                .join("\n");
-            Some(RuleDiagnostic::new(
-                rule_category!(),
-                None as Option<TextRange>,
-                markup! {
-                    "The filename"{trimmed_info}" should be in "<Emphasis>{allowed_case_names}</Emphasis>"."
-                },
-            ).note(markup! {
-                "The filename could be renamed to one of the following names:\n"{suggested_filenames}
-            }))
-        } else {
-            Some(RuleDiagnostic::new(
-                rule_category!(),
-                None as Option<TextRange>,
-                markup! {
-                    "The file extension should be in lowercase without any special characters."
-                },
-            ))
+                let suggested_filenames = allowed_cases
+                    .iter()
+                    .map(|case| file_name.replacen(trimmed_name, &case.convert(trimmed_name), 1))
+                    // Deduplicate suggestions
+                    .collect::<FxHashSet<_>>()
+                    .into_iter()
+                    .collect::<SmallVec<[_; 3]>>()
+                    .join("\n");
+                Some(RuleDiagnostic::new(
+                    rule_category!(),
+                    None as Option<TextRange>,
+                    markup! {
+                        "The filename"{trimmed_info}" should be in "<Emphasis>{allowed_case_names}</Emphasis>"."
+                    },
+                ).note(markup! {
+                    "The filename could be renamed to one of the following names:\n"{suggested_filenames}
+                }))
+            },
+            FileNamingConventionState::Extension => {
+                Some(RuleDiagnostic::new(
+                    rule_category!(),
+                    None as Option<TextRange>,
+                    markup! {
+                        "The file extension should be in lowercase without any special characters."
+                    },
+                ))
+            },
         }
     }
 }
 
 #[derive(Debug)]
 pub(crate) enum FileNamingConventionState {
+    /// The name is not in ASCII while `reuireAscii` is enabled.
+    Ascii,
+    /// The filename doesn't match the expected case
     Filename,
+    /// An extension is not in lowercase
     Extension,
 }
 
@@ -217,23 +242,24 @@ pub(crate) enum FileNamingConventionState {
 pub struct FilenamingConventionOptions {
     /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
     /// This does not affect other [Case].
-    #[serde(
-        default = "default_strict_case",
-        skip_serializing_if = "is_default_strict_case"
-    )]
+    #[serde(default = "enabled", skip_serializing_if = "is_enabled")]
     pub strict_case: bool,
+
+    /// If `false`, then non-ASCII characters are allowed.
+    #[serde(default = "enabled", skip_serializing_if = "is_enabled")]
+    pub require_ascii: bool,
 
     /// Allowed cases for _TypeScript_ `enum` member names.
     #[serde(default, skip_serializing_if = "is_default_filename_cases")]
     pub filename_cases: FilenameCases,
 }
 
-const fn default_strict_case() -> bool {
+const fn enabled() -> bool {
     true
 }
 
-const fn is_default_strict_case(strict_case: &bool) -> bool {
-    *strict_case == default_strict_case()
+const fn is_enabled(value: &bool) -> bool {
+    *value
 }
 
 fn is_default_filename_cases(value: &FilenameCases) -> bool {
@@ -243,7 +269,8 @@ fn is_default_filename_cases(value: &FilenameCases) -> bool {
 impl Default for FilenamingConventionOptions {
     fn default() -> Self {
         Self {
-            strict_case: default_strict_case(),
+            strict_case: enabled(),
+            require_ascii: enabled(),
             filename_cases: FilenameCases::default(),
         }
     }

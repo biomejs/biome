@@ -93,12 +93,13 @@ impl Case {
         for current_char in chars {
             result = match current_char {
                 '-' => match result {
-                    Case::Kebab | Case::Lower => Case::Kebab,
+                    Case::Kebab | Case::Lower if previous_char != '-' => Case::Kebab,
                     _ => return Case::Unknown,
                 },
                 '_' => match result {
-                    Case::Constant | Case::NumberableCapital | Case::Upper => Case::Constant,
-                    Case::Lower | Case::Snake => Case::Snake,
+                    Case::Constant | Case::Snake if previous_char != '_' => result,
+                    Case::NumberableCapital | Case::Upper => Case::Constant,
+                    Case::Lower => Case::Snake,
                     _ => return Case::Unknown,
                 },
                 _ if current_char.is_uppercase() => {
@@ -127,6 +128,10 @@ impl Case {
                 _ => return Case::Unknown,
             };
             previous_char = current_char;
+        }
+        // The last char cannot be a delimiter
+        if matches!(previous_char, '-' | '_') {
+            return Case::Unknown;
         }
         result
     }
@@ -330,7 +335,18 @@ mod tests {
         assert_eq!(Case::identify("100", no_effect), Case::Uni);
         assert_eq!(Case::identify("안녕하세요", no_effect), Case::Uni);
 
+        // don't allow identifier that starts/ends with a delimiter
+        assert_eq!(Case::identify("-a", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("_a", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("a-", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("a_", no_effect), Case::Unknown);
+
+        // don't allow identifier that use consecutive delimiters
+        assert_eq!(Case::identify("a--a", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("a__a", no_effect), Case::Unknown);
+
         assert_eq!(Case::identify("", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("-", no_effect), Case::Unknown);
         assert_eq!(Case::identify("_", no_effect), Case::Unknown);
         assert_eq!(Case::identify("안녕하세요ABC", no_effect), Case::Unknown);
         assert_eq!(Case::identify("안녕하세요abc", no_effect), Case::Unknown);
