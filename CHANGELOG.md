@@ -199,6 +199,27 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   Contributed by @Conaclos
 
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention) now supports [unicase](https://en.wikipedia.org/wiki/Unicase) letters ([#1786](https://github.com/biomejs/biome/issues/1786)).
+
+  [unicase](https://en.wikipedia.org/wiki/Unicase) letters have a single case: they are neither uppercase nor lowercase.
+  Previously, Biome reported names in unicase as invalid.
+  It now accepts a name in unicase everywhere.
+
+  The following code is now accepted:
+
+  ```js
+  const 안녕하세요 = { 안녕하세요: 0 };
+  ```
+
+  We still reject a name that mixes unicase characters with lowercase or uppercase characters:
+  The following names are rejected:
+
+  ```js
+  const A안녕하세요 = { a안녕하세요: 0 };
+  ```
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Fix [#1651](https://github.com/biomejs/biome/issues/1651). [noVar](https://biomejs.dev/linter/rules/no-var/) now ignores TsGlobalDeclaration. Contributed by @vasucp1207

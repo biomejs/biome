@@ -304,7 +304,8 @@ impl Rule for UseNamingConvention {
         }
         let trimmed_name = trim_underscore_dollar(name);
         let actual_case = Case::identify(trimmed_name, options.strict_case);
-        if trimmed_name.is_empty()
+        if actual_case == Case::Uni
+            || trimmed_name.is_empty()
             || allowed_cases
                 .iter()
                 .any(|&expected_style| actual_case.is_compatible_with(expected_style))
@@ -314,7 +315,8 @@ impl Rule for UseNamingConvention {
         }
         let preferred_case = element.allowed_cases(ctx.options())[0];
         let new_trimmed_name = preferred_case.convert(trimmed_name);
-        let suggested_name = name.replace(trimmed_name, &new_trimmed_name);
+        let suggested_name = (trimmed_name != new_trimmed_name)
+            .then(|| name.replacen(trimmed_name, &new_trimmed_name, 1));
         Some(State {
             element,
             suggested_name,
@@ -357,26 +359,33 @@ impl Rule for UseNamingConvention {
                 }));
             }
         }
-
-        Some(RuleDiagnostic::new(
+        let diagnostic = RuleDiagnostic::new(
             rule_category!(),
             ctx.query().syntax().text_trimmed_range(),
             markup! {
                 "This "<Emphasis>{element.to_string()}</Emphasis>" name"{trimmed_info}" should be in "<Emphasis>{allowed_case_names}</Emphasis>"."
             },
-        ).note(markup! {
-            "The name could be renamed to `"{suggested_name}"`."
-        }))
+        );
+        Some(if let Some(suggested_name) = suggested_name {
+            diagnostic.note(markup! {
+                "The name could be renamed to `"{suggested_name}"`."
+            })
+        } else {
+            diagnostic
+        })
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let node = ctx.query();
-        let model = ctx.model();
-        let mut mutation = ctx.root().begin();
         let State {
             element,
             suggested_name,
         } = state;
+        let Some(suggested_name) = suggested_name else {
+            return None;
+        };
+        let node = ctx.query();
+        let model = ctx.model();
+        let mut mutation = ctx.root().begin();
         let renamable = match node {
             AnyIdentifierBindingLike::JsIdentifierBinding(binding) => {
                 if binding.is_exported(model) {
@@ -452,7 +461,7 @@ impl AnyIdentifierBindingLike {
 #[derive(Debug)]
 pub(crate) struct State {
     element: Named,
-    suggested_name: String,
+    suggested_name: Option<String>,
 }
 
 /// Rule's options.
