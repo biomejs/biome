@@ -11,7 +11,7 @@ expression: content
     "rules": {
       "all": false,
       "nursery": {
-        "noUnusedDependencies": "error"
+        "noUndeclaredDependencies": "error"
       }
     }
   }
@@ -37,9 +37,9 @@ import "lodash";
 # Termination Message
 
 ```block
-configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome exited because the configuration resulted in errors. Please fix them.
+  × Some errors were emitted while running checks.
   
 
 
@@ -48,54 +48,32 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-biome.json:7:9 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fix.js:2:8 lint/nursery/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Found an unknown key `noUnusedDependencies`.
+  × The current dependency isn't specified in your package.json.
   
-    5 │       "all": false,
-    6 │       "nursery": {
-  > 7 │         "noUnusedDependencies": "error"
-      │         ^^^^^^^^^^^^^^^^^^^^^^
-    8 │       }
-    9 │     }
+    1 │ import "react";
+  > 2 │ import "lodash";
+      │        ^^^^^^^^
+    3 │ 		
   
-  i Accepted keys
+  i This could lead to errors.
   
-  - recommended
-  - all
-  - noConsole
-  - noDuplicateJsonKeys
-  - noEmptyBlockStatements
-  - noEmptyTypeParameters
-  - noFocusedTests
-  - noGlobalAssign
-  - noGlobalEval
-  - noInvalidUseBeforeDeclaration
-  - noMisleadingCharacterClass
-  - noNodejsModules
-  - noReExportAll
-  - noRestrictedImports
-  - noSkippedTests
-  - noThenProperty
-  - noUndeclaredDependencies
-  - noUnusedImports
-  - noUnusedPrivateClassMembers
-  - noUselessLoneBlockStatements
-  - noUselessTernary
-  - useAwait
-  - useConsistentArrayType
-  - useExportType
-  - useFilenamingConvention
-  - useForOf
-  - useGroupedTypeImport
-  - useImportRestrictions
-  - useImportType
-  - useNodejsImportProtocol
-  - useNumberNamespace
-  - useShorthandFunctionType
-  - useSortedClasses
+  i Add the dependency in your manifest.
   
 
+```
+
+```block
+fix.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file contains diagnostics that needs to be addressed.
+  
+
+```
+
+```block
+Checked 1 file(s) in <TIME>
 ```
 
 

@@ -2719,7 +2719,7 @@ fn no_unused_dependencies() {
     "rules": {
       "all": false,
       "nursery": {
-        "noUnusedDependencies": "error"
+        "noUndeclaredDependencies": "error"
       }
     }
   }

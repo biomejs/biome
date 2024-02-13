@@ -2023,7 +2023,7 @@ async fn pull_diagnostics_from_manifest() -> Result<()> {
         "linter": {
             "rules": {
                 "all": false,
-                "nursery": { "noUnusedDependencies": "error" }
+                "nursery": { "noDeclaredDependencies": "error" }
             }
         }
     }"#;
