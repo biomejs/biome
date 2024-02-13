@@ -41,7 +41,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-
-      - uses: pnpm/action-setup@v2.2.4
+      - uses: pnpm/action-setup@v3
         with:
           version: 8
       - name: Run Biome Format
@@ -55,7 +55,6 @@ jobs:
     steps:
       - name: Checkout PR Branch
         uses: actions/checkout@v4
-      - uses: jetli/wasm-pack-action@v0.4.0
       - name: Cache pnpm modules
         uses: actions/cache@v4
         with:
@@ -63,11 +62,13 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-
-      - uses: pnpm/action-setup@v2.2.4
+      - uses: pnpm/action-setup@v3
         with:
           version: 8
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Build WASM module for the web
         run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --scope biomedev crates/biome_wasm
       - name: Install libraries
