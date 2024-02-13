@@ -218,8 +218,8 @@ pub enum BiomeCommand {
         #[bpaf(long("organize-imports-enabled"), argument("true|false"), optional)]
         organize_imports_enabled: Option<bool>,
 
-        #[bpaf(external(partial_configuration), hide_usage)]
-        configuration: PartialConfiguration,
+        #[bpaf(external(partial_configuration), hide_usage, optional)]
+        configuration: Option<PartialConfiguration>,
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
