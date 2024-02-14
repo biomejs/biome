@@ -5,6 +5,7 @@ use biome_analyze::declare_group;
 pub(crate) mod no_empty_block_statements;
 pub(crate) mod no_empty_type_parameters;
 pub(crate) mod no_focused_tests;
+pub(crate) mod no_namespace_import;
 pub(crate) mod no_nodejs_modules;
 pub(crate) mod no_restricted_imports;
 pub(crate) mod no_skipped_tests;
@@ -27,6 +28,7 @@ declare_group! {
             self :: no_empty_block_statements :: NoEmptyBlockStatements ,
             self :: no_empty_type_parameters :: NoEmptyTypeParameters ,
             self :: no_focused_tests :: NoFocusedTests ,
+            self :: no_namespace_import :: NoNamespaceImport ,
             self :: no_nodejs_modules :: NoNodejsModules ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_skipped_tests :: NoSkippedTests ,

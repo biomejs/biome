@@ -111,6 +111,7 @@ define_categories! {
     "lint/nursery/noGlobalEval": "https://biomejs.dev/linter/rules/no-global-eval",
     "lint/nursery/noInvalidUseBeforeDeclaration": "https://biomejs.dev/linter/rules/no-invalid-use-before-declaration",
     "lint/nursery/noMisleadingCharacterClass": "https://biomejs.dev/linter/rules/no-misleading-character-class",
+    "lint/nursery/noNamespaceImport": "https://biomejs.dev/linter/rules/no-namespace-import",
     "lint/nursery/noNodejsModules": "https://biomejs.dev/linter/rules/no-nodejs-modules",
     "lint/nursery/noReExportAll": "https://biomejs.dev/linter/rules/no-re-export-all",
     "lint/nursery/noRestrictedImports": "https://biomejs.dev/linter/rules/no-restricted-imports",

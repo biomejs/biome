@@ -1359,6 +1359,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNamespaceImport": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNodejsModules": {
 					"description": "Forbid the use of Node.js builtin modules.",
 					"anyOf": [
