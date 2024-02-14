@@ -232,6 +232,7 @@ impl ops::Deref for GreenNode {
     fn deref(&self) -> &GreenNodeData {
         unsafe {
             let repr: &Repr = &self.ptr;
+            #[allow(invalid_reference_casting)]
             let repr: &ReprThin = &*(repr as *const Repr as *const ReprThin);
             mem::transmute::<&ReprThin, &GreenNodeData>(repr)
         }
