@@ -33,7 +33,9 @@ notTemplateFunction.div`px-2 foo p-4 bar`;
 // nested values
 /* SHOULD emit diagnostics (class attribute supported by default) */
 <div class={"px-2 foo p-4 bar"} />;
+<div class={`px-2 foo p-4 bar`} />;
 <div class={["px-2 foo p-4 bar"]} />;
+<div class={[`px-2 foo p-4 bar`]} />;
 <div
 	class={{
 		// TODO: property should be sorted

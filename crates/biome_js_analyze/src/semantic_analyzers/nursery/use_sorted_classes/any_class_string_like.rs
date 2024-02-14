@@ -86,17 +86,18 @@ impl AnyClassStringLike {
             AnyClassStringLike::JsTemplateChunkElement(template) => {
                 for ancestor in template.syntax().ancestors().skip(1) {
                     if let Some(template_expression) = JsTemplateExpression::cast_ref(&ancestor) {
-                        if let Some(tag) = template_expression.tag() {
-                            match tag {
-                                AnyJsExpression::JsIdentifierExpression(tag) => {
-                                    let name = tag.name().ok()?.name().ok()?;
-                                    if options.has_function(name.text()) {
-                                        return Some(true);
-                                    }
-                                }
-
-                                _ => {}
+                        if let Some(AnyJsExpression::JsIdentifierExpression(tag)) =
+                            template_expression.tag()
+                        {
+                            let name = tag.name().ok()?.name().ok()?;
+                            if options.has_function(name.text()) {
+                                return Some(true);
                             }
+                        }
+                    } else if let Some(jsx_attribute) = JsxAttribute::cast_ref(&ancestor) {
+                        let attribute_name = get_attribute_name(&jsx_attribute)?;
+                        if options.has_attribute(attribute_name.text()) {
+                            return Some(true);
                         }
                     }
                 }
