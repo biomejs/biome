@@ -268,6 +268,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
+- [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type) no longer reports valid use of the void type in conditional types ([#1812](https://github.com/biomejs/biome/issues/1812)).
+
+  The rule no longer reports the following code:
+
+  ```ts
+  type Conditional<T> = T extends void ? Record<string, never> : T
+  ```
+
+  Contributed by @lucasweng
+
 - [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) no longer reports valid use of binding patterns ([#1648](https://github.com/biomejs/biome/issues/1648)).
 
   The rule no longer reports the following code:
