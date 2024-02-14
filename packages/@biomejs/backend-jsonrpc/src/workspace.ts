@@ -900,7 +900,7 @@ export interface Nursery {
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow the use of namespace imports.
 	 */
 	noNamespaceImport?: RuleConfiguration;
 	/**

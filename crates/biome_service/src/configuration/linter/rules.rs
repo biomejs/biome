@@ -2248,7 +2248,7 @@ pub struct Nursery {
     #[doc = "Disallow characters made with multiple code points in character class syntax."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misleading_character_class: Option<RuleConfiguration>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow the use of namespace imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_namespace_import: Option<RuleConfiguration>,
     #[doc = "Forbid the use of Node.js builtin modules."]

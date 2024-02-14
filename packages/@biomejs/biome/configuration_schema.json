@@ -1360,7 +1360,7 @@
 					]
 				},
 				"noNamespaceImport": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow the use of namespace imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
