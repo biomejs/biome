@@ -82,7 +82,7 @@ pub struct CliOptions {
 
 impl CliOptions {
     /// Computes the [ConfigurationBasePath] based on the options passed by the user
-    pub(crate) fn as_configuration_base_path(&self) -> ConfigurationBasePath {
+    pub(crate) fn to_configuration_base_path(&self) -> ConfigurationBasePath {
         match self.config_path.as_ref() {
             None => ConfigurationBasePath::default(),
             Some(path) => ConfigurationBasePath::FromUser(PathBuf::from(path)),

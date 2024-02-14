@@ -268,3 +268,9 @@ impl Debug for MarkupBuf {
         Ok(())
     }
 }
+
+impl From<Markup<'_>> for MarkupBuf {
+    fn from(value: Markup<'_>) -> Self {
+        value.to_owned()
+    }
+}

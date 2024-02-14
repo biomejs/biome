@@ -8,6 +8,16 @@ pub const CONFIG_FORMAT: &str = r#"{
 }
 "#;
 
+pub const CONFIG_FORMAT_JS: &str = r#"export const config = {
+  formatter: {
+    enabled: true,
+    lineWidth: 160,
+    indentStyle: "space",
+    indentSize: 6,
+  }
+};
+"#;
+
 pub const CONFIG_FORMAT_JSONC: &str = r#"{
   // Formatting options
   "formatter": {

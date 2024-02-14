@@ -32,7 +32,7 @@ pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(
 
     let loaded_configuration = load_configuration(
         &session.app.fs,
-        payload.cli_options.as_configuration_base_path(),
+        payload.cli_options.to_configuration_base_path(),
     )?;
 
     validate_configuration_diagnostics(

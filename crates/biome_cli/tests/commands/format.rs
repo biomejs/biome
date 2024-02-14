@@ -1,7 +1,8 @@
 use crate::configs::{
     CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FORMAT,
     CONFIG_FORMATTER_AND_FILES_IGNORE, CONFIG_FORMATTER_IGNORED_DIRECTORIES,
-    CONFIG_FORMATTER_IGNORED_FILES, CONFIG_FORMAT_JSONC, CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
+    CONFIG_FORMATTER_IGNORED_FILES, CONFIG_FORMAT_JS, CONFIG_FORMAT_JSONC, CONFIG_ISSUE_3175_1,
+    CONFIG_ISSUE_3175_2,
 };
 use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
 use crate::{
@@ -1135,6 +1136,37 @@ fn format_with_configuration() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_with_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_with_js_configuration() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    fs.set_working_directory("/");
+
+    let file_path = Path::new("/biome.config.js");
+    fs.insert(file_path.into(), CONFIG_FORMAT_JS.as_bytes());
+
+    let file_path = Path::new("/file.js");
+    fs.insert(file_path.into(), CUSTOM_FORMAT_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(&["format", "/file.js", "--write"]),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, CUSTOM_FORMAT_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_with_js_configuration",
         fs,
         console,
         result,

@@ -123,6 +123,7 @@ tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
 bitflags          = "2.3.1"
+boa_engine        = { git = "https://github.com/boa-dev/boa.git", branch = "main" }
 bpaf              = { version = "0.9.5", features = ["derive"] }
 convert_case      = "0.6.0"
 countme           = "3.0.1"

@@ -28,6 +28,7 @@ pub struct MemoryFileSystem {
     errors: FxHashMap<PathBuf, ErrorEntry>,
     allow_write: bool,
     on_get_changed_files: OnGetChangedFiles,
+    working_directory: Option<PathBuf>,
 }
 
 impl Default for MemoryFileSystem {
@@ -37,6 +38,7 @@ impl Default for MemoryFileSystem {
             errors: Default::default(),
             allow_write: true,
             on_get_changed_files: None,
+            working_directory: None,
         }
     }
 }
@@ -107,6 +109,10 @@ impl MemoryFileSystem {
     ) {
         self.on_get_changed_files = Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(cfn)))));
     }
+
+    pub fn set_working_directory(&mut self, path: impl Into<PathBuf>) {
+        self.working_directory = Some(path.into());
+    }
 }
 
 impl FileSystem for MemoryFileSystem {
@@ -176,7 +182,7 @@ impl FileSystem for MemoryFileSystem {
     }
 
     fn working_directory(&self) -> Option<PathBuf> {
-        None
+        self.working_directory.clone()
     }
 
     fn path_exists(&self, path: &Path) -> bool {

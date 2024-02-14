@@ -18,18 +18,28 @@ pub const ROME_JSON: &str = "rome.json";
 pub struct ConfigName;
 
 impl ConfigName {
-    const BIOME_JSON: [&'static str; 2] = ["biome.json", "biome.jsonc"];
+    const BIOME_JSON: &'static str = "biome.json";
+    const BIOME_JSONC: &'static str = "biome.jsonc";
+    const BIOME_CONFIG_JS: &'static str = "biome.config.js";
 
     pub const fn biome_json() -> &'static str {
-        Self::BIOME_JSON[0]
+        Self::BIOME_JSON
     }
 
     pub const fn biome_jsonc() -> &'static str {
-        Self::BIOME_JSON[1]
+        Self::BIOME_JSONC
     }
 
-    pub const fn file_names() -> [&'static str; 2] {
-        Self::BIOME_JSON
+    pub const fn biome_config_js() -> &'static str {
+        Self::BIOME_CONFIG_JS
+    }
+
+    pub const fn file_names() -> [&'static str; 3] {
+        [
+            &Self::BIOME_JSON,
+            &Self::BIOME_JSONC,
+            &Self::BIOME_CONFIG_JS,
+        ]
     }
 }
 

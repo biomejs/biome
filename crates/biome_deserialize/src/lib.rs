@@ -31,6 +31,7 @@
 //!
 mod diagnostics;
 mod impls;
+pub mod js;
 pub mod json;
 mod merge;
 pub mod string_set;

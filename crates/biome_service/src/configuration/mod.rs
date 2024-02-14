@@ -13,8 +13,8 @@ pub mod organize_imports;
 mod overrides;
 pub mod vcs;
 
-use crate::configuration::diagnostics::CantLoadExtendFile;
 pub use crate::configuration::diagnostics::ConfigurationDiagnostic;
+use crate::configuration::diagnostics::{CantLoadExtendFile, EvaluationError};
 pub(crate) use crate::configuration::generated::push_to_analyzer_rules;
 use crate::configuration::organize_imports::{
     partial_organize_imports, OrganizeImports, PartialOrganizeImports,
@@ -27,6 +27,7 @@ use crate::settings::{WorkspaceSettings, DEFAULT_FILE_SIZE_LIMIT};
 use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
 use biome_console::markup;
+use biome_deserialize::js::deserialize_from_js_value;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge, StringSet};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
@@ -63,6 +64,7 @@ use std::io::ErrorKind;
 use std::iter::FusedIterator;
 use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 
 /// The configuration that is contained inside the file `biome.json`
 #[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
@@ -274,54 +276,113 @@ fn load_config(
     };
     let should_error = base_path.is_from_user();
 
-    let auto_search_result;
     let result = file_system.auto_search(
         configuration_directory.clone(),
         ConfigName::file_names().as_slice(),
         should_error,
     );
-    if let Ok(result) = result {
-        if result.is_none() {
-            auto_search_result = file_system.auto_search(
-                configuration_directory.clone(),
-                [deprecated_config_name].as_slice(),
-                should_error,
-            )?;
-        } else {
-            auto_search_result = result;
-        }
-    } else {
-        auto_search_result = file_system.auto_search(
+    let auto_search_result = match result {
+        Ok(None) | Err(_) => file_system.auto_search(
             configuration_directory.clone(),
             [deprecated_config_name].as_slice(),
             should_error,
-        )?;
+        )?,
+        Ok(result) => result,
+    };
+
+    let Some(auto_search_result) = auto_search_result else {
+        return Ok(None);
+    };
+
+    let AutoSearchResult {
+        content,
+        directory_path,
+        file_path,
+    } = auto_search_result;
+
+    let file_name = file_path.file_name().and_then(|s| s.to_str());
+
+    if file_name == Some(ConfigName::biome_config_js()) {
+        return load_js_config(content, file_path, directory_path);
     }
 
-    if let Some(auto_search_result) = auto_search_result {
-        let AutoSearchResult {
-            content,
-            directory_path,
-            file_path,
-        } = auto_search_result;
-        let parser_options =
-            if file_path.file_name().and_then(|s| s.to_str()) == Some(ConfigName::biome_jsonc()) {
-                JsonParserOptions::default()
-                    .with_allow_comments()
-                    .with_allow_trailing_commas()
-            } else {
-                JsonParserOptions::default()
-            };
-        let deserialized =
-            deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
-        Ok(Some(ConfigurationPayload {
-            deserialized,
-            configuration_file_path: file_path,
-            configuration_directory_path: directory_path,
-        }))
+    let parser_options = if file_name == Some(ConfigName::biome_jsonc()) {
+        JsonParserOptions::default()
+            .with_allow_comments()
+            .with_allow_trailing_commas()
     } else {
-        Ok(None)
+        JsonParserOptions::default()
+    };
+    let deserialized =
+        deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
+    Ok(Some(ConfigurationPayload {
+        deserialized,
+        configuration_file_path: file_path,
+        configuration_directory_path: directory_path,
+    }))
+}
+
+fn load_js_config(content: String, file_path: PathBuf, directory_path: PathBuf) -> LoadConfig {
+    use boa_engine::{
+        builtins::promise::PromiseState,
+        js_string,
+        module::{Module, SimpleModuleLoader},
+        Context, JsError, JsValue, Source,
+    };
+
+    let loader = Rc::new(
+        SimpleModuleLoader::new(&directory_path)
+            .map_err(|err| WorkspaceError::Configuration(err.into()))?,
+    );
+
+    let mut context = Context::builder()
+        .module_loader(loader.clone())
+        .build()
+        .map_err(|err| WorkspaceError::Configuration(err.into()))?;
+    let source = Source::from_reader(content.as_bytes(), Some(&file_path));
+
+    let module = Module::parse(source, None, &mut context)
+        .map_err(|err| WorkspaceError::Configuration(err.into()))?;
+    loader.insert(file_path.clone(), module.clone());
+
+    let promise_result = module.load_link_evaluate(&mut context);
+
+    // Allow the result promise to resolve.
+    context.run_jobs();
+
+    match promise_result.state() {
+        PromiseState::Pending => {
+            return Err(WorkspaceError::Configuration(
+                ConfigurationDiagnostic::EvaluationError(
+                    EvaluationError::from(markup!("Configuration file didn't finish evaluation"))
+                        .with_advice(markup!(
+                            "Your script may contain a promise that didn't resolve"
+                        )),
+                ),
+            ))
+        }
+        PromiseState::Fulfilled(value) => {
+            assert_eq!(value, JsValue::undefined());
+        }
+        PromiseState::Rejected(err) => {
+            return Err(WorkspaceError::Configuration(
+                JsError::from_opaque(err).into(),
+            ));
+        }
     }
+
+    let namespace = module.namespace(&mut context);
+    let config = namespace
+        .get(js_string!("config"), &mut context)
+        .map_err(|err| WorkspaceError::Configuration(err.into()))?;
+
+    println!("exported config = {}", config.display());
+
+    Ok(Some(ConfigurationPayload {
+        deserialized: deserialize_from_js_value(&mut context, config),
+        configuration_file_path: file_path,
+        configuration_directory_path: directory_path,
+    }))
 }
 
 /// Creates a new configuration on file system
