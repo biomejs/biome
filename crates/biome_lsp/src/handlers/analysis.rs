@@ -46,9 +46,7 @@ pub(crate) fn code_actions(
             .build(),
     })?;
 
-    if !file_features.supports_for(&FeatureName::Lint)
-        && !file_features.supports_for(&FeatureName::OrganizeImports)
-    {
+    if !file_features.supports_lint() && !file_features.supports_organize_imports() {
         debug!("Linter and organize imports are both disabled");
         return Ok(Some(Vec::new()));
     }
@@ -118,7 +116,7 @@ pub(crate) fn code_actions(
                 return None;
             }
             if action.category.matches("source.organizeImports.biome")
-                && !file_features.supports_for(&FeatureName::OrganizeImports)
+                && !file_features.supports_organize_imports()
             {
                 return None;
             }
@@ -176,7 +174,7 @@ fn fix_all(
             path: rome_path.clone(),
             feature: vec![FeatureName::Format],
         })?
-        .supports_for(&FeatureName::Format);
+        .supports_format();
     let fixed = session.workspace.fix_file(FixFileParams {
         path: rome_path,
         fix_file_mode: FixFileMode::SafeFixes,

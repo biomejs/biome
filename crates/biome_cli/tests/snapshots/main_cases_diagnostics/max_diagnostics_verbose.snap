@@ -70,14 +70,6 @@ src/file.js format ━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-src/file.js ci ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The file contains diagnostics that needs to be addressed.
-  
-
-```
-
-```block
 src/folder_0/tsconfig.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_0/tsconfig.json is protected because is handled by another tool. Biome won't process it.

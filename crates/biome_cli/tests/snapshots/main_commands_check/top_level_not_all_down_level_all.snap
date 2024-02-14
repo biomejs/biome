@@ -105,14 +105,6 @@ fix.js:4:5 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━
 ```
 
 ```block
-fix.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The file contains diagnostics that needs to be addressed.
-  
-
-```
-
-```block
 fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Formatter would have printed the following content:
@@ -128,14 +120,6 @@ fix.js format ━━━━━━━━━━━━━━━━━━━━━━
       4 │ + const·FOO·=·"FOO";
       5 │ + var·x,·y;
       6 │ + 
-  
-
-```
-
-```block
-fix.js check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The file contains diagnostics that needs to be addressed.
   
 
 ```

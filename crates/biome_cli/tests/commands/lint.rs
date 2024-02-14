@@ -188,7 +188,7 @@ fn maximum_diagnostics() {
             let content = format!("{:?}", m.content);
             content.contains("The number of diagnostics exceeds the number allowed by Biome")
                 && content.contains("Diagnostics not shown")
-                && content.contains("77")
+                && content.contains("76")
         }));
 
     assert_cli_snapshot(SnapshotPayload::new(
