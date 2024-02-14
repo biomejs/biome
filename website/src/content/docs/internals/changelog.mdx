@@ -37,6 +37,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Add a new command `biome migrate prettier`. The command will read the file `.prettierrc`/`prettier.json` and `.prettierignore` and map its configuration to Biome's one.
   Due to the different nature of `.prettierignore` globs and Biome's globs, it's **highly** advised to make sure that those still work under Biome.
 
+- Now the file name printed in the diagnostics is clickable. If you run the CLI from your editor, you can <kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd> + Click on the file name, and the editor will open said file. If row and columns are specified e.g. `file.js:32:7`, the editor will set the cursor right in that position. Contributed by @ematipico
+
 #### Bug fixes
 
 - Don't process files under an ignored directory.
