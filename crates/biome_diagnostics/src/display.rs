@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::{io, iter};
 
 use biome_console::{fmt, markup, HorizontalLine, Markup, MarkupBuf, MarkupElement, MarkupNode};
@@ -91,7 +92,15 @@ impl<'fmt, D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'fmt, D> {
         };
 
         if let Some(name) = file_name {
-            fmt.write_str(name)?;
+            let path_name = Path::new(name);
+            if path_name.is_absolute() {
+                let link = format!("file://{}", name);
+                fmt.write_markup(markup! {
+                    <Hyperlink href={link}>{name}</Hyperlink>
+                })?;
+            } else {
+                fmt.write_str(name)?;
+            }
 
             // Print the line and column position if the location has a span and source code
             // (the source code is necessary to convert a byte offset into a line + column)
