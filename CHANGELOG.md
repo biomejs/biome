@@ -12,7 +12,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Analyzer
 
-#### Bug fixed
+#### Bug fixes
 
 - Fix [#1748](https://github.com/biomejs/biome/issues/1748). Now for the following case we won't provide an unsafe fix for the `noNonNullAssertion` rule:
 
@@ -58,7 +58,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```
   Contributed by @ematipico
 
-### Enhancements
+#### Enhancements
 
 - Removed a superfluous diagnostic that was printed during the linting/check phase of a file:
 
@@ -267,6 +267,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   Contributed by @Conaclos
 
 #### Bug fixes
+
+- Fix missing link in [noStaticOnlyClass](https://biomejs.dev/linter/rules/no-static-only-class) documentation. Contributed by @yndajas
 
 - [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type) no longer reports valid use of the void type in conditional types ([#1812](https://github.com/biomejs/biome/issues/1812)).
 
