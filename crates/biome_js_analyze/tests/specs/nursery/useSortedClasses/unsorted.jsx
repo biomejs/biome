@@ -23,8 +23,8 @@
 // functions
 /* SHOULD NOT emit diagnostics (functions not specified in options) */
 clsx("px-2 foo p-4 bar");
-// TODO: tagged template literals are not supported yet
 tw`px-2 foo p-4 bar`;
+// TODO: tagged template literals with static member expressions
 tw.div`px-2 foo p-4 bar`;
 notClassFunction("px-2 foo p-4 bar");
 notTemplateFunction`px-2 foo p-4 bar`;

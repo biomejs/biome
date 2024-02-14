@@ -1,7 +1,7 @@
 use super::UtilityClassSortingOptions;
 use biome_js_syntax::{
-    JsCallArguments, JsCallExpression, JsStringLiteralExpression, JsTemplateChunkElement,
-    JsxAttribute, JsxString,
+    AnyJsExpression, JsCallArguments, JsCallExpression, JsStringLiteralExpression,
+    JsTemplateChunkElement, JsTemplateExpression, JsxAttribute, JsxString,
 };
 use biome_rowan::{declare_node_union, AstNode, TokenText};
 
@@ -83,7 +83,26 @@ impl AnyClassStringLike {
 
                 None
             }
-            AnyClassStringLike::JsTemplateChunkElement(_) => None,
+            AnyClassStringLike::JsTemplateChunkElement(template) => {
+                for ancestor in template.syntax().ancestors().skip(1) {
+                    if let Some(template_expression) = JsTemplateExpression::cast_ref(&ancestor) {
+                        if let Some(tag) = template_expression.tag() {
+                            match tag {
+                                AnyJsExpression::JsIdentifierExpression(tag) => {
+                                    let name = tag.name().ok()?.name().ok()?;
+                                    if options.has_function(name.text()) {
+                                        return Some(true);
+                                    }
+                                }
+
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+
+                None
+            }
         }
     }
 
