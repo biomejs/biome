@@ -361,6 +361,12 @@ impl From<FileSystemDiagnostic> for WorkspaceError {
     }
 }
 
+impl From<ConfigurationDiagnostic> for WorkspaceError {
+    fn from(value: ConfigurationDiagnostic) -> Self {
+        Self::Configuration(value)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "internalError/fs",

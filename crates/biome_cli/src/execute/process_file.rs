@@ -10,7 +10,6 @@ use crate::execute::process_file::format::format;
 use crate::execute::process_file::lint::lint;
 use crate::execute::traverse::TraversalOptions;
 use crate::execute::TraversalMode;
-use crate::CliDiagnostic;
 use biome_diagnostics::{category, DiagnosticExt, DiagnosticTags, Error};
 use biome_fs::RomePath;
 use biome_service::workspace::{FeatureName, FeaturesBuilder, SupportKind, SupportsFeatureParams};
@@ -34,7 +33,7 @@ pub(crate) enum Message {
         /// Suggested fixes skipped during the lint traversal
         skipped_suggested_fixes: u32,
     },
-    ApplyError(CliDiagnostic),
+    Failure,
     Error(Error),
     Diagnostics {
         name: String,
@@ -51,8 +50,11 @@ pub(crate) enum Message {
 }
 
 impl Message {
-    pub(crate) const fn is_diagnostic(&self) -> bool {
-        matches!(self, Message::Diff { .. } | Message::Diagnostics { .. })
+    pub(crate) const fn is_error(&self) -> bool {
+        matches!(
+            self,
+            Message::Diff { .. } | Message::Diagnostics { .. } | Message::Failure
+        )
     }
 }
 
@@ -238,11 +240,8 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
                 // the unsupported case should be handled already at this point
                 format(shared_context, path)
             }
-            TraversalMode::Check { .. } => {
-                check_file(shared_context, path, &file_features, category!("check"))
-            }
-            TraversalMode::CI { .. } => {
-                check_file(shared_context, path, &file_features, category!("ci"))
+            TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
+                check_file(shared_context, path, &file_features)
             }
             TraversalMode::Migrate { .. } => {
                 unreachable!("The migration should not be called for this file")

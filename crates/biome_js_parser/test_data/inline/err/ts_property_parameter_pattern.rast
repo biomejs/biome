@@ -69,12 +69,18 @@ JsModule {
                                         JsArrayBindingPattern {
                                             l_brack_token: L_BRACK@50..51 "[" [] [],
                                             elements: JsArrayBindingPatternElementList [
-                                                JsIdentifierBinding {
-                                                    name_token: IDENT@51..52 "a" [] [],
+                                                JsArrayBindingPatternElement {
+                                                    pattern: JsIdentifierBinding {
+                                                        name_token: IDENT@51..52 "a" [] [],
+                                                    },
+                                                    init: missing (optional),
                                                 },
                                                 COMMA@52..54 "," [] [Whitespace(" ")],
-                                                JsIdentifierBinding {
-                                                    name_token: IDENT@54..55 "b" [] [],
+                                                JsArrayBindingPatternElement {
+                                                    pattern: JsIdentifierBinding {
+                                                        name_token: IDENT@54..55 "b" [] [],
+                                                    },
+                                                    init: missing (optional),
                                                 },
                                             ],
                                             r_brack_token: R_BRACK@55..56 "]" [] [],
@@ -153,11 +159,15 @@ JsModule {
                   1: JS_ARRAY_BINDING_PATTERN@50..56
                     0: L_BRACK@50..51 "[" [] []
                     1: JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST@51..55
-                      0: JS_IDENTIFIER_BINDING@51..52
-                        0: IDENT@51..52 "a" [] []
+                      0: JS_ARRAY_BINDING_PATTERN_ELEMENT@51..52
+                        0: JS_IDENTIFIER_BINDING@51..52
+                          0: IDENT@51..52 "a" [] []
+                        1: (empty)
                       1: COMMA@52..54 "," [] [Whitespace(" ")]
-                      2: JS_IDENTIFIER_BINDING@54..55
-                        0: IDENT@54..55 "b" [] []
+                      2: JS_ARRAY_BINDING_PATTERN_ELEMENT@54..55
+                        0: JS_IDENTIFIER_BINDING@54..55
+                          0: IDENT@54..55 "b" [] []
+                        1: (empty)
                     2: R_BRACK@55..56 "]" [] []
             2: R_PAREN@56..58 ")" [] [Whitespace(" ")]
           3: JS_FUNCTION_BODY@58..61

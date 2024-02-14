@@ -5,6 +5,7 @@ expression: invalidTopLevelVariable.ts
 # Input
 ```ts
 export const Unknown_Style = 0
+export const MY__CONSTANT = 0
 
 export var Unknown_Style_1 = 0
 
@@ -29,8 +30,8 @@ invalidTopLevelVariable.ts:1:14 lint/style/useNamingConvention ━━━━━�
   
   > 1 │ export const Unknown_Style = 0
       │              ^^^^^^^^^^^^^
-    2 │ 
-    3 │ export var Unknown_Style_1 = 0
+    2 │ export const MY__CONSTANT = 0
+    3 │ 
   
   i The name could be renamed to `unknownStyle`.
   
@@ -38,66 +39,32 @@ invalidTopLevelVariable.ts:1:14 lint/style/useNamingConvention ━━━━━�
 ```
 
 ```
-invalidTopLevelVariable.ts:3:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This top-level var name should be in camelCase or PascalCase or CONSTANT_CASE.
-  
-    1 │ export const Unknown_Style = 0
-    2 │ 
-  > 3 │ export var Unknown_Style_1 = 0
-      │            ^^^^^^^^^^^^^^^
-    4 │ 
-    5 │ export let Unknown_Style_2 = 0
-  
-  i The name could be renamed to `unknownStyle1`.
-  
-
-```
-
-```
-invalidTopLevelVariable.ts:5:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This top-level let name should be in camelCase.
-  
-    3 │ export var Unknown_Style_1 = 0
-    4 │ 
-  > 5 │ export let Unknown_Style_2 = 0
-      │            ^^^^^^^^^^^^^^^
-    6 │ 
-    7 │ export namespace X {
-  
-  i The name could be renamed to `unknownStyle2`.
-  
-
-```
-
-```
-invalidTopLevelVariable.ts:8:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidTopLevelVariable.ts:2:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This top-level const name should be in camelCase or PascalCase or CONSTANT_CASE.
   
-     7 │ export namespace X {
-   > 8 │     export const Unknown_Style = 0
-       │                  ^^^^^^^^^^^^^
-     9 │ 
-    10 │     export var Unknown_Style_1 = 0
+    1 │ export const Unknown_Style = 0
+  > 2 │ export const MY__CONSTANT = 0
+      │              ^^^^^^^^^^^^
+    3 │ 
+    4 │ export var Unknown_Style_1 = 0
   
-  i The name could be renamed to `unknownStyle`.
+  i The name could be renamed to `myConstant`.
   
 
 ```
 
 ```
-invalidTopLevelVariable.ts:10:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidTopLevelVariable.ts:4:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This top-level var name should be in camelCase or PascalCase or CONSTANT_CASE.
   
-     8 │     export const Unknown_Style = 0
-     9 │ 
-  > 10 │     export var Unknown_Style_1 = 0
-       │                ^^^^^^^^^^^^^^^
-    11 │ 
-    12 │     export let Unknown_Style_2 = 0
+    2 │ export const MY__CONSTANT = 0
+    3 │ 
+  > 4 │ export var Unknown_Style_1 = 0
+      │            ^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ export let Unknown_Style_2 = 0
   
   i The name could be renamed to `unknownStyle1`.
   
@@ -105,16 +72,16 @@ invalidTopLevelVariable.ts:10:16 lint/style/useNamingConvention ━━━━━�
 ```
 
 ```
-invalidTopLevelVariable.ts:12:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidTopLevelVariable.ts:6:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This top-level let name should be in camelCase.
   
-    10 │     export var Unknown_Style_1 = 0
-    11 │ 
-  > 12 │     export let Unknown_Style_2 = 0
-       │                ^^^^^^^^^^^^^^^
-    13 │ }
-    14 │ 
+    4 │ export var Unknown_Style_1 = 0
+    5 │ 
+  > 6 │ export let Unknown_Style_2 = 0
+      │            ^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ export namespace X {
   
   i The name could be renamed to `unknownStyle2`.
   
@@ -122,17 +89,67 @@ invalidTopLevelVariable.ts:12:16 lint/style/useNamingConvention ━━━━━�
 ```
 
 ```
-invalidTopLevelVariable.ts:15:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidTopLevelVariable.ts:9:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in camelCase and PascalCase because `strictCase` is set to `true`.
+  ! This top-level const name should be in camelCase or PascalCase or CONSTANT_CASE.
   
-    13 │ }
-    14 │ 
-  > 15 │ export const fooYPosition = 0;
+     8 │ export namespace X {
+   > 9 │     export const Unknown_Style = 0
+       │                  ^^^^^^^^^^^^^
+    10 │ 
+    11 │     export var Unknown_Style_1 = 0
+  
+  i The name could be renamed to `unknownStyle`.
+  
+
+```
+
+```
+invalidTopLevelVariable.ts:11:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This top-level var name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+     9 │     export const Unknown_Style = 0
+    10 │ 
+  > 11 │     export var Unknown_Style_1 = 0
+       │                ^^^^^^^^^^^^^^^
+    12 │ 
+    13 │     export let Unknown_Style_2 = 0
+  
+  i The name could be renamed to `unknownStyle1`.
+  
+
+```
+
+```
+invalidTopLevelVariable.ts:13:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This top-level let name should be in camelCase.
+  
+    11 │     export var Unknown_Style_1 = 0
+    12 │ 
+  > 13 │     export let Unknown_Style_2 = 0
+       │                ^^^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+  i The name could be renamed to `unknownStyle2`.
+  
+
+```
+
+```
+invalidTopLevelVariable.ts:16:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Two consecutive uppercase characters are not allowed in camelCase and PascalCase because strictCase is set to `true`.
+  
+    14 │ }
+    15 │ 
+  > 16 │ export const fooYPosition = 0;
        │              ^^^^^^^^^^^^
   
-  i If you want to use consecutive uppercase characters in camelCase and PascalCase then consider setting `strictCase` option to `false`.
-     Check rule options for more inforamtion.
+  i If you want to use consecutive uppercase characters in camelCase and PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
   
 
 ```

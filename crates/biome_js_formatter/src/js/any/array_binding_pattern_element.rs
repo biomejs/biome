@@ -9,8 +9,7 @@ impl FormatRule<AnyJsArrayBindingPatternElement> for FormatAnyJsArrayBindingPatt
     fn fmt(&self, node: &AnyJsArrayBindingPatternElement, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyJsArrayBindingPatternElement::JsArrayHole(node) => node.format().fmt(f),
-            AnyJsArrayBindingPatternElement::AnyJsBindingPattern(node) => node.format().fmt(f),
-            AnyJsArrayBindingPatternElement::JsBindingPatternWithDefault(node) => {
+            AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(node) => {
                 node.format().fmt(f)
             }
             AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(node) => {

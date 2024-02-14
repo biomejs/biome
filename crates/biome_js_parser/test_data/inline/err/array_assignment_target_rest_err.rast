@@ -84,8 +84,11 @@ JsModule {
                                             ],
                                         },
                                         COMMA@53..55 "," [] [Whitespace(" ")],
-                                        JsIdentifierAssignment {
-                                            name_token: IDENT@55..72 "other_assignment" [] [Whitespace(" ")],
+                                        JsArrayAssignmentPatternElement {
+                                            pattern: JsIdentifierAssignment {
+                                                name_token: IDENT@55..72 "other_assignment" [] [Whitespace(" ")],
+                                            },
+                                            init: missing (optional),
                                         },
                                     ],
                                 },
@@ -162,8 +165,10 @@ JsModule {
                 1: JS_IDENTIFIER_ASSIGNMENT@49..53
                   0: IDENT@49..53 "rest" [] []
               1: COMMA@53..55 "," [] [Whitespace(" ")]
-              2: JS_IDENTIFIER_ASSIGNMENT@55..72
-                0: IDENT@55..72 "other_assignment" [] [Whitespace(" ")]
+              2: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@55..72
+                0: JS_IDENTIFIER_ASSIGNMENT@55..72
+                  0: IDENT@55..72 "other_assignment" [] [Whitespace(" ")]
+                1: (empty)
             2: R_BRACK@72..74 "]" [] [Whitespace(" ")]
           1: EQ@74..76 "=" [] [Whitespace(" ")]
           2: JS_IDENTIFIER_EXPRESSION@76..77

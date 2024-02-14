@@ -48,6 +48,16 @@ When the option is set to `false`, consecutive uppercase characters are allowed.
 
 Default: `true`
 
+### requireAscii
+
+When this option is set to `true`, it forbids names that include non-ASCII characters.
+For instance,  when the option is set to `true`, `café` or `안녕하세요` will throw an error.
+
+When the option is set to `false`, anames may include non-ASCII characters.
+`café` and `안녕하세요` are so valid.
+
+Default: `true`
+
 ### filenameCases
 
 By default, the rule enforces that the filename  is either in [`camelCase`](https://en.wikipedia.org/wiki/Camel_case), [`kebab-case`](https://en.wikipedia.org/wiki/Letter_case#Kebab_case), [`snake_case`](https://en.wikipedia.org/wiki/Snake_case), or equal to the name of one export in the file.

@@ -122,10 +122,10 @@ impl AnyJsVariableDeclaration {
         }
     }
 
-    pub fn kind_token(&self) -> Option<SyntaxToken> {
+    pub fn kind_token(&self) -> SyntaxResult<SyntaxToken> {
         match self {
-            AnyJsVariableDeclaration::JsVariableDeclaration(x) => x.kind().ok(),
-            AnyJsVariableDeclaration::JsForVariableDeclaration(x) => x.kind_token().ok(),
+            AnyJsVariableDeclaration::JsVariableDeclaration(x) => x.kind(),
+            AnyJsVariableDeclaration::JsForVariableDeclaration(x) => x.kind_token(),
         }
     }
 }
@@ -144,9 +144,8 @@ impl JsVariableDeclarator {
 impl AnyJsArrayAssignmentPatternElement {
     pub fn pattern(self) -> Option<AnyJsAssignmentPattern> {
         match self {
-            Self::AnyJsAssignmentPattern(p) => Some(p),
+            Self::JsArrayAssignmentPatternElement(p) => p.pattern().ok(),
             Self::JsArrayAssignmentPatternRestElement(p) => p.pattern().ok(),
-            Self::JsAssignmentWithDefault(p) => p.pattern().ok(),
             Self::JsArrayHole(_) => None,
         }
     }

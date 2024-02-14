@@ -107,6 +107,47 @@ pub struct JsArrayAssignmentPatternFields {
     pub r_brack_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsArrayAssignmentPatternElement {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsArrayAssignmentPatternElement {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsArrayAssignmentPatternElementFields {
+        JsArrayAssignmentPatternElementFields {
+            pattern: self.pattern(),
+            init: self.init(),
+        }
+    }
+    pub fn pattern(&self) -> SyntaxResult<AnyJsAssignmentPattern> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn init(&self) -> Option<JsInitializerClause> {
+        support::node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for JsArrayAssignmentPatternElement {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct JsArrayAssignmentPatternElementFields {
+    pub pattern: SyntaxResult<AnyJsAssignmentPattern>,
+    pub init: Option<JsInitializerClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsArrayAssignmentPatternRestElement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -192,6 +233,47 @@ pub struct JsArrayBindingPatternFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub elements: JsArrayBindingPatternElementList,
     pub r_brack_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsArrayBindingPatternElement {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsArrayBindingPatternElement {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsArrayBindingPatternElementFields {
+        JsArrayBindingPatternElementFields {
+            pattern: self.pattern(),
+            init: self.init(),
+        }
+    }
+    pub fn pattern(&self) -> SyntaxResult<AnyJsBindingPattern> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn init(&self) -> Option<JsInitializerClause> {
+        support::node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for JsArrayBindingPatternElement {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct JsArrayBindingPatternElementFields {
+    pub pattern: SyntaxResult<AnyJsBindingPattern>,
+    pub init: Option<JsInitializerClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsArrayBindingPatternRestElement {
@@ -417,52 +499,6 @@ pub struct JsAssignmentExpressionFields {
     pub right: SyntaxResult<AnyJsExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct JsAssignmentWithDefault {
-    pub(crate) syntax: SyntaxNode,
-}
-impl JsAssignmentWithDefault {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> JsAssignmentWithDefaultFields {
-        JsAssignmentWithDefaultFields {
-            pattern: self.pattern(),
-            eq_token: self.eq_token(),
-            default: self.default(),
-        }
-    }
-    pub fn pattern(&self) -> SyntaxResult<AnyJsAssignmentPattern> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn eq_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn default(&self) -> SyntaxResult<AnyJsExpression> {
-        support::required_node(&self.syntax, 2usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for JsAssignmentWithDefault {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct JsAssignmentWithDefaultFields {
-    pub pattern: SyntaxResult<AnyJsAssignmentPattern>,
-    pub eq_token: SyntaxResult<SyntaxToken>,
-    pub default: SyntaxResult<AnyJsExpression>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsAwaitExpression {
     pub(crate) syntax: SyntaxNode,
 }
@@ -584,52 +620,6 @@ pub struct JsBinaryExpressionFields {
     pub left: SyntaxResult<AnyJsExpression>,
     pub operator_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyJsExpression>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct JsBindingPatternWithDefault {
-    pub(crate) syntax: SyntaxNode,
-}
-impl JsBindingPatternWithDefault {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> JsBindingPatternWithDefaultFields {
-        JsBindingPatternWithDefaultFields {
-            pattern: self.pattern(),
-            eq_token: self.eq_token(),
-            default: self.default(),
-        }
-    }
-    pub fn pattern(&self) -> SyntaxResult<AnyJsBindingPattern> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn eq_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn default(&self) -> SyntaxResult<AnyJsExpression> {
-        support::required_node(&self.syntax, 2usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for JsBindingPatternWithDefault {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct JsBindingPatternWithDefaultFields {
-    pub pattern: SyntaxResult<AnyJsBindingPattern>,
-    pub eq_token: SyntaxResult<SyntaxToken>,
-    pub default: SyntaxResult<AnyJsExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsBlockStatement {
@@ -13455,15 +13445,16 @@ pub struct TsVoidTypeFields {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyJsArrayAssignmentPatternElement {
-    AnyJsAssignmentPattern(AnyJsAssignmentPattern),
+    JsArrayAssignmentPatternElement(JsArrayAssignmentPatternElement),
     JsArrayAssignmentPatternRestElement(JsArrayAssignmentPatternRestElement),
     JsArrayHole(JsArrayHole),
-    JsAssignmentWithDefault(JsAssignmentWithDefault),
 }
 impl AnyJsArrayAssignmentPatternElement {
-    pub fn as_any_js_assignment_pattern(&self) -> Option<&AnyJsAssignmentPattern> {
+    pub fn as_js_array_assignment_pattern_element(
+        &self,
+    ) -> Option<&JsArrayAssignmentPatternElement> {
         match &self {
-            AnyJsArrayAssignmentPatternElement::AnyJsAssignmentPattern(item) => Some(item),
+            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(item) => Some(item),
             _ => None,
         }
     }
@@ -13483,25 +13474,18 @@ impl AnyJsArrayAssignmentPatternElement {
             _ => None,
         }
     }
-    pub fn as_js_assignment_with_default(&self) -> Option<&JsAssignmentWithDefault> {
-        match &self {
-            AnyJsArrayAssignmentPatternElement::JsAssignmentWithDefault(item) => Some(item),
-            _ => None,
-        }
-    }
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyJsArrayBindingPatternElement {
-    AnyJsBindingPattern(AnyJsBindingPattern),
+    JsArrayBindingPatternElement(JsArrayBindingPatternElement),
     JsArrayBindingPatternRestElement(JsArrayBindingPatternRestElement),
     JsArrayHole(JsArrayHole),
-    JsBindingPatternWithDefault(JsBindingPatternWithDefault),
 }
 impl AnyJsArrayBindingPatternElement {
-    pub fn as_any_js_binding_pattern(&self) -> Option<&AnyJsBindingPattern> {
+    pub fn as_js_array_binding_pattern_element(&self) -> Option<&JsArrayBindingPatternElement> {
         match &self {
-            AnyJsArrayBindingPatternElement::AnyJsBindingPattern(item) => Some(item),
+            AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(item) => Some(item),
             _ => None,
         }
     }
@@ -13516,12 +13500,6 @@ impl AnyJsArrayBindingPatternElement {
     pub fn as_js_array_hole(&self) -> Option<&JsArrayHole> {
         match &self {
             AnyJsArrayBindingPatternElement::JsArrayHole(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_js_binding_pattern_with_default(&self) -> Option<&JsBindingPatternWithDefault> {
-        match &self {
-            AnyJsArrayBindingPatternElement::JsBindingPatternWithDefault(item) => Some(item),
             _ => None,
         }
     }
@@ -16501,6 +16479,45 @@ impl From<JsArrayAssignmentPattern> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for JsArrayAssignmentPatternElement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsArrayAssignmentPatternElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JsArrayAssignmentPatternElement")
+            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+            .field("init", &support::DebugOptionalElement(self.init()))
+            .finish()
+    }
+}
+impl From<JsArrayAssignmentPatternElement> for SyntaxNode {
+    fn from(n: JsArrayAssignmentPatternElement) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<JsArrayAssignmentPatternElement> for SyntaxElement {
+    fn from(n: JsArrayAssignmentPatternElement) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for JsArrayAssignmentPatternRestElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
@@ -16587,6 +16604,45 @@ impl From<JsArrayBindingPattern> for SyntaxNode {
 }
 impl From<JsArrayBindingPattern> for SyntaxElement {
     fn from(n: JsArrayBindingPattern) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsArrayBindingPatternElement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_ARRAY_BINDING_PATTERN_ELEMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_ARRAY_BINDING_PATTERN_ELEMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsArrayBindingPatternElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JsArrayBindingPatternElement")
+            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+            .field("init", &support::DebugOptionalElement(self.init()))
+            .finish()
+    }
+}
+impl From<JsArrayBindingPatternElement> for SyntaxNode {
+    fn from(n: JsArrayBindingPatternElement) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<JsArrayBindingPatternElement> for SyntaxElement {
+    fn from(n: JsArrayBindingPatternElement) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -16812,46 +16868,6 @@ impl From<JsAssignmentExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for JsAssignmentWithDefault {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(JS_ASSIGNMENT_WITH_DEFAULT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == JS_ASSIGNMENT_WITH_DEFAULT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for JsAssignmentWithDefault {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsAssignmentWithDefault")
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("default", &support::DebugSyntaxResult(self.default()))
-            .finish()
-    }
-}
-impl From<JsAssignmentWithDefault> for SyntaxNode {
-    fn from(n: JsAssignmentWithDefault) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<JsAssignmentWithDefault> for SyntaxElement {
-    fn from(n: JsAssignmentWithDefault) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for JsAwaitExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16975,46 +16991,6 @@ impl From<JsBinaryExpression> for SyntaxNode {
 }
 impl From<JsBinaryExpression> for SyntaxElement {
     fn from(n: JsBinaryExpression) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for JsBindingPatternWithDefault {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(JS_BINDING_PATTERN_WITH_DEFAULT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == JS_BINDING_PATTERN_WITH_DEFAULT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for JsBindingPatternWithDefault {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsBindingPatternWithDefault")
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("default", &support::DebugSyntaxResult(self.default()))
-            .finish()
-    }
-}
-impl From<JsBindingPatternWithDefault> for SyntaxNode {
-    fn from(n: JsBindingPatternWithDefault) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<JsBindingPatternWithDefault> for SyntaxElement {
-    fn from(n: JsBindingPatternWithDefault) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -29463,6 +29439,11 @@ impl From<TsVoidType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl From<JsArrayAssignmentPatternElement> for AnyJsArrayAssignmentPatternElement {
+    fn from(node: JsArrayAssignmentPatternElement) -> AnyJsArrayAssignmentPatternElement {
+        AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(node)
+    }
+}
 impl From<JsArrayAssignmentPatternRestElement> for AnyJsArrayAssignmentPatternElement {
     fn from(node: JsArrayAssignmentPatternRestElement) -> AnyJsArrayAssignmentPatternElement {
         AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(node)
@@ -29473,28 +29454,26 @@ impl From<JsArrayHole> for AnyJsArrayAssignmentPatternElement {
         AnyJsArrayAssignmentPatternElement::JsArrayHole(node)
     }
 }
-impl From<JsAssignmentWithDefault> for AnyJsArrayAssignmentPatternElement {
-    fn from(node: JsAssignmentWithDefault) -> AnyJsArrayAssignmentPatternElement {
-        AnyJsArrayAssignmentPatternElement::JsAssignmentWithDefault(node)
-    }
-}
 impl AstNode for AnyJsArrayAssignmentPatternElement {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyJsAssignmentPattern::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = JsArrayAssignmentPatternElement::KIND_SET
         .union(JsArrayAssignmentPatternRestElement::KIND_SET)
-        .union(JsArrayHole::KIND_SET)
-        .union(JsAssignmentWithDefault::KIND_SET);
+        .union(JsArrayHole::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        match kind {
-            JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT
-            | JS_ARRAY_HOLE
-            | JS_ASSIGNMENT_WITH_DEFAULT => true,
-            k if AnyJsAssignmentPattern::can_cast(k) => true,
-            _ => false,
-        }
+        matches!(
+            kind,
+            JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT
+                | JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT
+                | JS_ARRAY_HOLE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT => {
+                AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(
+                    JsArrayAssignmentPatternElement { syntax },
+                )
+            }
             JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT => {
                 AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(
                     JsArrayAssignmentPatternRestElement { syntax },
@@ -29503,68 +29482,50 @@ impl AstNode for AnyJsArrayAssignmentPatternElement {
             JS_ARRAY_HOLE => {
                 AnyJsArrayAssignmentPatternElement::JsArrayHole(JsArrayHole { syntax })
             }
-            JS_ASSIGNMENT_WITH_DEFAULT => {
-                AnyJsArrayAssignmentPatternElement::JsAssignmentWithDefault(
-                    JsAssignmentWithDefault { syntax },
-                )
-            }
-            _ => {
-                if let Some(any_js_assignment_pattern) = AnyJsAssignmentPattern::cast(syntax) {
-                    return Some(AnyJsArrayAssignmentPatternElement::AnyJsAssignmentPattern(
-                        any_js_assignment_pattern,
-                    ));
-                }
-                return None;
-            }
+            _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(it) => &it.syntax,
             AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(it) => {
                 &it.syntax
             }
             AnyJsArrayAssignmentPatternElement::JsArrayHole(it) => &it.syntax,
-            AnyJsArrayAssignmentPatternElement::JsAssignmentWithDefault(it) => &it.syntax,
-            AnyJsArrayAssignmentPatternElement::AnyJsAssignmentPattern(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(it) => it.syntax,
             AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(it) => {
                 it.syntax
             }
             AnyJsArrayAssignmentPatternElement::JsArrayHole(it) => it.syntax,
-            AnyJsArrayAssignmentPatternElement::JsAssignmentWithDefault(it) => it.syntax,
-            AnyJsArrayAssignmentPatternElement::AnyJsAssignmentPattern(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsArrayAssignmentPatternElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsArrayAssignmentPatternElement::AnyJsAssignmentPattern(it) => {
+            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
             AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
             AnyJsArrayAssignmentPatternElement::JsArrayHole(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsArrayAssignmentPatternElement::JsAssignmentWithDefault(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
         }
     }
 }
 impl From<AnyJsArrayAssignmentPatternElement> for SyntaxNode {
     fn from(n: AnyJsArrayAssignmentPatternElement) -> SyntaxNode {
         match n {
-            AnyJsArrayAssignmentPatternElement::AnyJsAssignmentPattern(it) => it.into(),
+            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(it) => it.into(),
             AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(it) => {
                 it.into()
             }
             AnyJsArrayAssignmentPatternElement::JsArrayHole(it) => it.into(),
-            AnyJsArrayAssignmentPatternElement::JsAssignmentWithDefault(it) => it.into(),
         }
     }
 }
@@ -29572,6 +29533,11 @@ impl From<AnyJsArrayAssignmentPatternElement> for SyntaxElement {
     fn from(n: AnyJsArrayAssignmentPatternElement) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
+    }
+}
+impl From<JsArrayBindingPatternElement> for AnyJsArrayBindingPatternElement {
+    fn from(node: JsArrayBindingPatternElement) -> AnyJsArrayBindingPatternElement {
+        AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(node)
     }
 }
 impl From<JsArrayBindingPatternRestElement> for AnyJsArrayBindingPatternElement {
@@ -29584,88 +29550,70 @@ impl From<JsArrayHole> for AnyJsArrayBindingPatternElement {
         AnyJsArrayBindingPatternElement::JsArrayHole(node)
     }
 }
-impl From<JsBindingPatternWithDefault> for AnyJsArrayBindingPatternElement {
-    fn from(node: JsBindingPatternWithDefault) -> AnyJsArrayBindingPatternElement {
-        AnyJsArrayBindingPatternElement::JsBindingPatternWithDefault(node)
-    }
-}
 impl AstNode for AnyJsArrayBindingPatternElement {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyJsBindingPattern::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = JsArrayBindingPatternElement::KIND_SET
         .union(JsArrayBindingPatternRestElement::KIND_SET)
-        .union(JsArrayHole::KIND_SET)
-        .union(JsBindingPatternWithDefault::KIND_SET);
+        .union(JsArrayHole::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        match kind {
-            JS_ARRAY_BINDING_PATTERN_REST_ELEMENT
-            | JS_ARRAY_HOLE
-            | JS_BINDING_PATTERN_WITH_DEFAULT => true,
-            k if AnyJsBindingPattern::can_cast(k) => true,
-            _ => false,
-        }
+        matches!(
+            kind,
+            JS_ARRAY_BINDING_PATTERN_ELEMENT
+                | JS_ARRAY_BINDING_PATTERN_REST_ELEMENT
+                | JS_ARRAY_HOLE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_ARRAY_BINDING_PATTERN_ELEMENT => {
+                AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(
+                    JsArrayBindingPatternElement { syntax },
+                )
+            }
             JS_ARRAY_BINDING_PATTERN_REST_ELEMENT => {
                 AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(
                     JsArrayBindingPatternRestElement { syntax },
                 )
             }
             JS_ARRAY_HOLE => AnyJsArrayBindingPatternElement::JsArrayHole(JsArrayHole { syntax }),
-            JS_BINDING_PATTERN_WITH_DEFAULT => {
-                AnyJsArrayBindingPatternElement::JsBindingPatternWithDefault(
-                    JsBindingPatternWithDefault { syntax },
-                )
-            }
-            _ => {
-                if let Some(any_js_binding_pattern) = AnyJsBindingPattern::cast(syntax) {
-                    return Some(AnyJsArrayBindingPatternElement::AnyJsBindingPattern(
-                        any_js_binding_pattern,
-                    ));
-                }
-                return None;
-            }
+            _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(it) => &it.syntax,
             AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(it) => &it.syntax,
             AnyJsArrayBindingPatternElement::JsArrayHole(it) => &it.syntax,
-            AnyJsArrayBindingPatternElement::JsBindingPatternWithDefault(it) => &it.syntax,
-            AnyJsArrayBindingPatternElement::AnyJsBindingPattern(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(it) => it.syntax,
             AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(it) => it.syntax,
             AnyJsArrayBindingPatternElement::JsArrayHole(it) => it.syntax,
-            AnyJsArrayBindingPatternElement::JsBindingPatternWithDefault(it) => it.syntax,
-            AnyJsArrayBindingPatternElement::AnyJsBindingPattern(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsArrayBindingPatternElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsArrayBindingPatternElement::AnyJsBindingPattern(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
             AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
             AnyJsArrayBindingPatternElement::JsArrayHole(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsArrayBindingPatternElement::JsBindingPatternWithDefault(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
         }
     }
 }
 impl From<AnyJsArrayBindingPatternElement> for SyntaxNode {
     fn from(n: AnyJsArrayBindingPatternElement) -> SyntaxNode {
         match n {
-            AnyJsArrayBindingPatternElement::AnyJsBindingPattern(it) => it.into(),
+            AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(it) => it.into(),
             AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(it) => it.into(),
             AnyJsArrayBindingPatternElement::JsArrayHole(it) => it.into(),
-            AnyJsArrayBindingPatternElement::JsBindingPatternWithDefault(it) => it.into(),
         }
     }
 }
@@ -37447,12 +37395,22 @@ impl std::fmt::Display for JsArrayAssignmentPattern {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for JsArrayAssignmentPatternElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for JsArrayAssignmentPatternRestElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for JsArrayBindingPattern {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsArrayBindingPatternElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -37482,11 +37440,6 @@ impl std::fmt::Display for JsAssignmentExpression {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for JsAssignmentWithDefault {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for JsAwaitExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -37498,11 +37451,6 @@ impl std::fmt::Display for JsBigintLiteralExpression {
     }
 }
 impl std::fmt::Display for JsBinaryExpression {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for JsBindingPatternWithDefault {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

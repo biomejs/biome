@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validUsedBindingPattern.js
+---
+# Input
+```jsx
+export function f({ a, b = a }) {
+	console.info(b);
+}
+
+```
+
+

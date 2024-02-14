@@ -49,12 +49,18 @@ JsModule {
                                     pattern: JsArrayBindingPattern {
                                         l_brack_token: L_BRACK@30..31 "[" [] [],
                                         elements: JsArrayBindingPatternElementList [
-                                            JsIdentifierBinding {
-                                                name_token: IDENT@31..32 "x" [] [],
+                                            JsArrayBindingPatternElement {
+                                                pattern: JsIdentifierBinding {
+                                                    name_token: IDENT@31..32 "x" [] [],
+                                                },
+                                                init: missing (optional),
                                             },
                                             COMMA@32..34 "," [] [Whitespace(" ")],
-                                            JsIdentifierBinding {
-                                                name_token: IDENT@34..35 "y" [] [],
+                                            JsArrayBindingPatternElement {
+                                                pattern: JsIdentifierBinding {
+                                                    name_token: IDENT@34..35 "y" [] [],
+                                                },
+                                                init: missing (optional),
                                             },
                                         ],
                                         r_brack_token: R_BRACK@35..37 "]" [] [Whitespace(" ")],
@@ -162,11 +168,15 @@ JsModule {
                   1: JS_ARRAY_BINDING_PATTERN@30..37
                     0: L_BRACK@30..31 "[" [] []
                     1: JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST@31..35
-                      0: JS_IDENTIFIER_BINDING@31..32
-                        0: IDENT@31..32 "x" [] []
+                      0: JS_ARRAY_BINDING_PATTERN_ELEMENT@31..32
+                        0: JS_IDENTIFIER_BINDING@31..32
+                          0: IDENT@31..32 "x" [] []
+                        1: (empty)
                       1: COMMA@32..34 "," [] [Whitespace(" ")]
-                      2: JS_IDENTIFIER_BINDING@34..35
-                        0: IDENT@34..35 "y" [] []
+                      2: JS_ARRAY_BINDING_PATTERN_ELEMENT@34..35
+                        0: JS_IDENTIFIER_BINDING@34..35
+                          0: IDENT@34..35 "y" [] []
+                        1: (empty)
                     2: R_BRACK@35..37 "]" [] [Whitespace(" ")]
               2: R_BRACK@37..39 "]" [] [Whitespace(" ")]
             1: (empty)

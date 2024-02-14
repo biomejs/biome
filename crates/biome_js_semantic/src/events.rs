@@ -379,16 +379,24 @@ impl SemanticEventExtractor {
             if let Some(declaration) = node.declaration() {
                 let is_exported = declaration.export().is_some();
                 match declaration {
+                    AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
+                    | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
+                    | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
+                    | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
+                    | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+                        if let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
+                            declaration.parent_binding_pattern_declaration()
+                        {
+                            if declarator.declaration().map_or(false, |x| x.is_var()) {
+                                hoisted_scope_id = self.scope_index_to_hoist_declarations(0)
+                            }
+                        }
+                        self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
+                    }
                     AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
-                        let is_var = declarator
-                            .declaration()
-                            .map(|x| x.is_var())
-                            .unwrap_or(false);
-                        hoisted_scope_id = if is_var {
-                            self.scope_index_to_hoist_declarations(0)
-                        } else {
-                            None
-                        };
+                        if declarator.declaration().map_or(false, |x| x.is_var()) {
+                            hoisted_scope_id = self.scope_index_to_hoist_declarations(0)
+                        }
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }
                     AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)

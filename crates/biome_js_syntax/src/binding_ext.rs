@@ -1,13 +1,15 @@
 use crate::{
-    AnyJsImportClause, AnyJsNamedImportSpecifier, JsArrowFunctionExpression,
-    JsBogusNamedImportSpecifier, JsBogusParameter, JsCatchDeclaration, JsClassDeclaration,
-    JsClassExportDefaultDeclaration, JsClassExpression, JsConstructorClassMember,
-    JsConstructorParameterList, JsConstructorParameters, JsDefaultImportSpecifier, JsExport,
-    JsFormalParameter, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration,
-    JsFunctionExpression, JsIdentifierBinding, JsMethodClassMember, JsMethodObjectMember,
-    JsNamedImportSpecifier, JsNamespaceImportSpecifier, JsParameterList, JsParameters,
-    JsRestParameter, JsSetterClassMember, JsSetterObjectMember, JsShorthandNamedImportSpecifier,
-    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, TsCallSignatureTypeMember,
+    AnyJsImportClause, AnyJsNamedImportSpecifier, JsArrayBindingPatternElement,
+    JsArrayBindingPatternRestElement, JsArrowFunctionExpression, JsBogusNamedImportSpecifier,
+    JsBogusParameter, JsCatchDeclaration, JsClassDeclaration, JsClassExportDefaultDeclaration,
+    JsClassExpression, JsConstructorClassMember, JsConstructorParameterList,
+    JsConstructorParameters, JsDefaultImportSpecifier, JsExport, JsFormalParameter,
+    JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
+    JsIdentifierBinding, JsMethodClassMember, JsMethodObjectMember, JsNamedImportSpecifier,
+    JsNamespaceImportSpecifier, JsObjectBindingPatternProperty, JsObjectBindingPatternRest,
+    JsObjectBindingPatternShorthandProperty, JsParameterList, JsParameters, JsRestParameter,
+    JsSetterClassMember, JsSetterObjectMember, JsShorthandNamedImportSpecifier, JsSyntaxKind,
+    JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, TsCallSignatureTypeMember,
     TsConstructSignatureTypeMember, TsConstructorSignatureClassMember, TsConstructorType,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration, TsEnumDeclaration,
     TsFunctionType, TsIdentifierBinding, TsImportEqualsDeclaration, TsIndexSignatureClassMember,
@@ -20,8 +22,14 @@ use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
 declare_node_union! {
     pub AnyJsBindingDeclaration =
+        // binding paatterns
+            JsArrayBindingPatternElement
+            | JsArrayBindingPatternRestElement
+            | JsObjectBindingPatternProperty
+            | JsObjectBindingPatternRest
+            | JsObjectBindingPatternShorthandProperty
         // variable
-            JsVariableDeclarator
+            | JsVariableDeclarator
         // parameters
             | JsArrowFunctionExpression | JsFormalParameter | JsRestParameter | JsBogusParameter
             | TsIndexSignatureParameter | TsPropertyParameter
@@ -124,31 +132,50 @@ impl AnyJsBindingDeclaration {
                 AnyJsBindingDeclaration::TsEnumDeclaration(_),
             ) => true,
             (
-                AnyJsBindingDeclaration::TsTypeAliasDeclaration(_),
+                AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
+                | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+                | AnyJsBindingDeclaration::TsModuleDeclaration(_),
                 AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                | AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
+                | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
+                | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
+                | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
+                | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
                 | AnyJsBindingDeclaration::JsVariableDeclarator(_)
+                | AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+                | AnyJsBindingDeclaration::JsFormalParameter(_)
+                | AnyJsBindingDeclaration::JsRestParameter(_)
+                | AnyJsBindingDeclaration::TsPropertyParameter(_)
+                | AnyJsBindingDeclaration::JsCatchDeclaration(_)
                 | AnyJsBindingDeclaration::TsModuleDeclaration(_),
             ) => true,
             (
                 AnyJsBindingDeclaration::TsInterfaceDeclaration(_),
                 AnyJsBindingDeclaration::JsClassDeclaration(_)
-                | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
-                | AnyJsBindingDeclaration::JsVariableDeclarator(_)
                 | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
-                | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
-                | AnyJsBindingDeclaration::TsModuleDeclaration(_),
+                | AnyJsBindingDeclaration::TsInterfaceDeclaration(_),
             ) => true,
             (
                 AnyJsBindingDeclaration::TsModuleDeclaration(_),
                 AnyJsBindingDeclaration::JsClassDeclaration(_)
-                | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
-                | AnyJsBindingDeclaration::JsVariableDeclarator(_)
                 | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
                 | AnyJsBindingDeclaration::TsEnumDeclaration(_)
-                | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
-                | AnyJsBindingDeclaration::TsModuleDeclaration(_),
+                | AnyJsBindingDeclaration::TsInterfaceDeclaration(_),
             ) => true,
             (_, _) => false,
+        }
+    }
+
+    pub fn parent_binding_pattern_declaration(&self) -> Option<AnyJsBindingDeclaration> {
+        match self {
+            AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
+            | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+                parent_binding_pattern_declaration(self.syntax())
+            }
+            _ => None,
         }
     }
 
@@ -168,6 +195,14 @@ impl AnyJsBindingDeclaration {
     /// Returns the export statement if this declaration is directly exported.
     pub fn export(&self) -> Option<JsExport> {
         let maybe_export = match self {
+            AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
+            | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+                return parent_binding_pattern_declaration(self.syntax())
+                    .and_then(|decl| decl.export());
+            }
             Self::JsVariableDeclarator(_) => self.syntax().ancestors().nth(4),
             Self::JsFunctionDeclaration(_)
             | Self::JsClassDeclaration(_)
@@ -196,23 +231,8 @@ declare_node_union! {
     pub AnyJsIdentifierBinding = JsIdentifierBinding | TsIdentifierBinding | TsTypeParameterName
 }
 
-fn declaration(node: &JsSyntaxNode) -> Option<AnyJsBindingDeclaration> {
-    let possible_declarator = node.ancestors().skip(1).find(|x| {
-        !matches!(
-            x.kind(),
-            JsSyntaxKind::JS_BINDING_PATTERN_WITH_DEFAULT
-                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN
-                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
-                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY
-                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
-                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY
-                | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN
-                | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
-                | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_REST_ELEMENT
-        )
-    })?;
-
-    match AnyJsBindingDeclaration::cast(possible_declarator)? {
+fn declaration(node: JsSyntaxNode) -> Option<AnyJsBindingDeclaration> {
+    match AnyJsBindingDeclaration::cast(node)? {
         AnyJsBindingDeclaration::JsFormalParameter(parameter) => {
             match parameter.parent::<TsPropertyParameter>() {
                 Some(parameter) => Some(AnyJsBindingDeclaration::TsPropertyParameter(parameter)),
@@ -223,11 +243,26 @@ fn declaration(node: &JsSyntaxNode) -> Option<AnyJsBindingDeclaration> {
     }
 }
 
+fn parent_binding_pattern_declaration(node: &JsSyntaxNode) -> Option<AnyJsBindingDeclaration> {
+    let possible_declarator = node.ancestors().skip(1).find(|x| {
+        !matches!(
+            x.kind(),
+            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT
+                | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
+                | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN
+                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN
+                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY
+                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
+        )
+    })?;
+    declaration(possible_declarator)
+}
+
 fn is_under_pattern_binding(node: &JsSyntaxNode) -> Option<bool> {
     use JsSyntaxKind::*;
     Some(matches!(
         node.parent()?.kind(),
-        JS_BINDING_PATTERN_WITH_DEFAULT
+        JS_ARRAY_BINDING_PATTERN_ELEMENT
             | JS_OBJECT_BINDING_PATTERN
             | JS_OBJECT_BINDING_PATTERN_REST
             | JS_OBJECT_BINDING_PATTERN_PROPERTY
@@ -246,7 +281,7 @@ fn is_under_array_pattern_binding(node: &JsSyntaxNode) -> Option<bool> {
         JS_ARRAY_BINDING_PATTERN
         | JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
         | JS_ARRAY_BINDING_PATTERN_REST_ELEMENT => Some(true),
-        JS_BINDING_PATTERN_WITH_DEFAULT => is_under_array_pattern_binding(&parent),
+        JS_ARRAY_BINDING_PATTERN_ELEMENT => is_under_array_pattern_binding(&parent),
         _ => Some(false),
     }
 }
@@ -260,7 +295,7 @@ fn is_under_object_pattern_binding(node: &JsSyntaxNode) -> Option<bool> {
         | JS_OBJECT_BINDING_PATTERN_PROPERTY
         | JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
         | JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY => Some(true),
-        JS_BINDING_PATTERN_WITH_DEFAULT => is_under_object_pattern_binding(&parent),
+        JS_ARRAY_BINDING_PATTERN_ELEMENT => is_under_object_pattern_binding(&parent),
         _ => Some(false),
     }
 }
@@ -275,7 +310,7 @@ impl AnyJsIdentifierBinding {
     }
 
     pub fn declaration(&self) -> Option<AnyJsBindingDeclaration> {
-        declaration(self.syntax())
+        declaration(self.syntax().parent()?)
     }
 
     pub fn is_under_pattern_binding(&self) -> Option<bool> {
@@ -333,7 +368,7 @@ impl JsIdentifierBinding {
     /// Navigate upward until the declaration of this binding bypassing all nodes
     /// related to pattern binding.
     pub fn declaration(&self) -> Option<AnyJsBindingDeclaration> {
-        declaration(&self.syntax)
+        declaration(self.syntax.parent()?)
     }
 
     pub fn is_under_pattern_binding(&self) -> Option<bool> {
@@ -351,7 +386,7 @@ impl JsIdentifierBinding {
 
 impl TsIdentifierBinding {
     pub fn declaration(&self) -> Option<AnyJsBindingDeclaration> {
-        declaration(&self.syntax)
+        declaration(self.syntax.parent()?)
     }
 
     pub fn is_under_pattern_binding(&self) -> Option<bool> {

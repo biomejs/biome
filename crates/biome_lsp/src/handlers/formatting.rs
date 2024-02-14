@@ -4,8 +4,8 @@ use crate::session::Session;
 use anyhow::Context;
 use biome_fs::RomePath;
 use biome_service::workspace::{
-    FeatureName, FeaturesBuilder, FileFeaturesResult, FormatFileParams, FormatOnTypeParams,
-    FormatRangeParams, SupportsFeatureParams,
+    FeaturesBuilder, FileFeaturesResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
+    SupportsFeatureParams,
 };
 use biome_service::{extension_error, WorkspaceError};
 use tower_lsp::lsp_types::*;
@@ -26,7 +26,7 @@ pub(crate) fn format(
         feature: FeaturesBuilder::new().with_formatter().build(),
     })?;
 
-    if file_features.supports_for(&FeatureName::Format) {
+    if file_features.supports_format() {
         debug!("Formatting...");
         let printed = session
             .workspace
@@ -66,7 +66,7 @@ pub(crate) fn format_range(
         feature: FeaturesBuilder::new().with_formatter().build(),
     })?;
 
-    if file_features.supports_for(&FeatureName::Format) {
+    if file_features.supports_format() {
         let doc = session.document(&url)?;
 
         let position_encoding = session.position_encoding();
@@ -122,7 +122,7 @@ pub(crate) fn format_on_type(
         feature: FeaturesBuilder::new().with_formatter().build(),
     })?;
 
-    if file_features.supports_for(&FeatureName::Format) {
+    if file_features.supports_format() {
         let doc = session.document(&url)?;
 
         let position_encoding = session.position_encoding();

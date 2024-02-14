@@ -117,6 +117,7 @@ define_categories! {
     "lint/nursery/noSkippedTests": "https://biomejs.dev/linter/rules/no-skipped-tests",
     "lint/nursery/noThenProperty": "https://biomejs.dev/linter/rules/no-then-property",
     "lint/nursery/noTypeOnlyImportAttributes": "https://biomejs.dev/linter/rules/no-type-only-import-attributes",
+    "lint/nursery/noUndeclaredDependencies": "https://biomejs.dev/linter/rules/no-undeclared-dependencies",
     "lint/nursery/noUnusedImports": "https://biomejs.dev/linter/rules/no-unused-imports",
     "lint/nursery/noUnusedPrivateClassMembers": "https://biomejs.dev/linter/rules/no-unused-private-class-members",
     "lint/nursery/noUselessLoneBlockStatements": "https://biomejs.dev/linter/rules/no-useless-lone-block-statements",

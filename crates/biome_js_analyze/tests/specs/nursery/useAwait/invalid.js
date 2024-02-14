@@ -55,3 +55,11 @@ async function complexFunction() {
 		return fetch('condition-data');
 	}
 }
+
+async function withoutForAwait () {
+	let sum = 0;
+	for (const n of [1, 2, 3]) {
+		sum += n
+	}
+	return sum;
+};

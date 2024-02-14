@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNonAscii.js
+---
+# Input
+```jsx
+const café = 0;
+```
+
+# Diagnostics
+```
+invalidNonAscii.js:1:7 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This top-level const name should be in ASCII because requireAscii` is set to `true`.
+  
+  > 1 │ const café = 0;
+      │       ^^^^
+  
+  i If you want to use non-ASCII names, then set the requireAscii option to `false`.
+    See the rule options for more details.
+  
+
+```
+
+

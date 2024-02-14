@@ -7,7 +7,7 @@ use biome_formatter::{FormatOptions, Printed};
 use biome_fs::RomePath;
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};
-use biome_service::workspace::{FeatureName, FeaturesBuilder, SupportsFeatureParams};
+use biome_service::workspace::{FeaturesBuilder, SupportsFeatureParams};
 use biome_service::App;
 use std::ops::Range;
 use std::path::{Path, PathBuf};
@@ -45,7 +45,7 @@ impl<'a> SpecTestFile<'a> {
             })
             .unwrap();
 
-        if can_format.supports_for(&FeatureName::Format) {
+        if can_format.supports_format() {
             let mut input_code = input_file.get_buffer_from_file();
 
             let (_, range_start_index, range_end_index) = strip_rome_placeholders(&mut input_code);

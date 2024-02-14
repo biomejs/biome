@@ -24,6 +24,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsArrayAssignmentPattern::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT => {
+                    let $pattern =
+                        unsafe { $crate::JsArrayAssignmentPatternElement::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT => {
                     let $pattern =
                         unsafe { $crate::JsArrayAssignmentPatternRestElement::new_unchecked(node) };
@@ -31,6 +36,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::JsSyntaxKind::JS_ARRAY_BINDING_PATTERN => {
                     let $pattern = unsafe { $crate::JsArrayBindingPattern::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT => {
+                    let $pattern =
+                        unsafe { $crate::JsArrayBindingPatternElement::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_REST_ELEMENT => {
@@ -55,10 +65,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsAssignmentExpression::new_unchecked(node) };
                     $body
                 }
-                $crate::JsSyntaxKind::JS_ASSIGNMENT_WITH_DEFAULT => {
-                    let $pattern = unsafe { $crate::JsAssignmentWithDefault::new_unchecked(node) };
-                    $body
-                }
                 $crate::JsSyntaxKind::JS_AWAIT_EXPRESSION => {
                     let $pattern = unsafe { $crate::JsAwaitExpression::new_unchecked(node) };
                     $body
@@ -70,11 +76,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::JsSyntaxKind::JS_BINARY_EXPRESSION => {
                     let $pattern = unsafe { $crate::JsBinaryExpression::new_unchecked(node) };
-                    $body
-                }
-                $crate::JsSyntaxKind::JS_BINDING_PATTERN_WITH_DEFAULT => {
-                    let $pattern =
-                        unsafe { $crate::JsBindingPatternWithDefault::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JS_BLOCK_STATEMENT => {

@@ -363,6 +363,7 @@ where
 
     fn actions(&self) -> AnalyzerActionIter<RuleLanguage<R>> {
         let globals = self.options.globals();
+
         let options = self.options.rule_options::<R>().unwrap_or_default();
         let ctx = RuleContext::new(
             &self.query_result,

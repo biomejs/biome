@@ -192,6 +192,7 @@ impl ops::Deref for GreenToken {
     fn deref(&self) -> &GreenTokenData {
         unsafe {
             let repr: &Repr = &self.ptr;
+            #[allow(invalid_reference_casting)]
             let repr: &ReprThin = &*(repr as *const Repr as *const ReprThin);
             mem::transmute::<&ReprThin, &GreenTokenData>(repr)
         }

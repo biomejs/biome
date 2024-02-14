@@ -1,12 +1,13 @@
 //! Provides traits for parsing pattern like nodes
 use crate::prelude::*;
-use crate::syntax::expr::{parse_assignment_expression_or_higher, ExpressionContext};
-use crate::syntax::js_parse_error;
+use crate::syntax::expr::ExpressionContext;
 use crate::ParsedSyntax::{Absent, Present};
 use crate::{JsParser, ParseRecoveryTokenSet, ParsedSyntax};
 use biome_js_syntax::JsSyntaxKind::{EOF, JS_ARRAY_HOLE};
 use biome_js_syntax::{JsSyntaxKind, TextRange, T};
 use biome_parser::ParserProgress;
+
+use super::class::parse_initializer_clause;
 
 /// Trait for parsing a pattern with an optional default of the form `pattern = default`
 pub(crate) trait ParseWithDefaultPattern {
@@ -22,23 +23,16 @@ pub(crate) trait ParseWithDefaultPattern {
 
     /// Parses a pattern and wraps it in a pattern with default if a `=` token follows the pattern
     fn parse_pattern_with_optional_default(&self, p: &mut JsParser) -> ParsedSyntax {
-        let pattern = self.parse_pattern(p);
-
-        // test_err js js_invalid_assignment
-        // ([=[(p[=[(p%]>([=[(p[=[(
-        if p.at(T![=]) {
-            let with_default = pattern.precede_or_add_diagnostic(p, Self::expected_pattern_error);
-            p.bump_any(); // eat the = token
+        self.parse_pattern(p).and_then(|pattern| {
+            let m = pattern.precede(p);
+            // test_err js js_invalid_assignment
+            // ([=[(p[=[(p%]>([=[(p[=[(
 
             // test js pattern_with_default_in_keyword
             // for ([a = "a" in {}] in []) {}
-            parse_assignment_expression_or_higher(p, ExpressionContext::default())
-                .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
-
-            Present(with_default.complete(p, Self::pattern_with_default_kind()))
-        } else {
-            pattern
-        }
+            parse_initializer_clause(p, ExpressionContext::default()).ok();
+            Present(m.complete(p, Self::pattern_with_default_kind()))
+        })
     }
 }
 
