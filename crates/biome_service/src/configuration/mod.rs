@@ -623,7 +623,28 @@ impl PartialConfiguration {
 
         let mut deserialized_configurations = vec![];
         for path in extends.iter() {
-            let config_path = directory_path.join(path);
+            let as_path = Path::new(path);
+            let extension = as_path.extension().and_then(|ext| ext.to_str());
+            // TODO: Remove extension in Biome 2.0
+            let config_path = if as_path.starts_with(".")
+                || extension == Some("json")
+                || extension == Some("jsonc")
+            {
+                directory_path.join(path)
+            } else {
+                fs.resolve_configuration(path.as_str())
+                    .map_err(|error| {
+                        ConfigurationDiagnostic::cant_resolve(
+                            fs.working_directory()
+                                .unwrap_or_default()
+                                .display()
+                                .to_string(),
+                            error,
+                        )
+                    })?
+                    .into_path_buf()
+            };
+
             let mut file = fs
                 .open_with_options(config_path.as_path(), OpenOptions::default().read(true))
                 .map_err(|err| {
@@ -729,5 +750,61 @@ impl PartialConfiguration {
             }
         }
         Ok((None, vec![]))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use oxc_resolver::{FileMetadata, ResolveOptions, ResolverGeneric};
+    use std::env;
+    use std::path::{Path, PathBuf};
+
+    #[test]
+    fn resolver_test() {
+        #[derive(Debug, Default)]
+        struct Test;
+
+        impl oxc_resolver::FileSystem for Test {
+            fn read_to_string(&self, _path: &Path) -> std::io::Result<String> {
+                Ok(String::from(
+                    r#"{ "name": "example", "exports": { "./biome": "./biome.json" }}"#,
+                ))
+            }
+
+            fn metadata(&self, _path: &Path) -> std::io::Result<FileMetadata> {
+                Ok(FileMetadata::new(true, false, false))
+            }
+
+            fn symlink_metadata(&self, _path: &Path) -> std::io::Result<FileMetadata> {
+                Ok(FileMetadata::new(true, false, false))
+            }
+
+            fn canonicalize(&self, _path: &Path) -> std::io::Result<PathBuf> {
+                env::current_dir().unwrap().canonicalize()
+            }
+        }
+
+        let resolver = ResolverGeneric::new_with_file_system(
+            Test {},
+            ResolveOptions {
+                condition_names: vec!["node".to_string(), "import".to_string()],
+                extensions: vec!["*.json".to_string()],
+                ..ResolveOptions::default()
+            },
+        );
+
+        let result = resolver
+            .resolve(
+                env::current_dir()
+                    .unwrap()
+                    .canonicalize()
+                    .unwrap()
+                    .display()
+                    .to_string(),
+                "example/biome",
+            )
+            .unwrap();
+
+        dbg!(&result);
     }
 }

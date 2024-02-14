@@ -36,6 +36,7 @@ biome_text_edit              = { workspace = true }
 biome_text_size              = { workspace = true }
 bitflags                     = { workspace = true }
 bpaf                         = { workspace = true }
+oxc_resolver                 = { workspace = true }
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"] }
 termcolor                    = "1.1.2"

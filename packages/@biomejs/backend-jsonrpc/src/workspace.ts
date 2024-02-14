@@ -864,6 +864,10 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Disallow the use of console.
+	 */
+	noConsole?: RuleConfiguration;
+	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration;
@@ -915,6 +919,10 @@ export interface Nursery {
 	 * Disallow then property.
 	 */
 	noThenProperty?: RuleConfiguration;
+	/**
+	 * Disallow the use of dependencies that aren't specified in the package.json.
+	 */
+	noUndeclaredDependencies?: RuleConfiguration;
 	/**
 	 * Disallow unused imports.
 	 */
@@ -1449,6 +1457,10 @@ export interface FilenamingConventionOptions {
 	 */
 	filenameCases: FilenameCases;
 	/**
+	 * If `false`, then non-ASCII characters are allowed.
+	 */
+	requireAscii: boolean;
+	/**
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
 	strictCase: boolean;
@@ -1474,6 +1486,10 @@ export interface NamingConventionOptions {
 	 * Allowed cases for _TypeScript_ `enum` member names.
 	 */
 	enumMemberCase: EnumMemberCase;
+	/**
+	 * If `false`, then non-ASCII characters are allowed.
+	 */
+	requireAscii: boolean;
 	/**
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
@@ -1542,10 +1558,14 @@ export type FilenameCase =
 	| "kebab-case"
 	| "PascalCase"
 	| "snake_case";
-export interface ProjectFeaturesParams {
-	manifest_path: RomePath;
+export interface UpdateProjectParams {
+	path: RomePath;
 }
-export interface ProjectFeaturesResult {}
+export interface OpenProjectParams {
+	content: string;
+	path: RomePath;
+	version: number;
+}
 export interface OpenFileParams {
 	content: string;
 	language_hint?: Language;
@@ -1557,6 +1577,7 @@ export interface OpenFileParams {
  */
 export type Language =
 	| "Astro"
+	| "Vue"
 	| "JavaScript"
 	| "JavaScriptReact"
 	| "TypeScript"
@@ -1719,6 +1740,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
+	| "lint/nursery/noConsole"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyTypeParameters"
@@ -1733,6 +1755,7 @@ export type Category =
 	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
+	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
 	| "lint/nursery/noUselessLoneBlockStatements"
@@ -2094,9 +2117,8 @@ export type Configuration = PartialConfiguration;
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<SupportsFeatureResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
-	projectFeatures(
-		params: ProjectFeaturesParams,
-	): Promise<ProjectFeaturesResult>;
+	updateCurrentProject(params: UpdateProjectParams): Promise<void>;
+	openProject(params: OpenProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
@@ -2126,8 +2148,11 @@ export function createWorkspace(transport: Transport): Workspace {
 		updateSettings(params) {
 			return transport.request("biome/update_settings", params);
 		},
-		projectFeatures(params) {
-			return transport.request("biome/project_features", params);
+		updateCurrentProject(params) {
+			return transport.request("biome/update_current_project", params);
+		},
+		openProject(params) {
+			return transport.request("biome/open_project", params);
 		},
 		openFile(params) {
 			return transport.request("biome/open_file", params);

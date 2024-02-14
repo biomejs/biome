@@ -372,7 +372,9 @@ Members are listed in alphabetical order. Members are free to use the full name,
 ### Maintainers team
 
 - [Arend van Beelen @arendjr](https://github.com/arendjr)
+- [Dani Guardiola @DaniGuardiola](https://github.com/DaniGuardiola)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki)
 - [Vasu Singh @vasucp1207](https://github.com/vasucp1207)
 - [Victor Teles @victor-teles](https://github.com/victor-teles)
+- [Yagiz Nizipli @anonrig](https://github.com/anonrig)

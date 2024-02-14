@@ -43,7 +43,7 @@ declare_rule! {
     /// - `useDeferredValue`
     /// - `useTransition`
     ///
-    /// If you want to add more hooks to the rule, check the [#options](options).
+    /// If you want to add more hooks to the rule, check the [options](#options).
     ///
     /// ## Examples
     ///
@@ -316,8 +316,8 @@ fn capture_needs_to_be_in_the_dependency_list(
     if binding.is_imported() {
         return None;
     }
-
-    match binding.tree().declaration()? {
+    let decl = binding.tree().declaration()?;
+    match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
         // These declarations are always stable
         AnyJsBindingDeclaration::JsFunctionDeclaration(_)
         | AnyJsBindingDeclaration::JsClassDeclaration(_)
@@ -371,6 +371,15 @@ fn capture_needs_to_be_in_the_dependency_list(
 
         // Ignore TypeScript `import <id> =`
         AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => None,
+
+        // This should be unreachable because we call `parent_binding_pattern_declaration`
+        AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
+        | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+            unreachable!("The declaration should be resolved to its prent declaration")
+        }
 
         // This should be unreachable because of the test if the capture is imported
         AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)

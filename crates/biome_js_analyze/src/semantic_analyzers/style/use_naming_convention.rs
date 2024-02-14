@@ -259,6 +259,16 @@ declare_rule! {
     ///
     /// Default: `true`
     ///
+    /// ### requireAscii
+    ///
+    /// When this option is set to `true`, it forbids names that include non-ASCII characters.
+    /// For instance,  when the option is set to `true`, `café` or `안녕하세요` will throw an error.
+    ///
+    /// When the option is set to `false`, anames may include non-ASCII characters.
+    /// `café` and `안녕하세요` are so valid.
+    ///
+    /// Default: `true`
+    ///
     /// ### enumMemberCase
     ///
     /// By default, the rule enforces the naming convention followed by the [TypeScript Compiler team](https://www.typescriptlang.org/docs/handbook/enums.html):
@@ -303,8 +313,15 @@ impl Rule for UseNamingConvention {
             return None;
         }
         let trimmed_name = trim_underscore_dollar(name);
+        if options.require_ascii && !trimmed_name.is_ascii() {
+            return Some(State {
+                element,
+                suggestion: Suggestion::Ascii,
+            });
+        }
         let actual_case = Case::identify(trimmed_name, options.strict_case);
-        if trimmed_name.is_empty()
+        if actual_case == Case::Uni
+            || trimmed_name.is_empty()
             || allowed_cases
                 .iter()
                 .any(|&expected_style| actual_case.is_compatible_with(expected_style))
@@ -314,17 +331,23 @@ impl Rule for UseNamingConvention {
         }
         let preferred_case = element.allowed_cases(ctx.options())[0];
         let new_trimmed_name = preferred_case.convert(trimmed_name);
-        let suggested_name = name.replace(trimmed_name, &new_trimmed_name);
-        Some(State {
-            element,
-            suggested_name,
-        })
+        if trimmed_name != new_trimmed_name {
+            Some(State {
+                element,
+                suggestion: Suggestion::Name(name.replacen(trimmed_name, &new_trimmed_name, 1)),
+            })
+        } else {
+            Some(State {
+                element,
+                suggestion: Suggestion::None,
+            })
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let State {
             element,
-            suggested_name,
+            suggestion,
         } = state;
         let options = ctx.options();
         let name = ctx.query().name().ok()?;
@@ -341,7 +364,17 @@ impl Rule for UseNamingConvention {
         } else {
             markup! {""}.to_owned()
         };
-
+        if matches!(suggestion, Suggestion::Ascii) {
+            return Some(RuleDiagnostic::new(
+                rule_category!(),
+                ctx.query().syntax().text_trimmed_range(),
+                markup! {
+                    "This "<Emphasis>{element.to_string()}</Emphasis>" name"{trimmed_info}" should be in ASCII because "<Emphasis>"requireAscii"</Emphasis>"` is set to `true`."
+                },
+            ).note(markup! {
+                "If you want to use non-ASCII names, then set the "<Emphasis>"requireAscii"</Emphasis>" option to `false`.\nSee the rule "<Hyperlink href="https://biomejs.dev/linter/rules/use-naming-convention#options">"options"</Hyperlink>" for more details."
+            }));
+        }
         if options.strict_case {
             let case_type = Case::identify(name, false);
             let case_strict = Case::identify(name, true);
@@ -350,33 +383,40 @@ impl Rule for UseNamingConvention {
                     rule_category!(),
                     ctx.query().syntax().text_trimmed_range(),
                     markup! {
-                        "Two consecutive uppercase characters are not allowed in camelCase and PascalCase because `strictCase` is set to `true`."
+                        "Two consecutive uppercase characters are not allowed in camelCase and PascalCase because "<Emphasis>"strictCase"</Emphasis>" is set to `true`."
                     },
                 ).note(markup! {
-                    "If you want to use consecutive uppercase characters in camelCase and PascalCase then consider setting `strictCase` option to `false`.\n Check rule "<Hyperlink href="https://biomejs.dev/linter/rules/use-naming-convention#options">"options"</Hyperlink>" for more inforamtion."
+                    "If you want to use consecutive uppercase characters in camelCase and PascalCase, then set the "<Emphasis>"strictCase"</Emphasis>" option to `false`.\nSee the rule "<Hyperlink href="https://biomejs.dev/linter/rules/use-naming-convention#options">"options"</Hyperlink>" for more details."
                 }));
             }
         }
-
-        Some(RuleDiagnostic::new(
+        let diagnostic = RuleDiagnostic::new(
             rule_category!(),
             ctx.query().syntax().text_trimmed_range(),
             markup! {
                 "This "<Emphasis>{element.to_string()}</Emphasis>" name"{trimmed_info}" should be in "<Emphasis>{allowed_case_names}</Emphasis>"."
             },
-        ).note(markup! {
-            "The name could be renamed to `"{suggested_name}"`."
-        }))
+        );
+        Some(if let Suggestion::Name(suggested_name) = suggestion {
+            diagnostic.note(markup! {
+                "The name could be renamed to `"{suggested_name}"`."
+            })
+        } else {
+            diagnostic
+        })
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let State {
+            element,
+            suggestion,
+        } = state;
+        let Suggestion::Name(suggested_name) = suggestion else {
+            return None;
+        };
         let node = ctx.query();
         let model = ctx.model();
         let mut mutation = ctx.root().begin();
-        let State {
-            element,
-            suggested_name,
-        } = state;
         let renamable = match node {
             AnyIdentifierBindingLike::JsIdentifierBinding(binding) => {
                 if binding.is_exported(model) {
@@ -452,7 +492,17 @@ impl AnyIdentifierBindingLike {
 #[derive(Debug)]
 pub(crate) struct State {
     element: Named,
-    suggested_name: String,
+    suggestion: Suggestion,
+}
+
+#[derive(Debug)]
+pub(crate) enum Suggestion {
+    /// No suggestion
+    None,
+    /// Suggest aa new name
+    Name(String),
+    /// Use only ASCII
+    Ascii,
 }
 
 /// Rule's options.
@@ -462,23 +512,24 @@ pub(crate) struct State {
 pub struct NamingConventionOptions {
     /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
     /// This does not affect other [Case].
-    #[serde(
-        default = "default_strict_case",
-        skip_serializing_if = "is_default_strict_case"
-    )]
+    #[serde(default = "enabled", skip_serializing_if = "is_enabled")]
     pub strict_case: bool,
+
+    /// If `false`, then non-ASCII characters are allowed.
+    #[serde(default = "enabled", skip_serializing_if = "is_enabled")]
+    pub require_ascii: bool,
 
     /// Allowed cases for _TypeScript_ `enum` member names.
     #[serde(default, skip_serializing_if = "is_default")]
     pub enum_member_case: EnumMemberCase,
 }
 
-const fn default_strict_case() -> bool {
+const fn enabled() -> bool {
     true
 }
 
-const fn is_default_strict_case(strict_case: &bool) -> bool {
-    *strict_case == default_strict_case()
+const fn is_enabled(value: &bool) -> bool {
+    *value
 }
 
 fn is_default<T: Default + Eq>(value: &T) -> bool {
@@ -488,7 +539,8 @@ fn is_default<T: Default + Eq>(value: &T) -> bool {
 impl Default for NamingConventionOptions {
     fn default() -> Self {
         Self {
-            strict_case: default_strict_case(),
+            strict_case: enabled(),
+            require_ascii: enabled(),
             enum_member_case: EnumMemberCase::default(),
         }
     }
@@ -567,6 +619,7 @@ enum Named {
     LocalLet,
     LocalVar,
     LocalUsing,
+    LocalVariable,
     Namespace,
     ObjectGetter,
     ObjectMethod,
@@ -742,6 +795,13 @@ impl Named {
 
     fn from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<Named> {
         match decl {
+            AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
+            | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+                Self::from_parent_binding_pattern_declaration(decl.parent_binding_pattern_declaration()?)
+            }
             AnyJsBindingDeclaration::JsVariableDeclarator(var) => {
                 Named::from_variable_declarator(var)
             }
@@ -778,6 +838,14 @@ impl Named {
             | AnyJsBindingDeclaration::TsInferType(_)
             | AnyJsBindingDeclaration::TsMappedType(_)
             | AnyJsBindingDeclaration::TsTypeParameter(_) => None,
+        }
+    }
+
+    fn from_parent_binding_pattern_declaration(decl: AnyJsBindingDeclaration) -> Option<Named> {
+        if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = decl {
+            Named::from_variable_declarator(&declarator)
+        } else {
+            Some(Named::LocalVariable)
         }
     }
 
@@ -858,6 +926,7 @@ impl Named {
             | Named::LocalConst
             | Named::LocalLet
             | Named::LocalVar
+            | Named::LocalVariable
             | Named::LocalUsing
             | Named::ObjectGetter
             | Named::ObjectMethod
@@ -918,6 +987,7 @@ impl std::fmt::Display for Named {
             Named::LocalConst => "local const",
             Named::LocalLet => "local let",
             Named::LocalVar => "local var",
+            Named::LocalVariable => "local variable",
             Named::LocalUsing => "local using",
             Named::Namespace => "namespace",
             Named::ObjectGetter => "object getter",

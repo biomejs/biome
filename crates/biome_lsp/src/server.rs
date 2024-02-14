@@ -34,7 +34,7 @@ pub struct LSPServer {
     /// If this is true the server will broadcast a shutdown signal once the
     /// last client disconnected
     stop_on_disconnect: bool,
-    /// This shared flag is set to true once at least one sessions has been
+    /// This shared flag is set to true once at least one session has been
     /// initialized on this server instance
     is_initialized: Arc<AtomicBool>,
 }
@@ -278,7 +278,8 @@ impl LanguageServer for LSPServer {
 
         futures::join!(
             self.session.load_extension_settings(),
-            self.session.load_workspace_settings()
+            self.session.load_workspace_settings(),
+            self.session.load_manifest()
         );
 
         let msg = format!("Server initialized with PID: {}", std::process::id());
@@ -324,6 +325,7 @@ impl LanguageServer for LSPServer {
                                     .contains(&&*possible_rome_json.display().to_string())
                             {
                                 self.session.load_workspace_settings().await;
+                                self.session.load_manifest().await;
                                 self.setup_capabilities().await;
                                 self.session.update_all_diagnostics().await;
                                 // for now we are only interested to the configuration file,
@@ -564,11 +566,11 @@ impl ServerFactory {
         builder = builder.custom_method("biome/rage", LSPServer::rage);
 
         workspace_method!(builder, file_features);
-        workspace_method!(builder, project_features);
         workspace_method!(builder, is_path_ignored);
         workspace_method!(builder, update_settings);
-        workspace_method!(builder, project_features);
         workspace_method!(builder, open_file);
+        workspace_method!(builder, open_project);
+        workspace_method!(builder, update_current_project);
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);

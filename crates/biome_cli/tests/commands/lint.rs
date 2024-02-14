@@ -188,7 +188,7 @@ fn maximum_diagnostics() {
             let content = format!("{:?}", m.content);
             content.contains("The number of diagnostics exceeds the number allowed by Biome")
                 && content.contains("Diagnostics not shown")
-                && content.contains("77")
+                && content.contains("76")
         }));
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -839,7 +839,7 @@ fn fs_error_dereferenced_symlink() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem(Some(root_path.clone())))),
+        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
         &mut console,
         Args::from([("lint"), root_path.display().to_string().as_str()].as_slice()),
     );
@@ -883,7 +883,7 @@ fn fs_error_infinite_symlink_expansion_to_dirs() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem(Some(root_path.clone())))),
+        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
         &mut console,
         Args::from([("lint"), (root_path.display().to_string().as_str())].as_slice()),
     );
@@ -929,7 +929,7 @@ fn fs_error_infinite_symlink_expansion_to_files() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem(Some(root_path.clone())))),
+        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
         &mut console,
         Args::from([("lint"), (root_path.display().to_string().as_str())].as_slice()),
     );
@@ -1110,7 +1110,7 @@ fn fs_files_ignore_symlink() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem(Some(root_path.clone())))),
+        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
         &mut console,
         Args::from(
             [
@@ -2702,6 +2702,57 @@ fn lint_syntax_rules() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_syntax_rules",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_unused_dependencies() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"	{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "all": false,
+      "nursery": {
+        "noUndeclaredDependencies": "error"
+      }
+    }
+  }
+}"#;
+
+    let configuration_path = Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let package_json = r#"	{
+  "dependencies": { "react": "latest", "react-dom": "^17.0.0" }
+}"#;
+    let package_json_path = Path::new("package.json");
+    fs.insert(package_json_path.into(), package_json.as_bytes());
+
+    let file_path = Path::new("fix.js");
+    fs.insert(
+        file_path.into(),
+        r#"import "react";
+import "lodash";
+		"#,
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_dependencies",
         fs,
         console,
         result,

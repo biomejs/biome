@@ -361,6 +361,12 @@ impl From<FileSystemDiagnostic> for WorkspaceError {
     }
 }
 
+impl From<ConfigurationDiagnostic> for WorkspaceError {
+    fn from(value: ConfigurationDiagnostic) -> Self {
+        Self::Configuration(value)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "internalError/fs",
@@ -734,7 +740,7 @@ mod test {
 
     #[test]
     fn diagnostic_size() {
-        assert_eq!(std::mem::size_of::<WorkspaceError>(), 104)
+        assert_eq!(std::mem::size_of::<WorkspaceError>(), 96)
     }
 
     #[test]

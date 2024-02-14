@@ -15,11 +15,12 @@ version              = "0.4.0"
 [dependencies]
 biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
-crossbeam         = "0.8.2"
+crossbeam         = { workspace = true }
 directories       = "5.0.1"
 indexmap          = { workspace = true }
+oxc_resolver      = { workspace = true }
 parking_lot       = { version = "0.12.0", features = ["arc_lock"] }
-rayon             = "1.7.0"
+rayon             = { workspace = true }
 rustc-hash        = { workspace = true }
 schemars          = { workspace = true, optional = true }
 serde             = { workspace = true }

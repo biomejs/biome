@@ -328,7 +328,7 @@ impl MemberChain {
     }
 
     /// Returns an iterator over all members in the member chain
-    fn members(&self) -> impl Iterator<Item = &ChainMember> + DoubleEndedIterator {
+    fn members(&self) -> impl DoubleEndedIterator<Item = &ChainMember> {
         self.head.members().iter().chain(self.tail.members())
     }
 

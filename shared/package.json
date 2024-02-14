@@ -1,0 +1,9 @@
+{
+	"name": "shared",
+	"version": "0.0.0",
+	"exports": {
+		"./biome": "./biome.json"
+	},
+	"keywords": [],
+	"license": "ISC"
+}

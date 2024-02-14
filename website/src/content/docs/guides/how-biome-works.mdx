@@ -2,7 +2,7 @@
 title: How Biome works
 description: Learn how Biome works, like assumptions, configuration and more.
 ---
-import DefaultConfiguration from "@src/components/generated/DefaultConfiguration.mdx";
+import DefaultConfiguration from "@/components/generated/DefaultConfiguration.mdx";
 
 This is a guide that explains how the tool works, assumptions, and internal information useful when setting up the project and the configuration file.
 
@@ -68,6 +68,89 @@ Here's an example:
 - biome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
 will use the configuration file `app/frontend/biome.json`;
 
+### The `extends` option
+
+The `extends` option allows to break down a configuration in multiple file and "share" common patterns among multiple projects/folders.
+
+```json title="biome.json"
+{
+  "$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
+  "extends": ["./formatter.json", "./linter.json"]
+}
+```
+
+```json title="formatter.json"
+{
+  "$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
+  "formatter": {
+    "indentSize": 2
+  },
+  "javascript": {
+    "formatter": {
+      "semicolons": "asNeeded"
+    }
+  }
+}
+```
+
+```json title="linter.json"
+{
+  "$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
+  "linter": {
+    "rules": {
+      "complexity": {
+        "noUselessConstructor": "off"
+      }
+    }
+  }
+}
+```
+
+The files defined in this array:
+- must exist in the file system;
+- are resolved from the path where the `biome.json` file is defined;
+- must be relative paths. Paths to libraries are not resolved;
+- must be reachable by Biome, e.g. symbolic links might not be resolved by Biome;
+- will be processed in order: from the first one to the last one;
+- can override the same properties, but ultimately only the last one will be used by Biome;
+
+
+#### Import `biome.json` from a library
+
+From version `v1.6.0`, Biome is able to resolve configuration files from `node_modules/`, so you can export your configuration file from a library, and import it in multiple projects.
+
+In order to do so, the first thing to do is to set up your "shared" Biome configuration in a certain way. Let's suppose that your library is called `@org/shared-configs`, and you want to import the Biome configuration using the specifier `@org/shared-configs/biome`. You have to set up the `package.json` is a specific way:
+
+```json title="package.json" ins={4}
+{
+  "name": "@org/shared-configs",
+  "exports": {
+    "./biome": "./biome.json"
+  }
+}
+```
+
+:::note
+You can also export `biome.jsonc` files. Just change `./biome.json` to `./biome.jsonc` and it should work.
+:::
+
+Make sure that `@org/shared-configs` is correctly installed in your project, and update the `biome.json` file to look like the following snippet:
+
+```json title="biome.json"
+{
+  "extends": ["@org/shared-configs/biome"]
+}
+```
+
+Biome will attempt to **resolve** your library `@org/shared-configs/` from your working directory. The working directory is:
+- when using the CLI, the directory where you execute your scripts from. Usually it matches the location of your `package.json` file;
+- when using the LSP, the root directory of your project.
+
+:::caution
+To avoid a breaking change with how the existing resolution works, paths that start with a dot `.` or contains `.json`/`.jsonc` in their name, they **won't** be resolved from `node_modules/`.
+:::
+
+For more information about the resolution algorithm, read the [Node.js documentation](https://nodejs.org/api/esm.html#resolution-and-loading-algorithm).
 
 ## Protected Files
 

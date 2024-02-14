@@ -37,14 +37,6 @@ check.js organizeImports ━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-check.js check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The file contains diagnostics that needs to be addressed.
-  
-
-```
-
-```block
 Checked 1 file(s) in <TIME>
 ```
 

@@ -16,8 +16,8 @@ hero:
   tagline: Format, lint, and more in a fraction of a second.
   image:
     alt: Biome, Toolchain of the web
-    dark: ../../assets/svg/slogan-dark-transparent.svg
-    light: ../../assets/svg/slogan-light-transparent.svg
+    dark: "@/assets/svg/slogan-dark-transparent.svg"
+    light: "@/assets/svg/slogan-light-transparent.svg"
   actions:
     - text: Get started
       link: /guides/getting-started/
@@ -30,19 +30,19 @@ hero:
 ---
 
 import { Card, CardGrid } from "@astrojs/starlight/components";
-import Inputf from "@src/components/formatter/input.md";
-import Outputf from "@src/components/formatter/output.md";
-import ProgressBar from "../../playground/components/Progress.tsx";
-import Community from "@src/components/Community.astro";
+import Inputf from "@/components/formatter/input.md";
+import Outputf from "@/components/formatter/output.md";
+import ProgressBar from "@/playground/components/Progress.tsx";
+import Community from "@/components/Community.astro";
 import { Icon } from "@astrojs/starlight/components";
-import arrow from "../../assets/svg/arrow-right.svg";
+import arrow from "@/assets/svg/arrow-right.svg";
 import { Image } from "astro:assets";
-import "../../styles/_performance.scss";
-import "../../styles/_installation.scss";
-import "../../styles/_community.scss";
-import Netlify from "@src/components/Netlify.astro";
-import Sponsors from "@src/components/Sponsors.astro";
-import LinterExample from "@src/components/linter/example.md";
+import "@/styles/_performance.scss";
+import "@/styles/_installation.scss";
+import "@/styles/_community.scss";
+import Netlify from "@/components/Netlify.astro";
+import Sponsors from "@/components/Sponsors.astro";
+import LinterExample from "@/components/linter/example.md";
 
 
 <div class="gradient"></div>

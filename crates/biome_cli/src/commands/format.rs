@@ -1,6 +1,6 @@
 use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
-use crate::commands::{get_stdin, validate_configuration_diagnostics};
+use crate::commands::{get_stdin, resolve_manifest, validate_configuration_diagnostics};
 use crate::diagnostics::DeprecatedArgument;
 use crate::execute::ReportMode;
 use crate::{
@@ -34,7 +34,7 @@ pub(crate) struct FormatCommandPayload {
 
 /// Handler for the "format" command of the Biome CLI
 pub(crate) fn format(
-    mut session: CliSession,
+    session: CliSession,
     payload: FormatCommandPayload,
 ) -> Result<(), CliDiagnostic> {
     let FormatCommandPayload {
@@ -60,15 +60,16 @@ pub(crate) fn format(
         session.app.console,
         cli_options.verbose,
     )?;
+    resolve_manifest(&session)?;
     let LoadedConfiguration {
         mut configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
     // TODO: remove in biome 2.0
+    let console = &mut *session.app.console;
     if let Some(config) = formatter_configuration.as_mut() {
         if let Some(indent_size) = config.indent_size {
-            let console = &mut session.app.console;
             let diagnostic = DeprecatedArgument::new(markup! {
                 "The argument "<Emphasis>"--indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--indent-width"</Emphasis>" instead."
             });
@@ -82,7 +83,6 @@ pub(crate) fn format(
     // TODO: remove in biome 2.0
     if let Some(js_formatter) = javascript_formatter.as_mut() {
         if let Some(indent_size) = js_formatter.indent_size {
-            let console = &mut session.app.console;
             let diagnostic = DeprecatedArgument::new(markup! {
                 "The argument "<Emphasis>"--javascript-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--javascript-formatter-indent-width"</Emphasis>" instead."
             });
@@ -96,7 +96,6 @@ pub(crate) fn format(
     // TODO: remove in biome 2.0
     if let Some(json_formatter) = json_formatter.as_mut() {
         if let Some(indent_size) = json_formatter.indent_size {
-            let console = &mut session.app.console;
             let diagnostic = DeprecatedArgument::new(markup! {
                 "The argument "<Emphasis>"--json-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--json-formatter-indent-width"</Emphasis>" instead."
             });
@@ -110,7 +109,6 @@ pub(crate) fn format(
     // TODO: remove in biome 2.0
     if let Some(css_formatter) = css_formatter.as_mut() {
         if let Some(indent_size) = css_formatter.indent_size {
-            let console = &mut session.app.console;
             let diagnostic = DeprecatedArgument::new(markup! {
                 "The argument "<Emphasis>"--css-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--css-formatter-indent-width"</Emphasis>" instead."
             });
@@ -174,7 +172,7 @@ pub(crate) fn format(
             gitignore_matches,
         })?;
 
-    let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "format")?;
+    let stdin = get_stdin(stdin_file_path, console, "format")?;
 
     let execution = if cli_options.json {
         Execution::with_report(

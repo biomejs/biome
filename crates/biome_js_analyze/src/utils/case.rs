@@ -22,6 +22,8 @@ pub enum Case {
     Pascal,
     /// snake_case
     Snake,
+    /// Alphanumeric Characters that cannot be in lowercase or uppercase (numbers and syllabary)
+    Uni,
     /// UPPERCASE
     Upper,
 }
@@ -44,7 +46,7 @@ impl Case {
     /// assert_eq!(Case::identify("aHttpServer", /* no effect */ true), Case::Camel);
     /// assert_eq!(Case::identify("aHTTPServer", true), Case::Unknown);
     /// assert_eq!(Case::identify("aHTTPServer", false), Case::Camel);
-    /// assert_eq!(Case::identify("v8Engine", true), Case::Camel);
+    /// assert_eq!(Case::identify("v8Engine", /* no effect */ true), Case::Camel);
     ///
     /// assert_eq!(Case::identify("HTTP_SERVER", /* no effect */ true), Case::Constant);
     /// assert_eq!(Case::identify("V8_ENGINE", /* no effect */ true), Case::Constant);
@@ -59,42 +61,46 @@ impl Case {
     /// assert_eq!(Case::identify("HttpServer", /* no effect */ true), Case::Pascal);
     /// assert_eq!(Case::identify("HTTPServer", true), Case::Unknown);
     /// assert_eq!(Case::identify("HTTPServer", false), Case::Pascal);
-    /// assert_eq!(Case::identify("V8Engine", true), Case::Pascal);
+    /// assert_eq!(Case::identify("V8Engine", /* no effect */ true), Case::Pascal);
     ///
     /// assert_eq!(Case::identify("http_server", /* no effect */ true), Case::Snake);
     ///
     /// assert_eq!(Case::identify("HTTPSERVER", /* no effect */ true), Case::Upper);
     ///
+    /// assert_eq!(Case::identify("100", /* no effect */ true), Case::Uni);
+    /// assert_eq!(Case::identify("안녕하세요", /* no effect */ true), Case::Uni);
+    ///
     /// assert_eq!(Case::identify("", /* no effect */ true), Case::Unknown);
     /// assert_eq!(Case::identify("_", /* no effect */ true), Case::Unknown);
+    /// assert_eq!(Case::identify("안녕하세요abc", /* no effect */ true), Case::Unknown);
     /// ```
     pub fn identify(value: &str, strict: bool) -> Case {
         let mut chars = value.chars();
         let Some(first_char) = chars.next() else {
             return Case::Unknown;
         };
-        if !first_char.is_alphanumeric() {
-            return Case::Unknown;
-        }
         let mut result = if first_char.is_uppercase() {
             Case::NumberableCapital
-        } else {
+        } else if first_char.is_lowercase() {
             Case::Lower
+        } else if first_char.is_alphanumeric() {
+            Case::Uni
+        } else {
+            return Case::Unknown;
         };
         let mut previous_char = first_char;
         let mut has_consecutive_uppercase = false;
         for current_char in chars {
             result = match current_char {
                 '-' => match result {
-                    Case::Kebab | Case::Lower => Case::Kebab,
+                    Case::Kebab | Case::Lower if previous_char != '-' => Case::Kebab,
                     _ => return Case::Unknown,
                 },
                 '_' => match result {
-                    Case::Constant | Case::NumberableCapital | Case::Upper => Case::Constant,
-                    Case::Lower | Case::Snake => Case::Snake,
-                    Case::Camel | Case::Kebab | Case::Pascal | Case::Unknown => {
-                        return Case::Unknown
-                    }
+                    Case::Constant | Case::Snake if previous_char != '_' => result,
+                    Case::NumberableCapital | Case::Upper => Case::Constant,
+                    Case::Lower => Case::Snake,
+                    _ => return Case::Unknown,
                 },
                 _ if current_char.is_uppercase() => {
                     has_consecutive_uppercase |= previous_char.is_uppercase();
@@ -105,19 +111,27 @@ impl Case {
                         Case::Camel | Case::Constant | Case::Pascal => result,
                         Case::Lower => Case::Camel,
                         Case::NumberableCapital | Case::Upper => Case::Upper,
-                        Case::Kebab | Case::Snake | Case::Unknown => return Case::Unknown,
+                        _ => return Case::Unknown,
                     }
                 }
                 _ if current_char.is_lowercase() => match result {
                     Case::Camel | Case::Kebab | Case::Lower | Case::Snake => result,
                     Case::Pascal | Case::NumberableCapital => Case::Pascal,
                     Case::Upper if !strict || !has_consecutive_uppercase => Case::Pascal,
-                    Case::Constant | Case::Upper | Case::Unknown => return Case::Unknown,
+                    _ => return Case::Unknown,
                 },
-                _ if current_char.is_numeric() => result, // Figures don't change the case.
+                _ if current_char.is_numeric() => result,
+                _ if current_char.is_alphabetic() => match result {
+                    Case::Uni => Case::Uni,
+                    _ => return Case::Unknown,
+                },
                 _ => return Case::Unknown,
             };
             previous_char = current_char;
+        }
+        // The last char cannot be a delimiter
+        if matches!(previous_char, '-' | '_') {
+            return Case::Unknown;
         }
         result
     }
@@ -128,6 +142,21 @@ impl Case {
     /// Thus [Case::Lower] is compatible with [Case::Camel], [Case::Kebab] , and [Case::Snake].
     ///
     /// Any [Case] is compatible with `Case::Unknown` and with itself.
+    ///
+    /// The compatibility relation between cases is depicted in the following diagram.
+    /// The arrow means "is compatible with".
+    ///
+    /// ```svgbob
+    ///                    ┌──► Pascal ────────────┐
+    /// NumberableCapital ─┤                       │
+    ///                    └──► Upper ─► Constant ─┤
+    ///                                            ├──► Unknown
+    ///                    ┌──► Kebab ─────────────┤
+    ///             Lower ─┤                       │
+    ///                    └──► Camel ─────────────┤
+    ///                                            │
+    ///               Uni ─────────────────────────┘
+    /// ```
     ///
     /// ### Examples
     ///
@@ -144,24 +173,6 @@ impl Case {
     /// assert!(Case::NumberableCapital.is_compatible_with(Case::Upper));
     ///
     /// assert!(Case::Upper.is_compatible_with(Case::Constant));
-    ///
-    /// assert!(Case::Camel.is_compatible_with(Case::Unknown));
-    /// assert!(Case::Constant.is_compatible_with(Case::Unknown));
-    /// assert!(Case::Kebab.is_compatible_with(Case::Unknown));
-    /// assert!(Case::Lower.is_compatible_with(Case::Unknown));
-    /// assert!(Case::NumberableCapital.is_compatible_with(Case::Unknown));
-    /// assert!(Case::Pascal.is_compatible_with(Case::Unknown));
-    /// assert!(Case::Snake.is_compatible_with(Case::Unknown));
-    /// assert!(Case::Upper.is_compatible_with(Case::Unknown));
-    ///
-    /// assert!(Case::Camel.is_compatible_with(Case::Camel));
-    /// assert!(Case::Constant.is_compatible_with(Case::Constant));
-    /// assert!(Case::Kebab.is_compatible_with(Case::Kebab));
-    /// assert!(Case::Lower.is_compatible_with(Case::Lower));
-    /// assert!(Case::NumberableCapital.is_compatible_with(Case::NumberableCapital));
-    /// assert!(Case::Pascal.is_compatible_with(Case::Pascal));
-    /// assert!(Case::Upper.is_compatible_with(Case::Upper));
-    /// assert!(Case::Unknown.is_compatible_with(Case::Unknown));
     /// ```
     pub fn is_compatible_with(self, other: Case) -> bool {
         self == other
@@ -203,32 +214,25 @@ impl Case {
     /// assert_eq!(Case::Snake.convert("HttpServer"), "http_server");
     ///
     /// assert_eq!(Case::Upper.convert("Http_SERVER"), "HTTPSERVER");
-    ///
-    /// assert_eq!(Case::Unknown.convert("_"), "_");
     /// ```
     pub fn convert(self, value: &str) -> String {
         if value.is_empty() || matches!(self, Case::Unknown) {
             return value.to_string();
         }
         let mut word_separator = matches!(self, Case::Pascal);
-        let last_i = value.len() - 1;
         let mut output = String::with_capacity(value.len());
-        let mut first_alphanumeric_i = 0;
         for ((i, current), next) in value
             .char_indices()
             .zip(value.chars().skip(1).map(Some).chain(Some(None)))
         {
-            if (i == 0 || (i == last_i)) && (current == '_' || current == '$') {
-                output.push(current);
-                first_alphanumeric_i = 1;
-                continue;
-            }
-            if !current.is_alphanumeric() {
+            if !current.is_alphanumeric()
+                || (matches!(self, Case::Uni) && (current.is_lowercase() || current.is_uppercase()))
+            {
                 word_separator = true;
                 continue;
             }
             if let Some(next) = next {
-                if i != first_alphanumeric_i && current.is_uppercase() && next.is_lowercase() {
+                if i != 0 && current.is_uppercase() && next.is_lowercase() {
                     word_separator = true;
                 }
             }
@@ -239,6 +243,7 @@ impl Case {
                     | Case::NumberableCapital
                     | Case::Pascal
                     | Case::Unknown
+                    | Case::Uni
                     | Case::Upper => (),
                     Case::Constant | Case::Snake => {
                         output.push('_');
@@ -258,11 +263,12 @@ impl Case {
                 }
                 Case::Constant | Case::Upper => output.extend(current.to_uppercase()),
                 Case::NumberableCapital => {
-                    if i == first_alphanumeric_i {
+                    if i == 0 {
                         output.extend(current.to_uppercase());
                     }
                 }
                 Case::Kebab | Case::Snake | Case::Lower => output.extend(current.to_lowercase()),
+                Case::Uni => output.extend(Some(current)),
                 Case::Unknown => (),
             }
             word_separator = false;
@@ -287,6 +293,7 @@ impl std::fmt::Display for Case {
             Case::NumberableCapital => "numberable capital case",
             Case::Pascal => "PascalCase",
             Case::Snake => "snake_case",
+            Case::Uni => "unicase",
             Case::Upper => "UPPERCASE",
         };
         write!(f, "{}", repr)
@@ -296,6 +303,170 @@ impl std::fmt::Display for Case {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_case_identify() {
+        let no_effect = true;
+
+        assert_eq!(Case::identify("aHttpServer", no_effect), Case::Camel);
+        assert_eq!(Case::identify("aHTTPServer", true), Case::Unknown);
+        assert_eq!(Case::identify("aHTTPServer", false), Case::Camel);
+        assert_eq!(Case::identify("v8Engine", no_effect), Case::Camel);
+
+        assert_eq!(Case::identify("HTTP_SERVER", no_effect), Case::Constant);
+        assert_eq!(Case::identify("V8_ENGINE", no_effect), Case::Constant);
+
+        assert_eq!(Case::identify("http-server", no_effect), Case::Kebab);
+
+        assert_eq!(Case::identify("httpserver", no_effect), Case::Lower);
+
+        assert_eq!(Case::identify("T", no_effect), Case::NumberableCapital);
+        assert_eq!(Case::identify("T1", no_effect), Case::NumberableCapital);
+
+        assert_eq!(Case::identify("HttpServer", no_effect), Case::Pascal);
+        assert_eq!(Case::identify("HTTPServer", true), Case::Unknown);
+        assert_eq!(Case::identify("HTTPServer", false), Case::Pascal);
+        assert_eq!(Case::identify("V8Engine", true), Case::Pascal);
+
+        assert_eq!(Case::identify("http_server", no_effect), Case::Snake);
+
+        assert_eq!(Case::identify("HTTPSERVER", no_effect), Case::Upper);
+
+        assert_eq!(Case::identify("100", no_effect), Case::Uni);
+        assert_eq!(Case::identify("안녕하세요", no_effect), Case::Uni);
+
+        // don't allow identifier that starts/ends with a delimiter
+        assert_eq!(Case::identify("-a", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("_a", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("a-", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("a_", no_effect), Case::Unknown);
+
+        // don't allow identifier that use consecutive delimiters
+        assert_eq!(Case::identify("a--a", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("a__a", no_effect), Case::Unknown);
+
+        assert_eq!(Case::identify("", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("-", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("_", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("안녕하세요ABC", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("안녕하세요abc", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("안녕하세요_ABC", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("안녕하세요_abc", no_effect), Case::Unknown);
+        assert_eq!(Case::identify("안녕하세요-abc", no_effect), Case::Unknown);
+    }
+
+    #[test]
+    fn test_case_is_compatible() {
+        assert!(Case::Unknown.is_compatible_with(Case::Unknown));
+        assert!(!Case::Unknown.is_compatible_with(Case::Camel));
+        assert!(!Case::Unknown.is_compatible_with(Case::Constant));
+        assert!(!Case::Unknown.is_compatible_with(Case::Kebab));
+        assert!(!Case::Unknown.is_compatible_with(Case::Lower));
+        assert!(!Case::Unknown.is_compatible_with(Case::NumberableCapital));
+        assert!(!Case::Unknown.is_compatible_with(Case::Pascal));
+        assert!(!Case::Unknown.is_compatible_with(Case::Snake));
+        assert!(!Case::Unknown.is_compatible_with(Case::Uni));
+        assert!(!Case::Unknown.is_compatible_with(Case::Upper));
+
+        assert!(Case::Camel.is_compatible_with(Case::Unknown));
+        assert!(Case::Camel.is_compatible_with(Case::Camel));
+        assert!(!Case::Camel.is_compatible_with(Case::Constant));
+        assert!(!Case::Camel.is_compatible_with(Case::Kebab));
+        assert!(!Case::Camel.is_compatible_with(Case::Lower));
+        assert!(!Case::Camel.is_compatible_with(Case::NumberableCapital));
+        assert!(!Case::Camel.is_compatible_with(Case::Pascal));
+        assert!(!Case::Camel.is_compatible_with(Case::Snake));
+        assert!(!Case::Camel.is_compatible_with(Case::Uni));
+        assert!(!Case::Camel.is_compatible_with(Case::Upper));
+
+        assert!(Case::Constant.is_compatible_with(Case::Unknown));
+        assert!(!Case::Constant.is_compatible_with(Case::Camel));
+        assert!(Case::Constant.is_compatible_with(Case::Constant));
+        assert!(!Case::Constant.is_compatible_with(Case::Kebab));
+        assert!(!Case::Constant.is_compatible_with(Case::Lower));
+        assert!(!Case::Constant.is_compatible_with(Case::NumberableCapital));
+        assert!(!Case::Constant.is_compatible_with(Case::Pascal));
+        assert!(!Case::Constant.is_compatible_with(Case::Snake));
+        assert!(!Case::Constant.is_compatible_with(Case::Uni));
+        assert!(!Case::Constant.is_compatible_with(Case::Upper));
+
+        assert!(Case::Kebab.is_compatible_with(Case::Unknown));
+        assert!(!Case::Kebab.is_compatible_with(Case::Camel));
+        assert!(!Case::Kebab.is_compatible_with(Case::Constant));
+        assert!(Case::Kebab.is_compatible_with(Case::Kebab));
+        assert!(!Case::Kebab.is_compatible_with(Case::Lower));
+        assert!(!Case::Kebab.is_compatible_with(Case::NumberableCapital));
+        assert!(!Case::Kebab.is_compatible_with(Case::Pascal));
+        assert!(!Case::Kebab.is_compatible_with(Case::Snake));
+        assert!(!Case::Kebab.is_compatible_with(Case::Uni));
+        assert!(!Case::Kebab.is_compatible_with(Case::Upper));
+
+        assert!(Case::Lower.is_compatible_with(Case::Unknown));
+        assert!(Case::Lower.is_compatible_with(Case::Camel));
+        assert!(!Case::Lower.is_compatible_with(Case::Constant));
+        assert!(Case::Lower.is_compatible_with(Case::Kebab));
+        assert!(Case::Lower.is_compatible_with(Case::Lower));
+        assert!(!Case::Lower.is_compatible_with(Case::NumberableCapital));
+        assert!(!Case::Lower.is_compatible_with(Case::Pascal));
+        assert!(Case::Lower.is_compatible_with(Case::Snake));
+        assert!(!Case::Lower.is_compatible_with(Case::Uni));
+        assert!(!Case::Lower.is_compatible_with(Case::Upper));
+
+        assert!(Case::NumberableCapital.is_compatible_with(Case::Unknown));
+        assert!(!Case::NumberableCapital.is_compatible_with(Case::Camel));
+        assert!(Case::NumberableCapital.is_compatible_with(Case::Constant));
+        assert!(!Case::NumberableCapital.is_compatible_with(Case::Kebab));
+        assert!(!Case::NumberableCapital.is_compatible_with(Case::Lower));
+        assert!(Case::NumberableCapital.is_compatible_with(Case::NumberableCapital));
+        assert!(Case::NumberableCapital.is_compatible_with(Case::Pascal));
+        assert!(!Case::NumberableCapital.is_compatible_with(Case::Snake));
+        assert!(!Case::NumberableCapital.is_compatible_with(Case::Uni));
+        assert!(Case::NumberableCapital.is_compatible_with(Case::Upper));
+
+        assert!(Case::Pascal.is_compatible_with(Case::Unknown));
+        assert!(!Case::Pascal.is_compatible_with(Case::Camel));
+        assert!(!Case::Pascal.is_compatible_with(Case::Constant));
+        assert!(!Case::Pascal.is_compatible_with(Case::Kebab));
+        assert!(!Case::Pascal.is_compatible_with(Case::Lower));
+        assert!(!Case::Pascal.is_compatible_with(Case::NumberableCapital));
+        assert!(Case::Pascal.is_compatible_with(Case::Pascal));
+        assert!(!Case::Pascal.is_compatible_with(Case::Snake));
+        assert!(!Case::Pascal.is_compatible_with(Case::Uni));
+        assert!(!Case::Pascal.is_compatible_with(Case::Upper));
+
+        assert!(Case::Snake.is_compatible_with(Case::Unknown));
+        assert!(!Case::Snake.is_compatible_with(Case::Camel));
+        assert!(!Case::Snake.is_compatible_with(Case::Constant));
+        assert!(!Case::Snake.is_compatible_with(Case::Kebab));
+        assert!(!Case::Snake.is_compatible_with(Case::Lower));
+        assert!(!Case::Snake.is_compatible_with(Case::NumberableCapital));
+        assert!(!Case::Snake.is_compatible_with(Case::Pascal));
+        assert!(Case::Snake.is_compatible_with(Case::Snake));
+        assert!(!Case::Snake.is_compatible_with(Case::Uni));
+        assert!(!Case::Snake.is_compatible_with(Case::Upper));
+
+        assert!(Case::Uni.is_compatible_with(Case::Unknown));
+        assert!(!Case::Uni.is_compatible_with(Case::Camel));
+        assert!(!Case::Uni.is_compatible_with(Case::Constant));
+        assert!(!Case::Uni.is_compatible_with(Case::Kebab));
+        assert!(!Case::Uni.is_compatible_with(Case::Lower));
+        assert!(!Case::Uni.is_compatible_with(Case::NumberableCapital));
+        assert!(!Case::Uni.is_compatible_with(Case::Pascal));
+        assert!(!Case::Uni.is_compatible_with(Case::Snake));
+        assert!(Case::Uni.is_compatible_with(Case::Uni));
+        assert!(!Case::Uni.is_compatible_with(Case::Upper));
+
+        assert!(Case::Upper.is_compatible_with(Case::Unknown));
+        assert!(!Case::Upper.is_compatible_with(Case::Camel));
+        assert!(Case::Upper.is_compatible_with(Case::Constant));
+        assert!(!Case::Upper.is_compatible_with(Case::Kebab));
+        assert!(!Case::Upper.is_compatible_with(Case::Lower));
+        assert!(!Case::Upper.is_compatible_with(Case::NumberableCapital));
+        assert!(!Case::Upper.is_compatible_with(Case::Pascal));
+        assert!(!Case::Upper.is_compatible_with(Case::Snake));
+        assert!(!Case::Upper.is_compatible_with(Case::Uni));
+        assert!(Case::Upper.is_compatible_with(Case::Upper));
+    }
 
     #[test]
     fn test_case_convert() {
@@ -350,6 +521,9 @@ mod tests {
         assert_eq!(Case::Upper.convert("PascalCase"), "PASCALCASE");
         assert_eq!(Case::Upper.convert("snake_case"), "SNAKECASE");
         assert_eq!(Case::Upper.convert("Unknown_Style"), "UNKNOWNSTYLE");
+
+        assert_eq!(Case::Uni.convert("안녕하세요"), "안녕하세요");
+        assert_eq!(Case::Uni.convert("a안b녕c하_세D요E"), "안녕하세요");
 
         assert_eq!(Case::Unknown.convert("Unknown_Style"), "Unknown_Style");
     }

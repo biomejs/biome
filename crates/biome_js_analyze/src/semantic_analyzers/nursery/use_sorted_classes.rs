@@ -11,7 +11,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_factory::make::{js_string_literal, js_string_literal_expression, jsx_string};
+use biome_js_factory::make::{
+    js_string_literal, js_string_literal_expression, js_template_chunk, js_template_chunk_element,
+    jsx_string,
+};
 use biome_rowan::{AstNode, BatchMutationExt};
 use lazy_static::lazy_static;
 
@@ -189,7 +192,10 @@ impl Rule for UseSortedClasses {
                 let replacement = jsx_string(js_string_literal(state));
                 mutation.replace_node(jsx_string_node.clone(), replacement);
             }
-            AnyClassStringLike::JsTemplateChunkElement(_) => return None,
+            AnyClassStringLike::JsTemplateChunkElement(chunk) => {
+                let replacement = js_template_chunk_element(js_template_chunk(state));
+                mutation.replace_node(chunk.clone(), replacement);
+            }
         };
 
         Some(JsRuleAction {

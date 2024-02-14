@@ -726,6 +726,7 @@ fn assert_lint(
                     filter,
                     &options,
                     source_type,
+                    None,
                     |signal| {
                         if let Some(mut diag) = signal.diagnostic() {
                             let category = diag.category().expect("linter diagnostic has no code");

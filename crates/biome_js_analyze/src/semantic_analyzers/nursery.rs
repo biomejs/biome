@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_group;
 
+pub(crate) mod no_console;
 pub(crate) mod no_global_assign;
 pub(crate) mod no_global_eval;
 pub(crate) mod no_invalid_use_before_declaration;
@@ -19,6 +20,7 @@ declare_group! {
     pub (crate) Nursery {
         name : "nursery" ,
         rules : [
+            self :: no_console :: NoConsole ,
             self :: no_global_assign :: NoGlobalAssign ,
             self :: no_global_eval :: NoGlobalEval ,
             self :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclaration ,

@@ -3,11 +3,13 @@ use biome_diagnostics::{console, Advices, Diagnostic, LogCategory, Visit};
 use biome_diagnostics::{Error, Severity};
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::OsFileSystem;
+use oxc_resolver::{Resolution, ResolveError};
 use serde::{Deserialize, Serialize};
-use std::io;
+use std::fmt::{Display, Formatter};
 use std::panic::RefUnwindSafe;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::{fmt, io};
 use tracing::{error, info};
 
 mod memory;
@@ -167,6 +169,8 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>>;
+
+    fn resolve_configuration(&self, path: &str) -> Result<Resolution, ResolveError>;
 }
 
 /// Result of the auto search
@@ -334,6 +338,10 @@ where
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
         T::get_changed_files(self, base)
     }
+
+    fn resolve_configuration(&self, path: &str) -> Result<Resolution, ResolveError> {
+        T::resolve_configuration(self, path)
+    }
 }
 
 #[derive(Debug, Diagnostic, Deserialize, Serialize)]
@@ -347,6 +355,12 @@ pub struct FileSystemDiagnostic {
     #[description]
     #[advice]
     pub error_kind: ErrorKind,
+}
+
+impl Display for FileSystemDiagnostic {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        Diagnostic::description(self, f)
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

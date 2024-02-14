@@ -121,3 +121,8 @@ export default function(a: number): number;
 export default function(a: number | boolean): number | boolean {
 	return a;
 }
+
+function g(A, { B }) {
+	interface A {}
+	interface B {}
+}

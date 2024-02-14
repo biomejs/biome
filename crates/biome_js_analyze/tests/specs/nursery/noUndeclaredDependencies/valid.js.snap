@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```jsx
+import "./valid";
+import "react";
+import "@testing-library/react";
+import("./valid");
+import("react");
+import("@testing-library/react");
+require("./valid");
+require("react");
+require("@testing-library/react");
+
+```
+
+

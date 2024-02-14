@@ -44,9 +44,9 @@ impl Rule for NoRenderReturnValue {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let callee = node.callee().ok()?;
+        let callee = node.callee().ok()?.omit_parentheses();
         let model = ctx.model();
-        if is_react_call_api(callee, model, ReactLibrary::ReactDOM, "render") {
+        if is_react_call_api(&callee, model, ReactLibrary::ReactDOM, "render") {
             let parent = node.syntax().parent()?;
 
             if !JsExpressionStatement::can_cast(parent.kind()) {

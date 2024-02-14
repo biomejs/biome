@@ -897,6 +897,10 @@
 					"description": "Allowed cases for _TypeScript_ `enum` member names.",
 					"allOf": [{ "$ref": "#/definitions/FilenameCases" }]
 				},
+				"requireAscii": {
+					"description": "If `false`, then non-ASCII characters are allowed.",
+					"type": "boolean"
+				},
 				"strictCase": {
 					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",
 					"type": "boolean"
@@ -1273,6 +1277,10 @@
 					"description": "Allowed cases for _TypeScript_ `enum` member names.",
 					"allOf": [{ "$ref": "#/definitions/EnumMemberCase" }]
 				},
+				"requireAscii": {
+					"description": "If `false`, then non-ASCII characters are allowed.",
+					"type": "boolean"
+				},
 				"strictCase": {
 					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",
 					"type": "boolean"
@@ -1287,6 +1295,13 @@
 				"all": {
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
+				},
+				"noConsole": {
+					"description": "Disallow the use of console.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"noDuplicateJsonKeys": {
 					"description": "Disallow two keys with the same name inside a JSON object.",
@@ -1374,6 +1389,13 @@
 				},
 				"noThenProperty": {
 					"description": "Disallow then property.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUndeclaredDependencies": {
+					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
