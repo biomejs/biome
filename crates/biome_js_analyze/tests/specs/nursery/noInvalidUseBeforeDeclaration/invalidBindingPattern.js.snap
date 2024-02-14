@@ -1,0 +1,187 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidBindingPattern.js
+---
+# Input
+```jsx
+function f({ b = a, a = 0 }) {}
+function f([b = a, a = 0]) {}
+function f({ x: [b = a, { a = 0 }] }) {}
+function f({ a = a }) {}
+{
+	const { b = a, a = 0 } = {};
+}
+{
+	const [b = a, a = 0] = {};
+}
+{
+	const {
+		x: [b = a, { a = 0 }],
+	} = {};
+}
+```
+
+# Diagnostics
+```
+invalidBindingPattern.js:1:18 lint/nursery/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is used before its declaration.
+  
+  > 1 │ function f({ b = a, a = 0 }) {}
+      │                  ^
+    2 │ function f([b = a, a = 0]) {}
+    3 │ function f({ x: [b = a, { a = 0 }] }) {}
+  
+  i The variable is declared here:
+  
+  > 1 │ function f({ b = a, a = 0 }) {}
+      │                     ^
+    2 │ function f([b = a, a = 0]) {}
+    3 │ function f({ x: [b = a, { a = 0 }] }) {}
+  
+
+```
+
+```
+invalidBindingPattern.js:2:17 lint/nursery/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is used before its declaration.
+  
+    1 │ function f({ b = a, a = 0 }) {}
+  > 2 │ function f([b = a, a = 0]) {}
+      │                 ^
+    3 │ function f({ x: [b = a, { a = 0 }] }) {}
+    4 │ function f({ a = a }) {}
+  
+  i The variable is declared here:
+  
+    1 │ function f({ b = a, a = 0 }) {}
+  > 2 │ function f([b = a, a = 0]) {}
+      │                    ^
+    3 │ function f({ x: [b = a, { a = 0 }] }) {}
+    4 │ function f({ a = a }) {}
+  
+
+```
+
+```
+invalidBindingPattern.js:3:22 lint/nursery/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is used before its declaration.
+  
+    1 │ function f({ b = a, a = 0 }) {}
+    2 │ function f([b = a, a = 0]) {}
+  > 3 │ function f({ x: [b = a, { a = 0 }] }) {}
+      │                      ^
+    4 │ function f({ a = a }) {}
+    5 │ {
+  
+  i The variable is declared here:
+  
+    1 │ function f({ b = a, a = 0 }) {}
+    2 │ function f([b = a, a = 0]) {}
+  > 3 │ function f({ x: [b = a, { a = 0 }] }) {}
+      │                           ^
+    4 │ function f({ a = a }) {}
+    5 │ {
+  
+
+```
+
+```
+invalidBindingPattern.js:4:18 lint/nursery/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is used before its declaration.
+  
+    2 │ function f([b = a, a = 0]) {}
+    3 │ function f({ x: [b = a, { a = 0 }] }) {}
+  > 4 │ function f({ a = a }) {}
+      │                  ^^
+    5 │ {
+    6 │ 	const { b = a, a = 0 } = {};
+  
+  i The variable is declared here:
+  
+    2 │ function f([b = a, a = 0]) {}
+    3 │ function f({ x: [b = a, { a = 0 }] }) {}
+  > 4 │ function f({ a = a }) {}
+      │              ^
+    5 │ {
+    6 │ 	const { b = a, a = 0 } = {};
+  
+
+```
+
+```
+invalidBindingPattern.js:6:14 lint/nursery/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is used before its declaration.
+  
+    4 │ function f({ a = a }) {}
+    5 │ {
+  > 6 │ 	const { b = a, a = 0 } = {};
+      │ 	            ^
+    7 │ }
+    8 │ {
+  
+  i The variable is declared here:
+  
+    4 │ function f({ a = a }) {}
+    5 │ {
+  > 6 │ 	const { b = a, a = 0 } = {};
+      │ 	               ^
+    7 │ }
+    8 │ {
+  
+
+```
+
+```
+invalidBindingPattern.js:9:13 lint/nursery/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is used before its declaration.
+  
+     7 │ }
+     8 │ {
+   > 9 │ 	const [b = a, a = 0] = {};
+       │ 	           ^
+    10 │ }
+    11 │ {
+  
+  i The variable is declared here:
+  
+     7 │ }
+     8 │ {
+   > 9 │ 	const [b = a, a = 0] = {};
+       │ 	              ^
+    10 │ }
+    11 │ {
+  
+
+```
+
+```
+invalidBindingPattern.js:13:11 lint/nursery/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is used before its declaration.
+  
+    11 │ {
+    12 │ 	const {
+  > 13 │ 		x: [b = a, { a = 0 }],
+       │ 		        ^
+    14 │ 	} = {};
+    15 │ }
+  
+  i The variable is declared here:
+  
+    11 │ {
+    12 │ 	const {
+  > 13 │ 		x: [b = a, { a = 0 }],
+       │ 		             ^
+    14 │ 	} = {};
+    15 │ }
+  
+
+```
+
+

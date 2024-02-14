@@ -72,13 +72,15 @@ JsModule {
                                 pattern: JsArrayAssignmentPattern {
                                     l_brack_token: L_BRACK@40..41 "[" [] [],
                                     elements: JsArrayAssignmentPatternElementList [
-                                        JsAssignmentWithDefault {
+                                        JsArrayAssignmentPatternElement {
                                             pattern: JsIdentifierAssignment {
                                                 name_token: IDENT@41..45 "baz" [] [Whitespace(" ")],
                                             },
-                                            eq_token: EQ@45..47 "=" [] [Whitespace(" ")],
-                                            default: JsStringLiteralExpression {
-                                                value_token: JS_STRING_LITERAL@47..52 "\"baz\"" [] [],
+                                            init: JsInitializerClause {
+                                                eq_token: EQ@45..47 "=" [] [Whitespace(" ")],
+                                                expression: JsStringLiteralExpression {
+                                                    value_token: JS_STRING_LITERAL@47..52 "\"baz\"" [] [],
+                                                },
                                             },
                                         },
                                     ],
@@ -181,12 +183,13 @@ JsModule {
                 2: JS_ARRAY_ASSIGNMENT_PATTERN@40..53
                   0: L_BRACK@40..41 "[" [] []
                   1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@41..52
-                    0: JS_ASSIGNMENT_WITH_DEFAULT@41..52
+                    0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@41..52
                       0: JS_IDENTIFIER_ASSIGNMENT@41..45
                         0: IDENT@41..45 "baz" [] [Whitespace(" ")]
-                      1: EQ@45..47 "=" [] [Whitespace(" ")]
-                      2: JS_STRING_LITERAL_EXPRESSION@47..52
-                        0: JS_STRING_LITERAL@47..52 "\"baz\"" [] []
+                      1: JS_INITIALIZER_CLAUSE@45..52
+                        0: EQ@45..47 "=" [] [Whitespace(" ")]
+                        1: JS_STRING_LITERAL_EXPRESSION@47..52
+                          0: JS_STRING_LITERAL@47..52 "\"baz\"" [] []
                   2: R_BRACK@52..53 "]" [] []
                 3: (empty)
               1: COMMA@53..55 "," [] [Whitespace(" ")]

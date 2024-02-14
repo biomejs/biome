@@ -1,7 +1,7 @@
 use crate::manifest_services::Manifest;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::JsModuleSource;
+use biome_js_syntax::AnyJsImportSpecifierLike;
 use biome_rowan::AstNode;
 
 declare_rule! {
@@ -26,14 +26,14 @@ declare_rule! {
 }
 
 impl Rule for NoUndeclaredDependencies {
-    type Query = Manifest<JsModuleSource>;
+    type Query = Manifest<AnyJsImportSpecifierLike>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let text = node.inner_string_text().ok()?;
+        let text = node.inner_string_text()?;
         if !text.text().starts_with('.')
             && !ctx.is_dependency(text.text())
             && !ctx.is_dev_dependency(text.text())

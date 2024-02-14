@@ -2,7 +2,7 @@ use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsOptionalChainExpression,
-    JsAssignmentExpression, JsAssignmentWithDefault, JsAwaitExpression, JsCallExpression,
+    JsArrayAssignmentPatternElement, JsAssignmentExpression, JsAwaitExpression, JsCallExpression,
     JsComputedMemberExpression, JsConditionalExpression, JsExtendsClause, JsForOfStatement,
     JsInExpression, JsInitializerClause, JsInstanceofExpression, JsLogicalExpression,
     JsLogicalOperator, JsNewExpression, JsObjectAssignmentPatternProperty, JsObjectMemberList,
@@ -236,7 +236,18 @@ impl Rule for NoUnsafeOptionalChaining {
                                 | AnyJsAssignmentPattern::JsArrayAssignmentPattern(_),)
                         ) {
                             // ({bar: [ foo ] = obj?.prop} = {});
-                            return Some(parent.syntax().text_trimmed_range());
+                            return Some(parent.range());
+                        }
+                    } else if let Some(parent) =
+                        initializer.parent::<JsArrayAssignmentPatternElement>()
+                    {
+                        if matches!(
+                            parent.pattern(),
+                            Ok(AnyJsAssignmentPattern::JsObjectAssignmentPattern(_)
+                                | AnyJsAssignmentPattern::JsArrayAssignmentPattern(_))
+                        ) {
+                            // [{ foo } = obj?.bar] = [];
+                            return Some(parent.range());
                         }
                     }
                 }
@@ -247,16 +258,6 @@ impl Rule for NoUnsafeOptionalChaining {
                             | AnyJsAssignmentPattern::JsArrayAssignmentPattern(_),)
                     ) {
                         return Some(expression.syntax().text_trimmed_range());
-                    }
-                }
-                RuleNode::JsAssignmentWithDefault(assigment) => {
-                    if matches!(
-                        assigment.pattern(),
-                        Ok(AnyJsAssignmentPattern::JsObjectAssignmentPattern(_)
-                            | AnyJsAssignmentPattern::JsArrayAssignmentPattern(_))
-                    ) {
-                        // [{ foo } = obj?.bar] = [];
-                        return Some(assigment.syntax().text_trimmed_range());
                     }
                 }
                 RuleNode::JsSpread(spread) => {
@@ -327,7 +328,6 @@ declare_node_union! {
     | JsExtendsClause
     | JsInExpression
     | JsInstanceofExpression
-    | JsAssignmentWithDefault
 }
 
 impl From<AnyJsOptionalChainExpression> for RuleNode {

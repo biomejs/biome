@@ -54,14 +54,6 @@ test.json:1:3 lint/nursery/noDuplicateJsonKeys ━━━━━━━━━━━
 ```
 
 ```block
-test.json lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The file contains diagnostics that needs to be addressed.
-  
-
-```
-
-```block
 Checked 1 file(s) in <TIME>
 ```
 

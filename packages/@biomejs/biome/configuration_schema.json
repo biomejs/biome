@@ -897,6 +897,10 @@
 					"description": "Allowed cases for _TypeScript_ `enum` member names.",
 					"allOf": [{ "$ref": "#/definitions/FilenameCases" }]
 				},
+				"requireAscii": {
+					"description": "If `false`, then non-ASCII characters are allowed.",
+					"type": "boolean"
+				},
 				"strictCase": {
 					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",
 					"type": "boolean"
@@ -1272,6 +1276,10 @@
 				"enumMemberCase": {
 					"description": "Allowed cases for _TypeScript_ `enum` member names.",
 					"allOf": [{ "$ref": "#/definitions/EnumMemberCase" }]
+				},
+				"requireAscii": {
+					"description": "If `false`, then non-ASCII characters are allowed.",
+					"type": "boolean"
 				},
 				"strictCase": {
 					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",

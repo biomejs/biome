@@ -5457,46 +5457,19 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeAssertionAssignment 
         FormatOwnedWithRule :: new (self , crate :: ts :: assignments :: type_assertion_assignment :: FormatTsTypeAssertionAssignment :: default ())
     }
 }
-impl FormatRule<biome_js_syntax::JsAssignmentWithDefault>
-    for crate::js::assignments::assignment_with_default::FormatJsAssignmentWithDefault
-{
-    type Context = JsFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_js_syntax::JsAssignmentWithDefault,
-        f: &mut JsFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_js_syntax::JsAssignmentWithDefault>::fmt(self, node, f)
-    }
-}
-impl AsFormat<JsFormatContext> for biome_js_syntax::JsAssignmentWithDefault {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_js_syntax::JsAssignmentWithDefault,
-        crate::js::assignments::assignment_with_default::FormatJsAssignmentWithDefault,
-    >;
+impl FormatRule < biome_js_syntax :: JsArrayAssignmentPatternElement > for crate :: js :: assignments :: array_assignment_pattern_element :: FormatJsArrayAssignmentPatternElement { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: JsArrayAssignmentPatternElement , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: JsArrayAssignmentPatternElement > :: fmt (self , node , f) } }
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayAssignmentPatternElement {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsArrayAssignmentPatternElement , crate :: js :: assignments :: array_assignment_pattern_element :: FormatJsArrayAssignmentPatternElement > ;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::js::assignments::assignment_with_default::FormatJsAssignmentWithDefault::default(
-            ),
-        )
+        FormatRefWithRule :: new (self , crate :: js :: assignments :: array_assignment_pattern_element :: FormatJsArrayAssignmentPatternElement :: default ())
     }
 }
-impl IntoFormat<JsFormatContext> for biome_js_syntax::JsAssignmentWithDefault {
-    type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsAssignmentWithDefault,
-        crate::js::assignments::assignment_with_default::FormatJsAssignmentWithDefault,
-    >;
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayAssignmentPatternElement {
+    type Format = FormatOwnedWithRule < biome_js_syntax :: JsArrayAssignmentPatternElement , crate :: js :: assignments :: array_assignment_pattern_element :: FormatJsArrayAssignmentPatternElement > ;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::js::assignments::assignment_with_default::FormatJsAssignmentWithDefault::default(
-            ),
-        )
+        FormatOwnedWithRule :: new (self , crate :: js :: assignments :: array_assignment_pattern_element :: FormatJsArrayAssignmentPatternElement :: default ())
     }
 }
 impl FormatRule<biome_js_syntax::JsArrayAssignmentPattern>
@@ -5686,38 +5659,38 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsIdentifierBinding {
         )
     }
 }
-impl FormatRule<biome_js_syntax::JsBindingPatternWithDefault>
-    for crate::js::bindings::binding_pattern_with_default::FormatJsBindingPatternWithDefault
+impl FormatRule<biome_js_syntax::JsArrayBindingPatternElement>
+    for crate::js::bindings::array_binding_pattern_element::FormatJsArrayBindingPatternElement
 {
     type Context = JsFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_js_syntax::JsBindingPatternWithDefault,
+        node: &biome_js_syntax::JsArrayBindingPatternElement,
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_js_syntax::JsBindingPatternWithDefault>::fmt(self, node, f)
+        FormatNodeRule::<biome_js_syntax::JsArrayBindingPatternElement>::fmt(self, node, f)
     }
 }
-impl AsFormat<JsFormatContext> for biome_js_syntax::JsBindingPatternWithDefault {
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPatternElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBindingPatternWithDefault,
-        crate::js::bindings::binding_pattern_with_default::FormatJsBindingPatternWithDefault,
+        biome_js_syntax::JsArrayBindingPatternElement,
+        crate::js::bindings::array_binding_pattern_element::FormatJsArrayBindingPatternElement,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule :: new (self , crate :: js :: bindings :: binding_pattern_with_default :: FormatJsBindingPatternWithDefault :: default ())
+        FormatRefWithRule :: new (self , crate :: js :: bindings :: array_binding_pattern_element :: FormatJsArrayBindingPatternElement :: default ())
     }
 }
-impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBindingPatternWithDefault {
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPatternElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBindingPatternWithDefault,
-        crate::js::bindings::binding_pattern_with_default::FormatJsBindingPatternWithDefault,
+        biome_js_syntax::JsArrayBindingPatternElement,
+        crate::js::bindings::array_binding_pattern_element::FormatJsArrayBindingPatternElement,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule :: new (self , crate :: js :: bindings :: binding_pattern_with_default :: FormatJsBindingPatternWithDefault :: default ())
+        FormatOwnedWithRule :: new (self , crate :: js :: bindings :: array_binding_pattern_element :: FormatJsArrayBindingPatternElement :: default ())
     }
 }
 impl FormatRule<biome_js_syntax::JsArrayBindingPattern>

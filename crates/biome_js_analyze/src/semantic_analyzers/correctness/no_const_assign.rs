@@ -6,12 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{self};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
-use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsObjectBindingPatternMember,
-    JsArrayBindingPatternElementList, JsForVariableDeclaration, JsIdentifierAssignment,
-    JsIdentifierBinding, JsObjectBindingPatternPropertyList, JsSyntaxKind, JsVariableDeclaration,
-    JsVariableDeclarator, JsVariableDeclaratorList,
-};
+use biome_js_syntax::{JsIdentifierAssignment, JsSyntaxKind};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
 declare_rule! {
@@ -70,36 +65,15 @@ impl Rule for NoConstAssign {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-
-        let declared_binding = model.binding(node)?;
-
-        if let Some(possible_declarator) = declared_binding.syntax().ancestors().find(|node| {
-            !AnyJsObjectBindingPatternMember::can_cast(node.kind())
-                && !JsObjectBindingPatternPropertyList::can_cast(node.kind())
-                && !AnyJsArrayBindingPatternElement::can_cast(node.kind())
-                && !JsArrayBindingPatternElementList::can_cast(node.kind())
-                && !JsIdentifierBinding::can_cast(node.kind())
-        }) {
-            if JsVariableDeclarator::can_cast(possible_declarator.kind()) {
-                let possible_declaration = possible_declarator.parent()?;
-                if let Some(js_for_variable_declaration) =
-                    JsForVariableDeclaration::cast_ref(&possible_declaration)
-                {
-                    if js_for_variable_declaration.is_const() {
-                        return Some(declared_binding.syntax().text_trimmed_range());
-                    }
-                } else if let Some(js_variable_declaration) =
-                    JsVariableDeclaratorList::cast_ref(&possible_declaration)
-                        .and_then(|declaration| declaration.syntax().parent())
-                        .and_then(JsVariableDeclaration::cast)
-                {
-                    if js_variable_declaration.is_const() {
-                        return Some(declared_binding.syntax().text_trimmed_range());
-                    }
-                }
+        let id_binding = model.binding(node)?.tree();
+        let decl = id_binding.declaration()?;
+        if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
+            decl.parent_binding_pattern_declaration().unwrap_or(decl)
+        {
+            if declarator.declaration()?.is_const() {
+                return Some(id_binding.range());
             }
-        }
-
+        };
         None
     }
 
@@ -124,14 +98,11 @@ impl Rule for NoConstAssign {
         let node = ctx.query();
         let model = ctx.model();
         let mut mutation = ctx.root().begin();
-
-        let declared_binding = model.binding(node)?;
-
-        if let AnyJsBindingDeclaration::JsVariableDeclarator(possible_declarator) =
-            declared_binding.tree().declaration()?
+        let decl = model.binding(node)?.tree().declaration()?;
+        if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
+            decl.parent_binding_pattern_declaration().unwrap_or(decl)
         {
-            let declaration = possible_declarator.declaration()?;
-            let const_token = declaration.kind_token()?;
+            let const_token = declarator.declaration()?.kind_token().ok()?;
             let let_token = make::token(JsSyntaxKind::LET_KW);
             mutation.replace_token(const_token, let_token);
             return Some(JsRuleAction {

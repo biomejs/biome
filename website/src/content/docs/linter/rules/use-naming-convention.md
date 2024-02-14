@@ -74,14 +74,14 @@ const fooYPosition = 0;
 
 <pre class="language-text"><code class="language-text">style/useNamingConvention.js:1:7 <a href="https://biomejs.dev/linter/rules/use-naming-convention">lint/style/useNamingConvention</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Two consecutive uppercase characters are not allowed in camelCase and PascalCase because `strictCase` is set to `true`.</span>
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Two consecutive uppercase characters are not allowed in camelCase and PascalCase because </span><span style="color: Orange;"><strong>strictCase</strong></span><span style="color: Orange;"> is set to `true`.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>const fooYPosition = 0;
    <strong>   │ </strong>      <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If you want to use consecutive uppercase characters in camelCase and PascalCase then consider setting `strictCase` option to `false`.
-</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> Check rule </span><span style="color: lightgreen;"><a href="https://biomejs.dev/linter/rules/use-naming-convention#options">options</a></span><span style="color: lightgreen;"> for more inforamtion.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If you want to use consecutive uppercase characters in camelCase and PascalCase, then set the </span><span style="color: lightgreen;"><strong>strictCase</strong></span><span style="color: lightgreen;"> option to `false`.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">See the rule </span><span style="color: lightgreen;"><a href="https://biomejs.dev/linter/rules/use-naming-convention#options">options</a></span><span style="color: lightgreen;"> for more details.</span>
   
 </code></pre>
 
@@ -337,6 +337,16 @@ These names should be renamed to `HttpServer` and `aHttpServer`
 
 When the option is set to `false`, consecutive uppercase characters are allowed.
 `HTTPServer` and `aHTTPServer` are so valid.
+
+Default: `true`
+
+### requireAscii
+
+When this option is set to `true`, it forbids names that include non-ASCII characters.
+For instance,  when the option is set to `true`, `café` or `안녕하세요` will throw an error.
+
+When the option is set to `false`, anames may include non-ASCII characters.
+`café` and `안녕하세요` are so valid.
 
 Default: `true`
 

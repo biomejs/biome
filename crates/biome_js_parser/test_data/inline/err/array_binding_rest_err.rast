@@ -102,8 +102,11 @@ JsModule {
                                                             ],
                                                         },
                                                         COMMA@60..62 "," [] [Whitespace(" ")],
-                                                        JsIdentifierBinding {
-                                                            name_token: IDENT@62..79 "other_assignment" [] [Whitespace(" ")],
+                                                        JsArrayBindingPatternElement {
+                                                            pattern: JsIdentifierBinding {
+                                                                name_token: IDENT@62..79 "other_assignment" [] [Whitespace(" ")],
+                                                            },
+                                                            init: missing (optional),
                                                         },
                                                     ],
                                                 },
@@ -190,8 +193,10 @@ JsModule {
                   1: JS_IDENTIFIER_BINDING@56..60
                     0: IDENT@56..60 "rest" [] []
                 1: COMMA@60..62 "," [] [Whitespace(" ")]
-                2: JS_IDENTIFIER_BINDING@62..79
-                  0: IDENT@62..79 "other_assignment" [] [Whitespace(" ")]
+                2: JS_ARRAY_BINDING_PATTERN_ELEMENT@62..79
+                  0: JS_IDENTIFIER_BINDING@62..79
+                    0: IDENT@62..79 "other_assignment" [] [Whitespace(" ")]
+                  1: (empty)
               2: R_BRACK@79..81 "]" [] [Whitespace(" ")]
             1: JS_INITIALIZER_CLAUSE@81..84
               0: EQ@81..83 "=" [] [Whitespace(" ")]

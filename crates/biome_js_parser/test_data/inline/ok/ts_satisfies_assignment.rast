@@ -177,14 +177,17 @@ JsModule {
                     left: JsArrayAssignmentPattern {
                         l_brack_token: L_BRACK@158..160 "[" [] [Whitespace(" ")],
                         elements: JsArrayAssignmentPatternElementList [
-                            TsSatisfiesAssignment {
-                                assignment: JsIdentifierAssignment {
-                                    name_token: IDENT@160..162 "a" [] [Whitespace(" ")],
+                            JsArrayAssignmentPatternElement {
+                                pattern: TsSatisfiesAssignment {
+                                    assignment: JsIdentifierAssignment {
+                                        name_token: IDENT@160..162 "a" [] [Whitespace(" ")],
+                                    },
+                                    satisfies_token: SATISFIES_KW@162..172 "satisfies" [] [Whitespace(" ")],
+                                    ty: TsStringType {
+                                        string_token: STRING_KW@172..179 "string" [] [Whitespace(" ")],
+                                    },
                                 },
-                                satisfies_token: SATISFIES_KW@162..172 "satisfies" [] [Whitespace(" ")],
-                                ty: TsStringType {
-                                    string_token: STRING_KW@172..179 "string" [] [Whitespace(" ")],
-                                },
+                                init: missing (optional),
                             },
                         ],
                         r_brack_token: R_BRACK@179..181 "]" [] [Whitespace(" ")],
@@ -405,12 +408,14 @@ JsModule {
           0: JS_ARRAY_ASSIGNMENT_PATTERN@158..181
             0: L_BRACK@158..160 "[" [] [Whitespace(" ")]
             1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@160..179
-              0: TS_SATISFIES_ASSIGNMENT@160..179
-                0: JS_IDENTIFIER_ASSIGNMENT@160..162
-                  0: IDENT@160..162 "a" [] [Whitespace(" ")]
-                1: SATISFIES_KW@162..172 "satisfies" [] [Whitespace(" ")]
-                2: TS_STRING_TYPE@172..179
-                  0: STRING_KW@172..179 "string" [] [Whitespace(" ")]
+              0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@160..179
+                0: TS_SATISFIES_ASSIGNMENT@160..179
+                  0: JS_IDENTIFIER_ASSIGNMENT@160..162
+                    0: IDENT@160..162 "a" [] [Whitespace(" ")]
+                  1: SATISFIES_KW@162..172 "satisfies" [] [Whitespace(" ")]
+                  2: TS_STRING_TYPE@172..179
+                    0: STRING_KW@172..179 "string" [] [Whitespace(" ")]
+                1: (empty)
             2: R_BRACK@179..181 "]" [] [Whitespace(" ")]
           1: EQ@181..183 "=" [] [Whitespace(" ")]
           2: JS_ARRAY_EXPRESSION@183..193

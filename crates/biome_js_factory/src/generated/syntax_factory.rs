@@ -76,6 +76,32 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.into_node(JS_ARRAY_ASSIGNMENT_PATTERN, children)
             }
+            JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if AnyJsAssignmentPattern::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if JsInitializerClause::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT, children)
+            }
             JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -134,6 +160,32 @@ impl SyntaxFactory for JsSyntaxFactory {
                     );
                 }
                 slots.into_node(JS_ARRAY_BINDING_PATTERN, children)
+            }
+            JS_ARRAY_BINDING_PATTERN_ELEMENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if AnyJsBindingPattern::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if JsInitializerClause::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JS_ARRAY_BINDING_PATTERN_ELEMENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JS_ARRAY_BINDING_PATTERN_ELEMENT, children)
             }
             JS_ARRAY_BINDING_PATTERN_REST_ELEMENT => {
                 let mut elements = (&children).into_iter();
@@ -311,39 +363,6 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.into_node(JS_ASSIGNMENT_EXPRESSION, children)
             }
-            JS_ASSIGNMENT_WITH_DEFAULT => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if AnyJsAssignmentPattern::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [=] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyJsExpression::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        JS_ASSIGNMENT_WITH_DEFAULT.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(JS_ASSIGNMENT_WITH_DEFAULT, children)
-            }
             JS_AWAIT_EXPRESSION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -443,39 +462,6 @@ impl SyntaxFactory for JsSyntaxFactory {
                     );
                 }
                 slots.into_node(JS_BINARY_EXPRESSION, children)
-            }
-            JS_BINDING_PATTERN_WITH_DEFAULT => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if AnyJsBindingPattern::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [=] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyJsExpression::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        JS_BINDING_PATTERN_WITH_DEFAULT.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(JS_BINDING_PATTERN_WITH_DEFAULT, children)
             }
             JS_BLOCK_STATEMENT => {
                 let mut elements = (&children).into_iter();

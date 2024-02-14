@@ -167,12 +167,12 @@ pub(crate) fn parse_assignment(
     assignment_expression.map(|expr| expression_to_assignment(p, expr, checkpoint))
 }
 
-struct AssignmentPatternWithDefault;
+struct ArrayAssignmentPatternElement;
 
-impl ParseWithDefaultPattern for AssignmentPatternWithDefault {
+impl ParseWithDefaultPattern for ArrayAssignmentPatternElement {
     #[inline]
     fn pattern_with_default_kind() -> JsSyntaxKind {
-        JS_ASSIGNMENT_WITH_DEFAULT
+        JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT
     }
 
     #[inline]
@@ -200,7 +200,7 @@ struct ArrayAssignmentPattern;
 // [a = , = "test"] = test;
 // [[a b] [c]]= test;
 // [a: b] = c
-impl ParseArrayPattern<AssignmentPatternWithDefault> for ArrayAssignmentPattern {
+impl ParseArrayPattern<ArrayAssignmentPatternElement> for ArrayAssignmentPattern {
     #[inline]
     fn bogus_pattern_kind() -> JsSyntaxKind {
         JS_BOGUS_ASSIGNMENT
@@ -239,8 +239,8 @@ impl ParseArrayPattern<AssignmentPatternWithDefault> for ArrayAssignmentPattern 
     }
 
     #[inline]
-    fn pattern_with_default(&self) -> AssignmentPatternWithDefault {
-        AssignmentPatternWithDefault
+    fn pattern_with_default(&self) -> ArrayAssignmentPatternElement {
+        ArrayAssignmentPatternElement
     }
 }
 

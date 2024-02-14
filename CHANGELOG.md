@@ -31,6 +31,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Add a new command `biome migrate prettier`. The command will read the file `.prettierrc`/`prettier.json` and `.prettierignore` and map its configuration to Biome's one.
   Due to the different nature of `.prettierignore` globs and Biome's globs, it's **highly** advised to make sure that those still work under Biome.
 
+- Now the file name printed in the diagnostics is clickable. If you run the CLI from your editor, you can <kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd> + Click on the file name, and the editor will open said file. If row and columns are specified e.g. `file.js:32:7`, the editor will set the cursor right in that position. Contributed by @ematipico
+
 #### Bug fixes
 
 - Don't process files under an ignored directory.
@@ -55,6 +57,18 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   ```
   Contributed by @ematipico
+
+### Enhancements
+
+- Removed a superfluous diagnostic that was printed during the linting/check phase of a file:
+
+  ```
+  test.js check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    × The file contains diagnostics that needs to be addressed.
+  ```
+  Contributed by @ematipico
+
 
 ### Configuration
 
@@ -145,6 +159,38 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Linter
 
+#### BREAKING CHANGES
+
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention) and [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now require identifiers to be in ASCII and without consecutive delimiters.
+
+  Set the `requireAscii` rule option to `false` to allow non-ASCII identifiers.
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "style": {
+          "useNamingConvention": { "options": { "requireAscii": false } }
+        },
+        "nursery": {
+          "useFilenamingConvention": { "options": { "requireAscii": false } }
+        }
+      }
+    }
+  }
+
+  ```
+
+  The following name is now invalid because it includes two underscores:
+
+  ```js
+  export const MY__CONSTANT = 0;
+  ```
+
+  Note that we still allow consecutive leading and consecutive trailing underscores.
+
+  Contributed by @Conaclos
+
 #### New features
 
 - Add the rule [noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests), to disallow skipped tests:
@@ -199,7 +245,49 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   Contributed by @Conaclos
 
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention) now supports [unicase](https://en.wikipedia.org/wiki/Unicase) letters ([#1786](https://github.com/biomejs/biome/issues/1786)).
+
+  [unicase](https://en.wikipedia.org/wiki/Unicase) letters have a single case: they are neither uppercase nor lowercase.
+  Previously, Biome reported names in unicase as invalid.
+  It now accepts a name in unicase everywhere.
+
+  The following code is now accepted:
+
+  ```js
+  const 안녕하세요 = { 안녕하세요: 0 };
+  ```
+
+  We still reject a name that mixes unicase characters with lowercase or uppercase characters:
+  The following names are rejected:
+
+  ```js
+  const A안녕하세요 = { a안녕하세요: 0 };
+  ```
+
+  Contributed by @Conaclos
+
 #### Bug fixes
+
+- [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) no longer reports valid use of binding patterns ([#1648](https://github.com/biomejs/biome/issues/1648)).
+
+  The rule no longer reports the following code:
+
+  ```js
+  const { a = 0, b = a } = {};
+  ```
+
+  Contributed by @Conaclos
+
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) no longer reports used binding patterns ([#1652](https://github.com/biomejs/biome/issues/1652)).
+
+  The rule no longer reports `a` as unused the following code:
+
+  ```js
+  const { a = 0, b = a } = {};
+  export { b };
+  ```
+
+  Contributed by @Conaclos
 
 - Fix [#1651](https://github.com/biomejs/biome/issues/1651). [noVar](https://biomejs.dev/linter/rules/no-var/) now ignores TsGlobalDeclaration. Contributed by @vasucp1207
 
@@ -815,7 +903,7 @@ The following rules are promoted:
   export default function(a: boolean): boolean;
   export default function(a: number): number;
   export default function(a: number | boolean): number | boolean {
-  	return a;
+    return a;
   }
   ```
 

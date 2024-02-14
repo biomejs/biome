@@ -31,6 +31,20 @@ impl JsArrayAssignmentPattern {
         )
     }
 }
+impl JsArrayAssignmentPatternElement {
+    pub fn with_pattern(self, element: AnyJsAssignmentPattern) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_init(self, element: Option<JsInitializerClause>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+}
 impl JsArrayAssignmentPatternRestElement {
     pub fn with_dotdotdot_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -63,6 +77,20 @@ impl JsArrayBindingPattern {
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
+    }
+}
+impl JsArrayBindingPatternElement {
+    pub fn with_pattern(self, element: AnyJsBindingPattern) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_init(self, element: Option<JsInitializerClause>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
 }
 impl JsArrayBindingPatternRestElement {
@@ -158,26 +186,6 @@ impl JsAssignmentExpression {
         )
     }
 }
-impl JsAssignmentWithDefault {
-    pub fn with_pattern(self, element: AnyJsAssignmentPattern) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-    pub fn with_eq_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_default(self, element: AnyJsExpression) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
 impl JsAwaitExpression {
     pub fn with_await_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -214,26 +222,6 @@ impl JsBinaryExpression {
         )
     }
     pub fn with_right(self, element: AnyJsExpression) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
-impl JsBindingPatternWithDefault {
-    pub fn with_pattern(self, element: AnyJsBindingPattern) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-    pub fn with_eq_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_default(self, element: AnyJsExpression) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),

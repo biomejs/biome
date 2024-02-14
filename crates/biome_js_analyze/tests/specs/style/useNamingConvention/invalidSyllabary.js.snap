@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSyllabary.js
+---
+# Input
+```jsx
+{
+    const 안녕a하세요 = 0;
+}
+{
+    const x = {
+        안녕하세요a: 0,
+    }
+}
+{
+    class A안녕하세요 {}
+}
+```
+
+# Diagnostics
+```
+invalidSyllabary.js:2:11 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This top-level const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    1 │ {
+  > 2 │     const 안녕a하세요 = 0;
+      │           ^^^^^^^^^^^
+    3 │ }
+    4 │ {
+  
+
+```
+
+```
+invalidSyllabary.js:6:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object property name should be in camelCase.
+  
+    4 │ {
+    5 │     const x = {
+  > 6 │         안녕하세요a: 0,
+      │         ^^^^^^^^^^^
+    7 │     }
+    8 │ }
+  
+
+```
+
+```
+invalidSyllabary.js:10:11 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class name should be in PascalCase.
+  
+     8 │ }
+     9 │ {
+  > 10 │     class A안녕하세요 {}
+       │           ^^^^^^^^^^^
+    11 │ }
+  
+
+```
+
+

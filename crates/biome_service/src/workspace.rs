@@ -233,11 +233,23 @@ impl FileFeaturesResult {
     }
 
     /// Checks whether the file support the given `feature`
-    pub fn supports_for(&self, feature: &FeatureName) -> bool {
+    fn supports_for(&self, feature: &FeatureName) -> bool {
         self.features_supported
             .get(feature)
             .map(|support_kind| matches!(support_kind, SupportKind::Supported))
             .unwrap_or_default()
+    }
+
+    pub fn supports_lint(&self) -> bool {
+        self.supports_for(&FeatureName::Lint)
+    }
+
+    pub fn supports_format(&self) -> bool {
+        self.supports_for(&FeatureName::Format)
+    }
+
+    pub fn supports_organize_imports(&self) -> bool {
+        self.supports_for(&FeatureName::OrganizeImports)
     }
 
     /// Loops through all the features of the current file, and if a feature is [SupportKind::FileNotSupported],

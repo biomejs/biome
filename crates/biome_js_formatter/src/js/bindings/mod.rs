@@ -1,8 +1,8 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 pub(crate) mod array_binding_pattern;
+pub(crate) mod array_binding_pattern_element;
 pub(crate) mod array_binding_pattern_rest_element;
-pub(crate) mod binding_pattern_with_default;
 pub(crate) mod constructor_parameters;
 pub(crate) mod formal_parameter;
 pub(crate) mod identifier_binding;
