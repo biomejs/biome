@@ -330,6 +330,8 @@ fn load_js_config(content: String, file_path: PathBuf, directory_path: PathBuf) 
         Context, JsError, JsValue, Source,
     };
 
+    let now = std::time::Instant::now();
+
     let loader = Rc::new(
         SimpleModuleLoader::new(&directory_path)
             .map_err(|err| WorkspaceError::Configuration(err.into()))?,
@@ -375,6 +377,8 @@ fn load_js_config(content: String, file_path: PathBuf, directory_path: PathBuf) 
     let config = namespace
         .get(js_string!("config"), &mut context)
         .map_err(|err| WorkspaceError::Configuration(err.into()))?;
+
+    println!("config evaluation took {:.2?}", now.elapsed());
 
     println!("exported config = {}", config.display());
 
