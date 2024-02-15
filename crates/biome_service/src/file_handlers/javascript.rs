@@ -627,7 +627,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
 }
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
-fn format(
+pub(crate) fn format(
     rome_path: &RomePath,
     parse: AnyParse,
     settings: SettingsHandle,
