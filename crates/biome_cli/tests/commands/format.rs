@@ -3401,7 +3401,7 @@ fn format_svelte_implicit_js_files_write() {
     let svelte_file_path = Path::new("file.svelte");
     fs.insert(
         svelte_file_path.into(),
-        VUE_IMPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
+        SVELTE_IMPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
     );
 
     let result = run_cli(
