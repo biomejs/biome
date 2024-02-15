@@ -4,6 +4,8 @@ use self::{
 };
 use crate::file_handlers::astro::AstroFileHandler;
 pub use crate::file_handlers::astro::ASTRO_FENCE;
+use crate::file_handlers::svelte::SvelteFileHandler;
+pub use crate::file_handlers::svelte::SVELTE_FENCE;
 use crate::file_handlers::vue::VueFileHandler;
 pub use crate::file_handlers::vue::VUE_FENCE;
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
@@ -31,6 +33,7 @@ mod astro;
 mod css;
 mod javascript;
 mod json;
+mod svelte;
 mod unknown;
 mod vue;
 
@@ -56,6 +59,8 @@ pub enum Language {
     Astro,
     ///
     Vue,
+    ///
+    Svelte,
     /// Any language that is not supported
     #[default]
     Unknown,
@@ -89,6 +94,7 @@ impl Language {
             "jsonc" => Language::Jsonc,
             "astro" => Language::Astro,
             "vue" => Language::Vue,
+            "svelte" => Language::Svelte,
             "css" => Language::Css,
             _ => Language::Unknown,
         }
@@ -142,6 +148,7 @@ impl Language {
             "jsonc" => Language::Jsonc,
             "astro" => Language::Astro,
             "vue" => Language::Vue,
+            "svelte" => Language::Svelte,
             // TODO: remove this when we are ready to handle CSS files
             "css" => Language::Unknown,
             _ => Language::Unknown,
@@ -204,6 +211,7 @@ impl Language {
             Language::TypeScriptReact => Some(JsFileSource::tsx()),
             Language::Astro => Some(JsFileSource::ts()),
             Language::Vue => Some(JsFileSource::ts()),
+            Language::Svelte => Some(JsFileSource::ts()),
             Language::Json | Language::Jsonc | Language::Css | Language::Unknown => None,
         }
     }
@@ -220,6 +228,7 @@ impl Language {
             | Language::Jsonc => true,
             Language::Astro => ASTRO_FENCE.is_match(content),
             Language::Vue => VUE_FENCE.is_match(content),
+            Language::Svelte => SVELTE_FENCE.is_match(content),
             Language::Unknown => false,
         }
     }
@@ -237,6 +246,7 @@ impl biome_console::fmt::Display for Language {
             Language::Css => fmt.write_markup(markup! { "CSS" }),
             Language::Astro => fmt.write_markup(markup! { "Astro" }),
             Language::Vue => fmt.write_markup(markup! { "Vue" }),
+            Language::Svelte => fmt.write_markup(markup! { "Svelte" }),
             Language::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -407,6 +417,7 @@ pub(crate) struct Features {
     css: CssFileHandler,
     astro: AstroFileHandler,
     vue: VueFileHandler,
+    svelte: SvelteFileHandler,
     unknown: UnknownFileHandler,
 }
 
@@ -418,6 +429,7 @@ impl Features {
             css: CssFileHandler {},
             astro: AstroFileHandler {},
             vue: VueFileHandler {},
+            svelte: SvelteFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
@@ -444,6 +456,7 @@ impl Features {
             }
             Language::Astro => self.astro.capabilities(),
             Language::Vue => self.vue.capabilities(),
+            Language::Svelte => self.svelte.capabilities(),
             Language::Unknown => self.unknown.capabilities(),
         }
     }

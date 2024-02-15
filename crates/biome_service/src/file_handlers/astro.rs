@@ -1,19 +1,17 @@
 use crate::file_handlers::{
-    AnalyzerCapabilities, Capabilities, DebugCapabilities, ExtensionHandler, FormatterCapabilities,
-    Language, Mime, ParserCapabilities,
+    javascript, AnalyzerCapabilities, Capabilities, DebugCapabilities, ExtensionHandler,
+    FormatterCapabilities, Language, Mime, ParserCapabilities,
 };
 use crate::settings::SettingsHandle;
 use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
-use biome_js_formatter::format_node;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
 use biome_rowan::{FileSource, NodeCache};
 use lazy_static::lazy_static;
 use regex::{Regex, RegexBuilder};
-use tracing::{debug, error, info};
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub(crate) struct AstroFileHandler;
@@ -93,17 +91,5 @@ fn format(
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(rome_path);
-    debug!("Options used for format: \n{}", options);
-
-    let tree = parse.syntax();
-    info!("Format file {}", rome_path.display());
-    let formatted = format_node(options, &tree)?;
-    match formatted.print() {
-        Ok(printed) => Ok(printed),
-        Err(error) => {
-            error!("The file {} couldn't be formatted", rome_path.display());
-            Err(WorkspaceError::FormatError(error.into()))
-        }
-    }
+    javascript::format(rome_path, parse, settings)
 }

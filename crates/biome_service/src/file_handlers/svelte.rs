@@ -15,11 +15,11 @@ use regex::Regex;
 use tracing::debug;
 
 #[derive(Debug, Default, PartialEq, Eq)]
-pub(crate) struct VueFileHandler;
+pub(crate) struct SvelteFileHandler;
 
 lazy_static! {
     // https://regex101.com/r/E4n4hh/3
-    pub static ref VUE_FENCE: Regex = Regex::new(
+    pub static ref SVELTE_FENCE: Regex = Regex::new(
         r#"(?ixms)(?:<script[^>]?)
             (?:
             (?:(lang)\s*=\s*['"](?P<lang>[^'"]*)['"])
@@ -31,7 +31,7 @@ lazy_static! {
     .unwrap();
 }
 
-impl ExtensionHandler for VueFileHandler {
+impl ExtensionHandler for SvelteFileHandler {
     fn language(&self) -> Language {
         Language::TypeScript
     }
@@ -66,12 +66,12 @@ impl ExtensionHandler for VueFileHandler {
 
 fn parse(
     _rome_path: &RomePath,
-    _language_hint: crate::file_handlers::Language,
+    _language_hint: Language,
     text: &str,
     _settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> AnyParse {
-    let matches = VUE_FENCE.captures(text);
+    let matches = SVELTE_FENCE.captures(text);
     let script = match matches {
         Some(ref captures) => &text[captures.name("script").unwrap().range()],
         _ => "",

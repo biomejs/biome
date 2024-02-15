@@ -1582,6 +1582,7 @@ export interface OpenFileParams {
 export type Language =
 	| "Astro"
 	| "Vue"
+	| "Svelte"
 	| "JavaScript"
 	| "JavaScriptReact"
 	| "TypeScript"

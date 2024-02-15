@@ -143,6 +143,17 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   <template></template>
   ```
 
+- Add partial for `.svelte` files. Biome is able to format the script block of Svelte files. Contributed by @ematipico
+
+  ```diff
+  <script setup lang="ts">
+  - statement ( );
+  + statement();
+  </script/>
+
+  <div></div>
+  ```
+
 #### Bug fixes
 
 - Fix [#1039](https://github.com/biomejs/biome/issues/1039). Check unicode width instead of number of bytes when checking if regex expression is a simple argument. Contributed by @kalleep
