@@ -12,7 +12,9 @@ This rule hasn't been released yet.
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-Avoid re-export all
+Source: <a href="https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/avoid-re-export-all.md" target="_blank"><code>avoid-re-export-all</code></a>
+
+Avoid re-export all.
 
 Deeply nested import chains in modular projects, where a barrel file imports another barrel file, can lead to increased load times and complexity.
 This structure results in the unnecessary loading of many modules, significantly impacting performance in large-scale applications.
