@@ -75,7 +75,7 @@ declare_rule! {
     pub(crate) UseImportRestrictions {
         version: "1.0.0",
         name: "useImportRestrictions",
-        source: RuleSource::EslintImport("jsdoc"),
+        source: RuleSource::EslintImportAccess(""),
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
     }
