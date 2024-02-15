@@ -1374,7 +1374,7 @@
 					]
 				},
 				"noReExportAll": {
-					"description": "Avoid re-export all",
+					"description": "Avoid re-export all.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

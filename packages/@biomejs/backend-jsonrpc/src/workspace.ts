@@ -908,7 +908,7 @@ export interface Nursery {
 	 */
 	noNodejsModules?: RuleConfiguration;
 	/**
-	 * Avoid re-export all
+	 * Avoid re-export all.
 	 */
 	noReExportAll?: RuleConfiguration;
 	/**
