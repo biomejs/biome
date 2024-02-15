@@ -85,6 +85,8 @@ pub enum RuleSource {
     EslintUnicorn(&'static str),
     /// Rules from [Eslint Plugin Mysticatea](https://github.com/mysticatea/eslint-plugin)
     EslintMysticatea(&'static str),
+    /// Rules from [Eslint Plugin Barrel Files](https://github.com/thepassle/eslint-plugin-barrel-files)
+    EslintBarrelFiles(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -109,6 +111,7 @@ impl std::fmt::Display for RuleSource {
             RuleSource::EslintTypeScript(_) => write!(f, "eslint-plugin-typescript"),
             RuleSource::EslintUnicorn(_) => write!(f, "eslint-plugin-unicorn"),
             RuleSource::EslintMysticatea(_) => write!(f, "eslint-plugin-mysticates"),
+            RuleSource::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
         }
     }
 }
@@ -150,7 +153,8 @@ impl RuleSource {
             | Self::EslintSonarJs(rule_name)
             | Self::EslintStylistic(rule_name)
             | Self::EslintUnicorn(rule_name)
-            | Self::EslintMysticatea(rule_name) => rule_name,
+            | Self::EslintMysticatea(rule_name)
+            | Self::EslintBarrelFiles(rule_name) => rule_name,
         }
     }
 
@@ -169,6 +173,7 @@ impl RuleSource {
             Self::EslintStylistic(rule_name) => format!("https://eslint.style/rules/default/{rule_name}"),
             Self::EslintUnicorn(rule_name) => format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintMysticatea(rule_name) => format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}.md"),
+            Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md")
         }
     }
 
