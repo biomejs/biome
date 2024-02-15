@@ -20,7 +20,7 @@ instead of putting them at the top level of an ECMAScript module. Doing so is ge
 
 
 - IDEs can't provide as good suggestions for static class or namespace imported properties when you start typing property names
-- It's more difficult to statically analyze code for unused variables, etc. when they're all on the class (see: Finding dead code (and dead types) in TypeScript).
+- It's more difficult to statically analyze code for unused variables, etc. when they're all on the class (see: [Finding dead code (and dead types) in TypeScript](https://effectivetypescript.com/2020/10/20/tsprune)).
 
 ## Examples
 
