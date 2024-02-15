@@ -1,10 +1,12 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+};
 use biome_console::markup;
 use biome_js_syntax::JsExport;
 use biome_rowan::AstNode;
 
 declare_rule! {
-    /// Avoid re-export all
+    /// Avoid re-export all.
     ///
     /// Deeply nested import chains in modular projects, where a barrel file imports another barrel file, can lead to increased load times and complexity.
     /// This structure results in the unnecessary loading of many modules, significantly impacting performance in large-scale applications.
@@ -32,6 +34,8 @@ declare_rule! {
         version: "next",
         name: "noReExportAll",
         recommended: false,
+        source: RuleSource::EslintBarrelFiles("avoid-re-export-all"),
+        source_kind: RuleSourceKind::SameLogic,
     }
 }
 
@@ -56,12 +60,17 @@ impl Rule for NoReExportAll {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _reference: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            ctx.query().range(),
-            markup! {
-                "Do not use export all (`export * from ...`)"
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                ctx.query().range(),
+                markup! {
+                    "Do not use export all ( "<Emphasis>"export * from ..."</Emphasis>" )."
+                },
+            )
+            .note(markup! {
+                "Use named export instead."
+            }),
+        )
     }
 }

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 83
 expression: invalid.js
 ---
 # Input
@@ -13,11 +12,13 @@ export * as foo from 'foo';
 ```
 invalid.js:1:1 lint/nursery/noReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use export all (`export * from ...`)
+  ! Do not use export all ( export * from ... ).
   
   > 1 │ export * from 'foo';
       │ ^^^^^^^^^^^^^^^^^^^^
     2 │ export * as foo from 'foo';
+  
+  i Use named export instead.
   
 
 ```
@@ -25,11 +26,13 @@ invalid.js:1:1 lint/nursery/noReExportAll ━━━━━━━━━━━━�
 ```
 invalid.js:2:1 lint/nursery/noReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use export all (`export * from ...`)
+  ! Do not use export all ( export * from ... ).
   
     1 │ export * from 'foo';
   > 2 │ export * as foo from 'foo';
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Use named export instead.
   
 
 ```
