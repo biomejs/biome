@@ -19,15 +19,15 @@ use serde::de::DeserializeOwned;
 ///
 /// ```
 /// use biome_deserialize::js::deserialize_from_js_value;
-/// use biome_deserialize_macros::Deserializable;
 /// use boa_engine::{Context, Source};
+/// use serde::Deserialize;
 ///
-/// #[derive(Debug, Default, Deserializable, Eq, PartialEq)]
+/// #[derive(Debug, Default, Deserialize, Eq, PartialEq)]
 /// struct NewConfiguration {
 ///     lorem: String
 /// }
 ///
-/// let source = r#"{ lorem: "ipsum" }"#;
+/// let source = r#"({ lorem: "ipsum" })"#;
 ///
 /// let mut context = Context::default();
 /// let value = context.eval(Source::from_bytes(source)).unwrap();
