@@ -22,6 +22,7 @@ default = ["console_error_panic_hook"]
 biome_console      = { workspace = true }
 biome_diagnostics  = { workspace = true }
 biome_service      = { workspace = true }
+getrandom          = { version = "0.2.12", features = ["js"] }
 js-sys             = "0.3.59"
 serde              = { workspace = true }
 serde-wasm-bindgen = "0.4.5"
