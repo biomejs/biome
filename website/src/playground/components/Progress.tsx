@@ -10,7 +10,7 @@ const ProgressBar = ({
 	label: string;
 	duration: number;
 	maxDuration: number;
-	color: string
+	color: string;
 }) => {
 	const [progress, setProgress] = useState(0);
 	// Calculate the relative progress based on maxDuration
@@ -45,7 +45,10 @@ const ProgressBar = ({
 		<div className="prog-cont">
 			<span className="label">{label}</span>
 			<div className="progress-bar-container">
-				<div className="bar" style={{ width: `${progress}%`, backgroundColor: `${color}` }}>
+				<div
+					className="bar"
+					style={{ width: `${progress}%`, backgroundColor: `${color}` }}
+				>
 					<span className="time">
 						{((progress / maxRelativeProgress) * duration).toFixed(2)}s
 					</span>
@@ -55,13 +58,24 @@ const ProgressBar = ({
 	);
 };
 
-const ProgressBarContainer = ({ data }: {data: Array<{duration: number, label: string, color: string}>}) => {
-	const maxDuration = data.reduce((max, { duration }) => Math.max(max, duration), 0);
+const ProgressBarContainer = ({
+	data,
+}: { data: Array<{ duration: number; label: string; color: string }> }) => {
+	const maxDuration = data.reduce(
+		(max, { duration }) => Math.max(max, duration),
+		0,
+	);
 
 	return (
 		<div>
 			{data.map(({ duration, label, color }) => (
-				<ProgressBar duration={duration} label={label} maxDuration={maxDuration} color={color} key={label} />
+				<ProgressBar
+					duration={duration}
+					label={label}
+					maxDuration={maxDuration}
+					color={color}
+					key={label}
+				/>
 			))}
 		</div>
 	);
