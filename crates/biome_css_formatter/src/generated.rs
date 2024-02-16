@@ -2882,6 +2882,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssDocumentAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssPropertyAtRule>
+    for crate::css::statements::property_at_rule::FormatCssPropertyAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssPropertyAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssPropertyAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssPropertyAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssPropertyAtRule,
+        crate::css::statements::property_at_rule::FormatCssPropertyAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::statements::property_at_rule::FormatCssPropertyAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPropertyAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssPropertyAtRule,
+        crate::css::statements::property_at_rule::FormatCssPropertyAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::statements::property_at_rule::FormatCssPropertyAtRule::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssFontFeatureValuesBlock>
     for crate::css::auxiliary::font_feature_values_block::FormatCssFontFeatureValuesBlock
 {

@@ -26,6 +26,7 @@ impl FormatRule<AnyCssAtRule> for FormatAnyCssAtRule {
             AnyCssAtRule::CssStartingStyleAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssDocumentAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssBogusAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssPropertyAtRule(node) => node.format().fmt(f),
         }
     }
 }

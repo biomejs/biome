@@ -3824,6 +3824,52 @@ pub struct CssPercentageFields {
     pub percent_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPropertyAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPropertyAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPropertyAtRuleFields {
+        CssPropertyAtRuleFields {
+            property_token: self.property_token(),
+            name: self.name(),
+            block: self.block(),
+        }
+    }
+    pub fn property_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationListBlock> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssPropertyAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssPropertyAtRuleFields {
+    pub property_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssDashedIdentifier>,
+    pub block: SyntaxResult<AnyCssDeclarationListBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPseudoClassFunctionCompoundSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -6246,6 +6292,7 @@ pub enum AnyCssAtRule {
     CssMediaAtRule(CssMediaAtRule),
     CssNamespaceAtRule(CssNamespaceAtRule),
     CssPageAtRule(CssPageAtRule),
+    CssPropertyAtRule(CssPropertyAtRule),
     CssScopeAtRule(CssScopeAtRule),
     CssStartingStyleAtRule(CssStartingStyleAtRule),
     CssSupportsAtRule(CssSupportsAtRule),
@@ -6338,6 +6385,12 @@ impl AnyCssAtRule {
     pub fn as_css_page_at_rule(&self) -> Option<&CssPageAtRule> {
         match &self {
             AnyCssAtRule::CssPageAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_property_at_rule(&self) -> Option<&CssPropertyAtRule> {
+        match &self {
+            AnyCssAtRule::CssPropertyAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -11944,6 +11997,49 @@ impl From<CssPercentage> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssPropertyAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PROPERTY_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_PROPERTY_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPropertyAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssPropertyAtRule")
+            .field(
+                "property_token",
+                &support::DebugSyntaxResult(self.property_token()),
+            )
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssPropertyAtRule> for SyntaxNode {
+    fn from(n: CssPropertyAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssPropertyAtRule> for SyntaxElement {
+    fn from(n: CssPropertyAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssPseudoClassFunctionCompoundSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
@@ -14409,6 +14505,11 @@ impl From<CssPageAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssPageAtRule(node)
     }
 }
+impl From<CssPropertyAtRule> for AnyCssAtRule {
+    fn from(node: CssPropertyAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssPropertyAtRule(node)
+    }
+}
 impl From<CssScopeAtRule> for AnyCssAtRule {
     fn from(node: CssScopeAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssScopeAtRule(node)
@@ -14441,6 +14542,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssMediaAtRule::KIND_SET)
         .union(CssNamespaceAtRule::KIND_SET)
         .union(CssPageAtRule::KIND_SET)
+        .union(CssPropertyAtRule::KIND_SET)
         .union(CssScopeAtRule::KIND_SET)
         .union(CssStartingStyleAtRule::KIND_SET)
         .union(CssSupportsAtRule::KIND_SET);
@@ -14462,6 +14564,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_MEDIA_AT_RULE
                 | CSS_NAMESPACE_AT_RULE
                 | CSS_PAGE_AT_RULE
+                | CSS_PROPERTY_AT_RULE
                 | CSS_SCOPE_AT_RULE
                 | CSS_STARTING_STYLE_AT_RULE
                 | CSS_SUPPORTS_AT_RULE
@@ -14498,6 +14601,7 @@ impl AstNode for AnyCssAtRule {
                 AnyCssAtRule::CssNamespaceAtRule(CssNamespaceAtRule { syntax })
             }
             CSS_PAGE_AT_RULE => AnyCssAtRule::CssPageAtRule(CssPageAtRule { syntax }),
+            CSS_PROPERTY_AT_RULE => AnyCssAtRule::CssPropertyAtRule(CssPropertyAtRule { syntax }),
             CSS_SCOPE_AT_RULE => AnyCssAtRule::CssScopeAtRule(CssScopeAtRule { syntax }),
             CSS_STARTING_STYLE_AT_RULE => {
                 AnyCssAtRule::CssStartingStyleAtRule(CssStartingStyleAtRule { syntax })
@@ -14524,6 +14628,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssMediaAtRule(it) => &it.syntax,
             AnyCssAtRule::CssNamespaceAtRule(it) => &it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssPropertyAtRule(it) => &it.syntax,
             AnyCssAtRule::CssScopeAtRule(it) => &it.syntax,
             AnyCssAtRule::CssStartingStyleAtRule(it) => &it.syntax,
             AnyCssAtRule::CssSupportsAtRule(it) => &it.syntax,
@@ -14546,6 +14651,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssMediaAtRule(it) => it.syntax,
             AnyCssAtRule::CssNamespaceAtRule(it) => it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => it.syntax,
+            AnyCssAtRule::CssPropertyAtRule(it) => it.syntax,
             AnyCssAtRule::CssScopeAtRule(it) => it.syntax,
             AnyCssAtRule::CssStartingStyleAtRule(it) => it.syntax,
             AnyCssAtRule::CssSupportsAtRule(it) => it.syntax,
@@ -14570,6 +14676,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssNamespaceAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssPageAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssPropertyAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssScopeAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssStartingStyleAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssSupportsAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -14594,6 +14701,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssMediaAtRule(it) => it.into(),
             AnyCssAtRule::CssNamespaceAtRule(it) => it.into(),
             AnyCssAtRule::CssPageAtRule(it) => it.into(),
+            AnyCssAtRule::CssPropertyAtRule(it) => it.into(),
             AnyCssAtRule::CssScopeAtRule(it) => it.into(),
             AnyCssAtRule::CssStartingStyleAtRule(it) => it.into(),
             AnyCssAtRule::CssSupportsAtRule(it) => it.into(),
@@ -21023,6 +21131,11 @@ impl std::fmt::Display for CssParenthesizedExpression {
     }
 }
 impl std::fmt::Display for CssPercentage {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssPropertyAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

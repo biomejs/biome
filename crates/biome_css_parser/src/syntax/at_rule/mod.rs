@@ -14,6 +14,7 @@ mod media;
 mod namespace;
 mod page;
 mod parse_error;
+mod property;
 mod scope;
 mod starting_style;
 mod supports;
@@ -51,6 +52,8 @@ use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
+
+use self::property::{is_at_property_at_rule, parse_property_at_rule};
 
 #[inline]
 pub(crate) fn is_at_at_rule(p: &mut CssParser) -> bool {
@@ -115,6 +118,8 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_starting_style_at_rule(p)
     } else if is_at_document_at_rule(p) {
         parse_document_at_rule(p)
+    } else if is_at_property_at_rule(p) {
+        parse_property_at_rule(p)
     } else {
         Absent
     }
