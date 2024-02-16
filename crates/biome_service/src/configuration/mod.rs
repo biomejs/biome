@@ -378,10 +378,6 @@ fn load_js_config(content: String, file_path: PathBuf, directory_path: PathBuf) 
         .get(js_string!("config"), &mut context)
         .map_err(|err| WorkspaceError::Configuration(err.into()))?;
 
-    println!("config evaluation took {:.2?}", now.elapsed());
-
-    println!("exported config = {}", config.display());
-
     Ok(Some(ConfigurationPayload {
         deserialized: deserialize_from_js_value(&mut context, config),
         configuration_file_path: file_path,
