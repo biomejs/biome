@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+import assert from 'node:assert';
+import("node:assert");
+require("node:assert");
+
+```
+
+# Diagnostics
+```
+invalid.js:1:20 lint/nursery/useNodeAssertStrict  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use node:assert/strict instead.
+  
+  > 1 │ import assert from 'node:assert';
+      │                    ^^^^^^^^^^^^^
+    2 │ import("node:assert");
+    3 │ require("node:assert");
+  
+  i The use of stricter assertion is preferred.
+  
+  i Safe fix: Replace with node:assert/strict.
+  
+    1   │ - import·assert·from·'node:assert';
+      1 │ + import·assert·from·"node:assert/strict";
+    2 2 │   import("node:assert");
+    3 3 │   require("node:assert");
+  
+
+```
+
+```
+invalid.js:2:8 lint/nursery/useNodeAssertStrict  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use node:assert/strict instead.
+  
+    1 │ import assert from 'node:assert';
+  > 2 │ import("node:assert");
+      │        ^^^^^^^^^^^^^
+    3 │ require("node:assert");
+    4 │ 
+  
+  i The use of stricter assertion is preferred.
+  
+  i Safe fix: Replace with node:assert/strict.
+  
+    2 │ import("node:assert/strict");
+      │                    +++++++   
+
+```
+
+```
+invalid.js:3:9 lint/nursery/useNodeAssertStrict  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use node:assert/strict instead.
+  
+    1 │ import assert from 'node:assert';
+    2 │ import("node:assert");
+  > 3 │ require("node:assert");
+      │         ^^^^^^^^^^^^^
+    4 │ 
+  
+  i The use of stricter assertion is preferred.
+  
+  i Safe fix: Replace with node:assert/strict.
+  
+    3 │ require("node:assert/strict");
+      │                     +++++++   
+
+```
+
+

@@ -132,6 +132,7 @@ define_categories! {
     "lint/nursery/useGroupedTypeImport": "https://biomejs.dev/linter/rules/use-grouped-type-import",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useImportType": "https://biomejs.dev/linter/rules/use-import-type",
+    "lint/nursery/useNodeAssertStrict": "https://biomejs.dev/linter/rules/use-node-assert-strict",
     "lint/nursery/useNodejsImportProtocol": "https://biomejs.dev/linter/rules/use-nodejs-import-protocol",
     "lint/nursery/useNumberNamespace": "https://biomejs.dev/linter/rules/use-number-namespace",
     "lint/nursery/useShorthandFunctionType": "https://biomejs.dev/linter/rules/use-shorthand-function-type",

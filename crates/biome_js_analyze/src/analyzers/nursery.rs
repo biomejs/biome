@@ -18,6 +18,7 @@ pub(crate) mod use_consistent_array_type;
 pub(crate) mod use_filenaming_convention;
 pub(crate) mod use_grouped_type_import;
 pub(crate) mod use_import_restrictions;
+pub(crate) mod use_node_assert_strict;
 pub(crate) mod use_nodejs_import_protocol;
 pub(crate) mod use_shorthand_function_type;
 
@@ -41,6 +42,7 @@ declare_group! {
             self :: use_filenaming_convention :: UseFilenamingConvention ,
             self :: use_grouped_type_import :: UseGroupedTypeImport ,
             self :: use_import_restrictions :: UseImportRestrictions ,
+            self :: use_node_assert_strict :: UseNodeAssertStrict ,
             self :: use_nodejs_import_protocol :: UseNodejsImportProtocol ,
             self :: use_shorthand_function_type :: UseShorthandFunctionType ,
         ]
