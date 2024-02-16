@@ -37,10 +37,10 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         let guard = FileGuard::open(
             ctx.workspace,
             OpenFileParams {
+                language_hint: Language::from_path(&rome_path),
                 path: rome_path,
                 version: 0,
                 content: input.clone(),
-                language_hint: Language::default(),
             },
         )
         .with_file_path_and_code(path.display().to_string(), category!("internalError/fs"))?;

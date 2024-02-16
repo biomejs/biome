@@ -252,6 +252,8 @@ fn compute_source_type_from_path_or_extension(
             "ts" => JsFileSource::ts(),
             "mts" | "cts" => JsFileSource::ts_restricted(),
             "tsx" => JsFileSource::tsx(),
+            // TODO: Remove once we have full support of astro files
+            "astro" => JsFileSource::ts(),
             _ => {
                 return Err(FileSourceError::UnknownExtension(
                     file_name.into(),

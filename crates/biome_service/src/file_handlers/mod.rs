@@ -2,8 +2,7 @@ use self::{
     css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
     unknown::UnknownFileHandler,
 };
-use crate::file_handlers::astro::AstroFileHandler;
-pub use crate::file_handlers::astro::ASTRO_FENCE;
+pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
 use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::svelte::SVELTE_FENCE;
 use crate::file_handlers::vue::VueFileHandler;
@@ -192,6 +191,7 @@ impl Language {
                 | Language::TypeScript
                 | Language::JavaScriptReact
                 | Language::TypeScriptReact
+                | Language::Astro
         )
     }
 

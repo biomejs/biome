@@ -242,6 +242,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   import * as foo from "foo";
   ```
   Contributed by @unvalley
+- Add partial support for `.astro` files. Biome is able to lint and fix the frontmatter of the Astro files. Contributed by @ematipico
+
+  ```diff
+  ---
+  - delete a.b
+  + a.b = undefined
+  ---
+
+  <div></div>
+  ```
 
 #### Enhancements
 

@@ -281,7 +281,7 @@ fn debug_formatter_ir(
     Ok(root_element.to_string())
 }
 
-fn lint(params: LintParams) -> LintResults {
+pub(crate) fn lint(params: LintParams) -> LintResults {
     debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
         .in_scope(move || {
             let settings = params.settings.as_ref();
@@ -432,7 +432,7 @@ impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
-fn code_actions(params: CodeActionsParams) -> PullActionsResult {
+pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let CodeActionsParams {
         parse,
         range,
@@ -510,7 +510,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 /// If applies all the safe fixes to the given syntax tree.
 ///
 /// If `indent_style` is [Some], it means that the formatting should be applied at the end
-fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let FixAllParams {
         parse,
         rules,
