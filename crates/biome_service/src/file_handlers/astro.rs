@@ -38,7 +38,7 @@ impl AstroFileHandler {
     }
 
     pub fn astro_output(input: &str, output: &str) -> String {
-        let mut matches = ASTRO_FENCE.find_iter(&input);
+        let mut matches = ASTRO_FENCE.find_iter(input);
         if let (Some(start), Some(end)) = (matches.next(), matches.next()) {
             format!(
                 "{}{}{}",
