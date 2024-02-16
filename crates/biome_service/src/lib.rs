@@ -24,7 +24,7 @@ pub use crate::matcher::Matcher;
 
 pub use crate::diagnostics::{TransportError, WorkspaceError};
 /// Exports only for this crate
-pub use crate::file_handlers::JsFormatterSettings;
+pub use crate::file_handlers::{AstroFileHandler, JsFormatterSettings};
 pub use crate::project_handlers::Manifests;
 pub use crate::workspace::Workspace;
 pub use diagnostics::extension_error;

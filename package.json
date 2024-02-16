@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "check:apply": "cargo biome-cli-dev check --apply-unsafe editors website packages/@biomejs/js-api",
-		"check": "cargo biome-cli-dev check editors website packages/@biomejs/js-api --verbose"
+		"check": "cargo biome-cli-dev check editors website packages/@biomejs/js-api"
 	},
   "keywords": [],
   "author": "",

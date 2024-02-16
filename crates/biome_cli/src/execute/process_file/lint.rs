@@ -4,6 +4,7 @@ use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraver
 use crate::CliDiagnostic;
 use biome_diagnostics::{category, Error};
 use biome_service::workspace::RuleCategories;
+use biome_service::AstroFileHandler;
 use std::path::Path;
 use std::sync::atomic::Ordering;
 
@@ -35,8 +36,16 @@ pub(crate) fn lint_with_guard<'ctx>(
                     skipped_suggested_fixes: fix_result.skipped_suggested_fixes,
                 });
 
-                if fix_result.code != input {
-                    workspace_file.update_file(fix_result.code)?;
+                let mut output = fix_result.code;
+                if output != input {
+                    if workspace_file.as_extension() == Some("astro") {
+                        if output.is_empty() {
+                            return Ok(FileStatus::Ignored);
+                        }
+                        output = AstroFileHandler::astro_output(input.as_str(), output.as_str());
+                    }
+
+                    workspace_file.update_file(output)?;
                     input = workspace_file.input()?;
                 }
                 errors = fix_result.errors;
@@ -56,6 +65,12 @@ pub(crate) fn lint_with_guard<'ctx>(
             errors += pull_diagnostics_result.errors;
 
             if !no_diagnostics {
+                let input = if workspace_file.as_extension() == Some("astro") {
+                    AstroFileHandler::astro_input(input.as_str()).to_string()
+                } else {
+                    input
+                };
+
                 ctx.push_message(Message::Diagnostics {
                     name: workspace_file.path.display().to_string(),
                     content: input,

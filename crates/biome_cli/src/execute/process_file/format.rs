@@ -5,8 +5,8 @@ use crate::execute::process_file::{
 };
 use crate::execute::TraversalMode;
 use biome_diagnostics::{category, DiagnosticExt};
-use biome_service::file_handlers::ASTRO_FENCE;
 use biome_service::workspace::RuleCategories;
+use biome_service::AstroFileHandler;
 use std::path::Path;
 use std::sync::atomic::Ordering;
 use tracing::debug;
@@ -73,17 +73,8 @@ pub(crate) fn format_with_guard<'ctx>(
                 if output.is_empty() {
                     return Ok(FileStatus::Ignored);
                 }
-                let mut matches = ASTRO_FENCE.find_iter(&input);
-                if let (Some(start), Some(end)) = (matches.next(), matches.next()) {
-                    output = format!(
-                        "{}{}{}",
-                        &input[..start.end() + 1],
-                        output.as_str(),
-                        &input[end.start()..]
-                    );
-                }
+                output = AstroFileHandler::astro_output(input.as_str(), output.as_str());
             }
-
             if output != input {
                 if should_write {
                     workspace_file.update_file(output)?;

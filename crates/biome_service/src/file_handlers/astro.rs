@@ -1,9 +1,10 @@
 use crate::file_handlers::{
-    AnalyzerCapabilities, Capabilities, DebugCapabilities, ExtensionHandler, FormatterCapabilities,
-    Language, LintParams, LintResults, Mime, ParserCapabilities, PullActions,
+    AnalyzerCapabilities, Capabilities, DebugCapabilities, ExtensionHandler, FixAllParams,
+    FormatterCapabilities, Language, LintParams, LintResults, Mime, ParserCapabilities,
+    PullActions,
 };
 use crate::settings::SettingsHandle;
-use crate::workspace::PullActionsResult;
+use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
@@ -17,13 +18,40 @@ use regex::{Regex, RegexBuilder};
 use tracing::{debug, error, info};
 
 #[derive(Debug, Default, PartialEq, Eq)]
-pub(crate) struct AstroFileHandler;
+pub struct AstroFileHandler;
 
 lazy_static! {
     pub static ref ASTRO_FENCE: Regex = RegexBuilder::new(r#"^---\s*$"#)
         .multi_line(true)
         .build()
         .unwrap();
+}
+
+impl AstroFileHandler {
+    /// It extracts the JavaScript code contained in the frontmatter of an Astro file
+    ///
+    /// If the frontmatter doesn't exist, an empty string is returned.
+    pub fn astro_input(text: &str) -> &str {
+        let mut matches = ASTRO_FENCE.find_iter(text);
+        match (matches.next(), matches.next()) {
+            (Some(start), Some(end)) => &text[start.end()..end.start()],
+            _ => "",
+        }
+    }
+
+    pub fn astro_output(input: &str, output: &str) -> String {
+        let mut matches = ASTRO_FENCE.find_iter(&input);
+        if let (Some(start), Some(end)) = (matches.next(), matches.next()) {
+            format!(
+                "{}{}{}",
+                &input[..start.end() + 1],
+                output.trim_start(),
+                &input[end.start()..]
+            )
+        } else {
+            input.to_string()
+        }
+    }
 }
 
 impl ExtensionHandler for AstroFileHandler {
@@ -47,7 +75,7 @@ impl ExtensionHandler for AstroFileHandler {
                 lint: Some(lint),
                 code_actions: Some(code_actions),
                 rename: None,
-                fix_all: None,
+                fix_all: Some(fix_all),
                 organize_imports: None,
             },
             formatter: FormatterCapabilities {
@@ -61,16 +89,12 @@ impl ExtensionHandler for AstroFileHandler {
 
 fn parse(
     _rome_path: &RomePath,
-    _language_hint: crate::file_handlers::Language,
+    _language_hint: Language,
     text: &str,
     _settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> AnyParse {
-    let mut matches = ASTRO_FENCE.find_iter(text);
-    let frontmatter = match (matches.next(), matches.next()) {
-        (Some(start), Some(end)) => &text[start.end()..end.start()],
-        _ => "",
-    };
+    let frontmatter = AstroFileHandler::astro_input(text);
     let parse = parse_js_with_cache(
         frontmatter,
         JsFileSource::ts(),
@@ -115,4 +139,8 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
 
 pub(crate) fn code_actions(params: PullActions) -> PullActionsResult {
     crate::file_handlers::javascript::code_actions(params)
+}
+
+fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+    crate::file_handlers::javascript::fix_all(params)
 }

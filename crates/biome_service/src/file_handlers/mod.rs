@@ -2,8 +2,8 @@ use self::{
     css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
     unknown::UnknownFileHandler,
 };
-use crate::file_handlers::astro::AstroFileHandler;
-pub use crate::file_handlers::astro::ASTRO_FENCE;
+
+pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
     settings::SettingsHandle,
