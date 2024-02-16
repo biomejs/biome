@@ -12,6 +12,7 @@ biome_css_parser     = { workspace = true }
 biome_css_syntax     = { workspace = true }
 biome_diagnostics    = { workspace = true }
 biome_formatter      = { workspace = true }
+biome_fs             = { workspace = true }
 biome_js_analyze     = { workspace = true }
 biome_js_formatter   = { workspace = true }
 biome_js_parser      = { workspace = true }
@@ -21,11 +22,13 @@ biome_json_parser    = { workspace = true }
 biome_json_syntax    = { workspace = true }
 biome_parser         = { workspace = true }
 biome_rowan          = { workspace = true }
+biome_service        = { workspace = true }
 
 
 ansi_rgb                  = "0.2.0"
 codspeed-criterion-compat = { version = "2.3.3", optional = true }
 criterion                 = "0.5.1"
+icu_calendar              = { version = "~1.4.0", features = ["compiled_data"] }
 regex                     = "1.5.5"
 ureq                      = "2.7.1"
 url                       = "2.2.2"
@@ -71,6 +74,10 @@ name    = "css_parser"
 [[bench]]
 harness = false
 name    = "css_formatter"
+
+[[bench]]
+harness = false
+name    = "js_config"
 
 [lints]
 workspace = true
