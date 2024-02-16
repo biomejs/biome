@@ -731,6 +731,7 @@ AnyCssAtRule =
 	| CssStartingStyleAtRule
 	| CssDocumentAtRule
 	| CssBogusAtRule
+	| CssPropertyAtRule
 
 // @charset "UTF-8";
 // ^^^^^^^^^^^^^^^^^
@@ -752,6 +753,11 @@ CssColorProfileAtRule =
 CssCounterStyleAtRule =
 	'counter-style'
 	name: CssCustomIdentifier
+	block: AnyCssDeclarationListBlock
+
+CssPropertyAtRule =
+	'property'
+	name: CssDashedIdentifier
 	block: AnyCssDeclarationListBlock
 
 // @font-face {}
