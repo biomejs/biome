@@ -980,6 +980,10 @@ export interface Nursery {
 	 */
 	useImportType?: RuleConfiguration;
 	/**
+	 * Promotes the usage of node:assert/strict over node:assert.
+	 */
+	useNodeAssertStrict?: RuleConfiguration;
+	/**
 	 * Enforces using the node: protocol for Node.js builtin modules.
 	 */
 	useNodejsImportProtocol?: RuleConfiguration;
@@ -1775,6 +1779,7 @@ export type Category =
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useImportType"
+	| "lint/nursery/useNodeAssertStrict"
 	| "lint/nursery/useNodejsImportProtocol"
 	| "lint/nursery/useNumberNamespace"
 	| "lint/nursery/useShorthandFunctionType"

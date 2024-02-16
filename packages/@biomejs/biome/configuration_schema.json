@@ -1496,6 +1496,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNodeAssertStrict": {
+					"description": "Promotes the usage of node:assert/strict over node:assert.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNodejsImportProtocol": {
 					"description": "Enforces using the node: protocol for Node.js builtin modules.",
 					"anyOf": [
