@@ -336,7 +336,7 @@ fn handle_continue_break_comment(
 ///     }
 /// ```
 ///
-/// All other same line comments will use `Default` placement if they have a perceding node.
+/// All other same line comments will use `Default` placement if they have a preceding node.
 /// ```javascript
 /// switch(x) {
 ///     default:

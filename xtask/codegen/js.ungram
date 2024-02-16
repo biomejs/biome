@@ -884,10 +884,9 @@ AnyJsAssignment =
 	| JsBogusAssignment
 
 
-JsAssignmentWithDefault =
+JsArrayAssignmentPatternElement =
 	pattern: AnyJsAssignmentPattern
-	'='
-	default: AnyJsExpression
+	init: JsInitializerClause?
 
 // (a) = "test"
 // ^^^
@@ -958,8 +957,7 @@ JsArrayAssignmentPattern =
 JsArrayAssignmentPatternElementList = (AnyJsArrayAssignmentPatternElement (',' AnyJsArrayAssignmentPatternElement)* ','?)
 
 AnyJsArrayAssignmentPatternElement =
-	JsAssignmentWithDefault
-	| AnyJsAssignmentPattern
+	JsArrayAssignmentPatternElement
 	| JsArrayAssignmentPatternRestElement
 	| JsArrayHole
 
@@ -1020,10 +1018,9 @@ JsIdentifierBinding =
 
 // [ a = "b"] = [];
 //   ^^^^^^^
-JsBindingPatternWithDefault =
+JsArrayBindingPatternElement =
 	pattern: AnyJsBindingPattern
-	'='
-	default: AnyJsExpression
+	init: JsInitializerClause?
 
 AnyJsBindingPattern =
 	AnyJsBinding
@@ -1041,8 +1038,7 @@ JsArrayBindingPatternElementList = (AnyJsArrayBindingPatternElement (',' AnyJsAr
 
 AnyJsArrayBindingPatternElement =
 	JsArrayHole
-	| AnyJsBindingPattern
-	| JsBindingPatternWithDefault
+	| JsArrayBindingPatternElement
 	| JsArrayBindingPatternRestElement
 
 JsArrayBindingPatternRestElement =

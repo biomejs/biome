@@ -233,11 +233,23 @@ impl FileFeaturesResult {
     }
 
     /// Checks whether the file support the given `feature`
-    pub fn supports_for(&self, feature: &FeatureName) -> bool {
+    fn supports_for(&self, feature: &FeatureName) -> bool {
         self.features_supported
             .get(feature)
             .map(|support_kind| matches!(support_kind, SupportKind::Supported))
             .unwrap_or_default()
+    }
+
+    pub fn supports_lint(&self) -> bool {
+        self.supports_for(&FeatureName::Lint)
+    }
+
+    pub fn supports_format(&self) -> bool {
+        self.supports_for(&FeatureName::Format)
+    }
+
+    pub fn supports_organize_imports(&self) -> bool {
+        self.supports_for(&FeatureName::OrganizeImports)
     }
 
     /// Loops through all the features of the current file, and if a feature is [SupportKind::FileNotSupported],
@@ -418,6 +430,19 @@ pub struct OpenFileParams {
     pub version: i32,
     #[serde(default)]
     pub language_hint: Language,
+}
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct OpenProjectParams {
+    pub path: RomePath,
+    pub content: String,
+    pub version: i32,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct UpdateProjectParams {
+    pub path: RomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -661,14 +686,6 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError>;
 
-    /// Given a file, the workspace tries to understand if this file is a "manifest" of a project.
-    fn project_features(
-        &self,
-        _params: ProjectFeaturesParams,
-    ) -> Result<ProjectFeaturesResult, WorkspaceError> {
-        todo!()
-    }
-
     /// Checks if the current path is ignored by the workspace, against a particular feature.
     ///
     /// Takes as input the path of the file that workspace is currently processing and
@@ -682,6 +699,12 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Add a new file to the workspace
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
+
+    /// Add a new project to the workspace
+    fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError>;
+
+    /// Sets the current project path
+    fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError>;
 
     // Return a textual, debug representation of the syntax tree for a given document
     fn get_syntax_tree(

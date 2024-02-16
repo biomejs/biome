@@ -7,7 +7,7 @@ expression: content
 ```block
 It updates the configuration when there are breaking changes
 
-Usage: migrate [--write]
+Usage: migrate [--write] [COMMAND ...]
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain text,
@@ -37,6 +37,10 @@ Global options applied to all commands
 Available options:
         --write               Writes the new configuration file to disk
     -h, --help                Prints help information
+
+Available commands:
+    prettier                  It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`,
+                              and map the Prettier's configuration into Biome's configuration file.
 
 ```
 

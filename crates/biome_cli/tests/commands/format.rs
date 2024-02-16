@@ -1,7 +1,7 @@
 use crate::configs::{
     CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FORMAT,
     CONFIG_FORMATTER_AND_FILES_IGNORE, CONFIG_FORMATTER_IGNORED_DIRECTORIES,
-    CONFIG_FORMATTER_IGNORED_FILES, CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
+    CONFIG_FORMATTER_IGNORED_FILES, CONFIG_FORMAT_JSONC, CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
 };
 use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
 use crate::{
@@ -42,6 +42,78 @@ const APPLY_CSS_QUOTE_STYLE_BEFORE: &str =
 
 const APPLY_CSS_QUOTE_STYLE_AFTER: &str =
     "[class='foo'] {\n\tbackground-image: url('/path/to/file.jpg');\n}\n";
+
+const VUE_IMPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script>
+import {    something } from "file.vue";
+statement ( ) ;
+</script>
+<template></template>"#;
+
+const VUE_IMPLICIT_JS_FILE_FORMATTED: &str = r#"<script>
+import { something } from "file.vue";
+statement();
+</script>
+<template></template>"#;
+
+const VUE_EXPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script lang="js">
+import {    something } from "file.vue";
+statement ( ) ;
+</script>
+<template></template>"#;
+
+const VUE_EXPLICIT_JS_FILE_FORMATTED: &str = r#"<script lang="js">
+import { something } from "file.vue";
+statement();
+</script>
+<template></template>"#;
+
+const VUE_TS_FILE_UNFORMATTED: &str = r#"<script setup lang="ts">
+import     { type     something } from "file.vue";
+const hello  :      string      = "world";
+</script>
+<template></template>"#;
+
+const VUE_TS_FILE_FORMATTED: &str = r#"<script setup lang="ts">
+import { type something } from "file.vue";
+const hello: string = "world";
+</script>
+<template></template>"#;
+
+const SVELTE_IMPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script>
+import {    something } from "file.svelte";
+statement ( ) ;
+</script>
+<div></div>"#;
+
+const SVELTE_IMPLICIT_JS_FILE_FORMATTED: &str = r#"<script>
+import { something } from "file.svelte";
+statement();
+</script>
+<div></div>"#;
+
+const SVELTE_EXPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script lang="js">
+import {    something } from "file.svelte";
+statement ( ) ;
+</script>
+<div></div>"#;
+
+const SVELTE_EXPLICIT_JS_FILE_FORMATTED: &str = r#"<script lang="js">
+import { something } from "file.svelte";
+statement();
+</script>
+<div></div>"#;
+
+const SVELTE_TS_FILE_UNFORMATTED: &str = r#"<script setup lang="ts">
+import     { type     something } from "file.svelte";
+const hello  :      string      = "world";
+</script>
+<div></div>"#;
+
+const SVELTE_TS_FILE_FORMATTED: &str = r#"<script setup lang="ts">
+import { type something } from "file.svelte";
+const hello: string = "world";
+</script>
+<div></div>"#;
 
 const APPLY_TRAILING_COMMA_BEFORE: &str = r#"
 const a = [
@@ -110,6 +182,25 @@ const APPLY_BRACKET_SAME_LINE_AFTER: &str = r#"<Foo
 	className={style}
 	reallyLongAttributeName1={longComplexValue}
 	reallyLongAttributeName2={anotherLongValue}>
+	Hi
+</Foo>;
+"#;
+
+const APPLY_ATTRIBUTE_POSITION_BEFORE: &str = r#"<Foo className={style}	reallyLongAttributeName1={longComplexValue}
+reallyLongAttributeName2={anotherLongValue} />;
+
+<Foo reallyLongAttributeName1={longComplexValue}reallyLongAttributeName2={anotherLongValue}>Hi</Foo>;"#;
+
+const APPLY_ATTRIBUTE_POSITION_AFTER: &str = r#"<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+/>;
+
+<Foo
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+>
 	Hi
 </Foo>;
 "#;
@@ -692,6 +783,42 @@ fn applies_custom_trailing_comma() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "applies_custom_trailing_comma",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn applies_custom_attribute_position() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("file.js");
+    fs.insert(file_path.into(), APPLY_ATTRIBUTE_POSITION_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--attribute-position"),
+                ("multiline"),
+                ("--write"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, APPLY_ATTRIBUTE_POSITION_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_custom_attribute_position",
         fs,
         console,
         result,
@@ -2776,6 +2903,43 @@ fn don_t_format_ignored_known_jsonc_files() {
 }
 
 #[test]
+fn applies_configuration_from_biome_jsonc() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("biome.jsonc");
+    fs.insert(file_path.into(), CONFIG_FORMAT_JSONC.as_bytes());
+
+    let file_path = Path::new("file.js");
+    fs.insert(file_path.into(), CUSTOM_CONFIGURATION_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--write"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, CUSTOM_CONFIGURATION_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_configuration_from_biome_jsonc",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn format_package_json() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -2821,6 +2985,537 @@ fn format_package_json() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_package_json",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_vue_implicit_js_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        VUE_IMPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, VUE_IMPLICIT_JS_FILE_UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_vue_implicit_js_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_vue_implicit_js_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        VUE_IMPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                vue_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, VUE_IMPLICIT_JS_FILE_FORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_vue_implicit_js_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_vue_explicit_js_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        VUE_EXPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, VUE_EXPLICIT_JS_FILE_UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_vue_explicit_js_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_vue_explicit_js_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        VUE_EXPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                vue_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, VUE_EXPLICIT_JS_FILE_FORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_vue_explicit_js_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_empty_vue_js_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(vue_file_path.into(), "<template></template>".as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                vue_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, "<template></template>");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_empty_vue_js_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_vue_ts_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(vue_file_path.into(), VUE_TS_FILE_UNFORMATTED.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, VUE_TS_FILE_UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_vue_ts_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_vue_ts_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(vue_file_path.into(), VUE_TS_FILE_UNFORMATTED.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                vue_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, VUE_TS_FILE_FORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_vue_ts_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_empty_vue_ts_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(vue_file_path.into(), "<template></template>".as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                vue_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, "<template></template>");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_empty_vue_ts_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+#[test]
+fn format_svelte_implicit_js_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file_path = Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        SVELTE_IMPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, svelte_file_path, SVELTE_IMPLICIT_JS_FILE_UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_svelte_implicit_js_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_svelte_implicit_js_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file_path = Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        SVELTE_IMPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                svelte_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, svelte_file_path, SVELTE_IMPLICIT_JS_FILE_FORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_svelte_implicit_js_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_svelte_explicit_js_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file_path = Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        SVELTE_EXPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, svelte_file_path, SVELTE_EXPLICIT_JS_FILE_UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_svelte_explicit_js_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_svelte_explicit_js_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file_path = Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        SVELTE_EXPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                svelte_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, svelte_file_path, SVELTE_EXPLICIT_JS_FILE_FORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_svelte_explicit_js_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_empty_svelte_js_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file_path = Path::new("file.svelte");
+    fs.insert(svelte_file_path.into(), "<div></div>".as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                svelte_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, svelte_file_path, "<div></div>");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_empty_svelte_js_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_svelte_ts_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file_path = Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        SVELTE_TS_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, svelte_file_path, SVELTE_TS_FILE_UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_svelte_ts_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_svelte_ts_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file_path = Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        SVELTE_TS_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                svelte_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, svelte_file_path, SVELTE_TS_FILE_FORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_svelte_ts_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_empty_svelte_ts_files_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file_path = Path::new("file.svelte");
+    fs.insert(svelte_file_path.into(), "<div></div>".as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                svelte_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, svelte_file_path, "<div></div>");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_empty_svelte_ts_files_write",
         fs,
         console,
         result,

@@ -404,6 +404,11 @@ export default defineConfig({
 	adapter: netlifyStatic(),
 
 	vite: {
+		resolve: {
+			alias: {
+				"@": new URL("./src", import.meta.url).pathname,
+			},
+		},
 		plugins: [],
 
 		worker: {

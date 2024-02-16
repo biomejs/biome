@@ -33,7 +33,7 @@ a = 2;
     <strong>2 │ </strong>a = 2;
     <strong>3 │ </strong>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Variable declarations without type annotation and initialization have implicitly the </span><span style="color: lightgreen;"><strong>any</strong></span><span style="color: lightgreen;"> type. Declare type or initialize the variable with some value.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Variable declarations without type annotation and initialization implicitly have the </span><span style="color: lightgreen;"><strong>any</strong></span><span style="color: lightgreen;"> type. Declare a type or initialize the variable with some value.</span>
   
 </code></pre>
 
@@ -51,7 +51,7 @@ b = 1
     <strong>2 │ </strong>b = 1
     <strong>3 │ </strong>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Variable declarations without type annotation and initialization have implicitly the </span><span style="color: lightgreen;"><strong>any</strong></span><span style="color: lightgreen;"> type. Declare type or initialize the variable with some value.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Variable declarations without type annotation and initialization implicitly have the </span><span style="color: lightgreen;"><strong>any</strong></span><span style="color: lightgreen;"> type. Declare a type or initialize the variable with some value.</span>
   
 </code></pre>
 

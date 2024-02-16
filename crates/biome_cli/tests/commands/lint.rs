@@ -10,8 +10,8 @@ use std::path::{Path, PathBuf};
 
 use crate::configs::{
     CONFIG_FILE_SIZE_LIMIT, CONFIG_IGNORE_SYMLINK, CONFIG_LINTER_AND_FILES_IGNORE,
-    CONFIG_LINTER_DISABLED, CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC, CONFIG_LINTER_IGNORED_FILES,
-    CONFIG_LINTER_SUPPRESSED_GROUP, CONFIG_LINTER_SUPPRESSED_RULE,
+    CONFIG_LINTER_DISABLED, CONFIG_LINTER_DISABLED_JSONC, CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC,
+    CONFIG_LINTER_IGNORED_FILES, CONFIG_LINTER_SUPPRESSED_GROUP, CONFIG_LINTER_SUPPRESSED_RULE,
     CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
 };
 use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
@@ -188,7 +188,7 @@ fn maximum_diagnostics() {
             let content = format!("{:?}", m.content);
             content.contains("The number of diagnostics exceeds the number allowed by Biome")
                 && content.contains("Diagnostics not shown")
-                && content.contains("77")
+                && content.contains("76")
         }));
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -433,6 +433,49 @@ fn no_lint_if_linter_is_disabled_when_run_apply() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "no_lint_if_linter_is_disabled_when_run_apply",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_lint_if_linter_is_disabled_when_run_apply_biome_jsonc() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("fix.js");
+    fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
+
+    let config_path = Path::new("biome.jsonc");
+    fs.insert(config_path.into(), CONFIG_LINTER_DISABLED_JSONC.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                ("--apply"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    assert_eq!(buffer, FIX_BEFORE);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_lint_if_linter_is_disabled_when_run_apply_biome_jsonc",
         fs,
         console,
         result,
@@ -796,7 +839,7 @@ fn fs_error_dereferenced_symlink() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem(Some(root_path.clone())))),
+        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
         &mut console,
         Args::from([("lint"), root_path.display().to_string().as_str()].as_slice()),
     );
@@ -840,7 +883,7 @@ fn fs_error_infinite_symlink_expansion_to_dirs() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem(Some(root_path.clone())))),
+        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
         &mut console,
         Args::from([("lint"), (root_path.display().to_string().as_str())].as_slice()),
     );
@@ -886,7 +929,7 @@ fn fs_error_infinite_symlink_expansion_to_files() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem(Some(root_path.clone())))),
+        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
         &mut console,
         Args::from([("lint"), (root_path.display().to_string().as_str())].as_slice()),
     );
@@ -1067,7 +1110,7 @@ fn fs_files_ignore_symlink() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem(Some(root_path.clone())))),
+        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
         &mut console,
         Args::from(
             [
@@ -2634,6 +2677,82 @@ fn should_not_process_ignored_file_even_if_its_changed() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_not_process_ignored_file_even_if_its_changed",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_syntax_rules() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), r#"class A { #foo; #foo }"#.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_syntax_rules",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_unused_dependencies() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"	{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "all": false,
+      "nursery": {
+        "noUndeclaredDependencies": "error"
+      }
+    }
+  }
+}"#;
+
+    let configuration_path = Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let package_json = r#"	{
+  "dependencies": { "react": "latest", "react-dom": "^17.0.0" }
+}"#;
+    let package_json_path = Path::new("package.json");
+    fs.insert(package_json_path.into(), package_json.as_bytes());
+
+    let file_path = Path::new("fix.js");
+    fs.insert(
+        file_path.into(),
+        r#"import "react";
+import "lodash";
+		"#,
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_dependencies",
         fs,
         console,
         result,

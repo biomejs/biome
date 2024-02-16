@@ -27,16 +27,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Run Biome Format
-        run: cargo biome-cli-dev ci editors website packages/@biomejs/js-api
-
-  type-check:
-    name: Type-check JS Files
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout PR Branch
-        uses: actions/checkout@v4
-      - uses: jetli/wasm-pack-action@v0.4.0
       - name: Cache pnpm modules
         uses: actions/cache@v3
         with:
@@ -44,11 +34,41 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-
-      - uses: pnpm/action-setup@v2.2.4
+      - name: Cache pnpm modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+      - name: Run Biome Format
+        run: |
+          pnpm i
+          pnpm run check
+
+  type-check:
+    name: Type-check JS Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@v4
+      - name: Cache pnpm modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+      - uses: pnpm/action-setup@v3
         with:
           version: 8
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Build WASM module for the web
         run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --scope biomedev crates/biome_wasm
       - name: Install libraries

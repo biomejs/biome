@@ -118,9 +118,6 @@ fn traverse_binding(
             return inner_binding.elements().into_iter().find_map(|element| {
                 let element = element.ok()?;
                 match element {
-                    AnyJsArrayBindingPatternElement::AnyJsBindingPattern(pattern) => {
-                        traverse_binding(pattern, tracked_bindings)
-                    }
                     AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(
                         binding_rest,
                     ) => {
@@ -128,7 +125,7 @@ fn traverse_binding(
                         traverse_binding(binding_pattern, tracked_bindings)
                     }
                     AnyJsArrayBindingPatternElement::JsArrayHole(_) => None,
-                    AnyJsArrayBindingPatternElement::JsBindingPatternWithDefault(
+                    AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(
                         binding_with_default,
                     ) => {
                         let pattern = binding_with_default.pattern().ok()?;

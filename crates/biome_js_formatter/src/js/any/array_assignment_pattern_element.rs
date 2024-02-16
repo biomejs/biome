@@ -12,10 +12,7 @@ impl FormatRule<AnyJsArrayAssignmentPatternElement> for FormatAnyJsArrayAssignme
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
         match node {
-            AnyJsArrayAssignmentPatternElement::JsAssignmentWithDefault(node) => {
-                node.format().fmt(f)
-            }
-            AnyJsArrayAssignmentPatternElement::AnyJsAssignmentPattern(node) => {
+            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(node) => {
                 node.format().fmt(f)
             }
             AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(node) => {

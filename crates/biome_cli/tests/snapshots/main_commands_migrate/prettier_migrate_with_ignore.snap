@@ -43,23 +43,25 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        6 │ + → → "indentWidth":·2,
        7 │ + → → "lineEnding":·"lf",
        8 │ + → → "lineWidth":·80,
-       9 │ + → → "ignore":·["dist/**",·"node_modules/**",·"generated/*.spec.js"]
-      10 │ + → },
-      11 │ + → "linter":·{·"enabled":·true·},
-      12 │ + → "javascript":·{
-      13 │ + → → "formatter":·{
-      14 │ + → → → "jsxQuoteStyle":·"double",
-      15 │ + → → → "quoteProperties":·"asNeeded",
-      16 │ + → → → "trailingComma":·"all",
-      17 │ + → → → "semicolons":·"always",
-      18 │ + → → → "arrowParentheses":·"always",
-      19 │ + → → → "bracketSpacing":·true,
-      20 │ + → → → "bracketSameLine":·false,
-      21 │ + → → → "quoteStyle":·"single"
-      22 │ + → → }
-      23 │ + → }
-      24 │ + }
-      25 │ + 
+       9 │ + → → "attributePosition":·"auto",
+      10 │ + → → "ignore":·["dist/**",·"node_modules/**",·"generated/*.spec.js"]
+      11 │ + → },
+      12 │ + → "linter":·{·"enabled":·true·},
+      13 │ + → "javascript":·{
+      14 │ + → → "formatter":·{
+      15 │ + → → → "jsxQuoteStyle":·"double",
+      16 │ + → → → "quoteProperties":·"asNeeded",
+      17 │ + → → → "trailingComma":·"all",
+      18 │ + → → → "semicolons":·"always",
+      19 │ + → → → "arrowParentheses":·"always",
+      20 │ + → → → "bracketSpacing":·true,
+      21 │ + → → → "bracketSameLine":·false,
+      22 │ + → → → "quoteStyle":·"single",
+      23 │ + → → → "attributePosition":·"auto"
+      24 │ + → → }
+      25 │ + → }
+      26 │ + }
+      27 │ + 
   
 
 ```

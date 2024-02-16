@@ -102,7 +102,13 @@ impl Rule for NoNonNullAssertion {
                 let old_node = AnyJsExpression::TsNonNullAssertionExpression(node.clone());
 
                 match node.parent::<AnyJsExpression>()? {
-                    AnyJsExpression::JsComputedMemberExpression(parent) => {
+                    AnyJsExpression::JsComputedMemberExpression(parent)
+                        if parent.object().is_ok_and(|object| {
+                            object
+                                .as_ts_non_null_assertion_expression()
+                                .is_some_and(|object| object == node)
+                        }) =>
+                    {
                         if parent.is_optional() {
                             // object!?["prop"] --> object?.["prop"]
                             mutation.replace_node(old_node, assertion_less_expr);

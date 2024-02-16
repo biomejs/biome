@@ -38,6 +38,7 @@ Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
+Attribute Position: Auto
 -----
 
 ```js
@@ -69,6 +70,7 @@ Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
+Attribute Position: Auto
 -----
 
 ```js
@@ -100,6 +102,7 @@ Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
+Attribute Position: Auto
 -----
 
 ```js

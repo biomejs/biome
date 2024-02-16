@@ -31,7 +31,7 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge, StringSet};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
-use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
+use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_js_analyze::metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
@@ -261,7 +261,6 @@ fn load_config(
     file_system: &DynRef<'_, dyn FileSystem>,
     base_path: ConfigurationBasePath,
 ) -> LoadConfig {
-    let config_name = file_system.config_name();
     let deprecated_config_name = file_system.deprecated_config_name();
     let working_directory = file_system.working_directory();
     let configuration_directory = match base_path {
@@ -276,13 +275,16 @@ fn load_config(
     let should_error = base_path.is_from_user();
 
     let auto_search_result;
-    let result =
-        file_system.auto_search(configuration_directory.clone(), config_name, should_error);
+    let result = file_system.auto_search(
+        configuration_directory.clone(),
+        ConfigName::file_names().as_slice(),
+        should_error,
+    );
     if let Ok(result) = result {
         if result.is_none() {
             auto_search_result = file_system.auto_search(
                 configuration_directory.clone(),
-                deprecated_config_name,
+                [deprecated_config_name].as_slice(),
                 should_error,
             )?;
         } else {
@@ -291,7 +293,7 @@ fn load_config(
     } else {
         auto_search_result = file_system.auto_search(
             configuration_directory.clone(),
-            deprecated_config_name,
+            [deprecated_config_name].as_slice(),
             should_error,
         )?;
     }
@@ -302,11 +304,16 @@ fn load_config(
             directory_path,
             file_path,
         } = auto_search_result;
-        let deserialized = deserialize_from_json_str::<PartialConfiguration>(
-            &content,
-            JsonParserOptions::default(),
-            "",
-        );
+        let parser_options =
+            if file_path.file_name().and_then(|s| s.to_str()) == Some(ConfigName::biome_jsonc()) {
+                JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas()
+            } else {
+                JsonParserOptions::default()
+            };
+        let deserialized =
+            deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
         Ok(Some(ConfigurationPayload {
             deserialized,
             configuration_file_path: file_path,
@@ -327,8 +334,13 @@ fn load_config(
 pub fn create_config(
     fs: &mut DynRef<dyn FileSystem>,
     mut configuration: PartialConfiguration,
+    emit_jsonc: bool,
 ) -> Result<(), WorkspaceError> {
-    let path = PathBuf::from(fs.config_name());
+    let path = if emit_jsonc {
+        PathBuf::from(ConfigName::biome_jsonc())
+    } else {
+        PathBuf::from(ConfigName::biome_json())
+    };
 
     let options = OpenOptions::default().write(true).create_new(true);
 
@@ -550,7 +562,28 @@ impl PartialConfiguration {
 
         let mut deserialized_configurations = vec![];
         for path in extends.iter() {
-            let config_path = directory_path.join(path);
+            let as_path = Path::new(path);
+            let extension = as_path.extension().and_then(|ext| ext.to_str());
+            // TODO: Remove extension in Biome 2.0
+            let config_path = if as_path.starts_with(".")
+                || extension == Some("json")
+                || extension == Some("jsonc")
+            {
+                directory_path.join(path)
+            } else {
+                fs.resolve_configuration(path.as_str())
+                    .map_err(|error| {
+                        ConfigurationDiagnostic::cant_resolve(
+                            fs.working_directory()
+                                .unwrap_or_default()
+                                .display()
+                                .to_string(),
+                            error,
+                        )
+                    })?
+                    .into_path_buf()
+            };
+
             let mut file = fs
                 .open_with_options(config_path.as_path(), OpenOptions::default().read(true))
                 .map_err(|err| {
@@ -639,7 +672,7 @@ impl PartialConfiguration {
             if let Some(client_kind) = &vcs.client_kind {
                 if !vcs.ignore_file_disabled() {
                     let result = file_system
-                        .auto_search(vcs_base_path, client_kind.ignore_file(), false)
+                        .auto_search(vcs_base_path, &[client_kind.ignore_file()], false)
                         .map_err(WorkspaceError::from)?;
 
                     if let Some(result) = result {
@@ -656,5 +689,61 @@ impl PartialConfiguration {
             }
         }
         Ok((None, vec![]))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use oxc_resolver::{FileMetadata, ResolveOptions, ResolverGeneric};
+    use std::env;
+    use std::path::{Path, PathBuf};
+
+    #[test]
+    fn resolver_test() {
+        #[derive(Debug, Default)]
+        struct Test;
+
+        impl oxc_resolver::FileSystem for Test {
+            fn read_to_string(&self, _path: &Path) -> std::io::Result<String> {
+                Ok(String::from(
+                    r#"{ "name": "example", "exports": { "./biome": "./biome.json" }}"#,
+                ))
+            }
+
+            fn metadata(&self, _path: &Path) -> std::io::Result<FileMetadata> {
+                Ok(FileMetadata::new(true, false, false))
+            }
+
+            fn symlink_metadata(&self, _path: &Path) -> std::io::Result<FileMetadata> {
+                Ok(FileMetadata::new(true, false, false))
+            }
+
+            fn canonicalize(&self, _path: &Path) -> std::io::Result<PathBuf> {
+                env::current_dir().unwrap().canonicalize()
+            }
+        }
+
+        let resolver = ResolverGeneric::new_with_file_system(
+            Test {},
+            ResolveOptions {
+                condition_names: vec!["node".to_string(), "import".to_string()],
+                extensions: vec!["*.json".to_string()],
+                ..ResolveOptions::default()
+            },
+        );
+
+        let result = resolver
+            .resolve(
+                env::current_dir()
+                    .unwrap()
+                    .canonicalize()
+                    .unwrap()
+                    .display()
+                    .to_string(),
+                "example/biome",
+            )
+            .unwrap();
+
+        dbg!(&result);
     }
 }

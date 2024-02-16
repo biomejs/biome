@@ -1,6 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_js_syntax::{JsLanguage, JsSyntaxKind, TsVoidType};
+use biome_js_syntax::{JsLanguage, JsSyntaxKind, TsConditionalType, TsVoidType};
 use biome_rowan::{AstNode, SyntaxNode};
 
 declare_rule! {
@@ -120,6 +120,19 @@ fn decide_void_type_context(node: &SyntaxNode<JsLanguage>) -> Option<VoidTypeCon
 
             JsSyntaxKind::TS_UNION_TYPE => {
                 return Some(VoidTypeContext::Union);
+            }
+
+            // type Conditional<T> = T extends void ? Record<string, never> : T
+            JsSyntaxKind::TS_CONDITIONAL_TYPE => {
+                let conditional = TsConditionalType::unwrap_cast(parent.clone());
+                let is_extends_type = conditional
+                    .extends_type()
+                    .map(AstNode::into_syntax)
+                    .as_ref()
+                    == Ok(node);
+                if is_extends_type {
+                    return None;
+                }
             }
 
             // Promise<void>

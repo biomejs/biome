@@ -1,6 +1,6 @@
 use super::{
-    AnalyzerCapabilities, DebugCapabilities, ExtensionHandler, FormatterCapabilities, LintParams,
-    LintResults, Mime, ParserCapabilities, PullActions,
+    AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler,
+    FormatterCapabilities, LintParams, LintResults, Mime, ParserCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -21,7 +21,8 @@ use biome_analyze::{
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
-    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    QuoteStyle,
 };
 use biome_fs::RomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
@@ -61,6 +62,7 @@ pub struct JsFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub enabled: Option<bool>,
+    pub attribute_position: Option<AttributePosition>,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -128,7 +130,13 @@ impl Language for JsLanguage {
             .with_semicolons(language.semicolons.unwrap_or_default())
             .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
             .with_bracket_spacing(language.bracket_spacing.unwrap_or_default())
-            .with_bracket_same_line(language.bracket_same_line.unwrap_or_default());
+            .with_bracket_same_line(language.bracket_same_line.unwrap_or_default())
+            .with_attribute_position(
+                language
+                    .attribute_position
+                    .or(global.attribute_position)
+                    .unwrap_or_default(),
+            );
 
         overrides.override_js_format_options(path, options)
     }
@@ -252,6 +260,7 @@ fn debug_control_flow(parse: AnyParse, cursor: TextSize) -> String {
         },
         &options,
         JsFileSource::default(),
+        None,
         |_| ControlFlow::<Never>::Continue(()),
     );
 
@@ -275,6 +284,7 @@ fn debug_formatter_ir(
 pub(crate) fn lint(params: LintParams) -> LintResults {
     debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
         .in_scope(move || {
+            let settings = params.settings.as_ref();
             let file_source = match params.parse.file_source(params.path) {
                 Ok(file_source) => file_source,
                 Err(_) => {
@@ -291,9 +301,31 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             };
             let tree = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
-
             let analyzer_options =
                 compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
+
+            // Compute final rules (taking `overrides` into account)
+            let rules = settings.as_rules(params.path.as_path());
+            let mut rule_filter_list = rules
+                .as_ref()
+                .map(|rules| rules.as_enabled_rules())
+                .unwrap_or_default()
+                .into_iter()
+                .collect::<Vec<_>>();
+            if settings.organize_imports.enabled && !params.categories.is_syntax() {
+                rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
+            }
+
+            rule_filter_list.push(RuleFilter::Rule(
+                "correctness",
+                "noDuplicatePrivateClassMembers",
+            ));
+            rule_filter_list.push(RuleFilter::Rule("correctness", "noInitializerWithDefinite"));
+            rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
+            rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
+
+            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
+            filter.categories = params.categories;
 
             let mut diagnostic_count = diagnostics.len() as u64;
             let mut errors = diagnostics
@@ -301,14 +333,15 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 .filter(|diag| diag.severity() <= Severity::Error)
                 .count();
 
-            let has_lint = params.filter.categories.contains(RuleCategories::LINT);
+            let has_lint = filter.categories.contains(RuleCategories::LINT);
 
             info!("Analyze file {}", params.path.display());
             let (_, analyze_diagnostics) = analyze(
                 &tree,
-                params.filter,
+                filter,
                 &analyzer_options,
                 file_source,
+                params.manifest,
                 |signal| {
                     if let Some(mut diagnostic) = signal.diagnostic() {
                         // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
@@ -326,8 +359,8 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                             .category()
                             .filter(|category| category.name().starts_with("lint/"))
                             .map(|category| {
-                                params
-                                    .rules
+                                rules
+                                    .as_ref()
                                     .and_then(|rules| rules.get_severity_from_code(category))
                                     .unwrap_or(Severity::Warning)
                             })
@@ -398,71 +431,80 @@ impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
     }
 }
 
-pub(crate) fn code_actions(params: PullActions) -> PullActionsResult {
-    debug_span!("", rules =? params.rules, path =? params.rome_path).in_scope(move || {
-        let PullActions {
-            parse,
-            range,
-            rules,
-            settings,
-            rome_path,
-        } = params;
-        let tree = parse.tree();
+#[tracing::instrument(level = "debug", skip(params))]
+pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
+    let CodeActionsParams {
+        parse,
+        range,
+        rules,
+        settings,
+        path,
+        manifest,
+    } = params;
+    debug_span!("Code actions JavaScript", range =? range, rules =? rules, path =? path).in_scope(
+        move || {
+            let tree = parse.tree();
+            let mut actions = Vec::new();
+            let mut enabled_rules = vec![];
+            if settings.as_ref().organize_imports.enabled {
+                enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
+            }
+            if let Some(rules) = rules {
+                let rules = rules.as_enabled_rules().into_iter().collect();
 
-        let mut actions = Vec::new();
+                // The rules in the assist category do not have configuration entries,
+                // always add them all to the enabled rules list
+                let mut visitor = ActionsVisitor {
+                    enabled_rules: rules,
+                };
+                visit_registry(&mut visitor);
 
-        let mut enabled_rules = vec![];
-        if settings.as_ref().organize_imports.enabled {
-            enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
-        }
-        if let Some(rules) = rules {
-            let rules = rules.as_enabled_rules().into_iter().collect();
+                enabled_rules.extend(visitor.enabled_rules);
+            }
 
-            // The rules in the assist category do not have configuration entries,
-            // always add them all to the enabled rules list
-            let mut visitor = ActionsVisitor {
-                enabled_rules: rules,
+            let mut filter = if !enabled_rules.is_empty() {
+                AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()))
+            } else {
+                AnalysisFilter::default()
             };
-            visit_registry(&mut visitor);
 
-            enabled_rules.extend(visitor.enabled_rules);
-        }
+            filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;
+            if settings.as_ref().organize_imports.enabled {
+                filter.categories |= RuleCategories::ACTION;
+            }
+            filter.range = Some(range);
 
-        let mut filter = if !enabled_rules.is_empty() {
-            AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()))
-        } else {
-            AnalysisFilter::default()
-        };
+            trace!("Filter applied for code actions: {:?}", &filter);
+            let analyzer_options =
+                compute_analyzer_options(&settings, PathBuf::from(path.as_path()));
+            let Ok(source_type) = parse.file_source(path) else {
+                return PullActionsResult { actions: vec![] };
+            };
 
-        filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;
-        if settings.as_ref().organize_imports.enabled {
-            filter.categories |= RuleCategories::ACTION;
-        }
-        filter.range = Some(range);
+            analyze(
+                &tree,
+                filter,
+                &analyzer_options,
+                source_type,
+                manifest,
+                |signal| {
+                    actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                        CodeAction {
+                            category: item.category.clone(),
+                            rule_name: item
+                                .rule_name
+                                .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                            suggestion: item.suggestion,
+                        }
+                    }));
 
-        trace!("Filter applied for code actions: {:?}", &filter);
-        let analyzer_options =
-            compute_analyzer_options(&settings, PathBuf::from(rome_path.as_path()));
-        let Ok(source_type) = parse.file_source(rome_path) else {
-            return PullActionsResult { actions: vec![] };
-        };
+                    ControlFlow::<Never>::Continue(())
+                },
+            );
 
-        analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-            actions.extend(signal.actions().into_code_action_iter().map(|item| {
-                CodeAction {
-                    category: item.category.clone(),
-                    rule_name: item
-                        .rule_name
-                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                    suggestion: item.suggestion,
-                }
-            }));
-
-            ControlFlow::<Never>::Continue(())
-        });
-
-        PullActionsResult { actions }
-    })
+            PullActionsResult { actions }
+        },
+    )
 }
 
 /// If applies all the safe fixes to the given syntax tree.
@@ -477,6 +519,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         should_format,
         rome_path,
         mut filter,
+        manifest,
     } = params;
 
     let file_source = parse
@@ -491,45 +534,52 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut errors: u16 = 0;
     let analyzer_options = compute_analyzer_options(&settings, PathBuf::from(rome_path.as_path()));
     loop {
-        let (action, _) = analyze(&tree, filter, &analyzer_options, file_source, |signal| {
-            let current_diagnostic = signal.diagnostic();
+        let (action, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            file_source,
+            manifest.clone(),
+            |signal| {
+                let current_diagnostic = signal.diagnostic();
 
-            if let Some(diagnostic) = current_diagnostic.as_ref() {
-                if is_diagnostic_error(diagnostic, rules) {
-                    errors += 1;
-                }
-            }
-
-            for action in signal.actions() {
-                // suppression actions should not be part of the fixes (safe or suggested)
-                if action.is_suppression() {
-                    continue;
-                }
-
-                match fix_file_mode {
-                    FixFileMode::SafeFixes => {
-                        if action.applicability == Applicability::MaybeIncorrect {
-                            skipped_suggested_fixes += 1;
-                        }
-                        if action.applicability == Applicability::Always {
-                            errors = errors.saturating_sub(1);
-                            return ControlFlow::Break(action);
-                        }
-                    }
-                    FixFileMode::SafeAndUnsafeFixes => {
-                        if matches!(
-                            action.applicability,
-                            Applicability::Always | Applicability::MaybeIncorrect
-                        ) {
-                            errors = errors.saturating_sub(1);
-                            return ControlFlow::Break(action);
-                        }
+                if let Some(diagnostic) = current_diagnostic.as_ref() {
+                    if is_diagnostic_error(diagnostic, rules) {
+                        errors += 1;
                     }
                 }
-            }
 
-            ControlFlow::Continue(())
-        });
+                for action in signal.actions() {
+                    // suppression actions should not be part of the fixes (safe or suggested)
+                    if action.is_suppression() {
+                        continue;
+                    }
+
+                    match fix_file_mode {
+                        FixFileMode::SafeFixes => {
+                            if action.applicability == Applicability::MaybeIncorrect {
+                                skipped_suggested_fixes += 1;
+                            }
+                            if action.applicability == Applicability::Always {
+                                errors = errors.saturating_sub(1);
+                                return ControlFlow::Break(action);
+                            }
+                        }
+                        FixFileMode::SafeAndUnsafeFixes => {
+                            if matches!(
+                                action.applicability,
+                                Applicability::Always | Applicability::MaybeIncorrect
+                            ) {
+                                errors = errors.saturating_sub(1);
+                                return ControlFlow::Break(action);
+                            }
+                        }
+                    }
+                }
+
+                ControlFlow::Continue(())
+            },
+        );
 
         match action {
             Some(action) => {
@@ -577,7 +627,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 }
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
-fn format(
+pub(crate) fn format(
     rome_path: &RomePath,
     parse: AnyParse,
     settings: SettingsHandle,
@@ -703,6 +753,7 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
         filter,
         &AnalyzerOptions::default(),
         JsFileSource::default(),
+        None,
         |signal| {
             for action in signal.actions() {
                 if action.is_suppression() {

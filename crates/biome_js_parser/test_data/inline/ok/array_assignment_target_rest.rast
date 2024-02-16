@@ -205,12 +205,18 @@ JsModule {
                                 pattern: JsArrayAssignmentPattern {
                                     l_brack_token: L_BRACK@124..125 "[" [] [],
                                     elements: JsArrayAssignmentPatternElementList [
-                                        JsIdentifierAssignment {
-                                            name_token: IDENT@125..126 "x" [] [],
+                                        JsArrayAssignmentPatternElement {
+                                            pattern: JsIdentifierAssignment {
+                                                name_token: IDENT@125..126 "x" [] [],
+                                            },
+                                            init: missing (optional),
                                         },
                                         COMMA@126..128 "," [] [Whitespace(" ")],
-                                        JsIdentifierAssignment {
-                                            name_token: IDENT@128..129 "y" [] [],
+                                        JsArrayAssignmentPatternElement {
+                                            pattern: JsIdentifierAssignment {
+                                                name_token: IDENT@128..129 "y" [] [],
+                                            },
+                                            init: missing (optional),
                                         },
                                     ],
                                     r_brack_token: R_BRACK@129..131 "]" [] [Whitespace(" ")],
@@ -415,11 +421,15 @@ JsModule {
                 1: JS_ARRAY_ASSIGNMENT_PATTERN@124..131
                   0: L_BRACK@124..125 "[" [] []
                   1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@125..129
-                    0: JS_IDENTIFIER_ASSIGNMENT@125..126
-                      0: IDENT@125..126 "x" [] []
+                    0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@125..126
+                      0: JS_IDENTIFIER_ASSIGNMENT@125..126
+                        0: IDENT@125..126 "x" [] []
+                      1: (empty)
                     1: COMMA@126..128 "," [] [Whitespace(" ")]
-                    2: JS_IDENTIFIER_ASSIGNMENT@128..129
-                      0: IDENT@128..129 "y" [] []
+                    2: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@128..129
+                      0: JS_IDENTIFIER_ASSIGNMENT@128..129
+                        0: IDENT@128..129 "y" [] []
+                      1: (empty)
                   2: R_BRACK@129..131 "]" [] [Whitespace(" ")]
             2: R_BRACK@131..133 "]" [] [Whitespace(" ")]
           1: EQ@133..135 "=" [] [Whitespace(" ")]

@@ -110,7 +110,10 @@ impl Rule for NoVar {
             JsSyntaxKind::LET_KW
         };
         let mut mutation = ctx.root().begin();
-        mutation.replace_token(declaration.kind_token()?, make::token(replacing_token_kind));
+        mutation.replace_token(
+            declaration.kind_token().ok()?,
+            make::token(replacing_token_kind),
+        );
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,

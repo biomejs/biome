@@ -2,9 +2,10 @@ use crate::cli_options::{cli_options, CliOptions, ColorsArg};
 use crate::diagnostics::DeprecatedConfigurationFile;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
-use crate::{CliDiagnostic, LoggingLevel, VERSION};
+use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
+use biome_fs::RomePath;
 use biome_service::configuration::vcs::PartialVcsConfiguration;
 use biome_service::configuration::{
     css::partial_css_formatter, javascript::partial_javascript_formatter,
@@ -17,6 +18,7 @@ use biome_service::configuration::{
     PartialLinterConfiguration,
 };
 use biome_service::documentation::Doc;
+use biome_service::workspace::{OpenProjectParams, UpdateProjectParams};
 use biome_service::{ConfigurationDiagnostic, PartialConfiguration, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
@@ -218,8 +220,8 @@ pub enum BiomeCommand {
         #[bpaf(long("organize-imports-enabled"), argument("true|false"), optional)]
         organize_imports_enabled: Option<bool>,
 
-        #[bpaf(external(partial_configuration), hide_usage)]
-        configuration: PartialConfiguration,
+        #[bpaf(external(partial_configuration), hide_usage, optional)]
+        configuration: Option<PartialConfiguration>,
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
@@ -240,7 +242,11 @@ pub enum BiomeCommand {
 
     /// Bootstraps a new biome project. Creates a configuration file with some defaults.
     #[bpaf(command)]
-    Init,
+    Init(
+        /// Tells Biome to emit a `biome.jsonc` file.
+        #[bpaf(long("jsonc"), switch)]
+        bool,
+    ),
     /// Acts as a server for the Language Server Protocol over stdin/stdout
     #[bpaf(command("lsp-proxy"))]
     LspProxy(
@@ -251,17 +257,15 @@ pub enum BiomeCommand {
     /// It updates the configuration when there are breaking changes
     #[bpaf(command)]
     Migrate {
-        /// It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`, and map
-        /// Prettier's configuration into `biome.json`
-        #[bpaf(long("prettier"), switch, hide, hide_usage)]
-        prettier: bool,
-
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
         /// Writes the new configuration file to disk
         #[bpaf(long("write"), switch)]
         write: bool,
+
+        #[bpaf(external(migrate_sub_command), optional)]
+        sub_command: Option<MigrateSubCommand>,
     },
 
     /// A command to retrieve the documentation of various aspects of the CLI.
@@ -294,6 +298,19 @@ pub enum BiomeCommand {
     PrintSocket,
 }
 
+#[derive(Debug, Bpaf, Clone)]
+pub enum MigrateSubCommand {
+    /// It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`, and map the Prettier's configuration into Biome's configuration file.
+    #[bpaf(command)]
+    Prettier,
+}
+
+impl MigrateSubCommand {
+    pub const fn is_prettier(&self) -> bool {
+        matches!(self, MigrateSubCommand::Prettier)
+    }
+}
+
 impl BiomeCommand {
     pub const fn get_color(&self) -> Option<&ColorsArg> {
         match self {
@@ -307,7 +324,7 @@ impl BiomeCommand {
             BiomeCommand::LspProxy(_)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::Init
+            | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => None,
@@ -323,7 +340,7 @@ impl BiomeCommand {
             | BiomeCommand::Ci { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Migrate { cli_options, .. } => cli_options.use_server,
-            BiomeCommand::Init
+            BiomeCommand::Init(_)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Explain { .. }
@@ -348,7 +365,7 @@ impl BiomeCommand {
             | BiomeCommand::Rage(..)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::Init
+            | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
@@ -368,7 +385,7 @@ impl BiomeCommand {
             | BiomeCommand::Rage(..)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::Init
+            | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => LoggingLevel::default(),
@@ -386,7 +403,7 @@ impl BiomeCommand {
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::Init
+            | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => LoggingKind::default(),
@@ -432,6 +449,29 @@ pub(crate) fn validate_configuration_diagnostics(
                 "Biome exited because the configuration resulted in errors. Please fix them.",
             )),
         ));
+    }
+
+    Ok(())
+}
+
+fn resolve_manifest(cli_session: &CliSession) -> Result<(), WorkspaceError> {
+    let fs = &*cli_session.app.fs;
+    let workspace = &*cli_session.app.workspace;
+
+    let result = fs.auto_search(
+        fs.working_directory().unwrap_or_default(),
+        &["package.json"],
+        false,
+    )?;
+
+    if let Some(result) = result {
+        let rome_path = RomePath::new(result.file_path);
+        workspace.open_project(OpenProjectParams {
+            path: rome_path.clone(),
+            content: result.content,
+            version: 0,
+        })?;
+        workspace.update_current_project(UpdateProjectParams { path: rome_path })?;
     }
 
     Ok(())

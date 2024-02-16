@@ -408,37 +408,6 @@ impl CliDiagnostic {
         })
     }
 
-    /// Emitted for a file that has code fixes, but still has diagnostics to address
-    pub fn file_check_apply_error(
-        file_path: impl Into<String>,
-        category: &'static Category,
-    ) -> Self {
-        Self::FileCheck(FileCheck {
-            file_path: file_path.into(),
-            category,
-            message: MessageAndDescription::from(
-                markup! {
-                    "Fixes applied to the file, but there are still diagnostics to address."
-                }
-                .to_owned(),
-            ),
-        })
-    }
-
-    /// Emitted when the file has diagnostics.
-    pub fn file_check_error(file_path: impl Into<String>, category: &'static Category) -> Self {
-        Self::FileCheck(FileCheck {
-            file_path: file_path.into(),
-            category,
-            message: MessageAndDescription::from(
-                markup! {
-                    "The file contains diagnostics that needs to be addressed."
-                }
-                .to_owned(),
-            ),
-        })
-    }
-
     /// Emitted when the server is not running
     pub fn server_not_running() -> Self {
         Self::ServerNotRunning(ServerNotRunning)
@@ -716,7 +685,7 @@ mod test {
     fn termination_diagnostic_size() {
         assert_eq!(
             std::mem::size_of::<CliDiagnostic>(),
-            104,
+            96,
             "you successfully decreased the size of the diagnostic!"
         )
     }

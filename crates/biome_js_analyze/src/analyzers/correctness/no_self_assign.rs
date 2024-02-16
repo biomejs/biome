@@ -216,11 +216,16 @@ impl SameIdentifiers {
             let right_element = right_element.ok()?;
 
             if let (
-                AnyJsArrayAssignmentPatternElement::AnyJsAssignmentPattern(left),
+                AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(left),
                 AnyJsArrayElement::AnyJsExpression(right),
             ) = (left_element, right_element)
             {
-                let new_assignment_like = AnyAssignmentLike::try_from((left, right)).ok()?;
+                if left.init().is_some() {
+                    // Allow self assign when the pattern has a default value.
+                    return Some(AnyAssignmentLike::None);
+                }
+                let new_assignment_like =
+                    AnyAssignmentLike::try_from((left.pattern().ok()?, right)).ok()?;
 
                 return Some(new_assignment_like);
             }

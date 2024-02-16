@@ -7,17 +7,13 @@ use crate::execute::diagnostics::{
 };
 use crate::{CliDiagnostic, CliSession, Execution, FormatterReportSummary, Report, TraversalMode};
 use biome_console::{fmt, markup, Console, ConsoleExt};
+use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::PrintGitHubDiagnostic;
 use biome_diagnostics::{category, DiagnosticExt, Error, PrintDiagnostic, Resource, Severity};
-use biome_diagnostics::{Diagnostic, DiagnosticTags};
 use biome_fs::{FileSystem, PathInterner, RomePath};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
-use biome_service::{
-    extension_error,
-    workspace::{FeatureName, SupportsFeatureParams},
-    Workspace, WorkspaceError,
-};
+use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
 use std::sync::atomic::AtomicU64;
@@ -355,16 +351,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     total_skipped_suggested_fixes += skipped_suggested_fixes;
                 }
 
-                Message::ApplyError(error) => {
-                    // *errors += 1;
+                Message::Failure => {
                     self.errors.fetch_add(1, Ordering::Relaxed);
-                    if self.should_skip_diagnostic(error.severity(), error.tags()) {
-                        continue;
-                    }
-                    let should_print = self.should_print();
-                    if self.execution.should_report_to_terminal() && should_print {
-                        diagnostics_to_print.push(Error::from(error));
-                    }
                 }
 
                 Message::Error(mut err) => {
@@ -683,12 +671,12 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         };
         match self.execution.traversal_mode() {
             TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
-                file_features.supports_for(&FeatureName::Lint)
-                    || file_features.supports_for(&FeatureName::Format)
-                    || file_features.supports_for(&FeatureName::OrganizeImports)
+                file_features.supports_lint()
+                    || file_features.supports_format()
+                    || file_features.supports_organize_imports()
             }
-            TraversalMode::Format { .. } => file_features.supports_for(&FeatureName::Format),
-            TraversalMode::Lint { .. } => file_features.supports_for(&FeatureName::Lint),
+            TraversalMode::Format { .. } => file_features.supports_format(),
+            TraversalMode::Lint { .. } => file_features.supports_lint(),
             // Imagine if Biome can't handle its own configuration file...
             TraversalMode::Migrate { .. } => true,
         }

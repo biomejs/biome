@@ -54,14 +54,6 @@ test1.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━�
 ```
 
 ```block
-test1.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Fixes applied to the file, but there are still diagnostics to address.
-  
-
-```
-
-```block
 test2.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use the rest parameters instead of arguments.
@@ -73,14 +65,6 @@ test2.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━�
     4 │ 
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
-  
-
-```
-
-```block
-test2.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Fixes applied to the file, but there are still diagnostics to address.
   
 
 ```

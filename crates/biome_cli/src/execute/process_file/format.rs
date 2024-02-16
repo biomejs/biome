@@ -5,8 +5,8 @@ use crate::execute::process_file::{
 };
 use crate::execute::TraversalMode;
 use biome_diagnostics::{category, DiagnosticExt};
+use biome_service::file_handlers::{AstroFileHandler, ASTRO_FENCE, SVELTE_FENCE, VUE_FENCE};
 use biome_service::workspace::RuleCategories;
-use biome_service::AstroFileHandler;
 use std::path::Path;
 use std::sync::atomic::Ordering;
 use tracing::debug;
@@ -69,12 +69,49 @@ pub(crate) fn format_with_guard<'ctx>(
                 return Ok(FileStatus::Ignored);
             }
 
-            if workspace_file.as_extension() == Some("astro") {
-                if output.is_empty() {
-                    return Ok(FileStatus::Ignored);
+            match workspace_file.as_extension() {
+                Some("astro") => {
+                    if output.is_empty() {
+                        return Ok(FileStatus::Ignored);
+                    }
+                    output = AstroFileHandler::astro_output(input.as_str(), output.as_str());
                 }
-                output = AstroFileHandler::astro_output(input.as_str(), output.as_str());
+                Some("vue") => {
+                    if output.is_empty() {
+                        return Ok(FileStatus::Ignored);
+                    }
+                    if let Some(script) = VUE_FENCE
+                        .captures(&input)
+                        .and_then(|captures| captures.name("script"))
+                    {
+                        output = format!(
+                            "{}{}{}",
+                            &input[..script.start()],
+                            output.as_str(),
+                            &input[script.end()..]
+                        );
+                    }
+                }
+
+                Some("svelte") => {
+                    if output.is_empty() {
+                        return Ok(FileStatus::Ignored);
+                    }
+                    if let Some(script) = SVELTE_FENCE
+                        .captures(&input)
+                        .and_then(|captures| captures.name("script"))
+                    {
+                        output = format!(
+                            "{}{}{}",
+                            &input[..script.start()],
+                            output.as_str(),
+                            &input[script.end()..]
+                        );
+                    }
+                }
+                _ => {}
             }
+
             if output != input {
                 if should_write {
                     workspace_file.update_file(output)?;

@@ -1,6 +1,6 @@
 ---
-import InlineSVG from "@src/components/InlineSVG.astro";
-import BlogPostInfo from "@src/components/BlogPostInfo.astro";
+import InlineSVG from "@/components/InlineSVG.astro";
+import BlogPostInfo from "@/components/BlogPostInfo.astro";
 import { getCollection } from "astro:content";
 
 const posts = (await getCollection("blog")).sort(

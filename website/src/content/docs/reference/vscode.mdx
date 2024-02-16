@@ -76,7 +76,7 @@ Biome respects VS Code's _Code Actions On Save_ setting. To enable fix on save, 
 ```json title="settings.json"
 {
   "editor.codeActionsOnSave": {
-    "quickfix.biome": true
+    "quickfix.biome": "explicit"
   }
 }
 ```
@@ -92,7 +92,7 @@ You can add the following to your editor configuration if you want the action to
 ```json title="settings.json"
 {
 	"editor.codeActionsOnSave":{
-		"source.organizeImports.biome": true
+		"source.organizeImports.biome": "explicit"
 	}
 }
 ```

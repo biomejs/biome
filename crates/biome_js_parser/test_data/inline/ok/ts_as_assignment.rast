@@ -177,14 +177,17 @@ JsModule {
                     left: JsArrayAssignmentPattern {
                         l_brack_token: L_BRACK@130..132 "[" [] [Whitespace(" ")],
                         elements: JsArrayAssignmentPatternElementList [
-                            TsAsAssignment {
-                                assignment: JsIdentifierAssignment {
-                                    name_token: IDENT@132..134 "a" [] [Whitespace(" ")],
+                            JsArrayAssignmentPatternElement {
+                                pattern: TsAsAssignment {
+                                    assignment: JsIdentifierAssignment {
+                                        name_token: IDENT@132..134 "a" [] [Whitespace(" ")],
+                                    },
+                                    as_token: AS_KW@134..137 "as" [] [Whitespace(" ")],
+                                    ty: TsStringType {
+                                        string_token: STRING_KW@137..144 "string" [] [Whitespace(" ")],
+                                    },
                                 },
-                                as_token: AS_KW@134..137 "as" [] [Whitespace(" ")],
-                                ty: TsStringType {
-                                    string_token: STRING_KW@137..144 "string" [] [Whitespace(" ")],
-                                },
+                                init: missing (optional),
                             },
                         ],
                         r_brack_token: R_BRACK@144..146 "]" [] [Whitespace(" ")],
@@ -428,12 +431,14 @@ JsModule {
           0: JS_ARRAY_ASSIGNMENT_PATTERN@130..146
             0: L_BRACK@130..132 "[" [] [Whitespace(" ")]
             1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@132..144
-              0: TS_AS_ASSIGNMENT@132..144
-                0: JS_IDENTIFIER_ASSIGNMENT@132..134
-                  0: IDENT@132..134 "a" [] [Whitespace(" ")]
-                1: AS_KW@134..137 "as" [] [Whitespace(" ")]
-                2: TS_STRING_TYPE@137..144
-                  0: STRING_KW@137..144 "string" [] [Whitespace(" ")]
+              0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@132..144
+                0: TS_AS_ASSIGNMENT@132..144
+                  0: JS_IDENTIFIER_ASSIGNMENT@132..134
+                    0: IDENT@132..134 "a" [] [Whitespace(" ")]
+                  1: AS_KW@134..137 "as" [] [Whitespace(" ")]
+                  2: TS_STRING_TYPE@137..144
+                    0: STRING_KW@137..144 "string" [] [Whitespace(" ")]
+                1: (empty)
             2: R_BRACK@144..146 "]" [] [Whitespace(" ")]
           1: EQ@146..148 "=" [] [Whitespace(" ")]
           2: JS_ARRAY_EXPRESSION@148..158

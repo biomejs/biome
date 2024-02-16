@@ -48,7 +48,7 @@ use tower_lsp::lsp_types::{DidChangeConfigurationParams, DidChangeTextDocumentPa
 use tower_lsp::LspService;
 use tower_lsp::{jsonrpc::Request, lsp_types::InitializeParams};
 
-/// Statically build an [lsp::Url] instance that points to the file at `$path`
+/// Statically build an [Url] instance that points to the file at `$path`
 /// within the workspace. The filesystem path contained in the return URI is
 /// guaranteed to be a valid path for the underlying operating system, but
 /// doesn't have to refer to an existing file on the host machine.
@@ -595,12 +595,12 @@ async fn pull_diagnostics() -> Result<()> {
                 uri: url!("document.js"),
                 version: Some(0),
                 diagnostics: vec![lsp::Diagnostic {
-                    range: lsp::Range {
-                        start: lsp::Position {
+                    range: Range {
+                        start: Position {
                             line: 0,
                             character: 5,
                         },
-                        end: lsp::Position {
+                        end: Position {
                             line: 0,
                             character: 7,
                         },
@@ -620,12 +620,12 @@ async fn pull_diagnostics() -> Result<()> {
                     related_information: Some(vec![lsp::DiagnosticRelatedInformation {
                         location: lsp::Location {
                             uri: url!("document.js"),
-                            range: lsp::Range {
-                                start: lsp::Position {
+                            range: Range {
+                                start: Position {
                                     line: 0,
                                     character: 5,
                                 },
-                                end: lsp::Position {
+                                end: Position {
                                     line: 0,
                                     character: 7,
                                 },
@@ -633,6 +633,68 @@ async fn pull_diagnostics() -> Result<()> {
                         },
                         message: String::new(),
                     }]),
+                    tags: None,
+                    data: None,
+                }],
+            }
+        ))
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create(None).into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("class A { #foo; #foo }").await?;
+
+    let notification = tokio::select! {
+        msg = receiver.next() => msg,
+        _ = sleep(Duration::from_secs(1)) => {
+            panic!("timed out waiting for the server to send diagnostics")
+        }
+    };
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: url!("document.js"),
+                version: Some(0),
+                diagnostics: vec![lsp::Diagnostic {
+                    range: Range {
+                        start: Position {
+                            line: 0,
+                            character: 16,
+                        },
+                        end: Position {
+                            line: 0,
+                            character: 20,
+                        },
+                    },
+                    severity: Some(lsp::DiagnosticSeverity::ERROR),
+                    code: Some(lsp::NumberOrString::String(String::from(
+                        "parse/noDuplicatePrivateClassMembers",
+                    ))),
+                    code_description: None,
+                    source: Some(String::from("biome")),
+                    message: String::from("Duplicate private class member \"#foo\"",),
+                    related_information: None,
                     tags: None,
                     data: None,
                 }],
@@ -677,12 +739,12 @@ async fn pull_diagnostics_from_new_file() -> Result<()> {
                 uri: url!("untitled-1"),
                 version: Some(0),
                 diagnostics: vec![lsp::Diagnostic {
-                    range: lsp::Range {
-                        start: lsp::Position {
+                    range: Range {
+                        start: Position {
                             line: 0,
                             character: 5,
                         },
-                        end: lsp::Position {
+                        end: Position {
                             line: 0,
                             character: 7,
                         },
@@ -702,12 +764,12 @@ async fn pull_diagnostics_from_new_file() -> Result<()> {
                     related_information: Some(vec![lsp::DiagnosticRelatedInformation {
                         location: lsp::Location {
                             uri: url!("untitled-1"),
-                            range: lsp::Range {
-                                start: lsp::Position {
+                            range: Range {
+                                start: Position {
                                     line: 0,
                                     character: 5,
                                 },
-                                end: lsp::Position {
+                                end: Position {
                                     line: 0,
                                     character: 7,
                                 },
@@ -732,9 +794,9 @@ async fn pull_diagnostics_from_new_file() -> Result<()> {
 
 fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {
     Ok(lsp::Diagnostic {
-        range: lsp::Range {
-            start: lsp::Position { line, character: 3 },
-            end: lsp::Position {
+        range: Range {
+            start: Position { line, character: 3 },
+            end: Position {
                 line,
                 character: 11,
             },
@@ -772,15 +834,15 @@ async fn pull_quick_fixes() -> Result<()> {
             "textDocument/codeAction",
             "pull_code_actions",
             lsp::CodeActionParams {
-                text_document: lsp::TextDocumentIdentifier {
+                text_document: TextDocumentIdentifier {
                     uri: url!("document.js"),
                 },
-                range: lsp::Range {
-                    start: lsp::Position {
+                range: Range {
+                    start: Position {
                         line: 0,
                         character: 6,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 0,
                         character: 6,
                     },
@@ -790,7 +852,7 @@ async fn pull_quick_fixes() -> Result<()> {
                     only: Some(vec![lsp::CodeActionKind::QUICKFIX]),
                     ..Default::default()
                 },
-                work_done_progress_params: lsp::WorkDoneProgressParams {
+                work_done_progress_params: WorkDoneProgressParams {
                     work_done_token: None,
                 },
                 partial_result_params: lsp::PartialResultParams {
@@ -804,13 +866,13 @@ async fn pull_quick_fixes() -> Result<()> {
     let mut changes = HashMap::default();
     changes.insert(
         url!("document.js"),
-        vec![lsp::TextEdit {
-            range: lsp::Range {
-                start: lsp::Position {
+        vec![TextEdit {
+            range: Range {
+                start: Position {
                     line: 0,
                     character: 9,
                 },
-                end: lsp::Position {
+                end: Position {
                     line: 0,
                     character: 10,
                 },
@@ -839,13 +901,13 @@ async fn pull_quick_fixes() -> Result<()> {
     let mut suppression_changes = HashMap::default();
     suppression_changes.insert(
         url!("document.js"),
-        vec![lsp::TextEdit {
-            range: lsp::Range {
-                start: lsp::Position {
+        vec![TextEdit {
+            range: Range {
+                start: Position {
                     line: 0,
                     character: 0,
                 },
-                end: lsp::Position {
+                end: Position {
                     line: 0,
                     character: 0,
                 },
@@ -891,12 +953,12 @@ async fn pull_biome_quick_fixes_ignore_unsafe() -> Result<()> {
     let mut server = Server::new(service);
 
     let unsafe_fixable = lsp::Diagnostic {
-        range: lsp::Range {
-            start: lsp::Position {
+        range: Range {
+            start: Position {
                 line: 0,
                 character: 6,
             },
-            end: lsp::Position {
+            end: Position {
                 line: 0,
                 character: 9,
             },
@@ -926,15 +988,15 @@ async fn pull_biome_quick_fixes_ignore_unsafe() -> Result<()> {
             "textDocument/codeAction",
             "pull_code_actions",
             lsp::CodeActionParams {
-                text_document: lsp::TextDocumentIdentifier {
+                text_document: TextDocumentIdentifier {
                     uri: url!("document.js"),
                 },
-                range: lsp::Range {
-                    start: lsp::Position {
+                range: Range {
+                    start: Position {
                         line: 0,
                         character: 6,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 0,
                         character: 6,
                     },
@@ -944,7 +1006,7 @@ async fn pull_biome_quick_fixes_ignore_unsafe() -> Result<()> {
                     only: Some(vec![lsp::CodeActionKind::new("quickfix.biome")]),
                     ..Default::default()
                 },
-                work_done_progress_params: lsp::WorkDoneProgressParams {
+                work_done_progress_params: WorkDoneProgressParams {
                     work_done_token: None,
                 },
                 partial_result_params: lsp::PartialResultParams {
@@ -985,15 +1047,15 @@ async fn pull_biome_quick_fixes() -> Result<()> {
             "textDocument/codeAction",
             "pull_code_actions",
             lsp::CodeActionParams {
-                text_document: lsp::TextDocumentIdentifier {
+                text_document: TextDocumentIdentifier {
                     uri: url!("document.js"),
                 },
-                range: lsp::Range {
-                    start: lsp::Position {
+                range: Range {
+                    start: Position {
                         line: 0,
                         character: 6,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 0,
                         character: 10,
                     },
@@ -1003,7 +1065,7 @@ async fn pull_biome_quick_fixes() -> Result<()> {
                     only: Some(vec![lsp::CodeActionKind::new("quickfix.biome")]),
                     ..Default::default()
                 },
-                work_done_progress_params: lsp::WorkDoneProgressParams {
+                work_done_progress_params: WorkDoneProgressParams {
                     work_done_token: None,
                 },
                 partial_result_params: lsp::PartialResultParams {
@@ -1017,13 +1079,13 @@ async fn pull_biome_quick_fixes() -> Result<()> {
     let mut changes = HashMap::default();
     changes.insert(
         url!("document.js"),
-        vec![lsp::TextEdit {
-            range: lsp::Range {
-                start: lsp::Position {
+        vec![TextEdit {
+            range: Range {
+                start: Position {
                     line: 0,
                     character: 9,
                 },
-                end: lsp::Position {
+                end: Position {
                     line: 0,
                     character: 10,
                 },
@@ -1067,12 +1129,12 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
     let mut server = Server::new(service);
 
     let unsafe_fixable = lsp::Diagnostic {
-        range: lsp::Range {
-            start: lsp::Position {
+        range: Range {
+            start: Position {
                 line: 0,
                 character: 6,
             },
-            end: lsp::Position {
+            end: Position {
                 line: 0,
                 character: 9,
             },
@@ -1102,15 +1164,15 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
             "textDocument/codeAction",
             "pull_code_actions",
             lsp::CodeActionParams {
-                text_document: lsp::TextDocumentIdentifier {
+                text_document: TextDocumentIdentifier {
                     uri: url!("document.js"),
                 },
-                range: lsp::Range {
-                    start: lsp::Position {
+                range: Range {
+                    start: Position {
                         line: 0,
                         character: 6,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 0,
                         character: 6,
                     },
@@ -1120,7 +1182,7 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
                     only: Some(vec![]),
                     ..Default::default()
                 },
-                work_done_progress_params: lsp::WorkDoneProgressParams {
+                work_done_progress_params: WorkDoneProgressParams {
                     work_done_token: None,
                 },
                 partial_result_params: lsp::PartialResultParams {
@@ -1134,13 +1196,13 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
     let mut changes = HashMap::default();
     changes.insert(
         url!("document.js"),
-        vec![lsp::TextEdit {
-            range: lsp::Range {
-                start: lsp::Position {
+        vec![TextEdit {
+            range: Range {
+                start: Position {
                     line: 0,
                     character: 7,
                 },
-                end: lsp::Position {
+                end: Position {
                     line: 0,
                     character: 7,
                 },
@@ -1169,13 +1231,13 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
     let mut suppression_changes = HashMap::default();
     suppression_changes.insert(
         url!("document.js"),
-        vec![lsp::TextEdit {
-            range: lsp::Range {
-                start: lsp::Position {
+        vec![TextEdit {
+            range: Range {
+                start: Position {
                     line: 0,
                     character: 0,
                 },
-                end: lsp::Position {
+                end: Position {
                     line: 0,
                     character: 0,
                 },
@@ -1249,12 +1311,12 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
                 uri: url!("biome.json"),
                 version: Some(0),
                 diagnostics: vec![lsp::Diagnostic {
-                    range: lsp::Range {
-                        start: lsp::Position {
+                    range: Range {
+                        start: Position {
                             line: 2,
                             character: 27,
                         },
-                        end: lsp::Position {
+                        end: Position {
                             line: 2,
                             character: 34,
                         },
@@ -1326,15 +1388,15 @@ async fn no_code_actions_for_ignored_json_files() -> Result<()> {
             "textDocument/codeAction",
             "pull_code_actions",
             lsp::CodeActionParams {
-                text_document: lsp::TextDocumentIdentifier {
+                text_document: TextDocumentIdentifier {
                     uri: url!("./node_modules/preact/package.json"),
                 },
-                range: lsp::Range {
-                    start: lsp::Position {
+                range: Range {
+                    start: Position {
                         line: 0,
                         character: 7,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 0,
                         character: 7,
                     },
@@ -1343,7 +1405,7 @@ async fn no_code_actions_for_ignored_json_files() -> Result<()> {
                     diagnostics: vec![],
                     ..Default::default()
                 },
-                work_done_progress_params: lsp::WorkDoneProgressParams {
+                work_done_progress_params: WorkDoneProgressParams {
                     work_done_token: None,
                 },
                 partial_result_params: lsp::PartialResultParams {
@@ -1394,15 +1456,15 @@ if(a === -0) {}
             "textDocument/codeAction",
             "pull_code_actions",
             lsp::CodeActionParams {
-                text_document: lsp::TextDocumentIdentifier {
+                text_document: TextDocumentIdentifier {
                     uri: url!("document.js"),
                 },
-                range: lsp::Range {
-                    start: lsp::Position {
+                range: Range {
+                    start: Position {
                         line: 0,
                         character: 6,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 0,
                         character: 10,
                     },
@@ -1411,7 +1473,7 @@ if(a === -0) {}
                     diagnostics: vec![fixable_diagnostic(0)?],
                     ..Default::default()
                 },
-                work_done_progress_params: lsp::WorkDoneProgressParams {
+                work_done_progress_params: WorkDoneProgressParams {
                     work_done_token: None,
                 },
                 partial_result_params: lsp::PartialResultParams {
@@ -1426,91 +1488,91 @@ if(a === -0) {}
     changes.insert(
         url!("document.js"),
         vec![
-            lsp::TextEdit {
-                range: lsp::Range {
-                    start: lsp::Position {
+            TextEdit {
+                range: Range {
+                    start: Position {
                         line: 1,
                         character: 7,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 1,
                         character: 8,
                     },
                 },
                 new_text: String::from("{ describe }"),
             },
-            lsp::TextEdit {
-                range: lsp::Range {
-                    start: lsp::Position {
+            TextEdit {
+                range: Range {
+                    start: Position {
                         line: 1,
                         character: 15,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 1,
                         character: 18,
                     },
                 },
                 new_text: String::from("node:test"),
             },
-            lsp::TextEdit {
-                range: lsp::Range {
-                    start: lsp::Position {
+            TextEdit {
+                range: Range {
+                    start: Position {
                         line: 2,
                         character: 7,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 2,
                         character: 13,
                     },
                 },
                 new_text: String::from("z"),
             },
-            lsp::TextEdit {
-                range: lsp::Range {
-                    start: lsp::Position {
+            TextEdit {
+                range: Range {
+                    start: Position {
                         line: 2,
                         character: 14,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 2,
                         character: 16,
                     },
                 },
                 new_text: String::new(),
             },
-            lsp::TextEdit {
-                range: lsp::Range {
-                    start: lsp::Position {
+            TextEdit {
+                range: Range {
+                    start: Position {
                         line: 2,
                         character: 22,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 2,
                         character: 28,
                     },
                 },
                 new_text: String::from("zod"),
             },
-            lsp::TextEdit {
-                range: lsp::Range {
-                    start: lsp::Position {
+            TextEdit {
+                range: Range {
+                    start: Position {
                         line: 3,
                         character: 9,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 3,
                         character: 17,
                     },
                 },
                 new_text: String::from("test"),
             },
-            lsp::TextEdit {
-                range: lsp::Range {
-                    start: lsp::Position {
+            TextEdit {
+                range: Range {
+                    start: Position {
                         line: 3,
                         character: 26,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 3,
                         character: 35,
                     },
@@ -1567,15 +1629,15 @@ async fn pull_refactors() -> Result<()> {
             "textDocument/codeAction",
             "pull_code_actions",
             lsp::CodeActionParams {
-                text_document: lsp::TextDocumentIdentifier {
+                text_document: TextDocumentIdentifier {
                     uri: url!("document.js"),
                 },
-                range: lsp::Range {
-                    start: lsp::Position {
+                range: Range {
+                    start: Position {
                         line: 0,
                         character: 7,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 0,
                         character: 7,
                     },
@@ -1585,7 +1647,7 @@ async fn pull_refactors() -> Result<()> {
                     only: Some(vec![lsp::CodeActionKind::REFACTOR]),
                     ..Default::default()
                 },
-                work_done_progress_params: lsp::WorkDoneProgressParams {
+                work_done_progress_params: WorkDoneProgressParams {
                     work_done_token: None,
                 },
                 partial_result_params: lsp::PartialResultParams {
@@ -1601,26 +1663,26 @@ async fn pull_refactors() -> Result<()> {
     changes.insert(
         url!("document.js"),
         vec![
-            lsp::TextEdit {
-                range: lsp::Range {
-                    start: lsp::Position {
+            TextEdit {
+                range: Range {
+                    start: Position {
                         line: 0,
                         character: 0,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 0,
                         character: 15,
                     },
                 },
                 new_text: String::from("func("),
             },
-            lsp::TextEdit {
-                range: lsp::Range {
-                    start: lsp::Position {
+            TextEdit {
+                range: Range {
+                    start: Position {
                         line: 0,
                         character: 22,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 0,
                         character: 37,
                     },
@@ -1679,15 +1741,15 @@ async fn pull_fix_all() -> Result<()> {
             "textDocument/codeAction",
             "pull_code_actions",
             lsp::CodeActionParams {
-                text_document: lsp::TextDocumentIdentifier {
+                text_document: TextDocumentIdentifier {
                     uri: url!("document.js"),
                 },
-                range: lsp::Range {
-                    start: lsp::Position {
+                range: Range {
+                    start: Position {
                         line: 0,
                         character: 7,
                     },
-                    end: lsp::Position {
+                    end: Position {
                         line: 0,
                         character: 7,
                     },
@@ -1701,7 +1763,7 @@ async fn pull_fix_all() -> Result<()> {
                     only: Some(vec![lsp::CodeActionKind::new("source.fixAll")]),
                     ..Default::default()
                 },
-                work_done_progress_params: lsp::WorkDoneProgressParams {
+                work_done_progress_params: WorkDoneProgressParams {
                     work_done_token: None,
                 },
                 partial_result_params: lsp::PartialResultParams {
@@ -1716,13 +1778,13 @@ async fn pull_fix_all() -> Result<()> {
 
     changes.insert(
         url!("document.js"),
-        vec![lsp::TextEdit {
-            range: lsp::Range {
-                start: lsp::Position {
+        vec![TextEdit {
+            range: Range {
+                start: Position {
                     line: 0,
                     character: 0,
                 },
-                end: lsp::Position {
+                end: Position {
                     line: 3,
                     character: 0,
                 },
@@ -1934,6 +1996,112 @@ async fn does_not_format_ignored_files() -> Result<()> {
         .context("formatting returned None")?;
 
     assert!(res.is_none());
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "Find a way to retrieve the last notification sent"]
+async fn pull_diagnostics_from_manifest() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create(None).into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    let config = r#"{
+        "linter": {
+            "rules": {
+                "all": false,
+                "nursery": { "noDeclaredDependencies": "error" }
+            }
+        }
+    }"#;
+    server
+        .open_named_document(config, url!("biome.json"), "json")
+        .await?;
+
+    let manifest = r#"{
+        "dependencies": { "react": "latest" }
+    }"#;
+    server
+        .open_named_document(manifest, url!("package.json"), "json")
+        .await?;
+
+    server.load_configuration().await?;
+
+    server
+        .open_document(r#"import "lodash"; import "react"; "#)
+        .await?;
+
+    let notification = tokio::select! {
+        msg = receiver.next() => msg,
+        _ = sleep(Duration::from_secs(1)) => {
+            panic!("timed out waiting for the server to send diagnostics")
+        }
+    };
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: url!("document.js"),
+                version: Some(0),
+                diagnostics: vec![lsp::Diagnostic {
+                    range: Range {
+                        start: Position {
+                            line: 0,
+                            character: 5,
+                        },
+                        end: Position {
+                            line: 0,
+                            character: 7,
+                        },
+                    },
+                    severity: Some(lsp::DiagnosticSeverity::ERROR),
+                    code: Some(lsp::NumberOrString::String(String::from(
+                        "lint/suspicious/noDoubleEquals",
+                    ))),
+                    code_description: Some(CodeDescription {
+                        href: Url::parse("https://biomejs.dev/linter/rules/no-double-equals")
+                            .unwrap()
+                    }),
+                    source: Some(String::from("biome")),
+                    message: String::from(
+                        "Use === instead of ==.\n== is only allowed when comparing against `null`",
+                    ),
+                    related_information: Some(vec![lsp::DiagnosticRelatedInformation {
+                        location: lsp::Location {
+                            uri: url!("untitled-1"),
+                            range: Range {
+                                start: Position {
+                                    line: 0,
+                                    character: 5,
+                                },
+                                end: Position {
+                                    line: 0,
+                                    character: 7,
+                                },
+                            },
+                        },
+                        message: String::new(),
+                    }]),
+                    tags: None,
+                    data: None,
+                }],
+            }
+        ))
+    );
 
     server.close_document().await?;
 

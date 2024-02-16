@@ -199,8 +199,11 @@ JsModule {
                                 left: JsArrayAssignmentPattern {
                                     l_brack_token: L_BRACK@130..131 "[" [] [],
                                     elements: JsArrayAssignmentPatternElementList [
-                                        JsIdentifierAssignment {
-                                            name_token: IDENT@131..132 "s" [] [],
+                                        JsArrayAssignmentPatternElement {
+                                            pattern: JsIdentifierAssignment {
+                                                name_token: IDENT@131..132 "s" [] [],
+                                            },
+                                            init: missing (optional),
                                         },
                                     ],
                                     r_brack_token: R_BRACK@132..134 "]" [] [Whitespace(" ")],
@@ -494,8 +497,10 @@ JsModule {
                 0: JS_ARRAY_ASSIGNMENT_PATTERN@130..134
                   0: L_BRACK@130..131 "[" [] []
                   1: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST@131..132
-                    0: JS_IDENTIFIER_ASSIGNMENT@131..132
-                      0: IDENT@131..132 "s" [] []
+                    0: JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT@131..132
+                      0: JS_IDENTIFIER_ASSIGNMENT@131..132
+                        0: IDENT@131..132 "s" [] []
+                      1: (empty)
                   2: R_BRACK@132..134 "]" [] [Whitespace(" ")]
                 1: EQ@134..136 "=" [] [Whitespace(" ")]
                 2: JS_IDENTIFIER_EXPRESSION@136..137

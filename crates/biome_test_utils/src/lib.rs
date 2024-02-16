@@ -1,9 +1,10 @@
-use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
+use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
+use biome_project::PackageJson;
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::settings::{Language, WorkspaceSettings};
@@ -29,13 +30,17 @@ pub fn create_analyzer_options(
     input_file: &Path,
     diagnostics: &mut Vec<String>,
 ) -> AnalyzerOptions {
-    let mut options = AnalyzerOptions {
+    let options = AnalyzerOptions {
         configuration: Default::default(),
         file_path: input_file.to_path_buf(),
     };
     // We allow a test file to configure its rule using a special
     // file with the same name as the test but with extension ".options.json"
     // that configures that specific rule.
+    let mut analyzer_configuration = AnalyzerConfiguration {
+        rules: AnalyzerRules::default(),
+        globals: vec![],
+    };
     let options_file = input_file.with_extension("options.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
         let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
@@ -57,29 +62,49 @@ pub fn create_analyzer_options(
                     })
                     .collect::<Vec<_>>(),
             );
-            None
         } else {
             let configuration = deserialized.into_deserialized().unwrap_or_default();
             let mut settings = WorkspaceSettings::default();
             settings
                 .merge_with_configuration(configuration, None, None, &[])
                 .unwrap();
-            let configuration = AnalyzerConfiguration {
-                rules: to_analyzer_rules(&settings, input_file),
-                globals: vec![],
-            };
-            options = AnalyzerOptions {
-                configuration,
-                ..options
-            };
-
-            Some(json)
+            analyzer_configuration.rules = to_analyzer_rules(&settings, input_file);
         }
-    } else {
-        None
-    };
+    }
 
-    options
+    AnalyzerOptions {
+        configuration: analyzer_configuration,
+        ..options
+    }
+}
+
+pub fn load_manifest(input_file: &Path, diagnostics: &mut Vec<String>) -> Option<PackageJson> {
+    let options_file = input_file.with_extension("package.json");
+    if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
+        let deserialized = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
+            json.as_str(),
+            JsonParserOptions::default(),
+            "",
+        );
+        if deserialized.has_errors() {
+            diagnostics.extend(
+                deserialized
+                    .into_diagnostics()
+                    .into_iter()
+                    .map(|diagnostic| {
+                        diagnostic_to_string(
+                            options_file.file_stem().unwrap().to_str().unwrap(),
+                            &json,
+                            diagnostic,
+                        )
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        } else {
+            return deserialized.into_deserialized();
+        }
+    }
+    None
 }
 
 pub fn diagnostic_to_string(name: &str, source: &str, diag: Error) -> String {

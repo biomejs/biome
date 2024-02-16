@@ -62,6 +62,14 @@ async function complexFunction() {
 	}
 }
 
+async function withoutForAwait () {
+	let sum = 0;
+	for (const n of [1, 2, 3]) {
+		sum += n
+	}
+	return sum;
+};
+
 ```
 
 # Diagnostics
@@ -430,11 +438,11 @@ invalid.js:41:1 lint/nursery/useAwait ━━━━━━━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   > 42 │ 	const obj = {
         ...
-  > 55 │ 		return fetch('condition-data');
   > 56 │ 	}
   > 57 │ }
        │ ^
     58 │ 
+    59 │ async function withoutForAwait () {
   
   i Remove this async modifier, or add an await expression in the function.
   
@@ -444,11 +452,49 @@ invalid.js:41:1 lint/nursery/useAwait ━━━━━━━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   > 42 │ 	const obj = {
         ...
-  > 55 │ 		return fetch('condition-data');
   > 56 │ 	}
   > 57 │ }
        │ ^
     58 │ 
+    59 │ async function withoutForAwait () {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+```
+
+```
+invalid.js:59:1 lint/nursery/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    57 │ }
+    58 │ 
+  > 59 │ async function withoutForAwait () {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 60 │ 	let sum = 0;
+  > 61 │ 	for (const n of [1, 2, 3]) {
+  > 62 │ 		sum += n
+  > 63 │ 	}
+  > 64 │ 	return sum;
+  > 65 │ };
+       │ ^
+    66 │ 
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    57 │ }
+    58 │ 
+  > 59 │ async function withoutForAwait () {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 60 │ 	let sum = 0;
+  > 61 │ 	for (const n of [1, 2, 3]) {
+  > 62 │ 		sum += n
+  > 63 │ 	}
+  > 64 │ 	return sum;
+  > 65 │ };
+       │ ^
+    66 │ 
   
   i Async functions without await expressions may not need to be declared async.
   

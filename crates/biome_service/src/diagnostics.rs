@@ -361,6 +361,12 @@ impl From<FileSystemDiagnostic> for WorkspaceError {
     }
 }
 
+impl From<ConfigurationDiagnostic> for WorkspaceError {
+    fn from(value: ConfigurationDiagnostic) -> Self {
+        Self::Configuration(value)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "internalError/fs",
@@ -389,7 +395,10 @@ pub struct ReportNotSerializable {
 pub struct NotFound;
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
-#[diagnostic(category = "format", message = "Format with errors is disabled.")]
+#[diagnostic(
+    category = "format",
+    message = "Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option."
+)]
 pub struct FormatWithErrorsDisabled;
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -731,7 +740,7 @@ mod test {
 
     #[test]
     fn diagnostic_size() {
-        assert_eq!(std::mem::size_of::<WorkspaceError>(), 104)
+        assert_eq!(std::mem::size_of::<WorkspaceError>(), 96)
     }
 
     #[test]

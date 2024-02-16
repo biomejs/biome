@@ -7,10 +7,11 @@ expression: content
 ```block
 Bootstraps a new biome project. Creates a configuration file with some defaults.
 
-Usage: init 
+Usage: init [--jsonc]
 
 Available options:
-    -h, --help  Prints help information
+        --jsonc  Tells Biome to emit a `biome.jsonc` file.
+    -h, --help   Prints help information
 
 ```
 

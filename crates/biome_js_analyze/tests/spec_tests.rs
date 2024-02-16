@@ -2,12 +2,12 @@ use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilt
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_syntax::{JsFileSource, JsLanguage, ModuleKind};
 use biome_rowan::AstNode;
 use biome_test_utils::{
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
-    write_analyzer_snapshot, CheckActionType,
+    has_bogus_nodes_or_empty_slots, load_manifest, parse_test_path, register_leak_checker,
+    scripts_from_json, write_analyzer_snapshot, CheckActionType,
 };
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
@@ -105,12 +105,24 @@ pub(crate) fn analyze_and_snap(
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
     let options = create_analyzer_options(input_file, &mut diagnostics);
+    let manifest = load_manifest(input_file, &mut diagnostics);
 
-    let (_, errors) = biome_js_analyze::analyze(&root, filter, &options, source_type, |event| {
-        if let Some(mut diag) = event.diagnostic() {
-            for action in event.actions() {
-                if check_action_type.is_suppression() {
-                    if action.is_suppression() {
+    let (_, errors) =
+        biome_js_analyze::analyze(&root, filter, &options, source_type, manifest, |event| {
+            if let Some(mut diag) = event.diagnostic() {
+                for action in event.actions() {
+                    if check_action_type.is_suppression() {
+                        if action.is_suppression() {
+                            check_code_action(
+                                input_file,
+                                input_code,
+                                source_type,
+                                &action,
+                                parser_options.clone(),
+                            );
+                            diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
+                        }
+                    } else if !action.is_suppression() {
                         check_code_action(
                             input_file,
                             input_code,
@@ -120,26 +132,26 @@ pub(crate) fn analyze_and_snap(
                         );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
-                } else if !action.is_suppression() {
-                    check_code_action(
-                        input_file,
-                        input_code,
-                        source_type,
-                        &action,
-                        parser_options.clone(),
-                    );
-                    diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
+
+                let error = diag.with_severity(Severity::Warning);
+                diagnostics.push(diagnostic_to_string(file_name, input_code, error));
+                return ControlFlow::Continue(());
             }
 
-            let error = diag.with_severity(Severity::Warning);
-            diagnostics.push(diagnostic_to_string(file_name, input_code, error));
-            return ControlFlow::Continue(());
-        }
-
-        for action in event.actions() {
-            if check_action_type.is_suppression() {
-                if action.category.matches("quickfix.suppressRule") {
+            for action in event.actions() {
+                if check_action_type.is_suppression() {
+                    if action.category.matches("quickfix.suppressRule") {
+                        check_code_action(
+                            input_file,
+                            input_code,
+                            source_type,
+                            &action,
+                            parser_options.clone(),
+                        );
+                        code_fixes.push(code_fix_to_string(input_code, action));
+                    }
+                } else if !action.category.matches("quickfix.suppressRule") {
                     check_code_action(
                         input_file,
                         input_code,
@@ -149,20 +161,10 @@ pub(crate) fn analyze_and_snap(
                     );
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
-            } else if !action.category.matches("quickfix.suppressRule") {
-                check_code_action(
-                    input_file,
-                    input_code,
-                    source_type,
-                    &action,
-                    parser_options.clone(),
-                );
-                code_fixes.push(code_fix_to_string(input_code, action));
             }
-        }
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        });
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));
@@ -218,6 +220,16 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
 
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let file_ext = match input_file.extension().and_then(OsStr::to_str).unwrap() {
+        "cjs" => JsFileSource::js_module().with_module_kind(ModuleKind::Script),
+        "js" | "mjs" | "jsx" => JsFileSource::jsx(),
+        "ts" => JsFileSource::ts(),
+        "mts" | "cts" => JsFileSource::ts_restricted(),
+        "tsx" => JsFileSource::tsx(),
+        _ => {
+            panic!("Unknown file extension: {:?}", input_file.extension());
+        }
+    };
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
 
@@ -233,7 +245,7 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
     analyze_and_snap(
         &mut snapshot,
         &input_code,
-        JsFileSource::jsx(),
+        file_ext,
         filter,
         file_name,
         input_file,

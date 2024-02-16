@@ -111,6 +111,10 @@ export interface PartialFilesConfiguration {
  * Generic options applied to all files
  */
 export interface PartialFormatterConfiguration {
+	/**
+	 * The attribute position style. By default auto.
+	 */
+	attributePosition?: AttributePosition;
 	enabled?: boolean;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
@@ -274,6 +278,7 @@ export interface PartialCssParser {
 	 */
 	allowWrongLineComments?: boolean;
 }
+export type AttributePosition = "auto" | "multiline";
 export type PlainIndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
 /**
@@ -290,6 +295,10 @@ export interface PartialJavascriptFormatter {
 	 * Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
 	 */
 	arrowParentheses?: ArrowParentheses;
+	/**
+	 * The attribute position style in JavaScript code. Defaults to auto.
+	 */
+	attributePosition?: AttributePosition;
 	/**
 	 * Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
 	 */
@@ -855,6 +864,10 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Disallow the use of console.
+	 */
+	noConsole?: RuleConfiguration;
+	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration;
@@ -887,9 +900,21 @@ export interface Nursery {
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
 	/**
+	 * Disallow the use of namespace imports.
+	 */
+	noNamespaceImport?: RuleConfiguration;
+	/**
 	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration;
+	/**
+	 * Avoid re-export all.
+	 */
+	noReExportAll?: RuleConfiguration;
+	/**
+	 * Disallow specified modules when loaded by import or require.
+	 */
+	noRestrictedImports?: RuleConfiguration;
 	/**
 	 * Disallow disabled tests.
 	 */
@@ -898,6 +923,10 @@ export interface Nursery {
 	 * Disallow then property.
 	 */
 	noThenProperty?: RuleConfiguration;
+	/**
+	 * Disallow the use of dependencies that aren't specified in the package.json.
+	 */
+	noUndeclaredDependencies?: RuleConfiguration;
 	/**
 	 * Disallow unused imports.
 	 */
@@ -1163,7 +1192,7 @@ export interface Suspicious {
 	 */
 	all?: boolean;
 	/**
-	 * Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
+	 * Use standard constants instead of approximated literals.
 	 */
 	noApproximativeNumericConstant?: RuleConfiguration;
 	/**
@@ -1348,6 +1377,10 @@ export interface Suspicious {
 	useValidTypeof?: RuleConfiguration;
 }
 export interface OverrideFormatterConfiguration {
+	/**
+	 * The attribute position style.
+	 */
+	attributePosition?: AttributePosition;
 	enabled?: boolean;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
@@ -1404,6 +1437,7 @@ export type PossibleOptions =
 	| DeprecatedHooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
+	| RestrictedImportsOptions
 	| ValidAriaRoleOptions
 	| UtilityClassSortingOptions;
 /**
@@ -1426,6 +1460,10 @@ export interface FilenamingConventionOptions {
 	 * Allowed cases for _TypeScript_ `enum` member names.
 	 */
 	filenameCases: FilenameCases;
+	/**
+	 * If `false`, then non-ASCII characters are allowed.
+	 */
+	requireAscii: boolean;
 	/**
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
@@ -1453,6 +1491,10 @@ export interface NamingConventionOptions {
 	 */
 	enumMemberCase: EnumMemberCase;
 	/**
+	 * If `false`, then non-ASCII characters are allowed.
+	 */
+	requireAscii: boolean;
+	/**
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
 	strictCase: boolean;
@@ -1465,6 +1507,15 @@ export interface RestrictedGlobalsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	deniedGlobals: string[];
+}
+/**
+ * Options for the rule `noRestrictedImports`.
+ */
+export interface RestrictedImportsOptions {
+	/**
+	 * A list of names that should trigger the rule
+	 */
+	paths: {};
 }
 export interface ValidAriaRoleOptions {
 	allowInvalidRoles: string[];
@@ -1511,10 +1562,14 @@ export type FilenameCase =
 	| "kebab-case"
 	| "PascalCase"
 	| "snake_case";
-export interface ProjectFeaturesParams {
-	manifest_path: RomePath;
+export interface UpdateProjectParams {
+	path: RomePath;
 }
-export interface ProjectFeaturesResult {}
+export interface OpenProjectParams {
+	content: string;
+	path: RomePath;
+	version: number;
+}
 export interface OpenFileParams {
 	content: string;
 	language_hint?: Language;
@@ -1526,6 +1581,8 @@ export interface OpenFileParams {
  */
 export type Language =
 	| "Astro"
+	| "Vue"
+	| "Svelte"
 	| "JavaScript"
 	| "JavaScriptReact"
 	| "TypeScript"
@@ -1688,6 +1745,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
+	| "lint/nursery/noConsole"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyTypeParameters"
@@ -1696,10 +1754,14 @@ export type Category =
 	| "lint/nursery/noGlobalEval"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
+	| "lint/nursery/noNamespaceImport"
 	| "lint/nursery/noNodejsModules"
+	| "lint/nursery/noReExportAll"
+	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
+	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
 	| "lint/nursery/noUselessLoneBlockStatements"
@@ -2061,9 +2123,8 @@ export type Configuration = PartialConfiguration;
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<SupportsFeatureResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
-	projectFeatures(
-		params: ProjectFeaturesParams,
-	): Promise<ProjectFeaturesResult>;
+	updateCurrentProject(params: UpdateProjectParams): Promise<void>;
+	openProject(params: OpenProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
@@ -2093,8 +2154,11 @@ export function createWorkspace(transport: Transport): Workspace {
 		updateSettings(params) {
 			return transport.request("biome/update_settings", params);
 		},
-		projectFeatures(params) {
-			return transport.request("biome/project_features", params);
+		updateCurrentProject(params) {
+			return transport.request("biome/update_current_project", params);
+		},
+		openProject(params) {
+			return transport.request("biome/open_project", params);
 		},
 		openFile(params) {
 			return transport.request("biome/open_file", params);

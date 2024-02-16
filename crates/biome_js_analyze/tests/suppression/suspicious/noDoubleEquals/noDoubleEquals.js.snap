@@ -57,7 +57,7 @@ noDoubleEquals.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
      2  2 │   text
      3    │ - ${a·==·b}
         3 │ + ${//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
-        4 │ + a··==·b}
+        4 │ + a·==·b}
      4  5 │   `;
      5  6 │   
   
@@ -89,11 +89,9 @@ noDoubleEquals.js:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
   
      5  5 │   
      6  6 │   // existing comment
-     7    │ - a·==·b;
         7 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
-        8 │ + a··==·b;
+     7  8 │   a == b;
      8  9 │   
-     9 10 │   if (a == b) {
   
 
 ```
@@ -125,11 +123,9 @@ noDoubleEquals.js:9:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
   
      7  7 │   a == b;
      8  8 │   
-     9    │ - if·(a·==·b)·{
         9 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
-       10 │ + if··(a·==·b)·{
+     9 10 │   if (a == b) {
     10 11 │       false;
-    11 12 │   }
   
 
 ```
@@ -195,7 +191,7 @@ noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
     18 18 │   let a = `Output of "biome rage":
     19    │ - ··formatter·enabled:·${formatter·==·true}
        19 │ + ··formatter·enabled:·${//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
-       20 │ + formatter··==·true}
+       20 │ + formatter·==·true}
     20 21 │     linter: ${linter}
     21 22 │   `;
   

@@ -8,7 +8,7 @@ title: useImportRestrictions (since v1.0.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-Inspired from: <a href="https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/jsdoc.md" target="_blank"><code>jsdoc</code></a>
+Inspired from: <a href="https://github.com/uhyo/eslint-plugin-import-access" target="_blank"><code>eslint-plugin-import-access</code></a>
 
 Disallows package private imports.
 

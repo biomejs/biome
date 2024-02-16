@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+export * from 'foo';
+export * as foo from 'foo';
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use export all ( export * from ... ).
+  
+  > 1 │ export * from 'foo';
+      │ ^^^^^^^^^^^^^^^^^^^^
+    2 │ export * as foo from 'foo';
+  
+  i Use named export instead.
+  
+
+```
+
+```
+invalid.js:2:1 lint/nursery/noReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use export all ( export * from ... ).
+  
+    1 │ export * from 'foo';
+  > 2 │ export * as foo from 'foo';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Use named export instead.
+  
+
+```
+
+

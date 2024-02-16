@@ -25,6 +25,7 @@
 [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=green
 [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
 
+
 </div>
 
 <div align="center">
@@ -87,6 +88,23 @@ or directly head to the [Getting Started guide][getting-started] to start using 
 Read more about our [project philosophy][biome-philosophy].
 
 **Biome** is [MIT licensed](https://github.com/biomejs/biome/tree/main/LICENSE-MIT) or [Apache 2.0 licensed](https://github.com/biomejs/biome/tree/main/LICENSE-APACHE) and moderated under the [Contributor Covenant Code of Conduct](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
+
+## Funding
+
+You can fund the project in different ways
+
+### Project sponsorship and funding
+
+You can sponsor or fund the project via [Open collective](https://opencollective.com/biome) or [GitHub sponsors](https://github.com/sponsors/biomejs)
+
+Biome offers a simple sponsorship program that allows companies to get visibility and recognition among various developers.
+
+### Issue funding
+
+We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific features that you would like to see and implement. Check our backlog and help us:
+
+<a href="https://polar.sh/biomejs"><img src="https://polar.sh/embed/fund-our-backlog.svg?org=biomejs" /></a>
+
 
 ## Sponsors
 

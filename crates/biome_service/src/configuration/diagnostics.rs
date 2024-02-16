@@ -2,9 +2,10 @@ use crate::WorkspaceError;
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_deserialize::DeserializationDiagnostic;
+use biome_diagnostics::adapters::ResolveError;
 use biome_diagnostics::{
-    Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
-    Severity, Visit,
+    Advices, Category, Diagnostic, DiagnosticTags, Error, Location, LogCategory,
+    MessageAndDescription, Severity, Visit,
 };
 use biome_rowan::SyntaxError;
 use serde::{Deserialize, Serialize};
@@ -33,6 +34,9 @@ pub enum ConfigurationDiagnostic {
 
     /// Thrown when there's something wrong with the files specified inside `"extends"`
     CantLoadExtendFile(CantLoadExtendFile),
+
+    /// Thrown when a configuration file can't be resolved from `node_modules`
+    CantResolve(CantResolve),
 }
 
 impl From<SyntaxError> for ConfigurationDiagnostic {
@@ -76,6 +80,18 @@ impl ConfigurationDiagnostic {
             message: MessageAndDescription::from(markup! {{message}}.to_owned()),
         })
     }
+
+    pub fn cant_resolve(path: impl Display, source: oxc_resolver::ResolveError) -> Self {
+        Self::CantResolve(CantResolve {
+            message: MessageAndDescription::from(
+                markup! {
+                   "Failed to resolve the configuration from "{{path}}
+                }
+                .to_owned(),
+            ),
+            source: Some(Error::from(ResolveError::from(source))),
+        })
+    }
 }
 
 impl Debug for ConfigurationDiagnostic {
@@ -99,6 +115,7 @@ impl Diagnostic for ConfigurationDiagnostic {
             ConfigurationDiagnostic::InvalidIgnorePattern(error) => error.severity(),
             ConfigurationDiagnostic::CantLoadExtendFile(error) => error.severity(),
             ConfigurationDiagnostic::InvalidConfiguration(error) => error.severity(),
+            ConfigurationDiagnostic::CantResolve(error) => error.severity(),
         }
     }
 
@@ -110,6 +127,7 @@ impl Diagnostic for ConfigurationDiagnostic {
             ConfigurationDiagnostic::InvalidIgnorePattern(error) => error.category(),
             ConfigurationDiagnostic::CantLoadExtendFile(error) => error.category(),
             ConfigurationDiagnostic::InvalidConfiguration(error) => error.category(),
+            ConfigurationDiagnostic::CantResolve(error) => error.category(),
         }
     }
 
@@ -121,6 +139,7 @@ impl Diagnostic for ConfigurationDiagnostic {
             ConfigurationDiagnostic::InvalidIgnorePattern(error) => error.tags(),
             ConfigurationDiagnostic::CantLoadExtendFile(error) => error.tags(),
             ConfigurationDiagnostic::InvalidConfiguration(error) => error.tags(),
+            ConfigurationDiagnostic::CantResolve(error) => error.tags(),
         }
     }
 
@@ -132,6 +151,7 @@ impl Diagnostic for ConfigurationDiagnostic {
             ConfigurationDiagnostic::InvalidIgnorePattern(error) => error.location(),
             ConfigurationDiagnostic::CantLoadExtendFile(error) => error.location(),
             ConfigurationDiagnostic::InvalidConfiguration(error) => error.location(),
+            ConfigurationDiagnostic::CantResolve(error) => error.location(),
         }
     }
 
@@ -143,6 +163,7 @@ impl Diagnostic for ConfigurationDiagnostic {
             ConfigurationDiagnostic::InvalidIgnorePattern(error) => error.source(),
             ConfigurationDiagnostic::CantLoadExtendFile(error) => error.source(),
             ConfigurationDiagnostic::InvalidConfiguration(error) => error.source(),
+            ConfigurationDiagnostic::CantResolve(error) => error.source(),
         }
     }
 
@@ -154,6 +175,7 @@ impl Diagnostic for ConfigurationDiagnostic {
             ConfigurationDiagnostic::InvalidIgnorePattern(error) => error.message(fmt),
             ConfigurationDiagnostic::CantLoadExtendFile(error) => error.message(fmt),
             ConfigurationDiagnostic::InvalidConfiguration(error) => error.message(fmt),
+            ConfigurationDiagnostic::CantResolve(error) => error.message(fmt),
         }
     }
 
@@ -165,6 +187,7 @@ impl Diagnostic for ConfigurationDiagnostic {
             ConfigurationDiagnostic::InvalidIgnorePattern(error) => error.description(fmt),
             ConfigurationDiagnostic::CantLoadExtendFile(error) => error.description(fmt),
             ConfigurationDiagnostic::InvalidConfiguration(error) => error.description(fmt),
+            ConfigurationDiagnostic::CantResolve(error) => error.description(fmt),
         }
     }
 
@@ -176,6 +199,7 @@ impl Diagnostic for ConfigurationDiagnostic {
             ConfigurationDiagnostic::InvalidIgnorePattern(error) => error.advices(visitor),
             ConfigurationDiagnostic::CantLoadExtendFile(error) => error.advices(visitor),
             ConfigurationDiagnostic::InvalidConfiguration(error) => error.advices(visitor),
+            ConfigurationDiagnostic::CantResolve(error) => error.advices(visitor),
         }
     }
 
@@ -187,6 +211,7 @@ impl Diagnostic for ConfigurationDiagnostic {
             ConfigurationDiagnostic::InvalidIgnorePattern(error) => error.verbose_advices(visitor),
             ConfigurationDiagnostic::CantLoadExtendFile(error) => error.verbose_advices(visitor),
             ConfigurationDiagnostic::InvalidConfiguration(error) => error.verbose_advices(visitor),
+            ConfigurationDiagnostic::CantResolve(error) => error.verbose_advices(visitor),
         }
     }
 }
@@ -283,6 +308,21 @@ pub struct InvalidConfiguration {
     message: MessageAndDescription,
 }
 
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+)]
+pub struct CantResolve {
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+
+    #[serde(skip)]
+    #[source]
+    source: Option<Error>,
+}
+
 #[cfg(test)]
 mod test {
     use crate::configuration::diagnostics::ConfigurationDiagnostic;
@@ -304,7 +344,7 @@ mod test {
 
     #[test]
     fn diagnostic_size() {
-        assert_eq!(std::mem::size_of::<ConfigurationDiagnostic>(), 104);
+        assert_eq!(std::mem::size_of::<ConfigurationDiagnostic>(), 96);
     }
 
     #[test]

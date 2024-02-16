@@ -107,20 +107,21 @@ impl SyntaxNodeText {
 
     pub fn for_each_chunk<F: FnMut(&str)>(&self, mut f: F) {
         enum Void {}
-        match self.try_for_each_chunk(|chunk| {
+        let out = self.try_for_each_chunk(|chunk| {
             f(chunk);
             Ok::<(), Void>(())
-        }) {
+        });
+        match out {
             Ok(()) => (),
             Err(void) => match void {},
         }
     }
 
-    fn tokens_with_ranges(&self) -> impl Iterator<Item = (SyntaxToken, TextRange)> + FusedIterator {
+    fn tokens_with_ranges(&self) -> impl FusedIterator<Item = (SyntaxToken, TextRange)> {
         SyntaxNodeTokenWithRanges::new(self)
     }
 
-    pub fn chars(&self) -> impl Iterator<Item = char> + FusedIterator {
+    pub fn chars(&self) -> impl FusedIterator<Item = char> {
         SyntaxNodeTextChars::new(self)
     }
 }

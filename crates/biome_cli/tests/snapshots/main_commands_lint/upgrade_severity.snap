@@ -53,14 +53,6 @@ file.js:1:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```block
-file.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The file contains diagnostics that needs to be addressed.
-  
-
-```
-
-```block
 Checked 1 file(s) in <TIME>
 ```
 

@@ -400,6 +400,30 @@ codeOptionsUnsorted.jsx:26:6 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
+codeOptionsUnsorted.jsx:28:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    26 │ clsx("px-2 foo p-4 bar");
+    27 │ // TODO: tagged template literals are not supported yet
+  > 28 │ tw`px-2 foo p-4 bar`;
+       │    ^^^^^^^^^^^^^^^^
+    29 │ tw.div`px-2 foo p-4 bar`;
+    30 │ notClassFunction("px-2 foo p-4 bar");
+  
+  i Unsafe fix: Sort the classes.
+  
+    26 26 │   clsx("px-2 foo p-4 bar");
+    27 27 │   // TODO: tagged template literals are not supported yet
+    28    │ - tw`px-2·foo·p-4·bar`;
+       28 │ + tw`foo·bar·p-4·px-2`;
+    29 29 │   tw.div`px-2 foo p-4 bar`;
+    30 30 │   notClassFunction("px-2 foo p-4 bar");
+  
+
+```
+
+```
 codeOptionsUnsorted.jsx:36:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! These CSS classes should be sorted.

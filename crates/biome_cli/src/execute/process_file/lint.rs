@@ -1,10 +1,9 @@
 use crate::execute::diagnostics::ResultExt;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
-use crate::CliDiagnostic;
 use biome_diagnostics::{category, Error};
+use biome_service::file_handlers::AstroFileHandler;
 use biome_service::workspace::RuleCategories;
-use biome_service::AstroFileHandler;
 use std::path::Path;
 use std::sync::atomic::Ordering;
 
@@ -54,7 +53,10 @@ pub(crate) fn lint_with_guard<'ctx>(
             let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
             let pull_diagnostics_result = workspace_file
                 .guard()
-                .pull_diagnostics(RuleCategories::LINT, max_diagnostics.into())
+                .pull_diagnostics(
+                    RuleCategories::LINT | RuleCategories::SYNTAX,
+                    max_diagnostics.into(),
+                )
                 .with_file_path_and_code(
                     workspace_file.path.display().to_string(),
                     category!("lint"),
@@ -84,21 +86,7 @@ pub(crate) fn lint_with_guard<'ctx>(
             }
 
             if errors > 0 {
-                if ctx.execution.is_check_apply() || ctx.execution.is_check_apply_unsafe() {
-                    Ok(FileStatus::Message(Message::ApplyError(
-                        CliDiagnostic::file_check_apply_error(
-                            workspace_file.path.display().to_string(),
-                            category!("lint"),
-                        ),
-                    )))
-                } else {
-                    Ok(FileStatus::Message(Message::ApplyError(
-                        CliDiagnostic::file_check_error(
-                            workspace_file.path.display().to_string(),
-                            category!("lint"),
-                        ),
-                    )))
-                }
+                Ok(FileStatus::Message(Message::Failure))
             } else {
                 Ok(FileStatus::Success)
             }

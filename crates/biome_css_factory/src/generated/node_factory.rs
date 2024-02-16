@@ -562,17 +562,47 @@ pub fn css_declaration_or_at_rule_block(
         ],
     ))
 }
-pub fn css_declaration_with_semicolon(
-    declaration: CssDeclaration,
-    semicolon_token: SyntaxToken,
-) -> CssDeclarationWithSemicolon {
-    CssDeclarationWithSemicolon::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_DECLARATION_WITH_SEMICOLON,
+pub fn css_declaration_or_rule_block(
+    l_curly_token: SyntaxToken,
+    items: CssDeclarationOrRuleList,
+    r_curly_token: SyntaxToken,
+) -> CssDeclarationOrRuleBlock {
+    CssDeclarationOrRuleBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DECLARATION_OR_RULE_BLOCK,
         [
-            Some(SyntaxElement::Node(declaration.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
         ],
     ))
+}
+pub fn css_declaration_with_semicolon(
+    declaration: CssDeclaration,
+) -> CssDeclarationWithSemicolonBuilder {
+    CssDeclarationWithSemicolonBuilder {
+        declaration,
+        semicolon_token: None,
+    }
+}
+pub struct CssDeclarationWithSemicolonBuilder {
+    declaration: CssDeclaration,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl CssDeclarationWithSemicolonBuilder {
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> CssDeclarationWithSemicolon {
+        CssDeclarationWithSemicolon::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_DECLARATION_WITH_SEMICOLON,
+            [
+                Some(SyntaxElement::Node(self.declaration.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn css_document_at_rule(
     document_token: SyntaxToken,
@@ -612,6 +642,48 @@ pub fn css_font_face_at_rule(
         CssSyntaxKind::CSS_FONT_FACE_AT_RULE,
         [
             Some(SyntaxElement::Token(font_face_token)),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_font_feature_values_at_rule(
+    font_feature_values_token: SyntaxToken,
+    name: AnyCssFontFamilyName,
+    block: AnyCssFontFeatureValuesBlock,
+) -> CssFontFeatureValuesAtRule {
+    CssFontFeatureValuesAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FEATURE_VALUES_AT_RULE,
+        [
+            Some(SyntaxElement::Token(font_feature_values_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_font_feature_values_block(
+    l_curly_token: SyntaxToken,
+    items: CssFontFeatureValuesItemList,
+    r_curly_token: SyntaxToken,
+) -> CssFontFeatureValuesBlock {
+    CssFontFeatureValuesBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FEATURE_VALUES_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn css_font_feature_values_item(
+    at_token: SyntaxToken,
+    name_token: SyntaxToken,
+    block: AnyCssDeclarationListBlock,
+) -> CssFontFeatureValuesItem {
+    CssFontFeatureValuesItem::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FEATURE_VALUES_ITEM,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(name_token)),
             Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
@@ -879,7 +951,7 @@ pub fn css_list_of_component_values_expression(
 pub fn css_margin_at_rule(
     at_token: SyntaxToken,
     name_token: SyntaxToken,
-    block: CssDeclarationOrAtRuleBlock,
+    block: AnyCssDeclarationOrAtRuleBlock,
 ) -> CssMarginAtRule {
     CssMarginAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_MARGIN_AT_RULE,
@@ -1090,6 +1162,18 @@ impl CssNamespaceAtRuleBuilder {
             ],
         ))
     }
+}
+pub fn css_nested_qualified_rule(
+    prelude: CssRelativeSelectorList,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> CssNestedQualifiedRule {
+    CssNestedQualifiedRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_NESTED_QUALIFIED_RULE,
+        [
+            Some(SyntaxElement::Node(prelude.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
 }
 pub fn css_nth_offset(sign_token: SyntaxToken, value: CssNumber) -> CssNthOffset {
     CssNthOffset::unwrap_cast(SyntaxNode::new_detached(
@@ -1526,7 +1610,7 @@ pub fn css_pseudo_element_selector(
 }
 pub fn css_qualified_rule(
     prelude: CssSelectorList,
-    block: AnyCssDeclarationListBlock,
+    block: AnyCssDeclarationOrRuleBlock,
 ) -> CssQualifiedRule {
     CssQualifiedRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_QUALIFIED_RULE,
@@ -2107,6 +2191,18 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn css_declaration_or_rule_list<I>(items: I) -> CssDeclarationOrRuleList
+where
+    I: IntoIterator<Item = AnyCssDeclarationOrRule>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssDeclarationOrRuleList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_document_matcher_list<I, S>(items: I, separators: S) -> CssDocumentMatcherList
 where
     I: IntoIterator<Item = AnyCssDocumentMatcher>,
@@ -2126,6 +2222,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn css_font_feature_values_item_list<I>(items: I) -> CssFontFeatureValuesItemList
+where
+    I: IntoIterator<Item = AnyCssFontFeatureValuesItem>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssFontFeatureValuesItemList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FEATURE_VALUES_ITEM_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_generic_component_value_list<I>(items: I) -> CssGenericComponentValueList
@@ -2445,6 +2553,16 @@ where
 {
     CssBogusDocumentMatcher::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_DOCUMENT_MATCHER,
+        slots,
+    ))
+}
+pub fn css_bogus_font_feature_values_item<I>(slots: I) -> CssBogusFontFeatureValuesItem
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusFontFeatureValuesItem::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_FONT_FEATURE_VALUES_ITEM,
         slots,
     ))
 }

@@ -93,7 +93,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install Rust toolchain
         run: rustup target add ${{ matrix.target }}
@@ -103,7 +103,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
-        
+
       - name: Install musl toolchain
         if: matrix.code-target == 'linux-x64-musl' || matrix.code-target == 'linux-arm64-musl'
         run: |
@@ -154,7 +154,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install wasm-pack
-        uses: jetli/wasm-pack-action@v0.4.0
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Build WASM module for bundlers
         run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --release --scope biomedev crates/biome_wasm
@@ -199,7 +199,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           registry-url: 'https://registry.npmjs.org'
 
       - name: Set release infos

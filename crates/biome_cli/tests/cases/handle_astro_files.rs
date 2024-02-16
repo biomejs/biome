@@ -21,12 +21,12 @@ statement();
 ---
 <div></div>"#;
 
-const ASTRO_FILE_LINT: &str = r#"---
+const ASTRO_FILE_DEBUGGER_BEFORE: &str = r#"---
+debugger;
+---
+<div></div>"#;
 
-a == b;
-delete a.c;
-
-var foo = "";
+const ASTRO_FILE_DEBUGGER_AFTER: &str = r#"---
 ---
 <div></div>"#;
 
@@ -131,7 +131,10 @@ fn lint_astro_files() {
     let mut console = BufferConsole::default();
 
     let astro_file_path = Path::new("file.astro");
-    fs.insert(astro_file_path.into(), ASTRO_FILE_LINT.as_bytes());
+    fs.insert(
+        astro_file_path.into(),
+        ASTRO_FILE_DEBUGGER_BEFORE.as_bytes(),
+    );
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -144,6 +147,43 @@ fn lint_astro_files() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_astro_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_and_fix_astro_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let astro_file_path = Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        ASTRO_FILE_DEBUGGER_BEFORE.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--apply-unsafe",
+                astro_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, astro_file_path, ASTRO_FILE_DEBUGGER_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_and_fix_astro_files",
         fs,
         console,
         result,
