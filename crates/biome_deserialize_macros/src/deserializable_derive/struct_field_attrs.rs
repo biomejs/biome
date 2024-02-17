@@ -66,7 +66,7 @@ impl TryFrom<&Vec<Attribute>> for StructFieldAttrs {
                                 let path_str = path.to_token_stream().to_string();
                                 return Err(Error::new(
                                     path.span(),
-                                    format!("Unexpected attribute: {path_str}"),
+                                    format_args!("Unexpected attribute: {path_str}"),
                                 ));
                             }
                         }
@@ -93,7 +93,7 @@ impl TryFrom<&Vec<Attribute>> for StructFieldAttrs {
                                     let meta_text = meta.to_token_stream().to_string();
                                     return Err(Error::new(
                                         meta.span(),
-                                        format!("Unexpected attribute: {meta_text}"),
+                                        format_args!("Unexpected attribute: {meta_text}"),
                                     ));
                                 };
                                 deprecated = if deprecated.is_some() {
@@ -109,7 +109,7 @@ impl TryFrom<&Vec<Attribute>> for StructFieldAttrs {
                                     let path_text = path.to_token_stream().to_string();
                                     return Err(Error::new(
                                         path.span(),
-                                        format!(
+                                        format_args!(
                                             "Unexpected attribute inside deprecated(): {path_text}"
                                         ),
                                     ));
@@ -122,7 +122,7 @@ impl TryFrom<&Vec<Attribute>> for StructFieldAttrs {
                             let meta_text = meta.to_token_stream().to_string();
                             return Err(Error::new(
                                 meta.span(),
-                                format!("Unexpected attribute: {meta_text}"),
+                                format_args!("Unexpected attribute: {meta_text}"),
                             ));
                         }
                     }

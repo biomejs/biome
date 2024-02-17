@@ -30,7 +30,7 @@ impl TryFrom<&Vec<Attribute>> for EnumVariantAttrs {
                             let val_str = val.to_token_stream().to_string();
                             return Err(Error::new(
                                 val.span(),
-                                format!("Unexpected attribute: {val_str}"),
+                                format_args!("Unexpected attribute: {val_str}"),
                             ));
                         }
                     }
