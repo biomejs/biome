@@ -1,6 +1,7 @@
 mod deserializable_derive;
 mod merge_derive;
 mod partial_derive;
+mod util;
 
 use proc_macro::TokenStream;
 use proc_macro_error::*;

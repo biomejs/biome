@@ -1,59 +1,38 @@
-use proc_macro2::Ident;
-use syn::ext::IdentExt;
-use syn::parse::{Parse, ParseStream, Result};
-use syn::{parenthesized, Attribute, Error, Token};
+use quote::ToTokens;
+use syn::spanned::Spanned;
+use syn::{Attribute, Error, Meta};
+
+use crate::util::parse_meta_list;
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct StructAttrs {
     pub with_validator: bool,
 }
 
-impl StructAttrs {
-    pub fn from_attrs(attrs: &[Attribute]) -> Self {
+impl TryFrom<&Vec<Attribute>> for StructAttrs {
+    type Error = Error;
+
+    fn try_from(attrs: &Vec<Attribute>) -> std::prelude::v1::Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
             if attr.path.is_ident("deserializable") {
-                opts.merge_with(
-                    syn::parse2::<Self>(attr.tokens.clone())
-                        .expect("Could not parse field attributes"),
-                );
+                parse_meta_list(&attr.parse_meta()?, |meta| {
+                    match meta {
+                        Meta::Path(path) if path.is_ident("with_validator") => {
+                            opts.with_validator = true
+                        }
+                        val => {
+                            let val_str = val.to_token_stream().to_string();
+                            return Err(Error::new(
+                                val.span(),
+                                format!("Unexpected attribute: {val_str}"),
+                            ));
+                        }
+                    }
+                    Ok(())
+                })?;
             }
         }
-        opts
-    }
-
-    fn merge_with(&mut self, other: Self) {
-        if other.with_validator {
-            self.with_validator = other.with_validator;
-        }
-    }
-}
-
-impl Parse for StructAttrs {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let content;
-        parenthesized!(content in input);
-
-        let mut result = Self::default();
-        loop {
-            let key: Ident = content.call(IdentExt::parse_any)?;
-            match key.to_string().as_ref() {
-                "with_validator" => result.with_validator = true,
-                other => {
-                    return Err(Error::new(
-                        content.span(),
-                        format!("Unexpected field attribute: {other}"),
-                    ))
-                }
-            }
-
-            if content.is_empty() {
-                break;
-            }
-
-            content.parse::<Token![,]>()?;
-        }
-
-        Ok(result)
+        Ok(opts)
     }
 }
