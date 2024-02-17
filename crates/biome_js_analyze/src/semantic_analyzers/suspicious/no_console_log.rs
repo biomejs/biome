@@ -89,12 +89,14 @@ impl Rule for NoConsoleLog {
         let call_expression = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        if let Some(stmt) = JsExpressionStatement::cast(call_expression.syntax().parent()?) {
-            if stmt.semicolon_token().is_some() {
+        match JsExpressionStatement::cast(call_expression.syntax().parent()?) {
+            Some(stmt) if stmt.semicolon_token().is_some() => {
                 mutation.remove_node(stmt);
             }
+            _ => {
+                mutation.remove_node(call_expression.clone());
+            }
         }
-        mutation.remove_node(call_expression.clone());
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,

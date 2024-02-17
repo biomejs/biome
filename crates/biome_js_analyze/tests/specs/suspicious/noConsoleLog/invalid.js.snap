@@ -47,9 +47,8 @@ invalid.js:2:1 lint/suspicious/noConsoleLog  FIXABLE  ━━━━━━━━�
   
   i Unsafe fix: Remove console.log
   
-    1   │ - console.log("something")
+    1 1 │   console.log("something")
     2   │ - console.log("with·semicolon");
-      1 │ + console.log("something");
     3 2 │   
   
 
