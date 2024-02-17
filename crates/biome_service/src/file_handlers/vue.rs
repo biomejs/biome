@@ -63,7 +63,7 @@ impl VueFileHandler {
         }
     }
 
-    pub fn vue_script_language(text: &str) -> JsFileSource {
+    pub fn vue_file_source(text: &str) -> JsFileSource {
         let matches = VUE_FENCE.captures(text);
         matches
             .and_then(|captures| captures.name("lang"))
@@ -116,7 +116,7 @@ fn parse(
     cache: &mut NodeCache,
 ) -> AnyParse {
     let script = VueFileHandler::vue_input(text);
-    let language = VueFileHandler::vue_script_language(text);
+    let language = VueFileHandler::vue_file_source(text);
 
     debug!("Parsing file with language {:?}", language);
 
