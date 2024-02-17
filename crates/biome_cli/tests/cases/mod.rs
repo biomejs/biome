@@ -5,6 +5,7 @@ mod biome_json_support;
 mod config_extends;
 mod diagnostics;
 mod handle_astro_files;
+mod handle_vue_files;
 mod included_files;
 mod overrides_formatter;
 mod overrides_linter;
