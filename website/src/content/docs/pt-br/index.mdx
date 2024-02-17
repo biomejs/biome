@@ -28,7 +28,7 @@ hero:
 import { Card, CardGrid } from "@astrojs/starlight/components";
 import Inputf from "@/components/formatter/input.md";
 import Outputf from "@/components/formatter/output.md";
-import ProgressBar from "@/playground/components/Progress.tsx";
+import ProgressBarContainer from "@/playground/components/Progress.tsx";
 import Community from "@/components/Community.astro";
 import { Icon } from "@astrojs/starlight/components";
 import arrow from "@/assets/svg/arrow-right.svg";
@@ -66,8 +66,13 @@ import LinterExample from "@/components/linter/example.md";
         <div class="bench-comp">
           <div class="bench">
             <div>
-              <ProgressBar client:visible duration={0.41} label="Biome" />
-              <ProgressBar client:visible duration={14.35} label="Prettier" />
+              <ProgressBarContainer
+                client:visible
+                data={[
+                  { duration: 0.41, label: "Biome", color: "#33ff66" },
+                  { duration: 14.35, label: "Prettier", color: "#ff0033" }
+                ]}
+              />
             </div>
           </div>
           <div class="perf-comp">
