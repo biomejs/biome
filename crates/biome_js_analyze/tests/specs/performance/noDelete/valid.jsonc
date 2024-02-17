@@ -4,5 +4,6 @@
 	"delete a.b[x];",
 	// uncovered by this rule
 	"delete x",
-	"delete f()"
+	"delete f()",
+	"delete el.dataset.something"
 ]

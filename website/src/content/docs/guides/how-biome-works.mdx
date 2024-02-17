@@ -68,6 +68,10 @@ Here's an example:
 - biome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
 will use the configuration file `app/frontend/biome.json`;
 
+:::note
+Most biome commands also support the `--config-path` command line option to point to a custom directory for the `biome.json` file. In this case, the above configuration file resolution is **disabled**.
+:::
+
 ### The `extends` option
 
 The `extends` option allows to break down a configuration in multiple file and "share" common patterns among multiple projects/folders.

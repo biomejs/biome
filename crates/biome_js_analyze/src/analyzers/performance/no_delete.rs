@@ -88,10 +88,24 @@ impl Rule for NoDelete {
                 .as_any_js_literal_expression()
                 .is_some()
         } else {
-            // if `argument` is not a computed or static member,
-            // then `delete` has either no effect or an undefined behavior.
-            // This should be rejected by another rule.
-            argument.as_js_static_member_expression().is_some()
+            let static_member_expression = argument.as_js_static_member_expression();
+            if let Some(static_member_expression) = static_member_expression {
+                if let AnyJsExpression::JsStaticMemberExpression(static_expression) =
+                    static_member_expression.object().ok()?
+                {
+                    let name = static_expression.member().ok()?;
+                    let name = name.as_js_name()?;
+                    if name.text() == "dataset" {
+                        return None;
+                    }
+                }
+                true
+            } else {
+                // if `argument` is not a computed or static member,
+                // then `delete` has either no effect or an undefined behavior.
+                // This should be rejected by another rule.
+                false
+            }
         };
         should_report.then_some(argument)
     }

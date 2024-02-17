@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+import * as foo from "foo"
+
+```
+
+# Diagnostics
+```
+invalid.js:1:8 lint/nursery/noNamespaceImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid namespace imports, it can prevent efficient tree shaking and increase bundle size.
+  
+  > 1 │ import * as foo from "foo"
+      │        ^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Use named imports instead.
+  
+
+```
+
+

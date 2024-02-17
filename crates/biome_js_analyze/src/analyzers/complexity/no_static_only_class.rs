@@ -18,7 +18,7 @@ declare_rule! {
     /// 	- Whatever would be put on them, such as utility functions, are already organized by virtue of being in a module.
     /// 	- As an alternative, you can import * as ... the module to get all of them in a single object.
     /// - IDEs can't provide as good suggestions for static class or namespace imported properties when you start typing property names
-    /// - It's more difficult to statically analyze code for unused variables, etc. when they're all on the class (see: Finding dead code (and dead types) in TypeScript).
+    /// - It's more difficult to statically analyze code for unused variables, etc. when they're all on the class (see: [Finding dead code (and dead types) in TypeScript](https://effectivetypescript.com/2020/10/20/tsprune)).
     ///
     /// ## Examples
     ///

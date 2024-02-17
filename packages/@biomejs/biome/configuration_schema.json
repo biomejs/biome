@@ -1359,6 +1359,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNamespaceImport": {
+					"description": "Disallow the use of namespace imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNodejsModules": {
 					"description": "Forbid the use of Node.js builtin modules.",
 					"anyOf": [
@@ -1367,7 +1374,7 @@
 					]
 				},
 				"noReExportAll": {
-					"description": "Avoid re-export all",
+					"description": "Avoid re-export all.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1484,6 +1491,13 @@
 				},
 				"useImportType": {
 					"description": "Promotes the use of import type for types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNodeAssertStrict": {
+					"description": "Promotes the usage of node:assert/strict over node:assert.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -1,0 +1,60 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@property --my-color {
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssPropertyAtRule {
+                property_token: PROPERTY_KW@1..10 "property" [] [Whitespace(" ")],
+                name: CssDashedIdentifier {
+                    value_token: IDENT@10..21 "--my-color" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationListBlock {
+                    l_curly_token: L_CURLY@21..22 "{" [] [],
+                    declarations: CssDeclarationList [],
+                    r_curly_token: R_CURLY@22..24 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@24..25 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..25
+  0: (empty)
+  1: CSS_RULE_LIST@0..24
+    0: CSS_AT_RULE@0..24
+      0: AT@0..1 "@" [] []
+      1: CSS_PROPERTY_AT_RULE@1..24
+        0: PROPERTY_KW@1..10 "property" [] [Whitespace(" ")]
+        1: CSS_DASHED_IDENTIFIER@10..21
+          0: IDENT@10..21 "--my-color" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@21..24
+          0: L_CURLY@21..22 "{" [] []
+          1: CSS_DECLARATION_LIST@22..22
+          2: R_CURLY@22..24 "}" [Newline("\n")] []
+  2: EOF@24..25 "" [Newline("\n")] []
+
+```
+
+

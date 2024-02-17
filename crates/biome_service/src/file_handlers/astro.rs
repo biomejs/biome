@@ -1,28 +1,55 @@
 use crate::file_handlers::{
-    AnalyzerCapabilities, Capabilities, DebugCapabilities, ExtensionHandler, FormatterCapabilities,
-    Language, Mime, ParserCapabilities,
+    javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime,
+    ParserCapabilities,
 };
 use crate::settings::SettingsHandle;
+use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
-use biome_js_formatter::format_node;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
 use biome_rowan::{FileSource, NodeCache};
 use lazy_static::lazy_static;
 use regex::{Regex, RegexBuilder};
-use tracing::{debug, error, info};
 
 #[derive(Debug, Default, PartialEq, Eq)]
-pub(crate) struct AstroFileHandler;
+pub struct AstroFileHandler;
 
 lazy_static! {
     pub static ref ASTRO_FENCE: Regex = RegexBuilder::new(r#"^---\s*$"#)
         .multi_line(true)
         .build()
         .unwrap();
+}
+
+impl AstroFileHandler {
+    /// It extracts the JavaScript code contained in the frontmatter of an Astro file
+    ///
+    /// If the frontmatter doesn't exist, an empty string is returned.
+    pub fn astro_input(text: &str) -> &str {
+        let mut matches = ASTRO_FENCE.find_iter(text);
+        match (matches.next(), matches.next()) {
+            (Some(start), Some(end)) => &text[start.end()..end.start()],
+            _ => "",
+        }
+    }
+
+    pub fn astro_output(input: &str, output: &str) -> String {
+        let mut matches = ASTRO_FENCE.find_iter(input);
+        if let (Some(start), Some(end)) = (matches.next(), matches.next()) {
+            format!(
+                "{}{}{}",
+                &input[..start.end() + 1],
+                output.trim_start(),
+                &input[end.start()..]
+            )
+        } else {
+            input.to_string()
+        }
+    }
 }
 
 impl ExtensionHandler for AstroFileHandler {
@@ -43,10 +70,10 @@ impl ExtensionHandler for AstroFileHandler {
                 debug_formatter_ir: None,
             },
             analyzer: AnalyzerCapabilities {
-                lint: None,
-                code_actions: None,
+                lint: Some(lint),
+                code_actions: Some(code_actions),
                 rename: None,
-                fix_all: None,
+                fix_all: Some(fix_all),
                 organize_imports: None,
             },
             formatter: FormatterCapabilities {
@@ -60,16 +87,12 @@ impl ExtensionHandler for AstroFileHandler {
 
 fn parse(
     _rome_path: &RomePath,
-    _language_hint: crate::file_handlers::Language,
+    _language_hint: Language,
     text: &str,
     _settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> AnyParse {
-    let mut matches = ASTRO_FENCE.find_iter(text);
-    let frontmatter = match (matches.next(), matches.next()) {
-        (Some(start), Some(end)) => &text[start.end()..end.start()],
-        _ => "",
-    };
+    let frontmatter = AstroFileHandler::astro_input(text);
     let parse = parse_js_with_cache(
         frontmatter,
         JsFileSource::ts(),
@@ -93,17 +116,17 @@ fn format(
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(rome_path);
-    debug!("Options used for format: \n{}", options);
+    javascript::format(rome_path, parse, settings)
+}
 
-    let tree = parse.syntax();
-    info!("Format file {}", rome_path.display());
-    let formatted = format_node(options, &tree)?;
-    match formatted.print() {
-        Ok(printed) => Ok(printed),
-        Err(error) => {
-            error!("The file {} couldn't be formatted", rome_path.display());
-            Err(WorkspaceError::FormatError(error.into()))
-        }
-    }
+pub(crate) fn lint(params: LintParams) -> LintResults {
+    javascript::lint(params)
+}
+
+pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
+    javascript::code_actions(params)
+}
+
+fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+    javascript::fix_all(params)
 }

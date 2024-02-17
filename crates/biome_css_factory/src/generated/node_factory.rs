@@ -1300,6 +1300,20 @@ pub fn css_percentage(value_token: SyntaxToken, percent_token: SyntaxToken) -> C
         ],
     ))
 }
+pub fn css_property_at_rule(
+    property_token: SyntaxToken,
+    name: CssDashedIdentifier,
+    block: AnyCssDeclarationListBlock,
+) -> CssPropertyAtRule {
+    CssPropertyAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PROPERTY_AT_RULE,
+        [
+            Some(SyntaxElement::Token(property_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_pseudo_class_function_compound_selector(
     name_token: SyntaxToken,
     l_paren_token: SyntaxToken,

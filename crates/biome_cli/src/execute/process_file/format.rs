@@ -5,7 +5,7 @@ use crate::execute::process_file::{
 };
 use crate::execute::TraversalMode;
 use biome_diagnostics::{category, DiagnosticExt};
-use biome_service::file_handlers::{ASTRO_FENCE, VUE_FENCE};
+use biome_service::file_handlers::{AstroFileHandler, VueFileHandler, SVELTE_FENCE};
 use biome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;
@@ -69,36 +69,37 @@ pub(crate) fn format_with_guard<'ctx>(
                 return Ok(FileStatus::Ignored);
             }
 
-            if workspace_file.as_extension() == Some("astro") {
-                if output.is_empty() {
-                    return Ok(FileStatus::Ignored);
+            match workspace_file.as_extension() {
+                Some("astro") => {
+                    if output.is_empty() {
+                        return Ok(FileStatus::Ignored);
+                    }
+                    output = AstroFileHandler::astro_output(input.as_str(), output.as_str());
                 }
-                let mut matches = ASTRO_FENCE.find_iter(&input);
-                if let (Some(start), Some(end)) = (matches.next(), matches.next()) {
-                    output = format!(
-                        "{}{}{}",
-                        &input[..start.end() + 1],
-                        output.as_str(),
-                        &input[end.start()..]
-                    );
+                Some("vue") => {
+                    if output.is_empty() {
+                        return Ok(FileStatus::Ignored);
+                    }
+                    output = VueFileHandler::vue_output(input.as_str(), output.as_str());
                 }
-            }
 
-            if workspace_file.as_extension() == Some("vue") {
-                if output.is_empty() {
-                    return Ok(FileStatus::Ignored);
+                Some("svelte") => {
+                    if output.is_empty() {
+                        return Ok(FileStatus::Ignored);
+                    }
+                    if let Some(script) = SVELTE_FENCE
+                        .captures(&input)
+                        .and_then(|captures| captures.name("script"))
+                    {
+                        output = format!(
+                            "{}{}{}",
+                            &input[..script.start()],
+                            output.as_str(),
+                            &input[script.end()..]
+                        );
+                    }
                 }
-                if let Some(script) = VUE_FENCE
-                    .captures(&input)
-                    .and_then(|captures| captures.name("script"))
-                {
-                    output = format!(
-                        "{}{}{}",
-                        &input[..script.start()],
-                        output.as_str(),
-                        &input[script.end()..]
-                    );
-                }
+                _ => {}
             }
 
             if output != input {

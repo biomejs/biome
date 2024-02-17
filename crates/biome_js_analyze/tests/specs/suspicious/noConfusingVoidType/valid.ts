@@ -40,3 +40,5 @@ class Test {
 }
 
 functionGeneric<void>(undefined);
+
+type Conditional<T> = T extends void ? Record<string, never> : T

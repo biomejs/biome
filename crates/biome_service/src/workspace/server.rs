@@ -208,7 +208,6 @@ impl WorkspaceServer {
                     settings,
                     &mut document.node_cache,
                 );
-
                 Ok(entry.insert(parsed).clone())
             }
         }

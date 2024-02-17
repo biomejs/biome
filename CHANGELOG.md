@@ -12,7 +12,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Analyzer
 
-#### Bug fixed
+#### Bug fixes
 
 - Fix [#1748](https://github.com/biomejs/biome/issues/1748). Now for the following case we won't provide an unsafe fix for the `noNonNullAssertion` rule:
 
@@ -58,7 +58,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```
   Contributed by @ematipico
 
-### Enhancements
+#### Enhancements
 
 - Removed a superfluous diagnostic that was printed during the linting/check phase of a file:
 
@@ -143,6 +143,17 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   <template></template>
   ```
 
+- Add partial for `.svelte` files. Biome is able to format the script block of Svelte files. Contributed by @ematipico
+
+  ```diff
+  <script setup lang="ts">
+  - statement ( );
+  + statement();
+  </script/>
+
+  <div></div>
+  ```
+
 #### Bug fixes
 
 - Fix [#1039](https://github.com/biomejs/biome/issues/1039). Check unicode width instead of number of bytes when checking if regex expression is a simple argument. Contributed by @kalleep
@@ -219,6 +230,36 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Add rule [noUndeclaredependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies), to detect the use of dependencies that aren't present in the `package.json`
 
+- Add rule [noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import), to report namespace imports:
+
+  ```js
+  import * as foo from "foo";
+  ```
+  Contributed by @unvalley
+- Add partial support for `.astro` files. Biome is able to lint and fix the frontmatter of the Astro files. Contributed by @ematipico
+
+  ```diff
+  ---
+  - delete a.b
+  + a.b = undefined
+  ---
+
+  <div></div>
+  ```
+
+- Add partial support for `.vue` files. Biome is able to lint and fix the script block of the Vue files. Contributed by @nhedger
+
+  ```diff
+  <script setup lang="ts">
+  - delete a.b
+  + a.b = undefined
+  <script>
+
+  <template></template>
+  ```
+
+- Add rule [useNodeAssertStrict](https://biomejs.dev/linter/rules/use-node-assert-strict), which promotes the use of `node:assert/strict` over `node:assert`. Contributed by @ematipico
+
 #### Enhancements
 
 - [noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary) now provides unsafe code fixes. Contributed by @vasucp1207
@@ -268,6 +309,18 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
+- Fix missing link in [noStaticOnlyClass](https://biomejs.dev/linter/rules/no-static-only-class) documentation. Contributed by @yndajas
+
+- [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type) no longer reports valid use of the void type in conditional types ([#1812](https://github.com/biomejs/biome/issues/1812)).
+
+  The rule no longer reports the following code:
+
+  ```ts
+  type Conditional<T> = T extends void ? Record<string, never> : T
+  ```
+
+  Contributed by @lucasweng
+
 - [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) no longer reports valid use of binding patterns ([#1648](https://github.com/biomejs/biome/issues/1648)).
 
   The rule no longer reports the following code:
@@ -306,7 +359,13 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix[#1697](https://github.com/biomejs/biome/issues/1697). Preserve leading trivia in autofix of suppression rules. Contributed by @togami2864
 
-- Fix[#603](https://github.com/biomejs/biome/issues/603). Trim trailing whitespace to avoid double insertion. Contributed by @togami2864
+- Fix [#603](https://github.com/biomejs/biome/issues/603). Trim trailing whitespace to avoid double insertion. Contributed by @togami2864
+
+- Fix [#1765](https://github.com/biomejs/biome/issues/1765). Now the rule `noDelete` doesn't trigger when deleting a dataset:
+  ```js
+  delete element.dataset.prop;
+  ```
+  Contributed by @ematipico
 
 ### Parser
 

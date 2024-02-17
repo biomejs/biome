@@ -900,11 +900,15 @@ export interface Nursery {
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
 	/**
+	 * Disallow the use of namespace imports.
+	 */
+	noNamespaceImport?: RuleConfiguration;
+	/**
 	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration;
 	/**
-	 * Avoid re-export all
+	 * Avoid re-export all.
 	 */
 	noReExportAll?: RuleConfiguration;
 	/**
@@ -975,6 +979,10 @@ export interface Nursery {
 	 * Promotes the use of import type for types.
 	 */
 	useImportType?: RuleConfiguration;
+	/**
+	 * Promotes the usage of node:assert/strict over node:assert.
+	 */
+	useNodeAssertStrict?: RuleConfiguration;
 	/**
 	 * Enforces using the node: protocol for Node.js builtin modules.
 	 */
@@ -1578,6 +1586,7 @@ export interface OpenFileParams {
 export type Language =
 	| "Astro"
 	| "Vue"
+	| "Svelte"
 	| "JavaScript"
 	| "JavaScriptReact"
 	| "TypeScript"
@@ -1749,6 +1758,7 @@ export type Category =
 	| "lint/nursery/noGlobalEval"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
+	| "lint/nursery/noNamespaceImport"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReExportAll"
 	| "lint/nursery/noRestrictedImports"
@@ -1769,6 +1779,7 @@ export type Category =
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useImportType"
+	| "lint/nursery/useNodeAssertStrict"
 	| "lint/nursery/useNodejsImportProtocol"
 	| "lint/nursery/useNumberNamespace"
 	| "lint/nursery/useShorthandFunctionType"

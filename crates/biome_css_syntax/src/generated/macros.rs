@@ -381,6 +381,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssPercentage::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_PROPERTY_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssPropertyAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR => {
                     let $pattern = unsafe {
                         $crate::CssPseudoClassFunctionCompoundSelector::new_unchecked(node)
