@@ -191,6 +191,7 @@ impl Language {
                 | Language::JavaScriptReact
                 | Language::TypeScriptReact
                 | Language::Astro
+                | Language::Vue
         )
     }
 

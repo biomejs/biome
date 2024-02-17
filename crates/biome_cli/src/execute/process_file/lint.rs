@@ -2,7 +2,7 @@ use crate::execute::diagnostics::ResultExt;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use biome_diagnostics::{category, Error};
-use biome_service::file_handlers::AstroFileHandler;
+use biome_service::file_handlers::{AstroFileHandler, VueFileHandler};
 use biome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;
@@ -44,6 +44,13 @@ pub(crate) fn lint_with_guard<'ctx>(
                         output = AstroFileHandler::astro_output(input.as_str(), output.as_str());
                     }
 
+                    if workspace_file.as_extension() == Some("vue") {
+                        if output.is_empty() {
+                            return Ok(FileStatus::Ignored);
+                        }
+                        output = VueFileHandler::vue_output(input.as_str(), output.as_str());
+                    }
+
                     workspace_file.update_file(output)?;
                     input = workspace_file.input()?;
                 }
@@ -67,10 +74,10 @@ pub(crate) fn lint_with_guard<'ctx>(
             errors += pull_diagnostics_result.errors;
 
             if !no_diagnostics {
-                let input = if workspace_file.as_extension() == Some("astro") {
-                    AstroFileHandler::astro_input(input.as_str()).to_string()
-                } else {
-                    input
+                let input = match workspace_file.as_extension() {
+                    Some("astro") => AstroFileHandler::astro_input(input.as_str()).to_string(),
+                    Some("vue") => VueFileHandler::vue_input(input.as_str()).to_string(),
+                    _ => input,
                 };
 
                 ctx.push_message(Message::Diagnostics {

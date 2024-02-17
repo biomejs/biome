@@ -42,6 +42,22 @@ const hello: string = "world";
 </script>
 <template></template>"#;
 
+const VUE_JS_FILE_NOT_LINTED: &str = r#"<script setup lang="js">
+a == b;
+delete a.c;
+
+var foo = "";
+</script>
+<template></template>"#;
+
+const VUE_TS_FILE_NOT_LINTED: &str = r#"<script setup lang="ts">
+a == b;
+delete a.c;
+
+var foo: string = "";
+</script>
+<template></template>"#;
+
 #[test]
 fn format_vue_implicit_js_files() {
     let mut fs = MemoryFileSystem::default();
@@ -299,6 +315,56 @@ fn format_empty_vue_ts_files_write() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_empty_vue_ts_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_vue_js_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(vue_file_path.into(), VUE_JS_FILE_NOT_LINTED.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_vue_js_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_vue_ts_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(vue_file_path.into(), VUE_TS_FILE_NOT_LINTED.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_vue_ts_files",
         fs,
         console,
         result,

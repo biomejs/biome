@@ -1,0 +1,108 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `file.vue`
+
+```vue
+<script setup lang="js">
+a == b;
+delete a.c;
+
+var foo = "";
+</script>
+<template></template>
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.vue:1:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use === instead of ==
+  
+  > 1 │ a == b;
+      │   ^^
+    2 │ delete a.c;
+    3 │ 
+  
+  i == is only allowed when comparing against null
+  
+  > 1 │ a == b;
+      │   ^^
+    2 │ delete a.c;
+    3 │ 
+  
+  i Using === may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    1 │ a·===·b;
+      │     +   
+
+```
+
+```block
+file.vue:2:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the delete operator which can impact performance.
+  
+    1 │ a == b;
+  > 2 │ delete a.c;
+      │ ^^^^^^^^^^
+    3 │ 
+    4 │ var foo = "";
+  
+  i Unsafe fix: Use an undefined assignment instead.
+  
+    1 1 │   a == b;
+    2   │ - delete·a.c;
+      2 │ + a.c·=·undefined;
+    3 3 │   
+    4 4 │   var foo = "";
+  
+
+```
+
+```block
+file.vue:4:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use let or const instead of var.
+  
+    2 │ delete a.c;
+    3 │ 
+  > 4 │ var foo = "";
+      │ ^^^^^^^^^^^^
+    5 │ 
+  
+  i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
+  
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'const' instead.
+  
+    2 2 │   delete a.c;
+    3 3 │   
+    4   │ - var·foo·=·"";
+      4 │ + const·foo·=·"";
+    5 5 │   
+  
+
+```
+
+```block
+Checked 1 file(s) in <TIME>
+```
+
+

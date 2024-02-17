@@ -1,8 +1,10 @@
 use crate::file_handlers::{
-    javascript, AnalyzerCapabilities, Capabilities, DebugCapabilities, ExtensionHandler,
-    FormatterCapabilities, Language, Mime, ParserCapabilities,
+    javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime,
+    ParserCapabilities,
 };
 use crate::settings::SettingsHandle;
+use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
@@ -91,10 +93,10 @@ impl ExtensionHandler for VueFileHandler {
                 debug_formatter_ir: None,
             },
             analyzer: AnalyzerCapabilities {
-                lint: None,
-                code_actions: None,
+                lint: Some(lint),
+                code_actions: Some(code_actions),
                 rename: None,
-                fix_all: None,
+                fix_all: Some(fix_all),
                 organize_imports: None,
             },
             formatter: FormatterCapabilities {
@@ -108,7 +110,7 @@ impl ExtensionHandler for VueFileHandler {
 
 fn parse(
     _rome_path: &RomePath,
-    _language_hint: crate::file_handlers::Language,
+    _language_hint: Language,
     text: &str,
     _settings: SettingsHandle,
     cache: &mut NodeCache,
@@ -137,4 +139,16 @@ fn format(
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format(rome_path, parse, settings)
+}
+
+pub(crate) fn lint(params: LintParams) -> LintResults {
+    javascript::lint(params)
+}
+
+pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
+    javascript::code_actions(params)
+}
+
+fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+    javascript::fix_all(params)
 }
