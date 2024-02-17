@@ -14,6 +14,7 @@ use crate::syntax::property::{is_at_any_property, parse_any_property};
 use crate::syntax::selector::is_nth_at_selector;
 use crate::syntax::selector::relative_selector::{is_at_relative_selector, RelativeSelectorList};
 use crate::syntax::selector::SelectorList;
+use crate::syntax::value::function::BINARY_OPERATION_TOKEN;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -23,7 +24,6 @@ use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser};
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
 use value::function::{is_at_any_function, parse_any_function};
-use crate::syntax::value::function::BINARY_OPERATION_TOKEN;
 
 use self::parse_error::{expected_component_value, expected_declaration_item, expected_number};
 pub(crate) fn parse_root(p: &mut CssParser) {
@@ -296,7 +296,7 @@ impl ParseNodeList for CssComponentValueList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-       p.at(T![,]) || p.at(T![')']) || p.at_ts(BINARY_OPERATION_TOKEN)
+        p.at(T![,]) || p.at(T![')']) || p.at_ts(BINARY_OPERATION_TOKEN)
     }
 
     fn recover(

@@ -103,6 +103,11 @@ CssRoot {
                             SEMICOLON@94..95 ";" [] [],
                         ],
                     },
+                    CssDeclarationListBlock {
+                        l_curly_token: missing (required),
+                        declarations: CssDeclarationList [],
+                        r_curly_token: missing (required),
+                    },
                 ],
             },
         },
@@ -162,6 +167,10 @@ CssRoot {
         1: CSS_BOGUS@89..95
           0: IDENT@89..94 "ident" [] []
           1: SEMICOLON@94..95 ";" [] []
+        2: CSS_DECLARATION_LIST_BLOCK@95..95
+          0: (empty)
+          1: CSS_DECLARATION_LIST@95..95
+          2: (empty)
   2: EOF@95..96 "" [Newline("\n")] []
 
 ```
@@ -265,14 +274,14 @@ at_rule_property_error.css:9:11 parse ━━━━━━━━━━━━━━
   
 at_rule_property_error.css:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found the end of the file.
+  × expected `{` but instead the file ends
   
      8 │ }
      9 │ @property ident;
   > 10 │ 
        │ 
   
-  i Expected a body here.
+  i the file ends here
   
      8 │ }
      9 │ @property ident;

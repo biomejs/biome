@@ -8,7 +8,7 @@ use biome_parser::TokenSet;
 use biome_parser::{parsed_syntax::ParsedSyntax, Parser};
 
 use crate::parser::CssParser;
-use crate::syntax::blocks::parse_or_recover_declaration_list_block;
+use crate::syntax::blocks::parse_declaration_list_block;
 use crate::syntax::parse_dashed_identifier;
 use crate::syntax::parse_error::expected_dashed_identifier;
 
@@ -41,9 +41,7 @@ pub(crate) fn parse_property_at_rule(p: &mut CssParser) -> ParsedSyntax {
         CSS_BOGUS_AT_RULE
     };
 
-    if parse_or_recover_declaration_list_block(p).is_err() {
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
-    }
+    parse_declaration_list_block(p);
 
     Present(m.complete(p, kind))
 }

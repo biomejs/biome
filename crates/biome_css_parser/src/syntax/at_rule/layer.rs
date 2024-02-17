@@ -2,7 +2,7 @@ use crate::parser::CssParser;
 
 use crate::syntax::blocks::parse_rule_list_block;
 use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::{parse_regular_identifier};
+use crate::syntax::parse_regular_identifier;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;

@@ -185,7 +185,8 @@ impl ParseNodeList for GenericComponentValueList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(CSS_END_OF_PROPERTY_VALUE_TOKEN_SET) || p.at(T![')']) || p.at(T![!]) // !important
+        p.at_ts(CSS_END_OF_PROPERTY_VALUE_TOKEN_SET) || p.at(T![')']) || p.at(T![!])
+        // !important
     }
 
     fn recover(
