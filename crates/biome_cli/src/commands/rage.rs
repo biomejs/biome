@@ -260,7 +260,9 @@ where
     T: Serialize,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        write!(f, "{}", serde_json::to_string(&self.0).unwrap())
+        let str = serde_json::to_string(&self.0)
+            .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to serialize"))?;
+        write!(f, "{}", str)
     }
 }
 
