@@ -15,7 +15,7 @@ use regex::Regex;
 use tracing::debug;
 
 #[derive(Debug, Default, PartialEq, Eq)]
-pub(crate) struct VueFileHandler;
+pub struct VueFileHandler;
 
 lazy_static! {
     // https://regex101.com/r/E4n4hh/3
@@ -29,6 +29,48 @@ lazy_static! {
         [^>]*>\n(?P<script>(?U:.*))</script>"#
     )
     .unwrap();
+}
+
+impl VueFileHandler {
+    /// It extracts the JavaScript/TypeScript code contained in the script block of a Vue file
+    ///
+    /// If there's no script block, an empty string is returned.
+    pub fn vue_input(text: &str) -> &str {
+        let script = VUE_FENCE
+            .captures(&text)
+            .and_then(|captures| captures.name("script"));
+        match script {
+            Some(script) => &text[script.start()..script.end()],
+            _ => "",
+        }
+    }
+
+    pub fn vue_output(input: &str, output: &str) -> String {
+        if let Some(script) = VUE_FENCE
+            .captures(&input)
+            .and_then(|captures| captures.name("script"))
+        {
+            format!(
+                "{}{}{}",
+                &input[..script.start()],
+                output,
+                &input[script.end()..]
+            )
+        } else {
+            input.to_string()
+        }
+    }
+
+    pub fn vue_script_language(text: &str) -> JsFileSource {
+        let matches = VUE_FENCE.captures(text);
+        matches
+            .and_then(|captures| captures.name("lang"))
+            .map(|lang| match lang.as_str() {
+                "ts" => JsFileSource::ts(),
+                _ => JsFileSource::js_module(),
+            })
+            .unwrap_or(JsFileSource::js_module())
+    }
 }
 
 impl ExtensionHandler for VueFileHandler {
@@ -71,19 +113,8 @@ fn parse(
     _settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> AnyParse {
-    let matches = VUE_FENCE.captures(text);
-    let script = match matches {
-        Some(ref captures) => &text[captures.name("script").unwrap().range()],
-        _ => "",
-    };
-
-    let language = matches
-        .and_then(|captures| captures.name("lang"))
-        .map(|lang| match lang.as_str() {
-            "ts" => JsFileSource::ts(),
-            _ => JsFileSource::js_module(),
-        })
-        .unwrap_or(JsFileSource::js_module());
+    let script = VueFileHandler::vue_input(text);
+    let language = VueFileHandler::vue_script_language(text);
 
     debug!("Parsing file with language {:?}", language);
 

@@ -5,7 +5,7 @@ use crate::execute::process_file::{
 };
 use crate::execute::TraversalMode;
 use biome_diagnostics::{category, DiagnosticExt};
-use biome_service::file_handlers::{AstroFileHandler, SVELTE_FENCE, VUE_FENCE};
+use biome_service::file_handlers::{AstroFileHandler, VueFileHandler, SVELTE_FENCE};
 use biome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;
@@ -80,17 +80,7 @@ pub(crate) fn format_with_guard<'ctx>(
                     if output.is_empty() {
                         return Ok(FileStatus::Ignored);
                     }
-                    if let Some(script) = VUE_FENCE
-                        .captures(&input)
-                        .and_then(|captures| captures.name("script"))
-                    {
-                        output = format!(
-                            "{}{}{}",
-                            &input[..script.start()],
-                            output.as_str(),
-                            &input[script.end()..]
-                        );
-                    }
+                    output = VueFileHandler::vue_output(input.as_str(), output.as_str());
                 }
 
                 Some("svelte") => {
