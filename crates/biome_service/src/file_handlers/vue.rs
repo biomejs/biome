@@ -37,7 +37,7 @@ impl VueFileHandler {
     /// If there's no script block, an empty string is returned.
     pub fn vue_input(text: &str) -> &str {
         let script = VUE_FENCE
-            .captures(&text)
+            .captures(text)
             .and_then(|captures| captures.name("script"));
         match script {
             Some(script) => &text[script.start()..script.end()],
@@ -47,7 +47,7 @@ impl VueFileHandler {
 
     pub fn vue_output(input: &str, output: &str) -> String {
         if let Some(script) = VUE_FENCE
-            .captures(&input)
+            .captures(input)
             .and_then(|captures| captures.name("script"))
         {
             format!(
