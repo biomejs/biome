@@ -193,7 +193,14 @@ fn with_linter_configuration() {
     "rules": {
       "recommended": true,
       "a11y": {
-        "noAccessKey": "off"
+        "noAccessKey": "off",
+        "noAutofocus": "off"
+      },
+      "complexity": {
+        "recommended": true
+      },
+      "correctness": {
+        "all": true
       },
       "nursery": {
         "useConsistentArrayType": {

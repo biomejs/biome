@@ -6,6 +6,8 @@ use biome_fs::FileSystem;
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{client, RageEntry, RageParams};
 use biome_service::{ConfigurationBasePath, DynRef, Workspace};
+use serde_json::Value;
+use std::collections::HashMap;
 use std::{env, io, ops::Deref};
 use tokio::runtime::Runtime;
 
@@ -211,14 +213,7 @@ impl Display for RageConfiguration<'_, '_> {
                             {Section("Linter rules")}
                             {KeyValuePair("Recommend", markup!({DebugDisplay(configuration.get_linter_rules().recommended.unwrap_or(false))}))}
                             {KeyValuePair("All", markup!({DebugDisplay(configuration.get_linter_rules().all.unwrap_or(false))}))}
-                            {KeyValuePair("A11y", markup!({DebugDisplayJson(configuration.get_linter_rules().a11y)}))}
-                            {KeyValuePair("Complexity", markup!({DebugDisplayJson(configuration.get_linter_rules().complexity)}))}
-                            {KeyValuePair("Correctness", markup!({DebugDisplayJson(configuration.get_linter_rules().correctness)}))}
-                            {KeyValuePair("Nursery", markup!({DebugDisplayJson(configuration.get_linter_rules().nursery)}))}
-                            {KeyValuePair("Performance", markup!({DebugDisplayJson(configuration.get_linter_rules().performance)}))}
-                            {KeyValuePair("Security", markup!({DebugDisplayJson(configuration.get_linter_rules().security)}))}
-                            {KeyValuePair("Style", markup!({DebugDisplayJson(configuration.get_linter_rules().style)}))}
-                            {KeyValuePair("Suspicious", markup!({DebugDisplayJson(configuration.get_linter_rules().suspicious)}))}
+                            {RageConfigurationRules(configuration.get_linter_rules())}
                         ).fmt(fmt)?
                     } else {
                         markup! (
@@ -242,6 +237,52 @@ impl Display for RageConfiguration<'_, '_> {
     }
 }
 
+struct RageConfigurationRules<T>(T);
+
+impl<T> Display for RageConfigurationRules<T>
+where
+    T: Serialize,
+{
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
+        let rules_str = "Rules";
+        write!(fmt, "  {rules_str}:")?;
+
+        let rules_json_str = serde_json::to_string(&self.0)
+            .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to serialize"))?;
+        let data: HashMap<String, Value> = serde_json::from_str(rules_json_str.as_str())
+            .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to convert to HashMap"))?;
+
+        let mut keys: Vec<&String> = data.keys().collect();
+        keys.sort();
+
+        let first_padding_width = 30usize.saturating_sub(rules_str.len() + 1);
+        let mut padding_width = first_padding_width;
+
+        if keys.is_empty() {
+            for _ in 0..padding_width {
+                fmt.write_str(" ")?;
+            }
+            markup!(<Dim>"unset\n"</Dim>).fmt(fmt)?;
+        } else {
+            for key in keys {
+                if let Some(value) = data.get(key).and_then(Value::as_object) {
+                    for (sub_key, sub_value) in value {
+                        for _ in 0..padding_width {
+                            fmt.write_str(" ")?;
+                        }
+                        fmt.write_str(&format!("{}/{} = {}\n", key, sub_key, sub_value))?;
+                        if padding_width == first_padding_width {
+                            padding_width = 30usize.saturating_sub(0) + 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+
 struct DebugDisplay<T>(T);
 
 impl<T> Display for DebugDisplay<T>
@@ -250,19 +291,6 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> io::Result<()> {
         write!(f, "{:?}", self.0)
-    }
-}
-
-struct DebugDisplayJson<T>(T);
-
-impl<T> Display for DebugDisplayJson<T>
-where
-    T: Serialize,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        let str = serde_json::to_string(&self.0)
-            .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to serialize"))?;
-        write!(f, "{}", str)
     }
 }
 

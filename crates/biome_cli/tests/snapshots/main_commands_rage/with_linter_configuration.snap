@@ -11,7 +11,14 @@ expression: content
     "rules": {
       "recommended": true,
       "a11y": {
-        "noAccessKey": "off"
+        "noAccessKey": "off",
+        "noAutofocus": "off"
+      },
+      "complexity": {
+        "recommended": true
+      },
+      "correctness": {
+        "all": true
       },
       "nursery": {
         "useConsistentArrayType": {
@@ -63,14 +70,13 @@ Biome Configuration:
 Linter rules:
   Recommend:                    true
   All:                          false
-  A11y:                         {"noAccessKey":"off"}
-  Complexity:                   null
-  Correctness:                  null
-  Nursery:                      {"useConsistentArrayType":{"level":"warn","options":{"syntax":"shorthand"}}}
-  Performance:                  null
-  Security:                     null
-  Style:                        {"noNonNullAssertion":"off"}
-  Suspicious:                   {"noCommentText":{"level":"warn"}}
+  Rules:                        a11y/noAccessKey = "off"
+                                a11y/noAutofocus = "off"
+                                complexity/recommended = true
+                                correctness/all = true
+                                nursery/useConsistentArrayType = {"level":"warn","options":{"syntax":"shorthand"}}
+                                style/noNonNullAssertion = "off"
+                                suspicious/noCommentText = {"level":"warn"}
 
 Server:
   Version:                      0.0.0
