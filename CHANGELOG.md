@@ -33,6 +33,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Now the file name printed in the diagnostics is clickable. If you run the CLI from your editor, you can <kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd> + Click on the file name, and the editor will open said file. If row and columns are specified e.g. `file.js:32:7`, the editor will set the cursor right in that position. Contributed by @ematipico
 
+- Add option `--linter` to `biome rage`. The option is required to view Biome linter configuration.  Contributed by @seitarof
+
 #### Bug fixes
 
 - Don't process files under an ignored directory.

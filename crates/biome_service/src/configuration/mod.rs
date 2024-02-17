@@ -153,6 +153,13 @@ impl PartialConfiguration {
             .unwrap_or(false)
     }
 
+    pub fn get_linter_rules(&self) -> Rules {
+        self.linter
+            .as_ref()
+            .map(|f| f.get_rules())
+            .unwrap_or_default()
+    }
+
     pub fn is_organize_imports_disabled(&self) -> bool {
         self.organize_imports
             .as_ref()

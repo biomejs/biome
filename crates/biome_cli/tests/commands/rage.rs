@@ -181,6 +181,58 @@ Not most recent log file
     ));
 }
 
+#[test]
+fn with_linter_configuration() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        Path::new("biome.json").to_path_buf(),
+        r#"{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noAccessKey": "off"
+      },
+      "nursery": {
+        "useConsistentArrayType": {
+          "level": "warn",
+          "options": {
+            "syntax": "shorthand"
+          }
+        }
+      },
+      "suspicious": {
+        "noCommentText": {
+          "level": "warn"
+        }
+      },
+      "style": {
+        "noNonNullAssertion": "off"
+      }
+    }
+  }
+}"#,
+    );
+
+    let result = run_rage(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("rage"), "--linter"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_linter_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
 /// Runs the `rage` command mocking out the log directory.
 fn run_rage<'app>(
     fs: DynRef<'app, dyn FileSystem>,
