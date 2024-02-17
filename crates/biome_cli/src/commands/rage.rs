@@ -222,12 +222,12 @@ impl Display for RageConfiguration<'_, '_> {
                         ).fmt(fmt)?
                     } else {
                         markup! (
-                    {KeyValuePair("Status", status)}
-                    {KeyValuePair("Formatter disabled", markup!({DebugDisplay(configuration.is_formatter_disabled())}))}
-                    {KeyValuePair("Linter disabled", markup!({DebugDisplay(configuration.is_linter_disabled())}))}
-                    {KeyValuePair("Organize imports disabled", markup!({DebugDisplay(configuration.is_organize_imports_disabled())}))}
-                    {KeyValuePair("VCS disabled", markup!({DebugDisplay(configuration.is_vcs_disabled())}))}
-                ).fmt(fmt)?
+                            {KeyValuePair("Status", status)}
+                            {KeyValuePair("Formatter disabled", markup!({DebugDisplay(configuration.is_formatter_disabled())}))}
+                            {KeyValuePair("Linter disabled", markup!({DebugDisplay(configuration.is_linter_disabled())}))}
+                            {KeyValuePair("Organize imports disabled", markup!({DebugDisplay(configuration.is_organize_imports_disabled())}))}
+                            {KeyValuePair("VCS disabled", markup!({DebugDisplay(configuration.is_vcs_disabled())}))}
+                        ).fmt(fmt)?
                     }
                 }
             }
