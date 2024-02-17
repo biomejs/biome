@@ -5,8 +5,7 @@ use self::{
 pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
 use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::svelte::SVELTE_FENCE;
-use crate::file_handlers::vue::VueFileHandler;
-pub use crate::file_handlers::vue::VUE_FENCE;
+pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
     settings::SettingsHandle,
@@ -192,6 +191,7 @@ impl Language {
                 | Language::JavaScriptReact
                 | Language::TypeScriptReact
                 | Language::Astro
+                | Language::Vue
         )
     }
 
