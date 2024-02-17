@@ -5,7 +5,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_syntax::{global_identifier, AnyJsMemberExpression, JsCallExpression};
+use biome_js_syntax::{
+    global_identifier, AnyJsMemberExpression, JsCallExpression, JsExpressionStatement,
+};
 use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_rule! {
@@ -65,6 +67,7 @@ impl Rule for NoConsoleLog {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
+        let node = JsExpressionStatement::cast(node.syntax().parent()?)?;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -86,6 +89,11 @@ impl Rule for NoConsoleLog {
         let call_expression = ctx.query();
         let mut mutation = ctx.root().begin();
 
+        if let Some(stmt) = JsExpressionStatement::cast(call_expression.syntax().parent()?) {
+            if stmt.semicolon_token().is_some() {
+                mutation.remove_node(stmt);
+            }
+        }
         mutation.remove_node(call_expression.clone());
 
         Some(JsRuleAction {
