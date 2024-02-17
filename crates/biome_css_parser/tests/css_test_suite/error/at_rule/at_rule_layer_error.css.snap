@@ -25,96 +25,80 @@ CssRoot {
                 layer_token: LAYER_KW@1..7 "layer" [] [Whitespace(" ")],
                 layer: CssBogusLayer {
                     items: [
-                        CssLayerReferenceList [
-                            CssLayerNameList [
-                                CssIdentifier {
-                                    value_token: IDENT@7..17 "framework" [] [Whitespace(" ")],
+                        CssBogus {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        CssIdentifier {
+                                            value_token: IDENT@7..17 "framework" [] [Whitespace(" ")],
+                                        },
+                                        CssBogus {
+                                            items: [
+                                                R_CURLY@17..18 "}" [] [],
+                                                AT@18..20 "@" [Newline("\n")] [],
+                                                LAYER_KW@20..26 "layer" [] [Whitespace(" ")],
+                                                IDENT@26..35 "framework" [] [],
+                                            ],
+                                        },
+                                    ],
                                 },
+                                COMMA@35..37 "," [] [Whitespace(" ")],
+                                CssLayerNameList [
+                                    CssIdentifier {
+                                        value_token: IDENT@37..48 "override" [] [Whitespace("   ")],
+                                    },
+                                ],
+                                COMMA@48..53 "," [] [Whitespace("    ")],
+                                CssLayerNameList [
+                                    CssIdentifier {
+                                        value_token: IDENT@53..59 "foo" [] [Whitespace("   ")],
+                                    },
+                                ],
+                                COMMA@59..61 "," [] [Whitespace(" ")],
+                                CssBogus {
+                                    items: [
+                                        CssIdentifier {
+                                            value_token: IDENT@61..64 "bar" [] [],
+                                        },
+                                        DOT@64..65 "." [] [],
+                                        CssIdentifier {
+                                            value_token: IDENT@65..68 "baz" [] [],
+                                        },
+                                        CssBogus {
+                                            items: [
+                                                AT@68..70 "@" [Newline("\n")] [],
+                                                LAYER_KW@70..76 "layer" [] [Whitespace(" ")],
+                                                IDENT@76..85 "framework" [] [],
+                                            ],
+                                        },
+                                    ],
+                                },
+                                COMMA@85..87 "," [] [Whitespace(" ")],
+                                CssLayerNameList [
+                                    CssIdentifier {
+                                        value_token: IDENT@87..98 "override" [] [Whitespace("   ")],
+                                    },
+                                ],
+                                COMMA@98..103 "," [] [Whitespace("    ")],
+                                CssLayerNameList [
+                                    CssIdentifier {
+                                        value_token: IDENT@103..109 "foo" [] [Whitespace("   ")],
+                                    },
+                                ],
+                                COMMA@109..111 "," [] [Whitespace(" ")],
+                                CssLayerNameList [
+                                    CssIdentifier {
+                                        value_token: IDENT@111..114 "bar" [] [],
+                                    },
+                                    DOT@114..115 "." [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@115..118 "baz" [] [],
+                                    },
+                                ],
                             ],
-                        ],
+                        },
+                        SEMICOLON@118..119 ";" [] [],
                     ],
-                },
-            },
-        },
-        CssBogusRule {
-            items: [
-                R_CURLY@17..18 "}" [] [],
-            ],
-        },
-        CssAtRule {
-            at_token: AT@18..20 "@" [Newline("\n")] [],
-            rule: CssLayerAtRule {
-                layer_token: LAYER_KW@20..26 "layer" [] [Whitespace(" ")],
-                layer: CssBogusLayer {
-                    items: [
-                        CssLayerReferenceList [
-                            CssLayerNameList [
-                                CssIdentifier {
-                                    value_token: IDENT@26..35 "framework" [] [],
-                                },
-                            ],
-                            COMMA@35..37 "," [] [Whitespace(" ")],
-                            CssLayerNameList [
-                                CssIdentifier {
-                                    value_token: IDENT@37..48 "override" [] [Whitespace("   ")],
-                                },
-                            ],
-                            COMMA@48..53 "," [] [Whitespace("    ")],
-                            CssLayerNameList [
-                                CssIdentifier {
-                                    value_token: IDENT@53..59 "foo" [] [Whitespace("   ")],
-                                },
-                            ],
-                            COMMA@59..61 "," [] [Whitespace(" ")],
-                            CssLayerNameList [
-                                CssIdentifier {
-                                    value_token: IDENT@61..64 "bar" [] [],
-                                },
-                                DOT@64..65 "." [] [],
-                                CssIdentifier {
-                                    value_token: IDENT@65..68 "baz" [] [],
-                                },
-                            ],
-                        ],
-                    ],
-                },
-            },
-        },
-        CssAtRule {
-            at_token: AT@68..70 "@" [Newline("\n")] [],
-            rule: CssLayerAtRule {
-                layer_token: LAYER_KW@70..76 "layer" [] [Whitespace(" ")],
-                layer: CssLayerReference {
-                    references: CssLayerReferenceList [
-                        CssLayerNameList [
-                            CssIdentifier {
-                                value_token: IDENT@76..85 "framework" [] [],
-                            },
-                        ],
-                        COMMA@85..87 "," [] [Whitespace(" ")],
-                        CssLayerNameList [
-                            CssIdentifier {
-                                value_token: IDENT@87..98 "override" [] [Whitespace("   ")],
-                            },
-                        ],
-                        COMMA@98..103 "," [] [Whitespace("    ")],
-                        CssLayerNameList [
-                            CssIdentifier {
-                                value_token: IDENT@103..109 "foo" [] [Whitespace("   ")],
-                            },
-                        ],
-                        COMMA@109..111 "," [] [Whitespace(" ")],
-                        CssLayerNameList [
-                            CssIdentifier {
-                                value_token: IDENT@111..114 "bar" [] [],
-                            },
-                            DOT@114..115 "." [] [],
-                            CssIdentifier {
-                                value_token: IDENT@115..118 "baz" [] [],
-                            },
-                        ],
-                    ],
-                    semicolon_token: SEMICOLON@118..119 ";" [] [],
                 },
             },
         },
@@ -129,26 +113,20 @@ CssRoot {
 0: CSS_ROOT@0..120
   0: (empty)
   1: CSS_RULE_LIST@0..119
-    0: CSS_AT_RULE@0..17
+    0: CSS_AT_RULE@0..119
       0: AT@0..1 "@" [] []
-      1: CSS_LAYER_AT_RULE@1..17
+      1: CSS_LAYER_AT_RULE@1..119
         0: LAYER_KW@1..7 "layer" [] [Whitespace(" ")]
-        1: CSS_BOGUS_LAYER@7..17
-          0: CSS_LAYER_REFERENCE_LIST@7..17
-            0: CSS_LAYER_NAME_LIST@7..17
+        1: CSS_BOGUS_LAYER@7..119
+          0: CSS_BOGUS@7..118
+            0: CSS_BOGUS@7..35
               0: CSS_IDENTIFIER@7..17
                 0: IDENT@7..17 "framework" [] [Whitespace(" ")]
-    1: CSS_BOGUS_RULE@17..18
-      0: R_CURLY@17..18 "}" [] []
-    2: CSS_AT_RULE@18..68
-      0: AT@18..20 "@" [Newline("\n")] []
-      1: CSS_LAYER_AT_RULE@20..68
-        0: LAYER_KW@20..26 "layer" [] [Whitespace(" ")]
-        1: CSS_BOGUS_LAYER@26..68
-          0: CSS_LAYER_REFERENCE_LIST@26..68
-            0: CSS_LAYER_NAME_LIST@26..35
-              0: CSS_IDENTIFIER@26..35
-                0: IDENT@26..35 "framework" [] []
+              1: CSS_BOGUS@17..35
+                0: R_CURLY@17..18 "}" [] []
+                1: AT@18..20 "@" [Newline("\n")] []
+                2: LAYER_KW@20..26 "layer" [] [Whitespace(" ")]
+                3: IDENT@26..35 "framework" [] []
             1: COMMA@35..37 "," [] [Whitespace(" ")]
             2: CSS_LAYER_NAME_LIST@37..48
               0: CSS_IDENTIFIER@37..48
@@ -158,31 +136,26 @@ CssRoot {
               0: CSS_IDENTIFIER@53..59
                 0: IDENT@53..59 "foo" [] [Whitespace("   ")]
             5: COMMA@59..61 "," [] [Whitespace(" ")]
-            6: CSS_LAYER_NAME_LIST@61..68
+            6: CSS_BOGUS@61..85
               0: CSS_IDENTIFIER@61..64
                 0: IDENT@61..64 "bar" [] []
               1: DOT@64..65 "." [] []
               2: CSS_IDENTIFIER@65..68
                 0: IDENT@65..68 "baz" [] []
-    3: CSS_AT_RULE@68..119
-      0: AT@68..70 "@" [Newline("\n")] []
-      1: CSS_LAYER_AT_RULE@70..119
-        0: LAYER_KW@70..76 "layer" [] [Whitespace(" ")]
-        1: CSS_LAYER_REFERENCE@76..119
-          0: CSS_LAYER_REFERENCE_LIST@76..118
-            0: CSS_LAYER_NAME_LIST@76..85
-              0: CSS_IDENTIFIER@76..85
-                0: IDENT@76..85 "framework" [] []
-            1: COMMA@85..87 "," [] [Whitespace(" ")]
-            2: CSS_LAYER_NAME_LIST@87..98
+              3: CSS_BOGUS@68..85
+                0: AT@68..70 "@" [Newline("\n")] []
+                1: LAYER_KW@70..76 "layer" [] [Whitespace(" ")]
+                2: IDENT@76..85 "framework" [] []
+            7: COMMA@85..87 "," [] [Whitespace(" ")]
+            8: CSS_LAYER_NAME_LIST@87..98
               0: CSS_IDENTIFIER@87..98
                 0: IDENT@87..98 "override" [] [Whitespace("   ")]
-            3: COMMA@98..103 "," [] [Whitespace("    ")]
-            4: CSS_LAYER_NAME_LIST@103..109
+            9: COMMA@98..103 "," [] [Whitespace("    ")]
+            10: CSS_LAYER_NAME_LIST@103..109
               0: CSS_IDENTIFIER@103..109
                 0: IDENT@103..109 "foo" [] [Whitespace("   ")]
-            5: COMMA@109..111 "," [] [Whitespace(" ")]
-            6: CSS_LAYER_NAME_LIST@111..118
+            11: COMMA@109..111 "," [] [Whitespace(" ")]
+            12: CSS_LAYER_NAME_LIST@111..118
               0: CSS_IDENTIFIER@111..114
                 0: IDENT@111..114 "bar" [] []
               1: DOT@114..115 "." [] []
@@ -198,7 +171,7 @@ CssRoot {
 ```
 at_rule_layer_error.css:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `;` but instead found `}`
+  × expected `.` but instead found `}`
   
   > 1 │ @layer framework }
       │                  ^
@@ -209,7 +182,7 @@ at_rule_layer_error.css:1:18 parse ━━━━━━━━━━━━━━━
   
 at_rule_layer_error.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `;` but instead found `@`
+  × expected `.` but instead found `@`
   
     1 │ @layer framework }
     2 │ @layer framework, override   ,    foo   , bar.baz

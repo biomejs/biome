@@ -93,104 +93,103 @@ CssRoot {
     rules: CssRuleList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssBogusAtRule {
-                items: [
-                    KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")],
-                    CssKeyframesBlock {
-                        l_curly_token: L_CURLY@11..12 "{" [] [],
-                        items: CssKeyframesItemList [
-                            CssKeyframesItem {
-                                selectors: CssKeyframesSelectorList [
-                                    CssKeyframesIdentSelector {
-                                        selector: FROM_KW@12..19 "from" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
-                                    },
-                                ],
-                                block: CssDeclarationListBlock {
-                                    l_curly_token: L_CURLY@19..20 "{" [] [],
-                                    declarations: CssDeclarationList [
-                                        CssDeclaration {
-                                            property: CssGenericProperty {
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@20..32 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                                },
-                                                colon_token: COLON@32..34 ":" [] [Whitespace(" ")],
-                                                value: CssGenericComponentValueList [
-                                                    CssFunction {
-                                                        name: CssIdentifier {
-                                                            value_token: IDENT@34..44 "translateX" [] [],
-                                                        },
-                                                        l_paren_token: L_PAREN@44..45 "(" [] [],
-                                                        items: CssParameterList [
-                                                            CssParameter {
-                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@45..46 "0" [] [],
-                                                                            percent_token: PERCENT@46..47 "%" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
-                                                            },
-                                                        ],
-                                                        r_paren_token: R_PAREN@47..48 ")" [] [],
-                                                    },
-                                                ],
-                                            },
-                                            important: missing (optional),
-                                        },
-                                        SEMICOLON@48..49 ";" [] [],
-                                    ],
-                                    r_curly_token: R_CURLY@49..52 "}" [Newline("\n"), Whitespace("\t")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")],
+                name: missing (required),
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@11..12 "{" [] [],
+                    items: CssKeyframesItemList [
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesIdentSelector {
+                                    selector: FROM_KW@12..19 "from" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                                 },
-                            },
-                            CssKeyframesItem {
-                                selectors: CssKeyframesSelectorList [
-                                    CssKeyframesIdentSelector {
-                                        selector: TO_KW@52..58 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
-                                    },
-                                ],
-                                block: CssDeclarationListBlock {
-                                    l_curly_token: L_CURLY@58..59 "{" [] [],
-                                    declarations: CssDeclarationList [
-                                        CssDeclaration {
-                                            property: CssGenericProperty {
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@59..71 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                                },
-                                                colon_token: COLON@71..73 ":" [] [Whitespace(" ")],
-                                                value: CssGenericComponentValueList [
-                                                    CssFunction {
-                                                        name: CssIdentifier {
-                                                            value_token: IDENT@73..83 "translateX" [] [],
-                                                        },
-                                                        l_paren_token: L_PAREN@83..84 "(" [] [],
-                                                        items: CssParameterList [
-                                                            CssParameter {
-                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@84..87 "100" [] [],
-                                                                            percent_token: PERCENT@87..88 "%" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
-                                                            },
-                                                        ],
-                                                        r_paren_token: R_PAREN@88..89 ")" [] [],
-                                                    },
-                                                ],
+                            ],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@19..20 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@20..32 "transform" [Newline("\n"), Whitespace("\t\t")] [],
                                             },
-                                            important: missing (optional),
+                                            colon_token: COLON@32..34 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@34..44 "translateX" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@44..45 "(" [] [],
+                                                    items: CssParameterList [
+                                                        CssParameter {
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@45..46 "0" [] [],
+                                                                        percent_token: PERCENT@46..47 "%" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@47..48 ")" [] [],
+                                                },
+                                            ],
                                         },
-                                        SEMICOLON@89..90 ";" [] [],
-                                    ],
-                                    r_curly_token: R_CURLY@90..93 "}" [Newline("\n"), Whitespace("\t")] [],
-                                },
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@48..49 ";" [] [],
+                                ],
+                                r_curly_token: R_CURLY@49..52 "}" [Newline("\n"), Whitespace("\t")] [],
                             },
-                        ],
-                        r_curly_token: R_CURLY@93..95 "}" [Newline("\n")] [],
-                    },
-                ],
+                        },
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesIdentSelector {
+                                    selector: TO_KW@52..58 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                },
+                            ],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@58..59 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@59..71 "transform" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@71..73 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@73..83 "translateX" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@83..84 "(" [] [],
+                                                    items: CssParameterList [
+                                                        CssParameter {
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@84..87 "100" [] [],
+                                                                        percent_token: PERCENT@87..88 "%" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@88..89 ")" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@89..90 ";" [] [],
+                                ],
+                                r_curly_token: R_CURLY@90..93 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@93..95 "}" [Newline("\n")] [],
+                },
             },
         },
         CssAtRule {
@@ -460,104 +459,98 @@ CssRoot {
                 block: CssKeyframesBlock {
                     l_curly_token: L_CURLY@412..413 "{" [] [],
                     items: CssKeyframesItemList [
-                        CssBogusKeyframesItem {
-                            items: [
-                                CssKeyframesSelectorList [
-                                    CssKeyframesIdentSelector {
-                                        selector: FROM_KW@413..419 "from" [Newline("\n"), Whitespace("\t")] [],
-                                    },
-                                ],
-                                CssBogusBlock {
-                                    items: [
-                                        IDENT@419..431 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                        COLON@431..433 ":" [] [Whitespace(" ")],
-                                        IDENT@433..443 "translateX" [] [],
-                                        L_PAREN@443..444 "(" [] [],
-                                    ],
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesIdentSelector {
+                                    selector: FROM_KW@413..419 "from" [Newline("\n"), Whitespace("\t")] [],
                                 },
                             ],
-                        },
-                        CssBogusKeyframesItem {
-                            items: [
-                                CssKeyframesSelectorList [
-                                    CssKeyframesPercentageSelector {
-                                        selector: CssPercentage {
-                                            value_token: CSS_NUMBER_LITERAL@444..445 "0" [] [],
-                                            percent_token: PERCENT@445..446 "%" [] [],
-                                        },
-                                    },
-                                    missing separator,
-                                    CssBogusSelector {
-                                        items: [
-                                            R_PAREN@446..447 ")" [] [],
-                                            SEMICOLON@447..448 ";" [] [],
-                                        ],
-                                    },
-                                ],
-                            ],
-                        },
-                    ],
-                    r_curly_token: R_CURLY@448..451 "}" [Newline("\n"), Whitespace("\t")] [],
-                },
-            },
-        },
-        CssQualifiedRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: CssTypeSelector {
-                        namespace: missing (optional),
-                        ident: CssIdentifier {
-                            value_token: IDENT@451..457 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
-                        },
-                    },
-                    sub_selectors: CssSubSelectorList [],
-                },
-            ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@457..458 "{" [] [],
-                items: CssDeclarationOrRuleList [
-                    CssDeclarationWithSemicolon {
-                        declaration: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssIdentifier {
-                                    value_token: IDENT@458..470 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                },
-                                colon_token: COLON@470..472 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssFunction {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@472..482 "translateX" [] [],
-                                        },
-                                        l_paren_token: L_PAREN@482..483 "(" [] [],
-                                        items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssPercentage {
-                                                            value_token: CSS_NUMBER_LITERAL@483..486 "100" [] [],
-                                                            percent_token: PERCENT@486..487 "%" [] [],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: missing (required),
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@419..431 "transform" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@431..433 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@433..443 "translateX" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@443..444 "(" [] [],
+                                                    items: CssParameterList [
+                                                        CssParameter {
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@444..445 "0" [] [],
+                                                                        percent_token: PERCENT@445..446 "%" [] [],
+                                                                    },
+                                                                ],
+                                                            },
                                                         },
                                                     ],
+                                                    r_paren_token: R_PAREN@446..447 ")" [] [],
                                                 },
-                                            },
-                                        ],
-                                        r_paren_token: R_PAREN@487..488 ")" [] [],
+                                            ],
+                                        },
+                                        important: missing (optional),
                                     },
+                                    SEMICOLON@447..448 ";" [] [],
                                 ],
+                                r_curly_token: R_CURLY@448..451 "}" [Newline("\n"), Whitespace("\t")] [],
                             },
-                            important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@488..489 ";" [] [],
-                    },
-                ],
-                r_curly_token: R_CURLY@489..492 "}" [Newline("\n"), Whitespace("\t")] [],
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesIdentSelector {
+                                    selector: TO_KW@451..457 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                },
+                            ],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@457..458 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@458..470 "transform" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@470..472 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@472..482 "translateX" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@482..483 "(" [] [],
+                                                    items: CssParameterList [
+                                                        CssParameter {
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@483..486 "100" [] [],
+                                                                        percent_token: PERCENT@486..487 "%" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@487..488 ")" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@488..489 ";" [] [],
+                                ],
+                                r_curly_token: R_CURLY@489..492 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@492..494 "}" [Newline("\n")] [],
+                },
             },
-        },
-        CssBogusRule {
-            items: [
-                R_CURLY@492..494 "}" [Newline("\n")] [],
-            ],
         },
         CssAtRule {
             at_token: AT@494..497 "@" [Newline("\n"), Newline("\n")] [],
@@ -613,51 +606,54 @@ CssRoot {
                                 r_curly_token: R_CURLY@553..556 "}" [Newline("\n"), Whitespace("\t")] [],
                             },
                         },
-                        CssBogusKeyframesItem {
-                            items: [
-                                CssKeyframesSelectorList [
-                                    CssKeyframesIdentSelector {
-                                        selector: TO_KW@556..561 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
-                                    },
-                                ],
-                                CssBogusBlock {
-                                    items: [
-                                        IDENT@561..573 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                        COLON@573..575 ":" [] [Whitespace(" ")],
-                                        IDENT@575..585 "translateX" [] [],
-                                        L_PAREN@585..586 "(" [] [],
-                                    ],
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesIdentSelector {
+                                    selector: TO_KW@556..561 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
                                 },
                             ],
-                        },
-                        CssBogusKeyframesItem {
-                            items: [
-                                CssKeyframesSelectorList [
-                                    CssKeyframesPercentageSelector {
-                                        selector: CssPercentage {
-                                            value_token: CSS_NUMBER_LITERAL@586..589 "100" [] [],
-                                            percent_token: PERCENT@589..590 "%" [] [],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: missing (required),
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@561..573 "transform" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@573..575 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@575..585 "translateX" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@585..586 "(" [] [],
+                                                    items: CssParameterList [
+                                                        CssParameter {
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@586..589 "100" [] [],
+                                                                        percent_token: PERCENT@589..590 "%" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@590..591 ")" [] [],
+                                                },
+                                            ],
                                         },
+                                        important: missing (optional),
                                     },
-                                    missing separator,
-                                    CssBogusSelector {
-                                        items: [
-                                            R_PAREN@590..591 ")" [] [],
-                                            SEMICOLON@591..592 ";" [] [],
-                                        ],
-                                    },
+                                    SEMICOLON@591..592 ";" [] [],
                                 ],
-                            ],
+                                r_curly_token: R_CURLY@592..595 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
                         },
                     ],
-                    r_curly_token: R_CURLY@592..595 "}" [Newline("\n"), Whitespace("\t")] [],
+                    r_curly_token: R_CURLY@595..597 "}" [Newline("\n")] [],
                 },
             },
-        },
-        CssBogusRule {
-            items: [
-                R_CURLY@595..597 "}" [Newline("\n")] [],
-            ],
         },
         CssAtRule {
             at_token: AT@597..600 "@" [Newline("\n"), Newline("\n")] [],
@@ -837,18 +833,21 @@ CssRoot {
                                 r_curly_token: R_CURLY@818..819 "}" [] [],
                             },
                         },
-                        CssBogusKeyframesItem {
-                            items: [
-                                CssKeyframesSelectorList [
-                                    CssBogusSelector {
-                                        items: [
-                                            AT@819..822 "@" [Newline("\n"), Newline("\n")] [],
-                                            KEYFRAMES_KW@822..832 "keyframes" [] [Whitespace(" ")],
-                                            IDENT@832..839 "slidein" [] [],
-                                        ],
-                                    },
-                                ],
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssBogusSelector {
+                                    items: [
+                                        AT@819..822 "@" [Newline("\n"), Newline("\n")] [],
+                                        KEYFRAMES_KW@822..832 "keyframes" [] [Whitespace(" ")],
+                                        IDENT@832..839 "slidein" [] [],
+                                    ],
+                                },
                             ],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: missing (required),
+                                declarations: CssDeclarationList [],
+                                r_curly_token: missing (required),
+                            },
                         },
                     ],
                     r_curly_token: missing (required),
@@ -868,9 +867,10 @@ CssRoot {
   1: CSS_RULE_LIST@0..839
     0: CSS_AT_RULE@0..95
       0: AT@0..1 "@" [] []
-      1: CSS_BOGUS_AT_RULE@1..95
+      1: CSS_KEYFRAMES_AT_RULE@1..95
         0: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")]
-        1: CSS_KEYFRAMES_BLOCK@11..95
+        1: (empty)
+        2: CSS_KEYFRAMES_BLOCK@11..95
           0: L_CURLY@11..12 "{" [] []
           1: CSS_KEYFRAMES_ITEM_LIST@12..93
             0: CSS_KEYFRAMES_ITEM@12..52
@@ -1095,80 +1095,81 @@ CssRoot {
                     9: SEMICOLON@385..386 ";" [] []
                 2: R_CURLY@386..389 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@389..391 "}" [Newline("\n")] []
-    5: CSS_AT_RULE@391..451
+    5: CSS_AT_RULE@391..494
       0: AT@391..394 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_KEYFRAMES_AT_RULE@394..451
+      1: CSS_KEYFRAMES_AT_RULE@394..494
         0: KEYFRAMES_KW@394..404 "keyframes" [] [Whitespace(" ")]
         1: CSS_CUSTOM_IDENTIFIER@404..412
           0: IDENT@404..412 "slidein" [] [Whitespace(" ")]
-        2: CSS_KEYFRAMES_BLOCK@412..451
+        2: CSS_KEYFRAMES_BLOCK@412..494
           0: L_CURLY@412..413 "{" [] []
-          1: CSS_KEYFRAMES_ITEM_LIST@413..448
-            0: CSS_BOGUS_KEYFRAMES_ITEM@413..444
+          1: CSS_KEYFRAMES_ITEM_LIST@413..492
+            0: CSS_KEYFRAMES_ITEM@413..451
               0: CSS_KEYFRAMES_SELECTOR_LIST@413..419
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@413..419
                   0: FROM_KW@413..419 "from" [Newline("\n"), Whitespace("\t")] []
-              1: CSS_BOGUS_BLOCK@419..444
-                0: IDENT@419..431 "transform" [Newline("\n"), Whitespace("\t\t")] []
-                1: COLON@431..433 ":" [] [Whitespace(" ")]
-                2: IDENT@433..443 "translateX" [] []
-                3: L_PAREN@443..444 "(" [] []
-            1: CSS_BOGUS_KEYFRAMES_ITEM@444..448
-              0: CSS_KEYFRAMES_SELECTOR_LIST@444..448
-                0: CSS_KEYFRAMES_PERCENTAGE_SELECTOR@444..446
-                  0: CSS_PERCENTAGE@444..446
-                    0: CSS_NUMBER_LITERAL@444..445 "0" [] []
-                    1: PERCENT@445..446 "%" [] []
-                1: (empty)
-                2: CSS_BOGUS_SELECTOR@446..448
-                  0: R_PAREN@446..447 ")" [] []
+              1: CSS_DECLARATION_LIST_BLOCK@419..451
+                0: (empty)
+                1: CSS_DECLARATION_LIST@419..448
+                  0: CSS_DECLARATION@419..447
+                    0: CSS_GENERIC_PROPERTY@419..447
+                      0: CSS_IDENTIFIER@419..431
+                        0: IDENT@419..431 "transform" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@431..433 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@433..447
+                        0: CSS_FUNCTION@433..447
+                          0: CSS_IDENTIFIER@433..443
+                            0: IDENT@433..443 "translateX" [] []
+                          1: L_PAREN@443..444 "(" [] []
+                          2: CSS_PARAMETER_LIST@444..446
+                            0: CSS_PARAMETER@444..446
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@444..446
+                                0: CSS_COMPONENT_VALUE_LIST@444..446
+                                  0: CSS_PERCENTAGE@444..446
+                                    0: CSS_NUMBER_LITERAL@444..445 "0" [] []
+                                    1: PERCENT@445..446 "%" [] []
+                          3: R_PAREN@446..447 ")" [] []
+                    1: (empty)
                   1: SEMICOLON@447..448 ";" [] []
-          2: R_CURLY@448..451 "}" [Newline("\n"), Whitespace("\t")] []
-    6: CSS_QUALIFIED_RULE@451..492
-      0: CSS_SELECTOR_LIST@451..457
-        0: CSS_COMPOUND_SELECTOR@451..457
-          0: (empty)
-          1: CSS_TYPE_SELECTOR@451..457
-            0: (empty)
-            1: CSS_IDENTIFIER@451..457
-              0: IDENT@451..457 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-          2: CSS_SUB_SELECTOR_LIST@457..457
-      1: CSS_DECLARATION_OR_RULE_BLOCK@457..492
-        0: L_CURLY@457..458 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@458..489
-          0: CSS_DECLARATION_WITH_SEMICOLON@458..489
-            0: CSS_DECLARATION@458..488
-              0: CSS_GENERIC_PROPERTY@458..488
-                0: CSS_IDENTIFIER@458..470
-                  0: IDENT@458..470 "transform" [Newline("\n"), Whitespace("\t\t")] []
-                1: COLON@470..472 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@472..488
-                  0: CSS_FUNCTION@472..488
-                    0: CSS_IDENTIFIER@472..482
-                      0: IDENT@472..482 "translateX" [] []
-                    1: L_PAREN@482..483 "(" [] []
-                    2: CSS_PARAMETER_LIST@483..487
-                      0: CSS_PARAMETER@483..487
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@483..487
-                          0: CSS_COMPONENT_VALUE_LIST@483..487
-                            0: CSS_PERCENTAGE@483..487
-                              0: CSS_NUMBER_LITERAL@483..486 "100" [] []
-                              1: PERCENT@486..487 "%" [] []
-                    3: R_PAREN@487..488 ")" [] []
-              1: (empty)
-            1: SEMICOLON@488..489 ";" [] []
-        2: R_CURLY@489..492 "}" [Newline("\n"), Whitespace("\t")] []
-    7: CSS_BOGUS_RULE@492..494
-      0: R_CURLY@492..494 "}" [Newline("\n")] []
-    8: CSS_AT_RULE@494..595
+                2: R_CURLY@448..451 "}" [Newline("\n"), Whitespace("\t")] []
+            1: CSS_KEYFRAMES_ITEM@451..492
+              0: CSS_KEYFRAMES_SELECTOR_LIST@451..457
+                0: CSS_KEYFRAMES_IDENT_SELECTOR@451..457
+                  0: TO_KW@451..457 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+              1: CSS_DECLARATION_LIST_BLOCK@457..492
+                0: L_CURLY@457..458 "{" [] []
+                1: CSS_DECLARATION_LIST@458..489
+                  0: CSS_DECLARATION@458..488
+                    0: CSS_GENERIC_PROPERTY@458..488
+                      0: CSS_IDENTIFIER@458..470
+                        0: IDENT@458..470 "transform" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@470..472 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@472..488
+                        0: CSS_FUNCTION@472..488
+                          0: CSS_IDENTIFIER@472..482
+                            0: IDENT@472..482 "translateX" [] []
+                          1: L_PAREN@482..483 "(" [] []
+                          2: CSS_PARAMETER_LIST@483..487
+                            0: CSS_PARAMETER@483..487
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@483..487
+                                0: CSS_COMPONENT_VALUE_LIST@483..487
+                                  0: CSS_PERCENTAGE@483..487
+                                    0: CSS_NUMBER_LITERAL@483..486 "100" [] []
+                                    1: PERCENT@486..487 "%" [] []
+                          3: R_PAREN@487..488 ")" [] []
+                    1: (empty)
+                  1: SEMICOLON@488..489 ";" [] []
+                2: R_CURLY@489..492 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@492..494 "}" [Newline("\n")] []
+    6: CSS_AT_RULE@494..597
       0: AT@494..497 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_KEYFRAMES_AT_RULE@497..595
+      1: CSS_KEYFRAMES_AT_RULE@497..597
         0: KEYFRAMES_KW@497..507 "keyframes" [] [Whitespace(" ")]
         1: CSS_CUSTOM_IDENTIFIER@507..515
           0: IDENT@507..515 "slidein" [] [Whitespace(" ")]
-        2: CSS_KEYFRAMES_BLOCK@515..595
+        2: CSS_KEYFRAMES_BLOCK@515..597
           0: L_CURLY@515..516 "{" [] []
-          1: CSS_KEYFRAMES_ITEM_LIST@516..592
+          1: CSS_KEYFRAMES_ITEM_LIST@516..595
             0: CSS_KEYFRAMES_ITEM@516..556
               0: CSS_KEYFRAMES_SELECTOR_LIST@516..523
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@516..523
@@ -1197,29 +1198,36 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@552..553 ";" [] []
                 2: R_CURLY@553..556 "}" [Newline("\n"), Whitespace("\t")] []
-            1: CSS_BOGUS_KEYFRAMES_ITEM@556..586
+            1: CSS_KEYFRAMES_ITEM@556..595
               0: CSS_KEYFRAMES_SELECTOR_LIST@556..561
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@556..561
                   0: TO_KW@556..561 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
-              1: CSS_BOGUS_BLOCK@561..586
-                0: IDENT@561..573 "transform" [Newline("\n"), Whitespace("\t\t")] []
-                1: COLON@573..575 ":" [] [Whitespace(" ")]
-                2: IDENT@575..585 "translateX" [] []
-                3: L_PAREN@585..586 "(" [] []
-            2: CSS_BOGUS_KEYFRAMES_ITEM@586..592
-              0: CSS_KEYFRAMES_SELECTOR_LIST@586..592
-                0: CSS_KEYFRAMES_PERCENTAGE_SELECTOR@586..590
-                  0: CSS_PERCENTAGE@586..590
-                    0: CSS_NUMBER_LITERAL@586..589 "100" [] []
-                    1: PERCENT@589..590 "%" [] []
-                1: (empty)
-                2: CSS_BOGUS_SELECTOR@590..592
-                  0: R_PAREN@590..591 ")" [] []
+              1: CSS_DECLARATION_LIST_BLOCK@561..595
+                0: (empty)
+                1: CSS_DECLARATION_LIST@561..592
+                  0: CSS_DECLARATION@561..591
+                    0: CSS_GENERIC_PROPERTY@561..591
+                      0: CSS_IDENTIFIER@561..573
+                        0: IDENT@561..573 "transform" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@573..575 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@575..591
+                        0: CSS_FUNCTION@575..591
+                          0: CSS_IDENTIFIER@575..585
+                            0: IDENT@575..585 "translateX" [] []
+                          1: L_PAREN@585..586 "(" [] []
+                          2: CSS_PARAMETER_LIST@586..590
+                            0: CSS_PARAMETER@586..590
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@586..590
+                                0: CSS_COMPONENT_VALUE_LIST@586..590
+                                  0: CSS_PERCENTAGE@586..590
+                                    0: CSS_NUMBER_LITERAL@586..589 "100" [] []
+                                    1: PERCENT@589..590 "%" [] []
+                          3: R_PAREN@590..591 ")" [] []
+                    1: (empty)
                   1: SEMICOLON@591..592 ";" [] []
-          2: R_CURLY@592..595 "}" [Newline("\n"), Whitespace("\t")] []
-    9: CSS_BOGUS_RULE@595..597
-      0: R_CURLY@595..597 "}" [Newline("\n")] []
-    10: CSS_AT_RULE@597..839
+                2: R_CURLY@592..595 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@595..597 "}" [Newline("\n")] []
+    7: CSS_AT_RULE@597..839
       0: AT@597..600 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@600..839
         0: KEYFRAMES_KW@600..610 "keyframes" [] [Whitespace(" ")]
@@ -1334,12 +1342,16 @@ CssRoot {
                 0: L_CURLY@816..818 "{" [] [Whitespace(" ")]
                 1: CSS_DECLARATION_LIST@818..818
                 2: R_CURLY@818..819 "}" [] []
-            7: CSS_BOGUS_KEYFRAMES_ITEM@819..839
+            7: CSS_KEYFRAMES_ITEM@819..839
               0: CSS_KEYFRAMES_SELECTOR_LIST@819..839
                 0: CSS_BOGUS_SELECTOR@819..839
                   0: AT@819..822 "@" [Newline("\n"), Newline("\n")] []
                   1: KEYFRAMES_KW@822..832 "keyframes" [] [Whitespace(" ")]
                   2: IDENT@832..839 "slidein" [] []
+              1: CSS_DECLARATION_LIST_BLOCK@839..839
+                0: (empty)
+                1: CSS_DECLARATION_LIST@839..839
+                2: (empty)
           2: (empty)
   2: EOF@839..840 "" [Newline("\n")] []
 
@@ -1431,146 +1443,28 @@ at_rule_keyframes.css:34:2 parse ━━━━━━━━━━━━━━━�
   
 at_rule_keyframes.css:41:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found 'transform: translateX('.
+  × expected `,` but instead found `transform`
   
     39 │ @keyframes slidein {
     40 │ 	from
   > 41 │ 		transform: translateX(0%);
-       │ 		^^^^^^^^^^^^^^^^^^^^^^
+       │ 		^^^^^^^^^
     42 │ 	}
     43 │ 
   
-  i Expected a body here.
-  
-    39 │ @keyframes slidein {
-    40 │ 	from
-  > 41 │ 		transform: translateX(0%);
-       │ 		^^^^^^^^^^^^^^^^^^^^^^
-    42 │ 	}
-    43 │ 
-  
-at_rule_keyframes.css:41:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    39 │ @keyframes slidein {
-    40 │ 	from
-  > 41 │ 		transform: translateX(0%);
-       │ 		                        ^
-    42 │ 	}
-    43 │ 
-  
-  i Remove )
-  
-at_rule_keyframes.css:42:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a body but instead found '}'.
-  
-    40 │ 	from
-    41 │ 		transform: translateX(0%);
-  > 42 │ 	}
-       │ 	^
-    43 │ 
-    44 │ 	to {
-  
-  i Expected a body here.
-  
-    40 │ 	from
-    41 │ 		transform: translateX(0%);
-  > 42 │ 	}
-       │ 	^
-    43 │ 
-    44 │ 	to {
-  
-at_rule_keyframes.css:47:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '}'.
-  
-    45 │ 		transform: translateX(100%);
-    46 │ 	}
-  > 47 │ }
-       │ ^
-    48 │ 
-    49 │ @keyframes slidein {
-  
-  i Expected a qualified rule, or an at rule here.
-  
-    45 │ 		transform: translateX(100%);
-    46 │ 	}
-  > 47 │ }
-       │ ^
-    48 │ 
-    49 │ @keyframes slidein {
+  i Remove transform
   
 at_rule_keyframes.css:55:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found 'transform: translateX('.
+  × expected `,` but instead found `transform`
   
     54 │ 	to
   > 55 │ 		transform: translateX(100%);
-       │ 		^^^^^^^^^^^^^^^^^^^^^^
+       │ 		^^^^^^^^^
     56 │ 	}
     57 │ }
   
-  i Expected a body here.
-  
-    54 │ 	to
-  > 55 │ 		transform: translateX(100%);
-       │ 		^^^^^^^^^^^^^^^^^^^^^^
-    56 │ 	}
-    57 │ }
-  
-at_rule_keyframes.css:55:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    54 │ 	to
-  > 55 │ 		transform: translateX(100%);
-       │ 		                          ^
-    56 │ 	}
-    57 │ }
-  
-  i Remove )
-  
-at_rule_keyframes.css:56:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a body but instead found '}'.
-  
-    54 │ 	to
-    55 │ 		transform: translateX(100%);
-  > 56 │ 	}
-       │ 	^
-    57 │ }
-    58 │ 
-  
-  i Expected a body here.
-  
-    54 │ 	to
-    55 │ 		transform: translateX(100%);
-  > 56 │ 	}
-       │ 	^
-    57 │ }
-    58 │ 
-  
-at_rule_keyframes.css:57:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '}'.
-  
-    55 │ 		transform: translateX(100%);
-    56 │ 	}
-  > 57 │ }
-       │ ^
-    58 │ 
-    59 │ @keyframes slidein {
-  
-  i Expected a qualified rule, or an at rule here.
-  
-    55 │ 		transform: translateX(100%);
-    56 │ 	}
-  > 57 │ }
-       │ ^
-    58 │ 
-    59 │ @keyframes slidein {
+  i Remove transform
   
 at_rule_keyframes.css:69:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1672,13 +1566,13 @@ at_rule_keyframes.css:75:1 parse ━━━━━━━━━━━━━━━�
   
 at_rule_keyframes.css:76:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found the end of the file.
+  × expected `{` but instead the file ends
   
     75 │ @keyframes slidein
   > 76 │ 
        │ 
   
-  i Expected a body here.
+  i the file ends here
   
     75 │ @keyframes slidein
   > 76 │ 

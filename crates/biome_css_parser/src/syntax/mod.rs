@@ -8,7 +8,7 @@ mod value;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
-use crate::syntax::blocks::parse_or_recover_declaration_or_rule_list_block;
+use crate::syntax::blocks::parse_declaration_or_rule_list_block;
 use crate::syntax::parse_error::expected_any_rule;
 use crate::syntax::property::{is_at_any_property, parse_any_property};
 use crate::syntax::selector::is_nth_at_selector;
@@ -20,26 +20,12 @@ use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{token_set, Parser};
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
 use value::function::{is_at_any_function, parse_any_function};
+use crate::syntax::value::function::BINARY_OPERATION_TOKEN;
 
 use self::parse_error::{expected_component_value, expected_declaration_item, expected_number};
-
-const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![
-    T![#],
-    T![.],
-    T![*],
-    T![ident],
-    T![:],
-    T![::],
-    T!['{'],
-    T![@]
-];
-const SELECTOR_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{'], T!['}'],];
-const BODY_RECOVERY_SET: TokenSet<CssSyntaxKind> =
-    SELECTOR_LIST_RECOVERY_SET.union(RULE_RECOVERY_SET);
-
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
     p.eat(UNICODE_BOM);
@@ -114,13 +100,9 @@ pub(crate) fn parse_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
 
     SelectorList::default().parse_list(p);
 
-    let kind = if parse_or_recover_declaration_or_rule_list_block(p).is_ok() {
-        CSS_QUALIFIED_RULE
-    } else {
-        CSS_BOGUS_RULE
-    };
+    parse_declaration_or_rule_list_block(p);
 
-    Present(m.complete(p, kind))
+    Present(m.complete(p, CSS_QUALIFIED_RULE))
 }
 
 /// Checks if the current position in the CSS parser is at the start of a nested qualified rule.
@@ -146,13 +128,9 @@ pub(crate) fn parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
 
     RelativeSelectorList::new(T!['{']).parse_list(p);
 
-    let kind = if parse_or_recover_declaration_or_rule_list_block(p).is_ok() {
-        CSS_NESTED_QUALIFIED_RULE
-    } else {
-        CSS_BOGUS_RULE
-    };
+    parse_declaration_or_rule_list_block(p);
 
-    Present(m.complete(p, kind))
+    Present(m.complete(p, CSS_NESTED_QUALIFIED_RULE))
 }
 
 pub(crate) struct DeclarationList;
@@ -318,7 +296,7 @@ impl ParseNodeList for CssComponentValueList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        !is_at_any_value(p)
+       p.at(T![,]) || p.at(T![')']) || p.at_ts(BINARY_OPERATION_TOKEN)
     }
 
     fn recover(
@@ -328,7 +306,7 @@ impl ParseNodeList for CssComponentValueList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T!['}'], T![;])),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T![')'], T![;])),
             expected_component_value,
         )
     }
