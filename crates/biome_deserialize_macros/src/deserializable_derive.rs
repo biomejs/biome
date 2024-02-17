@@ -10,7 +10,7 @@ use convert_case::{Case, Casing};
 use proc_macro2::{Ident, Span, TokenStream};
 use proc_macro_error::*;
 use quote::quote;
-use syn::{Data, GenericParam, Generics, Path, PathSegment, Type};
+use syn::{Data, GenericParam, Generics, Path, Type};
 
 pub(crate) struct DeriveInput {
     pub ident: Ident,
@@ -36,8 +36,7 @@ impl DeriveInput {
                         }
                     })
                     .map(|variant| {
-                        let attrs = EnumVariantAttrs::from_attrs(&variant.attrs);
-
+                        let attrs = EnumVariantAttrs::try_from(&variant.attrs).expect("Could not parse enum variant attributes");
                         let ident = variant.ident;
                         let key = attrs
                             .rename
@@ -49,16 +48,17 @@ impl DeriveInput {
                 DeserializableData::Enum(data)
             }
             Data::Struct(data) => {
+                let attrs =
+                    StructAttrs::try_from(&input.attrs).expect("Could not parse field attributes");
                 if data.fields.iter().all(|field| field.ident.is_some()) {
-                    let attrs = StructAttrs::from_attrs(&input.attrs);
-
                     let fields = data
                         .fields
                         .clone()
                         .into_iter()
                         .filter_map(|field| field.ident.map(|ident| (ident, field.attrs, field.ty)))
                         .map(|(ident, attrs, ty)| {
-                            let attrs = StructFieldAttrs::from_attrs(&attrs);
+                            let attrs = StructFieldAttrs::try_from(&attrs)
+                                .expect("Could not parse field attributes");
                             let key = attrs
                                 .rename
                                 .unwrap_or_else(|| ident.to_string().to_case(Case::Camel));
@@ -81,8 +81,6 @@ impl DeriveInput {
                         with_validator: attrs.with_validator,
                     })
                 } else if data.fields.len() == 1 {
-                    let attrs = StructAttrs::from_attrs(&input.attrs);
-
                     DeserializableData::Newtype(DeserializableNewtypeData {
                         with_validator: attrs.with_validator,
                     })
@@ -134,7 +132,7 @@ pub struct DeserializableFieldData {
     passthrough_name: bool,
     required: bool,
     ty: Type,
-    validate: Option<String>,
+    validate: Option<Path>,
 }
 
 #[derive(Debug)]
@@ -295,17 +293,7 @@ fn generate_deserializable_struct(
                 false => quote! { &key_text }
             };
 
-            let validate = field_data.validate.map(|validate| {
-                let path = Path {
-                    leading_colon: None,
-                    segments: validate
-                        .split("::")
-                        .map(|segment| {
-                            PathSegment::from(Ident::new(segment, Span::call_site()))
-                        })
-                        .collect(),
-                };
-
+            let validate = field_data.validate.map(|path| {
                 quote! {
                     .filter(|v| #path(v, #key, value.range(), diagnostics))
                 }

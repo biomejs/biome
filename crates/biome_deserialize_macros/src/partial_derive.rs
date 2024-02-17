@@ -26,7 +26,7 @@ impl DeriveInput {
         let ident = input.ident.clone();
         let partial_ident = Ident::new(&format!("Partial{}", input.ident), Span::call_site());
 
-        let attrs = Attrs::from_attrs(&input.attrs);
+        let attrs = Attrs::try_from(&input.attrs).expect("Could not parse attributes");
 
         let fields = match input.data {
             Data::Struct(data) => data
@@ -65,7 +65,8 @@ impl DeriveInput {
                             ident: ident.clone(),
                             ty: ty.clone(),
                             should_wrap,
-                            attrs: FieldAttrs::from_attrs(attrs),
+                            attrs: FieldAttrs::try_from(attrs)
+                                .expect("Could not parse field attributes"),
                         }
                     },
                 )
@@ -92,9 +93,9 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
         quote! { #[doc #tokens] }
     });
 
-    let attrs = input.attrs.nested_attrs.iter().map(|(ident, nested)| {
+    let attrs = input.attrs.nested_attrs.iter().map(|nested| {
         quote! {
-            #[#ident #nested]
+            #[#nested]
         }
     });
 
@@ -121,9 +122,9 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
                 None => ty.clone(),
             };
 
-            let attrs = attrs.nested_attrs.iter().map(|(ident, nested)| {
+            let attrs = attrs.nested_attrs.iter().map(|nested| {
                 quote! {
-                    #[#ident #nested]
+                    #[#nested]
                 }
             });
 
