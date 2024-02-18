@@ -81,8 +81,8 @@
 }
 
 .expressive-code:nth-child(-n+2)>figure>pre {
-  border: none;
-  padding: 1.2rem;
+  // border: none;
+  // padding: 1.2rem;
   --sl-hue-blue: 234;
   --sl-community-link: #ffffff;
   --sl-hue-blue: 234;
@@ -128,8 +128,8 @@
 }
 
 .expressive-code:nth-child(-n+2)>figure>pre {
-  border: none;
-  padding: 1.2rem;
+  // border: none;
+  // padding: 1.2rem;
 }
 
 .linter>div>.expressive-code:nth-child(-n+2)>figure>pre>code {
@@ -139,7 +139,7 @@
 }
 
 .expressive-code:first-child>figure>pre {
-  border-bottom-left-radius: 1rem;
+  // border-bottom-left-radius: 1rem;
 }
 
 .expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
@@ -153,7 +153,7 @@
 }
 
 .expressive-code:first-child>figure>pre {
-  border-bottom-left-radius: 1rem;
+  // border-bottom-left-radius: 1rem;
 }
 
 .expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
