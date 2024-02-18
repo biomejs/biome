@@ -67,4 +67,41 @@ invalid.js:3:6 lint/nursery/noFocusedTests ━━━━━━━━━━━━�
 
 ```
 
+```
+invalid.js:4:1 lint/nursery/noFocusedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    2 │ it.only("test", () => {});
+    3 │ test.only("test", () => {});
+  > 4 │ fdescribe('foo', () => {});
+      │ ^^^^^^^^^
+    5 │ fit('foo', () => {});
+    6 │ 
+  
+  i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
+  
+  i Remove it.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noFocusedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    3 │ test.only("test", () => {});
+    4 │ fdescribe('foo', () => {});
+  > 5 │ fit('foo', () => {});
+      │ ^^^
+    6 │ 
+  
+  i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
+  
+  i Remove it.
+  
+
+```
+
 
