@@ -31,6 +31,8 @@ declare_rule! {
     }
 }
 
+const FUNCTION_NAMES: [&str; 3] = ["only", "fdescribe", "fit"];
+
 impl Rule for NoFocusedTests {
     type Query = Ast<JsCallExpression>;
     type State = TextRange;
@@ -45,7 +47,7 @@ impl Rule for NoFocusedTests {
             if callee.contains_a_test_pattern().ok()? {
                 let function_name = get_function_name(&callee)?;
 
-                if function_name.text_trimmed() == "only" {
+                if FUNCTION_NAMES.contains(&function_name.text_trimmed()) {
                     return Some(function_name.text_trimmed_range());
                 }
             }
