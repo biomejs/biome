@@ -1,3 +1,4 @@
+// https://github.com/biomejs/biome/issues/1827
 try {
     undefined;
     try {
