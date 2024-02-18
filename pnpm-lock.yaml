@@ -83,7 +83,7 @@ importers:
         specifier: ^0.19.0
         version: 0.19.0(astro@4.4.0)
       '@biomejs/wasm-web':
-        specifier: link:..\packages\@biomejs\wasm-web
+        specifier: link:../packages/@biomejs/wasm-web
         version: link:../packages/@biomejs/wasm-web
       '@codemirror/lang-javascript':
         specifier: ^6.2.1
