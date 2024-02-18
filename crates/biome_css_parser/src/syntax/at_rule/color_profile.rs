@@ -1,6 +1,6 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::blocks::parse_declaration_list_block;
+use crate::syntax::block::parse_declaration_list_block;
 use crate::syntax::parse_custom_identifier;
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
 use biome_css_syntax::CssSyntaxKind::*;

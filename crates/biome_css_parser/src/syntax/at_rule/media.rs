@@ -1,7 +1,7 @@
 use super::parse_error::expected_media_query;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::feature::parse_any_query_feature;
-use crate::syntax::blocks::parse_rule_list_block;
+use crate::syntax::block::parse_rule_list_block;
 use crate::syntax::{is_at_identifier, is_nth_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};

@@ -1,6 +1,6 @@
 use crate::parser::CssParser;
 
-use crate::syntax::blocks::parse_rule_list_block;
+use crate::syntax::block::parse_rule_list_block;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::parse_regular_identifier;
 use biome_css_syntax::CssSyntaxKind::*;

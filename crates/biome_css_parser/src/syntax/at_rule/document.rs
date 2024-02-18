@@ -1,6 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::expected_any_document_matcher;
-use crate::syntax::blocks::parse_rule_list_block;
+use crate::syntax::block::parse_rule_list_block;
 use crate::syntax::parse_error::expected_string;
 use crate::syntax::parse_string;
 use crate::syntax::value::url::{is_at_url_function, parse_url_function};

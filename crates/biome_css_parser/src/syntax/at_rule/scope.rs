@@ -1,6 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::expected_any_scope_range;
-use crate::syntax::blocks::parse_rule_list_block;
+use crate::syntax::block::parse_rule_list_block;
 use crate::syntax::selector::SelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};

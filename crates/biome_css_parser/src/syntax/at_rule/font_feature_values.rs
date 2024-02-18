@@ -1,5 +1,5 @@
 use super::parse_error::{expected_any_font_feature_value_item, expected_font_feature_values_item};
-use crate::syntax::blocks::{parse_declaration_list_block, ParseBlockBody};
+use crate::syntax::block::{parse_declaration_list_block, ParseBlockBody};
 use crate::{
     lexer::CssLexContext,
     parser::CssParser,

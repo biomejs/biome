@@ -3,7 +3,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
 };
-use crate::syntax::blocks::{parse_declaration_list_block, ParseBlockBody};
+use crate::syntax::block::{parse_declaration_list_block, ParseBlockBody};
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::{is_at_declaration, is_at_identifier, parse_custom_identifier, parse_string};

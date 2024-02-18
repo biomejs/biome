@@ -1,5 +1,5 @@
 mod at_rule;
-mod blocks;
+mod block;
 mod parse_error;
 mod property;
 mod selector;
@@ -8,7 +8,7 @@ mod value;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
-use crate::syntax::blocks::parse_declaration_or_rule_list_block;
+use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::parse_error::expected_any_rule;
 use crate::syntax::property::{is_at_any_property, parse_any_property};
 use crate::syntax::selector::is_nth_at_selector;

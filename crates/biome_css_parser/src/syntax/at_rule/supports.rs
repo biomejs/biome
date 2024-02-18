@@ -1,5 +1,5 @@
 use crate::parser::CssParser;
-use crate::syntax::blocks::parse_rule_list_block;
+use crate::syntax::block::parse_rule_list_block;
 use crate::syntax::selector::parse_selector;
 use crate::syntax::value::function::{is_at_function, parse_function};
 use crate::syntax::{is_nth_at_identifier, parse_any_value, parse_declaration};

@@ -1,4 +1,4 @@
-use crate::syntax::blocks::parse_declaration_list_block;
+use crate::syntax::block::parse_declaration_list_block;
 use crate::syntax::parse_dashed_identifier;
 use crate::{parser::CssParser, syntax::parse_error::expected_dashed_identifier};
 use biome_css_syntax::{

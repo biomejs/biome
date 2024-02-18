@@ -8,7 +8,7 @@ use biome_parser::TokenSet;
 use biome_parser::{parsed_syntax::ParsedSyntax, Parser};
 
 use crate::parser::CssParser;
-use crate::syntax::blocks::parse_declaration_list_block;
+use crate::syntax::block::parse_declaration_list_block;
 use crate::syntax::parse_dashed_identifier;
 use crate::syntax::parse_error::expected_dashed_identifier;
 
