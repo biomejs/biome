@@ -227,7 +227,8 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Include", markup!({DebugDisplay(formatter_configuration.include.iter().collect::<Vec<_>>())}))}
                         ).fmt(fmt)?;
 
-                        let javascript_formatter_configuration = configuration.get_javascript_formatter_configuration();
+                        let javascript_formatter_configuration =
+                            configuration.get_javascript_formatter_configuration();
                         markup! (
                             {Section("JavaScript Formatter")}
                             {KeyValuePair("Enabled", markup!({DebugDisplay(javascript_formatter_configuration.enabled)}))}
@@ -248,7 +249,8 @@ impl Display for RageConfiguration<'_, '_> {
                         )
                         .fmt(fmt)?;
 
-                        let json_formatter_configuration = configuration.get_json_formatter_configuration();
+                        let json_formatter_configuration =
+                            configuration.get_json_formatter_configuration();
                         markup! (
                             {Section("JSON Formatter")}
                             {KeyValuePair("Enabled", markup!({DebugDisplay(json_formatter_configuration.enabled)}))}
@@ -295,8 +297,10 @@ where
 
         let rule_json_str = serde_json::to_string(&self.1)
             .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to serialize"))?;
-        let category_to_rules: HashMap<String, Value> = serde_json::from_str(rule_json_str.as_str())
-            .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to convert to HashMap"))?;
+        let category_to_rules: HashMap<String, Value> =
+            serde_json::from_str(rule_json_str.as_str()).map_err(|_| {
+                io::Error::new(io::ErrorKind::Other, "Failed to convert to HashMap")
+            })?;
 
         let mut categories: Vec<&String> = category_to_rules.keys().collect();
         categories.sort();
@@ -348,7 +352,7 @@ where
 {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if let Some(value) = &self.0 {
-            markup!({DebugDisplay(value)}).fmt(fmt)?;
+            markup!({ DebugDisplay(value) }).fmt(fmt)?;
         } else {
             markup!(<Dim>"unset"</Dim>).fmt(fmt)?;
         }

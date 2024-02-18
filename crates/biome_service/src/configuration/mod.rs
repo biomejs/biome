@@ -156,14 +156,24 @@ impl PartialConfiguration {
     pub fn get_javascript_formatter_configuration(&self) -> JavascriptFormatter {
         self.javascript
             .as_ref()
-            .map(|f| f.formatter.as_ref().map(|f| f.get_formatter_configuration()).unwrap_or_default())
+            .map(|f| {
+                f.formatter
+                    .as_ref()
+                    .map(|f| f.get_formatter_configuration())
+                    .unwrap_or_default()
+            })
             .unwrap_or_default()
     }
 
     pub fn get_json_formatter_configuration(&self) -> JsonFormatter {
         self.json
             .as_ref()
-            .map(|f| f.formatter.as_ref().map(|f| f.get_formatter_configuration()).unwrap_or_default())
+            .map(|f| {
+                f.formatter
+                    .as_ref()
+                    .map(|f| f.get_formatter_configuration())
+                    .unwrap_or_default()
+            })
             .unwrap_or_default()
     }
 
