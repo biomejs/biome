@@ -1597,13 +1597,13 @@ at_rule_keyframes.css:75:1 parse ━━━━━━━━━━━━━━━�
   
 at_rule_keyframes.css:76:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `}` but instead the file ends
+  × Expected a body but instead found the end of the file.
   
     75 │ @keyframes slidein
   > 76 │ 
        │ 
   
-  i the file ends here
+  i Expected a body here.
   
     75 │ @keyframes slidein
   > 76 │ 

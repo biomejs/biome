@@ -12,6 +12,8 @@ use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::Absent;
 use biome_parser::{CompletedMarker, Parser};
+use biome_parser::diagnostic::{expected_node, ParseDiagnostic};
+use biome_rowan::TextRange;
 
 struct DeclarationListBlock;
 
@@ -208,6 +210,7 @@ pub(crate) trait ParseBlockBody {
         let m = p.start();
 
         if !p.eat(T!['{']) && !self.is_at_element(p) {
+            p.error(expected_block(p, p.cur_range()));
             return m.complete(p, CSS_BOGUS_BLOCK);
         }
 
@@ -219,4 +222,8 @@ pub(crate) trait ParseBlockBody {
         p.state_mut().is_nesting_block = old_nesting_block;
         m.complete(p, Self::BLOCK_KIND)
     }
+}
+
+pub(crate) fn expected_block(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("body", range, p)
 }

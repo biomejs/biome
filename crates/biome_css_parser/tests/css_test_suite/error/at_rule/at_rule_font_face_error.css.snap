@@ -151,6 +151,38 @@ CssRoot {
 ## Diagnostics
 
 ```
+at_rule_font_face_error.css:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found 'foo'.
+  
+  > 1 │ @font-face foo {}
+      │            ^^^
+    2 │ @font-face foo;
+    3 │ @font-face ;
+  
+  i Expected a body here.
+  
+  > 1 │ @font-face foo {}
+      │            ^^^
+    2 │ @font-face foo;
+    3 │ @font-face ;
+  
+at_rule_font_face_error.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found 'foo'.
+  
+    1 │ @font-face foo {}
+  > 2 │ @font-face foo;
+      │            ^^^
+    3 │ @font-face ;
+  
+  i Expected a body here.
+  
+    1 │ @font-face foo {}
+  > 2 │ @font-face foo;
+      │            ^^^
+    3 │ @font-face ;
+  
 at_rule_font_face_error.css:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `;`
@@ -164,14 +196,14 @@ at_rule_font_face_error.css:2:15 parse ━━━━━━━━━━━━━�
   
 at_rule_font_face_error.css:3:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a qualified rule, or an at rule but instead found ';'.
+  × Expected a body but instead found ';'.
   
     1 │ @font-face foo {}
     2 │ @font-face foo;
   > 3 │ @font-face ;
       │            ^
   
-  i Expected a qualified rule, or an at rule here.
+  i Expected a body here.
   
     1 │ @font-face foo {}
     2 │ @font-face foo;

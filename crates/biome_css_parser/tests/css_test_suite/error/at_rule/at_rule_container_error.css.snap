@@ -1050,6 +1050,26 @@ at_rule_container_error.css:10:32 parse ━━━━━━━━━━━━━�
   
   i Remove {
   
+at_rule_container_error.css:18:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found '}'.
+  
+    16 │ @container card (inline-size > 30em) or {  }
+    17 │ 
+  > 18 │ @container (inline-size >= 0px)  }
+       │                                  ^
+    19 │ 
+    20 │ @container { }
+  
+  i Expected a body here.
+  
+    16 │ @container card (inline-size > 30em) or {  }
+    17 │ 
+  > 18 │ @container (inline-size >= 0px)  }
+       │                                  ^
+    19 │ 
+    20 │ @container { }
+  
 at_rule_container_error.css:22:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead the file ends
