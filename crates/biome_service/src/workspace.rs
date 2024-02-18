@@ -496,7 +496,7 @@ pub struct CloseFileParams {
 pub struct PullDiagnosticsParams {
     pub path: RomePath,
     pub categories: RuleCategories,
-    pub max_diagnostics: u64,
+    pub max_diagnostics: u32,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -504,7 +504,7 @@ pub struct PullDiagnosticsParams {
 pub struct PullDiagnosticsResult {
     pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub errors: usize,
-    pub skipped_diagnostics: u64,
+    pub skipped_diagnostics: u32,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -834,7 +834,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn pull_diagnostics(
         &self,
         categories: RuleCategories,
-        max_diagnostics: u64,
+        max_diagnostics: u32,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
             path: self.path.clone(),
