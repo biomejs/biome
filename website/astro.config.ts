@@ -2,8 +2,8 @@ import netlify from "@astrojs/netlify";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
-import { rehypeAutolink } from "./plugins/rehype-autolink";
 import rehypeSlug from "rehype-slug";
+import { rehypeAutolink } from "./plugins/rehype-autolink";
 
 const site = "https://biomejs.dev";
 // https://astro.build/config
@@ -381,7 +381,6 @@ export default defineConfig({
 
 		server: {
 			fs: {
-				strict: false,
 				// https://vitejs.dev/config/server-options.html#server-fs-allow
 				allow: [process.cwd(), "../packages/@biomejs/wasm-web"],
 			},

@@ -1,8 +1,8 @@
+import type { RehypePlugins } from "astro";
+import { toString as hastToString } from "hast-util-to-string";
 import { h } from "hastscript";
 import { escape as htmlEscape } from "html-escaper";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import { toString } from "hast-util-to-string";
-import { RehypePlugins } from "astro";
 
 const anchorLinkIcon = h(
 	"span",
@@ -32,7 +32,10 @@ const autolinkConfig = {
 			tabIndex: -1,
 			class: `heading-wrapper level-${tagName}`,
 		}),
-	content: (heading) => [anchorLinkIcon, anchorLinkSRLabel(toString(heading))],
+	content: (heading) => [
+		anchorLinkIcon,
+		anchorLinkSRLabel(hastToString(heading)),
+	],
 };
 
 export const rehypeAutolink = (): RehypePlugins => [
