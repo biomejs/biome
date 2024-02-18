@@ -312,11 +312,13 @@ fn analyze_simple(cfg: &JsControlFlowGraph, signals: &mut UnreachableRanges) {
                     if finally_fallthrough && handlers.is_some() {
                         // Jump towards the corresponding block if there are pending exception
                         // handlers, otherwise return from the function
-                        let handlers = handlers.and_then(<[_]>::split_first);
-
-                        if let Some((handler, handlers)) = handlers {
+                        if let Some((handler, remain_handlers)) =
+                            handlers.and_then(<[_]>::split_first)
+                        {
                             if reachable_blocks.insert(handler.target.index()) {
-                                queue.push_back((handler.target, Some(handlers)));
+                                queue.push_back((handler.target, Some(remain_handlers)));
+                            } else if reachable_blocks.insert(block.index()) {
+                                queue.push_back((block, handlers));
                             }
                         }
                     } else if reachable_blocks.insert(block.index()) {
