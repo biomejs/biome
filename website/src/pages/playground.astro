@@ -1,19 +1,21 @@
 ---
 import "@/styles/playground/index.scss";
-
-import StarlightSplashLayout from "@/layouts/StarlightSplashLayout.astro";
 import PlaygroundLoader from "@/playground/PlaygroundLoader";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 ---
 
-<StarlightSplashLayout
-  title="Playground"
-  description="Biome's interactive playground"
-  slug=""
+<StarlightPage
+  frontmatter={{
+    title: "Playground",
+    description: "Biome's interactive playground",
+    template: "splash",
+    editUrl: false,
+  }}
 >
   <div id="root" class="not-content">
     <PlaygroundLoader client:only />
   </div>
-</StarlightSplashLayout>
+</StarlightPage>
 
 <style>
   :global(div.content-panel) {

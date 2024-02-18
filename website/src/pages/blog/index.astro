@@ -1,12 +1,15 @@
 ---
 import PostsList from "@/components/PostsList.astro";
-import StarlightSplashLayout from "@/layouts/StarlightSplashLayout.astro";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 ---
 
-<StarlightSplashLayout
-  title="Blog"
-  description="Biome's toolchain official blog"
-  slug=""
+<StarlightPage
+  frontmatter={{
+    title: "Blog",
+    description: "Biome's toolchain official blog",
+    template: "splash",
+    editUrl: false,
+  }}
 >
   <PostsList />
-</StarlightSplashLayout>
+</StarlightPage>
