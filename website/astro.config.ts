@@ -4,6 +4,7 @@ import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
 import rehypeSlug from "rehype-slug";
 import { rehypeAutolink } from "./plugins/rehype-autolink";
+import { searchForWorkspaceRoot } from "vite";
 
 const site = "https://biomejs.dev";
 // https://astro.build/config
@@ -384,7 +385,7 @@ export default defineConfig({
 		server: {
 			fs: {
 				// https://vitejs.dev/config/server-options.html#server-fs-allow
-				allow: [process.cwd(), "../packages/@biomejs/wasm-web"],
+				allow: [searchForWorkspaceRoot(process.cwd())],
 			},
 		},
 	},
