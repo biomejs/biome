@@ -182,6 +182,53 @@ Not most recent log file
 }
 
 #[test]
+fn with_formatter_configuration() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        Path::new("biome.json").to_path_buf(),
+        r#"{
+  "formatter": {
+    "attributePosition": "multiline",
+    "enabled": true,
+    "formatWithErrors": true,
+    "include": [
+      "**/*.html",
+      "**/*.css",
+      "**/*.js",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.json",
+      "**/*.md"
+    ],
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 120,
+    "ignore": ["configuration-schema.json"]
+  }
+}"#,
+    );
+
+    let result = run_rage(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("rage"), "--formatter"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_formatter_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn with_linter_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

@@ -7,7 +7,7 @@ expression: content
 ```block
 Prints information for debugging
 
-Usage: rage [--daemon-logs] [--linter]
+Usage: rage [--daemon-logs] [--formatter] [--linter]
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain text,
@@ -36,7 +36,8 @@ Global options applied to all commands
 
 Available options:
         --daemon-logs         Prints the Biome daemon server logs
-        --linter              Prints the Biome configuration that the applied linter rules
+        --formatter           Prints the Biome configuration that the applied formatter configuration
+        --linter              Prints the Biome configuration that the applied linter configuration
     -h, --help                Prints help information
 
 ```

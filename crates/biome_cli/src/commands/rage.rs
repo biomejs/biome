@@ -20,6 +20,7 @@ use serde::Serialize;
 pub(crate) fn rage(
     session: CliSession,
     daemon_logs: bool,
+    formatter: bool,
     linter: bool,
 ) -> Result<(), CliDiagnostic> {
     let terminal_supports_colors = termcolor::BufferWriter::stdout(ColorChoice::Auto)
@@ -42,7 +43,7 @@ pub(crate) fn rage(
     {EnvVarOs("JS_RUNTIME_NAME")}
     {EnvVarOs("NODE_PACKAGE_MANAGER")}
 
-    {RageConfiguration(&session.app.fs, linter)}
+    {RageConfiguration(&session.app.fs, formatter, linter)}
     {WorkspaceRage(session.app.workspace.deref())}
     ));
 
@@ -172,7 +173,7 @@ impl Display for RunningRomeServer {
     }
 }
 
-struct RageConfiguration<'a, 'app>(&'a DynRef<'app, dyn FileSystem>, bool);
+struct RageConfiguration<'a, 'app>(&'a DynRef<'app, dyn FileSystem>, bool, bool);
 
 impl Display for RageConfiguration<'_, '_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
@@ -202,27 +203,39 @@ impl Display for RageConfiguration<'_, '_> {
                         markup!(<Dim>"Loaded successfully"</Dim>)
                     };
 
-                    // Print linter rules if --linter option is true
+                    markup! (
+                        {KeyValuePair("Status", status)}
+                        {KeyValuePair("Formatter disabled", markup!({DebugDisplay(configuration.is_formatter_disabled())}))}
+                        {KeyValuePair("Linter disabled", markup!({DebugDisplay(configuration.is_linter_disabled())}))}
+                        {KeyValuePair("Organize imports disabled", markup!({DebugDisplay(configuration.is_organize_imports_disabled())}))}
+                        {KeyValuePair("VCS disabled", markup!({DebugDisplay(configuration.is_vcs_disabled())}))}
+                    ).fmt(fmt)?;
+
+                    // Print formatter configuration if --formatter option is true
                     if self.1 {
                         markup! (
-                            {KeyValuePair("Status", status)}
-                            {KeyValuePair("Formatter disabled", markup!({DebugDisplay(configuration.is_formatter_disabled())}))}
-                            {KeyValuePair("Linter disabled", markup!({DebugDisplay(configuration.is_linter_disabled())}))}
-                            {KeyValuePair("Organize imports disabled", markup!({DebugDisplay(configuration.is_organize_imports_disabled())}))}
-                            {KeyValuePair("VCS disabled", markup!({DebugDisplay(configuration.is_vcs_disabled())}))}
-                            {Section("Linter rules")}
+                            {Section("Formatter")}
+                            {KeyValuePair("Format with errors", markup!({DebugDisplay(configuration.get_formatter_configuration().format_with_errors)}))}
+                            {KeyValuePair("Indent style", markup!({DebugDisplay(configuration.get_formatter_configuration().indent_style)}))}
+                            {KeyValuePair("Indent size", markup!({DebugDisplay(configuration.get_formatter_configuration().indent_size)}))}
+                            {KeyValuePair("Indent width", markup!({DebugDisplay(configuration.get_formatter_configuration().indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DebugDisplay(configuration.get_formatter_configuration().line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DebugDisplay(configuration.get_formatter_configuration().line_width.get())}))}
+                            {KeyValuePair("Attribute position", markup!({DebugDisplay(configuration.get_formatter_configuration().attribute_position)}))}
+                            {KeyValuePair("Ignore", markup!({DebugDisplay(configuration.get_formatter_configuration().ignore.iter().collect::<Vec<_>>())}))}
+                            {KeyValuePair("Include", markup!({DebugDisplay(configuration.get_formatter_configuration().include.iter().collect::<Vec<_>>())}))}
+                        )
+                        .fmt(fmt)?;
+                    }
+
+                    // Print linter configuration if --linter option is true
+                    if self.2 {
+                        markup! (
+                        {Section("Linter")}
                             {KeyValuePair("Recommend", markup!({DebugDisplay(configuration.get_linter_rules().recommended.unwrap_or(false))}))}
                             {KeyValuePair("All", markup!({DebugDisplay(configuration.get_linter_rules().all.unwrap_or(false))}))}
-                            {RageConfigurationRules(configuration.get_linter_rules())}
-                        ).fmt(fmt)?
-                    } else {
-                        markup! (
-                            {KeyValuePair("Status", status)}
-                            {KeyValuePair("Formatter disabled", markup!({DebugDisplay(configuration.is_formatter_disabled())}))}
-                            {KeyValuePair("Linter disabled", markup!({DebugDisplay(configuration.is_linter_disabled())}))}
-                            {KeyValuePair("Organize imports disabled", markup!({DebugDisplay(configuration.is_organize_imports_disabled())}))}
-                            {KeyValuePair("VCS disabled", markup!({DebugDisplay(configuration.is_vcs_disabled())}))}
-                        ).fmt(fmt)?
+                            {RageConfigurationRules("Rules",configuration.get_linter_rules())}
+                        ).fmt(fmt)?;
                     }
                 }
             }
@@ -237,17 +250,17 @@ impl Display for RageConfiguration<'_, '_> {
     }
 }
 
-struct RageConfigurationRules<T>(T);
+struct RageConfigurationRules<'a, T>(&'a str, T);
 
-impl<T> Display for RageConfigurationRules<T>
+impl<T> Display for RageConfigurationRules<'_, T>
 where
     T: Serialize,
 {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        let rules_str = "Rules";
+        let rules_str = self.0;
         write!(fmt, "  {rules_str}:")?;
 
-        let rules_json_str = serde_json::to_string(&self.0)
+        let rules_json_str = serde_json::to_string(&self.1)
             .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to serialize"))?;
         let data: HashMap<String, Value> = serde_json::from_str(rules_json_str.as_str())
             .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to convert to HashMap"))?;

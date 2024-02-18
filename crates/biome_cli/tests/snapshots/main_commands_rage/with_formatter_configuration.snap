@@ -1,0 +1,79 @@
+---
+source: crates/biome_cli/tests/commands/rage.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "attributePosition": "multiline",
+    "enabled": true,
+    "formatWithErrors": true,
+    "include": [
+      "**/*.html",
+      "**/*.css",
+      "**/*.js",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.json",
+      "**/*.md"
+    ],
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 120,
+    "ignore": ["configuration-schema.json"]
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+CLI:
+  Version:                      0.0.0
+  Color support:                **PLACEHOLDER**
+
+Platform:
+  CPU Architecture:             **PLACEHOLDER**
+  OS:                           **PLACEHOLDER**
+
+Environment:
+  BIOME_LOG_DIR:                **PLACEHOLDER**
+  NO_COLOR:                     **PLACEHOLDER**
+  TERM:                         **PLACEHOLDER**
+  JS_RUNTIME_VERSION:           unset
+  JS_RUNTIME_NAME:              unset
+  NODE_PACKAGE_MANAGER:         unset
+
+Biome Configuration:
+  Status:                       Loaded successfully
+  Formatter disabled:           false
+  Linter disabled:              false
+  Organize imports disabled:    false
+  VCS disabled:                 true
+
+Formatter:
+  Format with errors:           true
+  Indent style:                 Space
+  Indent size:                  0
+  Indent width:                 2
+  Line ending:                  Lf
+  Line width:                   120
+  Attribute position:           Multiline
+  Ignore:                       ["configuration-schema.json"]
+  Include:                      ["**/*.html", "**/*.css", "**/*.js", "**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.json", "**/*.md"]
+
+Server:
+  Version:                      0.0.0
+  Name:                         biome_lsp
+  CPU Architecture:             **PLACEHOLDER**
+  OS:                           **PLACEHOLDER**
+
+Workspace:
+  Open Documents:               0
+```
+
+

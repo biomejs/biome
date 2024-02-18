@@ -67,7 +67,7 @@ Biome Configuration:
   Organize imports disabled:    false
   VCS disabled:                 true
 
-Linter rules:
+Linter:
   Recommend:                    true
   All:                          false
   Rules:                        a11y/noAccessKey = "off"

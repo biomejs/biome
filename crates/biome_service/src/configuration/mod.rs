@@ -146,6 +146,13 @@ impl PartialConfiguration {
             .unwrap_or(false)
     }
 
+    pub fn get_formatter_configuration(&self) -> FormatterConfiguration {
+        self.formatter
+            .as_ref()
+            .map(|f| f.get_formatter_configuration())
+            .unwrap_or_default()
+    }
+
     pub fn is_linter_disabled(&self) -> bool {
         self.linter
             .as_ref()

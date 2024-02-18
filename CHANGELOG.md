@@ -35,6 +35,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Add an option `--linter` to `biome rage`. The option needs to check Biome linter configuration. Contributed by @seitarof
 
+- Add an option `--formatter` to `biome rage`. The option needs to check Biome formatter configuration. Contributed by @seitarof
+
 #### Bug fixes
 
 - Don't process files under an ignored directory.
