@@ -16,13 +16,12 @@
 		"textlint:fix": "textlint --fix './src/content/docs/ja/**/*.{md,mdx}'"
 	},
 	"devDependencies": {
-		"@astrojs/netlify": "^3.0.4",
+		"@astrojs/netlify": "^5.1.2",
 		"@astrojs/prism": "^2.1.2",
 		"@astrojs/react": "^2.3.2",
 		"@astrojs/rss": "^2.4.4",
-		"@astrojs/starlight": "^0.13.0",
-		"@astrojs/vercel": "^5.0.1",
-		"@biomejs/wasm-web": "link:../packages/@biomejs/wasm-web",
+		"@astrojs/starlight": "^0.19.0",
+		"@astrojs/vercel": "^7.3.1",
 		"@codemirror/lang-javascript": "6.1.8",
 		"@codemirror/lang-json": "6.0.1",
 		"@codemirror/lint": "6.2.1",
@@ -47,8 +46,8 @@
 		"mermaid": "^9.4.3",
 		"postcss": "^8.4.30",
 		"prettier": "^3.1.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
 		"rehype-autolink-headings": "^6.1.1",
 		"rehype-slug": "^5.1.0",
 		"rehype-toc": "^3.0.2",
@@ -67,7 +66,7 @@
 		"pnpm": "^8.0.0"
 	},
 	"dependencies": {
-		"astro": "^3.6.0",
+		"astro": "^4.4.0",
 		"astro-og-canvas": "^0.4.2",
 		"canvaskit-wasm": "^0.39.1"
 	}
