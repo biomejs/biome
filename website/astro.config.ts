@@ -3,8 +3,8 @@ import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
 import rehypeSlug from "rehype-slug";
-import { rehypeAutolink } from "./plugins/rehype-autolink";
 import { searchForWorkspaceRoot } from "vite";
+import { rehypeAutolink } from "./plugins/rehype-autolink";
 
 const site = "https://biomejs.dev";
 // https://astro.build/config
