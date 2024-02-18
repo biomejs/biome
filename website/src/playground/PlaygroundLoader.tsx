@@ -343,7 +343,7 @@ function initState(
 				searchParams.get("bracketSpacing") === "true" ||
 				defaultPlaygroundState.settings.bracketSpacing,
 			bracketSameLine:
-				searchParams.get("bracketSameLine") === "true" ||
+				searchParams.get("bracketSameLine") === "true" ??
 				defaultPlaygroundState.settings.bracketSameLine,
 			lintRules:
 				(searchParams.get("lintRules") as LintRules) ??
