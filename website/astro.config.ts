@@ -1,4 +1,7 @@
-import { netlifyStatic } from "@astrojs/netlify";
+
+// https://docs.astro.build/en/guides/deploy/netlify/#static-site 
+// is stacit by default, so no need to specify it
+// import { netlifyStatic } from "@astrojs/netlify";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
@@ -401,8 +404,6 @@ export default defineConfig({
 		rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, autolinkConfig]],
 	},
 
-	adapter: netlifyStatic(),
-
 	vite: {
 		resolve: {
 			alias: {
@@ -415,11 +416,12 @@ export default defineConfig({
 			format: "es",
 		},
 
-		server: {
-			fs: {
-				// https://vitejs.dev/config/server-options.html#server-fs-allow
-				allow: [process.cwd(), "../packages/@biomejs/wasm-web"],
-			},
-		},
+		// ../packages/@biomejs/wasm-web dosen not longer exist
+		// server: {
+		// 	fs: {
+		// 		// https://vitejs.dev/config/server-options.html#server-fs-allow
+		// 		allow: [process.cwd(), "../packages/@biomejs/wasm-web"],
+		// 	},
+		// },
 	},
 });
