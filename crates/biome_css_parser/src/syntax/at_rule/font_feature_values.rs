@@ -42,10 +42,22 @@ pub(crate) fn parse_font_feature_values_at_rule(p: &mut CssParser) -> ParsedSynt
         parse_string(p)
     };
 
-    name.or_add_diagnostic(p, expected_non_css_wide_keyword_identifier);
+    let kind = if name
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, FONT_FEATURE_VALUES_RECOVERY_SET)
+                .enable_recovery_on_line_break(),
+            expected_non_css_wide_keyword_identifier,
+        )
+        .is_ok()
+    {
+        CSS_FONT_FEATURE_VALUES_AT_RULE
+    } else {
+        CSS_BOGUS_AT_RULE
+    };
     FontFeatureValuesBlock.parse_block_body(p);
 
-    Present(m.complete(p, CSS_FONT_FEATURE_VALUES_AT_RULE))
+    Present(m.complete(p, kind))
 }
 
 struct FontFeatureValuesBlock;
@@ -126,5 +138,6 @@ const FONT_FEATURE_VALUES_ITEM_SET: TokenSet<CssSyntaxKind> = token_set![
     T![ornaments],
     T![annotation]
 ];
+const FONT_FEATURE_VALUES_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];
 const FONT_FEATURE_VALUES_ITEM_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     FONT_FEATURE_VALUES_ITEM_SET.union(token_set![T!['}']]);
