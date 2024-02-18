@@ -4,9 +4,10 @@ export interface Props {
 }
 
 const { src } = Astro.props as Props;
-
+// [WARN] [vite] The glob option "as" has been deprecated in favour of "query". Please update `as: 'raw'` to `query: '?raw', import: 'default'`.
 const files = await import.meta.glob<string>("/src/assets/svg/**/*.svg", {
-	as: "raw",
+	query: "?raw",
+	import: "default",
 });
 
 const path = `/src/assets/svg/${src}.svg`;
