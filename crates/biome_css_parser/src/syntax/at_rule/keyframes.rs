@@ -3,7 +3,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
 };
-use crate::syntax::blocks::{parse_block_body, parse_declaration_list_block};
+use crate::syntax::blocks::{parse_declaration_list_block, ParseBlockBody};
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::{is_at_declaration, is_at_identifier, parse_custom_identifier, parse_string};
@@ -38,17 +38,23 @@ pub(crate) fn parse_keyframes_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     name.or_add_diagnostic(p, expected_non_css_wide_keyword_identifier);
 
-    parse_keyframes_block(p);
+    KeyframesBlock.parse_block_body(p);
 
     Present(m.complete(p, CSS_KEYFRAMES_AT_RULE))
 }
-#[inline]
-fn parse_keyframes_block(p: &mut CssParser) -> CompletedMarker {
-    let m = parse_block_body(p, |p| {
-        KeyframesItemList.parse_list(p);
-    });
 
-    m.complete(p, CSS_KEYFRAMES_BLOCK)
+struct KeyframesBlock;
+
+impl ParseBlockBody for KeyframesBlock {
+    const BLOCK_KIND: CssSyntaxKind = CSS_KEYFRAMES_BLOCK;
+
+    fn is_at_element(&self, p: &mut CssParser) -> bool {
+        is_at_keyframes_item_selector(p)
+    }
+
+    fn parse_list(&mut self, p: &mut CssParser) {
+        KeyframesItemList.parse_list(p);
+    }
 }
 
 struct KeyframesItemListParseRecovery;

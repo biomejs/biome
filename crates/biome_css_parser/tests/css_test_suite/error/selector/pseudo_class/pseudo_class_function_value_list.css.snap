@@ -235,10 +235,8 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: missing (required),
-                items: CssDeclarationOrRuleList [],
-                r_curly_token: missing (required),
+            block: CssBogusBlock {
+                items: [],
             },
         },
     ],
@@ -390,10 +388,7 @@ CssRoot {
                   1: COMMA@105..107 "," [] [Whitespace(" ")]
                   2: CSS_IDENTIFIER@107..109
                     0: IDENT@107..109 "fr" [] []
-      1: CSS_DECLARATION_OR_RULE_BLOCK@109..109
-        0: (empty)
-        1: CSS_DECLARATION_OR_RULE_LIST@109..109
-        2: (empty)
+      1: CSS_BOGUS_BLOCK@109..109
   2: EOF@109..110 "" [Newline("\n")] []
 
 ```

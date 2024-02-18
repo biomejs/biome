@@ -106,10 +106,8 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: missing (required),
-                items: CssDeclarationOrRuleList [],
-                r_curly_token: missing (required),
+            block: CssBogusBlock {
+                items: [],
             },
         },
     ],
@@ -175,10 +173,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@26..28
             0: CSS_BOGUS_SUB_SELECTOR@26..28
               0: COLON@26..28 ":" [Newline("\n")] []
-      1: CSS_DECLARATION_OR_RULE_BLOCK@28..28
-        0: (empty)
-        1: CSS_DECLARATION_OR_RULE_LIST@28..28
-        2: (empty)
+      1: CSS_BOGUS_BLOCK@28..28
   2: EOF@28..29 "" [Newline("\n")] []
 
 ```

@@ -22769,9 +22769,9 @@ impl Serialize for CssDeclarationList {
         seq.end()
     }
 }
-impl AstSeparatedList for CssDeclarationList {
+impl AstNodeList for CssDeclarationList {
     type Language = Language;
-    type Node = CssDeclaration;
+    type Node = CssDeclarationWithSemicolon;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -22782,19 +22782,19 @@ impl AstSeparatedList for CssDeclarationList {
 impl Debug for CssDeclarationList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("CssDeclarationList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        f.debug_list().entries(self.iter()).finish()
     }
 }
-impl IntoIterator for CssDeclarationList {
-    type Item = SyntaxResult<CssDeclaration>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, CssDeclaration>;
+impl IntoIterator for &CssDeclarationList {
+    type Item = CssDeclarationWithSemicolon;
+    type IntoIter = AstNodeListIterator<Language, CssDeclarationWithSemicolon>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for &CssDeclarationList {
-    type Item = SyntaxResult<CssDeclaration>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, CssDeclaration>;
+impl IntoIterator for CssDeclarationList {
+    type Item = CssDeclarationWithSemicolon;
+    type IntoIter = AstNodeListIterator<Language, CssDeclarationWithSemicolon>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

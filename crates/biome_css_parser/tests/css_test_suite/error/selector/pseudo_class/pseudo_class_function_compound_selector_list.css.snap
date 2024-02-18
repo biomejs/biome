@@ -347,10 +347,8 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: missing (required),
-                items: CssDeclarationOrRuleList [],
-                r_curly_token: missing (required),
+            block: CssBogusBlock {
+                items: [],
             },
         },
     ],
@@ -567,10 +565,7 @@ CssRoot {
                         0: DOT@144..145 "." [] []
                         1: CSS_CUSTOM_IDENTIFIER@145..148
                           0: IDENT@145..148 "div" [] []
-      1: CSS_DECLARATION_OR_RULE_BLOCK@148..148
-        0: (empty)
-        1: CSS_DECLARATION_OR_RULE_LIST@148..148
-        2: (empty)
+      1: CSS_BOGUS_BLOCK@148..148
   2: EOF@148..149 "" [Newline("\n")] []
 
 ```

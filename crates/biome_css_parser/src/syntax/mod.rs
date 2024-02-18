@@ -45,6 +45,11 @@ impl RuleList {
     }
 }
 
+#[inline]
+pub(crate) fn is_at_rule_list_element(p: &mut CssParser) -> bool {
+    is_at_at_rule(p) || is_at_qualified_rule(p)
+}
+
 struct RuleListParseRecovery;
 
 impl ParseRecovery for RuleListParseRecovery {
@@ -53,7 +58,7 @@ impl ParseRecovery for RuleListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_RULE;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_at_rule(p) || is_at_qualified_rule(p)
+        is_at_rule_list_element(p)
     }
 }
 
@@ -135,13 +140,13 @@ pub(crate) fn parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
 
 pub(crate) struct DeclarationList;
 
-impl ParseSeparatedList for DeclarationList {
+impl ParseNodeList for DeclarationList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_DECLARATION_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_declaration(p)
+        parse_declaration_with_semicolon(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -158,14 +163,6 @@ impl ParseSeparatedList for DeclarationList {
             &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T!['}'])),
             expected_declaration_item,
         )
-    }
-
-    fn separating_element_kind(&mut self) -> Self::Kind {
-        T![;]
-    }
-
-    fn allow_trailing_separating_element(&self) -> bool {
-        true
     }
 }
 

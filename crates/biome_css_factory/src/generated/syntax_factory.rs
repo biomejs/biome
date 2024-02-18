@@ -4334,13 +4334,9 @@ impl SyntaxFactory for CssSyntaxFactory {
                 T ! [,],
                 false,
             ),
-            CSS_DECLARATION_LIST => Self::make_separated_list_syntax(
-                kind,
-                children,
-                CssDeclaration::can_cast,
-                T ! [;],
-                true,
-            ),
+            CSS_DECLARATION_LIST => {
+                Self::make_node_list_syntax(kind, children, CssDeclarationWithSemicolon::can_cast)
+            }
             CSS_DECLARATION_OR_AT_RULE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssDeclarationOrAtRule::can_cast)
             }

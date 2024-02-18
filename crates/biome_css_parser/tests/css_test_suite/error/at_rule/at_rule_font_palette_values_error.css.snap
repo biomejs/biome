@@ -195,19 +195,23 @@ CssRoot {
                         ],
                     },
                     CssBogusBlock {
+                        items: [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@326..328 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@328..348 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
                         items: [
-                            CssBogus {
-                                items: [
-                                    CssBogus {
-                                        items: [
-                                            AT@326..328 "@" [Newline("\n")] [],
-                                            FONT_PALETTE_VALUES_KW@328..348 "font-palette-values" [] [Whitespace(" ")],
-                                            SEMICOLON@348..349 ";" [] [],
-                                        ],
-                                    },
-                                ],
-                            },
+                            SEMICOLON@348..349 ";" [] [],
                         ],
+                    },
+                    CssBogusBlock {
+                        items: [],
                     },
                 ],
             },
@@ -311,18 +315,20 @@ CssRoot {
           0: L_CURLY@296..298 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@298..298
           2: R_CURLY@298..299 "}" [] []
-    9: CSS_AT_RULE@299..349
+    9: CSS_AT_RULE@299..326
       0: AT@299..301 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@301..349
+      1: CSS_BOGUS_AT_RULE@301..326
         0: FONT_PALETTE_VALUES_KW@301..321 "font-palette-values" [] [Whitespace(" ")]
         1: CSS_BOGUS@321..326
           0: IDENT@321..326 "ident" [] []
-        2: CSS_BOGUS_BLOCK@326..349
-          0: CSS_BOGUS@326..349
-            0: CSS_BOGUS@326..349
-              0: AT@326..328 "@" [Newline("\n")] []
-              1: FONT_PALETTE_VALUES_KW@328..348 "font-palette-values" [] [Whitespace(" ")]
-              2: SEMICOLON@348..349 ";" [] []
+        2: CSS_BOGUS_BLOCK@326..326
+    10: CSS_AT_RULE@326..349
+      0: AT@326..328 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@328..349
+        0: FONT_PALETTE_VALUES_KW@328..348 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@348..349
+          0: SEMICOLON@348..349 ";" [] []
+        2: CSS_BOGUS_BLOCK@349..349
   2: EOF@349..350 "" [Newline("\n")] []
 
 ```
@@ -524,33 +530,23 @@ at_rule_font_palette_values_error.css:10:22 parse ━━━━━━━━━━
     11 │ @font-palette-values ;
     12 │ 
   
-at_rule_font_palette_values_error.css:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+at_rule_font_palette_values_error.css:11:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `{` but instead found `@`
+  × Expected a dashed identifier but instead found ';'.
   
      9 │ @font-palette-values revert-layer { }
     10 │ @font-palette-values ident
   > 11 │ @font-palette-values ;
-       │ ^
+       │                      ^
     12 │ 
   
-  i Remove @
+  i Expected a dashed identifier here.
   
-at_rule_font_palette_values_error.css:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `}` but instead the file ends
-  
+     9 │ @font-palette-values revert-layer { }
     10 │ @font-palette-values ident
-    11 │ @font-palette-values ;
-  > 12 │ 
-       │ 
-  
-  i the file ends here
-  
-    10 │ @font-palette-values ident
-    11 │ @font-palette-values ;
-  > 12 │ 
-       │ 
+  > 11 │ @font-palette-values ;
+       │                      ^
+    12 │ 
   
 ```
 

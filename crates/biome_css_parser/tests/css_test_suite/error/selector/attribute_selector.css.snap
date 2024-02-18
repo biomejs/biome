@@ -148,10 +148,8 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: missing (required),
-                items: CssDeclarationOrRuleList [],
-                r_curly_token: missing (required),
+            block: CssBogusBlock {
+                items: [],
             },
         },
     ],
@@ -245,10 +243,7 @@ CssRoot {
                     0: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")]
                 2: S_KW@64..65 "s" [] []
               3: (empty)
-      1: CSS_DECLARATION_OR_RULE_BLOCK@65..65
-        0: (empty)
-        1: CSS_DECLARATION_OR_RULE_LIST@65..65
-        2: (empty)
+      1: CSS_BOGUS_BLOCK@65..65
   2: EOF@65..66 "" [Newline("\n")] []
 
 ```

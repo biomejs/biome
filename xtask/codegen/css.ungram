@@ -463,6 +463,8 @@ CssDeclarationListBlock =
 	declarations: CssDeclarationList
  	'}'
 
+CssDeclarationList = CssDeclarationWithSemicolon*
+
 AnyCssRuleListBlock =
 	CssRuleListBlock
 	| CssBogusBlock
@@ -472,12 +474,9 @@ CssRuleListBlock =
 	rules: CssRuleList
  	'}'
 
-CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
-
 CssDeclaration =
 	property: AnyCssProperty
 	important: CssDeclarationImportant?
-
 
 /////////////
 // PROPERTIES

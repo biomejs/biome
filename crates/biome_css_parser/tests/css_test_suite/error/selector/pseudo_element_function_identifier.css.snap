@@ -95,10 +95,8 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: missing (required),
-                items: CssDeclarationOrRuleList [],
-                r_curly_token: missing (required),
+            block: CssBogusBlock {
+                items: [],
             },
         },
     ],
@@ -159,10 +157,7 @@ CssRoot {
               1: CSS_BOGUS_PSEUDO_ELEMENT@44..54
                 0: HIGHLIGHT_KW@44..53 "highlight" [] []
                 1: L_PAREN@53..54 "(" [] []
-      1: CSS_DECLARATION_OR_RULE_BLOCK@54..54
-        0: (empty)
-        1: CSS_DECLARATION_OR_RULE_LIST@54..54
-        2: (empty)
+      1: CSS_BOGUS_BLOCK@54..54
   2: EOF@54..55 "" [Newline("\n")] []
 
 ```

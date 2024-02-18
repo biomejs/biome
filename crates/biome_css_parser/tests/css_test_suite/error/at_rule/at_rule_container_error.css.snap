@@ -482,45 +482,43 @@ CssRoot {
                                                         },
                                                         r_paren_token: R_PAREN@491..494 ")" [] [Whitespace("  ")],
                                                     },
-                                                    block: CssRuleListBlock {
-                                                        l_curly_token: missing (required),
-                                                        rules: CssRuleList [],
-                                                        r_curly_token: R_CURLY@494..495 "}" [] [],
-                                                    },
-                                                },
-                                            },
-                                            CssAtRule {
-                                                at_token: AT@495..498 "@" [Newline("\n"), Newline("\n")] [],
-                                                rule: CssContainerAtRule {
-                                                    container_token: CONTAINER_KW@498..508 "container" [] [Whitespace(" ")],
-                                                    name: missing (optional),
-                                                    query: missing (required),
-                                                    block: CssRuleListBlock {
-                                                        l_curly_token: L_CURLY@508..510 "{" [] [Whitespace(" ")],
-                                                        rules: CssRuleList [],
-                                                        r_curly_token: R_CURLY@510..511 "}" [] [],
-                                                    },
-                                                },
-                                            },
-                                            CssAtRule {
-                                                at_token: AT@511..513 "@" [Newline("\n")] [],
-                                                rule: CssContainerAtRule {
-                                                    container_token: CONTAINER_KW@513..523 "container" [] [Whitespace(" ")],
-                                                    name: missing (optional),
-                                                    query: CssContainerSizeFeatureInParens {
-                                                        l_paren_token: L_PAREN@523..524 "(" [] [],
-                                                        feature: missing (required),
-                                                        r_paren_token: R_PAREN@524..526 ")" [] [Whitespace(" ")],
-                                                    },
-                                                    block: CssRuleListBlock {
-                                                        l_curly_token: L_CURLY@526..528 "{" [] [Whitespace(" ")],
-                                                        rules: CssRuleList [],
-                                                        r_curly_token: R_CURLY@528..529 "}" [] [],
+                                                    block: CssBogusBlock {
+                                                        items: [],
                                                     },
                                                 },
                                             },
                                         ],
-                                        r_curly_token: missing (required),
+                                        r_curly_token: R_CURLY@494..495 "}" [] [],
+                                    },
+                                },
+                            },
+                            CssAtRule {
+                                at_token: AT@495..498 "@" [Newline("\n"), Newline("\n")] [],
+                                rule: CssContainerAtRule {
+                                    container_token: CONTAINER_KW@498..508 "container" [] [Whitespace(" ")],
+                                    name: missing (optional),
+                                    query: missing (required),
+                                    block: CssRuleListBlock {
+                                        l_curly_token: L_CURLY@508..510 "{" [] [Whitespace(" ")],
+                                        rules: CssRuleList [],
+                                        r_curly_token: R_CURLY@510..511 "}" [] [],
+                                    },
+                                },
+                            },
+                            CssAtRule {
+                                at_token: AT@511..513 "@" [Newline("\n")] [],
+                                rule: CssContainerAtRule {
+                                    container_token: CONTAINER_KW@513..523 "container" [] [Whitespace(" ")],
+                                    name: missing (optional),
+                                    query: CssContainerSizeFeatureInParens {
+                                        l_paren_token: L_PAREN@523..524 "(" [] [],
+                                        feature: missing (required),
+                                        r_paren_token: R_PAREN@524..526 ")" [] [Whitespace(" ")],
+                                    },
+                                    block: CssRuleListBlock {
+                                        l_curly_token: L_CURLY@526..528 "{" [] [Whitespace(" ")],
+                                        rules: CssRuleList [],
+                                        r_curly_token: R_CURLY@528..529 "}" [] [],
                                     },
                                 },
                             },
@@ -686,16 +684,16 @@ CssRoot {
                 0: L_CURLY@237..239 "{" [] [Whitespace(" ")]
                 1: CSS_DECLARATION_OR_RULE_LIST@239..239
                 2: R_CURLY@239..240 "}" [] []
-            1: CSS_AT_RULE@240..529
+            1: CSS_AT_RULE@240..495
               0: AT@240..243 "@" [Newline("\n"), Newline("\n")] []
-              1: CSS_CONTAINER_AT_RULE@243..529
+              1: CSS_CONTAINER_AT_RULE@243..495
                 0: CONTAINER_KW@243..253 "container" [] [Whitespace(" ")]
                 1: CSS_CUSTOM_IDENTIFIER@253..257
                   0: IDENT@253..257 "not" [] [Whitespace(" ")]
                 2: (empty)
-                3: CSS_RULE_LIST_BLOCK@257..529
+                3: CSS_RULE_LIST_BLOCK@257..495
                   0: (empty)
-                  1: CSS_RULE_LIST@257..529
+                  1: CSS_RULE_LIST@257..494
                     0: CSS_QUALIFIED_RULE@257..277
                       0: CSS_SELECTOR_LIST@257..273
                         0: CSS_COMPLEX_SELECTOR@257..263
@@ -823,9 +821,9 @@ CssRoot {
                           0: L_CURLY@455..458 "{" [] [Whitespace("  ")]
                           1: CSS_RULE_LIST@458..458
                           2: R_CURLY@458..459 "}" [] []
-                    6: CSS_AT_RULE@459..495
+                    6: CSS_AT_RULE@459..494
                       0: AT@459..462 "@" [Newline("\n"), Newline("\n")] []
-                      1: CSS_CONTAINER_AT_RULE@462..495
+                      1: CSS_CONTAINER_AT_RULE@462..494
                         0: CONTAINER_KW@462..472 "container" [] [Whitespace(" ")]
                         1: (empty)
                         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@472..494
@@ -839,34 +837,31 @@ CssRoot {
                               0: CSS_NUMBER_LITERAL@488..489 "0" [] []
                               1: IDENT@489..491 "px" [] []
                           2: R_PAREN@491..494 ")" [] [Whitespace("  ")]
-                        3: CSS_RULE_LIST_BLOCK@494..495
-                          0: (empty)
-                          1: CSS_RULE_LIST@494..494
-                          2: R_CURLY@494..495 "}" [] []
-                    7: CSS_AT_RULE@495..511
-                      0: AT@495..498 "@" [Newline("\n"), Newline("\n")] []
-                      1: CSS_CONTAINER_AT_RULE@498..511
-                        0: CONTAINER_KW@498..508 "container" [] [Whitespace(" ")]
-                        1: (empty)
-                        2: (empty)
-                        3: CSS_RULE_LIST_BLOCK@508..511
-                          0: L_CURLY@508..510 "{" [] [Whitespace(" ")]
-                          1: CSS_RULE_LIST@510..510
-                          2: R_CURLY@510..511 "}" [] []
-                    8: CSS_AT_RULE@511..529
-                      0: AT@511..513 "@" [Newline("\n")] []
-                      1: CSS_CONTAINER_AT_RULE@513..529
-                        0: CONTAINER_KW@513..523 "container" [] [Whitespace(" ")]
-                        1: (empty)
-                        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@523..526
-                          0: L_PAREN@523..524 "(" [] []
-                          1: (empty)
-                          2: R_PAREN@524..526 ")" [] [Whitespace(" ")]
-                        3: CSS_RULE_LIST_BLOCK@526..529
-                          0: L_CURLY@526..528 "{" [] [Whitespace(" ")]
-                          1: CSS_RULE_LIST@528..528
-                          2: R_CURLY@528..529 "}" [] []
-                  2: (empty)
+                        3: CSS_BOGUS_BLOCK@494..494
+                  2: R_CURLY@494..495 "}" [] []
+            2: CSS_AT_RULE@495..511
+              0: AT@495..498 "@" [Newline("\n"), Newline("\n")] []
+              1: CSS_CONTAINER_AT_RULE@498..511
+                0: CONTAINER_KW@498..508 "container" [] [Whitespace(" ")]
+                1: (empty)
+                2: (empty)
+                3: CSS_RULE_LIST_BLOCK@508..511
+                  0: L_CURLY@508..510 "{" [] [Whitespace(" ")]
+                  1: CSS_RULE_LIST@510..510
+                  2: R_CURLY@510..511 "}" [] []
+            3: CSS_AT_RULE@511..529
+              0: AT@511..513 "@" [Newline("\n")] []
+              1: CSS_CONTAINER_AT_RULE@513..529
+                0: CONTAINER_KW@513..523 "container" [] [Whitespace(" ")]
+                1: (empty)
+                2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@523..526
+                  0: L_PAREN@523..524 "(" [] []
+                  1: (empty)
+                  2: R_PAREN@524..526 ")" [] [Whitespace(" ")]
+                3: CSS_RULE_LIST_BLOCK@526..529
+                  0: L_CURLY@526..528 "{" [] [Whitespace(" ")]
+                  1: CSS_RULE_LIST@528..528
+                  2: R_CURLY@528..529 "}" [] []
           2: (empty)
   2: EOF@529..530 "" [Newline("\n")] []
 
@@ -950,19 +945,6 @@ at_rule_container_error.css:6:12 parse ━━━━━━━━━━━━━�
   
   i 'inherit' is a CSS-wide keyword that cannot be used here
   
-at_rule_container_error.css:6:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `{` but instead found `width`
-  
-    4 │ @container revert (width <= 500px) { }
-    5 │ @container revert-layer (width <= 500px) { }
-  > 6 │ @container inherit width <= 500px) { }
-      │                    ^^^^^
-    7 │ 
-    8 │ @container not width <= 500px) {  }
-  
-  i Remove width
-  
 at_rule_container_error.css:6:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a compound selector but instead found '<='.
@@ -1008,19 +990,6 @@ at_rule_container_error.css:6:34 parse ━━━━━━━━━━━━━�
     8 │ @container not width <= 500px) {  }
   
   i Remove )
-  
-at_rule_container_error.css:8:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `{` but instead found `width`
-  
-     6 │ @container inherit width <= 500px) { }
-     7 │ 
-   > 8 │ @container not width <= 500px) {  }
-       │                ^^^^^
-     9 │ 
-    10 │ @container not (width <= 500px {  }
-  
-  i Remove width
   
 at_rule_container_error.css:8:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1080,19 +1049,6 @@ at_rule_container_error.css:10:32 parse ━━━━━━━━━━━━━�
     12 │ @container not {  }
   
   i Remove {
-  
-at_rule_container_error.css:18:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `{` but instead found `}`
-  
-    16 │ @container card (inline-size > 30em) or {  }
-    17 │ 
-  > 18 │ @container (inline-size >= 0px)  }
-       │                                  ^
-    19 │ 
-    20 │ @container { }
-  
-  i Remove }
   
 at_rule_container_error.css:22:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

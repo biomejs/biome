@@ -772,10 +772,8 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: missing (required),
-                items: CssDeclarationOrRuleList [],
-                r_curly_token: missing (required),
+            block: CssBogusBlock {
+                items: [],
             },
         },
     ],
@@ -1258,10 +1256,7 @@ CssRoot {
                       1: CSS_NUMBER@432..433
                         0: CSS_NUMBER_LITERAL@432..433 "1" [] []
                   1: (empty)
-      1: CSS_DECLARATION_OR_RULE_BLOCK@433..433
-        0: (empty)
-        1: CSS_DECLARATION_OR_RULE_LIST@433..433
-        2: (empty)
+      1: CSS_BOGUS_BLOCK@433..433
   2: EOF@433..433 "" [] []
 
 ```
