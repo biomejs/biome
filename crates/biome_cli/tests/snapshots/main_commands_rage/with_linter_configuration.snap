@@ -68,7 +68,7 @@ Biome Configuration:
   VCS disabled:                 true
 
 Linter:
-  Recommend:                    true
+  Recommended:                  true
   All:                          false
   Rules:                        a11y/noAccessKey = "off"
                                 a11y/noAutofocus = "off"

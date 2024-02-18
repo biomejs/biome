@@ -25,6 +25,26 @@ expression: content
     "lineEnding": "lf",
     "lineWidth": 120,
     "ignore": ["configuration-schema.json"]
+  },
+  "javascript": {
+    "formatter": {
+      "enabled": true,
+      "arrowParentheses": "always",
+      "jsxQuoteStyle": "single",
+      "indentWidth": 2,
+      "indentStyle": "tab",
+      "lineEnding": "lf",
+      "lineWidth": 100
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineEnding": "lf",
+      "lineWidth": 100
+    }
   }
 }
 ```
@@ -65,6 +85,31 @@ Formatter:
   Attribute position:           Multiline
   Ignore:                       ["configuration-schema.json"]
   Include:                      ["**/*.html", "**/*.css", "**/*.js", "**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.json", "**/*.md"]
+
+JavaScript Formatter:
+  Enabled:                      true
+  JSX quote style:              Single
+  Quote properties:             AsNeeded
+  Trailing comma:               All
+  Semicolons:                   Always
+  Arrow parentheses:            Always
+  Bracket spacing:              false
+  Bracket same line:            false
+  Quote style:                  Double
+  Indent style:                 Tab
+  Indent size:                  unset
+  Indent width:                 2
+  Line ending:                  Lf
+  Line width:                   100
+  Attribute position:           Auto
+
+JSON Formatter:
+  Enabled:                      true
+  Indent style:                 Space
+  Indent width:                 2
+  Indent size:                  unset
+  Line ending:                  Lf
+  Line width:                   100
 
 Server:
   Version:                      0.0.0

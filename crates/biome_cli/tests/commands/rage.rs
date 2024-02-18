@@ -207,6 +207,26 @@ fn with_formatter_configuration() {
     "lineEnding": "lf",
     "lineWidth": 120,
     "ignore": ["configuration-schema.json"]
+  },
+  "javascript": {
+    "formatter": {
+        "enabled": true,
+        "arrowParentheses": "always",
+        "jsxQuoteStyle": "single",
+        "indentWidth": 2,
+        "indentStyle":"tab",
+        "lineEnding": "lf",
+        "lineWidth": 100
+    }
+  },
+  "json": {
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 2,
+        "lineEnding": "lf",
+        "lineWidth": 100
+    }
   }
 }"#,
     );

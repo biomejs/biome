@@ -98,6 +98,28 @@ pub struct JavascriptFormatter {
     pub attribute_position: AttributePosition,
 }
 
+impl PartialJavascriptFormatter {
+    pub fn get_formatter_configuration(&self) -> JavascriptFormatter {
+        JavascriptFormatter {
+            enabled: self.enabled.unwrap_or_default(),
+            jsx_quote_style: self.jsx_quote_style.unwrap_or_default(),
+            quote_properties: self.quote_properties.unwrap_or_default(),
+            trailing_comma: self.trailing_comma.unwrap_or_default(),
+            semicolons: self.semicolons.unwrap_or_default(),
+            arrow_parentheses: self.arrow_parentheses.unwrap_or_default(),
+            bracket_spacing: self.bracket_spacing.unwrap_or_default(),
+            bracket_same_line: self.bracket_same_line.unwrap_or_default(),
+            indent_style: self.indent_style,
+            indent_size: self.indent_size,
+            indent_width: self.indent_width,
+            line_ending: self.line_ending,
+            line_width: self.line_width,
+            quote_style: self.quote_style.unwrap_or_default(),
+            attribute_position: self.attribute_position.unwrap_or_default(),
+        }
+    }
+}
+
 impl Default for JavascriptFormatter {
     fn default() -> Self {
         Self {
