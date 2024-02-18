@@ -365,7 +365,9 @@ export default defineConfig({
 		rehypePlugins: [rehypeSlug, ...rehypeAutolink()],
 	},
 
-	adapter: netlify(),
+	adapter: netlify({
+		imageCDN: false,
+	}),
 
 	vite: {
 		resolve: {
