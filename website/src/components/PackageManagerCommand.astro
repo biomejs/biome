@@ -1,4 +1,5 @@
 ---
+import { Code } from "@astrojs/starlight/components";
 import InlineSVG from "@/components/InlineSVG.astro";
 ---
 
@@ -26,7 +27,15 @@ import InlineSVG from "@/components/InlineSVG.astro";
 </ul>
 
 
-<pre data-name="npm" class="package-manager-command language-shellsession active"><code>{Astro.props.npx ? "npx" : "npm"} {Astro.props.npx ?? Astro.props.npm ?? Astro.props.command}</code><button><InlineSVG src="copy-icon" /><InlineSVG src="tick-icon" /></button></pre>
-<pre data-name="yarn" class="package-manager-command language-shellsession"><code>yarn {Astro.props.yarn ?? Astro.props.command}</code><button><InlineSVG src="copy-icon" /><InlineSVG src="tick-icon" /></button></pre>
-<pre data-name="pnpm" class="package-manager-command language-shellsession"><code>pnpm {Astro.props.pnpm ?? Astro.props.command}</code><button><InlineSVG src="copy-icon" /><InlineSVG src="tick-icon" /></button></pre>
-<pre data-name="bun" class="package-manager-command language-shellsession"><code>bun{Astro.props.bun ? "" : "x"} {Astro.props.bunx ?? Astro.props.bun ?? Astro.props.command}</code><button><InlineSVG src="copy-icon" /><InlineSVG src="tick-icon" /></button></pre>
+<pre data-name="npm" class="package-manager-command language-shellsession active">
+  <Code code={`npm ${Astro.props.npx ? "npx" : "npm"} ${Astro.props.npx ?? Astro.props.npm ?? Astro.props.command}`} lang="bash"  />
+</pre>
+<pre data-name="yarn" class="package-manager-command language-shellsession">
+  <Code code={`yarn ${Astro.props.yarn ?? Astro.props.command}`} lang="bash"  />
+</pre>
+<pre data-name="pnpm" class="package-manager-command language-shellsession">
+  <Code code={`pnpm ${Astro.props.pnpm ?? Astro.props.command}`} lang="bash"  />
+</pre>
+<pre data-name="bun" class="package-manager-command language-shellsession">
+  <Code code={`bun${Astro.props.bun ? "" : "x"} ${Astro.props.bunx ?? Astro.props.bun ?? Astro.props.command}`} lang="bash"  />
+</pre>
