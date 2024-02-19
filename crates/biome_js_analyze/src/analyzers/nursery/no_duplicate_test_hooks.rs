@@ -88,7 +88,7 @@ impl HooksContext {
         };
         *counter += 1;
 
-        return *counter;
+        *counter
     }
 }
 
