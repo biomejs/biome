@@ -3,9 +3,10 @@ use crate::diagnostics::LspError;
 use crate::session::Session;
 use anyhow::Context;
 use biome_fs::RomePath;
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     FeaturesBuilder, FileFeaturesResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
-    SupportsFeatureParams,
+    GetFileContentParams, SupportsFeatureParams,
 };
 use biome_service::{extension_error, WorkspaceError};
 use tower_lsp::lsp_types::*;
@@ -28,9 +29,36 @@ pub(crate) fn format(
 
     if file_features.supports_format() {
         debug!("Formatting...");
-        let printed = session
-            .workspace
-            .format_file(FormatFileParams { path: rome_path })?;
+        let printed = session.workspace.format_file(FormatFileParams {
+            path: rome_path.clone(),
+        })?;
+
+        let mut output = printed.into_code();
+        let file_extension = rome_path.extension().and_then(|s| s.to_str());
+        let input = session.workspace.get_file_content(GetFileContentParams {
+            path: rome_path.clone(),
+        })?;
+        match file_extension {
+            Some("astro") => {
+                if output.is_empty() {
+                    return Ok(None);
+                }
+                output = AstroFileHandler::output(input.as_str(), output.as_str());
+            }
+            Some("vue") => {
+                if output.is_empty() {
+                    return Ok(None);
+                }
+                output = VueFileHandler::output(input.as_str(), output.as_str());
+            }
+            Some("svelte") => {
+                if output.is_empty() {
+                    return Ok(None);
+                }
+                output = SvelteFileHandler::output(input.as_str(), output.as_str());
+            }
+            _ => {}
+        }
 
         let num_lines: u32 = doc.line_index.len();
 
@@ -44,7 +72,7 @@ pub(crate) fn format(
 
         let edits = vec![TextEdit {
             range,
-            new_text: printed.into_code(),
+            new_text: output,
         }];
 
         Ok(Some(edits))

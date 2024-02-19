@@ -3,8 +3,7 @@ use self::{
     unknown::UnknownFileHandler,
 };
 pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
-use crate::file_handlers::svelte::SvelteFileHandler;
-pub use crate::file_handlers::svelte::SVELTE_FENCE;
+pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
 pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{

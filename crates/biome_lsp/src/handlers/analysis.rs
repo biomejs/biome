@@ -6,9 +6,10 @@ use anyhow::{Context, Result};
 use biome_analyze::{ActionCategory, SourceActionKind};
 use biome_diagnostics::Applicability;
 use biome_fs::RomePath;
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    FeatureName, FeaturesBuilder, FixFileMode, FixFileParams, PullActionsParams,
-    SupportsFeatureParams,
+    FeatureName, FeaturesBuilder, FixFileMode, FixFileParams, GetFileContentParams,
+    PullActionsParams, SupportsFeatureParams,
 };
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
@@ -101,12 +102,27 @@ pub(crate) fn code_actions(
     // document if the action category "source.fixAll" was explicitly requested
     // by the language client
     let fix_all = if has_fix_all {
-        fix_all(session, &url, rome_path, &doc.line_index, &diagnostics)?
+        fix_all(
+            session,
+            &url,
+            rome_path.clone(),
+            &doc.line_index,
+            &diagnostics,
+        )?
     } else {
         None
     };
 
     let mut has_fixes = false;
+    let content = session.workspace.get_file_content(GetFileContentParams {
+        path: rome_path.clone(),
+    })?;
+    let offset = match rome_path.extension().and_then(|s| s.to_str()) {
+        Some("vue") => VueFileHandler::start(content.as_str()),
+        Some("astro") => AstroFileHandler::start(content.as_str()),
+        Some("svelte") => SvelteFileHandler::start(content.as_str()),
+        _ => None,
+    };
     let mut actions: Vec<_> = result
         .actions
         .into_iter()
@@ -133,6 +149,7 @@ pub(crate) fn code_actions(
                 position_encoding,
                 &diagnostics,
                 action,
+                offset,
             )
             .ok()?;
 

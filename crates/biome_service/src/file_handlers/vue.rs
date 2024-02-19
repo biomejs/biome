@@ -9,11 +9,12 @@ use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
+use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
 use biome_rowan::{FileSource, NodeCache};
 use lazy_static::lazy_static;
-use regex::Regex;
+use regex::{Match, Regex};
 use tracing::debug;
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -37,21 +38,15 @@ impl VueFileHandler {
     /// It extracts the JavaScript/TypeScript code contained in the script block of a Vue file
     ///
     /// If there's no script block, an empty string is returned.
-    pub fn vue_input(text: &str) -> &str {
-        let script = VUE_FENCE
-            .captures(text)
-            .and_then(|captures| captures.name("script"));
-        match script {
+    pub fn input(text: &str) -> &str {
+        match Self::matches_script(text) {
             Some(script) => &text[script.start()..script.end()],
             _ => "",
         }
     }
 
-    pub fn vue_output(input: &str, output: &str) -> String {
-        if let Some(script) = VUE_FENCE
-            .captures(input)
-            .and_then(|captures| captures.name("script"))
-        {
+    pub fn output(input: &str, output: &str) -> String {
+        if let Some(script) = Self::matches_script(input) {
             format!(
                 "{}{}{}",
                 &input[..script.start()],
@@ -63,7 +58,17 @@ impl VueFileHandler {
         }
     }
 
-    pub fn vue_file_source(text: &str) -> JsFileSource {
+    pub fn start(input: &str) -> Option<u32> {
+        Self::matches_script(input).map(|m| m.start() as u32)
+    }
+
+    fn matches_script(input: &str) -> Option<Match> {
+        VUE_FENCE
+            .captures(input)
+            .and_then(|captures| captures.name("script"))
+    }
+
+    pub fn file_source(text: &str) -> JsFileSource {
         let matches = VUE_FENCE.captures(text);
         matches
             .and_then(|captures| captures.name("lang"))
@@ -115,8 +120,8 @@ fn parse(
     _settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> AnyParse {
-    let script = VueFileHandler::vue_input(text);
-    let language = VueFileHandler::vue_file_source(text);
+    let script = VueFileHandler::input(text);
+    let language = VueFileHandler::file_source(text);
 
     debug!("Parsing file with language {:?}", language);
 

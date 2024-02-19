@@ -692,6 +692,7 @@ dependencies = [
  "biome_text_edit",
  "futures",
  "indexmap 1.9.3",
+ "log",
  "rustc-hash",
  "serde",
  "serde_json",

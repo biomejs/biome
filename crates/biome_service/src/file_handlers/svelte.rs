@@ -1,8 +1,10 @@
 use crate::file_handlers::{
-    javascript, AnalyzerCapabilities, Capabilities, DebugCapabilities, ExtensionHandler,
-    FormatterCapabilities, Language, Mime, ParserCapabilities,
+    javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime,
+    ParserCapabilities,
 };
 use crate::settings::SettingsHandle;
+use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
@@ -11,11 +13,11 @@ use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
 use biome_rowan::{FileSource, NodeCache};
 use lazy_static::lazy_static;
-use regex::Regex;
+use regex::{Match, Regex};
 use tracing::debug;
 
 #[derive(Debug, Default, PartialEq, Eq)]
-pub(crate) struct SvelteFileHandler;
+pub struct SvelteFileHandler;
 
 lazy_static! {
     // https://regex101.com/r/E4n4hh/3
@@ -29,6 +31,52 @@ lazy_static! {
         [^>]*>\n(?P<script>(?U:.*))</script>"#
     )
     .unwrap();
+}
+
+impl SvelteFileHandler {
+    // It extracts the JavaScript/TypeScript code contained in the script block of a Vue file
+    ///
+    /// If there's no script block, an empty string is returned.
+    pub fn input(text: &str) -> &str {
+        match Self::matches_script(text) {
+            Some(script) => &text[script.start()..script.end()],
+            _ => "",
+        }
+    }
+
+    pub fn output(input: &str, output: &str) -> String {
+        if let Some(script) = Self::matches_script(input) {
+            format!(
+                "{}{}{}",
+                &input[..script.start()],
+                output,
+                &input[script.end()..]
+            )
+        } else {
+            input.to_string()
+        }
+    }
+
+    pub fn start(input: &str) -> Option<u32> {
+        Self::matches_script(input).map(|m| m.start() as u32)
+    }
+
+    fn matches_script(input: &str) -> Option<Match> {
+        SVELTE_FENCE
+            .captures(input)
+            .and_then(|captures| captures.name("script"))
+    }
+
+    pub fn file_source(text: &str) -> JsFileSource {
+        let matches = SVELTE_FENCE.captures(text);
+        matches
+            .and_then(|captures| captures.name("lang"))
+            .map(|lang| match lang.as_str() {
+                "ts" => JsFileSource::ts(),
+                _ => JsFileSource::js_module(),
+            })
+            .unwrap_or(JsFileSource::js_module())
+    }
 }
 
 impl ExtensionHandler for SvelteFileHandler {
@@ -49,10 +97,10 @@ impl ExtensionHandler for SvelteFileHandler {
                 debug_formatter_ir: None,
             },
             analyzer: AnalyzerCapabilities {
-                lint: None,
-                code_actions: None,
+                lint: Some(lint),
+                code_actions: Some(code_actions),
                 rename: None,
-                fix_all: None,
+                fix_all: Some(fix_all),
                 organize_imports: None,
             },
             formatter: FormatterCapabilities {
@@ -106,4 +154,16 @@ fn format(
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format(rome_path, parse, settings)
+}
+
+pub(crate) fn lint(params: LintParams) -> LintResults {
+    javascript::lint(params)
+}
+
+pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
+    javascript::code_actions(params)
+}
+
+fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+    javascript::fix_all(params)
 }

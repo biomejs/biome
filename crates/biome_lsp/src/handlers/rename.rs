@@ -38,7 +38,7 @@ pub(crate) fn rename(session: &Session, params: RenameParams) -> Result<Option<W
     let mut changes = HashMap::new();
     changes.insert(
         url,
-        utils::text_edit(&doc.line_index, result.indels, position_encoding)?,
+        utils::text_edit(&doc.line_index, result.indels, position_encoding, None)?,
     );
 
     let workspace_edit = WorkspaceEdit {

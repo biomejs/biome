@@ -1,7 +1,7 @@
 use crate::file_handlers::{
     javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
     ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime,
-    ParserCapabilities,
+    ParserCapabilities, VUE_FENCE,
 };
 use crate::settings::SettingsHandle;
 use crate::workspace::{FixFileResult, PullActionsResult};
@@ -13,7 +13,7 @@ use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
 use biome_rowan::{FileSource, NodeCache};
 use lazy_static::lazy_static;
-use regex::{Regex, RegexBuilder};
+use regex::{Match, Matches, Regex, RegexBuilder};
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct AstroFileHandler;
@@ -29,16 +29,24 @@ impl AstroFileHandler {
     /// It extracts the JavaScript code contained in the frontmatter of an Astro file
     ///
     /// If the frontmatter doesn't exist, an empty string is returned.
-    pub fn astro_input(text: &str) -> &str {
-        let mut matches = ASTRO_FENCE.find_iter(text);
+    pub fn input(text: &str) -> &str {
+        let mut matches = Self::matches(text);
         match (matches.next(), matches.next()) {
             (Some(start), Some(end)) => &text[start.end()..end.start()],
             _ => "",
         }
     }
 
-    pub fn astro_output(input: &str, output: &str) -> String {
-        let mut matches = ASTRO_FENCE.find_iter(input);
+    pub fn start(input: &str) -> Option<u32> {
+        ASTRO_FENCE.find_iter(input).next().map(|m| m.end() as u32)
+    }
+
+    fn matches(input: &str) -> Matches {
+        ASTRO_FENCE.find_iter(input)
+    }
+
+    pub fn output(input: &str, output: &str) -> String {
+        let mut matches = Self::matches(input);
         if let (Some(start), Some(end)) = (matches.next(), matches.next()) {
             format!(
                 "{}{}{}",
@@ -92,7 +100,7 @@ fn parse(
     _settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> AnyParse {
-    let frontmatter = AstroFileHandler::astro_input(text);
+    let frontmatter = AstroFileHandler::input(text);
     let parse = parse_js_with_cache(
         frontmatter,
         JsFileSource::ts(),
