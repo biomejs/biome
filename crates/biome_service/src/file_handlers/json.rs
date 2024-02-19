@@ -296,13 +296,13 @@ fn lint(params: LintParams) -> LintResults {
                 );
             }
 
-            let mut diagnostic_count = diagnostics.len() as u64;
+            let mut diagnostic_count = diagnostics.len() as u32;
             let mut errors = diagnostics
                 .iter()
                 .filter(|diag| diag.severity() <= Severity::Error)
                 .count();
 
-            let skipped_diagnostics = diagnostic_count - diagnostics.len() as u64;
+            let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
 
             let rules = settings.as_rules(params.path.as_path());
             let rule_filter_list = rules

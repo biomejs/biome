@@ -327,7 +327,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
             filter.categories = params.categories;
 
-            let mut diagnostic_count = diagnostics.len() as u64;
+            let mut diagnostic_count = diagnostics.len() as u32;
             let mut errors = diagnostics
                 .iter()
                 .filter(|diag| diag.severity() <= Severity::Error)
@@ -393,7 +393,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                     .map(biome_diagnostics::serde::Diagnostic::new)
                     .collect::<Vec<_>>(),
             );
-            let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u64);
+            let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
 
             LintResults {
                 diagnostics,
