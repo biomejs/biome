@@ -1346,6 +1346,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateTestHooks": {
+					"description": "A describe block should not contain duplicate hooks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmptyBlockStatements": {
 					"description": "Disallow empty block statements and static blocks.",
 					"anyOf": [
