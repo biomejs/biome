@@ -10,7 +10,7 @@ use crate::syntax::{is_at_declaration, is_at_identifier, parse_custom_identifier
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
@@ -36,12 +36,26 @@ pub(crate) fn parse_keyframes_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_string(p)
     };
 
-    name.or_add_diagnostic(p, expected_non_css_wide_keyword_identifier);
+    let kind = if name
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, KEYFRAMES_NAME_RECOVERY_SET)
+                .enable_recovery_on_line_break(),
+            expected_non_css_wide_keyword_identifier,
+        )
+        .is_ok()
+    {
+        CSS_KEYFRAMES_AT_RULE
+    } else {
+        CSS_BOGUS_AT_RULE
+    };
 
     KeyframesBlock.parse_block_body(p);
 
-    Present(m.complete(p, CSS_KEYFRAMES_AT_RULE))
+    Present(m.complete(p, kind))
 }
+
+const KEYFRAMES_NAME_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];
 
 struct KeyframesBlock;
 
