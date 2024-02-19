@@ -1,26 +1,26 @@
-// Vitest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`Biome WebAssembly DiagnosticPrinter > should format content > HTML diagnostic 1`] = `
 "file.js:3:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style=\\"color: Tomato;\\">  </span></strong><strong><span style=\\"color: Tomato;\\">✖</span></strong> <span style=\\"color: Tomato;\\">error message content</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">error message content</span>
   
     <strong>1 │ </strong>const variable = expr();
     <strong>2 │ </strong>
-<strong><span style=\\"color: Tomato;\\">  </span></strong><strong><span style=\\"color: Tomato;\\">&gt;</span></strong> <strong>3 │ </strong>if(expr()) {
-   <strong>   │ </strong>     <strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>if(expr()) {
+   <strong>   │ </strong>     <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>4 │ </strong>    statement();
     <strong>5 │ </strong>}
   
 file.js:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style=\\"color: Tomato;\\">  </span></strong><strong><span style=\\"color: Tomato;\\">✖</span></strong> <span style=\\"color: Tomato;\\">error message content</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">error message content</span>
   
     <strong>3 │ </strong>if(expr()) {
-<strong><span style=\\"color: Tomato;\\">  </span></strong><strong><span style=\\"color: Tomato;\\">&gt;</span></strong> <strong>4 │ </strong>    statement();
-   <strong>   │ </strong>       <strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong><strong><span style=\\"color: Tomato;\\">^</span></strong>
-<strong><span style=\\"color: Tomato;\\">  </span></strong><strong><span style=\\"color: Tomato;\\">&gt;</span></strong> <strong>5 │ </strong>}
-   <strong>   │ </strong><strong><span style=\\"color: Tomato;\\">^</span></strong>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>    statement();
+   <strong>   │ </strong>       <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>}
+   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong>
   
 "
 `;

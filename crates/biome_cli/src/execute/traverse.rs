@@ -16,7 +16,7 @@ use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
-use std::sync::atomic::AtomicU64;
+use std::sync::atomic::AtomicU32;
 use std::{
     ffi::OsString,
     io,
@@ -33,7 +33,7 @@ use std::{
 struct CheckResult {
     count: usize,
     duration: Duration,
-    errors: usize,
+    errors: u32,
 }
 impl fmt::Display for CheckResult {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> io::Result<()> {
@@ -243,37 +243,37 @@ struct DiagnosticsPrinter<'ctx> {
     ///  Execution of the traversal
     execution: &'ctx Execution,
     /// The maximum number of diagnostics the console thread is allowed to print
-    max_diagnostics: u64,
+    max_diagnostics: u32,
     /// The approximate number of diagnostics the console will print before
     /// folding the rest into the "skipped diagnostics" counter
-    remaining_diagnostics: AtomicU64,
+    remaining_diagnostics: AtomicU32,
     /// Mutable reference to a boolean flag tracking whether the console thread
     /// printed any error-level message
-    errors: AtomicUsize,
+    errors: AtomicU32,
     /// Mutable reference to a boolean flag tracking whether the console thread
     /// printed any warnings-level message
-    warnings: AtomicUsize,
+    warnings: AtomicU32,
     /// Whether the console thread should print diagnostics in verbose mode
     verbose: bool,
     /// The diagnostic level the console thread should print
     diagnostic_level: Severity,
 
-    not_printed_diagnostics: AtomicU64,
-    printed_diagnostics: AtomicU64,
+    not_printed_diagnostics: AtomicU32,
+    printed_diagnostics: AtomicU32,
 }
 
 impl<'ctx> DiagnosticsPrinter<'ctx> {
     fn new(execution: &'ctx Execution) -> Self {
         Self {
-            errors: AtomicUsize::new(0),
-            warnings: AtomicUsize::new(0),
-            remaining_diagnostics: AtomicU64::new(0),
+            errors: AtomicU32::new(0),
+            warnings: AtomicU32::new(0),
+            remaining_diagnostics: AtomicU32::new(0),
             execution,
             diagnostic_level: Severity::Hint,
             verbose: false,
             max_diagnostics: 20,
-            not_printed_diagnostics: AtomicU64::new(0),
-            printed_diagnostics: AtomicU64::new(0),
+            not_printed_diagnostics: AtomicU32::new(0),
+            printed_diagnostics: AtomicU32::new(0),
         }
     }
 
@@ -283,7 +283,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
     }
 
     fn with_max_diagnostics(mut self, value: u16) -> Self {
-        self.max_diagnostics = value as u64;
+        self.max_diagnostics = value as u32;
         self
     }
 
@@ -292,11 +292,11 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
         self
     }
 
-    fn errors(&self) -> usize {
+    fn errors(&self) -> u32 {
         self.errors.load(Ordering::Relaxed)
     }
 
-    fn warnings(&self) -> usize {
+    fn warnings(&self) -> u32 {
         self.warnings.load(Ordering::Relaxed)
     }
 

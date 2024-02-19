@@ -39,7 +39,7 @@ pub(crate) enum Message {
         name: String,
         content: String,
         diagnostics: Vec<Error>,
-        skipped_diagnostics: u64,
+        skipped_diagnostics: u32,
     },
     Diff {
         file_name: String,
