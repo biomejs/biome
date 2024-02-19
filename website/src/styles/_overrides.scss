@@ -76,20 +76,6 @@
   --size: 15vw;
 }
 
-.expressive-code:nth-child(-n+2) {
-  margin-top: 0 !important;
-}
-
-.expressive-code:nth-child(-n+2)>figure>pre {
-  border: none;
-  padding: 1.2rem;
-  --sl-hue-blue: 234;
-  --sl-community-link: #ffffff;
-  --sl-hue-blue: 234;
-  --sl-community-link: #ffffff;
-  --sl-perf-progress: #60a5fa;
-}
-
 .hero>.sl-flex>.actions>.primary,
 .hero>.sl-flex>.actions>.secondary {
   border-radius: 0.3rem;
@@ -125,35 +111,19 @@
 
 .expressive-code:nth-child(-n+2) {
   margin-top: 0 !important;
+  padding: 0;
+  width: 100%;
 }
 
 .expressive-code:nth-child(-n+2)>figure>pre {
   border: none;
-  padding: 1.2rem;
+  padding: 0 !important;
 }
 
 .linter>div>.expressive-code:nth-child(-n+2)>figure>pre>code {
   height: 400px !important;
   overflow: scroll;
   font-size: 0.7rem;
-}
-
-.expressive-code:first-child>figure>pre {
-  border-bottom-left-radius: 1rem;
-}
-
-.expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
-  display: none;
-}
-
-.linter>div>.expressive-code:nth-child(-n+2)>figure>pre>code {
-  height: 400px !important;
-  overflow: scroll;
-  font-size: 0.7rem;
-}
-
-.expressive-code:first-child>figure>pre {
-  border-bottom-left-radius: 1rem;
 }
 
 .expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
