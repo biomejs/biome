@@ -34,7 +34,7 @@ describe('foo', () => {
 
 <pre class="language-text"><code class="language-text">nursery/noDuplicateTestHooks.js:5:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-test-hooks">lint/nursery/noDuplicateTestHooks</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Disallow duplicate setup and teardown hooks.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Disallow duplicate setup and teardown hooks.</span>
   
     <strong>3 │ </strong>    // some setup
     <strong>4 │ </strong>  });
@@ -68,7 +68,7 @@ describe('foo', () => {
 
 <pre class="language-text"><code class="language-text">nursery/noDuplicateTestHooks.js:9:4 <a href="https://biomejs.dev/linter/rules/no-duplicate-test-hooks">lint/nursery/noDuplicateTestHooks</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Disallow duplicate setup and teardown hooks.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Disallow duplicate setup and teardown hooks.</span>
   
      <strong>7 │ </strong>      // some teardown
      <strong>8 │ </strong>    });

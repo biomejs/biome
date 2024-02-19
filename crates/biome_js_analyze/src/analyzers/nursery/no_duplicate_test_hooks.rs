@@ -59,7 +59,7 @@ declare_rule! {
     pub(crate) NoDuplicateTestHooks {
         version: "next",
         name: "noDuplicateTestHooks",
-        recommended: false,
+        recommended: true,
     }
 }
 
@@ -88,8 +88,8 @@ impl Visitor for DuplicateHooksVisitor {
             WalkEvent::Enter(node) => {
                 // When the visitor enters a function node, push a new entry on the stack
                 if let Some(node) = JsCallExpression::cast_ref(node) {
-                    if let Some(callee) = node.callee().ok() {
-                        if let Some(_) = callee.contains_a_test_pattern().ok() {
+                    if let Ok(callee) = node.callee() {
+                        if callee.contains_a_test_pattern().is_ok() {
                             if let Some(function_name) = get_function_name(&callee) {
                                 if function_name.text_trimmed() == "describe" {
                                     self.stack.push(HooksContext::default());
@@ -100,36 +100,32 @@ impl Visitor for DuplicateHooksVisitor {
                 }
 
                 if let Some(node) = JsCallExpression::cast_ref(node) {
-                    if let Some(callee) = node.callee().ok() {
-                        match callee {
-                            AnyJsExpression::JsIdentifierExpression(identifier) => identifier
-                                .name()
-                                .and_then(|name| name.value_token())
-                                .map_or((), |name| {
-                                    if let Some(hooks_context) = self.stack.last_mut() {
-                                        match name.text_trimmed() {
-                                            "beforeEach" | "beforeAll" | "afterEach"
-                                            | "afterAll" => {
-                                                let counter = match name.text_trimmed() {
-                                                    "beforeEach" => &mut hooks_context.before_each,
-                                                    "beforeAll" => &mut hooks_context.before_all,
-                                                    "afterEach" => &mut hooks_context.after_each,
-                                                    "afterAll" => &mut hooks_context.after_all,
-                                                    _ => {
-                                                        unreachable!()
-                                                    } // Should never happen
-                                                };
-                                                *counter += 1;
-                                                if *counter > 1 {
-                                                    ctx.match_query(DuplicateHooks(node.clone()));
-                                                }
+                    if let Ok(AnyJsExpression::JsIdentifierExpression(identifier)) = node.callee() {
+                        identifier
+                            .name()
+                            .and_then(|name| name.value_token())
+                            .map_or((), |name| {
+                                if let Some(hooks_context) = self.stack.last_mut() {
+                                    match name.text_trimmed() {
+                                        "beforeEach" | "beforeAll" | "afterEach" | "afterAll" => {
+                                            let counter = match name.text_trimmed() {
+                                                "beforeEach" => &mut hooks_context.before_each,
+                                                "beforeAll" => &mut hooks_context.before_all,
+                                                "afterEach" => &mut hooks_context.after_each,
+                                                "afterAll" => &mut hooks_context.after_all,
+                                                _ => {
+                                                    unreachable!()
+                                                } // Should never happen
+                                            };
+                                            *counter += 1;
+                                            if *counter > 1 {
+                                                ctx.match_query(DuplicateHooks(node.clone()));
                                             }
-                                            _ => {}
-                                        };
-                                    }
-                                }),
-                            _ => {}
-                        }
+                                        }
+                                        _ => {}
+                                    };
+                                };
+                            })
                     }
                 }
             }
@@ -137,8 +133,8 @@ impl Visitor for DuplicateHooksVisitor {
                 // When the visitor exits a function, if it matches the node of the top-most
                 // entry of the stack and the `has_yield` flag is `false`, emit a query match
                 if let Some(node) = JsCallExpression::cast_ref(node) {
-                    if let Some(callee) = node.callee().ok() {
-                        if let Some(_) = callee.contains_a_test_pattern().ok() {
+                    if let Ok(callee) = node.callee() {
+                        if callee.contains_a_test_pattern().is_ok() {
                             if let Some(function_name) = get_function_name(&callee) {
                                 if function_name.text_trimmed() == "describe" {
                                     self.stack.pop();
