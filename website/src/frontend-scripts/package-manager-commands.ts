@@ -29,25 +29,3 @@ const stored = localStorage.getItem("package-manager");
 if (stored != null) {
 	setActivePackageManager(stored);
 }
-
-const copyButtons = document.querySelectorAll(
-	".package-manager-command button",
-);
-
-function commandCopyHandler(button: Element) {
-	button.classList.add("copied");
-	setTimeout(() => {
-		button.classList.remove("copied");
-	}, 1000);
-
-	if (button.parentElement !== null) {
-		const cmd = button.parentElement.querySelector("code")?.textContent ?? "";
-		navigator.clipboard.writeText(cmd);
-	}
-}
-
-for (const button of copyButtons) {
-	button.addEventListener("click", () => {
-		commandCopyHandler(button);
-	});
-}
