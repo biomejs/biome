@@ -1,8 +1,14 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
+use biome_diagnostics::Applicability;
+use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsSyntaxToken, TextRange};
+use biome_rowan::BatchMutationExt;
+
+use crate::JsRuleAction;
 
 declare_rule! {
     /// Disallow focused tests.
@@ -22,12 +28,18 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// test.only("foo", () => {});
     /// ```
+    ///
+    /// ### Valid
+    /// ```js
+    /// test("foo", () => {});
+    /// ```
     pub(crate) NoFocusedTests {
         version: "next",
         name: "noFocusedTests",
         recommended: true,
         source: RuleSource::EslintJest("no-focused-tests"),
         source_kind: RuleSourceKind::Inspired,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -68,6 +80,42 @@ impl Rule for NoFocusedTests {
                 .note("This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.")
                 .note("Remove it.")
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let callee = node.callee().ok()?;
+        let function_name = get_function_name(&callee)?;
+        let replaced_function;
+
+        let mut mutation = ctx.root().begin();
+
+        match function_name.text_trimmed() {
+            "only" => {
+                let member = callee.as_js_static_member_expression()?;
+                let member_name = member.member().ok()?;
+                let operator_token = member.operator_token().ok()?;
+                // let member = member.as_js_name()?;
+                mutation.remove_element(member_name.into());
+                mutation.remove_element(operator_token.into());
+            }
+            "fit" => {
+                replaced_function = make::js_reference_identifier(make::ident("it"));
+                mutation.replace_element(function_name.into(), replaced_function.into());
+            }
+            "fdescribe" => {
+                replaced_function = make::js_reference_identifier(make::ident("describe"));
+                mutation.replace_element(function_name.into(), replaced_function.into());
+            }
+            _ => {}
+        };
+
+        Some(JsRuleAction {
+            category: biome_analyze::ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message: markup! { "Remove focus from test." }.to_owned(),
+            mutation,
+        })
     }
 }
 
