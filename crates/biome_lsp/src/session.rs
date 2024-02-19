@@ -25,7 +25,6 @@ use std::sync::atomic::AtomicU8;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::sync::RwLock;
-use std::u32;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
 use tower_lsp::lsp_types;
@@ -311,7 +310,7 @@ impl Session {
             let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
                 path: rome_path,
                 categories,
-                max_diagnostics: u32::MAX,
+                max_diagnostics: u64::MAX,
             })?;
 
             tracing::trace!("biome diagnostics: {:#?}", result.diagnostics);
