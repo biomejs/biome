@@ -1,6 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
+    RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, JsSyntaxToken, TextRange};
@@ -60,15 +60,36 @@ declare_rule! {
         version: "next",
         name: "noDuplicateTestHooks",
         recommended: true,
+        source: RuleSource::EslintJest("no-focused-tests"),
+        source_kind: RuleSourceKind::Inspired,
     }
 }
 
 #[derive(Debug, Default)]
 struct HooksContext {
-    before_all: usize,
-    before_each: usize,
+    after: usize,
     after_all: usize,
     after_each: usize,
+    before: usize,
+    before_all: usize,
+    before_each: usize,
+}
+
+impl HooksContext {
+    fn add(&mut self, hook_name: &str) -> usize {
+        let counter = match hook_name {
+            "after" => &mut self.after,
+            "afterAll" => &mut self.after_all,
+            "afterEach" => &mut self.after_each,
+            "before" => &mut self.before,
+            "beforeEach" => &mut self.before_each,
+            "beforeAll" => &mut self.before_all,
+            _ => unreachable!(), // Should never happen
+        };
+        *counter += 1;
+
+        return *counter;
+    }
 }
 
 #[derive(Default)]
@@ -89,7 +110,7 @@ impl Visitor for DuplicateHooksVisitor {
                 // When the visitor enters a function node, push a new entry on the stack
                 if let Some(node) = JsCallExpression::cast_ref(node) {
                     if let Ok(callee) = node.callee() {
-                        if callee.contains_a_test_pattern().is_ok() {
+                        if callee.contains_a_test_pattern() == Ok(true) {
                             if let Some(function_name) = get_function_name(&callee) {
                                 if function_name.text_trimmed() == "describe" {
                                     self.stack.push(HooksContext::default());
@@ -107,18 +128,13 @@ impl Visitor for DuplicateHooksVisitor {
                             .map_or((), |name| {
                                 if let Some(hooks_context) = self.stack.last_mut() {
                                     match name.text_trimmed() {
-                                        "beforeEach" | "beforeAll" | "afterEach" | "afterAll" => {
-                                            let counter = match name.text_trimmed() {
-                                                "beforeEach" => &mut hooks_context.before_each,
-                                                "beforeAll" => &mut hooks_context.before_all,
-                                                "afterEach" => &mut hooks_context.after_each,
-                                                "afterAll" => &mut hooks_context.after_all,
-                                                _ => {
-                                                    unreachable!()
-                                                } // Should never happen
-                                            };
-                                            *counter += 1;
-                                            if *counter > 1 {
+                                        "beforeEach" | "beforeAll" | "afterEach" | "afterAll"
+                                        | "after" | "before" => {
+                                            let counter = HooksContext::add(
+                                                hooks_context,
+                                                name.text_trimmed(),
+                                            );
+                                            if counter > 1 {
                                                 ctx.match_query(DuplicateHooks(node.clone()));
                                             }
                                         }
@@ -134,7 +150,7 @@ impl Visitor for DuplicateHooksVisitor {
                 // entry of the stack and the `has_yield` flag is `false`, emit a query match
                 if let Some(node) = JsCallExpression::cast_ref(node) {
                     if let Ok(callee) = node.callee() {
-                        if callee.contains_a_test_pattern().is_ok() {
+                        if callee.contains_a_test_pattern() == Ok(true) {
                             if let Some(function_name) = get_function_name(&callee) {
                                 if function_name.text_trimmed() == "describe" {
                                     self.stack.pop();

@@ -12,6 +12,8 @@ This rule hasn't been released yet.
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Inspired from: <a href="https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-focused-tests.md" target="_blank"><code>no-focused-tests</code></a>
+
 A `describe` block should not contain duplicate hooks.
 
 ## Examples

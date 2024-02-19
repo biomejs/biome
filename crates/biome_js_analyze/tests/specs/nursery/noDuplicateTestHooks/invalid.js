@@ -111,3 +111,19 @@ describe("something", () => {
 		});
 	});
 });
+
+describe("foo", () => {
+	before(() => {}),
+		before(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});
+
+describe("foo", () => {
+	after(() => {}),
+		after(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});

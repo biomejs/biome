@@ -118,6 +118,22 @@ describe("something", () => {
 	});
 });
 
+describe("foo", () => {
+	before(() => {}),
+		before(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});
+
+describe("foo", () => {
+	after(() => {}),
+		after(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});
+
 ```
 
 # Diagnostics
@@ -337,6 +353,40 @@ invalid.js:108:4 lint/nursery/noDuplicateTestHooks ━━━━━━━━━�
     110 │ 			it("is not fine", () => {});
   
   i Disallow beforeEach duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:117:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    115 │ describe("foo", () => {
+    116 │ 	before(() => {}),
+  > 117 │ 		before(() => {}),
+        │ 		^^^^^^^^^^^^^^^^
+    118 │ 		test("bar", () => {
+    119 │ 			someFn();
+  
+  i Disallow before duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:125:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    123 │ describe("foo", () => {
+    124 │ 	after(() => {}),
+  > 125 │ 		after(() => {}),
+        │ 		^^^^^^^^^^^^^^^
+    126 │ 		test("bar", () => {
+    127 │ 			someFn();
+  
+  i Disallow after duplicacy inside the describe function.
   
 
 ```
