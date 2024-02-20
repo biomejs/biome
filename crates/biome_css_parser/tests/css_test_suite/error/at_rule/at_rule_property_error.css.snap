@@ -269,14 +269,14 @@ at_rule_property_error.css:9:11 parse ━━━━━━━━━━━━━━
   
 at_rule_property_error.css:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found the end of the file.
+  × expected `{` but instead the file ends
   
      8 │ }
      9 │ @property ident;
   > 10 │ 
        │ 
   
-  i Expected a body here.
+  i the file ends here
   
      8 │ }
      9 │ @property ident;

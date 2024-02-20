@@ -33,7 +33,9 @@ pub(crate) trait ParseBlockBody {
     fn parse_block_body(&mut self, p: &mut CssParser) -> CompletedMarker {
         let m = p.start();
 
-        if !p.eat(T!['{']) && !self.is_at_element(p) {
+        let is_open_brace_missing = !p.expect(T!['{']);
+
+        if is_open_brace_missing && !self.is_at_element(p) {
             p.error(expected_block(p, p.cur_range()));
             return m.complete(p, CSS_BOGUS_BLOCK);
         }
@@ -41,10 +43,18 @@ pub(crate) trait ParseBlockBody {
         let old_nesting_block = std::mem::replace(&mut p.state_mut().is_nesting_block, true);
 
         self.parse_list(p);
-        p.expect(T!['}']);
+
+        let is_close_brace_missing = !p.expect(T!['}']);
 
         p.state_mut().is_nesting_block = old_nesting_block;
-        m.complete(p, Self::BLOCK_KIND)
+
+        let kind = if is_open_brace_missing || is_close_brace_missing {
+            CSS_BOGUS_BLOCK
+        } else {
+            Self::BLOCK_KIND
+        };
+
+        m.complete(p, kind)
     }
 }
 

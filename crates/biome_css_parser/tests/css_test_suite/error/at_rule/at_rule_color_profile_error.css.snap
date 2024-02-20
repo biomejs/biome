@@ -207,7 +207,7 @@ at_rule_color_profile_error.css:3:17 parse ━━━━━━━━━━━━�
   
 at_rule_color_profile_error.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found '@'.
+  × expected `{` but instead found `@`
   
     3 │ @color-profile  {  }
     4 │ @color-profile DEVICE-CMYK
@@ -215,13 +215,7 @@ at_rule_color_profile_error.css:5:1 parse ━━━━━━━━━━━━�
       │ ^
     6 │ 
   
-  i Expected a body here.
-  
-    3 │ @color-profile  {  }
-    4 │ @color-profile DEVICE-CMYK
-  > 5 │ @color-profile
-      │ ^
-    6 │ 
+  i Remove @
   
 at_rule_color_profile_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

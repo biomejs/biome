@@ -69,29 +69,30 @@ CssRoot {
                 name: CssCustomIdentifier {
                     value_token: IDENT@81..86 "ident" [] [],
                 },
-                block: CssFontFeatureValuesBlock {
-                    l_curly_token: missing (required),
-                    items: CssFontFeatureValuesItemList [
-                        CssFontFeatureValuesItem {
-                            at_token: AT@86..89 "@" [Newline("\n"), Newline("\n")] [],
-                            name: missing (required),
-                            block: CssBogusBlock {
-                                items: [],
+                block: CssBogusBlock {
+                    items: [
+                        CssFontFeatureValuesItemList [
+                            CssFontFeatureValuesItem {
+                                at_token: AT@86..89 "@" [Newline("\n"), Newline("\n")] [],
+                                name: missing (required),
+                                block: CssBogusBlock {
+                                    items: [],
+                                },
                             },
-                        },
-                        CssBogusFontFeatureValuesItem {
-                            items: [
-                                FONT_FEATURE_VALUES_KW@89..109 "font-feature-values" [] [Whitespace(" ")],
-                                SEMICOLON@109..110 ";" [] [],
-                                AT@110..113 "@" [Newline("\n"), Newline("\n")] [],
-                                FONT_FEATURE_VALUES_KW@113..133 "font-feature-values" [] [Whitespace(" ")],
-                                IDENT@133..139 "ident" [] [Whitespace(" ")],
-                                L_CURLY@139..140 "{" [] [],
-                                L_CURLY@140..144 "{" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
-                            ],
-                        },
+                            CssBogusFontFeatureValuesItem {
+                                items: [
+                                    FONT_FEATURE_VALUES_KW@89..109 "font-feature-values" [] [Whitespace(" ")],
+                                    SEMICOLON@109..110 ";" [] [],
+                                    AT@110..113 "@" [Newline("\n"), Newline("\n")] [],
+                                    FONT_FEATURE_VALUES_KW@113..133 "font-feature-values" [] [Whitespace(" ")],
+                                    IDENT@133..139 "ident" [] [Whitespace(" ")],
+                                    L_CURLY@139..140 "{" [] [],
+                                    L_CURLY@140..144 "{" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                ],
+                            },
+                        ],
+                        R_CURLY@144..145 "}" [] [],
                     ],
-                    r_curly_token: R_CURLY@144..145 "}" [] [],
                 },
             },
         },
@@ -168,9 +169,8 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@61..81 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_CUSTOM_IDENTIFIER@81..86
           0: IDENT@81..86 "ident" [] []
-        2: CSS_FONT_FEATURE_VALUES_BLOCK@86..145
-          0: (empty)
-          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@86..144
+        2: CSS_BOGUS_BLOCK@86..145
+          0: CSS_FONT_FEATURE_VALUES_ITEM_LIST@86..144
             0: CSS_FONT_FEATURE_VALUES_ITEM@86..89
               0: AT@86..89 "@" [Newline("\n"), Newline("\n")] []
               1: (empty)
@@ -183,7 +183,7 @@ CssRoot {
               4: IDENT@133..139 "ident" [] [Whitespace(" ")]
               5: L_CURLY@139..140 "{" [] []
               6: L_CURLY@140..144 "{" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-          2: R_CURLY@144..145 "}" [] []
+          1: R_CURLY@144..145 "}" [] []
     3: CSS_BOGUS_RULE@145..147
       0: R_CURLY@145..147 "}" [Newline("\n")] []
     4: CSS_AT_RULE@147..187
@@ -247,6 +247,19 @@ at_rule_font_feature_values_error.css:3:22 parse ━━━━━━━━━━�
       │                      ^^^^
     4 │ 
     5 │ @font-feature-values ident
+  
+at_rule_font_feature_values_error.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `@`
+  
+    5 │ @font-feature-values ident
+    6 │ 
+  > 7 │ @font-feature-values ;
+      │ ^
+    8 │ 
+    9 │ @font-feature-values ident {
+  
+  i Remove @
   
 at_rule_font_feature_values_error.css:7:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

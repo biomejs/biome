@@ -532,7 +532,7 @@ at_rule_font_palette_values_error.css:10:22 parse ━━━━━━━━━━
   
 at_rule_font_palette_values_error.css:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found '@'.
+  × expected `{` but instead found `@`
   
      9 │ @font-palette-values revert-layer { }
     10 │ @font-palette-values ident
@@ -540,13 +540,7 @@ at_rule_font_palette_values_error.css:11:1 parse ━━━━━━━━━━�
        │ ^
     12 │ 
   
-  i Expected a body here.
-  
-     9 │ @font-palette-values revert-layer { }
-    10 │ @font-palette-values ident
-  > 11 │ @font-palette-values ;
-       │ ^
-    12 │ 
+  i Remove @
   
 at_rule_font_palette_values_error.css:11:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -568,14 +562,14 @@ at_rule_font_palette_values_error.css:11:22 parse ━━━━━━━━━━
   
 at_rule_font_palette_values_error.css:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found the end of the file.
+  × expected `{` but instead the file ends
   
     10 │ @font-palette-values ident
     11 │ @font-palette-values ;
   > 12 │ 
        │ 
   
-  i Expected a body here.
+  i the file ends here
   
     10 │ @font-palette-values ident
     11 │ @font-palette-values ;

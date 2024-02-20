@@ -335,7 +335,7 @@ at_rule_counter_style_error.css:3:16 parse ━━━━━━━━━━━━�
   
 at_rule_counter_style_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found '@'.
+  × expected `{` but instead found `@`
   
     4 │ @counter-style ident
     5 │ 
@@ -344,14 +344,7 @@ at_rule_counter_style_error.css:6:1 parse ━━━━━━━━━━━━�
     7 │ @counter-style initial { }
     8 │ @counter-style unset { }
   
-  i Expected a body here.
-  
-    4 │ @counter-style ident
-    5 │ 
-  > 6 │ @counter-style inherit { }
-      │ ^
-    7 │ @counter-style initial { }
-    8 │ @counter-style unset { }
+  i Remove @
   
 at_rule_counter_style_error.css:6:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
