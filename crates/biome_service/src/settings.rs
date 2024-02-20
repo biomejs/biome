@@ -26,9 +26,7 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use indexmap::IndexSet;
-use std::any::{Any, TypeId};
 use std::borrow::Cow;
-use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::{
     num::NonZeroU64,
@@ -885,17 +883,17 @@ impl OverrideSettingPattern {
     fn json_parser_options(&self, options: &mut JsonParserOptions) {
         let cache = self.cached_json_parser_options.read().unwrap();
         if let Some(cached_options) = cache.as_ref() {
-            *options = cached_options.clone();
+            *options = *cached_options;
             return;
         }
         drop(cache);
         let json_parser = &self.languages.json.parser;
 
         options.allow_trailing_commas = json_parser.allow_trailing_commas;
-        options.allow_comments = options.allow_comments;
+        options.allow_comments = json_parser.allow_comments;
 
         let mut cache = self.cached_json_parser_options.write().unwrap();
-        let _ = cache.insert(options.clone());
+        let _ = cache.insert(*options);
     }
 
     #[allow(dead_code)]
