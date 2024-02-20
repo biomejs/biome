@@ -18,9 +18,9 @@ that allows users to navigate pages, in the same page, same website or on anothe
 While before it was possible to attach logic to an anchor element, with the advent of JSX libraries,
 it's now  easier to attach logic to any HTML element, anchors included.
 
-This rule is designed to prevent users to attach logic at the click of anchors when the `href`
+This rule is designed to prevent users from attaching logic at the click of anchors when the `href`
 provided to the anchor element is not valid. Avoid using `#` symbol inside the `href` when you are
-attaching the logic to anchor element. If the anchor has logic attached to it with an incorrect `href`
+attaching the logic to the anchor element. If the anchor has logic attached to it with an incorrect `href`
 the rules suggests to turn it to a `button`, because that's likely what the user wants.
 
 Anchor `<a></a>` elements should be used for navigation, while `<button></button>` should be
