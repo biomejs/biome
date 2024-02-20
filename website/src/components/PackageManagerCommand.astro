@@ -28,7 +28,7 @@ import InlineSVG from "@/components/InlineSVG.astro";
 
 
 <pre data-name="npm" class="package-manager-command language-shellsession active">
-  <Code code={`npm ${Astro.props.npx ? "npx" : "npm"} ${Astro.props.npx ?? Astro.props.npm ?? Astro.props.command}`} lang="bash"  />
+  <Code code={`${Astro.props.npx ? "npx" : "npm"} ${Astro.props.npx ?? Astro.props.npm ?? Astro.props.command}`} lang="bash"  />
 </pre>
 <pre data-name="yarn" class="package-manager-command language-shellsession">
   <Code code={`yarn ${Astro.props.yarn ?? Astro.props.command}`} lang="bash"  />
