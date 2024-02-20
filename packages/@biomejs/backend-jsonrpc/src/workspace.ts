@@ -884,6 +884,10 @@ export interface Nursery {
 	 */
 	noEmptyTypeParameters?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noExportsInTest?: RuleConfiguration;
+	/**
 	 * Disallow focused tests.
 	 */
 	noFocusedTests?: RuleConfiguration_for_Null;
@@ -1819,6 +1823,7 @@ export type Category =
 	| "lint/nursery/noDuplicateTestHooks"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyTypeParameters"
+	| "lint/nursery/noExportsInTest"
 	| "lint/nursery/noFocusedTests"
 	| "lint/nursery/noGlobalAssign"
 	| "lint/nursery/noGlobalEval"

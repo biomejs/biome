@@ -2508,7 +2508,7 @@ pub struct Nursery {
     pub no_empty_block_statements: Option<RuleConfiguration<NoEmptyBlockStatements>>,
     #[doc = "Disallow empty type parameters in type aliases and interfaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_empty_type_parameters: Option<RuleConfiguration<NoEmptyTypeParameters>>,
+    pub no_empty_type_parameters: Option<RuleConfiguration>,
     #[doc = "Disallow focused tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_focused_tests: Option<RuleConfiguration<NoFocusedTests>>,
@@ -2619,6 +2619,7 @@ impl Nursery {
         "noDuplicateTestHooks",
         "noEmptyBlockStatements",
         "noEmptyTypeParameters",
+        "noExportsInTest",
         "noFocusedTests",
         "noGlobalAssign",
         "noGlobalEval",
@@ -2666,7 +2667,7 @@ impl Nursery {
     ];
     const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 13] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
@@ -2750,7 +2751,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_empty_type_parameters.as_ref() {
+        if let Some(rule) = self.no_focused_tests.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
@@ -2924,7 +2925,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_empty_type_parameters.as_ref() {
+        if let Some(rule) = self.no_focused_tests.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
@@ -3113,142 +3114,39 @@ impl Nursery {
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
         match rule_name {
-            "noConsole" => self
-                .no_console
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noDuplicateJsonKeys" => self
-                .no_duplicate_json_keys
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noDuplicateTestHooks" => self
-                .no_duplicate_test_hooks
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noEmptyBlockStatements" => self
-                .no_empty_block_statements
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noEmptyTypeParameters" => self
-                .no_empty_type_parameters
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noFocusedTests" => self
-                .no_focused_tests
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noGlobalAssign" => self
-                .no_global_assign
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noGlobalEval" => self
-                .no_global_eval
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noInvalidUseBeforeDeclaration" => self
-                .no_invalid_use_before_declaration
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noMisleadingCharacterClass" => self
-                .no_misleading_character_class
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noNamespaceImport" => self
-                .no_namespace_import
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noNodejsModules" => self
-                .no_nodejs_modules
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noReExportAll" => self
-                .no_re_export_all
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noRestrictedImports" => self
-                .no_restricted_imports
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noSkippedTests" => self
-                .no_skipped_tests
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noThenProperty" => self
-                .no_then_property
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noUndeclaredDependencies" => self
-                .no_undeclared_dependencies
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noUnusedImports" => self
-                .no_unused_imports
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noUnusedPrivateClassMembers" => self
-                .no_unused_private_class_members
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noUselessLoneBlockStatements" => self
-                .no_useless_lone_block_statements
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noUselessTernary" => self
-                .no_useless_ternary
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useAwait" => self
-                .use_await
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useConsistentArrayType" => self
-                .use_consistent_array_type
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useExportType" => self
-                .use_export_type
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useFilenamingConvention" => self
-                .use_filenaming_convention
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useForOf" => self
-                .use_for_of
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useGroupedTypeImport" => self
-                .use_grouped_type_import
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useImportRestrictions" => self
-                .use_import_restrictions
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useImportType" => self
-                .use_import_type
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useNodeAssertStrict" => self
-                .use_node_assert_strict
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useNodejsImportProtocol" => self
-                .use_nodejs_import_protocol
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useNumberNamespace" => self
-                .use_number_namespace
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useShorthandFunctionType" => self
-                .use_shorthand_function_type
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useSortedClasses" => self
-                .use_sorted_classes
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
+            "noConsole" => self.no_console.as_ref(),
+            "noDuplicateJsonKeys" => self.no_duplicate_json_keys.as_ref(),
+            "noEmptyBlockStatements" => self.no_empty_block_statements.as_ref(),
+            "noEmptyTypeParameters" => self.no_empty_type_parameters.as_ref(),
+            "noFocusedTests" => self.no_focused_tests.as_ref(),
+            "noGlobalAssign" => self.no_global_assign.as_ref(),
+            "noGlobalEval" => self.no_global_eval.as_ref(),
+            "noInvalidUseBeforeDeclaration" => self.no_invalid_use_before_declaration.as_ref(),
+            "noMisleadingCharacterClass" => self.no_misleading_character_class.as_ref(),
+            "noNamespaceImport" => self.no_namespace_import.as_ref(),
+            "noNodejsModules" => self.no_nodejs_modules.as_ref(),
+            "noReExportAll" => self.no_re_export_all.as_ref(),
+            "noRestrictedImports" => self.no_restricted_imports.as_ref(),
+            "noSkippedTests" => self.no_skipped_tests.as_ref(),
+            "noThenProperty" => self.no_then_property.as_ref(),
+            "noUndeclaredDependencies" => self.no_undeclared_dependencies.as_ref(),
+            "noUnusedImports" => self.no_unused_imports.as_ref(),
+            "noUnusedPrivateClassMembers" => self.no_unused_private_class_members.as_ref(),
+            "noUselessLoneBlockStatements" => self.no_useless_lone_block_statements.as_ref(),
+            "noUselessTernary" => self.no_useless_ternary.as_ref(),
+            "useAwait" => self.use_await.as_ref(),
+            "useConsistentArrayType" => self.use_consistent_array_type.as_ref(),
+            "useExportType" => self.use_export_type.as_ref(),
+            "useFilenamingConvention" => self.use_filenaming_convention.as_ref(),
+            "useForOf" => self.use_for_of.as_ref(),
+            "useGroupedTypeImport" => self.use_grouped_type_import.as_ref(),
+            "useImportRestrictions" => self.use_import_restrictions.as_ref(),
+            "useImportType" => self.use_import_type.as_ref(),
+            "useNodeAssertStrict" => self.use_node_assert_strict.as_ref(),
+            "useNodejsImportProtocol" => self.use_nodejs_import_protocol.as_ref(),
+            "useNumberNamespace" => self.use_number_namespace.as_ref(),
+            "useShorthandFunctionType" => self.use_shorthand_function_type.as_ref(),
+            "useSortedClasses" => self.use_sorted_classes.as_ref(),
             _ => None,
         }
     }
