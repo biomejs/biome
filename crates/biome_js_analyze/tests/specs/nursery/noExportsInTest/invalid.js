@@ -1,5 +1,3 @@
-
-
- var a = 1;
-a = 2;
- a = 3;
+describe("a test", () => { expect(1).toBe(1); })
+export const myThing = "invalid"; test("a test", () => { expect(1).toBe(1); });
+export default function () { }

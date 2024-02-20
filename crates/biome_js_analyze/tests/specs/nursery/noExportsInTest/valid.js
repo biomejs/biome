@@ -1,3 +1,6 @@
 /* should not generate diagnostics */
 
- var a = 1;
+window.location = "valid"
+export const myThing = "valid"
+export default function () { }
+
