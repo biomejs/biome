@@ -283,38 +283,39 @@ CssRoot {
                 r_curly_token: R_CURLY@121..122 "}" [] [],
             },
         },
-        CssBogusRule {
-            items: [
-                CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssPseudoClassSelector {
-                                colon_token: COLON@122..124 ":" [Newline("\n")] [],
-                                class: CssBogusPseudoClass {
-                                    items: [
-                                        HOST_KW@124..128 "host" [] [],
-                                        L_PAREN@128..129 "(" [] [],
-                                        CssCompoundSelector {
-                                            nesting_selector_token: missing (optional),
-                                            simple_selector: missing (optional),
-                                            sub_selectors: CssSubSelectorList [
-                                                CssClassSelector {
-                                                    dot_token: DOT@129..130 "." [] [],
-                                                    name: CssCustomIdentifier {
-                                                        value_token: IDENT@130..133 "div" [] [],
-                                                    },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@122..124 ":" [Newline("\n")] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    HOST_KW@124..128 "host" [] [],
+                                    L_PAREN@128..129 "(" [] [],
+                                    CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@129..130 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@130..133 "div" [] [],
                                                 },
-                                            ],
-                                        },
-                                    ],
-                                },
+                                            },
+                                        ],
+                                    },
+                                ],
                             },
-                        ],
-                    },
-                ],
+                        },
+                    ],
+                },
             ],
+            block: CssBogusBlock {
+                items: [],
+            },
         },
     ],
     eof_token: EOF@133..134 "" [Newline("\n")] [],
@@ -491,7 +492,7 @@ CssRoot {
         0: L_CURLY@120..121 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@121..121
         2: R_CURLY@121..122 "}" [] []
-    7: CSS_BOGUS_RULE@122..133
+    7: CSS_QUALIFIED_RULE@122..133
       0: CSS_SELECTOR_LIST@122..133
         0: CSS_COMPOUND_SELECTOR@122..133
           0: (empty)
@@ -510,6 +511,7 @@ CssRoot {
                       0: DOT@129..130 "." [] []
                       1: CSS_CUSTOM_IDENTIFIER@130..133
                         0: IDENT@130..133 "div" [] []
+      1: CSS_BOGUS_BLOCK@133..133
   2: EOF@133..134 "" [Newline("\n")] []
 
 ```

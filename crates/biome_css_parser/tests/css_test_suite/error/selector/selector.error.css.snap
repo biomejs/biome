@@ -410,10 +410,13 @@ CssRoot {
                 },
             ],
             block: CssBogusBlock {
-                items: [
-                    CSS_STRING_LITERAL@214..216 "\"\"" [] [],
-                ],
+                items: [],
             },
+        },
+        CssBogusRule {
+            items: [
+                CSS_STRING_LITERAL@214..216 "\"\"" [] [],
+            ],
         },
         CssQualifiedRule {
             prelude: CssSelectorList [
@@ -438,13 +441,12 @@ CssRoot {
                 },
             ],
             block: CssBogusBlock {
-                items: [
-                    SEMICOLON@229..230 ";" [] [],
-                ],
+                items: [],
             },
         },
         CssBogusRule {
             items: [
+                SEMICOLON@229..230 ";" [] [],
                 R_CURLY@230..232 "}" [Newline("\n")] [],
             ],
         },
@@ -703,7 +705,7 @@ CssRoot {
         0: L_CURLY@206..207 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@207..207
         2: R_CURLY@207..208 "}" [] []
-    9: CSS_QUALIFIED_RULE@208..216
+    9: CSS_QUALIFIED_RULE@208..214
       0: CSS_SELECTOR_LIST@208..214
         0: CSS_COMPLEX_SELECTOR@208..214
           0: CSS_COMPOUND_SELECTOR@208..213
@@ -716,9 +718,10 @@ CssRoot {
                   0: IDENT@210..213 "div" [] []
           1: CSS_SPACE_LITERAL@213..214 " " [] []
           2: (empty)
-      1: CSS_BOGUS_BLOCK@214..216
-        0: CSS_STRING_LITERAL@214..216 "\"\"" [] []
-    10: CSS_QUALIFIED_RULE@216..230
+      1: CSS_BOGUS_BLOCK@214..214
+    10: CSS_BOGUS_RULE@214..216
+      0: CSS_STRING_LITERAL@214..216 "\"\"" [] []
+    11: CSS_QUALIFIED_RULE@216..229
       0: CSS_SELECTOR_LIST@216..229
         0: CSS_COMPOUND_SELECTOR@216..229
           0: (empty)
@@ -732,10 +735,10 @@ CssRoot {
               1: CSS_PSEUDO_CLASS_IDENTIFIER@226..229
                 0: CSS_IDENTIFIER@226..229
                   0: IDENT@226..229 "red" [] []
-      1: CSS_BOGUS_BLOCK@229..230
-        0: SEMICOLON@229..230 ";" [] []
-    11: CSS_BOGUS_RULE@230..232
-      0: R_CURLY@230..232 "}" [Newline("\n")] []
+      1: CSS_BOGUS_BLOCK@229..229
+    12: CSS_BOGUS_RULE@229..232
+      0: SEMICOLON@229..230 ";" [] []
+      1: R_CURLY@230..232 "}" [Newline("\n")] []
   2: EOF@232..233 "" [Newline("\n")] []
 
 ```
@@ -943,24 +946,6 @@ selector.error.css:14:13 parse ━━━━━━━━━━━━━━━━�
     16 │ 
   
   i Remove ;
-  
-selector.error.css:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '}'.
-  
-    13 │ .div ""
-    14 │   color: red;
-  > 15 │ }
-       │ ^
-    16 │ 
-  
-  i Expected a qualified rule, or an at rule here.
-  
-    13 │ .div ""
-    14 │   color: red;
-  > 15 │ }
-       │ ^
-    16 │ 
   
 ```
 

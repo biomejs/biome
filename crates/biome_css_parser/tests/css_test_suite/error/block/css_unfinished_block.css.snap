@@ -18,25 +18,26 @@ div }
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssBogusRule {
-            items: [
-                CssSelectorList [
-                    CssComplexSelector {
-                        left: CssCompoundSelector {
-                            nesting_selector_token: missing (optional),
-                            simple_selector: CssTypeSelector {
-                                namespace: missing (optional),
-                                ident: CssIdentifier {
-                                    value_token: IDENT@0..3 "div" [] [],
-                                },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
+                            ident: CssIdentifier {
+                                value_token: IDENT@0..3 "div" [] [],
                             },
-                            sub_selectors: CssSubSelectorList [],
                         },
-                        combinator: CSS_SPACE_LITERAL@3..4 " " [] [],
-                        right: missing (required),
+                        sub_selectors: CssSubSelectorList [],
                     },
-                ],
+                    combinator: CSS_SPACE_LITERAL@3..4 " " [] [],
+                    right: missing (required),
+                },
             ],
+            block: CssBogusBlock {
+                items: [],
+            },
         },
         CssBogusRule {
             items: [
@@ -58,10 +59,11 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@14..15 "{" [] [],
-                items: CssDeclarationOrRuleList [],
-                r_curly_token: missing (required),
+            block: CssBogusBlock {
+                items: [
+                    L_CURLY@14..15 "{" [] [],
+                    CssDeclarationOrRuleList [],
+                ],
             },
         },
     ],
@@ -75,7 +77,7 @@ CssRoot {
 0: CSS_ROOT@0..16
   0: (empty)
   1: CSS_RULE_LIST@0..15
-    0: CSS_BOGUS_RULE@0..4
+    0: CSS_QUALIFIED_RULE@0..4
       0: CSS_SELECTOR_LIST@0..4
         0: CSS_COMPLEX_SELECTOR@0..4
           0: CSS_COMPOUND_SELECTOR@0..3
@@ -87,6 +89,7 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@3..3
           1: CSS_SPACE_LITERAL@3..4 " " [] []
           2: (empty)
+      1: CSS_BOGUS_BLOCK@4..4
     1: CSS_BOGUS_RULE@4..5
       0: R_CURLY@4..5 "}" [] []
     2: CSS_QUALIFIED_RULE@5..15
@@ -99,10 +102,9 @@ CssRoot {
               0: DOT@5..7 "." [Newline("\n")] []
               1: CSS_CUSTOM_IDENTIFIER@7..14
                 0: IDENT@7..14 "action" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@14..15
+      1: CSS_BOGUS_BLOCK@14..15
         0: L_CURLY@14..15 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@15..15
-        2: (empty)
   2: EOF@15..16 "" [Newline("\n")] []
 
 ```

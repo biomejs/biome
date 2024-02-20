@@ -194,6 +194,9 @@ CssRoot {
                             IDENT@321..326 "ident" [] [],
                         ],
                     },
+                    CssBogusBlock {
+                        items: [],
+                    },
                 ],
             },
         },
@@ -206,6 +209,9 @@ CssRoot {
                         items: [
                             SEMICOLON@348..349 ";" [] [],
                         ],
+                    },
+                    CssBogusBlock {
+                        items: [],
                     },
                 ],
             },
@@ -315,12 +321,14 @@ CssRoot {
         0: FONT_PALETTE_VALUES_KW@301..321 "font-palette-values" [] [Whitespace(" ")]
         1: CSS_BOGUS@321..326
           0: IDENT@321..326 "ident" [] []
+        2: CSS_BOGUS_BLOCK@326..326
     10: CSS_AT_RULE@326..349
       0: AT@326..328 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@328..349
         0: FONT_PALETTE_VALUES_KW@328..348 "font-palette-values" [] [Whitespace(" ")]
         1: CSS_BOGUS@348..349
           0: SEMICOLON@348..349 ";" [] []
+        2: CSS_BOGUS_BLOCK@349..349
   2: EOF@349..350 "" [Newline("\n")] []
 
 ```
@@ -524,7 +532,7 @@ at_rule_font_palette_values_error.css:10:22 parse ━━━━━━━━━━
   
 at_rule_font_palette_values_error.css:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found '@'.
+  × expected `{` but instead found `@`
   
      9 │ @font-palette-values revert-layer { }
     10 │ @font-palette-values ident
@@ -532,13 +540,7 @@ at_rule_font_palette_values_error.css:11:1 parse ━━━━━━━━━━�
        │ ^
     12 │ 
   
-  i Expected a body here.
-  
-     9 │ @font-palette-values revert-layer { }
-    10 │ @font-palette-values ident
-  > 11 │ @font-palette-values ;
-       │ ^
-    12 │ 
+  i Remove @
   
 at_rule_font_palette_values_error.css:11:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -560,14 +562,14 @@ at_rule_font_palette_values_error.css:11:22 parse ━━━━━━━━━━
   
 at_rule_font_palette_values_error.css:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found the end of the file.
+  × expected `{` but instead the file ends
   
     10 │ @font-palette-values ident
     11 │ @font-palette-values ;
   > 12 │ 
        │ 
   
-  i Expected a body here.
+  i the file ends here
   
     10 │ @font-palette-values ident
     11 │ @font-palette-values ;

@@ -1,12 +1,11 @@
 use super::parse_error::{expected_any_font_feature_value_item, expected_font_feature_values_item};
-use crate::syntax::blocks::parse_or_recover_declaration_list_block;
+use crate::syntax::block::{parse_declaration_list_block, ParseBlockBody};
 use crate::{
     lexer::CssLexContext,
     parser::CssParser,
     syntax::{
         is_at_identifier, parse_custom_identifier,
-        parse_error::{expected_block, expected_non_css_wide_keyword_identifier},
-        parse_string, BODY_RECOVERY_SET,
+        parse_error::expected_non_css_wide_keyword_identifier, parse_string,
     },
 };
 use biome_css_syntax::{
@@ -56,33 +55,23 @@ pub(crate) fn parse_font_feature_values_at_rule(p: &mut CssParser) -> ParsedSynt
     } else {
         CSS_BOGUS_AT_RULE
     };
-
-    if parse_font_feature_values_block(p)
-        .or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_BLOCK, BODY_RECOVERY_SET)
-                .enable_recovery_on_line_break(),
-            expected_block,
-        )
-        .is_err()
-    {
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
-    }
+    FontFeatureValuesBlock.parse_block_body(p);
 
     Present(m.complete(p, kind))
 }
 
-#[inline]
-fn parse_font_feature_values_block(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at(T!['{']) {
-        return Absent;
-    }
-    let m = p.start();
-    p.expect(T!['{']);
-    FontFeatureValuesItemList.parse_list(p);
-    p.expect(T!['}']);
+struct FontFeatureValuesBlock;
 
-    Present(m.complete(p, CSS_FONT_FEATURE_VALUES_BLOCK))
+impl ParseBlockBody for FontFeatureValuesBlock {
+    const BLOCK_KIND: CssSyntaxKind = CSS_FONT_FEATURE_VALUES_BLOCK;
+
+    fn is_at_element(&self, p: &mut CssParser) -> bool {
+        p.at(T![@])
+    }
+
+    fn parse_list(&mut self, p: &mut CssParser) {
+        FontFeatureValuesItemList.parse_list(p);
+    }
 }
 
 struct FontFeatureValuesItemList;
@@ -121,6 +110,7 @@ fn parse_font_feature_values_item(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T![@]) {
         return Absent;
     }
+
     let m = p.start();
     p.bump(T![@]);
 
@@ -135,14 +125,10 @@ fn parse_font_feature_values_item(p: &mut CssParser) -> ParsedSyntax {
         _ => p.error(expected_any_font_feature_value_item(p, p.cur_range())),
     };
 
-    if parse_or_recover_declaration_list_block(p).is_err() {
-        return Present(m.complete(p, CSS_BOGUS_BLOCK));
-    }
+    parse_declaration_list_block(p);
 
     Present(m.complete(p, CSS_FONT_FEATURE_VALUES_ITEM))
 }
-
-const FONT_FEATURE_VALUES_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];
 const FONT_FEATURE_VALUES_ITEM_SET: TokenSet<CssSyntaxKind> = token_set![
     T![stylistic],
     T![historical_forms],
@@ -152,5 +138,6 @@ const FONT_FEATURE_VALUES_ITEM_SET: TokenSet<CssSyntaxKind> = token_set![
     T![ornaments],
     T![annotation]
 ];
+const FONT_FEATURE_VALUES_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];
 const FONT_FEATURE_VALUES_ITEM_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     FONT_FEATURE_VALUES_ITEM_SET.union(token_set![T!['}']]);

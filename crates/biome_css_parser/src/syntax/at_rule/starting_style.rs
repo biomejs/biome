@@ -1,7 +1,5 @@
 use crate::parser::CssParser;
-use crate::syntax::blocks::{
-    parse_or_recover_declaration_list_block, parse_or_recover_rule_list_block,
-};
+use crate::syntax::block::{parse_declaration_list_block, parse_rule_list_block};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
@@ -51,15 +49,11 @@ pub(crate) fn parse_starting_style_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![starting_style]);
 
-    let block = if p.state().is_nesting_block {
-        parse_or_recover_declaration_list_block(p)
+    if p.state().is_nesting_block {
+        parse_declaration_list_block(p);
     } else {
-        parse_or_recover_rule_list_block(p)
+        parse_rule_list_block(p);
     };
-
-    if block.is_err() {
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
-    }
 
     Present(m.complete(p, CSS_STARTING_STYLE_AT_RULE))
 }

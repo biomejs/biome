@@ -4,11 +4,10 @@ use crate::syntax::at_rule::parse_error::{
     expected_any_page_at_rule_item, expected_page_selector, expected_page_selector_pseudo,
 };
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
-use crate::syntax::blocks::{parse_block_body, parse_or_recover_declaration_or_at_rule_list_block};
-use crate::syntax::parse_error::expected_block;
+use crate::syntax::block::{parse_declaration_or_at_rule_list_block, ParseBlockBody};
 use crate::syntax::{
-    is_at_identifier, parse_custom_identifier_with_keywords, parse_declaration_with_semicolon,
-    BODY_RECOVERY_SET,
+    is_at_declaration, is_at_identifier, parse_custom_identifier_with_keywords,
+    parse_declaration_with_semicolon,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -34,18 +33,7 @@ pub(crate) fn parse_page_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![page]);
 
     PageSelectorList.parse_list(p);
-
-    if parse_page_block(p)
-        .or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_BLOCK, BODY_RECOVERY_SET)
-                .enable_recovery_on_line_break(),
-            expected_block,
-        )
-        .is_err()
-    {
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
-    }
+    PageBlock.parse_block_body(p);
 
     Present(m.complete(p, CSS_PAGE_AT_RULE))
 }
@@ -171,17 +159,18 @@ pub(crate) fn parse_page_selector_pseudo(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
-#[inline]
-pub(crate) fn parse_page_block(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at(T!['{']) {
-        return Absent;
+struct PageBlock;
+
+impl ParseBlockBody for PageBlock {
+    const BLOCK_KIND: CssSyntaxKind = CSS_PAGE_AT_RULE_BLOCK;
+
+    fn is_at_element(&self, p: &mut CssParser) -> bool {
+        is_at_at_rule(p) || is_at_declaration(p) || at_margin_rule(p)
     }
 
-    let m = parse_block_body(p, |p| {
+    fn parse_list(&mut self, p: &mut CssParser) {
         PageAtRuleItemList.parse_list(p);
-    });
-
-    Present(m.complete(p, CSS_PAGE_AT_RULE_BLOCK))
+    }
 }
 
 const CSS_PAGE_AT_RULE_ITEM_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
@@ -197,8 +186,10 @@ impl ParseNodeList for PageAtRuleItemList {
             parse_margin_at_rule(p)
         } else if is_at_at_rule(p) {
             parse_at_rule(p)
-        } else {
+        } else if is_at_declaration(p) {
             parse_declaration_with_semicolon(p)
+        } else {
+            Absent
         }
     }
 
@@ -253,9 +244,7 @@ pub(crate) fn parse_margin_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![@]);
     p.bump_ts(PAGE_MARGIN_AT_RULE_NAME_SET);
 
-    if parse_or_recover_declaration_or_at_rule_list_block(p).is_err() {
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
-    };
+    parse_declaration_or_at_rule_list_block(p);
 
     Present(m.complete(p, CSS_MARGIN_AT_RULE))
 }

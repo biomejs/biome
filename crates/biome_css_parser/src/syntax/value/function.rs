@@ -205,7 +205,8 @@ pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
-const BINARY_OPERATION_TOKEN: TokenSet<CssSyntaxKind> = token_set![T![+], T![-], T![*], T![/]];
+pub(crate) const BINARY_OPERATION_TOKEN: TokenSet<CssSyntaxKind> =
+    token_set![T![+], T![-], T![*], T![/]];
 
 /// Checks if the current position in the CSS parser is at a binary operator.
 ///

@@ -315,40 +315,41 @@ CssRoot {
                 r_curly_token: R_CURLY@136..137 "}" [] [],
             },
         },
-        CssBogusRule {
-            items: [
-                CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssPseudoClassSelector {
-                                colon_token: COLON@137..139 ":" [Newline("\n")] [],
-                                class: CssBogusPseudoClass {
-                                    items: [
-                                        PAST_KW@139..143 "past" [] [],
-                                        L_PAREN@143..144 "(" [] [],
-                                        CssCompoundSelectorList [
-                                            CssCompoundSelector {
-                                                nesting_selector_token: missing (optional),
-                                                simple_selector: missing (optional),
-                                                sub_selectors: CssSubSelectorList [
-                                                    CssClassSelector {
-                                                        dot_token: DOT@144..145 "." [] [],
-                                                        name: CssCustomIdentifier {
-                                                            value_token: IDENT@145..148 "div" [] [],
-                                                        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@137..139 ":" [Newline("\n")] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    PAST_KW@139..143 "past" [] [],
+                                    L_PAREN@143..144 "(" [] [],
+                                    CssCompoundSelectorList [
+                                        CssCompoundSelector {
+                                            nesting_selector_token: missing (optional),
+                                            simple_selector: missing (optional),
+                                            sub_selectors: CssSubSelectorList [
+                                                CssClassSelector {
+                                                    dot_token: DOT@144..145 "." [] [],
+                                                    name: CssCustomIdentifier {
+                                                        value_token: IDENT@145..148 "div" [] [],
                                                     },
-                                                ],
-                                            },
-                                        ],
+                                                },
+                                            ],
+                                        },
                                     ],
-                                },
+                                ],
                             },
-                        ],
-                    },
-                ],
+                        },
+                    ],
+                },
             ],
+            block: CssBogusBlock {
+                items: [],
+            },
         },
     ],
     eof_token: EOF@148..149 "" [Newline("\n")] [],
@@ -544,7 +545,7 @@ CssRoot {
         0: L_CURLY@135..136 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@136..136
         2: R_CURLY@136..137 "}" [] []
-    8: CSS_BOGUS_RULE@137..148
+    8: CSS_QUALIFIED_RULE@137..148
       0: CSS_SELECTOR_LIST@137..148
         0: CSS_COMPOUND_SELECTOR@137..148
           0: (empty)
@@ -564,6 +565,7 @@ CssRoot {
                         0: DOT@144..145 "." [] []
                         1: CSS_CUSTOM_IDENTIFIER@145..148
                           0: IDENT@145..148 "div" [] []
+      1: CSS_BOGUS_BLOCK@148..148
   2: EOF@148..149 "" [Newline("\n")] []
 
 ```
