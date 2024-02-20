@@ -64,6 +64,10 @@ impl PartialLinterConfiguration {
     pub const fn is_disabled(&self) -> bool {
         matches!(self.enabled, Some(false))
     }
+
+    pub fn get_rules(&self) -> Rules {
+        self.rules.as_ref().unwrap_or(&Rules::default()).clone()
+    }
 }
 
 pub fn to_linter_settings(

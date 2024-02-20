@@ -1,0 +1,124 @@
+---
+source: crates/biome_cli/tests/commands/rage.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "attributePosition": "multiline",
+    "enabled": true,
+    "formatWithErrors": true,
+    "include": [
+      "**/*.html",
+      "**/*.css",
+      "**/*.js",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.json",
+      "**/*.md"
+    ],
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 120,
+    "ignore": ["configuration-schema.json"]
+  },
+  "javascript": {
+    "formatter": {
+      "enabled": true,
+      "arrowParentheses": "always",
+      "jsxQuoteStyle": "single",
+      "indentWidth": 2,
+      "indentStyle": "tab",
+      "lineEnding": "lf",
+      "lineWidth": 100
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineEnding": "lf",
+      "lineWidth": 100
+    }
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+CLI:
+  Version:                      0.0.0
+  Color support:                **PLACEHOLDER**
+
+Platform:
+  CPU Architecture:             **PLACEHOLDER**
+  OS:                           **PLACEHOLDER**
+
+Environment:
+  BIOME_LOG_DIR:                **PLACEHOLDER**
+  NO_COLOR:                     **PLACEHOLDER**
+  TERM:                         **PLACEHOLDER**
+  JS_RUNTIME_VERSION:           unset
+  JS_RUNTIME_NAME:              unset
+  NODE_PACKAGE_MANAGER:         unset
+
+Biome Configuration:
+  Status:                       Loaded successfully
+  Formatter disabled:           false
+  Linter disabled:              false
+  Organize imports disabled:    false
+  VCS disabled:                 true
+
+Formatter:
+  Format with errors:           true
+  Indent style:                 Space
+  Indent size:                  0
+  Indent width:                 2
+  Line ending:                  Lf
+  Line width:                   120
+  Attribute position:           Multiline
+  Ignore:                       ["configuration-schema.json"]
+  Include:                      ["**/*.html", "**/*.css", "**/*.js", "**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.json", "**/*.md"]
+
+JavaScript Formatter:
+  Enabled:                      true
+  JSX quote style:              Single
+  Quote properties:             AsNeeded
+  Trailing comma:               All
+  Semicolons:                   Always
+  Arrow parentheses:            Always
+  Bracket spacing:              false
+  Bracket same line:            false
+  Quote style:                  Double
+  Indent style:                 Tab
+  Indent size:                  unset
+  Indent width:                 2
+  Line ending:                  Lf
+  Line width:                   100
+  Attribute position:           Auto
+
+JSON Formatter:
+  Enabled:                      true
+  Indent style:                 Space
+  Indent width:                 2
+  Indent size:                  unset
+  Line ending:                  Lf
+  Line width:                   100
+
+Server:
+  Version:                      0.0.0
+  Name:                         biome_lsp
+  CPU Architecture:             **PLACEHOLDER**
+  OS:                           **PLACEHOLDER**
+
+Workspace:
+  Open Documents:               0
+```
+
+

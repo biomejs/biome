@@ -68,6 +68,21 @@ impl PartialFormatterConfiguration {
     pub const fn is_disabled(&self) -> bool {
         matches!(self.enabled, Some(false))
     }
+
+    pub fn get_formatter_configuration(&self) -> FormatterConfiguration {
+        FormatterConfiguration {
+            enabled: self.enabled.unwrap_or_default(),
+            format_with_errors: self.format_with_errors.unwrap_or_default(),
+            indent_style: self.indent_style.unwrap_or_default(),
+            indent_size: self.indent_size.unwrap_or_default(),
+            indent_width: self.indent_width.unwrap_or_default(),
+            line_ending: self.line_ending.unwrap_or_default(),
+            line_width: self.line_width.unwrap_or_default(),
+            attribute_position: self.attribute_position.unwrap_or_default(),
+            ignore: self.ignore.clone().unwrap_or_default(),
+            include: self.include.clone().unwrap_or_default(),
+        }
+    }
 }
 
 impl Default for FormatterConfiguration {

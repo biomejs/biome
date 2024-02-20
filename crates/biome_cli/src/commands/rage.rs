@@ -6,15 +6,23 @@ use biome_fs::FileSystem;
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{client, RageEntry, RageParams};
 use biome_service::{ConfigurationBasePath, DynRef, Workspace};
+use serde_json::Value;
+use std::collections::HashMap;
 use std::{env, io, ops::Deref};
 use tokio::runtime::Runtime;
 
 use crate::commands::daemon::read_most_recent_log_file;
 use crate::service::enumerate_pipes;
 use crate::{service, CliDiagnostic, CliSession, VERSION};
+use serde::Serialize;
 
 /// Handler for the `rage` command
-pub(crate) fn rage(session: CliSession, daemon_logs: bool) -> Result<(), CliDiagnostic> {
+pub(crate) fn rage(
+    session: CliSession,
+    daemon_logs: bool,
+    formatter: bool,
+    linter: bool,
+) -> Result<(), CliDiagnostic> {
     let terminal_supports_colors = termcolor::BufferWriter::stdout(ColorChoice::Auto)
         .buffer()
         .supports_color();
@@ -35,7 +43,7 @@ pub(crate) fn rage(session: CliSession, daemon_logs: bool) -> Result<(), CliDiag
     {EnvVarOs("JS_RUNTIME_NAME")}
     {EnvVarOs("NODE_PACKAGE_MANAGER")}
 
-    {RageConfiguration(&session.app.fs)}
+    {RageConfiguration { fs: &session.app.fs, formatter, linter }}
     {WorkspaceRage(session.app.workspace.deref())}
     ));
 
@@ -165,13 +173,17 @@ impl Display for RunningRomeServer {
     }
 }
 
-struct RageConfiguration<'a, 'app>(&'a DynRef<'app, dyn FileSystem>);
+struct RageConfiguration<'a, 'app> {
+    fs: &'a DynRef<'app, dyn FileSystem>,
+    formatter: bool,
+    linter: bool,
+}
 
 impl Display for RageConfiguration<'_, '_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         Section("Biome Configuration").fmt(fmt)?;
 
-        match load_configuration(self.0, ConfigurationBasePath::default()) {
+        match load_configuration(self.fs, ConfigurationBasePath::default()) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.directory_path.is_none() {
                     KeyValuePair("Status", markup!(<Dim>"unset"</Dim>)).fmt(fmt)?;
@@ -196,12 +208,74 @@ impl Display for RageConfiguration<'_, '_> {
                     };
 
                     markup! (
-                    {KeyValuePair("Status", status)}
-                    {KeyValuePair("Formatter disabled", markup!({DebugDisplay(configuration.is_formatter_disabled())}))}
-                    {KeyValuePair("Linter disabled", markup!({DebugDisplay(configuration.is_linter_disabled())}))}
-                    {KeyValuePair("Organize imports disabled", markup!({DebugDisplay(configuration.is_organize_imports_disabled())}))}
-                    {KeyValuePair("VCS disabled", markup!({DebugDisplay(configuration.is_vcs_disabled())}))}
-                ).fmt(fmt)?
+                        {KeyValuePair("Status", status)}
+                        {KeyValuePair("Formatter disabled", markup!({DebugDisplay(configuration.is_formatter_disabled())}))}
+                        {KeyValuePair("Linter disabled", markup!({DebugDisplay(configuration.is_linter_disabled())}))}
+                        {KeyValuePair("Organize imports disabled", markup!({DebugDisplay(configuration.is_organize_imports_disabled())}))}
+                        {KeyValuePair("VCS disabled", markup!({DebugDisplay(configuration.is_vcs_disabled())}))}
+                    ).fmt(fmt)?;
+
+                    // Print formatter configuration if --formatter option is true
+                    if self.formatter {
+                        let formatter_configuration = configuration.get_formatter_configuration();
+                        markup! (
+                            {Section("Formatter")}
+                            {KeyValuePair("Format with errors", markup!({DebugDisplay(configuration.get_formatter_configuration().format_with_errors)}))}
+                            {KeyValuePair("Indent style", markup!({DebugDisplay(formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent size", markup!({DebugDisplay(formatter_configuration.indent_size)}))}
+                            {KeyValuePair("Indent width", markup!({DebugDisplay(formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DebugDisplay(formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DebugDisplay(formatter_configuration.line_width.get())}))}
+                            {KeyValuePair("Attribute position", markup!({DebugDisplay(formatter_configuration.attribute_position)}))}
+                            {KeyValuePair("Ignore", markup!({DebugDisplay(formatter_configuration.ignore.iter().collect::<Vec<_>>())}))}
+                            {KeyValuePair("Include", markup!({DebugDisplay(formatter_configuration.include.iter().collect::<Vec<_>>())}))}
+                        ).fmt(fmt)?;
+
+                        let javascript_formatter_configuration =
+                            configuration.get_javascript_formatter_configuration();
+                        markup! (
+                            {Section("JavaScript Formatter")}
+                            {KeyValuePair("Enabled", markup!({DebugDisplay(javascript_formatter_configuration.enabled)}))}
+                            {KeyValuePair("JSX quote style", markup!({DebugDisplay(javascript_formatter_configuration.jsx_quote_style)}))}
+                            {KeyValuePair("Quote properties", markup!({DebugDisplay(javascript_formatter_configuration.quote_properties)}))}
+                            {KeyValuePair("Trailing comma", markup!({DebugDisplay(javascript_formatter_configuration.trailing_comma)}))}
+                            {KeyValuePair("Semicolons", markup!({DebugDisplay(javascript_formatter_configuration.semicolons)}))}
+                            {KeyValuePair("Arrow parentheses", markup!({DebugDisplay(javascript_formatter_configuration.arrow_parentheses)}))}
+                            {KeyValuePair("Bracket spacing", markup!({DebugDisplay(javascript_formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair("Bracket same line", markup!({DebugDisplay(javascript_formatter_configuration.bracket_same_line)}))}
+                            {KeyValuePair("Quote style", markup!({DebugDisplay(javascript_formatter_configuration.quote_style)}))}
+                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent size", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_size)}))}
+                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(javascript_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DebugDisplayOption(javascript_formatter_configuration.line_width.map(|lw| lw.get()))}))}
+                            {KeyValuePair("Attribute position", markup!({DebugDisplay(javascript_formatter_configuration.attribute_position)}))}
+                        )
+                        .fmt(fmt)?;
+
+                        let json_formatter_configuration =
+                            configuration.get_json_formatter_configuration();
+                        markup! (
+                            {Section("JSON Formatter")}
+                            {KeyValuePair("Enabled", markup!({DebugDisplay(json_formatter_configuration.enabled)}))}
+                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(json_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(json_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Indent size", markup!({DebugDisplayOption(json_formatter_configuration.indent_size)}))}
+                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(json_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DebugDisplayOption(json_formatter_configuration.line_width.map(|lw| lw.get()))}))}
+                        ).fmt(fmt)?;
+                    }
+
+                    // Print linter configuration if --linter option is true
+                    if self.linter {
+                        let linter_configuration = configuration.get_linter_rules();
+                        markup! (
+                            {Section("Linter")}
+                            {KeyValuePair("Recommended", markup!({DebugDisplay(linter_configuration.recommended.unwrap_or(false))}))}
+                            {KeyValuePair("All", markup!({DebugDisplay(linter_configuration.all.unwrap_or(false))}))}
+                            {RageConfigurationLintRules("Rules",linter_configuration)}
+                        ).fmt(fmt)?;
+                    }
                 }
             }
             Err(err) => markup! (
@@ -209,6 +283,54 @@ impl Display for RageConfiguration<'_, '_> {
                 {KeyValuePair("Error", markup!({format!("{err}")}))}
             )
             .fmt(fmt)?,
+        }
+
+        Ok(())
+    }
+}
+
+struct RageConfigurationLintRules<'a, T>(&'a str, T);
+
+impl<T> Display for RageConfigurationLintRules<'_, T>
+where
+    T: Serialize,
+{
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
+        let rules_str = self.0;
+        write!(fmt, "  {rules_str}:")?;
+
+        let rule_json_str = serde_json::to_string(&self.1)
+            .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to serialize"))?;
+        let group_to_rules: HashMap<String, Value> = serde_json::from_str(rule_json_str.as_str())
+            .map_err(|_| {
+            io::Error::new(io::ErrorKind::Other, "Failed to convert to HashMap")
+        })?;
+
+        let mut groups: Vec<&String> = group_to_rules.keys().collect();
+        groups.sort();
+
+        let first_padding_width = 30usize.saturating_sub(rules_str.len() + 1);
+        let mut padding_width = first_padding_width;
+
+        if groups.is_empty() {
+            for _ in 0..padding_width {
+                fmt.write_str(" ")?;
+            }
+            markup!(<Dim>"unset\n"</Dim>).fmt(fmt)?;
+        } else {
+            for group in groups {
+                if let Some(rules) = group_to_rules.get(group).and_then(Value::as_object) {
+                    for (rule_name, rule_config) in rules {
+                        for _ in 0..padding_width {
+                            fmt.write_str(" ")?;
+                        }
+                        fmt.write_str(&format!("{}/{} = {}\n", group, rule_name, rule_config))?;
+                        if padding_width == first_padding_width {
+                            padding_width = 30usize.saturating_sub(0) + 2;
+                        }
+                    }
+                }
+            }
         }
 
         Ok(())
@@ -223,6 +345,22 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> io::Result<()> {
         write!(f, "{:?}", self.0)
+    }
+}
+
+struct DebugDisplayOption<T>(Option<T>);
+
+impl<T> Display for DebugDisplayOption<T>
+where
+    T: std::fmt::Debug,
+{
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        if let Some(value) = &self.0 {
+            markup!({ DebugDisplay(value) }).fmt(fmt)?;
+        } else {
+            markup!(<Dim>"unset"</Dim>).fmt(fmt)?;
+        }
+        Ok(())
     }
 }
 

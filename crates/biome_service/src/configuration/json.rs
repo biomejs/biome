@@ -69,6 +69,19 @@ pub struct JsonFormatter {
     pub line_width: Option<LineWidth>,
 }
 
+impl PartialJsonFormatter {
+    pub fn get_formatter_configuration(&self) -> JsonFormatter {
+        JsonFormatter {
+            enabled: self.enabled.unwrap_or_default(),
+            indent_style: self.indent_style,
+            indent_width: self.indent_width,
+            indent_size: self.indent_size,
+            line_ending: self.line_ending,
+            line_width: self.line_width,
+        }
+    }
+}
+
 impl Default for JsonFormatter {
     fn default() -> Self {
         Self {
