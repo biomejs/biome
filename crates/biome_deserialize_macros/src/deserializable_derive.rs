@@ -1,16 +1,16 @@
+mod container_attrs;
 mod enum_variant_attrs;
-mod struct_attrs;
 mod struct_field_attrs;
 
-use self::struct_attrs::StructAttrs;
+use self::container_attrs::ContainerAttrs;
 use self::struct_field_attrs::DeprecatedField;
 use crate::deserializable_derive::enum_variant_attrs::EnumVariantAttrs;
 use crate::deserializable_derive::struct_field_attrs::StructFieldAttrs;
 use convert_case::{Case, Casing};
-use proc_macro2::{Ident, Span, TokenStream};
+use proc_macro2::{Ident, TokenStream};
 use proc_macro_error::*;
 use quote::quote;
-use syn::{Data, GenericParam, Generics, Path, PathSegment, Type};
+use syn::{Data, GenericParam, Generics, Path, Type};
 
 pub(crate) struct DeriveInput {
     pub ident: Ident,
@@ -20,24 +20,42 @@ pub(crate) struct DeriveInput {
 
 impl DeriveInput {
     pub fn parse(input: syn::DeriveInput) -> Self {
-        let data = match input.data {
-            Data::Enum(data) => {
-                let data = data
+        let attrs =
+            ContainerAttrs::try_from(&input.attrs).expect("Could not parse field attributes");
+        let data = if let ContainerAttrs {
+            with_validator,
+            from: Some(from),
+            ..
+        } = attrs
+        {
+            DeserializableData::From(DeserializableFromData {
+                from,
+                with_validator,
+            })
+        } else if let ContainerAttrs {
+            with_validator,
+            try_from: Some(try_from),
+            ..
+        } = attrs
+        {
+            DeserializableData::TryFrom(DeserializableTryFromData {
+                try_from,
+                with_validator,
+            })
+        } else {
+            match input.data {
+                Data::Enum(data) => {
+                    let variants = data
                     .variants
                     .into_iter()
-                    .filter(|variant| {
-                        if variant.fields.is_empty() {
-                            true
-                        } else {
+                    .map(|variant| {
+                        if !variant.fields.is_empty() {
                             abort!(
                                 variant.fields,
                                 "Deserializable derive cannot handle enum variants with fields -- you may need a custom Deserializable implementation"
                             )
                         }
-                    })
-                    .map(|variant| {
-                        let attrs = EnumVariantAttrs::from_attrs(&variant.attrs);
-
+                        let attrs = EnumVariantAttrs::try_from(&variant.attrs).expect("Could not parse enum variant attributes");
                         let ident = variant.ident;
                         let key = attrs
                             .rename
@@ -46,57 +64,59 @@ impl DeriveInput {
                         DeserializableVariantData { ident, key }
                     })
                     .collect();
-                DeserializableData::Enum(data)
-            }
-            Data::Struct(data) => {
-                if data.fields.iter().all(|field| field.ident.is_some()) {
-                    let attrs = StructAttrs::from_attrs(&input.attrs);
+                    DeserializableData::Enum(DeserializableEnumData {
+                        variants,
+                        with_validator: attrs.with_validator,
+                    })
+                }
+                Data::Struct(data) => {
+                    if data.fields.iter().all(|field| field.ident.is_some()) {
+                        let fields = data
+                            .fields
+                            .into_iter()
+                            .filter_map(|field| {
+                                field.ident.map(|ident| (ident, field.attrs, field.ty))
+                            })
+                            .map(|(ident, attrs, ty)| {
+                                let attrs = StructFieldAttrs::try_from(&attrs)
+                                    .expect("Could not parse field attributes");
+                                let key = attrs
+                                    .rename
+                                    .unwrap_or_else(|| ident.to_string().to_case(Case::Camel));
 
-                    let fields = data
-                        .fields
-                        .clone()
-                        .into_iter()
-                        .filter_map(|field| field.ident.map(|ident| (ident, field.attrs, field.ty)))
-                        .map(|(ident, attrs, ty)| {
-                            let attrs = StructFieldAttrs::from_attrs(&attrs);
-                            let key = attrs
-                                .rename
-                                .unwrap_or_else(|| ident.to_string().to_case(Case::Camel));
+                                DeserializableFieldData {
+                                    bail_on_error: attrs.bail_on_error,
+                                    deprecated: attrs.deprecated,
+                                    ident,
+                                    key,
+                                    passthrough_name: attrs.passthrough_name,
+                                    required: attrs.required,
+                                    ty,
+                                    validate: attrs.validate,
+                                }
+                            })
+                            .collect();
 
-                            DeserializableFieldData {
-                                bail_on_error: attrs.bail_on_error,
-                                deprecated: attrs.deprecated,
-                                ident,
-                                key,
-                                passthrough_name: attrs.passthrough_name,
-                                required: attrs.required,
-                                ty,
-                                validate: attrs.validate,
-                            }
+                        DeserializableData::Struct(DeserializableStructData {
+                            fields,
+                            with_validator: attrs.with_validator,
                         })
-                        .collect();
-
-                    DeserializableData::Struct(DeserializableStructData {
-                        fields,
-                        with_validator: attrs.with_validator,
-                    })
-                } else if data.fields.len() == 1 {
-                    let attrs = StructAttrs::from_attrs(&input.attrs);
-
-                    DeserializableData::Newtype(DeserializableNewtypeData {
-                        with_validator: attrs.with_validator,
-                    })
-                } else {
-                    abort!(
+                    } else if data.fields.len() == 1 {
+                        DeserializableData::Newtype(DeserializableNewtypeData {
+                            with_validator: attrs.with_validator,
+                        })
+                    } else {
+                        abort!(
                         data.fields,
                         "Deserializable derive requires structs to have named fields or a single unnamed one -- you may need a custom Deserializable implementation"
                     )
+                    }
                 }
+                _ => abort!(
+                    input,
+                    "Deserializable can only be derived for enums and structs"
+                ),
             }
-            _ => abort!(
-                input,
-                "Deserializable can only be derived for enums and structs"
-            ),
         };
 
         Self {
@@ -109,9 +129,17 @@ impl DeriveInput {
 
 #[derive(Debug)]
 pub enum DeserializableData {
-    Enum(Vec<DeserializableVariantData>),
+    Enum(DeserializableEnumData),
     Newtype(DeserializableNewtypeData),
     Struct(DeserializableStructData),
+    From(DeserializableFromData),
+    TryFrom(DeserializableTryFromData),
+}
+
+#[derive(Debug)]
+pub struct DeserializableEnumData {
+    variants: Vec<DeserializableVariantData>,
+    with_validator: bool,
 }
 
 #[derive(Debug)]
@@ -125,6 +153,18 @@ pub struct DeserializableStructData {
     with_validator: bool,
 }
 
+#[derive(Debug)]
+pub struct DeserializableFromData {
+    pub from: Path,
+    pub with_validator: bool,
+}
+
+#[derive(Debug)]
+pub struct DeserializableTryFromData {
+    pub try_from: Path,
+    pub with_validator: bool,
+}
+
 #[derive(Clone, Debug)]
 pub struct DeserializableFieldData {
     bail_on_error: bool,
@@ -134,7 +174,7 @@ pub struct DeserializableFieldData {
     passthrough_name: bool,
     required: bool,
     ty: Type,
-    validate: Option<String>,
+    validate: Option<Path>,
 }
 
 #[derive(Debug)]
@@ -145,8 +185,8 @@ pub struct DeserializableVariantData {
 
 pub(crate) fn generate_deserializable(input: DeriveInput) -> TokenStream {
     match input.data {
-        DeserializableData::Enum(variants) => {
-            generate_deserializable_enum(input.ident, input.generics, variants)
+        DeserializableData::Enum(data) => {
+            generate_deserializable_enum(input.ident, input.generics, data)
         }
         DeserializableData::Newtype(data) => {
             generate_deserializable_newtype(input.ident, input.generics, data)
@@ -154,30 +194,48 @@ pub(crate) fn generate_deserializable(input: DeriveInput) -> TokenStream {
         DeserializableData::Struct(data) => {
             generate_deserializable_struct(input.ident, input.generics, data)
         }
+        DeserializableData::From(data) => {
+            generate_deserializable_from(input.ident, input.generics, data)
+        }
+        DeserializableData::TryFrom(data) => {
+            generate_deserializable_try_from(input.ident, input.generics, data)
+        }
     }
 }
 
 fn generate_deserializable_enum(
     ident: Ident,
     generics: Generics,
-    variants: Vec<DeserializableVariantData>,
+    data: DeserializableEnumData,
 ) -> TokenStream {
-    let allowed_variants: Vec<_> = variants
+    let allowed_variants: Vec<_> = data
+        .variants
         .iter()
         .map(|DeserializableVariantData { key, .. }| quote! { #key })
         .collect();
 
-    let deserialize_variants: Vec<_> = variants
+    let deserialize_variants: Vec<_> = data
+        .variants
         .iter()
         .map(
             |DeserializableVariantData {
                  ident: variant_ident,
                  key,
              }| {
-                quote! { #key => Some(Self::#variant_ident) }
+                quote! { #key => Self::#variant_ident }
             },
         )
         .collect();
+
+    let validator = if data.with_validator {
+        quote! {
+            if !biome_deserialize::DeserializableValidator::validate(&result, name, range, diagnostics) {
+                return None;
+            }
+        }
+    } else {
+        quote! {}
+    };
 
     let trait_bounds = generate_trait_bounds(&generics);
 
@@ -188,7 +246,7 @@ fn generate_deserializable_enum(
                 name: &str,
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self> {
-                match biome_deserialize::Text::deserialize(value, name, diagnostics)?.text() {
+                let result = match biome_deserialize::Text::deserialize(value, name, diagnostics)?.text() {
                     #(#deserialize_variants),*,
                     unknown_variant => {
                         const ALLOWED_VARIANTS: &[&str] = &[#(#allowed_variants),*];
@@ -197,9 +255,11 @@ fn generate_deserializable_enum(
                             value.range(),
                             ALLOWED_VARIANTS,
                         ));
-                        None
+                        return None;
                     }
-                }
+                };
+                #validator
+                Some(result)
             }
         }
     }
@@ -295,17 +355,7 @@ fn generate_deserializable_struct(
                 false => quote! { &key_text }
             };
 
-            let validate = field_data.validate.map(|validate| {
-                let path = Path {
-                    leading_colon: None,
-                    segments: validate
-                        .split("::")
-                        .map(|segment| {
-                            PathSegment::from(Ident::new(segment, Span::call_site()))
-                        })
-                        .collect(),
-                };
-
+            let validate = field_data.validate.map(|path| {
                 quote! {
                     .filter(|v| #path(v, #key, value.range(), diagnostics))
                 }
@@ -393,8 +443,6 @@ fn generate_deserializable_struct(
         validator
     };
 
-    let visitor_ident = Ident::new(&format!("{ident}Visitor"), Span::call_site());
-
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
             fn deserialize(
@@ -402,43 +450,116 @@ fn generate_deserializable_struct(
                 name: &str,
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self> {
-                value.deserialize(#visitor_ident, name, diagnostics)
-            }
-        }
+                struct Visitor #generics;
+                impl #generics biome_deserialize::DeserializationVisitor for Visitor #generics {
+                    type Output = #ident;
 
-        struct #visitor_ident #generics;
-        impl #generics biome_deserialize::DeserializationVisitor for #visitor_ident #generics {
-            type Output = #ident;
+                    const EXPECTED_TYPE: biome_deserialize::VisitableType = biome_deserialize::VisitableType::MAP;
 
-            const EXPECTED_TYPE: biome_deserialize::VisitableType = biome_deserialize::VisitableType::MAP;
-
-            fn visit_map(
-                self,
-                members: impl Iterator<Item = Option<(impl biome_deserialize::DeserializableValue, impl biome_deserialize::DeserializableValue)>>,
-                range: biome_deserialize::TextRange,
-                name: &str,
-                diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
-            ) -> Option<Self::Output> {
-                use biome_deserialize::{Deserializable, DeserializationDiagnostic, Text};
-                let mut result: Self::Output = Self::Output::default();
-                for (key, value) in members.flatten() {
-                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
-                        continue;
-                    };
-                    match key_text.text() {
-                        #(#deserialize_fields)*
-                        unknown_key => {
-                            const ALLOWED_KEYS: &[&str] = &[#(#allowed_keys),*];
-                            diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                                unknown_key,
-                                key.range(),
-                                ALLOWED_KEYS,
-                            ))
+                    fn visit_map(
+                        self,
+                        members: impl Iterator<Item = Option<(impl biome_deserialize::DeserializableValue, impl biome_deserialize::DeserializableValue)>>,
+                        range: biome_deserialize::TextRange,
+                        name: &str,
+                        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
+                    ) -> Option<Self::Output> {
+                        use biome_deserialize::{Deserializable, DeserializationDiagnostic, Text};
+                        let mut result: Self::Output = Self::Output::default();
+                        for (key, value) in members.flatten() {
+                            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                                continue;
+                            };
+                            match key_text.text() {
+                                #(#deserialize_fields)*
+                                unknown_key => {
+                                    const ALLOWED_KEYS: &[&str] = &[#(#allowed_keys),*];
+                                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                                        unknown_key,
+                                        key.range(),
+                                        ALLOWED_KEYS,
+                                    ))
+                                }
+                            }
                         }
+                        #validator
+                        Some(result)
                     }
                 }
+
+                value.deserialize(Visitor, name, diagnostics)
+            }
+        }
+    }
+}
+
+fn generate_deserializable_from(
+    ident: Ident,
+    generics: Generics,
+    data: DeserializableFromData,
+) -> TokenStream {
+    let trait_bounds = generate_trait_bounds(&generics);
+    let from = data.from;
+    let validator = if data.with_validator {
+        quote! {
+            if !biome_deserialize::DeserializableValidator::validate(&result, name, range, diagnostics) {
+                return None;
+            }
+        }
+    } else {
+        quote! {}
+    };
+    quote! {
+        impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
+            fn deserialize(
+                value: &impl biome_deserialize::DeserializableValue,
+                name: &str,
+                diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
+            ) -> Option<Self> {
+                let result: #from = biome_deserialize::Deserializable::deserialize(value, name, diagnostics)?;
+                let result: Self = result.into();
                 #validator
                 Some(result)
+            }
+        }
+    }
+}
+
+fn generate_deserializable_try_from(
+    ident: Ident,
+    generics: Generics,
+    data: DeserializableTryFromData,
+) -> TokenStream {
+    let trait_bounds = generate_trait_bounds(&generics);
+    let try_from = data.try_from;
+    let validator = if data.with_validator {
+        quote! {
+            if !biome_deserialize::DeserializableValidator::validate(&result, name, range, diagnostics) {
+                return None;
+            }
+        }
+    } else {
+        quote! {}
+    };
+    quote! {
+        impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
+            fn deserialize(
+                value: &impl biome_deserialize::DeserializableValue,
+                name: &str,
+                diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
+            ) -> Option<Self> {
+                let result: #try_from = biome_deserialize::Deserializable::deserialize(value, name, diagnostics)?;
+                match result.try_into() {
+                    Ok(result) => {
+                        #validator
+                        Some(result)
+                    }
+                    Err(err) => {
+                        diagnostics.push(biome_deserialize::DeserializationDiagnostic::new(
+                            format_args!("{}", err)
+                        ).with_range(value.range()));
+                        None
+                    }
+                }
             }
         }
     }

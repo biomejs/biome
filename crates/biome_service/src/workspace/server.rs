@@ -487,7 +487,7 @@ impl Workspace for WorkspaceServer {
                     let results = lint(LintParams {
                         parse,
                         settings: self.settings(),
-                        max_diagnostics: params.max_diagnostics,
+                        max_diagnostics: params.max_diagnostics as u32,
                         path: &params.path,
                         language: self.get_language(&params.path),
                         categories: params.categories,
@@ -520,7 +520,7 @@ impl Workspace for WorkspaceServer {
                 })
                 .collect(),
             errors,
-            skipped_diagnostics,
+            skipped_diagnostics: skipped_diagnostics.into(),
         })
     }
 

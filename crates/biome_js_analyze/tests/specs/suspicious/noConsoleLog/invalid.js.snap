@@ -5,6 +5,7 @@ expression: invalid.js
 # Input
 ```jsx
 console.log("something")
+console.log("with semicolon");
 
 ```
 
@@ -16,7 +17,8 @@ invalid.js:1:1 lint/suspicious/noConsoleLog  FIXABLE  ━━━━━━━━�
   
   > 1 │ console.log("something")
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
+    2 │ console.log("with semicolon");
+    3 │ 
   
   i console.log is usually a tool for debugging and you don't want to have that in production.
   
@@ -26,6 +28,29 @@ invalid.js:1:1 lint/suspicious/noConsoleLog  FIXABLE  ━━━━━━━━�
   
     1 │ console.log("something")
       │ ------------------------
+
+```
+
+```
+invalid.js:2:1 lint/suspicious/noConsoleLog  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.log
+  
+    1 │ console.log("something")
+  > 2 │ console.log("with semicolon");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i console.log is usually a tool for debugging and you don't want to have that in production.
+  
+  i If it is not for debugging purpose then using console.info might be more appropriate.
+  
+  i Unsafe fix: Remove console.log
+  
+    1 1 │   console.log("something")
+    2   │ - console.log("with·semicolon");
+    3 2 │   
+  
 
 ```
 

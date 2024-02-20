@@ -5,8 +5,7 @@ use self::{
 pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
 use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::svelte::SVELTE_FENCE;
-use crate::file_handlers::vue::VueFileHandler;
-pub use crate::file_handlers::vue::VUE_FENCE;
+pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
     settings::SettingsHandle,
@@ -192,6 +191,7 @@ impl Language {
                 | Language::JavaScriptReact
                 | Language::TypeScriptReact
                 | Language::Astro
+                | Language::Vue
         )
     }
 
@@ -325,7 +325,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) settings: SettingsHandle<'a>,
     pub(crate) language: Language,
-    pub(crate) max_diagnostics: u64,
+    pub(crate) max_diagnostics: u32,
     pub(crate) path: &'a RomePath,
     pub(crate) categories: RuleCategories,
     pub(crate) manifest: Option<PackageJson>,
@@ -334,7 +334,7 @@ pub(crate) struct LintParams<'a> {
 pub(crate) struct LintResults {
     pub(crate) diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub(crate) errors: usize,
-    pub(crate) skipped_diagnostics: u64,
+    pub(crate) skipped_diagnostics: u32,
 }
 
 pub(crate) struct CodeActionsParams<'a> {

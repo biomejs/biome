@@ -2,25 +2,35 @@ import "@/styles/_progress.scss";
 import { useEffect, useState } from "react";
 
 const ProgressBar = ({
-	duration,
 	label,
+	duration,
+	maxDuration,
+	color,
 }: {
-	duration: number;
 	label: string;
+	duration: number;
+	maxDuration: number;
+	color: string;
 }) => {
 	const [progress, setProgress] = useState(0);
+	// Calculate the relative progress based on maxDuration
+	const maxRelativeProgress = (duration / maxDuration) * 100;
 
 	useEffect(() => {
 		const startTime = Date.now();
 
 		const updateProgress = () => {
 			const elapsed = Date.now() - startTime;
-			const newProgress = elapsed / 1000;
+			const elapsedSeconds = elapsed / 1000;
+			// Calculate current progress based on elapsed time and relative maximum
+			const newProgress = (elapsedSeconds / duration) * maxRelativeProgress;
 
-			if (Math.floor(newProgress) >= duration) {
+			if (newProgress >= maxRelativeProgress) {
+				// Ensure progress does not exceed calculated relative maximum
+				setProgress(maxRelativeProgress);
 				clearInterval(interval);
 			} else {
-				setProgress(Math.min(newProgress, duration));
+				setProgress(newProgress);
 			}
 		};
 
@@ -29,18 +39,46 @@ const ProgressBar = ({
 		return () => {
 			clearInterval(interval);
 		};
-	}, [duration]);
+	}, [duration, maxRelativeProgress]);
 
 	return (
 		<div className="prog-cont">
 			<span className="label">{label}</span>
 			<div className="progress-bar-container">
-				<div className="bar" style={{ width: `calc(3 * ${progress}%)` }}>
-					<span className="time">{progress.toFixed(2)}s</span>
+				<div
+					className="bar"
+					style={{ width: `${progress}%`, backgroundColor: `${color}` }}
+				>
+					<span className="time">
+						{((progress / maxRelativeProgress) * duration).toFixed(2)}s
+					</span>
 				</div>
 			</div>
 		</div>
 	);
 };
 
-export default ProgressBar;
+const ProgressBarContainer = ({
+	data,
+}: { data: Array<{ duration: number; label: string; color: string }> }) => {
+	const maxDuration = data.reduce(
+		(max, { duration }) => Math.max(max, duration),
+		0,
+	);
+
+	return (
+		<div>
+			{data.map(({ duration, label, color }) => (
+				<ProgressBar
+					duration={duration}
+					label={label}
+					maxDuration={maxDuration}
+					color={color}
+					key={label}
+				/>
+			))}
+		</div>
+	);
+};
+
+export default ProgressBarContainer;

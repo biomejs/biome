@@ -40,8 +40,8 @@
 	"bugs": "https://github.com/biomejs/biome/issues",
 	"devDependencies": {
 		"typescript": "^4.8.2",
-		"vitest": "^0.22.0",
-		"vite": "^3.0.8",
+		"vitest": "^1.3.0",
+		"vite": "^5.1.3",
 		"@biomejs/wasm-bundler": "../wasm-bundler",
 		"@biomejs/wasm-nodejs": "../wasm-nodejs",
 		"@biomejs/wasm-web": "../wasm-web"

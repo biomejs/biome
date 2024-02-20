@@ -10,6 +10,7 @@ console.warn('hello world')
 console.table('hello world')
 console.error('hello world')
 console.nonExistent('hello world')
+console.log('with semicolon');
 
 globalThis.console.warn();
 
@@ -50,10 +51,10 @@ invalid.js:2:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Remove console
   
-    1 1 │   console.log('hello world')
-    2   │ - console.info('hello·world')
-    3 2 │   console.warn('hello world')
-    4 3 │   console.table('hello world')
+     1 1 │   console.log('hello world')
+     2   │ - console.info('hello·world')
+     3 2 │   console.warn('hello world')
+     4 3 │   console.table('hello world')
   
 
 ```
@@ -74,11 +75,11 @@ invalid.js:3:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Remove console
   
-    1 1 │   console.log('hello world')
-    2 2 │   console.info('hello world')
-    3   │ - console.warn('hello·world')
-    4 3 │   console.table('hello world')
-    5 4 │   console.error('hello world')
+     1 1 │   console.log('hello world')
+     2 2 │   console.info('hello world')
+     3   │ - console.warn('hello·world')
+     4 3 │   console.table('hello world')
+     5 4 │   console.error('hello world')
   
 
 ```
@@ -99,11 +100,11 @@ invalid.js:4:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Remove console
   
-    2 2 │   console.info('hello world')
-    3 3 │   console.warn('hello world')
-    4   │ - console.table('hello·world')
-    5 4 │   console.error('hello world')
-    6 5 │   console.nonExistent('hello world')
+     2 2 │   console.info('hello world')
+     3 3 │   console.warn('hello world')
+     4   │ - console.table('hello·world')
+     5 4 │   console.error('hello world')
+     6 5 │   console.nonExistent('hello world')
   
 
 ```
@@ -118,17 +119,17 @@ invalid.js:5:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
   > 5 │ console.error('hello world')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ console.nonExistent('hello world')
-    7 │ 
+    7 │ console.log('with semicolon');
   
   i Usage of console is disallowed.
   
   i Unsafe fix: Remove console
   
-    3 3 │   console.warn('hello world')
-    4 4 │   console.table('hello world')
-    5   │ - console.error('hello·world')
-    6 5 │   console.nonExistent('hello world')
-    7 6 │   
+     3 3 │   console.warn('hello world')
+     4 4 │   console.table('hello world')
+     5   │ - console.error('hello·world')
+     6 5 │   console.nonExistent('hello world')
+     7 6 │   console.log('with semicolon');
   
 
 ```
@@ -142,44 +143,66 @@ invalid.js:6:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
     5 │ console.error('hello world')
   > 6 │ console.nonExistent('hello world')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 
-    8 │ globalThis.console.warn();
+    7 │ console.log('with semicolon');
+    8 │ 
   
   i Usage of console is disallowed.
   
   i Unsafe fix: Remove console
   
-    4 4 │   console.table('hello world')
-    5 5 │   console.error('hello world')
-    6   │ - console.nonExistent('hello·world')
-    7 6 │   
-    8 7 │   globalThis.console.warn();
+     4 4 │   console.table('hello world')
+     5 5 │   console.error('hello world')
+     6   │ - console.nonExistent('hello·world')
+     7 6 │   console.log('with semicolon');
+     8 7 │   
   
 
 ```
 
 ```
-invalid.js:8:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use console
   
+    5 │ console.error('hello world')
     6 │ console.nonExistent('hello world')
-    7 │ 
-  > 8 │ globalThis.console.warn();
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    9 │ 
+  > 7 │ console.log('with semicolon');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ globalThis.console.warn();
   
   i Usage of console is disallowed.
   
   i Unsafe fix: Remove console
   
-    4 4 │   console.table('hello world')
-    5 5 │   console.error('hello world')
-    6   │ - console.nonExistent('hello·world')
-    7   │ - 
-    8   │ - globalThis.console.warn();
-      6 │ + console.nonExistent('hello·world');
-    9 7 │   
+     5 5 │   console.error('hello world')
+     6 6 │   console.nonExistent('hello world')
+     7   │ - console.log('with·semicolon');
+     8 7 │   
+     9 8 │   globalThis.console.warn();
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console
+  
+     7 │ console.log('with semicolon');
+     8 │ 
+   > 9 │ globalThis.console.warn();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Usage of console is disallowed.
+  
+  i Unsafe fix: Remove console
+  
+     7 7 │   console.log('with semicolon');
+     8 8 │   
+     9   │ - globalThis.console.warn();
+    10   │ - 
   
 
 ```

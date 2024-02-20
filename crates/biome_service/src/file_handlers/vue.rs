@@ -1,8 +1,10 @@
 use crate::file_handlers::{
-    javascript, AnalyzerCapabilities, Capabilities, DebugCapabilities, ExtensionHandler,
-    FormatterCapabilities, Language, Mime, ParserCapabilities,
+    javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime,
+    ParserCapabilities,
 };
 use crate::settings::SettingsHandle;
+use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
@@ -15,7 +17,7 @@ use regex::Regex;
 use tracing::debug;
 
 #[derive(Debug, Default, PartialEq, Eq)]
-pub(crate) struct VueFileHandler;
+pub struct VueFileHandler;
 
 lazy_static! {
     // https://regex101.com/r/E4n4hh/3
@@ -29,6 +31,48 @@ lazy_static! {
         [^>]*>\n(?P<script>(?U:.*))</script>"#
     )
     .unwrap();
+}
+
+impl VueFileHandler {
+    /// It extracts the JavaScript/TypeScript code contained in the script block of a Vue file
+    ///
+    /// If there's no script block, an empty string is returned.
+    pub fn vue_input(text: &str) -> &str {
+        let script = VUE_FENCE
+            .captures(text)
+            .and_then(|captures| captures.name("script"));
+        match script {
+            Some(script) => &text[script.start()..script.end()],
+            _ => "",
+        }
+    }
+
+    pub fn vue_output(input: &str, output: &str) -> String {
+        if let Some(script) = VUE_FENCE
+            .captures(input)
+            .and_then(|captures| captures.name("script"))
+        {
+            format!(
+                "{}{}{}",
+                &input[..script.start()],
+                output,
+                &input[script.end()..]
+            )
+        } else {
+            input.to_string()
+        }
+    }
+
+    pub fn vue_file_source(text: &str) -> JsFileSource {
+        let matches = VUE_FENCE.captures(text);
+        matches
+            .and_then(|captures| captures.name("lang"))
+            .map(|lang| match lang.as_str() {
+                "ts" => JsFileSource::ts(),
+                _ => JsFileSource::js_module(),
+            })
+            .unwrap_or(JsFileSource::js_module())
+    }
 }
 
 impl ExtensionHandler for VueFileHandler {
@@ -49,10 +93,10 @@ impl ExtensionHandler for VueFileHandler {
                 debug_formatter_ir: None,
             },
             analyzer: AnalyzerCapabilities {
-                lint: None,
-                code_actions: None,
+                lint: Some(lint),
+                code_actions: Some(code_actions),
                 rename: None,
-                fix_all: None,
+                fix_all: Some(fix_all),
                 organize_imports: None,
             },
             formatter: FormatterCapabilities {
@@ -66,24 +110,13 @@ impl ExtensionHandler for VueFileHandler {
 
 fn parse(
     _rome_path: &RomePath,
-    _language_hint: crate::file_handlers::Language,
+    _language_hint: Language,
     text: &str,
     _settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> AnyParse {
-    let matches = VUE_FENCE.captures(text);
-    let script = match matches {
-        Some(ref captures) => &text[captures.name("script").unwrap().range()],
-        _ => "",
-    };
-
-    let language = matches
-        .and_then(|captures| captures.name("lang"))
-        .map(|lang| match lang.as_str() {
-            "ts" => JsFileSource::ts(),
-            _ => JsFileSource::js_module(),
-        })
-        .unwrap_or(JsFileSource::js_module());
+    let script = VueFileHandler::vue_input(text);
+    let language = VueFileHandler::vue_file_source(text);
 
     debug!("Parsing file with language {:?}", language);
 
@@ -106,4 +139,16 @@ fn format(
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format(rome_path, parse, settings)
+}
+
+pub(crate) fn lint(params: LintParams) -> LintResults {
+    javascript::lint(params)
+}
+
+pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
+    javascript::code_actions(params)
+}
+
+fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+    javascript::fix_all(params)
 }

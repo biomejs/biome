@@ -257,6 +257,17 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   <div></div>
   ```
 
+- Add partial support for `.vue` files. Biome is able to lint and fix the script block of the Vue files. Contributed by @nhedger
+
+  ```diff
+  <script setup lang="ts">
+  - delete a.b
+  + a.b = undefined
+  <script>
+
+  <template></template>
+  ```
+
 - Add rule [useNodeAssertStrict](https://biomejs.dev/linter/rules/use-node-assert-strict), which promotes the use of `node:assert/strict` over `node:assert`. Contributed by @ematipico
 
 #### Enhancements

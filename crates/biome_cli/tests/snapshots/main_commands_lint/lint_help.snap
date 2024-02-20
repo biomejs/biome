@@ -33,8 +33,8 @@ Global options applied to all commands
                               output is determined to be incompatible
         --use-server          Connect to a running instance of the Biome daemon server.
         --verbose             Print additional diagnostics, and some diagnostics show more information.
-        --config-path=PATH    Set the filesystem path to the directory of the biome.json configuration
-                              file
+        --config-path=PATH    Set the directory of the biome.json configuration file and disable default
+                              configuration file resolution.
         --max-diagnostics=NUMBER  Cap the amount of diagnostics displayed.
                               [default: 20]
         --skip-errors         Skip over files containing syntax errors instead of emitting an error diagnostic.

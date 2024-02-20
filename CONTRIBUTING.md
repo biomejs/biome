@@ -378,3 +378,4 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Vasu Singh @vasucp1207](https://github.com/vasucp1207)
 - [Victor Teles @victor-teles](https://github.com/victor-teles)
 - [Yagiz Nizipli @anonrig](https://github.com/anonrig)
+- [Yoshiaki Togami @togami2864](https://github.com/togami2864)
