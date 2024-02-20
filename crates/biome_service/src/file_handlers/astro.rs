@@ -1,7 +1,7 @@
 use crate::file_handlers::{
     javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
     ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime,
-    ParserCapabilities, VUE_FENCE,
+    ParserCapabilities,
 };
 use crate::settings::SettingsHandle;
 use crate::workspace::{FixFileResult, PullActionsResult};
@@ -13,7 +13,7 @@ use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
 use biome_rowan::{FileSource, NodeCache};
 use lazy_static::lazy_static;
-use regex::{Match, Matches, Regex, RegexBuilder};
+use regex::{Matches, Regex, RegexBuilder};
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct AstroFileHandler;
@@ -37,6 +37,7 @@ impl AstroFileHandler {
         }
     }
 
+    /// Returns the start byte offset of the Astro fence
     pub fn start(input: &str) -> Option<u32> {
         ASTRO_FENCE.find_iter(input).next().map(|m| m.end() as u32)
     }
@@ -45,6 +46,8 @@ impl AstroFileHandler {
         ASTRO_FENCE.find_iter(input)
     }
 
+    /// It takes the original content of an Astro file, and new output of an Astro file. The output is only the content contained inside the
+    /// Astro fences. The function replaces `output` inside those fences.
     pub fn output(input: &str, output: &str) -> String {
         let mut matches = Self::matches(input);
         if let (Some(start), Some(end)) = (matches.next(), matches.next()) {

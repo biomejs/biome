@@ -9,7 +9,6 @@ use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
-use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
 use biome_rowan::{FileSource, NodeCache};
@@ -45,6 +44,8 @@ impl VueFileHandler {
         }
     }
 
+    /// It takes the original content of a Vue file, and new output of an Vue file. The output is only the content contained inside the
+    /// Vue `<script>` tag. The function replaces `output` inside that `<script>`.
     pub fn output(input: &str, output: &str) -> String {
         if let Some(script) = Self::matches_script(input) {
             format!(
@@ -58,6 +59,7 @@ impl VueFileHandler {
         }
     }
 
+    /// Returns the start byte offset of the Vue `<script>` tag
     pub fn start(input: &str) -> Option<u32> {
         Self::matches_script(input).map(|m| m.start() as u32)
     }

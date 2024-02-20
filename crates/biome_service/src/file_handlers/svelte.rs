@@ -34,7 +34,7 @@ lazy_static! {
 }
 
 impl SvelteFileHandler {
-    // It extracts the JavaScript/TypeScript code contained in the script block of a Vue file
+    // It extracts the JavaScript/TypeScript code contained in the script block of a Svelte file
     ///
     /// If there's no script block, an empty string is returned.
     pub fn input(text: &str) -> &str {
@@ -44,6 +44,8 @@ impl SvelteFileHandler {
         }
     }
 
+    /// It takes the original content of a Svelte file, and new output of an Svelte file. The output is only the content contained inside the
+    /// Svelte `<script>` tag. The function replaces `output` inside that `<script>`.
     pub fn output(input: &str, output: &str) -> String {
         if let Some(script) = Self::matches_script(input) {
             format!(
@@ -57,6 +59,7 @@ impl SvelteFileHandler {
         }
     }
 
+    /// Returns the start byte offset of the Svelte `<script>` tag
     pub fn start(input: &str) -> Option<u32> {
         Self::matches_script(input).map(|m| m.start() as u32)
     }

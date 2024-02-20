@@ -20,7 +20,7 @@ use std::{io, mem};
 use tower_lsp::jsonrpc::Error as LspError;
 use tower_lsp::lsp_types;
 use tower_lsp::lsp_types::{self as lsp, CodeDescription, Url};
-use tracing::{debug, error};
+use tracing::error;
 
 pub(crate) fn text_edit(
     line_index: &LineIndex,
