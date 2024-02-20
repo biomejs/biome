@@ -42,10 +42,12 @@ declare_rule! {
     /// ```jsx,expect_diagnostic
     /// <a href="javascript:void(0)">navigate here</a>
     /// ```
-    /// ```jsx,expect_diagnostic
+
+    /// ### Valid
+    ///
+    /// ```jsx
     /// <a href="https://example.com" onClick={something}>navigate here</a>
     /// ```
-    /// ### Valid
     ///
     /// ```jsx
     /// <a href={`https://www.javascript.com`}>navigate here</a>
@@ -145,7 +147,20 @@ impl Rule for UseValidAnchor {
             let on_click_attribute = node.find_attribute_by_name("onClick");
 
             match (anchor_attribute, on_click_attribute) {
-                (Some(_), Some(_)) => return Some(UseValidAnchorState::CantBeAnchor(node.range())),
+                (Some(anchor_attribute), Some(_)) => {
+                    if anchor_attribute.initializer().is_none() {
+                        return Some(UseValidAnchorState::CantBeAnchor(node.range()));
+                    }
+
+                    let static_value = anchor_attribute.as_static_value()?;
+                    if static_value.as_string_constant().map_or(true, |const_str| {
+                        const_str.is_empty()
+                            || const_str.contains('#')
+                            || const_str.contains("javascript:")
+                    }) {
+                        return Some(UseValidAnchorState::CantBeAnchor(node.range()));
+                    }
+                }
                 (Some(anchor_attribute), _) => {
                     if anchor_attribute.initializer().is_none() {
                         return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
