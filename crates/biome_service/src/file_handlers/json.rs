@@ -163,15 +163,15 @@ fn parse(
             LanguageId::Jsonc => JsonFileSource::jsonc(),
             _ => JsonFileSource::json(),
         });
-    let options: JsonParserOptions =
-        overrides
-            .as_json_parser_options(rome_path)
-            .unwrap_or(JsonParserOptions {
-                allow_comments: parser.allow_comments
-                    || source_type.is_jsonc()
-                    || is_file_allowed(rome_path),
-                allow_trailing_commas: parser.allow_trailing_commas || is_file_allowed(rome_path),
-            });
+    let options: JsonParserOptions = overrides.override_json_parser_options(
+        rome_path,
+        JsonParserOptions {
+            allow_comments: parser.allow_comments
+                || source_type.is_jsonc()
+                || is_file_allowed(rome_path),
+            allow_trailing_commas: parser.allow_trailing_commas || is_file_allowed(rome_path),
+        },
+    );
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();

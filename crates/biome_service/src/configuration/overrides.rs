@@ -22,6 +22,7 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::str::FromStr;
+use std::sync::RwLock;
 
 #[derive(
     Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
@@ -206,8 +207,8 @@ pub fn to_override_settings(
             formatter,
             linter,
             organize_imports,
-
             languages,
+            ..OverrideSettingPattern::default()
         };
 
         override_settings.patterns.push(pattern_setting);
