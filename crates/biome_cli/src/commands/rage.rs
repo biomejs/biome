@@ -176,7 +176,7 @@ impl Display for RunningRomeServer {
 struct RageConfiguration<'a, 'app> {
     fs: &'a DynRef<'app, dyn FileSystem>,
     formatter: bool,
-    linter: bool
+    linter: bool,
 }
 
 impl Display for RageConfiguration<'_, '_> {
@@ -301,10 +301,10 @@ where
 
         let rule_json_str = serde_json::to_string(&self.1)
             .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to serialize"))?;
-        let group_to_rules: HashMap<String, Value> =
-            serde_json::from_str(rule_json_str.as_str()).map_err(|_| {
-                io::Error::new(io::ErrorKind::Other, "Failed to convert to HashMap")
-            })?;
+        let group_to_rules: HashMap<String, Value> = serde_json::from_str(rule_json_str.as_str())
+            .map_err(|_| {
+            io::Error::new(io::ErrorKind::Other, "Failed to convert to HashMap")
+        })?;
 
         let mut groups: Vec<&String> = group_to_rules.keys().collect();
         groups.sort();
