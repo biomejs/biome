@@ -43,7 +43,7 @@ pub(crate) fn rage(
     {EnvVarOs("JS_RUNTIME_NAME")}
     {EnvVarOs("NODE_PACKAGE_MANAGER")}
 
-    {RageConfiguration(&session.app.fs, formatter, linter)}
+    {RageConfiguration { fs: &session.app.fs, formatter, linter }}
     {WorkspaceRage(session.app.workspace.deref())}
     ));
 
@@ -173,13 +173,17 @@ impl Display for RunningRomeServer {
     }
 }
 
-struct RageConfiguration<'a, 'app>(&'a DynRef<'app, dyn FileSystem>, bool, bool);
+struct RageConfiguration<'a, 'app> {
+    fs: &'a DynRef<'app, dyn FileSystem>,
+    formatter: bool,
+    linter: bool
+}
 
 impl Display for RageConfiguration<'_, '_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         Section("Biome Configuration").fmt(fmt)?;
 
-        match load_configuration(self.0, ConfigurationBasePath::default()) {
+        match load_configuration(self.fs, ConfigurationBasePath::default()) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.directory_path.is_none() {
                     KeyValuePair("Status", markup!(<Dim>"unset"</Dim>)).fmt(fmt)?;
@@ -212,7 +216,7 @@ impl Display for RageConfiguration<'_, '_> {
                     ).fmt(fmt)?;
 
                     // Print formatter configuration if --formatter option is true
-                    if self.1 {
+                    if self.formatter {
                         let formatter_configuration = configuration.get_formatter_configuration();
                         markup! (
                             {Section("Formatter")}
@@ -263,7 +267,7 @@ impl Display for RageConfiguration<'_, '_> {
                     }
 
                     // Print linter configuration if --linter option is true
-                    if self.2 {
+                    if self.linter {
                         let linter_configuration = configuration.get_linter_rules();
                         markup! (
                             {Section("Linter")}
@@ -297,30 +301,30 @@ where
 
         let rule_json_str = serde_json::to_string(&self.1)
             .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to serialize"))?;
-        let category_to_rules: HashMap<String, Value> =
+        let group_to_rules: HashMap<String, Value> =
             serde_json::from_str(rule_json_str.as_str()).map_err(|_| {
                 io::Error::new(io::ErrorKind::Other, "Failed to convert to HashMap")
             })?;
 
-        let mut categories: Vec<&String> = category_to_rules.keys().collect();
-        categories.sort();
+        let mut groups: Vec<&String> = group_to_rules.keys().collect();
+        groups.sort();
 
         let first_padding_width = 30usize.saturating_sub(rules_str.len() + 1);
         let mut padding_width = first_padding_width;
 
-        if categories.is_empty() {
+        if groups.is_empty() {
             for _ in 0..padding_width {
                 fmt.write_str(" ")?;
             }
             markup!(<Dim>"unset\n"</Dim>).fmt(fmt)?;
         } else {
-            for category in categories {
-                if let Some(rules) = category_to_rules.get(category).and_then(Value::as_object) {
+            for group in groups {
+                if let Some(rules) = group_to_rules.get(group).and_then(Value::as_object) {
                     for (rule_name, rule_config) in rules {
                         for _ in 0..padding_width {
                             fmt.write_str(" ")?;
                         }
-                        fmt.write_str(&format!("{}/{} = {}\n", category, rule_name, rule_config))?;
+                        fmt.write_str(&format!("{}/{} = {}\n", group, rule_name, rule_config))?;
                         if padding_width == first_padding_width {
                             padding_width = 30usize.saturating_sub(0) + 2;
                         }
