@@ -183,6 +183,7 @@ fn is_nth_at_flex_unit(p: &mut CssParser, n: usize) -> bool {
 /// Returns true if the parser is currently at the start of a RegularDimension
 /// that will become a Length value
 #[inline]
+#[allow(dead_code)]
 pub(crate) fn is_at_length_dimension(p: &mut CssParser) -> bool {
     is_at_regular_dimension(p) && is_nth_at_length_unit(p, 1)
 }
