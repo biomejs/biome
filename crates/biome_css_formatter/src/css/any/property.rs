@@ -10,9 +10,6 @@ impl FormatRule<AnyCssProperty> for FormatAnyCssProperty {
         match node {
             AnyCssProperty::CssGenericProperty(node) => node.format().fmt(f),
             AnyCssProperty::CssBogusProperty(node) => node.format().fmt(f),
-            AnyCssProperty::CssAllProperty(node) => node.format().fmt(f),
-            AnyCssProperty::CssBorderProperty(node) => node.format().fmt(f),
-            AnyCssProperty::CssZIndexProperty(node) => node.format().fmt(f),
         }
     }
 }

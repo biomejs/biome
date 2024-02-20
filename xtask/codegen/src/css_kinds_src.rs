@@ -298,9 +298,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_GENERIC_PROPERTY",
         "CSS_UNKNOWN_PROPERTY_VALUE",
         // Properties
-        "CSS_ALL_PROPERTY",
-        "CSS_BORDER_PROPERTY",
-        "CSS_Z_INDEX_PROPERTY",
         "CSS_PARAMETER_LIST",
         "CSS_DECLARATION_IMPORTANT",
         "CSS_REGULAR_DIMENSION",
@@ -355,11 +352,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_URL_FUNCTION",
         "CSS_URL_MODIFIER_LIST",
         "CSS_COLOR",
-        "CSS_AUTO",
         "CSS_BORDER",
-        "CSS_WIDE_KEYWORD",
-        "CSS_LINE_WIDTH_KEYWORD",
-        "CSS_LINE_STYLE",
         // At rule nodes
         "CSS_AT_RULE",
         "CSS_CHARSET_AT_RULE",

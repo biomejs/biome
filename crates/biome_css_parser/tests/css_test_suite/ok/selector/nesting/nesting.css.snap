@@ -349,25 +349,23 @@ CssRoot {
                                         items: CssDeclarationOrRuleList [
                                             CssDeclarationWithSemicolon {
                                                 declaration: CssDeclaration {
-                                                    property: CssBorderProperty {
+                                                    property: CssGenericProperty {
                                                         name: CssIdentifier {
                                                             value_token: IDENT@122..128 "border" [] [],
                                                         },
                                                         colon_token: COLON@128..129 ":" [] [],
-                                                        value: CssUnknownPropertyValue {
-                                                            css_generic_component_value_list: CssGenericComponentValueList [
-                                                                CssRegularDimension {
-                                                                    value_token: CSS_NUMBER_LITERAL@129..130 "1" [] [],
-                                                                    unit_token: IDENT@130..133 "px" [] [Whitespace(" ")],
-                                                                },
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@133..139 "solid" [] [Whitespace(" ")],
-                                                                },
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@139..145 "black" [] [Whitespace(" ")],
-                                                                },
-                                                            ],
-                                                        },
+                                                        value: CssGenericComponentValueList [
+                                                            CssRegularDimension {
+                                                                value_token: CSS_NUMBER_LITERAL@129..130 "1" [] [],
+                                                                unit_token: IDENT@130..133 "px" [] [Whitespace(" ")],
+                                                            },
+                                                            CssIdentifier {
+                                                                value_token: IDENT@133..139 "solid" [] [Whitespace(" ")],
+                                                            },
+                                                            CssIdentifier {
+                                                                value_token: IDENT@139..145 "black" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
                                                     },
                                                     important: missing (optional),
                                                 },
@@ -3010,19 +3008,18 @@ CssRoot {
                     1: CSS_DECLARATION_OR_RULE_LIST@122..145
                       0: CSS_DECLARATION_WITH_SEMICOLON@122..145
                         0: CSS_DECLARATION@122..145
-                          0: CSS_BORDER_PROPERTY@122..145
+                          0: CSS_GENERIC_PROPERTY@122..145
                             0: CSS_IDENTIFIER@122..128
                               0: IDENT@122..128 "border" [] []
                             1: COLON@128..129 ":" [] []
-                            2: CSS_UNKNOWN_PROPERTY_VALUE@129..145
-                              0: CSS_GENERIC_COMPONENT_VALUE_LIST@129..145
-                                0: CSS_REGULAR_DIMENSION@129..133
-                                  0: CSS_NUMBER_LITERAL@129..130 "1" [] []
-                                  1: IDENT@130..133 "px" [] [Whitespace(" ")]
-                                1: CSS_IDENTIFIER@133..139
-                                  0: IDENT@133..139 "solid" [] [Whitespace(" ")]
-                                2: CSS_IDENTIFIER@139..145
-                                  0: IDENT@139..145 "black" [] [Whitespace(" ")]
+                            2: CSS_GENERIC_COMPONENT_VALUE_LIST@129..145
+                              0: CSS_REGULAR_DIMENSION@129..133
+                                0: CSS_NUMBER_LITERAL@129..130 "1" [] []
+                                1: IDENT@130..133 "px" [] [Whitespace(" ")]
+                              1: CSS_IDENTIFIER@133..139
+                                0: IDENT@133..139 "solid" [] [Whitespace(" ")]
+                              2: CSS_IDENTIFIER@139..145
+                                0: IDENT@139..145 "black" [] [Whitespace(" ")]
                           1: (empty)
                         1: (empty)
                     2: R_CURLY@145..146 "}" [] []
