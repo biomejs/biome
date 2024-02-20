@@ -124,7 +124,7 @@ declare_rule! {
     /// };
     /// ```
     ///
-    pub(crate) NoUnsafeFinally {
+    pub NoUnsafeFinally {
         version: "1.0.0",
         name: "noUnsafeFinally",
         source: RuleSource::Eslint("no-unsafe-finally"),
@@ -133,7 +133,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) ControlFlowStatement = JsReturnStatement | JsThrowStatement | JsBreakStatement | JsContinueStatement
+    pub ControlFlowStatement = JsReturnStatement | JsThrowStatement | JsBreakStatement | JsContinueStatement
 }
 
 impl Rule for NoUnsafeFinally {

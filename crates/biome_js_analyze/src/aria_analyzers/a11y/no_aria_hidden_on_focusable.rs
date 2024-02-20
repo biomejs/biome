@@ -42,7 +42,7 @@ declare_rule! {
     /// - [Element with aria-hidden has no content in sequential focus navigation](https://www.w3.org/WAI/standards-guidelines/act/rules/6cfa84/proposed/)
     /// - [MDN aria-hidden](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden)
     ///
-    pub(crate) NoAriaHiddenOnFocusable {
+    pub NoAriaHiddenOnFocusable {
         version: "1.4.0",
         name: "noAriaHiddenOnFocusable",
         source: RuleSource::EslintJsxA11y("no-aria-hidden-on-focusable"),

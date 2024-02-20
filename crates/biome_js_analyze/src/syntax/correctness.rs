@@ -2,12 +2,12 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_duplicate_private_class_members;
-pub(crate) mod no_initializer_with_definite;
-pub(crate) mod no_super_without_extends;
+pub mod no_duplicate_private_class_members;
+pub mod no_initializer_with_definite;
+pub mod no_super_without_extends;
 
 declare_group! {
-    pub (crate) Correctness {
+    pub Correctness {
         name : "correctness" ,
         rules : [
             self :: no_duplicate_private_class_members :: NoDuplicatePrivateClassMembers ,

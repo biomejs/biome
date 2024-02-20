@@ -281,6 +281,7 @@ fn generate_deserializable_newtype(
     };
 
     let trait_bounds = generate_trait_bounds(&generics);
+    let generics = generate_generics_without_trait_bounds(&generics);
 
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
@@ -401,8 +402,6 @@ fn generate_deserializable_struct(
         })
         .collect();
 
-    let trait_bounds = generate_trait_bounds(&generics);
-
     let validator = if required_fields.is_empty() {
         quote! {}
     } else {
@@ -443,16 +442,21 @@ fn generate_deserializable_struct(
         validator
     };
 
-    quote! {
+    let tuple_type = generate_generics_tuple(&generics);
+    let trait_bounds = generate_trait_bounds(&generics);
+    let generics = generate_generics_without_trait_bounds(&generics);
+
+    let x = quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
             fn deserialize(
                 value: &impl biome_deserialize::DeserializableValue,
                 name: &str,
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self> {
-                struct Visitor #generics;
-                impl #generics biome_deserialize::DeserializationVisitor for Visitor #generics {
-                    type Output = #ident;
+                use std::marker::PhantomData;
+                struct Visitor #generics (PhantomData< #tuple_type >);
+                impl #generics biome_deserialize::DeserializationVisitor for Visitor #generics #trait_bounds {
+                    type Output = #ident #generics;
 
                     const EXPECTED_TYPE: biome_deserialize::VisitableType = biome_deserialize::VisitableType::MAP;
 
@@ -486,10 +490,14 @@ fn generate_deserializable_struct(
                     }
                 }
 
-                value.deserialize(Visitor, name, diagnostics)
+                value.deserialize(Visitor(PhantomData), name, diagnostics)
             }
         }
-    }
+    };
+    //if ident == "RuleWithOptions" {
+    //    panic!("{}", x.to_string());
+    //}
+    x
 }
 
 fn generate_deserializable_from(
@@ -498,6 +506,7 @@ fn generate_deserializable_from(
     data: DeserializableFromData,
 ) -> TokenStream {
     let trait_bounds = generate_trait_bounds(&generics);
+    let generics = generate_generics_without_trait_bounds(&generics);
     let from = data.from;
     let validator = if data.with_validator {
         quote! {
@@ -530,6 +539,7 @@ fn generate_deserializable_try_from(
     data: DeserializableTryFromData,
 ) -> TokenStream {
     let trait_bounds = generate_trait_bounds(&generics);
+    let generics = generate_generics_without_trait_bounds(&generics);
     let try_from = data.try_from;
     let validator = if data.with_validator {
         quote! {
@@ -565,6 +575,27 @@ fn generate_deserializable_try_from(
     }
 }
 
+fn generate_generics_without_trait_bounds(generics: &Generics) -> TokenStream {
+    if generics.params.is_empty() {
+        quote! {}
+    } else {
+        let params = generics.params.iter().map(|param| match param {
+            GenericParam::Type(ty) => {
+                let attrs = ty
+                    .attrs
+                    .iter()
+                    .fold(quote! {}, |acc, attr| quote! { #acc #attr });
+                let ident = &ty.ident;
+                quote! { #attrs #ident }
+            }
+            _ => abort!(generics, "Unsupported generic parameter"),
+        });
+        quote! {
+            < #(#params),* >
+        }
+    }
+}
+
 fn generate_trait_bounds(generics: &Generics) -> TokenStream {
     if generics.params.is_empty() {
         quote! {}
@@ -572,12 +603,30 @@ fn generate_trait_bounds(generics: &Generics) -> TokenStream {
         let params = generics.params.iter().map(|param| match param {
             GenericParam::Type(ty) => {
                 let ident = &ty.ident;
-                quote! { #ident: biome_deserialize::Deserializable }
+                let bounds = &ty.bounds;
+                if bounds.is_empty() {
+                    quote! { #ident: biome_deserialize::Deserializable }
+                } else {
+                    quote! { #ident: #bounds + biome_deserialize::Deserializable }
+                }
             }
             _ => abort!(generics, "Unsupported generic parameter"),
         });
         quote! {
             where #(#params),*
         }
+    }
+}
+
+fn generate_generics_tuple(generics: &Generics) -> TokenStream {
+    let params = generics.params.iter().map(|param| match param {
+        GenericParam::Type(ty) => {
+            let ident = &ty.ident;
+            quote! { #ident }
+        }
+        _ => abort!(generics, "Unsupported generic parameter"),
+    });
+    quote! {
+        ( #(#params),* )
     }
 }

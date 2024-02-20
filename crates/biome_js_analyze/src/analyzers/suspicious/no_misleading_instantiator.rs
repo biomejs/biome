@@ -45,7 +45,7 @@ declare_rule! {
     ///   new (): C;
     /// }
     /// ```
-    pub(crate) NoMisleadingInstantiator {
+    pub NoMisleadingInstantiator {
         version: "1.3.0",
         name: "noMisleadingInstantiator",
         source: RuleSource::EslintTypeScript("no-misused-new"),
@@ -54,10 +54,10 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) DeclarationQuery = TsInterfaceDeclaration |  TsTypeAliasDeclaration | JsClassDeclaration | TsDeclareStatement
+    pub DeclarationQuery = TsInterfaceDeclaration |  TsTypeAliasDeclaration | JsClassDeclaration | TsDeclareStatement
 }
 
-pub(crate) enum RuleState {
+pub enum RuleState {
     ClassMisleadingNew(TextRange),
     InterfaceMisleadingNew(TextRange),
     InterfaceMisleadingConstructor(TextRange),

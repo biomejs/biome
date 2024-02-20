@@ -49,7 +49,7 @@ declare_rule! {
     /// import * as e from "y";
     /// e = 1;
     /// ```
-    pub(crate) NoImportAssign {
+    pub NoImportAssign {
         version: "1.0.0",
         name: "noImportAssign",
         source: RuleSource::Eslint("no-import-assign"),
@@ -126,5 +126,5 @@ impl Rule for NoImportAssign {
 }
 
 declare_node_union! {
-    pub(crate) AnyJsImportLike = JsNamedImportSpecifier | JsShorthandNamedImportSpecifier | JsNamespaceImportSpecifier | JsDefaultImportSpecifier
+    pub AnyJsImportLike = JsNamedImportSpecifier | JsShorthandNamedImportSpecifier | JsNamespaceImportSpecifier | JsDefaultImportSpecifier
 }

@@ -28,7 +28,7 @@ declare_rule! {
     /// import type * as baz from "baz"
     /// ```
     ///
-    pub(crate) NoNamespaceImport {
+    pub NoNamespaceImport {
         version: "next",
         name: "noNamespaceImport",
         recommended: false,

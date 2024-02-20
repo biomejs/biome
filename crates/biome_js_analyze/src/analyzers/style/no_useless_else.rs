@@ -85,7 +85,7 @@ declare_rule! {
     ///     }
     /// }
     /// ```
-    pub(crate) NoUselessElse {
+    pub NoUselessElse {
         version: "1.3.0",
         name: "noUselessElse",
         source: RuleSource::Eslint("no-else-return"),

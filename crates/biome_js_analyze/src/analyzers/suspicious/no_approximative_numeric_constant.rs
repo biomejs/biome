@@ -43,7 +43,7 @@ declare_rule! {
     /// ```js
     /// let x = Math.LN10;
     /// ```
-    pub(crate) NoApproximativeNumericConstant {
+    pub NoApproximativeNumericConstant {
         version: "1.3.0",
         name: "noApproximativeNumericConstant",
         source: RuleSource::Clippy("approx_constant"),

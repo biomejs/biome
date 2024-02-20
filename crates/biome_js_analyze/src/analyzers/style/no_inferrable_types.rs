@@ -95,7 +95,7 @@ declare_rule! {
     /// function f(param: 1 | 2 = 1): void {}
     /// ```
     ///
-    pub(crate) NoInferrableTypes {
+    pub NoInferrableTypes {
         version: "1.0.0",
         name: "noInferrableTypes",
         source: RuleSource::EslintTypeScript("no-inferrable-types"),

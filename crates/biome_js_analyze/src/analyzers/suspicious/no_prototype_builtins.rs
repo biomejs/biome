@@ -39,7 +39,7 @@ declare_rule! {
     /// var valid = {}.propertyIsEnumerable.call(foo, "bar");
     /// ```
     ///
-    pub(crate) NoPrototypeBuiltins {
+    pub NoPrototypeBuiltins {
         version: "1.0.0",
         name: "noPrototypeBuiltins",
         source: RuleSource::Eslint("no-prototype-builtins"),
@@ -47,7 +47,7 @@ declare_rule! {
     }
 }
 
-pub(crate) struct RuleState {
+pub struct RuleState {
     prototype_builtins_method_name: String,
     text_range: TextRange,
 }

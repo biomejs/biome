@@ -58,9 +58,7 @@ declare_rule! {
     /// /^[👍]$/u;
     /// /^[\q{👶🏻}]$/v;
     /// ```
-    ///
-
-    pub(crate) NoMisleadingCharacterClass {
+    pub NoMisleadingCharacterClass {
         version: "1.5.0",
         name: "noMisleadingCharacterClass",
         source: RuleSource::Eslint("no-misleading-character-class"),
@@ -70,7 +68,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-  pub(crate) AnyRegexExpression = JsNewExpression | JsCallExpression | JsRegexLiteralExpression
+  pub AnyRegexExpression = JsNewExpression | JsCallExpression | JsRegexLiteralExpression
 }
 
 pub enum Message {

@@ -76,7 +76,7 @@ Linter:
                                 correctness/all = true
                                 nursery/useConsistentArrayType = {"level":"warn","options":{"syntax":"shorthand"}}
                                 style/noNonNullAssertion = "off"
-                                suspicious/noCommentText = {"level":"warn"}
+                                suspicious/noCommentText = {"level":"warn","options":null}
 
 Server:
   Version:                      0.0.0

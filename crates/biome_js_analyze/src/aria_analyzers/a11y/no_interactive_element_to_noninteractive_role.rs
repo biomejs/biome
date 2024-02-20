@@ -32,7 +32,7 @@ declare_rule! {
     /// <input role="button" />;
     /// ```
     ///
-    pub(crate) NoInteractiveElementToNoninteractiveRole {
+    pub NoInteractiveElementToNoninteractiveRole {
         version: "1.3.0",
         name: "noInteractiveElementToNoninteractiveRole",
         source: RuleSource::EslintJsxA11y("no-interactive-element-to-noninteractive-role"),

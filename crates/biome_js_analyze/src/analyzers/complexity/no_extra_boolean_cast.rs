@@ -56,7 +56,7 @@ declare_rule! {
     /// !x;
     /// !!x;
     /// ```
-    pub(crate) NoExtraBooleanCast {
+    pub NoExtraBooleanCast {
         version: "1.0.0",
         name: "noExtraBooleanCast",
         source: RuleSource::Eslint("no-extra-boolean-cast"),

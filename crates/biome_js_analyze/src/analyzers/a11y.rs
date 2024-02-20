@@ -2,29 +2,29 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_access_key;
-pub(crate) mod no_auto_focus;
-pub(crate) mod no_blank_target;
-pub(crate) mod no_distracting_elements;
-pub(crate) mod no_header_scope;
-pub(crate) mod no_redundant_alt;
-pub(crate) mod no_svg_without_title;
-pub(crate) mod use_alt_text;
-pub(crate) mod use_anchor_content;
-pub(crate) mod use_heading_content;
-pub(crate) mod use_html_lang;
-pub(crate) mod use_iframe_title;
-pub(crate) mod use_key_with_click_events;
-pub(crate) mod use_key_with_mouse_events;
-pub(crate) mod use_media_caption;
-pub(crate) mod use_valid_anchor;
+pub mod no_access_key;
+pub mod no_autofocus;
+pub mod no_blank_target;
+pub mod no_distracting_elements;
+pub mod no_header_scope;
+pub mod no_redundant_alt;
+pub mod no_svg_without_title;
+pub mod use_alt_text;
+pub mod use_anchor_content;
+pub mod use_heading_content;
+pub mod use_html_lang;
+pub mod use_iframe_title;
+pub mod use_key_with_click_events;
+pub mod use_key_with_mouse_events;
+pub mod use_media_caption;
+pub mod use_valid_anchor;
 
 declare_group! {
-    pub (crate) A11y {
+    pub A11y {
         name : "a11y" ,
         rules : [
             self :: no_access_key :: NoAccessKey ,
-            self :: no_auto_focus :: NoAutoFocus ,
+            self :: no_autofocus :: NoAutofocus ,
             self :: no_blank_target :: NoBlankTarget ,
             self :: no_distracting_elements :: NoDistractingElements ,
             self :: no_header_scope :: NoHeaderScope ,

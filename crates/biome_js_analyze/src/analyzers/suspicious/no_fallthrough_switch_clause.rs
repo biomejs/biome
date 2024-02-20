@@ -52,7 +52,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoFallthroughSwitchClause {
+    pub NoFallthroughSwitchClause {
         version: "1.0.0",
         name: "noFallthroughSwitchClause",
         source: RuleSource::Eslint("no-fallthrough"),

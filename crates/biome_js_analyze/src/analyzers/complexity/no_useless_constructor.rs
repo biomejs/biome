@@ -102,7 +102,7 @@ declare_rule! {
     ///     constructor (prop: number) {}
     /// }
     /// ```
-    pub(crate) NoUselessConstructor {
+    pub NoUselessConstructor {
         version: "1.0.0",
         name: "noUselessConstructor",
         source: RuleSource::EslintTypeScript("no-useless-constructor"),

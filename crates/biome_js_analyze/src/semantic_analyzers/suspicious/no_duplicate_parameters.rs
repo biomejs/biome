@@ -37,7 +37,7 @@ declare_rule! {
     /// function l([, l]) {}
     /// function foo([[a, b], [c, d]]) {}
     /// ```
-    pub(crate) NoDuplicateParameters {
+    pub NoDuplicateParameters {
         version: "1.0.0",
         name: "noDuplicateParameters",
         source: RuleSource::Eslint("no-dupe-args"),

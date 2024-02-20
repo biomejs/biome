@@ -65,7 +65,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoClassAssign {
+    pub NoClassAssign {
         version: "1.0.0",
         name: "noClassAssign",
         source: RuleSource::Eslint("no-class-assign"),

@@ -57,7 +57,7 @@ declare_rule! {
     /// function f() { return CONSTANT; }
     /// const CONSTANT = 0;
     /// ```
-    pub(crate) NoInvalidUseBeforeDeclaration {
+    pub NoInvalidUseBeforeDeclaration {
         version: "1.5.0",
         name: "noInvalidUseBeforeDeclaration",
         source: RuleSource::EslintTypeScript("no-use-before-define"),
@@ -176,14 +176,14 @@ impl Rule for NoInvalidUseBeforeDeclaration {
 }
 
 #[derive(Debug)]
-pub(crate) struct InvalidUseBeforeDeclaration {
+pub struct InvalidUseBeforeDeclaration {
     declaration_kind: DeclarationKind,
     reference_range: TextRange,
     binding_range: TextRange,
 }
 
 #[derive(Debug, Copy, Clone)]
-pub(crate) enum DeclarationKind {
+pub enum DeclarationKind {
     Parameter,
     Variable,
 }

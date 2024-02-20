@@ -36,7 +36,7 @@ declare_rule! {
     /// // This rule does not warn on empty generator functions.
     /// function* foo() { }
     /// ```
-    pub(crate) UseYield {
+    pub UseYield {
         version: "1.0.0",
         name: "useYield",
         source: RuleSource::Eslint("require-yield"),
@@ -94,7 +94,7 @@ impl Visitor for MissingYieldVisitor {
     }
 }
 
-pub(crate) struct MissingYield(AnyFunctionLike);
+pub struct MissingYield(AnyFunctionLike);
 
 impl QueryMatch for MissingYield {
     fn text_range(&self) -> TextRange {

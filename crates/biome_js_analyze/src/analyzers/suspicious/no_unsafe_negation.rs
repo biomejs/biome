@@ -33,7 +33,7 @@ declare_rule! {
     /// delete 1 in [1,2];
     /// +1 instanceof [1,2];
     /// ```
-    pub(crate) NoUnsafeNegation {
+    pub NoUnsafeNegation {
         version: "1.0.0",
         name: "noUnsafeNegation",
         source: RuleSource::Eslint("no-unsafe-negation"),
@@ -151,5 +151,5 @@ impl Rule for NoUnsafeNegation {
 declare_node_union! {
     /// Enum for [JsInstanceofExpression] and [JsInExpression]
     #[allow(dead_code)]
-    pub(crate) JsInOrInstanceOfExpression  = JsInstanceofExpression  | JsInExpression
+    pub JsInOrInstanceOfExpression  = JsInstanceofExpression  | JsInExpression
 }

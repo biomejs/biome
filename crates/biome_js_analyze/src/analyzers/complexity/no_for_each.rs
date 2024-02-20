@@ -51,7 +51,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoForEach {
+    pub NoForEach {
         version: "1.0.0",
         name: "noForEach",
         source: RuleSource::EslintUnicorn("no-array-for-each"),

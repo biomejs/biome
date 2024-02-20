@@ -57,7 +57,7 @@ declare_rule! {
     /// let { foo: bar } = baz;
     /// ```
     ///
-    pub(crate) NoUselessRename {
+    pub NoUselessRename {
         version: "1.0.0",
         name: "noUselessRename",
         source: RuleSource::Eslint("no-useless-rename"),
@@ -67,7 +67,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) JsRenaming = JsExportNamedFromSpecifier | JsExportNamedSpecifier | JsNamedImportSpecifier | JsObjectBindingPatternProperty
+    pub JsRenaming = JsExportNamedFromSpecifier | JsExportNamedSpecifier | JsNamedImportSpecifier | JsObjectBindingPatternProperty
 }
 
 impl Rule for NoUselessRename {

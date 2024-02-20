@@ -2,10 +2,10 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_accumulating_spread;
+pub mod no_accumulating_spread;
 
 declare_group! {
-    pub (crate) Performance {
+    pub Performance {
         name : "performance" ,
         rules : [
             self :: no_accumulating_spread :: NoAccumulatingSpread ,

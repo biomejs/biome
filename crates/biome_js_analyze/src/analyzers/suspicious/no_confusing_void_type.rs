@@ -46,7 +46,7 @@ declare_rule! {
     /// ```ts
     /// function printArg<T = void>(arg: T) {}
     /// ```
-    pub(crate) NoConfusingVoidType {
+    pub NoConfusingVoidType {
         version: "1.2.0",
         name: "noConfusingVoidType",
         source: RuleSource::EslintTypeScript("no-invalid-void-type"),

@@ -61,7 +61,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoUnreachableSuper {
+    pub NoUnreachableSuper {
         version: "1.0.0",
         name: "noUnreachableSuper",
         source: RuleSource::Eslint("no-this-before-super"),
@@ -70,7 +70,7 @@ declare_rule! {
 }
 
 #[allow(clippy::enum_variant_names)]
-pub(crate) enum RuleState {
+pub enum RuleState {
     /// The constructor may call `super` multiple times
     DuplicateSuper { first: TextRange, second: TextRange },
     /// The constructor may read or write from `this` without calling `super`

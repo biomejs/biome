@@ -197,9 +197,25 @@ pub fn update(path: &Path, contents: &str, mode: &Mode) -> Result<UpdateResult> 
     Ok(UpdateResult::Updated)
 }
 
-pub fn to_camel_case(s: &str) -> String {
+pub fn to_capitalized(s: &str) -> String {
+    let mut c = s.chars();
+    match c.next() {
+        None => String::new(),
+        Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+    }
+}
+
+pub fn to_lower_camel_case(s: &str) -> String {
+    to_pascal_camel_case(s, false)
+}
+
+pub fn to_pascal_case(s: &str) -> String {
+    to_pascal_camel_case(s, true)
+}
+
+fn to_pascal_camel_case(s: &str, is_ascal: bool) -> String {
     let mut buf = String::with_capacity(s.len());
-    let mut prev = false;
+    let mut prev = is_ascal;
     for c in s.chars() {
         if c == '_' {
             prev = true;

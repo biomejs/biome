@@ -45,7 +45,7 @@ declare_rule! {
     /// ({ 3.1e12: "floating point with e" });
     /// ```
     ///
-    pub(crate) UseSimpleNumberKeys {
+    pub UseSimpleNumberKeys {
         version: "1.0.0",
         name: "useSimpleNumberKeys",
         recommended: true,

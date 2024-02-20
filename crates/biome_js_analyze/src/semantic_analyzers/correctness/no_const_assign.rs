@@ -47,7 +47,7 @@ declare_rule! {
     /// b = 20;
     /// ```
     ///
-    pub(crate) NoConstAssign {
+    pub NoConstAssign {
         version: "1.0.0",
         name: "noConstAssign",
         source: RuleSource::Eslint("no-const-assign"),

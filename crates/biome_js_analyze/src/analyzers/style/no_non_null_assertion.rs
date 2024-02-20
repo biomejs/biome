@@ -45,7 +45,7 @@ declare_rule! {
     /// const includesBaz = foo.property?.includes('baz') ?? false;
     /// ```
     ///
-    pub(crate) NoNonNullAssertion {
+    pub NoNonNullAssertion {
         version: "1.0.0",
         name: "noNonNullAssertion",
         source: RuleSource::EslintTypeScript("no-non-null-assertion"),
@@ -55,7 +55,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) AnyTsNonNullAssertion = TsNonNullAssertionExpression | TsNonNullAssertionAssignment
+    pub AnyTsNonNullAssertion = TsNonNullAssertionExpression | TsNonNullAssertionAssignment
 }
 
 impl Rule for NoNonNullAssertion {

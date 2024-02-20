@@ -61,7 +61,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoUnusedPrivateClassMembers {
+    pub NoUnusedPrivateClassMembers {
         version: "1.3.3",
         name: "noUnusedPrivateClassMembers",
         source: RuleSource::Eslint("no-unused-private-class-members"),
@@ -71,7 +71,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) AnyMember = AnyJsClassMember | TsPropertyParameter
+    pub AnyMember = AnyJsClassMember | TsPropertyParameter
 }
 
 impl Rule for NoUnusedPrivateClassMembers {

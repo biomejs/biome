@@ -34,7 +34,7 @@ declare_rule! {
     /// ```js
     /// (1 >= 0)
     ///```
-    pub(crate) NoCompareNegZero {
+    pub NoCompareNegZero {
         version: "1.0.0",
         name: "noCompareNegZero",
         source: RuleSource::Eslint("no-compare-neg-zero"),

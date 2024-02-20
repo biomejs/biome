@@ -65,7 +65,7 @@ declare_rule! {
     /// Number.NEGATIVE_INFINITY; // false
     /// ```
     ///
-    pub(crate) UseNumberNamespace {
+    pub UseNumberNamespace {
         version: "1.5.0",
         name: "useNumberNamespace",
         source: RuleSource::EslintUnicorn("prefer-number-properties"),

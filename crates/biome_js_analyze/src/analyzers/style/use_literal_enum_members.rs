@@ -61,7 +61,7 @@ declare_rule! {
     ///     All = Read | Write
     /// }
     /// ```
-    pub(crate) UseLiteralEnumMembers {
+    pub UseLiteralEnumMembers {
         version: "1.0.0",
         name: "useLiteralEnumMembers",
         source: RuleSource::EslintTypeScript("prefer-literal-enum-member"),

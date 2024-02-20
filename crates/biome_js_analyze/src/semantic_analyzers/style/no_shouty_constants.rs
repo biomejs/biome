@@ -44,7 +44,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoShoutyConstants {
+    pub NoShoutyConstants {
         version: "1.0.0",
         name: "noShoutyConstants",
         recommended: false,

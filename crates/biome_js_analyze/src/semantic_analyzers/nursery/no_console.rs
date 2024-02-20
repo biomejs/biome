@@ -20,7 +20,7 @@ declare_rule! {
     /// console.error('hello world')
     /// ```
     ///
-    pub(crate) NoConsole {
+    pub NoConsole {
         version: "next",
         name: "noConsole",
         source: RuleSource::Eslint("no-console"),

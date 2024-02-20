@@ -18,7 +18,7 @@ declare_rule! {
     /// import "vite";
     /// ```
     ///
-    pub(crate) NoUndeclaredDependencies {
+    pub NoUndeclaredDependencies {
         version: "next",
         name: "noUndeclaredDependencies",
         recommended: false,

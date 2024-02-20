@@ -2,41 +2,41 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_approximative_numeric_constant;
-pub(crate) mod no_assign_in_expressions;
-pub(crate) mod no_async_promise_executor;
-pub(crate) mod no_comment_text;
-pub(crate) mod no_compare_neg_zero;
-pub(crate) mod no_confusing_labels;
-pub(crate) mod no_confusing_void_type;
-pub(crate) mod no_const_enum;
-pub(crate) mod no_control_characters_in_regex;
-pub(crate) mod no_debugger;
-pub(crate) mod no_double_equals;
-pub(crate) mod no_duplicate_case;
-pub(crate) mod no_duplicate_class_members;
-pub(crate) mod no_duplicate_jsx_props;
-pub(crate) mod no_duplicate_object_keys;
-pub(crate) mod no_empty_interface;
-pub(crate) mod no_explicit_any;
-pub(crate) mod no_extra_non_null_assertion;
-pub(crate) mod no_fallthrough_switch_clause;
-pub(crate) mod no_implicit_any_let;
-pub(crate) mod no_misleading_instantiator;
-pub(crate) mod no_misrefactored_shorthand_assign;
-pub(crate) mod no_prototype_builtins;
-pub(crate) mod no_redundant_use_strict;
-pub(crate) mod no_self_compare;
-pub(crate) mod no_shadow_restricted_names;
-pub(crate) mod no_sparse_array;
-pub(crate) mod no_unsafe_negation;
-pub(crate) mod use_default_switch_clause_last;
-pub(crate) mod use_getter_return;
-pub(crate) mod use_namespace_keyword;
-pub(crate) mod use_valid_typeof;
+pub mod no_approximative_numeric_constant;
+pub mod no_assign_in_expressions;
+pub mod no_async_promise_executor;
+pub mod no_comment_text;
+pub mod no_compare_neg_zero;
+pub mod no_confusing_labels;
+pub mod no_confusing_void_type;
+pub mod no_const_enum;
+pub mod no_control_characters_in_regex;
+pub mod no_debugger;
+pub mod no_double_equals;
+pub mod no_duplicate_case;
+pub mod no_duplicate_class_members;
+pub mod no_duplicate_jsx_props;
+pub mod no_duplicate_object_keys;
+pub mod no_empty_interface;
+pub mod no_explicit_any;
+pub mod no_extra_non_null_assertion;
+pub mod no_fallthrough_switch_clause;
+pub mod no_implicit_any_let;
+pub mod no_misleading_instantiator;
+pub mod no_misrefactored_shorthand_assign;
+pub mod no_prototype_builtins;
+pub mod no_redundant_use_strict;
+pub mod no_self_compare;
+pub mod no_shadow_restricted_names;
+pub mod no_sparse_array;
+pub mod no_unsafe_negation;
+pub mod use_default_switch_clause_last;
+pub mod use_getter_return;
+pub mod use_namespace_keyword;
+pub mod use_valid_typeof;
 
 declare_group! {
-    pub (crate) Suspicious {
+    pub Suspicious {
         name : "suspicious" ,
         rules : [
             self :: no_approximative_numeric_constant :: NoApproximativeNumericConstant ,

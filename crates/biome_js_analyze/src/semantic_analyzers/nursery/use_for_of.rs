@@ -40,7 +40,7 @@ declare_rule! {
     ///  }
     /// ```
     ///
-    pub(crate) UseForOf {
+    pub UseForOf {
         version: "1.5.0",
         name: "useForOf",
         source: RuleSource::EslintTypeScript("prefer-for-of"),
@@ -49,11 +49,11 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) AnyIncrementableLike = JsPostUpdateExpression | JsPreUpdateExpression | JsAssignmentExpression
+    pub AnyIncrementableLike = JsPostUpdateExpression | JsPreUpdateExpression | JsAssignmentExpression
 }
 
 declare_node_union! {
-    pub(crate) AnyBindingExpression = JsPostUpdateExpression | JsPreUpdateExpression | JsIdentifierExpression | JsShorthandPropertyObjectMember
+    pub AnyBindingExpression = JsPostUpdateExpression | JsPreUpdateExpression | JsIdentifierExpression | JsShorthandPropertyObjectMember
 }
 
 impl Rule for UseForOf {

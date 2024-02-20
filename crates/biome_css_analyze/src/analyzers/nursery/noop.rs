@@ -3,7 +3,7 @@ use biome_css_syntax::CssColor;
 
 declare_rule! {
     /// Noop rule
-    pub(crate) Noop {
+    pub Noop {
         version: "next",
         name: "noop",
     }

@@ -51,7 +51,7 @@ declare_rule! {
     /// function fn(param: Array<Array<unknown>>): Array<unknown> {}
     /// ```
     ///
-    pub(crate) NoExplicitAny {
+    pub NoExplicitAny {
         version: "1.0.0",
         name: "noExplicitAny",
         source: RuleSource::EslintTypeScript("no-explicit-any"),

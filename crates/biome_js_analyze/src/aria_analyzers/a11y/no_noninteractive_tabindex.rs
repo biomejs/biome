@@ -48,7 +48,7 @@ declare_rule! {
     /// <article tabIndex="-1" />
     /// ```
     ///
-    pub(crate) NoNoninteractiveTabindex {
+    pub NoNoninteractiveTabindex {
         version: "1.0.0",
         name: "noNoninteractiveTabindex",
         source: RuleSource::EslintJsxA11y("no-noninteractive-tabindex"),
@@ -66,7 +66,7 @@ declare_node_union! {
     /// - `JsNumberLiteralExpression` &mdash; `5`
     /// - `JsUnaryExpression` &mdash; `+5` | `-5`
     ///
-    pub(crate) AnyNumberLikeExpression = JsStringLiteralExpression | JsNumberLiteralExpression | JsUnaryExpression
+    pub AnyNumberLikeExpression = JsStringLiteralExpression | JsNumberLiteralExpression | JsUnaryExpression
 }
 
 impl AnyNumberLikeExpression {
@@ -91,7 +91,7 @@ impl AnyNumberLikeExpression {
     }
 }
 
-pub(crate) struct RuleState {
+pub struct RuleState {
     attribute_range: TextRange,
     element_name: String,
 }

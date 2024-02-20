@@ -57,7 +57,7 @@ declare_rule! {
     /// ```ts,ignore
     /// export { TypeA } from "./mod.ts"
     /// ```
-    pub(crate) UseExportType {
+    pub UseExportType {
         version: "1.5.0",
         name: "useExportType",
         source: RuleSource::EslintTypeScript("consistent-type-exports"),
@@ -213,7 +213,7 @@ impl Rule for UseExportType {
 }
 
 #[derive(Debug)]
-pub(crate) enum ExportTypeFix {
+pub enum ExportTypeFix {
     /**
      * Group inline type exports such as `export { type A, type B }` into `export type { A, B }`.
      */

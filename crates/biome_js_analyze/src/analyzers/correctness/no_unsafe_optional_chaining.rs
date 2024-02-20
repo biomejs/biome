@@ -61,7 +61,7 @@ declare_rule! {
     /// foo?.()?.bar;
     /// ```
     ///
-    pub(crate) NoUnsafeOptionalChaining {
+    pub NoUnsafeOptionalChaining {
         version: "1.0.0",
         name: "noUnsafeOptionalChaining",
         source: RuleSource::Eslint("no-unsafe-optional-chaining"),
@@ -309,7 +309,7 @@ impl Rule for NoUnsafeOptionalChaining {
 
 declare_node_union! {
     /// Only these variants of the union can be part of an unsafe optional chain.
-    pub(crate) RuleNode =
+    pub RuleNode =
     JsLogicalExpression
     | JsSequenceExpression
     | JsConditionalExpression

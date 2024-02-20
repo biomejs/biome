@@ -2,13 +2,13 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_banned_types;
-pub(crate) mod no_this_in_static;
-pub(crate) mod no_useless_fragments;
-pub(crate) mod no_useless_this_alias;
+pub mod no_banned_types;
+pub mod no_this_in_static;
+pub mod no_useless_fragments;
+pub mod no_useless_this_alias;
 
 declare_group! {
-    pub (crate) Complexity {
+    pub Complexity {
         name : "complexity" ,
         rules : [
             self :: no_banned_types :: NoBannedTypes ,

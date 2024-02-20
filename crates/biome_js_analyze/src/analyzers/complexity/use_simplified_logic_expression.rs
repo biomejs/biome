@@ -48,7 +48,7 @@ declare_rule! {
     /// const boolExpr6 = false;
     /// ```
     ///
-    pub(crate) UseSimplifiedLogicExpression {
+    pub UseSimplifiedLogicExpression {
         version: "1.0.0",
         name: "useSimplifiedLogicExpression",
         recommended: false,

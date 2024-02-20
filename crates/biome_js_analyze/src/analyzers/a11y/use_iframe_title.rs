@@ -58,7 +58,7 @@ declare_rule! {
     /// - [WCAG 2.4.1](https://www.w3.org/WAI/WCAG21/Understanding/bypass-blocks)
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     ///
-    pub(crate) UseIframeTitle {
+    pub UseIframeTitle {
         version: "1.0.0",
         name: "useIframeTitle",
         source: RuleSource::EslintJsxA11y("iframe-has-title"),

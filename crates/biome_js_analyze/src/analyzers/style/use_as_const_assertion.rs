@@ -45,7 +45,7 @@ declare_rule! {
     /// let bar = 'bar' as string;
     /// let foo = { bar: 'baz' };
     /// ```
-    pub(crate) UseAsConstAssertion {
+    pub UseAsConstAssertion {
         version: "1.3.0",
         name: "useAsConstAssertion",
         source: RuleSource::EslintTypeScript("prefer-as-const"),
@@ -55,10 +55,10 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) Query = JsVariableDeclarator | JsPropertyClassMember | TsAsExpression | TsTypeAssertionExpression
+    pub Query = JsVariableDeclarator | JsPropertyClassMember | TsAsExpression | TsTypeAssertionExpression
 }
 
-pub(crate) enum RuleState {
+pub enum RuleState {
     AsAssertion(TextRange),
     /// The angle bracket assertion is useful when the JSX option is None in tsconfig.json.
     AngleBracketAssertion(TextRange),

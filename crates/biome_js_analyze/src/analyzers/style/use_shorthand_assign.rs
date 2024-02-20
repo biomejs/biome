@@ -50,7 +50,7 @@ declare_rule! {
     ///  ```js
     /// a *= 1;
     /// ```
-    pub(crate) UseShorthandAssign {
+    pub UseShorthandAssign {
         version: "1.3.0",
         name: "useShorthandAssign",
         source: RuleSource::Eslint("operator-assignment"),

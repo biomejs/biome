@@ -80,7 +80,7 @@ declare_rule! {
     ///         break;
     /// }
     /// ```
-    pub(crate) NoDuplicateCase {
+    pub NoDuplicateCase {
         version: "1.0.0",
         name: "noDuplicateCase",
         source: RuleSource::Eslint("no-duplicate-case"),

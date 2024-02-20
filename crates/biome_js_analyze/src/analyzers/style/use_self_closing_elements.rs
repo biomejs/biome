@@ -54,7 +54,7 @@ declare_rule! {
     /// ```js
     /// <Foo.bar>child</Foo.bar>
     ///```
-    pub(crate) UseSelfClosingElements {
+    pub UseSelfClosingElements {
         version: "1.0.0",
         name: "useSelfClosingElements",
         source: RuleSource::EslintStylistic("jsx-self-closing-comp"),

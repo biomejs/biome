@@ -84,7 +84,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoVoidTypeReturn {
+    pub NoVoidTypeReturn {
         version: "1.0.0",
         name: "noVoidTypeReturn",
         recommended: true,
@@ -92,7 +92,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) JsFunctionMethod = JsArrowFunctionExpression | JsFunctionDeclaration | JsFunctionExportDefaultDeclaration | JsFunctionExpression | JsGetterClassMember | JsGetterObjectMember | JsMethodClassMember | JsMethodObjectMember
+    pub JsFunctionMethod = JsArrowFunctionExpression | JsFunctionDeclaration | JsFunctionExportDefaultDeclaration | JsFunctionExpression | JsGetterClassMember | JsGetterObjectMember | JsMethodClassMember | JsMethodObjectMember
 }
 
 pub(crate) fn return_type(func: &JsFunctionMethod) -> Option<AnyTsReturnType> {

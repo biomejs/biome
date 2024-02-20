@@ -54,7 +54,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoDuplicateObjectKeys {
+    pub NoDuplicateObjectKeys {
         version: "1.0.0",
         name: "noDuplicateObjectKeys",
         source: RuleSource::Eslint("no-dupe-keys"),
@@ -185,7 +185,7 @@ impl From<MemberDefinition> for DefinedProperty {
     }
 }
 
-pub(crate) struct PropertyConflict(DefinedProperty, MemberDefinition);
+pub struct PropertyConflict(DefinedProperty, MemberDefinition);
 impl DefinedProperty {
     fn extend_with(
         &self,

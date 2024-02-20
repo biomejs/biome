@@ -58,7 +58,7 @@ declare_rule! {
     /// delete f(); // uncovered by this rule.
     ///```
     ///
-    pub(crate) NoDelete {
+    pub NoDelete {
         version: "1.0.0",
         name: "noDelete",
         recommended: true,

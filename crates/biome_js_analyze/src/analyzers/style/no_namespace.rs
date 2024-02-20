@@ -45,7 +45,7 @@ declare_rule! {
     /// declare module 'foo' {}
     /// ```
     ///
-    pub(crate) NoNamespace {
+    pub NoNamespace {
         version: "1.0.0",
         name: "noNamespace",
         source: RuleSource::EslintTypeScript("no-namespace"),

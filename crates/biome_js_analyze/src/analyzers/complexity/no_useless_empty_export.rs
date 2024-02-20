@@ -42,7 +42,7 @@ declare_rule! {
     /// export {};
     /// ```
     ///
-    pub(crate) NoUselessEmptyExport {
+    pub NoUselessEmptyExport {
         version: "1.0.0",
         name: "noUselessEmptyExport",
         source: RuleSource::EslintTypeScript("no-useless-empty-export"),
