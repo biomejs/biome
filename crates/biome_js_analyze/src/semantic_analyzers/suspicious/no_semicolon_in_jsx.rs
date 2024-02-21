@@ -6,7 +6,9 @@ use biome_js_syntax::{jsx_ext::AnyJsxElement, JsLanguage, JsxChildList, JsxEleme
 use biome_rowan::{AstNode, AstNodeList, SyntaxToken, TextRange};
 
 declare_rule! {
-    /// Remove semicolons from JSX elements.
+    /// It detects possible "wrong" semicolons inside JSX elements.
+    ///
+    /// Semicolons that appear after a self-closing element or a closing element are usually the result of a typo of a refactor gone wrong.
     ///
     /// ## Examples
     ///
@@ -43,7 +45,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoSemicolonInJsx {
-        version: "1.0.0",
+        version: "next",
         name: "noSemicolonInJsx",
         source: RuleSource::Eslint("no-semicolons-in-jsx"),
         source_kind: RuleSourceKind::Inspired,
@@ -74,11 +76,14 @@ impl Rule for NoSemicolonInJsx {
             rule_category!(),
             state,
             markup! {
-                "There is suspicious "<Emphasis>"Semicolon"</Emphasis>" in the JSX element."
+                "There is a suspicious "<Emphasis>"semicolon"</Emphasis>" in the JSX element."
             },
         )
         .note(markup! {
-            "Remove the "<Emphasis>"Semicolon"</Emphasis>" from the JSX element."
+        	"This is usually the result of a typo or some refactor gone wrong."
+        })
+        .note(markup! {
+            "Remove the "<Emphasis>"semicolon"</Emphasis>", or move it inside a JSX element."
         });
         Some(diagnostic)
     }
