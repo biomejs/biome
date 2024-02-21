@@ -874,7 +874,7 @@ export interface Nursery {
 	/**
 	 * A describe block should not contain duplicate hooks.
 	 */
-	noDuplicateTestHooks?: RuleConfiguration;
+	noDuplicateTestHooks?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow empty block statements and static blocks.
 	 */

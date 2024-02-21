@@ -2499,10 +2499,10 @@ pub struct Nursery {
     pub no_console: Option<RuleConfiguration<NoConsole>>,
     #[doc = "Disallow two keys with the same name inside a JSON object."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_json_keys: Option<RuleConfiguration>,
+    pub no_duplicate_json_keys: Option<RuleConfiguration<NoDuplicateJsonKeys>>,
     #[doc = "A describe block should not contain duplicate hooks."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_test_hooks: Option<RuleConfiguration>,
+    pub no_duplicate_test_hooks: Option<RuleConfiguration<NoDuplicateTestHooks>>,
     #[doc = "Disallow empty block statements and static blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_empty_block_statements: Option<RuleConfiguration<NoEmptyBlockStatements>>,
@@ -3117,12 +3117,12 @@ impl Nursery {
                 .no_console
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noDuplicateTestHooks" => self
-                .no_duplicate_test_hooks
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
             "noDuplicateJsonKeys" => self
                 .no_duplicate_json_keys
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noDuplicateTestHooks" => self
+                .no_duplicate_test_hooks
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noEmptyBlockStatements" => self

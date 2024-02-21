@@ -56,7 +56,7 @@ declare_rule! {
     /// });
     /// ```
     ///
-    pub(crate) NoDuplicateTestHooks {
+    pub NoDuplicateTestHooks {
         version: "next",
         name: "noDuplicateTestHooks",
         recommended: true,
@@ -67,16 +67,16 @@ declare_rule! {
 
 #[derive(Debug, Default)]
 struct HooksContext {
-    after: usize,
-    after_all: usize,
-    after_each: usize,
-    before: usize,
-    before_all: usize,
-    before_each: usize,
+    after: u8,
+    after_all: u8,
+    after_each: u8,
+    before: u8,
+    before_all: u8,
+    before_each: u8,
 }
 
 impl HooksContext {
-    fn add(&mut self, hook_name: &str) -> usize {
+    fn add(&mut self, hook_name: &str) -> u8 {
         let counter = match hook_name {
             "after" => &mut self.after,
             "afterAll" => &mut self.after_all,
@@ -86,7 +86,9 @@ impl HooksContext {
             "beforeAll" => &mut self.before_all,
             _ => return 0, // Should never happen
         };
-        *counter += 1;
+        if *counter <= 1 {
+            *counter += 1;
+        }
 
         *counter
     }
@@ -165,7 +167,7 @@ impl Visitor for DuplicateHooksVisitor {
 }
 
 // Declare a query match struct type containing a JavaScript function node
-pub(crate) struct DuplicateHooks(JsCallExpression);
+pub struct DuplicateHooks(JsCallExpression);
 
 impl QueryMatch for DuplicateHooks {
     fn text_range(&self) -> TextRange {
