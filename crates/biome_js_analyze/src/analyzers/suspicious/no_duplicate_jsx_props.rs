@@ -30,7 +30,7 @@ declare_rule! {
     /// ```js
     /// <label xml:lang="en-US" lang="en-US"></label>
     /// ```
- pub(crate) NoDuplicateJsxProps {
+ pub NoDuplicateJsxProps {
         version: "1.0.0",
         name: "noDuplicateJsxProps",
         source: RuleSource::EslintReact("jsx-no-duplicate-props"),

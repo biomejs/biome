@@ -8,7 +8,7 @@ use biome_rowan::AstNode;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
-pub(crate) struct ManifestServices {
+pub struct ManifestServices {
     pub(crate) manifest: Arc<PackageJson>,
 }
 
@@ -50,7 +50,7 @@ impl Phase for ManifestServices {
 
 /// Query type usable by lint rules **that uses the semantic model** to match on specific [AstNode] types
 #[derive(Clone)]
-pub(crate) struct Manifest<N>(pub N);
+pub struct Manifest<N>(pub N);
 
 impl<N> Queryable for Manifest<N>
 where

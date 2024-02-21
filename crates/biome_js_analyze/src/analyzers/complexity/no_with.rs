@@ -22,7 +22,7 @@ declare_rule! {
     ///   }
     /// }
     /// ```
-    pub(crate) NoWith {
+    pub NoWith {
         version: "1.0.0",
         name: "noWith",
         source: RuleSource::Eslint("no-with"),

@@ -2,22 +2,22 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_console;
-pub(crate) mod no_global_assign;
-pub(crate) mod no_global_eval;
-pub(crate) mod no_invalid_use_before_declaration;
-pub(crate) mod no_misleading_character_class;
-pub(crate) mod no_re_export_all;
-pub(crate) mod no_then_property;
-pub(crate) mod no_unused_imports;
-pub(crate) mod use_export_type;
-pub(crate) mod use_for_of;
-pub(crate) mod use_import_type;
-pub(crate) mod use_number_namespace;
-pub(crate) mod use_sorted_classes;
+pub mod no_console;
+pub mod no_global_assign;
+pub mod no_global_eval;
+pub mod no_invalid_use_before_declaration;
+pub mod no_misleading_character_class;
+pub mod no_re_export_all;
+pub mod no_then_property;
+pub mod no_unused_imports;
+pub mod use_export_type;
+pub mod use_for_of;
+pub mod use_import_type;
+pub mod use_number_namespace;
+pub mod use_sorted_classes;
 
 declare_group! {
-    pub (crate) Nursery {
+    pub Nursery {
         name : "nursery" ,
         rules : [
             self :: no_console :: NoConsole ,

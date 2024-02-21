@@ -49,7 +49,7 @@ declare_rule! {
     ///     const corge = new BigInt(9007199254740991);
     /// }
     /// ```
-    pub(crate) NoInvalidNewBuiltin {
+    pub NoInvalidNewBuiltin {
         version: "1.3.0",
         name: "noInvalidNewBuiltin",
         source: RuleSource::Eslint("no-new-native-nonconstructor"),

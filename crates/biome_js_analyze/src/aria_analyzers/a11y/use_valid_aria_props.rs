@@ -25,7 +25,7 @@ declare_rule! {
     ///
     /// ## Accessibility guidelines
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
-    pub(crate) UseValidAriaProps {
+    pub UseValidAriaProps {
         version: "1.0.0",
         name: "useValidAriaProps",
         source: RuleSource::EslintJsxA11y("aria-props"),

@@ -49,7 +49,7 @@ declare_rule! {
     /// let valid: Array<keyof Bar>;
     /// let valid: Array<foo | bar>;
     /// ```
-    pub(crate) UseShorthandArrayType  {
+    pub UseShorthandArrayType  {
         version: "1.0.0",
         name: "useShorthandArrayType",
         source: RuleSource::EslintTypeScript("array-type"),

@@ -61,7 +61,7 @@ declare_rule! {
     ///     return new A(arg);
     /// }
     /// ```
-    pub(crate) NoUnusedImports {
+    pub NoUnusedImports {
         version: "1.3.0",
         name: "noUnusedImports",
         recommended: false,

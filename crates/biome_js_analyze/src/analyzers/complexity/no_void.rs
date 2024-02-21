@@ -17,7 +17,7 @@ declare_rule! {
     /// void 0;
     /// ```
     ///
-    pub(crate) NoVoid {
+    pub NoVoid {
         version: "1.0.0",
         name: "noVoid",
         source: RuleSource::Eslint("no-void"),

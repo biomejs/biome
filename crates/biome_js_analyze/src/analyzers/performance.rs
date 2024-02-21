@@ -2,10 +2,10 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_delete;
+pub mod no_delete;
 
 declare_group! {
-    pub (crate) Performance {
+    pub Performance {
         name : "performance" ,
         rules : [
             self :: no_delete :: NoDelete ,

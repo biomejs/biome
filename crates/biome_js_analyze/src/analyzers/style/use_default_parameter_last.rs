@@ -48,7 +48,7 @@ declare_rule! {
     /// function f(a: number, b = 0, c?: number) {}
     /// ```
     ///
-    pub(crate) UseDefaultParameterLast {
+    pub UseDefaultParameterLast {
         version: "1.0.0",
         name: "useDefaultParameterLast",
         source: RuleSource::Eslint("default-param-last"),
@@ -58,7 +58,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) AnyFormalParameter = JsFormalParameter | TsPropertyParameter
+    pub AnyFormalParameter = JsFormalParameter | TsPropertyParameter
 }
 
 impl AnyFormalParameter {

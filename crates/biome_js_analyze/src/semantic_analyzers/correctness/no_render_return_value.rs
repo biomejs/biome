@@ -29,7 +29,7 @@ declare_rule! {
     /// ```jsx
     /// ReactDOM.render(<div />, document.body);
     /// ```
-    pub(crate) NoRenderReturnValue {
+    pub NoRenderReturnValue {
         version: "1.0.0",
         name: "noRenderReturnValue",
         recommended: true,

@@ -56,7 +56,7 @@ declare_rule! {
     /// module.exports = class {};
     /// ```
     ///
-    pub(crate) NoDefaultExport {
+    pub NoDefaultExport {
         version: "1.4.0",
         name: "noDefaultExport",
         source: RuleSource::EslintImport("no-default-export"),

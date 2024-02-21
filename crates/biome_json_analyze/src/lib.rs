@@ -1,4 +1,5 @@
 mod analyzers;
+pub mod options;
 mod registry;
 
 pub use crate::registry::visit_registry;

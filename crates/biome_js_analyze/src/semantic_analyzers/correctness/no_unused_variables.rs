@@ -96,7 +96,7 @@ declare_rule! {
     /// }
     /// used_overloaded();
     /// ```
-    pub(crate) NoUnusedVariables {
+    pub NoUnusedVariables {
         version: "1.0.0",
         name: "noUnusedVariables",
         source: RuleSource::Eslint("no-unused-vars"),

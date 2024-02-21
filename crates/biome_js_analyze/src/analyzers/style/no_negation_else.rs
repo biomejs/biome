@@ -44,7 +44,7 @@ declare_rule! {
     /// ```js
     /// if (!!val) { f(); } else { g(); }
     ///```
-    pub(crate) NoNegationElse {
+    pub NoNegationElse {
         version: "1.0.0",
         name: "noNegationElse",
         source: RuleSource::Eslint("no-negated-condition"),

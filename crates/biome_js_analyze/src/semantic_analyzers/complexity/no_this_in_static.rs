@@ -78,7 +78,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoThisInStatic {
+    pub NoThisInStatic {
         version: "1.3.1",
         name: "noThisInStatic",
         source: RuleSource::EslintMysticatea("no-this-in-static"),
@@ -180,7 +180,7 @@ impl Rule for NoThisInStatic {
 }
 
 declare_node_union! {
-    pub(crate) JsThisSuperExpression = JsSuperExpression | JsThisExpression
+    pub JsThisSuperExpression = JsSuperExpression | JsThisExpression
 }
 
 impl JsThisSuperExpression {

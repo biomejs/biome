@@ -347,7 +347,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .iter()
                 .map(|variant| {
                     let variant_name = format_ident!("{}", variant);
-                    let fn_name = format_ident!("as_{}", to_lower_snake_case(variant));
+                    let fn_name = format_ident!("as_{}", (to_lower_snake_case(variant)));
                     quote! {
                         pub fn #fn_name(&self) -> Option<&#variant_name> {
                            match &self {

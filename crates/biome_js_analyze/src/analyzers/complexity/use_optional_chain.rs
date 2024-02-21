@@ -73,7 +73,7 @@ declare_rule! {
     /// foo["some long"] && foo["some long string"].baz
     ///```
     ///
-    pub(crate) UseOptionalChain {
+    pub UseOptionalChain {
         version: "1.0.0",
         name: "useOptionalChain",
         source: RuleSource::EslintTypeScript("prefer-optional-chain"),
@@ -82,7 +82,7 @@ declare_rule! {
     }
 }
 
-pub(crate) enum UseOptionalChainState {
+pub enum UseOptionalChainState {
     LogicalAnd(VecDeque<AnyJsExpression>),
     LogicalOrLike(LogicalOrLikeChain),
 }
@@ -310,7 +310,7 @@ enum LogicalAndChainOrdering {
 /// Iterate buffer `[bar, zoo]` we need to make every `JsAnyExpression` optional: `foo?.bar.baz?.zoo;`
 ///
 #[derive(Debug)]
-pub(crate) struct LogicalAndChain {
+pub struct LogicalAndChain {
     head: AnyJsExpression,
     /// The buffer of `JsAnyExpression` which need to make optional chain.
     buf: VecDeque<AnyJsExpression>,
@@ -575,7 +575,7 @@ impl LogicalAndChain {
 /// `foo?.bar?.baz;`
 ///
 #[derive(Debug)]
-pub(crate) struct LogicalOrLikeChain {
+pub struct LogicalOrLikeChain {
     member: AnyJsMemberExpression,
 }
 

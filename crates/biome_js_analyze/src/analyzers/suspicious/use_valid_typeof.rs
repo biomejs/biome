@@ -69,7 +69,7 @@ declare_rule! {
     /// ```js
     /// typeof bar === typeof qux
     /// ```
-    pub(crate) UseValidTypeof {
+    pub UseValidTypeof {
         version: "1.0.0",
         name: "useValidTypeof",
         source: RuleSource::Eslint("valid-typeof"),

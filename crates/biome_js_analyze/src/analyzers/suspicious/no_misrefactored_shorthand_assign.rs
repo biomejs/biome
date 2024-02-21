@@ -49,7 +49,7 @@ declare_rule! {
     /// ```js
     /// a = a - b
     /// ```
-    pub(crate) NoMisrefactoredShorthandAssign {
+    pub NoMisrefactoredShorthandAssign {
         version: "1.3.0",
         name: "noMisrefactoredShorthandAssign",
         source: RuleSource::Clippy("misrefactored_assign_op"),

@@ -47,7 +47,7 @@ declare_rule! {
     /// ```js
     /// null != foo
     ///```
-    pub(crate) NoDoubleEquals {
+    pub NoDoubleEquals {
         version: "1.0.0",
         name: "noDoubleEquals",
         source: RuleSource::Eslint("eqeqeq"),

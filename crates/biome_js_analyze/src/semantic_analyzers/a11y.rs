@@ -2,11 +2,11 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_positive_tabindex;
-pub(crate) mod use_button_type;
+pub mod no_positive_tabindex;
+pub mod use_button_type;
 
 declare_group! {
-    pub (crate) A11y {
+    pub A11y {
         name : "a11y" ,
         rules : [
             self :: no_positive_tabindex :: NoPositiveTabindex ,

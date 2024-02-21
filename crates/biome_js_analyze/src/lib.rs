@@ -15,8 +15,8 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::{borrow::Cow, error::Error};
 
-mod analyzers;
-mod aria_analyzers;
+pub mod analyzers;
+pub mod aria_analyzers;
 mod aria_services;
 mod assists;
 mod ast_utils;

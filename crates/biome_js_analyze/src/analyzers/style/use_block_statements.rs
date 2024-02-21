@@ -65,7 +65,7 @@ declare_rule! {
     /// ```js,expect_diagnostic
     ///   with (x);
     /// ```
-    pub(crate) UseBlockStatements {
+    pub UseBlockStatements {
         version: "1.0.0",
         name: "useBlockStatements",
         source: RuleSource::Eslint("curly"),
@@ -75,7 +75,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) AnyJsBlockStatement = JsIfStatement | JsElseClause | JsDoWhileStatement | JsForInStatement | JsForOfStatement | JsForStatement | JsWhileStatement | JsWithStatement
+    pub AnyJsBlockStatement = JsIfStatement | JsElseClause | JsDoWhileStatement | JsForInStatement | JsForOfStatement | JsForStatement | JsWhileStatement | JsWithStatement
 }
 
 impl Rule for UseBlockStatements {

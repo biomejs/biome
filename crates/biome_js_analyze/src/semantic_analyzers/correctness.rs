@@ -2,22 +2,22 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_children_prop;
-pub(crate) mod no_const_assign;
-pub(crate) mod no_constant_condition;
-pub(crate) mod no_global_object_calls;
-pub(crate) mod no_invalid_new_builtin;
-pub(crate) mod no_new_symbol;
-pub(crate) mod no_render_return_value;
-pub(crate) mod no_undeclared_variables;
-pub(crate) mod no_unused_variables;
-pub(crate) mod no_void_elements_with_children;
-pub(crate) mod use_exhaustive_dependencies;
-pub(crate) mod use_hook_at_top_level;
-pub(crate) mod use_is_nan;
+pub mod no_children_prop;
+pub mod no_const_assign;
+pub mod no_constant_condition;
+pub mod no_global_object_calls;
+pub mod no_invalid_new_builtin;
+pub mod no_new_symbol;
+pub mod no_render_return_value;
+pub mod no_undeclared_variables;
+pub mod no_unused_variables;
+pub mod no_void_elements_with_children;
+pub mod use_exhaustive_dependencies;
+pub mod use_hook_at_top_level;
+pub mod use_is_nan;
 
 declare_group! {
-    pub (crate) Correctness {
+    pub Correctness {
         name : "correctness" ,
         rules : [
             self :: no_children_prop :: NoChildrenProp ,

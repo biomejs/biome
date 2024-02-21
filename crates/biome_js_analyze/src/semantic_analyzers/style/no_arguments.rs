@@ -24,7 +24,7 @@ declare_rule! {
     ///     console.log(arguments);
     /// }
     /// ```
-    pub(crate) NoArguments {
+    pub NoArguments {
         version: "1.0.0",
         name: "noArguments",
         source: RuleSource::Eslint("prefer-rest-params"),

@@ -93,7 +93,7 @@ declare_rule! {
     ///     var foo = bar;
     /// }
     /// ```
-    pub(crate) NoFunctionAssign {
+    pub NoFunctionAssign {
         version: "1.0.0",
         name: "noFunctionAssign",
         source: RuleSource::Eslint("no-func-assign"),

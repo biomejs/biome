@@ -47,7 +47,7 @@ declare_rule! {
     ///
     /// - [ARIA Spec, States and Properties](https://www.w3.org/TR/wai-aria/#states_and_properties)
     /// - [Chrome Audit Rules, AX_ARIA_04](https://github.com/GoogleChrome/accessibility-developer-tools/wiki/Audit-Rules#ax_aria_04)
-    pub(crate) UseValidAriaValues {
+    pub UseValidAriaValues {
         version: "1.0.0",
         name: "useValidAriaValues",
         source: RuleSource::EslintJsxA11y("aria-proptypes"),
@@ -55,7 +55,7 @@ declare_rule! {
     }
 }
 
-pub(crate) struct UseValidAriaValuesState {
+pub struct UseValidAriaValuesState {
     attribute_value_range: TextRange,
     allowed_values: Iter<'static, &'static str>,
     attribute_name: JsSyntaxToken,

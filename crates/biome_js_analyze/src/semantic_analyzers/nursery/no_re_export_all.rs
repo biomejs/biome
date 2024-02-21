@@ -30,7 +30,7 @@ declare_rule! {
     /// export { foo } from "foo";
     /// ```
     ///
-    pub(crate) NoReExportAll {
+    pub NoReExportAll {
         version: "next",
         name: "noReExportAll",
         recommended: false,

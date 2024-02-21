@@ -34,7 +34,7 @@ declare_rule! {
     /// const foo = 1;
     /// let bar = 1;
     ///```
-    pub(crate) NoVar {
+    pub NoVar {
         version: "1.0.0",
         name: "noVar",
         source: RuleSource::Eslint("no-var"),

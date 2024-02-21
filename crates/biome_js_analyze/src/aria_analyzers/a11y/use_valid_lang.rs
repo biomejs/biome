@@ -28,7 +28,7 @@ declare_rule! {
     /// ```jsx
     /// <Html lang="en-babab" />
     /// ```
-    pub(crate) UseValidLang {
+    pub UseValidLang {
         version: "1.0.0",
         name: "useValidLang",
         source: RuleSource::EslintJsxA11y("lang"),
@@ -42,7 +42,7 @@ enum InvalidKind {
     Value,
 }
 
-pub(crate) struct UseValidLangState {
+pub struct UseValidLangState {
     invalid_kind: InvalidKind,
     attribute_range: TextRange,
 }

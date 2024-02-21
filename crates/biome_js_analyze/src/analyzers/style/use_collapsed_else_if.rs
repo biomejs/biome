@@ -81,7 +81,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) UseCollapsedElseIf {
+    pub UseCollapsedElseIf {
         version: "1.1.0",
         name: "useCollapsedElseIf",
         source: RuleSource::Eslint("no-lonely-if"),
@@ -90,7 +90,7 @@ declare_rule! {
     }
 }
 
-pub(crate) struct RuleState {
+pub struct RuleState {
     block_statement: JsBlockStatement,
     if_statement: JsIfStatement,
 }

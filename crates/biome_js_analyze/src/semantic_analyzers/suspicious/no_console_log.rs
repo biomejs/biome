@@ -33,7 +33,7 @@ declare_rule! {
     /// console.log();
     /// ```
     ///
-    pub(crate) NoConsoleLog {
+    pub NoConsoleLog {
         version: "1.0.0",
         name: "noConsoleLog",
         source: RuleSource::Eslint("no-console"),

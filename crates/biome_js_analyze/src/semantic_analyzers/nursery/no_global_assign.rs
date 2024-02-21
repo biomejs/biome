@@ -40,7 +40,7 @@ declare_rule! {
     /// let window;
     /// window = {};
     /// ```
-    pub(crate) NoGlobalAssign {
+    pub NoGlobalAssign {
         version: "1.5.0",
         name: "noGlobalAssign",
         source: RuleSource::Eslint("no-global-assign"),

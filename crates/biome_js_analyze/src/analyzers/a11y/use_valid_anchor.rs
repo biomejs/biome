@@ -66,7 +66,7 @@ declare_rule! {
     ///
     /// - [WCAG 2.1.1](https://www.w3.org/WAI/WCAG21/Understanding/keyboard)
     ///
-    pub(crate) UseValidAnchor {
+    pub UseValidAnchor {
         version: "1.0.0",
         name: "useValidAnchor",
         source: RuleSource::EslintJsxA11y("anchor-is-valid"),
@@ -77,7 +77,7 @@ declare_rule! {
 /// Representation of the various states
 ///
 /// The `TextRange` of each variant represents the range of where the issue is found.
-pub(crate) enum UseValidAnchorState {
+pub enum UseValidAnchorState {
     /// The anchor element has not `href` attribute
     MissingHrefAttribute(TextRange),
     /// The value assigned to attribute `href` is not valid

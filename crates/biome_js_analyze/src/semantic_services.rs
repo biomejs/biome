@@ -86,7 +86,7 @@ where
     }
 }
 
-pub(crate) struct SemanticModelBuilderVisitor {
+pub struct SemanticModelBuilderVisitor {
     extractor: SemanticEventExtractor,
     builder: SemanticModelBuilder,
 }

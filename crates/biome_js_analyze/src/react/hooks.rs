@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 
 /// Return result of [react_hook_with_dependency].
 #[derive(Debug)]
-pub(crate) struct ReactCallWithDependencyResult {
+pub struct ReactCallWithDependencyResult {
     pub(crate) function_name_range: TextRange,
     pub(crate) closure_node: Option<AnyJsExpression>,
     pub(crate) dependencies_node: Option<AnyJsExpression>,

@@ -483,6 +483,16 @@ impl Deserializable for PathBuf {
     }
 }
 
+impl<T: Deserializable> Deserializable for Box<T> {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        T::deserialize(value, name, diagnostics).map(Box::new)
+    }
+}
+
 impl<T: Deserializable> Deserializable for Vec<T> {
     fn deserialize(
         value: &impl DeserializableValue,

@@ -46,7 +46,7 @@ declare_rule! {
     /// ```js
     /// /foo bar	baz/
     ///```
-    pub(crate) NoMultipleSpacesInRegularExpressionLiterals {
+    pub NoMultipleSpacesInRegularExpressionLiterals {
         version: "1.0.0",
         name: "noMultipleSpacesInRegularExpressionLiterals",
         source: RuleSource::Eslint("no-regex-spaces"),

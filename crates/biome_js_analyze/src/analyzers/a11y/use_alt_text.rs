@@ -43,7 +43,7 @@ declare_rule! {
     ///
     /// - [WCAG 1.1.1](https://www.w3.org/WAI/WCAG21/Understanding/non-text-content.html)
     ///
-    pub(crate) UseAltText {
+    pub UseAltText {
         version: "1.0.0",
         name: "useAltText",
         source: RuleSource::EslintJsxA11y("alt-text"),

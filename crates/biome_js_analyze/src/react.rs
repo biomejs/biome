@@ -19,7 +19,7 @@ pub(crate) trait ReactApiCall {
 /// A convenient data structure that returns the three arguments of the [React.createElement] call
 ///
 ///[React.createElement]: https://reactjs.org/docs/react-api.html#createelement
-pub(crate) struct ReactCreateElementCall {
+pub struct ReactCreateElementCall {
     /// The type of the react element
     pub(crate) element_type: AnyJsCallArgument,
     /// Optional props
@@ -118,7 +118,7 @@ impl ReactApiCall for ReactCreateElementCall {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum ReactLibrary {
+pub enum ReactLibrary {
     React,
     ReactDOM,
 }

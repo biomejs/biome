@@ -45,7 +45,7 @@ declare_rule! {
     /// - [Fundamental Keyboard Navigation Conventions](https://www.w3.org/TR/wai-aria-practices-1.1/#kbd_generalnav)
     /// - [Mozilla Developer Network - ARIA Techniques](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_button_role#Keyboard_and_focus)
     ///
-    pub(crate) NoNoninteractiveElementToInteractiveRole {
+    pub NoNoninteractiveElementToInteractiveRole {
         version: "1.0.0",
         name: "noNoninteractiveElementToInteractiveRole",
         source: RuleSource::EslintJsxA11y("no-noninteractive-element-to-interactive-role"),
@@ -54,7 +54,7 @@ declare_rule! {
     }
 }
 
-pub(crate) struct RuleState {
+pub struct RuleState {
     attribute_range: TextRange,
     element_name: String,
 }

@@ -26,7 +26,7 @@ declare_rule! {
     /// ```js
     /// import fs from "fs-custom";
     /// ```
-    pub(crate) NoNodejsModules {
+    pub NoNodejsModules {
         version: "1.5.0",
         name: "noNodejsModules",
         source: RuleSource::EslintImport("no-nodejs-modules"),

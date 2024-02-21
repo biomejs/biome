@@ -57,7 +57,7 @@ declare_rule! {
     /// - [WHATWG HTML Standard, The autofocus attribute](https://html.spec.whatwg.org/multipage/interaction.html#attr-fe-autofocus)
     /// - [The accessibility of HTML 5 autofocus](https://brucelawson.co.uk/2009/the-accessibility-of-html-5-autofocus/)
     ///
-    pub(crate) NoAutoFocus {
+    pub NoAutofocus {
         version: "1.0.0",
         name: "noAutofocus",
         source: RuleSource::EslintJsxA11y("no-autofocus"),
@@ -66,7 +66,7 @@ declare_rule! {
     }
 }
 
-impl Rule for NoAutoFocus {
+impl Rule for NoAutofocus {
     type Query = Ast<AnyJsxElement>;
     type State = JsxAttribute;
     type Signals = Option<Self::State>;

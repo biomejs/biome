@@ -88,7 +88,7 @@ declare_rule! {
     ///   mutableField += 1;
     /// }
     /// ```
-    pub(crate) NoStaticOnlyClass {
+    pub NoStaticOnlyClass {
         version: "1.0.0",
         name: "noStaticOnlyClass",
         source: RuleSource::EslintTypeScript("no-extraneous-class"),

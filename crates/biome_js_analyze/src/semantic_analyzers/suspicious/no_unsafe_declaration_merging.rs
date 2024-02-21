@@ -40,7 +40,7 @@ declare_rule! {
     /// namespace Baz {}
     /// enum Baz {}
     /// ```
-    pub(crate) NoUnsafeDeclarationMerging {
+    pub NoUnsafeDeclarationMerging {
         version: "1.0.0",
         name: "noUnsafeDeclarationMerging",
         source: RuleSource::EslintTypeScript("no-unsafe-declaration-merging"),

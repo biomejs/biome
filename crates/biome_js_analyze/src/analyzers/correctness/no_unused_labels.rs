@@ -51,7 +51,7 @@ declare_rule! {
     ///     return n;
     /// }
     /// ```
-    pub(crate) NoUnusedLabels {
+    pub NoUnusedLabels {
         version: "1.0.0",
         name: "noUnusedLabels",
         source: RuleSource::Eslint("no-unused-labels"),
@@ -122,7 +122,7 @@ impl Visitor for UnusedLabelVisitor {
     }
 }
 
-pub(crate) struct UnusedLabel(JsLabeledStatement);
+pub struct UnusedLabel(JsLabeledStatement);
 
 impl QueryMatch for UnusedLabel {
     fn text_range(&self) -> TextRange {

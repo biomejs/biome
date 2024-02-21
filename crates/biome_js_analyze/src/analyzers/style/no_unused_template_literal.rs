@@ -38,7 +38,7 @@ declare_rule! {
     /// ```js
     /// const foo = `'bar'`
     /// ```
-    pub(crate) NoUnusedTemplateLiteral {
+    pub NoUnusedTemplateLiteral {
         version: "1.0.0",
         name: "noUnusedTemplateLiteral",
         source: RuleSource::EslintTypeScript("no-useless-template-literals"),

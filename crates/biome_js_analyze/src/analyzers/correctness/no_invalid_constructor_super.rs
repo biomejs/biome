@@ -45,7 +45,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoInvalidConstructorSuper {
+    pub NoInvalidConstructorSuper {
         version: "1.0.0",
         name: "noInvalidConstructorSuper",
         source: RuleSource::Eslint("constructor-super"),
@@ -53,7 +53,7 @@ declare_rule! {
     }
 }
 
-pub(crate) enum NoInvalidConstructorSuperState {
+pub enum NoInvalidConstructorSuperState {
     UnexpectedSuper(TextRange),
     BadExtends {
         extends_range: TextRange,

@@ -24,7 +24,7 @@ declare_rule! {
     /// if (a.b.c() !== a.b .c()) {}
     /// ```
     ///
-    pub(crate) NoSelfCompare {
+    pub NoSelfCompare {
         version: "1.0.0",
         name: "noSelfCompare",
         source: RuleSource::Eslint("no-self-compare"),

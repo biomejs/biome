@@ -41,7 +41,7 @@ declare_rule! {
     /// let a;
     /// a = 1;
     /// ```
-    pub(crate) NoAssignInExpressions {
+    pub NoAssignInExpressions {
         version: "1.0.0",
         name: "noAssignInExpressions",
         source: RuleSource::Eslint("no-cond-assign"),

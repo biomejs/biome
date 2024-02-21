@@ -34,7 +34,7 @@ declare_rule! {
     /// test("test", () => {});
     /// ```
     ///
-    pub(crate) NoSkippedTests {
+    pub NoSkippedTests {
         version: "next",
         name: "noSkippedTests",
         recommended: false,

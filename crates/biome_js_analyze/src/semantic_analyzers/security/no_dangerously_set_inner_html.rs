@@ -25,7 +25,7 @@ declare_rule! {
     ///     dangerouslySetInnerHTML: { __html: 'child' }
     /// });
     /// ```
-    pub(crate) NoDangerouslySetInnerHtml {
+    pub NoDangerouslySetInnerHtml {
         version: "1.0.0",
         name: "noDangerouslySetInnerHtml",
         source: RuleSource::EslintReact("no-danger-with-children"),
@@ -34,10 +34,10 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) AnyJsCreateElement = JsxAttribute | JsCallExpression
+    pub AnyJsCreateElement = JsxAttribute | JsCallExpression
 }
 
-pub(crate) enum NoDangerState {
+pub enum NoDangerState {
     Attribute(TextRange),
     Property(TextRange),
 }
