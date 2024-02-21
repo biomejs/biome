@@ -90,7 +90,7 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
     ],
     literals: &[
         "GRIT_INT_LITERAL",
-        "GRIT_SIGNED_INT_LITERAL",
+        "GRIT_NEGATIVE_INT_LITERAL",
         "GRIT_DOUBLE_LITERAL",
         "GRIT_STRING_LITERAL",
         "GRIT_REGEX_LITERAL",
@@ -100,6 +100,8 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
         "NEWLINE",
         "WHITESPACE",
         "COMMENT",
+        "MULTILINE_COMMENT",
+        "ERROR_TOKEN",
         "GRIT_ANNOTATION",
         "GRIT_BACKTICK_SNIPPET",
         "GRIT_RAW_BACKTICK_SNIPPET",

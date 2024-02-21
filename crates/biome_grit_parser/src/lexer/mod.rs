@@ -1,24 +1,22 @@
-//! An extremely fast, lookup table based, JSON lexer which yields SyntaxKind tokens used by the rome-json parser.
+//! An extremely fast, lookup table based, GritQL lexer which yields SyntaxKind tokens used by the biome Grit parser.
 
 #[rustfmt::skip]
 mod tests;
 
-use biome_json_syntax::{JsonSyntaxKind, JsonSyntaxKind::*, TextLen, TextRange, TextSize, T};
+use biome_grit_syntax::{GritSyntaxKind, GritSyntaxKind::*, TextLen, TextRange, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_unicode_table::{is_js_id_continue, is_js_id_start, lookup_byte, Dispatch::*};
+use biome_unicode_table::{lookup_byte, Dispatch::*};
 use std::iter::FusedIterator;
 use std::ops::Add;
 use unicode_bom::Bom;
 
-use crate::JsonParserOptions;
-
 pub struct Token {
-    kind: JsonSyntaxKind,
+    kind: GritSyntaxKind,
     range: TextRange,
 }
 
 impl Token {
-    pub fn kind(&self) -> JsonSyntaxKind {
+    pub fn kind(&self) -> GritSyntaxKind {
         self.kind
     }
 
@@ -37,7 +35,6 @@ pub(crate) struct Lexer<'src> {
     position: usize,
 
     diagnostics: Vec<ParseDiagnostic>,
-    options: JsonParserOptions,
 }
 
 impl<'src> Lexer<'src> {
@@ -46,8 +43,7 @@ impl<'src> Lexer<'src> {
         Self {
             source: string,
             position: 0,
-            diagnostics: vec![],
-            options: JsonParserOptions::default(),
+            diagnostics: Vec::new(),
         }
     }
 
@@ -92,42 +88,39 @@ impl<'src> Lexer<'src> {
         TextSize::try_from(self.position).expect("Input to be smaller than 4 GB")
     }
 
-    /// Bumps the current byte and creates a lexed token of the passed in kind
-    fn eat_byte(&mut self, tok: JsonSyntaxKind) -> JsonSyntaxKind {
+    /// Bumps the current byte and creates a lexed token of the passed in kind.
+    fn eat_byte(&mut self, tok: GritSyntaxKind) -> GritSyntaxKind {
         self.advance(1);
         tok
     }
 
-    /// Consume just one newline/line break.
+    /// Eats just one newline/line break and spits out the lexed token.
     ///
     /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    fn consume_newline(&mut self) -> bool {
+    /// Must be called at a newline character.
+    fn eat_newline(&mut self) -> GritSyntaxKind {
         self.assert_at_char_boundary();
 
         match self.current_byte() {
-            Some(b'\n') => {
-                self.advance(1);
-                true
-            }
+            Some(b'\n') => self.advance(1),
             Some(b'\r') => {
                 if self.peek_byte() == Some(b'\n') {
                     self.advance(2)
                 } else {
                     self.advance(1)
                 }
-                true
             }
-
-            _ => false,
+            _ => {}
         }
+
+        NEWLINE
     }
 
-    /// Consumes all whitespace until a non-whitespace or a newline is found.
+    /// Eats all whitespace until a non-whitespace or a newline is found.
     ///
     /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    fn consume_whitespaces(&mut self) {
+    /// Must be called at a whitespace character.
+    fn eat_whitespace(&mut self) -> GritSyntaxKind {
         self.assert_at_char_boundary();
 
         while let Some(byte) = self.current_byte() {
@@ -142,30 +135,19 @@ impl<'src> Lexer<'src> {
                         self.advance(1);
 
                         self.diagnostics.push(
-                                ParseDiagnostic::new(
-                                    "The JSON standard only allows tabs, whitespace, carriage return and line feed whitespace.",
-                                    start..self.text_position(),
-                                )
-                                .with_hint("Use a regular whitespace character instead."),
+                            ParseDiagnostic::new(
+                                "GritQL only allows tabs, whitespace, carriage return and line feed whitespace.",
+                                start..self.text_position(),
                             )
+                            .with_hint("Use a regular whitespace character instead."),
+                        )
                     }
                     _ => break,
                 },
             }
         }
-    }
 
-    /// Consume one newline or all whitespace until a non-whitespace or a newline is found.
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    fn consume_newline_or_whitespaces(&mut self) -> JsonSyntaxKind {
-        if self.consume_newline() {
-            NEWLINE
-        } else {
-            self.consume_whitespaces();
-            WHITESPACE
-        }
+        WHITESPACE
     }
 
     /// Check if the source starts with a Unicode BOM character. If it does,
@@ -180,7 +162,7 @@ impl<'src> Lexer<'src> {
     /// ## Safety
     /// Must be called at a valid UT8 char boundary (and realistically only at
     /// the start position of the source).
-    fn consume_potential_bom(&mut self) -> Option<JsonSyntaxKind> {
+    fn consume_potential_bom(&mut self) -> Option<GritSyntaxKind> {
         // Bom needs at least the first three bytes of the source to know if it
         // matches the UTF-8 BOM and not an alternative. This can be expanded
         // to more bytes to support other BOM characters if Biome decides to
@@ -294,48 +276,28 @@ impl<'src> Lexer<'src> {
     /// Lexes the next token
     ///
     /// Guaranteed to not be at the end of the file
-    // A lookup table of `byte -> fn(l: &mut Lexer) -> Token` is exponentially slower than this approach
-    fn lex_token(&mut self, current: u8) -> JsonSyntaxKind {
-        // The speed difference comes from the difference in table size, a 2kb table is easily fit into cpu cache
-        // While a 16kb table will be ejected from cache very often leading to slowdowns, this also allows LLVM
-        // to do more aggressive optimizations on the match regarding how to map it to instructions
-        let dispatched = lookup_byte(current);
-
-        match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
-            QOT => self.lex_string_literal(current),
-            IDT => self.lex_identifier(current),
-            COM => self.eat_byte(T![,]),
-            MIN | DIG | ZER => self.lex_number(current),
-            COL => self.eat_byte(T![:]),
-            BTO => self.eat_byte(T!['[']),
-            BTC => self.eat_byte(T![']']),
-            BEO => self.eat_byte(T!['{']),
-            BEC => self.eat_byte(T!['}']),
-
-            SLH => self.lex_slash(),
-
-            UNI => {
-                let chr = self.current_char_unchecked();
-
-                if is_js_id_start(chr) {
-                    self.lex_identifier(current)
-                } else if self.position == 0 && self.consume_potential_bom().is_some() {
-                    // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
-                    // perform the check. At any other position, the BOM is just considered plain whitespace.
-                    UNICODE_BOM
-                } else {
-                    self.eat_unexpected_character()
-                }
-            }
-
-            ERR | EXL | HAS | TLD | PIP | TPL | CRT | BSL | AT_ | QST | MOR | LSS | SEM | MUL
-            | PNO | PNC | PRD | PRC | AMP | EQL | PLS => self.eat_unexpected_character(),
+    fn lex_token(&mut self, current: u8) -> GritSyntaxKind {
+        match current {
+            b'\n' | b'\r' => self.eat_newline(),
+            b'\t' | b' ' => self.eat_whitespace(),
+            b'\'' | b'"' => self.lex_string_literal(current),
+            b'/' => self.lex_slash(),
+            b':' => self.eat_byte(T![:]),
+            b',' => self.eat_byte(T![,]),
+            b'[' => self.eat_byte(T!['[']),
+            b']' => self.eat_byte(T![']']),
+            b'{' => self.eat_byte(T!['{']),
+            b'}' => self.eat_byte(T!['}']),
+            b'$' => self.lex_variable(),
+            _ if is_leading_identifier_byte(current) => self.lex_name(current),
+            _ if (b'0'..=b'9').contains(&current) || current == b'-' => self.lex_number(current),
+            _ if self.position == 0 && self.consume_potential_bom().is_some() => UNICODE_BOM,
+            _ => self.eat_unexpected_character(),
         }
     }
 
     #[inline]
-    fn eat_unexpected_character(&mut self) -> JsonSyntaxKind {
+    fn eat_unexpected_character(&mut self) -> GritSyntaxKind {
         self.assert_at_char_boundary();
 
         let char = self.current_char_unchecked();
@@ -350,12 +312,12 @@ impl<'src> Lexer<'src> {
     }
 
     /// Lexes a JSON number literal
-    fn lex_number(&mut self, current: u8) -> JsonSyntaxKind {
+    fn lex_number(&mut self, first: u8) -> GritSyntaxKind {
         self.assert_at_char_boundary();
 
         let start = self.text_position();
 
-        if current == b'-' {
+        if first == b'-' {
             self.advance(1);
         }
 
@@ -445,9 +407,14 @@ impl<'src> Lexer<'src> {
         }
 
         match state {
-            LexNumberState::IntegerPart
-            | LexNumberState::FractionalPart
-            | LexNumberState::Exponent => JSON_NUMBER_LITERAL,
+            LexNumberState::IntegerPart => {
+                if first == b'-' {
+                    GRIT_NEGATIVE_INT_LITERAL
+                } else {
+                    GRIT_INT_LITERAL
+                }
+            }
+            LexNumberState::FractionalPart | LexNumberState::Exponent => GRIT_DOUBLE_LITERAL,
             LexNumberState::FirstDigit => {
                 let err = ParseDiagnostic::new(
                     "Minus must be followed by a digit",
@@ -459,28 +426,28 @@ impl<'src> Lexer<'src> {
             LexNumberState::Invalid { position, reason } => {
                 let diagnostic = match reason {
                     InvalidNumberReason::Fraction => ParseDiagnostic::new(
-
                         "Invalid fraction part",
                         position..position + TextSize::from(1),
                     ),
                     InvalidNumberReason::Exponent => ParseDiagnostic::new(
-
                         "Invalid exponent part",
                         position..position + TextSize::from(1),
                     ),
                     InvalidNumberReason::Octal => ParseDiagnostic::new(
-
-                        "The JSON standard doesn't allow octal number notation (numbers starting with zero)",
+                        "GritQL doesn't allow octal number notation (numbers starting with zero)",
                         position..position + TextSize::from(1),
                     ),
                     InvalidNumberReason::MissingExponent => {
-                        ParseDiagnostic::new( "Missing exponent", start..position)
-                            .with_detail(position..position + TextSize::from(1), "Expected a digit as the exponent")
+                        ParseDiagnostic::new("Missing exponent", start..position).with_detail(
+                            position..position + TextSize::from(1),
+                            "Expected a digit as the exponent",
+                        )
                     }
-                    InvalidNumberReason::MissingFraction => {
-                        ParseDiagnostic::new( "Missing fraction", position..position + TextSize::from(1))
-                            .with_hint("Remove the `.`")
-                    }
+                    InvalidNumberReason::MissingFraction => ParseDiagnostic::new(
+                        "Missing fraction",
+                        position..position + TextSize::from(1),
+                    )
+                    .with_hint("Remove the `.`"),
                 };
 
                 self.diagnostics.push(diagnostic);
@@ -489,7 +456,7 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    fn lex_string_literal(&mut self, quote: u8) -> JsonSyntaxKind {
+    fn lex_string_literal(&mut self, quote: u8) -> GritSyntaxKind {
         // Handle invalid quotes
         self.assert_at_char_boundary();
         let start = self.text_position();
@@ -573,11 +540,11 @@ impl<'src> Lexer<'src> {
 
                     self.diagnostics.push(unterminated);
 
-                    return JSON_STRING_LITERAL;
+                    return GRIT_STRING_LITERAL;
                 }
                 UNI => self.advance_char_unchecked(),
 
-                // From the spec:
+                // Following the same rules as JSON here:
                 // All code points may be placed within the quotation marks except for the code points that
                 //must be escaped:
                 // * quotation mark: (U+0022),
@@ -601,12 +568,12 @@ impl<'src> Lexer<'src> {
         }
 
         match state {
-            LexStringState::Terminated => JSON_STRING_LITERAL,
+            LexStringState::Terminated => GRIT_STRING_LITERAL,
             LexStringState::InvalidQuote => {
                 let literal_range = TextRange::new(start, self.text_position());
                 self.diagnostics.push(
                     ParseDiagnostic::new(
-                        "JSON standard does not allow single quoted strings",
+                        "GritQL does not allow single quoted strings",
                         literal_range,
                     )
                     .with_hint("Use double quotes to escape the string."),
@@ -622,7 +589,7 @@ impl<'src> Lexer<'src> {
                         );
                 self.diagnostics.push(unterminated);
 
-                JSON_STRING_LITERAL
+                GRIT_STRING_LITERAL
             }
             LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
         }
@@ -677,47 +644,96 @@ impl<'src> Lexer<'src> {
         Ok(())
     }
 
-    /// Implements basic lexing of identifiers without support for escape sequences.
-    /// This is merely for improved error recovery as identifiers are not valid in JSON.
-    fn lex_identifier(&mut self, first: u8) -> JsonSyntaxKind {
+    /// Lexes a name for variables (without leading `$`), labels, and keywords.
+    fn lex_name(&mut self, first: u8) -> GritSyntaxKind {
         self.assert_at_char_boundary();
 
-        let mut keyword = KeywordMatcher::from_byte(first);
+        // Note to keep the buffer large enough to fit every possible keyword that
+        // the lexer can return
+        const BUFFER_SIZE: usize = 14;
+        let mut buffer = [0u8; BUFFER_SIZE];
+        let mut len = 0;
 
         self.advance_byte_or_char(first);
 
         while let Some(byte) = self.current_byte() {
-            self.current_char_unchecked();
-            match lookup_byte(byte) {
-                IDT | DIG | ZER => {
-                    keyword = keyword.next_character(byte);
-                    self.advance(1)
+            if is_identifier_byte(byte) {
+                if len < BUFFER_SIZE {
+                    buffer[len] = byte;
+                    len += 1;
                 }
-                UNI => {
-                    let char = self.current_char_unchecked();
-                    keyword = KeywordMatcher::None;
-                    if is_js_id_continue(char) {
-                        self.advance(char.len_utf8());
-                    } else {
-                        break;
-                    }
-                }
-                _ => {
-                    break;
-                }
+
+                self.advance(1)
+            } else {
+                break;
             }
         }
 
-        match keyword {
-            KeywordMatcher::Null => NULL_KW,
-            KeywordMatcher::True => TRUE_KW,
-            KeywordMatcher::False => FALSE_KW,
-            _ => IDENT,
+        match &buffer[..len] {
+            b"sequential" => SEQUENTIAL_KW,
+            b"multifile" => MULTIFILE_KW,
+            b"engine" => ENGINE_KW,
+            b"biome" => BIOME_KW,
+            b"language" => LANGUAGE_KW,
+            b"js" => JS_KW,
+            b"css" => CSS_KW,
+            b"json" => JSON_KW,
+            b"grit" => GRIT_KW,
+            b"html" => HTML_KW,
+            b"typescript" => TYPESCRIPT_KW,
+            b"jsx" => JSX_KW,
+            b"js_do_not_use" => JS_DO_NOT_USE_KW,
+            b"as" => AS_KW,
+            b"limit" => LIMIT_KW,
+            b"where" => WHERE_KW,
+            b"orelse" => ORELSE_KW,
+            b"maybe" => MAYBE_KW,
+            b"after" => AFTER_KW,
+            b"before" => BEFORE_KW,
+            b"contains" => CONTAINS_KW,
+            b"until" => UNTIL_KW,
+            b"includes" => INCLUDES_KW,
+            b"if" => IF_KW,
+            b"else" => ELSE_KW,
+            b"within" => WITHIN_KW,
+            b"bubble" => BUBBLE_KW,
+            b"not" => NOT_KW,
+            b"or" => OR_KW,
+            b"and" => AND_KW,
+            b"any" => ANY_KW,
+            b"some" => SOME_KW,
+            b"every" => EVERY_KW,
+            b"private" => PRIVATE_KW,
+            b"pattern" => PATTERN_KW,
+            b"predicate" => PREDICATE_KW,
+            b"function" => FUNCTION_KW,
+            b"true" => TRUE_KW,
+            b"false" => FALSE_KW,
+            b"undefined" => UNDEFINED_KW,
+            b"like" => LIKE_KW,
+            b"return" => RETURN_KW,
+            _ => GRIT_NAME,
         }
     }
 
-    /// Lexes a comment. Comments are only supported in JSONC.
-    fn lex_slash(&mut self) -> JsonSyntaxKind {
+    /// Lexes a variable (with leading `$`).
+    fn lex_variable(&mut self) -> GritSyntaxKind {
+        self.assert_at_char_boundary();
+        self.advance(1); // Skip the leading `$`.
+
+        while let Some(byte) = self.current_byte() {
+            if is_identifier_byte(byte) {
+                self.advance(1)
+            } else {
+                break;
+            }
+        }
+
+        GRIT_VARIABLE
+    }
+
+    /// Lexes a comment.
+    fn lex_slash(&mut self) -> GritSyntaxKind {
         let start = self.text_position();
         match self.peek_byte() {
             Some(b'*') => {
@@ -730,13 +746,6 @@ impl<'src> Lexer<'src> {
                     match chr {
                         b'*' if self.peek_byte() == Some(b'/') => {
                             self.advance(2);
-
-                            if !self.options.allow_comments {
-                                self.diagnostics.push(ParseDiagnostic::new(
-                                    "JSON standard does not allow comments.",
-                                    start..self.text_position(),
-                                ));
-                            }
 
                             if has_newline {
                                 return MULTILINE_COMMENT;
@@ -777,22 +786,10 @@ impl<'src> Lexer<'src> {
                     }
                 }
 
-                if !self.options.allow_comments {
-                    self.diagnostics.push(ParseDiagnostic::new(
-                        "JSON standard does not allow comments.",
-                        start..self.text_position(),
-                    ));
-                }
-
                 COMMENT
             }
             _ => self.eat_unexpected_character(),
         }
-    }
-
-    pub(crate) fn with_options(mut self, options: JsonParserOptions) -> Self {
-        self.options = options;
-        self
     }
 }
 
@@ -859,55 +856,13 @@ enum LexStringState {
     Terminated,
 }
 
-enum KeywordMatcher {
-    MaybeNull(u32),
-    MaybeFalse(u32),
-    MaybeTrue(u32),
-    Null,
-    False,
-    True,
-    None,
+fn is_identifier_byte(byte: u8) -> bool {
+    (b'a'..=b'z').contains(&byte)
+        || (b'A'..=b'Z').contains(&byte)
+        || (b'0'..=b'9').contains(&byte)
+        || byte == b'_'
 }
 
-impl KeywordMatcher {
-    fn from_byte(c: u8) -> KeywordMatcher {
-        if c.is_ascii() {
-            match c {
-                b'n' => KeywordMatcher::MaybeNull(1),
-                b't' => KeywordMatcher::MaybeTrue(1),
-                b'f' => KeywordMatcher::MaybeFalse(1),
-                _ => KeywordMatcher::None,
-            }
-        } else {
-            KeywordMatcher::None
-        }
-    }
-
-    fn next_character(self, next: u8) -> KeywordMatcher {
-        match self {
-            KeywordMatcher::MaybeNull(position) => match (next, position) {
-                (b'u', 1) => KeywordMatcher::MaybeNull(2),
-                (b'l', 2) => KeywordMatcher::MaybeNull(3),
-                (b'l', 3) => KeywordMatcher::Null,
-                _ => KeywordMatcher::None,
-            },
-            KeywordMatcher::MaybeFalse(position) => match (next, position) {
-                (b'a', 1) => KeywordMatcher::MaybeFalse(2),
-                (b'l', 2) => KeywordMatcher::MaybeFalse(3),
-                (b's', 3) => KeywordMatcher::MaybeFalse(4),
-                (b'e', 4) => KeywordMatcher::False,
-                _ => KeywordMatcher::None,
-            },
-            KeywordMatcher::MaybeTrue(position) => match (next, position) {
-                (b'r', 1) => KeywordMatcher::MaybeTrue(2),
-                (b'u', 2) => KeywordMatcher::MaybeTrue(3),
-                (b'e', 3) => KeywordMatcher::True,
-                _ => KeywordMatcher::None,
-            },
-            KeywordMatcher::None
-            | KeywordMatcher::Null
-            | KeywordMatcher::False
-            | KeywordMatcher::True => KeywordMatcher::None,
-        }
-    }
+fn is_leading_identifier_byte(byte: u8) -> bool {
+    (b'a'..=b'z').contains(&byte) || (b'A'..=b'Z').contains(&byte) || byte == b'_'
 }

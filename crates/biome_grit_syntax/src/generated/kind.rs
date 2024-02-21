@@ -85,7 +85,7 @@ pub enum GritSyntaxKind {
     LIKE_KW,
     RETURN_KW,
     GRIT_INT_LITERAL,
-    GRIT_SIGNED_INT_LITERAL,
+    GRIT_NEGATIVE_INT_LITERAL,
     GRIT_DOUBLE_LITERAL,
     GRIT_STRING_LITERAL,
     GRIT_REGEX_LITERAL,
@@ -93,6 +93,8 @@ pub enum GritSyntaxKind {
     NEWLINE,
     WHITESPACE,
     COMMENT,
+    MULTILINE_COMMENT,
+    ERROR_TOKEN,
     GRIT_ANNOTATION,
     GRIT_BACKTICK_SNIPPET,
     GRIT_RAW_BACKTICK_SNIPPET,
@@ -229,7 +231,7 @@ impl GritSyntaxKind {
     pub const fn is_literal(self) -> bool {
         match self {
             GRIT_INT_LITERAL
-            | GRIT_SIGNED_INT_LITERAL
+            | GRIT_NEGATIVE_INT_LITERAL
             | GRIT_DOUBLE_LITERAL
             | GRIT_STRING_LITERAL
             | GRIT_REGEX_LITERAL

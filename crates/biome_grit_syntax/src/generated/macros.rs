@@ -169,6 +169,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritNamedArgWithDefault::new_unchecked(node) };
                     $body
                 }
+                $crate::GritSyntaxKind::GRIT_NEGATIVE_INT_LITERAL => {
+                    let $pattern = unsafe { $crate::GritNegativeIntLiteral::new_unchecked(node) };
+                    $body
+                }
                 $crate::GritSyntaxKind::GRIT_NODE_LIKE => {
                     let $pattern = unsafe { $crate::GritNodeLike::new_unchecked(node) };
                     $body
@@ -367,10 +371,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::GritSyntaxKind::GRIT_SEQUENTIAL => {
                     let $pattern = unsafe { $crate::GritSequential::new_unchecked(node) };
-                    $body
-                }
-                $crate::GritSyntaxKind::GRIT_SIGNED_INT_LITERAL => {
-                    let $pattern = unsafe { $crate::GritSignedIntLiteral::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_SNIPPET_REGEX => {

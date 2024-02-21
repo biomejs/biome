@@ -1996,6 +1996,42 @@ pub struct GritNamedArgWithDefaultFields {
     pub pattern: SyntaxResult<AnyGritPattern>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GritNegativeIntLiteral {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GritNegativeIntLiteral {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GritNegativeIntLiteralFields {
+        GritNegativeIntLiteralFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for GritNegativeIntLiteral {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct GritNegativeIntLiteralFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritNodeLike {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4295,42 +4331,6 @@ pub struct GritSequentialFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritSignedIntLiteral {
-    pub(crate) syntax: SyntaxNode,
-}
-impl GritSignedIntLiteral {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> GritSignedIntLiteralFields {
-        GritSignedIntLiteralFields {
-            value_token: self.value_token(),
-        }
-    }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for GritSignedIntLiteral {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GritSignedIntLiteralFields {
-    pub value_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritSnippetRegex {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4922,7 +4922,8 @@ impl GritListAccessorSubject {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum GritListIndex {
     AnyGritContainer(AnyGritContainer),
-    GritSignedIntLiteral(GritSignedIntLiteral),
+    GritIntLiteral(GritIntLiteral),
+    GritNegativeIntLiteral(GritNegativeIntLiteral),
 }
 impl GritListIndex {
     pub fn as_any_grit_container(&self) -> Option<&AnyGritContainer> {
@@ -4931,9 +4932,15 @@ impl GritListIndex {
             _ => None,
         }
     }
-    pub fn as_grit_signed_int_literal(&self) -> Option<&GritSignedIntLiteral> {
+    pub fn as_grit_int_literal(&self) -> Option<&GritIntLiteral> {
         match &self {
-            GritListIndex::GritSignedIntLiteral(item) => Some(item),
+            GritListIndex::GritIntLiteral(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_grit_negative_int_literal(&self) -> Option<&GritNegativeIntLiteral> {
+        match &self {
+            GritListIndex::GritNegativeIntLiteral(item) => Some(item),
             _ => None,
         }
     }
@@ -6915,6 +6922,47 @@ impl From<GritNamedArgWithDefault> for SyntaxNode {
 }
 impl From<GritNamedArgWithDefault> for SyntaxElement {
     fn from(n: GritNamedArgWithDefault) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for GritNegativeIntLiteral {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_NEGATIVE_INT_LITERAL as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_NEGATIVE_INT_LITERAL
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritNegativeIntLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritNegativeIntLiteral")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<GritNegativeIntLiteral> for SyntaxNode {
+    fn from(n: GritNegativeIntLiteral) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritNegativeIntLiteral> for SyntaxElement {
+    fn from(n: GritNegativeIntLiteral) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -9112,47 +9160,6 @@ impl From<GritSequential> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for GritSignedIntLiteral {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_SIGNED_INT_LITERAL as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_SIGNED_INT_LITERAL
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for GritSignedIntLiteral {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritSignedIntLiteral")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
-    }
-}
-impl From<GritSignedIntLiteral> for SyntaxNode {
-    fn from(n: GritSignedIntLiteral) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<GritSignedIntLiteral> for SyntaxElement {
-    fn from(n: GritSignedIntLiteral) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for GritSnippetRegex {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10140,26 +10147,33 @@ impl From<GritListAccessorSubject> for SyntaxElement {
         node.into()
     }
 }
-impl From<GritSignedIntLiteral> for GritListIndex {
-    fn from(node: GritSignedIntLiteral) -> GritListIndex {
-        GritListIndex::GritSignedIntLiteral(node)
+impl From<GritIntLiteral> for GritListIndex {
+    fn from(node: GritIntLiteral) -> GritListIndex {
+        GritListIndex::GritIntLiteral(node)
+    }
+}
+impl From<GritNegativeIntLiteral> for GritListIndex {
+    fn from(node: GritNegativeIntLiteral) -> GritListIndex {
+        GritListIndex::GritNegativeIntLiteral(node)
     }
 }
 impl AstNode for GritListIndex {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyGritContainer::KIND_SET.union(GritSignedIntLiteral::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyGritContainer::KIND_SET
+        .union(GritIntLiteral::KIND_SET)
+        .union(GritNegativeIntLiteral::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            GRIT_SIGNED_INT_LITERAL => true,
+            GRIT_INT_LITERAL | GRIT_NEGATIVE_INT_LITERAL => true,
             k if AnyGritContainer::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            GRIT_SIGNED_INT_LITERAL => {
-                GritListIndex::GritSignedIntLiteral(GritSignedIntLiteral { syntax })
+            GRIT_INT_LITERAL => GritListIndex::GritIntLiteral(GritIntLiteral { syntax }),
+            GRIT_NEGATIVE_INT_LITERAL => {
+                GritListIndex::GritNegativeIntLiteral(GritNegativeIntLiteral { syntax })
             }
             _ => {
                 if let Some(any_grit_container) = AnyGritContainer::cast(syntax) {
@@ -10172,13 +10186,15 @@ impl AstNode for GritListIndex {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            GritListIndex::GritSignedIntLiteral(it) => &it.syntax,
+            GritListIndex::GritIntLiteral(it) => &it.syntax,
+            GritListIndex::GritNegativeIntLiteral(it) => &it.syntax,
             GritListIndex::AnyGritContainer(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            GritListIndex::GritSignedIntLiteral(it) => it.syntax,
+            GritListIndex::GritIntLiteral(it) => it.syntax,
+            GritListIndex::GritNegativeIntLiteral(it) => it.syntax,
             GritListIndex::AnyGritContainer(it) => it.into_syntax(),
         }
     }
@@ -10187,7 +10203,8 @@ impl std::fmt::Debug for GritListIndex {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             GritListIndex::AnyGritContainer(it) => std::fmt::Debug::fmt(it, f),
-            GritListIndex::GritSignedIntLiteral(it) => std::fmt::Debug::fmt(it, f),
+            GritListIndex::GritIntLiteral(it) => std::fmt::Debug::fmt(it, f),
+            GritListIndex::GritNegativeIntLiteral(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -10195,7 +10212,8 @@ impl From<GritListIndex> for SyntaxNode {
     fn from(n: GritListIndex) -> SyntaxNode {
         match n {
             GritListIndex::AnyGritContainer(it) => it.into(),
-            GritListIndex::GritSignedIntLiteral(it) => it.into(),
+            GritListIndex::GritIntLiteral(it) => it.into(),
+            GritListIndex::GritNegativeIntLiteral(it) => it.into(),
         }
     }
 }
@@ -10760,6 +10778,11 @@ impl std::fmt::Display for GritNamedArgWithDefault {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for GritNegativeIntLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for GritNodeLike {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -11001,11 +11024,6 @@ impl std::fmt::Display for GritRoot {
     }
 }
 impl std::fmt::Display for GritSequential {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for GritSignedIntLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

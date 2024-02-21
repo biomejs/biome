@@ -780,6 +780,12 @@ pub fn grit_named_arg_with_default(
         ],
     ))
 }
+pub fn grit_negative_int_literal(value_token: SyntaxToken) -> GritNegativeIntLiteral {
+    GritNegativeIntLiteral::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_NEGATIVE_INT_LITERAL,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn grit_node_like(
     name: GritName,
     l_paren_token: SyntaxToken,
@@ -1883,12 +1889,6 @@ pub fn grit_sequential(
             Some(SyntaxElement::Node(sequential.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
         ],
-    ))
-}
-pub fn grit_signed_int_literal(value_token: SyntaxToken) -> GritSignedIntLiteral {
-    GritSignedIntLiteral::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_SIGNED_INT_LITERAL,
-        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn grit_snippet_regex(value_token: SyntaxToken) -> GritSnippetRegex {

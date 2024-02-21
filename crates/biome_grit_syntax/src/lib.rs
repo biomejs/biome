@@ -6,7 +6,8 @@
 mod generated;
 mod syntax_node;
 
-use biome_rowan::{AstNode, RawSyntaxKind, TriviaPieceKind};
+use biome_rowan::{AstNode, RawSyntaxKind};
+pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use generated::*;
 pub use syntax_node::*;
 

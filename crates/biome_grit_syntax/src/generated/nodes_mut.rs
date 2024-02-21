@@ -1033,6 +1033,14 @@ impl GritNamedArgWithDefault {
         )
     }
 }
+impl GritNegativeIntLiteral {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl GritNodeLike {
     pub fn with_name(self, element: GritName) -> Self {
         Self::unwrap_cast(
@@ -2067,14 +2075,6 @@ impl GritSequential {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into()))),
-        )
-    }
-}
-impl GritSignedIntLiteral {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }

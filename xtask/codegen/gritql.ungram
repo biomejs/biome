@@ -303,7 +303,7 @@ GritListAccessor =
     ']'
 
 GritListAccessorSubject = GritList | AnyGritContainer
-GritListIndex = AnyGritContainer | GritSignedIntLiteral
+GritListIndex = AnyGritContainer | GritNegativeIntLiteral | GritIntLiteral
 
 GritDot = '.'
 
@@ -539,7 +539,7 @@ GritNot = 'not' | '!'
 GritUndefined = 'undefined'
 
 GritIntLiteral = value: 'grit_int_literal'
-GritSignedIntLiteral = value: 'grit_signed_int_literal'
+GritNegativeIntLiteral = value: 'grit_negative_int_literal'
 
 GritDoubleLiteral = value: 'grit_double_literal'
 
