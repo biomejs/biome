@@ -288,7 +288,11 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
         .in_scope(move || {
             let settings = params.settings.as_ref();
-            let Some(file_source) = params.language.as_js_file_source() else {
+            let Some(file_source) = params
+                .language
+                .as_js_file_source()
+                .or(JsFileSource::try_from(params.path.as_path()).ok())
+            else {
                 return LintResults {
                     errors: 0,
                     diagnostics: vec![],
@@ -522,7 +526,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         language,
     } = params;
 
-    let Some(file_source) = language.as_js_file_source() else {
+    let Some(file_source) = language
+        .as_js_file_source()
+        .or(JsFileSource::try_from(rome_path.as_path()).ok())
+    else {
         return Err(extension_error(rome_path));
     };
     let mut tree: AnyJsRoot = parse.tree();
