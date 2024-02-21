@@ -104,7 +104,7 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
     }
 
     if changed {
-        paths = get_changed_files(&session.app.fs, &fs_configuration, since)?;
+        paths = get_changed_files(&session.app.fs, &fs_configuration, &cli_options, since)?;
     }
 
     session

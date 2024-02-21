@@ -1,4 +1,4 @@
-use crate::CliDiagnostic;
+use crate::{cli_options::CliOptions, CliDiagnostic};
 use biome_fs::FileSystem;
 use biome_service::{DynRef, PartialConfiguration};
 use std::ffi::OsString;
@@ -6,6 +6,7 @@ use std::ffi::OsString;
 pub(crate) fn get_changed_files(
     fs: &DynRef<'_, dyn FileSystem>,
     configuration: &PartialConfiguration,
+    cli_options: &CliOptions,
     since: Option<String>,
 ) -> Result<Vec<OsString>, CliDiagnostic> {
     let default_branch = configuration
@@ -24,7 +25,7 @@ pub(crate) fn get_changed_files(
 
     let filtered_changed_files = changed_files.iter().map(OsString::from).collect::<Vec<_>>();
 
-    if filtered_changed_files.is_empty() {
+    if filtered_changed_files.is_empty() && !cli_options.no_errors_on_unmatched {
         return Err(CliDiagnostic::no_files_processed());
     }
 

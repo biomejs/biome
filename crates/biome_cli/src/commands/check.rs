@@ -123,7 +123,7 @@ pub(crate) fn check(
     }
 
     if changed {
-        paths = get_changed_files(&session.app.fs, &fs_configuration, since)?;
+        paths = get_changed_files(&session.app.fs, &fs_configuration, &cli_options, since)?;
     }
     session
         .app
