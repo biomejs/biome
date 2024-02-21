@@ -1,5 +1,5 @@
 use std::fmt::Display;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
 /// Errors around the construct of the source type
 #[derive(Debug)]
@@ -29,4 +29,3 @@ impl Display for FileSourceError {
         }
     }
 }
-

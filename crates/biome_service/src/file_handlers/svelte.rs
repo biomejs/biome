@@ -1,4 +1,8 @@
-use crate::file_handlers::{javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime, ParserCapabilities, ParseResult};
+use crate::file_handlers::{
+    javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime,
+    ParseResult, ParserCapabilities,
+};
 use crate::settings::SettingsHandle;
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::WorkspaceError;
@@ -7,7 +11,7 @@ use biome_fs::RomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
 use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
-use biome_rowan::{NodeCache};
+use biome_rowan::NodeCache;
 use lazy_static::lazy_static;
 use regex::{Match, Regex};
 use tracing::debug;
@@ -30,7 +34,7 @@ lazy_static! {
 }
 
 impl SvelteFileHandler {
-    // It extracts the JavaScript/TypeScript code contained in the script block of a Svelte file
+    /// It extracts the JavaScript/TypeScript code contained in the script block of a Svelte file
     ///
     /// If there's no script block, an empty string is returned.
     pub fn input(text: &str) -> &str {

@@ -1,4 +1,4 @@
-use biome_rowan::{FileSourceError};
+use biome_rowan::FileSourceError;
 use std::path::Path;
 
 /// Enum of the different ECMAScript standard versions.
@@ -99,7 +99,6 @@ impl Language {
         )
     }
 }
-
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct JsFileSource {

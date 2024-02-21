@@ -381,7 +381,7 @@ impl ParserContextCheckpoint {
 
 pub trait Parser: Sized {
     type Kind: SyntaxKind;
-    type Source: TokenSource<Kind=Self::Kind>;
+    type Source: TokenSource<Kind = Self::Kind>;
 
     /// Returns a reference to the [`ParserContext`](ParserContext)
     fn context(&self) -> &ParserContext<Self::Kind>;
@@ -443,24 +443,24 @@ pub trait Parser: Sized {
 
     /// Look ahead at a token and get its kind.
     fn nth(&mut self, n: usize) -> Self::Kind
-        where
-            Self::Source: NthToken,
+    where
+        Self::Source: NthToken,
     {
         self.source_mut().nth(n)
     }
 
     /// Checks if a token lookahead is something
     fn nth_at(&mut self, n: usize, kind: Self::Kind) -> bool
-        where
-            Self::Source: NthToken,
+    where
+        Self::Source: NthToken,
     {
         self.nth(n) == kind
     }
 
     /// Checks if a token set lookahead is something
     fn nth_at_ts(&mut self, n: usize, kinds: TokenSet<Self::Kind>) -> bool
-        where
-            Self::Source: NthToken,
+    where
+        Self::Source: NthToken,
     {
         kinds.contains(self.nth(n))
     }
@@ -468,8 +468,8 @@ pub trait Parser: Sized {
     /// Tests if there's a line break before the nth token.
     #[inline]
     fn has_nth_preceding_line_break(&mut self, n: usize) -> bool
-        where
-            Self::Source: NthToken,
+    where
+        Self::Source: NthToken,
     {
         self.source_mut().has_nth_preceding_line_break(n)
     }
@@ -579,8 +579,8 @@ pub trait Parser: Sized {
         kind: Self::Kind,
         context: <Self::Source as BumpWithContext>::Context,
     ) -> bool
-        where
-            Self::Source: BumpWithContext,
+    where
+        Self::Source: BumpWithContext,
     {
         if !self.at(kind) {
             return false;
@@ -619,8 +619,8 @@ pub trait Parser: Sized {
         kinds: TokenSet<Self::Kind>,
         context: <Self::Source as BumpWithContext>::Context,
     ) -> bool
-        where
-            Self::Source: BumpWithContext,
+    where
+        Self::Source: BumpWithContext,
     {
         if !self.at_ts(kinds) {
             return false;
@@ -638,8 +638,8 @@ pub trait Parser: Sized {
         kind: Self::Kind,
         context: <Self::Source as BumpWithContext>::Context,
     ) -> bool
-        where
-            Self::Source: BumpWithContext,
+    where
+        Self::Source: BumpWithContext,
     {
         if self.eat_with_context(kind, context) {
             true
@@ -661,8 +661,8 @@ pub trait Parser: Sized {
 
     /// Allows parsing an unsupported syntax as skipped trivia tokens.
     fn parse_as_skipped_trivia_tokens<P>(&mut self, parse: P)
-        where
-            P: FnOnce(&mut Self),
+    where
+        P: FnOnce(&mut Self),
     {
         let events_pos = self.context().events.len();
         self.context_mut().skipping = true;
@@ -681,10 +681,10 @@ pub trait Parser: Sized {
         if let Some(previous) = self.context().diagnostics.last() {
             match (&err.diagnostic_range(), &previous.diagnostic_range()) {
                 (Some(err_range), Some(previous_range))
-                if err_range.start() == previous_range.start() =>
-                    {
-                        return;
-                    }
+                    if err_range.start() == previous_range.start() =>
+                {
+                    return;
+                }
                 _ => {}
             }
         }
@@ -748,8 +748,8 @@ impl ParserProgress {
     /// Returns true if the current parser position is passed this position
     #[inline]
     pub fn has_progressed<P>(&self, p: &P) -> bool
-        where
-            P: Parser,
+    where
+        P: Parser,
     {
         match self.0 {
             None => true,
@@ -764,8 +764,8 @@ impl ParserProgress {
     /// Panics if the parser is still at this position
     #[inline]
     pub fn assert_progressing<P>(&mut self, p: &P)
-        where
-            P: Parser,
+    where
+        P: Parser,
     {
         assert!(
             self.has_progressed(p),
@@ -801,10 +801,10 @@ pub trait SyntaxFeature: Sized {
         syntax: S,
         error_builder: E,
     ) -> ParsedSyntax
-        where
-            S: Into<ParsedSyntax>,
-            E: FnOnce(&Self::Parser<'source>, &CompletedMarker) -> D,
-            D: ToDiagnostic<Self::Parser<'source>>,
+    where
+        S: Into<ParsedSyntax>,
+        E: FnOnce(&Self::Parser<'source>, &CompletedMarker) -> D,
+        D: ToDiagnostic<Self::Parser<'source>>,
     {
         syntax.into().map(|mut syntax| {
             if self.is_unsupported(p) {
@@ -828,9 +828,9 @@ pub trait SyntaxFeature: Sized {
         parse: P,
         error_builder: E,
     ) -> ParsedSyntax
-        where
-            P: FnOnce(&mut Self::Parser<'source>) -> ParsedSyntax,
-            E: FnOnce(&Self::Parser<'source>, &CompletedMarker) -> ParseDiagnostic,
+    where
+        P: FnOnce(&mut Self::Parser<'source>) -> ParsedSyntax,
+        E: FnOnce(&Self::Parser<'source>, &CompletedMarker) -> ParseDiagnostic,
     {
         if self.is_supported(p) {
             parse(p)
@@ -861,9 +861,9 @@ pub trait SyntaxFeature: Sized {
         syntax: S,
         error_builder: E,
     ) -> ParsedSyntax
-        where
-            S: Into<ParsedSyntax>,
-            E: FnOnce(&Self::Parser<'source>, &CompletedMarker) -> ParseDiagnostic,
+    where
+        S: Into<ParsedSyntax>,
+        E: FnOnce(&Self::Parser<'source>, &CompletedMarker) -> ParseDiagnostic,
     {
         syntax.into().map(|mut syntax| {
             if self.is_unsupported(p) {
@@ -893,19 +893,13 @@ pub struct AnyParse {
 }
 
 impl AnyParse {
-    pub fn new(
-        root: SendNode,
-        diagnostics: Vec<ParseDiagnostic>,
-    ) -> AnyParse {
-        AnyParse {
-            root,
-            diagnostics,
-        }
+    pub fn new(root: SendNode, diagnostics: Vec<ParseDiagnostic>) -> AnyParse {
+        AnyParse { root, diagnostics }
     }
 
     pub fn syntax<L>(&self) -> SyntaxNode<L>
-        where
-            L: Language + 'static,
+    where
+        L: Language + 'static,
     {
         self.root.clone().into_node().unwrap_or_else(|| {
             panic!(
@@ -916,9 +910,9 @@ impl AnyParse {
     }
 
     pub fn tree<N>(&self) -> N
-        where
-            N: AstNode,
-            N::Language: 'static,
+    where
+        N: AstNode,
+        N::Language: 'static,
     {
         N::unwrap_cast(self.syntax::<N::Language>())
     }

@@ -1,4 +1,7 @@
-use super::{AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler, FormatterCapabilities, LintParams, LintResults, Mime, ParserCapabilities, ParseResult};
+use super::{
+    AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler,
+    FormatterCapabilities, LintParams, LintResults, Mime, ParseResult, ParserCapabilities,
+};
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
 use crate::file_handlers::{is_diagnostic_error, FixAllParams, Language as LanguageId};
@@ -401,21 +404,21 @@ struct ActionsVisitor<'a> {
 }
 
 impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
-    fn record_category<C: GroupCategory<Language=JsLanguage>>(&mut self) {
+    fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
         }
     }
 
-    fn record_group<G: RuleGroup<Language=JsLanguage>>(&mut self) {
+    fn record_group<G: RuleGroup<Language = JsLanguage>>(&mut self) {
         G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
-        where
-            R: biome_analyze::Rule + 'static,
-            R::Query: biome_analyze::Queryable<Language=JsLanguage>,
-            <R::Query as biome_analyze::Queryable>::Output: Clone,
+    where
+        R: biome_analyze::Rule + 'static,
+        R::Query: biome_analyze::Queryable<Language = JsLanguage>,
+        <R::Query as biome_analyze::Queryable>::Output: Clone,
     {
         self.enabled_rules.push(RuleFilter::Rule(
             <R::Group as RuleGroup>::NAME,
@@ -433,7 +436,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         settings,
         path,
         manifest,
-        language
+        language,
     } = params;
     debug_span!("Code actions JavaScript", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
@@ -516,9 +519,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         rome_path,
         mut filter,
         manifest,
-        language
+        language,
     } = params;
-
 
     let Some(file_source) = language.as_js_file_source() else {
         return Err(extension_error(rome_path));
@@ -608,8 +610,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         settings.format_options::<JsLanguage>(rome_path),
                         tree.syntax(),
                     )?
-                        .print()?
-                        .into_code()
+                    .print()?
+                    .into_code()
                 } else {
                     tree.syntax().to_string()
                 };

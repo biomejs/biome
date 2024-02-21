@@ -24,10 +24,7 @@ impl TestFormatLanguage for CssTestFormatLanguage {
     fn parse(&self, text: &str) -> AnyParse {
         let parse = parse_css(text, CssParserOptions::default());
 
-        AnyParse::new(
-            parse.syntax().as_send().unwrap(),
-            parse.into_diagnostics(),
-        )
+        AnyParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics())
     }
 
     fn deserialize_format_options(

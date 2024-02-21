@@ -63,7 +63,7 @@ use biome_rowan::{
 /// diagnostics, code actions or both
 pub struct Analyzer<'analyzer, L: Language, Matcher, Break, Diag> {
     /// List of visitors being run by this instance of the analyzer for each phase
-    phases: BTreeMap<Phases, Vec<Box<dyn Visitor<Language=L> + 'analyzer>>>,
+    phases: BTreeMap<Phases, Vec<Box<dyn Visitor<Language = L> + 'analyzer>>>,
     /// Holds the metadata for all the rules statically known to the analyzer
     metadata: &'analyzer MetadataRegistry,
     /// Executor for the query matches emitted by the visitors
@@ -84,10 +84,10 @@ pub struct AnalyzerContext<'a, L: Language> {
 }
 
 impl<'analyzer, L, Matcher, Break, Diag> Analyzer<'analyzer, L, Matcher, Break, Diag>
-    where
-        L: Language,
-        Matcher: QueryMatcher<L>,
-        Diag: Diagnostic + Clone + Send + Sync + 'static,
+where
+    L: Language,
+    Matcher: QueryMatcher<L>,
+    Diag: Diagnostic + Clone + Send + Sync + 'static,
 {
     /// Construct a new instance of the analyzer with the given rule registry
     /// and suppression comment parser
@@ -112,7 +112,7 @@ impl<'analyzer, L, Matcher, Break, Diag> Analyzer<'analyzer, L, Matcher, Break, 
     pub fn add_visitor(
         &mut self,
         phase: Phases,
-        visitor: Box<dyn Visitor<Language=L> + 'analyzer>,
+        visitor: Box<dyn Visitor<Language = L> + 'analyzer>,
     ) {
         self.phases.entry(phase).or_default().push(visitor);
     }
@@ -199,7 +199,7 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     /// Identifier of the phase this runner is executing
     phase: Phases,
     /// List of visitors being run by this instance of the analyzer for each phase
-    visitors: &'phase mut [Box<dyn Visitor<Language=L> + 'analyzer>],
+    visitors: &'phase mut [Box<dyn Visitor<Language = L> + 'analyzer>],
     /// Holds the metadata for all the rules statically known to the analyzer
     metadata: &'analyzer MetadataRegistry,
     /// Executor for the query matches emitted by the visitors
@@ -247,10 +247,10 @@ struct LineSuppression {
 }
 
 impl<'a, 'phase, L, Matcher, Break, Diag> PhaseRunner<'a, 'phase, L, Matcher, Break, Diag>
-    where
-        L: Language,
-        Matcher: QueryMatcher<L>,
-        Diag: Diagnostic + Clone + Send + Sync + 'static,
+where
+    L: Language,
+    Matcher: QueryMatcher<L>,
+    Diag: Diagnostic + Clone + Send + Sync + 'static,
 {
     /// Runs phase 0 over nodes and tokens to process line breaks and
     /// suppression comments
@@ -466,10 +466,10 @@ impl<'a, 'phase, L, Matcher, Break, Diag> PhaseRunner<'a, 'phase, L, Matcher, Br
                         range,
                         "// rome-ignore is deprecated, use // biome-ignore instead",
                     )
-                        .with_tags(DiagnosticTags::DEPRECATED_CODE)
-                        .with_severity(Severity::Information)
+                    .with_tags(DiagnosticTags::DEPRECATED_CODE)
+                    .with_severity(Severity::Information)
                 })
-                    .with_action(move || create_suppression_comment_action(token));
+                .with_action(move || create_suppression_comment_action(token));
 
                 (self.emit_signal)(&signal)?;
             }
@@ -532,7 +532,7 @@ impl<'a, 'phase, L, Matcher, Break, Diag> PhaseRunner<'a, 'phase, L, Matcher, Br
                     range,
                     "Suppression is using a deprecated syntax",
                 )
-                    .with_tags(DiagnosticTags::DEPRECATED_CODE)
+                .with_tags(DiagnosticTags::DEPRECATED_CODE)
             });
 
             let signal = signal
@@ -654,7 +654,7 @@ fn create_suppression_comment_action<L: Language>(
         message: markup! {
             "Use // biome-ignore instead"
         }
-            .to_owned(),
+        .to_owned(),
         rule_name: None,
     })
 }
@@ -741,7 +741,7 @@ fn update_suppression<L: Language>(
         message: markup! {
             "Rewrite suppression to use the newer syntax"
         }
-            .to_owned(),
+        .to_owned(),
         mutation,
     })
 }
@@ -781,8 +781,8 @@ impl RuleFilter<'_> {
 
     /// Return `true` if the rule `R` matches this filter
     fn match_rule<R>(self) -> bool
-        where
-            R: Rule,
+    where
+        R: Rule,
     {
         match self {
             RuleFilter::Group(group) => group == <R::Group as RuleGroup>::NAME,
@@ -836,27 +836,27 @@ impl<'analysis> AnalysisFilter<'analysis> {
     pub fn match_group<G: RuleGroup>(&self) -> bool {
         self.match_category::<G::Category>()
             && self.enabled_rules.map_or(true, |enabled_rules| {
-            enabled_rules.iter().any(|filter| filter.match_group::<G>())
-        })
+                enabled_rules.iter().any(|filter| filter.match_group::<G>())
+            })
             && self.disabled_rules.map_or(true, |disabled_rules| {
-            !disabled_rules
-                .iter()
-                .any(|filter| filter.match_group::<G>())
-        })
+                !disabled_rules
+                    .iter()
+                    .any(|filter| filter.match_group::<G>())
+            })
     }
 
     /// Return `true` if the rule `R` matches this filter
     pub fn match_rule<R>(&self) -> bool
-        where
-            R: Rule,
+    where
+        R: Rule,
     {
         self.match_group::<R::Group>()
             && self.enabled_rules.map_or(true, |enabled_rules| {
-            enabled_rules.iter().any(|filter| filter.match_rule::<R>())
-        })
+                enabled_rules.iter().any(|filter| filter.match_rule::<R>())
+            })
             && self.disabled_rules.map_or(true, |disabled_rules| {
-            !disabled_rules.iter().any(|filter| filter.match_rule::<R>())
-        })
+                !disabled_rules.iter().any(|filter| filter.match_rule::<R>())
+            })
     }
 
     /// It creates a new filter with the set of [enabled rules](RuleFilter) passed as argument

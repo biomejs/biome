@@ -305,7 +305,6 @@ pub struct ParseResult {
     pub(crate) language: Option<Language>,
 }
 
-
 type Parse = fn(&RomePath, Language, &str, SettingsHandle, &mut NodeCache) -> ParseResult;
 
 #[derive(Default)]
@@ -376,9 +375,9 @@ pub struct AnalyzerCapabilities {
 
 type Format = fn(&RomePath, AnyParse, SettingsHandle) -> Result<Printed, WorkspaceError>;
 type FormatRange =
-fn(&RomePath, AnyParse, SettingsHandle, TextRange) -> Result<Printed, WorkspaceError>;
+    fn(&RomePath, AnyParse, SettingsHandle, TextRange) -> Result<Printed, WorkspaceError>;
 type FormatOnType =
-fn(&RomePath, AnyParse, SettingsHandle, TextSize) -> Result<Printed, WorkspaceError>;
+    fn(&RomePath, AnyParse, SettingsHandle, TextSize) -> Result<Printed, WorkspaceError>;
 
 #[derive(Default)]
 pub(crate) struct FormatterCapabilities {

@@ -5,7 +5,9 @@ use super::{
     PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
     SupportsFeatureParams, UpdateProjectParams, UpdateSettingsParams,
 };
-use crate::file_handlers::{Capabilities, CodeActionsParams, FixAllParams, Language, LintParams, ParseResult};
+use crate::file_handlers::{
+    Capabilities, CodeActionsParams, FixAllParams, Language, LintParams, ParseResult,
+};
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
     OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
@@ -208,7 +210,10 @@ impl WorkspaceServer {
                     settings,
                     &mut document.node_cache,
                 );
-                let ParseResult { language, any_parse } = parsed;
+                let ParseResult {
+                    language,
+                    any_parse,
+                } = parsed;
                 if let Some(language) = language {
                     document.language_hint = language
                 }
@@ -237,24 +242,24 @@ impl WorkspaceServer {
         !is_included
             || settings.as_ref().files.ignored_files.matches_path(path)
             || settings
-            .as_ref()
-            .files
-            .git_ignore
-            .as_ref()
-            .map(|ignore| {
-                // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
-                // This checks excludes absolute paths that are not a prefix of the base root.
-                if !path.has_root() || path.starts_with(ignore.path()) {
-                    // Because Biome passes a list of paths,
-                    // we use `matched_path_or_any_parents` instead of `matched`.
-                    ignore
-                        .matched_path_or_any_parents(path, path.is_dir())
-                        .is_ignore()
-                } else {
-                    false
-                }
-            })
-            .unwrap_or_default()
+                .as_ref()
+                .files
+                .git_ignore
+                .as_ref()
+                .map(|ignore| {
+                    // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
+                    // This checks excludes absolute paths that are not a prefix of the base root.
+                    if !path.has_root() || path.starts_with(ignore.path()) {
+                        // Because Biome passes a list of paths,
+                        // we use `matched_path_or_any_parents` instead of `matched`.
+                        ignore
+                            .matched_path_or_any_parents(path, path.is_dir())
+                            .is_ignore()
+                    } else {
+                        false
+                    }
+                })
+                .unwrap_or_default()
     }
 
     /// Check whether a file is ignored in the feature `ignore`/`include`

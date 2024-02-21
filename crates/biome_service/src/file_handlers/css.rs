@@ -18,7 +18,7 @@ use biome_formatter::{
 };
 use biome_fs::RomePath;
 use biome_parser::AnyParse;
-use biome_rowan::{NodeCache};
+use biome_rowan::NodeCache;
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]

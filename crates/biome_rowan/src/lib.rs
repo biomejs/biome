@@ -37,7 +37,7 @@ pub use biome_text_size::{TextLen, TextRange, TextSize};
 
 pub use crate::{
     ast::*,
-    file_source::{FileSourceError},
+    file_source::FileSourceError,
     green::{NodeCache, RawSyntaxKind},
     syntax::{
         chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,

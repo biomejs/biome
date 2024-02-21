@@ -24,10 +24,7 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
     fn parse(&self, text: &str) -> AnyParse {
         let parse = parse_json(text, JsonParserOptions::default().with_allow_comments());
 
-        AnyParse::new(
-            parse.syntax().as_send().unwrap(),
-            parse.into_diagnostics(),
-        )
+        AnyParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics())
     }
 
     fn deserialize_format_options(

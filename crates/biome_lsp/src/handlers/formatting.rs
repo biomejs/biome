@@ -38,23 +38,17 @@ pub(crate) fn format(
         let input = session.workspace.get_file_content(GetFileContentParams {
             path: rome_path.clone(),
         })?;
+        if output.is_empty() {
+            return Ok(None);
+        }
         match file_extension {
             Some("astro") => {
-                if output.is_empty() {
-                    return Ok(None);
-                }
                 output = AstroFileHandler::output(input.as_str(), output.as_str());
             }
             Some("vue") => {
-                if output.is_empty() {
-                    return Ok(None);
-                }
                 output = VueFileHandler::output(input.as_str(), output.as_str());
             }
             Some("svelte") => {
-                if output.is_empty() {
-                    return Ok(None);
-                }
                 output = SvelteFileHandler::output(input.as_str(), output.as_str());
             }
             _ => {}

@@ -1,4 +1,4 @@
-use biome_rowan::{FileSourceError};
+use biome_rowan::FileSourceError;
 use std::path::Path;
 
 #[derive(Debug, Default, Clone, Copy)]

@@ -12,7 +12,7 @@ use biome_js_formatter::{format_node, format_range, JsFormatLanguage};
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_parser::AnyParse;
-use biome_rowan::{SyntaxNode};
+use biome_rowan::SyntaxNode;
 use biome_text_size::TextRange;
 use serde::{Deserialize, Serialize};
 
@@ -39,10 +39,7 @@ impl TestFormatLanguage for JsTestFormatLanguage {
             JsParserOptions::default().with_parse_class_parameter_decorators(),
         );
 
-        AnyParse::new(
-            parse.syntax().as_send().unwrap(),
-            parse.into_diagnostics(),
-        )
+        AnyParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics())
     }
 
     fn deserialize_format_options(

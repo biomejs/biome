@@ -15,7 +15,7 @@ use biome_service::workspace::{
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
 use std::collections::HashMap;
-use std::ops::{Sub};
+use std::ops::Sub;
 use tower_lsp::lsp_types::{
     self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse,
 };
@@ -169,7 +169,7 @@ pub(crate) fn code_actions(
                 action,
                 offset,
             )
-                .ok()?;
+            .ok()?;
 
             has_fixes |= action.diagnostics.is_some();
             Some(CodeActionOrCommand::CodeAction(action))
