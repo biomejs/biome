@@ -872,6 +872,10 @@ export interface Nursery {
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
 	/**
+	 * A describe block should not contain duplicate hooks.
+	 */
+	noDuplicateTestHooks?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow empty block statements and static blocks.
 	 */
 	noEmptyBlockStatements?: RuleConfiguration_for_Null;
@@ -1812,6 +1816,7 @@ export type Category =
 	| "lint/nursery/noApproximativeNumericConstant"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDuplicateJsonKeys"
+	| "lint/nursery/noDuplicateTestHooks"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyTypeParameters"
 	| "lint/nursery/noFocusedTests"

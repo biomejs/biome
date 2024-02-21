@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_group;
 
+pub mod no_duplicate_test_hooks;
 pub mod no_empty_block_statements;
 pub mod no_empty_type_parameters;
 pub mod no_focused_tests;
@@ -26,6 +27,7 @@ declare_group! {
     pub Nursery {
         name : "nursery" ,
         rules : [
+            self :: no_duplicate_test_hooks :: NoDuplicateTestHooks ,
             self :: no_empty_block_statements :: NoEmptyBlockStatements ,
             self :: no_empty_type_parameters :: NoEmptyTypeParameters ,
             self :: no_focused_tests :: NoFocusedTests ,

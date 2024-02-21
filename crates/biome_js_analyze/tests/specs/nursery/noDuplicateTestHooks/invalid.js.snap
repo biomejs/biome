@@ -1,0 +1,394 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+describe("foo", () => {
+	beforeEach(() => {}),
+		beforeEach(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});
+
+describe.skip("foo", () => {
+	beforeEach(() => {}),
+		beforeAll(() => {}),
+		beforeAll(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});
+
+describe.skip("foo", () => {
+	afterEach(() => {}),
+		afterEach(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});
+
+describe.skip("foo", () => {
+	afterAll(() => {}),
+		afterAll(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});
+
+describe("foo", () => {
+	beforeEach(() => {}),
+		beforeEach(() => {}),
+		beforeEach(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});
+
+describe.skip("foo", () => {
+	afterAll(() => {}),
+		afterAll(() => {}),
+		beforeAll(() => {}),
+		beforeAll(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});
+
+describe("foo", () => {
+	beforeEach(() => {}),
+		beforeEach(() => {}),
+		beforeAll(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});
+
+describe("foo", () => {
+	beforeAll(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+	describe("inner_foo", () => {
+		beforeEach(() => {});
+		beforeEach(() => {});
+		test("inner bar", () => {
+			someFn();
+		});
+	});
+});
+
+describe.each(["hello"])("%s", () => {
+	beforeEach(() => {});
+	beforeEach(() => {});
+
+	it("is not fine", () => {});
+});
+
+describe("something", () => {
+	describe.each(["hello"])("%s", () => {
+		beforeEach(() => {});
+
+		it("is fine", () => {});
+	});
+
+	describe.each(["world"])("%s", () => {
+		beforeEach(() => {});
+		beforeEach(() => {});
+
+		it("is not fine", () => {});
+	});
+});
+
+describe("something", () => {
+	describe.each(["hello"])("%s", () => {
+		beforeEach(() => {});
+
+		it("is fine", () => {});
+	});
+
+	describe.each(["world"])("%s", () => {
+		describe("some more", () => {
+			beforeEach(() => {});
+			beforeEach(() => {});
+
+			it("is not fine", () => {});
+		});
+	});
+});
+
+describe("foo", () => {
+	before(() => {}),
+		before(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});
+
+describe("foo", () => {
+	after(() => {}),
+		after(() => {}),
+		test("bar", () => {
+			someFn();
+		});
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:3:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    1 │ describe("foo", () => {
+    2 │ 	beforeEach(() => {}),
+  > 3 │ 		beforeEach(() => {}),
+      │ 		^^^^^^^^^^^^^^^^^^^^
+    4 │ 		test("bar", () => {
+    5 │ 			someFn();
+  
+  i Disallow beforeEach duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:12:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    10 │ 	beforeEach(() => {}),
+    11 │ 		beforeAll(() => {}),
+  > 12 │ 		beforeAll(() => {}),
+       │ 		^^^^^^^^^^^^^^^^^^^
+    13 │ 		test("bar", () => {
+    14 │ 			someFn();
+  
+  i Disallow beforeAll duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:20:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    18 │ describe.skip("foo", () => {
+    19 │ 	afterEach(() => {}),
+  > 20 │ 		afterEach(() => {}),
+       │ 		^^^^^^^^^^^^^^^^^^^
+    21 │ 		test("bar", () => {
+    22 │ 			someFn();
+  
+  i Disallow afterEach duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:28:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    26 │ describe.skip("foo", () => {
+    27 │ 	afterAll(() => {}),
+  > 28 │ 		afterAll(() => {}),
+       │ 		^^^^^^^^^^^^^^^^^^
+    29 │ 		test("bar", () => {
+    30 │ 			someFn();
+  
+  i Disallow afterAll duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:36:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    34 │ describe("foo", () => {
+    35 │ 	beforeEach(() => {}),
+  > 36 │ 		beforeEach(() => {}),
+       │ 		^^^^^^^^^^^^^^^^^^^^
+    37 │ 		beforeEach(() => {}),
+    38 │ 		test("bar", () => {
+  
+  i Disallow beforeEach duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:37:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    35 │ 	beforeEach(() => {}),
+    36 │ 		beforeEach(() => {}),
+  > 37 │ 		beforeEach(() => {}),
+       │ 		^^^^^^^^^^^^^^^^^^^^
+    38 │ 		test("bar", () => {
+    39 │ 			someFn();
+  
+  i Disallow beforeEach duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:45:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    43 │ describe.skip("foo", () => {
+    44 │ 	afterAll(() => {}),
+  > 45 │ 		afterAll(() => {}),
+       │ 		^^^^^^^^^^^^^^^^^^
+    46 │ 		beforeAll(() => {}),
+    47 │ 		beforeAll(() => {}),
+  
+  i Disallow afterAll duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:47:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    45 │ 		afterAll(() => {}),
+    46 │ 		beforeAll(() => {}),
+  > 47 │ 		beforeAll(() => {}),
+       │ 		^^^^^^^^^^^^^^^^^^^
+    48 │ 		test("bar", () => {
+    49 │ 			someFn();
+  
+  i Disallow beforeAll duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:55:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    53 │ describe("foo", () => {
+    54 │ 	beforeEach(() => {}),
+  > 55 │ 		beforeEach(() => {}),
+       │ 		^^^^^^^^^^^^^^^^^^^^
+    56 │ 		beforeAll(() => {}),
+    57 │ 		test("bar", () => {
+  
+  i Disallow beforeEach duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:69:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    67 │ 	describe("inner_foo", () => {
+    68 │ 		beforeEach(() => {});
+  > 69 │ 		beforeEach(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^
+    70 │ 		test("inner bar", () => {
+    71 │ 			someFn();
+  
+  i Disallow beforeEach duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:91:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    90 │ 	describe.each(["world"])("%s", () => {
+  > 91 │ 		beforeEach(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^
+    92 │ 		beforeEach(() => {});
+    93 │ 
+  
+  i Disallow beforeEach duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:92:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    90 │ 	describe.each(["world"])("%s", () => {
+    91 │ 		beforeEach(() => {});
+  > 92 │ 		beforeEach(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^
+    93 │ 
+    94 │ 		it("is not fine", () => {});
+  
+  i Disallow beforeEach duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:108:4 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    106 │ 		describe("some more", () => {
+    107 │ 			beforeEach(() => {});
+  > 108 │ 			beforeEach(() => {});
+        │ 			^^^^^^^^^^^^^^^^^^^^
+    109 │ 
+    110 │ 			it("is not fine", () => {});
+  
+  i Disallow beforeEach duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:117:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    115 │ describe("foo", () => {
+    116 │ 	before(() => {}),
+  > 117 │ 		before(() => {}),
+        │ 		^^^^^^^^^^^^^^^^
+    118 │ 		test("bar", () => {
+    119 │ 			someFn();
+  
+  i Disallow before duplicacy inside the describe function.
+  
+
+```
+
+```
+invalid.js:125:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow duplicate setup and teardown hooks.
+  
+    123 │ describe("foo", () => {
+    124 │ 	after(() => {}),
+  > 125 │ 		after(() => {}),
+        │ 		^^^^^^^^^^^^^^^
+    126 │ 		test("bar", () => {
+    127 │ 			someFn();
+  
+  i Disallow after duplicacy inside the describe function.
+  
+
+```
+
+
