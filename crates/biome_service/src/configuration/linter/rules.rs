@@ -3896,12 +3896,12 @@ pub struct Suspicious {
     #[doc = "Prevents from having redundant \"use strict\"."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_redundant_use_strict: Option<RuleConfiguration>,
-    #[doc = "Remove semicolons from JSX elements."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_semicolon_in_jsx: Option<RuleConfiguration>,
     #[doc = "Disallow comparisons where both sides are exactly the same."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_self_compare: Option<RuleConfiguration>,
+    #[doc = "Remove semicolons from JSX elements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_semicolon_in_jsx: Option<RuleConfiguration>,
     #[doc = "Disallow identifiers from shadowing restricted names."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_shadow_restricted_names: Option<RuleConfiguration>,
@@ -3982,8 +3982,8 @@ impl Suspicious {
         "noPrototypeBuiltins",
         "noRedeclare",
         "noRedundantUseStrict",
-        "noSemicolonInJsx",
         "noSelfCompare",
+        "noSemicolonInJsx",
         "noShadowRestrictedNames",
         "noSparseArray",
         "noUnsafeDeclarationMerging",
@@ -4027,8 +4027,8 @@ impl Suspicious {
         "noPrototypeBuiltins",
         "noRedeclare",
         "noRedundantUseStrict",
-        "noSemicolonInJsx",
         "noSelfCompare",
+        "noSemicolonInJsx",
         "noShadowRestrictedNames",
         "noSparseArray",
         "noUnsafeDeclarationMerging",
@@ -4322,12 +4322,12 @@ impl Suspicious {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.no_semicolon_in_jsx.as_ref() {
+        if let Some(rule) = self.no_self_compare.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
-        if let Some(rule) = self.no_self_compare.as_ref() {
+        if let Some(rule) = self.no_semicolon_in_jsx.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
@@ -4682,8 +4682,8 @@ impl Suspicious {
             "noPrototypeBuiltins" => self.no_prototype_builtins.as_ref(),
             "noRedeclare" => self.no_redeclare.as_ref(),
             "noRedundantUseStrict" => self.no_redundant_use_strict.as_ref(),
-            "noSemicolonInJsx" => self.no_semicolon_in_jsx.as_ref(),
             "noSelfCompare" => self.no_self_compare.as_ref(),
+            "noSemicolonInJsx" => self.no_semicolon_in_jsx.as_ref(),
             "noShadowRestrictedNames" => self.no_shadow_restricted_names.as_ref(),
             "noSparseArray" => self.no_sparse_array.as_ref(),
             "noUnsafeDeclarationMerging" => self.no_unsafe_declaration_merging.as_ref(),

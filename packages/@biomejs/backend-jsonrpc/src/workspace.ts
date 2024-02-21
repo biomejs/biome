@@ -1336,13 +1336,13 @@ export interface Suspicious {
 	 */
 	noRedundantUseStrict?: RuleConfiguration;
 	/**
-	 * Remove unnecessary semicolons in JSX expressions.
-	 */
-	noSemicolonInJsx?: RuleConfiguration
-	/**
 	 * Disallow comparisons where both sides are exactly the same.
 	 */
 	noSelfCompare?: RuleConfiguration;
+	/**
+	 * Remove semicolons from JSX elements.
+	 */
+	noSemicolonInJsx?: RuleConfiguration;
 	/**
 	 * Disallow identifiers from shadowing restricted names.
 	 */
@@ -1863,6 +1863,7 @@ export type Category =
 	| "lint/suspicious/noSelfCompare"
 	| "lint/suspicious/noShadowRestrictedNames"
 	| "lint/suspicious/noSparseArray"
+	| "lint/suspicious/noSemicolonInJsx"
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
 	| "lint/suspicious/useDefaultSwitchClauseLast"

@@ -2383,15 +2383,15 @@
 						{ "type": "null" }
 					]
 				},
-				"noSemicolonInJsx": {
-					"description": "Remove unnecessary semicolons in JSX expressions.",
+				"noSelfCompare": {
+					"description": "Disallow comparisons where both sides are exactly the same.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"noSelfCompare": {
-					"description": "Disallow comparisons where both sides are exactly the same.",
+				"noSemicolonInJsx": {
+					"description": "Remove semicolons from JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
