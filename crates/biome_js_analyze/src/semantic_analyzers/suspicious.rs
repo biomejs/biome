@@ -13,6 +13,7 @@ pub(crate) mod no_global_is_nan;
 pub(crate) mod no_import_assign;
 pub(crate) mod no_label_var;
 pub(crate) mod no_redeclare;
+pub(crate) mod no_semicolon_in_jsx;
 pub(crate) mod no_unsafe_declaration_merging;
 pub(crate) mod use_is_array;
 
@@ -31,6 +32,7 @@ declare_group! {
             self :: no_import_assign :: NoImportAssign ,
             self :: no_label_var :: NoLabelVar ,
             self :: no_redeclare :: NoRedeclare ,
+            self :: no_semicolon_in_jsx :: NoSemicolonInJsx ,
             self :: no_unsafe_declaration_merging :: NoUnsafeDeclarationMerging ,
             self :: use_is_array :: UseIsArray ,
         ]

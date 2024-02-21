@@ -1336,6 +1336,10 @@ export interface Suspicious {
 	 */
 	noRedundantUseStrict?: RuleConfiguration;
 	/**
+	 * Remove unnecessary semicolons in JSX expressions.
+	 */
+	noSemicolonInJsx?: RuleConfiguration
+	/**
 	 * Disallow comparisons where both sides are exactly the same.
 	 */
 	noSelfCompare?: RuleConfiguration;
