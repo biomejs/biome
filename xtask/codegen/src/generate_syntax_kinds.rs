@@ -12,7 +12,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
         if "{}[]()`".contains(token) {
             let c = token.chars().next().unwrap();
             quote! { #c }
-        } else if *token == "$=" {
+        } else if matches!(*token, "$=" | "$..." | "$_") {
             let token = Literal::string(token);
             quote! { #token }
         } else {
@@ -116,6 +116,19 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
                         JSON_STRING_LITERAL => "string literal",
+                        _ => return None,
+                    };
+                    Some(tok)
+                }
+            }
+        }
+        LanguageKind::Grit => {
+            quote! {
+                pub const fn to_string(&self) -> Option<&'static str> {
+                    let tok = match self {
+                        #(#punctuation => #punctuation_strings,)*
+                        #(#full_keywords => #all_keyword_to_strings,)*
+                        GRIT_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
                     Some(tok)

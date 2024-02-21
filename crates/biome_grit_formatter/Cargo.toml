@@ -1,0 +1,56 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Biome's GritQL formatter"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_grit_formatter"
+repository.workspace = true
+version              = "0.4.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_console                = { workspace = true }
+biome_deserialize            = { workspace = true }
+biome_deserialize_macros     = { workspace = true }
+biome_diagnostics_categories = { workspace = true }
+biome_formatter              = { workspace = true }
+biome_grit_factory           = { workspace = true }
+biome_grit_syntax            = { workspace = true }
+biome_rowan                  = { workspace = true }
+biome_text_size              = { workspace = true }
+biome_unicode_table          = { workspace = true }
+cfg-if                       = "1.0.0"
+schemars                     = { workspace = true, optional = true }
+serde                        = { workspace = true, features = ["derive"], optional = true }
+smallvec                     = { workspace = true }
+tracing                      = { workspace = true }
+unicode-width                = "0.1.9"
+
+[dev-dependencies]
+biome_diagnostics    = { path = "../biome_diagnostics" }
+biome_formatter_test = { path = "../biome_formatter_test" }
+biome_fs             = { path = "../biome_fs" }
+biome_grit_factory   = { path = "../biome_grit_factory" }
+biome_grit_parser    = { path = "../biome_grit_parser" }
+biome_parser         = { path = "../biome_parser" }
+countme              = { workspace = true, features = ["enable"] }
+insta                = { workspace = true, features = ["glob"] }
+quickcheck           = { workspace = true }
+quickcheck_macros    = { workspace = true }
+serde                = { version = "1", features = ["derive"] }
+serde_json           = { workspace = true }
+tests_macros         = { path = "../tests_macros" }
+
+[features]
+serde = ["dep:serde", "schemars"]
+
+# cargo-workspaces metadata
+[package.metadata.workspaces]
+independent = true
+
+[lints]
+workspace = true

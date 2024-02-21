@@ -436,6 +436,88 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_grit_factory"
+version = "0.4.0"
+dependencies = [
+ "biome_grit_syntax",
+ "biome_rowan",
+]
+
+[[package]]
+name = "biome_grit_formatter"
+version = "0.4.0"
+dependencies = [
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_diagnostics_categories",
+ "biome_formatter",
+ "biome_formatter_test",
+ "biome_fs",
+ "biome_grit_factory",
+ "biome_grit_parser",
+ "biome_grit_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_text_size",
+ "biome_unicode_table",
+ "cfg-if",
+ "countme",
+ "insta",
+ "quickcheck",
+ "quickcheck_macros",
+ "schemars",
+ "serde",
+ "serde_json",
+ "smallvec",
+ "tests_macros",
+ "tracing",
+ "unicode-width",
+]
+
+[[package]]
+name = "biome_grit_parser"
+version = "0.4.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_grit_factory",
+ "biome_grit_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_unicode_table",
+ "bitflags 2.3.1",
+ "cfg-if",
+ "drop_bomb",
+ "expect-test",
+ "indexmap 1.9.3",
+ "quickcheck",
+ "quickcheck_macros",
+ "rustc-hash",
+ "schemars",
+ "serde",
+ "serde_json",
+ "smallvec",
+ "tests_macros",
+ "tracing",
+ "unicode-bom",
+]
+
+[[package]]
+name = "biome_grit_syntax"
+version = "0.4.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_grit_factory",
+ "biome_grit_parser",
+ "biome_rowan",
+ "schemars",
+ "serde",
+]
+
+[[package]]
 name = "biome_html_factory"
 version = "0.4.0"
 dependencies = [

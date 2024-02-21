@@ -781,6 +781,21 @@ fn get_node_concept(
                 _ => NodeConcept::Auxiliary,
             },
 
+            LanguageKind::Grit => match name {
+                _ if name.starts_with("GritPattern") => NodeConcept::Expression,
+
+                "GritAssignmentAsPattern" | "GritPredicateAssignment" => NodeConcept::Assignment,
+
+                _ if name.ends_with("BacktickSnippet")
+                    || name.ends_with("QuoteSnippet")
+                    || name.ends_with("Literal") =>
+                {
+                    NodeConcept::Value
+                }
+
+                _ => NodeConcept::Auxiliary,
+            },
+
             LanguageKind::Html => match name {
                 _ if name.ends_with("Value") => NodeConcept::Value,
                 _ => NodeConcept::Auxiliary,
@@ -846,6 +861,7 @@ impl LanguageKind {
             LanguageKind::Js => "JsFormatter",
             LanguageKind::Css => "CssFormatter",
             LanguageKind::Json => "JsonFormatter",
+            LanguageKind::Grit => "GritFormatter",
             LanguageKind::Html => "HtmlFormatter",
         };
 
@@ -857,6 +873,7 @@ impl LanguageKind {
             LanguageKind::Js => "JsFormatContext",
             LanguageKind::Css => "CssFormatContext",
             LanguageKind::Json => "JsonFormatContext",
+            LanguageKind::Grit => "GritFormatContext",
             LanguageKind::Html => "HtmlFormatContext",
         };
 
