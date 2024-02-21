@@ -34,7 +34,7 @@ const Component3 = () => (
 ```
 invalid.jsx:4:18 lint/suspicious/noSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! There is suspicious Semicolon in the JSX element.
+  ! There is a suspicious semicolon in the JSX element.
   
     2 │     return (
     3 │         <div>
@@ -45,7 +45,9 @@ invalid.jsx:4:18 lint/suspicious/noSemicolonInJsx ━━━━━━━━━━
     6 │     );
     7 │ }
   
-  i Remove the Semicolon from the JSX element.
+  i This is usually the result of a typo or some refactor gone wrong.
+  
+  i Remove the semicolon, or move it inside a JSX element.
   
 
 ```
@@ -53,7 +55,7 @@ invalid.jsx:4:18 lint/suspicious/noSemicolonInJsx ━━━━━━━━━━
 ```
 invalid.jsx:14:23 lint/suspicious/noSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! There is suspicious Semicolon in the JSX element.
+  ! There is a suspicious semicolon in the JSX element.
   
     12 │           <Component>
     13 │             <div />
@@ -64,7 +66,9 @@ invalid.jsx:14:23 lint/suspicious/noSemicolonInJsx ━━━━━━━━━�
     16 │     );
     17 │ }
   
-  i Remove the Semicolon from the JSX element.
+  i This is usually the result of a typo or some refactor gone wrong.
+  
+  i Remove the semicolon, or move it inside a JSX element.
   
 
 ```
@@ -72,7 +76,7 @@ invalid.jsx:14:23 lint/suspicious/noSemicolonInJsx ━━━━━━━━━�
 ```
 invalid.jsx:21:22 lint/suspicious/noSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! There is suspicious Semicolon in the JSX element.
+  ! There is a suspicious semicolon in the JSX element.
   
     19 │ const Component3 = () => (
     20 │     <div>
@@ -83,9 +87,9 @@ invalid.jsx:21:22 lint/suspicious/noSemicolonInJsx ━━━━━━━━━�
     23 │ )
     24 │ 
   
-  i Remove the Semicolon from the JSX element.
+  i This is usually the result of a typo or some refactor gone wrong.
+  
+  i Remove the semicolon, or move it inside a JSX element.
   
 
 ```
-
-
