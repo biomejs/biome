@@ -88,6 +88,9 @@ impl Rule for NoSemicolonInJsx {
             },
         )
         .note(markup! {
+        	"This is usually the result of a typo or some refactor gone wrong."
+        })
+        .note(markup! {
             "Remove the "<Emphasis>"semicolon"</Emphasis>", or move it inside a JSX element."
         });
         Some(diagnostic)
