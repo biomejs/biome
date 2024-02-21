@@ -2,8 +2,8 @@ use biome_analyze::{
     context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_js_syntax::{jsx_ext::AnyJsxElement, JsLanguage, JsxChildList, JsxElement};
-use biome_rowan::{AstNode, AstNodeList, SyntaxToken, TextRange};
+use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxChildList, JsxElement};
+use biome_rowan::{AstNode, AstNodeList, TextRange};
 
 declare_rule! {
     /// It detects possible "wrong" semicolons inside JSX elements.
@@ -80,7 +80,7 @@ impl Rule for NoSemicolonInJsx {
             },
         )
         .note(markup! {
-        	"This is usually the result of a typo or some refactor gone wrong."
+            "This is usually the result of a typo or some refactor gone wrong."
         })
         .note(markup! {
             "Remove the "<Emphasis>"semicolon"</Emphasis>", or move it inside a JSX element."
