@@ -88,7 +88,7 @@ impl Rule for NoSemicolonInJsx {
             },
         )
         .note(markup! {
-            "Remove the "<Emphasis>"Semicolon"</Emphasis>" from the JSX element."
+            "Remove the "<Emphasis>"semicolon"</Emphasis>", or move it inside a JSX element."
         });
         Some(diagnostic)
     }
