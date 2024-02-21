@@ -213,7 +213,6 @@ define_categories! {
     "lint/suspicious/noSelfCompare": "https://biomejs.dev/linter/rules/no-self-compare",
     "lint/suspicious/noShadowRestrictedNames": "https://biomejs.dev/linter/rules/no-shadow-restricted-names",
     "lint/suspicious/noSparseArray": "https://biomejs.dev/linter/rules/no-sparse-array",
-    "lint/suspicious/noSemicolonInJsx": "https://biomejs.dev/linter/rules/no-semicolons-in-jsx",
     "lint/suspicious/noUnsafeDeclarationMerging": "https://biomejs.dev/linter/rules/no-unsafe-declaration-merging",
     "lint/suspicious/noUnsafeNegation": "https://biomejs.dev/linter/rules/no-unsafe-negation",
     "lint/suspicious/useDefaultSwitchClauseLast": "https://biomejs.dev/linter/rules/use-default-switch-clause-last",
