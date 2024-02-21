@@ -84,7 +84,7 @@ impl HooksContext {
             "before" => &mut self.before,
             "beforeEach" => &mut self.before_each,
             "beforeAll" => &mut self.before_all,
-            _ => unreachable!(), // Should never happen
+            _ => return 0, // Should never happen
         };
         *counter += 1;
 
