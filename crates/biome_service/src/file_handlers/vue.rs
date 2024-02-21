@@ -1,8 +1,4 @@
-use crate::file_handlers::{
-    javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime,
-    ParserCapabilities,
-};
+use crate::file_handlers::{javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime, ParserCapabilities, ParseResult};
 use crate::settings::SettingsHandle;
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::WorkspaceError;
@@ -11,7 +7,7 @@ use biome_fs::RomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
 use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
-use biome_rowan::{FileSource, NodeCache};
+use biome_rowan::{NodeCache};
 use lazy_static::lazy_static;
 use regex::{Match, Regex};
 use tracing::debug;
@@ -61,7 +57,7 @@ impl VueFileHandler {
 
     /// Returns the start byte offset of the Vue `<script>` tag
     pub fn start(input: &str) -> Option<u32> {
-        Self::matches_script(input).map(|m| m.start() as u32)
+        Self::matches_script(input).map(|m| m.start() as u32 - 1)
     }
 
     fn matches_script(input: &str) -> Option<Match> {
@@ -121,7 +117,7 @@ fn parse(
     text: &str,
     _settings: SettingsHandle,
     cache: &mut NodeCache,
-) -> AnyParse {
+) -> ParseResult {
     let script = VueFileHandler::input(text);
     let language = VueFileHandler::file_source(text);
 
@@ -131,12 +127,18 @@ fn parse(
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
 
-    AnyParse::new(
-        // SAFETY: the parser should always return a root node
-        root.as_send().unwrap(),
-        diagnostics,
-        JsFileSource::ts().as_any_file_source(),
-    )
+    ParseResult {
+        any_parse: AnyParse::new(
+            // SAFETY: the parser should always return a root node
+            root.as_send().unwrap(),
+            diagnostics,
+        ),
+        language: Some(if language.is_typescript() {
+            Language::TypeScript
+        } else {
+            Language::JavaScript
+        }),
+    }
 }
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]

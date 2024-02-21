@@ -287,6 +287,7 @@ pub struct FixAllParams<'a> {
     pub(crate) should_format: bool,
     pub(crate) rome_path: &'a RomePath,
     pub(crate) manifest: Option<PackageJson>,
+    pub(crate) language: Language,
 }
 
 #[derive(Default)]
@@ -298,7 +299,14 @@ pub struct Capabilities {
     pub(crate) formatter: FormatterCapabilities,
 }
 
-type Parse = fn(&RomePath, Language, &str, SettingsHandle, &mut NodeCache) -> AnyParse;
+#[derive(Clone)]
+pub struct ParseResult {
+    pub(crate) any_parse: AnyParse,
+    pub(crate) language: Option<Language>,
+}
+
+
+type Parse = fn(&RomePath, Language, &str, SettingsHandle, &mut NodeCache) -> ParseResult;
 
 #[derive(Default)]
 pub struct ParserCapabilities {
@@ -343,6 +351,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) settings: SettingsHandle<'a>,
     pub(crate) path: &'a RomePath,
     pub(crate) manifest: Option<PackageJson>,
+    pub(crate) language: Language,
 }
 
 type Lint = fn(LintParams) -> LintResults;
@@ -367,9 +376,9 @@ pub struct AnalyzerCapabilities {
 
 type Format = fn(&RomePath, AnyParse, SettingsHandle) -> Result<Printed, WorkspaceError>;
 type FormatRange =
-    fn(&RomePath, AnyParse, SettingsHandle, TextRange) -> Result<Printed, WorkspaceError>;
+fn(&RomePath, AnyParse, SettingsHandle, TextRange) -> Result<Printed, WorkspaceError>;
 type FormatOnType =
-    fn(&RomePath, AnyParse, SettingsHandle, TextSize) -> Result<Printed, WorkspaceError>;
+fn(&RomePath, AnyParse, SettingsHandle, TextSize) -> Result<Printed, WorkspaceError>;
 
 #[derive(Default)]
 pub(crate) struct FormatterCapabilities {

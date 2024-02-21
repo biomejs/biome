@@ -1,4 +1,4 @@
-use super::{ExtensionHandler, Mime};
+use super::{ExtensionHandler, Mime, ParseResult};
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
@@ -12,13 +12,13 @@ use crate::WorkspaceError;
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::{can_format_css_yet, format_node};
 use biome_css_parser::CssParserOptions;
-use biome_css_syntax::{CssFileSource, CssLanguage, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
 use biome_fs::RomePath;
 use biome_parser::AnyParse;
-use biome_rowan::{FileSource, NodeCache};
+use biome_rowan::{NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -136,18 +136,13 @@ impl ExtensionHandler for CssFileHandler {
 
 fn parse(
     rome_path: &RomePath,
-    language_hint: LanguageId,
+    _language_hint: LanguageId,
     text: &str,
     settings: SettingsHandle,
     cache: &mut NodeCache,
-) -> AnyParse {
+) -> ParseResult {
     let parser = &settings.as_ref().languages.css.parser;
     let overrides = &settings.as_ref().override_settings;
-    let source_type =
-        CssFileSource::try_from(rome_path.as_path()).unwrap_or_else(|_| match language_hint {
-            LanguageId::Css => CssFileSource::css(),
-            _ => CssFileSource::css(),
-        });
     let options: CssParserOptions =
         overrides
             .as_css_parser_options(rome_path)
@@ -157,12 +152,14 @@ fn parse(
     let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
-    AnyParse::new(
-        // SAFETY: the parser should always return a root node
-        root.as_send().unwrap(),
-        diagnostics,
-        source_type.as_any_file_source(),
-    )
+    ParseResult {
+        any_parse: AnyParse::new(
+            // SAFETY: the parser should always return a root node
+            root.as_send().unwrap(),
+            diagnostics,
+        ),
+        language: None,
+    }
 }
 
 fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeResult {

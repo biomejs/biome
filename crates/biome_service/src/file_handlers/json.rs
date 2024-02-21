@@ -1,4 +1,4 @@
-use super::{CodeActionsParams, ExtensionHandler, Mime};
+use super::{CodeActionsParams, ExtensionHandler, Mime, ParseResult};
 use crate::configuration::{to_analyzer_rules, PartialConfiguration};
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FixAllParams, FormatterCapabilities, LintParams,
@@ -26,7 +26,7 @@ use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, FileSource, NodeCache};
+use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use std::path::{Path, PathBuf};
 
@@ -154,7 +154,7 @@ fn parse(
     text: &str,
     settings: SettingsHandle,
     cache: &mut NodeCache,
-) -> AnyParse {
+) -> ParseResult {
     let parser = &settings.as_ref().languages.json.parser;
     let overrides = &settings.as_ref().override_settings;
     let source_type =
@@ -175,12 +175,15 @@ fn parse(
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
-    AnyParse::new(
-        // SAFETY: the parser should always return a root node
-        root.as_send().unwrap(),
-        diagnostics,
-        source_type.as_any_file_source(),
-    )
+
+    ParseResult {
+        any_parse: AnyParse::new(
+            // SAFETY: the parser should always return a root node
+            root.as_send().unwrap(),
+            diagnostics,
+        ),
+        language: None,
+    }
 }
 
 fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeResult {
@@ -273,6 +276,7 @@ fn format_on_type(
     let printed = biome_json_formatter::format_sub_tree(options, &root_node)?;
     Ok(printed)
 }
+
 fn lint(params: LintParams) -> LintResults {
     tracing::debug_span!("Linting JSON file", path =? params.path, language =? params.language)
         .in_scope(move || {
@@ -375,6 +379,7 @@ fn lint(params: LintParams) -> LintResults {
             }
         })
 }
+
 fn code_actions(_: CodeActionsParams) -> PullActionsResult {
     PullActionsResult {
         actions: Vec::new(),

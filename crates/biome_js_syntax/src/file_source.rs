@@ -1,5 +1,4 @@
-use crate::JsLanguage;
-use biome_rowan::{FileSource, FileSourceError};
+use biome_rowan::{FileSourceError};
 use std::path::Path;
 
 /// Enum of the different ECMAScript standard versions.
@@ -101,7 +100,6 @@ impl Language {
     }
 }
 
-impl<'a> FileSource<'a, JsLanguage> for JsFileSource {}
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct JsFileSource {
@@ -193,6 +191,10 @@ impl JsFileSource {
         self.module_kind.is_module()
     }
 
+    pub const fn is_typescript(&self) -> bool {
+        self.language.is_typescript()
+    }
+
     pub fn file_extension(&self) -> &str {
         match self.language {
             Language::JavaScript => {
@@ -254,11 +256,13 @@ fn compute_source_type_from_path_or_extension(
             "tsx" => JsFileSource::tsx(),
             // TODO: Remove once we have full support of astro files
             "astro" => JsFileSource::ts(),
+            "vue" => JsFileSource::ts(),
+            "svelte" => JsFileSource::ts(),
             _ => {
                 return Err(FileSourceError::UnknownExtension(
                     file_name.into(),
                     extension.into(),
-                ))
+                ));
             }
         }
     };

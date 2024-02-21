@@ -11,6 +11,7 @@ use biome_diagnostics::{category, Diagnostic, Error as DiagnosticError};
 use biome_js_syntax::suppression::SuppressionDiagnostic;
 use biome_js_syntax::{suppression::parse_suppression_comment, JsFileSource, JsLanguage};
 use biome_project::PackageJson;
+use log::trace;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::{borrow::Cow, error::Error};
@@ -136,6 +137,7 @@ where
         services.insert_service(Arc::new(manifest));
     }
     services.insert_service(source_type);
+    trace!("Analyzer run!!!");
     (
         analyzer.run(AnalyzerContext {
             root: root.clone(),

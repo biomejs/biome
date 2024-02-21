@@ -7,12 +7,12 @@ use biome_json_formatter::{format_node, format_range, JsonFormatLanguage};
 use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
-use biome_rowan::{FileSource, SyntaxNode, TextRange};
+use biome_rowan::{SyntaxNode, TextRange};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default)]
 pub struct JsonTestFormatLanguage {
-    source_type: JsonFileSource,
+    _source_type: JsonFileSource,
 }
 
 impl TestFormatLanguage for JsonTestFormatLanguage {
@@ -27,7 +27,6 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
         AnyParse::new(
             parse.syntax().as_send().unwrap(),
             parse.into_diagnostics(),
-            self.source_type.as_any_file_source(),
         )
     }
 

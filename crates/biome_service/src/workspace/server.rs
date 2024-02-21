@@ -5,7 +5,7 @@ use super::{
     PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
     SupportsFeatureParams, UpdateProjectParams, UpdateSettingsParams,
 };
-use crate::file_handlers::{Capabilities, CodeActionsParams, FixAllParams, Language, LintParams};
+use crate::file_handlers::{Capabilities, CodeActionsParams, FixAllParams, Language, LintParams, ParseResult};
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
     OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
@@ -208,7 +208,11 @@ impl WorkspaceServer {
                     settings,
                     &mut document.node_cache,
                 );
-                Ok(entry.insert(parsed).clone())
+                let ParseResult { language, any_parse } = parsed;
+                if let Some(language) = language {
+                    document.language_hint = language
+                }
+                Ok(entry.insert(any_parse).clone())
             }
         }
     }
@@ -219,10 +223,10 @@ impl WorkspaceServer {
         let file_name = path.file_name().and_then(|s| s.to_str());
         // Never ignore Biome's config file regardless `include`/`ignore`
         (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
-        // Apply top-level `include`/`ignore`
-        (self.is_ignored_by_top_level_config(path) ||
-        // Apply feature-level `include`/`ignore`
-        self.is_ignored_by_feature_config(path, feature))
+            // Apply top-level `include`/`ignore`
+            (self.is_ignored_by_top_level_config(path) ||
+                // Apply feature-level `include`/`ignore`
+                self.is_ignored_by_feature_config(path, feature))
     }
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
@@ -233,24 +237,24 @@ impl WorkspaceServer {
         !is_included
             || settings.as_ref().files.ignored_files.matches_path(path)
             || settings
-                .as_ref()
-                .files
-                .git_ignore
-                .as_ref()
-                .map(|ignore| {
-                    // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
-                    // This checks excludes absolute paths that are not a prefix of the base root.
-                    if !path.has_root() || path.starts_with(ignore.path()) {
-                        // Because Biome passes a list of paths,
-                        // we use `matched_path_or_any_parents` instead of `matched`.
-                        ignore
-                            .matched_path_or_any_parents(path, path.is_dir())
-                            .is_ignore()
-                    } else {
-                        false
-                    }
-                })
-                .unwrap_or_default()
+            .as_ref()
+            .files
+            .git_ignore
+            .as_ref()
+            .map(|ignore| {
+                // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
+                // This checks excludes absolute paths that are not a prefix of the base root.
+                if !path.has_root() || path.starts_with(ignore.path()) {
+                    // Because Biome passes a list of paths,
+                    // we use `matched_path_or_any_parents` instead of `matched`.
+                    ignore
+                        .matched_path_or_any_parents(path, path.is_dir())
+                        .is_ignore()
+                } else {
+                    false
+                }
+            })
+            .unwrap_or_default()
     }
 
     /// Check whether a file is ignored in the feature `ignore`/`include`
@@ -538,6 +542,7 @@ impl Workspace for WorkspaceServer {
         let settings = self.settings.read().unwrap();
         let rules = settings.linter().rules.as_ref();
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+        let language = self.get_language(&params.path);
         Ok(code_actions(CodeActionsParams {
             parse,
             range: params.range,
@@ -545,6 +550,7 @@ impl Workspace for WorkspaceServer {
             settings: self.settings(),
             path: &params.path,
             manifest,
+            language,
         }))
     }
 
@@ -617,6 +623,7 @@ impl Workspace for WorkspaceServer {
             .collect::<Vec<_>>();
         let filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+        let language = self.get_language(&params.path);
         fix_all(FixAllParams {
             parse,
             rules: rules.as_ref().map(|x| x.borrow()),
@@ -626,6 +633,7 @@ impl Workspace for WorkspaceServer {
             should_format: params.should_format,
             rome_path: &params.path,
             manifest,
+            language,
         })
     }
 

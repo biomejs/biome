@@ -1,7 +1,4 @@
-use super::{
-    AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler,
-    FormatterCapabilities, LintParams, LintResults, Mime, ParserCapabilities,
-};
+use super::{AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler, FormatterCapabilities, LintParams, LintResults, Mime, ParserCapabilities, ParseResult};
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
 use crate::file_handlers::{is_diagnostic_error, FixAllParams, Language as LanguageId};
@@ -40,11 +37,11 @@ use biome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, TextSize, TokenAtOffset,
 };
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, BatchMutationExt, Direction, FileSource, NodeCache};
+use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache};
 use std::borrow::Cow;
 use std::fmt::Debug;
 use std::path::PathBuf;
-use tracing::{debug, debug_span, error, info, trace};
+use tracing::{debug, debug_span, error, info, trace, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -181,13 +178,14 @@ impl ExtensionHandler for JsFileHandler {
         }
     }
 }
+
 fn parse(
     rome_path: &RomePath,
     language_hint: LanguageId,
     text: &str,
     settings: SettingsHandle,
     cache: &mut NodeCache,
-) -> AnyParse {
+) -> ParseResult {
     let source_type =
         JsFileSource::try_from(rome_path.as_path()).unwrap_or_else(|_| match language_hint {
             LanguageId::JavaScriptReact => JsFileSource::jsx(),
@@ -206,12 +204,14 @@ fn parse(
     let parse = biome_js_parser::parse_js_with_cache(text, source_type, options, cache);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
-    AnyParse::new(
-        // SAFETY: the parser should always return a root node
-        root.as_send().unwrap(),
-        diagnostics,
-        source_type.as_any_file_source(),
-    )
+    ParseResult {
+        any_parse: AnyParse::new(
+            // SAFETY: the parser should always return a root node
+            root.as_send().unwrap(),
+            diagnostics,
+        ),
+        language: None,
+    }
 }
 
 fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeResult {
@@ -285,19 +285,12 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
         .in_scope(move || {
             let settings = params.settings.as_ref();
-            let file_source = match params.parse.file_source(params.path) {
-                Ok(file_source) => file_source,
-                Err(_) => {
-                    if let Some(file_source) = params.language.as_js_file_source() {
-                        file_source
-                    } else {
-                        return LintResults {
-                            errors: 0,
-                            diagnostics: vec![],
-                            skipped_diagnostics: 0,
-                        };
-                    }
-                }
+            let Some(file_source) = params.language.as_js_file_source() else {
+                return LintResults {
+                    errors: 0,
+                    diagnostics: vec![],
+                    skipped_diagnostics: 0,
+                };
             };
             let tree = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
@@ -408,21 +401,21 @@ struct ActionsVisitor<'a> {
 }
 
 impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
-    fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
+    fn record_category<C: GroupCategory<Language=JsLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
         }
     }
 
-    fn record_group<G: RuleGroup<Language = JsLanguage>>(&mut self) {
+    fn record_group<G: RuleGroup<Language=JsLanguage>>(&mut self) {
         G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
-    where
-        R: biome_analyze::Rule + 'static,
-        R::Query: biome_analyze::Queryable<Language = JsLanguage>,
-        <R::Query as biome_analyze::Queryable>::Output: Clone,
+        where
+            R: biome_analyze::Rule + 'static,
+            R::Query: biome_analyze::Queryable<Language=JsLanguage>,
+            <R::Query as biome_analyze::Queryable>::Output: Clone,
     {
         self.enabled_rules.push(RuleFilter::Rule(
             <R::Group as RuleGroup>::NAME,
@@ -440,10 +433,11 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         settings,
         path,
         manifest,
+        language
     } = params;
-    debug_span!("Code actions JavaScript", range =? range, rules =? rules, path =? path).in_scope(
-        move || {
-            let tree = parse.tree();
+    debug_span!("Code actions JavaScript", range =? range, path =? path).in_scope(move || {
+        let tree = parse.tree();
+        trace_span!("Parsed file", tree =? tree).in_scope(move || {
             let mut actions = Vec::new();
             let mut enabled_rules = vec![];
             if settings.as_ref().organize_imports.enabled {
@@ -474,13 +468,15 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             }
             filter.range = Some(range);
 
-            trace!("Filter applied for code actions: {:?}", &filter);
             let analyzer_options =
                 compute_analyzer_options(&settings, PathBuf::from(path.as_path()));
-            let Ok(source_type) = parse.file_source(path) else {
+
+            let Some(source_type) = language.as_js_file_source() else {
+                error!("Could not determine the file source of the file");
                 return PullActionsResult { actions: vec![] };
             };
 
+            trace!("Javascript runs the analyzer");
             analyze(
                 &tree,
                 filter,
@@ -503,8 +499,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             );
 
             PullActionsResult { actions }
-        },
-    )
+        })
+    })
 }
 
 /// If applies all the safe fixes to the given syntax tree.
@@ -520,11 +516,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         rome_path,
         mut filter,
         manifest,
+        language
     } = params;
 
-    let file_source = parse
-        .file_source(rome_path)
-        .map_err(|_| extension_error(params.rome_path))?;
+
+    let Some(file_source) = language.as_js_file_source() else {
+        return Err(extension_error(rome_path));
+    };
     let mut tree: AnyJsRoot = parse.tree();
     let mut actions = Vec::new();
 
@@ -593,7 +591,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                                         (Cow::Borrowed(group), Cow::Borrowed(rule))
                                     }),
                                 },
-                            ))
+                            ));
                         }
                     };
                     actions.push(FixAction {
@@ -610,8 +608,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         settings.format_options::<JsLanguage>(rome_path),
                         tree.syntax(),
                     )?
-                    .print()?
-                    .into_code()
+                        .print()?
+                        .into_code()
                 } else {
                     tree.syntax().to_string()
                 };
@@ -647,6 +645,7 @@ pub(crate) fn format(
         }
     }
 }
+
 #[tracing::instrument(level = "trace", skip(parse, settings))]
 fn format_range(
     rome_path: &RomePath,
@@ -776,7 +775,7 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
                             .rule_name
                             .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
                     },
-                ))
+                ));
             }
         };
 
