@@ -43,7 +43,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoSemicolonInJsx {
-        version: "1.0.0",
+        version: "next",
         name: "noSemicolonInJsx",
         source: RuleSource::Eslint("no-semicolons-in-jsx"),
         source_kind: RuleSourceKind::Inspired,
