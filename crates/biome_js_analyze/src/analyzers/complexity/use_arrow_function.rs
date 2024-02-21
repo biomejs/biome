@@ -67,7 +67,7 @@ declare_rule! {
     ///     return 0;
     /// }
     /// ```
-    pub(crate) UseArrowFunction {
+    pub UseArrowFunction {
         version: "1.0.0",
         name: "useArrowFunction",
         source: RuleSource::Eslint("prefer-arrow-callback"),
@@ -221,7 +221,7 @@ fn needs_parentheses(function_expression: &JsFunctionExpression) -> bool {
 }
 
 declare_node_union! {
-    pub(crate) AnyThisScope =
+    pub AnyThisScope =
         JsConstructorClassMember
         | JsFunctionExpression
         | JsFunctionDeclaration
@@ -238,12 +238,12 @@ declare_node_union! {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct AnyThisScopeMetadata {
+pub struct AnyThisScopeMetadata {
     scope: AnyThisScope,
     has_this: bool,
 }
 
-pub(crate) struct ActualThisScope(AnyThisScopeMetadata);
+pub struct ActualThisScope(AnyThisScopeMetadata);
 
 impl QueryMatch for ActualThisScope {
     fn text_range(&self) -> TextRange {

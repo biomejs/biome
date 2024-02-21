@@ -72,13 +72,14 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@76..78 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
-                items: [
-                    COLOR_PROFILE_KW@78..92 "color-profile" [] [Whitespace(" ")],
-                    CssCustomIdentifier {
-                        value_token: IDENT@92..103 "DEVICE-CMYK" [] [],
-                    },
-                ],
+            rule: CssColorProfileAtRule {
+                color_profile_token: COLOR_PROFILE_KW@78..92 "color-profile" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@92..103 "DEVICE-CMYK" [] [],
+                },
+                block: CssBogusBlock {
+                    items: [],
+                },
             },
         },
         CssAtRule {
@@ -86,6 +87,9 @@ CssRoot {
             rule: CssBogusAtRule {
                 items: [
                     COLOR_PROFILE_KW@105..118 "color-profile" [] [],
+                    CssBogusBlock {
+                        items: [],
+                    },
                 ],
             },
         },
@@ -130,14 +134,16 @@ CssRoot {
           2: R_CURLY@75..76 "}" [] []
     3: CSS_AT_RULE@76..103
       0: AT@76..78 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@78..103
+      1: CSS_COLOR_PROFILE_AT_RULE@78..103
         0: COLOR_PROFILE_KW@78..92 "color-profile" [] [Whitespace(" ")]
         1: CSS_CUSTOM_IDENTIFIER@92..103
           0: IDENT@92..103 "DEVICE-CMYK" [] []
+        2: CSS_BOGUS_BLOCK@103..103
     4: CSS_AT_RULE@103..118
       0: AT@103..105 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@105..118
         0: COLOR_PROFILE_KW@105..118 "color-profile" [] []
+        1: CSS_BOGUS_BLOCK@118..118
   2: EOF@118..119 "" [Newline("\n")] []
 
 ```
@@ -201,7 +207,7 @@ at_rule_color_profile_error.css:3:17 parse ━━━━━━━━━━━━�
   
 at_rule_color_profile_error.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found '@'.
+  × expected `{` but instead found `@`
   
     3 │ @color-profile  {  }
     4 │ @color-profile DEVICE-CMYK
@@ -209,13 +215,7 @@ at_rule_color_profile_error.css:5:1 parse ━━━━━━━━━━━━�
       │ ^
     6 │ 
   
-  i Expected a body here.
-  
-    3 │ @color-profile  {  }
-    4 │ @color-profile DEVICE-CMYK
-  > 5 │ @color-profile
-      │ ^
-    6 │ 
+  i Remove @
   
 at_rule_color_profile_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

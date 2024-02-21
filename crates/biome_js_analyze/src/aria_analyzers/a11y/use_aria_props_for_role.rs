@@ -38,7 +38,7 @@ declare_rule! {
     /// ### Resources
     /// - [ARIA Spec, Roles](https://www.w3.org/TR/wai-aria/#roles)
     /// - [Chrome Audit Rules, AX_ARIA_03](https://github.com/GoogleChrome/accessibility-developer-tools/wiki/Audit-Rules#ax_aria_03)
-    pub(crate) UseAriaPropsForRole {
+    pub UseAriaPropsForRole {
         version: "1.0.0",
         name: "useAriaPropsForRole",
         source: RuleSource::EslintJsxA11y("role-has-required-aria-props"),
@@ -47,7 +47,7 @@ declare_rule! {
 }
 
 #[derive(Default, Debug)]
-pub(crate) struct UseAriaPropsForRoleState {
+pub struct UseAriaPropsForRoleState {
     missing_aria_props: Vec<String>,
     attribute: Option<(JsxAttribute, String)>,
 }

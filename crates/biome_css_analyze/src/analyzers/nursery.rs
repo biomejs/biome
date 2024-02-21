@@ -2,10 +2,10 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod noop;
+pub mod noop;
 
 declare_group! {
-    pub (crate) Nursery {
+    pub Nursery {
         name : "nursery" ,
         rules : [
             self :: noop :: Noop ,

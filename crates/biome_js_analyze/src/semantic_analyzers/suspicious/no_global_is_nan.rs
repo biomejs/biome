@@ -30,7 +30,7 @@ declare_rule! {
     /// Number.isNaN({}); // false
     /// ```
     ///
-    pub(crate) NoGlobalIsNan {
+    pub NoGlobalIsNan {
         version: "1.0.0",
         name: "noGlobalIsNan",
         recommended: true,

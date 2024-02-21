@@ -88,7 +88,7 @@ pub(crate) fn lint_with_guard<'ctx>(
                         .into_iter()
                         .map(Error::from)
                         .collect(),
-                    skipped_diagnostics: pull_diagnostics_result.skipped_diagnostics,
+                    skipped_diagnostics: pull_diagnostics_result.skipped_diagnostics as u32,
                 });
             }
 

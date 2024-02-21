@@ -15,7 +15,7 @@ xtest('foo', () => {});
 
 # Diagnostics
 ```
-invalid.js:1:10 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:10 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't disable tests.
   
@@ -28,11 +28,18 @@ invalid.js:1:10 lint/nursery/noSkippedTests ━━━━━━━━━━━━
   
   i If this is intentional, and you want to commit a disabled test, add a suppression comment.
   
+  i Unsafe fix: Enable the test.
+  
+    1   │ - describe.skip("test",·()·=>·{});
+      1 │ + describe("test",·()·=>·{});
+    2 2 │   it.skip("test", () => {});
+    3 3 │   test.skip("test", () => {});
+  
 
 ```
 
 ```
-invalid.js:2:4 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:4 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't disable tests.
   
@@ -46,11 +53,19 @@ invalid.js:2:4 lint/nursery/noSkippedTests ━━━━━━━━━━━━�
   
   i If this is intentional, and you want to commit a disabled test, add a suppression comment.
   
+  i Unsafe fix: Enable the test.
+  
+    1 1 │   describe.skip("test", () => {});
+    2   │ - it.skip("test",·()·=>·{});
+      2 │ + it("test",·()·=>·{});
+    3 3 │   test.skip("test", () => {});
+    4 4 │   xdescribe('foo', () => {});
+  
 
 ```
 
 ```
-invalid.js:3:6 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:6 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't disable tests.
   
@@ -65,11 +80,20 @@ invalid.js:3:6 lint/nursery/noSkippedTests ━━━━━━━━━━━━�
   
   i If this is intentional, and you want to commit a disabled test, add a suppression comment.
   
+  i Unsafe fix: Enable the test.
+  
+    1 1 │   describe.skip("test", () => {});
+    2 2 │   it.skip("test", () => {});
+    3   │ - test.skip("test",·()·=>·{});
+      3 │ + test("test",·()·=>·{});
+    4 4 │   xdescribe('foo', () => {});
+    5 5 │   xit('foo', () => {});
+  
 
 ```
 
 ```
-invalid.js:4:1 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:1 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't disable tests.
   
@@ -84,11 +108,20 @@ invalid.js:4:1 lint/nursery/noSkippedTests ━━━━━━━━━━━━�
   
   i If this is intentional, and you want to commit a disabled test, add a suppression comment.
   
+  i Unsafe fix: Enable the test.
+  
+    2 2 │   it.skip("test", () => {});
+    3 3 │   test.skip("test", () => {});
+    4   │ - xdescribe('foo',·()·=>·{});
+      4 │ + describe('foo',·()·=>·{});
+    5 5 │   xit('foo', () => {});
+    6 6 │   xtest('foo', () => {});
+  
 
 ```
 
 ```
-invalid.js:5:1 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't disable tests.
   
@@ -103,11 +136,20 @@ invalid.js:5:1 lint/nursery/noSkippedTests ━━━━━━━━━━━━�
   
   i If this is intentional, and you want to commit a disabled test, add a suppression comment.
   
+  i Unsafe fix: Enable the test.
+  
+    3 3 │   test.skip("test", () => {});
+    4 4 │   xdescribe('foo', () => {});
+    5   │ - xit('foo',·()·=>·{});
+      5 │ + it('foo',·()·=>·{});
+    6 6 │   xtest('foo', () => {});
+    7 7 │   
+  
 
 ```
 
 ```
-invalid.js:6:1 lint/nursery/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't disable tests.
   
@@ -120,6 +162,14 @@ invalid.js:6:1 lint/nursery/noSkippedTests ━━━━━━━━━━━━�
   i Disabling tests is useful when debugging or creating placeholder while working.
   
   i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    4 4 │   xdescribe('foo', () => {});
+    5 5 │   xit('foo', () => {});
+    6   │ - xtest('foo',·()·=>·{});
+      6 │ + test('foo',·()·=>·{});
+    7 7 │   
   
 
 ```

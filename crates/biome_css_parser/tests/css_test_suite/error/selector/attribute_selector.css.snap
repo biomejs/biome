@@ -120,36 +120,37 @@ CssRoot {
                 r_curly_token: R_CURLY@49..50 "}" [] [],
             },
         },
-        CssBogusRule {
-            items: [
-                CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssAttributeSelector {
-                                l_brack_token: L_BRACK@50..52 "[" [Newline("\n")] [],
-                                name: CssAttributeName {
-                                    namespace: missing (optional),
-                                    name: CssIdentifier {
-                                        value_token: IDENT@52..57 "title" [] [],
-                                    },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@50..52 "[" [Newline("\n")] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@52..57 "title" [] [],
                                 },
-                                matcher: CssAttributeMatcher {
-                                    operator: EQ@57..58 "=" [] [],
-                                    value: CssAttributeMatcherValue {
-                                        name: CssString {
-                                            value_token: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")],
-                                        },
-                                    },
-                                    modifier: S_KW@64..65 "s" [] [],
-                                },
-                                r_brack_token: missing (required),
                             },
-                        ],
-                    },
-                ],
+                            matcher: CssAttributeMatcher {
+                                operator: EQ@57..58 "=" [] [],
+                                value: CssAttributeMatcherValue {
+                                    name: CssString {
+                                        value_token: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")],
+                                    },
+                                },
+                                modifier: S_KW@64..65 "s" [] [],
+                            },
+                            r_brack_token: missing (required),
+                        },
+                    ],
+                },
             ],
+            block: CssBogusBlock {
+                items: [],
+            },
         },
     ],
     eof_token: EOF@65..66 "" [Newline("\n")] [],
@@ -223,7 +224,7 @@ CssRoot {
         0: L_CURLY@48..49 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@49..49
         2: R_CURLY@49..50 "}" [] []
-    3: CSS_BOGUS_RULE@50..65
+    3: CSS_QUALIFIED_RULE@50..65
       0: CSS_SELECTOR_LIST@50..65
         0: CSS_COMPOUND_SELECTOR@50..65
           0: (empty)
@@ -242,6 +243,7 @@ CssRoot {
                     0: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")]
                 2: S_KW@64..65 "s" [] []
               3: (empty)
+      1: CSS_BOGUS_BLOCK@65..65
   2: EOF@65..66 "" [Newline("\n")] []
 
 ```

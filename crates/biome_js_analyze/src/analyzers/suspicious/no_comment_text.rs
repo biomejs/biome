@@ -35,7 +35,7 @@ declare_rule! {
     /// const a1 = <div>{/** comment */}</div>;
     /// const a2 = <div className={"cls" /* comment */}></div>;
     /// ```
-    pub(crate) NoCommentText {
+    pub NoCommentText {
         version: "1.0.0",
         name: "noCommentText",
         source: RuleSource::EslintReact("jsx-no-comment-textnodes"),

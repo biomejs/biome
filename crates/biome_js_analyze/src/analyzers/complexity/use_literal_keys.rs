@@ -49,7 +49,7 @@ declare_rule! {
     /// a[d.c];
     /// ```
     ///
-    pub(crate) UseLiteralKeys {
+    pub UseLiteralKeys {
         version: "1.0.0",
         name: "useLiteralKeys",
         source: RuleSource::Eslint("dot-notation"),
@@ -178,5 +178,5 @@ impl Rule for UseLiteralKeys {
 }
 
 declare_node_union! {
-    pub(crate) AnyJsMember = AnyJsComputedMember | JsLiteralMemberName | JsComputedMemberName
+    pub AnyJsMember = AnyJsComputedMember | JsLiteralMemberName | JsComputedMemberName
 }

@@ -57,7 +57,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) UseGetterReturn {
+    pub UseGetterReturn {
         version: "1.0.0",
         name: "useGetterReturn",
         source: RuleSource::Eslint("getter-return"),
@@ -158,7 +158,7 @@ impl Rule for UseGetterReturn {
 }
 
 #[derive(Debug)]
-pub(crate) enum InvalidGetterReturn {
+pub enum InvalidGetterReturn {
     /// No `return` statement.
     MissingReturn,
     // A `return` statement without argument.

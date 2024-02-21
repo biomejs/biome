@@ -41,7 +41,7 @@ declare_rule! {
     /// declare module "foo" {}
     /// ```
     ///
-    pub(crate) UseNamespaceKeyword {
+    pub UseNamespaceKeyword {
         version: "1.0.0",
         name: "useNamespaceKeyword",
         source: RuleSource::EslintTypeScript("prefer-namespace-keyword"),

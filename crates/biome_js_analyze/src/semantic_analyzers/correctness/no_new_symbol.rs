@@ -30,7 +30,7 @@ declare_rule! {
     ///     new Symbol();
     /// }
     /// ```
-    pub(crate) NoNewSymbol {
+    pub NoNewSymbol {
         version: "1.0.0",
         name: "noNewSymbol",
         recommended: false,

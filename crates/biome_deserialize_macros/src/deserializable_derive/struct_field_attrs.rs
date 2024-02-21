@@ -1,8 +1,8 @@
-use proc_macro2::Ident;
 use quote::ToTokens;
-use syn::ext::IdentExt;
-use syn::parse::{Parse, ParseStream, Result};
-use syn::{parenthesized, Attribute, Error, LitStr, Token};
+use syn::spanned::Spanned;
+use syn::{Attribute, Error, Lit, Meta, MetaNameValue, Path};
+
+use crate::util::parse_meta_list;
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct StructFieldAttrs {
@@ -34,7 +34,7 @@ pub struct StructFieldAttrs {
     pub required: bool,
 
     /// Optional validation function to be called on the field value.
-    pub validate: Option<String>,
+    pub validate: Option<Path>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -46,176 +46,105 @@ pub enum DeprecatedField {
     UseInstead(String),
 }
 
-impl StructFieldAttrs {
-    pub fn from_attrs(attrs: &[Attribute]) -> Self {
+impl TryFrom<&Vec<Attribute>> for StructFieldAttrs {
+    type Error = Error;
+
+    fn try_from(attrs: &Vec<Attribute>) -> std::prelude::v1::Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
             if attr.path.is_ident("deserializable") {
-                opts.merge_with(
-                    syn::parse2::<Self>(attr.tokens.clone())
-                        .expect("Could not parse field attributes"),
-                );
+                parse_meta_list(&attr.parse_meta()?, |meta| {
+                    match meta {
+                        Meta::Path(path) => {
+                            if path.is_ident("required") {
+                                opts.required = true;
+                            } else if path.is_ident("passthrough_name") {
+                                opts.passthrough_name = true;
+                            } else if path.is_ident("bail_on_error") {
+                                opts.bail_on_error = true;
+                            } else {
+                                let path_str = path.to_token_stream().to_string();
+                                return Err(Error::new(
+                                    path.span(),
+                                    format_args!("Unexpected attribute: {path_str}"),
+                                ));
+                            }
+                        }
+                        Meta::NameValue(MetaNameValue {
+                            path,
+                            lit: Lit::Str(s),
+                            ..
+                        }) => {
+                            if path.is_ident("rename") {
+                                opts.rename = Some(s.value())
+                            } else if path.is_ident("validate") {
+                                opts.validate = Some(s.parse()?)
+                            }
+                        }
+                        Meta::List(_) if meta.path().is_ident("deprecated") => {
+                            let mut deprecated = None;
+                            parse_meta_list(meta, |meta| {
+                                let Meta::NameValue(MetaNameValue {
+                                    path,
+                                    lit: Lit::Str(s),
+                                    ..
+                                }) = meta
+                                else {
+                                    let meta_text = meta.to_token_stream().to_string();
+                                    return Err(Error::new(
+                                        meta.span(),
+                                        format_args!("Unexpected attribute: {meta_text}"),
+                                    ));
+                                };
+                                deprecated = if deprecated.is_some() {
+                                    return Err(Error::new(
+                                        meta.span(),
+                                        "Only one attribute expected inside deprecated()",
+                                    ));
+                                } else if path.is_ident("message") {
+                                    Some(DeprecatedField::Message(s.value()))
+                                } else if path.is_ident("use_instead") {
+                                    Some(DeprecatedField::UseInstead(s.value()))
+                                } else {
+                                    let path_text = path.to_token_stream().to_string();
+                                    return Err(Error::new(
+                                        path.span(),
+                                        format_args!(
+                                            "Unexpected attribute inside deprecated(): {path_text}"
+                                        ),
+                                    ));
+                                };
+                                Ok(())
+                            })?;
+                            opts.deprecated = deprecated;
+                        }
+                        _ => {
+                            let meta_text = meta.to_token_stream().to_string();
+                            return Err(Error::new(
+                                meta.span(),
+                                format_args!("Unexpected attribute: {meta_text}"),
+                            ));
+                        }
+                    }
+                    Ok(())
+                })?;
             } else if attr.path.is_ident("serde") {
-                opts.merge_with_serde(
-                    syn::parse2::<SerdeStructFieldAttrs>(attr.tokens.clone())
-                        .expect("Could not parse Serde field attributes"),
-                );
+                parse_meta_list(&attr.parse_meta()?, |meta| {
+                    match meta {
+                        Meta::NameValue(MetaNameValue {
+                            path,
+                            lit: Lit::Str(s),
+                            ..
+                        }) if opts.rename.is_none() && path.is_ident("rename") => {
+                            opts.rename = Some(s.value())
+                        }
+                        _ => {} // Don't fail on unrecognized Serde attrs
+                    }
+                    Ok(())
+                })
+                .ok();
             }
         }
-        opts
-    }
-
-    fn merge_with(&mut self, other: Self) {
-        if other.bail_on_error {
-            self.bail_on_error = other.bail_on_error;
-        }
-        if other.deprecated.is_some() {
-            self.deprecated = other.deprecated;
-        }
-        if other.passthrough_name {
-            self.passthrough_name = other.passthrough_name;
-        }
-        if other.rename.is_some() {
-            self.rename = other.rename;
-        }
-        if other.required {
-            self.required = other.required;
-        }
-        if other.validate.is_some() {
-            self.validate = other.validate;
-        }
-    }
-
-    fn merge_with_serde(&mut self, other: SerdeStructFieldAttrs) {
-        if other.rename.is_some() {
-            self.rename = other.rename;
-        }
-    }
-}
-
-impl Parse for StructFieldAttrs {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let content;
-        parenthesized!(content in input);
-
-        let parse_value = || -> Result<String> {
-            content.parse::<Token![=]>()?;
-            Ok(content
-                .parse::<LitStr>()?
-                .to_token_stream()
-                .to_string()
-                .trim_matches('"')
-                .to_owned())
-        };
-
-        let mut result = Self::default();
-        loop {
-            let key: Ident = content.call(IdentExt::parse_any)?;
-            match key.to_string().as_ref() {
-                "bail_on_error" => result.bail_on_error = true,
-                "deprecated" => {
-                    result.deprecated = Some(content.parse::<DeprecatedField>()?);
-                }
-                "passthrough_name" => result.passthrough_name = true,
-                "rename" => result.rename = Some(parse_value()?),
-                "required" => result.required = true,
-                "validate" => result.validate = Some(parse_value()?),
-                other => {
-                    return Err(Error::new(
-                        content.span(),
-                        format!("Unexpected field attribute: {other}"),
-                    ))
-                }
-            }
-
-            if content.is_empty() {
-                break;
-            }
-
-            content.parse::<Token![,]>()?;
-        }
-
-        Ok(result)
-    }
-}
-
-impl Parse for DeprecatedField {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let content;
-        parenthesized!(content in input);
-
-        let parse_value = || -> Result<String> {
-            content.parse::<Token![=]>()?;
-            Ok(content
-                .parse::<LitStr>()?
-                .to_token_stream()
-                .to_string()
-                .trim_matches('"')
-                .to_owned())
-        };
-
-        let key: Ident = content.call(IdentExt::parse_any)?;
-        let result = match key.to_string().as_ref() {
-            "message" => Self::Message(parse_value()?),
-            "use_instead" => Self::UseInstead(parse_value()?),
-            other => {
-                return Err(Error::new(
-                    content.span(),
-                    format!("Unexpected field attribute inside deprecated(): {other}"),
-                ))
-            }
-        };
-
-        if !content.is_empty() {
-            return Err(Error::new(
-                content.span(),
-                "Only one attribute expected inside deprecated()",
-            ));
-        }
-
-        Ok(result)
-    }
-}
-
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
-struct SerdeStructFieldAttrs {
-    rename: Option<String>,
-}
-
-impl Parse for SerdeStructFieldAttrs {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let content;
-        parenthesized!(content in input);
-
-        let parse_value = || -> Result<String> {
-            content.parse::<Token![=]>()?;
-            Ok(content
-                .parse::<LitStr>()?
-                .to_token_stream()
-                .to_string()
-                .trim_matches('"')
-                .to_owned())
-        };
-
-        let mut result = Self::default();
-        loop {
-            let key: Ident = content.call(IdentExt::parse_any)?;
-            match key.to_string().as_ref() {
-                "rename" => result.rename = Some(parse_value()?),
-                _ => {
-                    // Don't fail on unrecognized Serde attrs,
-                    // but consume values to advance the parser.
-                    let _result = parse_value();
-                }
-            }
-
-            if content.is_empty() {
-                break;
-            }
-
-            content.parse::<Token![,]>()?;
-        }
-
-        Ok(result)
+        Ok(opts)
     }
 }

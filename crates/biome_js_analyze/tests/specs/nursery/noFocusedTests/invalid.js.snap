@@ -14,7 +14,7 @@ fit('foo', () => {});
 
 # Diagnostics
 ```
-invalid.js:1:10 lint/nursery/noFocusedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:10 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -27,11 +27,18 @@ invalid.js:1:10 lint/nursery/noFocusedTests ━━━━━━━━━━━━
   
   i Remove it.
   
+  i Unsafe fix: Remove focus from test.
+  
+    1   │ - describe.only("test",·()·=>·{});
+      1 │ + describe("test",·()·=>·{});
+    2 2 │   it.only("test", () => {});
+    3 3 │   test.only("test", () => {});
+  
 
 ```
 
 ```
-invalid.js:2:4 lint/nursery/noFocusedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:4 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -45,11 +52,19 @@ invalid.js:2:4 lint/nursery/noFocusedTests ━━━━━━━━━━━━�
   
   i Remove it.
   
+  i Unsafe fix: Remove focus from test.
+  
+    1 1 │   describe.only("test", () => {});
+    2   │ - it.only("test",·()·=>·{});
+      2 │ + it("test",·()·=>·{});
+    3 3 │   test.only("test", () => {});
+    4 4 │   fdescribe('foo', () => {});
+  
 
 ```
 
 ```
-invalid.js:3:6 lint/nursery/noFocusedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:6 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -63,6 +78,69 @@ invalid.js:3:6 lint/nursery/noFocusedTests ━━━━━━━━━━━━�
   i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
   
   i Remove it.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    1 1 │   describe.only("test", () => {});
+    2 2 │   it.only("test", () => {});
+    3   │ - test.only("test",·()·=>·{});
+      3 │ + test("test",·()·=>·{});
+    4 4 │   fdescribe('foo', () => {});
+    5 5 │   fit('foo', () => {});
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    2 │ it.only("test", () => {});
+    3 │ test.only("test", () => {});
+  > 4 │ fdescribe('foo', () => {});
+      │ ^^^^^^^^^
+    5 │ fit('foo', () => {});
+    6 │ 
+  
+  i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
+  
+  i Remove it.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    2 2 │   it.only("test", () => {});
+    3 3 │   test.only("test", () => {});
+    4   │ - fdescribe('foo',·()·=>·{});
+      4 │ + describe('foo',·()·=>·{});
+    5 5 │   fit('foo', () => {});
+    6 6 │   
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    3 │ test.only("test", () => {});
+    4 │ fdescribe('foo', () => {});
+  > 5 │ fit('foo', () => {});
+      │ ^^^
+    6 │ 
+  
+  i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
+  
+  i Remove it.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    3 3 │   test.only("test", () => {});
+    4 4 │   fdescribe('foo', () => {});
+    5   │ - fit('foo',·()·=>·{});
+      5 │ + it('foo',·()·=>·{});
+    6 6 │   
   
 
 ```

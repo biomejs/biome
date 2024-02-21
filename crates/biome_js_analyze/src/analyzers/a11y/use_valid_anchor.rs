@@ -13,14 +13,15 @@ declare_rule! {
     /// While before it was possible to attach logic to an anchor element, with the advent of JSX libraries,
     /// it's now  easier to attach logic to any HTML element, anchors included.
     ///
-    /// This rule is designed to prevent users to attach logic at the click of anchors, and also makes
-    /// sure that the `href` provided to the anchor element is valid. If the anchor has logic attached to it,
+    /// This rule is designed to prevent users from attaching logic at the click of anchors when the `href`
+    /// provided to the anchor element is not valid. Avoid using `#` symbol inside the `href` when you are
+    /// attaching the logic to the anchor element. If the anchor has logic attached to it with an incorrect `href`
     /// the rules suggests to turn it to a `button`, because that's likely what the user wants.
     ///
     /// Anchor `<a></a>` elements should be used for navigation, while `<button></button>` should be
     /// used for user interaction.
     ///
-    /// There are **many reasons** why an anchor should not have a logic and have a correct `href` attribute:
+    /// There are **many reasons** why an anchor should not have a logic with an incorrect `href` attribute:
     /// - it can disrupt the correct flow of the user navigation e.g. a user that wants to open the link
     /// in another tab, but the default "click" behaviour is prevented
     /// - it can source of invalid links, and crawlers can't navigate the website, risking to penalise
@@ -42,10 +43,12 @@ declare_rule! {
     /// ```jsx,expect_diagnostic
     /// <a href="javascript:void(0)">navigate here</a>
     /// ```
-    /// ```jsx,expect_diagnostic
+
+    /// ### Valid
+    ///
+    /// ```jsx
     /// <a href="https://example.com" onClick={something}>navigate here</a>
     /// ```
-    /// ### Valid
     ///
     /// ```jsx
     /// <a href={`https://www.javascript.com`}>navigate here</a>
@@ -63,7 +66,7 @@ declare_rule! {
     ///
     /// - [WCAG 2.1.1](https://www.w3.org/WAI/WCAG21/Understanding/keyboard)
     ///
-    pub(crate) UseValidAnchor {
+    pub UseValidAnchor {
         version: "1.0.0",
         name: "useValidAnchor",
         source: RuleSource::EslintJsxA11y("anchor-is-valid"),
@@ -74,7 +77,7 @@ declare_rule! {
 /// Representation of the various states
 ///
 /// The `TextRange` of each variant represents the range of where the issue is found.
-pub(crate) enum UseValidAnchorState {
+pub enum UseValidAnchorState {
     /// The anchor element has not `href` attribute
     MissingHrefAttribute(TextRange),
     /// The value assigned to attribute `href` is not valid
@@ -145,7 +148,20 @@ impl Rule for UseValidAnchor {
             let on_click_attribute = node.find_attribute_by_name("onClick");
 
             match (anchor_attribute, on_click_attribute) {
-                (Some(_), Some(_)) => return Some(UseValidAnchorState::CantBeAnchor(node.range())),
+                (Some(anchor_attribute), Some(_)) => {
+                    if anchor_attribute.initializer().is_none() {
+                        return Some(UseValidAnchorState::CantBeAnchor(node.range()));
+                    }
+
+                    let static_value = anchor_attribute.as_static_value()?;
+                    if static_value.as_string_constant().map_or(true, |const_str| {
+                        const_str.is_empty()
+                            || const_str.contains('#')
+                            || const_str.contains("javascript:")
+                    }) {
+                        return Some(UseValidAnchorState::CantBeAnchor(node.range()));
+                    }
+                }
                 (Some(anchor_attribute), _) => {
                     if anchor_attribute.initializer().is_none() {
                         return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));

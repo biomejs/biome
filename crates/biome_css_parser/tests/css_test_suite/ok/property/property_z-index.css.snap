@@ -61,14 +61,16 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@5..41 "z-index" [Newline("\n"), Whitespace("    "), Comments("/* Global values */"), Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@41..43 ":" [] [Whitespace(" ")],
-                                value: CssWideKeyword {
-                                    value: INHERIT_KW@43..50 "inherit" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@43..50 "inherit" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -76,14 +78,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@51..63 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@63..65 ":" [] [Whitespace(" ")],
-                                value: CssWideKeyword {
-                                    value: INITIAL_KW@65..72 "initial" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@65..72 "initial" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -91,14 +95,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@73..85 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@85..87 ":" [] [Whitespace(" ")],
-                                value: CssWideKeyword {
-                                    value: UNSET_KW@87..92 "unset" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@87..92 "unset" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -106,14 +112,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@93..105 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@105..107 ":" [] [Whitespace(" ")],
-                                value: CssWideKeyword {
-                                    value: REVERT_KW@107..113 "revert" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@107..113 "revert" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -121,14 +129,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@114..126 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@126..128 ":" [] [Whitespace(" ")],
-                                value: CssWideKeyword {
-                                    value: REVERT_LAYER_KW@128..140 "revert-layer" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@128..140 "revert-layer" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -136,14 +146,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@141..169 "z-index" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* auto */"), Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@169..171 ":" [] [Whitespace(" ")],
-                                value: CssAuto {
-                                    value_token: AUTO_KW@171..175 "auto" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@171..175 "auto" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -151,14 +163,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@176..209 "z-index" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* <integer> */"), Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@209..211 ":" [] [Whitespace(" ")],
-                                value: CssNumber {
-                                    value_token: CSS_NUMBER_LITERAL@211..212 "1" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@211..212 "1" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -166,14 +180,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@213..225 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@225..227 ":" [] [Whitespace(" ")],
-                                value: CssNumber {
-                                    value_token: CSS_NUMBER_LITERAL@227..228 "0" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@227..228 "0" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -181,14 +197,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@229..241 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@241..243 ":" [] [Whitespace(" ")],
-                                value: CssNumber {
-                                    value_token: CSS_NUMBER_LITERAL@243..245 "-1" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@243..245 "-1" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -196,14 +214,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@246..258 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@258..260 ":" [] [Whitespace(" ")],
-                                value: CssNumber {
-                                    value_token: CSS_NUMBER_LITERAL@260..267 "-123456" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@260..267 "-123456" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -211,14 +231,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@268..280 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@280..282 ":" [] [Whitespace(" ")],
-                                value: CssNumber {
-                                    value_token: CSS_NUMBER_LITERAL@282..288 "444567" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@282..288 "444567" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -226,19 +248,17 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@289..345 "z-index" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Incorrect values b ..."), Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@345..347 ":" [] [Whitespace(" ")],
-                                value: CssUnknownPropertyValue {
-                                    css_generic_component_value_list: CssGenericComponentValueList [
-                                        CssRegularDimension {
-                                            value_token: CSS_NUMBER_LITERAL@347..349 "10" [] [],
-                                            unit_token: IDENT@349..350 "s" [] [],
-                                        },
-                                    ],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@347..349 "10" [] [],
+                                        unit_token: IDENT@349..350 "s" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -246,18 +266,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@351..363 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@363..365 ":" [] [Whitespace(" ")],
-                                value: CssUnknownPropertyValue {
-                                    css_generic_component_value_list: CssGenericComponentValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@365..374 "one-value" [] [],
-                                        },
-                                    ],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@365..374 "one-value" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -265,21 +283,19 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@375..387 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@387..389 ":" [] [Whitespace(" ")],
-                                value: CssUnknownPropertyValue {
-                                    css_generic_component_value_list: CssGenericComponentValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@389..398 "multiple" [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@398..404 "values" [] [],
-                                        },
-                                    ],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@389..398 "multiple" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@398..404 "values" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -287,24 +303,22 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@405..417 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@417..419 ":" [] [Whitespace(" ")],
-                                value: CssUnknownPropertyValue {
-                                    css_generic_component_value_list: CssGenericComponentValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@419..428 "delimited" [] [],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: COMMA@428..430 "," [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@430..436 "values" [] [],
-                                        },
-                                    ],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@419..428 "delimited" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@428..430 "," [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@430..436 "values" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -312,30 +326,28 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@437..449 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@449..451 ":" [] [Whitespace(" ")],
-                                value: CssUnknownPropertyValue {
-                                    css_generic_component_value_list: CssGenericComponentValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@451..461 "delimited" [] [Whitespace(" ")],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: SLASH@461..463 "/" [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@463..469 "slash" [] [Whitespace(" ")],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: SLASH@469..471 "/" [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@471..477 "values" [] [],
-                                        },
-                                    ],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@451..461 "delimited" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@461..463 "/" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@463..469 "slash" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@469..471 "/" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@471..477 "values" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -343,39 +355,37 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssZIndexProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@478..490 "z-index" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@490..492 ":" [] [Whitespace(" ")],
-                                value: CssUnknownPropertyValue {
-                                    css_generic_component_value_list: CssGenericComponentValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@492..497 "mixed" [] [],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: COMMA@497..499 "," [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@499..510 "delimiters" [] [Whitespace(" ")],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: SLASH@510..512 "/" [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@512..516 "can" [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@516..518 "be" [] [],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: COMMA@518..520 "," [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@520..524 "used" [] [],
-                                        },
-                                    ],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@492..497 "mixed" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@497..499 "," [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@499..510 "delimiters" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@510..512 "/" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@512..516 "can" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@516..518 "be" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@518..520 "," [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@520..524 "used" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -410,213 +420,218 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@5..525
           0: CSS_DECLARATION_WITH_SEMICOLON@5..51
             0: CSS_DECLARATION@5..50
-              0: CSS_Z_INDEX_PROPERTY@5..50
+              0: CSS_GENERIC_PROPERTY@5..50
                 0: CSS_IDENTIFIER@5..41
                   0: IDENT@5..41 "z-index" [Newline("\n"), Whitespace("    "), Comments("/* Global values */"), Newline("\n"), Whitespace("    ")] []
                 1: COLON@41..43 ":" [] [Whitespace(" ")]
-                2: CSS_WIDE_KEYWORD@43..50
-                  0: INHERIT_KW@43..50 "inherit" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@43..50
+                  0: CSS_IDENTIFIER@43..50
+                    0: IDENT@43..50 "inherit" [] []
               1: (empty)
             1: SEMICOLON@50..51 ";" [] []
           1: CSS_DECLARATION_WITH_SEMICOLON@51..73
             0: CSS_DECLARATION@51..72
-              0: CSS_Z_INDEX_PROPERTY@51..72
+              0: CSS_GENERIC_PROPERTY@51..72
                 0: CSS_IDENTIFIER@51..63
                   0: IDENT@51..63 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@63..65 ":" [] [Whitespace(" ")]
-                2: CSS_WIDE_KEYWORD@65..72
-                  0: INITIAL_KW@65..72 "initial" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@65..72
+                  0: CSS_IDENTIFIER@65..72
+                    0: IDENT@65..72 "initial" [] []
               1: (empty)
             1: SEMICOLON@72..73 ";" [] []
           2: CSS_DECLARATION_WITH_SEMICOLON@73..93
             0: CSS_DECLARATION@73..92
-              0: CSS_Z_INDEX_PROPERTY@73..92
+              0: CSS_GENERIC_PROPERTY@73..92
                 0: CSS_IDENTIFIER@73..85
                   0: IDENT@73..85 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@85..87 ":" [] [Whitespace(" ")]
-                2: CSS_WIDE_KEYWORD@87..92
-                  0: UNSET_KW@87..92 "unset" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@87..92
+                  0: CSS_IDENTIFIER@87..92
+                    0: IDENT@87..92 "unset" [] []
               1: (empty)
             1: SEMICOLON@92..93 ";" [] []
           3: CSS_DECLARATION_WITH_SEMICOLON@93..114
             0: CSS_DECLARATION@93..113
-              0: CSS_Z_INDEX_PROPERTY@93..113
+              0: CSS_GENERIC_PROPERTY@93..113
                 0: CSS_IDENTIFIER@93..105
                   0: IDENT@93..105 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@105..107 ":" [] [Whitespace(" ")]
-                2: CSS_WIDE_KEYWORD@107..113
-                  0: REVERT_KW@107..113 "revert" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@107..113
+                  0: CSS_IDENTIFIER@107..113
+                    0: IDENT@107..113 "revert" [] []
               1: (empty)
             1: SEMICOLON@113..114 ";" [] []
           4: CSS_DECLARATION_WITH_SEMICOLON@114..141
             0: CSS_DECLARATION@114..140
-              0: CSS_Z_INDEX_PROPERTY@114..140
+              0: CSS_GENERIC_PROPERTY@114..140
                 0: CSS_IDENTIFIER@114..126
                   0: IDENT@114..126 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@126..128 ":" [] [Whitespace(" ")]
-                2: CSS_WIDE_KEYWORD@128..140
-                  0: REVERT_LAYER_KW@128..140 "revert-layer" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@128..140
+                  0: CSS_IDENTIFIER@128..140
+                    0: IDENT@128..140 "revert-layer" [] []
               1: (empty)
             1: SEMICOLON@140..141 ";" [] []
           5: CSS_DECLARATION_WITH_SEMICOLON@141..176
             0: CSS_DECLARATION@141..175
-              0: CSS_Z_INDEX_PROPERTY@141..175
+              0: CSS_GENERIC_PROPERTY@141..175
                 0: CSS_IDENTIFIER@141..169
                   0: IDENT@141..169 "z-index" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* auto */"), Newline("\n"), Whitespace("    ")] []
                 1: COLON@169..171 ":" [] [Whitespace(" ")]
-                2: CSS_AUTO@171..175
-                  0: AUTO_KW@171..175 "auto" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@171..175
+                  0: CSS_IDENTIFIER@171..175
+                    0: IDENT@171..175 "auto" [] []
               1: (empty)
             1: SEMICOLON@175..176 ";" [] []
           6: CSS_DECLARATION_WITH_SEMICOLON@176..213
             0: CSS_DECLARATION@176..212
-              0: CSS_Z_INDEX_PROPERTY@176..212
+              0: CSS_GENERIC_PROPERTY@176..212
                 0: CSS_IDENTIFIER@176..209
                   0: IDENT@176..209 "z-index" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* <integer> */"), Newline("\n"), Whitespace("    ")] []
                 1: COLON@209..211 ":" [] [Whitespace(" ")]
-                2: CSS_NUMBER@211..212
-                  0: CSS_NUMBER_LITERAL@211..212 "1" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@211..212
+                  0: CSS_NUMBER@211..212
+                    0: CSS_NUMBER_LITERAL@211..212 "1" [] []
               1: (empty)
             1: SEMICOLON@212..213 ";" [] []
           7: CSS_DECLARATION_WITH_SEMICOLON@213..229
             0: CSS_DECLARATION@213..228
-              0: CSS_Z_INDEX_PROPERTY@213..228
+              0: CSS_GENERIC_PROPERTY@213..228
                 0: CSS_IDENTIFIER@213..225
                   0: IDENT@213..225 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@225..227 ":" [] [Whitespace(" ")]
-                2: CSS_NUMBER@227..228
-                  0: CSS_NUMBER_LITERAL@227..228 "0" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@227..228
+                  0: CSS_NUMBER@227..228
+                    0: CSS_NUMBER_LITERAL@227..228 "0" [] []
               1: (empty)
             1: SEMICOLON@228..229 ";" [] []
           8: CSS_DECLARATION_WITH_SEMICOLON@229..246
             0: CSS_DECLARATION@229..245
-              0: CSS_Z_INDEX_PROPERTY@229..245
+              0: CSS_GENERIC_PROPERTY@229..245
                 0: CSS_IDENTIFIER@229..241
                   0: IDENT@229..241 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@241..243 ":" [] [Whitespace(" ")]
-                2: CSS_NUMBER@243..245
-                  0: CSS_NUMBER_LITERAL@243..245 "-1" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@243..245
+                  0: CSS_NUMBER@243..245
+                    0: CSS_NUMBER_LITERAL@243..245 "-1" [] []
               1: (empty)
             1: SEMICOLON@245..246 ";" [] []
           9: CSS_DECLARATION_WITH_SEMICOLON@246..268
             0: CSS_DECLARATION@246..267
-              0: CSS_Z_INDEX_PROPERTY@246..267
+              0: CSS_GENERIC_PROPERTY@246..267
                 0: CSS_IDENTIFIER@246..258
                   0: IDENT@246..258 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@258..260 ":" [] [Whitespace(" ")]
-                2: CSS_NUMBER@260..267
-                  0: CSS_NUMBER_LITERAL@260..267 "-123456" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@260..267
+                  0: CSS_NUMBER@260..267
+                    0: CSS_NUMBER_LITERAL@260..267 "-123456" [] []
               1: (empty)
             1: SEMICOLON@267..268 ";" [] []
           10: CSS_DECLARATION_WITH_SEMICOLON@268..289
             0: CSS_DECLARATION@268..288
-              0: CSS_Z_INDEX_PROPERTY@268..288
+              0: CSS_GENERIC_PROPERTY@268..288
                 0: CSS_IDENTIFIER@268..280
                   0: IDENT@268..280 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@280..282 ":" [] [Whitespace(" ")]
-                2: CSS_NUMBER@282..288
-                  0: CSS_NUMBER_LITERAL@282..288 "444567" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@282..288
+                  0: CSS_NUMBER@282..288
+                    0: CSS_NUMBER_LITERAL@282..288 "444567" [] []
               1: (empty)
             1: SEMICOLON@288..289 ";" [] []
           11: CSS_DECLARATION_WITH_SEMICOLON@289..351
             0: CSS_DECLARATION@289..350
-              0: CSS_Z_INDEX_PROPERTY@289..350
+              0: CSS_GENERIC_PROPERTY@289..350
                 0: CSS_IDENTIFIER@289..345
                   0: IDENT@289..345 "z-index" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Incorrect values b ..."), Newline("\n"), Whitespace("    ")] []
                 1: COLON@345..347 ":" [] [Whitespace(" ")]
-                2: CSS_UNKNOWN_PROPERTY_VALUE@347..350
-                  0: CSS_GENERIC_COMPONENT_VALUE_LIST@347..350
-                    0: CSS_REGULAR_DIMENSION@347..350
-                      0: CSS_NUMBER_LITERAL@347..349 "10" [] []
-                      1: IDENT@349..350 "s" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@347..350
+                  0: CSS_REGULAR_DIMENSION@347..350
+                    0: CSS_NUMBER_LITERAL@347..349 "10" [] []
+                    1: IDENT@349..350 "s" [] []
               1: (empty)
             1: SEMICOLON@350..351 ";" [] []
           12: CSS_DECLARATION_WITH_SEMICOLON@351..375
             0: CSS_DECLARATION@351..374
-              0: CSS_Z_INDEX_PROPERTY@351..374
+              0: CSS_GENERIC_PROPERTY@351..374
                 0: CSS_IDENTIFIER@351..363
                   0: IDENT@351..363 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@363..365 ":" [] [Whitespace(" ")]
-                2: CSS_UNKNOWN_PROPERTY_VALUE@365..374
-                  0: CSS_GENERIC_COMPONENT_VALUE_LIST@365..374
-                    0: CSS_IDENTIFIER@365..374
-                      0: IDENT@365..374 "one-value" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@365..374
+                  0: CSS_IDENTIFIER@365..374
+                    0: IDENT@365..374 "one-value" [] []
               1: (empty)
             1: SEMICOLON@374..375 ";" [] []
           13: CSS_DECLARATION_WITH_SEMICOLON@375..405
             0: CSS_DECLARATION@375..404
-              0: CSS_Z_INDEX_PROPERTY@375..404
+              0: CSS_GENERIC_PROPERTY@375..404
                 0: CSS_IDENTIFIER@375..387
                   0: IDENT@375..387 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@387..389 ":" [] [Whitespace(" ")]
-                2: CSS_UNKNOWN_PROPERTY_VALUE@389..404
-                  0: CSS_GENERIC_COMPONENT_VALUE_LIST@389..404
-                    0: CSS_IDENTIFIER@389..398
-                      0: IDENT@389..398 "multiple" [] [Whitespace(" ")]
-                    1: CSS_IDENTIFIER@398..404
-                      0: IDENT@398..404 "values" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@389..404
+                  0: CSS_IDENTIFIER@389..398
+                    0: IDENT@389..398 "multiple" [] [Whitespace(" ")]
+                  1: CSS_IDENTIFIER@398..404
+                    0: IDENT@398..404 "values" [] []
               1: (empty)
             1: SEMICOLON@404..405 ";" [] []
           14: CSS_DECLARATION_WITH_SEMICOLON@405..437
             0: CSS_DECLARATION@405..436
-              0: CSS_Z_INDEX_PROPERTY@405..436
+              0: CSS_GENERIC_PROPERTY@405..436
                 0: CSS_IDENTIFIER@405..417
                   0: IDENT@405..417 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@417..419 ":" [] [Whitespace(" ")]
-                2: CSS_UNKNOWN_PROPERTY_VALUE@419..436
-                  0: CSS_GENERIC_COMPONENT_VALUE_LIST@419..436
-                    0: CSS_IDENTIFIER@419..428
-                      0: IDENT@419..428 "delimited" [] []
-                    1: CSS_GENERIC_DELIMITER@428..430
-                      0: COMMA@428..430 "," [] [Whitespace(" ")]
-                    2: CSS_IDENTIFIER@430..436
-                      0: IDENT@430..436 "values" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@419..436
+                  0: CSS_IDENTIFIER@419..428
+                    0: IDENT@419..428 "delimited" [] []
+                  1: CSS_GENERIC_DELIMITER@428..430
+                    0: COMMA@428..430 "," [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@430..436
+                    0: IDENT@430..436 "values" [] []
               1: (empty)
             1: SEMICOLON@436..437 ";" [] []
           15: CSS_DECLARATION_WITH_SEMICOLON@437..478
             0: CSS_DECLARATION@437..477
-              0: CSS_Z_INDEX_PROPERTY@437..477
+              0: CSS_GENERIC_PROPERTY@437..477
                 0: CSS_IDENTIFIER@437..449
                   0: IDENT@437..449 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@449..451 ":" [] [Whitespace(" ")]
-                2: CSS_UNKNOWN_PROPERTY_VALUE@451..477
-                  0: CSS_GENERIC_COMPONENT_VALUE_LIST@451..477
-                    0: CSS_IDENTIFIER@451..461
-                      0: IDENT@451..461 "delimited" [] [Whitespace(" ")]
-                    1: CSS_GENERIC_DELIMITER@461..463
-                      0: SLASH@461..463 "/" [] [Whitespace(" ")]
-                    2: CSS_IDENTIFIER@463..469
-                      0: IDENT@463..469 "slash" [] [Whitespace(" ")]
-                    3: CSS_GENERIC_DELIMITER@469..471
-                      0: SLASH@469..471 "/" [] [Whitespace(" ")]
-                    4: CSS_IDENTIFIER@471..477
-                      0: IDENT@471..477 "values" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@451..477
+                  0: CSS_IDENTIFIER@451..461
+                    0: IDENT@451..461 "delimited" [] [Whitespace(" ")]
+                  1: CSS_GENERIC_DELIMITER@461..463
+                    0: SLASH@461..463 "/" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@463..469
+                    0: IDENT@463..469 "slash" [] [Whitespace(" ")]
+                  3: CSS_GENERIC_DELIMITER@469..471
+                    0: SLASH@469..471 "/" [] [Whitespace(" ")]
+                  4: CSS_IDENTIFIER@471..477
+                    0: IDENT@471..477 "values" [] []
               1: (empty)
             1: SEMICOLON@477..478 ";" [] []
           16: CSS_DECLARATION_WITH_SEMICOLON@478..525
             0: CSS_DECLARATION@478..524
-              0: CSS_Z_INDEX_PROPERTY@478..524
+              0: CSS_GENERIC_PROPERTY@478..524
                 0: CSS_IDENTIFIER@478..490
                   0: IDENT@478..490 "z-index" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@490..492 ":" [] [Whitespace(" ")]
-                2: CSS_UNKNOWN_PROPERTY_VALUE@492..524
-                  0: CSS_GENERIC_COMPONENT_VALUE_LIST@492..524
-                    0: CSS_IDENTIFIER@492..497
-                      0: IDENT@492..497 "mixed" [] []
-                    1: CSS_GENERIC_DELIMITER@497..499
-                      0: COMMA@497..499 "," [] [Whitespace(" ")]
-                    2: CSS_IDENTIFIER@499..510
-                      0: IDENT@499..510 "delimiters" [] [Whitespace(" ")]
-                    3: CSS_GENERIC_DELIMITER@510..512
-                      0: SLASH@510..512 "/" [] [Whitespace(" ")]
-                    4: CSS_IDENTIFIER@512..516
-                      0: IDENT@512..516 "can" [] [Whitespace(" ")]
-                    5: CSS_IDENTIFIER@516..518
-                      0: IDENT@516..518 "be" [] []
-                    6: CSS_GENERIC_DELIMITER@518..520
-                      0: COMMA@518..520 "," [] [Whitespace(" ")]
-                    7: CSS_IDENTIFIER@520..524
-                      0: IDENT@520..524 "used" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@492..524
+                  0: CSS_IDENTIFIER@492..497
+                    0: IDENT@492..497 "mixed" [] []
+                  1: CSS_GENERIC_DELIMITER@497..499
+                    0: COMMA@497..499 "," [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@499..510
+                    0: IDENT@499..510 "delimiters" [] [Whitespace(" ")]
+                  3: CSS_GENERIC_DELIMITER@510..512
+                    0: SLASH@510..512 "/" [] [Whitespace(" ")]
+                  4: CSS_IDENTIFIER@512..516
+                    0: IDENT@512..516 "can" [] [Whitespace(" ")]
+                  5: CSS_IDENTIFIER@516..518
+                    0: IDENT@516..518 "be" [] []
+                  6: CSS_GENERIC_DELIMITER@518..520
+                    0: COMMA@518..520 "," [] [Whitespace(" ")]
+                  7: CSS_IDENTIFIER@520..524
+                    0: IDENT@520..524 "used" [] []
               1: (empty)
             1: SEMICOLON@524..525 ";" [] []
         2: R_CURLY@525..527 "}" [Newline("\n")] []

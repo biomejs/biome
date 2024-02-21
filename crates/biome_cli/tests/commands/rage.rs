@@ -181,6 +181,132 @@ Not most recent log file
     ));
 }
 
+#[test]
+fn with_formatter_configuration() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        Path::new("biome.json").to_path_buf(),
+        r#"{
+  "formatter": {
+    "attributePosition": "multiline",
+    "enabled": true,
+    "formatWithErrors": true,
+    "include": [
+      "**/*.html",
+      "**/*.css",
+      "**/*.js",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.json",
+      "**/*.md"
+    ],
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 120,
+    "ignore": ["configuration-schema.json"]
+  },
+  "javascript": {
+    "formatter": {
+        "enabled": true,
+        "arrowParentheses": "always",
+        "jsxQuoteStyle": "single",
+        "indentWidth": 2,
+        "indentStyle":"tab",
+        "lineEnding": "lf",
+        "lineWidth": 100
+    }
+  },
+  "json": {
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 2,
+        "lineEnding": "lf",
+        "lineWidth": 100
+    }
+  }
+}"#,
+    );
+
+    let result = run_rage(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("rage"), "--formatter"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_formatter_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn with_linter_configuration() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        Path::new("biome.json").to_path_buf(),
+        r#"{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noAccessKey": "off",
+        "noAutofocus": "off"
+      },
+      "complexity": {
+        "recommended": true
+      },
+      "correctness": {
+        "all": true
+      },
+      "nursery": {
+        "useConsistentArrayType": {
+          "level": "warn",
+          "options": {
+            "syntax": "shorthand"
+          }
+        }
+      },
+      "suspicious": {
+        "noCommentText": {
+          "level": "warn"
+        }
+      },
+      "style": {
+        "noNonNullAssertion": "off"
+      }
+    }
+  }
+}"#,
+    );
+
+    let result = run_rage(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("rage"), "--linter"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_linter_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
 /// Runs the `rage` command mocking out the log directory.
 fn run_rage<'app>(
     fs: DynRef<'app, dyn FileSystem>,

@@ -463,6 +463,8 @@ CssDeclarationListBlock =
 	declarations: CssDeclarationList
  	'}'
 
+CssDeclarationList = CssDeclarationWithSemicolon*
+
 AnyCssRuleListBlock =
 	CssRuleListBlock
 	| CssBogusBlock
@@ -472,197 +474,17 @@ CssRuleListBlock =
 	rules: CssRuleList
  	'}'
 
-CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
-
 CssDeclaration =
 	property: AnyCssProperty
 	important: CssDeclarationImportant?
-
 
 /////////////
 // PROPERTIES
 ////////////
 
-// ## Conventions for specifying Property nodes:
-//
-//   - The name of the node should be `CSS*Property`, with the `*` being the PascalCase
-//     representation of the name (e.g., `z-index` becomes `ZIndex`).
-//   - The `value` field should be defined as a Node with the name `AnyCss*PropertyValue`, with
-//     the * being the PascalCase representation of the property name. This will tell the code
-//     generator to automatically insert the `CssWideKeyword`, `CssUnknownPropertyValue`, and
-//     `CssBogusPropertyValue` variants for the enum.
-//   - With that automatic insertion by the code generator, only specify the _explicitly defined_
-//     productions from the CSS grammar as part of the `AnyCss*PropertyValue` node, leaving out
-//     all of the other variants.
-//   - Even if there is only one production for the value, still use the `AnyCss*PropertyValue`
-//     name so that the automatic insertion will work as expected.
-//
-// ## Specifying Values:
-//
-// Many values in the CSS grammar are written as references to other productions, like
-// `<length-percentage>`. Sometimes these are simple combinations of other kinds of tokens (like
-// length-percentage is), but other times they have their own syntax with multiple tokens or
-// ordering or combinators and so on.
-//
-// When building the CSS syntax tree for Biome, we want to provide as much fidelity and granularity
-// as possible (i.e., be _exact_ and _accurate_), but we also don't want to explode the tree result
-// from parsing the input with dozens if not hundreds of intermediate nodes that make it harder to
-// work with. This tradeoff can make it difficult to know how to best represent a given syntax in
-// the grammar. As an example, consider the same `<length-percentage>` token from above. The
-// definition of this token is "a CSS data type [that] represents a value that can be either a
-// <length> or a <percentage>". In terms of grammar, it looks like this:
-//
-//   length-percentage =
-//       <length> |
-//       <percentage>
-//
-// In this grammar, we _could_ encode this as a new Node type and use it in other productions, like
-// in `width`:
-//
-//   width =
-//       auto |
-//       <length-percentage [0,∞]> |
-//       min-content |
-//       max-content |
-//       fit-content(<length-percentage [0,∞]>)
-//
-// But in reality, adding a new node type for this ends up being difficult to work with, since it's
-// a layer of indirection in the parsed syntax tree that complicates traversal, parent-child
-// relationships, and more. Instead, these simple "aliases" for variations are best written inline
-// as part of the parent rule itself:
-//
-//   width =
-//       CssAuto |
-//       CssLength |
-//       CssPercentage
-//       // ...
-//
-// This way, the `width` knows exactly what kind of value it contains as a direct child, without
-// having to go through an intermediate node, and consumers can more easily see where lengths and
-// percentages are used (the parent of the `length` is the `width` value directly, rather than the
-// grandparent if there was an intermediate node).
-//
-// Other cases, however, _do_ deserve their own nodes and types. Often times this will just have to
-// be done based on feel, but a good example is `CssWideKeyword`, which is a single node that
-// represents any of the global keywords (`initial`, `inherit`, etc.). This node provides
-// additional value because it allows a consumer of the syntax tree to immediately know if _any_ of
-// the global keywords are being used, and simplifies the grammar definition to avoid needing to
-// specify 5+ keywords in each rule.
-//
-// When in doubt, ask about it! Discussion will help lead to the best representation and tradeoff
-// and ensure that the resulting grammar and syntax tree work correctly and efficiently.
-//
-// ## Referencing other rules
-//
-// The CSS grammar often "embeds" property rules inside of other rules to build them up. In the
-// grammar, this is represented by the property name in quotes, like `<'line-height'>`, and
-// is defined as "any value that would be valid for that property, excluding the CSS-wide
-// keywords".
-//
-// To handle this, we can use the property value nodes directly in other definitions. This is
-// another reason why splitting out the `AnyCss*PropertyValue` and `Css*` node types is important.
-// For example, the value type of `CssBorderProperty` is `AnyCssBorderPropertyValue = CssBorder`,
-// which implicitly adds the Css-wide keywords as well as generic and bogus handling into the
-// allowed types. But if `<'border'>` were to be referenced by some other rule, we would only want
-// the valid value types to be included, which we could do by using `CssBorder` directly.
-//
-//   CssPositionedBorderPropertyValue =
-//       position: ('top' | 'bottom')
-//       border: CssBorder
-//
-// Even if the valid value type is only a single node type, this structure ensures that any value
-// definition can be embedded in another value definition, regardless of its structure.
-
-
 AnyCssProperty =
 	CssGenericProperty
 	| CssBogusProperty
-	| CssAllProperty
-	| CssBorderProperty
-	| CssZIndexProperty
-
-/// https://drafts.csswg.org/css-cascade/#all-shorthand
-/// all =
-///   <global-keyword>
-CssAllProperty =
-    name: CssIdentifier
-	':'
-	value: AnyCssAllPropertyValue
-
-// The only valid values for the `all` property are the css-wide keywords. We
-// still use the `AnyCss*PropertyValue` node naming convention here to
-// automatically insert `CssBogusPropertyValue` and
-// `CssUnknownPropertyValue` as alternatives for the parser to use for
-// recovery and representing "valid but incorrect" inputs.
-AnyCssAllPropertyValue = CssWideKeyword
-
-/// https://drafts.csswg.org/css-backgrounds/#propdef-border
-/// border =
-///   <line-width> ||
-///   <line-style> ||
-///   <color>
-CssBorderProperty =
-	name: CssIdentifier
-	':'
-	value: AnyCssBorderPropertyValue
-
-AnyCssBorderPropertyValue =
-	CssBorder
-
-CssBorder =
-	line_width: AnyCssLineWidth ||
-	line_style: CssLineStyle ||
-	color: CssColor
-
-// TODO: This should be narrowed down to CssLength when we can.
-AnyCssLineWidth =
-	CssRegularDimension
-	| CssLineWidthKeyword
-
-CssLineWidthKeyword = keyword: ('thin' | 'medium' | 'thick')
-
-CssLineStyle =
-	keyword: ( 'none' | 'hidden' | 'dotted' | 'dashed' | 'solid' | 'double'  | 'groove' | 'ridge' | 'inset' | 'outset')
-
-
-/// https://drafts.csswg.org/css2/#z-index
-/// z-index =
-///   auto |
-///   <integer> |
-///   inherit
-///
-/// `inherit` is covered by the CssWideKeyword set.
-CssZIndexProperty =
-	name: CssIdentifier
-	':'
-	value: AnyCssZIndexPropertyValue
-
-// The parser will be responsible for ensuring the `Number` is an integer.
-AnyCssZIndexPropertyValue =
-	CssAuto
-	| CssNumber
-
-CssAuto =
-	value: 'auto'
-
-/// Css Wide keywords are implicitly accepted by _all_ properties when given
-/// as the sole value (like `width: unset;`). This node _should not_ be
-/// specified directly in any node definitions in this grammar. It is inserted
-/// implicitly by the code generator when encountering any node named
-/// `Any*PropertyValue`. This is an important distinction to be able to follow
-/// the "Property value ranges" value type of the value syntax definition:
-/// https://www.w3.org/TR/css-values/#component-types.
-CssWideKeyword =
-	value: ('inherit' | 'initial' | 'unset' | 'revert' | 'revert-layer' | 'default')
-
-/// Because of the way Biome's syntax generation works, List nodes can't be used
-/// directly as variants in a union. This node is a wrapper around the generic
-/// component value list to indicate a property value that is _syntactically valid_,
-/// but doesn't match the syntax definition for that property.
-///
-/// It is a more-correct alternative to a Bogus node that implies _acceptability_,
-/// but not necessarily _semantic validity_.
-CssUnknownPropertyValue = CssGenericComponentValueList
 
 CssGenericProperty =
 	name: AnyCssDeclarationName
@@ -675,11 +497,6 @@ CssGenericProperty =
 //  background: transparent center/1em auto no-repeat;
 //              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // }
-//
-// This node type is implicitly added to any Node definition with the name
-// `Any*PropertyValue`, similarly to `CssWideKeyword`. It is the default used
-// in place of a Bogus node, where the syntax of the property and value is
-// _correct_, but semantically does not match the specified grammar.
 CssGenericComponentValueList = AnyCssGenericComponentValue*
 
 AnyCssGenericComponentValue =

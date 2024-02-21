@@ -53,7 +53,7 @@ declare_rule! {
     /// const x = "Don't use \\8 and \\9 escapes.";
     /// ```
     ///
-    pub(crate) NoNonoctalDecimalEscape {
+    pub NoNonoctalDecimalEscape {
         version: "1.0.0",
         name: "noNonoctalDecimalEscape",
         source: RuleSource::Eslint("no-nonoctal-decimal-escape"),
@@ -63,12 +63,12 @@ declare_rule! {
 }
 
 #[derive(Debug)]
-pub(crate) enum FixSuggestionKind {
+pub enum FixSuggestionKind {
     Refactor,
 }
 
 #[derive(Debug)]
-pub(crate) struct RuleState {
+pub struct RuleState {
     kind: FixSuggestionKind,
     diagnostics_text_range: TextRange,
     replace_from: String,

@@ -15,8 +15,8 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::{borrow::Cow, error::Error};
 
-mod analyzers;
-mod aria_analyzers;
+pub mod analyzers;
+pub mod aria_analyzers;
 mod aria_services;
 mod assists;
 mod ast_utils;
@@ -258,7 +258,7 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"xdescribe('foo', () => {});
+        const SOURCE: &str = r#"<a href="class/html-css1/navigation/links#" onclick="window.location.href=index.html"> Home </a>
         "#;
         // const SOURCE: &str = r#"document.querySelector("foo").value = document.querySelector("foo").value
         //
@@ -273,7 +273,7 @@ mod tests {
             closure_index: Some(0),
             dependencies_index: Some(1),
         };
-        let rule_filter = RuleFilter::Rule("nursery", "noDisabledTests");
+        let rule_filter = RuleFilter::Rule("a11y", "useValidAnchor");
 
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),

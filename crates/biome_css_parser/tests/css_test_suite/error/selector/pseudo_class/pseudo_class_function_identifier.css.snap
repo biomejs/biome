@@ -323,32 +323,33 @@ CssRoot {
                 r_curly_token: R_CURLY@166..167 "}" [] [],
             },
         },
-        CssBogusRule {
-            items: [
-                CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssPseudoClassSelector {
-                                colon_token: COLON@167..169 ":" [Newline("\n")] [],
-                                class: CssBogusPseudoClass {
-                                    items: [
-                                        DIR_KW@169..172 "dir" [] [],
-                                        L_PAREN@172..173 "(" [] [],
-                                        CssBogus {
-                                            items: [
-                                                DOT@173..174 "." [] [],
-                                                IDENT@174..181 "invalid" [] [],
-                                            ],
-                                        },
-                                    ],
-                                },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@167..169 ":" [Newline("\n")] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    DIR_KW@169..172 "dir" [] [],
+                                    L_PAREN@172..173 "(" [] [],
+                                    CssBogus {
+                                        items: [
+                                            DOT@173..174 "." [] [],
+                                            IDENT@174..181 "invalid" [] [],
+                                        ],
+                                    },
+                                ],
                             },
-                        ],
-                    },
-                ],
+                        },
+                    ],
+                },
             ],
+            block: CssBogusBlock {
+                items: [],
+            },
         },
     ],
     eof_token: EOF@181..182 "" [Newline("\n")] [],
@@ -543,7 +544,7 @@ CssRoot {
         0: L_CURLY@165..166 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@166..166
         2: R_CURLY@166..167 "}" [] []
-    10: CSS_BOGUS_RULE@167..181
+    10: CSS_QUALIFIED_RULE@167..181
       0: CSS_SELECTOR_LIST@167..181
         0: CSS_COMPOUND_SELECTOR@167..181
           0: (empty)
@@ -557,6 +558,7 @@ CssRoot {
                 2: CSS_BOGUS@173..181
                   0: DOT@173..174 "." [] []
                   1: IDENT@174..181 "invalid" [] []
+      1: CSS_BOGUS_BLOCK@181..181
   2: EOF@181..182 "" [Newline("\n")] []
 
 ```

@@ -32,7 +32,7 @@ declare_rule! {
     /// function foo({a = []}) {}
     /// var [a] = foo;
     /// ```
-    pub(crate) NoEmptyPattern {
+    pub NoEmptyPattern {
         version: "1.0.0",
         name: "noEmptyPattern",
         source: RuleSource::Eslint("no-empty-pattern"),
@@ -85,5 +85,5 @@ impl Rule for NoEmptyPattern {
 
 declare_node_union! {
     /// enum of `JsObjectBindingPattern` and `JsArrayBindingPattern`
-    pub(crate) JsAnyBindPatternLike = JsArrayBindingPattern | JsObjectBindingPattern
+    pub JsAnyBindPatternLike = JsArrayBindingPattern | JsObjectBindingPattern
 }

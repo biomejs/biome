@@ -32,7 +32,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoUselessLabel {
+    pub NoUselessLabel {
         version: "1.0.0",
         name: "noUselessLabel",
         source: RuleSource::Eslint("no-extra-label"),

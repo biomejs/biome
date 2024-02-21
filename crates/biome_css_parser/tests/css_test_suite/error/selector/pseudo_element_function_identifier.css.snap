@@ -77,26 +77,27 @@ CssRoot {
                 r_curly_token: R_CURLY@40..41 "}" [] [],
             },
         },
-        CssBogusRule {
-            items: [
-                CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssPseudoElementSelector {
-                                double_colon_token: COLON2@41..44 "::" [Newline("\n")] [],
-                                element: CssBogusPseudoElement {
-                                    items: [
-                                        HIGHLIGHT_KW@44..53 "highlight" [] [],
-                                        L_PAREN@53..54 "(" [] [],
-                                    ],
-                                },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@41..44 "::" [Newline("\n")] [],
+                            element: CssBogusPseudoElement {
+                                items: [
+                                    HIGHLIGHT_KW@44..53 "highlight" [] [],
+                                    L_PAREN@53..54 "(" [] [],
+                                ],
                             },
-                        ],
-                    },
-                ],
+                        },
+                    ],
+                },
             ],
+            block: CssBogusBlock {
+                items: [],
+            },
         },
     ],
     eof_token: EOF@54..55 "" [Newline("\n")] [],
@@ -145,7 +146,7 @@ CssRoot {
         0: L_CURLY@39..40 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@40..40
         2: R_CURLY@40..41 "}" [] []
-    2: CSS_BOGUS_RULE@41..54
+    2: CSS_QUALIFIED_RULE@41..54
       0: CSS_SELECTOR_LIST@41..54
         0: CSS_COMPOUND_SELECTOR@41..54
           0: (empty)
@@ -156,6 +157,7 @@ CssRoot {
               1: CSS_BOGUS_PSEUDO_ELEMENT@44..54
                 0: HIGHLIGHT_KW@44..53 "highlight" [] []
                 1: L_PAREN@53..54 "(" [] []
+      1: CSS_BOGUS_BLOCK@54..54
   2: EOF@54..55 "" [Newline("\n")] []
 
 ```

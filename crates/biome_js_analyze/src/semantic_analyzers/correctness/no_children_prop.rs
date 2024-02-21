@@ -22,7 +22,7 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// React.createElement('div', { children: 'foo' });
     /// ```
-    pub(crate) NoChildrenProp {
+    pub NoChildrenProp {
         version: "1.0.0",
         name: "noChildrenProp",
         source: RuleSource::EslintReact("no-children-prop"),
@@ -31,10 +31,10 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) NoChildrenPropQuery = JsxAttribute | JsCallExpression
+    pub NoChildrenPropQuery = JsxAttribute | JsCallExpression
 }
 
-pub(crate) enum NoChildrenPropState {
+pub enum NoChildrenPropState {
     JsxProp(TextRange),
     MemberProp(TextRange),
 }

@@ -57,7 +57,7 @@ declare_rule! {
     /// <>foo {bar}</>
     /// ```
     ///
-    pub(crate) NoUselessFragments {
+    pub NoUselessFragments {
         version: "1.0.0",
         name: "noUselessFragments",
         source: RuleSource::EslintReact("jsx-no-useless-fragment"),
@@ -67,13 +67,13 @@ declare_rule! {
 }
 
 #[derive(Debug)]
-pub(crate) enum NoUselessFragmentsState {
+pub enum NoUselessFragmentsState {
     Empty,
     Child(AnyJsxChild),
 }
 
 declare_node_union! {
-    pub(crate) NoUselessFragmentsQuery = JsxFragment | JsxElement
+    pub NoUselessFragmentsQuery = JsxFragment | JsxElement
 }
 
 impl NoUselessFragmentsQuery {

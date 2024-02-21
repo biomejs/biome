@@ -62,7 +62,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) UseHookAtTopLevel {
+    pub UseHookAtTopLevel {
         version: "1.0.0",
         name: "useHookAtTopLevel",
         source: RuleSource::EslintReactHooks("rules-of-hooks"),
@@ -364,7 +364,7 @@ impl Phase for FunctionCallServices {
 }
 
 #[derive(Clone)]
-pub(crate) struct FunctionCall(JsCallExpression);
+pub struct FunctionCall(JsCallExpression);
 
 impl QueryMatch for FunctionCall {
     fn text_range(&self) -> TextRange {

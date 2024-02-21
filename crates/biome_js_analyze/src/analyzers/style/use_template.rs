@@ -47,7 +47,7 @@ declare_rule! {
     /// ```js
     /// let s = `value: ${1}`;
     /// ```
-    pub(crate) UseTemplate {
+    pub UseTemplate {
         version: "1.0.0",
         name: "useTemplate",
         source: RuleSource::Eslint("prefer-template"),

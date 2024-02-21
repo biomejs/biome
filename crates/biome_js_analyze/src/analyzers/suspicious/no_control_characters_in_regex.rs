@@ -58,7 +58,7 @@ declare_rule! {
     /// var pattern6 = new RegExp("\x20");
     /// ```
     ///
-    pub(crate) NoControlCharactersInRegex {
+    pub NoControlCharactersInRegex {
         version: "1.0.0",
         name: "noControlCharactersInRegex",
         source: RuleSource::Eslint("no-control-regex"),
@@ -67,7 +67,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) RegexExpressionLike = JsNewExpression | JsCallExpression | JsRegexLiteralExpression
+    pub RegexExpressionLike = JsNewExpression | JsCallExpression | JsRegexLiteralExpression
 }
 
 fn decode_hex_character_to_code_point(iter: &mut Peekable<Chars>) -> Option<(String, i64)> {

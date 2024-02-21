@@ -26,7 +26,7 @@ declare_rule! {
     /// import * as assert from "node:assert/strict"
     /// ```
     ///
-    pub(crate) UseNodeAssertStrict {
+    pub UseNodeAssertStrict {
         version: "next",
         name: "useNodeAssertStrict",
         recommended: false,

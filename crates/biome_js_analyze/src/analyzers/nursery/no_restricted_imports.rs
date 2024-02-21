@@ -24,7 +24,7 @@ declare_rule! {
     ///     }
     /// }
     /// ```
-    pub(crate) NoRestrictedImports {
+    pub NoRestrictedImports {
         version: "next",
         name: "noRestrictedImports",
         source: RuleSource::Eslint("no-restricted-imports"),
@@ -46,7 +46,7 @@ impl Rule for NoRestrictedImports {
     type Query = Ast<AnyJsImportSpecifierLike>;
     type State = (TextRange, String);
     type Signals = Option<Self::State>;
-    type Options = RestrictedImportsOptions;
+    type Options = Box<RestrictedImportsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let module_name = ctx.query().module_name_token()?;

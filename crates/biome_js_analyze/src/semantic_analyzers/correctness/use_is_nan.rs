@@ -59,7 +59,7 @@ declare_rule! {
     /// switch(foo) {}
     /// ```
     ///
-    pub(crate) UseIsNan {
+    pub UseIsNan {
         version: "1.0.0",
         name: "useIsNan",
         source: RuleSource::Eslint("use-isnan"),
@@ -69,7 +69,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) UseIsNanQuery = JsBinaryExpression | JsCaseClause | JsSwitchStatement
+    pub UseIsNanQuery = JsBinaryExpression | JsCaseClause | JsSwitchStatement
 }
 
 enum Message {

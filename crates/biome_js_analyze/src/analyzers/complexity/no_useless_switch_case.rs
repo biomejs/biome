@@ -57,7 +57,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoUselessSwitchCase {
+    pub NoUselessSwitchCase {
         version: "1.0.0",
         name: "noUselessSwitchCase",
         source: RuleSource::EslintUnicorn("no-useless-switch-case"),

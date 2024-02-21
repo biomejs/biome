@@ -1,8 +1,8 @@
-use proc_macro2::Ident;
 use quote::ToTokens;
-use syn::ext::IdentExt;
-use syn::parse::{Parse, ParseStream, Result};
-use syn::{parenthesized, Attribute, Error, LitStr, Token};
+use syn::spanned::Spanned;
+use syn::{Attribute, Error, Lit, Meta, MetaNameValue};
+
+use crate::util::parse_meta_list;
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct EnumVariantAttrs {
@@ -12,62 +12,47 @@ pub struct EnumVariantAttrs {
     pub rename: Option<String>,
 }
 
-impl EnumVariantAttrs {
-    pub fn from_attrs(attrs: &[Attribute]) -> Self {
+impl TryFrom<&Vec<Attribute>> for EnumVariantAttrs {
+    type Error = Error;
+
+    fn try_from(attrs: &Vec<Attribute>) -> std::prelude::v1::Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
-            if attr.path.is_ident("deserializable") || attr.path.is_ident("serde") {
-                opts.merge_with(
-                    syn::parse2::<Self>(attr.tokens.clone())
-                        .expect("Could not parse variant attributes"),
-                );
+            if attr.path.is_ident("deserializable") {
+                parse_meta_list(&attr.parse_meta()?, |meta| {
+                    match meta {
+                        Meta::NameValue(MetaNameValue {
+                            path,
+                            lit: Lit::Str(s),
+                            ..
+                        }) if path.is_ident("rename") => opts.rename = Some(s.value()),
+                        val => {
+                            let val_str = val.to_token_stream().to_string();
+                            return Err(Error::new(
+                                val.span(),
+                                format_args!("Unexpected attribute: {val_str}"),
+                            ));
+                        }
+                    }
+                    Ok(())
+                })?;
+            } else if attr.path.is_ident("serde") {
+                parse_meta_list(&attr.parse_meta()?, |meta| {
+                    match meta {
+                        Meta::NameValue(MetaNameValue {
+                            path,
+                            lit: Lit::Str(s),
+                            ..
+                        }) if opts.rename.is_none() && path.is_ident("rename") => {
+                            opts.rename = Some(s.value())
+                        }
+                        _ => {} // Don't fail on unrecognized Serde attrs
+                    }
+                    Ok(())
+                })
+                .ok();
             }
         }
-        opts
-    }
-
-    fn merge_with(&mut self, other: Self) {
-        if other.rename.is_some() {
-            self.rename = other.rename;
-        }
-    }
-}
-
-impl Parse for EnumVariantAttrs {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let content;
-        parenthesized!(content in input);
-
-        let parse_value = || -> Result<String> {
-            content.parse::<Token![=]>()?;
-            Ok(content
-                .parse::<LitStr>()?
-                .to_token_stream()
-                .to_string()
-                .trim_matches('"')
-                .to_owned())
-        };
-
-        let mut result = Self::default();
-        loop {
-            let key: Ident = content.call(IdentExt::parse_any)?;
-            match key.to_string().as_ref() {
-                "rename" => result.rename = Some(parse_value()?),
-                other => {
-                    return Err(Error::new(
-                        content.span(),
-                        format!("Unexpected variant attribute: {other}"),
-                    ))
-                }
-            }
-
-            if content.is_empty() {
-                break;
-            }
-
-            content.parse::<Token![,]>()?;
-        }
-
-        Ok(result)
+        Ok(opts)
     }
 }

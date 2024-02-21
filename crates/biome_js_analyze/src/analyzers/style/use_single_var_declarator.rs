@@ -41,7 +41,7 @@ declare_rule! {
     /// ```js
     /// for (let i = 0, x = 1; i < arr.length; i++) {}
     /// ```
-    pub(crate) UseSingleVarDeclarator {
+    pub UseSingleVarDeclarator {
         version: "1.0.0",
         name: "useSingleVarDeclarator",
         source: RuleSource::Eslint("one-var"),

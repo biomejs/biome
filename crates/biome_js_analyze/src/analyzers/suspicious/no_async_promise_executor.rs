@@ -36,7 +36,7 @@ declare_rule! {
     ///   new Foo(async (resolve, reject) => {})
     ///   new Foo((( (resolve, reject) => {} )))
     /// ```
-    pub(crate) NoAsyncPromiseExecutor {
+    pub NoAsyncPromiseExecutor {
         version: "1.0.0",
         name: "noAsyncPromiseExecutor",
         source: RuleSource::Eslint("no-async-promise-executor"),

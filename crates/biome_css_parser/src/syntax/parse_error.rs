@@ -208,10 +208,6 @@ pub(crate) fn expected_any_at_rule(p: &CssParser, range: TextRange) -> ParseDiag
     .into_diagnostic(p)
 }
 
-pub(crate) fn expected_block(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("body", range, p)
-}
-
 pub(crate) fn expected_declaration_item(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("declaration item", range, p)
 }

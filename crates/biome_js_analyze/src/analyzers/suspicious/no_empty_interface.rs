@@ -40,7 +40,7 @@ declare_rule! {
     /// // Allow empty interfaces that extend a type.
     /// interface B extends A {}
     /// ```
-    pub(crate) NoEmptyInterface {
+    pub NoEmptyInterface {
         version: "1.0.0",
         name: "noEmptyInterface",
         source: RuleSource::EslintTypeScript("no-empty-interface"),

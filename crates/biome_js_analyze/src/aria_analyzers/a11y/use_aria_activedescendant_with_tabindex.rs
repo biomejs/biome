@@ -48,7 +48,7 @@ declare_rule! {
     /// <input aria-activedescendant={someID} />
     /// ```
     ///
-    pub(crate) UseAriaActivedescendantWithTabindex {
+    pub UseAriaActivedescendantWithTabindex {
         version: "1.3.0",
         name: "useAriaActivedescendantWithTabindex",
         source: RuleSource::EslintJsxA11y("aria-activedescendant-has-tabindex"),

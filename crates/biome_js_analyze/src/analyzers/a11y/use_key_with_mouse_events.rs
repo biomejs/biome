@@ -39,7 +39,7 @@ declare_rule! {
     ///
     /// - [WCAG 2.1.1](https://www.w3.org/WAI/WCAG21/Understanding/keyboard)
     ///
-    pub(crate) UseKeyWithMouseEvents {
+    pub UseKeyWithMouseEvents {
         version: "1.0.0",
         name: "useKeyWithMouseEvents",
         source: RuleSource::EslintJsxA11y("mouse-events-have-key-events"),
@@ -47,7 +47,7 @@ declare_rule! {
     }
 }
 
-pub(crate) enum UseKeyWithMouseEventsState {
+pub enum UseKeyWithMouseEventsState {
     MissingOnFocus,
     MissingOnBlur,
 }

@@ -38,7 +38,7 @@ declare_rule! {
     /// for (var i = 0; i < 10; i++) {
     /// }
     /// ```
-    pub(crate) UseValidForDirection {
+    pub UseValidForDirection {
         version: "1.0.0",
         name: "useValidForDirection",
         source: RuleSource::Eslint("for-direction"),

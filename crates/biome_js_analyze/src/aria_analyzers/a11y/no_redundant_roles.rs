@@ -43,7 +43,7 @@ declare_rule! {
     /// <span></span>
     /// ```
     ///
-    pub(crate) NoRedundantRoles {
+    pub NoRedundantRoles {
         version: "1.0.0",
         name: "noRedundantRoles",
         source: RuleSource::EslintJsxA11y("no-redundant-roles"),
@@ -52,7 +52,7 @@ declare_rule! {
     }
 }
 
-pub(crate) struct RuleState {
+pub struct RuleState {
     redundant_attribute: JsxAttribute,
     redundant_attribute_value: AnyJsxAttributeValue,
     element_name: String,

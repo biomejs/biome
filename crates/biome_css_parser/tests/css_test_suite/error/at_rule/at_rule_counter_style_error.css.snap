@@ -76,13 +76,14 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@74..76 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
-                items: [
-                    COUNTER_STYLE_KW@76..90 "counter-style" [] [Whitespace(" ")],
-                    CssCustomIdentifier {
-                        value_token: IDENT@90..95 "ident" [] [],
-                    },
-                ],
+            rule: CssCounterStyleAtRule {
+                counter_style_token: COUNTER_STYLE_KW@76..90 "counter-style" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@90..95 "ident" [] [],
+                },
+                block: CssBogusBlock {
+                    items: [],
+                },
             },
         },
         CssAtRule {
@@ -216,10 +217,11 @@ CssRoot {
           2: R_CURLY@73..74 "}" [] []
     3: CSS_AT_RULE@74..95
       0: AT@74..76 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@76..95
+      1: CSS_COUNTER_STYLE_AT_RULE@76..95
         0: COUNTER_STYLE_KW@76..90 "counter-style" [] [Whitespace(" ")]
         1: CSS_CUSTOM_IDENTIFIER@90..95
           0: IDENT@90..95 "ident" [] []
+        2: CSS_BOGUS_BLOCK@95..95
     4: CSS_AT_RULE@95..123
       0: AT@95..98 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@98..123
@@ -333,7 +335,7 @@ at_rule_counter_style_error.css:3:16 parse ━━━━━━━━━━━━�
   
 at_rule_counter_style_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found '@'.
+  × expected `{` but instead found `@`
   
     4 │ @counter-style ident
     5 │ 
@@ -342,14 +344,7 @@ at_rule_counter_style_error.css:6:1 parse ━━━━━━━━━━━━�
     7 │ @counter-style initial { }
     8 │ @counter-style unset { }
   
-  i Expected a body here.
-  
-    4 │ @counter-style ident
-    5 │ 
-  > 6 │ @counter-style inherit { }
-      │ ^
-    7 │ @counter-style initial { }
-    8 │ @counter-style unset { }
+  i Remove @
   
 at_rule_counter_style_error.css:6:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

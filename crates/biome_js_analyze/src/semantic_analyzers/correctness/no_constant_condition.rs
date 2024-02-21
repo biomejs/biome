@@ -79,7 +79,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoConstantCondition    {
+    pub NoConstantCondition    {
         version: "1.0.0",
         name: "noConstantCondition",
         source: RuleSource::Eslint("no-constant-condition"),
@@ -88,7 +88,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) ConditionalStatement = JsConditionalExpression | JsWhileStatement | JsDoWhileStatement | JsIfStatement | JsForStatement
+    pub ConditionalStatement = JsConditionalExpression | JsWhileStatement | JsDoWhileStatement | JsIfStatement | JsForStatement
 }
 
 impl Rule for NoConstantCondition {

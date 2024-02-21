@@ -12,7 +12,7 @@ declare_rule! {
     /// ```js
     /// let foo!: string = "bar";
     /// ```
-    pub(crate) NoInitializerWithDefinite {
+    pub NoInitializerWithDefinite {
         version: "1.4.0",
         name: "noInitializerWithDefinite",
     }

@@ -64,7 +64,7 @@ declare_rule! {
     /// - [WCAG 2.4.4](https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context)
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     ///
-    pub(crate) UseAnchorContent {
+    pub UseAnchorContent {
         version: "1.0.0",
         name: "useAnchorContent",
         source: RuleSource::EslintJsxA11y("anchor-has-content"),

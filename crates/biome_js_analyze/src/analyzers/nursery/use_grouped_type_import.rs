@@ -57,7 +57,7 @@ declare_rule! {
     /// ```ts
     /// import { A, type B } from "mod";
     /// ```
-    pub(crate) UseGroupedTypeImport {
+    pub UseGroupedTypeImport {
         version: "1.0.0",
         name: "useGroupedTypeImport",
         source: RuleSource::EslintTypeScript("no-import-type-side-effects"),

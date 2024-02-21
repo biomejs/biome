@@ -10,7 +10,7 @@ use rustc_hash::FxHashMap;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
-pub(crate) struct AriaServices {
+pub struct AriaServices {
     pub(crate) roles: Arc<AriaRoles>,
     pub(crate) properties: Arc<AriaProperties>,
 }
@@ -97,7 +97,7 @@ impl Phase for AriaServices {
 
 /// Query type usable by lint rules **that uses the semantic model** to match on specific [AstNode] types
 #[derive(Clone)]
-pub(crate) struct Aria<N>(pub N);
+pub struct Aria<N>(pub N);
 
 impl<N> Queryable for Aria<N>
 where

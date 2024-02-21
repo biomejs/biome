@@ -208,35 +208,36 @@ CssRoot {
                 r_curly_token: R_CURLY@95..96 "}" [] [],
             },
         },
-        CssBogusRule {
-            items: [
-                CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssPseudoClassSelector {
-                                colon_token: COLON@96..98 ":" [Newline("\n")] [],
-                                class: CssBogusPseudoClass {
-                                    items: [
-                                        LANG_KW@98..102 "lang" [] [],
-                                        L_PAREN@102..103 "(" [] [],
-                                        CssPseudoValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@103..105 "de" [] [],
-                                            },
-                                            COMMA@105..107 "," [] [Whitespace(" ")],
-                                            CssIdentifier {
-                                                value_token: IDENT@107..109 "fr" [] [],
-                                            },
-                                        ],
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@96..98 ":" [Newline("\n")] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    LANG_KW@98..102 "lang" [] [],
+                                    L_PAREN@102..103 "(" [] [],
+                                    CssPseudoValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@103..105 "de" [] [],
+                                        },
+                                        COMMA@105..107 "," [] [Whitespace(" ")],
+                                        CssIdentifier {
+                                            value_token: IDENT@107..109 "fr" [] [],
+                                        },
                                     ],
-                                },
+                                ],
                             },
-                        ],
-                    },
-                ],
+                        },
+                    ],
+                },
             ],
+            block: CssBogusBlock {
+                items: [],
+            },
         },
     ],
     eof_token: EOF@109..110 "" [Newline("\n")] [],
@@ -370,7 +371,7 @@ CssRoot {
         0: L_CURLY@94..95 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@95..95
         2: R_CURLY@95..96 "}" [] []
-    6: CSS_BOGUS_RULE@96..109
+    6: CSS_QUALIFIED_RULE@96..109
       0: CSS_SELECTOR_LIST@96..109
         0: CSS_COMPOUND_SELECTOR@96..109
           0: (empty)
@@ -387,6 +388,7 @@ CssRoot {
                   1: COMMA@105..107 "," [] [Whitespace(" ")]
                   2: CSS_IDENTIFIER@107..109
                     0: IDENT@107..109 "fr" [] []
+      1: CSS_BOGUS_BLOCK@109..109
   2: EOF@109..110 "" [Newline("\n")] []
 
 ```

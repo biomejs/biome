@@ -88,7 +88,7 @@ declare_rule! {
     /// let tuple: [boolean, string] = [false, "foo"];
     /// ```
     ///
-    pub(crate) NoBannedTypes {
+    pub NoBannedTypes {
         version: "1.0.0",
         name: "noBannedTypes",
         source: RuleSource::EslintTypeScript("ban-types"),
@@ -185,7 +185,7 @@ impl Rule for NoBannedTypes {
 }
 
 declare_node_union! {
-    pub(crate) TsBannedType = TsReferenceType | TsObjectType
+    pub TsBannedType = TsReferenceType | TsObjectType
 }
 
 pub struct State {

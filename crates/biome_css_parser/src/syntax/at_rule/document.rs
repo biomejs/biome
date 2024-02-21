@@ -1,6 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::expected_any_document_matcher;
-use crate::syntax::blocks::parse_or_recover_rule_list_block;
+use crate::syntax::block::parse_rule_list_block;
 use crate::syntax::parse_error::expected_string;
 use crate::syntax::parse_string;
 use crate::syntax::value::url::{is_at_url_function, parse_url_function};
@@ -49,10 +49,7 @@ pub(crate) fn parse_document_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![document]);
 
     DocumentMatcherList.parse_list(p);
-
-    if parse_or_recover_rule_list_block(p).is_err() {
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
-    }
+    parse_rule_list_block(p);
 
     Present(m.complete(p, CSS_DOCUMENT_AT_RULE))
 }

@@ -54,7 +54,7 @@ declare_rule! {
     /// Number.parseInt(foo);
     /// Number.parseInt(foo, 2);
     /// ```
-    pub(crate) UseNumericLiterals {
+    pub UseNumericLiterals {
         version: "1.0.0",
         name: "useNumericLiterals",
         source: RuleSource::Eslint("prefer-numeric-literals"),

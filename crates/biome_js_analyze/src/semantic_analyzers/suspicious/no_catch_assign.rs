@@ -34,7 +34,7 @@ declare_rule! {
     ///   e = 100;
     /// }
     /// ```
-    pub(crate) NoCatchAssign {
+    pub NoCatchAssign {
         version: "1.0.0",
         name: "noCatchAssign",
         source: RuleSource::Eslint("no-ex-assign"),

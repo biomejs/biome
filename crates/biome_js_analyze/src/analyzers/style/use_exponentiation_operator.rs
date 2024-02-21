@@ -53,7 +53,7 @@ declare_rule! {
     /// let quux = (-1) ** n;
     /// ```
     ///
-    pub(crate) UseExponentiationOperator {
+    pub UseExponentiationOperator {
         version: "1.0.0",
         name: "useExponentiationOperator",
         source: RuleSource::Eslint("prefer-exponentiation-operator"),

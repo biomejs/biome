@@ -738,42 +738,43 @@ CssRoot {
                 r_curly_token: R_CURLY@414..415 "}" [] [],
             },
         },
-        CssBogusRule {
-            items: [
-                CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssPseudoClassSelector {
-                                colon_token: COLON@415..417 ":" [Newline("\n")] [],
-                                class: CssBogusPseudoClass {
-                                    items: [
-                                        NTH_CHILD_KW@417..426 "nth-child" [] [],
-                                        L_PAREN@426..427 "(" [] [],
-                                        CssPseudoClassNthSelector {
-                                            nth: CssPseudoClassNth {
-                                                sign: missing (optional),
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@415..417 ":" [Newline("\n")] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    NTH_CHILD_KW@417..426 "nth-child" [] [],
+                                    L_PAREN@426..427 "(" [] [],
+                                    CssPseudoClassNthSelector {
+                                        nth: CssPseudoClassNth {
+                                            sign: missing (optional),
+                                            value: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@427..428 "2" [] [],
+                                            },
+                                            symbol_token: N_KW@428..430 "n" [] [Whitespace(" ")],
+                                            offset: CssNthOffset {
+                                                sign: PLUS@430..432 "+" [] [Whitespace(" ")],
                                                 value: CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@427..428 "2" [] [],
-                                                },
-                                                symbol_token: N_KW@428..430 "n" [] [Whitespace(" ")],
-                                                offset: CssNthOffset {
-                                                    sign: PLUS@430..432 "+" [] [Whitespace(" ")],
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@432..433 "1" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@432..433 "1" [] [],
                                                 },
                                             },
-                                            of_selector: missing (optional),
                                         },
-                                    ],
-                                },
+                                        of_selector: missing (optional),
+                                    },
+                                ],
                             },
-                        ],
-                    },
-                ],
+                        },
+                    ],
+                },
             ],
+            block: CssBogusBlock {
+                items: [],
+            },
         },
     ],
     eof_token: EOF@433..433 "" [] [],
@@ -1233,7 +1234,7 @@ CssRoot {
         0: L_CURLY@413..414 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@414..414
         2: R_CURLY@414..415 "}" [] []
-    17: CSS_BOGUS_RULE@415..433
+    17: CSS_QUALIFIED_RULE@415..433
       0: CSS_SELECTOR_LIST@415..433
         0: CSS_COMPOUND_SELECTOR@415..433
           0: (empty)
@@ -1255,6 +1256,7 @@ CssRoot {
                       1: CSS_NUMBER@432..433
                         0: CSS_NUMBER_LITERAL@432..433 "1" [] []
                   1: (empty)
+      1: CSS_BOGUS_BLOCK@433..433
   2: EOF@433..433 "" [] []
 
 ```

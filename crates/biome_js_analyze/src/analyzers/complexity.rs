@@ -2,30 +2,30 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_excessive_cognitive_complexity;
-pub(crate) mod no_extra_boolean_cast;
-pub(crate) mod no_for_each;
-pub(crate) mod no_multiple_spaces_in_regular_expression_literals;
-pub(crate) mod no_static_only_class;
-pub(crate) mod no_useless_catch;
-pub(crate) mod no_useless_constructor;
-pub(crate) mod no_useless_empty_export;
-pub(crate) mod no_useless_label;
-pub(crate) mod no_useless_rename;
-pub(crate) mod no_useless_switch_case;
-pub(crate) mod no_useless_type_constraint;
-pub(crate) mod no_void;
-pub(crate) mod no_with;
-pub(crate) mod use_arrow_function;
-pub(crate) mod use_flat_map;
-pub(crate) mod use_literal_keys;
-pub(crate) mod use_optional_chain;
-pub(crate) mod use_regex_literals;
-pub(crate) mod use_simple_number_keys;
-pub(crate) mod use_simplified_logic_expression;
+pub mod no_excessive_cognitive_complexity;
+pub mod no_extra_boolean_cast;
+pub mod no_for_each;
+pub mod no_multiple_spaces_in_regular_expression_literals;
+pub mod no_static_only_class;
+pub mod no_useless_catch;
+pub mod no_useless_constructor;
+pub mod no_useless_empty_export;
+pub mod no_useless_label;
+pub mod no_useless_rename;
+pub mod no_useless_switch_case;
+pub mod no_useless_type_constraint;
+pub mod no_void;
+pub mod no_with;
+pub mod use_arrow_function;
+pub mod use_flat_map;
+pub mod use_literal_keys;
+pub mod use_optional_chain;
+pub mod use_regex_literals;
+pub mod use_simple_number_keys;
+pub mod use_simplified_logic_expression;
 
 declare_group! {
-    pub (crate) Complexity {
+    pub Complexity {
         name : "complexity" ,
         rules : [
             self :: no_excessive_cognitive_complexity :: NoExcessiveCognitiveComplexity ,

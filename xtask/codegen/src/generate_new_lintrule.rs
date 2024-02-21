@@ -51,7 +51,7 @@ declare_rule! {{
     /// var a = 1;
     /// ```
     ///
-    pub(crate) {rule_name_upper_camel} {{
+    pub {rule_name_upper_camel} {{
         version: "next",
         name: "{rule_name_lower_camel}",
         recommended: false,

@@ -64,7 +64,7 @@ declare_rule! {
     /// import { B } from "./mod.js" with {};
     /// export type { B };
     /// ```
-    pub(crate) UseImportType {
+    pub UseImportType {
         version: "1.5.0",
         name: "useImportType",
         source: RuleSource::EslintTypeScript("consistent-type-imports"),
@@ -462,7 +462,7 @@ impl Rule for UseImportType {
 }
 
 #[derive(Debug)]
-pub(crate) enum ImportTypeFix {
+pub enum ImportTypeFix {
     UseImportType,
     ExtractDefaultImportType(Vec<AnyJsNamedImportSpecifier>),
     ExtractCombinedImportType,
@@ -485,7 +485,7 @@ fn is_only_used_as_type(model: &SemanticModel, binding: &JsIdentifierBinding) ->
 }
 
 #[derive(Debug)]
-pub(crate) enum NamedImportTypeFix {
+pub enum NamedImportTypeFix {
     UseImportType(Vec<AnyJsNamedImportSpecifier>),
     AddInlineTypeQualifiers(Vec<AnyJsNamedImportSpecifier>),
 }

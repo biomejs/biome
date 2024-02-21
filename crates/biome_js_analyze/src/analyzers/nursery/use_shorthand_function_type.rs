@@ -78,7 +78,7 @@ declare_rule! {
     /// type Intersection = ((data: string) => number) & ((id: number) => string);
     ///```
     ///
-    pub(crate) UseShorthandFunctionType {
+    pub UseShorthandFunctionType {
         version: "1.5.0",
         name: "useShorthandFunctionType",
         source: RuleSource::EslintTypeScript("prefer-function-type"),

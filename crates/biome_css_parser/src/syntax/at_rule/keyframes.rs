@@ -3,12 +3,10 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
 };
-use crate::syntax::blocks::{parse_block_body, parse_declaration_list_block};
-use crate::syntax::parse_error::{expected_block, expected_non_css_wide_keyword_identifier};
+use crate::syntax::block::{parse_declaration_list_block, ParseBlockBody};
+use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
-use crate::syntax::{
-    is_at_declaration, is_at_identifier, parse_custom_identifier, parse_string, BODY_RECOVERY_SET,
-};
+use crate::syntax::{is_at_declaration, is_at_identifier, parse_custom_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -52,33 +50,25 @@ pub(crate) fn parse_keyframes_at_rule(p: &mut CssParser) -> ParsedSyntax {
         CSS_BOGUS_AT_RULE
     };
 
-    if parse_keyframes_block(p)
-        .or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_BLOCK, BODY_RECOVERY_SET)
-                .enable_recovery_on_line_break(),
-            expected_block,
-        )
-        .is_err()
-    {
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
-    }
+    KeyframesBlock.parse_block_body(p);
 
     Present(m.complete(p, kind))
 }
+
 const KEYFRAMES_NAME_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];
 
-#[inline]
-fn parse_keyframes_block(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at(T!['{']) {
-        return Absent;
+struct KeyframesBlock;
+
+impl ParseBlockBody for KeyframesBlock {
+    const BLOCK_KIND: CssSyntaxKind = CSS_KEYFRAMES_BLOCK;
+
+    fn is_at_element(&self, p: &mut CssParser) -> bool {
+        is_at_keyframes_item_selector(p)
     }
 
-    let m = parse_block_body(p, |p| {
+    fn parse_list(&mut self, p: &mut CssParser) {
         KeyframesItemList.parse_list(p);
-    });
-
-    Present(m.complete(p, CSS_KEYFRAMES_BLOCK))
+    }
 }
 
 struct KeyframesItemListParseRecovery;
@@ -156,32 +146,9 @@ fn parse_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
         p.error(expected_keyframes_item_selector(p, p.cur_range()))
     }
 
-    let declaration_block = parse_declaration_list_block(p).or_recover(
-        p,
-        &KeyframesItemBlockParseRecovery,
-        expected_block,
-    );
+    parse_declaration_list_block(p);
 
-    let kind = match declaration_block {
-        Ok(block) => {
-            if block.kind(p) == CSS_BOGUS_BLOCK {
-                // If we have recovered a bogus block, we need to ensure that we consume the closing '}' token.
-                // Otherwise, the parser will interpret the '}' token as the end of the keyframe block:
-                //    @keyframes name { <----- the keyframe block
-                //      from
-                //          color: red;
-                //      } <----- here it's a recover point
-                //   }
-                p.eat(T!['}']);
-                CSS_BOGUS_KEYFRAMES_ITEM
-            } else {
-                CSS_KEYFRAMES_ITEM
-            }
-        }
-        Err(_) => CSS_BOGUS_KEYFRAMES_ITEM,
-    };
-
-    Present(m.complete(p, kind))
+    Present(m.complete(p, CSS_KEYFRAMES_ITEM))
 }
 
 struct KeyframesSelectorListParseRecovery;
@@ -223,7 +190,7 @@ impl ParseSeparatedList for KeyframesSelectorList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_keyframes_selector_list_end(p)
+        p.at(T!['{'])
     }
 
     fn recover(

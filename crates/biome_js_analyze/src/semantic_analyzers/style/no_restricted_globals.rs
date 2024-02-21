@@ -45,7 +45,7 @@ declare_rule! {
     /// In the example above, the rule will emit a diagnostics if tried to use `$` or `MooTools` without
     /// creating a local variable.
     ///
-    pub(crate) NoRestrictedGlobals {
+    pub NoRestrictedGlobals {
         version: "1.0.0",
         name: "noRestrictedGlobals",
         source: RuleSource::Eslint("no-restricted-globals"),
@@ -69,7 +69,7 @@ impl Rule for NoRestrictedGlobals {
     type Query = SemanticServices;
     type State = (TextRange, String);
     type Signals = Vec<Self::State>;
-    type Options = RestrictedGlobalsOptions;
+    type Options = Box<RestrictedGlobalsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();

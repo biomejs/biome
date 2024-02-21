@@ -83,14 +83,16 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@5..40 "border" [Newline("\n"), Whitespace("    "), Comments("/* Global values */"), Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@40..42 ":" [] [Whitespace(" ")],
-                                value: CssWideKeyword {
-                                    value: INHERIT_KW@42..49 "inherit" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@42..49 "inherit" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -98,14 +100,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@50..61 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@61..63 ":" [] [Whitespace(" ")],
-                                value: CssWideKeyword {
-                                    value: INITIAL_KW@63..70 "initial" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@63..70 "initial" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -113,14 +117,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@71..82 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@82..84 ":" [] [Whitespace(" ")],
-                                value: CssWideKeyword {
-                                    value: UNSET_KW@84..89 "unset" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@84..89 "unset" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -128,14 +134,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@90..101 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@101..103 ":" [] [Whitespace(" ")],
-                                value: CssWideKeyword {
-                                    value: REVERT_KW@103..109 "revert" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@103..109 "revert" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -143,14 +151,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@110..121 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@121..123 ":" [] [Whitespace(" ")],
-                                value: CssWideKeyword {
-                                    value: REVERT_LAYER_KW@123..135 "revert-layer" [] [],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@123..135 "revert-layer" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -158,18 +168,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@136..171 "border" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* <line-style> */"), Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@171..173 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: CssLineStyle {
-                                        keyword: SOLID_KW@173..178 "solid" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@173..178 "solid" [] [],
                                     },
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -177,18 +185,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@179..190 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@190..192 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: CssLineStyle {
-                                        keyword: NONE_KW@192..196 "none" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@192..196 "none" [] [],
                                     },
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -196,18 +202,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@197..208 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@208..210 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: CssLineStyle {
-                                        keyword: HIDDEN_KW@210..216 "hidden" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@210..216 "hidden" [] [],
                                     },
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -215,18 +219,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@217..228 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@228..230 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: CssLineStyle {
-                                        keyword: DOTTED_KW@230..236 "dotted" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@230..236 "dotted" [] [],
                                     },
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -234,18 +236,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@237..248 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@248..250 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: CssLineStyle {
-                                        keyword: DASHED_KW@250..256 "dashed" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@250..256 "dashed" [] [],
                                     },
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -253,18 +253,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@257..268 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@268..270 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: CssLineStyle {
-                                        keyword: SOLID_KW@270..275 "solid" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@270..275 "solid" [] [],
                                     },
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -272,18 +270,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@276..287 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@287..289 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: CssLineStyle {
-                                        keyword: DOUBLE_KW@289..295 "double" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@289..295 "double" [] [],
                                     },
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -291,18 +287,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@296..307 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@307..309 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: CssLineStyle {
-                                        keyword: GROOVE_KW@309..315 "groove" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@309..315 "groove" [] [],
                                     },
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -310,18 +304,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@316..327 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@327..329 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: CssLineStyle {
-                                        keyword: RIDGE_KW@329..334 "ridge" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@329..334 "ridge" [] [],
                                     },
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -329,18 +321,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@335..346 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@346..348 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: CssLineStyle {
-                                        keyword: INSET_KW@348..353 "inset" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@348..353 "inset" [] [],
                                     },
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -348,18 +338,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@354..365 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@365..367 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: CssLineStyle {
-                                        keyword: OUTSET_KW@367..373 "outset" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@367..373 "outset" [] [],
                                     },
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -367,18 +355,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@374..409 "border" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* <line-width> */"), Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@409..411 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: CssLineWidthKeyword {
-                                        keyword: THIN_KW@411..415 "thin" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@411..415 "thin" [] [],
                                     },
-                                    line_style: missing (optional),
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -386,18 +372,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@416..427 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@427..429 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: CssLineWidthKeyword {
-                                        keyword: MEDIUM_KW@429..435 "medium" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@429..435 "medium" [] [],
                                     },
-                                    line_style: missing (optional),
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -405,18 +389,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@436..447 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@447..449 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: CssLineWidthKeyword {
-                                        keyword: THICK_KW@449..454 "thick" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@449..454 "thick" [] [],
                                     },
-                                    line_style: missing (optional),
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -424,19 +406,17 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@455..466 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@466..468 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: CssRegularDimension {
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
                                         value_token: CSS_NUMBER_LITERAL@468..471 "100" [] [],
                                         unit_token: IDENT@471..473 "px" [] [],
                                     },
-                                    line_style: missing (optional),
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -444,19 +424,17 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@474..485 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@485..487 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: CssRegularDimension {
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
                                         value_token: CSS_NUMBER_LITERAL@487..489 "20" [] [],
                                         unit_token: IDENT@489..491 "em" [] [],
                                     },
-                                    line_style: missing (optional),
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -464,19 +442,17 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@492..503 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@503..505 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: CssRegularDimension {
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
                                         value_token: CSS_NUMBER_LITERAL@505..506 "5" [] [],
                                         unit_token: IDENT@506..508 "vh" [] [],
                                     },
-                                    line_style: missing (optional),
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -484,19 +460,17 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@509..539 "border" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* <color> */"), Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@539..541 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: missing (optional),
-                                    color: CssColor {
+                                value: CssGenericComponentValueList [
+                                    CssColor {
                                         hash_token: HASH@541..542 "#" [] [],
                                         value_token: CSS_COLOR_LITERAL@542..545 "fff" [] [],
                                     },
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -504,21 +478,20 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@546..581 "border" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* combinations */"), Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@581..583 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: CssRegularDimension {
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
                                         value_token: CSS_NUMBER_LITERAL@583..584 "2" [] [],
                                         unit_token: IDENT@584..587 "px" [] [Whitespace(" ")],
                                     },
-                                    line_style: CssLineStyle {
-                                        keyword: DOTTED_KW@587..593 "dotted" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@587..593 "dotted" [] [],
                                     },
-                                    color: missing (optional),
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -526,21 +499,20 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@594..605 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@605..607 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: missing (optional),
-                                    line_style: CssLineStyle {
-                                        keyword: OUTSET_KW@607..614 "outset" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@607..614 "outset" [] [Whitespace(" ")],
                                     },
-                                    color: CssColor {
+                                    CssColor {
                                         hash_token: HASH@614..615 "#" [] [],
                                         value_token: CSS_COLOR_LITERAL@615..618 "f33" [] [],
                                     },
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -548,23 +520,23 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@619..630 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@630..632 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: CssLineWidthKeyword {
-                                        keyword: MEDIUM_KW@632..639 "medium" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@632..639 "medium" [] [Whitespace(" ")],
                                     },
-                                    line_style: CssLineStyle {
-                                        keyword: DASHED_KW@639..646 "dashed" [] [Whitespace(" ")],
+                                    CssIdentifier {
+                                        value_token: IDENT@639..646 "dashed" [] [Whitespace(" ")],
                                     },
-                                    color: CssColor {
+                                    CssColor {
                                         hash_token: HASH@646..647 "#" [] [],
                                         value_token: CSS_COLOR_LITERAL@647..650 "000" [] [],
                                     },
-                                },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -572,24 +544,24 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@651..662 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@662..664 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: CssRegularDimension {
-                                        value_token: CSS_NUMBER_LITERAL@677..679 "10" [] [],
-                                        unit_token: IDENT@679..681 "px" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@664..672 "groove" [] [Whitespace("  ")],
                                     },
-                                    line_style: CssLineStyle {
-                                        keyword: GROOVE_KW@664..672 "groove" [] [Whitespace("  ")],
-                                    },
-                                    color: CssColor {
+                                    CssColor {
                                         hash_token: HASH@672..673 "#" [] [],
                                         value_token: CSS_COLOR_LITERAL@673..677 "fff" [] [Whitespace(" ")],
                                     },
-                                },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@677..679 "10" [] [],
+                                        unit_token: IDENT@679..681 "px" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -597,24 +569,24 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@682..693 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@693..695 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: CssRegularDimension {
-                                        value_token: CSS_NUMBER_LITERAL@700..702 "20" [] [],
-                                        unit_token: IDENT@702..705 "vh" [] [Whitespace(" ")],
-                                    },
-                                    line_style: CssLineStyle {
-                                        keyword: INSET_KW@705..710 "inset" [] [],
-                                    },
-                                    color: CssColor {
+                                value: CssGenericComponentValueList [
+                                    CssColor {
                                         hash_token: HASH@695..696 "#" [] [],
                                         value_token: CSS_COLOR_LITERAL@696..700 "00f" [] [Whitespace(" ")],
                                     },
-                                },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@700..702 "20" [] [],
+                                        unit_token: IDENT@702..705 "vh" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@705..710 "inset" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -622,23 +594,23 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@711..722 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@722..724 ":" [] [Whitespace(" ")],
-                                value: CssBorder {
-                                    line_width: CssLineWidthKeyword {
-                                        keyword: THIN_KW@724..729 "thin" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@724..729 "thin" [] [Whitespace(" ")],
                                     },
-                                    line_style: CssLineStyle {
-                                        keyword: NONE_KW@735..739 "none" [] [],
-                                    },
-                                    color: CssColor {
+                                    CssColor {
                                         hash_token: HASH@729..730 "#" [] [],
                                         value_token: CSS_COLOR_LITERAL@730..735 "0000" [] [Whitespace(" ")],
                                     },
-                                },
+                                    CssIdentifier {
+                                        value_token: IDENT@735..739 "none" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -646,19 +618,17 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@740..795 "border" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Incorrect values b ..."), Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@795..797 ":" [] [Whitespace(" ")],
-                                value: CssUnknownPropertyValue {
-                                    css_generic_component_value_list: CssGenericComponentValueList [
-                                        CssRegularDimension {
-                                            value_token: CSS_NUMBER_LITERAL@797..799 "10" [] [],
-                                            unit_token: IDENT@799..800 "s" [] [],
-                                        },
-                                    ],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@797..799 "10" [] [],
+                                        unit_token: IDENT@799..800 "s" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -666,18 +636,16 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@801..812 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@812..814 ":" [] [Whitespace(" ")],
-                                value: CssUnknownPropertyValue {
-                                    css_generic_component_value_list: CssGenericComponentValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@814..823 "one-value" [] [],
-                                        },
-                                    ],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@814..823 "one-value" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -685,21 +653,19 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@824..835 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@835..837 ":" [] [Whitespace(" ")],
-                                value: CssUnknownPropertyValue {
-                                    css_generic_component_value_list: CssGenericComponentValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@837..846 "multiple" [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@846..852 "values" [] [],
-                                        },
-                                    ],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@837..846 "multiple" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@846..852 "values" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -707,24 +673,22 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@853..864 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@864..866 ":" [] [Whitespace(" ")],
-                                value: CssUnknownPropertyValue {
-                                    css_generic_component_value_list: CssGenericComponentValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@866..875 "delimited" [] [],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: COMMA@875..877 "," [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@877..883 "values" [] [],
-                                        },
-                                    ],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@866..875 "delimited" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@875..877 "," [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@877..883 "values" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -732,30 +696,28 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@884..895 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@895..897 ":" [] [Whitespace(" ")],
-                                value: CssUnknownPropertyValue {
-                                    css_generic_component_value_list: CssGenericComponentValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@897..907 "delimited" [] [Whitespace(" ")],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: SLASH@907..909 "/" [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@909..915 "slash" [] [Whitespace(" ")],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: SLASH@915..917 "/" [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@917..923 "values" [] [],
-                                        },
-                                    ],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@897..907 "delimited" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@907..909 "/" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@909..915 "slash" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@915..917 "/" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@917..923 "values" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -763,39 +725,37 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBorderProperty {
+                            property: CssGenericProperty {
                                 name: CssIdentifier {
                                     value_token: IDENT@924..935 "border" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@935..937 ":" [] [Whitespace(" ")],
-                                value: CssUnknownPropertyValue {
-                                    css_generic_component_value_list: CssGenericComponentValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@937..942 "mixed" [] [],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: COMMA@942..944 "," [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@944..955 "delimiters" [] [Whitespace(" ")],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: SLASH@955..957 "/" [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@957..961 "can" [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@961..963 "be" [] [],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: COMMA@963..965 "," [] [Whitespace(" ")],
-                                        },
-                                        CssIdentifier {
-                                            value_token: IDENT@965..969 "used" [] [],
-                                        },
-                                    ],
-                                },
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@937..942 "mixed" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@942..944 "," [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@944..955 "delimiters" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@955..957 "/" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@957..961 "can" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@961..963 "be" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@963..965 "," [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@965..969 "used" [] [],
+                                    },
+                                ],
                             },
                             important: missing (optional),
                         },
@@ -830,333 +790,300 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@5..970
           0: CSS_DECLARATION_WITH_SEMICOLON@5..50
             0: CSS_DECLARATION@5..49
-              0: CSS_BORDER_PROPERTY@5..49
+              0: CSS_GENERIC_PROPERTY@5..49
                 0: CSS_IDENTIFIER@5..40
                   0: IDENT@5..40 "border" [Newline("\n"), Whitespace("    "), Comments("/* Global values */"), Newline("\n"), Whitespace("    ")] []
                 1: COLON@40..42 ":" [] [Whitespace(" ")]
-                2: CSS_WIDE_KEYWORD@42..49
-                  0: INHERIT_KW@42..49 "inherit" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@42..49
+                  0: CSS_IDENTIFIER@42..49
+                    0: IDENT@42..49 "inherit" [] []
               1: (empty)
             1: SEMICOLON@49..50 ";" [] []
           1: CSS_DECLARATION_WITH_SEMICOLON@50..71
             0: CSS_DECLARATION@50..70
-              0: CSS_BORDER_PROPERTY@50..70
+              0: CSS_GENERIC_PROPERTY@50..70
                 0: CSS_IDENTIFIER@50..61
                   0: IDENT@50..61 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@61..63 ":" [] [Whitespace(" ")]
-                2: CSS_WIDE_KEYWORD@63..70
-                  0: INITIAL_KW@63..70 "initial" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@63..70
+                  0: CSS_IDENTIFIER@63..70
+                    0: IDENT@63..70 "initial" [] []
               1: (empty)
             1: SEMICOLON@70..71 ";" [] []
           2: CSS_DECLARATION_WITH_SEMICOLON@71..90
             0: CSS_DECLARATION@71..89
-              0: CSS_BORDER_PROPERTY@71..89
+              0: CSS_GENERIC_PROPERTY@71..89
                 0: CSS_IDENTIFIER@71..82
                   0: IDENT@71..82 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@82..84 ":" [] [Whitespace(" ")]
-                2: CSS_WIDE_KEYWORD@84..89
-                  0: UNSET_KW@84..89 "unset" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@84..89
+                  0: CSS_IDENTIFIER@84..89
+                    0: IDENT@84..89 "unset" [] []
               1: (empty)
             1: SEMICOLON@89..90 ";" [] []
           3: CSS_DECLARATION_WITH_SEMICOLON@90..110
             0: CSS_DECLARATION@90..109
-              0: CSS_BORDER_PROPERTY@90..109
+              0: CSS_GENERIC_PROPERTY@90..109
                 0: CSS_IDENTIFIER@90..101
                   0: IDENT@90..101 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@101..103 ":" [] [Whitespace(" ")]
-                2: CSS_WIDE_KEYWORD@103..109
-                  0: REVERT_KW@103..109 "revert" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@103..109
+                  0: CSS_IDENTIFIER@103..109
+                    0: IDENT@103..109 "revert" [] []
               1: (empty)
             1: SEMICOLON@109..110 ";" [] []
           4: CSS_DECLARATION_WITH_SEMICOLON@110..136
             0: CSS_DECLARATION@110..135
-              0: CSS_BORDER_PROPERTY@110..135
+              0: CSS_GENERIC_PROPERTY@110..135
                 0: CSS_IDENTIFIER@110..121
                   0: IDENT@110..121 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@121..123 ":" [] [Whitespace(" ")]
-                2: CSS_WIDE_KEYWORD@123..135
-                  0: REVERT_LAYER_KW@123..135 "revert-layer" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@123..135
+                  0: CSS_IDENTIFIER@123..135
+                    0: IDENT@123..135 "revert-layer" [] []
               1: (empty)
             1: SEMICOLON@135..136 ";" [] []
           5: CSS_DECLARATION_WITH_SEMICOLON@136..179
             0: CSS_DECLARATION@136..178
-              0: CSS_BORDER_PROPERTY@136..178
+              0: CSS_GENERIC_PROPERTY@136..178
                 0: CSS_IDENTIFIER@136..171
                   0: IDENT@136..171 "border" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* <line-style> */"), Newline("\n"), Whitespace("    ")] []
                 1: COLON@171..173 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@173..178
-                  0: CSS_LINE_STYLE@173..178
-                    0: SOLID_KW@173..178 "solid" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@173..178
+                  0: CSS_IDENTIFIER@173..178
+                    0: IDENT@173..178 "solid" [] []
               1: (empty)
             1: SEMICOLON@178..179 ";" [] []
           6: CSS_DECLARATION_WITH_SEMICOLON@179..197
             0: CSS_DECLARATION@179..196
-              0: CSS_BORDER_PROPERTY@179..196
+              0: CSS_GENERIC_PROPERTY@179..196
                 0: CSS_IDENTIFIER@179..190
                   0: IDENT@179..190 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@190..192 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@192..196
-                  0: CSS_LINE_STYLE@192..196
-                    0: NONE_KW@192..196 "none" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@192..196
+                  0: CSS_IDENTIFIER@192..196
+                    0: IDENT@192..196 "none" [] []
               1: (empty)
             1: SEMICOLON@196..197 ";" [] []
           7: CSS_DECLARATION_WITH_SEMICOLON@197..217
             0: CSS_DECLARATION@197..216
-              0: CSS_BORDER_PROPERTY@197..216
+              0: CSS_GENERIC_PROPERTY@197..216
                 0: CSS_IDENTIFIER@197..208
                   0: IDENT@197..208 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@208..210 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@210..216
-                  0: CSS_LINE_STYLE@210..216
-                    0: HIDDEN_KW@210..216 "hidden" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@210..216
+                  0: CSS_IDENTIFIER@210..216
+                    0: IDENT@210..216 "hidden" [] []
               1: (empty)
             1: SEMICOLON@216..217 ";" [] []
           8: CSS_DECLARATION_WITH_SEMICOLON@217..237
             0: CSS_DECLARATION@217..236
-              0: CSS_BORDER_PROPERTY@217..236
+              0: CSS_GENERIC_PROPERTY@217..236
                 0: CSS_IDENTIFIER@217..228
                   0: IDENT@217..228 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@228..230 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@230..236
-                  0: CSS_LINE_STYLE@230..236
-                    0: DOTTED_KW@230..236 "dotted" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@230..236
+                  0: CSS_IDENTIFIER@230..236
+                    0: IDENT@230..236 "dotted" [] []
               1: (empty)
             1: SEMICOLON@236..237 ";" [] []
           9: CSS_DECLARATION_WITH_SEMICOLON@237..257
             0: CSS_DECLARATION@237..256
-              0: CSS_BORDER_PROPERTY@237..256
+              0: CSS_GENERIC_PROPERTY@237..256
                 0: CSS_IDENTIFIER@237..248
                   0: IDENT@237..248 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@248..250 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@250..256
-                  0: CSS_LINE_STYLE@250..256
-                    0: DASHED_KW@250..256 "dashed" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@250..256
+                  0: CSS_IDENTIFIER@250..256
+                    0: IDENT@250..256 "dashed" [] []
               1: (empty)
             1: SEMICOLON@256..257 ";" [] []
           10: CSS_DECLARATION_WITH_SEMICOLON@257..276
             0: CSS_DECLARATION@257..275
-              0: CSS_BORDER_PROPERTY@257..275
+              0: CSS_GENERIC_PROPERTY@257..275
                 0: CSS_IDENTIFIER@257..268
                   0: IDENT@257..268 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@268..270 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@270..275
-                  0: CSS_LINE_STYLE@270..275
-                    0: SOLID_KW@270..275 "solid" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@270..275
+                  0: CSS_IDENTIFIER@270..275
+                    0: IDENT@270..275 "solid" [] []
               1: (empty)
             1: SEMICOLON@275..276 ";" [] []
           11: CSS_DECLARATION_WITH_SEMICOLON@276..296
             0: CSS_DECLARATION@276..295
-              0: CSS_BORDER_PROPERTY@276..295
+              0: CSS_GENERIC_PROPERTY@276..295
                 0: CSS_IDENTIFIER@276..287
                   0: IDENT@276..287 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@287..289 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@289..295
-                  0: CSS_LINE_STYLE@289..295
-                    0: DOUBLE_KW@289..295 "double" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@289..295
+                  0: CSS_IDENTIFIER@289..295
+                    0: IDENT@289..295 "double" [] []
               1: (empty)
             1: SEMICOLON@295..296 ";" [] []
           12: CSS_DECLARATION_WITH_SEMICOLON@296..316
             0: CSS_DECLARATION@296..315
-              0: CSS_BORDER_PROPERTY@296..315
+              0: CSS_GENERIC_PROPERTY@296..315
                 0: CSS_IDENTIFIER@296..307
                   0: IDENT@296..307 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@307..309 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@309..315
-                  0: CSS_LINE_STYLE@309..315
-                    0: GROOVE_KW@309..315 "groove" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@309..315
+                  0: CSS_IDENTIFIER@309..315
+                    0: IDENT@309..315 "groove" [] []
               1: (empty)
             1: SEMICOLON@315..316 ";" [] []
           13: CSS_DECLARATION_WITH_SEMICOLON@316..335
             0: CSS_DECLARATION@316..334
-              0: CSS_BORDER_PROPERTY@316..334
+              0: CSS_GENERIC_PROPERTY@316..334
                 0: CSS_IDENTIFIER@316..327
                   0: IDENT@316..327 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@327..329 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@329..334
-                  0: CSS_LINE_STYLE@329..334
-                    0: RIDGE_KW@329..334 "ridge" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@329..334
+                  0: CSS_IDENTIFIER@329..334
+                    0: IDENT@329..334 "ridge" [] []
               1: (empty)
             1: SEMICOLON@334..335 ";" [] []
           14: CSS_DECLARATION_WITH_SEMICOLON@335..354
             0: CSS_DECLARATION@335..353
-              0: CSS_BORDER_PROPERTY@335..353
+              0: CSS_GENERIC_PROPERTY@335..353
                 0: CSS_IDENTIFIER@335..346
                   0: IDENT@335..346 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@346..348 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@348..353
-                  0: CSS_LINE_STYLE@348..353
-                    0: INSET_KW@348..353 "inset" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@348..353
+                  0: CSS_IDENTIFIER@348..353
+                    0: IDENT@348..353 "inset" [] []
               1: (empty)
             1: SEMICOLON@353..354 ";" [] []
           15: CSS_DECLARATION_WITH_SEMICOLON@354..374
             0: CSS_DECLARATION@354..373
-              0: CSS_BORDER_PROPERTY@354..373
+              0: CSS_GENERIC_PROPERTY@354..373
                 0: CSS_IDENTIFIER@354..365
                   0: IDENT@354..365 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@365..367 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@367..373
-                  0: CSS_LINE_STYLE@367..373
-                    0: OUTSET_KW@367..373 "outset" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@367..373
+                  0: CSS_IDENTIFIER@367..373
+                    0: IDENT@367..373 "outset" [] []
               1: (empty)
             1: SEMICOLON@373..374 ";" [] []
           16: CSS_DECLARATION_WITH_SEMICOLON@374..416
             0: CSS_DECLARATION@374..415
-              0: CSS_BORDER_PROPERTY@374..415
+              0: CSS_GENERIC_PROPERTY@374..415
                 0: CSS_IDENTIFIER@374..409
                   0: IDENT@374..409 "border" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* <line-width> */"), Newline("\n"), Whitespace("    ")] []
                 1: COLON@409..411 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@411..415
-                  0: CSS_LINE_WIDTH_KEYWORD@411..415
-                    0: THIN_KW@411..415 "thin" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@411..415
+                  0: CSS_IDENTIFIER@411..415
+                    0: IDENT@411..415 "thin" [] []
               1: (empty)
             1: SEMICOLON@415..416 ";" [] []
           17: CSS_DECLARATION_WITH_SEMICOLON@416..436
             0: CSS_DECLARATION@416..435
-              0: CSS_BORDER_PROPERTY@416..435
+              0: CSS_GENERIC_PROPERTY@416..435
                 0: CSS_IDENTIFIER@416..427
                   0: IDENT@416..427 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@427..429 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@429..435
-                  0: CSS_LINE_WIDTH_KEYWORD@429..435
-                    0: MEDIUM_KW@429..435 "medium" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@429..435
+                  0: CSS_IDENTIFIER@429..435
+                    0: IDENT@429..435 "medium" [] []
               1: (empty)
             1: SEMICOLON@435..436 ";" [] []
           18: CSS_DECLARATION_WITH_SEMICOLON@436..455
             0: CSS_DECLARATION@436..454
-              0: CSS_BORDER_PROPERTY@436..454
+              0: CSS_GENERIC_PROPERTY@436..454
                 0: CSS_IDENTIFIER@436..447
                   0: IDENT@436..447 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@447..449 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@449..454
-                  0: CSS_LINE_WIDTH_KEYWORD@449..454
-                    0: THICK_KW@449..454 "thick" [] []
-                  1: (empty)
-                  2: (empty)
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@449..454
+                  0: CSS_IDENTIFIER@449..454
+                    0: IDENT@449..454 "thick" [] []
               1: (empty)
             1: SEMICOLON@454..455 ";" [] []
           19: CSS_DECLARATION_WITH_SEMICOLON@455..474
             0: CSS_DECLARATION@455..473
-              0: CSS_BORDER_PROPERTY@455..473
+              0: CSS_GENERIC_PROPERTY@455..473
                 0: CSS_IDENTIFIER@455..466
                   0: IDENT@455..466 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@466..468 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@468..473
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@468..473
                   0: CSS_REGULAR_DIMENSION@468..473
                     0: CSS_NUMBER_LITERAL@468..471 "100" [] []
                     1: IDENT@471..473 "px" [] []
-                  1: (empty)
-                  2: (empty)
               1: (empty)
             1: SEMICOLON@473..474 ";" [] []
           20: CSS_DECLARATION_WITH_SEMICOLON@474..492
             0: CSS_DECLARATION@474..491
-              0: CSS_BORDER_PROPERTY@474..491
+              0: CSS_GENERIC_PROPERTY@474..491
                 0: CSS_IDENTIFIER@474..485
                   0: IDENT@474..485 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@485..487 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@487..491
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@487..491
                   0: CSS_REGULAR_DIMENSION@487..491
                     0: CSS_NUMBER_LITERAL@487..489 "20" [] []
                     1: IDENT@489..491 "em" [] []
-                  1: (empty)
-                  2: (empty)
               1: (empty)
             1: SEMICOLON@491..492 ";" [] []
           21: CSS_DECLARATION_WITH_SEMICOLON@492..509
             0: CSS_DECLARATION@492..508
-              0: CSS_BORDER_PROPERTY@492..508
+              0: CSS_GENERIC_PROPERTY@492..508
                 0: CSS_IDENTIFIER@492..503
                   0: IDENT@492..503 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@503..505 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@505..508
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@505..508
                   0: CSS_REGULAR_DIMENSION@505..508
                     0: CSS_NUMBER_LITERAL@505..506 "5" [] []
                     1: IDENT@506..508 "vh" [] []
-                  1: (empty)
-                  2: (empty)
               1: (empty)
             1: SEMICOLON@508..509 ";" [] []
           22: CSS_DECLARATION_WITH_SEMICOLON@509..546
             0: CSS_DECLARATION@509..545
-              0: CSS_BORDER_PROPERTY@509..545
+              0: CSS_GENERIC_PROPERTY@509..545
                 0: CSS_IDENTIFIER@509..539
                   0: IDENT@509..539 "border" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* <color> */"), Newline("\n"), Whitespace("    ")] []
                 1: COLON@539..541 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@541..545
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@541..545
                   0: CSS_COLOR@541..545
                     0: HASH@541..542 "#" [] []
                     1: CSS_COLOR_LITERAL@542..545 "fff" [] []
-                  1: (empty)
-                  2: (empty)
               1: (empty)
             1: SEMICOLON@545..546 ";" [] []
           23: CSS_DECLARATION_WITH_SEMICOLON@546..594
             0: CSS_DECLARATION@546..593
-              0: CSS_BORDER_PROPERTY@546..593
+              0: CSS_GENERIC_PROPERTY@546..593
                 0: CSS_IDENTIFIER@546..581
                   0: IDENT@546..581 "border" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* combinations */"), Newline("\n"), Whitespace("    ")] []
                 1: COLON@581..583 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@583..593
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@583..593
                   0: CSS_REGULAR_DIMENSION@583..587
                     0: CSS_NUMBER_LITERAL@583..584 "2" [] []
                     1: IDENT@584..587 "px" [] [Whitespace(" ")]
-                  1: CSS_LINE_STYLE@587..593
-                    0: DOTTED_KW@587..593 "dotted" [] []
-                  2: (empty)
+                  1: CSS_IDENTIFIER@587..593
+                    0: IDENT@587..593 "dotted" [] []
               1: (empty)
             1: SEMICOLON@593..594 ";" [] []
           24: CSS_DECLARATION_WITH_SEMICOLON@594..619
             0: CSS_DECLARATION@594..618
-              0: CSS_BORDER_PROPERTY@594..618
+              0: CSS_GENERIC_PROPERTY@594..618
                 0: CSS_IDENTIFIER@594..605
                   0: IDENT@594..605 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@605..607 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@607..618
-                  0: CSS_LINE_STYLE@607..614
-                    0: OUTSET_KW@607..614 "outset" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@607..618
+                  0: CSS_IDENTIFIER@607..614
+                    0: IDENT@607..614 "outset" [] [Whitespace(" ")]
                   1: CSS_COLOR@614..618
                     0: HASH@614..615 "#" [] []
                     1: CSS_COLOR_LITERAL@615..618 "f33" [] []
-                  2: (empty)
               1: (empty)
             1: SEMICOLON@618..619 ";" [] []
           25: CSS_DECLARATION_WITH_SEMICOLON@619..651
             0: CSS_DECLARATION@619..650
-              0: CSS_BORDER_PROPERTY@619..650
+              0: CSS_GENERIC_PROPERTY@619..650
                 0: CSS_IDENTIFIER@619..630
                   0: IDENT@619..630 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@630..632 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@632..650
-                  0: CSS_LINE_WIDTH_KEYWORD@632..639
-                    0: MEDIUM_KW@632..639 "medium" [] [Whitespace(" ")]
-                  1: CSS_LINE_STYLE@639..646
-                    0: DASHED_KW@639..646 "dashed" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@632..650
+                  0: CSS_IDENTIFIER@632..639
+                    0: IDENT@632..639 "medium" [] [Whitespace(" ")]
+                  1: CSS_IDENTIFIER@639..646
+                    0: IDENT@639..646 "dashed" [] [Whitespace(" ")]
                   2: CSS_COLOR@646..650
                     0: HASH@646..647 "#" [] []
                     1: CSS_COLOR_LITERAL@647..650 "000" [] []
@@ -1164,13 +1091,13 @@ CssRoot {
             1: SEMICOLON@650..651 ";" [] []
           26: CSS_DECLARATION_WITH_SEMICOLON@651..682
             0: CSS_DECLARATION@651..681
-              0: CSS_BORDER_PROPERTY@651..681
+              0: CSS_GENERIC_PROPERTY@651..681
                 0: CSS_IDENTIFIER@651..662
                   0: IDENT@651..662 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@662..664 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@664..681
-                  0: CSS_LINE_STYLE@664..672
-                    0: GROOVE_KW@664..672 "groove" [] [Whitespace("  ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@664..681
+                  0: CSS_IDENTIFIER@664..672
+                    0: IDENT@664..672 "groove" [] [Whitespace("  ")]
                   1: CSS_COLOR@672..677
                     0: HASH@672..673 "#" [] []
                     1: CSS_COLOR_LITERAL@673..677 "fff" [] [Whitespace(" ")]
@@ -1181,136 +1108,130 @@ CssRoot {
             1: SEMICOLON@681..682 ";" [] []
           27: CSS_DECLARATION_WITH_SEMICOLON@682..711
             0: CSS_DECLARATION@682..710
-              0: CSS_BORDER_PROPERTY@682..710
+              0: CSS_GENERIC_PROPERTY@682..710
                 0: CSS_IDENTIFIER@682..693
                   0: IDENT@682..693 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@693..695 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@695..710
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@695..710
                   0: CSS_COLOR@695..700
                     0: HASH@695..696 "#" [] []
                     1: CSS_COLOR_LITERAL@696..700 "00f" [] [Whitespace(" ")]
                   1: CSS_REGULAR_DIMENSION@700..705
                     0: CSS_NUMBER_LITERAL@700..702 "20" [] []
                     1: IDENT@702..705 "vh" [] [Whitespace(" ")]
-                  2: CSS_LINE_STYLE@705..710
-                    0: INSET_KW@705..710 "inset" [] []
+                  2: CSS_IDENTIFIER@705..710
+                    0: IDENT@705..710 "inset" [] []
               1: (empty)
             1: SEMICOLON@710..711 ";" [] []
           28: CSS_DECLARATION_WITH_SEMICOLON@711..740
             0: CSS_DECLARATION@711..739
-              0: CSS_BORDER_PROPERTY@711..739
+              0: CSS_GENERIC_PROPERTY@711..739
                 0: CSS_IDENTIFIER@711..722
                   0: IDENT@711..722 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@722..724 ":" [] [Whitespace(" ")]
-                2: CSS_BORDER@724..739
-                  0: CSS_LINE_WIDTH_KEYWORD@724..729
-                    0: THIN_KW@724..729 "thin" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@724..739
+                  0: CSS_IDENTIFIER@724..729
+                    0: IDENT@724..729 "thin" [] [Whitespace(" ")]
                   1: CSS_COLOR@729..735
                     0: HASH@729..730 "#" [] []
                     1: CSS_COLOR_LITERAL@730..735 "0000" [] [Whitespace(" ")]
-                  2: CSS_LINE_STYLE@735..739
-                    0: NONE_KW@735..739 "none" [] []
+                  2: CSS_IDENTIFIER@735..739
+                    0: IDENT@735..739 "none" [] []
               1: (empty)
             1: SEMICOLON@739..740 ";" [] []
           29: CSS_DECLARATION_WITH_SEMICOLON@740..801
             0: CSS_DECLARATION@740..800
-              0: CSS_BORDER_PROPERTY@740..800
+              0: CSS_GENERIC_PROPERTY@740..800
                 0: CSS_IDENTIFIER@740..795
                   0: IDENT@740..795 "border" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Incorrect values b ..."), Newline("\n"), Whitespace("    ")] []
                 1: COLON@795..797 ":" [] [Whitespace(" ")]
-                2: CSS_UNKNOWN_PROPERTY_VALUE@797..800
-                  0: CSS_GENERIC_COMPONENT_VALUE_LIST@797..800
-                    0: CSS_REGULAR_DIMENSION@797..800
-                      0: CSS_NUMBER_LITERAL@797..799 "10" [] []
-                      1: IDENT@799..800 "s" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@797..800
+                  0: CSS_REGULAR_DIMENSION@797..800
+                    0: CSS_NUMBER_LITERAL@797..799 "10" [] []
+                    1: IDENT@799..800 "s" [] []
               1: (empty)
             1: SEMICOLON@800..801 ";" [] []
           30: CSS_DECLARATION_WITH_SEMICOLON@801..824
             0: CSS_DECLARATION@801..823
-              0: CSS_BORDER_PROPERTY@801..823
+              0: CSS_GENERIC_PROPERTY@801..823
                 0: CSS_IDENTIFIER@801..812
                   0: IDENT@801..812 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@812..814 ":" [] [Whitespace(" ")]
-                2: CSS_UNKNOWN_PROPERTY_VALUE@814..823
-                  0: CSS_GENERIC_COMPONENT_VALUE_LIST@814..823
-                    0: CSS_IDENTIFIER@814..823
-                      0: IDENT@814..823 "one-value" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@814..823
+                  0: CSS_IDENTIFIER@814..823
+                    0: IDENT@814..823 "one-value" [] []
               1: (empty)
             1: SEMICOLON@823..824 ";" [] []
           31: CSS_DECLARATION_WITH_SEMICOLON@824..853
             0: CSS_DECLARATION@824..852
-              0: CSS_BORDER_PROPERTY@824..852
+              0: CSS_GENERIC_PROPERTY@824..852
                 0: CSS_IDENTIFIER@824..835
                   0: IDENT@824..835 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@835..837 ":" [] [Whitespace(" ")]
-                2: CSS_UNKNOWN_PROPERTY_VALUE@837..852
-                  0: CSS_GENERIC_COMPONENT_VALUE_LIST@837..852
-                    0: CSS_IDENTIFIER@837..846
-                      0: IDENT@837..846 "multiple" [] [Whitespace(" ")]
-                    1: CSS_IDENTIFIER@846..852
-                      0: IDENT@846..852 "values" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@837..852
+                  0: CSS_IDENTIFIER@837..846
+                    0: IDENT@837..846 "multiple" [] [Whitespace(" ")]
+                  1: CSS_IDENTIFIER@846..852
+                    0: IDENT@846..852 "values" [] []
               1: (empty)
             1: SEMICOLON@852..853 ";" [] []
           32: CSS_DECLARATION_WITH_SEMICOLON@853..884
             0: CSS_DECLARATION@853..883
-              0: CSS_BORDER_PROPERTY@853..883
+              0: CSS_GENERIC_PROPERTY@853..883
                 0: CSS_IDENTIFIER@853..864
                   0: IDENT@853..864 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@864..866 ":" [] [Whitespace(" ")]
-                2: CSS_UNKNOWN_PROPERTY_VALUE@866..883
-                  0: CSS_GENERIC_COMPONENT_VALUE_LIST@866..883
-                    0: CSS_IDENTIFIER@866..875
-                      0: IDENT@866..875 "delimited" [] []
-                    1: CSS_GENERIC_DELIMITER@875..877
-                      0: COMMA@875..877 "," [] [Whitespace(" ")]
-                    2: CSS_IDENTIFIER@877..883
-                      0: IDENT@877..883 "values" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@866..883
+                  0: CSS_IDENTIFIER@866..875
+                    0: IDENT@866..875 "delimited" [] []
+                  1: CSS_GENERIC_DELIMITER@875..877
+                    0: COMMA@875..877 "," [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@877..883
+                    0: IDENT@877..883 "values" [] []
               1: (empty)
             1: SEMICOLON@883..884 ";" [] []
           33: CSS_DECLARATION_WITH_SEMICOLON@884..924
             0: CSS_DECLARATION@884..923
-              0: CSS_BORDER_PROPERTY@884..923
+              0: CSS_GENERIC_PROPERTY@884..923
                 0: CSS_IDENTIFIER@884..895
                   0: IDENT@884..895 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@895..897 ":" [] [Whitespace(" ")]
-                2: CSS_UNKNOWN_PROPERTY_VALUE@897..923
-                  0: CSS_GENERIC_COMPONENT_VALUE_LIST@897..923
-                    0: CSS_IDENTIFIER@897..907
-                      0: IDENT@897..907 "delimited" [] [Whitespace(" ")]
-                    1: CSS_GENERIC_DELIMITER@907..909
-                      0: SLASH@907..909 "/" [] [Whitespace(" ")]
-                    2: CSS_IDENTIFIER@909..915
-                      0: IDENT@909..915 "slash" [] [Whitespace(" ")]
-                    3: CSS_GENERIC_DELIMITER@915..917
-                      0: SLASH@915..917 "/" [] [Whitespace(" ")]
-                    4: CSS_IDENTIFIER@917..923
-                      0: IDENT@917..923 "values" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@897..923
+                  0: CSS_IDENTIFIER@897..907
+                    0: IDENT@897..907 "delimited" [] [Whitespace(" ")]
+                  1: CSS_GENERIC_DELIMITER@907..909
+                    0: SLASH@907..909 "/" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@909..915
+                    0: IDENT@909..915 "slash" [] [Whitespace(" ")]
+                  3: CSS_GENERIC_DELIMITER@915..917
+                    0: SLASH@915..917 "/" [] [Whitespace(" ")]
+                  4: CSS_IDENTIFIER@917..923
+                    0: IDENT@917..923 "values" [] []
               1: (empty)
             1: SEMICOLON@923..924 ";" [] []
           34: CSS_DECLARATION_WITH_SEMICOLON@924..970
             0: CSS_DECLARATION@924..969
-              0: CSS_BORDER_PROPERTY@924..969
+              0: CSS_GENERIC_PROPERTY@924..969
                 0: CSS_IDENTIFIER@924..935
                   0: IDENT@924..935 "border" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@935..937 ":" [] [Whitespace(" ")]
-                2: CSS_UNKNOWN_PROPERTY_VALUE@937..969
-                  0: CSS_GENERIC_COMPONENT_VALUE_LIST@937..969
-                    0: CSS_IDENTIFIER@937..942
-                      0: IDENT@937..942 "mixed" [] []
-                    1: CSS_GENERIC_DELIMITER@942..944
-                      0: COMMA@942..944 "," [] [Whitespace(" ")]
-                    2: CSS_IDENTIFIER@944..955
-                      0: IDENT@944..955 "delimiters" [] [Whitespace(" ")]
-                    3: CSS_GENERIC_DELIMITER@955..957
-                      0: SLASH@955..957 "/" [] [Whitespace(" ")]
-                    4: CSS_IDENTIFIER@957..961
-                      0: IDENT@957..961 "can" [] [Whitespace(" ")]
-                    5: CSS_IDENTIFIER@961..963
-                      0: IDENT@961..963 "be" [] []
-                    6: CSS_GENERIC_DELIMITER@963..965
-                      0: COMMA@963..965 "," [] [Whitespace(" ")]
-                    7: CSS_IDENTIFIER@965..969
-                      0: IDENT@965..969 "used" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@937..969
+                  0: CSS_IDENTIFIER@937..942
+                    0: IDENT@937..942 "mixed" [] []
+                  1: CSS_GENERIC_DELIMITER@942..944
+                    0: COMMA@942..944 "," [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@944..955
+                    0: IDENT@944..955 "delimiters" [] [Whitespace(" ")]
+                  3: CSS_GENERIC_DELIMITER@955..957
+                    0: SLASH@955..957 "/" [] [Whitespace(" ")]
+                  4: CSS_IDENTIFIER@957..961
+                    0: IDENT@957..961 "can" [] [Whitespace(" ")]
+                  5: CSS_IDENTIFIER@961..963
+                    0: IDENT@961..963 "be" [] []
+                  6: CSS_GENERIC_DELIMITER@963..965
+                    0: COMMA@963..965 "," [] [Whitespace(" ")]
+                  7: CSS_IDENTIFIER@965..969
+                    0: IDENT@965..969 "used" [] []
               1: (empty)
             1: SEMICOLON@969..970 ";" [] []
         2: R_CURLY@970..972 "}" [Newline("\n")] []

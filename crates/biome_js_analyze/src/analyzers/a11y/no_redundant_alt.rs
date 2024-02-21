@@ -39,7 +39,7 @@ declare_rule! {
     /// </>
     /// ```
     ///
-    pub(crate) NoRedundantAlt {
+    pub NoRedundantAlt {
         version: "1.0.0",
         name: "noRedundantAlt",
         source: RuleSource::EslintJsxA11y("no-redundant-roles"),

@@ -63,7 +63,7 @@ declare_rule! {
     /// [a, b] = [b, a];
     /// ```
     ///
-    pub(crate) NoSelfAssign {
+    pub NoSelfAssign {
         version: "1.0.0",
         name: "noSelfAssign",
         source: RuleSource::Eslint("no-self-assign"),
@@ -546,11 +546,11 @@ enum AnyAssignmentLike {
 }
 
 declare_node_union! {
-    pub(crate) AnyNameLike = AnyJsName | JsReferenceIdentifier | AnyJsLiteralExpression
+    pub AnyNameLike = AnyJsName | JsReferenceIdentifier | AnyJsLiteralExpression
 }
 
 declare_node_union! {
-    pub(crate) AnyAssignmentExpressionLike = JsStaticMemberExpression | JsComputedMemberExpression
+    pub AnyAssignmentExpressionLike = JsStaticMemberExpression | JsComputedMemberExpression
 }
 
 impl AnyAssignmentExpressionLike {
@@ -656,7 +656,7 @@ impl TryFrom<(AnyJsAssignmentPattern, AnyJsExpression)> for AnyAssignmentLike {
 /// - the first one is the identifier found in the left arm of the assignment;
 /// - the second one is the identifier found in the right arm of the assignment;
 #[derive(Debug, Clone)]
-pub(crate) enum IdentifiersLike {
+pub enum IdentifiersLike {
     /// To store identifiers found in code like:
     ///
     /// ```js

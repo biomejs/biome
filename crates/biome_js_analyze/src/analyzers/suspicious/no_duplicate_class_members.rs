@@ -84,7 +84,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoDuplicateClassMembers {
+    pub NoDuplicateClassMembers {
         version: "1.0.0",
         name: "noDuplicateClassMembers",
         source: RuleSource::Eslint("no-dupe-class-members"),
@@ -110,7 +110,7 @@ fn is_static_member(node: JsSyntaxList) -> bool {
 }
 
 declare_node_union! {
-    pub(crate) AnyClassMemberDefinition = JsGetterClassMember | JsMethodClassMember | JsPropertyClassMember | JsSetterClassMember
+    pub AnyClassMemberDefinition = JsGetterClassMember | JsMethodClassMember | JsPropertyClassMember | JsSetterClassMember
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

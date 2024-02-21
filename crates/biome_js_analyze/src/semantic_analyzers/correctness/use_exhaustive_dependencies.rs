@@ -165,7 +165,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) UseExhaustiveDependencies {
+    pub UseExhaustiveDependencies {
         version: "1.0.0",
         name: "useExhaustiveDependencies",
         source: RuleSource::EslintReactHooks("exhaustive-deps"),
@@ -474,11 +474,11 @@ impl Rule for UseExhaustiveDependencies {
     type Query = Semantic<JsCallExpression>;
     type State = Fix;
     type Signals = Vec<Self::State>;
-    type Options = HooksOptions;
+    type Options = Box<HooksOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Vec<Self::State> {
         let options = ctx.options();
-        let options = ReactExtensiveDependenciesOptions::new(options.clone());
+        let options = ReactExtensiveDependenciesOptions::new(options.as_ref().clone());
 
         let mut signals = vec![];
 

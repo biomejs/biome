@@ -69,7 +69,7 @@ declare_rule! {
     ///
     /// The allowed values range from 1 through 254. The default is 15.
     ///
-    pub(crate) NoExcessiveCognitiveComplexity {
+    pub NoExcessiveCognitiveComplexity {
         version: "1.0.0",
         name: "noExcessiveCognitiveComplexity",
         source: RuleSource::EslintSonarJs("cognitive-complexity"),
@@ -133,7 +133,7 @@ impl Rule for NoExcessiveCognitiveComplexity {
 }
 
 #[derive(Clone)]
-pub(crate) struct CognitiveComplexity {
+pub struct CognitiveComplexity {
     function_like: AnyFunctionLike,
     score: ComplexityScore,
 }

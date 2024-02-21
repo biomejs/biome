@@ -281,7 +281,7 @@ declare_rule! {
     /// [`camelCase`]: https://en.wikipedia.org/wiki/Camel_case
     /// [`PascalCase`]: https://en.wikipedia.org/wiki/Camel_case
     /// [`CONSTANT_CASE`]: https://en.wikipedia.org/wiki/Snake_case
-    pub(crate)  UseNamingConvention {
+    pub UseNamingConvention {
         version: "1.0.0",
         name: "useNamingConvention",
         source: RuleSource::EslintTypeScript("naming-convention"),
@@ -459,7 +459,7 @@ impl Rule for UseNamingConvention {
 
 declare_node_union! {
     /// Ast nodes that defines a name.
-    pub(crate) AnyIdentifierBindingLike =
+    pub AnyIdentifierBindingLike =
         JsIdentifierBinding |
         JsLiteralMemberName |
         JsPrivateClassMemberName |
@@ -490,13 +490,13 @@ impl AnyIdentifierBindingLike {
 }
 
 #[derive(Debug)]
-pub(crate) struct State {
+pub struct State {
     element: Named,
     suggestion: Suggestion,
 }
 
 #[derive(Debug)]
-pub(crate) enum Suggestion {
+pub enum Suggestion {
     /// No suggestion
     None,
     /// Suggest aa new name

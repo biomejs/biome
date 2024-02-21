@@ -49,7 +49,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoUselessThisAlias {
+    pub NoUselessThisAlias {
         version: "1.0.0",
         name: "noUselessThisAlias",
         source: RuleSource::EslintTypeScript("no-this-alias"),

@@ -69,7 +69,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoSwitchDeclarations {
+    pub NoSwitchDeclarations {
         version: "1.0.0",
         name: "noSwitchDeclarations",
         source: RuleSource::Eslint("no-case-declarations"),

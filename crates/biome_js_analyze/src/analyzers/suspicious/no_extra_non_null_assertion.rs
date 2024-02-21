@@ -45,7 +45,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoExtraNonNullAssertion {
+    pub NoExtraNonNullAssertion {
         version: "1.0.0",
         name: "noExtraNonNullAssertion",
         source: RuleSource::EslintTypeScript("no-extra-non-null-assertion"),
@@ -55,7 +55,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) AnyTsNonNullAssertion = TsNonNullAssertionAssignment | TsNonNullAssertionExpression
+    pub AnyTsNonNullAssertion = TsNonNullAssertionAssignment | TsNonNullAssertionExpression
 }
 
 impl Rule for NoExtraNonNullAssertion {

@@ -75,7 +75,7 @@ declare_rule! {
     /// [`kebab-case`]: https://en.wikipedia.org/wiki/Letter_case#Kebab_case
     /// [`PascalCase`]: https://en.wikipedia.org/wiki/Camel_case
     /// [`snake_case`]: https://en.wikipedia.org/wiki/Snake_case
-    pub(crate) UseFilenamingConvention {
+    pub UseFilenamingConvention {
         version: "1.5.0",
         name: "useFilenamingConvention",
         source: RuleSource::EslintUnicorn("filename-case"),
@@ -88,7 +88,7 @@ impl Rule for UseFilenamingConvention {
     type Query = SemanticServices;
     type State = FileNamingConventionState;
     type Signals = Option<Self::State>;
-    type Options = FilenamingConventionOptions;
+    type Options = Box<FilenamingConventionOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let file_name = ctx.file_path().file_name()?.to_str()?;
@@ -226,7 +226,7 @@ impl Rule for UseFilenamingConvention {
 }
 
 #[derive(Debug)]
-pub(crate) enum FileNamingConventionState {
+pub enum FileNamingConventionState {
     /// The name is not in ASCII while `reuireAscii` is enabled.
     Ascii,
     /// The filename doesn't match the expected case

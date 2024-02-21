@@ -71,7 +71,7 @@ declare_rule! {
     ///   }
     /// }
     /// ```
-    pub(crate) NoUnnecessaryContinue {
+    pub NoUnnecessaryContinue {
         version: "1.0.0",
         name: "noUnnecessaryContinue",
         recommended: true,

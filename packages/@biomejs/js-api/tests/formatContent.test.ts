@@ -59,7 +59,7 @@ describe("Biome WebAssembly formatContent", () => {
 		expect(result.content).toEqual("function f() {}\n");
 		expect(result.diagnostics).toEqual([]);
 		expect(result.ir).toMatchInlineSnapshot(
-			'"[\\"function f\\", group([\\"()\\"]), \\" {}\\", hard_line_break]"',
+			`"["function f", group(["()"]), " {}", hard_line_break]"`,
 		);
 	});
 
@@ -85,12 +85,12 @@ describe("Biome WebAssembly formatContent", () => {
 		expect(result.ir).toMatchInlineSnapshot(
 			`
 			"[
-			  group([\\"let a\\"]),
-			  \\";\\",
+			  group(["let a"]),
+			  ";",
 			  hard_line_break,
-			  \\"function g\\",
-			  group([\\"()\\"]),
-			  \\" {}\\",
+			  "function g",
+			  group(["()"]),
+			  " {}",
 			  hard_line_break
 			]"
 		`,

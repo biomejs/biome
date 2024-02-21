@@ -1,0 +1,91 @@
+---
+source: crates/biome_cli/tests/commands/rage.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noAccessKey": "off",
+        "noAutofocus": "off"
+      },
+      "complexity": {
+        "recommended": true
+      },
+      "correctness": {
+        "all": true
+      },
+      "nursery": {
+        "useConsistentArrayType": {
+          "level": "warn",
+          "options": {
+            "syntax": "shorthand"
+          }
+        }
+      },
+      "suspicious": {
+        "noCommentText": {
+          "level": "warn"
+        }
+      },
+      "style": {
+        "noNonNullAssertion": "off"
+      }
+    }
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+CLI:
+  Version:                      0.0.0
+  Color support:                **PLACEHOLDER**
+
+Platform:
+  CPU Architecture:             **PLACEHOLDER**
+  OS:                           **PLACEHOLDER**
+
+Environment:
+  BIOME_LOG_DIR:                **PLACEHOLDER**
+  NO_COLOR:                     **PLACEHOLDER**
+  TERM:                         **PLACEHOLDER**
+  JS_RUNTIME_VERSION:           unset
+  JS_RUNTIME_NAME:              unset
+  NODE_PACKAGE_MANAGER:         unset
+
+Biome Configuration:
+  Status:                       Loaded successfully
+  Formatter disabled:           false
+  Linter disabled:              false
+  Organize imports disabled:    false
+  VCS disabled:                 true
+
+Linter:
+  Recommended:                  true
+  All:                          false
+  Rules:                        a11y/noAccessKey = "off"
+                                a11y/noAutofocus = "off"
+                                complexity/recommended = true
+                                correctness/all = true
+                                nursery/useConsistentArrayType = {"level":"warn","options":{"syntax":"shorthand"}}
+                                style/noNonNullAssertion = "off"
+                                suspicious/noCommentText = {"level":"warn","options":null}
+
+Server:
+  Version:                      0.0.0
+  Name:                         biome_lsp
+  CPU Architecture:             **PLACEHOLDER**
+  OS:                           **PLACEHOLDER**
+
+Workspace:
+  Open Documents:               0
+```
+
+

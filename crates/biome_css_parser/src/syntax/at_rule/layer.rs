@@ -1,8 +1,8 @@
 use crate::parser::CssParser;
 
-use crate::syntax::blocks::parse_or_recover_rule_list_block;
+use crate::syntax::block::parse_rule_list_block;
 use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::{is_at_identifier, parse_regular_identifier};
+use crate::syntax::parse_regular_identifier;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -38,13 +38,8 @@ pub(crate) fn parse_any_layer(p: &mut CssParser) -> CompletedMarker {
     LayerReferenceList.parse_list(p);
 
     if p.at(T!['{']) {
-        let kind = if parse_or_recover_rule_list_block(p).is_ok() {
-            CSS_LAYER_DECLARATION
-        } else {
-            CSS_BOGUS_LAYER
-        };
-
-        m.complete(p, kind)
+        parse_rule_list_block(p);
+        m.complete(p, CSS_LAYER_DECLARATION)
     } else {
         let kind = if p.expect(T![;]) {
             CSS_LAYER_REFERENCE
@@ -72,7 +67,7 @@ impl ParseSeparatedList for LayerReferenceList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        (!is_at_identifier(p) && !p.at(T![,])) || p.at_ts(LAYER_REFERENCE_LIST_END_SET)
+        p.at_ts(LAYER_REFERENCE_LIST_END_SET)
     }
 
     fn recover(
@@ -93,7 +88,7 @@ impl ParseSeparatedList for LayerReferenceList {
     }
 }
 
-const LAYER_NAME_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set!(T![,], T!['{'], T![;]);
+const LAYER_NAME_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set!(T![')'], T![,], T!['{'], T![;]);
 const LAYER_NAME_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     LAYER_NAME_LIST_END_SET.union(token_set!(T![.]));
 
@@ -119,7 +114,7 @@ impl ParseSeparatedList for LayerNameList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        (!is_at_identifier(p) && !p.at(T![.])) || p.at_ts(LAYER_NAME_LIST_END_SET)
+        p.at_ts(LAYER_NAME_LIST_END_SET)
     }
 
     fn recover(

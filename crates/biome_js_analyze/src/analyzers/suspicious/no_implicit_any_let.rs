@@ -33,7 +33,7 @@ declare_rule! {
     /// var b =10;
     /// ```
     ///
-    pub(crate) NoImplicitAnyLet {
+    pub NoImplicitAnyLet {
         version: "1.4.0",
         name: "noImplicitAnyLet",
         recommended: true,
