@@ -1,6 +1,4 @@
-use biome_analyze::{
-    context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
-};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxChildList, JsxElement};
 use biome_rowan::{AstNode, AstNodeList, TextRange};
