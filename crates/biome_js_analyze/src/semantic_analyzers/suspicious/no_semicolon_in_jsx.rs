@@ -6,7 +6,9 @@ use biome_js_syntax::{jsx_ext::AnyJsxElement, JsLanguage, JsxChildList, JsxEleme
 use biome_rowan::{AstNode, AstNodeList, SyntaxToken};
 
 declare_rule! {
-    /// Remove semicolons from JSX elements.
+    /// It detects possible "wrong" semicolons inside JSX elements.
+    ///
+    /// Semicolons that appear after a self-closing element or a closing element are usually the result of a typo of a refactor gone wrong.
     ///
     /// ## Examples
     ///
