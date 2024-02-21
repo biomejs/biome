@@ -74,7 +74,7 @@ impl Visitor for ExportClauseInTestVisitor {
                 if let Some(_) = AnyJsRoot::cast_ref(node) {
                     if self.has_test {
                         for export in self.exports.iter() {
-                            ctx.match_query(ExportClauseInTest(export.clone()));
+                            ctx.match_query(ExportInTest(export.clone()));
                         }
                     }
                 }
@@ -83,15 +83,15 @@ impl Visitor for ExportClauseInTestVisitor {
     }
 }
 
-pub(crate) struct ExportClauseInTest(JsExport);
+pub(crate) struct ExportInTest(JsExport);
 
-impl QueryMatch for ExportClauseInTest {
+impl QueryMatch for ExportInTest {
     fn text_range(&self) -> TextRange {
         self.0.range()
     }
 }
 
-impl Queryable for ExportClauseInTest {
+impl Queryable for ExportInTest {
     type Input = Self;
     type Language = JsLanguage;
     type Output = JsExport;
@@ -110,7 +110,7 @@ impl Queryable for ExportClauseInTest {
 }
 
 impl Rule for NoExportsInTest {
-    type Query = ExportClauseInTest;
+    type Query = ExportInTest;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
