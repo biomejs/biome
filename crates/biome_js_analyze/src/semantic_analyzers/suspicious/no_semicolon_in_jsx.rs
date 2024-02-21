@@ -84,7 +84,7 @@ impl Rule for NoSemicolonInJsx {
             rule_category!(),
             incorrect_semicolon.text_range(),
             markup! {
-                "There is suspicious "<Emphasis>"Semicolon"</Emphasis>" in the JSX element."
+                "There is a suspicious "<Emphasis>"semicolon"</Emphasis>" in the JSX element."
             },
         )
         .note(markup! {
