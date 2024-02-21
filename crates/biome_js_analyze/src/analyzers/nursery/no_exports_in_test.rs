@@ -1,40 +1,44 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, ServiceBag, Visitor,
+    RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsRoot, JsCallExpression, JsExport, JsLanguage};
 use biome_rowan::{AstNode, Language, TextRange, WalkEvent};
 
 declare_rule! {
-    /// Succinct description of the rule.
+    /// Disallow using `exports` in files containing tests
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding ESLint rule (if any):
+    /// This rule aims to eliminate duplicate runs of tests by exporting things from test files.
+    /// If you import from a test file, then all the tests in that file will be run in each imported instance,
+    /// so bottom line, don't export from a test, but instead move helper functions into a separate file when they need to be shared across tests.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// export function myHelper() {}
+    /// describe('a test', () => {
+    ///     expect(1).toBe(1);
+    /// });
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// var a = 1;
+    /// function myHelper() {}
+    /// describe('a test', () => {
+    ///     expect(1).toBe(1);
+    /// });
     /// ```
     ///
     pub(crate) NoExportsInTest {
         version: "next",
         name: "noExportsInTest",
         recommended: true,
+        source: RuleSource::EslintJest("no-export"),
+        source_kind: RuleSourceKind::Inspired,
     }
 }
 
@@ -120,7 +124,7 @@ impl Rule for NoExportsInTest {
             rule_category!(),
             ctx.query().range(),
             markup! {
-                "Don't export in a test file."
+                "Do not export from a test file."
             },
         ))
     }

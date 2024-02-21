@@ -884,7 +884,7 @@ export interface Nursery {
 	 */
 	noEmptyTypeParameters?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow using exports in files containing tests
 	 */
 	noExportsInTest?: RuleConfiguration;
 	/**

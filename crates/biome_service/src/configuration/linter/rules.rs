@@ -2509,6 +2509,9 @@ pub struct Nursery {
     #[doc = "Disallow empty type parameters in type aliases and interfaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_empty_type_parameters: Option<RuleConfiguration>,
+    #[doc = "Disallow using exports in files containing tests"]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_exports_in_test: Option<RuleConfiguration>,
     #[doc = "Disallow focused tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_focused_tests: Option<RuleConfiguration<NoFocusedTests>>,
@@ -2654,6 +2657,7 @@ impl Nursery {
         "noDuplicateJsonKeys",
         "noDuplicateTestHooks",
         "noEmptyTypeParameters",
+        "noExportsInTest",
         "noFocusedTests",
         "noGlobalAssign",
         "noGlobalEval",

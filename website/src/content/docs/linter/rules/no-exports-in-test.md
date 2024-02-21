@@ -12,42 +12,43 @@ This rule hasn't been released yet.
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-Succinct description of the rule.
+Inspired from: <a href="https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-export.md" target="_blank"><code>no-export</code></a>
 
-Put context and details about the rule.
-As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+Disallow using `exports` in files containing tests
 
-Try to stay consistent with the descriptions of implemented rules.
-
-Add a link to the corresponding ESLint rule (if any):
+This rule aims to eliminate duplicate runs of tests by exporting things from test files.
+If you import from a test file, then all the tests in that file will be run in each imported instance,
+so bottom line, don't export from a test, but instead move helper functions into a separate file when they need to be shared across tests.
 
 ## Examples
 
 ### Invalid
 
 ```jsx
-var a = 1;
-a = 2;
+export function myHelper() {}
+describe('a test', () => {
+    expect(1).toBe(1);
+});
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noExportsInTest.js:1:11 <a href="https://biomejs.dev/linter/rules/no-exports-in-test">lint/nursery/noExportsInTest</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noExportsInTest.js:1:1 <a href="https://biomejs.dev/linter/rules/no-exports-in-test">lint/nursery/noExportsInTest</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable is read here.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Don't export in a test file.</span>
   
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>var a = 1;
-   <strong>   │ </strong>          
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>a = 2;
-   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>3 │ </strong>
-  
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This note will give you more information.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>export function myHelper() {}
+   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>describe('a test', () =&gt; {
+    <strong>3 │ </strong>    expect(1).toBe(1);
   
 </code></pre>
 
 ### Valid
 
 ```jsx
-var a = 1;
+function myHelper() {}
+describe('a test', () => {
+    expect(1).toBe(1);
+});
 ```
 
 ## Related links
