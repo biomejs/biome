@@ -1,8 +1,12 @@
 ---
-title: noSemicolonInJsx (since v1.0.0)
+title: noSemicolonInJsx (not released)
 ---
 
 **Diagnostic Category: `lint/suspicious/noSemicolonInJsx`**
+
+:::danger
+This rule hasn't been released yet.
+:::
 
 :::note
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
@@ -10,7 +14,9 @@ This rule is recommended by Biome. A diagnostic error will appear when linting y
 
 Inspired from: <a href="https://eslint.org/docs/latest/rules/no-semicolons-in-jsx" target="_blank"><code>no-semicolons-in-jsx</code></a>
 
-Remove semicolons from JSX elements.
+It detects possible "wrong" semicolons inside JSX elements.
+
+Semicolons that appear after a self-closing element or a closing element are usually the result of a typo of a refactor gone wrong.
 
 ## Examples
 
@@ -28,7 +34,7 @@ const Component = () => {
 
 <pre class="language-text"><code class="language-text">suspicious/noSemicolonInJsx.js:4:14 <a href="https://biomejs.dev/linter/rules/no-semicolons-in-jsx">lint/suspicious/noSemicolonInJsx</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">There is suspicious </span><span style="color: Tomato;"><strong>Semicolon</strong></span><span style="color: Tomato;"> in the JSX element.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">There is a suspicious </span><span style="color: Tomato;"><strong>semicolon</strong></span><span style="color: Tomato;"> in the JSX element.</span>
   
     <strong>2 │ </strong>  return (
     <strong>3 │ </strong>    &lt;div&gt;
@@ -39,7 +45,9 @@ const Component = () => {
     <strong>6 │ </strong> );
     <strong>7 │ </strong>}
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Remove the </span><span style="color: lightgreen;"><strong>Semicolon</strong></span><span style="color: lightgreen;"> from the JSX element.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This is usually the result of a typo or some refactor gone wrong.</span>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Remove the </span><span style="color: lightgreen;"><strong>semicolon</strong></span><span style="color: lightgreen;">, or move it inside a JSX element.</span>
   
 </code></pre>
 

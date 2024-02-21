@@ -2391,7 +2391,7 @@
 					]
 				},
 				"noSemicolonInJsx": {
-					"description": "Remove semicolons from JSX elements.",
+					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

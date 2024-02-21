@@ -1340,7 +1340,7 @@ export interface Suspicious {
 	 */
 	noSelfCompare?: RuleConfiguration;
 	/**
-	 * Remove semicolons from JSX elements.
+	 * It detects possible "wrong" semicolons inside JSX elements.
 	 */
 	noSemicolonInJsx?: RuleConfiguration;
 	/**

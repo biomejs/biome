@@ -3899,7 +3899,7 @@ pub struct Suspicious {
     #[doc = "Disallow comparisons where both sides are exactly the same."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_self_compare: Option<RuleConfiguration>,
-    #[doc = "Remove semicolons from JSX elements."]
+    #[doc = "It detects possible \"wrong\" semicolons inside JSX elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_semicolon_in_jsx: Option<RuleConfiguration>,
     #[doc = "Disallow identifiers from shadowing restricted names."]
