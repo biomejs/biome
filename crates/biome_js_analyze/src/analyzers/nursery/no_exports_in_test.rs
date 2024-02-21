@@ -3,8 +3,8 @@ use biome_analyze::{
     RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsRoot, JsCallExpression, JsExport, JsLanguage};
-use biome_rowan::{AstNode, Language, TextRange, WalkEvent};
+use biome_js_syntax::{AnyJsRoot, JsAssignmentExpression, JsCallExpression, JsExport, JsLanguage};
+use biome_rowan::{declare_node_union, AstNode, Language, TextRange, WalkEvent};
 
 declare_rule! {
     /// Disallow using `exports` in files containing tests
@@ -42,11 +42,39 @@ declare_rule! {
     }
 }
 
-#[derive(Default)]
+declare_node_union! {
+    pub(crate)  MaybeExport = JsExport | JsAssignmentExpression
+}
 
+impl MaybeExport {
+    fn is_export(&self) -> bool {
+        match self {
+            MaybeExport::JsExport(_) => true,
+            MaybeExport::JsAssignmentExpression(expr) => {
+                // TODO: module[exports], module.export.foo
+                let left = expr.left().ok();
+                if let Some(left) = left {
+                    let is_commonjs_export = left
+                        .as_any_js_assignment()
+                        .and_then(|left| left.as_js_static_member_assignment())
+                        .is_some_and(|member_assignment| {
+                            let obj = member_assignment.object();
+                            let member = member_assignment.member();
+                            obj.is_ok_and(|obj| obj.text() == "module")
+                                && member.is_ok_and(|member| member.text() == "exports")
+                        });
+                    return is_commonjs_export;
+                }
+
+                false
+            }
+        }
+    }
+}
+#[derive(Default)]
 struct ExportClauseInTestVisitor {
     has_test: bool,
-    exports: Vec<JsExport>,
+    exports: Vec<MaybeExport>,
 }
 
 impl Visitor for ExportClauseInTestVisitor {
@@ -60,8 +88,10 @@ impl Visitor for ExportClauseInTestVisitor {
         match event {
             WalkEvent::Enter(node) => {
                 // TODO(ah-yu): CommonJs export
-                if let Some(export) = JsExport::cast_ref(node) {
-                    self.exports.push(export)
+                if let Some(maybe_export) = MaybeExport::cast_ref(node) {
+                    if maybe_export.is_export() {
+                        self.exports.push(maybe_export);
+                    }
                 }
 
                 if !self.has_test {
@@ -83,7 +113,7 @@ impl Visitor for ExportClauseInTestVisitor {
     }
 }
 
-pub(crate) struct ExportInTest(JsExport);
+pub(crate) struct ExportInTest(MaybeExport);
 
 impl QueryMatch for ExportInTest {
     fn text_range(&self) -> TextRange {
@@ -94,7 +124,7 @@ impl QueryMatch for ExportInTest {
 impl Queryable for ExportInTest {
     type Input = Self;
     type Language = JsLanguage;
-    type Output = JsExport;
+    type Output = MaybeExport;
     type Services = ();
 
     fn build_visitor(
