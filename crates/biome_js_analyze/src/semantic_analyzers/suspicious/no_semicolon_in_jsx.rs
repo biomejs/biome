@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsLanguage, JsxChildList, JsxElement};
-use biome_rowan::{AstNode, AstNodeList, SyntaxToken};
+use biome_rowan::{AstNode, AstNodeList, SyntaxToken, TextRange};
 
 declare_rule! {
     /// Remove semicolons from JSX elements.
@@ -51,13 +51,9 @@ declare_rule! {
     }
 }
 
-pub(crate) struct NoSemicolonInJsxState {
-    incorrect_semicolon: SyntaxToken<JsLanguage>,
-}
-
 impl Rule for NoSemicolonInJsx {
     type Query = Ast<AnyJsxElement>;
-    type State = NoSemicolonInJsxState;
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -67,22 +63,16 @@ impl Rule for NoSemicolonInJsx {
         if let AnyJsxElement::JsxOpeningElement(_) = node {
             let has_semicolon = has_suspicious_semicolon(&jsx_element.children());
             if let Some(incorrect_semicolon) = has_semicolon {
-                return Some(NoSemicolonInJsxState {
-                    incorrect_semicolon,
-                });
+                return Some(incorrect_semicolon);
             }
         }
         None
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let NoSemicolonInJsxState {
-            incorrect_semicolon,
-        } = state;
-
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            incorrect_semicolon.text_range(),
+            state,
             markup! {
                 "There is suspicious "<Emphasis>"Semicolon"</Emphasis>" in the JSX element."
             },
@@ -94,12 +84,16 @@ impl Rule for NoSemicolonInJsx {
     }
 }
 
-fn has_suspicious_semicolon(node: &JsxChildList) -> Option<SyntaxToken<JsLanguage>> {
+fn has_suspicious_semicolon(node: &JsxChildList) -> Option<TextRange> {
     node.iter().find_map(|c| {
         let jsx_text = c.as_jsx_text()?;
         let jsx_text_value = jsx_text.value_token().ok()?;
-        if jsx_text_value.text().starts_with(";\n") {
-            return Some(jsx_text_value.clone());
+        // We should also check for \r and \r\n
+        if jsx_text_value.text().starts_with(";\n")
+            || jsx_text_value.text().starts_with(";\r")
+            || jsx_text_value.text().starts_with(";\r\n")
+        {
+            return Some(jsx_text_value.text_range());
         }
 
         c.as_jsx_element()
