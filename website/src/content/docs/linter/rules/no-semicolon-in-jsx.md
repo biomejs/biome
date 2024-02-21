@@ -12,8 +12,6 @@ This rule hasn't been released yet.
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
-Inspired from: <a href="https://eslint.org/docs/latest/rules/no-semicolons-in-jsx" target="_blank"><code>no-semicolons-in-jsx</code></a>
-
 It detects possible "wrong" semicolons inside JSX elements.
 
 Semicolons that appear after a self-closing element or a closing element are usually the result of a typo of a refactor gone wrong.
