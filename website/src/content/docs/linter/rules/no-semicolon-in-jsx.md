@@ -2,14 +2,14 @@
 title: noSemicolonInJsx (not released)
 ---
 
-**Diagnostic Category: `lint/suspicious/noSemicolonInJsx`**
+**Diagnostic Category: `lint/nursery/noSemicolonInJsx`**
 
 :::danger
 This rule hasn't been released yet.
 :::
 
-:::note
-This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
 It detects possible "wrong" semicolons inside JSX elements.
@@ -30,7 +30,7 @@ const Component = () => {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noSemicolonInJsx.js:4:14 <a href="https://biomejs.dev/linter/rules/no-semicolons-in-jsx">lint/suspicious/noSemicolonInJsx</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noSemicolonInJsx.js:4:14 <a href="https://biomejs.dev/linter/rules/no-semicolons-in-jsx">lint/nursery/noSemicolonInJsx</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">There is a suspicious </span><span style="color: Tomato;"><strong>semicolon</strong></span><span style="color: Tomato;"> in the JSX element.</span>
   

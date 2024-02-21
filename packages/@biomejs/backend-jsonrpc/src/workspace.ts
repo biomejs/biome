@@ -916,6 +916,10 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration;
 	/**
+	 * It detects possible "wrong" semicolons inside JSX elements.
+	 */
+	noSemicolonInJsx?: RuleConfiguration;
+	/**
 	 * Disallow disabled tests.
 	 */
 	noSkippedTests?: RuleConfiguration;
@@ -1340,10 +1344,6 @@ export interface Suspicious {
 	 */
 	noSelfCompare?: RuleConfiguration;
 	/**
-	 * It detects possible "wrong" semicolons inside JSX elements.
-	 */
-	noSemicolonInJsx?: RuleConfiguration;
-	/**
 	 * Disallow identifiers from shadowing restricted names.
 	 */
 	noShadowRestrictedNames?: RuleConfiguration;
@@ -1766,6 +1766,7 @@ export type Category =
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReExportAll"
 	| "lint/nursery/noRestrictedImports"
+	| "lint/nursery/noSemicolonInJsx"
 	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"

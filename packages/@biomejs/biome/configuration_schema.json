@@ -1387,6 +1387,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSemicolonInJsx": {
+					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSkippedTests": {
 					"description": "Disallow disabled tests.",
 					"anyOf": [
@@ -2385,13 +2392,6 @@
 				},
 				"noSelfCompare": {
 					"description": "Disallow comparisons where both sides are exactly the same.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noSemicolonInJsx": {
-					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -8,6 +8,7 @@ pub(crate) mod no_global_eval;
 pub(crate) mod no_invalid_use_before_declaration;
 pub(crate) mod no_misleading_character_class;
 pub(crate) mod no_re_export_all;
+pub(crate) mod no_semicolon_in_jsx;
 pub(crate) mod no_then_property;
 pub(crate) mod no_unused_imports;
 pub(crate) mod use_export_type;
@@ -26,6 +27,7 @@ declare_group! {
             self :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclaration ,
             self :: no_misleading_character_class :: NoMisleadingCharacterClass ,
             self :: no_re_export_all :: NoReExportAll ,
+            self :: no_semicolon_in_jsx :: NoSemicolonInJsx ,
             self :: no_then_property :: NoThenProperty ,
             self :: no_unused_imports :: NoUnusedImports ,
             self :: use_export_type :: UseExportType ,
