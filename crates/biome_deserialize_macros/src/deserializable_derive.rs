@@ -446,7 +446,7 @@ fn generate_deserializable_struct(
     let trait_bounds = generate_trait_bounds(&generics);
     let generics = generate_generics_without_trait_bounds(&generics);
 
-    let x = quote! {
+    quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
             fn deserialize(
                 value: &impl biome_deserialize::DeserializableValue,
@@ -493,11 +493,7 @@ fn generate_deserializable_struct(
                 value.deserialize(Visitor(PhantomData), name, diagnostics)
             }
         }
-    };
-    //if ident == "RuleWithOptions" {
-    //    panic!("{}", x.to_string());
-    //}
-    x
+    }
 }
 
 fn generate_deserializable_from(
