@@ -272,11 +272,11 @@ impl ImportGroup {
         let mut previous_start = import_node.node.syntax().text_range().end();
         import_node.is_sorted()
             && iter.all(|import_node| {
-            let start = import_node.node.syntax().text_range().end();
-            let is_sorted = previous_start < start && import_node.is_sorted();
-            previous_start = start;
-            is_sorted
-        })
+                let start = import_node.node.syntax().text_range().end();
+                let is_sorted = previous_start < start && import_node.is_sorted();
+                previous_start = start;
+                is_sorted
+            })
     }
 }
 
@@ -529,7 +529,7 @@ fn prepend_leading_newline(
 /// rather than the trivia pieces themselves
 fn leading_trivia_iter(
     token: &JsSyntaxToken,
-) -> impl ExactSizeIterator<Item=(TriviaPieceKind, &str)> {
+) -> impl ExactSizeIterator<Item = (TriviaPieceKind, &str)> {
     let token_text = token.text();
     let token_range = token.text_range();
     let trivia = token.leading_trivia();
