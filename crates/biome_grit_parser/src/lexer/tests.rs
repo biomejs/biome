@@ -204,14 +204,14 @@ fn object() {
         L_CURLY:1,
         WHITESPACE:1,
 
-        GRIT_NAME:5,
+        GRIT_NAME:3,
         COLON:1,
         WHITESPACE:1,
         GRIT_STRING_LITERAL:7,
         COMMA:1,
 
         WHITESPACE:1,
-        GRIT_NAME:7,
+        GRIT_NAME:5,
         COLON:1,
         WHITESPACE:1,
         GRIT_INT_LITERAL:1,
@@ -234,7 +234,7 @@ fn basic_string() {
 fn single_quote_string() {
     assert_lex! {
         r#"'A string token using single quotes that are not supported in GritQL'"#,
-        ERROR_TOKEN:67,
+        ERROR_TOKEN:69,
         EOF:0
     }
 }
@@ -243,7 +243,7 @@ fn single_quote_string() {
 fn unterminated_string() {
     assert_lex! {
         r#""A string without the closing quote"#,
-        GRIT_STRING_LITERAL:35,
+        ERROR_TOKEN:35,
         EOF:0
     }
 }
@@ -251,7 +251,7 @@ fn unterminated_string() {
 #[test]
 fn simple_escape_sequences() {
     assert_lex! {
-        r#""Escaped \t""#,
+        r#""Escaped \$""#,
         GRIT_STRING_LITERAL:12,
         EOF:0
     }
@@ -269,31 +269,7 @@ fn simple_escape_sequences() {
     }
 
     assert_lex! {
-        r#""Escaped \/""#,
-        GRIT_STRING_LITERAL:12,
-        EOF:0
-    }
-
-    assert_lex! {
-        r#""Escaped \b""#,
-        GRIT_STRING_LITERAL:12,
-        EOF:0
-    }
-
-    assert_lex! {
-        r#""Escaped \f""#,
-        GRIT_STRING_LITERAL:12,
-        EOF:0
-    }
-
-    assert_lex! {
         r#""Escaped \n""#,
-        GRIT_STRING_LITERAL:12,
-        EOF:0
-    }
-
-    assert_lex! {
-        r#""Escaped \r""#,
         GRIT_STRING_LITERAL:12,
         EOF:0
     }
@@ -354,7 +330,7 @@ fn single_quote_escape_in_single_quote_string() {
 }
 
 #[test]
-fn identifiers() {
+fn names() {
     assert_lex! {
         r#"asciiIdentifier"#,
         GRIT_NAME:15,
@@ -380,6 +356,114 @@ fn identifiers() {
         GRIT_NAME:12,
         ERROR_TOKEN:2,
         ERROR_TOKEN:2,
+        EOF:0
+    }
+}
+
+#[test]
+fn regex() {
+    assert_lex! {
+        r#"r"a+b?""#,
+        GRIT_REGEX_LITERAL:7,
+        EOF:0
+    }
+
+    assert_lex! {
+        r#"r"a\\.b?""#,
+        GRIT_REGEX_LITERAL:9,
+        EOF:0
+    }
+
+    assert_lex! {
+        r#"r"a\"b?""#,
+        GRIT_REGEX_LITERAL:8,
+        EOF:0
+    }
+
+    assert_lex! {
+        r#"r"a+b?"#,
+        ERROR_TOKEN: 6,
+        EOF:0
+    }
+}
+
+#[test]
+fn snippet_regex() {
+    assert_lex! {
+        r#"r`a+b?`"#,
+        GRIT_SNIPPET_REGEX_LITERAL:7,
+        EOF:0
+    }
+
+    assert_lex! {
+        r#"r`a\\.b?`"#,
+        GRIT_SNIPPET_REGEX_LITERAL:9,
+        EOF:0
+    }
+
+    assert_lex! {
+        r#"r`a\`b?`"#,
+        GRIT_SNIPPET_REGEX_LITERAL:8,
+        EOF:0
+    }
+
+    assert_lex! {
+        r#"r`a+b?"#,
+        ERROR_TOKEN: 6,
+        EOF:0
+    }
+}
+
+#[test]
+fn snippets() {
+    assert_lex! {
+        r#"`console.log()`"#,
+        GRIT_BACKTICK_SNIPPET:15,
+        EOF:0
+    }
+
+    assert_lex! {
+        r#"`console.log($message)`"#,
+        GRIT_BACKTICK_SNIPPET:23,
+        EOF:0
+    }
+
+    assert_lex! {
+        r#"`console.log(\$message)`"#,
+        GRIT_BACKTICK_SNIPPET:24,
+        EOF:0
+    }
+
+    assert_lex! {
+        r#"`console.log(\/message)`"#,
+        ERROR_TOKEN:24,
+        EOF:0
+    }
+}
+
+#[test]
+fn raw_snippets() {
+    assert_lex! {
+        r#"raw`console.log()`"#,
+        GRIT_RAW_BACKTICK_SNIPPET:18,
+        EOF:0
+    }
+
+    assert_lex! {
+        r#"raw`console.log($message)`"#,
+        GRIT_RAW_BACKTICK_SNIPPET:26,
+        EOF:0
+    }
+
+    assert_lex! {
+        r#"raw`console.log(\$message)`"#,
+        GRIT_RAW_BACKTICK_SNIPPET:27,
+        EOF:0
+    }
+
+    assert_lex! {
+        r#"raw`console.log(\/message)`"#,
+        ERROR_TOKEN:27,
         EOF:0
     }
 }

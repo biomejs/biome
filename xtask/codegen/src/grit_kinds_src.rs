@@ -105,7 +105,6 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
         "GRIT_ANNOTATION",
         "GRIT_BACKTICK_SNIPPET",
         "GRIT_RAW_BACKTICK_SNIPPET",
-        "GRIT_DOUBLE_QUOTE_SNIPPET",
         "GRIT_NAME",
         "GRIT_VARIABLE",
     ],

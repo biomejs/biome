@@ -5,7 +5,6 @@ mod tests;
 
 use biome_grit_syntax::{GritSyntaxKind, GritSyntaxKind::*, TextLen, TextRange, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_unicode_table::{lookup_byte, Dispatch::*};
 use std::iter::FusedIterator;
 use std::ops::Add;
 use unicode_bom::Bom;
@@ -129,8 +128,8 @@ impl<'src> Lexer<'src> {
                 b'\r' | b'\n' => {
                     break;
                 }
-                _ => match lookup_byte(byte) {
-                    WHS => {
+                _ => match byte {
+                    b' ' | b'\t' | b'\n' | b'\r' => {
                         let start = self.text_position();
                         self.advance(1);
 
@@ -281,6 +280,7 @@ impl<'src> Lexer<'src> {
             b'\n' | b'\r' => self.eat_newline(),
             b'\t' | b' ' => self.eat_whitespace(),
             b'\'' | b'"' => self.lex_string_literal(current),
+            b'`' => self.lex_backtick_snippet(),
             b'/' => self.lex_slash(),
             b':' => self.eat_byte(T![:]),
             b',' => self.eat_byte(T![,]),
@@ -468,10 +468,8 @@ impl<'src> Lexer<'src> {
         };
 
         while let Some(chr) = self.current_byte() {
-            let dispatch = lookup_byte(chr);
-
-            match dispatch {
-                QOT if quote == chr => {
+            match chr {
+                b'\'' | b'"' if quote == chr => {
                     self.advance(1);
                     state = match state {
                         LexStringState::InString => LexStringState::Terminated,
@@ -480,12 +478,12 @@ impl<'src> Lexer<'src> {
                     break;
                 }
                 // '\t' etc
-                BSL => {
+                b'\\' => {
                     let escape_start = self.text_position();
                     self.advance(1);
 
                     match self.current_byte() {
-                        Some(b'"' | b'\\' | b'/' | b'b' | b'f' | b'n' | b'r' | b't') => {
+                        Some(b'$' | b'\\' | b'"' | b'n') => {
                             self.advance(1)
                         }
 
@@ -513,7 +511,7 @@ impl<'src> Lexer<'src> {
                                         "Invalid escape sequence",
                                         escape_start..self.text_position() + c.text_len(),
                                     )
-                                        .with_hint(r#"Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. "#),
+                                        .with_hint(r#"Valid escape sequences are: `\$`, `\\`, `\"`, `\n`."#),
                                 );
                                 state = LexStringState::InvalidEscapeSequence;
                             }
@@ -533,37 +531,16 @@ impl<'src> Lexer<'src> {
                         }
                     }
                 }
-                WHS if matches!(chr, b'\n' | b'\r') => {
+                b'\n' | b'\r' => {
                     let unterminated =
                         ParseDiagnostic::new("Missing closing quote", start..self.text_position())
                             .with_detail(self.position..self.position + 1, "line breaks here");
 
                     self.diagnostics.push(unterminated);
 
-                    return GRIT_STRING_LITERAL;
+                    return ERROR_TOKEN;
                 }
-                UNI => self.advance_char_unchecked(),
-
-                // Following the same rules as JSON here:
-                // All code points may be placed within the quotation marks except for the code points that
-                //must be escaped:
-                // * quotation mark: (U+0022),
-                // * reverse solidus (U+005C),
-                // * and the **control characters U+0000 to U+001F** <- This
-                ERR | WHS if matches!(state, LexStringState::InString) && chr <= 0x1f => {
-                    self.diagnostics.push(
-                        ParseDiagnostic::new(
-
-                            format!(
-                                "Control character '\\u{chr:04x}' is not allowed in string literals."
-                            ),
-                            self.text_position()..self.text_position() + TextSize::from(1),
-                        )
-                        .with_hint(format!("Use the escape sequence '\\u{chr:04x}' instead.")),
-                    );
-                    state = LexStringState::InvalidEscapeSequence;
-                }
-                _ => self.advance(1),
+                _ => self.advance_char_unchecked(),
             }
         }
 
@@ -589,9 +566,87 @@ impl<'src> Lexer<'src> {
                         );
                 self.diagnostics.push(unterminated);
 
-                GRIT_STRING_LITERAL
+                ERROR_TOKEN
             }
             LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
+        }
+    }
+
+    fn lex_backtick_snippet(&mut self) -> GritSyntaxKind {
+        // Handle invalid quotes
+        self.assert_at_char_boundary();
+        let start = self.text_position();
+
+        self.advance(1); // Skip over the backtick
+        let mut state = LexBacktickSnippet::InSnippet;
+
+        while let Some(chr) = self.current_byte() {
+            match chr {
+                b'`' => {
+                    self.advance(1);
+                    state = match state {
+                        LexBacktickSnippet::InSnippet => LexBacktickSnippet::Terminated,
+                        state => state,
+                    };
+                    break;
+                }
+                // '\t' etc
+                b'\\' => {
+                    let escape_start = self.text_position();
+                    self.advance(1);
+
+                    match self.current_byte() {
+                        Some(b'$' | b'\\' | b'`' | b'n') => {
+                            self.advance(1)
+                        }
+
+                        Some(_) => {
+                            if matches!(state, LexBacktickSnippet::InSnippet) {
+                                let c = self.current_char_unchecked();
+                                self.diagnostics.push(
+                                    ParseDiagnostic::new(
+
+                                        "Invalid escape sequence",
+                                        escape_start..self.text_position() + c.text_len(),
+                                    )
+                                        .with_hint(r#"Valid escape sequences are: `\$`, `\\`, `\``, `\n`."#),
+                                );
+                                state = LexBacktickSnippet::InvalidEscapeSequence;
+                            }
+                        }
+
+                        None => {
+                            if matches!(state, LexBacktickSnippet::InSnippet) {
+                                self.diagnostics.push(ParseDiagnostic::new(
+
+                                    "Expected an escape sequence following a backslash, but found none",
+                                    escape_start..self.text_position(),
+                                )
+                                    .with_detail(self.text_position()..self.text_position(), "File ends here")
+                                );
+                                state = LexBacktickSnippet::InvalidEscapeSequence;
+                            }
+                        }
+                    }
+                }
+                _ => self.advance_char_unchecked(),
+            }
+        }
+
+        match state {
+            LexBacktickSnippet::Terminated => GRIT_BACKTICK_SNIPPET,
+            LexBacktickSnippet::InSnippet => {
+                let unterminated =
+                    ParseDiagnostic::new("Missing closing quote", start..self.text_position())
+                        .with_detail(
+                            self.source.text_len()..self.source.text_len(),
+                            "file ends here",
+                        );
+                self.diagnostics.push(unterminated);
+
+                ERROR_TOKEN
+            }
+            LexBacktickSnippet::InvalidEscapeSequence => ERROR_TOKEN,
         }
     }
 
@@ -645,14 +700,18 @@ impl<'src> Lexer<'src> {
     }
 
     /// Lexes a name for variables (without leading `$`), labels, and keywords.
+    ///
+    /// Branches into regular expressions and raw backticks, which have named prefixes.
     fn lex_name(&mut self, first: u8) -> GritSyntaxKind {
+        let name_start = self.text_position();
         self.assert_at_char_boundary();
 
         // Note to keep the buffer large enough to fit every possible keyword that
         // the lexer can return
         const BUFFER_SIZE: usize = 14;
         let mut buffer = [0u8; BUFFER_SIZE];
-        let mut len = 0;
+        buffer[0] = first;
+        let mut len = 1;
 
         self.advance_byte_or_char(first);
 
@@ -664,6 +723,43 @@ impl<'src> Lexer<'src> {
                 }
 
                 self.advance(1)
+            } else if byte == b'"' {
+                return match &buffer[..len] {
+                    b"r" => self.lex_regex(),
+                    _ => {
+                        self.diagnostics.push(ParseDiagnostic::new(
+
+                            "Unxpected string prefix",
+                            name_start..self.text_position(),
+                        )
+                            .with_hint("Use the `r` prefix to create a regex literal.")
+                        );
+
+                        ERROR_TOKEN
+                    }
+                };
+            } else if byte == b'`' {
+                return match &buffer[..len] {
+                    b"r" => match self.lex_backtick_snippet() {
+                        GRIT_BACKTICK_SNIPPET => GRIT_SNIPPET_REGEX_LITERAL,
+                        other => other
+                    }
+                    b"raw" => match self.lex_backtick_snippet() {
+                        GRIT_BACKTICK_SNIPPET => GRIT_RAW_BACKTICK_SNIPPET,
+                        other => other
+                    }
+                    _ => {
+                        self.diagnostics.push(ParseDiagnostic::new(
+
+                            "Unxpected snippet prefix",
+                            name_start..self.text_position(),
+                        )
+                            .with_hint("Supported snippet prefixes are `r` and `raw`.")
+                        );
+                        
+                        ERROR_TOKEN
+                    }
+                } 
             } else {
                 break;
             }
@@ -713,6 +809,76 @@ impl<'src> Lexer<'src> {
             b"like" => LIKE_KW,
             b"return" => RETURN_KW,
             _ => GRIT_NAME,
+        }
+    }
+
+    /// Lexes a regular expression.
+    fn lex_regex(&mut self) -> GritSyntaxKind {
+        // Handle invalid quotes
+        self.assert_at_char_boundary();
+        let start = self.text_position();
+
+        self.advance(1); // Skip over the quote
+        let mut state = LexRegexState::InRegex;
+
+        while let Some(chr) = self.current_byte() {
+            match chr {
+                b'"' => {
+                    self.advance(1);
+                    state = match state {
+                        LexRegexState::InRegex => LexRegexState::Terminated,
+                        state => state,
+                    };
+                    break;
+                }
+                // '\t' etc
+                b'\\' => {
+                    let escape_start = self.text_position();
+                    self.advance(1);
+
+                    match self.current_byte() {
+                        Some(_) => self.advance_char_unchecked(),
+
+                        None => {
+                            if matches!(state, LexRegexState::InRegex) {
+                                self.diagnostics.push(ParseDiagnostic::new(
+
+                                    "Expected an escape sequence following a backslash, but found none",
+                                    escape_start..self.text_position(),
+                                )
+                                    .with_detail(self.text_position()..self.text_position(), "File ends here")
+                                );
+                                return ERROR_TOKEN;
+                            }
+                        }
+                    }
+                }
+                b'\n' | b'\r' => {
+                    let unterminated =
+                        ParseDiagnostic::new("Missing closing quote", start..self.text_position())
+                            .with_detail(self.position..self.position + 1, "line breaks here");
+
+                    self.diagnostics.push(unterminated);
+
+                    return ERROR_TOKEN;
+                }
+                _ => self.advance_char_unchecked(),
+            }
+        }
+
+        match state {
+            LexRegexState::Terminated => GRIT_REGEX_LITERAL,
+            LexRegexState::InRegex => {
+                let unterminated =
+                    ParseDiagnostic::new("Missing closing quote", start..self.text_position())
+                        .with_detail(
+                            self.source.text_len()..self.source.text_len(),
+                            "file ends here",
+                        );
+                self.diagnostics.push(unterminated);
+
+                ERROR_TOKEN
+            }
         }
     }
 
@@ -843,16 +1009,37 @@ enum InvalidNumberReason {
 
 #[derive(Copy, Clone, Debug)]
 enum LexStringState {
-    /// When using `'` instead of `"`
+    /// When using `'` instead of `"`.
     InvalidQuote,
 
-    /// String that contains an invalid escape sequence
+    /// String that contains an invalid escape sequence.
     InvalidEscapeSequence,
 
     /// Between the opening `"` and closing `"` quotes.
     InString,
 
-    /// Properly terminated string
+    /// Properly terminated string.
+    Terminated,
+}
+
+#[derive(Copy, Clone, Debug)]
+enum LexBacktickSnippet {
+    /// Between the opening and closing backticks.
+    InSnippet,
+
+    /// Snippet that contains an invalid escape sequence.
+    InvalidEscapeSequence,
+
+    /// Properly terminated snippet.
+    Terminated,
+}
+
+#[derive(Copy, Clone, Debug)]
+enum LexRegexState {
+    /// Between the opening and closing quotes.
+    InRegex,
+
+    /// Properly terminated regex.
     Terminated,
 }
 

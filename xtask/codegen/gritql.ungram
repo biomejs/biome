@@ -517,11 +517,9 @@ GritBacktickSnippet = value: 'grit_backtick_snippet'
 
 GritRawBacktickSnippet = value: 'grit_raw_backtick_snippet'
 
-GritDoubleQuoteSnippet = value: 'grit_double_quote_snippet'
-
 GritLanguageSpecificSnippet =
     language: GritLanguageName
-    snippet: GritDoubleQuoteSnippet
+    snippet: 'grit_string_literal'
 
 // a code snippet may be prefixed by a label;
 // the label may be prefixed by a module or sort name (separated from the label by a dot)
