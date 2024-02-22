@@ -24,14 +24,15 @@ This feature is enabled by default but can be opted-out via configuration:
 Import statements are sorted by "distance". Modules that are "farther" from the user are put on the top, modules "closer" to the user are put on the bottom:
 
 1. modules imported via `bun:` protocol. This is applicable when writing code run by Bun;
-2. built-in Node.js modules that are explicitly imported using the `node:` protocol and common Node built-ins such as `assert`;
-3. modules imported via `npm:` protocol. This is applicable when writing code run by Deno;
-4. modules imported via URL;
-5. modules imported from libraries;
-6. modules imported via absolute imports;
-7. modules imported from a name prefixed by `#`. This is applicable when using [Node's subpath imports](https://nodejs.org/api/packages.html#subpath-imports);
-8. modules imported via relative imports;
-9. modules that couldn't be identified by the previous criteria;
+1. built-in Node.js modules that are explicitly imported using the `node:` protocol and common Node built-ins such as `assert`;
+1. modules imported via `npm:` protocol. This is applicable when writing code run by Deno;
+1. modules that contain the protocol `:`. These are usually considered "virtual modules", modules that are injected by your working environment, e.g. `vite`;
+1. modules imported via URL;
+1. modules imported from libraries;
+1. modules imported via absolute imports;
+1. modules imported from a name prefixed by `#`. This is applicable when using [Node's subpath imports](https://nodejs.org/api/packages.html#subpath-imports);
+1. modules imported via relative imports;
+1. modules that couldn't be identified by the previous criteria;
 
 For example, given the following code:
 
@@ -40,6 +41,7 @@ import uncle from "../uncle";
 import sibling from "./sibling";
 import express from "npm:express";
 import imageUrl from "url:./image.png";
+import { sortBy } from "virtual:utils";
 import assert from "node:assert";
 import aunt from "../aunt";
 import { VERSION } from "https://deno.land/std/version.ts";
@@ -57,6 +59,7 @@ They will be sorted like this:
  import assert from "node:assert";
  import { mock, test } from "node:test";
  import express from "npm:express";
+ import { sortBy } from "virtual:utils";
  import { VERSION } from "https://deno.land/std/version.ts";
  import React from "react";
  import { secret } from "/absolute/path";
