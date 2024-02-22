@@ -71,9 +71,8 @@ impl MaybeExport {
                                         static_member,
                                     ) => static_member.member().map(|member| member.text()),
                                 };
-                                let is_commonjs_export = ident_text == "module"
-                                    && member_text.is_ok_and(|text| text == "exports");
-                                is_commonjs_export
+                                ident_text == "module"
+                                    && member_text.is_ok_and(|text| text == "exports")
                             }
                             _ => {
                                 // modules.exports.foo = {}, module.exports[foo] = {}
@@ -129,11 +128,9 @@ impl Visitor for AnyExportInTestVisitor {
                 }
             }
             WalkEvent::Leave(node) => {
-                if let Some(_) = AnyJsRoot::cast_ref(node) {
-                    if self.has_test {
-                        for export in self.exports.iter() {
-                            ctx.match_query(AnyExportInTest(export.clone()));
-                        }
+                if AnyJsRoot::cast_ref(node).is_some() && self.has_test {
+                    for export in self.exports.iter() {
+                        ctx.match_query(AnyExportInTest(export.clone()));
                     }
                 }
             }
