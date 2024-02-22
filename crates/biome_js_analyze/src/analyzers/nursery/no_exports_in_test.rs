@@ -4,8 +4,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{
-    assign_ext::AnyJsMemberAssignment, AnyJsExpression, AnyJsMemberExpression, AnyJsRoot,
-    JsAssignmentExpression, JsCallExpression, JsExport, JsLanguage,
+    assign_ext::AnyJsMemberAssignment, AnyJsExpression, AnyJsRoot, JsAssignmentExpression,
+    JsCallExpression, JsExport, JsLanguage,
 };
 use biome_rowan::{declare_node_union, AstNode, Language, TextRange, WalkEvent};
 
@@ -59,35 +59,32 @@ impl MaybeExport {
                     .and_then(|left| AnyJsMemberAssignment::try_cast_node(left).ok())
                     .is_some_and(|member_expr| {
                         let object = member_expr.object().ok();
-                        // module.exports = {}, module[exports] = {}
+                        // module.exports = {}
                         let is_commonjs_export = object.is_some_and(|object| match object {
-                            AnyJsExpression::JsIdentifierExpression(ident) => {
-                                let ident_text = ident.text();
-                                let member_text = match member_expr {
-                                    AnyJsMemberAssignment::JsComputedMemberAssignment(computed) => {
-                                        computed.member().map(|member| member.text())
-                                    }
-                                    AnyJsMemberAssignment::JsStaticMemberAssignment(
-                                        static_member,
-                                    ) => static_member.member().map(|member| member.text()),
-                                };
-                                ident_text == "module"
-                                    && member_text.is_ok_and(|text| text == "exports")
-                            }
+                            AnyJsExpression::JsIdentifierExpression(ident) => match member_expr {
+                                AnyJsMemberAssignment::JsComputedMemberAssignment(_) => false,
+                                AnyJsMemberAssignment::JsStaticMemberAssignment(static_member) => {
+                                    let indent_text = ident.text();
+                                    let member_text =
+                                        static_member.member().map(|member| member.text());
+                                    indent_text == "module"
+                                        && member_text
+                                            .is_ok_and(|member_text| member_text == "exports")
+                                }
+                            },
                             _ => {
                                 // modules.exports.foo = {}, module.exports[foo] = {}
-                                let is_commonjs_export = AnyJsMemberExpression::try_cast_node(
-                                    object,
-                                )
-                                .is_ok_and(|member_expr| {
-                                    let object_text =
-                                        member_expr.object().map(|object| object.text());
-                                    let member_name = member_expr.member_name();
-                                    object_text.is_ok_and(|text| text == "module")
-                                        && member_name.is_some_and(|member_name| {
-                                            member_name.text() == "exports"
-                                        })
-                                });
+                                let is_commonjs_export = object
+                                    .as_js_static_member_expression()
+                                    .is_some_and(|member_expr| {
+                                        let object_text =
+                                            member_expr.object().map(|object| object.text());
+                                        let member_text =
+                                            member_expr.member().map(|member| member.text());
+                                        object_text.is_ok_and(|text| text == "module")
+                                            && member_text
+                                                .is_ok_and(|member_text| member_text == "exports")
+                                    });
                                 is_commonjs_export
                             }
                         });
