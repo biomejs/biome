@@ -85,6 +85,7 @@ biome_deserialize_macros     = { version = "0.4.0", path = "./crates/biome_deser
 biome_diagnostics            = { version = "0.4.0", path = "./crates/biome_diagnostics" }
 biome_diagnostics_categories = { version = "0.4.0", path = "./crates/biome_diagnostics_categories" }
 biome_diagnostics_macros     = { version = "0.4.0", path = "./crates/biome_diagnostics_macros" }
+biome_file_source            = { version = "0.4.0", path = "./crates/biome_file_source" }
 biome_formatter              = { version = "0.4.0", path = "./crates/biome_formatter" }
 biome_fs                     = { version = "0.4.0", path = "./crates/biome_fs" }
 biome_html_factory           = { version = "0.4.0", path = "./crates/biome_html_factory" }

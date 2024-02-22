@@ -1,5 +1,4 @@
-use crate::HtmlLanguage;
-use biome_rowan::{FileSource, FileSourceError};
+use biome_rowan::FileSourceError;
 use std::path::Path;
 
 #[derive(Debug, Default, Clone)]
@@ -27,8 +26,6 @@ impl HtmlFileSource {
         }
     }
 }
-
-impl<'a> FileSource<'a, HtmlLanguage> for HtmlFileSource {}
 
 impl TryFrom<&Path> for HtmlFileSource {
     type Error = FileSourceError;

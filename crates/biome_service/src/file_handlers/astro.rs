@@ -1,7 +1,7 @@
 use crate::file_handlers::{
     javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
     ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime,
-    ParserCapabilities,
+    ParseResult, ParserCapabilities,
 };
 use crate::settings::SettingsHandle;
 use crate::workspace::{FixFileResult, PullActionsResult};
@@ -11,9 +11,9 @@ use biome_fs::RomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
 use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
-use biome_rowan::{FileSource, NodeCache};
+use biome_rowan::NodeCache;
 use lazy_static::lazy_static;
-use regex::{Regex, RegexBuilder};
+use regex::{Matches, Regex, RegexBuilder};
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct AstroFileHandler;
@@ -29,16 +29,27 @@ impl AstroFileHandler {
     /// It extracts the JavaScript code contained in the frontmatter of an Astro file
     ///
     /// If the frontmatter doesn't exist, an empty string is returned.
-    pub fn astro_input(text: &str) -> &str {
-        let mut matches = ASTRO_FENCE.find_iter(text);
+    pub fn input(text: &str) -> &str {
+        let mut matches = Self::matches(text);
         match (matches.next(), matches.next()) {
             (Some(start), Some(end)) => &text[start.end()..end.start()],
             _ => "",
         }
     }
 
-    pub fn astro_output(input: &str, output: &str) -> String {
-        let mut matches = ASTRO_FENCE.find_iter(input);
+    /// Returns the start byte offset of the Astro fence
+    pub fn start(input: &str) -> Option<u32> {
+        ASTRO_FENCE.find_iter(input).next().map(|m| m.end() as u32)
+    }
+
+    fn matches(input: &str) -> Matches {
+        ASTRO_FENCE.find_iter(input)
+    }
+
+    /// It takes the original content of an Astro file, and new output of an Astro file. The output is only the content contained inside the
+    /// Astro fences. The function replaces `output` inside those fences.
+    pub fn output(input: &str, output: &str) -> String {
+        let mut matches = Self::matches(input);
         if let (Some(start), Some(end)) = (matches.next(), matches.next()) {
             format!(
                 "{}{}{}",
@@ -91,8 +102,8 @@ fn parse(
     text: &str,
     _settings: SettingsHandle,
     cache: &mut NodeCache,
-) -> AnyParse {
-    let frontmatter = AstroFileHandler::astro_input(text);
+) -> ParseResult {
+    let frontmatter = AstroFileHandler::input(text);
     let parse = parse_js_with_cache(
         frontmatter,
         JsFileSource::ts(),
@@ -102,12 +113,14 @@ fn parse(
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
 
-    AnyParse::new(
-        // SAFETY: the parser should always return a root node
-        root.as_send().unwrap(),
-        diagnostics,
-        JsFileSource::ts().as_any_file_source(),
-    )
+    ParseResult {
+        any_parse: AnyParse::new(
+            // SAFETY: the parser should always return a root node
+            root.as_send().unwrap(),
+            diagnostics,
+        ),
+        language: Some(Language::TypeScript),
+    }
 }
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]

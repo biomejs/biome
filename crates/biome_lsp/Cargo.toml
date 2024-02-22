@@ -26,6 +26,7 @@ biome_service      = { workspace = true }
 biome_text_edit    = { workspace = true }
 futures            = "0.3"
 indexmap           = { workspace = true }
+log                = "0.4.20"
 rustc-hash         = { workspace = true }
 serde              = { workspace = true, features = ["derive"] }
 serde_json         = { workspace = true }

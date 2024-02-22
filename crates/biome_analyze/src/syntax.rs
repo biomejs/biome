@@ -1,4 +1,5 @@
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
+use tracing::debug;
 
 use crate::{
     registry::NodeLanguage, AddVisitor, Phases, QueryKey, QueryMatch, Queryable, ServiceBag,
@@ -62,6 +63,7 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
     type Language = L;
 
     fn visit(&mut self, event: &WalkEvent<SyntaxNode<Self::Language>>, mut ctx: VisitorContext<L>) {
+        debug!("Node range {:?} and given range {:?}", &event, &ctx.range);
         let node = match event {
             WalkEvent::Enter(node) => node,
             WalkEvent::Leave(node) => {
