@@ -3,7 +3,10 @@ use biome_analyze::{
     RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsRoot, JsAssignmentExpression, JsCallExpression, JsExport, JsLanguage};
+use biome_js_syntax::{
+    assign_ext::AnyJsMemberAssignment, AnyJsExpression, AnyJsMemberExpression, AnyJsRoot,
+    JsAssignmentExpression, JsCallExpression, JsExport, JsLanguage,
+};
 use biome_rowan::{declare_node_union, AstNode, Language, TextRange, WalkEvent};
 
 declare_rule! {
@@ -50,27 +53,53 @@ impl MaybeExport {
     fn is_export(&self) -> bool {
         match self {
             MaybeExport::JsExport(_) => true,
-            MaybeExport::JsAssignmentExpression(expr) => {
-                // TODO: module[exports], module.export.foo
-                let left = expr.left().ok();
-                if let Some(left) = left {
-                    let is_commonjs_export = left
-                        .as_any_js_assignment()
-                        .and_then(|left| left.as_js_static_member_assignment())
-                        .is_some_and(|member_assignment| {
-                            let obj = member_assignment.object();
-                            let member = member_assignment.member();
-                            obj.is_ok_and(|obj| obj.text() == "module")
-                                && member.is_ok_and(|member| member.text() == "exports")
+            MaybeExport::JsAssignmentExpression(assignment_expr) => {
+                let left = assignment_expr.left().ok();
+                let is_commonjs_export = left
+                    .and_then(|left| AnyJsMemberAssignment::try_cast_node(left).ok())
+                    .is_some_and(|member_expr| {
+                        let object = member_expr.object().ok();
+                        // module.exports = {}, module[exports] = {}
+                        let is_commonjs_export = object.is_some_and(|object| match object {
+                            AnyJsExpression::JsIdentifierExpression(ident) => {
+                                let ident_text = ident.text();
+                                let member_text = match member_expr {
+                                    AnyJsMemberAssignment::JsComputedMemberAssignment(computed) => {
+                                        computed.member().map(|member| member.text())
+                                    }
+                                    AnyJsMemberAssignment::JsStaticMemberAssignment(
+                                        static_member,
+                                    ) => static_member.member().map(|member| member.text()),
+                                };
+                                let is_commonjs_export = ident_text == "module"
+                                    && member_text.is_ok_and(|text| text == "exports");
+                                is_commonjs_export
+                            }
+                            _ => {
+                                // modules.exports.foo = {}, module.exports[foo] = {}
+                                let is_commonjs_export = AnyJsMemberExpression::try_cast_node(
+                                    object,
+                                )
+                                .is_ok_and(|member_expr| {
+                                    let object_text =
+                                        member_expr.object().map(|object| object.text());
+                                    let member_name = member_expr.member_name();
+                                    object_text.is_ok_and(|text| text == "module")
+                                        && member_name.is_some_and(|member_name| {
+                                            member_name.text() == "exports"
+                                        })
+                                });
+                                is_commonjs_export
+                            }
                         });
-                    return is_commonjs_export;
-                }
-
-                false
+                        is_commonjs_export
+                    });
+                is_commonjs_export
             }
         }
     }
 }
+
 #[derive(Default)]
 struct ExportClauseInTestVisitor {
     has_test: bool,
