@@ -101,12 +101,12 @@ impl MaybeExport {
 }
 
 #[derive(Default)]
-struct ExportClauseInTestVisitor {
+struct AnyExportInTestVisitor {
     has_test: bool,
     exports: Vec<MaybeExport>,
 }
 
-impl Visitor for ExportClauseInTestVisitor {
+impl Visitor for AnyExportInTestVisitor {
     type Language = JsLanguage;
 
     fn visit(
@@ -133,7 +133,7 @@ impl Visitor for ExportClauseInTestVisitor {
                 if let Some(_) = AnyJsRoot::cast_ref(node) {
                     if self.has_test {
                         for export in self.exports.iter() {
-                            ctx.match_query(ExportInTest(export.clone()));
+                            ctx.match_query(AnyExportInTest(export.clone()));
                         }
                     }
                 }
@@ -142,15 +142,15 @@ impl Visitor for ExportClauseInTestVisitor {
     }
 }
 
-pub(crate) struct ExportInTest(MaybeExport);
+pub(crate) struct AnyExportInTest(MaybeExport);
 
-impl QueryMatch for ExportInTest {
+impl QueryMatch for AnyExportInTest {
     fn text_range(&self) -> TextRange {
         self.0.range()
     }
 }
 
-impl Queryable for ExportInTest {
+impl Queryable for AnyExportInTest {
     type Input = Self;
     type Language = JsLanguage;
     type Output = MaybeExport;
@@ -160,7 +160,7 @@ impl Queryable for ExportInTest {
         analyzer: &mut impl AddVisitor<Self::Language>,
         _: &<Self::Language as Language>::Root,
     ) {
-        analyzer.add_visitor(Phases::Syntax, ExportClauseInTestVisitor::default);
+        analyzer.add_visitor(Phases::Syntax, AnyExportInTestVisitor::default);
     }
 
     fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
@@ -169,7 +169,7 @@ impl Queryable for ExportInTest {
 }
 
 impl Rule for NoExportsInTest {
-    type Query = ExportInTest;
+    type Query = AnyExportInTest;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
