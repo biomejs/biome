@@ -656,7 +656,7 @@ pub(crate) fn format(
 }
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
-fn format_range(
+pub(crate) fn format_range(
     rome_path: &RomePath,
     parse: AnyParse,
     settings: SettingsHandle,
@@ -670,7 +670,7 @@ fn format_range(
 }
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
-fn format_on_type(
+pub(crate) fn format_on_type(
     rome_path: &RomePath,
     parse: AnyParse,
     settings: SettingsHandle,

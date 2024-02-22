@@ -9,7 +9,7 @@ use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
-use biome_js_syntax::JsFileSource;
+use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use lazy_static::lazy_static;
@@ -108,8 +108,8 @@ impl ExtensionHandler for VueFileHandler {
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
-                format_range: None,
-                format_on_type: None,
+                format_range: Some(format_range),
+                format_on_type: Some(format_on_type),
             },
         }
     }
@@ -152,6 +152,24 @@ fn format(
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format(rome_path, parse, settings)
+}
+
+pub(crate) fn format_range(
+    rome_path: &RomePath,
+    parse: AnyParse,
+    settings: SettingsHandle,
+    range: TextRange,
+) -> Result<Printed, WorkspaceError> {
+    javascript::format_range(rome_path, parse, settings, range)
+}
+
+pub(crate) fn format_on_type(
+    rome_path: &RomePath,
+    parse: AnyParse,
+    settings: SettingsHandle,
+    offset: TextSize,
+) -> Result<Printed, WorkspaceError> {
+    javascript::format_on_type(rome_path, parse, settings, offset)
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {
