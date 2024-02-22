@@ -886,7 +886,7 @@ export interface Nursery {
 	/**
 	 * Disallow using exports in files containing tests
 	 */
-	noExportsInTest?: RuleConfiguration;
+	noExportsInTest?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow focused tests.
 	 */

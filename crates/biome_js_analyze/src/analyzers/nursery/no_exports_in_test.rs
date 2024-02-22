@@ -36,7 +36,7 @@ declare_rule! {
     /// });
     /// ```
     ///
-    pub(crate) NoExportsInTest {
+    pub NoExportsInTest {
         version: "next",
         name: "noExportsInTest",
         recommended: true,
@@ -46,7 +46,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate)  MaybeExport = JsExport | JsAssignmentExpression
+    pub MaybeExport = JsExport | JsAssignmentExpression
 }
 
 impl MaybeExport {
@@ -141,7 +141,7 @@ impl Visitor for AnyExportInTestVisitor {
     }
 }
 
-pub(crate) struct AnyExportInTest(MaybeExport);
+pub struct AnyExportInTest(MaybeExport);
 
 impl QueryMatch for AnyExportInTest {
     fn text_range(&self) -> TextRange {

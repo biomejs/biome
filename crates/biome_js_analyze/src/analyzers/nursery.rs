@@ -2,25 +2,27 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_empty_block_statements;
-pub(crate) mod no_empty_type_parameters;
-pub(crate) mod no_focused_tests;
-pub(crate) mod no_namespace_import;
-pub(crate) mod no_nodejs_modules;
-pub(crate) mod no_restricted_imports;
-pub(crate) mod no_skipped_tests;
-pub(crate) mod no_undeclared_dependencies;
-pub(crate) mod no_unused_private_class_members;
-pub(crate) mod no_useless_lone_block_statements;
-pub(crate) mod no_useless_ternary;
-pub(crate) mod use_await;
-pub(crate) mod use_consistent_array_type;
-pub(crate) mod use_filenaming_convention;
-pub(crate) mod use_grouped_type_import;
-pub(crate) mod use_import_restrictions;
-pub(crate) mod use_node_assert_strict;
-pub(crate) mod use_nodejs_import_protocol;
-pub(crate) mod use_shorthand_function_type;
+pub mod no_duplicate_test_hooks;
+pub mod no_empty_block_statements;
+pub mod no_empty_type_parameters;
+pub mod no_exports_in_test;
+pub mod no_focused_tests;
+pub mod no_namespace_import;
+pub mod no_nodejs_modules;
+pub mod no_restricted_imports;
+pub mod no_skipped_tests;
+pub mod no_undeclared_dependencies;
+pub mod no_unused_private_class_members;
+pub mod no_useless_lone_block_statements;
+pub mod no_useless_ternary;
+pub mod use_await;
+pub mod use_consistent_array_type;
+pub mod use_filenaming_convention;
+pub mod use_grouped_type_import;
+pub mod use_import_restrictions;
+pub mod use_node_assert_strict;
+pub mod use_nodejs_import_protocol;
+pub mod use_shorthand_function_type;
 
 declare_group! {
     pub Nursery {
