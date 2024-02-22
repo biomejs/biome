@@ -1,8 +1,8 @@
-import type { TailwindSpec, UtilitySpec } from "./introspect";
+import type { TailwindSpec, UtilitySpec } from "./introspect.js";
 
 export type SortConfig = {
 	utilities: Array<{
-		name: string;
+		layer: string;
 		classes: Array<string>;
 	}>;
 };
@@ -17,10 +17,10 @@ function findDuplicates(array: Array<string>) {
 	return array.filter((item, index) => array.indexOf(item) !== index);
 }
 
-function logDuplicates(array: Array<string>) {
+function logDuplicates(layer: string, array: Array<string>) {
 	const duplicates = findDuplicates(array);
 	if (duplicates.length > 0) {
-		console.log("Duplicates found: ", duplicates);
+		console.log(`Duplicates found in "${layer}" layer: `, duplicates);
 	}
 }
 
@@ -55,13 +55,15 @@ export function sortConfigFromSpec(
 				})
 				.flatMap(({ utility, hasDefault, hasValues }) => {
 					const entries: Array<string> = [];
-					if (!hasValues || hasDefault) entries.push(utility);
+					if (!hasValues || hasDefault) entries.push(`${utility}$`);
 					if (hasValues) entries.push(`${utility}-`);
 					return entries;
 				});
-			logDuplicates(classes);
+			// this is to track utilities with the same name and different value types, so
+			// that we can figure out how to handle them in the future
+			logDuplicates(layer, classes);
 			return {
-				name: layer,
+				layer,
 				classes: [...new Set(classes)], // remove duplicates
 			};
 		});

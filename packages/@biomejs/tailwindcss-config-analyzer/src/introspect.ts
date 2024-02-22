@@ -1,7 +1,7 @@
-import resolveConfig from "tailwindcss/resolveConfig";
+import resolveConfig from "tailwindcss/resolveConfig.js";
 import { createContext } from "tailwindcss/lib/lib/setupContextUtils";
 import type { Config } from "tailwindcss";
-import type { TailwindContext } from "./types";
+import type { TailwindContext } from "./types.js";
 
 const DEFAULT_CONFIG: Config = { content: [] };
 
@@ -28,13 +28,13 @@ function introspectUtilities(
 			{
 				layer,
 				sort: { index },
-				options: { values = {} } = {},
+				options: { values } = { values: undefined },
 			},
 			rule,
 		] of candidates) {
 			if (excludedLayers?.includes(layer)) continue;
 			const hasValues = values != null || typeof rule === "function";
-			const hasDefault = "DEFAULT" in values;
+			const hasDefault = values != null && "DEFAULT" in values;
 			utilities.add({ utility, layer, index, hasValues, hasDefault });
 		}
 	}
