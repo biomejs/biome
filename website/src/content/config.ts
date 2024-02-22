@@ -1,6 +1,6 @@
-import { docsSchema } from "@astrojs/starlight/schema";
 // src/content/config.ts
 import { type ImageFunction, defineCollection, z } from "astro:content";
+import { docsSchema } from "@astrojs/starlight/schema";
 
 const blogSchema = (image: ImageFunction) =>
 	z.object({
