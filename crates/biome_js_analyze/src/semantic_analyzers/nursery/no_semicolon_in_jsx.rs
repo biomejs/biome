@@ -42,7 +42,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoSemicolonInJsx {
+    pub NoSemicolonInJsx {
         version: "next",
         name: "noSemicolonInJsx",
         recommended: true,

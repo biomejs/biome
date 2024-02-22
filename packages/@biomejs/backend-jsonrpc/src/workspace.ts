@@ -922,7 +922,7 @@ export interface Nursery {
 	/**
 	 * It detects possible "wrong" semicolons inside JSX elements.
 	 */
-	noSemicolonInJsx?: RuleConfiguration;
+	noSemicolonInJsx?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow disabled tests.
 	 */
@@ -1930,7 +1930,6 @@ export type Category =
 	| "lint/suspicious/noSelfCompare"
 	| "lint/suspicious/noShadowRestrictedNames"
 	| "lint/suspicious/noSparseArray"
-	| "lint/suspicious/noSemicolonInJsx"
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
 	| "lint/suspicious/useDefaultSwitchClauseLast"

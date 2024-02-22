@@ -2538,7 +2538,7 @@ pub struct Nursery {
     pub no_restricted_imports: Option<RuleConfiguration<NoRestrictedImports>>,
     #[doc = "It detects possible \"wrong\" semicolons inside JSX elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_semicolon_in_jsx: Option<RuleConfiguration>,
+    pub no_semicolon_in_jsx: Option<RuleConfiguration<NoSemicolonInJsx>>,
     #[doc = "Disallow disabled tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_skipped_tests: Option<RuleConfiguration<NoSkippedTests>>,
@@ -2616,7 +2616,7 @@ impl DeserializableValidator for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 34] = [
+    pub(crate) const GROUP_RULES: [&'static str; 35] = [
         "noConsole",
         "noDuplicateJsonKeys",
         "noDuplicateTestHooks",
@@ -2653,7 +2653,7 @@ impl Nursery {
         "useShorthandFunctionType",
         "useSortedClasses",
     ];
-    const RECOMMENDED_RULES: [&'static str; 13] = [
+    const RECOMMENDED_RULES: [&'static str; 14] = [
         "noDuplicateJsonKeys",
         "noDuplicateTestHooks",
         "noEmptyTypeParameters",
@@ -2669,22 +2669,23 @@ impl Nursery {
         "useImportType",
         "useNumberNamespace",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 13] = [
+    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 14] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 34] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 35] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2719,6 +2720,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended(&self) -> bool {
@@ -2800,109 +2802,114 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.no_skipped_tests.as_ref() {
+        if let Some(rule) = self.no_restricted_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_skipped_tests.as_ref() {
+        if let Some(rule) = self.no_semicolon_in_jsx.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_then_property.as_ref() {
+        if let Some(rule) = self.no_skipped_tests.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_then_property.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_unused_imports.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_unused_private_class_members.as_ref() {
+        if let Some(rule) = self.no_unused_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
+        if let Some(rule) = self.no_unused_private_class_members.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_useless_ternary.as_ref() {
+        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_await.as_ref() {
+        if let Some(rule) = self.no_useless_ternary.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_consistent_array_type.as_ref() {
+        if let Some(rule) = self.use_await.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_export_type.as_ref() {
+        if let Some(rule) = self.use_consistent_array_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_filenaming_convention.as_ref() {
+        if let Some(rule) = self.use_export_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_for_of.as_ref() {
+        if let Some(rule) = self.use_filenaming_convention.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_grouped_type_import.as_ref() {
+        if let Some(rule) = self.use_for_of.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_grouped_type_import.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_import_type.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_node_assert_strict.as_ref() {
+        if let Some(rule) = self.use_import_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
-        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
+        if let Some(rule) = self.use_node_assert_strict.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
-        if let Some(rule) = self.use_number_namespace.as_ref() {
+        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+        if let Some(rule) = self.use_number_namespace.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
         index_set
@@ -2974,109 +2981,114 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.no_skipped_tests.as_ref() {
+        if let Some(rule) = self.no_restricted_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_skipped_tests.as_ref() {
+        if let Some(rule) = self.no_semicolon_in_jsx.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_then_property.as_ref() {
+        if let Some(rule) = self.no_skipped_tests.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_then_property.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_unused_imports.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_unused_private_class_members.as_ref() {
+        if let Some(rule) = self.no_unused_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
+        if let Some(rule) = self.no_unused_private_class_members.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_useless_ternary.as_ref() {
+        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_await.as_ref() {
+        if let Some(rule) = self.no_useless_ternary.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_consistent_array_type.as_ref() {
+        if let Some(rule) = self.use_await.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_export_type.as_ref() {
+        if let Some(rule) = self.use_consistent_array_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_filenaming_convention.as_ref() {
+        if let Some(rule) = self.use_export_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_for_of.as_ref() {
+        if let Some(rule) = self.use_filenaming_convention.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_grouped_type_import.as_ref() {
+        if let Some(rule) = self.use_for_of.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_grouped_type_import.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_import_type.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_node_assert_strict.as_ref() {
+        if let Some(rule) = self.use_import_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
-        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
+        if let Some(rule) = self.use_node_assert_strict.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
-        if let Some(rule) = self.use_number_namespace.as_ref() {
+        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+        if let Some(rule) = self.use_number_namespace.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
         index_set
@@ -3089,10 +3101,10 @@ impl Nursery {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 13] {
+    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 14] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 34] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 35] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3118,39 +3130,146 @@ impl Nursery {
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
         match rule_name {
-            "noConsole" => self.no_console.as_ref(),
-            "noDuplicateJsonKeys" => self.no_duplicate_json_keys.as_ref(),
-            "noEmptyBlockStatements" => self.no_empty_block_statements.as_ref(),
-            "noEmptyTypeParameters" => self.no_empty_type_parameters.as_ref(),
-            "noFocusedTests" => self.no_focused_tests.as_ref(),
-            "noGlobalAssign" => self.no_global_assign.as_ref(),
-            "noGlobalEval" => self.no_global_eval.as_ref(),
-            "noInvalidUseBeforeDeclaration" => self.no_invalid_use_before_declaration.as_ref(),
-            "noMisleadingCharacterClass" => self.no_misleading_character_class.as_ref(),
-            "noNamespaceImport" => self.no_namespace_import.as_ref(),
-            "noNodejsModules" => self.no_nodejs_modules.as_ref(),
-            "noReExportAll" => self.no_re_export_all.as_ref(),
-            "noRestrictedImports" => self.no_restricted_imports.as_ref(),
-            "noSkippedTests" => self.no_skipped_tests.as_ref(),
-            "noThenProperty" => self.no_then_property.as_ref(),
-            "noUndeclaredDependencies" => self.no_undeclared_dependencies.as_ref(),
-            "noUnusedImports" => self.no_unused_imports.as_ref(),
-            "noUnusedPrivateClassMembers" => self.no_unused_private_class_members.as_ref(),
-            "noUselessLoneBlockStatements" => self.no_useless_lone_block_statements.as_ref(),
-            "noUselessTernary" => self.no_useless_ternary.as_ref(),
-            "useAwait" => self.use_await.as_ref(),
-            "useConsistentArrayType" => self.use_consistent_array_type.as_ref(),
-            "useExportType" => self.use_export_type.as_ref(),
-            "useFilenamingConvention" => self.use_filenaming_convention.as_ref(),
-            "useForOf" => self.use_for_of.as_ref(),
-            "useGroupedTypeImport" => self.use_grouped_type_import.as_ref(),
-            "useImportRestrictions" => self.use_import_restrictions.as_ref(),
-            "useImportType" => self.use_import_type.as_ref(),
-            "useNodeAssertStrict" => self.use_node_assert_strict.as_ref(),
-            "useNodejsImportProtocol" => self.use_nodejs_import_protocol.as_ref(),
-            "useNumberNamespace" => self.use_number_namespace.as_ref(),
-            "useShorthandFunctionType" => self.use_shorthand_function_type.as_ref(),
-            "useSortedClasses" => self.use_sorted_classes.as_ref(),
+            "noConsole" => self
+                .no_console
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noDuplicateJsonKeys" => self
+                .no_duplicate_json_keys
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noDuplicateTestHooks" => self
+                .no_duplicate_test_hooks
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noEmptyBlockStatements" => self
+                .no_empty_block_statements
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noEmptyTypeParameters" => self
+                .no_empty_type_parameters
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noFocusedTests" => self
+                .no_focused_tests
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noGlobalAssign" => self
+                .no_global_assign
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noGlobalEval" => self
+                .no_global_eval
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noInvalidUseBeforeDeclaration" => self
+                .no_invalid_use_before_declaration
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noMisleadingCharacterClass" => self
+                .no_misleading_character_class
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noNamespaceImport" => self
+                .no_namespace_import
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noNodejsModules" => self
+                .no_nodejs_modules
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noReExportAll" => self
+                .no_re_export_all
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noRestrictedImports" => self
+                .no_restricted_imports
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noSemicolonInJsx" => self
+                .no_semicolon_in_jsx
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noSkippedTests" => self
+                .no_skipped_tests
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noThenProperty" => self
+                .no_then_property
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUndeclaredDependencies" => self
+                .no_undeclared_dependencies
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUnusedImports" => self
+                .no_unused_imports
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUnusedPrivateClassMembers" => self
+                .no_unused_private_class_members
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUselessLoneBlockStatements" => self
+                .no_useless_lone_block_statements
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUselessTernary" => self
+                .no_useless_ternary
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useAwait" => self
+                .use_await
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useConsistentArrayType" => self
+                .use_consistent_array_type
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useExportType" => self
+                .use_export_type
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useFilenamingConvention" => self
+                .use_filenaming_convention
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useForOf" => self
+                .use_for_of
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useGroupedTypeImport" => self
+                .use_grouped_type_import
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useImportRestrictions" => self
+                .use_import_restrictions
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useImportType" => self
+                .use_import_type
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useNodeAssertStrict" => self
+                .use_node_assert_strict
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useNodejsImportProtocol" => self
+                .use_nodejs_import_protocol
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useNumberNamespace" => self
+                .use_number_namespace
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useShorthandFunctionType" => self
+                .use_shorthand_function_type
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useSortedClasses" => self
+                .use_sorted_classes
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
         }
     }
