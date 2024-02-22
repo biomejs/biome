@@ -272,11 +272,11 @@ impl ImportGroup {
         let mut previous_start = import_node.node.syntax().text_range().end();
         import_node.is_sorted()
             && iter.all(|import_node| {
-                let start = import_node.node.syntax().text_range().end();
-                let is_sorted = previous_start < start && import_node.is_sorted();
-                previous_start = start;
-                is_sorted
-            })
+            let start = import_node.node.syntax().text_range().end();
+            let is_sorted = previous_start < start && import_node.is_sorted();
+            previous_start = start;
+            is_sorted
+        })
     }
 }
 
@@ -529,7 +529,7 @@ fn prepend_leading_newline(
 /// rather than the trivia pieces themselves
 fn leading_trivia_iter(
     token: &JsSyntaxToken,
-) -> impl ExactSizeIterator<Item = (TriviaPieceKind, &str)> {
+) -> impl ExactSizeIterator<Item=(TriviaPieceKind, &str)> {
     let token_text = token.text();
     let token_range = token.text_range();
     let trivia = token.leading_trivia();
@@ -588,6 +588,10 @@ enum ImportCategory {
     /// NPM dependencies with an explicit `npm:` prefix, such as supported by
     /// Deno.
     Npm,
+    /// Modules that contains the column `:` are usually considered "virtual modules". E.g. `astro:middleware`
+    ///
+    /// This modules are usually injected by the environment of the application, and usually present before any relative module.
+    VirtualModule,
     /// Imports from an absolute URL such as supported by browsers.
     Url,
     /// Anything without explicit protocol specifier is assumed to be a library
@@ -602,9 +606,6 @@ enum ImportCategory {
     SharpImport,
     /// Relative file imports `./<path>`.
     Relative,
-    /// Any unrecognized protocols are grouped here. These may include custom
-    /// protocols such as supported by bundlers.
-    Other,
 }
 
 impl From<&str> for ImportCategory {
@@ -617,7 +618,7 @@ impl From<&str> for ImportCategory {
                 "http" | "https" => Self::Url,
                 "node" => Self::NodeBuiltin,
                 "npm" => Self::Npm,
-                _ => Self::Other,
+                _ => Self::VirtualModule,
             }
         } else if value.starts_with('#') {
             Self::SharpImport

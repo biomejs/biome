@@ -26,7 +26,7 @@ import { secret } from "/absolute/path";
 +import assert from "node:assert";
 +import { mock, test } from "node:test";
  import express from "npm:express";
--import imageUrl from "url:./image.png";
+ import imageUrl from "url:./image.png";
 -import assert from "node:assert";
 -import aunt from "../aunt";
  import { VERSION } from "https://deno.land/std/version.ts";
@@ -39,7 +39,6 @@ import { secret } from "/absolute/path";
 +import aunt from "../aunt";
 +import uncle from "../uncle";
 +import sibling from "./sibling";
-+import imageUrl from "url:./image.png";
 \ No newline at end of file
 
 ```
