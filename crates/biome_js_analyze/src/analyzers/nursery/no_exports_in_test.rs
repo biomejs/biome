@@ -116,7 +116,6 @@ impl Visitor for AnyExportInTestVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                // TODO(ah-yu): CommonJs export
                 if let Some(maybe_export) = MaybeExport::cast_ref(node) {
                     if maybe_export.is_export() {
                         self.exports.push(maybe_export);
