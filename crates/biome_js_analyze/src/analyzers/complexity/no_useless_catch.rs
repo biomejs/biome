@@ -50,7 +50,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoUselessCatch {
+    pub NoUselessCatch {
         version: "1.0.0",
         name: "noUselessCatch",
         source: RuleSource::Eslint("no-useless-catch"),

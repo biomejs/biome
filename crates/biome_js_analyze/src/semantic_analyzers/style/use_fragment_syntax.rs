@@ -27,7 +27,7 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// <React.Fragment>child</React.Fragment>
     /// ```
-    pub(crate) UseFragmentSyntax {
+    pub UseFragmentSyntax {
         version: "1.0.0",
         name: "useFragmentSyntax",
         source: RuleSource::EslintReact("jsx-fragments"),

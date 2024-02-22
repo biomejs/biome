@@ -38,7 +38,7 @@ declare_rule! {
     ///     i++
     /// }
     /// ```
-    pub(crate) UseWhile {
+    pub UseWhile {
         version: "1.0.0",
         name: "useWhile",
         recommended: true,

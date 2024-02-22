@@ -64,7 +64,7 @@ declare_rule! {
     ///     Sunny,
     /// }
     /// ```
-    pub(crate) UseEnumInitializers {
+    pub UseEnumInitializers {
         version: "1.0.0",
         name: "useEnumInitializers",
         source: RuleSource::EslintTypeScript("prefer-enum-initializers"),

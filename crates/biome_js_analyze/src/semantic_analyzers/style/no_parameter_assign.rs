@@ -53,7 +53,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoParameterAssign {
+    pub NoParameterAssign {
         version: "1.0.0",
         name: "noParameterAssign",
         source: RuleSource::Eslint("no-param-reassign"),

@@ -43,7 +43,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoConstructorReturn {
+    pub NoConstructorReturn {
         version: "1.0.0",
         name: "noConstructorReturn",
         source: RuleSource::Eslint("no-constructor-return"),

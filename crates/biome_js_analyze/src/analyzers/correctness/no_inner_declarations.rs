@@ -85,7 +85,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoInnerDeclarations {
+    pub NoInnerDeclarations {
         version: "1.0.0",
         name: "noInnerDeclarations",
         source: RuleSource::Eslint("no-inner-declarations"),

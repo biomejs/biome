@@ -30,7 +30,7 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// React.createElement('img', {}, 'child')
     /// ```
-    pub(crate) NoVoidElementsWithChildren {
+    pub NoVoidElementsWithChildren {
         version: "1.0.0",
         name: "noVoidElementsWithChildren",
         source: RuleSource::EslintReact("void-dom-elements-no-children"),
@@ -40,7 +40,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) NoVoidElementsWithChildrenQuery = JsxElement | JsCallExpression | JsxSelfClosingElement
+    pub NoVoidElementsWithChildrenQuery = JsxElement | JsCallExpression | JsxSelfClosingElement
 }
 
 /// Returns true if the name of the element belong to a self-closing element
@@ -66,7 +66,7 @@ fn is_void_dom_element(element_name: &str) -> bool {
     )
 }
 
-pub(crate) enum NoVoidElementsWithChildrenCause {
+pub enum NoVoidElementsWithChildrenCause {
     /// The cause affects React using JSX code
     Jsx {
         /// If the current element has children props in style
@@ -99,7 +99,7 @@ pub(crate) enum NoVoidElementsWithChildrenCause {
     },
 }
 
-pub(crate) struct NoVoidElementsWithChildrenState {
+pub struct NoVoidElementsWithChildrenState {
     /// The name of the element that triggered the rule
     element_name: String,
     /// It tracks the causes that triggers the rule

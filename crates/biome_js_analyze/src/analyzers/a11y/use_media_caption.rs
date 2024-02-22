@@ -30,7 +30,7 @@ declare_rule! {
     /// ```jsx
     /// 	<video muted {...props}></video>
     /// ```
-    pub(crate) UseMediaCaption {
+    pub UseMediaCaption {
         version: "1.0.0",
         name: "useMediaCaption",
         source: RuleSource::EslintJsxA11y("media-has-caption"),

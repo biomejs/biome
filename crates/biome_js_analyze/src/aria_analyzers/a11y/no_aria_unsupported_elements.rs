@@ -33,7 +33,7 @@ declare_rule! {
     /// ```
     ///
     ///
-    pub(crate) NoAriaUnsupportedElements {
+    pub NoAriaUnsupportedElements {
         version: "1.0.0",
         name: "noAriaUnsupportedElements",
         source: RuleSource::EslintJsxA11y("aria-unsupported-elements"),

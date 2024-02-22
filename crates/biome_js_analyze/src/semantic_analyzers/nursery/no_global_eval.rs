@@ -49,7 +49,7 @@ declare_rule! {
     /// let foo = globalThis;
     /// foo.eval("let a = 0;");
     /// ```
-    pub(crate) NoGlobalEval {
+    pub NoGlobalEval {
         version: "1.5.0",
         name: "noGlobalEval",
         source: RuleSource::Eslint("no-eval"),

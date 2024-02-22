@@ -16,7 +16,7 @@ declare_rule! {
     ///   #foo;
     //  }
     /// ```
-    pub(crate) NoDuplicatePrivateClassMembers {
+    pub NoDuplicatePrivateClassMembers {
         version: "1.0.0",
         name: "noDuplicatePrivateClassMembers",
     }

@@ -2,34 +2,34 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_comma_operator;
-pub(crate) mod no_default_export;
-pub(crate) mod no_implicit_boolean;
-pub(crate) mod no_inferrable_types;
-pub(crate) mod no_namespace;
-pub(crate) mod no_negation_else;
-pub(crate) mod no_non_null_assertion;
-pub(crate) mod no_parameter_properties;
-pub(crate) mod no_unused_template_literal;
-pub(crate) mod no_useless_else;
-pub(crate) mod use_as_const_assertion;
-pub(crate) mod use_block_statements;
-pub(crate) mod use_collapsed_else_if;
-pub(crate) mod use_default_parameter_last;
-pub(crate) mod use_enum_initializers;
-pub(crate) mod use_exponentiation_operator;
-pub(crate) mod use_literal_enum_members;
-pub(crate) mod use_numeric_literals;
-pub(crate) mod use_self_closing_elements;
-pub(crate) mod use_shorthand_array_type;
-pub(crate) mod use_shorthand_assign;
-pub(crate) mod use_single_case_statement;
-pub(crate) mod use_single_var_declarator;
-pub(crate) mod use_template;
-pub(crate) mod use_while;
+pub mod no_comma_operator;
+pub mod no_default_export;
+pub mod no_implicit_boolean;
+pub mod no_inferrable_types;
+pub mod no_namespace;
+pub mod no_negation_else;
+pub mod no_non_null_assertion;
+pub mod no_parameter_properties;
+pub mod no_unused_template_literal;
+pub mod no_useless_else;
+pub mod use_as_const_assertion;
+pub mod use_block_statements;
+pub mod use_collapsed_else_if;
+pub mod use_default_parameter_last;
+pub mod use_enum_initializers;
+pub mod use_exponentiation_operator;
+pub mod use_literal_enum_members;
+pub mod use_numeric_literals;
+pub mod use_self_closing_elements;
+pub mod use_shorthand_array_type;
+pub mod use_shorthand_assign;
+pub mod use_single_case_statement;
+pub mod use_single_var_declarator;
+pub mod use_template;
+pub mod use_while;
 
 declare_group! {
-    pub (crate) Style {
+    pub Style {
         name : "style" ,
         rules : [
             self :: no_comma_operator :: NoCommaOperator ,

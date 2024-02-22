@@ -34,7 +34,7 @@ declare_rule! {
     ///  bar: T;
     /// }
     /// ```
-    pub(crate) NoEmptyTypeParameters {
+    pub NoEmptyTypeParameters {
         version: "1.5.0",
         name: "noEmptyTypeParameters",
         recommended: true,

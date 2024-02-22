@@ -20,7 +20,7 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// [1,,2]
     /// ```
-    pub(crate) NoSparseArray {
+    pub NoSparseArray {
         version: "1.0.0",
         name: "noSparseArray",
         source: RuleSource::Eslint("no-sparse-array"),

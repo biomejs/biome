@@ -34,7 +34,7 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// React.createElement('div', { dangerouslySetInnerHTML: { __html: 'HTML' } }, 'children')
     /// ```
-    pub(crate) NoDangerouslySetInnerHtmlWithChildren {
+    pub NoDangerouslySetInnerHtmlWithChildren {
         version: "1.0.0",
         name: "noDangerouslySetInnerHtmlWithChildren",
         source: RuleSource::EslintReact("no-danger"),
@@ -43,7 +43,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) DangerousProp = JsxAttribute | JsPropertyObjectMember
+    pub DangerousProp = JsxAttribute | JsPropertyObjectMember
 }
 /// The kind of children
 enum ChildrenKind {
@@ -67,7 +67,7 @@ impl ChildrenKind {
     }
 }
 
-pub(crate) struct RuleState {
+pub struct RuleState {
     /// The `dangerouslySetInnerHTML` prop range
     dangerous_prop: TextRange,
 
@@ -76,7 +76,7 @@ pub(crate) struct RuleState {
 }
 
 declare_node_union! {
-    pub(crate) AnyJsCreateElement = JsxElement | JsxSelfClosingElement | JsCallExpression
+    pub AnyJsCreateElement = JsxElement | JsxSelfClosingElement | JsCallExpression
 }
 
 impl AnyJsCreateElement {

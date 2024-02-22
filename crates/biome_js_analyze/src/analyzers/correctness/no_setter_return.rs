@@ -64,7 +64,7 @@ declare_rule! {
     ///   }
     /// }
     /// ```
-    pub(crate) NoSetterReturn {
+    pub NoSetterReturn {
         version: "1.0.0",
         name: "noSetterReturn",
         source: RuleSource::Eslint("no-setter-return"),
@@ -73,7 +73,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) JsSetterMember = JsSetterClassMember | JsSetterObjectMember
+    pub JsSetterMember = JsSetterClassMember | JsSetterObjectMember
 }
 
 impl Rule for NoSetterReturn {

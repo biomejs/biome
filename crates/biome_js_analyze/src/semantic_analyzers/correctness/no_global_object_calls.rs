@@ -83,7 +83,7 @@ declare_rule! {
     /// var segmenterFr = new Intl.Segmenter("fr", { granularity: "word" });
     /// ```
     ///
-    pub(crate) NoGlobalObjectCalls {
+    pub NoGlobalObjectCalls {
         version: "1.0.0",
         name: "noGlobalObjectCalls",
         source: RuleSource::Eslint("no-obj-calls"),
@@ -125,7 +125,7 @@ impl Rule for NoGlobalObjectCalls {
 
 declare_node_union! {
     /// Enum for [JsCallExpression] and [JsNewExpression]
-    pub(crate) QueryNode  = JsNewExpression  | JsCallExpression
+    pub QueryNode  = JsNewExpression  | JsCallExpression
 }
 
 impl QueryNode {
@@ -138,7 +138,7 @@ impl QueryNode {
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub(crate) enum NonCallableGlobals {
+pub enum NonCallableGlobals {
     Atomics,
     Json,
     Math,

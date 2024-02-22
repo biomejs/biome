@@ -44,7 +44,7 @@ declare_rule! {
     ///
     /// - [WCAG 2.4.6](https://www.w3.org/TR/UNDERSTANDING-WCAG20/navigation-mechanisms-descriptive.html)
     ///
-    pub(crate) UseHeadingContent {
+    pub UseHeadingContent {
         version: "1.0.0",
         name: "useHeadingContent",
         source: RuleSource::EslintJsxA11y("heading-has-content"),

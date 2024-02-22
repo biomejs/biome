@@ -41,7 +41,7 @@ declare_rule! {
     /// import path from 'node:path';
     /// ```
     ///
-    pub(crate) UseNodejsImportProtocol {
+    pub UseNodejsImportProtocol {
         version: "1.5.0",
         name: "useNodejsImportProtocol",
         source: RuleSource::EslintUnicorn("prefer-node-protocol"),

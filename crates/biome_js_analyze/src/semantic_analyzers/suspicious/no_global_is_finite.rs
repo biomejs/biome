@@ -29,7 +29,7 @@ declare_rule! {
     /// ```js
     /// Number.isFinite(false); // false
     /// ```
-    pub(crate) NoGlobalIsFinite {
+    pub NoGlobalIsFinite {
         version: "1.0.0",
         name: "noGlobalIsFinite",
         recommended: true,

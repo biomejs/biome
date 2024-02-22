@@ -37,7 +37,7 @@ declare_rule! {
     ///
     /// - [WCAG 2.2.2](https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide)
     ///
-    pub(crate) NoDistractingElements {
+    pub NoDistractingElements {
         version: "1.0.0",
         name: "noDistractingElements",
         source: RuleSource::EslintJsxA11y("no-distracting-elements"),

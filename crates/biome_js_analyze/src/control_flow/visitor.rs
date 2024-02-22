@@ -158,7 +158,7 @@ pub(super) struct FunctionVisitor {
 }
 
 declare_node_union! {
-    pub(crate) AnyJsControlFlowRoot = JsModule
+    pub AnyJsControlFlowRoot = JsModule
         | JsScript
         | AnyJsFunction
         | JsGetterObjectMember

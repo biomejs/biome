@@ -43,7 +43,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoUselessLoneBlockStatements {
+    pub NoUselessLoneBlockStatements {
         version: "1.3.3",
         name: "noUselessLoneBlockStatements",
         source: RuleSource::Eslint("no-lone-blocks"),

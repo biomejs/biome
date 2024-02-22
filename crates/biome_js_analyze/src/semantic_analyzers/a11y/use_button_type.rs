@@ -36,7 +36,7 @@ declare_rule! {
     ///     <button type={buttonType}>Do something</button>
     /// </>
     /// ```
-    pub(crate) UseButtonType {
+    pub UseButtonType {
         version: "1.0.0",
         name: "useButtonType",
         source: RuleSource::EslintReact("button-has-type"),
@@ -47,10 +47,10 @@ declare_rule! {
 const ALLOWED_BUTTON_TYPES: [&str; 3] = ["submit", "button", "reset"];
 
 declare_node_union! {
-    pub(crate) UseButtonTypeQuery = JsxSelfClosingElement | JsxOpeningElement | JsCallExpression
+    pub UseButtonTypeQuery = JsxSelfClosingElement | JsxOpeningElement | JsCallExpression
 }
 
-pub(crate) struct UseButtonTypeState {
+pub struct UseButtonTypeState {
     range: TextRange,
     missing_prop: bool,
 }

@@ -48,7 +48,7 @@ declare_rule! {
     /// ```js
     /// React.createElement("div", { tabIndex: -1 })
     /// ```
-    pub(crate) NoPositiveTabindex {
+    pub NoPositiveTabindex {
         version: "1.0.0",
         name: "noPositiveTabindex",
         source: RuleSource::EslintJsxA11y("tabindex-no-positive"),
@@ -58,11 +58,11 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) TabindexProp = JsxAttribute | JsPropertyObjectMember
+    pub TabindexProp = JsxAttribute | JsPropertyObjectMember
 }
 
 declare_node_union! {
-    pub(crate) NoPositiveTabindexQuery = AnyJsxElement | JsCallExpression
+    pub NoPositiveTabindexQuery = AnyJsxElement | JsCallExpression
 }
 
 declare_node_union! {
@@ -74,7 +74,7 @@ declare_node_union! {
     /// - `JsNumberLiteralExpression` &mdash; `5`
     /// - `JsUnaryExpression` &mdash; `+5` | `-5`
     ///
-    pub(crate) AnyNumberLikeExpression = JsStringLiteralExpression | JsNumberLiteralExpression | JsUnaryExpression
+    pub AnyNumberLikeExpression = JsStringLiteralExpression | JsNumberLiteralExpression | JsUnaryExpression
 }
 
 impl NoPositiveTabindexQuery {

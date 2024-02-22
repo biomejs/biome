@@ -13,7 +13,7 @@ declare_rule! {
     /// ```js
     /// import type { A } from "./a.json" with { type: "json" };
     /// ```
-    pub(crate) NoTypeOnlyImportAttributes {
+    pub NoTypeOnlyImportAttributes {
         version: "1.5.0",
         name: "noTypeOnlyImportAttributes",
     }
@@ -114,7 +114,7 @@ impl Rule for NoTypeOnlyImportAttributes {
 }
 
 #[derive(Debug)]
-pub(crate) struct RuleState {
+pub struct RuleState {
     /// Range of the first found type token
     type_token_range: TextRange,
     /// Range of import attributes

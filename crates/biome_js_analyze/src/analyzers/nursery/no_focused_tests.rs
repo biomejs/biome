@@ -33,7 +33,7 @@ declare_rule! {
     /// ```js
     /// test("foo", () => {});
     /// ```
-    pub(crate) NoFocusedTests {
+    pub NoFocusedTests {
         version: "next",
         name: "noFocusedTests",
         recommended: true,

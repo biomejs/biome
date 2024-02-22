@@ -31,7 +31,7 @@ declare_rule! {
     /// array.map(sentence => sentence.split(' ')).flat(2);
     /// ```
     ///
-    pub(crate) UseFlatMap {
+    pub UseFlatMap {
         version: "1.0.0",
         name: "useFlatMap",
         source: RuleSource::EslintUnicorn("prefer-array-flat-map"),

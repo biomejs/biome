@@ -58,7 +58,7 @@ declare_rule! {
     ///     bar(a: A, b: B) {}
     /// }
     /// ```
-    pub(crate) NoRedeclare {
+    pub NoRedeclare {
         version: "1.0.0",
         name: "noRedeclare",
         source: RuleSource::EslintTypeScript("no-redeclare"),
@@ -67,7 +67,7 @@ declare_rule! {
 }
 
 #[derive(Debug)]
-pub(crate) struct Redeclaration {
+pub struct Redeclaration {
     name: String,
     declaration: TextRange,
     redeclaration: TextRange,

@@ -45,7 +45,7 @@ declare_rule! {
     /// const x = 9007_1992547409_91
     /// ```
     ///
-    pub(crate) NoPrecisionLoss {
+    pub NoPrecisionLoss {
         version: "1.0.0",
         name: "noPrecisionLoss",
         source: RuleSource::Eslint("no-loss-of-precision"),

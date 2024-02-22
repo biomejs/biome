@@ -45,7 +45,7 @@ declare_rule! {
     /// // Nor does it warn about empty `async` functions
     /// async function noop() { }
     /// ```
-    pub(crate) UseAwait {
+    pub UseAwait {
         version: "1.4.0",
         name: "useAwait",
         source: RuleSource::Eslint("require-await"),
@@ -99,7 +99,7 @@ impl Visitor for MissingAwaitVisitor {
     }
 }
 
-pub(crate) struct MissingAwait(AnyFunctionLike);
+pub struct MissingAwait(AnyFunctionLike);
 
 impl QueryMatch for MissingAwait {
     fn text_range(&self) -> TextRange {

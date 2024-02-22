@@ -37,7 +37,7 @@ declare_rule! {
     /// - [WCAG 1.3.1](https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships)
     /// - [WCAG 4.1.1](https://www.w3.org/WAI/WCAG21/Understanding/parsing)
     ///
-    pub(crate) NoHeaderScope {
+    pub NoHeaderScope {
         version: "1.0.0",
         name: "noHeaderScope",
         source: RuleSource::EslintJsxA11y("scope"),

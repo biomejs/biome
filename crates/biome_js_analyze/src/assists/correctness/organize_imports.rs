@@ -41,7 +41,7 @@ declare_rule! {
     /// import { Popup } from '@ui/Popup';
     /// import { createConnection } from '@server/database';
     /// ```
-    pub(crate) OrganizeImports {
+    pub OrganizeImports {
         version: "1.0.0",
         name: "organizeImports",
         recommended: false,
@@ -245,7 +245,7 @@ impl Rule for OrganizeImports {
 }
 
 #[derive(Debug)]
-pub(crate) struct ImportGroups {
+pub struct ImportGroups {
     /// The list of all the import groups in the file
     groups: Vec<ImportGroup>,
 }

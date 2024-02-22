@@ -36,7 +36,7 @@ declare_rule! {
     /// if (Array.isArray(xs)) {}
     /// ```
     ///
-    pub(crate) UseIsArray {
+    pub UseIsArray {
         version: "1.0.0",
         name: "useIsArray",
         source: RuleSource::EslintUnicorn("no-instanceof-array"),

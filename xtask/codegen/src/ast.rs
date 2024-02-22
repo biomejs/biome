@@ -491,7 +491,7 @@ fn handle_comma_list<'a>(grammar: &'a Grammar, rules: &[Rule]) -> Option<CommaLi
         _ => return None,
     };
 
-    // Does the repeat match (token node))
+    // Does the repeat match (token)
     let comma = match repeat.as_slice() {
         [comma, Rule::Node(n)] => {
             let separator_matches_trailing = if let Some(trailing) = trailing_separator {

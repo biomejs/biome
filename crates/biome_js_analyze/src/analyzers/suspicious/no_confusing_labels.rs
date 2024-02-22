@@ -47,7 +47,7 @@ declare_rule! {
     ///     }
     /// }
     /// ```
-    pub(crate) NoConfusingLabels {
+    pub NoConfusingLabels {
         version: "1.0.0",
         name: "noConfusingLabels",
         source: RuleSource::Eslint("no-labels"),

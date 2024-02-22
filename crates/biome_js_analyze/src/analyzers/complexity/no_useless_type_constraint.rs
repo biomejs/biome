@@ -76,7 +76,7 @@ declare_rule! {
     ///
     /// type Bar<T> = {};
     ///```
-    pub(crate) NoUselessTypeConstraint {
+    pub NoUselessTypeConstraint {
         version: "1.0.0",
         name: "noUselessTypeConstraint",
         source: RuleSource::EslintTypeScript("no-unnecessary-type-constraint"),

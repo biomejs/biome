@@ -51,7 +51,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoEmptyBlockStatements {
+    pub NoEmptyBlockStatements {
         version: "1.3.0",
         name: "noEmptyBlockStatements",
         // Include also `eslint/no-empty-static-block`
@@ -61,7 +61,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) Query = JsBlockStatement | JsFunctionBody | JsStaticInitializationBlockClassMember | JsSwitchStatement
+    pub Query = JsBlockStatement | JsFunctionBody | JsStaticInitializationBlockClassMember | JsSwitchStatement
 }
 
 impl Rule for NoEmptyBlockStatements {

@@ -48,7 +48,7 @@ declare_rule! {
     /// ```jsx
     /// <a href='http://external.link' target='_blank' rel="noopener" {...props}>child</a>
     /// ```
-    pub(crate) NoBlankTarget {
+    pub NoBlankTarget {
         version: "1.0.0",
         name: "noBlankTarget",
         source: RuleSource::EslintReact("jsx-no-target-blank"),

@@ -31,7 +31,7 @@ declare_rule! {
     /// while (s.toLocaleUpperCase() === "abc") {}
     /// for (let s = "abc"; s === "abc"; s = s.toUpperCase()) {}
     /// ```
-    pub(crate) NoStringCaseMismatch {
+    pub NoStringCaseMismatch {
         version: "1.0.0",
         name: "noStringCaseMismatch",
         source: RuleSource::Clippy("match_str_case_mismatch"),
@@ -109,10 +109,10 @@ impl Rule for NoStringCaseMismatch {
 }
 
 declare_node_union! {
-    pub(crate) QueryCandidate = JsBinaryExpression | JsSwitchStatement
+    pub QueryCandidate = JsBinaryExpression | JsSwitchStatement
 }
 
-pub(crate) struct CaseMismatchInfo {
+pub struct CaseMismatchInfo {
     expected_case: ExpectedStringCase,
     expected_value: String,
     call: JsCallExpression,

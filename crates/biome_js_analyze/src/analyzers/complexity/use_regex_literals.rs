@@ -45,7 +45,7 @@ declare_rule! {
     /// new RegExp("abc", flags);
     /// ```
     ///
-    pub(crate) UseRegexLiterals {
+    pub UseRegexLiterals {
         version: "1.3.0",
         name: "useRegexLiterals",
         source: RuleSource::Eslint("prefer-regex-literals"),
@@ -55,7 +55,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) JsNewOrCallExpression = JsNewExpression | JsCallExpression
+    pub JsNewOrCallExpression = JsNewExpression | JsCallExpression
 }
 
 pub struct UseRegexLiteralsState {

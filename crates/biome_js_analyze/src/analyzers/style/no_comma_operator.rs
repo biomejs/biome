@@ -36,7 +36,7 @@ declare_rule! {
     /// for(a = 0, b = 0; (a + b) < 10; a++, b += 2) {}
     /// ```
     ///
-    pub(crate) NoCommaOperator {
+    pub NoCommaOperator {
         version: "1.0.0",
         name: "noCommaOperator",
         source: RuleSource::Eslint("no-sequences"),

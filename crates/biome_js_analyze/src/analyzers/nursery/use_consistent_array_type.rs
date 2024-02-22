@@ -67,7 +67,7 @@ declare_rule! {
     /// By default, all array declarations will be converted to `T[]` or `readonly T[]`, which it means `shorthand`,
     /// or if the options is set to the "generic", that all will converted to `Array<T>` or `ReadonlyArray<T>`.
     ///
-    pub(crate) UseConsistentArrayType {
+    pub UseConsistentArrayType {
         version: "1.5.0",
         name: "useConsistentArrayType",
         source: RuleSource::EslintTypeScript("array-type"),

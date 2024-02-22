@@ -31,7 +31,7 @@ declare_rule! {
     /// ```ts
     /// type B<T> = PromiseLike<T>
     /// ```
-    pub(crate) NoUndeclaredVariables {
+    pub NoUndeclaredVariables {
         version: "1.0.0",
         name: "noUndeclaredVariables",
         source: RuleSource::Eslint("no-undef"),

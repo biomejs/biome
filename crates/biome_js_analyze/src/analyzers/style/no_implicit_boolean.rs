@@ -44,7 +44,7 @@ declare_rule! {
     /// ```jsx
     /// <input disabled='false' />
     ///```
-    pub(crate) NoImplicitBoolean {
+    pub NoImplicitBoolean {
         version: "1.0.0",
         name: "noImplicitBoolean",
         source: RuleSource::EslintReact("jsx-boolean-value"),

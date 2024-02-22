@@ -67,7 +67,7 @@ declare_rule! {
  ///```
  ///
 
- pub(crate) NoRedundantUseStrict {
+ pub NoRedundantUseStrict {
         version: "1.0.0",
         name: "noRedundantUseStrict",
         recommended: true,
@@ -84,7 +84,7 @@ impl AnyNodeWithDirectives {
         }
     }
 }
-declare_node_union! { pub(crate) AnyJsStrictModeNode = AnyJsClass| JsModule | JsDirective  }
+declare_node_union! { pub AnyJsStrictModeNode = AnyJsClass| JsModule | JsDirective  }
 
 impl Rule for NoRedundantUseStrict {
     type Query = Ast<JsDirective>;

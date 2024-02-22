@@ -53,7 +53,7 @@ declare_rule! {
     ///
     /// Logical NOT: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_NOT
     ///
-    pub(crate) NoUselessTernary {
+    pub NoUselessTernary {
         version: "1.5.0",
         name: "noUselessTernary",
         source: RuleSource::Eslint("no-unneeded-ternary"),

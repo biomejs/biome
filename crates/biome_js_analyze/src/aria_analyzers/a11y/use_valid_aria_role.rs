@@ -64,7 +64,7 @@ declare_rule! {
     /// - [DPUB-ARIA roles](https://www.w3.org/TR/dpub-aria-1.0/)
     /// - [MDN: Using ARIA: Roles, states, and properties](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques)
     ///
-    pub(crate) UseValidAriaRole {
+    pub UseValidAriaRole {
         version: "1.4.0",
         name: "useValidAriaRole",
         source: RuleSource::EslintJsxA11y("aria-role"),
@@ -85,7 +85,7 @@ impl Rule for UseValidAriaRole {
     type Query = Aria<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ValidAriaRoleOptions;
+    type Options = Box<ValidAriaRoleOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

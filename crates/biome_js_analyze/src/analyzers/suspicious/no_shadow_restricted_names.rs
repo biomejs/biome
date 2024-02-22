@@ -30,7 +30,7 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// function test(JSON) {console.log(JSON)}
     /// ```
-    pub(crate) NoShadowRestrictedNames {
+    pub NoShadowRestrictedNames {
         version: "1.0.0",
         name: "noShadowRestrictedNames",
         source: RuleSource::Eslint("no-shadow-restricted-names"),

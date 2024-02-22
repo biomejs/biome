@@ -26,14 +26,14 @@ declare_rule! {
     ///   "secondTitle": "Second title"
     /// }
     /// ```
-    pub(crate) NoDuplicateJsonKeys {
+    pub NoDuplicateJsonKeys {
         version: "1.0.0",
         name: "noDuplicateJsonKeys",
         recommended: true,
     }
 }
 
-pub(crate) struct DuplicatedKeys {
+pub struct DuplicatedKeys {
     /// The fist key, which should be the correct one
     original_key: JsonMemberName,
     /// The ranges where the duplicated keys are found

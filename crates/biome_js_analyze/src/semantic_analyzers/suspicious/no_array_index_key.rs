@@ -63,7 +63,7 @@ declare_rule! {
     /// });
     /// ```
     ///
-    pub(crate) NoArrayIndexKey {
+    pub NoArrayIndexKey {
         version: "1.0.0",
         name: "noArrayIndexKey",
         source: RuleSource::EslintReact("no-array-index-key"),
@@ -72,7 +72,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) NoArrayIndexKeyQuery = JsxAttribute | JsPropertyObjectMember
+    pub NoArrayIndexKeyQuery = JsxAttribute | JsPropertyObjectMember
 }
 
 impl NoArrayIndexKeyQuery {
@@ -114,7 +114,7 @@ impl NoArrayIndexKeyQuery {
     }
 }
 
-pub(crate) struct NoArrayIndexKeyState {
+pub struct NoArrayIndexKeyState {
     /// The incorrect prop
     incorrect_prop: TextRange,
     /// Where the incorrect prop was defined

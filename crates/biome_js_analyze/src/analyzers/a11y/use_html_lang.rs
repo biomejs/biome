@@ -52,7 +52,7 @@ declare_rule! {
     ///
     /// - [WCAG 3.1.1](https://www.w3.org/WAI/WCAG21/Understanding/language-of-page)
     ///
-    pub(crate) UseHtmlLang {
+    pub UseHtmlLang {
         version: "1.0.0",
         name: "useHtmlLang",
         source: RuleSource::EslintJsxA11y("html-has-lang"),

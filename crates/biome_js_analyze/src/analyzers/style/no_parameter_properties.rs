@@ -30,7 +30,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub(crate) NoParameterProperties {
+    pub NoParameterProperties {
         version: "1.0.0",
         name: "noParameterProperties",
         source: RuleSource::EslintTypeScript("parameter-properties"),

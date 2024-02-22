@@ -83,7 +83,7 @@ declare_rule! {
     /// const foo = bar.then;
     /// ```
     ///
-    pub(crate) NoThenProperty {
+    pub NoThenProperty {
         version: "1.5.0",
         name: "noThenProperty",
         source: RuleSource::EslintUnicorn("no-thenable"),
@@ -92,7 +92,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) NoThenPropertyQuery =
+    pub NoThenPropertyQuery =
         AnyJsObjectMember |
         JsComputedMemberName |
         AnyJsClassMember |

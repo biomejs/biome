@@ -26,7 +26,7 @@ declare_rule! {
     /// const test = { debugger: 1 };
     /// test.debugger;
     ///```
-    pub(crate) NoDebugger {
+    pub NoDebugger {
         version: "1.0.0",
         name: "noDebugger",
         source: RuleSource::Eslint("no-debugger"),

@@ -56,7 +56,7 @@ declare_rule! {
     /// let a = 1, b = 2;
     /// b = 3;
     /// ```
-    pub(crate) UseConst {
+    pub UseConst {
         version: "1.0.0",
         name: "useConst",
         source: RuleSource::Eslint("prefer-const"),
@@ -132,7 +132,7 @@ impl Rule for UseConst {
     }
 }
 
-pub(crate) struct ConstBindings {
+pub struct ConstBindings {
     pub can_be_const: Vec<JsIdentifierBinding>,
     pub can_fix: bool,
 }
@@ -302,7 +302,7 @@ fn with_binding_identifier(
 }
 
 declare_node_union! {
-    pub(crate) DestructuringHost = JsVariableDeclarator | JsAssignmentExpression
+    pub DestructuringHost = JsVariableDeclarator | JsAssignmentExpression
 }
 
 impl DestructuringHost {
