@@ -10,7 +10,7 @@ use biome_js_syntax::{
 use biome_rowan::{declare_node_union, AstNode, Language, TextRange, WalkEvent};
 
 declare_rule! {
-    /// Disallow using `exports` in files containing tests
+    /// Disallow using `export` or `module.exports` in files containing tests
     ///
     /// This rule aims to eliminate duplicate runs of tests by exporting things from test files.
     /// If you import from a test file, then all the tests in that file will be run in each imported instance,
@@ -120,7 +120,7 @@ impl Visitor for AnyExportInTestVisitor {
 
                 if !self.has_test {
                     if let Some(call_expr) = JsCallExpression::cast_ref(node) {
-                        self.has_test = call_expr.is_test_call_expression().ok().unwrap_or(false);
+                        self.has_test = call_expr.is_test_call_expression().unwrap_or(false);
                     }
                 }
             }
