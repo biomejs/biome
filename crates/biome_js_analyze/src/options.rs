@@ -142,6 +142,7 @@ pub type NoSelfAssign =
     <analyzers::correctness::no_self_assign::NoSelfAssign as biome_analyze::Rule>::Options;
 pub type NoSelfCompare =
     <analyzers::suspicious::no_self_compare::NoSelfCompare as biome_analyze::Rule>::Options;
+pub type NoSemicolonInJsx = < semantic_analyzers :: nursery :: no_semicolon_in_jsx :: NoSemicolonInJsx as biome_analyze :: Rule > :: Options ;
 pub type NoSetterReturn =
     <analyzers::correctness::no_setter_return::NoSetterReturn as biome_analyze::Rule>::Options;
 pub type NoShadowRestrictedNames = < analyzers :: suspicious :: no_shadow_restricted_names :: NoShadowRestrictedNames as biome_analyze :: Rule > :: Options ;
