@@ -55,15 +55,14 @@ impl MaybeExport {
             MaybeExport::JsExport(_) => true,
             MaybeExport::JsAssignmentExpression(assignment_expr) => {
                 let left = assignment_expr.left().ok();
-                let is_commonjs_export = left
-                    .and_then(|left| AnyJsMemberAssignment::try_cast_node(left).ok())
+                left.and_then(|left| AnyJsMemberAssignment::try_cast_node(left).ok())
                     .is_some_and(|member_expr| {
                         let object = member_expr.object().ok();
-                        // module.exports = {}
-                        let is_commonjs_export = object.is_some_and(|object| match object {
+                        object.is_some_and(|object| match object {
                             AnyJsExpression::JsIdentifierExpression(ident) => match member_expr {
                                 AnyJsMemberAssignment::JsComputedMemberAssignment(_) => false,
                                 AnyJsMemberAssignment::JsStaticMemberAssignment(static_member) => {
+                                    // module.exports = {}
                                     let indent_text = ident.text();
                                     let member_text =
                                         static_member.member().map(|member| member.text());
@@ -76,17 +75,12 @@ impl MaybeExport {
                                 // modules.exports.foo = {}, module.exports[foo] = {}
                                 let object_text = member_expr.object().map(|object| object.text());
                                 let member_text = member_expr.member().map(|member| member.text());
-                                let is_commonjs_export = object_text
-                                    .is_ok_and(|text| text == "module")
-                                    && member_text
-                                        .is_ok_and(|member_text| member_text == "exports");
-                                is_commonjs_export
+                                object_text.is_ok_and(|text| text == "module")
+                                    && member_text.is_ok_and(|member_text| member_text == "exports")
                             }
                             _ => false,
-                        });
-                        is_commonjs_export
-                    });
-                is_commonjs_export
+                        })
+                    })
             }
         }
     }
