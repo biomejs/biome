@@ -19,7 +19,7 @@ use biome_analyze::{
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
-use biome_fs::{ConfigName, RomePath, ROME_JSON};
+use biome_fs::{BiomePath, ConfigName, ROME_JSON};
 use biome_json_analyze::analyze;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
@@ -61,7 +61,7 @@ impl Language for JsonLanguage {
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &RomePath,
+        path: &BiomePath,
     ) -> Self::FormatOptions {
         let indent_style = if let Some(indent_style) = language.indent_style {
             indent_style
@@ -149,7 +149,7 @@ fn is_file_allowed(path: &Path) -> bool {
 }
 
 fn parse(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     language_hint: LanguageId,
     text: &str,
     settings: SettingsHandle,
@@ -186,7 +186,7 @@ fn parse(
     }
 }
 
-fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeResult {
+fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
     let syntax: JsonSyntaxNode = parse.syntax();
     let tree: JsonRoot = parse.tree();
     GetSyntaxTreeResult {
@@ -196,7 +196,7 @@ fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeRes
 }
 
 fn debug_formatter_ir(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<String, WorkspaceError> {
@@ -211,7 +211,7 @@ fn debug_formatter_ir(
 
 #[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
@@ -229,7 +229,7 @@ fn format(
 }
 
 fn format_range(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
@@ -242,7 +242,7 @@ fn format_range(
 }
 
 fn format_on_type(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,

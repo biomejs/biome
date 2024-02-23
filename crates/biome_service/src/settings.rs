@@ -16,7 +16,7 @@ use biome_css_syntax::CssLanguage;
 use biome_deserialize::{Merge, StringSet};
 use biome_diagnostics::Category;
 use biome_formatter::{AttributePosition, IndentStyle, IndentWidth, LineEnding, LineWidth};
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_js_analyze::metadata;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
@@ -390,7 +390,7 @@ pub trait Language: biome_rowan::Language {
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &RomePath,
+        path: &BiomePath,
     ) -> Self::FormatOptions;
 }
 
@@ -502,7 +502,7 @@ impl<'a> AsRef<WorkspaceSettings> for SettingsHandle<'a> {
 
 impl<'a> SettingsHandle<'a> {
     /// Resolve the formatting context for the given language
-    pub(crate) fn format_options<L>(self, path: &RomePath) -> L::FormatOptions
+    pub(crate) fn format_options<L>(self, path: &BiomePath) -> L::FormatOptions
     where
         L: Language,
     {
@@ -564,7 +564,7 @@ impl OverrideSettings {
 
     pub fn override_js_globals(
         &self,
-        path: &RomePath,
+        path: &BiomePath,
         base_set: &Option<IndexSet<String>>,
     ) -> IndexSet<String> {
         self.patterns

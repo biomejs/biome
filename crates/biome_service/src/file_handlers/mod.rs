@@ -17,7 +17,7 @@ use biome_console::markup;
 use biome_css_formatter::can_format_css_yet;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
@@ -285,7 +285,7 @@ pub struct FixAllParams<'a> {
     pub(crate) settings: SettingsHandle<'a>,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
-    pub(crate) rome_path: &'a RomePath,
+    pub(crate) rome_path: &'a BiomePath,
     pub(crate) manifest: Option<PackageJson>,
     pub(crate) language: Language,
 }
@@ -305,7 +305,7 @@ pub struct ParseResult {
     pub(crate) language: Option<Language>,
 }
 
-type Parse = fn(&RomePath, Language, &str, SettingsHandle, &mut NodeCache) -> ParseResult;
+type Parse = fn(&BiomePath, Language, &str, SettingsHandle, &mut NodeCache) -> ParseResult;
 
 #[derive(Default)]
 pub struct ParserCapabilities {
@@ -313,9 +313,9 @@ pub struct ParserCapabilities {
     pub(crate) parse: Option<Parse>,
 }
 
-type DebugSyntaxTree = fn(&RomePath, AnyParse) -> GetSyntaxTreeResult;
+type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
 type DebugControlFlow = fn(AnyParse, TextSize) -> String;
-type DebugFormatterIR = fn(&RomePath, AnyParse, SettingsHandle) -> Result<String, WorkspaceError>;
+type DebugFormatterIR = fn(&BiomePath, AnyParse, SettingsHandle) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -332,7 +332,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) settings: SettingsHandle<'a>,
     pub(crate) language: Language,
     pub(crate) max_diagnostics: u32,
-    pub(crate) path: &'a RomePath,
+    pub(crate) path: &'a BiomePath,
     pub(crate) categories: RuleCategories,
     pub(crate) manifest: Option<PackageJson>,
 }
@@ -348,7 +348,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) range: TextRange,
     pub(crate) rules: Option<&'a Rules>,
     pub(crate) settings: SettingsHandle<'a>,
-    pub(crate) path: &'a RomePath,
+    pub(crate) path: &'a BiomePath,
     pub(crate) manifest: Option<PackageJson>,
     pub(crate) language: Language,
 }
@@ -356,7 +356,7 @@ pub(crate) struct CodeActionsParams<'a> {
 type Lint = fn(LintParams) -> LintResults;
 type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
-type Rename = fn(&RomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
+type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
 type OrganizeImports = fn(AnyParse) -> Result<OrganizeImportsResult, WorkspaceError>;
 
 #[derive(Default)]
@@ -373,11 +373,11 @@ pub struct AnalyzerCapabilities {
     pub(crate) organize_imports: Option<OrganizeImports>,
 }
 
-type Format = fn(&RomePath, AnyParse, SettingsHandle) -> Result<Printed, WorkspaceError>;
+type Format = fn(&BiomePath, AnyParse, SettingsHandle) -> Result<Printed, WorkspaceError>;
 type FormatRange =
-    fn(&RomePath, AnyParse, SettingsHandle, TextRange) -> Result<Printed, WorkspaceError>;
+    fn(&BiomePath, AnyParse, SettingsHandle, TextRange) -> Result<Printed, WorkspaceError>;
 type FormatOnType =
-    fn(&RomePath, AnyParse, SettingsHandle, TextSize) -> Result<Printed, WorkspaceError>;
+    fn(&BiomePath, AnyParse, SettingsHandle, TextSize) -> Result<Printed, WorkspaceError>;
 
 #[derive(Default)]
 pub(crate) struct FormatterCapabilities {
@@ -441,10 +441,10 @@ impl Features {
         }
     }
 
-    /// Returns the [Capabilities] associated with a [RomePath]
+    /// Returns the [Capabilities] associated with a [BiomePath]
     pub(crate) fn get_capabilities(
         &self,
-        rome_path: &RomePath,
+        rome_path: &BiomePath,
         language_hint: Language,
     ) -> Capabilities {
         match Language::from_path_and_known_filename(rome_path).or(language_hint) {

@@ -2,7 +2,7 @@ use anyhow::bail;
 use anyhow::Context;
 use anyhow::Error;
 use anyhow::Result;
-use biome_fs::{MemoryFileSystem, RomePath};
+use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_lsp::LSPServer;
 use biome_lsp::ServerFactory;
 use biome_lsp::WorkspaceSettings;
@@ -435,7 +435,7 @@ async fn document_lifecycle() -> Result<()> {
             "biome/get_syntax_tree",
             "get_syntax_tree",
             GetSyntaxTreeParams {
-                path: RomePath::new("document.js"),
+                path: BiomePath::new("document.js"),
             },
         )
         .await?
@@ -1869,7 +1869,7 @@ isSpreadAssignment;
             "biome/get_file_content",
             "get_file_content",
             GetFileContentParams {
-                path: RomePath::new("document.js"),
+                path: BiomePath::new("document.js"),
             },
         )
         .await?

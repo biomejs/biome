@@ -6,7 +6,7 @@ use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_service::workspace::{
     ChangeFileParams, FeaturesBuilder, FixFileParams, FormatFileParams, Language, OpenFileParams,
     OrganizeImportsParams, PullDiagnosticsParams, RuleCategories, SupportsFeatureParams,
@@ -17,7 +17,7 @@ use std::borrow::Cow;
 pub(crate) fn run<'a>(
     session: CliSession,
     mode: &'a Execution,
-    rome_path: RomePath,
+    rome_path: BiomePath,
     content: &'a str,
     verbose: bool,
 ) -> Result<(), CliDiagnostic> {

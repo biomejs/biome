@@ -3,7 +3,7 @@ use super::{BoxedTraversal, ErrorKind, File, FileSystemDiagnostic};
 use crate::fs::OpenOptions;
 use crate::{
     fs::{TraversalContext, TraversalScope},
-    FileSystem, RomePath,
+    BiomePath, FileSystem,
 };
 use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
 use oxc_resolver::{Resolution, ResolveError, ResolveOptions, Resolver};
@@ -246,7 +246,7 @@ fn handle_any_file<'scope>(
     mut origin_path: Option<PathBuf>,
 ) {
     if file_type.is_symlink() {
-        if !ctx.can_handle(&RomePath::new(path.clone())) {
+        if !ctx.can_handle(&BiomePath::new(path.clone())) {
             return;
         }
         let Ok((target_path, target_file_type)) = expand_symbolic_link(path.clone(), ctx) else {
@@ -274,7 +274,7 @@ fn handle_any_file<'scope>(
     // This is required to support ignore patterns to symbolic links.
     let rome_path = if let Some(origin_path) = &origin_path {
         if let Some(file_name) = path.file_name() {
-            RomePath::new(origin_path.join(file_name))
+            BiomePath::new(origin_path.join(file_name))
         } else {
             ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
                 path: path.to_string_lossy().to_string(),
@@ -284,7 +284,7 @@ fn handle_any_file<'scope>(
             return;
         }
     } else {
-        RomePath::new(&path)
+        BiomePath::new(&path)
     };
 
     // Performing this check here let's us skip unsupported

@@ -5,7 +5,7 @@ use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_service::configuration::vcs::PartialVcsConfiguration;
 use biome_service::configuration::{
     css::partial_css_formatter, javascript::partial_javascript_formatter,
@@ -471,7 +471,7 @@ fn resolve_manifest(cli_session: &CliSession) -> Result<(), WorkspaceError> {
     )?;
 
     if let Some(result) = result {
-        let rome_path = RomePath::new(result.file_path);
+        let rome_path = BiomePath::new(result.file_path);
         workspace.open_project(OpenProjectParams {
             path: rome_path.clone(),
             content: result.content,

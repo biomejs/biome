@@ -16,7 +16,7 @@ use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
@@ -52,7 +52,7 @@ impl Language for CssLanguage {
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &RomePath,
+        path: &BiomePath,
     ) -> Self::FormatOptions {
         let indent_style = if let Some(indent_style) = language.indent_style {
             indent_style
@@ -135,7 +135,7 @@ impl ExtensionHandler for CssFileHandler {
 }
 
 fn parse(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     _language_hint: LanguageId,
     text: &str,
     settings: SettingsHandle,
@@ -162,7 +162,7 @@ fn parse(
     }
 }
 
-fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeResult {
+fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
     let syntax: CssSyntaxNode = parse.syntax();
     let tree: CssRoot = parse.tree();
     GetSyntaxTreeResult {
@@ -172,7 +172,7 @@ fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeRes
 }
 
 fn debug_formatter_ir(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<String, WorkspaceError> {
@@ -187,7 +187,7 @@ fn debug_formatter_ir(
 
 #[tracing::instrument(level = "debug", skip(parse))]
 fn format(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
@@ -205,7 +205,7 @@ fn format(
 }
 
 fn format_range(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
@@ -218,7 +218,7 @@ fn format_range(
 }
 
 fn format_on_type(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,

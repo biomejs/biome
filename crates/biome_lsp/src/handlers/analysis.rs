@@ -5,7 +5,7 @@ use crate::utils;
 use anyhow::{Context, Result};
 use biome_analyze::{ActionCategory, SourceActionKind};
 use biome_diagnostics::Applicability;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
@@ -199,7 +199,7 @@ pub(crate) fn code_actions(
 fn fix_all(
     session: &Session,
     url: &lsp::Url,
-    rome_path: RomePath,
+    rome_path: BiomePath,
     line_index: &LineIndex,
     diagnostics: &[lsp::Diagnostic],
     offset: Option<u32>,

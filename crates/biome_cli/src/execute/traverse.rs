@@ -10,7 +10,7 @@ use biome_console::{fmt, markup, Console, ConsoleExt};
 use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::PrintGitHubDiagnostic;
 use biome_diagnostics::{category, DiagnosticExt, Error, PrintDiagnostic, Resource, Severity};
-use biome_fs::{FileSystem, PathInterner, RomePath};
+use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
@@ -597,7 +597,7 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
         self.messages.send(msg.into()).ok();
     }
 
-    pub(crate) fn miss_handler_err(&self, err: WorkspaceError, rome_path: &RomePath) {
+    pub(crate) fn miss_handler_err(&self, err: WorkspaceError, rome_path: &BiomePath) {
         self.push_diagnostic(
             err.with_category(category!("files/missingHandler"))
                 .with_file_path(rome_path.display().to_string())
@@ -605,7 +605,7 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
         );
     }
 
-    pub(crate) fn protected_file(&self, rome_path: &RomePath) {
+    pub(crate) fn protected_file(&self, rome_path: &BiomePath) {
         self.push_diagnostic(WorkspaceError::protected_file(rome_path.display().to_string()).into())
     }
 }
@@ -619,7 +619,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         self.push_message(error);
     }
 
-    fn can_handle(&self, rome_path: &RomePath) -> bool {
+    fn can_handle(&self, rome_path: &BiomePath) -> bool {
         if !self.fs.path_is_file(rome_path.as_path()) {
             // handle:
             // - directories

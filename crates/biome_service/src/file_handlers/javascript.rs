@@ -24,7 +24,7 @@ use biome_formatter::{
     AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
     QuoteStyle,
 };
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
     analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph, RuleError,
@@ -96,7 +96,7 @@ impl Language for JsLanguage {
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &JsFormatterSettings,
-        path: &RomePath,
+        path: &BiomePath,
     ) -> JsFormatOptions {
         let options = JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
             .with_indent_style(
@@ -183,7 +183,7 @@ impl ExtensionHandler for JsFileHandler {
 }
 
 fn parse(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     language_hint: LanguageId,
     text: &str,
     settings: SettingsHandle,
@@ -217,7 +217,7 @@ fn parse(
     }
 }
 
-fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeResult {
+fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
     let syntax: JsSyntaxNode = parse.syntax();
     let tree: AnyJsRoot = parse.tree();
     GetSyntaxTreeResult {
@@ -271,7 +271,7 @@ fn debug_control_flow(parse: AnyParse, cursor: TextSize) -> String {
 }
 
 fn debug_formatter_ir(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<String, WorkspaceError> {
@@ -635,7 +635,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
 pub(crate) fn format(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
@@ -657,7 +657,7 @@ pub(crate) fn format(
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
 pub(crate) fn format_range(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
@@ -671,7 +671,7 @@ pub(crate) fn format_range(
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
 pub(crate) fn format_on_type(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,
@@ -707,7 +707,7 @@ pub(crate) fn format_on_type(
 }
 
 fn rename(
-    _rome_path: &RomePath,
+    _rome_path: &BiomePath,
     parse: AnyParse,
     symbol_at: TextSize,
     new_name: String,
@@ -805,7 +805,7 @@ fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> An
         globals: settings
             .override_settings
             .override_js_globals(
-                &RomePath::new(file_path.as_path()),
+                &BiomePath::new(file_path.as_path()),
                 &settings.languages.javascript.globals,
             )
             .into_iter()

@@ -9,7 +9,7 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Merge;
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{category, PrintDiagnostic};
-use biome_fs::{ConfigName, FileSystemExt, OpenOptions, RomePath};
+use biome_fs::{BiomePath, ConfigName, FileSystemExt, OpenOptions};
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonRoot;
 use biome_migrate::{migrate_configuration, ControlFlow};
@@ -60,7 +60,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     let mut configuration_content = String::new();
     configuration_file.read_to_string(&mut configuration_content)?;
 
-    let rome_path = RomePath::new(configuration_file_path.as_path());
+    let rome_path = BiomePath::new(configuration_file_path.as_path());
     workspace.open_file(OpenFileParams {
         path: rome_path.clone(),
         content: configuration_content.to_string(),

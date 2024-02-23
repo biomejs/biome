@@ -2,7 +2,7 @@ use crate::converters::{from_proto, to_proto};
 use crate::diagnostics::LspError;
 use crate::session::Session;
 use anyhow::Context;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     FeaturesBuilder, FileFeaturesResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
@@ -186,7 +186,7 @@ pub(crate) fn format_on_type(
     }
 }
 
-fn notify_user<T>(file_features: FileFeaturesResult, rome_path: RomePath) -> Result<T, LspError> {
+fn notify_user<T>(file_features: FileFeaturesResult, rome_path: BiomePath) -> Result<T, LspError> {
     let error = if file_features.is_ignored() {
         WorkspaceError::file_ignored(rome_path.display().to_string())
     } else if file_features.is_protected() {

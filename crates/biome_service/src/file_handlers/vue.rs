@@ -7,7 +7,7 @@ use crate::settings::SettingsHandle;
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::WorkspaceError;
 use biome_formatter::Printed;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
@@ -116,7 +116,7 @@ impl ExtensionHandler for VueFileHandler {
 }
 
 fn parse(
-    _rome_path: &RomePath,
+    _rome_path: &BiomePath,
     _language_hint: Language,
     text: &str,
     _settings: SettingsHandle,
@@ -147,7 +147,7 @@ fn parse(
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
 fn format(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
@@ -155,7 +155,7 @@ fn format(
 }
 
 pub(crate) fn format_range(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
@@ -164,7 +164,7 @@ pub(crate) fn format_range(
 }
 
 pub(crate) fn format_on_type(
-    rome_path: &RomePath,
+    rome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,

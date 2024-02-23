@@ -7,7 +7,7 @@ use anyhow::Result;
 use biome_analyze::RuleCategories;
 use biome_console::markup;
 use biome_diagnostics::PrintDescription;
-use biome_fs::{FileSystem, RomePath};
+use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
@@ -255,7 +255,7 @@ impl Session {
         self.documents.write().unwrap().remove(url);
     }
 
-    pub(crate) fn file_path(&self, url: &lsp_types::Url) -> Result<RomePath> {
+    pub(crate) fn file_path(&self, url: &lsp_types::Url) -> Result<BiomePath> {
         let mut path_to_file = match url.to_file_path() {
             Err(_) => {
                 // If we can't create a path, it's probably because the file doesn't exist.
@@ -275,7 +275,7 @@ impl Session {
             path_to_file = relative_path.into();
         }
 
-        Ok(RomePath::new(path_to_file))
+        Ok(BiomePath::new(path_to_file))
     }
 
     /// Computes diagnostics for the file matching the provided url and publishes
@@ -489,7 +489,7 @@ impl Session {
             match result {
                 Ok(result) => {
                     if let Some(result) = result {
-                        let rome_path = RomePath::new(result.file_path);
+                        let rome_path = BiomePath::new(result.file_path);
                         let result = self.workspace.open_project(OpenProjectParams {
                             path: rome_path.clone(),
                             content: result.content,
