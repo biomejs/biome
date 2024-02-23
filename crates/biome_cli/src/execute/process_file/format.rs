@@ -5,7 +5,7 @@ use crate::execute::process_file::{
 };
 use crate::execute::TraversalMode;
 use biome_diagnostics::{category, DiagnosticExt};
-use biome_service::file_handlers::{AstroFileHandler, VueFileHandler, SvelteFileHandler};
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;

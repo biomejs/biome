@@ -10,8 +10,8 @@ use crate::{
 pub struct Ast<N>(pub N);
 
 impl<N> Queryable for Ast<N>
-    where
-        N: AstNode + 'static,
+where
+    N: AstNode + 'static,
 {
     type Input = SyntaxNode<NodeLanguage<N>>;
     type Output = N;

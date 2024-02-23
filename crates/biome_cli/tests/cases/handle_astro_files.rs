@@ -86,7 +86,7 @@ fn format_astro_files_write() {
                 "--write",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -120,7 +120,7 @@ fn format_empty_astro_files_write() {
                 "--write",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -185,7 +185,7 @@ fn lint_and_fix_astro_files() {
                 "--apply-unsafe",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -202,17 +202,13 @@ fn lint_and_fix_astro_files() {
     ));
 }
 
-
 #[test]
 fn sorts_imports_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let astro_file_path = Path::new("file.astro");
-    fs.insert(
-        astro_file_path.into(),
-        ASTRO_FILE_IMPORTS_BEFORE.as_bytes(),
-    );
+    fs.insert(astro_file_path.into(), ASTRO_FILE_IMPORTS_BEFORE.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -224,7 +220,7 @@ fn sorts_imports_check() {
                 "--linter-enabled=false",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -247,10 +243,7 @@ fn sorts_imports_write() {
     let mut console = BufferConsole::default();
 
     let astro_file_path = Path::new("file.astro");
-    fs.insert(
-        astro_file_path.into(),
-        ASTRO_FILE_IMPORTS_BEFORE.as_bytes(),
-    );
+    fs.insert(astro_file_path.into(), ASTRO_FILE_IMPORTS_BEFORE.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -263,7 +256,7 @@ fn sorts_imports_write() {
                 "--apply",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 

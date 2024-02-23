@@ -6,7 +6,6 @@ use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
-
 const SVELTE_FILE_IMPORTS_BEFORE: &str = r#"<script setup lang="ts">
 import Button from "./components/Button.svelte";
 import * as svelteUse from "svelte-use";
@@ -40,7 +39,7 @@ fn sorts_imports_check() {
                 "--linter-enabled=false",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -79,7 +78,7 @@ fn sorts_imports_write() {
                 "--apply",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 

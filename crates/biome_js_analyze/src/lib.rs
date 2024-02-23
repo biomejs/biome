@@ -65,10 +65,10 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     manifest: Option<PackageJson>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
-    where
-        V: FnMut(&MatchQueryParams<JsLanguage>) + 'a,
-        F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
-        B: 'a,
+where
+    V: FnMut(&MatchQueryParams<JsLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
 {
     fn parse_linter_suppression_comment(
         text: &str,
@@ -158,9 +158,9 @@ pub fn analyze<'a, F, B>(
     manifest: Option<PackageJson>,
     emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
-    where
-        F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
-        B: 'a,
+where
+    F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
 {
     analyze_with_inspect_matcher(
         root,

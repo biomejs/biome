@@ -120,7 +120,7 @@ fn format_vue_implicit_js_files_write() {
                 "--write",
                 vue_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -187,7 +187,7 @@ fn format_vue_explicit_js_files_write() {
                 "--write",
                 vue_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -221,7 +221,7 @@ fn format_empty_vue_js_files_write() {
                 "--write",
                 vue_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -282,7 +282,7 @@ fn format_vue_ts_files_write() {
                 "--write",
                 vue_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -316,7 +316,7 @@ fn format_empty_vue_ts_files_write() {
                 "--write",
                 vue_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -383,17 +383,13 @@ fn lint_vue_ts_files() {
     ));
 }
 
-
 #[test]
 fn sorts_imports_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Path::new("file.vue");
-    fs.insert(
-        vue_file_path.into(),
-        VUE_FILE_IMPORTS_BEFORE.as_bytes(),
-    );
+    fs.insert(vue_file_path.into(), VUE_FILE_IMPORTS_BEFORE.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -405,7 +401,7 @@ fn sorts_imports_check() {
                 "--linter-enabled=false",
                 vue_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -428,10 +424,7 @@ fn sorts_imports_write() {
     let mut console = BufferConsole::default();
 
     let vue_file_path = Path::new("file.vue");
-    fs.insert(
-        vue_file_path.into(),
-        VUE_FILE_IMPORTS_BEFORE.as_bytes(),
-    );
+    fs.insert(vue_file_path.into(), VUE_FILE_IMPORTS_BEFORE.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -444,7 +437,7 @@ fn sorts_imports_write() {
                 "--apply",
                 vue_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
