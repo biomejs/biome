@@ -44,8 +44,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritBacktickSnippet::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_BOOLEAN_LITERAL => {
-                    let $pattern = unsafe { $crate::GritBooleanLiteral::new_unchecked(node) };
+                $crate::GritSyntaxKind::GRIT_BOOLEAN_VALUE => {
+                    let $pattern = unsafe { $crate::GritBooleanValue::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_BUBBLE => {
@@ -76,12 +76,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritDotdotdot::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_DOUBLE_LITERAL => {
-                    let $pattern = unsafe { $crate::GritDoubleLiteral::new_unchecked(node) };
-                    $body
-                }
-                $crate::GritSyntaxKind::GRIT_DOUBLE_QUOTE_SNIPPET => {
-                    let $pattern = unsafe { $crate::GritDoubleQuoteSnippet::new_unchecked(node) };
+                $crate::GritSyntaxKind::GRIT_DOUBLE_VALUE => {
+                    let $pattern = unsafe { $crate::GritDoubleValue::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_EVERY => {
@@ -96,8 +92,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritFunctionDefinition::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_INT_LITERAL => {
-                    let $pattern = unsafe { $crate::GritIntLiteral::new_unchecked(node) };
+                $crate::GritSyntaxKind::GRIT_INT_VALUE => {
+                    let $pattern = unsafe { $crate::GritIntValue::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_LANGUAGE_DECLARATION => {
@@ -169,8 +165,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritNamedArgWithDefault::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_NEGATIVE_INT_LITERAL => {
-                    let $pattern = unsafe { $crate::GritNegativeIntLiteral::new_unchecked(node) };
+                $crate::GritSyntaxKind::GRIT_NEGATIVE_INT_VALUE => {
+                    let $pattern = unsafe { $crate::GritNegativeIntValue::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_NODE_LIKE => {
@@ -348,10 +344,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritRawBacktickSnippet::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_REGEX_LITERAL => {
-                    let $pattern = unsafe { $crate::GritRegexLiteral::new_unchecked(node) };
-                    $body
-                }
                 $crate::GritSyntaxKind::GRIT_REGEX_PATTERN => {
                     let $pattern = unsafe { $crate::GritRegexPattern::new_unchecked(node) };
                     $body
@@ -359,6 +351,10 @@ macro_rules! map_syntax_node {
                 $crate::GritSyntaxKind::GRIT_REGEX_PATTERN_VARIABLES => {
                     let $pattern =
                         unsafe { $crate::GritRegexPatternVariables::new_unchecked(node) };
+                    $body
+                }
+                $crate::GritSyntaxKind::GRIT_REGEX_VALUE => {
+                    let $pattern = unsafe { $crate::GritRegexValue::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_REWRITE => {
@@ -373,16 +369,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritSequential::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_SNIPPET_REGEX => {
-                    let $pattern = unsafe { $crate::GritSnippetRegex::new_unchecked(node) };
+                $crate::GritSyntaxKind::GRIT_SNIPPET_REGEX_VALUE => {
+                    let $pattern = unsafe { $crate::GritSnippetRegexValue::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_SOME => {
                     let $pattern = unsafe { $crate::GritSome::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_STRING_LITERAL => {
-                    let $pattern = unsafe { $crate::GritStringLiteral::new_unchecked(node) };
+                $crate::GritSyntaxKind::GRIT_STRING_VALUE => {
+                    let $pattern = unsafe { $crate::GritStringValue::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_SUB_OPERATION => {

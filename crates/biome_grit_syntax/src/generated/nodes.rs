@@ -296,7 +296,7 @@ impl AnyGritPredicate {
             l_paren_token: self.l_paren_token(),
             any_grit_predicate: self.any_grit_predicate(),
             r_paren_token: self.r_paren_token(),
-            grit_boolean_literal: self.grit_boolean_literal(),
+            grit_boolean_value: self.grit_boolean_value(),
             grit_predicate_return: self.grit_predicate_return(),
             grit_bogus_predicate: self.grit_bogus_predicate(),
         }
@@ -361,7 +361,7 @@ impl AnyGritPredicate {
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 19usize)
     }
-    pub fn grit_boolean_literal(&self) -> SyntaxResult<GritBooleanLiteral> {
+    pub fn grit_boolean_value(&self) -> SyntaxResult<GritBooleanValue> {
         support::required_node(&self.syntax, 20usize)
     }
     pub fn grit_predicate_return(&self) -> SyntaxResult<GritPredicateReturn> {
@@ -402,7 +402,7 @@ pub struct AnyGritPredicateFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub any_grit_predicate: SyntaxResult<AnyGritPredicate>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
-    pub grit_boolean_literal: SyntaxResult<GritBooleanLiteral>,
+    pub grit_boolean_value: SyntaxResult<GritBooleanValue>,
     pub grit_predicate_return: SyntaxResult<GritPredicateReturn>,
     pub grit_bogus_predicate: SyntaxResult<GritBogusPredicate>,
 }
@@ -617,10 +617,10 @@ pub struct GritBacktickSnippetFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritBooleanLiteral {
+pub struct GritBooleanValue {
     pub(crate) syntax: SyntaxNode,
 }
-impl GritBooleanLiteral {
+impl GritBooleanValue {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -630,8 +630,8 @@ impl GritBooleanLiteral {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> GritBooleanLiteralFields {
-        GritBooleanLiteralFields {
+    pub fn as_fields(&self) -> GritBooleanValueFields {
+        GritBooleanValueFields {
             true_token: self.true_token(),
             false_token: self.false_token(),
         }
@@ -644,7 +644,7 @@ impl GritBooleanLiteral {
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for GritBooleanLiteral {
+impl Serialize for GritBooleanValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -653,7 +653,7 @@ impl Serialize for GritBooleanLiteral {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GritBooleanLiteralFields {
+pub struct GritBooleanValueFields {
     pub true_token: SyntaxResult<SyntaxToken>,
     pub false_token: SyntaxResult<SyntaxToken>,
 }
@@ -955,10 +955,10 @@ pub struct GritDotdotdotFields {
     pub maybe_curly_grit_pattern: Option<MaybeCurlyGritPattern>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritDoubleLiteral {
+pub struct GritDoubleValue {
     pub(crate) syntax: SyntaxNode,
 }
-impl GritDoubleLiteral {
+impl GritDoubleValue {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -968,8 +968,8 @@ impl GritDoubleLiteral {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> GritDoubleLiteralFields {
-        GritDoubleLiteralFields {
+    pub fn as_fields(&self) -> GritDoubleValueFields {
+        GritDoubleValueFields {
             value_token: self.value_token(),
         }
     }
@@ -978,7 +978,7 @@ impl GritDoubleLiteral {
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for GritDoubleLiteral {
+impl Serialize for GritDoubleValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -987,43 +987,7 @@ impl Serialize for GritDoubleLiteral {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GritDoubleLiteralFields {
-    pub value_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritDoubleQuoteSnippet {
-    pub(crate) syntax: SyntaxNode,
-}
-impl GritDoubleQuoteSnippet {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> GritDoubleQuoteSnippetFields {
-        GritDoubleQuoteSnippetFields {
-            value_token: self.value_token(),
-        }
-    }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for GritDoubleQuoteSnippet {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GritDoubleQuoteSnippetFields {
+pub struct GritDoubleValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1180,10 +1144,10 @@ pub struct GritFunctionDefinitionFields {
     pub body: SyntaxResult<GritCurlyPredicateList>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritIntLiteral {
+pub struct GritIntValue {
     pub(crate) syntax: SyntaxNode,
 }
-impl GritIntLiteral {
+impl GritIntValue {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1193,8 +1157,8 @@ impl GritIntLiteral {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> GritIntLiteralFields {
-        GritIntLiteralFields {
+    pub fn as_fields(&self) -> GritIntValueFields {
+        GritIntValueFields {
             value_token: self.value_token(),
         }
     }
@@ -1203,7 +1167,7 @@ impl GritIntLiteral {
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for GritIntLiteral {
+impl Serialize for GritIntValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -1212,7 +1176,7 @@ impl Serialize for GritIntLiteral {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GritIntLiteralFields {
+pub struct GritIntValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1234,6 +1198,7 @@ impl GritLanguageDeclaration {
             language_token: self.language_token(),
             name: self.name(),
             flavor: self.flavor(),
+            semicolon_token: self.semicolon_token(),
         }
     }
     pub fn language_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -1244,6 +1209,9 @@ impl GritLanguageDeclaration {
     }
     pub fn flavor(&self) -> Option<GritLanguageFlavor> {
         support::node(&self.syntax, 2usize)
+    }
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -1260,6 +1228,7 @@ pub struct GritLanguageDeclarationFields {
     pub language_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GritLanguageName>,
     pub flavor: Option<GritLanguageFlavor>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritLanguageFlavor {
@@ -1280,7 +1249,6 @@ impl GritLanguageFlavor {
             l_paren_token: self.l_paren_token(),
             grit_language_flavor_list: self.grit_language_flavor_list(),
             r_paren_token: self.r_paren_token(),
-            semicolon_token: self.semicolon_token(),
         }
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -1291,9 +1259,6 @@ impl GritLanguageFlavor {
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
-    }
-    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 3usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -1310,7 +1275,6 @@ pub struct GritLanguageFlavorFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub grit_language_flavor_list: GritLanguageFlavorList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
-    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritLanguageFlavorKind {
@@ -1421,14 +1385,14 @@ impl GritLanguageSpecificSnippet {
     pub fn as_fields(&self) -> GritLanguageSpecificSnippetFields {
         GritLanguageSpecificSnippetFields {
             language: self.language(),
-            snippet: self.snippet(),
+            snippet_token: self.snippet_token(),
         }
     }
     pub fn language(&self) -> SyntaxResult<GritLanguageName> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn snippet(&self) -> SyntaxResult<GritDoubleQuoteSnippet> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn snippet_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -1443,7 +1407,7 @@ impl Serialize for GritLanguageSpecificSnippet {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GritLanguageSpecificSnippetFields {
     pub language: SyntaxResult<GritLanguageName>,
-    pub snippet: SyntaxResult<GritDoubleQuoteSnippet>,
+    pub snippet_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritLike {
@@ -1996,10 +1960,10 @@ pub struct GritNamedArgWithDefaultFields {
     pub pattern: SyntaxResult<AnyGritPattern>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritNegativeIntLiteral {
+pub struct GritNegativeIntValue {
     pub(crate) syntax: SyntaxNode,
 }
-impl GritNegativeIntLiteral {
+impl GritNegativeIntValue {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -2009,8 +1973,8 @@ impl GritNegativeIntLiteral {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> GritNegativeIntLiteralFields {
-        GritNegativeIntLiteralFields {
+    pub fn as_fields(&self) -> GritNegativeIntValueFields {
+        GritNegativeIntValueFields {
             value_token: self.value_token(),
         }
     }
@@ -2019,7 +1983,7 @@ impl GritNegativeIntLiteral {
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for GritNegativeIntLiteral {
+impl Serialize for GritNegativeIntValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -2028,7 +1992,7 @@ impl Serialize for GritNegativeIntLiteral {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GritNegativeIntLiteralFields {
+pub struct GritNegativeIntValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -2809,7 +2773,7 @@ impl GritPatternLimit {
     pub fn limit_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn limit(&self) -> SyntaxResult<GritIntLiteral> {
+    pub fn limit(&self) -> SyntaxResult<GritIntValue> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -2826,7 +2790,7 @@ impl Serialize for GritPatternLimit {
 pub struct GritPatternLimitFields {
     pub pattern: SyntaxResult<AnyGritPattern>,
     pub limit_token: SyntaxResult<SyntaxToken>,
-    pub limit: SyntaxResult<GritIntLiteral>,
+    pub limit: SyntaxResult<GritIntValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritPatternMaybe {
@@ -4050,42 +4014,6 @@ pub struct GritRawBacktickSnippetFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritRegexLiteral {
-    pub(crate) syntax: SyntaxNode,
-}
-impl GritRegexLiteral {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> GritRegexLiteralFields {
-        GritRegexLiteralFields {
-            value_token: self.value_token(),
-        }
-    }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for GritRegexLiteral {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GritRegexLiteralFields {
-    pub value_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritRegexPattern {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4173,6 +4101,42 @@ pub struct GritRegexPatternVariablesFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GritRegexValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GritRegexValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GritRegexValueFields {
+        GritRegexValueFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for GritRegexValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct GritRegexValueFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritRewrite {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4239,27 +4203,35 @@ impl GritRoot {
     }
     pub fn as_fields(&self) -> GritRootFields {
         GritRootFields {
+            bom_token: self.bom_token(),
             version: self.version(),
             language: self.language(),
             definitions: self.definitions(),
             pattern: self.pattern(),
             definitions_continued: self.definitions_continued(),
+            eof_token: self.eof_token(),
         }
     }
-    pub fn version(&self) -> Option<GritVersion> {
-        support::node(&self.syntax, 0usize)
+    pub fn bom_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
     }
-    pub fn language(&self) -> Option<GritLanguageDeclaration> {
+    pub fn version(&self) -> Option<GritVersion> {
         support::node(&self.syntax, 1usize)
     }
+    pub fn language(&self) -> Option<GritLanguageDeclaration> {
+        support::node(&self.syntax, 2usize)
+    }
     pub fn definitions(&self) -> GritDefinitionList {
-        support::list(&self.syntax, 2usize)
+        support::list(&self.syntax, 3usize)
     }
     pub fn pattern(&self) -> Option<AnyGritPattern> {
-        support::node(&self.syntax, 3usize)
+        support::node(&self.syntax, 4usize)
     }
     pub fn definitions_continued(&self) -> GritDefinitionList {
-        support::list(&self.syntax, 4usize)
+        support::list(&self.syntax, 5usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 6usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -4273,11 +4245,13 @@ impl Serialize for GritRoot {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GritRootFields {
+    pub bom_token: Option<SyntaxToken>,
     pub version: Option<GritVersion>,
     pub language: Option<GritLanguageDeclaration>,
     pub definitions: GritDefinitionList,
     pub pattern: Option<AnyGritPattern>,
     pub definitions_continued: GritDefinitionList,
+    pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritSequential {
@@ -4331,10 +4305,10 @@ pub struct GritSequentialFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritSnippetRegex {
+pub struct GritSnippetRegexValue {
     pub(crate) syntax: SyntaxNode,
 }
-impl GritSnippetRegex {
+impl GritSnippetRegexValue {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -4344,8 +4318,8 @@ impl GritSnippetRegex {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> GritSnippetRegexFields {
-        GritSnippetRegexFields {
+    pub fn as_fields(&self) -> GritSnippetRegexValueFields {
+        GritSnippetRegexValueFields {
             value_token: self.value_token(),
         }
     }
@@ -4354,7 +4328,7 @@ impl GritSnippetRegex {
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for GritSnippetRegex {
+impl Serialize for GritSnippetRegexValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -4363,7 +4337,7 @@ impl Serialize for GritSnippetRegex {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GritSnippetRegexFields {
+pub struct GritSnippetRegexValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4408,10 +4382,10 @@ pub struct GritSomeFields {
     pub pattern: SyntaxResult<MaybeCurlyGritPattern>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritStringLiteral {
+pub struct GritStringValue {
     pub(crate) syntax: SyntaxNode,
 }
-impl GritStringLiteral {
+impl GritStringValue {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -4421,8 +4395,8 @@ impl GritStringLiteral {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> GritStringLiteralFields {
-        GritStringLiteralFields {
+    pub fn as_fields(&self) -> GritStringValueFields {
+        GritStringValueFields {
             value_token: self.value_token(),
         }
     }
@@ -4431,7 +4405,7 @@ impl GritStringLiteral {
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for GritStringLiteral {
+impl Serialize for GritStringValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -4440,7 +4414,7 @@ impl Serialize for GritStringLiteral {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GritStringLiteralFields {
+pub struct GritStringValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4616,7 +4590,7 @@ impl GritVersion {
             engine_token: self.engine_token(),
             biome_token: self.biome_token(),
             l_paren_token: self.l_paren_token(),
-            grit_double_literal: self.grit_double_literal(),
+            grit_double_value: self.grit_double_value(),
             r_paren_token: self.r_paren_token(),
         }
     }
@@ -4629,7 +4603,7 @@ impl GritVersion {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
     }
-    pub fn grit_double_literal(&self) -> SyntaxResult<GritDoubleLiteral> {
+    pub fn grit_double_value(&self) -> SyntaxResult<GritDoubleValue> {
         support::required_node(&self.syntax, 3usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -4650,7 +4624,7 @@ pub struct GritVersionFields {
     pub engine_token: SyntaxResult<SyntaxToken>,
     pub biome_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub grit_double_literal: SyntaxResult<GritDoubleLiteral>,
+    pub grit_double_value: SyntaxResult<GritDoubleValue>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4779,13 +4753,13 @@ impl AnyGritListPattern {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyGritLiteral {
     GritBogusLiteral(GritBogusLiteral),
-    GritBooleanLiteral(GritBooleanLiteral),
+    GritBooleanValue(GritBooleanValue),
     GritCodeSnippet(GritCodeSnippet),
-    GritDoubleLiteral(GritDoubleLiteral),
-    GritIntLiteral(GritIntLiteral),
+    GritDoubleValue(GritDoubleValue),
+    GritIntValue(GritIntValue),
     GritList(GritList),
     GritMap(GritMap),
-    GritStringLiteral(GritStringLiteral),
+    GritStringValue(GritStringValue),
     GritUndefined(GritUndefined),
 }
 impl AnyGritLiteral {
@@ -4795,9 +4769,9 @@ impl AnyGritLiteral {
             _ => None,
         }
     }
-    pub fn as_grit_boolean_literal(&self) -> Option<&GritBooleanLiteral> {
+    pub fn as_grit_boolean_value(&self) -> Option<&GritBooleanValue> {
         match &self {
-            AnyGritLiteral::GritBooleanLiteral(item) => Some(item),
+            AnyGritLiteral::GritBooleanValue(item) => Some(item),
             _ => None,
         }
     }
@@ -4807,15 +4781,15 @@ impl AnyGritLiteral {
             _ => None,
         }
     }
-    pub fn as_grit_double_literal(&self) -> Option<&GritDoubleLiteral> {
+    pub fn as_grit_double_value(&self) -> Option<&GritDoubleValue> {
         match &self {
-            AnyGritLiteral::GritDoubleLiteral(item) => Some(item),
+            AnyGritLiteral::GritDoubleValue(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_grit_int_literal(&self) -> Option<&GritIntLiteral> {
+    pub fn as_grit_int_value(&self) -> Option<&GritIntValue> {
         match &self {
-            AnyGritLiteral::GritIntLiteral(item) => Some(item),
+            AnyGritLiteral::GritIntValue(item) => Some(item),
             _ => None,
         }
     }
@@ -4831,9 +4805,9 @@ impl AnyGritLiteral {
             _ => None,
         }
     }
-    pub fn as_grit_string_literal(&self) -> Option<&GritStringLiteral> {
+    pub fn as_grit_string_value(&self) -> Option<&GritStringValue> {
         match &self {
-            AnyGritLiteral::GritStringLiteral(item) => Some(item),
+            AnyGritLiteral::GritStringValue(item) => Some(item),
             _ => None,
         }
     }
@@ -4922,8 +4896,8 @@ impl GritListAccessorSubject {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum GritListIndex {
     AnyGritContainer(AnyGritContainer),
-    GritIntLiteral(GritIntLiteral),
-    GritNegativeIntLiteral(GritNegativeIntLiteral),
+    GritIntValue(GritIntValue),
+    GritNegativeIntValue(GritNegativeIntValue),
 }
 impl GritListIndex {
     pub fn as_any_grit_container(&self) -> Option<&AnyGritContainer> {
@@ -4932,15 +4906,15 @@ impl GritListIndex {
             _ => None,
         }
     }
-    pub fn as_grit_int_literal(&self) -> Option<&GritIntLiteral> {
+    pub fn as_grit_int_value(&self) -> Option<&GritIntValue> {
         match &self {
-            GritListIndex::GritIntLiteral(item) => Some(item),
+            GritListIndex::GritIntValue(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_grit_negative_int_literal(&self) -> Option<&GritNegativeIntLiteral> {
+    pub fn as_grit_negative_int_value(&self) -> Option<&GritNegativeIntValue> {
         match &self {
-            GritListIndex::GritNegativeIntLiteral(item) => Some(item),
+            GritListIndex::GritNegativeIntValue(item) => Some(item),
             _ => None,
         }
     }
@@ -5008,19 +4982,19 @@ impl GritPredicateMatchSubject {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum GritRegex {
-    GritRegexLiteral(GritRegexLiteral),
-    GritSnippetRegex(GritSnippetRegex),
+    GritRegexValue(GritRegexValue),
+    GritSnippetRegexValue(GritSnippetRegexValue),
 }
 impl GritRegex {
-    pub fn as_grit_regex_literal(&self) -> Option<&GritRegexLiteral> {
+    pub fn as_grit_regex_value(&self) -> Option<&GritRegexValue> {
         match &self {
-            GritRegex::GritRegexLiteral(item) => Some(item),
+            GritRegex::GritRegexValue(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_grit_snippet_regex(&self) -> Option<&GritSnippetRegex> {
+    pub fn as_grit_snippet_regex_value(&self) -> Option<&GritSnippetRegexValue> {
         match &self {
-            GritRegex::GritSnippetRegex(item) => Some(item),
+            GritRegex::GritSnippetRegexValue(item) => Some(item),
             _ => None,
         }
     }
@@ -5336,8 +5310,8 @@ impl std::fmt::Debug for AnyGritPredicate {
                 &support::DebugSyntaxResult(self.r_paren_token()),
             )
             .field(
-                "grit_boolean_literal",
-                &support::DebugSyntaxResult(self.grit_boolean_literal()),
+                "grit_boolean_value",
+                &support::DebugSyntaxResult(self.grit_boolean_value()),
             )
             .field(
                 "grit_predicate_return",
@@ -5571,12 +5545,12 @@ impl From<GritBacktickSnippet> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for GritBooleanLiteral {
+impl AstNode for GritBooleanValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_BOOLEAN_LITERAL as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_BOOLEAN_VALUE as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_BOOLEAN_LITERAL
+        kind == GRIT_BOOLEAN_VALUE
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -5592,9 +5566,9 @@ impl AstNode for GritBooleanLiteral {
         self.syntax
     }
 }
-impl std::fmt::Debug for GritBooleanLiteral {
+impl std::fmt::Debug for GritBooleanValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBooleanLiteral")
+        f.debug_struct("GritBooleanValue")
             .field("true_token", &support::DebugSyntaxResult(self.true_token()))
             .field(
                 "false_token",
@@ -5603,13 +5577,13 @@ impl std::fmt::Debug for GritBooleanLiteral {
             .finish()
     }
 }
-impl From<GritBooleanLiteral> for SyntaxNode {
-    fn from(n: GritBooleanLiteral) -> SyntaxNode {
+impl From<GritBooleanValue> for SyntaxNode {
+    fn from(n: GritBooleanValue) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<GritBooleanLiteral> for SyntaxElement {
-    fn from(n: GritBooleanLiteral) -> SyntaxElement {
+impl From<GritBooleanValue> for SyntaxElement {
+    fn from(n: GritBooleanValue) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -5915,12 +5889,12 @@ impl From<GritDotdotdot> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for GritDoubleLiteral {
+impl AstNode for GritDoubleValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_DOUBLE_LITERAL as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_DOUBLE_VALUE as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_DOUBLE_LITERAL
+        kind == GRIT_DOUBLE_VALUE
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -5936,9 +5910,9 @@ impl AstNode for GritDoubleLiteral {
         self.syntax
     }
 }
-impl std::fmt::Debug for GritDoubleLiteral {
+impl std::fmt::Debug for GritDoubleValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritDoubleLiteral")
+        f.debug_struct("GritDoubleValue")
             .field(
                 "value_token",
                 &support::DebugSyntaxResult(self.value_token()),
@@ -5946,54 +5920,13 @@ impl std::fmt::Debug for GritDoubleLiteral {
             .finish()
     }
 }
-impl From<GritDoubleLiteral> for SyntaxNode {
-    fn from(n: GritDoubleLiteral) -> SyntaxNode {
+impl From<GritDoubleValue> for SyntaxNode {
+    fn from(n: GritDoubleValue) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<GritDoubleLiteral> for SyntaxElement {
-    fn from(n: GritDoubleLiteral) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for GritDoubleQuoteSnippet {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_DOUBLE_QUOTE_SNIPPET as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_DOUBLE_QUOTE_SNIPPET
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for GritDoubleQuoteSnippet {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritDoubleQuoteSnippet")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
-    }
-}
-impl From<GritDoubleQuoteSnippet> for SyntaxNode {
-    fn from(n: GritDoubleQuoteSnippet) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<GritDoubleQuoteSnippet> for SyntaxElement {
-    fn from(n: GritDoubleQuoteSnippet) -> SyntaxElement {
+impl From<GritDoubleValue> for SyntaxElement {
+    fn from(n: GritDoubleValue) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -6141,12 +6074,12 @@ impl From<GritFunctionDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for GritIntLiteral {
+impl AstNode for GritIntValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_INT_LITERAL as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_INT_VALUE as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_INT_LITERAL
+        kind == GRIT_INT_VALUE
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -6162,9 +6095,9 @@ impl AstNode for GritIntLiteral {
         self.syntax
     }
 }
-impl std::fmt::Debug for GritIntLiteral {
+impl std::fmt::Debug for GritIntValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritIntLiteral")
+        f.debug_struct("GritIntValue")
             .field(
                 "value_token",
                 &support::DebugSyntaxResult(self.value_token()),
@@ -6172,13 +6105,13 @@ impl std::fmt::Debug for GritIntLiteral {
             .finish()
     }
 }
-impl From<GritIntLiteral> for SyntaxNode {
-    fn from(n: GritIntLiteral) -> SyntaxNode {
+impl From<GritIntValue> for SyntaxNode {
+    fn from(n: GritIntValue) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<GritIntLiteral> for SyntaxElement {
-    fn from(n: GritIntLiteral) -> SyntaxElement {
+impl From<GritIntValue> for SyntaxElement {
+    fn from(n: GritIntValue) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -6212,6 +6145,10 @@ impl std::fmt::Debug for GritLanguageDeclaration {
             )
             .field("name", &support::DebugSyntaxResult(self.name()))
             .field("flavor", &support::DebugOptionalElement(self.flavor()))
+            .field(
+                "semicolon_token",
+                &support::DebugOptionalElement(self.semicolon_token()),
+            )
             .finish()
     }
 }
@@ -6260,10 +6197,6 @@ impl std::fmt::Debug for GritLanguageFlavor {
             .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
             )
             .finish()
     }
@@ -6386,7 +6319,10 @@ impl std::fmt::Debug for GritLanguageSpecificSnippet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("GritLanguageSpecificSnippet")
             .field("language", &support::DebugSyntaxResult(self.language()))
-            .field("snippet", &support::DebugSyntaxResult(self.snippet()))
+            .field(
+                "snippet_token",
+                &support::DebugSyntaxResult(self.snippet_token()),
+            )
             .finish()
     }
 }
@@ -6925,12 +6861,12 @@ impl From<GritNamedArgWithDefault> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for GritNegativeIntLiteral {
+impl AstNode for GritNegativeIntValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_NEGATIVE_INT_LITERAL as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_NEGATIVE_INT_VALUE as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_NEGATIVE_INT_LITERAL
+        kind == GRIT_NEGATIVE_INT_VALUE
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -6946,9 +6882,9 @@ impl AstNode for GritNegativeIntLiteral {
         self.syntax
     }
 }
-impl std::fmt::Debug for GritNegativeIntLiteral {
+impl std::fmt::Debug for GritNegativeIntValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritNegativeIntLiteral")
+        f.debug_struct("GritNegativeIntValue")
             .field(
                 "value_token",
                 &support::DebugSyntaxResult(self.value_token()),
@@ -6956,13 +6892,13 @@ impl std::fmt::Debug for GritNegativeIntLiteral {
             .finish()
     }
 }
-impl From<GritNegativeIntLiteral> for SyntaxNode {
-    fn from(n: GritNegativeIntLiteral) -> SyntaxNode {
+impl From<GritNegativeIntValue> for SyntaxNode {
+    fn from(n: GritNegativeIntValue) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<GritNegativeIntLiteral> for SyntaxElement {
-    fn from(n: GritNegativeIntLiteral) -> SyntaxElement {
+impl From<GritNegativeIntValue> for SyntaxElement {
+    fn from(n: GritNegativeIntValue) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -8889,47 +8825,6 @@ impl From<GritRawBacktickSnippet> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for GritRegexLiteral {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_REGEX_LITERAL as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_REGEX_LITERAL
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for GritRegexLiteral {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritRegexLiteral")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
-    }
-}
-impl From<GritRegexLiteral> for SyntaxNode {
-    fn from(n: GritRegexLiteral) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<GritRegexLiteral> for SyntaxElement {
-    fn from(n: GritRegexLiteral) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for GritRegexPattern {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9021,6 +8916,47 @@ impl From<GritRegexPatternVariables> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for GritRegexValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_REGEX_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_REGEX_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritRegexValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritRegexValue")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<GritRegexValue> for SyntaxNode {
+    fn from(n: GritRegexValue) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritRegexValue> for SyntaxElement {
+    fn from(n: GritRegexValue) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for GritRewrite {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9092,11 +9028,16 @@ impl AstNode for GritRoot {
 impl std::fmt::Debug for GritRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("GritRoot")
+            .field(
+                "bom_token",
+                &support::DebugOptionalElement(self.bom_token()),
+            )
             .field("version", &support::DebugOptionalElement(self.version()))
             .field("language", &support::DebugOptionalElement(self.language()))
             .field("definitions", &self.definitions())
             .field("pattern", &support::DebugOptionalElement(self.pattern()))
             .field("definitions_continued", &self.definitions_continued())
+            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
             .finish()
     }
 }
@@ -9160,12 +9101,12 @@ impl From<GritSequential> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for GritSnippetRegex {
+impl AstNode for GritSnippetRegexValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_SNIPPET_REGEX as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_SNIPPET_REGEX_VALUE as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_SNIPPET_REGEX
+        kind == GRIT_SNIPPET_REGEX_VALUE
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -9181,9 +9122,9 @@ impl AstNode for GritSnippetRegex {
         self.syntax
     }
 }
-impl std::fmt::Debug for GritSnippetRegex {
+impl std::fmt::Debug for GritSnippetRegexValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritSnippetRegex")
+        f.debug_struct("GritSnippetRegexValue")
             .field(
                 "value_token",
                 &support::DebugSyntaxResult(self.value_token()),
@@ -9191,13 +9132,13 @@ impl std::fmt::Debug for GritSnippetRegex {
             .finish()
     }
 }
-impl From<GritSnippetRegex> for SyntaxNode {
-    fn from(n: GritSnippetRegex) -> SyntaxNode {
+impl From<GritSnippetRegexValue> for SyntaxNode {
+    fn from(n: GritSnippetRegexValue) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<GritSnippetRegex> for SyntaxElement {
-    fn from(n: GritSnippetRegex) -> SyntaxElement {
+impl From<GritSnippetRegexValue> for SyntaxElement {
+    fn from(n: GritSnippetRegexValue) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -9240,12 +9181,12 @@ impl From<GritSome> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for GritStringLiteral {
+impl AstNode for GritStringValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_STRING_LITERAL as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_STRING_VALUE as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_STRING_LITERAL
+        kind == GRIT_STRING_VALUE
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -9261,9 +9202,9 @@ impl AstNode for GritStringLiteral {
         self.syntax
     }
 }
-impl std::fmt::Debug for GritStringLiteral {
+impl std::fmt::Debug for GritStringValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritStringLiteral")
+        f.debug_struct("GritStringValue")
             .field(
                 "value_token",
                 &support::DebugSyntaxResult(self.value_token()),
@@ -9271,13 +9212,13 @@ impl std::fmt::Debug for GritStringLiteral {
             .finish()
     }
 }
-impl From<GritStringLiteral> for SyntaxNode {
-    fn from(n: GritStringLiteral) -> SyntaxNode {
+impl From<GritStringValue> for SyntaxNode {
+    fn from(n: GritStringValue) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<GritStringLiteral> for SyntaxElement {
-    fn from(n: GritStringLiteral) -> SyntaxElement {
+impl From<GritStringValue> for SyntaxElement {
+    fn from(n: GritStringValue) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -9484,8 +9425,8 @@ impl std::fmt::Debug for GritVersion {
                 &support::DebugSyntaxResult(self.l_paren_token()),
             )
             .field(
-                "grit_double_literal",
-                &support::DebugSyntaxResult(self.grit_double_literal()),
+                "grit_double_value",
+                &support::DebugSyntaxResult(self.grit_double_value()),
             )
             .field(
                 "r_paren_token",
@@ -9778,9 +9719,9 @@ impl From<GritBogusLiteral> for AnyGritLiteral {
         AnyGritLiteral::GritBogusLiteral(node)
     }
 }
-impl From<GritBooleanLiteral> for AnyGritLiteral {
-    fn from(node: GritBooleanLiteral) -> AnyGritLiteral {
-        AnyGritLiteral::GritBooleanLiteral(node)
+impl From<GritBooleanValue> for AnyGritLiteral {
+    fn from(node: GritBooleanValue) -> AnyGritLiteral {
+        AnyGritLiteral::GritBooleanValue(node)
     }
 }
 impl From<GritCodeSnippet> for AnyGritLiteral {
@@ -9788,14 +9729,14 @@ impl From<GritCodeSnippet> for AnyGritLiteral {
         AnyGritLiteral::GritCodeSnippet(node)
     }
 }
-impl From<GritDoubleLiteral> for AnyGritLiteral {
-    fn from(node: GritDoubleLiteral) -> AnyGritLiteral {
-        AnyGritLiteral::GritDoubleLiteral(node)
+impl From<GritDoubleValue> for AnyGritLiteral {
+    fn from(node: GritDoubleValue) -> AnyGritLiteral {
+        AnyGritLiteral::GritDoubleValue(node)
     }
 }
-impl From<GritIntLiteral> for AnyGritLiteral {
-    fn from(node: GritIntLiteral) -> AnyGritLiteral {
-        AnyGritLiteral::GritIntLiteral(node)
+impl From<GritIntValue> for AnyGritLiteral {
+    fn from(node: GritIntValue) -> AnyGritLiteral {
+        AnyGritLiteral::GritIntValue(node)
     }
 }
 impl From<GritList> for AnyGritLiteral {
@@ -9808,9 +9749,9 @@ impl From<GritMap> for AnyGritLiteral {
         AnyGritLiteral::GritMap(node)
     }
 }
-impl From<GritStringLiteral> for AnyGritLiteral {
-    fn from(node: GritStringLiteral) -> AnyGritLiteral {
-        AnyGritLiteral::GritStringLiteral(node)
+impl From<GritStringValue> for AnyGritLiteral {
+    fn from(node: GritStringValue) -> AnyGritLiteral {
+        AnyGritLiteral::GritStringValue(node)
     }
 }
 impl From<GritUndefined> for AnyGritLiteral {
@@ -9821,40 +9762,38 @@ impl From<GritUndefined> for AnyGritLiteral {
 impl AstNode for AnyGritLiteral {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = GritBogusLiteral::KIND_SET
-        .union(GritBooleanLiteral::KIND_SET)
+        .union(GritBooleanValue::KIND_SET)
         .union(GritCodeSnippet::KIND_SET)
-        .union(GritDoubleLiteral::KIND_SET)
-        .union(GritIntLiteral::KIND_SET)
+        .union(GritDoubleValue::KIND_SET)
+        .union(GritIntValue::KIND_SET)
         .union(GritList::KIND_SET)
         .union(GritMap::KIND_SET)
-        .union(GritStringLiteral::KIND_SET)
+        .union(GritStringValue::KIND_SET)
         .union(GritUndefined::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
             GRIT_BOGUS_LITERAL
-                | GRIT_BOOLEAN_LITERAL
+                | GRIT_BOOLEAN_VALUE
                 | GRIT_CODE_SNIPPET
-                | GRIT_DOUBLE_LITERAL
-                | GRIT_INT_LITERAL
+                | GRIT_DOUBLE_VALUE
+                | GRIT_INT_VALUE
                 | GRIT_LIST
                 | GRIT_MAP
-                | GRIT_STRING_LITERAL
+                | GRIT_STRING_VALUE
                 | GRIT_UNDEFINED
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             GRIT_BOGUS_LITERAL => AnyGritLiteral::GritBogusLiteral(GritBogusLiteral { syntax }),
-            GRIT_BOOLEAN_LITERAL => {
-                AnyGritLiteral::GritBooleanLiteral(GritBooleanLiteral { syntax })
-            }
+            GRIT_BOOLEAN_VALUE => AnyGritLiteral::GritBooleanValue(GritBooleanValue { syntax }),
             GRIT_CODE_SNIPPET => AnyGritLiteral::GritCodeSnippet(GritCodeSnippet { syntax }),
-            GRIT_DOUBLE_LITERAL => AnyGritLiteral::GritDoubleLiteral(GritDoubleLiteral { syntax }),
-            GRIT_INT_LITERAL => AnyGritLiteral::GritIntLiteral(GritIntLiteral { syntax }),
+            GRIT_DOUBLE_VALUE => AnyGritLiteral::GritDoubleValue(GritDoubleValue { syntax }),
+            GRIT_INT_VALUE => AnyGritLiteral::GritIntValue(GritIntValue { syntax }),
             GRIT_LIST => AnyGritLiteral::GritList(GritList { syntax }),
             GRIT_MAP => AnyGritLiteral::GritMap(GritMap { syntax }),
-            GRIT_STRING_LITERAL => AnyGritLiteral::GritStringLiteral(GritStringLiteral { syntax }),
+            GRIT_STRING_VALUE => AnyGritLiteral::GritStringValue(GritStringValue { syntax }),
             GRIT_UNDEFINED => AnyGritLiteral::GritUndefined(GritUndefined { syntax }),
             _ => return None,
         };
@@ -9863,26 +9802,26 @@ impl AstNode for AnyGritLiteral {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyGritLiteral::GritBogusLiteral(it) => &it.syntax,
-            AnyGritLiteral::GritBooleanLiteral(it) => &it.syntax,
+            AnyGritLiteral::GritBooleanValue(it) => &it.syntax,
             AnyGritLiteral::GritCodeSnippet(it) => &it.syntax,
-            AnyGritLiteral::GritDoubleLiteral(it) => &it.syntax,
-            AnyGritLiteral::GritIntLiteral(it) => &it.syntax,
+            AnyGritLiteral::GritDoubleValue(it) => &it.syntax,
+            AnyGritLiteral::GritIntValue(it) => &it.syntax,
             AnyGritLiteral::GritList(it) => &it.syntax,
             AnyGritLiteral::GritMap(it) => &it.syntax,
-            AnyGritLiteral::GritStringLiteral(it) => &it.syntax,
+            AnyGritLiteral::GritStringValue(it) => &it.syntax,
             AnyGritLiteral::GritUndefined(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyGritLiteral::GritBogusLiteral(it) => it.syntax,
-            AnyGritLiteral::GritBooleanLiteral(it) => it.syntax,
+            AnyGritLiteral::GritBooleanValue(it) => it.syntax,
             AnyGritLiteral::GritCodeSnippet(it) => it.syntax,
-            AnyGritLiteral::GritDoubleLiteral(it) => it.syntax,
-            AnyGritLiteral::GritIntLiteral(it) => it.syntax,
+            AnyGritLiteral::GritDoubleValue(it) => it.syntax,
+            AnyGritLiteral::GritIntValue(it) => it.syntax,
             AnyGritLiteral::GritList(it) => it.syntax,
             AnyGritLiteral::GritMap(it) => it.syntax,
-            AnyGritLiteral::GritStringLiteral(it) => it.syntax,
+            AnyGritLiteral::GritStringValue(it) => it.syntax,
             AnyGritLiteral::GritUndefined(it) => it.syntax,
         }
     }
@@ -9891,13 +9830,13 @@ impl std::fmt::Debug for AnyGritLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyGritLiteral::GritBogusLiteral(it) => std::fmt::Debug::fmt(it, f),
-            AnyGritLiteral::GritBooleanLiteral(it) => std::fmt::Debug::fmt(it, f),
+            AnyGritLiteral::GritBooleanValue(it) => std::fmt::Debug::fmt(it, f),
             AnyGritLiteral::GritCodeSnippet(it) => std::fmt::Debug::fmt(it, f),
-            AnyGritLiteral::GritDoubleLiteral(it) => std::fmt::Debug::fmt(it, f),
-            AnyGritLiteral::GritIntLiteral(it) => std::fmt::Debug::fmt(it, f),
+            AnyGritLiteral::GritDoubleValue(it) => std::fmt::Debug::fmt(it, f),
+            AnyGritLiteral::GritIntValue(it) => std::fmt::Debug::fmt(it, f),
             AnyGritLiteral::GritList(it) => std::fmt::Debug::fmt(it, f),
             AnyGritLiteral::GritMap(it) => std::fmt::Debug::fmt(it, f),
-            AnyGritLiteral::GritStringLiteral(it) => std::fmt::Debug::fmt(it, f),
+            AnyGritLiteral::GritStringValue(it) => std::fmt::Debug::fmt(it, f),
             AnyGritLiteral::GritUndefined(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -9906,13 +9845,13 @@ impl From<AnyGritLiteral> for SyntaxNode {
     fn from(n: AnyGritLiteral) -> SyntaxNode {
         match n {
             AnyGritLiteral::GritBogusLiteral(it) => it.into(),
-            AnyGritLiteral::GritBooleanLiteral(it) => it.into(),
+            AnyGritLiteral::GritBooleanValue(it) => it.into(),
             AnyGritLiteral::GritCodeSnippet(it) => it.into(),
-            AnyGritLiteral::GritDoubleLiteral(it) => it.into(),
-            AnyGritLiteral::GritIntLiteral(it) => it.into(),
+            AnyGritLiteral::GritDoubleValue(it) => it.into(),
+            AnyGritLiteral::GritIntValue(it) => it.into(),
             AnyGritLiteral::GritList(it) => it.into(),
             AnyGritLiteral::GritMap(it) => it.into(),
-            AnyGritLiteral::GritStringLiteral(it) => it.into(),
+            AnyGritLiteral::GritStringValue(it) => it.into(),
             AnyGritLiteral::GritUndefined(it) => it.into(),
         }
     }
@@ -10147,33 +10086,33 @@ impl From<GritListAccessorSubject> for SyntaxElement {
         node.into()
     }
 }
-impl From<GritIntLiteral> for GritListIndex {
-    fn from(node: GritIntLiteral) -> GritListIndex {
-        GritListIndex::GritIntLiteral(node)
+impl From<GritIntValue> for GritListIndex {
+    fn from(node: GritIntValue) -> GritListIndex {
+        GritListIndex::GritIntValue(node)
     }
 }
-impl From<GritNegativeIntLiteral> for GritListIndex {
-    fn from(node: GritNegativeIntLiteral) -> GritListIndex {
-        GritListIndex::GritNegativeIntLiteral(node)
+impl From<GritNegativeIntValue> for GritListIndex {
+    fn from(node: GritNegativeIntValue) -> GritListIndex {
+        GritListIndex::GritNegativeIntValue(node)
     }
 }
 impl AstNode for GritListIndex {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyGritContainer::KIND_SET
-        .union(GritIntLiteral::KIND_SET)
-        .union(GritNegativeIntLiteral::KIND_SET);
+        .union(GritIntValue::KIND_SET)
+        .union(GritNegativeIntValue::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            GRIT_INT_LITERAL | GRIT_NEGATIVE_INT_LITERAL => true,
+            GRIT_INT_VALUE | GRIT_NEGATIVE_INT_VALUE => true,
             k if AnyGritContainer::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            GRIT_INT_LITERAL => GritListIndex::GritIntLiteral(GritIntLiteral { syntax }),
-            GRIT_NEGATIVE_INT_LITERAL => {
-                GritListIndex::GritNegativeIntLiteral(GritNegativeIntLiteral { syntax })
+            GRIT_INT_VALUE => GritListIndex::GritIntValue(GritIntValue { syntax }),
+            GRIT_NEGATIVE_INT_VALUE => {
+                GritListIndex::GritNegativeIntValue(GritNegativeIntValue { syntax })
             }
             _ => {
                 if let Some(any_grit_container) = AnyGritContainer::cast(syntax) {
@@ -10186,15 +10125,15 @@ impl AstNode for GritListIndex {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            GritListIndex::GritIntLiteral(it) => &it.syntax,
-            GritListIndex::GritNegativeIntLiteral(it) => &it.syntax,
+            GritListIndex::GritIntValue(it) => &it.syntax,
+            GritListIndex::GritNegativeIntValue(it) => &it.syntax,
             GritListIndex::AnyGritContainer(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            GritListIndex::GritIntLiteral(it) => it.syntax,
-            GritListIndex::GritNegativeIntLiteral(it) => it.syntax,
+            GritListIndex::GritIntValue(it) => it.syntax,
+            GritListIndex::GritNegativeIntValue(it) => it.syntax,
             GritListIndex::AnyGritContainer(it) => it.into_syntax(),
         }
     }
@@ -10203,8 +10142,8 @@ impl std::fmt::Debug for GritListIndex {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             GritListIndex::AnyGritContainer(it) => std::fmt::Debug::fmt(it, f),
-            GritListIndex::GritIntLiteral(it) => std::fmt::Debug::fmt(it, f),
-            GritListIndex::GritNegativeIntLiteral(it) => std::fmt::Debug::fmt(it, f),
+            GritListIndex::GritIntValue(it) => std::fmt::Debug::fmt(it, f),
+            GritListIndex::GritNegativeIntValue(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -10212,8 +10151,8 @@ impl From<GritListIndex> for SyntaxNode {
     fn from(n: GritListIndex) -> SyntaxNode {
         match n {
             GritListIndex::AnyGritContainer(it) => it.into(),
-            GritListIndex::GritIntLiteral(it) => it.into(),
-            GritListIndex::GritNegativeIntLiteral(it) => it.into(),
+            GritListIndex::GritIntValue(it) => it.into(),
+            GritListIndex::GritNegativeIntValue(it) => it.into(),
         }
     }
 }
@@ -10401,57 +10340,59 @@ impl From<GritPredicateMatchSubject> for SyntaxElement {
         node.into()
     }
 }
-impl From<GritRegexLiteral> for GritRegex {
-    fn from(node: GritRegexLiteral) -> GritRegex {
-        GritRegex::GritRegexLiteral(node)
+impl From<GritRegexValue> for GritRegex {
+    fn from(node: GritRegexValue) -> GritRegex {
+        GritRegex::GritRegexValue(node)
     }
 }
-impl From<GritSnippetRegex> for GritRegex {
-    fn from(node: GritSnippetRegex) -> GritRegex {
-        GritRegex::GritSnippetRegex(node)
+impl From<GritSnippetRegexValue> for GritRegex {
+    fn from(node: GritSnippetRegexValue) -> GritRegex {
+        GritRegex::GritSnippetRegexValue(node)
     }
 }
 impl AstNode for GritRegex {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        GritRegexLiteral::KIND_SET.union(GritSnippetRegex::KIND_SET);
+        GritRegexValue::KIND_SET.union(GritSnippetRegexValue::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, GRIT_REGEX_LITERAL | GRIT_SNIPPET_REGEX)
+        matches!(kind, GRIT_REGEX_VALUE | GRIT_SNIPPET_REGEX_VALUE)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            GRIT_REGEX_LITERAL => GritRegex::GritRegexLiteral(GritRegexLiteral { syntax }),
-            GRIT_SNIPPET_REGEX => GritRegex::GritSnippetRegex(GritSnippetRegex { syntax }),
+            GRIT_REGEX_VALUE => GritRegex::GritRegexValue(GritRegexValue { syntax }),
+            GRIT_SNIPPET_REGEX_VALUE => {
+                GritRegex::GritSnippetRegexValue(GritSnippetRegexValue { syntax })
+            }
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            GritRegex::GritRegexLiteral(it) => &it.syntax,
-            GritRegex::GritSnippetRegex(it) => &it.syntax,
+            GritRegex::GritRegexValue(it) => &it.syntax,
+            GritRegex::GritSnippetRegexValue(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            GritRegex::GritRegexLiteral(it) => it.syntax,
-            GritRegex::GritSnippetRegex(it) => it.syntax,
+            GritRegex::GritRegexValue(it) => it.syntax,
+            GritRegex::GritSnippetRegexValue(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for GritRegex {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            GritRegex::GritRegexLiteral(it) => std::fmt::Debug::fmt(it, f),
-            GritRegex::GritSnippetRegex(it) => std::fmt::Debug::fmt(it, f),
+            GritRegex::GritRegexValue(it) => std::fmt::Debug::fmt(it, f),
+            GritRegex::GritSnippetRegexValue(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<GritRegex> for SyntaxNode {
     fn from(n: GritRegex) -> SyntaxNode {
         match n {
-            GritRegex::GritRegexLiteral(it) => it.into(),
-            GritRegex::GritSnippetRegex(it) => it.into(),
+            GritRegex::GritRegexValue(it) => it.into(),
+            GritRegex::GritSnippetRegexValue(it) => it.into(),
         }
     }
 }
@@ -10623,7 +10564,7 @@ impl std::fmt::Display for GritBacktickSnippet {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for GritBooleanLiteral {
+impl std::fmt::Display for GritBooleanValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -10663,12 +10604,7 @@ impl std::fmt::Display for GritDotdotdot {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for GritDoubleLiteral {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for GritDoubleQuoteSnippet {
+impl std::fmt::Display for GritDoubleValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -10688,7 +10624,7 @@ impl std::fmt::Display for GritFunctionDefinition {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for GritIntLiteral {
+impl std::fmt::Display for GritIntValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -10778,7 +10714,7 @@ impl std::fmt::Display for GritNamedArgWithDefault {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for GritNegativeIntLiteral {
+impl std::fmt::Display for GritNegativeIntValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -10998,17 +10934,17 @@ impl std::fmt::Display for GritRawBacktickSnippet {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for GritRegexLiteral {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for GritRegexPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for GritRegexPatternVariables {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GritRegexValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -11028,7 +10964,7 @@ impl std::fmt::Display for GritSequential {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for GritSnippetRegex {
+impl std::fmt::Display for GritSnippetRegexValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -11038,7 +10974,7 @@ impl std::fmt::Display for GritSome {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for GritStringLiteral {
+impl std::fmt::Display for GritStringValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

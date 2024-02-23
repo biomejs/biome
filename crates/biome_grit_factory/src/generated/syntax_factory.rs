@@ -464,7 +464,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GritBooleanLiteral::can_cast(element.kind()) {
+                    if GritBooleanValue::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -629,7 +629,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.into_node(GRIT_BACKTICK_SNIPPET, children)
             }
-            GRIT_BOOLEAN_LITERAL => {
+            GRIT_BOOLEAN_VALUE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -649,11 +649,11 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        GRIT_BOOLEAN_LITERAL.to_bogus(),
+                        GRIT_BOOLEAN_VALUE.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(GRIT_BOOLEAN_LITERAL, children)
+                slots.into_node(GRIT_BOOLEAN_VALUE, children)
             }
             GRIT_BUBBLE => {
                 let mut elements = (&children).into_iter();
@@ -848,7 +848,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.into_node(GRIT_DOTDOTDOT, children)
             }
-            GRIT_DOUBLE_LITERAL => {
+            GRIT_DOUBLE_VALUE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -861,30 +861,11 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        GRIT_DOUBLE_LITERAL.to_bogus(),
+                        GRIT_DOUBLE_VALUE.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(GRIT_DOUBLE_LITERAL, children)
-            }
-            GRIT_DOUBLE_QUOTE_SNIPPET => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == GRIT_DOUBLE_QUOTE_SNIPPET {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        GRIT_DOUBLE_QUOTE_SNIPPET.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(GRIT_DOUBLE_QUOTE_SNIPPET, children)
+                slots.into_node(GRIT_DOUBLE_VALUE, children)
             }
             GRIT_EVERY => {
                 let mut elements = (&children).into_iter();
@@ -1006,7 +987,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.into_node(GRIT_FUNCTION_DEFINITION, children)
             }
-            GRIT_INT_LITERAL => {
+            GRIT_INT_VALUE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -1019,15 +1000,15 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        GRIT_INT_LITERAL.to_bogus(),
+                        GRIT_INT_VALUE.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(GRIT_INT_LITERAL, children)
+                slots.into_node(GRIT_INT_VALUE, children)
             }
             GRIT_LANGUAGE_DECLARATION => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T![language] {
@@ -1050,6 +1031,13 @@ impl SyntaxFactory for GritSyntaxFactory {
                     }
                 }
                 slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [;] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
                         GRIT_LANGUAGE_DECLARATION.to_bogus(),
@@ -1060,7 +1048,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             }
             GRIT_LANGUAGE_FLAVOR => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T!['('] {
@@ -1078,13 +1066,6 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if element.kind() == T![')'] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [;] {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1176,7 +1157,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GritDoubleQuoteSnippet::can_cast(element.kind()) {
+                    if element.kind() == GRIT_STRING_LITERAL {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1583,7 +1564,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.into_node(GRIT_NAMED_ARG_WITH_DEFAULT, children)
             }
-            GRIT_NEGATIVE_INT_LITERAL => {
+            GRIT_NEGATIVE_INT_VALUE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -1596,11 +1577,11 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        GRIT_NEGATIVE_INT_LITERAL.to_bogus(),
+                        GRIT_NEGATIVE_INT_VALUE.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(GRIT_NEGATIVE_INT_LITERAL, children)
+                slots.into_node(GRIT_NEGATIVE_INT_VALUE, children)
             }
             GRIT_NODE_LIKE => {
                 let mut elements = (&children).into_iter();
@@ -2167,7 +2148,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GritIntLiteral::can_cast(element.kind()) {
+                    if GritIntValue::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -3074,25 +3055,6 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.into_node(GRIT_RAW_BACKTICK_SNIPPET, children)
             }
-            GRIT_REGEX_LITERAL => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == GRIT_REGEX_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        GRIT_REGEX_LITERAL.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(GRIT_REGEX_LITERAL, children)
-            }
             GRIT_REGEX_PATTERN => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -3152,6 +3114,25 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.into_node(GRIT_REGEX_PATTERN_VARIABLES, children)
             }
+            GRIT_REGEX_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == GRIT_REGEX_LITERAL {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GRIT_REGEX_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GRIT_REGEX_VALUE, children)
+            }
             GRIT_REWRITE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
@@ -3194,8 +3175,15 @@ impl SyntaxFactory for GritSyntaxFactory {
             }
             GRIT_ROOT => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![UNICODE_BOM] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
                 if let Some(element) = &current_element {
                     if GritVersion::can_cast(element.kind()) {
                         slots.mark_present();
@@ -3226,6 +3214,13 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if GritDefinitionList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![EOF] {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -3279,7 +3274,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.into_node(GRIT_SEQUENTIAL, children)
             }
-            GRIT_SNIPPET_REGEX => {
+            GRIT_SNIPPET_REGEX_VALUE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -3292,11 +3287,11 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        GRIT_SNIPPET_REGEX.to_bogus(),
+                        GRIT_SNIPPET_REGEX_VALUE.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(GRIT_SNIPPET_REGEX, children)
+                slots.into_node(GRIT_SNIPPET_REGEX_VALUE, children)
             }
             GRIT_SOME => {
                 let mut elements = (&children).into_iter();
@@ -3324,7 +3319,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.into_node(GRIT_SOME, children)
             }
-            GRIT_STRING_LITERAL => {
+            GRIT_STRING_VALUE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -3337,11 +3332,11 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        GRIT_STRING_LITERAL.to_bogus(),
+                        GRIT_STRING_VALUE.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(GRIT_STRING_LITERAL, children)
+                slots.into_node(GRIT_STRING_VALUE, children)
             }
             GRIT_SUB_OPERATION => {
                 let mut elements = (&children).into_iter();
@@ -3459,7 +3454,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GritDoubleLiteral::can_cast(element.kind()) {
+                    if GritDoubleValue::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }

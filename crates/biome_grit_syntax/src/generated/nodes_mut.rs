@@ -372,7 +372,7 @@ impl AnyGritPredicate {
                 .splice_slots(19usize..=19usize, once(Some(element.into()))),
         )
     }
-    pub fn with_grit_boolean_literal(self, element: GritBooleanLiteral) -> Self {
+    pub fn with_grit_boolean_value(self, element: GritBooleanValue) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(20usize..=20usize, once(Some(element.into_syntax().into()))),
@@ -467,7 +467,7 @@ impl GritBacktickSnippet {
         )
     }
 }
-impl GritBooleanLiteral {
+impl GritBooleanValue {
     pub fn with_true_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -591,15 +591,7 @@ impl GritDotdotdot {
         ))
     }
 }
-impl GritDoubleLiteral {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
-impl GritDoubleQuoteSnippet {
+impl GritDoubleValue {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -685,7 +677,7 @@ impl GritFunctionDefinition {
         )
     }
 }
-impl GritIntLiteral {
+impl GritIntValue {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -712,6 +704,12 @@ impl GritLanguageDeclaration {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
+    pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(element.map(|element| element.into()))),
+        )
+    }
 }
 impl GritLanguageFlavor {
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
@@ -730,12 +728,6 @@ impl GritLanguageFlavor {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(3usize..=3usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -786,10 +778,10 @@ impl GritLanguageSpecificSnippet {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_snippet(self, element: GritDoubleQuoteSnippet) -> Self {
+    pub fn with_snippet_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
 }
@@ -1033,7 +1025,7 @@ impl GritNamedArgWithDefault {
         )
     }
 }
-impl GritNegativeIntLiteral {
+impl GritNegativeIntValue {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -1395,7 +1387,7 @@ impl GritPatternLimit {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_limit(self, element: GritIntLiteral) -> Self {
+    pub fn with_limit(self, element: GritIntValue) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -1952,14 +1944,6 @@ impl GritRawBacktickSnippet {
         )
     }
 }
-impl GritRegexLiteral {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
 impl GritRegexPattern {
     pub fn with_regex(self, element: GritRegex) -> Self {
         Self::unwrap_cast(
@@ -1994,6 +1978,14 @@ impl GritRegexPatternVariables {
         )
     }
 }
+impl GritRegexValue {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl GritRewrite {
     pub fn with_left(self, element: AnyGritPattern) -> Self {
         Self::unwrap_cast(
@@ -2021,35 +2013,47 @@ impl GritRewrite {
     }
 }
 impl GritRoot {
-    pub fn with_version(self, element: Option<GritVersion>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            0usize..=0usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
+    pub fn with_bom_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
+        )
     }
-    pub fn with_language(self, element: Option<GritLanguageDeclaration>) -> Self {
+    pub fn with_version(self, element: Option<GritVersion>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_definitions(self, element: Option<GritDefinitionList>) -> Self {
+    pub fn with_language(self, element: Option<GritLanguageDeclaration>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             2usize..=2usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_pattern(self, element: Option<AnyGritPattern>) -> Self {
+    pub fn with_definitions(self, element: Option<GritDefinitionList>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             3usize..=3usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_definitions_continued(self, element: Option<GritDefinitionList>) -> Self {
+    pub fn with_pattern(self, element: Option<AnyGritPattern>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             4usize..=4usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
+    }
+    pub fn with_definitions_continued(self, element: Option<GritDefinitionList>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            5usize..=5usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_eof_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(6usize..=6usize, once(Some(element.into()))),
+        )
     }
 }
 impl GritSequential {
@@ -2078,7 +2082,7 @@ impl GritSequential {
         )
     }
 }
-impl GritSnippetRegex {
+impl GritSnippetRegexValue {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -2100,7 +2104,7 @@ impl GritSome {
         )
     }
 }
-impl GritStringLiteral {
+impl GritStringValue {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -2171,7 +2175,7 @@ impl GritVersion {
                 .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
     }
-    pub fn with_grit_double_literal(self, element: GritDoubleLiteral) -> Self {
+    pub fn with_grit_double_value(self, element: GritDoubleValue) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),

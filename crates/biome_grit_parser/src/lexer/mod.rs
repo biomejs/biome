@@ -288,6 +288,8 @@ impl<'src> Lexer<'src> {
             b']' => self.eat_byte(T![']']),
             b'{' => self.eat_byte(T!['{']),
             b'}' => self.eat_byte(T!['}']),
+            b'(' => self.eat_byte(T!['(']),
+            b')' => self.eat_byte(T![')']),
             b'$' => self.lex_variable(),
             _ if is_leading_identifier_byte(current) => self.lex_name(current),
             _ if (b'0'..=b'9').contains(&current) || current == b'-' => self.lex_number(current),
@@ -483,9 +485,7 @@ impl<'src> Lexer<'src> {
                     self.advance(1);
 
                     match self.current_byte() {
-                        Some(b'$' | b'\\' | b'"' | b'n') => {
-                            self.advance(1)
-                        }
+                        Some(b'$' | b'\\' | b'"' | b'n') => self.advance(1),
 
                         Some(b'u') => match (self.lex_unicode_escape(), state) {
                             (Ok(_), _) => {}
@@ -507,11 +507,12 @@ impl<'src> Lexer<'src> {
                                 let c = self.current_char_unchecked();
                                 self.diagnostics.push(
                                     ParseDiagnostic::new(
-
                                         "Invalid escape sequence",
                                         escape_start..self.text_position() + c.text_len(),
                                     )
-                                        .with_hint(r#"Valid escape sequences are: `\$`, `\\`, `\"`, `\n`."#),
+                                    .with_hint(
+                                        r#"Valid escape sequences are: `\$`, `\\`, `\"`, `\n`."#,
+                                    ),
                                 );
                                 state = LexStringState::InvalidEscapeSequence;
                             }
@@ -596,20 +597,19 @@ impl<'src> Lexer<'src> {
                     self.advance(1);
 
                     match self.current_byte() {
-                        Some(b'$' | b'\\' | b'`' | b'n') => {
-                            self.advance(1)
-                        }
+                        Some(b'$' | b'\\' | b'`' | b'n') => self.advance(1),
 
                         Some(_) => {
                             if matches!(state, LexBacktickSnippet::InSnippet) {
                                 let c = self.current_char_unchecked();
                                 self.diagnostics.push(
                                     ParseDiagnostic::new(
-
                                         "Invalid escape sequence",
                                         escape_start..self.text_position() + c.text_len(),
                                     )
-                                        .with_hint(r#"Valid escape sequences are: `\$`, `\\`, `\``, `\n`."#),
+                                    .with_hint(
+                                        r#"Valid escape sequences are: `\$`, `\\`, `\``, `\n`."#,
+                                    ),
                                 );
                                 state = LexBacktickSnippet::InvalidEscapeSequence;
                             }
@@ -727,12 +727,12 @@ impl<'src> Lexer<'src> {
                 return match &buffer[..len] {
                     b"r" => self.lex_regex(),
                     _ => {
-                        self.diagnostics.push(ParseDiagnostic::new(
-
-                            "Unxpected string prefix",
-                            name_start..self.text_position(),
-                        )
-                            .with_hint("Use the `r` prefix to create a regex literal.")
+                        self.diagnostics.push(
+                            ParseDiagnostic::new(
+                                "Unxpected string prefix",
+                                name_start..self.text_position(),
+                            )
+                            .with_hint("Use the `r` prefix to create a regex literal."),
                         );
 
                         ERROR_TOKEN
@@ -742,24 +742,24 @@ impl<'src> Lexer<'src> {
                 return match &buffer[..len] {
                     b"r" => match self.lex_backtick_snippet() {
                         GRIT_BACKTICK_SNIPPET => GRIT_SNIPPET_REGEX_LITERAL,
-                        other => other
-                    }
+                        other => other,
+                    },
                     b"raw" => match self.lex_backtick_snippet() {
                         GRIT_BACKTICK_SNIPPET => GRIT_RAW_BACKTICK_SNIPPET,
-                        other => other
-                    }
+                        other => other,
+                    },
                     _ => {
-                        self.diagnostics.push(ParseDiagnostic::new(
-
-                            "Unxpected snippet prefix",
-                            name_start..self.text_position(),
-                        )
-                            .with_hint("Supported snippet prefixes are `r` and `raw`.")
+                        self.diagnostics.push(
+                            ParseDiagnostic::new(
+                                "Unxpected snippet prefix",
+                                name_start..self.text_position(),
+                            )
+                            .with_hint("Supported snippet prefixes are `r` and `raw`."),
                         );
-                        
+
                         ERROR_TOKEN
                     }
-                } 
+                };
             } else {
                 break;
             }

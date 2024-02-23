@@ -19,10 +19,6 @@ biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_unicode_table = { workspace = true }
 bitflags            = { workspace = true }
-cfg-if              = "1.0.0"
-drop_bomb           = "0.1.5"
-indexmap            = { workspace = true }
-rustc-hash          = { workspace = true }
 schemars            = { workspace = true, optional = true }
 serde               = { workspace = true, features = ["derive"] }
 serde_json          = { workspace = true }
@@ -31,7 +27,7 @@ tracing             = { workspace = true }
 unicode-bom         = { workspace = true }
 
 [dev-dependencies]
-expect-test       = "1.2.2"
+insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { workspace = true }

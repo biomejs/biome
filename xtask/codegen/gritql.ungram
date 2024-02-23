@@ -45,11 +45,13 @@ GritBogusNamedArg = SyntaxElement*
 GritBogusPredicate = SyntaxElement*
 
 GritRoot =
+    bom: 'UNICODE_BOM'?
     version: GritVersion?
     language: GritLanguageDeclaration?
     definitions: GritDefinitionList?
     pattern: AnyGritPattern?
     definitions_continued: GritDefinitionList?
+    eof: 'EOF'
 
 GritSequential = 'sequential' '{' sequential: GritSequentialList '}'
 GritSequentialList = AnyGritPattern (',' AnyGritPattern)* ','?
@@ -65,14 +67,15 @@ AnyGritDefinition =
 
 GritDefinitionList = AnyGritDefinition ('newline' AnyGritDefinition)* 'newline'?
 
-GritVersion = 'engine' 'biome' '(' GritDoubleLiteral ')'
+GritVersion = 'engine' 'biome' '(' GritDoubleValue ')'
 
 GritLanguageDeclaration =
     'language'
     name: GritLanguageName
     flavor: GritLanguageFlavor?
+    ';'?
 
-GritLanguageFlavor = '(' GritLanguageFlavorList ')' ';'?
+GritLanguageFlavor = '(' GritLanguageFlavorList ')'
 GritLanguageFlavorList = GritLanguageFlavorKind (',' GritLanguageFlavorKind)* ','?
 GritLanguageFlavorKind =
     flavor_kind: (
@@ -147,7 +150,7 @@ GritPatternAs =
     pattern: AnyGritPattern 'as' variable: GritVariable
 
 GritPatternLimit =
-    pattern: AnyGritPattern 'limit' limit: GritIntLiteral
+    pattern: AnyGritPattern 'limit' limit: GritIntValue
 
 // statement, in the engine this is a predicate that always evaluates to true
 // This is useful for initializing variables at the root of a pattern definition
@@ -163,10 +166,10 @@ GritPatternWhere =
 
 AnyGritLiteral =
     GritCodeSnippet
-    | GritStringLiteral
-    | GritIntLiteral
-    | GritDoubleLiteral
-    | GritBooleanLiteral
+    | GritStringValue
+    | GritIntValue
+    | GritDoubleValue
+    | GritBooleanValue
     | GritUndefined
     | GritMap
     | GritList
@@ -303,7 +306,7 @@ GritListAccessor =
     ']'
 
 GritListAccessorSubject = GritList | AnyGritContainer
-GritListIndex = AnyGritContainer | GritNegativeIntLiteral | GritIntLiteral
+GritListIndex = AnyGritContainer | GritNegativeIntValue | GritIntValue
 
 GritDot = '.'
 
@@ -390,7 +393,7 @@ AnyGritPredicate =
     | GritPredicateMatch
     | GritPredicateCall
     | '(' AnyGritPredicate ')'
-    | GritBooleanLiteral
+    | GritBooleanValue
     | GritPredicateReturn
     | GritBogusPredicate
 
@@ -497,7 +500,7 @@ GritPredicateReturn =
 
 // --- tokens and lexical definitions
 
-GritBooleanLiteral = 'true' | 'false'
+GritBooleanValue = 'true' | 'false'
 
 GritVariable = 'grit_variable'
 GritVariableList = GritVariable (',' GritVariable)* ','?
@@ -536,17 +539,17 @@ GritNot = 'not' | '!'
 
 GritUndefined = 'undefined'
 
-GritIntLiteral = value: 'grit_int_literal'
-GritNegativeIntLiteral = value: 'grit_negative_int_literal'
+GritIntValue = value: 'grit_int_literal'
+GritNegativeIntValue = value: 'grit_negative_int_literal'
 
-GritDoubleLiteral = value: 'grit_double_literal'
+GritDoubleValue = value: 'grit_double_literal'
 
-GritStringLiteral = value: 'grit_string_literal'
+GritStringValue = value: 'grit_string_literal'
 
-GritRegex = GritRegexLiteral | GritSnippetRegex
+GritRegex = GritRegexValue | GritSnippetRegexValue
 
-GritRegexLiteral = value: 'grit_regex_literal'
+GritRegexValue = value: 'grit_regex_literal'
 
-GritSnippetRegex = value: 'grit_snippet_regex_literal'
+GritSnippetRegexValue = value: 'grit_snippet_regex_literal'
 
 GritAnnotation = 'grit_annotation'

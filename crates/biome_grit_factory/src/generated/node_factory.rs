@@ -120,7 +120,7 @@ pub fn any_grit_predicate(
     l_paren_token: SyntaxToken,
     any_grit_predicate: AnyGritPredicate,
     r_paren_token: SyntaxToken,
-    grit_boolean_literal: GritBooleanLiteral,
+    grit_boolean_value: GritBooleanValue,
     grit_predicate_return: GritPredicateReturn,
     grit_bogus_predicate: GritBogusPredicate,
 ) -> AnyGritPredicate {
@@ -149,7 +149,7 @@ pub fn any_grit_predicate(
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(any_grit_predicate.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
-            Some(SyntaxElement::Node(grit_boolean_literal.into_syntax())),
+            Some(SyntaxElement::Node(grit_boolean_value.into_syntax())),
             Some(SyntaxElement::Node(grit_predicate_return.into_syntax())),
             Some(SyntaxElement::Node(grit_bogus_predicate.into_syntax())),
         ],
@@ -209,12 +209,9 @@ pub fn grit_backtick_snippet(value_token: SyntaxToken) -> GritBacktickSnippet {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn grit_boolean_literal(
-    true_token: SyntaxToken,
-    false_token: SyntaxToken,
-) -> GritBooleanLiteral {
-    GritBooleanLiteral::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_BOOLEAN_LITERAL,
+pub fn grit_boolean_value(true_token: SyntaxToken, false_token: SyntaxToken) -> GritBooleanValue {
+    GritBooleanValue::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BOOLEAN_VALUE,
         [
             Some(SyntaxElement::Token(true_token)),
             Some(SyntaxElement::Token(false_token)),
@@ -369,15 +366,9 @@ impl GritDotdotdotBuilder {
         ))
     }
 }
-pub fn grit_double_literal(value_token: SyntaxToken) -> GritDoubleLiteral {
-    GritDoubleLiteral::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_DOUBLE_LITERAL,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
-pub fn grit_double_quote_snippet(value_token: SyntaxToken) -> GritDoubleQuoteSnippet {
-    GritDoubleQuoteSnippet::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_DOUBLE_QUOTE_SNIPPET,
+pub fn grit_double_value(value_token: SyntaxToken) -> GritDoubleValue {
+    GritDoubleValue::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_DOUBLE_VALUE,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -450,9 +441,9 @@ impl GritFunctionDefinitionBuilder {
         ))
     }
 }
-pub fn grit_int_literal(value_token: SyntaxToken) -> GritIntLiteral {
-    GritIntLiteral::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_INT_LITERAL,
+pub fn grit_int_value(value_token: SyntaxToken) -> GritIntValue {
+    GritIntValue::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_INT_VALUE,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -464,16 +455,22 @@ pub fn grit_language_declaration(
         language_token,
         name,
         flavor: None,
+        semicolon_token: None,
     }
 }
 pub struct GritLanguageDeclarationBuilder {
     language_token: SyntaxToken,
     name: GritLanguageName,
     flavor: Option<GritLanguageFlavor>,
+    semicolon_token: Option<SyntaxToken>,
 }
 impl GritLanguageDeclarationBuilder {
     pub fn with_flavor(mut self, flavor: GritLanguageFlavor) -> Self {
         self.flavor = Some(flavor);
+        self
+    }
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
         self
     }
     pub fn build(self) -> GritLanguageDeclaration {
@@ -484,6 +481,8 @@ impl GritLanguageDeclarationBuilder {
                 Some(SyntaxElement::Node(self.name.into_syntax())),
                 self.flavor
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
             ],
         ))
     }
@@ -492,39 +491,15 @@ pub fn grit_language_flavor(
     l_paren_token: SyntaxToken,
     grit_language_flavor_list: GritLanguageFlavorList,
     r_paren_token: SyntaxToken,
-) -> GritLanguageFlavorBuilder {
-    GritLanguageFlavorBuilder {
-        l_paren_token,
-        grit_language_flavor_list,
-        r_paren_token,
-        semicolon_token: None,
-    }
-}
-pub struct GritLanguageFlavorBuilder {
-    l_paren_token: SyntaxToken,
-    grit_language_flavor_list: GritLanguageFlavorList,
-    r_paren_token: SyntaxToken,
-    semicolon_token: Option<SyntaxToken>,
-}
-impl GritLanguageFlavorBuilder {
-    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
-        self.semicolon_token = Some(semicolon_token);
-        self
-    }
-    pub fn build(self) -> GritLanguageFlavor {
-        GritLanguageFlavor::unwrap_cast(SyntaxNode::new_detached(
-            GritSyntaxKind::GRIT_LANGUAGE_FLAVOR,
-            [
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                Some(SyntaxElement::Node(
-                    self.grit_language_flavor_list.into_syntax(),
-                )),
-                Some(SyntaxElement::Token(self.r_paren_token)),
-                self.semicolon_token
-                    .map(|token| SyntaxElement::Token(token)),
-            ],
-        ))
-    }
+) -> GritLanguageFlavor {
+    GritLanguageFlavor::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_LANGUAGE_FLAVOR,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(grit_language_flavor_list.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
 }
 pub fn grit_language_flavor_kind(flavor_kind_token: SyntaxToken) -> GritLanguageFlavorKind {
     GritLanguageFlavorKind::unwrap_cast(SyntaxNode::new_detached(
@@ -552,13 +527,13 @@ pub fn grit_language_name(
 }
 pub fn grit_language_specific_snippet(
     language: GritLanguageName,
-    snippet: GritDoubleQuoteSnippet,
+    snippet_token: SyntaxToken,
 ) -> GritLanguageSpecificSnippet {
     GritLanguageSpecificSnippet::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_LANGUAGE_SPECIFIC_SNIPPET,
         [
             Some(SyntaxElement::Node(language.into_syntax())),
-            Some(SyntaxElement::Node(snippet.into_syntax())),
+            Some(SyntaxElement::Token(snippet_token)),
         ],
     ))
 }
@@ -780,9 +755,9 @@ pub fn grit_named_arg_with_default(
         ],
     ))
 }
-pub fn grit_negative_int_literal(value_token: SyntaxToken) -> GritNegativeIntLiteral {
-    GritNegativeIntLiteral::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_NEGATIVE_INT_LITERAL,
+pub fn grit_negative_int_value(value_token: SyntaxToken) -> GritNegativeIntValue {
+    GritNegativeIntValue::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_NEGATIVE_INT_VALUE,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -1171,7 +1146,7 @@ pub fn grit_pattern_includes(
 pub fn grit_pattern_limit(
     pattern: AnyGritPattern,
     limit_token: SyntaxToken,
-    limit: GritIntLiteral,
+    limit: GritIntValue,
 ) -> GritPatternLimit {
     GritPatternLimit::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_PATTERN_LIMIT,
@@ -1720,12 +1695,6 @@ pub fn grit_raw_backtick_snippet(value_token: SyntaxToken) -> GritRawBacktickSni
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn grit_regex_literal(value_token: SyntaxToken) -> GritRegexLiteral {
-    GritRegexLiteral::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_REGEX_LITERAL,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
 pub fn grit_regex_pattern(regex: GritRegex) -> GritRegexPatternBuilder {
     GritRegexPatternBuilder {
         regex,
@@ -1784,6 +1753,12 @@ impl GritRegexPatternVariablesBuilder {
         ))
     }
 }
+pub fn grit_regex_value(value_token: SyntaxToken) -> GritRegexValue {
+    GritRegexValue::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_REGEX_VALUE,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn grit_rewrite(
     left: AnyGritPattern,
     fat_arrow_token: SyntaxToken,
@@ -1820,8 +1795,10 @@ impl GritRewriteBuilder {
         ))
     }
 }
-pub fn grit_root() -> GritRootBuilder {
+pub fn grit_root(eof_token: SyntaxToken) -> GritRootBuilder {
     GritRootBuilder {
+        eof_token,
+        bom_token: None,
         version: None,
         language: None,
         definitions: None,
@@ -1830,6 +1807,8 @@ pub fn grit_root() -> GritRootBuilder {
     }
 }
 pub struct GritRootBuilder {
+    eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
     version: Option<GritVersion>,
     language: Option<GritLanguageDeclaration>,
     definitions: Option<GritDefinitionList>,
@@ -1837,6 +1816,10 @@ pub struct GritRootBuilder {
     definitions_continued: Option<GritDefinitionList>,
 }
 impl GritRootBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
     pub fn with_version(mut self, version: GritVersion) -> Self {
         self.version = Some(version);
         self
@@ -1861,6 +1844,7 @@ impl GritRootBuilder {
         GritRoot::unwrap_cast(SyntaxNode::new_detached(
             GritSyntaxKind::GRIT_ROOT,
             [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
                 self.version
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.language
@@ -1871,6 +1855,7 @@ impl GritRootBuilder {
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.definitions_continued
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
             ],
         ))
     }
@@ -1891,9 +1876,9 @@ pub fn grit_sequential(
         ],
     ))
 }
-pub fn grit_snippet_regex(value_token: SyntaxToken) -> GritSnippetRegex {
-    GritSnippetRegex::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_SNIPPET_REGEX,
+pub fn grit_snippet_regex_value(value_token: SyntaxToken) -> GritSnippetRegexValue {
+    GritSnippetRegexValue::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_SNIPPET_REGEX_VALUE,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -1906,9 +1891,9 @@ pub fn grit_some(some_token: SyntaxToken, pattern: MaybeCurlyGritPattern) -> Gri
         ],
     ))
 }
-pub fn grit_string_literal(value_token: SyntaxToken) -> GritStringLiteral {
-    GritStringLiteral::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_STRING_LITERAL,
+pub fn grit_string_value(value_token: SyntaxToken) -> GritStringValue {
+    GritStringValue::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_STRING_VALUE,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -1948,7 +1933,7 @@ pub fn grit_version(
     engine_token: SyntaxToken,
     biome_token: SyntaxToken,
     l_paren_token: SyntaxToken,
-    grit_double_literal: GritDoubleLiteral,
+    grit_double_value: GritDoubleValue,
     r_paren_token: SyntaxToken,
 ) -> GritVersion {
     GritVersion::unwrap_cast(SyntaxNode::new_detached(
@@ -1957,7 +1942,7 @@ pub fn grit_version(
             Some(SyntaxElement::Token(engine_token)),
             Some(SyntaxElement::Token(biome_token)),
             Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(grit_double_literal.into_syntax())),
+            Some(SyntaxElement::Node(grit_double_value.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
