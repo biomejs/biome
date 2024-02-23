@@ -23,19 +23,25 @@ pub(crate) fn organize_imports_with_guard<'ctx>(
 
             let input = workspace_file.input()?;
             let mut output = sorted.code;
-            if output.is_empty() {
-                return Ok(FileStatus::Ignored);
-            }
 
             match workspace_file.as_extension() {
                 Some("astro") => {
+                    if output.is_empty() {
+                        return Ok(FileStatus::Unchanged);
+                    }
                     output = AstroFileHandler::output(input.as_str(), output.as_str());
                 }
                 Some("vue") => {
+                    if output.is_empty() {
+                        return Ok(FileStatus::Unchanged);
+                    }
                     output = VueFileHandler::output(input.as_str(), output.as_str());
                 }
 
                 Some("svelte") => {
+                    if output.is_empty() {
+                        return Ok(FileStatus::Unchanged);
+                    }
                     output = SvelteFileHandler::output(input.as_str(), output.as_str());
                 }
                 _ => {}
@@ -52,9 +58,10 @@ pub(crate) fn organize_imports_with_guard<'ctx>(
                         diff_kind: DiffKind::OrganizeImports,
                     }));
                 }
+                Ok(FileStatus::Changed)
+            } else {
+                Ok(FileStatus::Unchanged)
             }
-
-            Ok(FileStatus::Success)
         },
     )
 }

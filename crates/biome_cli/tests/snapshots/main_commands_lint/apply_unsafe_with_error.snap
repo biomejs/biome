@@ -66,7 +66,7 @@ test2.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━�
 ```
 
 ```block
-Fixed 2 file(s) in <TIME>
+Checked 2 file(s) in <TIME>; 0 file(s) are changed, 2 file(s) are unchanged.
 ```
 
 

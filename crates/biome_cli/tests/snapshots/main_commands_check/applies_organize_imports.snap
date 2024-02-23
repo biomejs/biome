@@ -19,7 +19,7 @@ import * as something from "../something";
 # Emitted Messages
 
 ```block
-Fixed 1 file(s) in <TIME>
+Checked 1 file(s) in <TIME>; 0 file(s) are changed, 1 file(s) are unchanged.
 ```
 
 

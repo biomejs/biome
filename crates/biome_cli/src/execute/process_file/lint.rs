@@ -2,7 +2,7 @@ use crate::execute::diagnostics::ResultExt;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use biome_diagnostics::{category, Error};
-use biome_service::file_handlers::{AstroFileHandler, VueFileHandler};
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;
@@ -21,7 +21,7 @@ pub(crate) fn lint_with_guard<'ctx>(
         move || {
             let mut errors = 0;
             let mut input = workspace_file.input()?;
-
+            let mut changed = false;
             if let Some(fix_mode) = ctx.execution.as_fix_file_mode() {
                 let fix_result = workspace_file
                     .guard()
@@ -36,21 +36,22 @@ pub(crate) fn lint_with_guard<'ctx>(
                 });
 
                 let mut output = fix_result.code;
+
                 if output != input {
-                    if workspace_file.as_extension() == Some("astro") {
-                        if output.is_empty() {
-                            return Ok(FileStatus::Ignored);
+                    match workspace_file.as_extension() {
+                        Some("astro") => {
+                            output = AstroFileHandler::output(input.as_str(), output.as_str());
                         }
-                        output = AstroFileHandler::output(input.as_str(), output.as_str());
+                        Some("vue") => {
+                            output = VueFileHandler::output(input.as_str(), output.as_str());
+                        }
+                        Some("svelte") => {
+                            output = SvelteFileHandler::output(input.as_str(), output.as_str());
+                        }
+                        _ => {}
                     }
 
-                    if workspace_file.as_extension() == Some("vue") {
-                        if output.is_empty() {
-                            return Ok(FileStatus::Ignored);
-                        }
-                        output = VueFileHandler::output(input.as_str(), output.as_str());
-                    }
-
+                    changed = true;
                     workspace_file.update_file(output)?;
                     input = workspace_file.input()?;
                 }
@@ -77,6 +78,7 @@ pub(crate) fn lint_with_guard<'ctx>(
                 let input = match workspace_file.as_extension() {
                     Some("astro") => AstroFileHandler::input(input.as_str()).to_string(),
                     Some("vue") => VueFileHandler::input(input.as_str()).to_string(),
+                    Some("svelte") => SvelteFileHandler::input(input.as_str()).to_string(),
                     _ => input,
                 };
 
@@ -94,8 +96,10 @@ pub(crate) fn lint_with_guard<'ctx>(
 
             if errors > 0 {
                 Ok(FileStatus::Message(Message::Failure))
+            } else if changed {
+                Ok(FileStatus::Changed)
             } else {
-                Ok(FileStatus::Success)
+                Ok(FileStatus::Unchanged)
             }
         },
     )

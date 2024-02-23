@@ -143,10 +143,17 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     //
     // This is a workaround, and it might not work for all cases.
     const PATTERN: &str = "file(s) in ";
+    const SEMICOLON: &str = ";";
     if let Some(start) = output.find(PATTERN) {
-        output
-            .to_mut()
-            .replace_range(start + PATTERN.len().., "<TIME>");
+        if let Some(start_semi) = output.find(SEMICOLON) {
+            output
+                .to_mut()
+                .replace_range(start + PATTERN.len()..start_semi, "<TIME>");
+        } else {
+            output
+                .to_mut()
+                .replace_range(start + PATTERN.len().., "<TIME>");
+        }
     }
 
     // Normalize the name of the current executable to "biome"

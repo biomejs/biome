@@ -31,13 +31,15 @@ use std::{
 };
 
 struct CheckResult {
-    count: usize,
+    changed: usize,
+    unchanged: usize,
     duration: Duration,
     errors: u32,
 }
+
 impl fmt::Display for CheckResult {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> io::Result<()> {
-        markup!(<Info>"Checked "{self.count}" file(s) in "{self.duration}</Info>).fmt(fmt)?;
+        markup!(<Info>"Checked "{self.changed + self.unchanged}" file(s) in "{self.duration}</Info>).fmt(fmt)?;
 
         if self.errors > 0 {
             markup!("\n"<Error>"Found "{self.errors}" error(s)"</Error>).fmt(fmt)?
@@ -64,7 +66,8 @@ pub(crate) fn traverse(
     let (interner, recv_files) = PathInterner::new();
     let (sender, receiver) = unbounded();
 
-    let processed = AtomicUsize::new(0);
+    let changed = AtomicUsize::new(0);
+    let unchanged = AtomicUsize::new(0);
     let skipped = AtomicUsize::new(0);
 
     let fs = &*session.app.fs;
@@ -99,7 +102,8 @@ pub(crate) fn traverse(
                 workspace,
                 execution: &execution,
                 interner,
-                processed: &processed,
+                changed: &changed,
+                unchanged: &unchanged,
                 skipped: &skipped,
                 messages: sender,
                 remaining_diagnostics: &remaining_diagnostics,
@@ -113,7 +117,9 @@ pub(crate) fn traverse(
 
     let errors = printer.errors();
     let warnings = printer.warnings();
-    let count = processed.load(Ordering::Relaxed);
+    let changed = changed.load(Ordering::Relaxed);
+    let unchanged = unchanged.load(Ordering::Relaxed);
+    let count = changed + unchanged;
     let skipped = skipped.load(Ordering::Relaxed);
 
     if execution.should_report_to_terminal() {
@@ -121,12 +127,13 @@ pub(crate) fn traverse(
             TraversalMode::Check { .. } | TraversalMode::Lint { .. } => {
                 if execution.as_fix_file_mode().is_some() {
                     console.log(markup! {
-                        <Info>"Fixed "{count}" file(s) in "{duration}</Info>
+                        <Info>"Checked "{count}" file(s) in "{duration}"; "{changed}" file(s) are changed, "{unchanged}" file(s) are unchanged."</Info>
                     });
                 } else {
                     console.log(markup!({
                         CheckResult {
-                            count,
+                            changed,
+                            unchanged,
                             duration,
                             errors,
                         }
@@ -136,7 +143,8 @@ pub(crate) fn traverse(
             TraversalMode::CI { .. } => {
                 console.log(markup!({
                     CheckResult {
-                        count,
+                        changed,
+                        unchanged,
                         duration,
                         errors,
                     }
@@ -149,7 +157,7 @@ pub(crate) fn traverse(
             }
             TraversalMode::Format { write: true, .. } => {
                 console.log(markup! {
-                    <Info>"Formatted "{count}" file(s) in "{duration}</Info>
+                    <Info>"Formatted "{changed}" file(s) in "{duration}"; "{unchanged}" file(s) are unchanged."</Info>
                 });
             }
 
@@ -576,8 +584,10 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     pub(crate) execution: &'ctx Execution,
     /// File paths interner cache used by the filesystem traversal
     interner: PathInterner,
-    /// Shared atomic counter storing the number of processed files
-    processed: &'ctx AtomicUsize,
+    /// Shared atomic counter storing the number of changed files
+    changed: &'ctx AtomicUsize,
+    /// Shared atomic counter storing the number of unchanged files
+    unchanged: &'ctx AtomicUsize,
     /// Shared atomic counter storing the number of skipped files
     skipped: &'ctx AtomicUsize,
     /// Channel sending messages to the display thread
@@ -588,8 +598,11 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
 }
 
 impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
-    pub(crate) fn increment_processed(&self) {
-        self.processed.fetch_add(1, Ordering::Relaxed);
+    pub(crate) fn increment_changed(&self) {
+        self.changed.fetch_add(1, Ordering::Relaxed);
+    }
+    pub(crate) fn increment_unchanged(&self) {
+        self.unchanged.fetch_add(1, Ordering::Relaxed);
     }
 
     /// Send a message to the display thread
@@ -694,15 +707,23 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
 /// traversal function returns Err or panics)
 fn handle_file(ctx: &TraversalOptions, path: &Path) {
     match catch_unwind(move || process_file(ctx, path)) {
-        Ok(Ok(FileStatus::Success)) => {}
+        Ok(Ok(FileStatus::Changed)) => {
+            ctx.increment_changed();
+        }
+        Ok(Ok(FileStatus::Unchanged)) => {
+            ctx.increment_unchanged();
+        }
         Ok(Ok(FileStatus::Message(msg))) => {
+            ctx.increment_unchanged();
             ctx.push_message(msg);
         }
         Ok(Ok(FileStatus::Protected(file_path))) => {
+            ctx.increment_unchanged();
             ctx.push_diagnostic(WorkspaceError::protected_file(file_path).into());
         }
         Ok(Ok(FileStatus::Ignored)) => {}
         Ok(Err(err)) => {
+            ctx.increment_unchanged();
             ctx.skipped.fetch_add(1, Ordering::Relaxed);
             ctx.push_message(err);
         }
