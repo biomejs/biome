@@ -13,6 +13,50 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### New features
+
+- Add partial for `.astro` files. Biome is able to sort imports inside the frontmatter of the Astro files. Contributed
+  by @ematipico
+
+  ```diff
+  ---
+  - import { getLocale } from "astro:i18n";
+  - import { Code } from "astro:components";
+  + import { getLocale } from "astro:i18n";
+  + import { Code } from "astro:components";
+  ---
+
+  <div></div>
+  ```
+
+- Add partial for `.vue` files. Biome is able to sort imports inside the script block of Vue files. Contributed by
+  @nhedger
+
+  ```diff
+  <script setup lang="ts">
+     - import Button from "./components/Button.vue";
+     - import * as vueUse from "vue-use";
+     + import * as vueUse from "vue-use";
+     + import Button from "./components/Button.vue";
+  </script/>
+
+  <template></template>
+  ```
+
+- Add partial for `.svelte` files. Biome is able to sort imports inside the script block of Svelte files. Contributed by
+  @ematipico
+
+  ```diff
+  <script setup lang="ts">
+    - import Button from "./components/Button.svelte";
+    - import * as svelteUse from "svelte-use";
+    + import * as svelteUse from "svelte-use";
+    + import Button from "./components/Button.svelte";
+  </script/>
+
+  <div></div>
+  ```
+
 #### Bug fixes
 
 - Fix [#1748](https://github.com/biomejs/biome/issues/1748). Now for the following case we won't provide an unsafe fix
