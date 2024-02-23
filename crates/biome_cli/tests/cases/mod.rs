@@ -12,3 +12,4 @@ mod overrides_linter;
 mod overrides_organize_imports;
 mod protected_files;
 mod unknown_files;
+mod handle_svelte_files;

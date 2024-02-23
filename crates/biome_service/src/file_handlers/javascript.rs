@@ -292,13 +292,13 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 .language
                 .as_js_file_source()
                 .or(JsFileSource::try_from(params.path.as_path()).ok())
-            else {
-                return LintResults {
-                    errors: 0,
-                    diagnostics: vec![],
-                    skipped_diagnostics: 0,
+                else {
+                    return LintResults {
+                        errors: 0,
+                        diagnostics: vec![],
+                        skipped_diagnostics: 0,
+                    };
                 };
-            };
             let tree = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
             let analyzer_options =
@@ -408,21 +408,21 @@ struct ActionsVisitor<'a> {
 }
 
 impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
-    fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
+    fn record_category<C: GroupCategory<Language=JsLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
         }
     }
 
-    fn record_group<G: RuleGroup<Language = JsLanguage>>(&mut self) {
+    fn record_group<G: RuleGroup<Language=JsLanguage>>(&mut self) {
         G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
-    where
-        R: biome_analyze::Rule + 'static,
-        R::Query: biome_analyze::Queryable<Language = JsLanguage>,
-        <R::Query as biome_analyze::Queryable>::Output: Clone,
+        where
+            R: biome_analyze::Rule + 'static,
+            R::Query: biome_analyze::Queryable<Language=JsLanguage>,
+            <R::Query as biome_analyze::Queryable>::Output: Clone,
     {
         self.enabled_rules.push(RuleFilter::Rule(
             <R::Group as RuleGroup>::NAME,
@@ -529,9 +529,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let Some(file_source) = language
         .as_js_file_source()
         .or(JsFileSource::try_from(rome_path.as_path()).ok())
-    else {
-        return Err(extension_error(rome_path));
-    };
+        else {
+            return Err(extension_error(rome_path));
+        };
     let mut tree: AnyJsRoot = parse.tree();
     let mut actions = Vec::new();
 
@@ -617,8 +617,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         settings.format_options::<JsLanguage>(rome_path),
                         tree.syntax(),
                     )?
-                    .print()?
-                    .into_code()
+                        .print()?
+                        .into_code()
                 } else {
                     tree.syntax().to_string()
                 };
@@ -747,7 +747,7 @@ fn rename(
     }
 }
 
-fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
+pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
     let mut tree: AnyJsRoot = parse.tree();
 
     let filter = AnalysisFilter {

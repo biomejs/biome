@@ -11,7 +11,6 @@ use biome_diagnostics::{category, Diagnostic, Error as DiagnosticError};
 use biome_js_syntax::suppression::SuppressionDiagnostic;
 use biome_js_syntax::{suppression::parse_suppression_comment, JsFileSource, JsLanguage};
 use biome_project::PackageJson;
-use log::trace;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::{borrow::Cow, error::Error};
@@ -66,10 +65,10 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     manifest: Option<PackageJson>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
-where
-    V: FnMut(&MatchQueryParams<JsLanguage>) + 'a,
-    F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
-    B: 'a,
+    where
+        V: FnMut(&MatchQueryParams<JsLanguage>) + 'a,
+        F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
+        B: 'a,
 {
     fn parse_linter_suppression_comment(
         text: &str,
@@ -137,7 +136,6 @@ where
         services.insert_service(Arc::new(manifest));
     }
     services.insert_service(source_type);
-    trace!("Analyzer run!!!");
     (
         analyzer.run(AnalyzerContext {
             root: root.clone(),
@@ -160,9 +158,9 @@ pub fn analyze<'a, F, B>(
     manifest: Option<PackageJson>,
     emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
-where
-    F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
-    B: 'a,
+    where
+        F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
+        B: 'a,
 {
     analyze_with_inspect_matcher(
         root,

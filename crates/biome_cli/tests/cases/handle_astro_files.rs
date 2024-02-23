@@ -30,6 +30,18 @@ const ASTRO_FILE_DEBUGGER_AFTER: &str = r#"---
 ---
 <div></div>"#;
 
+const ASTRO_FILE_IMPORTS_BEFORE: &str = r#"---
+import { getLocale } from "astro:i18n";
+import { Code } from "astro:components";
+---
+<div></div>"#;
+
+const ASTRO_FILE_IMPORTS_AFTER: &str = r#"---
+import { Code } from "astro:components";
+import { getLocale } from "astro:i18n";
+---
+<div></div>"#;
+
 #[test]
 fn format_astro_files() {
     let mut fs = MemoryFileSystem::default();
@@ -74,7 +86,7 @@ fn format_astro_files_write() {
                 "--write",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-            .as_slice(),
+                .as_slice(),
         ),
     );
 
@@ -108,7 +120,7 @@ fn format_empty_astro_files_write() {
                 "--write",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-            .as_slice(),
+                .as_slice(),
         ),
     );
 
@@ -173,7 +185,7 @@ fn lint_and_fix_astro_files() {
                 "--apply-unsafe",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-            .as_slice(),
+                .as_slice(),
         ),
     );
 
@@ -184,6 +196,84 @@ fn lint_and_fix_astro_files() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_and_fix_astro_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+
+#[test]
+fn sorts_imports_check() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let astro_file_path = Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        ASTRO_FILE_IMPORTS_BEFORE.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("check"),
+                "--formatter-enabled=false",
+                "--linter-enabled=false",
+                astro_file_path.as_os_str().to_str().unwrap(),
+            ]
+                .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, astro_file_path, ASTRO_FILE_IMPORTS_BEFORE);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "sorts_imports_check",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn sorts_imports_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let astro_file_path = Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        ASTRO_FILE_IMPORTS_BEFORE.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("check"),
+                "--formatter-enabled=false",
+                "--linter-enabled=false",
+                "--apply",
+                astro_file_path.as_os_str().to_str().unwrap(),
+            ]
+                .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, astro_file_path, ASTRO_FILE_IMPORTS_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "sorts_imports_write",
         fs,
         console,
         result,

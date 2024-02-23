@@ -13,6 +13,49 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### New features
+
+- Add partial for `.astro` files. Biome is able to sort imports inside the frontmatter of the Astro files. Contributed
+  by @ematipico
+
+  ```diff
+  ---
+  - import { getLocale } from "astro:i18n";
+  - import { Code } from "astro:components";
+  + import { getLocale } from "astro:i18n";
+  + import { Code } from "astro:components";
+  ---
+
+  <div></div>
+  ```
+- Add partial for `.vue` files. Biome is able to sort imports inside the script block of Vue files. Contributed by
+  @nhedger
+
+  ```diff
+  <script setup lang="ts">
+     - import Button from "./components/Button.vue";
+     - import * as vueUse from "vue-use";
+     + import * as vueUse from "vue-use";
+     + import Button from "./components/Button.vue";
+  </script/>
+
+  <template></template>
+  ```
+
+- Add partial for `.svelte` files. Biome is able to sort imports inside the script block of Svelte files. Contributed by
+  @ematipico
+
+  ```diff
+  <script setup lang="ts">
+    - import Button from "./components/Button.svelte";
+    - import * as svelteUse from "svelte-use";
+    + import * as svelteUse from "svelte-use";
+    + import Button from "./components/Button.svelte";
+  </script/>
+
+  <div></div>
+  ```
+
 #### Bug fixes
 
 - Fix [#1748](https://github.com/biomejs/biome/issues/1748). Now for the following case we won't provide an unsafe fix
@@ -297,7 +340,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add rule [useNodeAssertStrict](https://biomejs.dev/linter/rules/use-node-assert-strict), which promotes the use
   of `node:assert/strict` over `node:assert`. Contributed by @ematipico
 
-- Add rule [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test) which disallows `export` or `modules.exports` in files
+- Add rule [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test) which disallows `export`
+  or `modules.exports` in files
   containing test. Contributed by @ah-yu
 
 #### Enhancements
@@ -394,6 +438,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ignores TsGlobalDeclaration. Contributed by @vasucp1207
 
 -
+
 Fix [#1640](https://github.com/biomejs/biome/issues/1640). [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers)
 code action now generates valid code when last member has a comment but no comma. Contributed by @kalleep
 
@@ -401,13 +446,16 @@ code action now generates valid code when last member has a comment but no comma
   false-positive case. Contributed by @togami2864
 
 -
+
 Fix [#1656](https://github.com/biomejs/biome/issues/1656). [useOptionalChain](https://biomejs.dev/linter/rules/use-optional-chain/)
 code action now correctly handles logical and chains where methods with the same name are invoked with different
 arguments:
+
 ```diff
 - tags·&&·tags.includes('a')·&&·tags.includes('b')
 + tags?.includes('a') && tags.includes('b')
 ```
+
 Contributed by @lucasweng
 
 - Fix [#1704](https://github.com/biomejs/biome/issues/1704). Convert `/` to escaped slash `\/` to avoid parsing error in
@@ -506,6 +554,7 @@ Contributed by @lucasweng
 #### Bug fixes
 
 -
+
 Fix [#1575](https://github.com/biomejs/biome/issues/1575). [noArrayIndexKey](https://biomejs.dev/linter/rules/no-array-index-key/)
 now captures array index value inside template literals and with string concatination. Contributed by @vasucp1207
 
@@ -728,6 +777,7 @@ now captures array index value inside template literals and with string concatin
 #### Bug fixes
 
 -
+
 Fix [#1335](https://github.com/biomejs/biome/issues/1335). [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/)
 now ignores code action on component props when the fragment is empty. Contributed by @vasucp1207
 
@@ -735,10 +785,12 @@ now ignores code action on component props when the fragment is empty. Contribut
   the `style` rule group instead of the `nursery` group. It is now correctly placed under `nursery`.
 
 -
+
 Fix [#1483](https://github.com/biomejs/biome/issues/1483). [useConsistentArrayType](https://biomejs.dev/linter/rules/use-consistent-array-type)
 now correctly handles its option. Contributed by @Conaclos
 
 -
+
 Fix [#1502](https://github.com/biomejs/biome/issues/1502). [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function)
 now correctly handle functions that return a (comma) sequence expression. Contributed by @Conaclos
 
@@ -757,6 +809,7 @@ Now, the rule wraps any comma sequence between parentheses:
 ```
 
 -
+
 Fix [#1473](https://github.com/biomejs/biome/issues/1473): [useHookAtTopLevel](https://biomejs.dev/linter/rules/use-hook-at-top-level/)
 now correctly handles React components and hooks that are nested inside other functions. Contributed by @arendjr
 
@@ -1120,24 +1173,27 @@ The following rules are promoted:
 #### Bug fixes
 
 -
+
 Fix [#1061](https://github.com/biomejs/biome/issues/1061). [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare)
 no longer reports overloads of `export default function`. Contributed by @Conaclos
 
 The following code is no longer reported:
 
 ```ts
-export default function(a: boolean): boolean;
-export default function(a: number): number;
-export default function(a: number | boolean): number | boolean {
+export default function (a: boolean): boolean;
+export default function (a: number): number;
+export default function (a: number | boolean): number | boolean {
   return a;
 }
 ```
 
 -
+
 Fix [#651](https://github.com/biomejs/biome/issues/651), [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies)
 no longer reports out of scope dependencies. Contributed by @kalleep
 
 The following code is no longer reported:
+
 ```ts
 let outer = false;
 
@@ -1149,6 +1205,7 @@ const Component = ({}) => {
 ```
 
 -
+
 Fix [#1191](https://github.com/biomejs/biome/issues/1191). [noUselessElse](https://biomejs.dev/linter/rules/no-useless-else)
 now preserve comments of the `else` clause. Contributed by @Conaclos
 
@@ -1181,6 +1238,7 @@ Now the rule suggests a fix that preserves the comment of the `else` clause:
 ```
 
 -
+
 Fix [#1383](https://github.com/biomejs/biome/issues/1383). [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type)
 now accepts the `void` type in type parameter lists.
 
@@ -1191,14 +1249,17 @@ f<void>();
 ```
 
 -
+
 Fix [#728](https://github.com/biomejs/biome/issues/728). [useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator)
 no longer outputs invalid code. Contributed by @Conaclos
 
 -
+
 Fix [#1167](https://github.com/biomejs/biome/issues/1167). [useValidAriaProps](https://biomejs.dev/linter/rules/use-valid-aria-props)
 no longer reports `aria-atomic` as invalid. Contributed by @unvalley
 
 -
+
 Fix [#1192](https://github.com/biomejs/biome/issues/1192). [useTemplate](https://biomejs.dev/linter/rules/use-template/)
 now correctly handles parenthesized expressions and respects type coercions. Contributed by @n-gude
 
@@ -1213,6 +1274,7 @@ These cases are now properly handled:
 ```
 
 -
+
 Fix [#1456](https://github.com/biomejs/biome/issues/1456). [useTemplate](https://biomejs.dev/linter/rules/use-template/)
 now reports expressions with an interpolated template literal and non-string expressions. Contributed by @n-gude
 
@@ -1223,6 +1285,7 @@ The following code is now reported:
 ```
 
 -
+
 Fix [#1436](https://github.com/biomejs/biome/issues/1436). [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function/)
 now applies a correct fix when a function expression is used in a call expression or a member access. Contributed by
 @Conaclos
@@ -1242,6 +1305,7 @@ It now proposes a fix that adds the needed parentheses:
 ```
 
 -
+
 Fix [#696](https://github.com/biomejs/biome/issues/696). [useHookAtTopLevel](https://biomejs.dev/linter/rules/use-hook-at-top-level)
 now correctly detects early returns before the calls to the hook.
 
@@ -1249,10 +1313,12 @@ now correctly detects early returns before the calls to the hook.
   trailing comma when needed to disambiguate a type parameter list from a JSX element. COntributed by @Conaclos
 
 -
+
 Fix [#578](https://github.com/biomejs/biome/issues/578). [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies)
 now correctly recognizes hooks namespaced under the `React` namespace. Contributed by @XiNiHa
 
 -
+
 Fix [#910](https://github.com/biomejs/biome/issues/910). [noSvgWithoutTitle](https://biomejs.dev/linter/rules/no-svg-without-title)
 now ignores `<svg>` element with `aria-hidden="true"`. COntributed by @vasucp1207
 
@@ -1384,6 +1450,7 @@ now ignores `<svg>` element with `aria-hidden="true"`. COntributed by @vasucp120
 #### Bug fixes
 
 -
+
 Fix [#918](https://github.com/biomejs/biome/issues/918). [useSimpleNumberKeys](https://biomejs.dev/linter/rules/use-simple-number-keys)
 no longer repports false positive on comments. Contributed by @kalleep
 
@@ -1392,6 +1459,7 @@ no longer repports false positive on comments. Contributed by @kalleep
   @Conaclos
 
 -
+
 Fix [#608](https://github.com/biomejs/biome/issues/608). [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies)
 no longer repports missing dependencies for React hooks without dependency array. Contributed by @kalleep
 
@@ -1510,6 +1578,7 @@ The following rules are now deprecated:
   clauses of TypeScript's conditional types. Contributed by @Conaclos
 
 -
+
 Fix [#653](https://github.com/biomejs/biome/issues/653). [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports)
 now correctly removes the entire line where the unused `import` is. Contributed by @Conaclos
 
@@ -1523,10 +1592,12 @@ now correctly removes the entire line where the unused `import` is. Contributed 
   correctly.
 
 -
+
 Fix [#727](https://github.com/biomejs/biome/issues/727). [noInferrableTypes](https://biomejs.dev/linter/rules/no-inferrable-types)
 now correctly keeps type annotations when the initialization expression is `null`. Contributed by @Conaclos
 
 -
+
 Fix [#784](https://github.com/biomejs/biome/issues/784), [noSvgWithoutTitle](https://biomejs.dev/linter/rules/no-svg-without-title)
 fixes false-positives to `aria-label` and reports svg's role attribute is implicit. Contributed by @unvalley
 
@@ -1927,6 +1998,7 @@ The following rules are now recommended:
   Contributed by @nikeee
 
 -
+
 Add [noInteractiveElementToNoninteractiveRole](https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role)
 rule. The rule enforces the non-interactive ARIA roles are not assigned to interactive HTML elements. Contributed by
 @nissy-dev
@@ -1983,18 +2055,22 @@ rule. The rule enforces the non-interactive ARIA roles are not assigned to inter
 #### Bug fixes
 
 -
+
 Fix [#294](https://github.com/biomejs/biome/issues/294). [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type/)
 no longer reports false positives for return types. Contributed by @b4s36t4
 
 -
+
 Fix [#313](https://github.com/biomejs/biome/issues/313). [noRedundantUseStrict](https://biomejs.dev/linter/rules/no-redundant-use-strict/)
 now keeps leading comments.
 
 -
+
 Fix [#383](https://github.com/biomejs/biome/issues/383). [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals)
 now provides correct code fixes when consecutive spaces are followed by a quantifier. Contributed by @Conaclos
 
 -
+
 Fix [#397](https://github.com/biomejs/biome/issues/397). [useNumericLiterals](https://biomejs.dev/linter/rules/use-numeric-literals)
 now provides correct code fixes for signed numbers. Contributed by @Conaclos
 
@@ -2741,6 +2817,7 @@ The following rules are now recommended:
   type members [#4478](https://github.com/rome/tools/issues/4478)
 
 -
+
 Improve [noConsoleLog](https://biomejs.dev/linter/rules/no-console-log/), [noGlobalObjectCalls](https://biomejs.dev/linter/rules/no-global-object-calls/), [useIsNan](https://biomejs.dev/linter/rules/use-is-nan/),
 and [useNumericLiterals](https://biomejs.dev/linter/rules/use-numeric-literals/) by handling `globalThis` and `window`
 namespaces.
