@@ -1,7 +1,7 @@
 use crate::file_handlers::{
     javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
     ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime,
-    ParserCapabilities,
+    ParseResult, ParserCapabilities,
 };
 use crate::settings::SettingsHandle;
 use crate::workspace::{FixFileResult, PullActionsResult};
@@ -9,11 +9,11 @@ use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
-use biome_js_syntax::JsFileSource;
+use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
-use biome_rowan::{FileSource, NodeCache};
+use biome_rowan::NodeCache;
 use lazy_static::lazy_static;
-use regex::Regex;
+use regex::{Match, Regex};
 use tracing::debug;
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -37,21 +37,17 @@ impl VueFileHandler {
     /// It extracts the JavaScript/TypeScript code contained in the script block of a Vue file
     ///
     /// If there's no script block, an empty string is returned.
-    pub fn vue_input(text: &str) -> &str {
-        let script = VUE_FENCE
-            .captures(text)
-            .and_then(|captures| captures.name("script"));
-        match script {
+    pub fn input(text: &str) -> &str {
+        match Self::matches_script(text) {
             Some(script) => &text[script.start()..script.end()],
             _ => "",
         }
     }
 
-    pub fn vue_output(input: &str, output: &str) -> String {
-        if let Some(script) = VUE_FENCE
-            .captures(input)
-            .and_then(|captures| captures.name("script"))
-        {
+    /// It takes the original content of a Vue file, and new output of an Vue file. The output is only the content contained inside the
+    /// Vue `<script>` tag. The function replaces `output` inside that `<script>`.
+    pub fn output(input: &str, output: &str) -> String {
+        if let Some(script) = Self::matches_script(input) {
             format!(
                 "{}{}{}",
                 &input[..script.start()],
@@ -63,7 +59,18 @@ impl VueFileHandler {
         }
     }
 
-    pub fn vue_file_source(text: &str) -> JsFileSource {
+    /// Returns the start byte offset of the Vue `<script>` tag
+    pub fn start(input: &str) -> Option<u32> {
+        Self::matches_script(input).map(|m| m.start() as u32 - 1)
+    }
+
+    fn matches_script(input: &str) -> Option<Match> {
+        VUE_FENCE
+            .captures(input)
+            .and_then(|captures| captures.name("script"))
+    }
+
+    pub fn file_source(text: &str) -> JsFileSource {
         let matches = VUE_FENCE.captures(text);
         matches
             .and_then(|captures| captures.name("lang"))
@@ -101,8 +108,8 @@ impl ExtensionHandler for VueFileHandler {
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
-                format_range: None,
-                format_on_type: None,
+                format_range: Some(format_range),
+                format_on_type: Some(format_on_type),
             },
         }
     }
@@ -114,9 +121,9 @@ fn parse(
     text: &str,
     _settings: SettingsHandle,
     cache: &mut NodeCache,
-) -> AnyParse {
-    let script = VueFileHandler::vue_input(text);
-    let language = VueFileHandler::vue_file_source(text);
+) -> ParseResult {
+    let script = VueFileHandler::input(text);
+    let language = VueFileHandler::file_source(text);
 
     debug!("Parsing file with language {:?}", language);
 
@@ -124,12 +131,18 @@ fn parse(
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
 
-    AnyParse::new(
-        // SAFETY: the parser should always return a root node
-        root.as_send().unwrap(),
-        diagnostics,
-        JsFileSource::ts().as_any_file_source(),
-    )
+    ParseResult {
+        any_parse: AnyParse::new(
+            // SAFETY: the parser should always return a root node
+            root.as_send().unwrap(),
+            diagnostics,
+        ),
+        language: Some(if language.is_typescript() {
+            Language::TypeScript
+        } else {
+            Language::JavaScript
+        }),
+    }
 }
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
@@ -139,6 +152,24 @@ fn format(
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format(rome_path, parse, settings)
+}
+
+pub(crate) fn format_range(
+    rome_path: &RomePath,
+    parse: AnyParse,
+    settings: SettingsHandle,
+    range: TextRange,
+) -> Result<Printed, WorkspaceError> {
+    javascript::format_range(rome_path, parse, settings, range)
+}
+
+pub(crate) fn format_on_type(
+    rome_path: &RomePath,
+    parse: AnyParse,
+    settings: SettingsHandle,
+    offset: TextSize,
+) -> Result<Printed, WorkspaceError> {
+    javascript::format_on_type(rome_path, parse, settings, offset)
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {

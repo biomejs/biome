@@ -76,12 +76,12 @@ Husky doesn't hide unstaged changes and is not able to provides the list of stag
 This is why it is often used in tandem with another tool such as _lint-staged_ or _git-format-staged_.
 
 If your project contains a `package.json`,
-you can automatically set up _husky_ hooks upon package installation using `scripts.postinstall`:
+you can automatically set up _husky_ hooks upon package installation using `scripts.prepare`:
 
 ```json title="package.json"
 {
   "scripts": {
-    "postinstall": "husky install"
+    "prepare": "husky"
   }
 }
 ```

@@ -74,13 +74,13 @@ pub(crate) fn format_with_guard<'ctx>(
                     if output.is_empty() {
                         return Ok(FileStatus::Ignored);
                     }
-                    output = AstroFileHandler::astro_output(input.as_str(), output.as_str());
+                    output = AstroFileHandler::output(input.as_str(), output.as_str());
                 }
                 Some("vue") => {
                     if output.is_empty() {
                         return Ok(FileStatus::Ignored);
                     }
-                    output = VueFileHandler::vue_output(input.as_str(), output.as_str());
+                    output = VueFileHandler::output(input.as_str(), output.as_str());
                 }
 
                 Some("svelte") => {

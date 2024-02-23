@@ -9,9 +9,10 @@ use biome_console::markup;
 use biome_diagnostics::PrintDescription;
 use biome_fs::{FileSystem, RomePath};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    FeaturesBuilder, OpenProjectParams, PullDiagnosticsParams, SupportsFeatureParams,
-    UpdateProjectParams,
+    FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
+    SupportsFeatureParams, UpdateProjectParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::{ConfigurationBasePath, Workspace};
@@ -308,12 +309,21 @@ impl Session {
                 categories |= RuleCategories::ACTION
             }
             let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
-                path: rome_path,
+                path: rome_path.clone(),
                 categories,
                 max_diagnostics: u64::MAX,
             })?;
 
             tracing::trace!("biome diagnostics: {:#?}", result.diagnostics);
+            let content = self.workspace.get_file_content(GetFileContentParams {
+                path: rome_path.clone(),
+            })?;
+            let offset = match rome_path.extension().and_then(|s| s.to_str()) {
+                Some("vue") => VueFileHandler::start(content.as_str()),
+                Some("astro") => AstroFileHandler::start(content.as_str()),
+                Some("svelte") => SvelteFileHandler::start(content.as_str()),
+                _ => None,
+            };
 
             let result = result
                 .diagnostics
@@ -324,6 +334,7 @@ impl Session {
                         &url,
                         &doc.line_index,
                         self.position_encoding(),
+                        offset,
                     ) {
                         Ok(diag) => Some(diag),
                         Err(err) => {

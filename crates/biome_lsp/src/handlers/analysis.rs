@@ -6,13 +6,16 @@ use anyhow::{Context, Result};
 use biome_analyze::{ActionCategory, SourceActionKind};
 use biome_diagnostics::Applicability;
 use biome_fs::RomePath;
+use biome_rowan::{TextRange, TextSize};
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    FeatureName, FeaturesBuilder, FixFileMode, FixFileParams, PullActionsParams,
-    SupportsFeatureParams,
+    FeatureName, FeaturesBuilder, FixFileMode, FixFileParams, GetFileContentParams,
+    PullActionsParams, SupportsFeatureParams,
 };
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
 use std::collections::HashMap;
+use std::ops::Sub;
 use tower_lsp::lsp_types::{
     self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse,
 };
@@ -30,7 +33,7 @@ fn fix_all_kind() -> CodeActionKind {
 /// Queries the [`AnalysisServer`] for code actions of the file matching its path
 ///
 /// If the AnalysisServer has no matching file, results in error.
-#[tracing::instrument(level = "debug", skip_all, fields(uri = display(&params.text_document.uri), range = debug(params.range), only = debug(&params.context.only), diagnostics = debug(&params.context.diagnostics)), err)]
+#[tracing::instrument(level = "debug", skip_all, fields(uri = display(& params.text_document.uri), range = debug(params.range), only = debug(& params.context.only), diagnostics = debug(& params.context.diagnostics)), err)]
 pub(crate) fn code_actions(
     session: &Session,
     params: CodeActionParams,
@@ -73,6 +76,15 @@ pub(crate) fn code_actions(
     let position_encoding = session.position_encoding();
 
     let diagnostics = params.context.diagnostics;
+    let content = session.workspace.get_file_content(GetFileContentParams {
+        path: rome_path.clone(),
+    })?;
+    let offset = match rome_path.extension().and_then(|s| s.to_str()) {
+        Some("vue") => VueFileHandler::start(content.as_str()),
+        Some("astro") => AstroFileHandler::start(content.as_str()),
+        Some("svelte") => SvelteFileHandler::start(content.as_str()),
+        _ => None,
+    };
     let cursor_range = from_proto::text_range(&doc.line_index, params.range, position_encoding)
         .with_context(|| {
             format!(
@@ -80,6 +92,20 @@ pub(crate) fn code_actions(
                 params.range, &doc.line_index,
             )
         })?;
+    let cursor_range = if let Some(offset) = offset {
+        if cursor_range.start().gt(&TextSize::from(offset)) {
+            TextRange::new(
+                cursor_range.start().sub(TextSize::from(offset)),
+                cursor_range.end().sub(TextSize::from(offset)),
+            )
+        } else {
+            cursor_range
+        }
+    } else {
+        cursor_range
+    };
+
+    debug!("Cursor range {:?}", &cursor_range);
 
     let result = match session.workspace.pull_actions(PullActionsParams {
         path: rome_path.clone(),
@@ -91,7 +117,7 @@ pub(crate) fn code_actions(
                 Ok(Some(Vec::new()))
             } else {
                 Err(err.into())
-            }
+            };
         }
     };
 
@@ -101,12 +127,20 @@ pub(crate) fn code_actions(
     // document if the action category "source.fixAll" was explicitly requested
     // by the language client
     let fix_all = if has_fix_all {
-        fix_all(session, &url, rome_path, &doc.line_index, &diagnostics)?
+        fix_all(
+            session,
+            &url,
+            rome_path.clone(),
+            &doc.line_index,
+            &diagnostics,
+            offset,
+        )?
     } else {
         None
     };
 
     let mut has_fixes = false;
+
     let mut actions: Vec<_> = result
         .actions
         .into_iter()
@@ -133,6 +167,7 @@ pub(crate) fn code_actions(
                 position_encoding,
                 &diagnostics,
                 action,
+                offset,
             )
             .ok()?;
 
@@ -167,6 +202,7 @@ fn fix_all(
     rome_path: RomePath,
     line_index: &LineIndex,
     diagnostics: &[lsp::Diagnostic],
+    offset: Option<u32>,
 ) -> Result<Option<CodeActionOrCommand>, WorkspaceError> {
     let should_format = session
         .workspace
@@ -198,6 +234,18 @@ fn fix_all(
             let position_encoding = session.position_encoding();
 
             let diag_range = from_proto::text_range(line_index, d.range, position_encoding).ok()?;
+            let diag_range = if let Some(offset) = offset {
+                if diag_range.start().gt(&TextSize::from(offset)) {
+                    TextRange::new(
+                        diag_range.start().sub(TextSize::from(offset)),
+                        diag_range.end().sub(TextSize::from(offset)),
+                    )
+                } else {
+                    diag_range
+                }
+            } else {
+                diag_range
+            };
             let has_matching_rule = fixed.actions.iter().any(|action| {
                 let Some((group_name, rule_name)) = &action.rule_name else {
                     return false;

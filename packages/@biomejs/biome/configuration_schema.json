@@ -1367,6 +1367,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExportsInTest": {
+					"description": "Disallow using export or module.exports in files containing tests",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFocusedTests": {
 					"description": "Disallow focused tests.",
 					"anyOf": [

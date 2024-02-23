@@ -247,12 +247,8 @@ use crate::event::Event::Token;
 use crate::token_source::{BumpWithContext, NthToken, TokenSource};
 use biome_console::fmt::Display;
 use biome_diagnostics::location::AsSpan;
-use biome_rowan::{
-    AnyFileSource, AstNode, FileSource, FileSourceError, Language, SendNode, SyntaxKind,
-    SyntaxNode, TextRange, TextSize,
-};
+use biome_rowan::{AstNode, Language, SendNode, SyntaxKind, SyntaxNode, TextRange, TextSize};
 use std::any::type_name;
-use std::path::Path;
 
 pub mod diagnostic;
 pub mod event;
@@ -894,20 +890,11 @@ pub trait SyntaxFeature: Sized {
 pub struct AnyParse {
     pub(crate) root: SendNode,
     pub(crate) diagnostics: Vec<ParseDiagnostic>,
-    pub(crate) file_source: AnyFileSource,
 }
 
 impl AnyParse {
-    pub fn new(
-        root: SendNode,
-        diagnostics: Vec<ParseDiagnostic>,
-        file_source: AnyFileSource,
-    ) -> AnyParse {
-        AnyParse {
-            root,
-            diagnostics,
-            file_source,
-        }
+    pub fn new(root: SendNode, diagnostics: Vec<ParseDiagnostic>) -> AnyParse {
+        AnyParse { root, diagnostics }
     }
 
     pub fn syntax<L>(&self) -> SyntaxNode<L>
@@ -920,14 +907,6 @@ impl AnyParse {
                 type_name::<L>()
             )
         })
-    }
-
-    pub fn file_source<'a, F, L>(&self, path: &'a Path) -> Result<F, FileSourceError>
-    where
-        F: FileSource<'a, L> + 'static,
-        L: Language + 'static,
-    {
-        self.file_source.unwrap_cast_from_path(path)
     }
 
     pub fn tree<N>(&self) -> N

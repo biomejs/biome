@@ -41,14 +41,14 @@ pub(crate) fn lint_with_guard<'ctx>(
                         if output.is_empty() {
                             return Ok(FileStatus::Ignored);
                         }
-                        output = AstroFileHandler::astro_output(input.as_str(), output.as_str());
+                        output = AstroFileHandler::output(input.as_str(), output.as_str());
                     }
 
                     if workspace_file.as_extension() == Some("vue") {
                         if output.is_empty() {
                             return Ok(FileStatus::Ignored);
                         }
-                        output = VueFileHandler::vue_output(input.as_str(), output.as_str());
+                        output = VueFileHandler::output(input.as_str(), output.as_str());
                     }
 
                     workspace_file.update_file(output)?;
@@ -75,8 +75,8 @@ pub(crate) fn lint_with_guard<'ctx>(
 
             if !no_diagnostics {
                 let input = match workspace_file.as_extension() {
-                    Some("astro") => AstroFileHandler::astro_input(input.as_str()).to_string(),
-                    Some("vue") => VueFileHandler::vue_input(input.as_str()).to_string(),
+                    Some("astro") => AstroFileHandler::input(input.as_str()).to_string(),
+                    Some("vue") => VueFileHandler::input(input.as_str()).to_string(),
                     _ => input,
                 };
 

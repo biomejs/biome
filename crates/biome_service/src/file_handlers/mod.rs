@@ -3,8 +3,7 @@ use self::{
     unknown::UnknownFileHandler,
 };
 pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
-use crate::file_handlers::svelte::SvelteFileHandler;
-pub use crate::file_handlers::svelte::SVELTE_FENCE;
+pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
 pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
@@ -288,6 +287,7 @@ pub struct FixAllParams<'a> {
     pub(crate) should_format: bool,
     pub(crate) rome_path: &'a RomePath,
     pub(crate) manifest: Option<PackageJson>,
+    pub(crate) language: Language,
 }
 
 #[derive(Default)]
@@ -299,7 +299,13 @@ pub struct Capabilities {
     pub(crate) formatter: FormatterCapabilities,
 }
 
-type Parse = fn(&RomePath, Language, &str, SettingsHandle, &mut NodeCache) -> AnyParse;
+#[derive(Clone)]
+pub struct ParseResult {
+    pub(crate) any_parse: AnyParse,
+    pub(crate) language: Option<Language>,
+}
+
+type Parse = fn(&RomePath, Language, &str, SettingsHandle, &mut NodeCache) -> ParseResult;
 
 #[derive(Default)]
 pub struct ParserCapabilities {
@@ -344,6 +350,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) settings: SettingsHandle<'a>,
     pub(crate) path: &'a RomePath,
     pub(crate) manifest: Option<PackageJson>,
+    pub(crate) language: Language,
 }
 
 type Lint = fn(LintParams) -> LintResults;
