@@ -72,21 +72,17 @@ impl MaybeExport {
                                             .is_ok_and(|member_text| member_text == "exports")
                                 }
                             },
-                            _ => {
+                            AnyJsExpression::JsStaticMemberExpression(member_expr) => {
                                 // modules.exports.foo = {}, module.exports[foo] = {}
-                                let is_commonjs_export = object
-                                    .as_js_static_member_expression()
-                                    .is_some_and(|member_expr| {
-                                        let object_text =
-                                            member_expr.object().map(|object| object.text());
-                                        let member_text =
-                                            member_expr.member().map(|member| member.text());
-                                        object_text.is_ok_and(|text| text == "module")
-                                            && member_text
-                                                .is_ok_and(|member_text| member_text == "exports")
-                                    });
+                                let object_text = member_expr.object().map(|object| object.text());
+                                let member_text = member_expr.member().map(|member| member.text());
+                                let is_commonjs_export = object_text
+                                    .is_ok_and(|text| text == "module")
+                                    && member_text
+                                        .is_ok_and(|member_text| member_text == "exports");
                                 is_commonjs_export
                             }
+                            _ => false,
                         });
                         is_commonjs_export
                     });
