@@ -107,6 +107,7 @@ define_categories! {
     "lint/nursery/noDuplicateTestHooks": "https://biomejs.dev/linter/rules/no-duplicate-test-hooks",
     "lint/nursery/noEmptyBlockStatements": "https://biomejs.dev/linter/rules/no-empty-block-statements",
     "lint/nursery/noEmptyTypeParameters": "https://biomejs.dev/linter/rules/no-empty-type-parameters",
+    "lint/nursery/noExportsInTest": "https://biomejs.dev/linter/rules/no-exports-in-test",
     "lint/nursery/noFocusedTests": "https://biomejs.dev/linter/rules/no-focused-tests",
     "lint/nursery/noGlobalAssign": "https://biomejs.dev/linter/rules/no-global-assign",
     "lint/nursery/noGlobalEval": "https://biomejs.dev/linter/rules/no-global-eval",
