@@ -1,7 +1,7 @@
 ---
-import type { Props } from "@astrojs/starlight/props";
-import Default from "@astrojs/starlight/components/Head.astro";
 import { getCollection } from "astro:content";
+import Default from "@astrojs/starlight/components/Head.astro";
+import type { Props } from "@astrojs/starlight/props";
 
 const docs = await getCollection("docs");
 const routes = new Set(docs.map(({ data, slug }) => `${slug}.png`));

@@ -747,7 +747,7 @@ fn rename(
     }
 }
 
-fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
+pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
     let mut tree: AnyJsRoot = parse.tree();
 
     let filter = AnalysisFilter {

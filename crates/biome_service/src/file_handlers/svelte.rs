@@ -4,7 +4,7 @@ use crate::file_handlers::{
     ParseResult, ParserCapabilities,
 };
 use crate::settings::SettingsHandle;
-use crate::workspace::{FixFileResult, PullActionsResult};
+use crate::workspace::{FixFileResult, OrganizeImportsResult, PullActionsResult};
 use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
@@ -104,7 +104,7 @@ impl ExtensionHandler for SvelteFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
-                organize_imports: None,
+                organize_imports: Some(organize_imports),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -193,4 +193,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     javascript::fix_all(params)
+}
+
+fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
+    javascript::organize_imports(parse)
 }
