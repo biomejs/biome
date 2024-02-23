@@ -2,10 +2,10 @@
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
 	feature: FeatureName[];
-	path: RomePath;
+	path: BiomePath;
 }
 export type FeatureName = "Format" | "Lint" | "OrganizeImports";
-export interface RomePath {
+export interface BiomePath {
 	path: string;
 }
 export interface SupportsFeatureResult {
@@ -160,7 +160,7 @@ export interface PartialJavascriptConfiguration {
 	/**
 	* A list of global bindings that should be ignored by the analyzers
 
-If defined here, they should not emit diagnostics. 
+If defined here, they should not emit diagnostics.
 	 */
 	globals?: StringSet;
 	organize_imports?: PartialJavascriptOrganizeImports;
@@ -234,7 +234,7 @@ export interface PartialVcsConfiguration {
 	/**
 	* The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
 
-If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted 
+If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
 	 */
 	root?: string;
 	/**
@@ -284,7 +284,7 @@ export type LineEnding = "lf" | "crlf" | "cr";
 /**
 	* Validated value for the `line_width` formatter options
 
-The allowed range of values is 1..=320 
+The allowed range of values is 1..=320
 	 */
 export type LineWidth = number;
 /**
@@ -360,7 +360,7 @@ export interface PartialJavascriptParser {
 	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
-These decorators belong to an old proposal, and they are subject to change. 
+These decorators belong to an old proposal, and they are subject to change.
 	 */
 	unsafeParameterDecoratorsEnabled?: boolean;
 }
@@ -1612,7 +1612,7 @@ export interface Hooks {
 	/**
 	* The "position" of the closure function, starting from zero.
 
-### Example 
+### Example
 	 */
 	closureIndex?: number;
 	/**
@@ -1640,17 +1640,17 @@ export type FilenameCase =
 	| "PascalCase"
 	| "snake_case";
 export interface UpdateProjectParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface OpenProjectParams {
 	content: string;
-	path: RomePath;
+	path: BiomePath;
 	version: number;
 }
 export interface OpenFileParams {
 	content: string;
 	language_hint?: Language;
-	path: RomePath;
+	path: BiomePath;
 	version: number;
 }
 /**
@@ -1670,40 +1670,40 @@ export type Language =
 	| "Unknown";
 export interface ChangeFileParams {
 	content: string;
-	path: RomePath;
+	path: BiomePath;
 	version: number;
 }
 export interface CloseFileParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface GetSyntaxTreeParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface GetSyntaxTreeResult {
 	ast: string;
 	cst: string;
 }
 export interface OrganizeImportsParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface OrganizeImportsResult {
 	code: string;
 }
 export interface GetFileContentParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface GetControlFlowGraphParams {
 	cursor: TextSize;
-	path: RomePath;
+	path: BiomePath;
 }
 export type TextSize = number;
 export interface GetFormatterIRParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	max_diagnostics: number;
-	path: RomePath;
+	path: BiomePath;
 }
 export type RuleCategories = RuleCategory[];
 export type RuleCategory = "Syntax" | "Lint" | "Action" | "Transformation";
@@ -1989,7 +1989,7 @@ export type DiagnosticTags = DiagnosticTag[];
 /**
 	* Serializable representation of a [Diagnostic](super::Diagnostic) advice
 
-See the [Visitor] trait for additional documentation on all the supported advice types. 
+See the [Visitor] trait for additional documentation on all the supported advice types.
 	 */
 export type Advice =
 	| { Log: [LogCategory, MarkupBuf] }
@@ -2066,7 +2066,7 @@ export interface BacktraceSymbol {
 	name?: string;
 }
 export interface PullActionsParams {
-	path: RomePath;
+	path: BiomePath;
 	range: TextRange;
 }
 export interface PullActionsResult {
@@ -2080,7 +2080,7 @@ export interface CodeAction {
 /**
 	* The category of a code action, this type maps directly to the [CodeActionKind] type in the Language Server Protocol specification
 
-[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
+[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind
 	 */
 export type ActionCategory =
 	| "QuickFix"
@@ -2119,7 +2119,7 @@ export type SourceActionKind =
  */
 export type Applicability = "Always" | "MaybeIncorrect";
 export interface FormatFileParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface Printed {
 	code: string;
@@ -2141,16 +2141,16 @@ export interface SourceMarker {
 	source: TextSize;
 }
 export interface FormatRangeParams {
-	path: RomePath;
+	path: BiomePath;
 	range: TextRange;
 }
 export interface FormatOnTypeParams {
 	offset: TextSize;
-	path: RomePath;
+	path: BiomePath;
 }
 export interface FixFileParams {
 	fix_file_mode: FixFileMode;
-	path: RomePath;
+	path: BiomePath;
 	should_format: boolean;
 }
 /**
@@ -2187,7 +2187,7 @@ export interface FixAction {
 }
 export interface RenameParams {
 	new_name: string;
-	path: RomePath;
+	path: BiomePath;
 	symbol_at: TextSize;
 }
 export interface RenameResult {
