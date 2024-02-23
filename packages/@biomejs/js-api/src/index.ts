@@ -1,8 +1,8 @@
 import type {
+	BiomePath,
 	Diagnostic,
 	PartialConfiguration,
 	PullDiagnosticsResult,
-	BiomePath,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
 import { Distribution, type WasmModule, loadModule, wrapError } from "./wasm";
