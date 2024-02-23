@@ -7,7 +7,7 @@ use crate::settings::SettingsHandle;
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::WorkspaceError;
 use biome_formatter::Printed;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
@@ -116,7 +116,7 @@ impl ExtensionHandler for SvelteFileHandler {
 }
 
 fn parse(
-    _rome_path: &RomePath,
+    _rome_path: &BiomePath,
     _language_hint: Language,
     text: &str,
     _settings: SettingsHandle,
@@ -158,29 +158,29 @@ fn parse(
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
 fn format(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format(rome_path, parse, settings)
+    javascript::format(biome_path, parse, settings)
 }
 
 pub(crate) fn format_range(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_range(rome_path, parse, settings, range)
+    javascript::format_range(biome_path, parse, settings, range)
 }
 
 pub(crate) fn format_on_type(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_on_type(rome_path, parse, settings, offset)
+    javascript::format_on_type(biome_path, parse, settings, offset)
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {

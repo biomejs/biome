@@ -15,9 +15,9 @@ pub struct SyntaxTreePayload {
 
 pub(crate) fn syntax_tree(session: &Session, url: &Url) -> Result<String> {
     info!("Showing syntax tree");
-    let rome_path = session.file_path(url)?;
+    let biome_path = session.file_path(url)?;
     let syntax_tree = session
         .workspace
-        .get_syntax_tree(GetSyntaxTreeParams { path: rome_path })?;
+        .get_syntax_tree(GetSyntaxTreeParams { path: biome_path })?;
     Ok(syntax_tree.ast)
 }
