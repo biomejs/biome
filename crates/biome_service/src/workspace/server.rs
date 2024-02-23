@@ -168,22 +168,22 @@ impl WorkspaceServer {
     ///
     /// Returns and error if no file exists in the workspace with this path or
     /// if the language associated with the file has no parser capability
-    fn get_parse(&self, rome_path: BiomePath) -> Result<AnyParse, WorkspaceError> {
-        match self.syntax.entry(rome_path) {
+    fn get_parse(&self, biome_path: BiomePath) -> Result<AnyParse, WorkspaceError> {
+        match self.syntax.entry(biome_path) {
             Entry::Occupied(entry) => Ok(entry.get().clone()),
             Entry::Vacant(entry) => {
-                let rome_path = entry.key();
-                let capabilities = self.get_file_capabilities(rome_path);
+                let biome_path = entry.key();
+                let capabilities = self.get_file_capabilities(biome_path);
 
                 let mut document = self
                     .documents
-                    .get_mut(rome_path)
+                    .get_mut(biome_path)
                     .ok_or_else(WorkspaceError::not_found)?;
 
                 let parse = capabilities
                     .parser
                     .parse
-                    .ok_or_else(self.build_capability_error(rome_path))?;
+                    .ok_or_else(self.build_capability_error(biome_path))?;
 
                 let size_limit = {
                     let settings = self.settings();
@@ -196,7 +196,7 @@ impl WorkspaceServer {
                 let size = document.content.as_bytes().len();
                 if size >= size_limit {
                     return Err(WorkspaceError::file_too_large(
-                        rome_path.to_path_buf().display().to_string(),
+                        biome_path.to_path_buf().display().to_string(),
                         size,
                         size_limit,
                     ));
@@ -204,7 +204,7 @@ impl WorkspaceServer {
 
                 let settings = self.settings();
                 let parsed = parse(
-                    rome_path,
+                    biome_path,
                     document.language_hint,
                     document.content.as_str(),
                     settings,
@@ -342,7 +342,7 @@ impl Workspace for WorkspaceServer {
         }
     }
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        Ok(self.is_ignored(params.rome_path.as_path(), params.feature))
+        Ok(self.is_ignored(params.biome_path.as_path(), params.feature))
     }
     /// Update the global settings for this workspace
     ///
@@ -636,7 +636,7 @@ impl Workspace for WorkspaceServer {
             filter,
             settings: self.settings(),
             should_format: params.should_format,
-            rome_path: &params.path,
+            biome_path: &params.path,
             manifest,
             language,
         })

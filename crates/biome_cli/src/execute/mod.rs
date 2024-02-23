@@ -292,11 +292,11 @@ pub(crate) fn execute_mode(
 
     // don't do any traversal if there's some content coming from stdin
     if let Some(stdin) = mode.as_stdin_file() {
-        let rome_path = BiomePath::new(stdin.as_path());
+        let biome_path = BiomePath::new(stdin.as_path());
         std_in::run(
             session,
             &mode,
-            rome_path,
+            biome_path,
             stdin.as_content(),
             cli_options.verbose,
         )

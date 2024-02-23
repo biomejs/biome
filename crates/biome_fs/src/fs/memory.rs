@@ -272,8 +272,8 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
 
                 if should_process_file {
                     let _ = ctx.interner().intern_path(path.into());
-                    let rome_path = BiomePath::new(path);
-                    if !ctx.can_handle(&rome_path) {
+                    let biome_path = BiomePath::new(path);
+                    if !ctx.can_handle(&biome_path) {
                         continue;
                     }
                     ctx.handle_file(path);

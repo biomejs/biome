@@ -39,10 +39,10 @@ pub(crate) fn code_actions(
     params: CodeActionParams,
 ) -> Result<Option<CodeActionResponse>> {
     let url = params.text_document.uri.clone();
-    let rome_path = session.file_path(&url)?;
+    let biome_path = session.file_path(&url)?;
 
     let file_features = &session.workspace.file_features(SupportsFeatureParams {
-        path: rome_path,
+        path: biome_path,
         feature: FeaturesBuilder::new()
             .with_linter()
             .with_organize_imports()
@@ -71,15 +71,15 @@ pub(crate) fn code_actions(
     }
 
     let url = params.text_document.uri.clone();
-    let rome_path = session.file_path(&url)?;
+    let biome_path = session.file_path(&url)?;
     let doc = session.document(&url)?;
     let position_encoding = session.position_encoding();
 
     let diagnostics = params.context.diagnostics;
     let content = session.workspace.get_file_content(GetFileContentParams {
-        path: rome_path.clone(),
+        path: biome_path.clone(),
     })?;
-    let offset = match rome_path.extension().and_then(|s| s.to_str()) {
+    let offset = match biome_path.extension().and_then(|s| s.to_str()) {
         Some("vue") => VueFileHandler::start(content.as_str()),
         Some("astro") => AstroFileHandler::start(content.as_str()),
         Some("svelte") => SvelteFileHandler::start(content.as_str()),
@@ -108,7 +108,7 @@ pub(crate) fn code_actions(
     debug!("Cursor range {:?}", &cursor_range);
 
     let result = match session.workspace.pull_actions(PullActionsParams {
-        path: rome_path.clone(),
+        path: biome_path.clone(),
         range: cursor_range,
     }) {
         Ok(result) => result,
@@ -130,7 +130,7 @@ pub(crate) fn code_actions(
         fix_all(
             session,
             &url,
-            rome_path.clone(),
+            biome_path.clone(),
             &doc.line_index,
             &diagnostics,
             offset,
@@ -199,7 +199,7 @@ pub(crate) fn code_actions(
 fn fix_all(
     session: &Session,
     url: &lsp::Url,
-    rome_path: BiomePath,
+    biome_path: BiomePath,
     line_index: &LineIndex,
     diagnostics: &[lsp::Diagnostic],
     offset: Option<u32>,
@@ -207,12 +207,12 @@ fn fix_all(
     let should_format = session
         .workspace
         .file_features(SupportsFeatureParams {
-            path: rome_path.clone(),
+            path: biome_path.clone(),
             feature: vec![FeatureName::Format],
         })?
         .supports_format();
     let fixed = session.workspace.fix_file(FixFileParams {
-        path: rome_path,
+        path: biome_path,
         fix_file_mode: FixFileMode::SafeFixes,
         should_format,
     })?;

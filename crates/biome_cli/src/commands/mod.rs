@@ -471,13 +471,13 @@ fn resolve_manifest(cli_session: &CliSession) -> Result<(), WorkspaceError> {
     )?;
 
     if let Some(result) = result {
-        let rome_path = BiomePath::new(result.file_path);
+        let biome_path = BiomePath::new(result.file_path);
         workspace.open_project(OpenProjectParams {
-            path: rome_path.clone(),
+            path: biome_path.clone(),
             content: result.content,
             version: 0,
         })?;
-        workspace.update_current_project(UpdateProjectParams { path: rome_path })?;
+        workspace.update_current_project(UpdateProjectParams { path: biome_path })?;
     }
 
     Ok(())

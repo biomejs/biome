@@ -60,9 +60,9 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     let mut configuration_content = String::new();
     configuration_file.read_to_string(&mut configuration_content)?;
 
-    let rome_path = BiomePath::new(configuration_file_path.as_path());
+    let biome_path = BiomePath::new(configuration_file_path.as_path());
     workspace.open_file(OpenFileParams {
-        path: rome_path.clone(),
+        path: biome_path.clone(),
         content: configuration_content.to_string(),
         version: 0,
         language_hint: Language::Json,
@@ -139,13 +139,13 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 })?;
 
                 workspace.change_file(ChangeFileParams {
-                    path: rome_path.clone(),
+                    path: biome_path.clone(),
                     content: new_content,
                     version: 1,
                 })?;
 
                 let printed = workspace.format_file(FormatFileParams {
-                    path: rome_path.clone(),
+                    path: biome_path.clone(),
                 })?;
 
                 if write {

@@ -116,11 +116,11 @@ impl<'ctx, 'app> Deref for SharedTraversalOptions<'ctx, 'app> {
 /// write mode is enabled
 pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
     tracing::trace_span!("process_file", path = ?path).in_scope(move || {
-        let rome_path = BiomePath::new(path);
+        let biome_path = BiomePath::new(path);
         let file_features = ctx
             .workspace
             .file_features(SupportsFeatureParams {
-                path: rome_path,
+                path: biome_path,
                 feature: FeaturesBuilder::new()
                     .with_formatter()
                     .with_linter()

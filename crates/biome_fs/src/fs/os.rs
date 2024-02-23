@@ -272,7 +272,7 @@ fn handle_any_file<'scope>(
     // In case the file is inside a directory that is behind a symbolic link,
     // the unresolved origin path is used to construct a new path.
     // This is required to support ignore patterns to symbolic links.
-    let rome_path = if let Some(origin_path) = &origin_path {
+    let biome_path = if let Some(origin_path) = &origin_path {
         if let Some(file_name) = path.file_name() {
             BiomePath::new(origin_path.join(file_name))
         } else {
@@ -292,7 +292,7 @@ fn handle_any_file<'scope>(
     // doing a directory traversal, but printing an error message if the
     // user explicitly requests an unsupported file to be handled.
     // This check also works for symbolic links.
-    if !ctx.can_handle(&rome_path) {
+    if !ctx.can_handle(&biome_path) {
         return;
     }
 

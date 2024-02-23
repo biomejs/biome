@@ -147,29 +147,29 @@ fn parse(
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
 fn format(
-    rome_path: &BiomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format(rome_path, parse, settings)
+    javascript::format(biome_path, parse, settings)
 }
 
 pub(crate) fn format_range(
-    rome_path: &BiomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_range(rome_path, parse, settings, range)
+    javascript::format_range(biome_path, parse, settings, range)
 }
 
 pub(crate) fn format_on_type(
-    rome_path: &BiomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_on_type(rome_path, parse, settings, offset)
+    javascript::format_on_type(biome_path, parse, settings, offset)
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {

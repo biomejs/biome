@@ -285,7 +285,7 @@ pub struct FixAllParams<'a> {
     pub(crate) settings: SettingsHandle<'a>,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
-    pub(crate) rome_path: &'a BiomePath,
+    pub(crate) biome_path: &'a BiomePath,
     pub(crate) manifest: Option<PackageJson>,
     pub(crate) language: Language,
 }
@@ -444,10 +444,10 @@ impl Features {
     /// Returns the [Capabilities] associated with a [BiomePath]
     pub(crate) fn get_capabilities(
         &self,
-        rome_path: &BiomePath,
+        biome_path: &BiomePath,
         language_hint: Language,
     ) -> Capabilities {
-        match Language::from_path_and_known_filename(rome_path).or(language_hint) {
+        match Language::from_path_and_known_filename(biome_path).or(language_hint) {
             Language::JavaScript
             | Language::JavaScriptReact
             | Language::TypeScript

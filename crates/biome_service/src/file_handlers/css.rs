@@ -135,7 +135,7 @@ impl ExtensionHandler for CssFileHandler {
 }
 
 fn parse(
-    rome_path: &BiomePath,
+    biome_path: &BiomePath,
     _language_hint: LanguageId,
     text: &str,
     settings: SettingsHandle,
@@ -145,7 +145,7 @@ fn parse(
     let overrides = &settings.as_ref().override_settings;
     let options: CssParserOptions =
         overrides
-            .as_css_parser_options(rome_path)
+            .as_css_parser_options(biome_path)
             .unwrap_or(CssParserOptions {
                 allow_wrong_line_comments: parser.allow_wrong_line_comments,
             });
@@ -172,11 +172,11 @@ fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeRe
 }
 
 fn debug_formatter_ir(
-    rome_path: &BiomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(rome_path);
+    let options = settings.format_options::<CssLanguage>(biome_path);
 
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
@@ -187,11 +187,11 @@ fn debug_formatter_ir(
 
 #[tracing::instrument(level = "debug", skip(parse))]
 fn format(
-    rome_path: &BiomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(rome_path);
+    let options = settings.format_options::<CssLanguage>(biome_path);
 
     tracing::debug!("Format with the following options: \n{}", options);
 
@@ -205,12 +205,12 @@ fn format(
 }
 
 fn format_range(
-    rome_path: &BiomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(rome_path);
+    let options = settings.format_options::<CssLanguage>(biome_path);
 
     let tree = parse.syntax();
     let printed = biome_css_formatter::format_range(options, &tree, range)?;
@@ -218,12 +218,12 @@ fn format_range(
 }
 
 fn format_on_type(
-    rome_path: &BiomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(rome_path);
+    let options = settings.format_options::<CssLanguage>(biome_path);
 
     let tree = parse.syntax();
 

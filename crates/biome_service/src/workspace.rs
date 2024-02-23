@@ -672,7 +672,7 @@ impl RageEntry {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IsPathIgnoredParams {
-    pub rome_path: BiomePath,
+    pub biome_path: BiomePath,
     pub feature: FeatureName,
 }
 
