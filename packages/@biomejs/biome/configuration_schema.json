@@ -1368,7 +1368,7 @@
 					]
 				},
 				"noExportsInTest": {
-					"description": "Disallow using exports in files containing tests",
+					"description": "Disallow using export or module.exports in files containing tests",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

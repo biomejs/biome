@@ -14,7 +14,7 @@ This rule is part of the [nursery](/linter/rules/#nursery) group.
 
 Inspired from: <a href="https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-export.md" target="_blank"><code>no-export</code></a>
 
-Disallow using `exports` in files containing tests
+Disallow using `export` or `module.exports` in files containing tests
 
 This rule aims to eliminate duplicate runs of tests by exporting things from test files.
 If you import from a test file, then all the tests in that file will be run in each imported instance,
