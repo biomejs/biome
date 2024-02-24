@@ -959,6 +959,30 @@ impl AnyJsExpression {
         }
     }
 
+    pub fn get_callee_object_name(&self) -> Option<JsSyntaxToken> {
+        match self {
+            AnyJsExpression::JsStaticMemberExpression(node) => {
+                let member = node.object().ok()?;
+                let member = member.as_js_identifier_expression()?.name().ok()?;
+                member.value_token().ok()
+            }
+            AnyJsExpression::JsIdentifierExpression(node) => node.name().ok()?.value_token().ok(),
+            _ => None,
+        }
+    }
+
+    pub fn get_callee_member_name(&self) -> Option<JsSyntaxToken> {
+        match self {
+            AnyJsExpression::JsStaticMemberExpression(node) => {
+                let member = node.member().ok()?;
+                let member = member.as_js_name()?;
+                member.value_token().ok()
+            }
+            AnyJsExpression::JsIdentifierExpression(node) => node.name().ok()?.value_token().ok(),
+            _ => None,
+        }
+    }
+
     /// This function checks if a call expressions has one of the following members:
     /// - `it`
     /// - `it.only`
