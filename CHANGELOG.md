@@ -357,7 +357,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
 
-  Contributed by [@fujiyamaorange](https://github.com/fujiyamaorange)
+  Contributed by @fujiyamaorange
 
 #### Enhancements
 
