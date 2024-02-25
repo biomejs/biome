@@ -345,6 +345,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add rule [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test) which disallows `export` or `modules.exports` in files
   containing test. Contributed by @ah-yu
 
+- Add rule [noSemicolonInJsx](https://biomejs.dev/linter/rules/no-semicolon-in-jsx/) to detect possible wrong semicolons inside JSX elements.
+
+  ```jsx
+  const Component = () => {
+    return (
+      <div>
+        <div />;
+      </div>
+    );
+  }
+  ```
+
+  Contributed by @fujiyamaorange
+
 #### Enhancements
 
 - [noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary) now provides unsafe code fixes. Contributed by
