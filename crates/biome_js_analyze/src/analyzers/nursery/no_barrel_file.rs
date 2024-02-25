@@ -5,7 +5,7 @@ use biome_js_syntax::{JsExport, JsExportFromClause, JsExportNamedFromClause};
 use biome_rowan::{declare_node_union, AstNode};
 
 declare_rule! {
-    /// Disallow the use of barrel files.
+    /// Disallow the use of barrel file.
     ///
     /// A barrel file is a file that re-exports all of the exports from other files in a directory.
     /// This structure results in the unnecessary loading of many modules, significantly impacting performance in large-scale applications.
@@ -27,7 +27,7 @@ declare_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```ts
     /// export type * from "foo";
     /// export type { foo } from "foo";
     /// ```

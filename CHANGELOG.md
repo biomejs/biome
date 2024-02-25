@@ -365,6 +365,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add rule [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test) which disallows `export` or `modules.exports` in files
   containing test. Contributed by @ah-yu
 
+<<<<<<< HEAD
 - Add rule [noSemicolonInJsx](https://biomejs.dev/linter/rules/no-semicolon-in-jsx/) to detect possible wrong semicolons inside JSX elements.
 
   ```jsx
@@ -378,6 +379,15 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @fujiyamaorange
+=======
+- Add rule [noBarrelFile](https://biomejs.dev/linter/rules/no-barrel-file), to report the usage of barrel file:
+
+  ```js
+  export * from "foo";
+  export * as bar from "foo";
+  ```
+  Contributed by @togami2864
+>>>>>>> 63c5cb656b (chore: changelog)
 
 #### Enhancements
 

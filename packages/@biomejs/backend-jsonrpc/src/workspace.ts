@@ -864,7 +864,7 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow the use of barrel file.
 	 */
 	noBarrelFile?: RuleConfiguration_for_Null;
 	/**

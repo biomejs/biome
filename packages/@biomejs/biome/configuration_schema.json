@@ -1336,7 +1336,7 @@
 					"type": ["boolean", "null"]
 				},
 				"noBarrelFile": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow the use of barrel file.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
