@@ -4,6 +4,7 @@ use crate::execute::process_file::{
     DiffKind, FileResult, FileStatus, Message, SharedTraversalOptions,
 };
 use biome_diagnostics::category;
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 
 /// Lints a single file and returns a [FileResult]
 pub(crate) fn organize_imports_with_guard<'ctx>(
@@ -21,14 +22,33 @@ pub(crate) fn organize_imports_with_guard<'ctx>(
                 )?;
 
             let input = workspace_file.input()?;
-            if sorted.code != input {
+            let mut output = sorted.code;
+            if output.is_empty() {
+                return Ok(FileStatus::Ignored);
+            }
+
+            match workspace_file.as_extension() {
+                Some("astro") => {
+                    output = AstroFileHandler::output(input.as_str(), output.as_str());
+                }
+                Some("vue") => {
+                    output = VueFileHandler::output(input.as_str(), output.as_str());
+                }
+
+                Some("svelte") => {
+                    output = SvelteFileHandler::output(input.as_str(), output.as_str());
+                }
+                _ => {}
+            }
+
+            if output != input {
                 if ctx.execution.is_check_apply() || ctx.execution.is_check_apply_unsafe() {
-                    workspace_file.update_file(sorted.code)?;
+                    workspace_file.update_file(output)?;
                 } else {
                     return Ok(FileStatus::Message(Message::Diff {
                         file_name: workspace_file.path.display().to_string(),
                         old: input,
-                        new: sorted.code,
+                        new: output,
                         diff_kind: DiffKind::OrganizeImports,
                     }));
                 }

@@ -68,6 +68,8 @@ pub type NoEmptyTypeParameters = < analyzers :: nursery :: no_empty_type_paramet
 pub type NoExcessiveCognitiveComplexity = < analyzers :: complexity :: no_excessive_cognitive_complexity :: NoExcessiveCognitiveComplexity as biome_analyze :: Rule > :: Options ;
 pub type NoExplicitAny =
     <analyzers::suspicious::no_explicit_any::NoExplicitAny as biome_analyze::Rule>::Options;
+pub type NoExportsInTest =
+    <analyzers::nursery::no_exports_in_test::NoExportsInTest as biome_analyze::Rule>::Options;
 pub type NoExtraBooleanCast = < analyzers :: complexity :: no_extra_boolean_cast :: NoExtraBooleanCast as biome_analyze :: Rule > :: Options ;
 pub type NoExtraNonNullAssertion = < analyzers :: suspicious :: no_extra_non_null_assertion :: NoExtraNonNullAssertion as biome_analyze :: Rule > :: Options ;
 pub type NoFallthroughSwitchClause = < analyzers :: suspicious :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause as biome_analyze :: Rule > :: Options ;
@@ -140,6 +142,7 @@ pub type NoSelfAssign =
     <analyzers::correctness::no_self_assign::NoSelfAssign as biome_analyze::Rule>::Options;
 pub type NoSelfCompare =
     <analyzers::suspicious::no_self_compare::NoSelfCompare as biome_analyze::Rule>::Options;
+pub type NoSemicolonInJsx = < semantic_analyzers :: nursery :: no_semicolon_in_jsx :: NoSemicolonInJsx as biome_analyze :: Rule > :: Options ;
 pub type NoSetterReturn =
     <analyzers::correctness::no_setter_return::NoSetterReturn as biome_analyze::Rule>::Options;
 pub type NoShadowRestrictedNames = < analyzers :: suspicious :: no_shadow_restricted_names :: NoShadowRestrictedNames as biome_analyze :: Rule > :: Options ;

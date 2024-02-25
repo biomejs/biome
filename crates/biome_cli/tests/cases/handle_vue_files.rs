@@ -58,6 +58,18 @@ var foo: string = "";
 </script>
 <template></template>"#;
 
+const VUE_FILE_IMPORTS_BEFORE: &str = r#"<script setup lang="ts">
+import Button from "./components/Button.vue";
+import * as vueUse from "vue-use";
+</script>
+<template></template>"#;
+
+const VUE_FILE_IMPORTS_AFTER: &str = r#"<script setup lang="ts">
+import * as vueUse from "vue-use";
+import Button from "./components/Button.vue";
+</script>
+<template></template>"#;
+
 #[test]
 fn format_vue_implicit_js_files() {
     let mut fs = MemoryFileSystem::default();
@@ -365,6 +377,77 @@ fn lint_vue_ts_files() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_vue_ts_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn sorts_imports_check() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(vue_file_path.into(), VUE_FILE_IMPORTS_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("check"),
+                "--formatter-enabled=false",
+                "--linter-enabled=false",
+                vue_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, VUE_FILE_IMPORTS_BEFORE);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "sorts_imports_check",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn sorts_imports_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(vue_file_path.into(), VUE_FILE_IMPORTS_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("check"),
+                "--formatter-enabled=false",
+                "--linter-enabled=false",
+                "--apply",
+                vue_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, VUE_FILE_IMPORTS_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "sorts_imports_write",
         fs,
         console,
         result,

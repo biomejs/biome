@@ -1,7 +1,7 @@
 ---
+import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
 import BlogPostInfo from "@/components/BlogPostInfo.astro";
-import { Image } from "astro:assets";
 
 export interface Props {
 	post: CollectionEntry<"blog">["data"];

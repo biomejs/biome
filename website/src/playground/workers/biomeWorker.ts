@@ -14,7 +14,7 @@ import { isJsonFilename } from "@/playground/utils";
 import init, {
 	DiagnosticPrinter,
 	type PartialConfiguration as Configuration,
-	type RomePath as BiomePath,
+	type BiomePath,
 	type RuleCategories,
 	Workspace,
 } from "@biomejs/wasm-web";

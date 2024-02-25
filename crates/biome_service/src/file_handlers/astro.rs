@@ -4,12 +4,12 @@ use crate::file_handlers::{
     ParseResult, ParserCapabilities,
 };
 use crate::settings::SettingsHandle;
-use crate::workspace::{FixFileResult, PullActionsResult};
+use crate::workspace::{FixFileResult, OrganizeImportsResult, PullActionsResult};
 use crate::WorkspaceError;
 use biome_formatter::Printed;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
-use biome_js_syntax::JsFileSource;
+use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use lazy_static::lazy_static;
@@ -85,19 +85,19 @@ impl ExtensionHandler for AstroFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
-                organize_imports: None,
+                organize_imports: Some(organize_imports),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
-                format_range: None,
-                format_on_type: None,
+                format_range: Some(format_range),
+                format_on_type: Some(format_on_type),
             },
         }
     }
 }
 
 fn parse(
-    _rome_path: &RomePath,
+    _rome_path: &BiomePath,
     _language_hint: Language,
     text: &str,
     _settings: SettingsHandle,
@@ -125,11 +125,29 @@ fn parse(
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
 fn format(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format(rome_path, parse, settings)
+    javascript::format(biome_path, parse, settings)
+}
+
+pub(crate) fn format_range(
+    biome_path: &BiomePath,
+    parse: AnyParse,
+    settings: SettingsHandle,
+    range: TextRange,
+) -> Result<Printed, WorkspaceError> {
+    javascript::format_range(biome_path, parse, settings, range)
+}
+
+pub(crate) fn format_on_type(
+    biome_path: &BiomePath,
+    parse: AnyParse,
+    settings: SettingsHandle,
+    offset: TextSize,
+) -> Result<Printed, WorkspaceError> {
+    javascript::format_on_type(biome_path, parse, settings, offset)
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {
@@ -142,4 +160,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     javascript::fix_all(params)
+}
+
+fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
+    javascript::organize_imports(parse)
 }
