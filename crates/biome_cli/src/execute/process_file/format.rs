@@ -64,19 +64,28 @@ pub(crate) fn format_with_guard<'ctx>(
 
             let mut output = printed.into_code();
 
-            if ignore_errors || output.is_empty() {
+            if ignore_errors {
                 return Ok(FileStatus::Ignored);
             }
 
             match workspace_file.as_extension() {
                 Some("astro") => {
+                    if output.is_empty() {
+                        return Ok(FileStatus::Unchanged);
+                    }
                     output = AstroFileHandler::output(input.as_str(), output.as_str());
                 }
                 Some("vue") => {
+                    if output.is_empty() {
+                        return Ok(FileStatus::Unchanged);
+                    }
                     output = VueFileHandler::output(input.as_str(), output.as_str());
                 }
 
                 Some("svelte") => {
+                    if output.is_empty() {
+                        return Ok(FileStatus::Unchanged);
+                    }
                     output = SvelteFileHandler::output(input.as_str(), output.as_str());
                 }
                 _ => {}
@@ -93,8 +102,10 @@ pub(crate) fn format_with_guard<'ctx>(
                         diff_kind: DiffKind::Format,
                     }));
                 }
+                Ok(FileStatus::Changed)
+            } else {
+                Ok(FileStatus::Unchanged)
             }
-            Ok(FileStatus::Success)
         },
     )
 }

@@ -19,11 +19,22 @@ use std::path::Path;
 
 #[derive(Debug)]
 pub(crate) enum FileStatus {
-    Success,
+    /// File changed and it was a success
+    Changed,
+    /// File unchanged, and it was a success
+    Unchanged,
+    /// While handling the file, something happened
     Message(Message),
+    /// File ignored, it should not be count as "handled"
     Ignored,
     /// Files that belong to other tools and shouldn't be touched
     Protected(String),
+}
+
+impl FileStatus {
+    pub const fn is_changed(&self) -> bool {
+        matches!(self, Self::Changed)
+    }
 }
 
 /// Wrapper type for messages that can be printed during the traversal process
@@ -216,20 +227,19 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
                 SupportKind::FileNotSupported => {
                     return Err(Message::from(
                         UnhandledDiagnostic.with_file_path(path.display().to_string()),
-                    ))
+                    ));
                 }
                 SupportKind::FeatureNotEnabled | SupportKind::Ignored => {
-                    return Ok(FileStatus::Ignored)
+                    return Ok(FileStatus::Ignored);
                 }
                 SupportKind::Protected => {
-                    return Ok(FileStatus::Protected(path.display().to_string()))
+                    return Ok(FileStatus::Protected(path.display().to_string()));
                 }
                 SupportKind::Supported => {}
             };
         }
 
         let shared_context = &SharedTraversalOptions::new(ctx);
-        ctx.increment_processed();
 
         match ctx.execution.traversal_mode {
             TraversalMode::Lint { .. } => {

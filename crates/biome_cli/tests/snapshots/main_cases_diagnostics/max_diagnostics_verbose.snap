@@ -130,7 +130,8 @@ src/folder_6/tsconfig.json project  VERBOSE  ━━━━━━━━━━━�
 ```
 
 ```block
-Checked 1 file(s) in <TIME>
+Checked 1 file in <TIME>. No fixes needed.
+Found 2 errors.
 ```
 
 
