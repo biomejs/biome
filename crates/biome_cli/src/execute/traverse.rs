@@ -44,9 +44,7 @@ struct Files(usize);
 
 impl fmt::Display for Files {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        fmt.write_markup(
-            markup!({self.0} " ")
-        )?;
+        fmt.write_markup(markup!({self.0} " "))?;
         if self.0 == 1 {
             fmt.write_str("file")
         } else {
@@ -77,12 +75,11 @@ impl<'a> fmt::Display for SummaryTotal<'a> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         let files = Files(self.1);
         match self.0 {
-            TraversalMode::Check { .. } | TraversalMode::Lint { .. } => fmt.write_markup(markup! {
-                "Checked "{files}" in "{self.2}
-            }),
-            TraversalMode::CI { .. } => fmt.write_markup(markup! {
-                "Checked "{files}" in "{self.2}
-            }),
+            TraversalMode::Check { .. } | TraversalMode::Lint { .. } | TraversalMode::CI { .. } => {
+                fmt.write_markup(markup! {
+                    "Checked "{files}" in "{self.2}
+                })
+            }
             TraversalMode::Format { write, .. } => {
                 if *write {
                     fmt.write_markup(markup! {
