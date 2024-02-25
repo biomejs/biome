@@ -50,20 +50,24 @@ impl GritParse {
     ///
     /// ```
     /// # use biome_grit_parser::parse_grit;
-    /// # use biome_grit_syntax::GritSyntaxKind;
+    /// # use biome_grit_syntax::{GritSyntaxKind, AnyGritLiteral, AnyGritPattern};
     /// # use biome_rowan::{AstNode, AstNodeList, SyntaxError};
     ///
-    /// # fn main() -> Result<(), SyntaxError> {
+    /// # fn main() {
     /// use biome_grit_syntax::GritSyntaxKind;
-    /// use biome_grit_parser::GritParserOptions;
     /// let parse = parse_grit(r#"`console.log($message)`"#);
     ///
-    /// // Get the root value
-    /// let root_value = parse.tree().value()?;
-    ///
-    /// assert_eq!(root_value.syntax().kind(), GritSyntaxKind::GRIT_ARRAY_VALUE);
-    ///
-    /// # Ok(())
+    /// // Get the pattern
+    /// let pattern = parse.tree().pattern();
+    /// match pattern {
+    ///     Some(AnyGritPattern::AnyGritLiteral(AnyGritLiteral::GritCodeSnippet(snippet))) => {
+    ///         assert_eq!(
+    ///             snippet.source().unwrap().syntax().kind(),
+    ///             GritSyntaxKind::GRIT_BACKTICK_SNIPPET_LITERAL
+    ///         );
+    ///     }
+    ///     _ => panic!("Unexpected pattern"),
+    /// }
     /// # }
     /// ```
     pub fn syntax(&self) -> GritSyntaxNode {

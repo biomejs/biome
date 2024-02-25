@@ -16,7 +16,7 @@ GritRoot {
         engine_token: ENGINE_KW@0..7 "engine" [] [Whitespace(" ")],
         biome_token: BIOME_KW@7..13 "biome" [] [Whitespace(" ")],
         l_paren_token: L_PAREN@13..14 "(" [] [],
-        grit_double_value: missing (required),
+        grit_double_literal: missing (required),
         r_paren_token: missing (required),
     },
     language: missing (optional),

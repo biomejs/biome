@@ -282,7 +282,9 @@ impl<'src> Lexer<'src> {
             b'\'' | b'"' => self.lex_string_literal(current),
             b'`' => self.lex_backtick_snippet(),
             b'/' => self.lex_slash(),
+            b'=' => self.eat_equals_or_rewrite(),
             b':' => self.eat_byte(T![:]),
+            b';' => self.eat_byte(T![;]),
             b',' => self.eat_byte(T![,]),
             b'[' => self.eat_byte(T!['[']),
             b']' => self.eat_byte(T![']']),
@@ -295,6 +297,23 @@ impl<'src> Lexer<'src> {
             _ if (b'0'..=b'9').contains(&current) || current == b'-' => self.lex_number(current),
             _ if self.position == 0 && self.consume_potential_bom().is_some() => UNICODE_BOM,
             _ => self.eat_unexpected_character(),
+        }
+    }
+
+    fn eat_equals_or_rewrite(&mut self) -> GritSyntaxKind {
+        assert_eq!(self.current_byte(), Some(b'='));
+        self.advance(1);
+
+        match self.current_byte() {
+            Some(b'=') => {
+                self.advance(1);
+                T![==]
+            }
+            Some(b'>') => {
+                self.advance(1);
+                T![=>]
+            }
+            _ => T![=],
         }
     }
 

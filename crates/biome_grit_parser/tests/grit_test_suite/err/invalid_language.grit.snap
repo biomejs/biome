@@ -1,0 +1,59 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+language non_existing;
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: GritLanguageDeclaration {
+        language_token: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")],
+        name: missing (required),
+        flavor: missing (optional),
+        semicolon_token: missing (optional),
+    },
+    definitions: GritDefinitionList [],
+    pattern: missing (optional),
+    definitions_continued: GritDefinitionList [],
+    eof_token: EOF@9..23 "non_existing;\n" [] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..23
+  0: (empty)
+  1: (empty)
+  2: GRIT_LANGUAGE_DECLARATION@0..9
+    0: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")]
+    1: (empty)
+    2: (empty)
+    3: (empty)
+  3: GRIT_DEFINITION_LIST@9..9
+  4: (empty)
+  5: GRIT_DEFINITION_LIST@9..9
+  6: EOF@9..23 "non_existing;\n" [] []
+
+```
+
+## Diagnostics
+
+```
+invalid_language.grit:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a supported language; must be one of `js`, `json`, `css`, `html`, or `grit`
+  
+  > 1 │ language non_existing;
+      │          ^^^^^^^^^^^^
+    2 │ 
+  
+```

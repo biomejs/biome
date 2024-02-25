@@ -1,0 +1,69 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+language js(vanilla);
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: GritLanguageDeclaration {
+        language_token: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")],
+        name: GritLanguageName {
+            language_kind: JS_KW@9..11 "js" [] [],
+        },
+        flavor: GritLanguageFlavor {
+            l_paren_token: L_PAREN@11..12 "(" [] [],
+            grit_language_flavor_list: GritLanguageFlavorList [],
+            r_paren_token: missing (required),
+        },
+        semicolon_token: missing (optional),
+    },
+    definitions: GritDefinitionList [],
+    pattern: missing (optional),
+    definitions_continued: GritDefinitionList [],
+    eof_token: EOF@12..22 "vanilla);\n" [] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..22
+  0: (empty)
+  1: (empty)
+  2: GRIT_LANGUAGE_DECLARATION@0..12
+    0: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")]
+    1: GRIT_LANGUAGE_NAME@9..11
+      0: JS_KW@9..11 "js" [] []
+    2: GRIT_LANGUAGE_FLAVOR@11..12
+      0: L_PAREN@11..12 "(" [] []
+      1: GRIT_LANGUAGE_FLAVOR_LIST@12..12
+      2: (empty)
+    3: (empty)
+  3: GRIT_DEFINITION_LIST@12..12
+  4: (empty)
+  5: GRIT_DEFINITION_LIST@12..12
+  6: EOF@12..22 "vanilla);\n" [] []
+
+```
+
+## Diagnostics
+
+```
+language_with_invalid_flavor.grit:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a supported language flavor; must be one of `typescript` or `jsx`
+  
+  > 1 │ language js(vanilla);
+      │             ^^^^^^^
+    2 │ 
+  
+```

@@ -7,151 +7,31 @@ use biome_grit_syntax::{
     GritSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
-pub fn any_grit_pattern(
-    any_grit_literal: AnyGritLiteral,
-    grit_pattern_not: GritPatternNot,
-    grit_pattern_or: GritPatternOr,
-    grit_pattern_or_else: GritPatternOrElse,
-    grit_pattern_any: GritPatternAny,
-    grit_pattern_and: GritPatternAnd,
-    grit_pattern_maybe: GritPatternMaybe,
-    grit_pattern_if_else: GritPatternIfElse,
-    grit_pattern_contains: GritPatternContains,
-    grit_pattern_includes: GritPatternIncludes,
-    grit_pattern_after: GritPatternAfter,
-    grit_pattern_before: GritPatternBefore,
-    grit_within: GritWithin,
-    grit_bubble: GritBubble,
-    grit_node_like: GritNodeLike,
-    grit_map_accessor: GritMapAccessor,
-    grit_list_accessor: GritListAccessor,
-    grit_dot: GritDot,
-    grit_some: GritSome,
-    grit_every: GritEvery,
-    grit_underscore: GritUnderscore,
-    grit_variable: GritVariable,
-    grit_regex_pattern: GritRegexPattern,
-    grit_pattern_as: GritPatternAs,
-    grit_pattern_limit: GritPatternLimit,
-    grit_assignment_as_pattern: GritAssignmentAsPattern,
-    grit_pattern_accumulate: GritPatternAccumulate,
-    grit_rewrite: GritRewrite,
-    grit_like: GritLike,
-    grit_pattern_where: GritPatternWhere,
-    grit_mul_operation: GritMulOperation,
-    grit_div_operation: GritDivOperation,
-    grit_mod_operation: GritModOperation,
-    grit_add_operation: GritAddOperation,
-    grit_sub_operation: GritSubOperation,
-    grit_sequential: GritSequential,
-    grit_files: GritFiles,
+pub fn bracketed_grit_pattern(
     l_paren_token: SyntaxToken,
     any_grit_pattern: AnyGritPattern,
     r_paren_token: SyntaxToken,
-    grit_bogus_pattern: GritBogusPattern,
-) -> AnyGritPattern {
-    AnyGritPattern::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::ANY_GRIT_PATTERN,
+) -> BracketedGritPattern {
+    BracketedGritPattern::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::BRACKETED_GRIT_PATTERN,
         [
-            Some(SyntaxElement::Node(any_grit_literal.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_not.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_or.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_or_else.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_any.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_and.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_maybe.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_if_else.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_contains.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_includes.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_after.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_before.into_syntax())),
-            Some(SyntaxElement::Node(grit_within.into_syntax())),
-            Some(SyntaxElement::Node(grit_bubble.into_syntax())),
-            Some(SyntaxElement::Node(grit_node_like.into_syntax())),
-            Some(SyntaxElement::Node(grit_map_accessor.into_syntax())),
-            Some(SyntaxElement::Node(grit_list_accessor.into_syntax())),
-            Some(SyntaxElement::Node(grit_dot.into_syntax())),
-            Some(SyntaxElement::Node(grit_some.into_syntax())),
-            Some(SyntaxElement::Node(grit_every.into_syntax())),
-            Some(SyntaxElement::Node(grit_underscore.into_syntax())),
-            Some(SyntaxElement::Node(grit_variable.into_syntax())),
-            Some(SyntaxElement::Node(grit_regex_pattern.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_as.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_limit.into_syntax())),
-            Some(SyntaxElement::Node(
-                grit_assignment_as_pattern.into_syntax(),
-            )),
-            Some(SyntaxElement::Node(grit_pattern_accumulate.into_syntax())),
-            Some(SyntaxElement::Node(grit_rewrite.into_syntax())),
-            Some(SyntaxElement::Node(grit_like.into_syntax())),
-            Some(SyntaxElement::Node(grit_pattern_where.into_syntax())),
-            Some(SyntaxElement::Node(grit_mul_operation.into_syntax())),
-            Some(SyntaxElement::Node(grit_div_operation.into_syntax())),
-            Some(SyntaxElement::Node(grit_mod_operation.into_syntax())),
-            Some(SyntaxElement::Node(grit_add_operation.into_syntax())),
-            Some(SyntaxElement::Node(grit_sub_operation.into_syntax())),
-            Some(SyntaxElement::Node(grit_sequential.into_syntax())),
-            Some(SyntaxElement::Node(grit_files.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(any_grit_pattern.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
-            Some(SyntaxElement::Node(grit_bogus_pattern.into_syntax())),
         ],
     ))
 }
-pub fn any_grit_predicate(
-    grit_predicate_not: GritPredicateNot,
-    grit_predicate_maybe: GritPredicateMaybe,
-    grit_predicate_and: GritPredicateAnd,
-    grit_predicate_or: GritPredicateOr,
-    grit_predicate_any: GritPredicateAny,
-    grit_predicate_if_else: GritPredicateIfElse,
-    grit_predicate_assignment: GritPredicateAssignment,
-    grit_predicate_accumulate: GritPredicateAccumulate,
-    grit_predicate_rewrite: GritPredicateRewrite,
-    grit_predicate_greater: GritPredicateGreater,
-    grit_predicate_less: GritPredicateLess,
-    grit_predicate_greater_equal: GritPredicateGreaterEqual,
-    grit_predicate_less_equal: GritPredicateLessEqual,
-    grit_predicate_not_equal: GritPredicateNotEqual,
-    grit_predicate_equal: GritPredicateEqual,
-    grit_predicate_match: GritPredicateMatch,
-    grit_predicate_call: GritPredicateCall,
+pub fn bracketed_grit_predicate(
     l_paren_token: SyntaxToken,
     any_grit_predicate: AnyGritPredicate,
     r_paren_token: SyntaxToken,
-    grit_boolean_value: GritBooleanValue,
-    grit_predicate_return: GritPredicateReturn,
-    grit_bogus_predicate: GritBogusPredicate,
-) -> AnyGritPredicate {
-    AnyGritPredicate::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::ANY_GRIT_PREDICATE,
+) -> BracketedGritPredicate {
+    BracketedGritPredicate::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::BRACKETED_GRIT_PREDICATE,
         [
-            Some(SyntaxElement::Node(grit_predicate_not.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_maybe.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_and.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_or.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_any.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_if_else.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_assignment.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_accumulate.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_rewrite.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_greater.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_less.into_syntax())),
-            Some(SyntaxElement::Node(
-                grit_predicate_greater_equal.into_syntax(),
-            )),
-            Some(SyntaxElement::Node(grit_predicate_less_equal.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_not_equal.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_equal.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_match.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_call.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(any_grit_predicate.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
-            Some(SyntaxElement::Node(grit_boolean_value.into_syntax())),
-            Some(SyntaxElement::Node(grit_predicate_return.into_syntax())),
-            Some(SyntaxElement::Node(grit_bogus_predicate.into_syntax())),
         ],
     ))
 }
@@ -203,15 +83,18 @@ pub fn grit_assignment_as_pattern(
         ],
     ))
 }
-pub fn grit_backtick_snippet(value_token: SyntaxToken) -> GritBacktickSnippet {
-    GritBacktickSnippet::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_BACKTICK_SNIPPET,
+pub fn grit_backtick_snippet_literal(value_token: SyntaxToken) -> GritBacktickSnippetLiteral {
+    GritBacktickSnippetLiteral::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BACKTICK_SNIPPET_LITERAL,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn grit_boolean_value(true_token: SyntaxToken, false_token: SyntaxToken) -> GritBooleanValue {
-    GritBooleanValue::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_BOOLEAN_VALUE,
+pub fn grit_boolean_literal(
+    true_token: SyntaxToken,
+    false_token: SyntaxToken,
+) -> GritBooleanLiteral {
+    GritBooleanLiteral::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BOOLEAN_LITERAL,
         [
             Some(SyntaxElement::Token(true_token)),
             Some(SyntaxElement::Token(false_token)),
@@ -366,9 +249,9 @@ impl GritDotdotdotBuilder {
         ))
     }
 }
-pub fn grit_double_value(value_token: SyntaxToken) -> GritDoubleValue {
-    GritDoubleValue::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_DOUBLE_VALUE,
+pub fn grit_double_literal(value_token: SyntaxToken) -> GritDoubleLiteral {
+    GritDoubleLiteral::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_DOUBLE_LITERAL,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -441,9 +324,9 @@ impl GritFunctionDefinitionBuilder {
         ))
     }
 }
-pub fn grit_int_value(value_token: SyntaxToken) -> GritIntValue {
-    GritIntValue::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_INT_VALUE,
+pub fn grit_int_literal(value_token: SyntaxToken) -> GritIntLiteral {
+    GritIntLiteral::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_INT_LITERAL,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -507,22 +390,10 @@ pub fn grit_language_flavor_kind(flavor_kind_token: SyntaxToken) -> GritLanguage
         [Some(SyntaxElement::Token(flavor_kind_token))],
     ))
 }
-pub fn grit_language_name(
-    js_token: SyntaxToken,
-    css_token: SyntaxToken,
-    json_token: SyntaxToken,
-    grit_token: SyntaxToken,
-    html_token: SyntaxToken,
-) -> GritLanguageName {
+pub fn grit_language_name(language_kind_token: SyntaxToken) -> GritLanguageName {
     GritLanguageName::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_LANGUAGE_NAME,
-        [
-            Some(SyntaxElement::Token(js_token)),
-            Some(SyntaxElement::Token(css_token)),
-            Some(SyntaxElement::Token(json_token)),
-            Some(SyntaxElement::Token(grit_token)),
-            Some(SyntaxElement::Token(html_token)),
-        ],
+        [Some(SyntaxElement::Token(language_kind_token))],
     ))
 }
 pub fn grit_language_specific_snippet(
@@ -755,9 +626,9 @@ pub fn grit_named_arg_with_default(
         ],
     ))
 }
-pub fn grit_negative_int_value(value_token: SyntaxToken) -> GritNegativeIntValue {
-    GritNegativeIntValue::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_NEGATIVE_INT_VALUE,
+pub fn grit_negative_int_literal(value_token: SyntaxToken) -> GritNegativeIntLiteral {
+    GritNegativeIntLiteral::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_NEGATIVE_INT_LITERAL,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -1146,7 +1017,7 @@ pub fn grit_pattern_includes(
 pub fn grit_pattern_limit(
     pattern: AnyGritPattern,
     limit_token: SyntaxToken,
-    limit: GritIntValue,
+    limit: GritIntLiteral,
 ) -> GritPatternLimit {
     GritPatternLimit::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_PATTERN_LIMIT,
@@ -1689,20 +1560,28 @@ impl GritPredicateRewriteBuilder {
         ))
     }
 }
-pub fn grit_raw_backtick_snippet(value_token: SyntaxToken) -> GritRawBacktickSnippet {
-    GritRawBacktickSnippet::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_RAW_BACKTICK_SNIPPET,
+pub fn grit_raw_backtick_snippet_literal(
+    value_token: SyntaxToken,
+) -> GritRawBacktickSnippetLiteral {
+    GritRawBacktickSnippetLiteral::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_RAW_BACKTICK_SNIPPET_LITERAL,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn grit_regex_pattern(regex: GritRegex) -> GritRegexPatternBuilder {
+pub fn grit_regex_literal(value_token: SyntaxToken) -> GritRegexLiteral {
+    GritRegexLiteral::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_REGEX_LITERAL,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn grit_regex_pattern(regex: AnyGritRegex) -> GritRegexPatternBuilder {
     GritRegexPatternBuilder {
         regex,
         variables: None,
     }
 }
 pub struct GritRegexPatternBuilder {
-    regex: GritRegex,
+    regex: AnyGritRegex,
     variables: Option<GritRegexPatternVariables>,
 }
 impl GritRegexPatternBuilder {
@@ -1752,12 +1631,6 @@ impl GritRegexPatternVariablesBuilder {
             ],
         ))
     }
-}
-pub fn grit_regex_value(value_token: SyntaxToken) -> GritRegexValue {
-    GritRegexValue::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_REGEX_VALUE,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
 }
 pub fn grit_rewrite(
     left: AnyGritPattern,
@@ -1876,9 +1749,9 @@ pub fn grit_sequential(
         ],
     ))
 }
-pub fn grit_snippet_regex_value(value_token: SyntaxToken) -> GritSnippetRegexValue {
-    GritSnippetRegexValue::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_SNIPPET_REGEX_VALUE,
+pub fn grit_snippet_regex_literal(value_token: SyntaxToken) -> GritSnippetRegexLiteral {
+    GritSnippetRegexLiteral::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_SNIPPET_REGEX_LITERAL,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -1891,9 +1764,9 @@ pub fn grit_some(some_token: SyntaxToken, pattern: MaybeCurlyGritPattern) -> Gri
         ],
     ))
 }
-pub fn grit_string_value(value_token: SyntaxToken) -> GritStringValue {
-    GritStringValue::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_STRING_VALUE,
+pub fn grit_string_literal(value_token: SyntaxToken) -> GritStringLiteral {
+    GritStringLiteral::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_STRING_LITERAL,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -1911,9 +1784,9 @@ pub fn grit_sub_operation(
         ],
     ))
 }
-pub fn grit_undefined(undefined_token: SyntaxToken) -> GritUndefined {
-    GritUndefined::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_UNDEFINED,
+pub fn grit_undefined_literal(undefined_token: SyntaxToken) -> GritUndefinedLiteral {
+    GritUndefinedLiteral::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_UNDEFINED_LITERAL,
         [Some(SyntaxElement::Token(undefined_token))],
     ))
 }
@@ -1933,7 +1806,7 @@ pub fn grit_version(
     engine_token: SyntaxToken,
     biome_token: SyntaxToken,
     l_paren_token: SyntaxToken,
-    grit_double_value: GritDoubleValue,
+    grit_double_literal: GritDoubleLiteral,
     r_paren_token: SyntaxToken,
 ) -> GritVersion {
     GritVersion::unwrap_cast(SyntaxNode::new_detached(
@@ -1942,7 +1815,7 @@ pub fn grit_version(
             Some(SyntaxElement::Token(engine_token)),
             Some(SyntaxElement::Token(biome_token)),
             Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(grit_double_value.into_syntax())),
+            Some(SyntaxElement::Node(grit_double_literal.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))

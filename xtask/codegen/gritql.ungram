@@ -67,7 +67,7 @@ AnyGritDefinition =
 
 GritDefinitionList = AnyGritDefinition ('newline' AnyGritDefinition)* 'newline'?
 
-GritVersion = 'engine' 'biome' '(' GritDoubleValue ')'
+GritVersion = 'engine' 'biome' '(' GritDoubleLiteral ')'
 
 GritLanguageDeclaration =
     'language'
@@ -81,8 +81,6 @@ GritLanguageFlavorKind =
     flavor_kind: (
         // JavaScript flavors:
         'typescript' | 'jsx'
-        // Technically raw JS is supported, but we encourage using typescript in most cases - it will match raw JS fine
-        | 'js_do_not_use'
     )
 
 // --- patterns
@@ -125,8 +123,10 @@ AnyGritPattern =
     | GritSubOperation
     | GritSequential
     | GritFiles
-    | '(' AnyGritPattern ')'
+    | BracketedGritPattern
     | GritBogusPattern
+
+BracketedGritPattern = '(' AnyGritPattern ')'
 
 MaybeCurlyGritPattern = AnyGritPattern | CurlyGritPattern
 CurlyGritPattern = '{' AnyGritPattern '}'
@@ -150,7 +150,7 @@ GritPatternAs =
     pattern: AnyGritPattern 'as' variable: GritVariable
 
 GritPatternLimit =
-    pattern: AnyGritPattern 'limit' limit: GritIntValue
+    pattern: AnyGritPattern 'limit' limit: GritIntLiteral
 
 // statement, in the engine this is a predicate that always evaluates to true
 // This is useful for initializing variables at the root of a pattern definition
@@ -166,11 +166,11 @@ GritPatternWhere =
 
 AnyGritLiteral =
     GritCodeSnippet
-    | GritStringValue
-    | GritIntValue
-    | GritDoubleValue
-    | GritBooleanValue
-    | GritUndefined
+    | GritStringLiteral
+    | GritIntLiteral
+    | GritDoubleLiteral
+    | GritBooleanLiteral
+    | GritUndefinedLiteral
     | GritMap
     | GritList
     | GritBogusLiteral
@@ -306,7 +306,7 @@ GritListAccessor =
     ']'
 
 GritListAccessorSubject = GritList | AnyGritContainer
-GritListIndex = AnyGritContainer | GritNegativeIntValue | GritIntValue
+GritListIndex = AnyGritContainer | GritNegativeIntLiteral | GritIntLiteral
 
 GritDot = '.'
 
@@ -321,7 +321,7 @@ GritUnderscore =
     dollar_underscore: '$_'
 
 GritRegexPattern =
-    regex: GritRegex
+    regex: AnyGritRegex
     variables: GritRegexPatternVariables?
 
 GritRegexPatternVariables =
@@ -392,10 +392,12 @@ AnyGritPredicate =
     | GritPredicateEqual
     | GritPredicateMatch
     | GritPredicateCall
-    | '(' AnyGritPredicate ')'
-    | GritBooleanValue
+    | BracketedGritPredicate
+    | GritBooleanLiteral
     | GritPredicateReturn
     | GritBogusPredicate
+
+BracketedGritPredicate = '(' AnyGritPredicate ')'
 
 GritPredicateNot =
     GritNot
@@ -500,7 +502,7 @@ GritPredicateReturn =
 
 // --- tokens and lexical definitions
 
-GritBooleanValue = 'true' | 'false'
+GritBooleanLiteral = 'true' | 'false'
 
 GritVariable = 'grit_variable'
 GritVariableList = GritVariable (',' GritVariable)* ','?
@@ -510,19 +512,15 @@ GritName = 'grit_name'
 
 // These are target languages
 GritLanguageName =
-    'js'
-    | 'css'
-    | 'json'
-    | 'grit'
-    | 'html'
+    language_kind: ('js' | 'css' | 'json' | 'grit' | 'html')
 
-GritBacktickSnippet = value: 'grit_backtick_snippet'
+GritBacktickSnippetLiteral = value: 'grit_backtick_snippet'
 
-GritRawBacktickSnippet = value: 'grit_raw_backtick_snippet'
+GritRawBacktickSnippetLiteral = value: 'grit_raw_backtick_snippet'
 
 GritLanguageSpecificSnippet =
     language: GritLanguageName
-    snippet: 'grit_string_literal'
+    snippet: 'grit_string'
 
 // a code snippet may be prefixed by a label;
 // the label may be prefixed by a module or sort name (separated from the label by a dot)
@@ -531,25 +529,25 @@ GritCodeSnippet =
     source: GritCodeSnippetSource
 
 GritCodeSnippetSource =
-    GritBacktickSnippet
+    GritBacktickSnippetLiteral
     | GritLanguageSpecificSnippet
-    | GritRawBacktickSnippet
+    | GritRawBacktickSnippetLiteral
 
 GritNot = 'not' | '!'
 
-GritUndefined = 'undefined'
+GritUndefinedLiteral = 'undefined'
 
-GritIntValue = value: 'grit_int_literal'
-GritNegativeIntValue = value: 'grit_negative_int_literal'
+GritIntLiteral = value: 'grit_int'
+GritNegativeIntLiteral = value: 'grit_negative_int'
 
-GritDoubleValue = value: 'grit_double_literal'
+GritDoubleLiteral = value: 'grit_double'
 
-GritStringValue = value: 'grit_string_literal'
+GritStringLiteral = value: 'grit_string'
 
-GritRegex = GritRegexValue | GritSnippetRegexValue
+AnyGritRegex = GritRegexLiteral | GritSnippetRegexLiteral
 
-GritRegexValue = value: 'grit_regex_literal'
+GritRegexLiteral = value: 'grit_regex'
 
-GritSnippetRegexValue = value: 'grit_snippet_regex_literal'
+GritSnippetRegexLiteral = value: 'grit_snippet_regex'
 
 GritAnnotation = 'grit_annotation'
