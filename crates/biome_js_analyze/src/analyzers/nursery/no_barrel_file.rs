@@ -1,69 +1,96 @@
-use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, RuleSource};
 use biome_console::markup;
-use biome_js_semantic::{Reference, ReferencesExtensions};
-use biome_js_syntax::JsIdentifierBinding;
+use biome_js_syntax::{JsExport, JsExportFromClause, JsExportNamedFromClause};
+use biome_rowan::{declare_node_union, AstNode};
 
 declare_rule! {
-    /// Succinct description of the rule.
+    /// Disallow the use of barrel files.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding ESLint rule (if any):
+    /// A barrel file is a file that re-exports all of the exports from other files in a directory.
+    /// This structure results in the unnecessary loading of many modules, significantly impacting performance in large-scale applications.
+    /// Additionally, it complicates the codebase, making it difficult to navigate and understand the project's dependency graph.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// export * from "foo";
+    /// export * as bar from "foo";
+    /// export { foo } from "foo";
+    /// export { foo, type Bar } from "foo";
+    /// export { baz, qux } from "foobar";
+    /// export { module as module1 } from "./module1";
+    /// export { default as module2 } from "./module2";
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// var a = 1;
+    /// export type * from "foo";
+    /// export type { foo } from "foo";
     /// ```
     ///
     pub NoBarrelFile {
         version: "next",
         name: "noBarrelFile",
         recommended: false,
+        source: RuleSource::EslintBarrelFiles("avoid-namespace-import"),
     }
 }
 
+declare_node_union! {
+    pub AnyJsExportFromClause = JsExportFromClause | JsExportNamedFromClause
+}
+
 impl Rule for NoBarrelFile {
-    type Query = Semantic<JsIdentifierBinding>;
-    type State = Reference;
-    type Signals = Vec<Self::State>;
+    type Query = Ast<AnyJsExportFromClause>;
+    type State = ();
+    type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let binding = ctx.query();
-        let model = ctx.model();
-        binding.all_references(model).collect()
+        let export_from_clause = ctx.query();
+        match export_from_clause {
+            AnyJsExportFromClause::JsExportFromClause(clause) => {
+                if clause.type_token().is_some() {
+                    return None;
+                }
+            }
+            AnyJsExportFromClause::JsExportNamedFromClause(clause) => {
+                if clause.type_token().is_some() {
+                    return None;
+                }
+                if clause
+                    .specifiers()
+                    .into_iter()
+                    .flatten()
+                    .all(|s| s.type_token().is_some())
+                {
+                    return None;
+                }
+            }
+        };
+        Some(())
     }
 
-    fn diagnostic(_: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                reference.range(),
-                markup! {
-                    "Variable is read here."
-                },
-            )
-            .note(markup! {
-                "This note will give you more information."
-            }),
-        )
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+        let span = match JsExport::cast(node.syntax().parent()?) {
+            Some(node) => node.range(),
+            // `JsExportFromClause` and `JsExportNamedFromClause` are always inside JsExport`
+            None => unreachable!(),
+        };
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            span,
+            markup! {
+                "Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused."
+            },
+        ).note(
+            markup! {
+                "Check "<Hyperlink href="https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/">"this thorough explanation"</Hyperlink>" to better understand the context."
+            }))
     }
 }
