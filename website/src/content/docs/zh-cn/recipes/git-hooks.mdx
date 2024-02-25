@@ -57,17 +57,6 @@ Git 允许在运行 git 命令的过程中执行 [Git Hooks](https://git-scm.com
 
 配置之后，运行 `lefthook install` 来设置 hooks。
 
-如果你的项目包含 `package.json` 文件，
-你可以通过 `scripts.postinstall` 命令，在包安装完成后自动设置 _Lefthook_。
-
-```json title="package.json"
-{
-  "scripts": {
-    "postinstall": "lefthook install"
-  }
-}
-```
-
 
 ## Husky
 
