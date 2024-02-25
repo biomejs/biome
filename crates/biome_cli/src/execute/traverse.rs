@@ -44,6 +44,9 @@ struct Files(usize);
 
 impl fmt::Display for Files {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        fmt.write_markup(
+            markup!({self.0} " ")
+        )?;
         if self.0 == 1 {
             fmt.write_str("file")
         } else {
@@ -58,7 +61,7 @@ impl fmt::Display for SummaryDetail {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if self.0 > 0 {
             fmt.write_markup(markup! {
-                ". fixed "{Files(self.0)}"."
+                ". Fixed "{Files(self.0)}"."
             })
         } else {
             fmt.write_markup(markup! {
@@ -72,24 +75,22 @@ struct SummaryTotal<'a>(&'a TraversalMode, usize, &'a Duration);
 
 impl<'a> fmt::Display for SummaryTotal<'a> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        if self.1 == 0 {}
-
         let files = Files(self.1);
         match self.0 {
             TraversalMode::Check { .. } | TraversalMode::Lint { .. } => fmt.write_markup(markup! {
-                "Checked "{self.1}" "{files}" in "{self.2}
+                "Checked "{files}" in "{self.2}
             }),
             TraversalMode::CI { .. } => fmt.write_markup(markup! {
-                "Checked "{self.1}" "{files}" in "{self.2}
+                "Checked "{files}" in "{self.2}
             }),
             TraversalMode::Format { write, .. } => {
                 if *write {
                     fmt.write_markup(markup! {
-                        "Formatted "{self.1}" "{files}" in "{self.2}
+                        "Formatted "{files}" in "{self.2}
                     })
                 } else {
                     fmt.write_markup(markup! {
-                        "Checked "{self.1}" "{files}" in "{self.2}
+                        "Checked "{files}" in "{self.2}
                     })
                 }
             }
@@ -128,9 +129,9 @@ impl<'a> fmt::Display for SummaryResult<'a> {
         }
         if self.warnings > 0 {
             if self.warnings == 1 {
-                fmt.write_markup(markup!("\n"<Warn>"Found "{self.warnings}" error."</Warn>))?;
+                fmt.write_markup(markup!("\n"<Warn>"Found "{self.warnings}" warning."</Warn>))?;
             } else {
-                fmt.write_markup(markup!("\n"<Warn>"Found "{self.warnings}" errors."</Warn>))?;
+                fmt.write_markup(markup!("\n"<Warn>"Found "{self.warnings}" warnings."</Warn>))?;
             }
         }
         Ok(())

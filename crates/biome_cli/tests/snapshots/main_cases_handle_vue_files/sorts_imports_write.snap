@@ -15,7 +15,7 @@ import Button from "./components/Button.vue";
 # Emitted Messages
 
 ```block
-Checked 1 file in <TIME>. fixed file.
+Checked 1 file in <TIME>. Fixed 1 file.
 ```
 
 
