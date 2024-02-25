@@ -21,7 +21,8 @@ Diagnostics not shown: 50.
 ```
 
 ```block
-Compared 60 file(s) in <TIME>
+Checked 60 files in <TIME>. No fixes needed.
+Found 60 errors.
 ```
 
 

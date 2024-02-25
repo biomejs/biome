@@ -8,11 +8,17 @@ use biome_fs::{ConfigName, FileSystemExt, MemoryFileSystem};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
 use biome_json_parser::{parse_json, JsonParserOptions};
+use lazy_static::lazy_static;
+use regex::Regex;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::env::{current_exe, temp_dir};
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf, MAIN_SEPARATOR};
+
+lazy_static! {
+    static ref TIME_REGEX: Regex = Regex::new("[0-9]+[(m|µ|n)]s").unwrap();
+}
 
 #[derive(Default)]
 struct InMessages {
@@ -142,18 +148,9 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     // otherwise at each run we invalid the previous snapshot.
     //
     // This is a workaround, and it might not work for all cases.
-    const PATTERN: &str = "file(s) in ";
-    const SEMICOLON: &str = ";";
-    if let Some(start) = output.find(PATTERN) {
-        if let Some(start_semi) = output.find(SEMICOLON) {
-            output
-                .to_mut()
-                .replace_range(start + PATTERN.len()..start_semi, "<TIME>");
-        } else {
-            output
-                .to_mut()
-                .replace_range(start + PATTERN.len().., "<TIME>");
-        }
+    let the_match = TIME_REGEX.find(output.as_ref()).map(|f| f.start()..f.end());
+    if let Some(found) = the_match {
+        output.to_mut().replace_range(found, "<TIME>");
     }
 
     // Normalize the name of the current executable to "biome"

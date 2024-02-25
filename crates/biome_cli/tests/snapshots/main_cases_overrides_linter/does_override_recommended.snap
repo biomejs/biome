@@ -39,7 +39,7 @@ debugger
 # Emitted Messages
 
 ```block
-Checked 3 file(s) in <TIME>; 1 file(s) are changed, 2 file(s) are unchanged.
+Checked 3 files in <TIME>. fixed file.
 ```
 
 

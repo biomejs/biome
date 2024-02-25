@@ -46,7 +46,7 @@ expression: content
 # Emitted Messages
 
 ```block
-Checked 2 file(s) in <TIME>; 2 file(s) are changed, 0 file(s) are unchanged.
+Checked 2 files in <TIME>. fixed files.
 ```
 
 

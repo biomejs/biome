@@ -33,7 +33,8 @@ fix.js:1:22 parse ━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-Checked 1 file(s) in <TIME>; 0 file(s) are changed, 1 file(s) are unchanged.
+Checked 1 file in <TIME>. No fixes needed.
+Found 2 errors.
 ```
 
 

@@ -161,7 +161,8 @@ Diagnostics not shown: 50.
 ```
 
 ```block
-Checked 20 file(s) in <TIME>
+Checked 20 files in <TIME>. No fixes needed.
+Found 100 errors.
 ```
 
 

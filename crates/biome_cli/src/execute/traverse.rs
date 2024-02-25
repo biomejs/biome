@@ -6,6 +6,7 @@ use crate::execute::diagnostics::{
     FormatDiffDiagnostic, OrganizeImportsDiffDiagnostic, PanicDiagnostic,
 };
 use crate::{CliDiagnostic, CliSession, Execution, FormatterReportSummary, Report, TraversalMode};
+use biome_console::fmt::Formatter;
 use biome_console::{fmt, markup, Console, ConsoleExt};
 use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::PrintGitHubDiagnostic;
@@ -30,19 +31,107 @@ use std::{
     time::{Duration, Instant},
 };
 
-struct CheckResult {
+struct SummaryResult<'a> {
     changed: usize,
     unchanged: usize,
     duration: Duration,
     errors: u32,
+    warnings: u32,
+    traversal: &'a TraversalMode,
 }
 
-impl fmt::Display for CheckResult {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> io::Result<()> {
-        markup!(<Info>"Checked "{self.changed + self.unchanged}" file(s) in "{self.duration}</Info>).fmt(fmt)?;
+struct Files(usize);
+
+impl fmt::Display for Files {
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        if self.0 == 1 {
+            fmt.write_str("file")
+        } else {
+            fmt.write_str("files")
+        }
+    }
+}
+
+struct SummaryDetail(usize);
+
+impl fmt::Display for SummaryDetail {
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        if self.0 > 0 {
+            fmt.write_markup(markup! {
+                ". fixed "{Files(self.0)}"."
+            })
+        } else {
+            fmt.write_markup(markup! {
+                ". No fixes needed."
+            })
+        }
+    }
+}
+
+struct SummaryTotal<'a>(&'a TraversalMode, usize, &'a Duration);
+
+impl<'a> fmt::Display for SummaryTotal<'a> {
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        if self.1 == 0 {}
+
+        let files = Files(self.1);
+        match self.0 {
+            TraversalMode::Check { .. } | TraversalMode::Lint { .. } => fmt.write_markup(markup! {
+                "Checked "{self.1}" "{files}" in "{self.2}
+            }),
+            TraversalMode::CI { .. } => fmt.write_markup(markup! {
+                "Checked "{self.1}" "{files}" in "{self.2}
+            }),
+            TraversalMode::Format { write, .. } => {
+                if *write {
+                    fmt.write_markup(markup! {
+                        "Formatted "{self.1}" "{files}" in "{self.2}
+                    })
+                } else {
+                    fmt.write_markup(markup! {
+                        "Checked "{self.1}" "{files}" in "{self.2}
+                    })
+                }
+            }
+
+            TraversalMode::Migrate { write, .. } => {
+                if *write {
+                    fmt.write_markup(markup! {
+                      "Migrated your configuration file in "{self.2}
+                    })
+                } else {
+                    fmt.write_markup(markup! {
+                        "Checked your configuration file in "{self.2}
+                    })
+                }
+            }
+        }
+    }
+}
+
+impl<'a> fmt::Display for SummaryResult<'a> {
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        let summary = SummaryTotal(
+            self.traversal,
+            self.changed + self.unchanged,
+            &self.duration,
+        );
+        let detail = SummaryDetail(self.changed);
+        fmt.write_markup(markup!(<Info>{summary}{detail}</Info>))?;
 
         if self.errors > 0 {
-            markup!("\n"<Error>"Found "{self.errors}" error(s)"</Error>).fmt(fmt)?
+            if self.errors == 1 {
+                fmt.write_markup(markup!("\n"<Error>"Found "{self.errors}" error."</Error>))?;
+            } else {
+                fmt.write_markup(markup!("\n"<Error>"Found "{self.errors}" errors."</Error>))?;
+            }
+        }
+        if self.warnings > 0 {
+            if self.warnings == 1 {
+                fmt.write_markup(markup!("\n"<Warn>"Found "{self.warnings}" error."</Warn>))?;
+            } else {
+                fmt.write_markup(markup!("\n"<Warn>"Found "{self.warnings}" errors."</Warn>))?;
+            }
         }
         Ok(())
     }
@@ -123,56 +212,16 @@ pub(crate) fn traverse(
     let skipped = skipped.load(Ordering::Relaxed);
 
     if execution.should_report_to_terminal() {
-        match execution.traversal_mode() {
-            TraversalMode::Check { .. } | TraversalMode::Lint { .. } => {
-                if execution.as_fix_file_mode().is_some() {
-                    console.log(markup! {
-                        <Info>"Checked "{count}" file(s) in "{duration}"; "{changed}" file(s) are changed, "{unchanged}" file(s) are unchanged."</Info>
-                    });
-                } else {
-                    console.log(markup!({
-                        CheckResult {
-                            changed,
-                            unchanged,
-                            duration,
-                            errors,
-                        }
-                    }));
-                }
-            }
-            TraversalMode::CI { .. } => {
-                console.log(markup!({
-                    CheckResult {
-                        changed,
-                        unchanged,
-                        duration,
-                        errors,
-                    }
-                }));
-            }
-            TraversalMode::Format { write: false, .. } => {
-                console.log(markup! {
-                    <Info>"Compared "{count}" file(s) in "{duration}</Info>
-                });
-            }
-            TraversalMode::Format { write: true, .. } => {
-                console.log(markup! {
-                    <Info>"Formatted "{changed}" file(s) in "{duration}"; "{unchanged}" file(s) are unchanged."</Info>
-                });
-            }
-
-            TraversalMode::Migrate { write: false, .. } => {
-                console.log(markup! {
-                    <Info>"Checked your configuration file in "{duration}</Info>
-                });
-            }
-
-            TraversalMode::Migrate { write: true, .. } => {
-                console.log(markup! {
-                    <Info>"Migrated your configuration file in "{duration}</Info>
-                });
-            }
-        }
+        console.log(markup! {
+            {SummaryResult {
+                changed,
+                unchanged,
+                duration,
+                errors,
+                warnings,
+                traversal: execution.traversal_mode()
+            }}
+        });
     } else {
         if let TraversalMode::Format { write, .. } = execution.traversal_mode() {
             let mut summary = FormatterReportSummary::default();
