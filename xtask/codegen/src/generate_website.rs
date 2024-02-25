@@ -26,7 +26,7 @@ pub(crate) fn generate_files() -> Result<()> {
     let changelog = fs::read_to_string(project_root().join("CHANGELOG.md"))?;
     let default_configuration =
         project_root().join("website/src/components/generated/DefaultConfiguration.mdx");
-    fs::remove_file(project_root().join("website/src/content/docs/internals/changelog.mdx")).ok();
+    fs::remove_file(project_root().join("website/src/content/docs/internals/changelog.md")).ok();
     let changelog = format!("{CHANGELOG_FRONTMATTER}{changelog}");
 
     let configuration_content = serde_json::to_string(&PartialConfiguration::init()).unwrap();
@@ -51,7 +51,7 @@ pub(crate) fn generate_files() -> Result<()> {
     fs::write(default_configuration, configuration)?;
 
     fs::write(
-        project_root().join("website/src/content/docs/internals/changelog.mdx"),
+        project_root().join("website/src/content/docs/internals/changelog.md"),
         changelog,
     )?;
 
