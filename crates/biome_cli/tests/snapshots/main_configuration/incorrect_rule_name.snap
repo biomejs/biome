@@ -45,7 +45,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
     7 │         },
     8 │         "style": {
   
-  i Accepted keys
+  i Known keys:
   
   - recommended
   - all
@@ -98,7 +98,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
     10 │         }
     11 │     }
   
-  i Accepted keys
+  i Known keys:
   
   - recommended
   - all
