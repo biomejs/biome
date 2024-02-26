@@ -769,7 +769,7 @@ impl GritFiles {
     pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn files(&self) -> GritFilesList {
+    pub fn files(&self) -> GritPatternList {
         support::list(&self.syntax, 2usize)
     }
     pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -789,7 +789,7 @@ impl Serialize for GritFiles {
 pub struct GritFilesFields {
     pub multifile_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
-    pub files: GritFilesList,
+    pub files: GritPatternList,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -3971,7 +3971,7 @@ impl GritSequential {
     pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn sequential(&self) -> GritSequentialList {
+    pub fn sequential(&self) -> GritPatternList {
         support::list(&self.syntax, 2usize)
     }
     pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -3991,7 +3991,7 @@ impl Serialize for GritSequential {
 pub struct GritSequentialFields {
     pub sequential_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
-    pub sequential: GritSequentialList,
+    pub sequential: GritPatternList,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -12208,89 +12208,6 @@ impl IntoIterator for &GritDefinitionList {
     }
 }
 #[derive(Clone, Eq, PartialEq, Hash)]
-pub struct GritFilesList {
-    syntax_list: SyntaxList,
-}
-impl GritFilesList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for GritFilesList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_FILES_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_FILES_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<GritFilesList> {
-        if Self::can_cast(syntax.kind()) {
-            Some(GritFilesList {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for GritFilesList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstSeparatedList for GritFilesList {
-    type Language = Language;
-    type Node = AnyGritPattern;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for GritFilesList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("GritFilesList ")?;
-        f.debug_list().entries(self.elements()).finish()
-    }
-}
-impl IntoIterator for GritFilesList {
-    type Item = SyntaxResult<AnyGritPattern>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, AnyGritPattern>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for &GritFilesList {
-    type Item = SyntaxResult<AnyGritPattern>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, AnyGritPattern>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
 pub struct GritLanguageFlavorList {
     syntax_list: SyntaxList,
 }
@@ -12784,89 +12701,6 @@ impl IntoIterator for GritPredicateList {
 impl IntoIterator for &GritPredicateList {
     type Item = SyntaxResult<AnyGritPredicate>;
     type IntoIter = AstSeparatedListNodesIterator<Language, AnyGritPredicate>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
-pub struct GritSequentialList {
-    syntax_list: SyntaxList,
-}
-impl GritSequentialList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for GritSequentialList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_SEQUENTIAL_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_SEQUENTIAL_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<GritSequentialList> {
-        if Self::can_cast(syntax.kind()) {
-            Some(GritSequentialList {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for GritSequentialList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstSeparatedList for GritSequentialList {
-    type Language = Language;
-    type Node = AnyGritPattern;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for GritSequentialList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("GritSequentialList ")?;
-        f.debug_list().entries(self.elements()).finish()
-    }
-}
-impl IntoIterator for GritSequentialList {
-    type Item = SyntaxResult<AnyGritPattern>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, AnyGritPattern>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for &GritSequentialList {
-    type Item = SyntaxResult<AnyGritPattern>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, AnyGritPattern>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

@@ -53,11 +53,9 @@ GritRoot =
     definitions_continued: GritDefinitionList?
     eof: 'EOF'
 
-GritSequential = 'sequential' '{' sequential: GritSequentialList '}'
-GritSequentialList = AnyGritPattern (',' AnyGritPattern)* ','?
+GritSequential = 'sequential' '{' sequential: GritPatternList '}'
 
-GritFiles = 'multifile' '{' files: GritFilesList '}'
-GritFilesList = AnyGritPattern (',' AnyGritPattern)* ','?
+GritFiles = 'multifile' '{' files: GritPatternList '}'
 
 AnyGritDefinition =
     GritPatternDefinition

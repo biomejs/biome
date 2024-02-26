@@ -106,7 +106,7 @@ fn empty() {
 fn int() {
     assert_lex! {
         "5098382",
-        GRIT_INT_LITERAL:7,
+        GRIT_INT:7,
         EOF:0
     }
 }
@@ -115,7 +115,7 @@ fn int() {
 fn float() {
     assert_lex! {
         "345.893872",
-        GRIT_DOUBLE_LITERAL:10,
+        GRIT_DOUBLE:10,
         EOF:0
     }
 }
@@ -133,7 +133,7 @@ fn float_invalid() {
 fn negative() {
     assert_lex! {
         "-5098382",
-        GRIT_NEGATIVE_INT_LITERAL:8,
+        GRIT_NEGATIVE_INT:8,
         EOF:0
     }
 }
@@ -151,13 +151,13 @@ fn minus_without_number() {
 fn exponent() {
     assert_lex! {
         "-493e+534",
-        GRIT_DOUBLE_LITERAL:9,
+        GRIT_DOUBLE:9,
         EOF:0
     }
 
     assert_lex! {
         "-493E-534",
-        GRIT_DOUBLE_LITERAL:9,
+        GRIT_DOUBLE:9,
         EOF:0
     }
 }
@@ -182,16 +182,16 @@ fn array() {
     assert_lex! {
         "[1, 2, 3, 4]",
         L_BRACK:1,
-        GRIT_INT_LITERAL:1,
+        GRIT_INT:1,
         COMMA:1
         WHITESPACE:1,
-        GRIT_INT_LITERAL:1,
+        GRIT_INT:1,
         COMMA:1,
         WHITESPACE:1,
-        GRIT_INT_LITERAL:1,
+        GRIT_INT:1,
         COMMA:1,
         WHITESPACE:1,
-        GRIT_INT_LITERAL:1,
+        GRIT_INT:1,
         R_BRACK:1,
         EOF:0,
     }
@@ -207,14 +207,14 @@ fn object() {
         GRIT_NAME:3,
         COLON:1,
         WHITESPACE:1,
-        GRIT_STRING_LITERAL:7,
+        GRIT_STRING:7,
         COMMA:1,
 
         WHITESPACE:1,
         GRIT_NAME:5,
         COLON:1,
         WHITESPACE:1,
-        GRIT_INT_LITERAL:1,
+        GRIT_INT:1,
         WHITESPACE:1,
         R_CURLY:1,
         EOF:0,
@@ -225,7 +225,7 @@ fn object() {
 fn basic_string() {
     assert_lex! {
         r#""A string consisting of ASCII characters only""#,
-        GRIT_STRING_LITERAL:46,
+        GRIT_STRING:46,
         EOF:0
     }
 }
@@ -252,25 +252,25 @@ fn unterminated_string() {
 fn simple_escape_sequences() {
     assert_lex! {
         r#""Escaped \$""#,
-        GRIT_STRING_LITERAL:12,
+        GRIT_STRING:12,
         EOF:0
     }
 
     assert_lex! {
         r#""Escaped \"""#,
-        GRIT_STRING_LITERAL:12,
+        GRIT_STRING:12,
         EOF:0
     }
 
     assert_lex! {
         r#""Escaped \\""#,
-        GRIT_STRING_LITERAL:12,
+        GRIT_STRING:12,
         EOF:0
     }
 
     assert_lex! {
         r#""Escaped \n""#,
-        GRIT_STRING_LITERAL:12,
+        GRIT_STRING:12,
         EOF:0
     }
 }
@@ -279,13 +279,13 @@ fn simple_escape_sequences() {
 fn unicode_escape() {
     assert_lex! {
         r#""Escaped \u002F""#,
-        GRIT_STRING_LITERAL:16,
+        GRIT_STRING:16,
         EOF:0
     }
 
     assert_lex! {
         r#""Escaped \u002f""#,
-        GRIT_STRING_LITERAL:16,
+        GRIT_STRING:16,
         EOF:0
     }
 }
@@ -364,19 +364,19 @@ fn names() {
 fn regex() {
     assert_lex! {
         r#"r"a+b?""#,
-        GRIT_REGEX_LITERAL:7,
+        GRIT_REGEX:7,
         EOF:0
     }
 
     assert_lex! {
         r#"r"a\\.b?""#,
-        GRIT_REGEX_LITERAL:9,
+        GRIT_REGEX:9,
         EOF:0
     }
 
     assert_lex! {
         r#"r"a\"b?""#,
-        GRIT_REGEX_LITERAL:8,
+        GRIT_REGEX:8,
         EOF:0
     }
 
@@ -391,19 +391,19 @@ fn regex() {
 fn snippet_regex() {
     assert_lex! {
         r#"r`a+b?`"#,
-        GRIT_SNIPPET_REGEX_LITERAL:7,
+        GRIT_SNIPPET_REGEX:7,
         EOF:0
     }
 
     assert_lex! {
         r#"r`a\\.b?`"#,
-        GRIT_SNIPPET_REGEX_LITERAL:9,
+        GRIT_SNIPPET_REGEX:9,
         EOF:0
     }
 
     assert_lex! {
         r#"r`a\`b?`"#,
-        GRIT_SNIPPET_REGEX_LITERAL:8,
+        GRIT_SNIPPET_REGEX:8,
         EOF:0
     }
 

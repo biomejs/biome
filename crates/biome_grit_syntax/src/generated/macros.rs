@@ -435,10 +435,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritDefinitionList::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_FILES_LIST => {
-                    let $pattern = unsafe { $crate::GritFilesList::new_unchecked(node) };
-                    $body
-                }
                 $crate::GritSyntaxKind::GRIT_LANGUAGE_FLAVOR_LIST => {
                     let $pattern = unsafe { $crate::GritLanguageFlavorList::new_unchecked(node) };
                     $body
@@ -461,10 +457,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::GritSyntaxKind::GRIT_PREDICATE_LIST => {
                     let $pattern = unsafe { $crate::GritPredicateList::new_unchecked(node) };
-                    $body
-                }
-                $crate::GritSyntaxKind::GRIT_SEQUENTIAL_LIST => {
-                    let $pattern = unsafe { $crate::GritSequentialList::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_VARIABLE_LIST => {

@@ -21,9 +21,11 @@ GritRoot {
     },
     language: missing (optional),
     definitions: GritDefinitionList [],
-    pattern: missing (optional),
+    pattern: GritStringLiteral {
+        value_token: GRIT_STRING@14..19 "\"1.0\"" [] [],
+    },
     definitions_continued: GritDefinitionList [],
-    eof_token: EOF@14..20 "\"1.0\")" [] [],
+    eof_token: EOF@19..20 ")" [] [],
 }
 ```
 
@@ -40,9 +42,10 @@ GritRoot {
     4: (empty)
   2: (empty)
   3: GRIT_DEFINITION_LIST@14..14
-  4: (empty)
-  5: GRIT_DEFINITION_LIST@14..14
-  6: EOF@14..20 "\"1.0\")" [] []
+  4: GRIT_STRING_LITERAL@14..19
+    0: GRIT_STRING@14..19 "\"1.0\"" [] []
+  5: GRIT_DEFINITION_LIST@19..19
+  6: EOF@19..20 ")" [] []
 
 ```
 

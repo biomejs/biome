@@ -267,7 +267,7 @@ pub fn grit_every(every_token: SyntaxToken, pattern: MaybeCurlyGritPattern) -> G
 pub fn grit_files(
     multifile_token: SyntaxToken,
     l_curly_token: SyntaxToken,
-    files: GritFilesList,
+    files: GritPatternList,
     r_curly_token: SyntaxToken,
 ) -> GritFiles {
     GritFiles::unwrap_cast(SyntaxNode::new_detached(
@@ -1736,7 +1736,7 @@ impl GritRootBuilder {
 pub fn grit_sequential(
     sequential_token: SyntaxToken,
     l_curly_token: SyntaxToken,
-    sequential: GritSequentialList,
+    sequential: GritPatternList,
     r_curly_token: SyntaxToken,
 ) -> GritSequential {
     GritSequential::unwrap_cast(SyntaxNode::new_detached(
@@ -1841,27 +1841,6 @@ where
     let length = items.len() + separators.len();
     GritDefinitionList::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_DEFINITION_LIST,
-        (0..length).map(|index| {
-            if index % 2 == 0 {
-                Some(items.next()?.into_syntax().into())
-            } else {
-                Some(separators.next()?.into())
-            }
-        }),
-    ))
-}
-pub fn grit_files_list<I, S>(items: I, separators: S) -> GritFilesList
-where
-    I: IntoIterator<Item = AnyGritPattern>,
-    I::IntoIter: ExactSizeIterator,
-    S: IntoIterator<Item = GritSyntaxToken>,
-    S::IntoIter: ExactSizeIterator,
-{
-    let mut items = items.into_iter();
-    let mut separators = separators.into_iter();
-    let length = items.len() + separators.len();
-    GritFilesList::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_FILES_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())
@@ -1988,27 +1967,6 @@ where
     let length = items.len() + separators.len();
     GritPredicateList::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_PREDICATE_LIST,
-        (0..length).map(|index| {
-            if index % 2 == 0 {
-                Some(items.next()?.into_syntax().into())
-            } else {
-                Some(separators.next()?.into())
-            }
-        }),
-    ))
-}
-pub fn grit_sequential_list<I, S>(items: I, separators: S) -> GritSequentialList
-where
-    I: IntoIterator<Item = AnyGritPattern>,
-    I::IntoIter: ExactSizeIterator,
-    S: IntoIterator<Item = GritSyntaxToken>,
-    S::IntoIter: ExactSizeIterator,
-{
-    let mut items = items.into_iter();
-    let mut separators = separators.into_iter();
-    let length = items.len() + separators.len();
-    GritSequentialList::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_SEQUENTIAL_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())

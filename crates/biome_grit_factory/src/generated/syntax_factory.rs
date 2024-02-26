@@ -506,7 +506,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GritFilesList::can_cast(element.kind()) {
+                    if GritPatternList::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2822,7 +2822,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GritSequentialList::can_cast(element.kind()) {
+                    if GritPatternList::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -3077,13 +3077,6 @@ impl SyntaxFactory for GritSyntaxFactory {
                 NEWLINE,
                 true,
             ),
-            GRIT_FILES_LIST => Self::make_separated_list_syntax(
-                kind,
-                children,
-                AnyGritPattern::can_cast,
-                T ! [,],
-                true,
-            ),
             GRIT_LANGUAGE_FLAVOR_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
@@ -3123,13 +3116,6 @@ impl SyntaxFactory for GritSyntaxFactory {
                 kind,
                 children,
                 AnyGritPredicate::can_cast,
-                T ! [,],
-                true,
-            ),
-            GRIT_SEQUENTIAL_LIST => Self::make_separated_list_syntax(
-                kind,
-                children,
-                AnyGritPattern::can_cast,
                 T ! [,],
                 true,
             ),

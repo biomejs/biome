@@ -283,8 +283,11 @@ impl<'src> Lexer<'src> {
             b'`' => self.lex_backtick_snippet(),
             b'/' => self.lex_slash(),
             b'=' => self.eat_equals_or_rewrite(),
+            b'<' => self.eat_lt_or_match(),
+            b'>' => self.eat_gt(),
             b':' => self.eat_byte(T![:]),
             b';' => self.eat_byte(T![;]),
+            b'.' => self.eat_byte(T![.]),
             b',' => self.eat_byte(T![,]),
             b'[' => self.eat_byte(T!['[']),
             b']' => self.eat_byte(T![']']),
@@ -314,6 +317,36 @@ impl<'src> Lexer<'src> {
                 T![=>]
             }
             _ => T![=],
+        }
+    }
+
+    fn eat_lt_or_match(&mut self) -> GritSyntaxKind {
+        assert_eq!(self.current_byte(), Some(b'<'));
+        self.advance(1);
+
+        match self.current_byte() {
+            Some(b':') => {
+                self.advance(1);
+                T![<:]
+            }
+            Some(b'=') => {
+                self.advance(1);
+                T![<=]
+            }
+            _ => T![<],
+        }
+    }
+
+    fn eat_gt(&mut self) -> GritSyntaxKind {
+        assert_eq!(self.current_byte(), Some(b'>'));
+        self.advance(1);
+
+        match self.current_byte() {
+            Some(b'=') => {
+                self.advance(1);
+                T![>=]
+            }
+            _ => T![>],
         }
     }
 
@@ -430,12 +463,12 @@ impl<'src> Lexer<'src> {
         match state {
             LexNumberState::IntegerPart => {
                 if first == b'-' {
-                    GRIT_NEGATIVE_INT_LITERAL
+                    GRIT_NEGATIVE_INT
                 } else {
-                    GRIT_INT_LITERAL
+                    GRIT_INT
                 }
             }
-            LexNumberState::FractionalPart | LexNumberState::Exponent => GRIT_DOUBLE_LITERAL,
+            LexNumberState::FractionalPart | LexNumberState::Exponent => GRIT_DOUBLE,
             LexNumberState::FirstDigit => {
                 let err = ParseDiagnostic::new(
                     "Minus must be followed by a digit",
@@ -565,7 +598,7 @@ impl<'src> Lexer<'src> {
         }
 
         match state {
-            LexStringState::Terminated => GRIT_STRING_LITERAL,
+            LexStringState::Terminated => GRIT_STRING,
             LexStringState::InvalidQuote => {
                 let literal_range = TextRange::new(start, self.text_position());
                 self.diagnostics.push(
@@ -745,13 +778,19 @@ impl<'src> Lexer<'src> {
             } else if byte == b'"' {
                 return match &buffer[..len] {
                     b"r" => self.lex_regex(),
+                    b"js" => T![js],
+                    b"json" => T![json],
+                    b"css" => T![css],
+                    b"grit" => T![grit],
+                    b"html" => T![html],
                     _ => {
                         self.diagnostics.push(
                             ParseDiagnostic::new(
                                 "Unxpected string prefix",
                                 name_start..self.text_position(),
                             )
-                            .with_hint("Use the `r` prefix to create a regex literal."),
+                            .with_hint("Use a language annotation to create a language-specific snippet or use the `r` prefix to create a regex literal.")
+                            .with_hint("Supported language annotations are `js`, `json`, `css`, `grit`, and `html`."),
                         );
 
                         ERROR_TOKEN
@@ -760,7 +799,7 @@ impl<'src> Lexer<'src> {
             } else if byte == b'`' {
                 return match &buffer[..len] {
                     b"r" => match self.lex_backtick_snippet() {
-                        GRIT_BACKTICK_SNIPPET => GRIT_SNIPPET_REGEX_LITERAL,
+                        GRIT_BACKTICK_SNIPPET => GRIT_SNIPPET_REGEX,
                         other => other,
                     },
                     b"raw" => match self.lex_backtick_snippet() {
@@ -886,7 +925,7 @@ impl<'src> Lexer<'src> {
         }
 
         match state {
-            LexRegexState::Terminated => GRIT_REGEX_LITERAL,
+            LexRegexState::Terminated => GRIT_REGEX,
             LexRegexState::InRegex => {
                 let unterminated =
                     ParseDiagnostic::new("Missing closing quote", start..self.text_position())
@@ -905,6 +944,10 @@ impl<'src> Lexer<'src> {
     fn lex_variable(&mut self) -> GritSyntaxKind {
         self.assert_at_char_boundary();
         self.advance(1); // Skip the leading `$`.
+
+        if self.current_byte() == Some(b'_') {
+            return GRIT_UNDERSCORE;
+        }
 
         while let Some(byte) = self.current_byte() {
             if is_identifier_byte(byte) {

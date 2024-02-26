@@ -105,9 +105,7 @@ pub enum GritSyntaxKind {
     CURLY_GRIT_PATTERN,
     GRIT_ROOT,
     GRIT_SEQUENTIAL,
-    GRIT_SEQUENTIAL_LIST,
     GRIT_FILES,
-    GRIT_FILES_LIST,
     GRIT_DEFINITION_LIST,
     GRIT_VERSION,
     GRIT_LANGUAGE_DECLARATION,
@@ -238,9 +236,7 @@ impl GritSyntaxKind {
     }
     pub const fn is_list(self) -> bool {
         match self {
-            GRIT_SEQUENTIAL_LIST
-            | GRIT_FILES_LIST
-            | GRIT_DEFINITION_LIST
+            GRIT_DEFINITION_LIST
             | GRIT_LANGUAGE_FLAVOR_LIST
             | GRIT_PATTERN_LIST
             | GRIT_NAMED_ARG_LIST
