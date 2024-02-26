@@ -81,7 +81,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#1081](https://github.com/biomejs/biome/issues/1081). The `useAwait` rule does not report `for await...of`.
   Contributed by @unvalley
 
-- Fix [#1827](https://github.com/biomejs/biome/issues/1827) by properly handling `finally` clause for nested try statements. Contributed by @ah-yu
+- Fix [#1827](https://github.com/biomejs/biome/issues/1827) by properly analyzing nested `try-finally` statements. Contributed by @ah-yu
 
 ### CLI
 
