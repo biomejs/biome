@@ -56,7 +56,9 @@ For instance,  when the option is set to `true`, `café` or `안녕하세요` wi
 When the option is set to `false`, anames may include non-ASCII characters.
 `café` and `안녕하세요` are so valid.
 
-Default: `true`
+Default: `false`
+
+**This option will be turned on by default in Biome 2.0.**
 
 ### filenameCases
 
