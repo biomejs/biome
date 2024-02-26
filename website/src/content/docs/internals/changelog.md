@@ -236,16 +236,51 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   <div></div>
   ```
 
+#### Enhancements
+
+- `composer.json`, `deno.json`, `jsconfig.json`, `package.json` and `tsconfig.json` are no longer protected files.
+
+  This means that you can now format them.
+
+  If you want to ignore these files, you can use the [files.ignore](https://biomejs.dev/reference/configuration/#filesignore) configuration:
+
+  ```json
+  {
+    "files": {
+      "ignore": [
+        "composer.json",
+        "jsconfig.json",
+        "package.json",
+        "tsconfig.json",
+        "typescript.json",
+        "deno.json",
+        "deno.jsonc"
+      ]
+    }
+  }
+  ```
+
+  The following files are still protected, and thus ignored:
+
+  - `composer.lock`
+  - `npm-shrinkwrap.json`
+  - `package-lock.json`
+  - `yarn.lock`
+
+   Contributed by @pattrickrice and @Conaclos
+
 #### Bug fixes
 
 - Fix [#1039](https://github.com/biomejs/biome/issues/1039). Check unicode width instead of number of bytes when
-  checking if regex expression is a simple argument. Contributed by @kalleep
+  checking if regex expression is a simple argument.
 
   This no longer breaks.
 
   ```js
   s(/🚀🚀/).s().s();
   ```
+
+   Contributed by @kalleep
 
 - Fix [#1218](https://github.com/biomejs/biome/issues/1218), by correctly preserving empty lines in member chains.
   Contributed by @ah-yu
