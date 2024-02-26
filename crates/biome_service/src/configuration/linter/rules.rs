@@ -343,7 +343,7 @@ impl Rules {
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", default)]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct A11y {
     #[doc = r" It enables the recommended rules for this group"]
@@ -1075,7 +1075,7 @@ impl A11y {
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", default)]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Complexity {
     #[doc = r" It enables the recommended rules for this group"]
@@ -1701,7 +1701,7 @@ impl Complexity {
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", default)]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Correctness {
     #[doc = r" It enables the recommended rules for this group"]
@@ -2485,7 +2485,7 @@ impl Correctness {
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", default)]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Nursery {
     #[doc = r" It enables the recommended rules for this group"]
@@ -3298,7 +3298,7 @@ impl Nursery {
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", default)]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Performance {
     #[doc = r" It enables the recommended rules for this group"]
@@ -3433,7 +3433,7 @@ impl Performance {
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", default)]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Security {
     #[doc = r" It enables the recommended rules for this group"]
@@ -3575,7 +3575,7 @@ impl Security {
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", default)]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Style {
     #[doc = r" It enables the recommended rules for this group"]
@@ -4339,7 +4339,7 @@ impl Style {
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", default)]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Suspicious {
     #[doc = r" It enables the recommended rules for this group"]

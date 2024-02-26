@@ -20,7 +20,7 @@ malformedOptions.options:9:7 deserialize ━━━━━━━━━━━━━
     10 │ 							{
     11 │ 								"name": "useMyEffect",
   
-  i Accepted keys
+  i Known keys:
   
   - hooks
   
