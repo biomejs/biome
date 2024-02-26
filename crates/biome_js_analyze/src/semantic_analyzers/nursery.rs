@@ -14,6 +14,7 @@ pub mod no_unused_imports;
 pub mod use_export_type;
 pub mod use_for_of;
 pub mod use_import_type;
+pub mod use_jsx_key_in_iterable;
 pub mod use_number_namespace;
 pub mod use_sorted_classes;
 
@@ -33,6 +34,7 @@ declare_group! {
             self :: use_export_type :: UseExportType ,
             self :: use_for_of :: UseForOf ,
             self :: use_import_type :: UseImportType ,
+            self :: use_jsx_key_in_iterable :: UseJsxKeyInIterable ,
             self :: use_number_namespace :: UseNumberNamespace ,
             self :: use_sorted_classes :: UseSortedClasses ,
         ]
