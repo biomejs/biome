@@ -11,9 +11,9 @@ expression: content
 # Emitted Messages
 
 ```block
-tsconfig.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The file tsconfig.json is protected because is handled by another tool. Biome won't process it.
+  i The file package-lock.json is protected because is handled by another tool. Biome won't process it.
   
   Verbose advice
   

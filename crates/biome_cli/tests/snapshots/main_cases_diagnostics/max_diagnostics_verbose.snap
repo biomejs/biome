@@ -22,9 +22,9 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-src/folder_2/tsconfig.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+src/folder_3/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The file src/folder_2/tsconfig.json is protected because is handled by another tool. Biome won't process it.
+  i The file src/folder_3/package-lock.json is protected because is handled by another tool. Biome won't process it.
   
   Verbose advice
   
@@ -34,9 +34,9 @@ src/folder_2/tsconfig.json project  VERBOSE  ━━━━━━━━━━━�
 ```
 
 ```block
-src/folder_4/tsconfig.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+src/folder_2/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The file src/folder_4/tsconfig.json is protected because is handled by another tool. Biome won't process it.
+  i The file src/folder_2/package-lock.json is protected because is handled by another tool. Biome won't process it.
   
   Verbose advice
   
@@ -46,9 +46,21 @@ src/folder_4/tsconfig.json project  VERBOSE  ━━━━━━━━━━━�
 ```
 
 ```block
-src/folder_1/tsconfig.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+src/folder_4/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The file src/folder_1/tsconfig.json is protected because is handled by another tool. Biome won't process it.
+  i The file src/folder_4/package-lock.json is protected because is handled by another tool. Biome won't process it.
+  
+  Verbose advice
+  
+    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
+    
+
+```
+
+```block
+src/folder_6/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The file src/folder_6/package-lock.json is protected because is handled by another tool. Biome won't process it.
   
   Verbose advice
   
@@ -70,9 +82,9 @@ src/file.js format ━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-src/folder_0/tsconfig.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+src/folder_7/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The file src/folder_0/tsconfig.json is protected because is handled by another tool. Biome won't process it.
+  i The file src/folder_7/package-lock.json is protected because is handled by another tool. Biome won't process it.
   
   Verbose advice
   
@@ -82,9 +94,9 @@ src/folder_0/tsconfig.json project  VERBOSE  ━━━━━━━━━━━�
 ```
 
 ```block
-src/folder_3/tsconfig.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+src/folder_1/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The file src/folder_3/tsconfig.json is protected because is handled by another tool. Biome won't process it.
+  i The file src/folder_1/package-lock.json is protected because is handled by another tool. Biome won't process it.
   
   Verbose advice
   
@@ -94,9 +106,9 @@ src/folder_3/tsconfig.json project  VERBOSE  ━━━━━━━━━━━�
 ```
 
 ```block
-src/folder_5/tsconfig.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+src/folder_5/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The file src/folder_5/tsconfig.json is protected because is handled by another tool. Biome won't process it.
+  i The file src/folder_5/package-lock.json is protected because is handled by another tool. Biome won't process it.
   
   Verbose advice
   
@@ -106,21 +118,9 @@ src/folder_5/tsconfig.json project  VERBOSE  ━━━━━━━━━━━�
 ```
 
 ```block
-src/folder_7/tsconfig.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+src/folder_0/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The file src/folder_7/tsconfig.json is protected because is handled by another tool. Biome won't process it.
-  
-  Verbose advice
-  
-    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
-
-```
-
-```block
-src/folder_6/tsconfig.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The file src/folder_6/tsconfig.json is protected because is handled by another tool. Biome won't process it.
+  i The file src/folder_0/package-lock.json is protected because is handled by another tool. Biome won't process it.
   
   Verbose advice
   

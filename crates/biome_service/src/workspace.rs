@@ -98,21 +98,12 @@ pub struct FileFeaturesResult {
 impl FileFeaturesResult {
     /// Sorted array of files that should not be processed no matter the cases.
     /// These files are handled by other tools.
-    const PROTECTED_FILES: &'static [&'static str; 10] = &[
+    const PROTECTED_FILES: &'static [&'static str; 4] = &[
         // Composer
-        "composer.json",
         "composer.lock",
-        // Deno
-        "deno.json",
-        "deno.jsonc",
-        // TSC
-        "jsconfig.json",
         // NPM
         "npm-shrinkwrap.json",
         "package-lock.json",
-        // TSC
-        "tsconfig.json",
-        "typescript.json",
         // Yarn
         "yarn.lock",
     ];
@@ -122,11 +113,7 @@ impl FileFeaturesResult {
     pub(crate) fn is_protected_file(path: &Path) -> bool {
         path.file_name()
             .and_then(OsStr::to_str)
-            .is_some_and(|file_name| {
-                FileFeaturesResult::PROTECTED_FILES
-                    .binary_search(&file_name)
-                    .is_ok()
-            })
+            .is_some_and(|file_name| FileFeaturesResult::PROTECTED_FILES.contains(&file_name))
     }
 
     /// By default, all features are not supported by a file.

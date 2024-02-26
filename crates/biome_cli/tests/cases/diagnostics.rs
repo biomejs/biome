@@ -76,7 +76,7 @@ fn max_diagnostics_no_verbose() {
     let mut console = BufferConsole::default();
 
     for i in 0..10 {
-        let file_path = PathBuf::from(format!("src/folder_{i}/tsconfig.json"));
+        let file_path = PathBuf::from(format!("src/folder_{i}/package-lock.json"));
         fs.insert(file_path, "{}".as_bytes());
     }
     let file_path = PathBuf::from("src/file.js".to_string());
@@ -91,7 +91,7 @@ fn max_diagnostics_no_verbose() {
     assert!(result.is_err(), "run_cli returned {result:?}");
 
     for i in 0..10 {
-        let file_path = PathBuf::from(format!("src/folder_{i}/tsconfig.json"));
+        let file_path = PathBuf::from(format!("src/folder_{i}/package-lock.json"));
         fs.remove(Path::new(&file_path));
     }
 
@@ -110,7 +110,7 @@ fn max_diagnostics_verbose() {
     let mut console = BufferConsole::default();
 
     for i in 0..8 {
-        let file_path = PathBuf::from(format!("src/folder_{i}/tsconfig.json"));
+        let file_path = PathBuf::from(format!("src/folder_{i}/package-lock.json"));
         fs.insert(file_path, "{}".as_bytes());
     }
     let file_path = PathBuf::from("src/file.js".to_string());
@@ -125,7 +125,7 @@ fn max_diagnostics_verbose() {
     assert!(result.is_err(), "run_cli returned {result:?}");
 
     for i in 0..8 {
-        let file_path = PathBuf::from(format!("src/folder_{i}/tsconfig.json"));
+        let file_path = PathBuf::from(format!("src/folder_{i}/package-lock.json"));
         fs.remove(Path::new(&file_path));
     }
 
