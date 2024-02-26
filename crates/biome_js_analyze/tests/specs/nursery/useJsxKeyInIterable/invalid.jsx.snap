@@ -51,7 +51,7 @@ React.Children.map(c => React.cloneElement(c));
 ```
 invalid.jsx:3:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     1 │ import React from "react";
     2 │ 
@@ -60,7 +60,7 @@ invalid.jsx:3:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
     4 │ 
     5 │ [...[<Hello />, <Hello />], <Hello />];
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -70,7 +70,7 @@ invalid.jsx:3:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
 ```
 invalid.jsx:3:13 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     1 │ import React from "react";
     2 │ 
@@ -79,7 +79,7 @@ invalid.jsx:3:13 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
     4 │ 
     5 │ [...[<Hello />, <Hello />], <Hello />];
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -89,7 +89,7 @@ invalid.jsx:3:13 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 invalid.jsx:3:24 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     1 │ import React from "react";
     2 │ 
@@ -98,7 +98,7 @@ invalid.jsx:3:24 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
     4 │ 
     5 │ [...[<Hello />, <Hello />], <Hello />];
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -108,7 +108,7 @@ invalid.jsx:3:24 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 invalid.jsx:5:29 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     3 │ [<Hello />, <Hello />, <Hello />];
     4 │ 
@@ -117,7 +117,7 @@ invalid.jsx:5:29 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
     6 │ 
     7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -127,7 +127,7 @@ invalid.jsx:5:29 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 invalid.jsx:5:6 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     3 │ [<Hello />, <Hello />, <Hello />];
     4 │ 
@@ -136,7 +136,7 @@ invalid.jsx:5:6 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
     6 │ 
     7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -146,7 +146,7 @@ invalid.jsx:5:6 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
 ```
 invalid.jsx:5:17 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     3 │ [<Hello />, <Hello />, <Hello />];
     4 │ 
@@ -155,7 +155,7 @@ invalid.jsx:5:17 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
     6 │ 
     7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -165,7 +165,7 @@ invalid.jsx:5:17 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 invalid.jsx:7:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     5 │ [...[<Hello />, <Hello />], <Hello />];
     6 │ 
@@ -174,7 +174,7 @@ invalid.jsx:7:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
     8 │ 
     9 │ [<></>, <></>, <></>];
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -184,7 +184,7 @@ invalid.jsx:7:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
 ```
 invalid.jsx:7:19 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     5 │ [...[<Hello />, <Hello />], <Hello />];
     6 │ 
@@ -193,7 +193,7 @@ invalid.jsx:7:19 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
     8 │ 
     9 │ [<></>, <></>, <></>];
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -203,7 +203,7 @@ invalid.jsx:7:19 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 invalid.jsx:7:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     5 │ [...[<Hello />, <Hello />], <Hello />];
     6 │ 
@@ -212,7 +212,7 @@ invalid.jsx:7:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
     8 │ 
     9 │ [<></>, <></>, <></>];
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -222,7 +222,7 @@ invalid.jsx:7:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 invalid.jsx:7:41 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     5 │ [...[<Hello />, <Hello />], <Hello />];
     6 │ 
@@ -231,7 +231,7 @@ invalid.jsx:7:41 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
     8 │ 
     9 │ [<></>, <></>, <></>];
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -241,7 +241,7 @@ invalid.jsx:7:41 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 invalid.jsx:9:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
      7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
      8 │ 
@@ -250,7 +250,7 @@ invalid.jsx:9:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
     10 │ 
     11 │ data.map(x => <Hello>{x}</Hello>);
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -260,7 +260,7 @@ invalid.jsx:9:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
 ```
 invalid.jsx:9:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
      7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
      8 │ 
@@ -269,7 +269,7 @@ invalid.jsx:9:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
     10 │ 
     11 │ data.map(x => <Hello>{x}</Hello>);
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -279,7 +279,7 @@ invalid.jsx:9:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
 ```
 invalid.jsx:9:16 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
      7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
      8 │ 
@@ -288,7 +288,7 @@ invalid.jsx:9:16 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
     10 │ 
     11 │ data.map(x => <Hello>{x}</Hello>);
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -298,7 +298,7 @@ invalid.jsx:9:16 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 invalid.jsx:11:15 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
      9 │ [<></>, <></>, <></>];
     10 │ 
@@ -307,7 +307,7 @@ invalid.jsx:11:15 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
     12 │ 
     13 │ data.map(x => <>{x}</>);
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -317,7 +317,7 @@ invalid.jsx:11:15 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 invalid.jsx:13:15 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     11 │ data.map(x => <Hello>{x}</Hello>);
     12 │ 
@@ -326,7 +326,7 @@ invalid.jsx:13:15 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
     14 │ 
     15 │ data.forEach(x => data1.push(<>{x}</>));
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -336,7 +336,7 @@ invalid.jsx:13:15 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 invalid.jsx:15:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     13 │ data.map(x => <>{x}</>);
     14 │ 
@@ -345,7 +345,7 @@ invalid.jsx:15:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
     16 │ 
     17 │ Array.from([1, 2, 3], (x) => <Hello>{x}</Hello>);
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -355,7 +355,7 @@ invalid.jsx:15:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 invalid.jsx:17:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     15 │ data.forEach(x => data1.push(<>{x}</>));
     16 │ 
@@ -364,7 +364,7 @@ invalid.jsx:17:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
     18 │ 
     19 │ Array.from([1, 2, 3], (x) => {
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -374,7 +374,7 @@ invalid.jsx:17:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 invalid.jsx:20:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     19 │ Array.from([1, 2, 3], (x) => {
   > 20 │ 	return <Hello>{x}</Hello>
@@ -382,7 +382,7 @@ invalid.jsx:20:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
     21 │ });
     22 │ 
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -392,7 +392,7 @@ invalid.jsx:20:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 invalid.jsx:24:14 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     23 │ Array.from([1, 2, 3], (x) => {
   > 24 │ 	const xyz = <h1></h1>
@@ -400,7 +400,7 @@ invalid.jsx:24:14 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
     25 │ 
     26 │ 	if (a)
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -410,7 +410,7 @@ invalid.jsx:24:14 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 invalid.jsx:28:4 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     26 │ 	if (a)
     27 │ 		return (
@@ -419,7 +419,7 @@ invalid.jsx:28:4 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
     29 │ 				<div>{x}</div>
     30 │ 			</Hello>
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -429,7 +429,7 @@ invalid.jsx:28:4 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 invalid.jsx:33:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     31 │ 		);
     32 │ 
@@ -438,7 +438,7 @@ invalid.jsx:33:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
     34 │ });
     35 │ 
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -448,7 +448,7 @@ invalid.jsx:33:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 invalid.jsx:36:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     34 │ });
     35 │ 
@@ -457,7 +457,7 @@ invalid.jsx:36:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
     37 │ 
     38 │ data.map(c => React.createElement("h1"));
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -467,7 +467,7 @@ invalid.jsx:36:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 invalid.jsx:36:48 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     34 │ });
     35 │ 
@@ -476,7 +476,7 @@ invalid.jsx:36:48 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
     37 │ 
     38 │ data.map(c => React.createElement("h1"));
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -486,7 +486,7 @@ invalid.jsx:36:48 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 invalid.jsx:36:75 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     34 │ });
     35 │ 
@@ -495,7 +495,7 @@ invalid.jsx:36:75 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
     37 │ 
     38 │ data.map(c => React.createElement("h1"));
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -505,7 +505,7 @@ invalid.jsx:36:75 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 invalid.jsx:38:34 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     36 │ [React.createElement("h1"), React.createElement("h1"), React.createElement("h1")];
     37 │ 
@@ -514,7 +514,7 @@ invalid.jsx:38:34 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
     39 │ 
     40 │ React.Children.map(c => React.cloneElement(c));
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   
@@ -524,7 +524,7 @@ invalid.jsx:38:34 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 invalid.jsx:40:43 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing "key" prop for element in iterator
+  ! Missing key property for this element in iterable.
   
     38 │ data.map(c => React.createElement("h1"));
     39 │ 
@@ -532,7 +532,7 @@ invalid.jsx:40:43 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
        │                                           ^^^
     41 │ 
   
-  i The order of the items may change, and having a key can help React identify which item was moved
+  i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
   

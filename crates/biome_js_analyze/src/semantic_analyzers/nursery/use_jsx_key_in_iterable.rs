@@ -1,6 +1,7 @@
 use crate::react::{is_react_call_api, ReactLibrary};
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -14,8 +15,6 @@ declare_rule! {
     ///
     /// Warn if an element that likely requires a key prop--namely, one present in an array literal or an arrow function expression.
     /// Check out React documentation for [explanation on the why does React need keys.](https://react.dev/learn/rendering-lists#why-does-react-need-keys)
-    ///
-    /// Source: [Eslint `react/jsx-key`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-key.md)
     ///
     /// ## Examples
     ///
@@ -36,6 +35,8 @@ declare_rule! {
     pub UseJsxKeyInIterable {
         version: "next",
         name: "useJsxKeyInIterable",
+        source: RuleSource::EslintReact("jsx-key"),
+        source_kind: RuleSourceKind::SameLogic,
         recommended: false,
     }
 }
@@ -71,11 +72,11 @@ impl Rule for UseJsxKeyInIterable {
             rule_category!(),
             state,
             markup! {
-                "Missing \"key\" prop for element in iterator"
+                "Missing "<Emphasis>"key"</Emphasis>" property for this element in iterable."
             },
         )
         .note(markup! {
-            "The order of the items may change, and having a key can help React identify which item was moved"
+            "The order of the items may change, and having a key can help React identify which item was moved."
         }).note(markup! {
             "Check the "<Hyperlink href="https://react.dev/learn/rendering-lists#why-does-react-need-keys">"React documentation"</Hyperlink>". "
         });
@@ -101,8 +102,7 @@ fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<Te
             let res = node
                 .syntax()
                 .descendants()
-                .filter_map(|x| x.cast::<ReactComponentExpression>())
-                .filter_map(|node| match node {
+                .filter_map(|node| match node.cast::<ReactComponentExpression>()? {
                     ReactComponentExpression::JsxTagExpression(node) => handle_jsx_tag(&node),
                     ReactComponentExpression::JsCallExpression(node) => {
                         handle_react_non_jsx(&node, model)
@@ -124,16 +124,10 @@ fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<Te
 /// ```
 fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Vec<TextRange>> {
     let callee = node.callee().ok()?;
-    let member_expression = AnyJsMemberExpression::cast_ref(callee.syntax())?;
+    let member_expression = AnyJsMemberExpression::cast(callee.into_syntax())?;
     let arguments = node.arguments().ok()?;
 
-    let mut callback_index = None;
-    let caller_name = member_expression
-        .object()
-        .ok()
-        .and_then(|o| o.as_js_identifier_expression()?.name().ok()?.name().ok());
-
-    if matches!(
+    if !matches!(
         member_expression.member_name()?.text(),
         "map"
             | "flatMap"
@@ -147,14 +141,19 @@ fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Ve
             | "reduce"
             | "reduceRight"
     ) {
-        if caller_name.is_some_and(|name| name == "Array") {
-            callback_index = Some(1);
-        } else {
-            callback_index = Some(0);
-        }
+        return None;
     }
 
-    let callback_index = callback_index?;
+    let caller_name = member_expression
+        .object()
+        .ok()
+        .and_then(|o| o.as_js_identifier_expression()?.name().ok()?.name().ok());
+
+    let callback_index = if caller_name.is_some_and(|name| name == "Array") {
+        1
+    } else {
+        0
+    };
 
     let callback_arguments = arguments.get_arguments_by_index([callback_index]);
 
@@ -169,8 +168,7 @@ fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Ve
             let res = body
                 .syntax()
                 .descendants()
-                .filter_map(|x| x.cast::<ReactComponentExpression>())
-                .filter_map(|node| match node {
+                .filter_map(|node| match node.cast::<ReactComponentExpression>()? {
                     ReactComponentExpression::JsxTagExpression(node) => handle_jsx_tag(&node),
                     ReactComponentExpression::JsCallExpression(node) => {
                         handle_react_non_jsx(&node, model)
@@ -183,8 +181,7 @@ fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Ve
             let res = callback
                 .syntax()
                 .descendants()
-                .filter_map(|x| x.cast::<ReactComponentExpression>())
-                .filter_map(|node| match node {
+                .filter_map(|node| match node.cast::<ReactComponentExpression>()? {
                     ReactComponentExpression::JsxTagExpression(node) => handle_jsx_tag(&node),
                     ReactComponentExpression::JsCallExpression(node) => {
                         handle_react_non_jsx(&node, model)
