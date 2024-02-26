@@ -17,7 +17,7 @@ use std::fmt::Write as _;
 use std::path::{Path, PathBuf, MAIN_SEPARATOR};
 
 lazy_static! {
-    static ref TIME_REGEX: Regex = Regex::new("[0-9]+[(m|µ|n)]s").unwrap();
+    static ref TIME_REGEX: Regex = Regex::new("\\s[0-9]+[(m|µ|n)]s.").unwrap();
 }
 
 #[derive(Default)]
@@ -150,7 +150,7 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     // This is a workaround, and it might not work for all cases.
     let the_match = TIME_REGEX.find(output.as_ref()).map(|f| f.start()..f.end());
     if let Some(found) = the_match {
-        output.to_mut().replace_range(found, "<TIME>");
+        output.to_mut().replace_range(found, " <TIME>.");
     }
 
     // Normalize the name of the current executable to "biome"
