@@ -558,6 +558,7 @@ enum NodeDialect {
     Jsx,
     Json,
     Css,
+    Grit,
 }
 
 impl NodeDialect {
@@ -568,6 +569,7 @@ impl NodeDialect {
             NodeDialect::Jsx,
             NodeDialect::Json,
             NodeDialect::Css,
+            NodeDialect::Grit,
         ]
     }
 
@@ -582,6 +584,7 @@ impl NodeDialect {
             NodeDialect::Jsx => "jsx",
             NodeDialect::Json => "json",
             NodeDialect::Css => "css",
+            NodeDialect::Grit => "grit",
         }
     }
 
@@ -592,6 +595,7 @@ impl NodeDialect {
             "Ts" => NodeDialect::Ts,
             "Json" => NodeDialect::Json,
             "Css" => NodeDialect::Css,
+            "Grit" => NodeDialect::Grit,
             _ => {
                 eprintln!("missing prefix {}", name);
                 NodeDialect::Js
@@ -784,6 +788,8 @@ fn get_node_concept(
             LanguageKind::Grit => match name {
                 _ if name.starts_with("GritPattern") => NodeConcept::Expression,
 
+                _ if name.starts_with("GritPredicate") => NodeConcept::Expression,
+
                 "GritAssignmentAsPattern" | "GritPredicateAssignment" => NodeConcept::Assignment,
 
                 _ if name.ends_with("BacktickSnippet")
@@ -792,6 +798,8 @@ fn get_node_concept(
                 {
                     NodeConcept::Value
                 }
+
+                _ if name.ends_with("List") => NodeConcept::List,
 
                 _ => NodeConcept::Auxiliary,
             },
