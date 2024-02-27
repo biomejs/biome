@@ -81,10 +81,10 @@ impl Rule for NoExcessiveNestedTestSuites {
                 },
             )
             .note(markup! {
-                "Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity."
+                "Excessive nesting of "<Emphasis>describe()</Empahsis>" calls can hinder test readability."
             })
             .note(markup! {
-                "Nested `describe()` patterns are considered warnings with the default option of 5."
+                "Consider refactoring and "<Emphasis>reduce the level of nested describe</Emphasis>" to improve code clarity."
             }),
         )
     }
