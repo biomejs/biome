@@ -56,7 +56,7 @@ describe("foo", () => {
 ```
 invalid.js:6:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule enforces a maximum depth to nested `describe()` calls to improve code clarity in your tests.
+  ! Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.
   
      4 │ 			describe("qux", function () {
      5 │ 				describe("quxx", function () {
@@ -78,7 +78,7 @@ invalid.js:6:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━
 ```
 invalid.js:24:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule enforces a maximum depth to nested `describe()` calls to improve code clarity in your tests.
+  ! Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.
   
     22 │ 			describe("baz1", () => {
     23 │ 				describe("baz2", () => {
@@ -100,7 +100,7 @@ invalid.js:24:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━�
 ```
 invalid.js:30:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule enforces a maximum depth to nested `describe()` calls to improve code clarity in your tests.
+  ! Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.
   
     28 │ 					});
     29 │ 

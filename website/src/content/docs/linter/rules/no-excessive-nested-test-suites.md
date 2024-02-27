@@ -42,7 +42,7 @@ describe('foo', () => {
 
 <pre class="language-text"><code class="language-text">nursery/noExcessiveNestedTestSuites.js:6:11 <a href="https://biomejs.dev/linter/rules/no-excessive-nested-test-suites">lint/nursery/noExcessiveNestedTestSuites</a> ━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This rule enforces a maximum depth to nested `describe()` calls to improve code clarity in your tests.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.</span>
   
      <strong>4 │ </strong>      describe('qux', () =&gt; {
      <strong>5 │ </strong>        describe('quxx', () =&gt; {

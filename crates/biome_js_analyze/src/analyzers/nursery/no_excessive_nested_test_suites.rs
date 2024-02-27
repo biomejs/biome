@@ -77,7 +77,7 @@ impl Rule for NoExcessiveNestedTestSuites {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "This rule enforces a maximum depth to nested `describe()` calls to improve code clarity in your tests."
+                    "Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity."
                 },
             )
             .note(markup! {
@@ -88,8 +88,8 @@ impl Rule for NoExcessiveNestedTestSuites {
 }
 
 struct NestedTestVisitor {
-    max_count: usize,
-    curr_count: usize,
+    max_count: u8,
+    curr_count: u8,
 }
 
 impl Default for NestedTestVisitor {
