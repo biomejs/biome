@@ -56,7 +56,7 @@ describe("foo", () => {
 ```
 invalid.js:6:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.
+  ! Excessive `describe()` nesting detected.
   
      4 │ 			describe("qux", function () {
      5 │ 				describe("quxx", function () {
@@ -70,6 +70,8 @@ invalid.js:6:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━
     13 │ 				});
     14 │ 			});
   
+  i Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.
+  
   i Nested `describe()` patterns are considered warnings with the default option of 5.
   
 
@@ -78,7 +80,7 @@ invalid.js:6:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━
 ```
 invalid.js:24:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.
+  ! Excessive `describe()` nesting detected.
   
     22 │ 			describe("baz1", () => {
     23 │ 				describe("baz2", () => {
@@ -92,6 +94,8 @@ invalid.js:24:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━�
     29 │ 
     30 │ 					describe("baz4", () => {
   
+  i Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.
+  
   i Nested `describe()` patterns are considered warnings with the default option of 5.
   
 
@@ -100,7 +104,7 @@ invalid.js:24:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━�
 ```
 invalid.js:30:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.
+  ! Excessive `describe()` nesting detected.
   
     28 │ 					});
     29 │ 
@@ -113,6 +117,8 @@ invalid.js:30:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━�
        │ 					^^
     35 │ 				});
     36 │ 			});
+  
+  i Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.
   
   i Nested `describe()` patterns are considered warnings with the default option of 5.
   

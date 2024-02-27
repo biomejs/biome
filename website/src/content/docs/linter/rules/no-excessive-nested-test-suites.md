@@ -42,7 +42,7 @@ describe('foo', () => {
 
 <pre class="language-text"><code class="language-text">nursery/noExcessiveNestedTestSuites.js:6:11 <a href="https://biomejs.dev/linter/rules/no-excessive-nested-test-suites">lint/nursery/noExcessiveNestedTestSuites</a> ━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Excessive `describe()` nesting detected.</span>
   
      <strong>4 │ </strong>      describe('qux', () =&gt; {
      <strong>5 │ </strong>        describe('quxx', () =&gt; {
@@ -55,6 +55,8 @@ describe('foo', () => {
     <strong>   │ </strong>          <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>11 │ </strong>        });
     <strong>12 │ </strong>      });
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.</span>
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Nested `describe()` patterns are considered warnings with the default option of 5.</span>
   

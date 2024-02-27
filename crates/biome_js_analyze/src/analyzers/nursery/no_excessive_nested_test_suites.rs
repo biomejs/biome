@@ -77,9 +77,12 @@ impl Rule for NoExcessiveNestedTestSuites {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity."
+                    "Excessive `describe()` nesting detected."
                 },
             )
+            .note(markup! {
+                "Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity."
+            })
             .note(markup! {
                 "Nested `describe()` patterns are considered warnings with the default option of 5."
             }),
