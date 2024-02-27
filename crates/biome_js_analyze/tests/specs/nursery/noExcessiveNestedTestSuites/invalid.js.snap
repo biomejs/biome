@@ -70,9 +70,9 @@ invalid.js:6:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━
     13 │ 				});
     14 │ 			});
   
-  i Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.
+  i Excessive nesting of describe() calls can hinder test readability.
   
-  i Nested `describe()` patterns are considered warnings with the default option of 5.
+  i Consider refactoring and reduce the level of nested describe to improve code clarity.
   
 
 ```
@@ -94,9 +94,9 @@ invalid.js:24:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━�
     29 │ 
     30 │ 					describe("baz4", () => {
   
-  i Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.
+  i Excessive nesting of describe() calls can hinder test readability.
   
-  i Nested `describe()` patterns are considered warnings with the default option of 5.
+  i Consider refactoring and reduce the level of nested describe to improve code clarity.
   
 
 ```
@@ -118,9 +118,9 @@ invalid.js:30:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━�
     35 │ 				});
     36 │ 			});
   
-  i Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.
+  i Excessive nesting of describe() calls can hinder test readability.
   
-  i Nested `describe()` patterns are considered warnings with the default option of 5.
+  i Consider refactoring and reduce the level of nested describe to improve code clarity.
   
 
 ```

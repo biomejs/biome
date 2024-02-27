@@ -56,9 +56,9 @@ describe('foo', () => {
     <strong>11 │ </strong>        });
     <strong>12 │ </strong>      });
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Excessive nesting of `describe()` calls can hinder test readability. Consider refactoring to improve code clarity.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Excessive nesting of </span><span style="color: lightgreen;"><strong>describe()</strong></span><span style="color: lightgreen;"> calls can hinder test readability.</span>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Nested `describe()` patterns are considered warnings with the default option of 5.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Consider refactoring and </span><span style="color: lightgreen;"><strong>reduce the level of nested describe</strong></span><span style="color: lightgreen;"> to improve code clarity.</span>
   
 </code></pre>
 
