@@ -56,6 +56,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   <div></div>
   ```
 
+#### Enhancements
+
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) ignores unused rest spread silbings.
+
+  The following code is now valid:
+
+  ```js
+  const { a, ...rest } = { a: 0, b: 1 };
+  console.log(rest);
+  ```
+
+  Contributed by @ah-yu
+
 #### Bug fixes
 
 - Fix [#1748](https://github.com/biomejs/biome/issues/1748). Now for the following case we won't provide an unsafe fix
