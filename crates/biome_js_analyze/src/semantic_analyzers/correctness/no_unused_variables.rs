@@ -149,24 +149,22 @@ fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedF
 fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
     let decl = binding.declaration()?;
     // It is fine to ignore unused rest spread silbings
-    match &decl {
-        node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)) => {
-            if node
-                .syntax()
-                .siblings(Direction::Next)
-                .last()
-                .is_some_and(|last_sibling| {
-                    matches!(
-                        last_sibling.kind(),
-                        JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
-                    )
-                })
-            {
-                return None;
-            }
+    if let node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
+    | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)) = &decl
+    {
+        if node
+            .syntax()
+            .siblings(Direction::Next)
+            .last()
+            .is_some_and(|last_sibling| {
+                matches!(
+                    last_sibling.kind(),
+                    JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
+                )
+            })
+        {
+            return None;
         }
-        _ => (),
     }
 
     match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
