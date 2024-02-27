@@ -26,24 +26,21 @@ Array.from([1, 2, 3], (x) => {
 	return <Hello>{x}</Hello>
 });
 
-Array.from([1, 2, 3], (x) => {
-	const xyz = <h1></h1>
-
-	if (a)
-		return (
-			<Hello>
-				<div>{x}</div>
-			</Hello>
-		);
-
-	return <Hello>{x}</Hello>
-});
-
 [React.createElement("h1"), React.createElement("h1"), React.createElement("h1")];
 
 data.map(c => React.createElement("h1"));
 
 React.Children.map(c => React.cloneElement(c));
+
+(<h1>{data.map(x => <h1>{x}</h1>)}</h1>)
+
+(<h1>{[<h1></h1>, <h1></h1>, <h1></h1>]}</h1>)
+
+(<h1>{[<h1></h1>, xyz, abc? <h2></h2>: bcd]}</h1>)
+
+(<h1>{data.map(c => <h1></h1>)}</h1>)
+
+(<h1>{data.map(c => xyz)}</h1>)
 
 ```
 
@@ -182,44 +179,6 @@ invalid.jsx:7:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:7:19 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing key property for this element in iterable.
-  
-    5 │ [...[<Hello />, <Hello />], <Hello />];
-    6 │ 
-  > 7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
-      │                   ^^^^^^^^^
-    8 │ 
-    9 │ [<></>, <></>, <></>];
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
-invalid.jsx:7:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing key property for this element in iterable.
-  
-    5 │ [...[<Hello />, <Hello />], <Hello />];
-    6 │ 
-  > 7 │ [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
-      │                              ^^^^^^^^^
-    8 │ 
-    9 │ [<></>, <></>, <></>];
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
 invalid.jsx:7:41 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
@@ -334,25 +293,6 @@ invalid.jsx:13:15 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:15:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing key property for this element in iterable.
-  
-    13 │ data.map(x => <>{x}</>);
-    14 │ 
-  > 15 │ data.forEach(x => data1.push(<>{x}</>));
-       │                              ^^^^^^^^
-    16 │ 
-    17 │ Array.from([1, 2, 3], (x) => <Hello>{x}</Hello>);
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
 invalid.jsx:17:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
@@ -390,72 +330,16 @@ invalid.jsx:20:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:24:14 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
-    23 │ Array.from([1, 2, 3], (x) => {
-  > 24 │ 	const xyz = <h1></h1>
-       │ 	            ^^^^
-    25 │ 
-    26 │ 	if (a)
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
-invalid.jsx:28:4 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing key property for this element in iterable.
-  
-    26 │ 	if (a)
-    27 │ 		return (
-  > 28 │ 			<Hello>
-       │ 			^^^^^^^
-    29 │ 				<div>{x}</div>
-    30 │ 			</Hello>
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
-invalid.jsx:33:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing key property for this element in iterable.
-  
-    31 │ 		);
-    32 │ 
-  > 33 │ 	return <Hello>{x}</Hello>
-       │ 	       ^^^^^^^
-    34 │ });
-    35 │ 
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
-invalid.jsx:36:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing key property for this element in iterable.
-  
-    34 │ });
-    35 │ 
-  > 36 │ [React.createElement("h1"), React.createElement("h1"), React.createElement("h1")];
+    21 │ });
+    22 │ 
+  > 23 │ [React.createElement("h1"), React.createElement("h1"), React.createElement("h1")];
        │                     ^^^^^^
-    37 │ 
-    38 │ data.map(c => React.createElement("h1"));
+    24 │ 
+    25 │ data.map(c => React.createElement("h1"));
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   
@@ -465,16 +349,16 @@ invalid.jsx:36:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:36:48 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:48 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
-    34 │ });
-    35 │ 
-  > 36 │ [React.createElement("h1"), React.createElement("h1"), React.createElement("h1")];
+    21 │ });
+    22 │ 
+  > 23 │ [React.createElement("h1"), React.createElement("h1"), React.createElement("h1")];
        │                                                ^^^^^^
-    37 │ 
-    38 │ data.map(c => React.createElement("h1"));
+    24 │ 
+    25 │ data.map(c => React.createElement("h1"));
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   
@@ -484,16 +368,16 @@ invalid.jsx:36:48 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:36:75 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:75 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
-    34 │ });
-    35 │ 
-  > 36 │ [React.createElement("h1"), React.createElement("h1"), React.createElement("h1")];
+    21 │ });
+    22 │ 
+  > 23 │ [React.createElement("h1"), React.createElement("h1"), React.createElement("h1")];
        │                                                                           ^^^^^^
-    37 │ 
-    38 │ data.map(c => React.createElement("h1"));
+    24 │ 
+    25 │ data.map(c => React.createElement("h1"));
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   
@@ -503,16 +387,16 @@ invalid.jsx:36:75 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:38:34 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:25:34 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
-    36 │ [React.createElement("h1"), React.createElement("h1"), React.createElement("h1")];
-    37 │ 
-  > 38 │ data.map(c => React.createElement("h1"));
+    23 │ [React.createElement("h1"), React.createElement("h1"), React.createElement("h1")];
+    24 │ 
+  > 25 │ data.map(c => React.createElement("h1"));
        │                                  ^^^^^^
-    39 │ 
-    40 │ React.Children.map(c => React.cloneElement(c));
+    26 │ 
+    27 │ React.Children.map(c => React.cloneElement(c));
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   
@@ -522,19 +406,190 @@ invalid.jsx:38:34 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:40:43 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:27:43 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
-    38 │ data.map(c => React.createElement("h1"));
-    39 │ 
-  > 40 │ React.Children.map(c => React.cloneElement(c));
+    25 │ data.map(c => React.createElement("h1"));
+    26 │ 
+  > 27 │ React.Children.map(c => React.cloneElement(c));
        │                                           ^^^
-    41 │ 
+    28 │ 
+    29 │ (<h1>{data.map(x => <h1>{x}</h1>)}</h1>)
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   
   i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:29:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing key property for this element in iterable.
+  
+    27 │ React.Children.map(c => React.cloneElement(c));
+    28 │ 
+  > 29 │ (<h1>{data.map(x => <h1>{x}</h1>)}</h1>)
+       │                     ^^^^
+    30 │ 
+    31 │ (<h1>{[<h1></h1>, <h1></h1>, <h1></h1>]}</h1>)
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:31:8 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing key property for this element in iterable.
+  
+    29 │ (<h1>{data.map(x => <h1>{x}</h1>)}</h1>)
+    30 │ 
+  > 31 │ (<h1>{[<h1></h1>, <h1></h1>, <h1></h1>]}</h1>)
+       │        ^^^^
+    32 │ 
+    33 │ (<h1>{[<h1></h1>, xyz, abc? <h2></h2>: bcd]}</h1>)
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:31:19 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing key property for this element in iterable.
+  
+    29 │ (<h1>{data.map(x => <h1>{x}</h1>)}</h1>)
+    30 │ 
+  > 31 │ (<h1>{[<h1></h1>, <h1></h1>, <h1></h1>]}</h1>)
+       │                   ^^^^
+    32 │ 
+    33 │ (<h1>{[<h1></h1>, xyz, abc? <h2></h2>: bcd]}</h1>)
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:31:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing key property for this element in iterable.
+  
+    29 │ (<h1>{data.map(x => <h1>{x}</h1>)}</h1>)
+    30 │ 
+  > 31 │ (<h1>{[<h1></h1>, <h1></h1>, <h1></h1>]}</h1>)
+       │                              ^^^^
+    32 │ 
+    33 │ (<h1>{[<h1></h1>, xyz, abc? <h2></h2>: bcd]}</h1>)
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:33:8 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing key property for this element in iterable.
+  
+    31 │ (<h1>{[<h1></h1>, <h1></h1>, <h1></h1>]}</h1>)
+    32 │ 
+  > 33 │ (<h1>{[<h1></h1>, xyz, abc? <h2></h2>: bcd]}</h1>)
+       │        ^^^^
+    34 │ 
+    35 │ (<h1>{data.map(c => <h1></h1>)}</h1>)
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:33:19 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Cannot determine whether this child has the required key prop.
+  
+    31 │ (<h1>{[<h1></h1>, <h1></h1>, <h1></h1>]}</h1>)
+    32 │ 
+  > 33 │ (<h1>{[<h1></h1>, xyz, abc? <h2></h2>: bcd]}</h1>)
+       │                   ^^^
+    34 │ 
+    35 │ (<h1>{data.map(c => <h1></h1>)}</h1>)
+  
+  i Either return a JSX expression, or suppress this instance if you determine it is safe.
+  
+  i Check the React documentation for why a key prop is required. 
+  
+
+```
+
+```
+invalid.jsx:33:24 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Cannot determine whether this child has the required key prop.
+  
+    31 │ (<h1>{[<h1></h1>, <h1></h1>, <h1></h1>]}</h1>)
+    32 │ 
+  > 33 │ (<h1>{[<h1></h1>, xyz, abc? <h2></h2>: bcd]}</h1>)
+       │                        ^^^^^^^^^^^^^^^^^^^
+    34 │ 
+    35 │ (<h1>{data.map(c => <h1></h1>)}</h1>)
+  
+  i Either return a JSX expression, or suppress this instance if you determine it is safe.
+  
+  i Check the React documentation for why a key prop is required. 
+  
+
+```
+
+```
+invalid.jsx:35:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing key property for this element in iterable.
+  
+    33 │ (<h1>{[<h1></h1>, xyz, abc? <h2></h2>: bcd]}</h1>)
+    34 │ 
+  > 35 │ (<h1>{data.map(c => <h1></h1>)}</h1>)
+       │                     ^^^^
+    36 │ 
+    37 │ (<h1>{data.map(c => xyz)}</h1>)
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:37:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Cannot determine whether this child has the required key prop.
+  
+    35 │ (<h1>{data.map(c => <h1></h1>)}</h1>)
+    36 │ 
+  > 37 │ (<h1>{data.map(c => xyz)}</h1>)
+       │                     ^^^
+    38 │ 
+  
+  i Either return a JSX expression, or suppress this instance if you determine it is safe.
+  
+  i Check the React documentation for why a key prop is required. 
   
 
 ```

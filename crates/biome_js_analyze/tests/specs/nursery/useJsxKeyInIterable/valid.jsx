@@ -22,21 +22,23 @@ Array.from([1, 2, 3], (x) => {
 	return <Hello key={x}>{x}</Hello>
 });
 
-Array.from([1, 2, 3], (x) => {
-	const xyz = <h1 key={x}></h1>
-
-	if (a)
-		return (
-			<Hello key={x}>
-				<div>{x}</div>
-			</Hello>
-		);
-
-	return <Hello key={x}>{x}</Hello>
-});
-
 [React.createElement("h1", {key}), React.createElement("h1", {key: "second"}), React.createElement("h1", {key: third})];
 
 data.map(c => React.createElement("h1", {key}));
 
 React.Children.map(c => React.cloneElement(c, {key: c}));
+
+(<h1></h1>)
+
+(<h1>
+		<h2></h2>
+		<h2></h2>
+		<h2></h2>
+		<h2></h2>
+</h1>)
+
+(<h1>{data.map(x => <h1 key={x}>{x}</h1>)}</h1>)
+
+(<h1>{[<h1 key={1}></h1>, <h1 key={2}></h1>, <h1 key={3}></h1>]}</h1>)
+
+(<h1>{data.map(c => <h1 key={c}></h1>)}</h1>)

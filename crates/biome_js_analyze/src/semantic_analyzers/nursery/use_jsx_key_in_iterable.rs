@@ -5,10 +5,11 @@ use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsMemberExpression, AnyJsObjectMember, AnyJsxAttribute, AnyJsxTag,
-    JsArrayExpression, JsCallExpression, JsObjectExpression, JsxAttributeList, JsxTagExpression,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsxAttribute,
+    AnyJsxTag, JsArrayExpression, JsCallExpression, JsObjectExpression, JsxAttributeList,
+    JsxExpressionChild, JsxTagExpression,
 };
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, SyntaxNodeCast, TextRange};
+use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
 
 declare_rule! {
     /// Disallow missing key props in iterators/collection literals.
@@ -49,9 +50,15 @@ declare_node_union! {
     pub ReactComponentExpression = JsxTagExpression | JsCallExpression
 }
 
+#[derive(Debug)]
+pub enum UseJsxKeyInIterableState {
+    MissingKeyProps(TextRange),
+    CantDetermineJSXProp(TextRange),
+}
+
 impl Rule for UseJsxKeyInIterable {
     type Query = Semantic<UseJsxKeyInIterableQuery>;
-    type State = TextRange;
+    type State = UseJsxKeyInIterableState;
     type Signals = Vec<Self::State>;
     type Options = ();
 
@@ -68,19 +75,38 @@ impl Rule for UseJsxKeyInIterable {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let diagnostic = RuleDiagnostic::new(
-            rule_category!(),
-            state,
-            markup! {
-                "Missing "<Emphasis>"key"</Emphasis>" property for this element in iterable."
-            },
-        )
-        .note(markup! {
-            "The order of the items may change, and having a key can help React identify which item was moved."
-        }).note(markup! {
-            "Check the "<Hyperlink href="https://react.dev/learn/rendering-lists#why-does-react-need-keys">"React documentation"</Hyperlink>". "
-        });
-        Some(diagnostic)
+        match state {
+            UseJsxKeyInIterableState::MissingKeyProps(state) => {
+                let diagnostic = RuleDiagnostic::new(
+                    rule_category!(),
+                    state,
+                    markup! {
+                        "Missing "<Emphasis>"key"</Emphasis>" property for this element in iterable."
+                    },
+                )
+                .note(markup! {
+                    "The order of the items may change, and having a key can help React identify which item was moved."
+                }).note(markup! {
+                    "Check the "<Hyperlink href="https://react.dev/learn/rendering-lists#why-does-react-need-keys">"React documentation"</Hyperlink>". "
+                });
+                Some(diagnostic)
+            }
+            UseJsxKeyInIterableState::CantDetermineJSXProp(state) => {
+                let diagnostic = RuleDiagnostic::new(
+                    rule_category!(),
+                    state,
+                    markup! {
+                        "Cannot determine whether this child has the required "<Emphasis>"key"</Emphasis>" prop."
+                    },
+                )
+                .note(markup! {
+                    "Either return a JSX expression, or suppress this instance if you determine it is safe."
+                }).note(markup! {
+                    "Check the "<Hyperlink href="https://react.dev/learn/rendering-lists#why-does-react-need-keys">"React documentation for why a key prop is required"</Hyperlink>". "
+                });
+                Some(diagnostic)
+            }
+        }
     }
 }
 
@@ -91,7 +117,11 @@ impl Rule for UseJsxKeyInIterable {
 /// ```js
 /// [<h1></h1>, <h1></h1>]
 /// ```
-fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<TextRange> {
+fn handle_collections(
+    node: &JsArrayExpression,
+    model: &SemanticModel,
+) -> Vec<UseJsxKeyInIterableState> {
+    let is_inside_jsx = node.parent::<JsxExpressionChild>().is_some();
     node.elements()
         .iter()
         .filter_map(|node| {
@@ -99,19 +129,8 @@ fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<Te
             // no need to handle spread case, if the spread argument is itself a list it
             // will be handled during list declaration
             let node = node.as_any_js_expression()?;
-            let res = node
-                .syntax()
-                .descendants()
-                .filter_map(|node| match node.cast::<ReactComponentExpression>()? {
-                    ReactComponentExpression::JsxTagExpression(node) => handle_jsx_tag(&node),
-                    ReactComponentExpression::JsCallExpression(node) => {
-                        handle_react_non_jsx(&node, model)
-                    }
-                })
-                .collect::<Vec<_>>();
-            Some(res)
+            handle_potential_react_component(node, model, is_inside_jsx)
         })
-        .flatten()
         .collect()
 }
 
@@ -122,7 +141,10 @@ fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<Te
 /// ```js
 /// data.map(x => <h1>{x}</h1>)
 /// ```
-fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Vec<TextRange>> {
+fn handle_iterators(
+    node: &JsCallExpression,
+    model: &SemanticModel,
+) -> Option<Vec<UseJsxKeyInIterableState>> {
     let callee = node.callee().ok()?;
     let member_expression = AnyJsMemberExpression::cast(callee.into_syntax())?;
     let arguments = node.arguments().ok()?;
@@ -162,35 +184,73 @@ fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Ve
         .as_ref()?
         .as_any_js_expression()?;
 
+    let is_inside_jsx = node.parent::<JsxExpressionChild>().is_some();
     match callback_argument {
         AnyJsExpression::JsFunctionExpression(callback) => {
             let body = callback.body().ok()?;
             let res = body
-                .syntax()
-                .descendants()
-                .filter_map(|node| match node.cast::<ReactComponentExpression>()? {
-                    ReactComponentExpression::JsxTagExpression(node) => handle_jsx_tag(&node),
-                    ReactComponentExpression::JsCallExpression(node) => {
-                        handle_react_non_jsx(&node, model)
-                    }
+                .statements()
+                .into_iter()
+                .filter_map(|statement| {
+                    let statement = statement.as_js_return_statement()?;
+                    let returned_value = statement.argument()?;
+                    handle_potential_react_component(&returned_value, model, is_inside_jsx)
                 })
                 .collect::<Vec<_>>();
+
             Some(res)
         }
         AnyJsExpression::JsArrowFunctionExpression(callback) => {
-            let res = callback
-                .syntax()
-                .descendants()
-                .filter_map(|node| match node.cast::<ReactComponentExpression>()? {
-                    ReactComponentExpression::JsxTagExpression(node) => handle_jsx_tag(&node),
-                    ReactComponentExpression::JsCallExpression(node) => {
-                        handle_react_non_jsx(&node, model)
-                    }
-                })
-                .collect::<Vec<_>>();
-            Some(res)
+            let body = callback.body().ok()?;
+            match body {
+                AnyJsFunctionBody::AnyJsExpression(expr) => {
+                    handle_potential_react_component(&expr, model, is_inside_jsx)
+                        .map(|state| vec![state])
+                }
+                AnyJsFunctionBody::JsFunctionBody(body) => {
+                    let res = body
+                        .statements()
+                        .into_iter()
+                        .filter_map(|statement| {
+                            let statement = statement.as_js_return_statement()?;
+                            let returned_value = statement.argument()?;
+                            handle_potential_react_component(&returned_value, model, is_inside_jsx)
+                        })
+                        .collect::<Vec<_>>();
+                    Some(res)
+                }
+            }
         }
         _ => None,
+    }
+}
+
+fn handle_potential_react_component(
+    node: &AnyJsExpression,
+    model: &SemanticModel,
+    is_inside_jsx: bool,
+) -> Option<UseJsxKeyInIterableState> {
+    if is_inside_jsx {
+        if let Some(node) = ReactComponentExpression::cast_ref(node.syntax()) {
+            let range = handle_react_component(node, model)?;
+            Some(UseJsxKeyInIterableState::MissingKeyProps(range))
+        } else {
+            Some(UseJsxKeyInIterableState::CantDetermineJSXProp(node.range()))
+        }
+    } else {
+        let range =
+            handle_react_component(ReactComponentExpression::cast_ref(node.syntax())?, model)?;
+        Some(UseJsxKeyInIterableState::MissingKeyProps(range))
+    }
+}
+
+fn handle_react_component(
+    node: ReactComponentExpression,
+    model: &SemanticModel,
+) -> Option<TextRange> {
+    match node {
+        ReactComponentExpression::JsxTagExpression(node) => handle_jsx_tag(&node),
+        ReactComponentExpression::JsCallExpression(node) => handle_react_non_jsx(&node, model),
     }
 }
 
