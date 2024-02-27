@@ -65,7 +65,7 @@ pub enum Language {
 
 impl Language {
     /// Sorted array of files that are known as JSONC (JSON with comments).
-    pub(crate) const KNOWN_FILES_AS_JSONC: &'static [&'static str; 12] = &[
+    pub(crate) const KNOWN_FILES_AS_JSONC: &'static [&'static str; 15] = &[
         ".babelrc",
         ".babelrc.json",
         ".ember-cli",
@@ -76,8 +76,11 @@ impl Language {
         ".jshintrc",
         ".swcrc",
         "babel.config.json",
+        "jsconfig.json",
+        "tsconfig.json",
         "tslint.json",
         "typedoc.json",
+        "typescript.json",
     ];
 
     /// Returns the language corresponding to this file extension
@@ -98,10 +101,7 @@ impl Language {
     }
 
     pub fn from_known_filename(s: &str) -> Self {
-        if Self::KNOWN_FILES_AS_JSONC
-            .binary_search(&s.to_lowercase().as_str())
-            .is_ok()
-        {
+        if Self::KNOWN_FILES_AS_JSONC.binary_search(&s).is_ok() {
             Language::Jsonc
         } else {
             Language::Unknown

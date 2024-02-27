@@ -42,6 +42,38 @@ use syn::{parse_macro_input, DeriveInput};
 /// When [Deserializable] is derived on a struct or  an enum,
 /// its behavior may be adjusted through attributes.
 ///
+/// ### `unknown_fields`
+///
+/// This attribute allows controling how to handle unknown fields in structs.
+/// It takes one of the following values:
+///
+/// - `"deny"`: emit an error when an unknown struct field is found.
+/// - `"warn"`: emit a warning when an unknown struct field is found.
+/// - `"allow"`: ignore unknown struct fields.
+///
+/// The default behavior is `"warn"`, when the attribute is not specified.
+///
+/// For structs that also implement Serde's [serde::Deserialize],
+/// it automatically picks up on Serde's
+/// [`deny_unknown_fields` attribute](https://serde.rs/container-attrs.html#from).
+/// `serde(deny_unknown_fields)` is mapped to `unknown_fields = "error"`.
+/// `deserializable(unknown_fields = _)` takes precdence over `serde(deny_unknown_fields = _)`.
+///
+/// ```no_test
+/// #[derive(Default, Deserializable)]
+/// #[deserializable(unknown_fields = "deny")]
+/// struct Contact {
+///     fullname: String,
+/// }
+///
+/// #[derive(Default, Deserializable)]
+/// #[deserializable(unknown_fields = "allow")]
+/// struct Person {
+///     firstnames: String,
+///     lastname: String,
+/// }
+/// ```
+///
 /// ### `with_validator`
 ///
 /// When the `with_validator` attribute is present, the deserializable type is

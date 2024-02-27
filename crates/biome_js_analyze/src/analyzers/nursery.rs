@@ -5,6 +5,7 @@ use biome_analyze::declare_group;
 pub mod no_duplicate_test_hooks;
 pub mod no_empty_block_statements;
 pub mod no_empty_type_parameters;
+pub mod no_excessive_nested_test_suites;
 pub mod no_exports_in_test;
 pub mod no_focused_tests;
 pub mod no_namespace_import;
@@ -31,6 +32,7 @@ declare_group! {
             self :: no_duplicate_test_hooks :: NoDuplicateTestHooks ,
             self :: no_empty_block_statements :: NoEmptyBlockStatements ,
             self :: no_empty_type_parameters :: NoEmptyTypeParameters ,
+            self :: no_excessive_nested_test_suites :: NoExcessiveNestedTestSuites ,
             self :: no_exports_in_test :: NoExportsInTest ,
             self :: no_focused_tests :: NoFocusedTests ,
             self :: no_namespace_import :: NoNamespaceImport ,

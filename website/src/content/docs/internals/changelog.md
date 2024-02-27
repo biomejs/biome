@@ -64,6 +64,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add lint rule useJsxKeyInIterable from Eslint rule [`react/jsx-key`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-key.md)
   ```
 
+#### Enhancements
+
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) ignores unused rest spread silbings.
+
+  The following code is now valid:
+
+  ```js
+  const { a, ...rest } = { a: 0, b: 1 };
+  console.log(rest);
+  ```
+
+  Contributed by @ah-yu
+
 #### Bug fixes
 
 - Fix [#1748](https://github.com/biomejs/biome/issues/1748). Now for the following case we won't provide an unsafe fix
@@ -88,6 +101,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#1081](https://github.com/biomejs/biome/issues/1081). The `useAwait` rule does not report `for await...of`.
   Contributed by @unvalley
+
+- Fix [#1827](https://github.com/biomejs/biome/issues/1827) by properly analyzing nested `try-finally` statements. Contributed by @ah-yu
 
 ### CLI
 
@@ -236,10 +251,43 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   <div></div>
   ```
 
+#### Enhancements
+
+- `composer.json`, `deno.json`, `jsconfig.json`, `package.json` and `tsconfig.json` are no longer protected files.
+
+  This means that you can now format them.
+
+  If you want to ignore these files, you can use the [files.ignore](https://biomejs.dev/reference/configuration/#filesignore) configuration:
+
+  ```json
+  {
+    "files": {
+      "ignore": [
+        "composer.json",
+        "jsconfig.json",
+        "package.json",
+        "tsconfig.json",
+        "typescript.json",
+        "deno.json",
+        "deno.jsonc"
+      ]
+    }
+  }
+  ```
+
+  The following files are still protected, and thus ignored:
+
+  - `composer.lock`
+  - `npm-shrinkwrap.json`
+  - `package-lock.json`
+  - `yarn.lock`
+
+   Contributed by @pattrickrice and @Conaclos
+
 #### Bug fixes
 
 - Fix [#1039](https://github.com/biomejs/biome/issues/1039). Check unicode width instead of number of bytes when
-  checking if regex expression is a simple argument. Contributed by @kalleep
+  checking if regex expression is a simple argument.
 
   This no longer breaks.
 
@@ -247,46 +295,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   s(/🚀🚀/).s().s();
   ```
 
+   Contributed by @kalleep
+
 - Fix [#1218](https://github.com/biomejs/biome/issues/1218), by correctly preserving empty lines in member chains.
   Contributed by @ah-yu
 
 ### JavaScript APIs
 
 ### Linter
-
-#### BREAKING CHANGES
-
-- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention)
-  and [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now require identifiers to
-  be in ASCII and without consecutive delimiters.
-
-  Set the `requireAscii` rule option to `false` to allow non-ASCII identifiers.
-
-  ```json
-  {
-    "linter": {
-      "rules": {
-        "style": {
-          "useNamingConvention": { "options": { "requireAscii": false } }
-        },
-        "nursery": {
-          "useFilenamingConvention": { "options": { "requireAscii": false } }
-        }
-      }
-    }
-  }
-
-  ```
-
-  The following name is now invalid because it includes two underscores:
-
-  ```js
-  export const MY__CONSTANT = 0;
-  ```
-
-  Note that we still allow consecutive leading and consecutive trailing underscores.
-
-  Contributed by @Conaclos
 
 #### New features
 
@@ -418,6 +434,32 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention)
+  and [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now provides a new option `requireAscii` to require identifiers to
+  be in ASCII.
+
+  To avoid any breaking change, this option is turned off by default.
+  We intend to turn it on in the next major release of Biome (Biome 2.0).
+
+  Set the `requireAscii` rule option to `true` to require identifiers to be in ASCII.
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "style": {
+          "useNamingConvention": { "options": { "requireAscii": false } }
+        },
+        "nursery": {
+          "useFilenamingConvention": { "options": { "requireAscii": false } }
+        }
+      }
+    }
+  }
+  ```
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Fix missing link in [noStaticOnlyClass](https://biomejs.dev/linter/rules/no-static-only-class) documentation.
@@ -460,22 +502,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#1651](https://github.com/biomejs/biome/issues/1651). [noVar](https://biomejs.dev/linter/rules/no-var/) now
   ignores TsGlobalDeclaration. Contributed by @vasucp1207
 
--
-Fix [#1640](https://github.com/biomejs/biome/issues/1640). [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers)
-code action now generates valid code when last member has a comment but no comma. Contributed by @kalleep
+- Fix [#1640](https://github.com/biomejs/biome/issues/1640). [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers) code action now generates valid code when last member has a comment but no comma. Contributed by @kalleep
 
-- Fix [#1653](https://github.com/biomejs/biome/issues/1653). Handle a shorthand value in `useForOf` to avoid the
-  false-positive case. Contributed by @togami2864
+- Fix [#1653](https://github.com/biomejs/biome/issues/1653). Handle a shorthand value in `useForOf` to avoid the false-positive case. Contributed by @togami2864
 
--
-Fix [#1656](https://github.com/biomejs/biome/issues/1656). [useOptionalChain](https://biomejs.dev/linter/rules/use-optional-chain/)
-code action now correctly handles logical and chains where methods with the same name are invoked with different
-arguments:
-```diff
-- tags·&&·tags.includes('a')·&&·tags.includes('b')
-+ tags?.includes('a') && tags.includes('b')
-```
-Contributed by @lucasweng
+- Fix [#1656](https://github.com/biomejs/biome/issues/1656). [useOptionalChain](https://biomejs.dev/linter/rules/use-optional-chain/) code action now correctly handles logical and chains where methods with the same name are invoked with different arguments:
+
+  ```diff
+  - tags·&&·tags.includes('a')·&&·tags.includes('b')
+  + tags?.includes('a') && tags.includes('b')
+  ```
+
+  Contributed by @lucasweng
 
 - Fix [#1704](https://github.com/biomejs/biome/issues/1704). Convert `/` to escaped slash `\/` to avoid parsing error in
   the result of autofix. Contributed by @togami2864
@@ -492,6 +530,19 @@ Contributed by @lucasweng
   delete element.dataset.prop;
   ```
   Contributed by @ematipico
+
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention)
+  and [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now reject identifiers with consecutive delimiters.
+
+  The following name is now invalid because it includes two underscores:
+
+  ```js
+  export const MY__CONSTANT = 0;
+  ```
+
+  Note that we still allow consecutive leading and consecutive trailing underscores.
+
+  Contributed by @Conaclos
 
 ### Parser
 

@@ -2,7 +2,7 @@ mod container_attrs;
 mod enum_variant_attrs;
 mod struct_field_attrs;
 
-use self::container_attrs::ContainerAttrs;
+use self::container_attrs::{ContainerAttrs, UnknownFields};
 use self::struct_field_attrs::DeprecatedField;
 use crate::deserializable_derive::enum_variant_attrs::EnumVariantAttrs;
 use crate::deserializable_derive::struct_field_attrs::StructFieldAttrs;
@@ -100,6 +100,7 @@ impl DeriveInput {
                         DeserializableData::Struct(DeserializableStructData {
                             fields,
                             with_validator: attrs.with_validator,
+                            unknown_fields: attrs.unknown_fields.unwrap_or_default(),
                         })
                     } else if data.fields.len() == 1 {
                         DeserializableData::Newtype(DeserializableNewtypeData {
@@ -151,6 +152,7 @@ pub struct DeserializableNewtypeData {
 pub struct DeserializableStructData {
     fields: Vec<DeserializableFieldData>,
     with_validator: bool,
+    unknown_fields: UnknownFields,
 }
 
 #[derive(Debug)]
@@ -441,6 +443,26 @@ fn generate_deserializable_struct(
     } else {
         validator
     };
+    let unknown_key_handler = match data.unknown_fields {
+        UnknownFields::Warn | UnknownFields::Deny => {
+            let with_customseverity = if data.unknown_fields == UnknownFields::Warn {
+                quote! { .with_custom_severity(biome_diagnostics::Severity::Warning) }
+            } else {
+                quote! {}
+            };
+            quote! {
+                unknown_key => {
+                    const ALLOWED_KEYS: &[&str] = &[#(#allowed_keys),*];
+                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                        unknown_key,
+                        key.range(),
+                        ALLOWED_KEYS,
+                    )#with_customseverity)
+                }
+            }
+        }
+        UnknownFields::Allow => quote! { _ => {} },
+    };
 
     let tuple_type = generate_generics_tuple(&generics);
     let trait_bounds = generate_trait_bounds(&generics);
@@ -475,14 +497,7 @@ fn generate_deserializable_struct(
                             };
                             match key_text.text() {
                                 #(#deserialize_fields)*
-                                unknown_key => {
-                                    const ALLOWED_KEYS: &[&str] = &[#(#allowed_keys),*];
-                                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                                        unknown_key,
-                                        key.range(),
-                                        ALLOWED_KEYS,
-                                    ))
-                                }
+                                #unknown_key_handler
                             }
                         }
                         #validator

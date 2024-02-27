@@ -13,7 +13,7 @@ formatter_extraneous_field.json:3:3 deserialize ━━━━━━━━━━�
     4 │ 	}
     5 │ }
   
-  i Accepted keys
+  i Known keys:
   
   - enabled
   - formatWithErrors

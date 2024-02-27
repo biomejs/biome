@@ -160,32 +160,28 @@ For more information about the resolution algorithm, read the [Node.js documenta
 
 The following files are currently ignored by Biome. This means that no diagnostics will be ever emitted by Biome for those files.
 
-- `package.json`
-- `package-lock.json`
-- `npm-shrinkwrap.json`
-- `yarn.lock`
-- `composer.json`
 - `composer.lock`
-- `typescript.json`
-- `tsconfig.json`
-- `jsconfig.json`
-- `deno.json`
-- `deno.jsonc`
+- `npm-shrinkwrap.json`
+- `package-lock.json`
+- `yarn.lock`
 
 The following files are parsed as **`JSON` files** with  the options `json.parser.allowComments` and `json.parser.allowTrailingCommas` set to `true`. This is because editor tools like VSCode treat them like this.
 
-- `tslint.json`
-- `babel.config.json`
 - `.babelrc.json`
+- `.babelrc`
 - `.ember-cli`
-- `typedoc.json`
-- `.eslintrc`
 - `.eslintrc.json`
+- `.eslintrc`
+- `.hintrc`
 - `.jsfmtrc`
 - `.jshintrc`
 - `.swcrc`
-- `.hintrc`
-- `.babelrc`
+- `babel.config.json`
+- `jsconfig.json`
+- `tsconfig.json`
+- `tslint.json`
+- `typedoc.json`
+- `typescript.json`
 
 ## `include` and `ignore` explained
 

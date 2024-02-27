@@ -16,7 +16,7 @@ use biome_js_syntax::{
     JsIdentifierExpression, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode, TsConditionalType,
     TsInferType,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult};
+use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 
 declare_rule! {
     /// Disallow unused variables.
@@ -148,6 +148,25 @@ fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedF
 // Returning None means is ok to be unused
 fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
     let decl = binding.declaration()?;
+    // It is fine to ignore unused rest spread silbings
+    if let node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
+    | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)) = &decl
+    {
+        if node
+            .syntax()
+            .siblings(Direction::Next)
+            .last()
+            .is_some_and(|last_sibling| {
+                matches!(
+                    last_sibling.kind(),
+                    JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
+                )
+            })
+        {
+            return None;
+        }
+    }
+
     match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
         // ok to not be used
         AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
@@ -181,7 +200,7 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
         | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
         | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
-            unreachable!("The declaration should be resolved to its prent declaration");
+            unreachable!("The declaration should be resolved to its parent declaration");
         }
         node @ AnyJsBindingDeclaration::JsVariableDeclarator(_) => {
             if is_in_ambient_context(node.syntax()) {

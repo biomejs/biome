@@ -884,6 +884,10 @@ export interface Nursery {
 	 */
 	noEmptyTypeParameters?: RuleConfiguration_for_Null;
 	/**
+	 * This rule enforces a maximum depth to nested describe() in test files.
+	 */
+	noExcessiveNestedTestSuites?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow using export or module.exports in files containing tests
 	 */
 	noExportsInTest?: RuleConfiguration_for_Null;
@@ -1831,6 +1835,7 @@ export type Category =
 	| "lint/nursery/noDuplicateTestHooks"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyTypeParameters"
+	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noExportsInTest"
 	| "lint/nursery/noFocusedTests"
 	| "lint/nursery/noGlobalAssign"

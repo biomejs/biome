@@ -267,7 +267,9 @@ declare_rule! {
     /// When the option is set to `false`, anames may include non-ASCII characters.
     /// `café` and `안녕하세요` are so valid.
     ///
-    /// Default: `true`
+    /// Default: `false`
+    ///
+    /// **This option will be turned on by default in Biome 2.0.**
     ///
     /// ### enumMemberCase
     ///
@@ -516,7 +518,7 @@ pub struct NamingConventionOptions {
     pub strict_case: bool,
 
     /// If `false`, then non-ASCII characters are allowed.
-    #[serde(default = "enabled", skip_serializing_if = "is_enabled")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub require_ascii: bool,
 
     /// Allowed cases for _TypeScript_ `enum` member names.
@@ -539,8 +541,8 @@ fn is_default<T: Default + Eq>(value: &T) -> bool {
 impl Default for NamingConventionOptions {
     fn default() -> Self {
         Self {
-            strict_case: enabled(),
-            require_ascii: enabled(),
+            strict_case: true,
+            require_ascii: false,
             enum_member_case: EnumMemberCase::default(),
         }
     }

@@ -319,7 +319,9 @@ fn analyze_simple(cfg: &JsControlFlowGraph, signals: &mut UnreachableRanges) {
                                 queue.push_back((handler.target, Some(handlers)));
                             }
                         }
-                    } else if reachable_blocks.insert(block.index()) {
+                    }
+
+                    if reachable_blocks.insert(block.index()) {
                         // Insert an edge if this jump is reachable
                         queue.push_back((block, handlers));
                     }
