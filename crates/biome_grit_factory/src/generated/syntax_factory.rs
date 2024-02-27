@@ -602,7 +602,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             }
             GRIT_LANGUAGE_DECLARATION => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T![language] {
@@ -620,6 +620,13 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if GritLanguageFlavor::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if GritBogus::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -675,10 +682,17 @@ impl SyntaxFactory for GritSyntaxFactory {
             }
             GRIT_LANGUAGE_FLAVOR_KIND => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if matches!(element.kind(), T![typescript] | T![jsx]) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if GritBogus::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1083,25 +1097,6 @@ impl SyntaxFactory for GritSyntaxFactory {
             }
             GRIT_NAMED_ARG => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if GritName::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        GRIT_NAMED_ARG.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(GRIT_NAMED_ARG, children)
-            }
-            GRIT_NAMED_ARG_WITH_DEFAULT => {
-                let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
@@ -1127,11 +1122,11 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        GRIT_NAMED_ARG_WITH_DEFAULT.to_bogus(),
+                        GRIT_NAMED_ARG.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(GRIT_NAMED_ARG_WITH_DEFAULT, children)
+                slots.into_node(GRIT_NAMED_ARG, children)
             }
             GRIT_NEGATIVE_INT_LITERAL => {
                 let mut elements = (&children).into_iter();
@@ -3101,7 +3096,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             GRIT_NAMED_ARG_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
-                GritNamedArg::can_cast,
+                MaybeGritNamedArg::can_cast,
                 T ! [,],
                 true,
             ),

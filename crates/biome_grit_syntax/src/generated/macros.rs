@@ -162,10 +162,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritNamedArg::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_NAMED_ARG_WITH_DEFAULT => {
-                    let $pattern = unsafe { $crate::GritNamedArgWithDefault::new_unchecked(node) };
-                    $body
-                }
                 $crate::GritSyntaxKind::GRIT_NEGATIVE_INT_LITERAL => {
                     let $pattern = unsafe { $crate::GritNegativeIntLiteral::new_unchecked(node) };
                     $body

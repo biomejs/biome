@@ -908,6 +908,7 @@ impl GritLanguageDeclaration {
             language_token: self.language_token(),
             name: self.name(),
             flavor: self.flavor(),
+            grit_bogus: self.grit_bogus(),
             semicolon_token: self.semicolon_token(),
         }
     }
@@ -920,8 +921,11 @@ impl GritLanguageDeclaration {
     pub fn flavor(&self) -> Option<GritLanguageFlavor> {
         support::node(&self.syntax, 2usize)
     }
+    pub fn grit_bogus(&self) -> Option<GritBogus> {
+        support::node(&self.syntax, 3usize)
+    }
     pub fn semicolon_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 3usize)
+        support::token(&self.syntax, 4usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -938,6 +942,7 @@ pub struct GritLanguageDeclarationFields {
     pub language_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GritLanguageName>,
     pub flavor: Option<GritLanguageFlavor>,
+    pub grit_bogus: Option<GritBogus>,
     pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1003,10 +1008,14 @@ impl GritLanguageFlavorKind {
     pub fn as_fields(&self) -> GritLanguageFlavorKindFields {
         GritLanguageFlavorKindFields {
             flavor_kind: self.flavor_kind(),
+            grit_bogus: self.grit_bogus(),
         }
     }
     pub fn flavor_kind(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
+    }
+    pub fn grit_bogus(&self) -> Option<GritBogus> {
+        support::node(&self.syntax, 1usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -1021,6 +1030,7 @@ impl Serialize for GritLanguageFlavorKind {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GritLanguageFlavorKindFields {
     pub flavor_kind: SyntaxResult<SyntaxToken>,
+    pub grit_bogus: Option<GritBogus>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritLanguageName {
@@ -1584,41 +1594,7 @@ impl GritNamedArg {
         Self { syntax }
     }
     pub fn as_fields(&self) -> GritNamedArgFields {
-        GritNamedArgFields { name: self.name() }
-    }
-    pub fn name(&self) -> SyntaxResult<GritName> {
-        support::required_node(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for GritNamedArg {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GritNamedArgFields {
-    pub name: SyntaxResult<GritName>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritNamedArgWithDefault {
-    pub(crate) syntax: SyntaxNode,
-}
-impl GritNamedArgWithDefault {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> GritNamedArgWithDefaultFields {
-        GritNamedArgWithDefaultFields {
+        GritNamedArgFields {
             name: self.name(),
             eq_token: self.eq_token(),
             pattern: self.pattern(),
@@ -1635,7 +1611,7 @@ impl GritNamedArgWithDefault {
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for GritNamedArgWithDefault {
+impl Serialize for GritNamedArg {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -1644,7 +1620,7 @@ impl Serialize for GritNamedArgWithDefault {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GritNamedArgWithDefaultFields {
+pub struct GritNamedArgFields {
     pub name: SyntaxResult<GritName>,
     pub eq_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritPattern>,
@@ -4510,33 +4486,6 @@ impl AnyGritLiteral {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum AnyGritNamedArg {
-    GritBogusNamedArg(GritBogusNamedArg),
-    GritNamedArg(GritNamedArg),
-    GritNamedArgWithDefault(GritNamedArgWithDefault),
-}
-impl AnyGritNamedArg {
-    pub fn as_grit_bogus_named_arg(&self) -> Option<&GritBogusNamedArg> {
-        match &self {
-            AnyGritNamedArg::GritBogusNamedArg(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_grit_named_arg(&self) -> Option<&GritNamedArg> {
-        match &self {
-            AnyGritNamedArg::GritNamedArg(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_grit_named_arg_with_default(&self) -> Option<&GritNamedArgWithDefault> {
-        match &self {
-            AnyGritNamedArg::GritNamedArgWithDefault(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyGritPattern {
     AnyGritLiteral(AnyGritLiteral),
     BracketedGritPattern(BracketedGritPattern),
@@ -5137,6 +5086,33 @@ impl MaybeCurlyGritPattern {
     pub fn as_curly_grit_pattern(&self) -> Option<&CurlyGritPattern> {
         match &self {
             MaybeCurlyGritPattern::CurlyGritPattern(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum MaybeGritNamedArg {
+    AnyGritPattern(AnyGritPattern),
+    GritBogusNamedArg(GritBogusNamedArg),
+    GritNamedArg(GritNamedArg),
+}
+impl MaybeGritNamedArg {
+    pub fn as_any_grit_pattern(&self) -> Option<&AnyGritPattern> {
+        match &self {
+            MaybeGritNamedArg::AnyGritPattern(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_grit_bogus_named_arg(&self) -> Option<&GritBogusNamedArg> {
+        match &self {
+            MaybeGritNamedArg::GritBogusNamedArg(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_grit_named_arg(&self) -> Option<&GritNamedArg> {
+        match &self {
+            MaybeGritNamedArg::GritNamedArg(item) => Some(item),
             _ => None,
         }
     }
@@ -6051,6 +6027,10 @@ impl std::fmt::Debug for GritLanguageDeclaration {
             .field("name", &support::DebugSyntaxResult(self.name()))
             .field("flavor", &support::DebugOptionalElement(self.flavor()))
             .field(
+                "grit_bogus",
+                &support::DebugOptionalElement(self.grit_bogus()),
+            )
+            .field(
                 "semicolon_token",
                 &support::DebugOptionalElement(self.semicolon_token()),
             )
@@ -6143,6 +6123,10 @@ impl std::fmt::Debug for GritLanguageFlavorKind {
             .field(
                 "flavor_kind",
                 &support::DebugSyntaxResult(self.flavor_kind()),
+            )
+            .field(
+                "grit_bogus",
+                &support::DebugOptionalElement(self.grit_bogus()),
             )
             .finish()
     }
@@ -6712,6 +6696,8 @@ impl std::fmt::Debug for GritNamedArg {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("GritNamedArg")
             .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
             .finish()
     }
 }
@@ -6722,46 +6708,6 @@ impl From<GritNamedArg> for SyntaxNode {
 }
 impl From<GritNamedArg> for SyntaxElement {
     fn from(n: GritNamedArg) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for GritNamedArgWithDefault {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_NAMED_ARG_WITH_DEFAULT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_NAMED_ARG_WITH_DEFAULT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for GritNamedArgWithDefault {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritNamedArgWithDefault")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
-    }
-}
-impl From<GritNamedArgWithDefault> for SyntaxNode {
-    fn from(n: GritNamedArgWithDefault) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<GritNamedArgWithDefault> for SyntaxElement {
-    fn from(n: GritNamedArgWithDefault) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -9773,84 +9719,6 @@ impl From<AnyGritLiteral> for SyntaxElement {
         node.into()
     }
 }
-impl From<GritBogusNamedArg> for AnyGritNamedArg {
-    fn from(node: GritBogusNamedArg) -> AnyGritNamedArg {
-        AnyGritNamedArg::GritBogusNamedArg(node)
-    }
-}
-impl From<GritNamedArg> for AnyGritNamedArg {
-    fn from(node: GritNamedArg) -> AnyGritNamedArg {
-        AnyGritNamedArg::GritNamedArg(node)
-    }
-}
-impl From<GritNamedArgWithDefault> for AnyGritNamedArg {
-    fn from(node: GritNamedArgWithDefault) -> AnyGritNamedArg {
-        AnyGritNamedArg::GritNamedArgWithDefault(node)
-    }
-}
-impl AstNode for AnyGritNamedArg {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = GritBogusNamedArg::KIND_SET
-        .union(GritNamedArg::KIND_SET)
-        .union(GritNamedArgWithDefault::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            GRIT_BOGUS_NAMED_ARG | GRIT_NAMED_ARG | GRIT_NAMED_ARG_WITH_DEFAULT
-        )
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            GRIT_BOGUS_NAMED_ARG => {
-                AnyGritNamedArg::GritBogusNamedArg(GritBogusNamedArg { syntax })
-            }
-            GRIT_NAMED_ARG => AnyGritNamedArg::GritNamedArg(GritNamedArg { syntax }),
-            GRIT_NAMED_ARG_WITH_DEFAULT => {
-                AnyGritNamedArg::GritNamedArgWithDefault(GritNamedArgWithDefault { syntax })
-            }
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            AnyGritNamedArg::GritBogusNamedArg(it) => &it.syntax,
-            AnyGritNamedArg::GritNamedArg(it) => &it.syntax,
-            AnyGritNamedArg::GritNamedArgWithDefault(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            AnyGritNamedArg::GritBogusNamedArg(it) => it.syntax,
-            AnyGritNamedArg::GritNamedArg(it) => it.syntax,
-            AnyGritNamedArg::GritNamedArgWithDefault(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnyGritNamedArg {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AnyGritNamedArg::GritBogusNamedArg(it) => std::fmt::Debug::fmt(it, f),
-            AnyGritNamedArg::GritNamedArg(it) => std::fmt::Debug::fmt(it, f),
-            AnyGritNamedArg::GritNamedArgWithDefault(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyGritNamedArg> for SyntaxNode {
-    fn from(n: AnyGritNamedArg) -> SyntaxNode {
-        match n {
-            AnyGritNamedArg::GritBogusNamedArg(it) => it.into(),
-            AnyGritNamedArg::GritNamedArg(it) => it.into(),
-            AnyGritNamedArg::GritNamedArgWithDefault(it) => it.into(),
-        }
-    }
-}
-impl From<AnyGritNamedArg> for SyntaxElement {
-    fn from(n: AnyGritNamedArg) -> SyntaxElement {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl From<BracketedGritPattern> for AnyGritPattern {
     fn from(node: BracketedGritPattern) -> AnyGritPattern {
         AnyGritPattern::BracketedGritPattern(node)
@@ -11227,6 +11095,82 @@ impl From<MaybeCurlyGritPattern> for SyntaxElement {
         node.into()
     }
 }
+impl From<GritBogusNamedArg> for MaybeGritNamedArg {
+    fn from(node: GritBogusNamedArg) -> MaybeGritNamedArg {
+        MaybeGritNamedArg::GritBogusNamedArg(node)
+    }
+}
+impl From<GritNamedArg> for MaybeGritNamedArg {
+    fn from(node: GritNamedArg) -> MaybeGritNamedArg {
+        MaybeGritNamedArg::GritNamedArg(node)
+    }
+}
+impl AstNode for MaybeGritNamedArg {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AnyGritPattern::KIND_SET
+        .union(GritBogusNamedArg::KIND_SET)
+        .union(GritNamedArg::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            GRIT_BOGUS_NAMED_ARG | GRIT_NAMED_ARG => true,
+            k if AnyGritPattern::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            GRIT_BOGUS_NAMED_ARG => {
+                MaybeGritNamedArg::GritBogusNamedArg(GritBogusNamedArg { syntax })
+            }
+            GRIT_NAMED_ARG => MaybeGritNamedArg::GritNamedArg(GritNamedArg { syntax }),
+            _ => {
+                if let Some(any_grit_pattern) = AnyGritPattern::cast(syntax) {
+                    return Some(MaybeGritNamedArg::AnyGritPattern(any_grit_pattern));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            MaybeGritNamedArg::GritBogusNamedArg(it) => &it.syntax,
+            MaybeGritNamedArg::GritNamedArg(it) => &it.syntax,
+            MaybeGritNamedArg::AnyGritPattern(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            MaybeGritNamedArg::GritBogusNamedArg(it) => it.syntax,
+            MaybeGritNamedArg::GritNamedArg(it) => it.syntax,
+            MaybeGritNamedArg::AnyGritPattern(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for MaybeGritNamedArg {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MaybeGritNamedArg::AnyGritPattern(it) => std::fmt::Debug::fmt(it, f),
+            MaybeGritNamedArg::GritBogusNamedArg(it) => std::fmt::Debug::fmt(it, f),
+            MaybeGritNamedArg::GritNamedArg(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<MaybeGritNamedArg> for SyntaxNode {
+    fn from(n: MaybeGritNamedArg) -> SyntaxNode {
+        match n {
+            MaybeGritNamedArg::AnyGritPattern(it) => it.into(),
+            MaybeGritNamedArg::GritBogusNamedArg(it) => it.into(),
+            MaybeGritNamedArg::GritNamedArg(it) => it.into(),
+        }
+    }
+}
+impl From<MaybeGritNamedArg> for SyntaxElement {
+    fn from(n: MaybeGritNamedArg) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl std::fmt::Display for AnyGritContainer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -11243,11 +11187,6 @@ impl std::fmt::Display for AnyGritListPattern {
     }
 }
 impl std::fmt::Display for AnyGritLiteral {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for AnyGritNamedArg {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -11298,6 +11237,11 @@ impl std::fmt::Display for GritPredicateMatchSubject {
     }
 }
 impl std::fmt::Display for MaybeCurlyGritPattern {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MaybeGritNamedArg {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -11478,11 +11422,6 @@ impl std::fmt::Display for GritName {
     }
 }
 impl std::fmt::Display for GritNamedArg {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for GritNamedArgWithDefault {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -12511,7 +12450,7 @@ impl Serialize for GritNamedArgList {
 }
 impl AstSeparatedList for GritNamedArgList {
     type Language = Language;
-    type Node = GritNamedArg;
+    type Node = MaybeGritNamedArg;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -12526,15 +12465,15 @@ impl Debug for GritNamedArgList {
     }
 }
 impl IntoIterator for GritNamedArgList {
-    type Item = SyntaxResult<GritNamedArg>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, GritNamedArg>;
+    type Item = SyntaxResult<MaybeGritNamedArg>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, MaybeGritNamedArg>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for &GritNamedArgList {
-    type Item = SyntaxResult<GritNamedArg>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, GritNamedArg>;
+    type Item = SyntaxResult<MaybeGritNamedArg>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, MaybeGritNamedArg>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

@@ -33,6 +33,7 @@ GritRoot {
             language_kind: JS_KW@27..29 "js" [] [],
         },
         flavor: missing (optional),
+        grit_bogus: missing (optional),
         semicolon_token: missing (optional),
     },
     definitions: GritDefinitionList [],
@@ -100,6 +101,7 @@ GritRoot {
       0: JS_KW@27..29 "js" [] []
     2: (empty)
     3: (empty)
+    4: (empty)
   3: GRIT_DEFINITION_LIST@29..29
   4: GRIT_PATTERN_WHERE@29..91
     0: GRIT_CODE_SNIPPET@29..43

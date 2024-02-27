@@ -19,17 +19,28 @@ GritRoot {
         name: GritLanguageName {
             language_kind: JS_KW@9..11 "js" [] [],
         },
-        flavor: GritLanguageFlavor {
-            l_paren_token: L_PAREN@11..12 "(" [] [],
-            grit_language_flavor_list: GritLanguageFlavorList [],
-            r_paren_token: missing (required),
+        flavor: missing (optional),
+        grit_bogus: GritBogus {
+            items: [
+                L_PAREN@11..12 "(" [] [],
+                GritBogus {
+                    items: [
+                        GritBogus {
+                            items: [
+                                GRIT_NAME@12..19 "vanilla" [] [],
+                            ],
+                        },
+                    ],
+                },
+                R_PAREN@19..20 ")" [] [],
+            ],
         },
-        semicolon_token: missing (optional),
+        semicolon_token: SEMICOLON@20..21 ";" [] [],
     },
     definitions: GritDefinitionList [],
     pattern: missing (optional),
     definitions_continued: GritDefinitionList [],
-    eof_token: EOF@12..22 "vanilla);\n" [] [],
+    eof_token: EOF@21..22 "" [Newline("\n")] [],
 }
 ```
 
@@ -39,19 +50,22 @@ GritRoot {
 0: GRIT_ROOT@0..22
   0: (empty)
   1: (empty)
-  2: GRIT_LANGUAGE_DECLARATION@0..12
+  2: GRIT_LANGUAGE_DECLARATION@0..21
     0: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")]
     1: GRIT_LANGUAGE_NAME@9..11
       0: JS_KW@9..11 "js" [] []
-    2: GRIT_LANGUAGE_FLAVOR@11..12
+    2: (empty)
+    3: GRIT_BOGUS@11..20
       0: L_PAREN@11..12 "(" [] []
-      1: GRIT_LANGUAGE_FLAVOR_LIST@12..12
-      2: (empty)
-    3: (empty)
-  3: GRIT_DEFINITION_LIST@12..12
+      1: GRIT_BOGUS@12..19
+        0: GRIT_BOGUS@12..19
+          0: GRIT_NAME@12..19 "vanilla" [] []
+      2: R_PAREN@19..20 ")" [] []
+    4: SEMICOLON@20..21 ";" [] []
+  3: GRIT_DEFINITION_LIST@21..21
   4: (empty)
-  5: GRIT_DEFINITION_LIST@12..12
-  6: EOF@12..22 "vanilla);\n" [] []
+  5: GRIT_DEFINITION_LIST@21..21
+  6: EOF@21..22 "" [Newline("\n")] []
 
 ```
 

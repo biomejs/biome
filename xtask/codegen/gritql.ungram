@@ -71,6 +71,7 @@ GritLanguageDeclaration =
     'language'
     name: GritLanguageName
     flavor: GritLanguageFlavor?
+    GritBogus?
     ';'?
 
 GritLanguageFlavor = '(' GritLanguageFlavorList ')'
@@ -80,6 +81,7 @@ GritLanguageFlavorKind =
         // JavaScript flavors:
         'typescript' | 'jsx'
     )
+    GritBogus?
 
 // --- patterns
 
@@ -233,20 +235,17 @@ GritBubble =
     variables: GritBubbleScope?
     pattern: MaybeCurlyGritPattern
 
-AnyGritNamedArg =
-    GritNamedArg
-    | GritNamedArgWithDefault
+MaybeGritNamedArg =
+    AnyGritPattern
+    | GritNamedArg
     | GritBogusNamedArg
 
 GritNamedArg =
     name: GritName
-
-GritNamedArgWithDefault =
-    name: GritName
     '='
     pattern: AnyGritPattern
 
-GritNamedArgList = GritNamedArg (',' GritNamedArg)* ','?
+GritNamedArgList = MaybeGritNamedArg (',' MaybeGritNamedArg)* ','?
 
 // maybe we should have a different fieldname for each choice?
 GritNodeLike =

@@ -150,7 +150,6 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
         "GRIT_BUBBLE_SCOPE",
         "GRIT_BUBBLE",
         "GRIT_NAMED_ARG",
-        "GRIT_NAMED_ARG_WITH_DEFAULT",
         "GRIT_NAMED_ARG_LIST",
         "GRIT_NODE_LIKE",
         "GRIT_LIKE",
@@ -205,7 +204,6 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
         "GRIT_CODE_SNIPPET",
         "GRIT_NOT",
         "GRIT_UNDERSCORE",
-        "MAYBE_CURLY_GRIT_PATTERN",
         // literal wrappers:
         "GRIT_BACKTICK_SNIPPET_LITERAL",
         "GRIT_BOOLEAN_LITERAL",

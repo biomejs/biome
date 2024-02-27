@@ -22,9 +22,20 @@ GritRoot {
     },
     language: missing (optional),
     definitions: GritDefinitionList [],
-    pattern: missing (optional),
+    pattern: GritNodeLike {
+        name: GritName {
+            grit_name_token: GRIT_NAME@7..15 "marzano" [] [Whitespace(" ")],
+        },
+        l_paren_token: L_PAREN@15..16 "(" [] [],
+        named_args: GritNamedArgList [
+            GritDoubleLiteral {
+                value_token: GRIT_DOUBLE@16..19 "1.0" [] [],
+            },
+        ],
+        r_paren_token: R_PAREN@19..20 ")" [] [],
+    },
     definitions_continued: GritDefinitionList [],
-    eof_token: EOF@7..21 "marzano (1.0)\n" [] [],
+    eof_token: EOF@20..21 "" [Newline("\n")] [],
 }
 ```
 
@@ -41,9 +52,16 @@ GritRoot {
     4: (empty)
   2: (empty)
   3: GRIT_DEFINITION_LIST@7..7
-  4: (empty)
-  5: GRIT_DEFINITION_LIST@7..7
-  6: EOF@7..21 "marzano (1.0)\n" [] []
+  4: GRIT_NODE_LIKE@7..20
+    0: GRIT_NAME@7..15
+      0: GRIT_NAME@7..15 "marzano" [] [Whitespace(" ")]
+    1: L_PAREN@15..16 "(" [] []
+    2: GRIT_NAMED_ARG_LIST@16..19
+      0: GRIT_DOUBLE_LITERAL@16..19
+        0: GRIT_DOUBLE@16..19 "1.0" [] []
+    3: R_PAREN@19..20 ")" [] []
+  5: GRIT_DEFINITION_LIST@20..20
+  6: EOF@20..21 "" [Newline("\n")] []
 
 ```
 

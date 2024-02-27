@@ -356,10 +356,16 @@ impl GritLanguageDeclaration {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
+    pub fn with_grit_bogus(self, element: Option<GritBogus>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            3usize..=3usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
     pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(3usize..=3usize, once(element.map(|element| element.into()))),
+                .splice_slots(4usize..=4usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -389,6 +395,12 @@ impl GritLanguageFlavorKind {
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
+    }
+    pub fn with_grit_bogus(self, element: Option<GritBogus>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
 }
 impl GritLanguageName {
@@ -626,14 +638,6 @@ impl GritName {
     }
 }
 impl GritNamedArg {
-    pub fn with_name(self, element: GritName) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
-impl GritNamedArgWithDefault {
     pub fn with_name(self, element: GritName) -> Self {
         Self::unwrap_cast(
             self.syntax

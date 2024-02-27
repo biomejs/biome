@@ -338,6 +338,7 @@ pub fn grit_language_declaration(
         language_token,
         name,
         flavor: None,
+        grit_bogus: None,
         semicolon_token: None,
     }
 }
@@ -345,11 +346,16 @@ pub struct GritLanguageDeclarationBuilder {
     language_token: SyntaxToken,
     name: GritLanguageName,
     flavor: Option<GritLanguageFlavor>,
+    grit_bogus: Option<GritBogus>,
     semicolon_token: Option<SyntaxToken>,
 }
 impl GritLanguageDeclarationBuilder {
     pub fn with_flavor(mut self, flavor: GritLanguageFlavor) -> Self {
         self.flavor = Some(flavor);
+        self
+    }
+    pub fn with_grit_bogus(mut self, grit_bogus: GritBogus) -> Self {
+        self.grit_bogus = Some(grit_bogus);
         self
     }
     pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
@@ -363,6 +369,8 @@ impl GritLanguageDeclarationBuilder {
                 Some(SyntaxElement::Token(self.language_token)),
                 Some(SyntaxElement::Node(self.name.into_syntax())),
                 self.flavor
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.grit_bogus
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.semicolon_token
                     .map(|token| SyntaxElement::Token(token)),
@@ -384,11 +392,31 @@ pub fn grit_language_flavor(
         ],
     ))
 }
-pub fn grit_language_flavor_kind(flavor_kind_token: SyntaxToken) -> GritLanguageFlavorKind {
-    GritLanguageFlavorKind::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_LANGUAGE_FLAVOR_KIND,
-        [Some(SyntaxElement::Token(flavor_kind_token))],
-    ))
+pub fn grit_language_flavor_kind(flavor_kind_token: SyntaxToken) -> GritLanguageFlavorKindBuilder {
+    GritLanguageFlavorKindBuilder {
+        flavor_kind_token,
+        grit_bogus: None,
+    }
+}
+pub struct GritLanguageFlavorKindBuilder {
+    flavor_kind_token: SyntaxToken,
+    grit_bogus: Option<GritBogus>,
+}
+impl GritLanguageFlavorKindBuilder {
+    pub fn with_grit_bogus(mut self, grit_bogus: GritBogus) -> Self {
+        self.grit_bogus = Some(grit_bogus);
+        self
+    }
+    pub fn build(self) -> GritLanguageFlavorKind {
+        GritLanguageFlavorKind::unwrap_cast(SyntaxNode::new_detached(
+            GritSyntaxKind::GRIT_LANGUAGE_FLAVOR_KIND,
+            [
+                Some(SyntaxElement::Token(self.flavor_kind_token)),
+                self.grit_bogus
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn grit_language_name(language_kind_token: SyntaxToken) -> GritLanguageName {
     GritLanguageName::unwrap_cast(SyntaxNode::new_detached(
@@ -606,19 +634,13 @@ pub fn grit_name(grit_name_token: SyntaxToken) -> GritName {
         [Some(SyntaxElement::Token(grit_name_token))],
     ))
 }
-pub fn grit_named_arg(name: GritName) -> GritNamedArg {
-    GritNamedArg::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_NAMED_ARG,
-        [Some(SyntaxElement::Node(name.into_syntax()))],
-    ))
-}
-pub fn grit_named_arg_with_default(
+pub fn grit_named_arg(
     name: GritName,
     eq_token: SyntaxToken,
     pattern: AnyGritPattern,
-) -> GritNamedArgWithDefault {
-    GritNamedArgWithDefault::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_NAMED_ARG_WITH_DEFAULT,
+) -> GritNamedArg {
+    GritNamedArg::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_NAMED_ARG,
         [
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(eq_token)),
@@ -1915,7 +1937,7 @@ where
 }
 pub fn grit_named_arg_list<I, S>(items: I, separators: S) -> GritNamedArgList
 where
-    I: IntoIterator<Item = GritNamedArg>,
+    I: IntoIterator<Item = MaybeGritNamedArg>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = GritSyntaxToken>,
     S::IntoIter: ExactSizeIterator,

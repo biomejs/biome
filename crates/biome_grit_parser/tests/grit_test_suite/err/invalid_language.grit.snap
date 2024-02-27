@@ -18,12 +18,17 @@ GritRoot {
         language_token: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")],
         name: missing (required),
         flavor: missing (optional),
-        semicolon_token: missing (optional),
+        grit_bogus: GritBogus {
+            items: [
+                GRIT_NAME@9..21 "non_existing" [] [],
+            ],
+        },
+        semicolon_token: SEMICOLON@21..22 ";" [] [],
     },
     definitions: GritDefinitionList [],
     pattern: missing (optional),
     definitions_continued: GritDefinitionList [],
-    eof_token: EOF@9..23 "non_existing;\n" [] [],
+    eof_token: EOF@22..23 "" [Newline("\n")] [],
 }
 ```
 
@@ -33,15 +38,17 @@ GritRoot {
 0: GRIT_ROOT@0..23
   0: (empty)
   1: (empty)
-  2: GRIT_LANGUAGE_DECLARATION@0..9
+  2: GRIT_LANGUAGE_DECLARATION@0..22
     0: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")]
     1: (empty)
     2: (empty)
-    3: (empty)
-  3: GRIT_DEFINITION_LIST@9..9
+    3: GRIT_BOGUS@9..21
+      0: GRIT_NAME@9..21 "non_existing" [] []
+    4: SEMICOLON@21..22 ";" [] []
+  3: GRIT_DEFINITION_LIST@22..22
   4: (empty)
-  5: GRIT_DEFINITION_LIST@9..9
-  6: EOF@9..23 "non_existing;\n" [] []
+  5: GRIT_DEFINITION_LIST@22..22
+  6: EOF@22..23 "" [Newline("\n")] []
 
 ```
 

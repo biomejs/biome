@@ -20,6 +20,7 @@ GritRoot {
             language_kind: JS_KW@9..11 "js" [] [],
         },
         flavor: missing (optional),
+        grit_bogus: missing (optional),
         semicolon_token: SEMICOLON@11..12 ";" [] [],
     },
     definitions: GritDefinitionList [],
@@ -40,7 +41,8 @@ GritRoot {
     1: GRIT_LANGUAGE_NAME@9..11
       0: JS_KW@9..11 "js" [] []
     2: (empty)
-    3: SEMICOLON@11..12 ";" [] []
+    3: (empty)
+    4: SEMICOLON@11..12 ";" [] []
   3: GRIT_DEFINITION_LIST@12..12
   4: (empty)
   5: GRIT_DEFINITION_LIST@12..12

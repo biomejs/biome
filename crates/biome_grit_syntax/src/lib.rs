@@ -63,8 +63,8 @@ impl biome_rowan::SyntaxKind for GritSyntaxKind {
             kind if AnyGritDefinition::can_cast(*kind) => GRIT_BOGUS_DEFINITION,
             kind if AnyGritPattern::can_cast(*kind) => GRIT_BOGUS_PATTERN,
             kind if AnyGritLiteral::can_cast(*kind) => GRIT_BOGUS_LITERAL,
-            kind if AnyGritNamedArg::can_cast(*kind) => GRIT_BOGUS_NAMED_ARG,
             kind if AnyGritPredicate::can_cast(*kind) => GRIT_BOGUS_PREDICATE,
+            kind if MaybeGritNamedArg::can_cast(*kind) => GRIT_BOGUS_NAMED_ARG,
 
             _ => GRIT_BOGUS,
         }

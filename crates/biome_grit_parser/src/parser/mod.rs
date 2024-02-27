@@ -1,4 +1,5 @@
 mod literals;
+mod parse_error;
 mod patterns;
 mod predicates;
 
@@ -7,12 +8,19 @@ use biome_grit_syntax::GritSyntaxKind::{self, *};
 use biome_grit_syntax::T;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
+use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::{ParsedSyntax::*, *};
 use biome_parser::token_source::Trivia;
 use biome_parser::ParserContext;
 use biome_rowan::TextRange;
 use literals::parse_double_literal;
 use patterns::parse_pattern;
+
+use self::parse_error::{expected_language_flavor, expected_language_name};
+
+const LANGUAGE_NAME_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(T!['('], T![;]);
+
+const LANGUAGE_FLAVOR_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(T![')'], T![,], T![;]);
 
 const SUPPORTED_LANGUAGE_SET: TokenSet<GritSyntaxKind> =
     token_set![T![js], T![json], T![css], T![grit], T![html]];
@@ -126,16 +134,12 @@ fn parse_language(p: &mut GritParser) -> Option<CompletedMarker> {
     let m = p.start();
     p.bump(T![language]);
 
-    if p.at_ts(SUPPORTED_LANGUAGE_SET) {
-        let m = p.start();
-        p.bump_ts(SUPPORTED_LANGUAGE_SET);
-        m.complete(p, GRIT_LANGUAGE_NAME);
-    } else {
-        p.error(p.err_builder(
-            "Expected a supported language; must be one of `js`, `json`, `css`, `html`, or `grit`",
-            p.cur_range(),
-        ))
-    }
+    let _ = parse_language_name(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, LANGUAGE_NAME_RECOVERY_SET)
+            .enable_recovery_on_line_break(),
+        expected_language_name,
+    );
 
     let _ = parse_language_flavor(p);
 
@@ -144,6 +148,16 @@ fn parse_language(p: &mut GritParser) -> Option<CompletedMarker> {
     let result = m.complete(p, GRIT_LANGUAGE_DECLARATION);
 
     Some(result)
+}
+
+fn parse_language_name(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at_ts(SUPPORTED_LANGUAGE_SET) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_ts(SUPPORTED_LANGUAGE_SET);
+    Present(m.complete(p, GRIT_LANGUAGE_NAME))
 }
 
 fn parse_language_flavor(p: &mut GritParser) -> ParsedSyntax {
@@ -168,7 +182,12 @@ fn parse_language_flavor(p: &mut GritParser) -> ParsedSyntax {
 fn parse_language_flavor_list(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
 
-    let _ = parse_language_flavor_kind(p);
+    let _ = parse_language_flavor_kind(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, LANGUAGE_FLAVOR_RECOVERY_SET)
+            .enable_recovery_on_line_break(),
+        expected_language_flavor,
+    );
 
     while p.eat(T![,]) {
         let _ = parse_language_flavor_kind(p);
@@ -178,19 +197,13 @@ fn parse_language_flavor_list(p: &mut GritParser) -> ParsedSyntax {
 }
 
 fn parse_language_flavor_kind(p: &mut GritParser) -> ParsedSyntax {
-    let m = p.start();
-
-    if p.at_ts(SUPPORTED_LANGUAGE_FLAVOR_SET) {
-        p.bump_ts(SUPPORTED_LANGUAGE_FLAVOR_SET);
-        Present(m.complete(p, GRIT_LANGUAGE_FLAVOR_KIND))
-    } else {
-        p.error(p.err_builder(
-            "Expected a supported language flavor; must be one of `typescript` or `jsx`",
-            p.cur_range(),
-        ));
-        m.abandon(p);
-        Absent
+    if !p.at_ts(SUPPORTED_LANGUAGE_FLAVOR_SET) {
+        return Absent;
     }
+
+    let m = p.start();
+    p.bump_ts(SUPPORTED_LANGUAGE_FLAVOR_SET);
+    Present(m.complete(p, GRIT_LANGUAGE_FLAVOR_KIND))
 }
 
 fn parse_definition_list(p: &mut GritParser) -> CompletedMarker {
@@ -209,16 +222,38 @@ fn parse_definition_list(p: &mut GritParser) -> CompletedMarker {
 }
 
 #[inline]
-fn parse_variable_list(p: &mut GritParser) -> ParsedSyntax {
+fn parse_name(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(GRIT_NAME) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(GRIT_NAME);
+    Present(m.complete(p, GRIT_NAME))
+}
+
+#[inline]
+fn parse_variable(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(GRIT_VARIABLE) {
         return Absent;
     }
 
     let m = p.start();
     p.bump(GRIT_VARIABLE);
+    Present(m.complete(p, GRIT_VARIABLE))
+}
+
+#[inline]
+fn parse_variable_list(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(GRIT_VARIABLE) {
+        return Absent;
+    }
+
+    let m = p.start();
+    let _ = parse_variable(p);
 
     while p.eat(T![,]) {
-        if !p.eat(GRIT_VARIABLE) {
+        if parse_variable(p) == Absent {
             break;
         }
     }
