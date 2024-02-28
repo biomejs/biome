@@ -52,3 +52,5 @@ import {
     k1, /* comment 1 */
     k3, // comment 3
     k2, /* comment 2 */ } from 'k';
+
+import { m1 as m3, m2 } from 'm'

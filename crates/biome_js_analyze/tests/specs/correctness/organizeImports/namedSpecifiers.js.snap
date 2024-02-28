@@ -59,11 +59,13 @@ import {
     k3, // comment 3
     k2, /* comment 2 */ } from 'k';
 
+import { m1 as m3, m2 } from 'm'
+
 ```
 
 # Actions
 ```diff
-@@ -1,54 +1,57 @@
+@@ -1,56 +1,59 @@
 -import { a1, a3, a5, a2, a4 } from 'a';
 +import { a1, a2, a3, a4, a5 } from 'a';
  
@@ -78,12 +80,12 @@ import {
  
  import {
      e1,
--    e3,
--    e5,
-     e2,
-+    e3,
-     e4,
-+    e5,
++    e2,
+     e3,
++    e4,
+     e5,
+-    e2,
+-    e4,
  } from 'e';
  
  import {
@@ -140,7 +142,8 @@ import {
      k3, // comment 3
 -    k2, /* comment 2 */ } from 'k';
 +} from 'k';
+ 
+-import { m1 as m3, m2 } from 'm'
++import { m2, m1 as m3 } from 'm'
 
 ```
-
-
