@@ -287,7 +287,7 @@ impl<'src> Lexer<'src> {
             b'>' => self.eat_gt(),
             b':' => self.eat_byte(T![:]),
             b';' => self.eat_byte(T![;]),
-            b'.' => self.eat_byte(T![.]),
+            b'.' => self.eat_dots(),
             b',' => self.eat_byte(T![,]),
             b'+' => self.eat_plus_or_acc(),
             b'*' => self.eat_byte(T![*]),
@@ -299,10 +299,24 @@ impl<'src> Lexer<'src> {
             b'(' => self.eat_byte(T!['(']),
             b')' => self.eat_byte(T![')']),
             b'$' => self.lex_variable(),
+            b'!' => self.eat_byte(T![!]),
             _ if is_leading_identifier_byte(current) => self.lex_name(current),
             _ if (b'0'..=b'9').contains(&current) || current == b'-' => self.lex_number(current),
             _ if self.position == 0 && self.consume_potential_bom().is_some() => UNICODE_BOM,
             _ => self.eat_unexpected_character(),
+        }
+    }
+
+    fn eat_dots(&mut self) -> GritSyntaxKind {
+        assert_eq!(self.current_byte(), Some(b'.'));
+        self.advance(1);
+
+        match self.current_byte() {
+            Some(b'.') if self.byte_at(1) == Some(b'.') => {
+                self.advance(2);
+                DOT3
+            }
+            _ => T![.],
         }
     }
 
@@ -840,7 +854,6 @@ impl<'src> Lexer<'src> {
             b"html" => HTML_KW,
             b"typescript" => TYPESCRIPT_KW,
             b"jsx" => JSX_KW,
-            b"js_do_not_use" => JS_DO_NOT_USE_KW,
             b"as" => AS_KW,
             b"limit" => LIMIT_KW,
             b"where" => WHERE_KW,
@@ -952,14 +965,6 @@ impl<'src> Lexer<'src> {
         if self.current_byte() == Some(b'_') {
             self.advance(1);
             return DOLLAR_UNDERSCORE;
-        }
-
-        if self.current_byte() == Some(b'.')
-            && self.byte_at(1) == Some(b'.')
-            && self.byte_at(2) == Some(b'.')
-        {
-            self.advance(3);
-            return DOLLAR_DOT3;
         }
 
         while let Some(byte) = self.current_byte() {

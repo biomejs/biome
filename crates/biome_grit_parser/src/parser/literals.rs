@@ -70,12 +70,12 @@ fn parse_code_snippet(p: &mut GritParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_dotdotdot(p: &mut GritParser) -> ParsedSyntax {
-    if !p.at(DOLLAR_DOT3) {
+    if !p.at(DOT3) {
         return Absent;
     }
 
     let m = p.start();
-    p.bump(DOLLAR_DOT3);
+    p.bump(DOT3);
     let _ = parse_maybe_curly_pattern(p);
     Present(m.complete(p, GRIT_DOTDOTDOT))
 }
@@ -161,7 +161,7 @@ fn parse_list_pattern_list(p: &mut GritParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_list_pattern(p: &mut GritParser) -> ParsedSyntax {
-    if p.at(DOLLAR_DOT3) {
+    if p.at(DOT3) {
         parse_dotdotdot(p)
     } else {
         parse_literal(p)

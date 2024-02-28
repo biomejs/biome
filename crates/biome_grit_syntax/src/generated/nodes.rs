@@ -342,15 +342,11 @@ impl GritBooleanLiteral {
     }
     pub fn as_fields(&self) -> GritBooleanLiteralFields {
         GritBooleanLiteralFields {
-            true_token: self.true_token(),
-            false_token: self.false_token(),
+            value: self.value(),
         }
     }
-    pub fn true_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn value(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
-    }
-    pub fn false_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -364,8 +360,7 @@ impl Serialize for GritBooleanLiteral {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GritBooleanLiteralFields {
-    pub true_token: SyntaxResult<SyntaxToken>,
-    pub false_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritBubble {
@@ -639,11 +634,11 @@ impl GritDotdotdot {
     }
     pub fn as_fields(&self) -> GritDotdotdotFields {
         GritDotdotdotFields {
-            dollar_dotdotdot_token: self.dollar_dotdotdot_token(),
+            dotdotdot_token: self.dotdotdot_token(),
             maybe_curly_grit_pattern: self.maybe_curly_grit_pattern(),
         }
     }
-    pub fn dollar_dotdotdot_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn dotdotdot_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn maybe_curly_grit_pattern(&self) -> Option<MaybeCurlyGritPattern> {
@@ -661,7 +656,7 @@ impl Serialize for GritDotdotdot {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GritDotdotdotFields {
-    pub dollar_dotdotdot_token: SyntaxResult<SyntaxToken>,
+    pub dotdotdot_token: SyntaxResult<SyntaxToken>,
     pub maybe_curly_grit_pattern: Option<MaybeCurlyGritPattern>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1738,15 +1733,11 @@ impl GritNot {
     }
     pub fn as_fields(&self) -> GritNotFields {
         GritNotFields {
-            not_token: self.not_token(),
-            excl_token: self.excl_token(),
+            token: self.token(),
         }
     }
-    pub fn not_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
-    }
-    pub fn excl_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -1760,8 +1751,7 @@ impl Serialize for GritNot {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GritNotFields {
-    pub not_token: SyntaxResult<SyntaxToken>,
-    pub excl_token: SyntaxResult<SyntaxToken>,
+    pub token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritPatternAccumulate {
@@ -5482,11 +5472,7 @@ impl AstNode for GritBooleanLiteral {
 impl std::fmt::Debug for GritBooleanLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("GritBooleanLiteral")
-            .field("true_token", &support::DebugSyntaxResult(self.true_token()))
-            .field(
-                "false_token",
-                &support::DebugSyntaxResult(self.false_token()),
-            )
+            .field("value", &support::DebugSyntaxResult(self.value()))
             .finish()
     }
 }
@@ -5782,8 +5768,8 @@ impl std::fmt::Debug for GritDotdotdot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("GritDotdotdot")
             .field(
-                "dollar_dotdotdot_token",
-                &support::DebugSyntaxResult(self.dollar_dotdotdot_token()),
+                "dotdotdot_token",
+                &support::DebugSyntaxResult(self.dotdotdot_token()),
             )
             .field(
                 "maybe_curly_grit_pattern",
@@ -6863,8 +6849,7 @@ impl AstNode for GritNot {
 impl std::fmt::Debug for GritNot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("GritNot")
-            .field("not_token", &support::DebugSyntaxResult(self.not_token()))
-            .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
+            .field("token", &support::DebugSyntaxResult(self.token()))
             .finish()
     }
 }

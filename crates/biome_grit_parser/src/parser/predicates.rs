@@ -1,8 +1,8 @@
 use super::literals::{parse_boolean_literal, parse_literal};
 use super::parse_error::expected_pattern;
 use super::patterns::{parse_container, parse_pattern};
-use super::GritParser;
 use super::{constants::*, parse_named_arg_list};
+use super::{parse_not, GritParser};
 use biome_grit_syntax::GritSyntaxKind::*;
 use biome_grit_syntax::T;
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
@@ -250,12 +250,11 @@ fn parse_predicate_maybe(p: &mut GritParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_predicate_not(p: &mut GritParser) -> ParsedSyntax {
-    if !p.at_ts(NOT_SET) {
-        return Absent;
-    }
+    let m = match parse_not(p) {
+        Present(syntax) => syntax.precede(p),
+        Absent => return Absent,
+    };
 
-    let m = p.start();
-    p.bump_ts(NOT_SET);
     match parse_predicate(p) {
         Present(_) => Present(m.complete(p, GRIT_PREDICATE_NOT)),
         Absent => {

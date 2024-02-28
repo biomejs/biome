@@ -89,16 +89,10 @@ pub fn grit_backtick_snippet_literal(value_token: SyntaxToken) -> GritBacktickSn
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn grit_boolean_literal(
-    true_token: SyntaxToken,
-    false_token: SyntaxToken,
-) -> GritBooleanLiteral {
+pub fn grit_boolean_literal(value_token: SyntaxToken) -> GritBooleanLiteral {
     GritBooleanLiteral::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_BOOLEAN_LITERAL,
-        [
-            Some(SyntaxElement::Token(true_token)),
-            Some(SyntaxElement::Token(false_token)),
-        ],
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn grit_bubble(bubble_token: SyntaxToken, pattern: MaybeCurlyGritPattern) -> GritBubbleBuilder {
@@ -220,14 +214,14 @@ pub fn grit_dot(dot_token: SyntaxToken) -> GritDot {
         [Some(SyntaxElement::Token(dot_token))],
     ))
 }
-pub fn grit_dotdotdot(dollar_dotdotdot_token: SyntaxToken) -> GritDotdotdotBuilder {
+pub fn grit_dotdotdot(dotdotdot_token: SyntaxToken) -> GritDotdotdotBuilder {
     GritDotdotdotBuilder {
-        dollar_dotdotdot_token,
+        dotdotdot_token,
         maybe_curly_grit_pattern: None,
     }
 }
 pub struct GritDotdotdotBuilder {
-    dollar_dotdotdot_token: SyntaxToken,
+    dotdotdot_token: SyntaxToken,
     maybe_curly_grit_pattern: Option<MaybeCurlyGritPattern>,
 }
 impl GritDotdotdotBuilder {
@@ -242,7 +236,7 @@ impl GritDotdotdotBuilder {
         GritDotdotdot::unwrap_cast(SyntaxNode::new_detached(
             GritSyntaxKind::GRIT_DOTDOTDOT,
             [
-                Some(SyntaxElement::Token(self.dollar_dotdotdot_token)),
+                Some(SyntaxElement::Token(self.dotdotdot_token)),
                 self.maybe_curly_grit_pattern
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
@@ -736,13 +730,10 @@ impl GritNodeLikeBuilder {
         ))
     }
 }
-pub fn grit_not(not_token: SyntaxToken, excl_token: SyntaxToken) -> GritNot {
+pub fn grit_not(token_token: SyntaxToken) -> GritNot {
     GritNot::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_NOT,
-        [
-            Some(SyntaxElement::Token(not_token)),
-            Some(SyntaxElement::Token(excl_token)),
-        ],
+        [Some(SyntaxElement::Token(token_token))],
     ))
 }
 pub fn grit_pattern_accumulate(

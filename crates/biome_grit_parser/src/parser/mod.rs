@@ -280,6 +280,17 @@ fn parse_named_arg_list(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn parse_not(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at_ts(NOT_SET) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_ts(NOT_SET);
+    Present(m.complete(p, GRIT_NOT))
+}
+
+#[inline]
 fn parse_variable(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(GRIT_VARIABLE) {
         return Absent;

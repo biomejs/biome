@@ -120,16 +120,10 @@ impl GritBacktickSnippetLiteral {
     }
 }
 impl GritBooleanLiteral {
-    pub fn with_true_token(self, element: SyntaxToken) -> Self {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_false_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
 }
@@ -230,7 +224,7 @@ impl GritDot {
     }
 }
 impl GritDotdotdot {
-    pub fn with_dollar_dotdotdot_token(self, element: SyntaxToken) -> Self {
+    pub fn with_dotdotdot_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
@@ -704,16 +698,10 @@ impl GritNodeLike {
     }
 }
 impl GritNot {
-    pub fn with_not_token(self, element: SyntaxToken) -> Self {
+    pub fn with_token_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_excl_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
 }

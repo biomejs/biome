@@ -5,7 +5,7 @@ use crate::kind_src::KindsSrc;
 
 pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
     punct: &[
-        ("$...", "DOLLAR_DOT3"),
+        ("...", "DOT3"),
         ("$_", "DOLLAR_UNDERSCORE"),
         ("<:", "MATCH"),
         (";", "SEMICOLON"),

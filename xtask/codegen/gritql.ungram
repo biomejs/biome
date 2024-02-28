@@ -315,7 +315,7 @@ GritSome = 'some' pattern: MaybeCurlyGritPattern
 GritEvery = 'every' pattern: MaybeCurlyGritPattern
 
 GritDotdotdot =
-    dollar_dotdotdot: '$...'
+    dotdotdot: '...'
     MaybeCurlyGritPattern?
 
 GritUnderscore =
@@ -506,7 +506,8 @@ GritPredicateReturn =
 
 // --- tokens and lexical definitions
 
-GritBooleanLiteral = 'true' | 'false'
+GritBooleanLiteral =
+    value: ('true' | 'false')
 
 GritVariable = 'grit_variable'
 GritVariableList = GritVariable (',' GritVariable)* ','?
@@ -537,7 +538,8 @@ GritCodeSnippetSource =
     | GritLanguageSpecificSnippet
     | GritRawBacktickSnippetLiteral
 
-GritNot = 'not' | '!'
+GritNot =
+    token: ('not' | '!')
 
 GritUndefinedLiteral = 'undefined'
 
