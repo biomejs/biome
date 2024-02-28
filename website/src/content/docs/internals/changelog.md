@@ -80,6 +80,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#1748](https://github.com/biomejs/biome/issues/1748). Now for the following case we won't provide an unsafe fix
   for the `noNonNullAssertion` rule:
 
+  ```ts
+  x[y.z!];
+  ```
+
+  Contributed by @ah-yu
+
 - Imports that contain the protocol `:` are now sorted after the `npm:` modules, and before the `URL` modules.
   Contributed by @ematipico
 
@@ -91,16 +97,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   + import Component from "./component.js"
   ```
 
-  ```ts
-  x[y.z!];
-  ```
-
-  Contributed by @ah-yu
-
 - Fix [#1081](https://github.com/biomejs/biome/issues/1081). The `useAwait` rule does not report `for await...of`.
   Contributed by @unvalley
 
 - Fix [#1827](https://github.com/biomejs/biome/issues/1827) by properly analyzing nested `try-finally` statements. Contributed by @ah-yu
+
+- Fix [#1924](https://github.com/biomejs/biome/issues/1924) Use the correct export name to sort in the import clause. Contributed by @ah-yu
 
 ### CLI
 
