@@ -54,9 +54,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   </script/>
 
   <div></div>
-
-- Add lint rule useJsxKeyInIterable from Eslint rule [react/jsx-key](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-key.md). Contributed by @vohoanglong0107
   ```
+
+- Add lint rule useJsxKeyInIterable from Eslint rule [`react/jsx-key`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-key.md). Contributed by @vohoanglong0107
 
 #### Enhancements
 
