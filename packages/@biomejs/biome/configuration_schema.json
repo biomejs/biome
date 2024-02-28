@@ -1335,6 +1335,13 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
+				"noBarrelFile": {
+					"description": "Disallow the use of barrel file.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConsole": {
 					"description": "Disallow the use of console.",
 					"anyOf": [

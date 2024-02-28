@@ -864,6 +864,10 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Disallow the use of barrel file.
+	 */
+	noBarrelFile?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of console.
 	 */
 	noConsole?: RuleConfiguration_for_Null;
@@ -1830,6 +1834,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
+	| "lint/nursery/noBarrelFile"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateTestHooks"

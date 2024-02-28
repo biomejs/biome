@@ -378,6 +378,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @fujiyamaorange
+- Add rule [noBarrelFile](https://biomejs.dev/linter/rules/no-barrel-file), to report the usage of barrel file:
+
+  ```js
+  export * from "foo";
+  ```
+  Contributed by @togami2864
 
 #### Enhancements
 
