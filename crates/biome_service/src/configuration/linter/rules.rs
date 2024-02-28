@@ -2494,7 +2494,7 @@ pub struct Nursery {
     #[doc = r" It enables ALL rules for this group."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub all: Option<bool>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow the use of barrel file."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_barrel_file: Option<RuleConfiguration<NoBarrelFile>>,
     #[doc = "Disallow the use of console."]

@@ -388,7 +388,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```js
   export * from "foo";
-  export * as bar from "foo";
   ```
   Contributed by @togami2864
 
