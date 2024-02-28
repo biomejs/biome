@@ -1,8 +1,8 @@
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_analyze::{Ast, RuleSource, RuleSourceKind};
 use biome_console::markup;
-use biome_js_syntax::{JsExport, JsExportFromClause, JsExportNamedFromClause};
-use biome_rowan::{declare_node_union, AstNode};
+use biome_js_syntax::{JsExport, JsExportFromClause, JsExportNamedFromClause, JsModule};
+use biome_rowan::AstNode;
 
 declare_rule! {
     /// Disallow the use of barrel file.
@@ -19,10 +19,12 @@ declare_rule! {
     ///
     /// ```ts,expect_diagnostic
     /// export * from "foo";
+    /// export * from "bar";
     /// ```
     ///
     /// ```ts,expect_diagnostic
     /// export { foo } from "foo";
+    /// export { bar } from "bar";
     /// ```
     ///
     /// ```ts,expect_diagnostic
@@ -45,48 +47,50 @@ declare_rule! {
     }
 }
 
-declare_node_union! {
-    pub AnyJsExportFromClause = JsExportFromClause | JsExportNamedFromClause
-}
-
 impl Rule for NoBarrelFile {
-    type Query = Ast<AnyJsExportFromClause>;
-    type State = ();
+    type Query = Ast<JsModule>;
+    type State = JsExport;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let export_from_clause = ctx.query();
-        match export_from_clause {
-            AnyJsExportFromClause::JsExportFromClause(clause) => {
-                if clause.type_token().is_some() {
-                    return None;
+        let items = ctx.query().items();
+
+        for i in items {
+            if let Some(export) = JsExport::cast(i.into()) {
+                if let Ok(export_from_clause) = export.export_clause() {
+                    if let Some(export_from_clause) =
+                        JsExportFromClause::cast(export_from_clause.clone().into())
+                    {
+                        if export_from_clause.type_token().is_some() {
+                            return None;
+                        }
+                    }
+
+                    if let Some(export_from_clause) =
+                        JsExportNamedFromClause::cast(export_from_clause.into())
+                    {
+                        if export_from_clause.type_token().is_some() {
+                            return None;
+                        }
+                        if export_from_clause
+                            .specifiers()
+                            .into_iter()
+                            .flatten()
+                            .all(|s| s.type_token().is_some())
+                        {
+                            return None;
+                        }
+                    }
+                    return Some(export);
                 }
             }
-            AnyJsExportFromClause::JsExportNamedFromClause(clause) => {
-                if clause.type_token().is_some() {
-                    return None;
-                }
-                if clause
-                    .specifiers()
-                    .into_iter()
-                    .flatten()
-                    .all(|s| s.type_token().is_some())
-                {
-                    return None;
-                }
-            }
-        };
-        Some(())
+        }
+        None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-        let span = match JsExport::cast(node.syntax().parent()?) {
-            Some(node) => node.range(),
-            // `JsExportFromClause` and `JsExportNamedFromClause` are always inside JsExport`
-            None => unreachable!(),
-        };
+    fn diagnostic(_: &RuleContext<Self>, js_export: &Self::State) -> Option<RuleDiagnostic> {
+        let span = js_export.range();
         Some(RuleDiagnostic::new(
             rule_category!(),
             span,

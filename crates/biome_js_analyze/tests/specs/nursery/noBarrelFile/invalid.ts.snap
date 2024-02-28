@@ -4,13 +4,7 @@ expression: invalid.ts
 ---
 # Input
 ```ts
-export * from "foo";
-export * as bar from "foo";
-export { foo } from "foo";
 export { foo, type Bar } from "foo";
-export { baz, qux } from "foobar";
-export { module as module1 } from "./module1";
-export { default as module2 } from "./module2";
 ```
 
 # Diagnostics
@@ -19,108 +13,8 @@ invalid.ts:1:1 lint/nursery/noBarrelFile ━━━━━━━━━━━━━
 
   ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
   
-  > 1 │ export * from "foo";
-      │ ^^^^^^^^^^^^^^^^^^^^
-    2 │ export * as bar from "foo";
-    3 │ export { foo } from "foo";
-  
-  i Check this thorough explanation to better understand the context.
-  
-
-```
-
-```
-invalid.ts:2:1 lint/nursery/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
-  
-    1 │ export * from "foo";
-  > 2 │ export * as bar from "foo";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ export { foo } from "foo";
-    4 │ export { foo, type Bar } from "foo";
-  
-  i Check this thorough explanation to better understand the context.
-  
-
-```
-
-```
-invalid.ts:3:1 lint/nursery/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
-  
-    1 │ export * from "foo";
-    2 │ export * as bar from "foo";
-  > 3 │ export { foo } from "foo";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ export { foo, type Bar } from "foo";
-    5 │ export { baz, qux } from "foobar";
-  
-  i Check this thorough explanation to better understand the context.
-  
-
-```
-
-```
-invalid.ts:4:1 lint/nursery/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
-  
-    2 │ export * as bar from "foo";
-    3 │ export { foo } from "foo";
-  > 4 │ export { foo, type Bar } from "foo";
+  > 1 │ export { foo, type Bar } from "foo";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ export { baz, qux } from "foobar";
-    6 │ export { module as module1 } from "./module1";
-  
-  i Check this thorough explanation to better understand the context.
-  
-
-```
-
-```
-invalid.ts:5:1 lint/nursery/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
-  
-    3 │ export { foo } from "foo";
-    4 │ export { foo, type Bar } from "foo";
-  > 5 │ export { baz, qux } from "foobar";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ export { module as module1 } from "./module1";
-    7 │ export { default as module2 } from "./module2";
-  
-  i Check this thorough explanation to better understand the context.
-  
-
-```
-
-```
-invalid.ts:6:1 lint/nursery/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
-  
-    4 │ export { foo, type Bar } from "foo";
-    5 │ export { baz, qux } from "foobar";
-  > 6 │ export { module as module1 } from "./module1";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ export { default as module2 } from "./module2";
-  
-  i Check this thorough explanation to better understand the context.
-  
-
-```
-
-```
-invalid.ts:7:1 lint/nursery/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
-  
-    5 │ export { baz, qux } from "foobar";
-    6 │ export { module as module1 } from "./module1";
-  > 7 │ export { default as module2 } from "./module2";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i Check this thorough explanation to better understand the context.
   
