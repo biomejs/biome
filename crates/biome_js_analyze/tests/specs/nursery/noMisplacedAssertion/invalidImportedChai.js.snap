@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImportedChai.js
+---
+# Input
+```jsx
+import { expect } from "chai";
+describe(() => {
+	expect("something").toBeTrue()
+})
+```
+
+# Diagnostics
+```
+invalidImportedChai.js:3:2 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The assertion isn't inside an it call.
+  
+    1 │ import { expect } from "chai";
+    2 │ describe(() => {
+  > 3 │ 	expect("something").toBeTrue()
+      │ 	^^^^^^^^^^^^^^^^^^^
+    4 │ })
+  
+
+```
+
+

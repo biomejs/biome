@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+describe(() => {
+	expect("something").toBeTrue()
+})
+```
+
+# Diagnostics
+```
+invalid.js:2:2 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The assertion isn't inside an it call.
+  
+    1 │ describe(() => {
+  > 2 │ 	expect("something").toBeTrue()
+      │ 	^^^^^^^^^^^^^^^^^^^
+    3 │ })
+  
+
+```
+
+

@@ -1069,6 +1069,39 @@ impl AnyJsExpression {
             _ => false,
         })
     }
+
+    pub fn is_test_describe_call(&self) -> bool {
+        if self.contains_a_test_pattern() == Ok(true) {
+            if let Some(function_name) = self.get_callee_object_name() {
+                if matches!(function_name.text_trimmed(), "describe") {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    pub fn is_test_it_call(&self) -> bool {
+        if self.contains_a_test_pattern() == Ok(true) {
+            if let Some(function_name) = self.get_callee_object_name() {
+                if matches!(function_name.text_trimmed(), "it") {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    pub fn is_assertion_call(&self) -> bool {
+        let name = self.get_callee_object_name();
+        if let Some(name) = name {
+            if matches!(name.text_trimmed(), "expect" | "assert") {
+                return true;
+            }
+        }
+
+        false
+    }
 }
 
 /// Iterator that returns the callee names in "top down order".

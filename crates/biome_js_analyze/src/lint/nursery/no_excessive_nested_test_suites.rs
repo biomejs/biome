@@ -80,10 +80,10 @@ impl Rule for NoExcessiveNestedTestSuites {
                     "Excessive `describe()` nesting detected."
                 },
             )
-            .note(markup! {
+                .note(markup! {
                 "Excessive nesting of "<Emphasis>"describe()"</Emphasis>" calls can hinder test readability."
             })
-            .note(markup! {
+                .note(markup! {
                 "Consider refactoring and "<Emphasis>"reduce the level of nested describe"</Emphasis>" to improve code clarity."
             }),
         )
@@ -116,14 +116,10 @@ impl Visitor for NestedTestVisitor {
             WalkEvent::Enter(node) => {
                 if let Some(node) = JsCallExpression::cast_ref(node) {
                     if let Ok(callee) = node.callee() {
-                        if callee.contains_a_test_pattern() == Ok(true) {
-                            if let Some(function_name) = callee.get_callee_object_name() {
-                                if function_name.text_trimmed() == "describe" {
-                                    self.curr_count += 1;
-                                    if self.curr_count == self.max_count + 1 {
-                                        ctx.match_query(NestedTest(node.clone()));
-                                    }
-                                }
+                        if callee.is_test_describe_call() {
+                            self.curr_count += 1;
+                            if self.curr_count == self.max_count + 1 {
+                                ctx.match_query(NestedTest(node.clone()));
                             }
                         }
                     }
@@ -132,12 +128,8 @@ impl Visitor for NestedTestVisitor {
             WalkEvent::Leave(node) => {
                 if let Some(node) = JsCallExpression::cast_ref(node) {
                     if let Ok(callee) = node.callee() {
-                        if callee.contains_a_test_pattern() == Ok(true) {
-                            if let Some(function_name) = callee.get_callee_object_name() {
-                                if function_name.text_trimmed() == "describe" {
-                                    self.curr_count -= 1;
-                                }
-                            }
+                        if callee.is_test_describe_call() {
+                            self.curr_count -= 1;
                         }
                     }
                 }
