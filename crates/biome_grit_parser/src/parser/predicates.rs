@@ -1,8 +1,8 @@
-use super::constants::*;
 use super::literals::{parse_boolean_literal, parse_literal};
 use super::parse_error::expected_pattern;
 use super::patterns::{parse_container, parse_pattern};
 use super::GritParser;
+use super::{constants::*, parse_named_arg_list};
 use biome_grit_syntax::GritSyntaxKind::*;
 use biome_grit_syntax::T;
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
@@ -16,17 +16,16 @@ pub(crate) fn parse_predicate(p: &mut GritParser) -> ParsedSyntax {
         OR_KW => parse_predicate_or(p),
         ANY_KW => parse_predicate_any(p),
         IF_KW => parse_predicate_if_else(p),
-        // TODO: GritPredicateRewrite => {}
         // TODO: GritPredicateGreater => {}
         // TODO: GritPredicateLess => {}
         // TODO: GritPredicateGreaterEqual => {}
         // TODO: GritPredicateLessEqual => {}
         // TODO: GritPredicateNotEqual => {}
         // TODO: GritPredicateEqual => {}
-        // TODO: GritPredicateCall => {}
+        GRIT_NAME if p.lookahead() == T!['('] => parse_predicate_call(p),
         T!['('] => parse_bracketed_predicate(p),
         T![true] | T![false] => parse_boolean_literal(p),
-        // TODO: GritPredicateReturn => {}
+        RETURN_KW => parse_predicate_return(p),
         _ => parse_infix_predicate(p),
     }
 }
@@ -159,6 +158,23 @@ fn parse_predicate_any(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn parse_predicate_call(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(GRIT_NAME) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(GRIT_NAME);
+    p.eat(T!['(']);
+
+    let _ = parse_named_arg_list(p);
+
+    p.eat(T![')']);
+
+    Present(m.complete(p, GRIT_PREDICATE_CALL))
+}
+
+#[inline]
 fn parse_predicate_if_else(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(IF_KW) {
         return Absent;
@@ -270,4 +286,22 @@ fn parse_predicate_or(p: &mut GritParser) -> ParsedSyntax {
             Absent
         }
     }
+}
+
+#[inline]
+fn parse_predicate_return(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(RETURN_KW) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(RETURN_KW);
+
+    let _ = parse_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PREDICATE_RECOVERY_SET),
+        expected_pattern,
+    );
+
+    Present(m.complete(p, GRIT_PREDICATE_RETURN))
 }

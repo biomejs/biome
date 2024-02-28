@@ -3,9 +3,9 @@ use super::literals::*;
 use super::parse_error::{expected_list_index, expected_map_key, expected_pattern};
 use super::predicates::parse_predicate;
 use super::{parse_name, parse_variable, parse_variable_list, GritParser};
-use biome_grit_syntax::GritSyntaxKind::{self, *};
+use biome_grit_syntax::GritSyntaxKind::*;
 use biome_grit_syntax::T;
-use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet};
+use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::{ParsedSyntax::*, *};
 
 pub(crate) fn parse_pattern(p: &mut GritParser) -> ParsedSyntax {
@@ -386,17 +386,6 @@ pub(crate) fn parse_maybe_curly_pattern(p: &mut GritParser) -> ParsedSyntax {
         parse_curly_pattern(p)
     } else {
         parse_pattern(p)
-    }
-}
-
-struct ArgListParseRecovery;
-impl ParseRecovery for ArgListParseRecovery {
-    type Kind = GritSyntaxKind;
-    type Parser<'source> = GritParser<'source>;
-    const RECOVERED_KIND: Self::Kind = GRIT_BOGUS;
-
-    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')'])
     }
 }
 

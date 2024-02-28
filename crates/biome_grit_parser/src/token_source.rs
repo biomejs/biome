@@ -1,4 +1,4 @@
-use crate::lexer::{Lexer, Token};
+use crate::lexer::Lexer;
 use biome_grit_syntax::GritSyntaxKind::{EOF, TOMBSTONE};
 use biome_grit_syntax::{GritSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -9,9 +9,24 @@ use biome_rowan::TriviaPieceKind;
 pub(crate) struct GritTokenSource<'source> {
     lexer: Lexer<'source>,
     trivia: Vec<Trivia>,
-    current: GritSyntaxKind,
-    current_range: TextRange,
+    current: NonTriviaToken,
+    next: Option<NonTriviaToken>,
+}
+
+struct NonTriviaToken {
+    kind: GritSyntaxKind,
+    range: TextRange,
     preceding_line_break: bool,
+}
+
+impl Default for NonTriviaToken {
+    fn default() -> Self {
+        Self {
+            kind: TOMBSTONE,
+            range: TextRange::default(),
+            preceding_line_break: false,
+        }
+    }
 }
 
 impl<'source> GritTokenSource<'source> {
@@ -21,32 +36,54 @@ impl<'source> GritTokenSource<'source> {
         let mut source = Self {
             lexer,
             trivia: Vec::new(),
-            current: TOMBSTONE,
-            current_range: TextRange::default(),
-            preceding_line_break: false,
+            current: NonTriviaToken::default(),
+            next: None,
         };
 
-        source.next_non_trivia_token(true);
+        source.advance_to_next_non_trivia_token(true);
         source
     }
 
-    fn next_non_trivia_token(&mut self, first_token: bool) {
+    fn advance_to_next_non_trivia_token(&mut self, first_token: bool) {
+        self.current = match self.next.take() {
+            Some(next) => next,
+            None => self.next_non_trivia_token(first_token),
+        }
+    }
+
+    pub fn lookahead(&mut self) -> GritSyntaxKind {
+        match self.next.as_ref() {
+            Some(next) => next.kind,
+            None if self.current.kind != EOF => {
+                let next_token = self.next_non_trivia_token(false);
+                let next_kind = next_token.kind;
+                self.next = Some(next_token);
+                next_kind
+            }
+            None => EOF,
+        }
+    }
+
+    #[must_use]
+    fn next_non_trivia_token(&mut self, first_token: bool) -> NonTriviaToken {
+        let mut non_trivia_token = NonTriviaToken::default();
+
         let mut trailing = !first_token;
-        self.preceding_line_break = false;
 
         while let Some(token) = self.lexer.next_token() {
             let trivia_kind = TriviaPieceKind::try_from(token.kind());
 
             match trivia_kind {
                 Err(_) => {
-                    self.set_current_token(token);
                     // Not trivia
+                    non_trivia_token.kind = token.kind();
+                    non_trivia_token.range = token.range();
                     break;
                 }
                 Ok(trivia_kind) => {
                     if trivia_kind.is_newline() {
                         trailing = false;
-                        self.preceding_line_break = true;
+                        non_trivia_token.preceding_line_break = true;
                     }
 
                     self.trivia
@@ -54,11 +91,8 @@ impl<'source> GritTokenSource<'source> {
                 }
             }
         }
-    }
 
-    fn set_current_token(&mut self, token: Token) {
-        self.current = token.kind();
-        self.current_range = token.range()
+        non_trivia_token
     }
 }
 
@@ -66,11 +100,11 @@ impl<'source> TokenSource for GritTokenSource<'source> {
     type Kind = GritSyntaxKind;
 
     fn current(&self) -> Self::Kind {
-        self.current
+        self.current.kind
     }
 
     fn current_range(&self) -> TextRange {
-        self.current_range
+        self.current.range
     }
 
     fn text(&self) -> &str {
@@ -78,12 +112,12 @@ impl<'source> TokenSource for GritTokenSource<'source> {
     }
 
     fn has_preceding_line_break(&self) -> bool {
-        self.preceding_line_break
+        self.current.preceding_line_break
     }
 
     fn bump(&mut self) {
-        if self.current != EOF {
-            self.next_non_trivia_token(false)
+        if self.current.kind != EOF {
+            self.advance_to_next_non_trivia_token(false)
         }
     }
 
@@ -95,7 +129,7 @@ impl<'source> TokenSource for GritTokenSource<'source> {
                 false,
             ));
 
-            self.next_non_trivia_token(false)
+            self.advance_to_next_non_trivia_token(false)
         }
     }
 

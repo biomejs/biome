@@ -16,9 +16,8 @@ use biome_parser::ParserContext;
 use biome_rowan::TextRange;
 use constants::*;
 use literals::parse_double_literal;
+use parse_error::{expected_language_flavor, expected_language_name, expected_pattern};
 use patterns::parse_pattern;
-
-use self::parse_error::{expected_language_flavor, expected_language_name};
 
 pub(crate) struct GritParser<'source> {
     context: ParserContext<GritSyntaxKind>,
@@ -31,6 +30,10 @@ impl<'source> GritParser<'source> {
             context: ParserContext::default(),
             source: GritTokenSource::from_str(source),
         }
+    }
+
+    pub fn lookahead(&mut self) -> GritSyntaxKind {
+        self.source.lookahead()
     }
 
     pub fn finish(
@@ -215,6 +218,22 @@ fn parse_definition_list(p: &mut GritParser) -> CompletedMarker {
 }
 
 #[inline]
+fn parse_maybe_named_arg(p: &mut GritParser) -> ParsedSyntax {
+    if p.at(GRIT_NAME) {
+        parse_named_arg(p)
+    } else {
+        parse_pattern(p)
+            .or_recover_with_token_set(
+                p,
+                &ParseRecoveryTokenSet::new(GRIT_BOGUS, ARG_LIST_RECOVERY_SET),
+                expected_pattern,
+            )
+            .ok()
+            .into()
+    }
+}
+
+#[inline]
 fn parse_name(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(GRIT_NAME) {
         return Absent;
@@ -223,6 +242,41 @@ fn parse_name(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(GRIT_NAME);
     Present(m.complete(p, GRIT_NAME))
+}
+
+#[inline]
+fn parse_named_arg(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(GRIT_NAME) {
+        return Absent;
+    }
+
+    let m = p.start();
+    let _ = parse_name(p);
+    p.eat(T![=]);
+    let _ = parse_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, ARG_LIST_RECOVERY_SET),
+        expected_pattern,
+    );
+    Present(m.complete(p, GRIT_NAMED_ARG))
+}
+
+#[inline]
+fn parse_named_arg_list(p: &mut GritParser) -> ParsedSyntax {
+    let m = p.start();
+
+    if parse_maybe_named_arg(p) == Absent {
+        m.abandon(p);
+        return Absent;
+    }
+
+    while p.eat(T![,]) {
+        if p.at(T![')']) || parse_maybe_named_arg(p) == Absent {
+            break;
+        }
+    }
+
+    Present(m.complete(p, GRIT_NAMED_ARG_LIST))
 }
 
 #[inline]
