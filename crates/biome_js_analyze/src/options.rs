@@ -17,6 +17,8 @@ pub type NoAssignInExpressions = < analyzers :: suspicious :: no_assign_in_expre
 pub type NoAsyncPromiseExecutor = < analyzers :: suspicious :: no_async_promise_executor :: NoAsyncPromiseExecutor as biome_analyze :: Rule > :: Options ;
 pub type NoAutofocus = <analyzers::a11y::no_autofocus::NoAutofocus as biome_analyze::Rule>::Options;
 pub type NoBannedTypes = < semantic_analyzers :: complexity :: no_banned_types :: NoBannedTypes as biome_analyze :: Rule > :: Options ;
+pub type NoBarrelFile =
+    <analyzers::nursery::no_barrel_file::NoBarrelFile as biome_analyze::Rule>::Options;
 pub type NoBlankTarget =
     <analyzers::a11y::no_blank_target::NoBlankTarget as biome_analyze::Rule>::Options;
 pub type NoCatchAssign = < semantic_analyzers :: suspicious :: no_catch_assign :: NoCatchAssign as biome_analyze :: Rule > :: Options ;

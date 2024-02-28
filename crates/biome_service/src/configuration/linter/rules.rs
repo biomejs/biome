@@ -2494,6 +2494,9 @@ pub struct Nursery {
     #[doc = r" It enables ALL rules for this group."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub all: Option<bool>,
+    #[doc = "Succinct description of the rule."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_barrel_file: Option<RuleConfiguration<NoBarrelFile>>,
     #[doc = "Disallow the use of console."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_console: Option<RuleConfiguration<NoConsole>>,
@@ -2625,7 +2628,12 @@ impl DeserializableValidator for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
+<<<<<<< HEAD
     pub(crate) const GROUP_RULES: [&'static str; 38] = [
+=======
+    pub(crate) const GROUP_RULES: [&'static str; 37] = [
+        "noBarrelFile",
+>>>>>>> 09c8270bcd (chore: initialize)
         "noConsole",
         "noDuplicateJsonKeys",
         "noDuplicateTestHooks",
@@ -2683,10 +2691,14 @@ impl Nursery {
         "useImportType",
         "useNumberNamespace",
     ];
+<<<<<<< HEAD
     const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 16] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
+=======
+    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 15] = [
+>>>>>>> 09c8270bcd (chore: initialize)
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
@@ -2699,9 +2711,15 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
+<<<<<<< HEAD
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
     ];
     const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 38] = [
+=======
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
+    ];
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 37] = [
+>>>>>>> 09c8270bcd (chore: initialize)
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2739,7 +2757,10 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
+<<<<<<< HEAD
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
+=======
+>>>>>>> 09c8270bcd (chore: initialize)
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended(&self) -> bool {
@@ -2756,32 +2777,36 @@ impl Nursery {
     }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
-        if let Some(rule) = self.no_console.as_ref() {
+        if let Some(rule) = self.no_barrel_file.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_console.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
         }
-        if let Some(rule) = self.no_duplicate_test_hooks.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
-        if let Some(rule) = self.no_empty_block_statements.as_ref() {
+        if let Some(rule) = self.no_duplicate_test_hooks.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_empty_type_parameters.as_ref() {
+        if let Some(rule) = self.no_empty_block_statements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.no_excessive_nested_test_suites.as_ref() {
+=======
+        if let Some(rule) = self.no_empty_type_parameters.as_ref() {
+>>>>>>> 09c8270bcd (chore: initialize)
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
@@ -2916,66 +2941,93 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
+=======
+        if let Some(rule) = self.use_node_assert_strict.as_ref() {
+>>>>>>> 09c8270bcd (chore: initialize)
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.use_node_assert_strict.as_ref() {
+=======
+        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
+>>>>>>> 09c8270bcd (chore: initialize)
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
+=======
+        if let Some(rule) = self.use_number_namespace.as_ref() {
+>>>>>>> 09c8270bcd (chore: initialize)
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.use_number_namespace.as_ref() {
+=======
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+>>>>>>> 09c8270bcd (chore: initialize)
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+=======
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+>>>>>>> 09c8270bcd (chore: initialize)
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
+=======
+>>>>>>> 09c8270bcd (chore: initialize)
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
-        if let Some(rule) = self.no_console.as_ref() {
+        if let Some(rule) = self.no_barrel_file.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_console.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
         }
-        if let Some(rule) = self.no_duplicate_test_hooks.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
-        if let Some(rule) = self.no_empty_block_statements.as_ref() {
+        if let Some(rule) = self.no_duplicate_test_hooks.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_empty_type_parameters.as_ref() {
+        if let Some(rule) = self.no_empty_block_statements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.no_excessive_nested_test_suites.as_ref() {
+=======
+        if let Some(rule) = self.no_empty_type_parameters.as_ref() {
+>>>>>>> 09c8270bcd (chore: initialize)
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
@@ -3110,36 +3162,59 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
+=======
+        if let Some(rule) = self.use_node_assert_strict.as_ref() {
+>>>>>>> 09c8270bcd (chore: initialize)
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.use_node_assert_strict.as_ref() {
+=======
+        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
+>>>>>>> 09c8270bcd (chore: initialize)
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
+=======
+        if let Some(rule) = self.use_number_namespace.as_ref() {
+>>>>>>> 09c8270bcd (chore: initialize)
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.use_number_namespace.as_ref() {
+=======
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+>>>>>>> 09c8270bcd (chore: initialize)
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+=======
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+>>>>>>> 09c8270bcd (chore: initialize)
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
+=======
+>>>>>>> 09c8270bcd (chore: initialize)
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
@@ -3153,7 +3228,11 @@ impl Nursery {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 16] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
+<<<<<<< HEAD
     pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 38] {
+=======
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 37] {
+>>>>>>> 09c8270bcd (chore: initialize)
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3179,6 +3258,10 @@ impl Nursery {
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
         match rule_name {
+            "noBarrelFile" => self
+                .no_barrel_file
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "noConsole" => self
                 .no_console
                 .as_ref()
