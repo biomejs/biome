@@ -105,6 +105,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#1827](https://github.com/biomejs/biome/issues/1827) by properly analyzing nested `try-finally` statements. Contributed by @ah-yu
 
 - Fix [#1924](https://github.com/biomejs/biome/issues/1924) Use the correct export name to sort in the import clause. Contributed by @ah-yu
+- Fix [#1805](https://github.com/biomejs/biome/issues/1805) fix formatting arrow function which has conditional expression body  Contributed by @mdm317
 
 ### CLI
 
