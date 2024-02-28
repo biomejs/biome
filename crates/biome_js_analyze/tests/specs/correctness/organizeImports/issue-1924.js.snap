@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue-1924.js
+---
+# Input
+```jsx
+import { path } from './foo';
+import { relative as relativePath, relative } from 'node:path';
+
+```
+
+# Actions
+```diff
+@@ -1,2 +1,2 @@
++import { relative, relative as relativePath } from 'node:path';
+ import { path } from './foo';
+-import { relative as relativePath, relative } from 'node:path';
+
+```
