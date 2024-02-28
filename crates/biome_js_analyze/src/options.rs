@@ -251,6 +251,7 @@ pub type UseIsArray =
     <semantic_analyzers::suspicious::use_is_array::UseIsArray as biome_analyze::Rule>::Options;
 pub type UseIsNan =
     <semantic_analyzers::correctness::use_is_nan::UseIsNan as biome_analyze::Rule>::Options;
+pub type UseJsxKeyInIterable = < semantic_analyzers :: nursery :: use_jsx_key_in_iterable :: UseJsxKeyInIterable as biome_analyze :: Rule > :: Options ;
 pub type UseKeyWithClickEvents = < analyzers :: a11y :: use_key_with_click_events :: UseKeyWithClickEvents as biome_analyze :: Rule > :: Options ;
 pub type UseKeyWithMouseEvents = < analyzers :: a11y :: use_key_with_mouse_events :: UseKeyWithMouseEvents as biome_analyze :: Rule > :: Options ;
 pub type UseLiteralEnumMembers = < analyzers :: style :: use_literal_enum_members :: UseLiteralEnumMembers as biome_analyze :: Rule > :: Options ;

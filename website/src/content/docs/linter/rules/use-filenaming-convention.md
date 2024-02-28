@@ -51,10 +51,10 @@ Default: `true`
 ### requireAscii
 
 When this option is set to `true`, it forbids names that include non-ASCII characters.
-For instance,  when the option is set to `true`, names like `café` or `안녕하세요` will throw an error.
+For instance,  when the option is set to `true`, `café` or `안녕하세요` will throw an error.
 
-When the option is set to `false`, names may include non-ASCII characters.
-`café` and `안녕하세요` are valid.
+When the option is set to `false`, anames may include non-ASCII characters.
+`café` and `안녕하세요` are so valid.
 
 Default: `false`
 

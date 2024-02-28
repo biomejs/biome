@@ -1563,6 +1563,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useJsxKeyInIterable": {
+					"description": "Disallow missing key props in iterators/collection literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNodeAssertStrict": {
 					"description": "Promotes the usage of node:assert/strict over node:assert.",
 					"anyOf": [

@@ -996,6 +996,10 @@ export interface Nursery {
 	 */
 	useImportType?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow missing key props in iterators/collection literals.
+	 */
+	useJsxKeyInIterable?: RuleConfiguration_for_Null;
+	/**
 	 * Promotes the usage of node:assert/strict over node:assert.
 	 */
 	useNodeAssertStrict?: RuleConfiguration_for_Null;
@@ -1860,6 +1864,7 @@ export type Category =
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useImportType"
+	| "lint/nursery/useJsxKeyInIterable"
 	| "lint/nursery/useNodeAssertStrict"
 	| "lint/nursery/useNodejsImportProtocol"
 	| "lint/nursery/useNumberNamespace"
