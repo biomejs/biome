@@ -125,8 +125,11 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                 //   e.g. a `function` and a `namespace`
                 // - when both are parameter-like.
                 //   A parameter can override a previous parameter.
+                // - when both are type parameter in different declarations.
+                //   A type parameter can be redeclared if they are in different declarations.
                 if !(first_decl.is_mergeable(&decl)
-                    || first_decl.is_parameter_like() && decl.is_parameter_like())
+                    || first_decl.is_parameter_like() && decl.is_parameter_like()
+                    || first_decl.is_type_parameter() && decl.is_type_parameter())
                 {
                     redeclarations.push(Redeclaration {
                         name,
