@@ -1,11 +1,12 @@
+use super::constants::*;
 use super::literals::{parse_boolean_literal, parse_literal};
-use super::patterns::parse_pattern;
+use super::parse_error::expected_pattern;
+use super::patterns::{parse_container, parse_pattern};
 use super::GritParser;
-use biome_grit_syntax::GritSyntaxKind::{self, *};
+use biome_grit_syntax::GritSyntaxKind::*;
 use biome_grit_syntax::T;
+use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::{ParsedSyntax::*, *};
-
-const NOT_SET: TokenSet<GritSyntaxKind> = token_set![NOT_KW, T![!]];
 
 pub(crate) fn parse_predicate(p: &mut GritParser) -> ParsedSyntax {
     match p.cur() {
@@ -15,8 +16,6 @@ pub(crate) fn parse_predicate(p: &mut GritParser) -> ParsedSyntax {
         OR_KW => parse_predicate_or(p),
         ANY_KW => parse_predicate_any(p),
         IF_KW => parse_predicate_if_else(p),
-        // TODO: GritPredicateAssignment => {}
-        // TODO: GritPredicateAccumulate => {}
         // TODO: GritPredicateRewrite => {}
         // TODO: GritPredicateGreater => {}
         // TODO: GritPredicateLess => {}
@@ -28,7 +27,7 @@ pub(crate) fn parse_predicate(p: &mut GritParser) -> ParsedSyntax {
         T!['('] => parse_bracketed_predicate(p),
         T![true] | T![false] => parse_boolean_literal(p),
         // TODO: GritPredicateReturn => {}
-        _ => parse_predicate_match(p),
+        _ => parse_infix_predicate(p),
     }
 }
 
@@ -54,6 +53,63 @@ fn parse_bracketed_predicate(p: &mut GritParser) -> ParsedSyntax {
     }
 }
 
+enum InfixPredicateKind {
+    Accumulate,
+    Assignment,
+    Match,
+    Rewrite,
+}
+
+/// Parses any of the infix predicates without need for backtracking.
+#[inline]
+fn parse_infix_predicate(p: &mut GritParser) -> ParsedSyntax {
+    let m = p.start();
+
+    let Present(mut subject) = parse_container(p).or_else(|| parse_literal(p)) else {
+        m.abandon(p);
+        return Absent;
+    };
+
+    use InfixPredicateKind::*;
+    let kind = match p.cur() {
+        T![+=] => Accumulate,
+        T![=] => Assignment,
+        T![<:] => Match,
+        T![=>] => Rewrite,
+        _ => {
+            m.abandon(p);
+            return Absent;
+        }
+    };
+
+    // Verify the subjects are allowed for the matched predicate kind:
+    match kind {
+        Accumulate | Rewrite if subject.kind(p) != GRIT_VARIABLE => {
+            subject.change_to_bogus(p);
+        }
+        Assignment if !CONTAINER_SET.contains(subject.kind(p)) => {
+            subject.change_to_bogus(p);
+        }
+        _ => {}
+    }
+
+    p.bump_any();
+
+    let _ = parse_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PREDICATE_RECOVERY_SET),
+        expected_pattern,
+    );
+
+    let kind = match kind {
+        Accumulate => GRIT_PREDICATE_ACCUMULATE,
+        Assignment => GRIT_PREDICATE_ASSIGNMENT,
+        Match => GRIT_PREDICATE_MATCH,
+        Rewrite => GRIT_PREDICATE_REWRITE,
+    };
+    Present(m.complete(p, kind))
+}
+
 #[inline]
 fn parse_predicate_and(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(AND_KW) && !p.at(T!['{']) {
@@ -68,17 +124,11 @@ fn parse_predicate_and(p: &mut GritParser) -> ParsedSyntax {
         return Present(m.complete(p, GRIT_PREDICATE_AND));
     }
 
-    let result = parse_predicate_list(p);
+    let _ = parse_predicate_list(p);
 
     p.eat(T!['}']);
 
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_PREDICATE_AND)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_PREDICATE_AND))
 }
 
 #[inline]
@@ -163,39 +213,6 @@ fn parse_predicate_list(p: &mut GritParser) -> ParsedSyntax {
     }
 
     Present(m.complete(p, GRIT_PREDICATE_LIST))
-}
-
-#[inline]
-fn parse_predicate_match(p: &mut GritParser) -> ParsedSyntax {
-    let m = p.start();
-
-    if parse_predicate_match_subject(p) == Absent {
-        m.abandon(p);
-        return Absent;
-    }
-
-    if !p.eat(T![<:]) {
-        m.abandon(p);
-        return Absent;
-    }
-
-    let _ = parse_pattern(p);
-
-    Present(m.complete(p, GRIT_PREDICATE_MATCH))
-}
-
-#[inline]
-fn parse_predicate_match_subject(p: &mut GritParser) -> ParsedSyntax {
-    match p.cur() {
-        GRIT_VARIABLE => {
-            let m = p.start();
-            p.bump(GRIT_VARIABLE);
-            Present(m.complete(p, GRIT_VARIABLE))
-        }
-        // TODO: GritMapAccessor => {}
-        // TODO: GritListAccessor => {}
-        _ => parse_literal(p),
-    }
 }
 
 #[inline]

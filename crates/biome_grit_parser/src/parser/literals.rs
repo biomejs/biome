@@ -1,11 +1,12 @@
-use super::{GritParser, SUPPORTED_LANGUAGE_SET};
-use biome_grit_syntax::GritSyntaxKind::{self, *};
+use super::constants::*;
+use super::parse_error::expected_pattern;
+use super::parse_name;
+use super::patterns::{parse_maybe_curly_pattern, parse_pattern};
+use super::GritParser;
+use biome_grit_syntax::GritSyntaxKind::*;
+use biome_grit_syntax::T;
+use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::{ParsedSyntax::*, *};
-
-const BOOLEAN_VALUE_SET: TokenSet<GritSyntaxKind> = token_set![TRUE_KW, FALSE_KW];
-
-const CODE_SNIPPET_SET: TokenSet<GritSyntaxKind> =
-    SUPPORTED_LANGUAGE_SET.union(token_set![GRIT_BACKTICK_SNIPPET, GRIT_RAW_BACKTICK_SNIPPET]);
 
 pub(crate) fn parse_literal(p: &mut GritParser) -> ParsedSyntax {
     match p.cur() {
@@ -15,9 +16,9 @@ pub(crate) fn parse_literal(p: &mut GritParser) -> ParsedSyntax {
         GRIT_NEGATIVE_INT => parse_negative_int_literal(p),
         GRIT_STRING => parse_string_literal(p),
         UNDEFINED_KW => parse_undefined_literal(p),
+        T!['{'] => parse_map(p),
+        GRIT_NAME | T!['['] => parse_list(p),
         kind if CODE_SNIPPET_SET.contains(kind) => parse_code_snippet(p),
-        // TODO: List
-        // TODO: Map
         _ => Absent,
     }
 }
@@ -68,6 +69,18 @@ fn parse_code_snippet(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn parse_dotdotdot(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(DOLLAR_DOT3) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(DOLLAR_DOT3);
+    let _ = parse_maybe_curly_pattern(p);
+    Present(m.complete(p, GRIT_DOTDOTDOT))
+}
+
+#[inline]
 pub(crate) fn parse_double_literal(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(GRIT_DOUBLE) {
         return Absent;
@@ -79,7 +92,7 @@ pub(crate) fn parse_double_literal(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_int_literal(p: &mut GritParser) -> ParsedSyntax {
+pub(crate) fn parse_int_literal(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(GRIT_INT) {
         return Absent;
     }
@@ -109,7 +122,106 @@ fn parse_language_specific_snippet(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_negative_int_literal(p: &mut GritParser) -> ParsedSyntax {
+pub(crate) fn parse_list(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(T!['[']) && !p.at(GRIT_NAME) {
+        return Absent;
+    }
+
+    let m = p.start();
+    let _ = parse_name(p);
+
+    if !p.eat(T!['[']) {
+        m.abandon(p);
+        return Absent;
+    }
+
+    let _ = parse_list_pattern_list(p);
+
+    p.eat(T![']']);
+    Present(m.complete(p, GRIT_LIST))
+}
+
+#[inline]
+fn parse_list_pattern_list(p: &mut GritParser) -> ParsedSyntax {
+    let m = p.start();
+
+    if parse_list_pattern(p) == Absent {
+        m.abandon(p);
+        return Absent;
+    }
+
+    while p.eat(T![,]) {
+        if parse_list_pattern(p) == Absent {
+            break;
+        }
+    }
+
+    Present(m.complete(p, GRIT_LIST_PATTERN_LIST))
+}
+
+#[inline]
+fn parse_list_pattern(p: &mut GritParser) -> ParsedSyntax {
+    if p.at(DOLLAR_DOT3) {
+        parse_dotdotdot(p)
+    } else {
+        parse_literal(p)
+    }
+}
+
+#[inline]
+pub(crate) fn parse_map(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(T!['{']) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T!['{']);
+
+    let _ = parse_map_element_list(p);
+
+    p.eat(T!['}']);
+    Present(m.complete(p, GRIT_MAP))
+}
+
+#[inline]
+fn parse_map_element_list(p: &mut GritParser) -> ParsedSyntax {
+    let m = p.start();
+
+    if parse_map_element(p) == Absent {
+        m.abandon(p);
+        return Absent;
+    }
+
+    while p.eat(T![,]) {
+        if parse_map_element(p) == Absent {
+            break;
+        }
+    }
+
+    Present(m.complete(p, GRIT_MAP_ELEMENT_LIST))
+}
+
+#[inline]
+fn parse_map_element(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(GRIT_NAME) {
+        return Absent;
+    }
+
+    let m = p.start();
+    let _ = parse_name(p);
+    p.eat(T![:]);
+
+    let _ = parse_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, ELEMENT_LIST_RECOVERY_SET),
+        expected_pattern,
+    );
+
+    Present(m.complete(p, GRIT_MAP_ELEMENT))
+}
+
+#[inline]
+pub(crate) fn parse_negative_int_literal(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(GRIT_NEGATIVE_INT) {
         return Absent;
     }

@@ -1282,6 +1282,7 @@ impl GritListAccessor {
             l_brack_token: self.l_brack_token(),
             index: self.index(),
             r_brack_token: self.r_brack_token(),
+            grit_bogus: self.grit_bogus(),
         }
     }
     pub fn list(&self) -> SyntaxResult<GritListAccessorSubject> {
@@ -1295,6 +1296,9 @@ impl GritListAccessor {
     }
     pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
+    }
+    pub fn grit_bogus(&self) -> Option<GritBogus> {
+        support::node(&self.syntax, 4usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -1312,6 +1316,7 @@ pub struct GritListAccessorFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub index: SyntaxResult<GritListIndex>,
     pub r_brack_token: SyntaxResult<SyntaxToken>,
+    pub grit_bogus: Option<GritBogus>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritMap {
@@ -1378,6 +1383,7 @@ impl GritMapAccessor {
             map: self.map(),
             dot_token: self.dot_token(),
             key: self.key(),
+            grit_bogus: self.grit_bogus(),
         }
     }
     pub fn map(&self) -> SyntaxResult<GritMapAccessorSubject> {
@@ -1388,6 +1394,9 @@ impl GritMapAccessor {
     }
     pub fn key(&self) -> SyntaxResult<GritMapKey> {
         support::required_node(&self.syntax, 2usize)
+    }
+    pub fn grit_bogus(&self) -> Option<GritBogus> {
+        support::node(&self.syntax, 3usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -1404,6 +1413,7 @@ pub struct GritMapAccessorFields {
     pub map: SyntaxResult<GritMapAccessorSubject>,
     pub dot_token: SyntaxResult<SyntaxToken>,
     pub key: SyntaxResult<GritMapKey>,
+    pub grit_bogus: Option<GritBogus>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritMapElement {
@@ -2855,6 +2865,7 @@ impl GritPredicateAssignment {
             container: self.container(),
             eq_token: self.eq_token(),
             pattern: self.pattern(),
+            grit_bogus: self.grit_bogus(),
         }
     }
     pub fn container(&self) -> SyntaxResult<AnyGritContainer> {
@@ -2865,6 +2876,9 @@ impl GritPredicateAssignment {
     }
     pub fn pattern(&self) -> SyntaxResult<AnyGritPattern> {
         support::required_node(&self.syntax, 2usize)
+    }
+    pub fn grit_bogus(&self) -> Option<GritBogus> {
+        support::node(&self.syntax, 3usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -2881,6 +2895,7 @@ pub struct GritPredicateAssignmentFields {
     pub container: SyntaxResult<AnyGritContainer>,
     pub eq_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritPattern>,
+    pub grit_bogus: Option<GritBogus>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritPredicateCall {
@@ -3345,6 +3360,7 @@ impl GritPredicateMatch {
             left: self.left(),
             match_token: self.match_token(),
             right: self.right(),
+            grit_bogus: self.grit_bogus(),
         }
     }
     pub fn left(&self) -> SyntaxResult<GritPredicateMatchSubject> {
@@ -3355,6 +3371,9 @@ impl GritPredicateMatch {
     }
     pub fn right(&self) -> SyntaxResult<AnyGritPattern> {
         support::required_node(&self.syntax, 2usize)
+    }
+    pub fn grit_bogus(&self) -> Option<GritBogus> {
+        support::node(&self.syntax, 3usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -3371,6 +3390,7 @@ pub struct GritPredicateMatchFields {
     pub left: SyntaxResult<GritPredicateMatchSubject>,
     pub match_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyGritPattern>,
+    pub grit_bogus: Option<GritBogus>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritPredicateMaybe {
@@ -3612,6 +3632,7 @@ impl GritPredicateRewrite {
             annotation: self.annotation(),
             fat_arrow_token: self.fat_arrow_token(),
             right: self.right(),
+            grit_bogus: self.grit_bogus(),
         }
     }
     pub fn left(&self) -> SyntaxResult<GritVariable> {
@@ -3625,6 +3646,9 @@ impl GritPredicateRewrite {
     }
     pub fn right(&self) -> SyntaxResult<AnyGritPattern> {
         support::required_node(&self.syntax, 3usize)
+    }
+    pub fn grit_bogus(&self) -> Option<GritBogus> {
+        support::node(&self.syntax, 4usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -3642,6 +3666,7 @@ pub struct GritPredicateRewriteFields {
     pub annotation: Option<GritAnnotation>,
     pub fat_arrow_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyGritPattern>,
+    pub grit_bogus: Option<GritBogus>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritRawBacktickSnippetLiteral {
@@ -4337,11 +4362,18 @@ pub struct GritWithinFields {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyGritContainer {
+    GritBogusContainer(GritBogusContainer),
     GritListAccessor(GritListAccessor),
     GritMapAccessor(GritMapAccessor),
     GritVariable(GritVariable),
 }
 impl AnyGritContainer {
+    pub fn as_grit_bogus_container(&self) -> Option<&GritBogusContainer> {
+        match &self {
+            AnyGritContainer::GritBogusContainer(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_grit_list_accessor(&self) -> Option<&GritListAccessor> {
         match &self {
             AnyGritContainer::GritListAccessor(item) => Some(item),
@@ -6405,6 +6437,10 @@ impl std::fmt::Debug for GritListAccessor {
                 "r_brack_token",
                 &support::DebugSyntaxResult(self.r_brack_token()),
             )
+            .field(
+                "grit_bogus",
+                &support::DebugOptionalElement(self.grit_bogus()),
+            )
             .finish()
     }
 }
@@ -6491,6 +6527,10 @@ impl std::fmt::Debug for GritMapAccessor {
             .field("map", &support::DebugSyntaxResult(self.map()))
             .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
             .field("key", &support::DebugSyntaxResult(self.key()))
+            .field(
+                "grit_bogus",
+                &support::DebugOptionalElement(self.grit_bogus()),
+            )
             .finish()
     }
 }
@@ -7904,6 +7944,10 @@ impl std::fmt::Debug for GritPredicateAssignment {
             .field("container", &support::DebugSyntaxResult(self.container()))
             .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
             .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+            .field(
+                "grit_bogus",
+                &support::DebugOptionalElement(self.grit_bogus()),
+            )
             .finish()
     }
 }
@@ -8361,6 +8405,10 @@ impl std::fmt::Debug for GritPredicateMatch {
                 &support::DebugSyntaxResult(self.match_token()),
             )
             .field("right", &support::DebugSyntaxResult(self.right()))
+            .field(
+                "grit_bogus",
+                &support::DebugOptionalElement(self.grit_bogus()),
+            )
             .finish()
     }
 }
@@ -8621,6 +8669,10 @@ impl std::fmt::Debug for GritPredicateRewrite {
                 &support::DebugSyntaxResult(self.fat_arrow_token()),
             )
             .field("right", &support::DebugSyntaxResult(self.right()))
+            .field(
+                "grit_bogus",
+                &support::DebugOptionalElement(self.grit_bogus()),
+            )
             .finish()
     }
 }
@@ -9337,6 +9389,11 @@ impl From<GritWithin> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl From<GritBogusContainer> for AnyGritContainer {
+    fn from(node: GritBogusContainer) -> AnyGritContainer {
+        AnyGritContainer::GritBogusContainer(node)
+    }
+}
 impl From<GritListAccessor> for AnyGritContainer {
     fn from(node: GritListAccessor) -> AnyGritContainer {
         AnyGritContainer::GritListAccessor(node)
@@ -9354,14 +9411,21 @@ impl From<GritVariable> for AnyGritContainer {
 }
 impl AstNode for AnyGritContainer {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = GritListAccessor::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = GritBogusContainer::KIND_SET
+        .union(GritListAccessor::KIND_SET)
         .union(GritMapAccessor::KIND_SET)
         .union(GritVariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, GRIT_LIST_ACCESSOR | GRIT_MAP_ACCESSOR | GRIT_VARIABLE)
+        matches!(
+            kind,
+            GRIT_BOGUS_CONTAINER | GRIT_LIST_ACCESSOR | GRIT_MAP_ACCESSOR | GRIT_VARIABLE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            GRIT_BOGUS_CONTAINER => {
+                AnyGritContainer::GritBogusContainer(GritBogusContainer { syntax })
+            }
             GRIT_LIST_ACCESSOR => AnyGritContainer::GritListAccessor(GritListAccessor { syntax }),
             GRIT_MAP_ACCESSOR => AnyGritContainer::GritMapAccessor(GritMapAccessor { syntax }),
             GRIT_VARIABLE => AnyGritContainer::GritVariable(GritVariable { syntax }),
@@ -9371,6 +9435,7 @@ impl AstNode for AnyGritContainer {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyGritContainer::GritBogusContainer(it) => &it.syntax,
             AnyGritContainer::GritListAccessor(it) => &it.syntax,
             AnyGritContainer::GritMapAccessor(it) => &it.syntax,
             AnyGritContainer::GritVariable(it) => &it.syntax,
@@ -9378,6 +9443,7 @@ impl AstNode for AnyGritContainer {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyGritContainer::GritBogusContainer(it) => it.syntax,
             AnyGritContainer::GritListAccessor(it) => it.syntax,
             AnyGritContainer::GritMapAccessor(it) => it.syntax,
             AnyGritContainer::GritVariable(it) => it.syntax,
@@ -9387,6 +9453,7 @@ impl AstNode for AnyGritContainer {
 impl std::fmt::Debug for AnyGritContainer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyGritContainer::GritBogusContainer(it) => std::fmt::Debug::fmt(it, f),
             AnyGritContainer::GritListAccessor(it) => std::fmt::Debug::fmt(it, f),
             AnyGritContainer::GritMapAccessor(it) => std::fmt::Debug::fmt(it, f),
             AnyGritContainer::GritVariable(it) => std::fmt::Debug::fmt(it, f),
@@ -9396,6 +9463,7 @@ impl std::fmt::Debug for AnyGritContainer {
 impl From<AnyGritContainer> for SyntaxNode {
     fn from(n: AnyGritContainer) -> SyntaxNode {
         match n {
+            AnyGritContainer::GritBogusContainer(it) => it.into(),
             AnyGritContainer::GritListAccessor(it) => it.into(),
             AnyGritContainer::GritMapAccessor(it) => it.into(),
             AnyGritContainer::GritVariable(it) => it.into(),
@@ -11775,6 +11843,63 @@ impl From<GritBogus> for SyntaxNode {
 }
 impl From<GritBogus> for SyntaxElement {
     fn from(n: GritBogus) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct GritBogusContainer {
+    syntax: SyntaxNode,
+}
+impl GritBogusContainer {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for GritBogusContainer {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_BOGUS_CONTAINER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_BOGUS_CONTAINER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritBogusContainer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritBogusContainer")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<GritBogusContainer> for SyntaxNode {
+    fn from(n: GritBogusContainer) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritBogusContainer> for SyntaxElement {
+    fn from(n: GritBogusContainer) -> SyntaxElement {
         n.syntax.into()
     }
 }

@@ -289,6 +289,9 @@ impl<'src> Lexer<'src> {
             b';' => self.eat_byte(T![;]),
             b'.' => self.eat_byte(T![.]),
             b',' => self.eat_byte(T![,]),
+            b'+' => self.eat_plus_or_acc(),
+            b'*' => self.eat_byte(T![*]),
+            b'%' => self.eat_byte(T![%]),
             b'[' => self.eat_byte(T!['[']),
             b']' => self.eat_byte(T![']']),
             b'{' => self.eat_byte(T!['{']),
@@ -347,6 +350,19 @@ impl<'src> Lexer<'src> {
                 T![>=]
             }
             _ => T![>],
+        }
+    }
+
+    fn eat_plus_or_acc(&mut self) -> GritSyntaxKind {
+        assert_eq!(self.current_byte(), Some(b'+'));
+        self.advance(1);
+
+        match self.current_byte() {
+            Some(b'=') => {
+                self.advance(1);
+                T![+=]
+            }
+            _ => T![+],
         }
     }
 
@@ -461,22 +477,10 @@ impl<'src> Lexer<'src> {
         }
 
         match state {
-            LexNumberState::IntegerPart => {
-                if first == b'-' {
-                    GRIT_NEGATIVE_INT
-                } else {
-                    GRIT_INT
-                }
-            }
+            LexNumberState::IntegerPart if first == b'-' => GRIT_NEGATIVE_INT,
+            LexNumberState::IntegerPart => GRIT_INT,
             LexNumberState::FractionalPart | LexNumberState::Exponent => GRIT_DOUBLE,
-            LexNumberState::FirstDigit => {
-                let err = ParseDiagnostic::new(
-                    "Minus must be followed by a digit",
-                    start..self.text_position(),
-                );
-                self.diagnostics.push(err);
-                ERROR_TOKEN
-            }
+            LexNumberState::FirstDigit => MINUS,
             LexNumberState::Invalid { position, reason } => {
                 let diagnostic = match reason {
                     InvalidNumberReason::Fraction => ParseDiagnostic::new(
@@ -946,7 +950,16 @@ impl<'src> Lexer<'src> {
         self.advance(1); // Skip the leading `$`.
 
         if self.current_byte() == Some(b'_') {
-            return GRIT_UNDERSCORE;
+            self.advance(1);
+            return DOLLAR_UNDERSCORE;
+        }
+
+        if self.current_byte() == Some(b'.')
+            && self.byte_at(1) == Some(b'.')
+            && self.byte_at(2) == Some(b'.')
+        {
+            self.advance(3);
+            return DOLLAR_DOT3;
         }
 
         while let Some(byte) = self.current_byte() {
@@ -1016,7 +1029,10 @@ impl<'src> Lexer<'src> {
 
                 COMMENT
             }
-            _ => self.eat_unexpected_character(),
+            _ => {
+                self.advance(1);
+                T![/]
+            }
         }
     }
 }

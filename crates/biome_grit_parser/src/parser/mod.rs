@@ -1,3 +1,4 @@
+mod constants;
 mod literals;
 mod parse_error;
 mod patterns;
@@ -13,19 +14,11 @@ use biome_parser::prelude::{ParsedSyntax::*, *};
 use biome_parser::token_source::Trivia;
 use biome_parser::ParserContext;
 use biome_rowan::TextRange;
+use constants::*;
 use literals::parse_double_literal;
 use patterns::parse_pattern;
 
 use self::parse_error::{expected_language_flavor, expected_language_name};
-
-const LANGUAGE_NAME_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(T!['('], T![;]);
-
-const LANGUAGE_FLAVOR_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(T![')'], T![,], T![;]);
-
-const SUPPORTED_LANGUAGE_SET: TokenSet<GritSyntaxKind> =
-    token_set![T![js], T![json], T![css], T![grit], T![html]];
-
-const SUPPORTED_LANGUAGE_FLAVOR_SET: TokenSet<GritSyntaxKind> = token_set![T![typescript], T![jsx]];
 
 pub(crate) struct GritParser<'source> {
     context: ParserContext<GritSyntaxKind>,

@@ -15,6 +15,7 @@ impl SyntaxFactory for GritSyntaxFactory {
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
             GRIT_BOGUS
+            | GRIT_BOGUS_CONTAINER
             | GRIT_BOGUS_DEFINITION
             | GRIT_BOGUS_LITERAL
             | GRIT_BOGUS_NAMED_ARG
@@ -876,7 +877,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             }
             GRIT_LIST_ACCESSOR => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if GritListAccessorSubject::can_cast(element.kind()) {
@@ -901,6 +902,13 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if element.kind() == T![']'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if GritBogus::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -946,7 +954,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             }
             GRIT_MAP_ACCESSOR => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if GritMapAccessorSubject::can_cast(element.kind()) {
@@ -964,6 +972,13 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if GritMapKey::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if GritBogus::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2006,7 +2021,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             }
             GRIT_PREDICATE_ASSIGNMENT => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if AnyGritContainer::can_cast(element.kind()) {
@@ -2024,6 +2039,13 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if AnyGritPattern::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if GritBogus::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2378,7 +2400,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             }
             GRIT_PREDICATE_MATCH => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if GritPredicateMatchSubject::can_cast(element.kind()) {
@@ -2396,6 +2418,13 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if AnyGritPattern::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if GritBogus::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2562,7 +2591,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             }
             GRIT_PREDICATE_REWRITE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if GritVariable::can_cast(element.kind()) {
@@ -2587,6 +2616,13 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if AnyGritPattern::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if GritBogus::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }

@@ -528,6 +528,12 @@ impl GritListAccessor {
                 .splice_slots(3usize..=3usize, once(Some(element.into()))),
         )
     }
+    pub fn with_grit_bogus(self, element: Option<GritBogus>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            4usize..=4usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
 }
 impl GritMap {
     pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
@@ -567,6 +573,12 @@ impl GritMapAccessor {
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
+    }
+    pub fn with_grit_bogus(self, element: Option<GritBogus>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            3usize..=3usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
 }
 impl GritMapElement {
@@ -1217,6 +1229,12 @@ impl GritPredicateAssignment {
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
+    pub fn with_grit_bogus(self, element: Option<GritBogus>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            3usize..=3usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
 }
 impl GritPredicateCall {
     pub fn with_name(self, element: GritName) -> Self {
@@ -1453,6 +1471,12 @@ impl GritPredicateMatch {
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
+    pub fn with_grit_bogus(self, element: Option<GritBogus>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            3usize..=3usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
 }
 impl GritPredicateMaybe {
     pub fn with_maybe_token(self, element: SyntaxToken) -> Self {
@@ -1566,6 +1590,12 @@ impl GritPredicateRewrite {
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
+    }
+    pub fn with_grit_bogus(self, element: Option<GritBogus>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            4usize..=4usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
 }
 impl GritRawBacktickSnippetLiteral {

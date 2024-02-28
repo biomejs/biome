@@ -73,6 +73,7 @@ GritRoot {
                             },
                         },
                     },
+                    grit_bogus: missing (optional),
                 },
             ],
             r_curly_token: R_CURLY@89..91 "}" [Newline("\n")] [],
@@ -129,6 +130,7 @@ GritRoot {
                 0: GRIT_LANGUAGE_NAME@81..83
                   0: JS_KW@81..83 "js" [] []
                 1: GRIT_STRING@83..89 "\"test\"" [] []
+          3: (empty)
       3: R_CURLY@89..91 "}" [Newline("\n")] []
   5: GRIT_DEFINITION_LIST@91..91
   6: EOF@91..92 "" [Newline("\n")] []

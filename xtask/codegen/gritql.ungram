@@ -38,6 +38,7 @@
 SyntaxElement = SyntaxElement
 
 GritBogus = SyntaxElement*
+GritBogusContainer = SyntaxElement*
 GritBogusDefinition = SyntaxElement*
 GritBogusPattern = SyntaxElement*
 GritBogusLiteral = SyntaxElement*
@@ -133,7 +134,8 @@ CurlyGritPattern = '{' AnyGritPattern '}'
 
 GritPatternList = AnyGritPattern (',' AnyGritPattern)* ','?
 
-AnyGritContainer = GritVariable | GritMapAccessor | GritListAccessor
+AnyGritContainer =
+    GritVariable | GritMapAccessor | GritListAccessor | GritBogusContainer
 
 GritMulOperation =
     left: AnyGritPattern '*' right: AnyGritPattern
@@ -282,6 +284,7 @@ GritMapAccessor =
     map: GritMapAccessorSubject
     '.'
     key: GritMapKey
+    GritBogus?
 
 GritMapAccessorSubject = GritMap | AnyGritContainer
 GritMapKey = GritName | GritVariable
@@ -292,7 +295,7 @@ GritList =
     patterns: GritListPatternList?
     ']'
 
-GritListPatternList = (AnyGritListPattern (',' AnyGritListPattern)* ','?)
+GritListPatternList = AnyGritListPattern (',' AnyGritListPattern)* ','?
 
 AnyGritListPattern = AnyGritPattern | GritDotdotdot
 
@@ -301,6 +304,7 @@ GritListAccessor =
     '['
     index: GritListIndex
     ']'
+    GritBogus?
 
 GritListAccessorSubject = GritList | AnyGritContainer
 GritListIndex = AnyGritContainer | GritNegativeIntLiteral | GritIntLiteral
@@ -439,11 +443,13 @@ GritPredicateRewrite =
     annotation: GritAnnotation?
     '=>'
     right: AnyGritPattern
+    GritBogus?
 
 GritPredicateAssignment =
     container: AnyGritContainer
     '='
     pattern: AnyGritPattern
+    GritBogus?
 
 GritPredicateAccumulate =
     left: GritVariable
@@ -484,6 +490,7 @@ GritPredicateMatch =
     left: GritPredicateMatchSubject
     match: '<:'
     right: AnyGritPattern
+    GritBogus?
 
 GritPredicateMatchSubject = AnyGritContainer | AnyGritLiteral
 

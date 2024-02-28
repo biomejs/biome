@@ -18,6 +18,14 @@ pub(crate) fn expected_language_flavor(p: &GritParser, range: TextRange) -> Pars
     )
 }
 
+pub(crate) fn expected_list_index(p: &GritParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("list index", range, p)
+}
+
+pub(crate) fn expected_map_key(p: &GritParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("map key", range, p)
+}
+
 pub(crate) fn expected_pattern(p: &GritParser, range: TextRange) -> ParseDiagnostic {
     expected_node("pattern", range, p)
 }

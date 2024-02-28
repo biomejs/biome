@@ -142,7 +142,7 @@ fn negative() {
 fn minus_without_number() {
     assert_lex! {
         "-",
-        ERROR_TOKEN:1,
+        MINUS:1,
         EOF:0
     }
 }

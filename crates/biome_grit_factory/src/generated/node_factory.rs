@@ -532,16 +532,40 @@ pub fn grit_list_accessor(
     l_brack_token: SyntaxToken,
     index: GritListIndex,
     r_brack_token: SyntaxToken,
-) -> GritListAccessor {
-    GritListAccessor::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_LIST_ACCESSOR,
-        [
-            Some(SyntaxElement::Node(list.into_syntax())),
-            Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Node(index.into_syntax())),
-            Some(SyntaxElement::Token(r_brack_token)),
-        ],
-    ))
+) -> GritListAccessorBuilder {
+    GritListAccessorBuilder {
+        list,
+        l_brack_token,
+        index,
+        r_brack_token,
+        grit_bogus: None,
+    }
+}
+pub struct GritListAccessorBuilder {
+    list: GritListAccessorSubject,
+    l_brack_token: SyntaxToken,
+    index: GritListIndex,
+    r_brack_token: SyntaxToken,
+    grit_bogus: Option<GritBogus>,
+}
+impl GritListAccessorBuilder {
+    pub fn with_grit_bogus(mut self, grit_bogus: GritBogus) -> Self {
+        self.grit_bogus = Some(grit_bogus);
+        self
+    }
+    pub fn build(self) -> GritListAccessor {
+        GritListAccessor::unwrap_cast(SyntaxNode::new_detached(
+            GritSyntaxKind::GRIT_LIST_ACCESSOR,
+            [
+                Some(SyntaxElement::Node(self.list.into_syntax())),
+                Some(SyntaxElement::Token(self.l_brack_token)),
+                Some(SyntaxElement::Node(self.index.into_syntax())),
+                Some(SyntaxElement::Token(self.r_brack_token)),
+                self.grit_bogus
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn grit_map(l_curly_token: SyntaxToken, r_curly_token: SyntaxToken) -> GritMapBuilder {
     GritMapBuilder {
@@ -576,15 +600,37 @@ pub fn grit_map_accessor(
     map: GritMapAccessorSubject,
     dot_token: SyntaxToken,
     key: GritMapKey,
-) -> GritMapAccessor {
-    GritMapAccessor::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_MAP_ACCESSOR,
-        [
-            Some(SyntaxElement::Node(map.into_syntax())),
-            Some(SyntaxElement::Token(dot_token)),
-            Some(SyntaxElement::Node(key.into_syntax())),
-        ],
-    ))
+) -> GritMapAccessorBuilder {
+    GritMapAccessorBuilder {
+        map,
+        dot_token,
+        key,
+        grit_bogus: None,
+    }
+}
+pub struct GritMapAccessorBuilder {
+    map: GritMapAccessorSubject,
+    dot_token: SyntaxToken,
+    key: GritMapKey,
+    grit_bogus: Option<GritBogus>,
+}
+impl GritMapAccessorBuilder {
+    pub fn with_grit_bogus(mut self, grit_bogus: GritBogus) -> Self {
+        self.grit_bogus = Some(grit_bogus);
+        self
+    }
+    pub fn build(self) -> GritMapAccessor {
+        GritMapAccessor::unwrap_cast(SyntaxNode::new_detached(
+            GritSyntaxKind::GRIT_MAP_ACCESSOR,
+            [
+                Some(SyntaxElement::Node(self.map.into_syntax())),
+                Some(SyntaxElement::Token(self.dot_token)),
+                Some(SyntaxElement::Node(self.key.into_syntax())),
+                self.grit_bogus
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn grit_map_element(
     key: GritName,
@@ -1230,15 +1276,37 @@ pub fn grit_predicate_assignment(
     container: AnyGritContainer,
     eq_token: SyntaxToken,
     pattern: AnyGritPattern,
-) -> GritPredicateAssignment {
-    GritPredicateAssignment::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_PREDICATE_ASSIGNMENT,
-        [
-            Some(SyntaxElement::Node(container.into_syntax())),
-            Some(SyntaxElement::Token(eq_token)),
-            Some(SyntaxElement::Node(pattern.into_syntax())),
-        ],
-    ))
+) -> GritPredicateAssignmentBuilder {
+    GritPredicateAssignmentBuilder {
+        container,
+        eq_token,
+        pattern,
+        grit_bogus: None,
+    }
+}
+pub struct GritPredicateAssignmentBuilder {
+    container: AnyGritContainer,
+    eq_token: SyntaxToken,
+    pattern: AnyGritPattern,
+    grit_bogus: Option<GritBogus>,
+}
+impl GritPredicateAssignmentBuilder {
+    pub fn with_grit_bogus(mut self, grit_bogus: GritBogus) -> Self {
+        self.grit_bogus = Some(grit_bogus);
+        self
+    }
+    pub fn build(self) -> GritPredicateAssignment {
+        GritPredicateAssignment::unwrap_cast(SyntaxNode::new_detached(
+            GritSyntaxKind::GRIT_PREDICATE_ASSIGNMENT,
+            [
+                Some(SyntaxElement::Node(self.container.into_syntax())),
+                Some(SyntaxElement::Token(self.eq_token)),
+                Some(SyntaxElement::Node(self.pattern.into_syntax())),
+                self.grit_bogus
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn grit_predicate_call(
     name: GritName,
@@ -1453,15 +1521,37 @@ pub fn grit_predicate_match(
     left: GritPredicateMatchSubject,
     match_token: SyntaxToken,
     right: AnyGritPattern,
-) -> GritPredicateMatch {
-    GritPredicateMatch::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_PREDICATE_MATCH,
-        [
-            Some(SyntaxElement::Node(left.into_syntax())),
-            Some(SyntaxElement::Token(match_token)),
-            Some(SyntaxElement::Node(right.into_syntax())),
-        ],
-    ))
+) -> GritPredicateMatchBuilder {
+    GritPredicateMatchBuilder {
+        left,
+        match_token,
+        right,
+        grit_bogus: None,
+    }
+}
+pub struct GritPredicateMatchBuilder {
+    left: GritPredicateMatchSubject,
+    match_token: SyntaxToken,
+    right: AnyGritPattern,
+    grit_bogus: Option<GritBogus>,
+}
+impl GritPredicateMatchBuilder {
+    pub fn with_grit_bogus(mut self, grit_bogus: GritBogus) -> Self {
+        self.grit_bogus = Some(grit_bogus);
+        self
+    }
+    pub fn build(self) -> GritPredicateMatch {
+        GritPredicateMatch::unwrap_cast(SyntaxNode::new_detached(
+            GritSyntaxKind::GRIT_PREDICATE_MATCH,
+            [
+                Some(SyntaxElement::Node(self.left.into_syntax())),
+                Some(SyntaxElement::Token(self.match_token)),
+                Some(SyntaxElement::Node(self.right.into_syntax())),
+                self.grit_bogus
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn grit_predicate_maybe(
     maybe_token: SyntaxToken,
@@ -1556,6 +1646,7 @@ pub fn grit_predicate_rewrite(
         fat_arrow_token,
         right,
         annotation: None,
+        grit_bogus: None,
     }
 }
 pub struct GritPredicateRewriteBuilder {
@@ -1563,10 +1654,15 @@ pub struct GritPredicateRewriteBuilder {
     fat_arrow_token: SyntaxToken,
     right: AnyGritPattern,
     annotation: Option<GritAnnotation>,
+    grit_bogus: Option<GritBogus>,
 }
 impl GritPredicateRewriteBuilder {
     pub fn with_annotation(mut self, annotation: GritAnnotation) -> Self {
         self.annotation = Some(annotation);
+        self
+    }
+    pub fn with_grit_bogus(mut self, grit_bogus: GritBogus) -> Self {
+        self.grit_bogus = Some(grit_bogus);
         self
     }
     pub fn build(self) -> GritPredicateRewrite {
@@ -1578,6 +1674,8 @@ impl GritPredicateRewriteBuilder {
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.fat_arrow_token)),
                 Some(SyntaxElement::Node(self.right.into_syntax())),
+                self.grit_bogus
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
     }
@@ -2025,6 +2123,16 @@ where
     I::IntoIter: ExactSizeIterator,
 {
     GritBogus::unwrap_cast(SyntaxNode::new_detached(GritSyntaxKind::GRIT_BOGUS, slots))
+}
+pub fn grit_bogus_container<I>(slots: I) -> GritBogusContainer
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GritBogusContainer::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BOGUS_CONTAINER,
+        slots,
+    ))
 }
 pub fn grit_bogus_definition<I>(slots: I) -> GritBogusDefinition
 where
