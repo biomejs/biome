@@ -546,6 +546,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Fix [#1932](https://github.com/biomejs/biome/issues/1932) Allow redeclaration of type parameters in different declarations.
+  Contributed by @keita-hino
+
 ### Parser
 
 #### Bug fixes
