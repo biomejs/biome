@@ -1,5 +1,5 @@
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
-use biome_analyze::{Ast, RuleSource};
+use biome_analyze::{Ast, RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_js_syntax::{JsExport, JsExportFromClause, JsExportNamedFromClause};
 use biome_rowan::{declare_node_union, AstNode};
@@ -11,17 +11,21 @@ declare_rule! {
     /// This structure results in the unnecessary loading of many modules, significantly impacting performance in large-scale applications.
     /// Additionally, it complicates the codebase, making it difficult to navigate and understand the project's dependency graph.
     ///
+    /// For a more detailed explanation, check out https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/
+    ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// export * from "foo";
-    /// export * as bar from "foo";
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
     /// export { foo } from "foo";
-    /// export { foo, type Bar } from "foo";
-    /// export { baz, qux } from "foobar";
-    /// export { module as module1 } from "./module1";
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
     /// export { default as module2 } from "./module2";
     /// ```
     ///
@@ -37,6 +41,7 @@ declare_rule! {
         name: "noBarrelFile",
         recommended: false,
         source: RuleSource::EslintBarrelFiles("avoid-namespace-import"),
+        source_kind: RuleSourceKind::Inspired,
     }
 }
 
