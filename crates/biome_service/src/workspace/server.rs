@@ -377,7 +377,7 @@ impl Workspace for WorkspaceServer {
     /// Add a new file to the workspace
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
         let mut file_sources = self.file_sources.write().unwrap();
-        let (index, _) = file_sources.insert_full(params.language_hint);
+        let (index, _) = file_sources.insert_full(params.document_file_source);
         self.syntax.remove(&params.path);
         self.documents.insert(
             params.path,

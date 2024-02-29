@@ -63,7 +63,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         path: biome_path.clone(),
         content: configuration_content.to_string(),
         version: 0,
-        language_hint: JsonFileSource::json().into(),
+        document_file_source: JsonFileSource::json().into(),
     })?;
 
     let parsed = parse_json_with_cache(

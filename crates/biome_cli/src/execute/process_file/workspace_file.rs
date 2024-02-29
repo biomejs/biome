@@ -36,7 +36,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         let guard = FileGuard::open(
             ctx.workspace,
             OpenFileParams {
-                language_hint: DocumentFileSource::from_path(&biome_path),
+                document_file_source: DocumentFileSource::from_path(&biome_path),
                 path: biome_path,
                 version: 0,
                 content: input.clone(),

@@ -416,7 +416,7 @@ pub struct OpenFileParams {
     pub content: String,
     pub version: i32,
     #[serde(default)]
-    pub language_hint: DocumentFileSource,
+    pub document_file_source: DocumentFileSource,
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]

@@ -18,7 +18,7 @@ fn debug_control_flow() {
             path: BiomePath::new("file.js"),
             content: SOURCE.into(),
             version: 0,
-            language_hint: Language::JavaScript,
+            document_file_source: Language::JavaScript,
         },
     )
     .unwrap();
