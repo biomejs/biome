@@ -121,6 +121,29 @@ impl DocumentFileSource {
         }
     }
 
+    /// Returns the language corresponding to this language ID
+    ///
+    /// See the [microsoft spec]
+    /// for a list of language identifiers
+    ///
+    /// [microsoft spec]: https://code.visualstudio.com/docs/languages/identifiers
+    pub fn from_language_id(s: &str) -> Self {
+        match s.to_lowercase().as_str() {
+            "javascript" => JsFileSource::js_module().into(),
+            "typescript" => JsFileSource::ts().into(),
+            "javascriptreact" => JsFileSource::jsx().into(),
+            "typescriptreact" => JsFileSource::tsx().into(),
+            "json" => JsonFileSource::json().into(),
+            "jsonc" => JsonFileSource::json().into(),
+            "astro" => JsFileSource::astro().into(),
+            "vue" => JsFileSource::vue().into(),
+            "svelte" => JsFileSource::svelte().into(),
+            // TODO: remove this when we are ready to handle CSS files
+            "css" => DocumentFileSource::Unknown,
+            _ => DocumentFileSource::Unknown,
+        }
+    }
+
     pub fn from_known_filename(s: &str) -> Self {
         if Self::KNOWN_FILES_AS_JSONC.binary_search(&s).is_ok() {
             JsonFileSource::jsonc().into()
