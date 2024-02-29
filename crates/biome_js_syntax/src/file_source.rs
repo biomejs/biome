@@ -5,11 +5,8 @@ use std::path::Path;
 /// The versions are ordered in increasing order; The newest version comes last.
 ///
 /// Defaults to the latest stable ECMAScript standard.
-#[cfg_attr(
-    feature = "schema",
-    derive(schemars::JsonSchema, serde::Serialize, serde::Deserialize)
-)]
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum LanguageVersion {
     ES2022,
 
@@ -32,11 +29,10 @@ impl Default for LanguageVersion {
 
 /// Is the source file an ECMAScript Module or Script.
 /// Changes the parsing semantic.
-#[cfg_attr(
-    feature = "schema",
-    derive(schemars::JsonSchema, serde::Serialize, serde::Deserialize)
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema,))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
-#[derive(Debug, Clone, Default, Copy, Eq, PartialEq, Hash)]
 pub enum ModuleKind {
     /// An ECMAScript [Script](https://tc39.es/ecma262/multipage/ecmascript-language-scripts-and-modules.html#sec-scripts)
     Script,
@@ -55,11 +51,10 @@ impl ModuleKind {
     }
 }
 
-#[cfg_attr(
-    feature = "schema",
-    derive(schemars::JsonSchema, serde::Serialize, serde::Deserialize)
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Copy, Clone, Eq, PartialEq, Hash, Default, serde::Serialize, serde::Deserialize,
 )]
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
 pub enum LanguageVariant {
     /// Standard JavaScript or TypeScript syntax without any extensions
     #[default]
