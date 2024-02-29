@@ -103,7 +103,7 @@ impl DocumentFileSource {
     /// [microsoft spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn from_extension(s: &str) -> Self {
         match s.to_lowercase().as_str() {
-            "js" | "mjs" => JsFileSource::js_module().into(),
+            "js" | "mjs" => JsFileSource::jsx().into(),
             "cjs" => JsFileSource::js_script().into(),
             "jsx" => JsFileSource::jsx().into(),
             "ts" | "mts" => JsFileSource::ts().into(),
@@ -155,23 +155,24 @@ impl DocumentFileSource {
     /// # Examples
     ///
     /// ```
-    /// # use biome_js_syntax::JsFileSource;
+    /// use biome_js_syntax::JsFileSource;
+    /// use biome_json_syntax::JsonFileSource;
     /// use biome_service::workspace::DocumentFileSource;
     /// let x = JsFileSource::js_module().into();
     /// let y = DocumentFileSource::Unknown;
-    /// assert_eq!(x.or(y), Language::JavaScript);
+    /// assert_eq!(x.or(y), JsFileSource::js_module().into());
     ///
-    /// let x = Language::Unknown;
-    /// let y = Language::JavaScript;
-    /// assert_eq!(x.or(y), Language::JavaScript);
+    /// let x = DocumentFileSource::Unknown;
+    /// let y = JsFileSource::js_module().into();
+    /// assert_eq!(x.or(y), JsFileSource::js_module().into());
     ///
-    /// let x = Language::JavaScript;
-    /// let y = Language::Json;
-    /// assert_eq!(x.or(y), Language::JavaScript);
+    /// let x = JsFileSource::js_module().into();
+    /// let y = JsonFileSource::json().into();
+    /// assert_eq!(x.or(y), JsFileSource::js_module().into());
     ///
-    /// let x = Language::Unknown;
-    /// let y = Language::Unknown;
-    /// assert_eq!(x.or(y), Language::Unknown);
+    /// let x = DocumentFileSource::Unknown;
+    /// let y = DocumentFileSource::Unknown;
+    /// assert_eq!(x.or(y), DocumentFileSource::Unknown);
     /// ```
     pub fn or(self, other: DocumentFileSource) -> DocumentFileSource {
         if self != DocumentFileSource::Unknown {
@@ -195,7 +196,7 @@ impl DocumentFileSource {
 
     pub fn to_js_file_source(&self) -> Option<JsFileSource> {
         match self {
-            DocumentFileSource::Js(file_source) => Some(file_source.clone()),
+            DocumentFileSource::Js(file_source) => Some(*file_source),
             DocumentFileSource::Json(_)
             | DocumentFileSource::Css(_)
             | DocumentFileSource::Unknown => None,
@@ -204,7 +205,7 @@ impl DocumentFileSource {
 
     pub fn to_json_file_source(&self) -> Option<JsonFileSource> {
         match self {
-            DocumentFileSource::Json(json) => Some(json.clone()),
+            DocumentFileSource::Json(json) => Some(*json),
             DocumentFileSource::Js(_)
             | DocumentFileSource::Css(_)
             | DocumentFileSource::Unknown => None,
@@ -213,7 +214,7 @@ impl DocumentFileSource {
 
     pub fn to_css_file_source(&self) -> Option<CssFileSource> {
         match self {
-            DocumentFileSource::Css(css) => Some(css.clone()),
+            DocumentFileSource::Css(css) => Some(*css),
             DocumentFileSource::Js(_)
             | DocumentFileSource::Json(_)
             | DocumentFileSource::Unknown => None,
@@ -246,12 +247,10 @@ impl biome_console::fmt::Display for DocumentFileSource {
                     } else {
                         fmt.write_markup(markup! { "TypeScript" })
                     }
+                } else if is_jsx {
+                    fmt.write_markup(markup! { "JSX" })
                 } else {
-                    if is_jsx {
-                        fmt.write_markup(markup! { "JSX" })
-                    } else {
-                        fmt.write_markup(markup! { "JavaScript" })
-                    }
+                    fmt.write_markup(markup! { "JavaScript" })
                 }
             }
             DocumentFileSource::Json(json) => {

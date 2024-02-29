@@ -758,7 +758,7 @@ fn applies_custom_attribute_position() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.jsx");
+    let file_path = Path::new("file.js");
     fs.insert(file_path.into(), APPLY_ATTRIBUTE_POSITION_BEFORE.as_bytes());
 
     let result = run_cli(
@@ -830,7 +830,7 @@ fn applies_custom_bracket_spacing() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.jsx");
+    let file_path = Path::new("file.js");
     fs.insert(file_path.into(), APPLY_BRACKET_SPACING_BEFORE.as_bytes());
 
     let result = run_cli(
@@ -850,8 +850,8 @@ fn applies_custom_bracket_spacing() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs , file_path, APPLY_BRACKET_SPACING_AFTER);
-    
+    assert_file_contents(&fs, file_path, APPLY_BRACKET_SPACING_AFTER);
+
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "applies_custom_bracket_spacing",
@@ -886,7 +886,7 @@ fn applies_custom_bracket_same_line() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs , file_path, APPLY_BRACKET_SAME_LINE_AFTER);
+    assert_file_contents(&fs, file_path, APPLY_BRACKET_SAME_LINE_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

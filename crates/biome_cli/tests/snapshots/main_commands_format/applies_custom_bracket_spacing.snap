@@ -2,9 +2,9 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
 ---
-## `file.jsx`
+## `file.js`
 
-```jsx
+```js
 import {Foo} from "bar";
 let foo = {a, b};
 const {a, b} = foo;

@@ -109,7 +109,7 @@ impl WorkspaceServer {
         self.documents
             .get(path)
             .map(|doc| doc.file_source_index)
-            .and_then(|index| self.file_sources.read().unwrap().get_index(index).cloned())
+            .and_then(|index| self.file_sources.read().unwrap().get_index(index).copied())
             .unwrap_or_default()
     }
 
@@ -213,7 +213,7 @@ impl WorkspaceServer {
                 };
                 let parsed = parse(
                     biome_path,
-                    file_source.clone(),
+                    *file_source,
                     document.content.as_str(),
                     settings,
                     &mut document.node_cache,
