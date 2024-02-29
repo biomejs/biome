@@ -6,7 +6,7 @@ use std::path::Path;
 ///
 /// Defaults to the latest stable ECMAScript standard.
 #[cfg_attr(
-    feature = "serde",
+    feature = "schema",
     derive(schemars::JsonSchema, serde::Serialize, serde::Deserialize)
 )]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -33,7 +33,7 @@ impl Default for LanguageVersion {
 /// Is the source file an ECMAScript Module or Script.
 /// Changes the parsing semantic.
 #[cfg_attr(
-    feature = "serde",
+    feature = "schema",
     derive(schemars::JsonSchema, serde::Serialize, serde::Deserialize)
 )]
 #[derive(Debug, Clone, Default, Copy, Eq, PartialEq, Hash)]
@@ -56,7 +56,7 @@ impl ModuleKind {
 }
 
 #[cfg_attr(
-    feature = "serde",
+    feature = "schema",
     derive(schemars::JsonSchema, serde::Serialize, serde::Deserialize)
 )]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
@@ -84,7 +84,7 @@ impl LanguageVariant {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Copy, Clone, Eq, PartialEq, Default, Hash, serde::Serialize, serde::Deserialize,
 )]
@@ -114,7 +114,7 @@ impl Language {
         )
     }
 }
-#[cfg_attr(feature = "serde", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
@@ -138,7 +138,7 @@ impl EmbeddingKind {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]

@@ -15,14 +15,14 @@ biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
 biome_rowan       = { workspace = true }
 schemars          = { workspace = true, optional = true }
-serde             = { workspace = true, features = ["derive"], optional = true }
+serde             = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
 biome_js_factory = { path = "../biome_js_factory" }
 biome_js_parser  = { path = "../biome_js_parser" }
 
 [features]
-serde = ["dep:serde", "schemars", "biome_rowan/serde"]
+schema = ["schemars", "biome_rowan/serde"]
 
 [lints]
 workspace = true
