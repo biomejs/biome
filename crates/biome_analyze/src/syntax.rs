@@ -92,7 +92,6 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
 
 #[cfg(test)]
 mod tests {
-
     use biome_rowan::{
         raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
         AstNode, SyntaxNode,

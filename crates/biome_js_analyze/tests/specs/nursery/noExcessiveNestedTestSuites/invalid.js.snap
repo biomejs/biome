@@ -1,0 +1,128 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+describe("foo", function () {
+	describe("bar", function () {
+		describe("baz", function () {
+			describe("qux", function () {
+				describe("quxx", function () {
+					describe("over limit", function () {
+						describe("qux nested", function () {
+                            it("should get something", () => {
+                                expect(getSomething()).toBe("Something");
+                            });
+                        });
+					});
+				});
+			});
+		});
+	});
+});
+
+describe("foo", () => {
+	describe("bar", () => {
+		describe("baz", () => {
+			describe("baz1", () => {
+				describe("baz2", () => {
+					describe("baz3", () => {
+						it("should get something", () => {
+							expect(getSomething()).toBe("Something");
+						});
+					});
+
+					describe("baz4", () => {
+						it("should get something", () => {
+							expect(getSomething()).toBe("Something");
+						});
+					});
+				});
+			});
+		});
+
+		describe("qux", function () {
+			it("should get something", () => {
+				expect(getSomething()).toBe("Something");
+			});
+		});
+	});
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:6:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Excessive `describe()` nesting detected.
+  
+     4 │ 			describe("qux", function () {
+     5 │ 				describe("quxx", function () {
+   > 6 │ 					describe("over limit", function () {
+       │ 					^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 7 │ 						describe("qux nested", function () {
+        ...
+  > 11 │                         });
+  > 12 │ 					});
+       │ 					^^
+    13 │ 				});
+    14 │ 			});
+  
+  i Excessive nesting of describe() calls can hinder test readability.
+  
+  i Consider refactoring and reduce the level of nested describe to improve code clarity.
+  
+
+```
+
+```
+invalid.js:24:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Excessive `describe()` nesting detected.
+  
+    22 │ 			describe("baz1", () => {
+    23 │ 				describe("baz2", () => {
+  > 24 │ 					describe("baz3", () => {
+       │ 					^^^^^^^^^^^^^^^^^^^^^^^^
+  > 25 │ 						it("should get something", () => {
+  > 26 │ 							expect(getSomething()).toBe("Something");
+  > 27 │ 						});
+  > 28 │ 					});
+       │ 					^^
+    29 │ 
+    30 │ 					describe("baz4", () => {
+  
+  i Excessive nesting of describe() calls can hinder test readability.
+  
+  i Consider refactoring and reduce the level of nested describe to improve code clarity.
+  
+
+```
+
+```
+invalid.js:30:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Excessive `describe()` nesting detected.
+  
+    28 │ 					});
+    29 │ 
+  > 30 │ 					describe("baz4", () => {
+       │ 					^^^^^^^^^^^^^^^^^^^^^^^^
+  > 31 │ 						it("should get something", () => {
+  > 32 │ 							expect(getSomething()).toBe("Something");
+  > 33 │ 						});
+  > 34 │ 					});
+       │ 					^^
+    35 │ 				});
+    36 │ 			});
+  
+  i Excessive nesting of describe() calls can hinder test readability.
+  
+  i Consider refactoring and reduce the level of nested describe to improve code clarity.
+  
+
+```
+
+

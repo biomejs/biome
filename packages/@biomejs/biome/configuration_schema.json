@@ -294,7 +294,8 @@
 						{ "type": "null" }
 					]
 				}
-			}
+			},
+			"additionalProperties": false
 		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
@@ -485,7 +486,8 @@
 						{ "type": "null" }
 					]
 				}
-			}
+			},
+			"additionalProperties": false
 		},
 		"ComplexityConfiguration": {
 			"anyOf": [
@@ -778,7 +780,8 @@
 						{ "type": "null" }
 					]
 				}
-			}
+			},
+			"additionalProperties": false
 		},
 		"CssConfiguration": {
 			"description": "Options applied to CSS files",
@@ -1332,6 +1335,13 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
+				"noBarrelFile": {
+					"description": "Disallow the use of barrel file.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConsole": {
 					"description": "Disallow the use of console.",
 					"anyOf": [
@@ -1362,6 +1372,20 @@
 				},
 				"noEmptyTypeParameters": {
 					"description": "Disallow empty type parameters in type aliases and interfaces.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noExcessiveNestedTestSuites": {
+					"description": "This rule enforces a maximum depth to nested describe() in test files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noExportsInTest": {
+					"description": "Disallow using export or module.exports in files containing tests",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1427,6 +1451,13 @@
 					"description": "Disallow specified modules when loaded by import or require.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RestrictedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSemicolonInJsx": {
+					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1539,6 +1570,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useJsxKeyInIterable": {
+					"description": "Disallow missing key props in iterators/collection literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNodeAssertStrict": {
 					"description": "Promotes the usage of node:assert/strict over node:assert.",
 					"anyOf": [
@@ -1574,7 +1612,8 @@
 						{ "type": "null" }
 					]
 				}
-			}
+			},
+			"additionalProperties": false
 		},
 		"OrganizeImports": {
 			"type": "object",
@@ -1752,7 +1791,8 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				}
-			}
+			},
+			"additionalProperties": false
 		},
 		"PlainIndentStyle": {
 			"oneOf": [
@@ -1973,7 +2013,8 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				}
-			}
+			},
+			"additionalProperties": false
 		},
 		"Semicolons": { "type": "string", "enum": ["always", "asNeeded"] },
 		"StringSet": {
@@ -2224,7 +2265,8 @@
 						{ "type": "null" }
 					]
 				}
-			}
+			},
+			"additionalProperties": false
 		},
 		"Suspicious": {
 			"description": "A list of rules that belong to this group",
@@ -2553,7 +2595,8 @@
 						{ "type": "null" }
 					]
 				}
-			}
+			},
+			"additionalProperties": false
 		},
 		"TrailingComma": {
 			"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures.",

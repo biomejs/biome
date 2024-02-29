@@ -9,13 +9,13 @@ use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{
     Applicability, {Diagnostic, DiagnosticTags, Location, PrintDescription, Severity, Visit},
 };
-use biome_rowan::TextSize;
+use biome_rowan::{TextRange, TextSize};
 use biome_service::workspace::CodeAction;
 use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
 use std::any::Any;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display};
-use std::ops::Range;
+use std::ops::{Add, Range};
 use std::{io, mem};
 use tower_lsp::jsonrpc::Error as LspError;
 use tower_lsp::lsp_types;
@@ -26,9 +26,14 @@ pub(crate) fn text_edit(
     line_index: &LineIndex,
     diff: TextEdit,
     position_encoding: PositionEncoding,
+    offset: Option<u32>,
 ) -> Result<Vec<lsp::TextEdit>> {
     let mut result: Vec<lsp::TextEdit> = Vec::new();
-    let mut offset = TextSize::from(0);
+    let mut offset = if let Some(offset) = offset {
+        TextSize::from(offset)
+    } else {
+        TextSize::from(0)
+    };
 
     for op in diff.iter() {
         match op {
@@ -91,6 +96,7 @@ pub(crate) fn code_fix_to_lsp(
     position_encoding: PositionEncoding,
     diagnostics: &[lsp::Diagnostic],
     action: CodeAction,
+    offset: Option<u32>,
 ) -> Result<lsp::CodeAction> {
     // Mark diagnostics emitted by the same rule as resolved by this action
     let diagnostics: Vec<_> = action
@@ -136,7 +142,7 @@ pub(crate) fn code_fix_to_lsp(
     let suggestion = action.suggestion;
 
     let mut changes = HashMap::new();
-    let edits = text_edit(line_index, suggestion.suggestion, position_encoding)?;
+    let edits = text_edit(line_index, suggestion.suggestion, position_encoding, offset)?;
 
     changes.insert(url.clone(), edits);
 
@@ -175,10 +181,19 @@ pub(crate) fn diagnostic_to_lsp<D: Diagnostic>(
     url: &lsp::Url,
     line_index: &LineIndex,
     position_encoding: PositionEncoding,
+    offset: Option<u32>,
 ) -> Result<lsp::Diagnostic> {
     let location = diagnostic.location();
 
     let span = location.span.context("diagnostic location has no span")?;
+    let span = if let Some(offset) = offset {
+        TextRange::new(
+            span.start().add(TextSize::from(offset)),
+            span.end().add(TextSize::from(offset)),
+        )
+    } else {
+        span
+    };
     let span = to_proto::range(line_index, span, position_encoding)
         .context("failed to convert diagnostic span to LSP range")?;
 
@@ -403,7 +418,7 @@ line 7 new";
         let line_index = LineIndex::new(OLD);
         let diff = TextEdit::from_unicode_words(OLD, NEW);
 
-        let text_edit = super::text_edit(&line_index, diff, PositionEncoding::Utf8).unwrap();
+        let text_edit = super::text_edit(&line_index, diff, PositionEncoding::Utf8, None).unwrap();
 
         assert_eq!(
             text_edit.as_slice(),
@@ -446,7 +461,7 @@ line 7 new";
         let line_index = LineIndex::new(OLD);
         let diff = TextEdit::from_unicode_words(OLD, NEW);
 
-        let text_edit = super::text_edit(&line_index, diff, PositionEncoding::Utf8).unwrap();
+        let text_edit = super::text_edit(&line_index, diff, PositionEncoding::Utf8, None).unwrap();
 
         assert_eq!(
             text_edit.as_slice(),

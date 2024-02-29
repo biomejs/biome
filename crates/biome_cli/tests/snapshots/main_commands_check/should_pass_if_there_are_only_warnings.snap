@@ -48,7 +48,8 @@ file.js:2:1 lint/suspicious/noClassAssign ━━━━━━━━━━━━�
 ```
 
 ```block
-Fixed 1 file(s) in <TIME>
+Checked 1 file in <TIME>. Fixed 1 file.
+Found 1 warning.
 ```
 
 

@@ -3,7 +3,7 @@ use biome_analyze::{
     RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, JsSyntaxToken, TextRange};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, TextRange};
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
 
 declare_rule! {
@@ -113,7 +113,7 @@ impl Visitor for DuplicateHooksVisitor {
                 if let Some(node) = JsCallExpression::cast_ref(node) {
                     if let Ok(callee) = node.callee() {
                         if callee.contains_a_test_pattern() == Ok(true) {
-                            if let Some(function_name) = get_function_name(&callee) {
+                            if let Some(function_name) = callee.get_callee_object_name() {
                                 if function_name.text_trimmed() == "describe" {
                                     self.stack.push(HooksContext::default());
                                 }
@@ -153,7 +153,7 @@ impl Visitor for DuplicateHooksVisitor {
                 if let Some(node) = JsCallExpression::cast_ref(node) {
                     if let Ok(callee) = node.callee() {
                         if callee.contains_a_test_pattern() == Ok(true) {
-                            if let Some(function_name) = get_function_name(&callee) {
+                            if let Some(function_name) = callee.get_callee_object_name() {
                                 if function_name.text_trimmed() == "describe" {
                                     self.stack.pop();
                                 }
@@ -210,7 +210,7 @@ impl Rule for NoDuplicateTestHooks {
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         let callee = node.callee().ok()?;
-        let node_name = get_function_name(&callee)?;
+        let node_name = callee.get_callee_object_name()?;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -223,17 +223,5 @@ impl Rule for NoDuplicateTestHooks {
                 "Disallow "<Emphasis>{node_name.text_trimmed()}</Emphasis>" duplicacy inside the describe function."
             }),
         )
-    }
-}
-
-fn get_function_name(callee: &AnyJsExpression) -> Option<JsSyntaxToken> {
-    match callee {
-        AnyJsExpression::JsStaticMemberExpression(node) => {
-            let member = node.object().ok()?;
-            let member = member.as_js_identifier_expression()?.name().ok()?;
-            member.value_token().ok()
-        }
-        AnyJsExpression::JsIdentifierExpression(node) => node.name().ok()?.value_token().ok(),
-        _ => None,
     }
 }

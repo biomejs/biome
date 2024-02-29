@@ -47,7 +47,8 @@ somefile.json format ━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-Compared 1 file(s) in <TIME>
+Checked 1 file in <TIME>. No fixes needed.
+Found 1 error.
 ```
 
 

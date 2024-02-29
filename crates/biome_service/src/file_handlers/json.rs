@@ -1,4 +1,4 @@
-use super::{CodeActionsParams, ExtensionHandler, Mime};
+use super::{CodeActionsParams, ExtensionHandler, Mime, ParseResult};
 use crate::configuration::{to_analyzer_rules, PartialConfiguration};
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FixAllParams, FormatterCapabilities, LintParams,
@@ -19,14 +19,14 @@ use biome_analyze::{
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
-use biome_fs::{ConfigName, RomePath, ROME_JSON};
+use biome_fs::{BiomePath, ConfigName, ROME_JSON};
 use biome_json_analyze::analyze;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, FileSource, NodeCache};
+use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use std::path::{Path, PathBuf};
 
@@ -61,7 +61,7 @@ impl Language for JsonLanguage {
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &RomePath,
+        path: &BiomePath,
     ) -> Self::FormatOptions {
         let indent_style = if let Some(indent_style) = language.indent_style {
             indent_style
@@ -149,41 +149,44 @@ fn is_file_allowed(path: &Path) -> bool {
 }
 
 fn parse(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     language_hint: LanguageId,
     text: &str,
     settings: SettingsHandle,
     cache: &mut NodeCache,
-) -> AnyParse {
+) -> ParseResult {
     let parser = &settings.as_ref().languages.json.parser;
     let overrides = &settings.as_ref().override_settings;
     let source_type =
-        JsonFileSource::try_from(rome_path.as_path()).unwrap_or_else(|_| match language_hint {
+        JsonFileSource::try_from(biome_path.as_path()).unwrap_or_else(|_| match language_hint {
             LanguageId::Json => JsonFileSource::json(),
             LanguageId::Jsonc => JsonFileSource::jsonc(),
             _ => JsonFileSource::json(),
         });
-    let options: JsonParserOptions =
-        overrides
-            .as_json_parser_options(rome_path)
-            .unwrap_or(JsonParserOptions {
-                allow_comments: parser.allow_comments
-                    || source_type.is_jsonc()
-                    || is_file_allowed(rome_path),
-                allow_trailing_commas: parser.allow_trailing_commas || is_file_allowed(rome_path),
-            });
+    let options: JsonParserOptions = overrides.override_json_parser_options(
+        biome_path,
+        JsonParserOptions {
+            allow_comments: parser.allow_comments
+                || source_type.is_jsonc()
+                || is_file_allowed(biome_path),
+            allow_trailing_commas: parser.allow_trailing_commas || is_file_allowed(biome_path),
+        },
+    );
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
-    AnyParse::new(
-        // SAFETY: the parser should always return a root node
-        root.as_send().unwrap(),
-        diagnostics,
-        source_type.as_any_file_source(),
-    )
+
+    ParseResult {
+        any_parse: AnyParse::new(
+            // SAFETY: the parser should always return a root node
+            root.as_send().unwrap(),
+            diagnostics,
+        ),
+        language: None,
+    }
 }
 
-fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeResult {
+fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
     let syntax: JsonSyntaxNode = parse.syntax();
     let tree: JsonRoot = parse.tree();
     GetSyntaxTreeResult {
@@ -193,11 +196,11 @@ fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeRes
 }
 
 fn debug_formatter_ir(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<JsonLanguage>(rome_path);
+    let options = settings.format_options::<JsonLanguage>(biome_path);
 
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
@@ -208,11 +211,11 @@ fn debug_formatter_ir(
 
 #[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsonLanguage>(rome_path);
+    let options = settings.format_options::<JsonLanguage>(biome_path);
 
     tracing::debug!("Format with the following options: \n{}", options);
 
@@ -226,12 +229,12 @@ fn format(
 }
 
 fn format_range(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsonLanguage>(rome_path);
+    let options = settings.format_options::<JsonLanguage>(biome_path);
 
     let tree = parse.syntax();
     let printed = biome_json_formatter::format_range(options, &tree, range)?;
@@ -239,12 +242,12 @@ fn format_range(
 }
 
 fn format_on_type(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsonLanguage>(rome_path);
+    let options = settings.format_options::<JsonLanguage>(biome_path);
 
     let tree = parse.syntax();
 
@@ -273,6 +276,7 @@ fn format_on_type(
     let printed = biome_json_formatter::format_sub_tree(options, &root_node)?;
     Ok(printed)
 }
+
 fn lint(params: LintParams) -> LintResults {
     tracing::debug_span!("Linting JSON file", path =? params.path, language =? params.language)
         .in_scope(move || {
@@ -375,6 +379,7 @@ fn lint(params: LintParams) -> LintResults {
             }
         })
 }
+
 fn code_actions(_: CodeActionsParams) -> PullActionsResult {
     PullActionsResult {
         actions: Vec::new(),

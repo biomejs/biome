@@ -9,7 +9,7 @@ use std::sync::RwLock;
 
 /// A data structure to use when there's need to match a string or a path a against
 /// a unix shell style patterns
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Matcher {
     root: Option<PathBuf>,
     patterns: Vec<Pattern>,

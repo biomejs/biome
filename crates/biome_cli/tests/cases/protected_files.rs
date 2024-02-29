@@ -16,7 +16,7 @@ fn not_process_file_from_stdin_format() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), ("--stdin-file-path=tsconfig.json")].as_slice()),
+        Args::from([("format"), ("--stdin-file-path=package-lock.json")].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -64,7 +64,14 @@ fn not_process_file_from_stdin_verbose_format() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), "--verbose", ("--stdin-file-path=tsconfig.json")].as_slice()),
+        Args::from(
+            [
+                ("format"),
+                "--verbose",
+                ("--stdin-file-path=package-lock.json"),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -88,7 +95,14 @@ fn not_process_file_from_stdin_verbose_lint() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), "--verbose", ("--stdin-file-path=tsconfig.json")].as_slice()),
+        Args::from(
+            [
+                ("format"),
+                "--verbose",
+                ("--stdin-file-path=package-lock.json"),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -107,7 +121,7 @@ fn not_process_file_from_cli() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("tsconfig.json");
+    let file_path = Path::new("package-lock.json");
     fs.insert(file_path.into(), r#"{ "name": "test" }"#.as_bytes());
 
     let result = run_cli(
@@ -132,7 +146,7 @@ fn not_process_file_from_cli_verbose() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("tsconfig.json");
+    let file_path = Path::new("package-lock.json");
     fs.insert(file_path.into(), r#"{ "name": "test" }"#.as_bytes());
 
     let result = run_cli(
@@ -252,7 +266,7 @@ fn should_return_the_content_of_protected_files_via_stdin() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), ("--stdin-file-path"), ("tsconfig.json")].as_slice()),
+        Args::from([("format"), ("--stdin-file-path"), ("package-lock.json")].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

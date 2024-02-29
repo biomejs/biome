@@ -192,6 +192,11 @@ impl AnyJsBindingDeclaration {
         )
     }
 
+    /// Returns `true` if `self` is a type parameter.
+    pub const fn is_type_parameter(&self) -> bool {
+        matches!(self, AnyJsBindingDeclaration::TsTypeParameter(_))
+    }
+
     /// Returns the export statement if this declaration is directly exported.
     pub fn export(&self) -> Option<JsExport> {
         let maybe_export = match self {

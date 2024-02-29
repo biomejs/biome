@@ -59,7 +59,7 @@ use biome_console::{markup, Markup, MarkupBuf};
 use biome_css_formatter::can_format_css_yet;
 use biome_diagnostics::CodeSuggestion;
 use biome_formatter::Printed;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use std::collections::HashMap;
@@ -79,7 +79,7 @@ mod server;
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SupportsFeatureParams {
-    pub path: RomePath,
+    pub path: BiomePath,
     pub feature: Vec<FeatureName>,
 }
 
@@ -98,21 +98,12 @@ pub struct FileFeaturesResult {
 impl FileFeaturesResult {
     /// Sorted array of files that should not be processed no matter the cases.
     /// These files are handled by other tools.
-    const PROTECTED_FILES: &'static [&'static str; 10] = &[
+    const PROTECTED_FILES: &'static [&'static str; 4] = &[
         // Composer
-        "composer.json",
         "composer.lock",
-        // Deno
-        "deno.json",
-        "deno.jsonc",
-        // TSC
-        "jsconfig.json",
         // NPM
         "npm-shrinkwrap.json",
         "package-lock.json",
-        // TSC
-        "tsconfig.json",
-        "typescript.json",
         // Yarn
         "yarn.lock",
     ];
@@ -122,11 +113,7 @@ impl FileFeaturesResult {
     pub(crate) fn is_protected_file(path: &Path) -> bool {
         path.file_name()
             .and_then(OsStr::to_str)
-            .is_some_and(|file_name| {
-                FileFeaturesResult::PROTECTED_FILES
-                    .binary_search(&file_name)
-                    .is_ok()
-            })
+            .is_some_and(|file_name| FileFeaturesResult::PROTECTED_FILES.contains(&file_name))
     }
 
     /// By default, all features are not supported by a file.
@@ -415,7 +402,7 @@ pub struct UpdateSettingsParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ProjectFeaturesParams {
-    pub manifest_path: RomePath,
+    pub manifest_path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -425,7 +412,7 @@ pub struct ProjectFeaturesResult {}
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct OpenFileParams {
-    pub path: RomePath,
+    pub path: BiomePath,
     pub content: String,
     pub version: i32,
     #[serde(default)]
@@ -434,7 +421,7 @@ pub struct OpenFileParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct OpenProjectParams {
-    pub path: RomePath,
+    pub path: BiomePath,
     pub content: String,
     pub version: i32,
 }
@@ -442,13 +429,13 @@ pub struct OpenProjectParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct UpdateProjectParams {
-    pub path: RomePath,
+    pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct GetSyntaxTreeParams {
-    pub path: RomePath,
+    pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -461,26 +448,26 @@ pub struct GetSyntaxTreeResult {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct GetControlFlowGraphParams {
-    pub path: RomePath,
+    pub path: BiomePath,
     pub cursor: TextSize,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct GetFormatterIRParams {
-    pub path: RomePath,
+    pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct GetFileContentParams {
-    pub path: RomePath,
+    pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ChangeFileParams {
-    pub path: RomePath,
+    pub path: BiomePath,
     pub content: String,
     pub version: i32,
 }
@@ -488,13 +475,13 @@ pub struct ChangeFileParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CloseFileParams {
-    pub path: RomePath,
+    pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct PullDiagnosticsParams {
-    pub path: RomePath,
+    pub path: BiomePath,
     pub categories: RuleCategories,
     pub max_diagnostics: u64,
 }
@@ -510,7 +497,7 @@ pub struct PullDiagnosticsResult {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct PullActionsParams {
-    pub path: RomePath,
+    pub path: BiomePath,
     pub range: TextRange,
 }
 
@@ -531,20 +518,20 @@ pub struct CodeAction {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct FormatFileParams {
-    pub path: RomePath,
+    pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct FormatRangeParams {
-    pub path: RomePath,
+    pub path: BiomePath,
     pub range: TextRange,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct FormatOnTypeParams {
-    pub path: RomePath,
+    pub path: BiomePath,
     pub offset: TextSize,
 }
 
@@ -561,7 +548,7 @@ pub enum FixFileMode {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct FixFileParams {
-    pub path: RomePath,
+    pub path: BiomePath,
     pub fix_file_mode: FixFileMode,
     pub should_format: bool,
 }
@@ -593,7 +580,7 @@ pub struct FixAction {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct RenameParams {
-    pub path: RomePath,
+    pub path: BiomePath,
     pub symbol_at: TextSize,
     pub new_name: String,
 }
@@ -639,7 +626,7 @@ pub enum RageEntry {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct OrganizeImportsParams {
-    pub path: RomePath,
+    pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -672,7 +659,7 @@ impl RageEntry {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IsPathIgnoredParams {
-    pub rome_path: RomePath,
+    pub biome_path: BiomePath,
     pub feature: FeatureName,
 }
 
@@ -793,7 +780,7 @@ where
 /// automatically on drop
 pub struct FileGuard<'app, W: Workspace + ?Sized> {
     workspace: &'app W,
-    path: RomePath,
+    path: BiomePath,
 }
 
 impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {

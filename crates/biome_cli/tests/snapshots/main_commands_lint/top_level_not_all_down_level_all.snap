@@ -105,7 +105,8 @@ fix.js:4:5 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━
 ```
 
 ```block
-Checked 1 file(s) in <TIME>
+Checked 1 file in <TIME>. No fixes needed.
+Found 4 errors.
 ```
 
 

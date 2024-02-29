@@ -13,7 +13,7 @@ hooks_incorrect_options.json:9:7 deserialize ━━━━━━━━━━━�
     10 │ 					}
     11 │ 				}
   
-  i Accepted keys
+  i Known keys:
   
   - hooks
   

@@ -5,7 +5,9 @@ use super::{
     PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
     SupportsFeatureParams, UpdateProjectParams, UpdateSettingsParams,
 };
-use crate::file_handlers::{Capabilities, CodeActionsParams, FixAllParams, Language, LintParams};
+use crate::file_handlers::{
+    Capabilities, CodeActionsParams, FixAllParams, Language, LintParams, ParseResult,
+};
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
     OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
@@ -20,7 +22,7 @@ use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
 use biome_formatter::Printed;
-use biome_fs::{ConfigName, RomePath};
+use biome_fs::{BiomePath, ConfigName};
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_parser::AnyParse;
 use biome_project::NodeJsProject;
@@ -38,15 +40,15 @@ pub(super) struct WorkspaceServer {
     /// global settings object for this workspace
     settings: RwLock<WorkspaceSettings>,
     /// Stores the document (text content + version number) associated with a URL
-    documents: DashMap<RomePath, Document>,
+    documents: DashMap<BiomePath, Document>,
     /// Stores the result of the parser (syntax tree + diagnostics) for a given URL
-    syntax: DashMap<RomePath, AnyParse>,
+    syntax: DashMap<BiomePath, AnyParse>,
     /// Stores the features supported for each file
-    file_features: DashMap<RomePath, FileFeaturesResult>,
+    file_features: DashMap<BiomePath, FileFeaturesResult>,
     /// Stores the parsed manifests
-    manifests: DashMap<RomePath, NodeJsProject>,
+    manifests: DashMap<BiomePath, NodeJsProject>,
     /// The current focused project
-    current_project_path: RwLock<Option<RomePath>>,
+    current_project_path: RwLock<Option<BiomePath>>,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross
@@ -88,7 +90,7 @@ impl WorkspaceServer {
     }
 
     /// Get the supported capabilities for a given file path
-    fn get_file_capabilities(&self, path: &RomePath) -> Capabilities {
+    fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
         let language = self.get_language(path);
 
         debug!("File capabilities: {:?} {:?}", &language, &path);
@@ -96,7 +98,7 @@ impl WorkspaceServer {
     }
 
     /// Retrieves the supported language of a file
-    fn get_language(&self, path: &RomePath) -> Language {
+    fn get_language(&self, path: &BiomePath) -> Language {
         self.documents
             .get(path)
             .map(|doc| doc.language_hint)
@@ -106,7 +108,7 @@ impl WorkspaceServer {
     /// Return an error factory function for unsupported features at a given path
     fn build_capability_error<'a>(
         &'a self,
-        path: &'a RomePath,
+        path: &'a BiomePath,
         // feature_name: &'a str,
     ) -> impl FnOnce() -> WorkspaceError + 'a {
         move || {
@@ -166,22 +168,22 @@ impl WorkspaceServer {
     ///
     /// Returns and error if no file exists in the workspace with this path or
     /// if the language associated with the file has no parser capability
-    fn get_parse(&self, rome_path: RomePath) -> Result<AnyParse, WorkspaceError> {
-        match self.syntax.entry(rome_path) {
+    fn get_parse(&self, biome_path: BiomePath) -> Result<AnyParse, WorkspaceError> {
+        match self.syntax.entry(biome_path) {
             Entry::Occupied(entry) => Ok(entry.get().clone()),
             Entry::Vacant(entry) => {
-                let rome_path = entry.key();
-                let capabilities = self.get_file_capabilities(rome_path);
+                let biome_path = entry.key();
+                let capabilities = self.get_file_capabilities(biome_path);
 
                 let mut document = self
                     .documents
-                    .get_mut(rome_path)
+                    .get_mut(biome_path)
                     .ok_or_else(WorkspaceError::not_found)?;
 
                 let parse = capabilities
                     .parser
                     .parse
-                    .ok_or_else(self.build_capability_error(rome_path))?;
+                    .ok_or_else(self.build_capability_error(biome_path))?;
 
                 let size_limit = {
                     let settings = self.settings();
@@ -194,7 +196,7 @@ impl WorkspaceServer {
                 let size = document.content.as_bytes().len();
                 if size >= size_limit {
                     return Err(WorkspaceError::file_too_large(
-                        rome_path.to_path_buf().display().to_string(),
+                        biome_path.to_path_buf().display().to_string(),
                         size,
                         size_limit,
                     ));
@@ -202,13 +204,20 @@ impl WorkspaceServer {
 
                 let settings = self.settings();
                 let parsed = parse(
-                    rome_path,
+                    biome_path,
                     document.language_hint,
                     document.content.as_str(),
                     settings,
                     &mut document.node_cache,
                 );
-                Ok(entry.insert(parsed).clone())
+                let ParseResult {
+                    language,
+                    any_parse,
+                } = parsed;
+                if let Some(language) = language {
+                    document.language_hint = language
+                }
+                Ok(entry.insert(any_parse).clone())
             }
         }
     }
@@ -219,10 +228,10 @@ impl WorkspaceServer {
         let file_name = path.file_name().and_then(|s| s.to_str());
         // Never ignore Biome's config file regardless `include`/`ignore`
         (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
-        // Apply top-level `include`/`ignore`
-        (self.is_ignored_by_top_level_config(path) ||
-        // Apply feature-level `include`/`ignore`
-        self.is_ignored_by_feature_config(path, feature))
+            // Apply top-level `include`/`ignore`
+            (self.is_ignored_by_top_level_config(path) ||
+                // Apply feature-level `include`/`ignore`
+                self.is_ignored_by_feature_config(path, feature))
     }
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
@@ -333,7 +342,7 @@ impl Workspace for WorkspaceServer {
         }
     }
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        Ok(self.is_ignored(params.rome_path.as_path(), params.feature))
+        Ok(self.is_ignored(params.biome_path.as_path(), params.feature))
     }
     /// Update the global settings for this workspace
     ///
@@ -538,6 +547,7 @@ impl Workspace for WorkspaceServer {
         let settings = self.settings.read().unwrap();
         let rules = settings.linter().rules.as_ref();
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+        let language = self.get_language(&params.path);
         Ok(code_actions(CodeActionsParams {
             parse,
             range: params.range,
@@ -545,6 +555,7 @@ impl Workspace for WorkspaceServer {
             settings: self.settings(),
             path: &params.path,
             manifest,
+            language,
         }))
     }
 
@@ -617,6 +628,7 @@ impl Workspace for WorkspaceServer {
             .collect::<Vec<_>>();
         let filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+        let language = self.get_language(&params.path);
         fix_all(FixAllParams {
             parse,
             rules: rules.as_ref().map(|x| x.borrow()),
@@ -624,8 +636,9 @@ impl Workspace for WorkspaceServer {
             filter,
             settings: self.settings(),
             should_format: params.should_format,
-            rome_path: &params.path,
+            biome_path: &params.path,
             manifest,
+            language,
         })
     }
 

@@ -19,7 +19,7 @@ use std::rc::Rc;
 pub enum FormatElement {
     /// A space token, see [crate::builders::space] for documentation.
     Space,
-
+    HardSpace,
     /// A new line, see [crate::builders::soft_line_break], [crate::builders::hard_line_break], and [crate::builders::soft_line_break_or_space] for documentation.
     Line(LineMode),
 
@@ -27,7 +27,9 @@ pub enum FormatElement {
     ExpandParent,
 
     /// Token constructed by the formatter from a static string
-    StaticText { text: &'static str },
+    StaticText {
+        text: &'static str,
+    },
 
     /// Token constructed from the input source as a dynamic
     /// string with its start position in the input document.
@@ -66,7 +68,7 @@ pub enum FormatElement {
 impl std::fmt::Debug for FormatElement {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            FormatElement::Space => write!(fmt, "Space"),
+            FormatElement::Space | FormatElement::HardSpace => write!(fmt, "Space"),
             FormatElement::Line(mode) => fmt.debug_tuple("Line").field(mode).finish(),
             FormatElement::ExpandParent => write!(fmt, "ExpandParent"),
             FormatElement::StaticText { text } => {
@@ -251,9 +253,10 @@ impl FormatElements for FormatElement {
             // Traverse into the most flat version because the content is guaranteed to expand when even
             // the most flat version contains some content that forces a break.
             FormatElement::BestFitting(best_fitting) => best_fitting.most_flat().will_break(),
-            FormatElement::LineSuffixBoundary | FormatElement::Space | FormatElement::Tag(_) => {
-                false
-            }
+            FormatElement::LineSuffixBoundary
+            | FormatElement::Space
+            | FormatElement::Tag(_)
+            | FormatElement::HardSpace => false,
         }
     }
 

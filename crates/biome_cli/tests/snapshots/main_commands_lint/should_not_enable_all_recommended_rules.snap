@@ -41,7 +41,7 @@ expression: content
 # Emitted Messages
 
 ```block
-Checked 1 file(s) in <TIME>
+Checked 1 file in <TIME>. No fixes needed.
 ```
 
 

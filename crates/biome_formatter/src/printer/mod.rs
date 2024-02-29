@@ -88,7 +88,7 @@ impl<'a> Printer<'a> {
         let args = stack.top();
 
         match element {
-            FormatElement::Space => {
+            FormatElement::Space | FormatElement::HardSpace => {
                 if self.state.line_width > 0 {
                     self.state.pending_space = true;
                 }
@@ -985,7 +985,12 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                     self.state.pending_space = true;
                 }
             }
-
+            FormatElement::HardSpace => {
+                self.state.line_width += 1;
+                if self.state.line_width > self.options().print_width.into() {
+                    return Ok(Fits::No);
+                }
+            }
             FormatElement::Line(line_mode) => {
                 if args.mode().is_flat() {
                     match line_mode {
@@ -1628,7 +1633,6 @@ two lines`,
 
         assert_eq!(printed.as_code(), "[1, 2, 3]; // trailing")
     }
-
     #[test]
     fn conditional_with_group_id_in_fits() {
         let content = format_with(|f| {

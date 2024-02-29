@@ -12,11 +12,11 @@ use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
 )]
-pub struct RomePath {
+pub struct BiomePath {
     path: PathBuf,
 }
 
-impl Deref for RomePath {
+impl Deref for BiomePath {
     type Target = PathBuf;
 
     fn deref(&self) -> &Self::Target {
@@ -24,7 +24,7 @@ impl Deref for RomePath {
     }
 }
 
-impl RomePath {
+impl BiomePath {
     pub fn new(path_to_file: impl Into<PathBuf>) -> Self {
         Self {
             path: path_to_file.into(),

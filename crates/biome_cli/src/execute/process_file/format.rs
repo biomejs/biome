@@ -5,7 +5,7 @@ use crate::execute::process_file::{
 };
 use crate::execute::TraversalMode;
 use biome_diagnostics::{category, DiagnosticExt};
-use biome_service::file_handlers::{AstroFileHandler, VueFileHandler, SVELTE_FENCE};
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;
@@ -64,7 +64,6 @@ pub(crate) fn format_with_guard<'ctx>(
 
             let mut output = printed.into_code();
 
-            // NOTE: ignoring the
             if ignore_errors {
                 return Ok(FileStatus::Ignored);
             }
@@ -72,32 +71,22 @@ pub(crate) fn format_with_guard<'ctx>(
             match workspace_file.as_extension() {
                 Some("astro") => {
                     if output.is_empty() {
-                        return Ok(FileStatus::Ignored);
+                        return Ok(FileStatus::Unchanged);
                     }
-                    output = AstroFileHandler::astro_output(input.as_str(), output.as_str());
+                    output = AstroFileHandler::output(input.as_str(), output.as_str());
                 }
                 Some("vue") => {
                     if output.is_empty() {
-                        return Ok(FileStatus::Ignored);
+                        return Ok(FileStatus::Unchanged);
                     }
-                    output = VueFileHandler::vue_output(input.as_str(), output.as_str());
+                    output = VueFileHandler::output(input.as_str(), output.as_str());
                 }
 
                 Some("svelte") => {
                     if output.is_empty() {
-                        return Ok(FileStatus::Ignored);
+                        return Ok(FileStatus::Unchanged);
                     }
-                    if let Some(script) = SVELTE_FENCE
-                        .captures(&input)
-                        .and_then(|captures| captures.name("script"))
-                    {
-                        output = format!(
-                            "{}{}{}",
-                            &input[..script.start()],
-                            output.as_str(),
-                            &input[script.end()..]
-                        );
-                    }
+                    output = SvelteFileHandler::output(input.as_str(), output.as_str());
                 }
                 _ => {}
             }
@@ -113,8 +102,10 @@ pub(crate) fn format_with_guard<'ctx>(
                         diff_kind: DiffKind::Format,
                     }));
                 }
+                Ok(FileStatus::Changed)
+            } else {
+                Ok(FileStatus::Unchanged)
             }
-            Ok(FileStatus::Success)
         },
     )
 }

@@ -1,5 +1,4 @@
-use crate::JsonLanguage;
-use biome_rowan::{FileSource, FileSourceError};
+use biome_rowan::FileSourceError;
 use std::path::Path;
 
 #[derive(Debug, Default, Clone)]
@@ -31,8 +30,6 @@ impl JsonFileSource {
         matches!(self.variant, JsonVariant::Jsonc)
     }
 }
-
-impl<'a> FileSource<'a, JsonLanguage> for JsonFileSource {}
 
 impl TryFrom<&Path> for JsonFileSource {
     type Error = FileSourceError;
@@ -69,7 +66,7 @@ fn compute_source_type_from_path_or_extension(
                 return Err(FileSourceError::UnknownExtension(
                     file_name.into(),
                     extension.into(),
-                ))
+                ));
             }
         }
     };
