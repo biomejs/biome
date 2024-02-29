@@ -23,6 +23,7 @@ biome_js_parser  = { path = "../biome_js_parser" }
 
 [features]
 schema = ["schemars", "biome_rowan/serde"]
+serde = ["biome_rowan/serde"]
 
 [lints]
 workspace = true
