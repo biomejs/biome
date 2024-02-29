@@ -48,11 +48,7 @@ export function sortConfigFromSpec(
 			const layerUtilities = utilitiesByLayer.get(layer);
 			if (!layerUtilities) throw new Error("Unknown layer");
 			const classes = [...layerUtilities]
-				.sort((a, b) => {
-					const result = compareBigInt(a.index, b.index);
-					if (result !== 0) return result;
-					return a.utility.localeCompare(b.utility);
-				})
+				.sort((a, b) => compareBigInt(a.index, b.index))
 				.flatMap(({ utility, hasDefault, hasValues }) => {
 					const entries: Array<string> = [];
 					if (!hasValues || hasDefault) entries.push(`${utility}$`);
