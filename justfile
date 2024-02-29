@@ -44,6 +44,10 @@ gen-lint:
 gen-web:
   cargo codegen-website
 
+# Generates the Tailwind CSS preset for utility class sorting (requires Bun)
+gen-tw:
+  bun packages/tailwindcss-config-analyzer/src/generate-tailwind-preset.ts
+
 # Generates the linter documentation and Rust documentation
 documentation:
   cargo lintdoc
