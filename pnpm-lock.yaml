@@ -62,9 +62,6 @@ importers:
       '@types/bun':
         specifier: ^1.0.6
         version: 1.0.6
-      bun:
-        specifier: ^1.0.28
-        version: 1.0.28
       read-package-up:
         specifier: ^11.0.0
         version: 11.0.0
@@ -1823,54 +1820,6 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
 
-  /@oven/bun-darwin-aarch64@1.0.28:
-    resolution: {integrity: sha512-6wfvHpBAM+4FitGTYOpSnZ4X79j9vQlJoyP+kTeHma2h/2UmyvUUdtYtzQJ/dcdiNzSDRwWOSkt1iDRPOsn+Ng==}
-    cpu: [arm64]
-    os: [darwin]
-    requiresBuild: true
-    dev: true
-    optional: true
-
-  /@oven/bun-darwin-x64-baseline@1.0.28:
-    resolution: {integrity: sha512-4/wnvq4/PufThDqaZLn4l7LXwTG4IO7+Scd1LQ5z4W783X7hPnaRWpps1/2lEIskrsCBdgpyLolEr/u0NhaM9w==}
-    cpu: [x64]
-    os: [darwin]
-    requiresBuild: true
-    dev: true
-    optional: true
-
-  /@oven/bun-darwin-x64@1.0.28:
-    resolution: {integrity: sha512-ujucsd8y4Uq0w3Sp+kj7dYiscj1QGGGWcAVHq4qAfvYcJa+ApKf3OLBo+aifYpEC7OKro0g76kNFd4h9fY/OeA==}
-    cpu: [x64]
-    os: [darwin]
-    requiresBuild: true
-    dev: true
-    optional: true
-
-  /@oven/bun-linux-aarch64@1.0.28:
-    resolution: {integrity: sha512-PGECrkAVZDZdLFSGNZai8bcr06A8rrSWaMv4s3qEZ+IAGDNs5uFPasD8BaKdPWz7pXNTh3AFB203VwFq7atQkw==}
-    cpu: [arm64]
-    os: [linux]
-    requiresBuild: true
-    dev: true
-    optional: true
-
-  /@oven/bun-linux-x64-baseline@1.0.28:
-    resolution: {integrity: sha512-tpQvbjHvLIOZx4DInOQOawyH00Sg/MqwCbtg/y27r3oRTGHjjrm/09RgqP0nUATofDhdoLYy20iWLlnMKePuFg==}
-    cpu: [x64]
-    os: [linux]
-    requiresBuild: true
-    dev: true
-    optional: true
-
-  /@oven/bun-linux-x64@1.0.28:
-    resolution: {integrity: sha512-lb8hkLylJ1m55AU5TGL3N6HAJVyCSMxzgdtzTkVsxMggkDYk0l3r4j3ktfqlCVi2Gb65b0BBIXA9/gowEMDG7w==}
-    cpu: [x64]
-    os: [linux]
-    requiresBuild: true
-    dev: true
-    optional: true
-
   /@pagefind/darwin-arm64@1.0.3:
     resolution: {integrity: sha512-vsHDtvao3W4iFCxVc4S0BVhpj3E2MAoIVM7RmuQfGp1Ng22nGLRaMP6FguLO8TMabRJdvp4SVr227hL4WGKOHA==}
     cpu: [arm64]
@@ -3057,21 +3006,6 @@ packages:
     dependencies:
       '@types/node': 20.11.19
       '@types/ws': 8.5.10
-    dev: true
-
-  /bun@1.0.28:
-    resolution: {integrity: sha512-tTxCYdwBcSPblIoBOyEshe6n5/Ga6K0VTzucJV/OfsCpJpnRh1iN3snLntTF4HD20HuTFZIfDqUnjrRtLNBc7A==}
-    cpu: [arm64, x64]
-    os: [darwin, linux]
-    hasBin: true
-    requiresBuild: true
-    optionalDependencies:
-      '@oven/bun-darwin-aarch64': 1.0.28
-      '@oven/bun-darwin-x64': 1.0.28
-      '@oven/bun-darwin-x64-baseline': 1.0.28
-      '@oven/bun-linux-aarch64': 1.0.28
-      '@oven/bun-linux-x64': 1.0.28
-      '@oven/bun-linux-x64-baseline': 1.0.28
     dev: true
 
   /cac@6.7.14:

@@ -1,3 +1,6 @@
+// run this script: $ just gen-tw
+// requires Bun installed globally: bun.sh
+
 import { introspectTailwindConfig } from "./introspect.js";
 import { SortConfig, sortConfigFromSpec } from "./sort-config.js";
 import { readPackageUp } from "read-package-up";
