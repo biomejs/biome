@@ -59,6 +59,8 @@ schema = [
   "biome_formatter/serde",
   "biome_js_factory",
   "biome_text_edit/schemars",
+  "biome_json_syntax/schema",
+  "biome_css_syntax/schema",
 ]
 
 [dev-dependencies]

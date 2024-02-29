@@ -6,6 +6,7 @@ use crate::configuration::{
     push_to_analyzer_rules, to_override_settings, CssConfiguration, FormatterConfiguration,
     JavascriptConfiguration, JsonConfiguration, LinterConfiguration, PartialConfiguration,
 };
+use crate::workspace::DocumentFileSource;
 use crate::{
     configuration::FilesConfiguration, ConfigurationDiagnostic, Matcher, Rules, WorkspaceError,
 };
@@ -391,6 +392,7 @@ pub trait Language: biome_rowan::Language {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         path: &BiomePath,
+        file_source: &DocumentFileSource,
     ) -> Self::FormatOptions;
 }
 
@@ -502,7 +504,11 @@ impl<'a> AsRef<WorkspaceSettings> for SettingsHandle<'a> {
 
 impl<'a> SettingsHandle<'a> {
     /// Resolve the formatting context for the given language
-    pub(crate) fn format_options<L>(self, path: &BiomePath) -> L::FormatOptions
+    pub(crate) fn format_options<L>(
+        self,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> L::FormatOptions
     where
         L: Language,
     {
@@ -511,6 +517,7 @@ impl<'a> SettingsHandle<'a> {
             &self.inner.override_settings,
             &L::lookup_settings(&self.inner.languages).formatter,
             path,
+            file_source,
         )
     }
 }

@@ -1,7 +1,10 @@
 use biome_rowan::FileSourceError;
 use std::path::Path;
 
-#[derive(Debug, Default, Clone, Copy)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 pub struct CssFileSource {
     // Unused until we potentially support postcss/less/sass
     #[allow(unused)]
@@ -12,7 +15,10 @@ pub struct CssFileSource {
 ///
 /// Currently, Biome only supports plain CSS, and aims to be compatible with
 /// the latest Recommendation level standards.
-#[derive(Debug, Default, Clone, Copy)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 enum CssVariant {
     #[default]
     Standard,

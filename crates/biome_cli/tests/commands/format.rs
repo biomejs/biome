@@ -606,7 +606,7 @@ fn applies_custom_jsx_quote_style() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Path::new("file.jsx");
     fs.insert(file_path.into(), APPLY_JSX_QUOTE_STYLE_BEFORE.as_bytes());
 
     let result = run_cli(
@@ -758,7 +758,7 @@ fn applies_custom_attribute_position() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Path::new("file.jsx");
     fs.insert(file_path.into(), APPLY_ATTRIBUTE_POSITION_BEFORE.as_bytes());
 
     let result = run_cli(
@@ -830,7 +830,7 @@ fn applies_custom_bracket_spacing() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Path::new("file.jsx");
     fs.insert(file_path.into(), APPLY_BRACKET_SPACING_BEFORE.as_bytes());
 
     let result = run_cli(
@@ -850,17 +850,8 @@ fn applies_custom_bracket_spacing() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, APPLY_BRACKET_SPACING_AFTER);
-
-    drop(file);
+    assert_file_contents(&fs , file_path, APPLY_BRACKET_SPACING_AFTER);
+    
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "applies_custom_bracket_spacing",
@@ -875,7 +866,7 @@ fn applies_custom_bracket_same_line() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Path::new("file.jsx");
     fs.insert(file_path.into(), APPLY_BRACKET_SAME_LINE_BEFORE.as_bytes());
 
     let result = run_cli(
@@ -895,17 +886,8 @@ fn applies_custom_bracket_same_line() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs , file_path, APPLY_BRACKET_SAME_LINE_AFTER);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, APPLY_BRACKET_SAME_LINE_AFTER);
-
-    drop(file);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "applies_custom_bracket_same_line",
@@ -2245,6 +2227,49 @@ fn format_json_when_allow_trailing_commas() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_json_when_allow_trailing_commas",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_json_when_allow_trailing_commas_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config_json = r#"{
+    "json": {
+        "parser": { "allowTrailingCommas": true }
+    }
+}"#;
+    let biome_config = "biome.json";
+    let code = r#"{   "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar",
+}"#;
+    let file_path = Path::new("file.json");
+    fs.insert(file_path.into(), code.as_bytes());
+    fs.insert(biome_config.into(), config_json);
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                "--write",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n}\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_json_when_allow_trailing_commas_write",
         fs,
         console,
         result,

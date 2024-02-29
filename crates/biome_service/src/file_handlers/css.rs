@@ -1,13 +1,13 @@
 use super::{ExtensionHandler, Mime, ParseResult};
+use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
-use crate::file_handlers::{DebugCapabilities, Language as LanguageId};
 use crate::settings::{
     FormatSettings, Language, LanguageListSettings, LanguageSettings, OverrideSettings,
     SettingsHandle,
 };
-use crate::workspace::GetSyntaxTreeResult;
+use crate::workspace::{DocumentFileSource, GetSyntaxTreeResult};
 use crate::WorkspaceError;
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::{can_format_css_yet, format_node};
@@ -53,6 +53,7 @@ impl Language for CssLanguage {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         path: &BiomePath,
+        document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = if let Some(indent_style) = language.indent_style {
             indent_style
@@ -72,11 +73,15 @@ impl Language for CssLanguage {
 
         overrides.override_css_format_options(
             path,
-            CssFormatOptions::new(path.as_path().try_into().unwrap_or_default())
-                .with_indent_style(indent_style)
-                .with_indent_width(indent_width)
-                .with_line_width(line_width)
-                .with_quote_style(language.quote_style.unwrap_or_default()),
+            CssFormatOptions::new(
+                document_file_source
+                    .to_css_file_source()
+                    .unwrap_or_default(),
+            )
+            .with_indent_style(indent_style)
+            .with_indent_width(indent_width)
+            .with_line_width(line_width)
+            .with_quote_style(language.quote_style.unwrap_or_default()),
         )
     }
 }
@@ -85,10 +90,6 @@ impl Language for CssLanguage {
 pub(crate) struct CssFileHandler;
 
 impl ExtensionHandler for CssFileHandler {
-    fn language(&self) -> super::Language {
-        super::Language::Css
-    }
-
     fn mime(&self) -> super::Mime {
         Mime::Css
     }
@@ -136,7 +137,7 @@ impl ExtensionHandler for CssFileHandler {
 
 fn parse(
     biome_path: &BiomePath,
-    _language_hint: LanguageId,
+    _file_source: DocumentFileSource,
     text: &str,
     settings: SettingsHandle,
     cache: &mut NodeCache,
@@ -173,10 +174,11 @@ fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeRe
 
 fn debug_formatter_ir(
     biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(biome_path);
+    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
@@ -188,10 +190,11 @@ fn debug_formatter_ir(
 #[tracing::instrument(level = "debug", skip(parse))]
 fn format(
     biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(biome_path);
+    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
     tracing::debug!("Format with the following options: \n{}", options);
 
@@ -206,11 +209,12 @@ fn format(
 
 fn format_range(
     biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(biome_path);
+    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
     let tree = parse.syntax();
     let printed = biome_css_formatter::format_range(options, &tree, range)?;
@@ -219,11 +223,12 @@ fn format_range(
 
 fn format_on_type(
     biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(biome_path);
+    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
     let tree = parse.syntax();
 

@@ -1,6 +1,6 @@
 use anyhow::Result;
 use biome_service::workspace::{
-    ChangeFileParams, CloseFileParams, GetFileContentParams, Language, OpenFileParams,
+    ChangeFileParams, CloseFileParams, DocumentFileSource, GetFileContentParams, OpenFileParams,
 };
 use tower_lsp::lsp_types;
 use tracing::{error, field};
@@ -17,7 +17,7 @@ pub(crate) async fn did_open(
     let url = params.text_document.uri;
     let version = params.text_document.version;
     let content = params.text_document.text;
-    let language_hint = Language::from_language_id(&params.text_document.language_id);
+    let language_hint = DocumentFileSource::from_extension(&params.text_document.language_id);
 
     let biome_path = session.file_path(&url)?;
     let doc = Document::new(version, &content);

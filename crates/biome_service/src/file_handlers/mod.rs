@@ -15,10 +15,12 @@ use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic, RuleCategories};
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_css_formatter::can_format_css_yet;
+use biome_css_syntax::CssFileSource;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_syntax::{JsFileSource, TextRange, TextSize};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, ModuleKind, TextRange, TextSize};
+use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
 use biome_rowan::NodeCache;
@@ -34,36 +36,46 @@ mod svelte;
 mod unknown;
 mod vue;
 
-/// Supported languages by Biome
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub enum Language {
-    /// JavaScript
-    JavaScript,
-    /// JSX
-    JavaScriptReact,
-    /// TypeScript
-    TypeScript,
-    /// TSX
-    TypeScriptReact,
-    /// JSON
-    Json,
-    /// JSONC
-    Jsonc,
-    /// CSS
-    Css,
-    ///
-    Astro,
-    ///
-    Vue,
-    ///
-    Svelte,
-    /// Any language that is not supported
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+pub enum DocumentFileSource {
+    Js(JsFileSource),
+    Json(JsonFileSource),
+    Css(CssFileSource),
     #[default]
     Unknown,
 }
 
-impl Language {
+impl From<JsFileSource> for DocumentFileSource {
+    fn from(value: JsFileSource) -> Self {
+        Self::Js(value)
+    }
+}
+
+impl From<JsonFileSource> for DocumentFileSource {
+    fn from(value: JsonFileSource) -> Self {
+        Self::Json(value)
+    }
+}
+
+impl From<CssFileSource> for DocumentFileSource {
+    fn from(value: CssFileSource) -> Self {
+        Self::Css(value)
+    }
+}
+
+impl From<&Path> for DocumentFileSource {
+    fn from(value: &Path) -> Self {
+        JsFileSource::try_from(value)
+            .map(Into::into)
+            .or(JsonFileSource::try_from(value).map(Into::into))
+            .unwrap_or(DocumentFileSource::Unknown)
+    }
+}
+
+impl DocumentFileSource {
     /// Sorted array of files that are known as JSONC (JSON with comments).
     pub(crate) const KNOWN_FILES_AS_JSONC: &'static [&'static str; 15] = &[
         ".babelrc",
@@ -83,28 +95,37 @@ impl Language {
         "typescript.json",
     ];
 
-    /// Returns the language corresponding to this file extension
+    /// Returns the language corresponding to this language ID
+    ///
+    /// See the [microsoft spec]
+    /// for a list of language identifiers
+    ///
+    /// [microsoft spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn from_extension(s: &str) -> Self {
         match s.to_lowercase().as_str() {
-            "js" | "mjs" | "cjs" => Language::JavaScript,
-            "jsx" => Language::JavaScriptReact,
-            "ts" | "mts" | "cts" => Language::TypeScript,
-            "tsx" => Language::TypeScriptReact,
-            "json" => Language::Json,
-            "jsonc" => Language::Jsonc,
-            "astro" => Language::Astro,
-            "vue" => Language::Vue,
-            "svelte" => Language::Svelte,
-            "css" => Language::Css,
-            _ => Language::Unknown,
+            "js" | "mjs" => JsFileSource::js_module().into(),
+            "cjs" => JsFileSource::js_script().into(),
+            "jsx" => JsFileSource::jsx().into(),
+            "ts" | "mts" => JsFileSource::ts().into(),
+            "cts" => JsFileSource::ts()
+                .with_module_kind(ModuleKind::Script)
+                .into(),
+            "tsx" => JsFileSource::tsx().into(),
+            "json" => JsonFileSource::json().into(),
+            "jsonc" => JsonFileSource::jsonc().into(),
+            "astro" => JsFileSource::astro().into(),
+            "vue" => JsFileSource::vue().into(),
+            "svelte" => JsFileSource::svelte().into(),
+            "css" => CssFileSource::css().into(),
+            _ => DocumentFileSource::Unknown,
         }
     }
 
     pub fn from_known_filename(s: &str) -> Self {
         if Self::KNOWN_FILES_AS_JSONC.binary_search(&s).is_ok() {
-            Language::Jsonc
+            JsonFileSource::jsonc().into()
         } else {
-            Language::Unknown
+            DocumentFileSource::Unknown
         }
     }
 
@@ -112,8 +133,8 @@ impl Language {
     pub fn from_path(path: &Path) -> Self {
         path.extension()
             .and_then(|path| path.to_str())
-            .map(Language::from_extension)
-            .unwrap_or(Language::Unknown)
+            .map(DocumentFileSource::from_extension)
+            .unwrap_or(DocumentFileSource::Unknown)
     }
 
     /// Returns the language corresponding to the file path
@@ -121,35 +142,12 @@ impl Language {
     pub fn from_path_and_known_filename(path: &Path) -> Self {
         path.extension()
             .and_then(OsStr::to_str)
-            .map(Language::from_extension)
+            .map(DocumentFileSource::from_extension)
             .or(path
                 .file_name()
                 .and_then(OsStr::to_str)
-                .map(Language::from_known_filename))
+                .map(DocumentFileSource::from_known_filename))
             .unwrap_or_default()
-    }
-
-    /// Returns the language corresponding to this language ID
-    ///
-    /// See the [microsoft spec]
-    /// for a list of language identifiers
-    ///
-    /// [microsoft spec]: https://code.visualstudio.com/docs/languages/identifiers
-    pub fn from_language_id(s: &str) -> Self {
-        match s.to_lowercase().as_str() {
-            "javascript" => Language::JavaScript,
-            "typescript" => Language::TypeScript,
-            "javascriptreact" => Language::JavaScriptReact,
-            "typescriptreact" => Language::TypeScriptReact,
-            "json" => Language::Json,
-            "jsonc" => Language::Jsonc,
-            "astro" => Language::Astro,
-            "vue" => Language::Vue,
-            "svelte" => Language::Svelte,
-            // TODO: remove this when we are ready to handle CSS files
-            "css" => Language::Unknown,
-            _ => Language::Unknown,
-        }
     }
 
     /// Returns the language if it's not unknown, otherwise returns `other`.
@@ -157,9 +155,10 @@ impl Language {
     /// # Examples
     ///
     /// ```
-    /// # use biome_service::workspace::Language;
-    /// let x = Language::JavaScript;
-    /// let y = Language::Unknown;
+    /// # use biome_js_syntax::JsFileSource;
+    /// use biome_service::workspace::DocumentFileSource;
+    /// let x = JsFileSource::js_module().into();
+    /// let y = DocumentFileSource::Unknown;
     /// assert_eq!(x.or(y), Language::JavaScript);
     ///
     /// let x = Language::Unknown;
@@ -174,8 +173,8 @@ impl Language {
     /// let y = Language::Unknown;
     /// assert_eq!(x.or(y), Language::Unknown);
     /// ```
-    pub fn or(self, other: Language) -> Language {
-        if self != Language::Unknown {
+    pub fn or(self, other: DocumentFileSource) -> DocumentFileSource {
+        if self != DocumentFileSource::Unknown {
             self
         } else {
             other
@@ -183,70 +182,87 @@ impl Language {
     }
 
     pub const fn is_javascript_like(&self) -> bool {
-        matches!(
-            self,
-            Language::JavaScript
-                | Language::TypeScript
-                | Language::JavaScriptReact
-                | Language::TypeScriptReact
-                | Language::Astro
-                | Language::Vue
-        )
+        matches!(self, DocumentFileSource::Js(_))
     }
 
     pub const fn is_json_like(&self) -> bool {
-        matches!(self, Language::Json | Language::Jsonc)
+        matches!(self, DocumentFileSource::Json(_))
     }
 
     pub const fn is_css_like(&self) -> bool {
-        matches!(self, Language::Css)
+        matches!(self, DocumentFileSource::Css(_))
     }
 
-    pub fn as_js_file_source(&self) -> Option<JsFileSource> {
+    pub fn to_js_file_source(&self) -> Option<JsFileSource> {
         match self {
-            Language::JavaScript => Some(JsFileSource::js_module()),
-            Language::JavaScriptReact => Some(JsFileSource::jsx()),
-            Language::TypeScript => Some(JsFileSource::tsx()),
-            Language::TypeScriptReact => Some(JsFileSource::tsx()),
-            Language::Astro => Some(JsFileSource::ts()),
-            Language::Vue => Some(JsFileSource::ts()),
-            Language::Svelte => Some(JsFileSource::ts()),
-            Language::Json | Language::Jsonc | Language::Css | Language::Unknown => None,
+            DocumentFileSource::Js(file_source) => Some(file_source.clone()),
+            DocumentFileSource::Json(_)
+            | DocumentFileSource::Css(_)
+            | DocumentFileSource::Unknown => None,
+        }
+    }
+
+    pub fn to_json_file_source(&self) -> Option<JsonFileSource> {
+        match self {
+            DocumentFileSource::Json(json) => Some(json.clone()),
+            DocumentFileSource::Js(_)
+            | DocumentFileSource::Css(_)
+            | DocumentFileSource::Unknown => None,
+        }
+    }
+
+    pub fn to_css_file_source(&self) -> Option<CssFileSource> {
+        match self {
+            DocumentFileSource::Css(css) => Some(css.clone()),
+            DocumentFileSource::Js(_)
+            | DocumentFileSource::Json(_)
+            | DocumentFileSource::Unknown => None,
         }
     }
 
     pub fn can_parse(path: &Path, content: &str) -> bool {
-        let language = Language::from_path(path);
-        match language {
-            Language::JavaScript
-            | Language::JavaScriptReact
-            | Language::TypeScript
-            | Language::TypeScriptReact
-            | Language::Json
-            | Language::Css
-            | Language::Jsonc => true,
-            Language::Astro => ASTRO_FENCE.is_match(content),
-            Language::Vue => VUE_FENCE.is_match(content),
-            Language::Svelte => SVELTE_FENCE.is_match(content),
-            Language::Unknown => false,
+        let file_source = DocumentFileSource::from_path(path);
+        match file_source {
+            DocumentFileSource::Js(js) => match js.as_embedding_kind() {
+                EmbeddingKind::Astro => ASTRO_FENCE.is_match(content),
+                EmbeddingKind::Vue => VUE_FENCE.is_match(content),
+                EmbeddingKind::Svelte => SVELTE_FENCE.is_match(content),
+                EmbeddingKind::None => true,
+            },
+            DocumentFileSource::Json(_) | DocumentFileSource::Css(_) => true,
+            DocumentFileSource::Unknown => false,
         }
     }
 }
 
-impl biome_console::fmt::Display for Language {
+impl biome_console::fmt::Display for DocumentFileSource {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
-            Language::JavaScript => fmt.write_markup(markup! { "JavaScript" }),
-            Language::JavaScriptReact => fmt.write_markup(markup! { "JSX" }),
-            Language::TypeScript => fmt.write_markup(markup! { "TypeScript" }),
-            Language::TypeScriptReact => fmt.write_markup(markup! { "TSX" }),
-            Language::Json => fmt.write_markup(markup! { "JSON" }),
-            Language::Jsonc => fmt.write_markup(markup! { "JSONC" }),
-            Language::Css => fmt.write_markup(markup! { "CSS" }),
-            Language::Astro => fmt.write_markup(markup! { "Astro" }),
-            Language::Vue => fmt.write_markup(markup! { "Vue" }),
-            Language::Svelte => fmt.write_markup(markup! { "Svelte" }),
-            Language::Unknown => fmt.write_markup(markup! { "Unknown" }),
+            DocumentFileSource::Js(js) => {
+                let is_jsx = js.is_jsx();
+                if js.is_typescript() {
+                    if is_jsx {
+                        fmt.write_markup(markup! { "TSX" })
+                    } else {
+                        fmt.write_markup(markup! { "TypeScript" })
+                    }
+                } else {
+                    if is_jsx {
+                        fmt.write_markup(markup! { "JSX" })
+                    } else {
+                        fmt.write_markup(markup! { "JavaScript" })
+                    }
+                }
+            }
+            DocumentFileSource::Json(json) => {
+                if json.is_jsonc() {
+                    fmt.write_markup(markup! { "JSONC" })
+                } else {
+                    fmt.write_markup(markup! { "JSON" })
+                }
+            }
+            DocumentFileSource::Css(_) => fmt.write_markup(markup! { "CSS" }),
+            DocumentFileSource::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
 }
@@ -287,7 +303,7 @@ pub struct FixAllParams<'a> {
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
     pub(crate) manifest: Option<PackageJson>,
-    pub(crate) language: Language,
+    pub(crate) document_file_source: DocumentFileSource,
 }
 
 #[derive(Default)]
@@ -302,10 +318,11 @@ pub struct Capabilities {
 #[derive(Clone)]
 pub struct ParseResult {
     pub(crate) any_parse: AnyParse,
-    pub(crate) language: Option<Language>,
+    pub(crate) language: Option<DocumentFileSource>,
 }
 
-type Parse = fn(&BiomePath, Language, &str, SettingsHandle, &mut NodeCache) -> ParseResult;
+type Parse =
+    fn(&BiomePath, DocumentFileSource, &str, SettingsHandle, &mut NodeCache) -> ParseResult;
 
 #[derive(Default)]
 pub struct ParserCapabilities {
@@ -315,7 +332,8 @@ pub struct ParserCapabilities {
 
 type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
 type DebugControlFlow = fn(AnyParse, TextSize) -> String;
-type DebugFormatterIR = fn(&BiomePath, AnyParse, SettingsHandle) -> Result<String, WorkspaceError>;
+type DebugFormatterIR =
+    fn(&BiomePath, &DocumentFileSource, AnyParse, SettingsHandle) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -330,7 +348,7 @@ pub struct DebugCapabilities {
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) settings: SettingsHandle<'a>,
-    pub(crate) language: Language,
+    pub(crate) language: DocumentFileSource,
     pub(crate) max_diagnostics: u32,
     pub(crate) path: &'a BiomePath,
     pub(crate) categories: RuleCategories,
@@ -350,7 +368,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) settings: SettingsHandle<'a>,
     pub(crate) path: &'a BiomePath,
     pub(crate) manifest: Option<PackageJson>,
-    pub(crate) language: Language,
+    pub(crate) language: DocumentFileSource,
 }
 
 type Lint = fn(LintParams) -> LintResults;
@@ -373,11 +391,26 @@ pub struct AnalyzerCapabilities {
     pub(crate) organize_imports: Option<OrganizeImports>,
 }
 
-type Format = fn(&BiomePath, AnyParse, SettingsHandle) -> Result<Printed, WorkspaceError>;
-type FormatRange =
-    fn(&BiomePath, AnyParse, SettingsHandle, TextRange) -> Result<Printed, WorkspaceError>;
-type FormatOnType =
-    fn(&BiomePath, AnyParse, SettingsHandle, TextSize) -> Result<Printed, WorkspaceError>;
+type Format = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    SettingsHandle,
+) -> Result<Printed, WorkspaceError>;
+type FormatRange = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    SettingsHandle,
+    TextRange,
+) -> Result<Printed, WorkspaceError>;
+type FormatOnType = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    SettingsHandle,
+    TextSize,
+) -> Result<Printed, WorkspaceError>;
 
 #[derive(Default)]
 pub(crate) struct FormatterCapabilities {
@@ -391,10 +424,6 @@ pub(crate) struct FormatterCapabilities {
 
 /// Main trait to use to add a new language to Biome
 pub(crate) trait ExtensionHandler {
-    /// The language of the file. It can be a super language.
-    /// For example, a ".js" file can have [Language::Ts]
-    fn language(&self) -> Language;
-
     /// MIME types used to identify a certain language
     fn mime(&self) -> Mime;
 
@@ -445,15 +474,17 @@ impl Features {
     pub(crate) fn get_capabilities(
         &self,
         biome_path: &BiomePath,
-        language_hint: Language,
+        language_hint: DocumentFileSource,
     ) -> Capabilities {
-        match Language::from_path_and_known_filename(biome_path).or(language_hint) {
-            Language::JavaScript
-            | Language::JavaScriptReact
-            | Language::TypeScript
-            | Language::TypeScriptReact => self.js.capabilities(),
-            Language::Json | Language::Jsonc => self.json.capabilities(),
-            Language::Css => {
+        match DocumentFileSource::from_path_and_known_filename(biome_path).or(language_hint) {
+            DocumentFileSource::Js(source) => match source.as_embedding_kind() {
+                EmbeddingKind::Astro => self.astro.capabilities(),
+                EmbeddingKind::Vue => self.vue.capabilities(),
+                EmbeddingKind::Svelte => self.svelte.capabilities(),
+                EmbeddingKind::None => self.js.capabilities(),
+            },
+            DocumentFileSource::Json(_) => self.json.capabilities(),
+            DocumentFileSource::Css(_) => {
                 // TODO: change this when we are ready to handle CSS files
                 if can_format_css_yet() {
                     self.css.capabilities()
@@ -461,10 +492,7 @@ impl Features {
                     self.unknown.capabilities()
                 }
             }
-            Language::Astro => self.astro.capabilities(),
-            Language::Vue => self.vue.capabilities(),
-            Language::Svelte => self.svelte.capabilities(),
-            Language::Unknown => self.unknown.capabilities(),
+            DocumentFileSource::Unknown => self.unknown.capabilities(),
         }
     }
 }
@@ -491,7 +519,7 @@ pub(crate) fn is_diagnostic_error(
 
 #[test]
 fn test_order() {
-    for items in Language::KNOWN_FILES_AS_JSONC.windows(2) {
+    for items in DocumentFileSource::KNOWN_FILES_AS_JSONC.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }

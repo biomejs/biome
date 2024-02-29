@@ -4,9 +4,9 @@ use super::{
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
-use crate::file_handlers::{is_diagnostic_error, FixAllParams, Language as LanguageId};
+use crate::file_handlers::{is_diagnostic_error, FixAllParams};
 use crate::settings::OverrideSettings;
-use crate::workspace::OrganizeImportsResult;
+use crate::workspace::{DocumentFileSource, OrganizeImportsResult};
 use crate::{
     settings::{FormatSettings, Language, LanguageListSettings, LanguageSettings, SettingsHandle},
     workspace::{
@@ -97,46 +97,49 @@ impl Language for JsLanguage {
         overrides: &OverrideSettings,
         language: &JsFormatterSettings,
         path: &BiomePath,
+        document_file_source: &DocumentFileSource,
     ) -> JsFormatOptions {
-        let options = JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
-            .with_indent_style(
-                language
-                    .indent_style
-                    .or(global.indent_style)
-                    .unwrap_or_default(),
-            )
-            .with_indent_width(
-                language
-                    .indent_width
-                    .or(global.indent_width)
-                    .unwrap_or_default(),
-            )
-            .with_line_width(
-                language
-                    .line_width
-                    .or(global.line_width)
-                    .unwrap_or_default(),
-            )
-            .with_line_ending(
-                language
-                    .line_ending
-                    .or(global.line_ending)
-                    .unwrap_or_default(),
-            )
-            .with_quote_style(language.quote_style.unwrap_or_default())
-            .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
-            .with_quote_properties(language.quote_properties.unwrap_or_default())
-            .with_trailing_comma(language.trailing_comma.unwrap_or_default())
-            .with_semicolons(language.semicolons.unwrap_or_default())
-            .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
-            .with_bracket_spacing(language.bracket_spacing.unwrap_or_default())
-            .with_bracket_same_line(language.bracket_same_line.unwrap_or_default())
-            .with_attribute_position(
-                language
-                    .attribute_position
-                    .or(global.attribute_position)
-                    .unwrap_or_default(),
-            );
+        dbg!(&document_file_source);
+        let options =
+            JsFormatOptions::new(document_file_source.to_js_file_source().unwrap_or_default())
+                .with_indent_style(
+                    language
+                        .indent_style
+                        .or(global.indent_style)
+                        .unwrap_or_default(),
+                )
+                .with_indent_width(
+                    language
+                        .indent_width
+                        .or(global.indent_width)
+                        .unwrap_or_default(),
+                )
+                .with_line_width(
+                    language
+                        .line_width
+                        .or(global.line_width)
+                        .unwrap_or_default(),
+                )
+                .with_line_ending(
+                    language
+                        .line_ending
+                        .or(global.line_ending)
+                        .unwrap_or_default(),
+                )
+                .with_quote_style(language.quote_style.unwrap_or_default())
+                .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
+                .with_quote_properties(language.quote_properties.unwrap_or_default())
+                .with_trailing_comma(language.trailing_comma.unwrap_or_default())
+                .with_semicolons(language.semicolons.unwrap_or_default())
+                .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
+                .with_bracket_spacing(language.bracket_spacing.unwrap_or_default())
+                .with_bracket_same_line(language.bracket_same_line.unwrap_or_default())
+                .with_attribute_position(
+                    language
+                        .attribute_position
+                        .or(global.attribute_position)
+                        .unwrap_or_default(),
+                );
 
         overrides.override_js_format_options(path, options)
     }
@@ -146,10 +149,6 @@ impl Language for JsLanguage {
 pub(crate) struct JsFileHandler;
 
 impl ExtensionHandler for JsFileHandler {
-    fn language(&self) -> super::Language {
-        super::Language::JavaScript
-    }
-
     fn mime(&self) -> Mime {
         Mime::Javascript
     }
@@ -184,18 +183,11 @@ impl ExtensionHandler for JsFileHandler {
 
 fn parse(
     biome_path: &BiomePath,
-    language_hint: LanguageId,
+    file_source: DocumentFileSource,
     text: &str,
     settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let source_type =
-        JsFileSource::try_from(biome_path.as_path()).unwrap_or_else(|_| match language_hint {
-            LanguageId::JavaScriptReact => JsFileSource::jsx(),
-            LanguageId::TypeScript => JsFileSource::ts(),
-            LanguageId::TypeScriptReact => JsFileSource::tsx(),
-            _ => JsFileSource::js_module(),
-        });
     let parser_settings = &settings.as_ref().languages.javascript.parser;
     let overrides = &settings.as_ref().override_settings;
     let options = overrides.override_js_parser_options(
@@ -204,7 +196,8 @@ fn parse(
             parse_class_parameter_decorators: parser_settings.parse_class_parameter_decorators,
         },
     );
-    let parse = biome_js_parser::parse_js_with_cache(text, source_type, options, cache);
+    let file_source = file_source.to_js_file_source().unwrap_or_default();
+    let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
     ParseResult {
@@ -271,11 +264,12 @@ fn debug_control_flow(parse: AnyParse, cursor: TextSize) -> String {
 }
 
 fn debug_formatter_ir(
-    biome_path: &BiomePath,
+    path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(biome_path);
+    let options = settings.format_options::<JsLanguage>(path, document_file_source);
 
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
@@ -290,7 +284,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             let settings = params.settings.as_ref();
             let Some(file_source) = params
                 .language
-                .as_js_file_source()
+                .to_js_file_source()
                 .or(JsFileSource::try_from(params.path.as_path()).ok())
             else {
                 return LintResults {
@@ -478,7 +472,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             let analyzer_options =
                 compute_analyzer_options(&settings, PathBuf::from(path.as_path()));
 
-            let Some(source_type) = language.as_js_file_source() else {
+            let Some(source_type) = language.to_js_file_source() else {
                 error!("Could not determine the file source of the file");
                 return PullActionsResult { actions: vec![] };
             };
@@ -523,11 +517,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         biome_path,
         mut filter,
         manifest,
-        language,
+        document_file_source,
     } = params;
 
-    let Some(file_source) = language
-        .as_js_file_source()
+    let Some(file_source) = document_file_source
+        .to_js_file_source()
         .or(JsFileSource::try_from(biome_path.as_path()).ok())
     else {
         return Err(extension_error(biome_path));
@@ -614,7 +608,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             None => {
                 let code = if should_format {
                     format_node(
-                        settings.format_options::<JsLanguage>(biome_path),
+                        settings.format_options::<JsLanguage>(biome_path, &document_file_source),
                         tree.syntax(),
                     )?
                     .print()?
@@ -636,10 +630,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 #[tracing::instrument(level = "trace", skip(parse, settings))]
 pub(crate) fn format(
     biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(biome_path);
+    let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
 
     debug!("Options used for format: \n{}", options);
 
@@ -658,11 +653,12 @@ pub(crate) fn format(
 #[tracing::instrument(level = "trace", skip(parse, settings))]
 pub(crate) fn format_range(
     biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(biome_path);
+    let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
 
     let tree = parse.syntax();
     let printed = biome_js_formatter::format_range(options, &tree, range)?;
@@ -671,12 +667,13 @@ pub(crate) fn format_range(
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
 pub(crate) fn format_on_type(
-    biome_path: &BiomePath,
+    path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(biome_path);
+    let options = settings.format_options::<JsLanguage>(path, document_file_source);
 
     let tree = parse.syntax();
 

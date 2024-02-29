@@ -4,10 +4,6 @@ use super::ExtensionHandler;
 pub(crate) struct UnknownFileHandler {}
 
 impl ExtensionHandler for UnknownFileHandler {
-    fn language(&self) -> super::Language {
-        super::Language::Unknown
-    }
-
     fn mime(&self) -> super::Mime {
         super::Mime::Text
     }
