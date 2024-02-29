@@ -1,6 +1,6 @@
-import resolveConfig from "tailwindcss/resolveConfig.js";
-import { createContext } from "tailwindcss/lib/lib/setupContextUtils";
 import type { Config } from "tailwindcss";
+import { createContext } from "tailwindcss/lib/lib/setupContextUtils";
+import resolveConfig from "tailwindcss/resolveConfig.js";
 import type { TailwindContext } from "./types.js";
 
 const DEFAULT_CONFIG: Config = { content: [] };

@@ -7,7 +7,7 @@ export type SortConfig = {
 	}>;
 };
 
-function compareBigInt(a: BigInt, b: BigInt) {
+function compareBigInt(a: bigint, b: bigint) {
 	if (a < b) return -1;
 	if (a > b) return 1;
 	return 0;
@@ -29,11 +29,11 @@ export function sortConfigFromSpec(
 	{ layerOrder }: { layerOrder: Array<string> },
 ): SortConfig {
 	const utilitiesByLayer = new Map<string, Set<UtilitySpec>>();
-	spec.utilities.forEach((utilitySpec) => {
+	for (const utilitySpec of spec.utilities) {
 		const layer = utilitiesByLayer.get(utilitySpec.layer) ?? new Set();
 		layer.add(utilitySpec);
 		utilitiesByLayer.set(utilitySpec.layer, layer);
-	});
+	}
 	const layerIndexes = new Map(
 		layerOrder.map((layer, index) => [layer, index]),
 	);

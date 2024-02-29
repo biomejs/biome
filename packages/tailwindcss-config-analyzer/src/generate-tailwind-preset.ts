@@ -1,10 +1,10 @@
 // run this script: $ just gen-tw
 // requires Bun installed globally: bun.sh
 
-import { introspectTailwindConfig } from "./introspect.js";
-import { SortConfig, sortConfigFromSpec } from "./sort-config.js";
-import { readPackageUp } from "read-package-up";
 import path from "node:path";
+import { readPackageUp } from "read-package-up";
+import { introspectTailwindConfig } from "./introspect.js";
+import { type SortConfig, sortConfigFromSpec } from "./sort-config.js";
 
 const ROOT_PACKAGE_NAME = "@biomejs/monorepo";
 const OUTPUT_PATH =
@@ -22,14 +22,18 @@ use super::sort_config::UtilityLayer;
 `;
 
 function generateLayer({ layer, classes }: SortConfig["utilities"][number]) {
-	const header = `const ${layer.toUpperCase()}_LAYER_CLASSES: [&str; ${classes.length}] = [`;
+	const header = `const ${layer.toUpperCase()}_LAYER_CLASSES: [&str; ${
+		classes.length
+	}] = [`;
 
 	// try single line
 	const singleLine = `${header}${classes.map((c) => `"${c}"`).join(", ")}];`;
 	if (singleLine.length < LINE_LIMIT) return `${singleLine}\n`;
 
 	// if single line is too long, do multi-line
-	return `${header}\n${classes.map((c) => `${INDENT}"${c}"`).join(",\n")},\n];\n`;
+	return `${header}\n${classes
+		.map((c) => `${INDENT}"${c}"`)
+		.join(",\n")},\n];\n`;
 }
 
 function generateLayerArray(layers: SortConfig["utilities"]) {
