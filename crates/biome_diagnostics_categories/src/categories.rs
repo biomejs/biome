@@ -130,7 +130,7 @@ define_categories! {
     "lint/nursery/noUselessTernary": "https://biomejs.dev/linter/rules/no-useless-ternary",
     "lint/nursery/useAwait": "https://biomejs.dev/linter/rules/use-await",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
-    "lint/nursery/useConsistentArrayType": "https://biomejs.dev/linter/rules/use-consistent-arrray-type",
+    "lint/nursery/useConsistentArrayType": "https://biomejs.dev/linter/rules/use-consistent-array-type",
     "lint/nursery/useExportType": "https://biomejs.dev/linter/rules/use-export-type",
     "lint/nursery/useFilenamingConvention": "https://biomejs.dev/linter/rules/use-filenaming-convention",
     "lint/nursery/useForOf": "https://biomejs.dev/linter/rules/use-for-of",
