@@ -1,4 +1,5 @@
 mod constants;
+mod definitions;
 mod literals;
 mod parse_error;
 mod patterns;
@@ -15,6 +16,7 @@ use biome_parser::token_source::Trivia;
 use biome_parser::ParserContext;
 use biome_rowan::TextRange;
 use constants::*;
+use definitions::parse_definition_list;
 use literals::parse_double_literal;
 use parse_error::{expected_language_flavor, expected_language_name, expected_pattern};
 use patterns::parse_pattern;
@@ -78,20 +80,20 @@ pub(crate) fn parse_root(p: &mut GritParser) -> CompletedMarker {
 
     p.eat(UNICODE_BOM);
 
-    parse_version(p);
-    parse_language(p);
-    parse_definition_list(p);
+    let _ = parse_version(p);
+    let _ = parse_language_declaration(p);
+    let _ = parse_definition_list(p);
     let _ = parse_pattern(p);
-    parse_definition_list(p);
+    let _ = parse_definition_list(p);
 
     p.eat(EOF);
 
     m.complete(p, GRIT_ROOT)
 }
 
-fn parse_version(p: &mut GritParser) -> Option<CompletedMarker> {
+fn parse_version(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(T![engine]) {
-        return None;
+        return Absent;
     }
 
     let m = p.start();
@@ -117,14 +119,12 @@ fn parse_version(p: &mut GritParser) -> Option<CompletedMarker> {
         p.error(p.err_builder("Engine must be `biome`", engine_range));
     }
 
-    let result = m.complete(p, GRIT_VERSION);
-
-    Some(result)
+    Present(m.complete(p, GRIT_VERSION))
 }
 
-fn parse_language(p: &mut GritParser) -> Option<CompletedMarker> {
+fn parse_language_declaration(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(T![language]) {
-        return None;
+        return Absent;
     }
 
     let m = p.start();
@@ -141,9 +141,7 @@ fn parse_language(p: &mut GritParser) -> Option<CompletedMarker> {
 
     p.eat(T![;]);
 
-    let result = m.complete(p, GRIT_LANGUAGE_DECLARATION);
-
-    Some(result)
+    Present(m.complete(p, GRIT_LANGUAGE_DECLARATION))
 }
 
 fn parse_language_name(p: &mut GritParser) -> ParsedSyntax {
@@ -202,34 +200,19 @@ fn parse_language_flavor_kind(p: &mut GritParser) -> ParsedSyntax {
     Present(m.complete(p, GRIT_LANGUAGE_FLAVOR_KIND))
 }
 
-fn parse_definition_list(p: &mut GritParser) -> CompletedMarker {
-    let m = p.start();
-
-    match p.cur() {
-        GRIT_BOGUS => {
-            let m = p.start();
-            p.bump(GRIT_BOGUS);
-            m.complete(p, GRIT_BOGUS_DEFINITION);
-        }
-        _ => {}
-    }
-
-    m.complete(p, GRIT_DEFINITION_LIST)
-}
-
 #[inline]
 fn parse_maybe_named_arg(p: &mut GritParser) -> ParsedSyntax {
-    if p.at(GRIT_NAME) {
-        parse_named_arg(p)
-    } else {
-        parse_pattern(p)
+    match p.cur() {
+        T![')'] => Absent,
+        GRIT_NAME => parse_named_arg(p),
+        _ => parse_pattern(p)
             .or_recover_with_token_set(
                 p,
                 &ParseRecoveryTokenSet::new(GRIT_BOGUS, ARG_LIST_RECOVERY_SET),
                 expected_pattern,
             )
             .ok()
-            .into()
+            .into(),
     }
 }
 
@@ -265,13 +248,10 @@ fn parse_named_arg(p: &mut GritParser) -> ParsedSyntax {
 fn parse_named_arg_list(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
 
-    if parse_maybe_named_arg(p) == Absent {
-        m.abandon(p);
-        return Absent;
-    }
+    let _ = parse_maybe_named_arg(p);
 
     while p.eat(T![,]) {
-        if p.at(T![')']) || parse_maybe_named_arg(p) == Absent {
+        if parse_maybe_named_arg(p) == Absent {
             break;
         }
     }

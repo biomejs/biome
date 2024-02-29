@@ -54,9 +54,9 @@ pub(crate) fn parse_pattern(p: &mut GritParser) -> ParsedSyntax {
 
     // precedence: 8
     let left = match p.cur() {
-        T![*] => parse_operator(p, left, T![*]),
-        T![/] => parse_operator(p, left, T![/]),
-        T![%] => parse_operator(p, left, T![%]),
+        T![*] => parse_pattern_operation(p, left, T![*]),
+        T![/] => parse_pattern_operation(p, left, T![/]),
+        T![%] => parse_pattern_operation(p, left, T![%]),
         _ => Present(left),
     };
 
@@ -66,8 +66,8 @@ pub(crate) fn parse_pattern(p: &mut GritParser) -> ParsedSyntax {
 
     // precedence: 7
     let left = match p.cur() {
-        T![+] => parse_operator(p, left, T![+]),
-        T![-] => parse_operator(p, left, T![-]),
+        T![+] => parse_pattern_operation(p, left, T![+]),
+        T![-] => parse_pattern_operation(p, left, T![-]),
         _ => Present(left),
     };
 
@@ -183,7 +183,7 @@ fn parse_bubble_scope(p: &mut GritParser) -> ParsedSyntax {
 
     p.eat(T![')']);
 
-    Present(m.complete(p, GRIT_BUBBLE))
+    Present(m.complete(p, GRIT_BUBBLE_SCOPE))
 }
 
 #[inline]
@@ -413,10 +413,9 @@ fn parse_map_key(p: &mut GritParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn parse_maybe_curly_pattern(p: &mut GritParser) -> ParsedSyntax {
-    if p.at(T!['{']) {
-        parse_curly_pattern(p)
-    } else {
-        parse_pattern(p)
+    match p.cur() {
+        T!['{'] => parse_curly_pattern(p),
+        _ => parse_pattern(p),
     }
 }
 
@@ -492,7 +491,7 @@ fn parse_node_like(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_operator(
+fn parse_pattern_operation(
     p: &mut GritParser,
     left: CompletedMarker,
     operator: GritSyntaxKind,
@@ -769,7 +768,7 @@ fn parse_pattern_limit(p: &mut GritParser, left: CompletedMarker) -> ParsedSynta
 }
 
 #[inline]
-fn parse_pattern_list(p: &mut GritParser) -> ParsedSyntax {
+pub(crate) fn parse_pattern_list(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
 
     if parse_pattern(p) == Absent {

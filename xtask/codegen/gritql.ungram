@@ -330,11 +330,6 @@ GritRegexPatternVariables =
     GritPatternArgList?
     ')'
 
-// node api does not have good support for fields (big sad)
-// I double checked by priniting out a JSON stringified
-// version of the object and it does not have the necessary
-// fields. so in order to hide _pattern we create this intermediate
-// value to extract the patternDefinitionBody.
 GritPatternDefinitionBody =
     '{'
     patterns: GritPatternList?

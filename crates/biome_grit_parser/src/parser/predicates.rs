@@ -1,7 +1,7 @@
 use super::literals::{parse_boolean_literal, parse_literal};
 use super::parse_error::expected_pattern;
 use super::patterns::{parse_container, parse_pattern};
-use super::{constants::*, parse_named_arg_list};
+use super::{constants::*, parse_name, parse_named_arg_list};
 use super::{parse_not, GritParser};
 use biome_grit_syntax::GritSyntaxKind::*;
 use biome_grit_syntax::T;
@@ -16,12 +16,6 @@ pub(crate) fn parse_predicate(p: &mut GritParser) -> ParsedSyntax {
         OR_KW => parse_predicate_or(p),
         ANY_KW => parse_predicate_any(p),
         IF_KW => parse_predicate_if_else(p),
-        // TODO: GritPredicateGreater => {}
-        // TODO: GritPredicateLess => {}
-        // TODO: GritPredicateGreaterEqual => {}
-        // TODO: GritPredicateLessEqual => {}
-        // TODO: GritPredicateNotEqual => {}
-        // TODO: GritPredicateEqual => {}
         GRIT_NAME if p.lookahead() == T!['('] => parse_predicate_call(p),
         T!['('] => parse_bracketed_predicate(p),
         T![true] | T![false] => parse_boolean_literal(p),
@@ -55,7 +49,13 @@ fn parse_bracketed_predicate(p: &mut GritParser) -> ParsedSyntax {
 enum InfixPredicateKind {
     Accumulate,
     Assignment,
+    Equal,
+    Greater,
+    GreaterEqual,
+    Less,
+    LessEqual,
     Match,
+    NotEqual,
     Rewrite,
 }
 
@@ -73,7 +73,13 @@ fn parse_infix_predicate(p: &mut GritParser) -> ParsedSyntax {
     let kind = match p.cur() {
         T![+=] => Accumulate,
         T![=] => Assignment,
+        T![==] => Equal,
+        T![>] => Greater,
+        T![>=] => GreaterEqual,
+        T![<] => Less,
+        T![<=] => LessEqual,
         T![<:] => Match,
+        T![!=] => NotEqual,
         T![=>] => Rewrite,
         _ => {
             m.abandon(p);
@@ -83,7 +89,9 @@ fn parse_infix_predicate(p: &mut GritParser) -> ParsedSyntax {
 
     // Verify the subjects are allowed for the matched predicate kind:
     match kind {
-        Accumulate | Rewrite if subject.kind(p) != GRIT_VARIABLE => {
+        Accumulate | Equal | Greater | GreaterEqual | Less | LessEqual | NotEqual | Rewrite
+            if subject.kind(p) != GRIT_VARIABLE =>
+        {
             subject.change_to_bogus(p);
         }
         Assignment if !CONTAINER_SET.contains(subject.kind(p)) => {
@@ -103,7 +111,13 @@ fn parse_infix_predicate(p: &mut GritParser) -> ParsedSyntax {
     let kind = match kind {
         Accumulate => GRIT_PREDICATE_ACCUMULATE,
         Assignment => GRIT_PREDICATE_ASSIGNMENT,
+        Equal => GRIT_PREDICATE_EQUAL,
+        Greater => GRIT_PREDICATE_GREATER,
+        GreaterEqual => GRIT_PREDICATE_GREATER_EQUAL,
+        Less => GRIT_PREDICATE_LESS,
+        LessEqual => GRIT_PREDICATE_LESS_EQUAL,
         Match => GRIT_PREDICATE_MATCH,
+        NotEqual => GRIT_PREDICATE_NOT_EQUAL,
         Rewrite => GRIT_PREDICATE_REWRITE,
     };
     Present(m.complete(p, kind))
@@ -164,11 +178,10 @@ fn parse_predicate_call(p: &mut GritParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump(GRIT_NAME);
+
+    let _ = parse_name(p);
     p.eat(T!['(']);
-
     let _ = parse_named_arg_list(p);
-
     p.eat(T![')']);
 
     Present(m.complete(p, GRIT_PREDICATE_CALL))
@@ -214,7 +227,7 @@ fn parse_predicate_else_clause(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_predicate_list(p: &mut GritParser) -> ParsedSyntax {
+pub(crate) fn parse_predicate_list(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
 
     if parse_predicate(p) == Absent {
