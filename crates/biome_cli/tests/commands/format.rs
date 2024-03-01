@@ -2276,7 +2276,6 @@ fn format_json_when_allow_trailing_commas_write() {
     ));
 }
 
-
 #[test]
 fn format_omits_json_trailing_comma() {
     let mut fs = MemoryFileSystem::default();
@@ -2304,7 +2303,7 @@ fn format_omits_json_trailing_comma() {
                 "--write",
                 file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
