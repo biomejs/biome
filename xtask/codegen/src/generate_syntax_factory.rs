@@ -22,6 +22,11 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
             quote! { JsonSyntaxKind },
             quote! { JsonSyntaxFactory },
         ),
+        LanguageKind::Grit => (
+            quote! { biome_grit_syntax },
+            quote! { GritSyntaxKind },
+            quote! { GritSyntaxFactory },
+        ),
         LanguageKind::Html => (
             quote! { biome_html_syntax },
             quote! { HtmlSyntaxKind },

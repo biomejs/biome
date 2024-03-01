@@ -437,6 +437,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_grit_factory"
+version = "0.4.0"
+dependencies = [
+ "biome_grit_syntax",
+ "biome_rowan",
+]
+
+[[package]]
+name = "biome_grit_syntax"
+version = "0.4.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_grit_factory",
+ "biome_rowan",
+ "schemars",
+ "serde",
+]
+
+[[package]]
 name = "biome_html_factory"
 version = "0.4.0"
 dependencies = [

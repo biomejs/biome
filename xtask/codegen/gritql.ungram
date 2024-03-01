@@ -1,0 +1,554 @@
+// GritQL Un-Grammar.
+//
+// This grammar specifies the structure of Rust's concrete syntax tree.
+// It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
+// Tokens are processed -- contextual keywords are recognised, compound operators glued.
+//
+// Legend:
+//
+//   //          				-- comment
+//   Name =      				-- non-terminal definition
+//   'ident'     				-- token (terminal)
+//   A B         				-- sequence
+//   A | B       				-- alternation
+//   A*          				-- zero or more repetition
+//   (A (',' A)* ','?)	        -- repetition of node A separated by ',' and allowing a trailing comma
+//   (A (',' A)*)	            -- repetition of node A separated by ',' without a trailing comma
+//   A?          				-- zero or one repetition
+//   (A)         				-- same as A
+//   label:A     				-- suggested name for field of AST node
+
+// NOTES
+//
+// - SyntaxNode, SyntaxToken and SyntaxElement will be stripped from the codegen
+// - Bogus nodes are special nodes used to keep track of broken code; they are
+//   not part of the grammar but they will appear inside the green tree
+//
+
+
+///////////////
+// Bogus NODES
+///////////////
+// SyntaxElement is a generic data structure that is meant to track nodes and tokens
+// in cases where we care about both types
+//
+// As Bogus* node will need to yield both tokens and nodes without discrimination,
+// and their children will need to yield nodes and tokens as well.
+// For this reason, SyntaxElement = SyntaxElement
+SyntaxElement = SyntaxElement
+
+GritBogus = SyntaxElement*
+GritBogusContainer = SyntaxElement*
+GritBogusDefinition = SyntaxElement*
+GritBogusPattern = SyntaxElement*
+GritBogusLiteral = SyntaxElement*
+GritBogusNamedArg = SyntaxElement*
+GritBogusPredicate = SyntaxElement*
+
+GritRoot =
+    bom: 'UNICODE_BOM'?
+    version: GritVersion?
+    language: GritLanguageDeclaration?
+    definitions: GritDefinitionList?
+    pattern: AnyGritPattern?
+    definitions_continued: GritDefinitionList?
+    eof: 'EOF'
+
+GritSequential = 'sequential' '{' sequential: GritPatternList '}'
+
+GritFiles = 'multifile' '{' files: GritPatternList '}'
+
+AnyGritDefinition =
+    GritPatternDefinition
+    | GritPredicateDefinition
+    | GritFunctionDefinition
+    | GritBogusDefinition
+
+GritDefinitionList = AnyGritDefinition ('newline' AnyGritDefinition)* 'newline'?
+
+GritVersion = 'engine' 'biome' '(' GritDoubleLiteral ')'
+
+GritLanguageDeclaration =
+    'language'
+    name: GritLanguageName
+    flavor: GritLanguageFlavor?
+    GritBogus?
+    ';'?
+
+GritLanguageFlavor = '(' GritLanguageFlavorList ')'
+GritLanguageFlavorList = GritLanguageFlavorKind (',' GritLanguageFlavorKind)* ','?
+GritLanguageFlavorKind =
+    flavor_kind: (
+        // JavaScript flavors:
+        'typescript' | 'jsx'
+    )
+    GritBogus?
+
+// --- patterns
+
+AnyGritPattern =
+    AnyGritLiteral
+    | GritPatternNot
+    | GritPatternOr
+    | GritPatternOrElse
+    | GritPatternAny
+    | GritPatternAnd
+    | GritPatternMaybe
+    | GritPatternIfElse
+    | GritPatternContains
+    | GritPatternIncludes
+    | GritPatternAfter
+    | GritPatternBefore
+    | GritWithin
+    | GritBubble
+    | GritNodeLike
+    | GritMapAccessor
+    | GritListAccessor
+    | GritDot
+    | GritSome
+    | GritEvery
+    | GritUnderscore
+    | GritVariable
+    | GritRegexPattern
+    | GritPatternAs
+    | GritPatternLimit
+    | GritAssignmentAsPattern
+    | GritPatternAccumulate
+    | GritRewrite
+    | GritLike
+    | GritPatternWhere
+    | GritMulOperation
+    | GritDivOperation
+    | GritModOperation
+    | GritAddOperation
+    | GritSubOperation
+    | GritSequential
+    | GritFiles
+    | BracketedGritPattern
+    | GritBogusPattern
+
+BracketedGritPattern = '(' AnyGritPattern ')'
+
+MaybeCurlyGritPattern = AnyGritPattern | CurlyGritPattern
+CurlyGritPattern = '{' AnyGritPattern '}'
+
+GritPatternList = AnyGritPattern (',' AnyGritPattern)* ','?
+
+AnyGritContainer =
+    GritVariable | GritMapAccessor | GritListAccessor | GritBogusContainer
+
+GritMulOperation =
+    left: AnyGritPattern '*' right: AnyGritPattern
+GritDivOperation =
+    left: AnyGritPattern '/' right: AnyGritPattern
+GritModOperation =
+    left: AnyGritPattern '%' right: AnyGritPattern
+GritAddOperation =
+    left: AnyGritPattern '+' right: AnyGritPattern
+GritSubOperation =
+    left: AnyGritPattern '-' right: AnyGritPattern
+
+GritPatternAs =
+    pattern: AnyGritPattern 'as' variable: GritVariable
+
+GritPatternLimit =
+    pattern: AnyGritPattern 'limit' limit: GritIntLiteral
+
+// statement, in the engine this is a predicate that always evaluates to true
+// This is useful for initializing variables at the root of a pattern definition
+GritAssignmentAsPattern =
+    container: AnyGritContainer '=' pattern: AnyGritPattern
+
+// Primarily used for initializing variables at the root of a pattern definition
+GritPatternAccumulate =
+    left: AnyGritPattern '+=' right: AnyGritPattern
+
+GritPatternWhere =
+    pattern: AnyGritPattern 'where' side_condition: AnyGritPredicate
+
+AnyGritLiteral =
+    GritCodeSnippet
+    | GritStringLiteral
+    | GritIntLiteral
+    | GritDoubleLiteral
+    | GritBooleanLiteral
+    | GritUndefinedLiteral
+    | GritMap
+    | GritList
+    | GritBogusLiteral
+
+GritPatternNot =
+    GritNot
+    pattern: AnyGritPattern
+
+GritPatternOr = 'or' '{' patterns: GritPatternList '}'
+
+GritPatternOrElse = 'orelse' '{' patterns: GritPatternList? '}'
+
+GritPatternAny = 'any' '{' patterns: GritPatternList? '}'
+
+GritPatternAnd = 'and' '{' patterns: GritPatternList? '}'
+
+GritPatternMaybe = 'maybe' pattern: MaybeCurlyGritPattern
+
+GritPatternAfter = 'after' pattern: AnyGritPattern
+
+GritPatternBefore = 'before' pattern: AnyGritPattern
+
+GritPatternContains =
+    'contains'
+    contains: MaybeCurlyGritPattern
+    GritPatternContainsUntilClause?
+
+GritPatternContainsUntilClause =
+    'until'
+    until: AnyGritPattern
+
+GritPatternIncludes = 'includes' includes: MaybeCurlyGritPattern
+
+GritRewrite =
+    left: AnyGritPattern
+    annotation: GritAnnotation?
+    '=>'
+    right: AnyGritPattern
+
+// --- conditional pattern ------------
+GritPatternIfElse =
+    'if'
+    '('
+    if_predicate: AnyGritPredicate
+    ')'
+    then_pattern: MaybeCurlyGritPattern
+    GritPatternElseClause?
+
+GritPatternElseClause =
+    'else'
+    else_pattern: MaybeCurlyGritPattern
+// --- conditional pattern ------------
+
+GritWithin =
+    'within'
+    pattern: MaybeCurlyGritPattern
+
+GritBubbleScope = '(' GritVariableList? ')'
+
+GritBubble =
+    'bubble'
+    variables: GritBubbleScope?
+    pattern: MaybeCurlyGritPattern
+
+MaybeGritNamedArg =
+    AnyGritPattern
+    | GritNamedArg
+    | GritBogusNamedArg
+
+GritNamedArg =
+    name: GritName
+    '='
+    pattern: AnyGritPattern
+
+GritNamedArgList = MaybeGritNamedArg (',' MaybeGritNamedArg)* ','?
+
+// maybe we should have a different fieldname for each choice?
+GritNodeLike =
+    name: GritName
+    '('
+    named_args: GritNamedArgList?
+    ')'
+
+GritLike =
+    'like'
+    GritLikeThreshold?
+    '{'
+    example: AnyGritPattern
+    '}'
+
+GritLikeThreshold =
+    '('
+    threshold: AnyGritPattern
+    ')'
+
+GritMap =
+    '{'
+    elements: GritMapElementList?
+    '}'
+
+GritMapElementList = GritMapElement (',' GritMapElement)* ','?
+
+GritMapElement =
+    key: GritName
+    ':'
+    value: AnyGritPattern
+
+GritMapAccessor =
+    map: GritMapAccessorSubject
+    '.'
+    key: GritMapKey
+    GritBogus?
+
+GritMapAccessorSubject = GritMap | AnyGritContainer
+GritMapKey = GritName | GritVariable
+
+GritList =
+    GritName?
+    '['
+    patterns: GritListPatternList?
+    ']'
+
+GritListPatternList = AnyGritListPattern (',' AnyGritListPattern)* ','?
+
+AnyGritListPattern = AnyGritPattern | GritDotdotdot
+
+GritListAccessor =
+    list: GritListAccessorSubject
+    '['
+    index: GritListIndex
+    ']'
+    GritBogus?
+
+GritListAccessorSubject = GritList | AnyGritContainer
+GritListIndex = AnyGritContainer | GritNegativeIntLiteral | GritIntLiteral
+
+GritDot = '.'
+
+GritSome = 'some' pattern: MaybeCurlyGritPattern
+GritEvery = 'every' pattern: MaybeCurlyGritPattern
+
+GritDotdotdot =
+    dotdotdot: '...'
+    MaybeCurlyGritPattern?
+
+GritUnderscore =
+    dollar_underscore: '$_'
+
+GritRegexPattern =
+    regex: AnyGritRegex
+    variables: GritRegexPatternVariables?
+
+GritRegexPatternVariables =
+    '('
+    GritPatternArgList?
+    ')'
+
+GritPatternDefinitionBody =
+    '{'
+    patterns: GritPatternList?
+    '}'
+
+GritPatternDefinition =
+    visibility: 'private'?
+    'pattern'
+    name: GritName
+    '('
+    args: GritPatternArgList?
+    ')'
+    language: GritLanguageDeclaration?
+    body: GritPatternDefinitionBody
+
+GritPatternArgList = GritVariableList
+
+GritPredicateList = AnyGritPredicate (',' AnyGritPredicate)* ','?
+
+GritCurlyPredicateList =
+    '{'
+    predicates: GritPredicateList?
+    '}'
+
+GritPredicateDefinition =
+    'predicate'
+    name: GritName
+    '('
+    args: GritPatternArgList?
+    ')'
+    body: GritCurlyPredicateList
+
+GritFunctionDefinition =
+    'function'
+    name: GritName
+    '('
+    args: GritVariableList?
+    ')'
+    body: GritCurlyPredicateList
+
+AnyGritPredicate =
+    GritPredicateNot
+    | GritPredicateMaybe
+    | GritPredicateAnd
+    | GritPredicateOr
+    | GritPredicateAny
+    | GritPredicateIfElse
+    | GritPredicateAssignment
+    | GritPredicateAccumulate
+    | GritPredicateRewrite
+    | GritPredicateGreater
+    | GritPredicateLess
+    | GritPredicateGreaterEqual
+    | GritPredicateLessEqual
+    | GritPredicateNotEqual
+    | GritPredicateEqual
+    | GritPredicateMatch
+    | GritPredicateCall
+    | BracketedGritPredicate
+    | GritBooleanLiteral
+    | GritPredicateReturn
+    | GritBogusPredicate
+
+BracketedGritPredicate = '(' AnyGritPredicate ')'
+
+GritPredicateNot =
+    GritNot
+    predicate: AnyGritPredicate
+
+GritPredicateMaybe =
+    'maybe'
+    predicate: AnyGritPredicate
+
+GritPredicateAnd =
+    'and'?
+    '{'
+    predicates: GritPredicateList?
+    '}'
+
+GritPredicateOr =
+    'or'
+    '{'
+    predicates: GritPredicateList?
+    '}'
+
+GritPredicateAny =
+    'any'
+    '{'
+    predicates: GritPredicateList?
+    '}'
+
+GritPredicateIfElse =
+    'if'
+    '('
+    if_predicate: AnyGritPredicate
+    ')'
+    then_predicate: AnyGritPredicate
+    GritPredicateElseClause?
+
+GritPredicateElseClause =
+    'else'
+    else_predicate: AnyGritPredicate
+
+GritPredicateRewrite =
+    left: GritVariable
+    annotation: GritAnnotation?
+    '=>'
+    right: AnyGritPattern
+    GritBogus?
+
+GritPredicateAssignment =
+    container: AnyGritContainer
+    '='
+    pattern: AnyGritPattern
+    GritBogus?
+
+GritPredicateAccumulate =
+    left: GritVariable
+    '+='
+    right: AnyGritPattern
+
+GritPredicateGreater =
+    left: GritVariable
+    '>'
+    right: AnyGritPattern
+
+GritPredicateLess =
+    left: GritVariable
+    '<'
+    right: AnyGritPattern
+
+GritPredicateGreaterEqual =
+    left: GritVariable
+    '>='
+    right: AnyGritPattern
+
+GritPredicateLessEqual =
+    left: GritVariable
+    '<='
+    right: AnyGritPattern
+
+GritPredicateNotEqual =
+    left: GritVariable
+    '!='
+    right: AnyGritPattern
+
+GritPredicateEqual =
+    left: GritVariable
+    '=='
+    right: AnyGritPattern
+
+GritPredicateMatch =
+    left: GritPredicateMatchSubject
+    match: '<:'
+    right: AnyGritPattern
+    GritBogus?
+
+GritPredicateMatchSubject = AnyGritContainer | AnyGritLiteral
+
+GritPredicateCall =
+    name: GritName
+    '('
+    named_args: GritNamedArgList?
+    ')'
+
+GritPredicateReturn =
+    'return'
+    pattern: AnyGritPattern
+
+// --- tokens and lexical definitions
+
+GritBooleanLiteral =
+    value: ('true' | 'false')
+
+GritVariable = 'grit_variable'
+GritVariableList = GritVariable (',' GritVariable)* ','?
+
+// name for variables, labels
+GritName = 'grit_name'
+
+// These are target languages
+GritLanguageName =
+    language_kind: ('js' | 'css' | 'json' | 'grit' | 'html')
+
+GritBacktickSnippetLiteral = value: 'grit_backtick_snippet'
+
+GritRawBacktickSnippetLiteral = value: 'grit_raw_backtick_snippet'
+
+GritLanguageSpecificSnippet =
+    language: GritLanguageName
+    snippet: 'grit_string'
+
+// a code snippet may be prefixed by a label;
+// the label may be prefixed by a module or sort name (separated from the label by a dot)
+// used to be: /((?:[A-Za-z0-9_]+\.)?[A-Za-z0-9_]*)?`(?:[^`\\]|\\`|\\n)*`/
+GritCodeSnippet =
+    source: GritCodeSnippetSource
+
+GritCodeSnippetSource =
+    GritBacktickSnippetLiteral
+    | GritLanguageSpecificSnippet
+    | GritRawBacktickSnippetLiteral
+
+GritNot =
+    token: ('not' | '!')
+
+GritUndefinedLiteral = 'undefined'
+
+GritIntLiteral = value: 'grit_int'
+GritNegativeIntLiteral = value: 'grit_negative_int'
+
+GritDoubleLiteral = value: 'grit_double'
+
+GritStringLiteral = value: 'grit_string'
+
+AnyGritRegex = GritRegexLiteral | GritSnippetRegexLiteral
+
+GritRegexLiteral = value: 'grit_regex'
+
+GritSnippetRegexLiteral = value: 'grit_snippet_regex'
+
+GritAnnotation = 'grit_annotation'

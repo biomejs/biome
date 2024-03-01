@@ -13,6 +13,7 @@ use crate::css_kinds_src::CSS_KINDS_SRC;
 use crate::generate_node_factory::generate_node_factory;
 use crate::generate_nodes_mut::generate_nodes_mut;
 use crate::generate_syntax_factory::generate_syntax_factory;
+use crate::grit_kinds_src::GRIT_KINDS_SRC;
 use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::js_kinds_src::{
     AstEnumSrc, AstListSeparatorConfiguration, AstListSrc, AstNodeSrc, TokenKind, JS_KINDS_SRC,
@@ -48,10 +49,7 @@ pub fn generate_ast(mode: Mode, language_kind_list: Vec<String>) -> Result<()> {
     };
     for kind in codegen_language_kinds {
         println_string_with_fg_color(
-            format!(
-                "-------------------Generating Grammar for {}-------------------",
-                kind
-            ),
+            format!("-------------------Generating Grammar for {kind}-------------------"),
             Color::Green,
         );
         let mut ast = load_ast(kind);
@@ -67,6 +65,7 @@ pub(crate) fn load_ast(language: LanguageKind) -> AstSrc {
         LanguageKind::Js => load_js_ast(),
         LanguageKind::Css => load_css_ast(),
         LanguageKind::Json => load_json_ast(),
+        LanguageKind::Grit => load_gritql_ast(),
         LanguageKind::Html => load_html_ast(),
     }
 }
@@ -85,6 +84,7 @@ pub(crate) fn generate_syntax(ast: AstSrc, mode: &Mode, language_kind: LanguageK
         LanguageKind::Js => JS_KINDS_SRC,
         LanguageKind::Css => CSS_KINDS_SRC,
         LanguageKind::Json => JSON_KINDS_SRC,
+        LanguageKind::Grit => GRIT_KINDS_SRC,
         LanguageKind::Html => HTML_KINDS_SRC,
     };
 
@@ -182,6 +182,12 @@ pub(crate) fn load_css_ast() -> AstSrc {
 
 pub(crate) fn load_json_ast() -> AstSrc {
     let grammar_src = include_str!("../json.ungram");
+    let grammar: Grammar = grammar_src.parse().unwrap();
+    make_ast(&grammar)
+}
+
+pub(crate) fn load_gritql_ast() -> AstSrc {
+    let grammar_src = include_str!("../gritql.ungram");
     let grammar: Grammar = grammar_src.parse().unwrap();
     make_ast(&grammar)
 }
