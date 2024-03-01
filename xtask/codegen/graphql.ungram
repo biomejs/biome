@@ -1,0 +1,519 @@
+// GraphQL Un-Grammar.
+//
+// This grammar specifies the structure of Rust's concrete syntax tree.
+// It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
+// Tokens are processed -- contextual keywords are recognised, compound operators glued.
+//
+// Legend:
+//
+//   //          				-- comment
+//   Name =      				-- non-terminal definition
+//   'ident'     				-- token (terminal)
+//   A B         				-- sequence
+//   A | B       				-- alternation
+//   A*          				-- zero or more repetition
+//   (A (',' A)* ','?)	-- repetition of node A separated by ',' and allowing a trailing comma
+//   (A (',' A)*)	      -- repetition of node A separated by ',' without a trailing comma
+//   A?          				-- zero or one repetition
+//   (A)         				-- same as A
+//   label:A     				-- suggested name for field of AST node
+
+// NOTES
+//
+// - SyntaxNode, SyntaxToken and SyntaxElement will be stripped from the codegen
+// - Bogus nodes are special nodes used to keep track of broken code; they are
+//   not part of the grammar but they will appear inside the green tree
+//
+
+
+///////////////
+// BOGUS NODES
+///////////////
+// SyntaxElement is a generic data structure that is meant to track nodes and tokens
+// in cases where we care about both types
+//
+// As Bogus* node will need to yield both tokens and nodes without discrimination,
+// and their children will need to yield nodes and tokens as well.
+// For this reason, SyntaxElement = SyntaxElement
+SyntaxElement = SyntaxElement
+
+GraphqlBogus = SyntaxElement*
+
+GraphqlName = value: 'ident'
+
+GraphqlDocument = GraphqlDefinitionList
+
+GraphqlDefinitionList = AnyGraphqlDefinition*
+
+AnyGraphqlDefinition =
+  AnyGraphqlOperationDefinition
+  | GraphqlFragmentDefinition
+  | GraphqlDirectiveDefinition
+  | GraphqlSchemaDefinition
+  // Type Definitions
+  | GraphqlScalarTypeDefinition
+  | GraphqlObjectTypeDefinition
+  | GraphqlInterfaceTypeDefinition
+  | GraphqlUnionTypeDefinition
+  | GraphqlEnumTypeDefinition
+  | GraphqlInputObjectTypeDefinition
+  // Type System Extensions: we may possible want to group those in an enum outside of 'Definition'
+  | AnyGraphqlSchemaExtension
+  // Type Extensions
+  | GraphqlScalarTypeExtension
+  | AnyGraphqlObjectTypeExtension
+  | AnyGraphqlInterfaceTypeExtension
+  | AnyGraphqlUnionTypeExtension
+  | AnyGraphqlEnumTypeExtension
+  | AnyGraphqlInputObjectTypeExtension
+
+AnyGraphqlOperationDefinition = GraphqlOperationDefinition | GraphqlSelectionSet
+
+GraphqlOperationDefinition =
+  type: GraphqlOperationType
+	name: GraphqlName?
+	variables: GraphqlVariableDefinitions?
+	directives: GraphqlDirectiveList
+	selection_set: GraphqlSelectionSet
+
+GraphqlOperationType =
+  value_token: ('query' | 'mutation' | 'subscription')
+
+GraphqlSelectionSet =
+  '{'
+	selections: GraphqlSelectionList
+	'}'
+
+GraphqlSelectionList = AnyGraphqlSelection*
+
+AnyGraphqlSelection =
+  GraphqlField
+  | GraphqlFragmentSpread
+  | GraphqlInlineFragment
+
+GraphqlField =
+  alias: GraphqlAlias?
+	name: GraphqlName
+	arguments: GraphqlArguments?
+	directives: GraphqlDirectiveList
+	selection_set: GraphqlSelectionSet?
+
+GraphqlAlias =
+  value: GraphqlName
+	':'
+
+GraphqlArguments =
+  '('
+	arguments: GraphqlArgumentList
+	')'
+
+GraphqlArgumentList = GraphqlArgument*
+
+GraphqlArgument =
+  name: GraphqlName
+	':'
+	value: AnyGraphqlValue
+
+GraphqlFragmentSpread =
+  '...'
+	name: GraphqlFragmentName
+	directives: GraphqlDirectiveList
+
+GraphqlInlineFragment =
+  '...'
+	type_condition: GraphqlTypeCondition?
+	directives: GraphqlDirectiveList
+	selection_set: GraphqlSelectionSet
+
+GraphqlFragmentDefinition =
+  'fragment'
+	name: GraphqlFragmentName
+	type_condition: GraphqlTypeCondition
+	directives: GraphqlDirectiveList
+	selection_set: GraphqlSelectionSet
+
+GraphqlFragmentName =
+  name: GraphqlName
+
+GraphqlTypeCondition =
+  'on'
+	type: GraphqlNamedType
+
+AnyGraphqlValue =
+  GraphqlVariable
+  | GraphqlStringValue
+  | GraphqlFloatValue
+  | GraphqlIntValue
+  | GraphqlBooleanValue
+  | GraphqlNullValue
+  | GraphqlEnumValue
+  | GraphqlListValue
+  | GraphqlObjectValue
+
+GraphqlStringValue = 'graphql_string_literal'
+
+GraphqlFloatValue = 'graphql_float_literal'
+
+GraphqlIntValue = 'graphql_int_literal'
+
+GraphqlBooleanValue = value_token: ('true' | 'false')
+
+GraphqlNullValue = 'null'
+
+GraphqlEnumValue = GraphqlName
+
+GraphqlListValue =
+ '['
+ elements: GraphqlListValueElementList
+ ']'
+
+// TODO: commas is optional in GraphQL
+GraphqlListValueElementList = (AnyGraphqlValue (',' AnyGraphqlValue)* ','?)
+
+GraphqlObjectValue =
+ '{'
+ members: GraphqlObjectValueMemberList
+ '}'
+
+// TODO: commas is optional in GraphQL
+GraphqlObjectValueMemberList = (GraphqlObjectField (',' GraphqlObjectField)* ','?)
+
+GraphqlObjectField =
+  name: GraphqlName
+	':'
+	value: AnyGraphqlValue
+
+GraphqlVariableDefinitions =
+  '('
+	elements: GraphqlVariableDefinitionList
+	')'
+
+// TODO: commas is optional in GraphQL
+GraphqlVariableDefinitionList = (GraphqlVariableDefinition (',' GraphqlVariableDefinition)* ','?)
+
+GraphqlVariableDefinition =
+  variable: GraphqlVariable
+	':'
+	type: AnyGraphqlType
+	default: GraphqlDefaultValue?
+	directives: GraphqlDirectiveList
+
+GraphqlVariable =
+  '$'
+	name: GraphqlName
+
+GraphqlDefaultValue =
+  '='
+	value: AnyGraphqlValue
+
+AnyGraphqlType =
+  AnyGraphqlPrimitiveType
+  | GraphqlNonNullType
+
+AnyGraphqlPrimitiveType = GraphqlNamedType | GraphqlListType
+
+GraphqlNamedType =
+  name: GraphqlName
+
+GraphqlListType =
+  '['
+	element: AnyGraphqlType
+	']'
+
+GraphqlNonNullType =
+	base: AnyGraphqlPrimitiveType
+	'!'
+
+GraphqlDirectiveList =
+  GraphqlDirective*
+
+GraphqlDirective =
+  '@'
+	name: GraphqlName
+	arguments: GraphqlArguments?
+
+GraphqlSchemaDefinition =
+  description: GraphqlDescription?
+	'schema'
+	directives: GraphqlDirectiveList
+	'{'
+	root_operation_type: GraphqlRootOperationTypeDefinitionList
+	'}'
+
+GraphqlRootOperationTypeDefinitionList = GraphqlRootOperationTypeDefinition*
+
+AnyGraphqlSchemaExtension =
+	GraphqlSchemaExtensionWithRootOperationType
+  | GraphqlSchemaExtension
+
+GraphqlSchemaExtensionWithRootOperationType =
+  'extend' 'schema'
+	directives: GraphqlDirectiveList
+	'{'
+	root_operation_type: GraphqlRootOperationTypeDefinitionList
+	'}'
+
+GraphqlSchemaExtension =
+   'extend'
+	 'schema'
+	 directives: GraphqlDirectiveList
+
+GraphqlRootOperationTypeDefinition =
+  operation_type: GraphqlOperationType
+	':'
+	named_type: GraphqlNamedType
+
+GraphqlDescription =
+  GraphqlStringValue
+
+GraphqlScalarTypeDefinition =
+  description: GraphqlDescription?
+	'scalar'
+	name: GraphqlName
+	directives: GraphqlDirectiveList
+
+GraphqlScalarTypeExtension =
+  'extend'
+	'scalar'
+	name: GraphqlName
+	directives: GraphqlDirectiveList
+
+GraphqlObjectTypeDefinition =
+  description: GraphqlDescription?
+	'type'
+	name: GraphqlName
+	implements: GraphqlImplementsInterfaces?
+	directives: GraphqlDirectiveList
+	fields: GraphqlFieldsDefinition?
+
+AnyGraphqlObjectTypeExtension =
+  GraphqlObjectTypeExtensionWithFields
+  | GraphqlObjectTypeExtensionWithDirectives
+	| GraphqlObjectTypeExtension
+
+GraphqlObjectTypeExtensionWithFields =
+  'extend'
+	'type'
+	name: GraphqlName
+	implements: GraphqlImplementsInterfaces?
+	directives: GraphqlDirectiveList
+	fields: GraphqlFieldsDefinition
+
+GraphqlObjectTypeExtensionWithDirectives =
+  'extend'
+	'type'
+	name: GraphqlName
+	implements: GraphqlImplementsInterfaces?
+	directives: GraphqlDirectiveList
+
+GraphqlObjectTypeExtension =
+  'extend'
+	'type'
+	name: GraphqlName
+	implements: GraphqlImplementsInterfaces
+
+GraphqlImplementsInterfaces =
+  'implements'
+	'&'?
+	interfaces: GraphqlImplementsInterfaceList
+
+GraphqlImplementsInterfaceList = (GraphqlNamedType ('&' GraphqlNamedType)*)
+
+GraphqlFieldsDefinition =
+  '{'
+	fields: GraphqlFieldDefinitionList
+	'}'
+
+GraphqlFieldDefinitionList = GraphqlFieldDefinition*
+
+GraphqlFieldDefinition =
+  description: GraphqlDescription?
+	name: GraphqlName
+	arguments: GraphqlArgumentsDefinition?
+	':'
+	type: AnyGraphqlType
+	directives: GraphqlDirectiveList
+
+GraphqlArgumentsDefinition =
+  '('
+	arguments: GraphqlArgumentDefinitionList
+	')'
+
+GraphqlArgumentDefinitionList = GraphqlInputValueDefinition*
+
+GraphqlInputValueDefinition =
+  description: GraphqlDescription?
+	name: GraphqlName
+	':'
+	type: AnyGraphqlType
+	default: GraphqlDefaultValue?
+	directives: GraphqlDirectiveList
+
+GraphqlInterfaceTypeDefinition =
+  description: GraphqlDescription?
+	'interface'
+	name: GraphqlName
+	implements: GraphqlImplementsInterfaces?
+	directives: GraphqlDirectiveList
+	fields: GraphqlFieldsDefinition?
+
+AnyGraphqlInterfaceTypeExtension =
+  GraphqlInterfaceTypeExtensionWithFields
+  | GraphqlInterfaceTypeExtensionWithDirectives
+  | GraphqlInterfaceTypeExtension
+
+GraphqlInterfaceTypeExtensionWithFields =
+  'extend'
+	'interface'
+	name: GraphqlName
+	implements: GraphqlImplementsInterfaces?
+	directives: GraphqlDirectiveList
+	fields: GraphqlFieldsDefinition
+
+GraphqlInterfaceTypeExtensionWithDirectives =
+  'extend'
+	'interface'
+	name: GraphqlName
+	implements: GraphqlImplementsInterfaces?
+	directives: GraphqlDirectiveList
+
+GraphqlInterfaceTypeExtension =
+  'extend'
+	'interface'
+	name: GraphqlName
+	implements: GraphqlImplementsInterfaces
+
+GraphqlUnionTypeDefinition =
+  description: GraphqlDescription?
+	'union'
+	name: GraphqlName
+	directives: GraphqlDirectiveList
+	union_members: GraphqlUnionMemberTypes?
+
+GraphqlUnionMemberTypes =
+  '='
+	'|'?
+	members: GraphqlUnionMemberTypeList
+
+GraphqlUnionMemberTypeList = (GraphqlNamedType ('|' GraphqlNamedType)*)
+
+AnyGraphqlUnionTypeExtension =
+  GraphqlUnionTypeExtensionWithMembers
+	| GraphqlUnionTypeExtension
+
+GraphqlUnionTypeExtensionWithMembers =
+  'extend'
+	'union'
+	name: GraphqlName
+	directives: GraphqlDirectiveList
+	union_members: GraphqlUnionMemberTypes
+
+GraphqlUnionTypeExtension =
+	'extend'
+	'union'
+	name: GraphqlName
+	directives: GraphqlDirectiveList
+
+GraphqlEnumTypeDefinition =
+  description: GraphqlDescription?
+	'enum'
+	name: GraphqlName
+	directives: GraphqlDirectiveList
+	enum_values: GraphqlEnumValuesDefinition?
+
+GraphqlEnumValuesDefinition =
+  '{'
+	values: GraphqlEnumValueList
+	'}'
+
+GraphqlEnumValueList = GraphqlEnumValueDefinition*
+
+GraphqlEnumValueDefinition =
+  description: GraphqlDescription?
+	value: GraphqlEnumValue
+	directives: GraphqlDirectiveList
+
+AnyGraphqlEnumTypeExtension =
+  GraphqlEnumTypeExtensionWithValues
+  | GraphqlEnumTypeExtension
+
+GraphqlEnumTypeExtensionWithValues =
+  'extend'
+	'enum'
+	name: GraphqlName
+	directives: GraphqlDirectiveList
+	enum_values: GraphqlEnumValuesDefinition
+
+GraphqlEnumTypeExtension =
+  'extend'
+	'enum'
+	name: GraphqlName
+	directives: GraphqlDirectiveList
+
+GraphqlInputObjectTypeDefinition =
+  description: GraphqlDescription?
+	'input'
+	name: GraphqlName
+	directives: GraphqlDirectiveList
+	input_fields: GraphqlInputFieldsDefinition?
+
+GraphqlInputFieldsDefinition =
+  '{'
+	fields: GraphqlInputFieldList
+	'}'
+
+GraphqlInputFieldList = GraphqlInputValueDefinition*
+
+AnyGraphqlInputObjectTypeExtension =
+  GraphqlInputObjectTypeExtensionWithFields
+	| GraphqlInputObjectTypeExtension
+
+GraphqlInputObjectTypeExtensionWithFields =
+  'extend'
+	'input'
+	name: GraphqlName
+	directives: GraphqlDirectiveList
+	input_fields: GraphqlInputFieldsDefinition
+
+GraphqlInputObjectTypeExtension =
+	'extend'
+	'input'
+	name: GraphqlName
+	directives: GraphqlDirectiveList
+
+GraphqlDirectiveDefinition =
+  description: GraphqlDescription?
+	'directive'
+	'@'
+	name: GraphqlName
+	arguments: GraphqlArgumentsDefinition?
+	'repeatable'?
+	'on'
+	'|'?
+	locations: GraphqlDirectiveLocationList
+
+GraphqlDirectiveLocationList =
+	(GraphqlDirectiveLocation ('|' GraphqlDirectiveLocation)*)
+
+GraphqlDirectiveLocation =
+  value_token: (
+		'QUERY'
+		| 'MUTATION'
+		| 'SUBSCRIPTION'
+		| 'FIELD'
+		| 'FRAGMENT_DEFINITION'
+		| 'FRAGMENT_SPREAD'
+		| 'INLINE_FRAGMENT'
+		| 'VARIABLE_DEFINITION'
+		| 'SCHEMA'
+		| 'SCALAR'
+		| 'OBJECT'
+		| 'FIELD_DEFINITION'
+		| 'ARGUMENT_DEFINITION'
+		| 'INTERFACE'
+		| 'UNION'
+		| 'ENUM'
+		| 'ENUM_VALUE'
+		| 'INPUT_OBJECT'
+		| 'INPUT_FIELD_DEFINITION'
+	)

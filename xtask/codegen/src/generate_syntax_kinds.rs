@@ -38,9 +38,22 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
     // we need to replace "-" with "_" for the keywords
     // e.g. we have `color-profile` in css but it's an invalid ident in rust code
     // color-profile => "color_profile"
+    // also mark uppercase differently from lowercase
+    // e.g. "query" => "QUERY", "QUERY" => "Q_U_E_R_Y_"
     let all_keywords_values = all_keywords
         .iter()
-        .map(|kw| kw.replace('-', "_"))
+        .map(|kw| {
+            kw.replace('-', "_")
+                .chars()
+                .map(|c| {
+                    if c.is_uppercase() {
+                        c.to_string() + "_"
+                    } else {
+                        c.to_string()
+                    }
+                })
+                .collect::<String>()
+        })
         .collect::<Vec<_>>();
     // "color_profile" => COLOR_PROFILE_KW
     let full_keywords = all_keywords_values
@@ -144,6 +157,19 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
                         HTML_STRING_LITERAL => "string literal",
+                        _ => return None,
+                    };
+                    Some(tok)
+                }
+            }
+        }
+        LanguageKind::Graphql => {
+            quote! {
+                pub const fn to_string(&self) -> Option<&'static str> {
+                    let tok = match self {
+                        #(#punctuation => #punctuation_strings,)*
+                        #(#full_keywords => #all_keyword_to_strings,)*
+                        GRAPHQL_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
                     Some(tok)
