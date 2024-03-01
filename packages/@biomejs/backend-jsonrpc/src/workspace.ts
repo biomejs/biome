@@ -389,6 +389,10 @@ export interface PartialJsonFormatter {
 	 * What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "omit".
+	 */
+	trailingComma?: TrailingComma;
 }
 /**
  * Options that changes how the JSON parser behaves

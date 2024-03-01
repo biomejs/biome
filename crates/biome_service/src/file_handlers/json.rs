@@ -21,7 +21,7 @@ use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::{BiomePath, ConfigName, ROME_JSON};
 use biome_json_analyze::analyze;
-use biome_json_formatter::context::JsonFormatOptions;
+use biome_json_formatter::context::{JsonFormatOptions, TrailingComma};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
@@ -37,6 +37,7 @@ pub struct JsonFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
+    pub trailing_comma: Option<TrailingComma>,
     pub enabled: Option<bool>,
 }
 
@@ -60,7 +61,7 @@ impl Language for JsonLanguage {
     fn resolve_format_options(
         global: &FormatSettings,
         overrides: &OverrideSettings,
-        language: &Self::FormatterSettings,
+        language: &JsonFormatterSettings,
         path: &BiomePath,
         document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
@@ -88,15 +89,26 @@ impl Language for JsonLanguage {
 
         overrides.override_json_format_options(
             path,
-            JsonFormatOptions::new(
-                document_file_source
-                    .to_json_file_source()
-                    .unwrap_or_default(),
-            )
-            .with_line_ending(line_ending)
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width),
+            JsonFormatOptions::new()
+                .with_line_ending(line_ending)
+                .with_indent_style(indent_style)
+                .with_indent_width(indent_width)
+                .with_line_width(line_width)
+                .with_trailing_comma(
+                    language
+                        .trailing_comma
+                        .or(document_file_source
+                            .to_json_file_source()
+                            .map(|source| source.allows_trailing_comma())
+                            .map(|allows| {
+                                if allows {
+                                    TrailingComma::All
+                                } else {
+                                    TrailingComma::None
+                                }
+                            }))
+                        .unwrap_or_default(),
+                ),
         )
     }
 }

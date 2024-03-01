@@ -49,13 +49,8 @@ pub(crate) trait FormatAstSeparatedListExtension:
     fn format_separated(
         &self,
         separator: &'static str,
-        allow_trailing_separator: bool,
+        trailing_separator: TrailingSeparator,
     ) -> JsonFormatSeparatedIter<Self::Node> {
-        let trailing_separator = if allow_trailing_separator {
-            TrailingSeparator::Allowed
-        } else {
-            TrailingSeparator::Disallowed
-        };
         JsonFormatSeparatedIter::new(
             self.elements(),
             separator,

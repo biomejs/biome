@@ -3,6 +3,7 @@ use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
+use biome_json_formatter::context::TrailingComma;
 
 /// Options applied to JSON files
 #[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
@@ -67,6 +68,10 @@ pub struct JsonFormatter {
     ))]
     #[partial(bpaf(long("json-formatter-line-width"), argument("NUMBER"), optional))]
     pub line_width: Option<LineWidth>,
+
+    /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "omit".
+    #[partial(bpaf(long("json-formatter-trailing-comma"), argument("omit|allow"), optional))]
+    pub trailing_comma: Option<TrailingComma>,
 }
 
 impl PartialJsonFormatter {
@@ -78,6 +83,7 @@ impl PartialJsonFormatter {
             indent_size: self.indent_size,
             line_ending: self.line_ending,
             line_width: self.line_width,
+            trailing_comma: self.trailing_comma
         }
     }
 }
@@ -91,6 +97,7 @@ impl Default for JsonFormatter {
             indent_size: Default::default(),
             line_ending: Default::default(),
             line_width: Default::default(),
+            trailing_comma: Default::default()
         }
     }
 }

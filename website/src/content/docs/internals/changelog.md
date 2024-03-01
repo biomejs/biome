@@ -625,6 +625,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+#### New features
+
+- Add option `json.formatter.trailingComma`, to provide a better control over the trailing comma in JSON/JSONC files. Its default value is `"none"`.
+  When this option isn't provided, and you set the parser option `json.parser.allowTrailingComma` to `true`, the value of `json.formatter.trailingComma` is `"all"`.
+
 #### Bug fixes
 
 - Fix [#1178](https://github.com/biomejs/biome/issues/1178), where the line ending option wasn't correctly applied.

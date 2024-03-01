@@ -1236,6 +1236,13 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"trailingComma": {
+					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"omit\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/TrailingComma" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false

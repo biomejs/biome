@@ -2276,6 +2276,51 @@ fn format_json_when_allow_trailing_commas_write() {
     ));
 }
 
+
+#[test]
+fn format_omits_json_trailing_comma() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config_json = r#"{
+    "json": {
+        "parser": { "allowTrailingCommas": true },
+        "formatter": { "trailingComma": "omit" }
+    }
+}"#;
+    let biome_config = "biome.json";
+    let code = r#"{   "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar",
+}"#;
+    let file_path = Path::new("file.json");
+    fs.insert(file_path.into(), code.as_bytes());
+    fs.insert(biome_config.into(), config_json);
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                "--write",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+                .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_omits_json_trailing_comma",
+        fs,
+        console,
+        result,
+    ));
+}
+
 #[test]
 fn treat_known_json_files_as_jsonc_files() {
     let mut fs = MemoryFileSystem::default();

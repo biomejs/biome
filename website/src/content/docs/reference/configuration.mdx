@@ -694,6 +694,18 @@ How many characters can be written on a single line in JSON (and its super langu
 
 > Default: `80`
 
+### `json.formatter.trailingComma`
+
+Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
+
+Allowed values:
+- `none`: the trailing comma is removed;
+- `all`: the trailing comma is kept **and** preferred.
+
+> Default: `none`
+
+When this option isn't provided, and you set the parser option `json.parser.allowTrailingComma` to `true`, the value of `json.formatter.trailingComma` is `"all"`.
+
 ## `overrides`
 
 A list of patterns.
