@@ -21,7 +21,7 @@ use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::{BiomePath, ConfigName, ROME_JSON};
 use biome_json_analyze::analyze;
-use biome_json_formatter::context::{JsonFormatOptions, TrailingComma};
+use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
@@ -37,7 +37,7 @@ pub struct JsonFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
-    pub trailing_comma: Option<TrailingComma>,
+    pub trailing_comma: Option<TrailingCommas>,
     pub enabled: Option<bool>,
 }
 
@@ -63,7 +63,7 @@ impl Language for JsonLanguage {
         overrides: &OverrideSettings,
         language: &JsonFormatterSettings,
         path: &BiomePath,
-        document_file_source: &DocumentFileSource,
+        _document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = if let Some(indent_style) = language.indent_style {
             indent_style
@@ -94,21 +94,7 @@ impl Language for JsonLanguage {
                 .with_indent_style(indent_style)
                 .with_indent_width(indent_width)
                 .with_line_width(line_width)
-                .with_trailing_comma(
-                    language
-                        .trailing_comma
-                        .or(document_file_source
-                            .to_json_file_source()
-                            .map(|source| source.allows_trailing_comma())
-                            .map(|allows| {
-                                if allows {
-                                    TrailingComma::All
-                                } else {
-                                    TrailingComma::None
-                                }
-                            }))
-                        .unwrap_or_default(),
-                ),
+                .with_trailing_comma(language.trailing_comma.unwrap_or_default()),
         )
     }
 }

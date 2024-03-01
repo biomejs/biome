@@ -415,8 +415,7 @@ pub struct OpenFileParams {
     pub path: BiomePath,
     pub content: String,
     pub version: i32,
-    #[serde(default)]
-    pub document_file_source: DocumentFileSource,
+    pub document_file_source: Option<DocumentFileSource>,
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]

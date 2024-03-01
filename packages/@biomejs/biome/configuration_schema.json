@@ -1237,10 +1237,10 @@
 					"description": "What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
-				"trailingComma": {
+				"trailingCommas": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"omit\".",
 					"anyOf": [
-						{ "$ref": "#/definitions/TrailingComma" },
+						{ "$ref": "#/definitions/TrailingCommas" },
 						{ "type": "null" }
 					]
 				}
@@ -2622,6 +2622,20 @@
 					"description": "No trailing commas.",
 					"type": "string",
 					"enum": ["none"]
+				}
+			]
+		},
+		"TrailingCommas": {
+			"oneOf": [
+				{
+					"description": "The formatter will remove the trailing comma",
+					"type": "string",
+					"enum": ["none"]
+				},
+				{
+					"description": "The trailing comma is allowed and advised",
+					"type": "string",
+					"enum": ["all"]
 				}
 			]
 		},

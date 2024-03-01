@@ -342,7 +342,7 @@ impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
 
         language_setting.parser.allow_comments = json.parser.allow_comments;
         language_setting.parser.allow_trailing_commas = json.parser.allow_trailing_commas;
-        language_setting.formatter.trailing_comma = json.formatter.trailing_comma;
+        language_setting.formatter.trailing_comma = json.formatter.trailing_commas;
         language_setting.formatter.enabled = Some(json.formatter.enabled);
         language_setting.formatter.line_width = json.formatter.line_width;
         language_setting.formatter.indent_width = json.formatter.indent_width.map(Into::into);

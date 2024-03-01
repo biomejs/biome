@@ -66,7 +66,7 @@ pub struct JsonFormatOptions {
     line_width: LineWidth,
     attribute_position: AttributePosition,
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
-    trailing_comma: TrailingComma,
+    trailing_commas: TrailingCommas,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
@@ -75,7 +75,7 @@ pub struct JsonFormatOptions {
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
     serde(rename_all = "camelCase")
 )]
-pub enum TrailingComma {
+pub enum TrailingCommas {
     #[default]
     /// The formatter will remove the trailing comma
     None,
@@ -83,23 +83,23 @@ pub enum TrailingComma {
     All,
 }
 
-impl FromStr for TrailingComma {
+impl FromStr for TrailingCommas {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "none" => Ok(Self::None),
             "all" => Ok(Self::All),
-            _ => Err("Value not supported for TrailingComma"),
+            _ => Err("Value not supported for TrailingCommas"),
         }
     }
 }
 
-impl fmt::Display for TrailingComma {
+impl fmt::Display for TrailingCommas {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            TrailingComma::None => std::write!(f, "None"),
-            TrailingComma::All => std::write!(f, "All"),
+            TrailingCommas::None => std::write!(f, "None"),
+            TrailingCommas::All => std::write!(f, "All"),
         }
     }
 }
@@ -131,8 +131,8 @@ impl JsonFormatOptions {
         self
     }
 
-    pub fn with_trailing_comma(mut self, trailing_comma: TrailingComma) -> Self {
-        self.trailing_comma = trailing_comma;
+    pub fn with_trailing_comma(mut self, trailing_comma: TrailingCommas) -> Self {
+        self.trailing_commas = trailing_comma;
         self
     }
 
@@ -153,9 +153,9 @@ impl JsonFormatOptions {
     }
 
     pub(crate) fn to_trailing_separator(&self) -> TrailingSeparator {
-        match self.trailing_comma {
-            TrailingComma::None => TrailingSeparator::Omit,
-            TrailingComma::All => TrailingSeparator::Allowed,
+        match self.trailing_commas {
+            TrailingCommas::None => TrailingSeparator::Omit,
+            TrailingCommas::All => TrailingSeparator::Allowed,
         }
     }
 }
@@ -192,6 +192,6 @@ impl fmt::Display for JsonFormatOptions {
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.get())?;
-        writeln!(f, "Trailing comma: {}", self.trailing_comma)
+        writeln!(f, "Trailing comma: {}", self.trailing_commas)
     }
 }
