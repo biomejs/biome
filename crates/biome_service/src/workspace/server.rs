@@ -110,7 +110,9 @@ impl WorkspaceServer {
             .get(path)
             .map(|doc| doc.file_source_index)
             .and_then(|index| self.file_sources.read().unwrap().get_index(index).copied())
-            .unwrap_or_default()
+            .unwrap_or(
+                DocumentFileSource::from_path(path)
+            )
     }
 
     /// Return an error factory function for unsupported features at a given path

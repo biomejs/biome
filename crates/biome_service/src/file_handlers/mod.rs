@@ -181,16 +181,16 @@ impl DocumentFileSource {
     /// use biome_js_syntax::JsFileSource;
     /// use biome_json_syntax::JsonFileSource;
     /// use biome_service::workspace::DocumentFileSource;
-    /// let x = JsFileSource::js_module().into();
+    /// let x = DocumentFileSource::from(JsFileSource::js_module());
     /// let y = DocumentFileSource::Unknown;
     /// assert_eq!(x.or(y), JsFileSource::js_module().into());
     ///
     /// let x = DocumentFileSource::Unknown;
-    /// let y = JsFileSource::js_module().into();
+    /// let y = DocumentFileSource::from(JsFileSource::js_module());
     /// assert_eq!(x.or(y), JsFileSource::js_module().into());
     ///
-    /// let x = JsFileSource::js_module().into();
-    /// let y = JsonFileSource::json().into();
+    /// let x = DocumentFileSource::from(JsFileSource::js_module());
+    /// let y = DocumentFileSource::from(JsonFileSource::json());
     /// assert_eq!(x.or(y), JsFileSource::js_module().into());
     ///
     /// let x = DocumentFileSource::Unknown;
