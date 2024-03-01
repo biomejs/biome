@@ -19,7 +19,7 @@ fn debug_control_flow() {
             path: BiomePath::new("file.js"),
             content: SOURCE.into(),
             version: 0,
-            document_file_source: DocumentFileSource::from(JsFileSource::default()),
+            document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
         },
     )
     .unwrap();

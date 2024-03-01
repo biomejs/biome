@@ -392,7 +392,7 @@ export interface PartialJsonFormatter {
 	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "omit".
 	 */
-	trailingComma?: TrailingComma;
+	trailingCommas?: TrailingCommas;
 }
 /**
  * Options that changes how the JSON parser behaves
@@ -468,6 +468,7 @@ export type Semicolons = "always" | "asNeeded";
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
  */
 export type TrailingComma = "all" | "es5" | "none";
+export type TrailingCommas = "none" | "all";
 /**
  * A list of rules that belong to this group
  */
