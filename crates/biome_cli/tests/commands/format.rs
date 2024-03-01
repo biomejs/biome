@@ -2284,7 +2284,7 @@ fn format_omits_json_trailing_comma() {
     let config_json = r#"{
     "json": {
         "parser": { "allowTrailingCommas": true },
-        "formatter": { "trailingComma": "omit" }
+        "formatter": { "trailingComma": "none" }
     }
 }"#;
     let biome_config = "biome.json";

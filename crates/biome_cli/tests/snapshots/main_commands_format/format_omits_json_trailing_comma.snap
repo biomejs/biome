@@ -8,7 +8,7 @@ expression: content
 {
   "json": {
     "parser": { "allowTrailingCommas": true },
-    "formatter": { "trailingComma": "omit" }
+    "formatter": { "trailingComma": "none" }
   }
 }
 ```
