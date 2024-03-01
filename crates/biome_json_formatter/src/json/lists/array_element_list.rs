@@ -16,11 +16,15 @@ impl FormatRule<JsonArrayElementList> for FormatJsonArrayElementList {
             ArrayLayout::OnePerLine
         };
 
+        let allow_trailing_separator = f.options().allows_trailing_separator();
         match layout {
             ArrayLayout::Fill => {
                 let mut filler = f.fill();
 
-                for (element, formatted) in node.iter().zip(node.format_separated(",")) {
+                for (element, formatted) in node
+                    .iter()
+                    .zip(node.format_separated(",", allow_trailing_separator))
+                {
                     filler.entry(
                         &format_once(|f| {
                             if get_lines_before(element?.syntax()) > 1 {
@@ -39,7 +43,10 @@ impl FormatRule<JsonArrayElementList> for FormatJsonArrayElementList {
             ArrayLayout::OnePerLine => {
                 let mut join = f.join_nodes_with_soft_line();
 
-                for (element, formatted) in node.elements().zip(node.format_separated(",")) {
+                for (element, formatted) in node
+                    .elements()
+                    .zip(node.format_separated(",", allow_trailing_separator))
+                {
                     join.entry(element.node()?.syntax(), &formatted);
                 }
 

@@ -62,13 +62,13 @@ pub struct JsonFormatOptions {
     line_ending: LineEnding,
     line_width: LineWidth,
     attribute_position: AttributePosition,
-    _file_source: JsonFileSource,
+    file_source: JsonFileSource,
 }
 
 impl JsonFormatOptions {
     pub fn new(file_source: JsonFileSource) -> Self {
         Self {
-            _file_source: file_source,
+            file_source,
             indent_style: IndentStyle::default(),
             indent_width: IndentWidth::default(),
             line_ending: LineEnding::default(),
@@ -111,6 +111,10 @@ impl JsonFormatOptions {
 
     pub fn set_line_width(&mut self, line_width: LineWidth) {
         self.line_width = line_width;
+    }
+
+    pub fn allows_trailing_separator(&self) -> bool {
+        self.file_source.allows_trailing_comma()
     }
 }
 

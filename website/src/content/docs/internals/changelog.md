@@ -39,10 +39,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```diff
   <script setup lang="ts">
-     - import Button from "./components/Button.vue";
-     - import * as vueUse from "vue-use";
-     + import * as vueUse from "vue-use";
-     + import Button from "./components/Button.vue";
+  - import Button from "./components/Button.vue";
+  - import * as vueUse from "vue-use";
+  + import * as vueUse from "vue-use";
+  + import Button from "./components/Button.vue";
   </script/>
 
   <template></template>
@@ -53,10 +53,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```diff
   <script setup lang="ts">
-    - import Button from "./components/Button.svelte";
-    - import * as svelteUse from "svelte-use";
-    + import * as svelteUse from "svelte-use";
-    + import Button from "./components/Button.svelte";
+  - import Button from "./components/Button.svelte";
+  - import * as svelteUse from "svelte-use";
+  + import * as svelteUse from "svelte-use";
+  + import Button from "./components/Button.svelte";
   </script/>
 
   <div></div>
@@ -302,6 +302,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#1218](https://github.com/biomejs/biome/issues/1218), by correctly preserving empty lines in member chains.
   Contributed by @ah-yu
+- Fix [#1659](https://github.com/biomejs/biome/issues/1659) and [#1662](https://github.com/biomejs/biome/issues/1662), by correctly taking into account the leading comma inside the formatter options. Contributed by @ematipico
 
 ### JavaScript APIs
 

@@ -38,7 +38,7 @@ tests_macros      = { workspace = true }
 
 [features]
 schemars = ["dep:schemars"]
-serde    = ["biome_js_syntax/serde"]
+serde    = ["biome_js_syntax/schema"]
 tests    = []
 
 # cargo-workspaces metadata

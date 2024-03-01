@@ -1,10 +1,12 @@
 use crate::file_handlers::{
     javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, Language, LintParams, LintResults, Mime,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, Mime,
     ParseResult, ParserCapabilities,
 };
 use crate::settings::SettingsHandle;
-use crate::workspace::{FixFileResult, OrganizeImportsResult, PullActionsResult};
+use crate::workspace::{
+    DocumentFileSource, FixFileResult, OrganizeImportsResult, PullActionsResult,
+};
 use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
@@ -64,10 +66,6 @@ impl AstroFileHandler {
 }
 
 impl ExtensionHandler for AstroFileHandler {
-    fn language(&self) -> Language {
-        Language::TypeScript
-    }
-
     fn mime(&self) -> Mime {
         Mime::Javascript
     }
@@ -98,7 +96,7 @@ impl ExtensionHandler for AstroFileHandler {
 
 fn parse(
     _rome_path: &BiomePath,
-    _language_hint: Language,
+    _file_source: DocumentFileSource,
     text: &str,
     _settings: SettingsHandle,
     cache: &mut NodeCache,
@@ -119,35 +117,37 @@ fn parse(
             root.as_send().unwrap(),
             diagnostics,
         ),
-        language: Some(Language::TypeScript),
+        language: Some(JsFileSource::ts().into()),
     }
 }
 
 #[tracing::instrument(level = "trace", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format(biome_path, parse, settings)
+    javascript::format(biome_path, document_file_source, parse, settings)
 }
-
 pub(crate) fn format_range(
     biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_range(biome_path, parse, settings, range)
+    javascript::format_range(biome_path, document_file_source, parse, settings, range)
 }
 
 pub(crate) fn format_on_type(
     biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_on_type(biome_path, parse, settings, offset)
+    javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {

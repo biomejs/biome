@@ -5,9 +5,9 @@
 		"jsx": "react-jsx",
 		"baseUrl": ".",
 		"paths": {
-		"@/*": ["src/*"],
-	}
+			"@/*": ["src/*"],
+		},
 	},
 	"extends": "astro/tsconfigs/strictest",
-	"include": ["./src"]
+	"include": ["./src"],
 }

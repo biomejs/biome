@@ -1661,25 +1661,54 @@ export interface OpenProjectParams {
 }
 export interface OpenFileParams {
 	content: string;
-	language_hint?: Language;
+	document_file_source?: DocumentFileSource;
 	path: BiomePath;
 	version: number;
 }
-/**
- * Supported languages by Biome
- */
+export type DocumentFileSource =
+	| "Unknown"
+	| { Js: JsFileSource }
+	| { Json: JsonFileSource }
+	| { Css: CssFileSource };
+export interface JsFileSource {
+	/**
+	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
+	 */
+	embedding_kind: EmbeddingKind;
+	language: Language;
+	module_kind: ModuleKind;
+	variant: LanguageVariant;
+	version: LanguageVersion;
+}
+export interface JsonFileSource {
+	allow_trailing_comma: boolean;
+	variant: JsonVariant;
+}
+export interface CssFileSource {
+	variant: CssVariant;
+}
+export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
-	| "Astro"
-	| "Vue"
-	| "Svelte"
 	| "JavaScript"
-	| "JavaScriptReact"
-	| "TypeScript"
-	| "TypeScriptReact"
-	| "Json"
-	| "Jsonc"
-	| "Css"
-	| "Unknown";
+	| { TypeScript: { definition_file: boolean } };
+/**
+ * Is the source file an ECMAScript Module or Script. Changes the parsing semantic.
+ */
+export type ModuleKind = "Script" | "Module";
+export type LanguageVariant = "Standard" | "StandardRestricted" | "Jsx";
+/**
+	* Enum of the different ECMAScript standard versions. The versions are ordered in increasing order; The newest version comes last.
+
+Defaults to the latest stable ECMAScript standard. 
+	 */
+export type LanguageVersion = "ES2022" | "ESNext";
+export type JsonVariant = "Standard" | "Jsonc";
+/**
+	* The style of CSS contained in the file.
+
+Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
+	 */
+export type CssVariant = "Standard";
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;

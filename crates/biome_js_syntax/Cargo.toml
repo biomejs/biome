@@ -14,15 +14,16 @@ version              = "0.4.0"
 biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
 biome_rowan       = { workspace = true }
-schemars          = { version = "0.8.10", optional = true }
-serde             = { version = "1.0.136", features = ["derive"], optional = true }
+schemars          = { workspace = true, optional = true }
+serde             = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
 biome_js_factory = { path = "../biome_js_factory" }
 biome_js_parser  = { path = "../biome_js_parser" }
 
 [features]
-serde = ["dep:serde", "schemars", "biome_rowan/serde"]
+schema = ["schemars", "biome_rowan/serde"]
+serde  = ["biome_rowan/serde"]
 
 [lints]
 workspace = true
