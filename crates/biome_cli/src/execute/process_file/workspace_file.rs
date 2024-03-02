@@ -2,7 +2,7 @@ use crate::execute::diagnostics::{ResultExt, ResultIoExt};
 use crate::execute::process_file::SharedTraversalOptions;
 use biome_diagnostics::{category, Error};
 use biome_fs::{BiomePath, File, OpenOptions};
-use biome_service::workspace::{DocumentFileSource, FileGuard, OpenFileParams};
+use biome_service::workspace::{FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
 use std::path::{Path, PathBuf};
 
@@ -36,7 +36,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         let guard = FileGuard::open(
             ctx.workspace,
             OpenFileParams {
-                document_file_source: DocumentFileSource::from_path(&biome_path),
+                document_file_source: None,
                 path: biome_path,
                 version: 0,
                 content: input.clone(),

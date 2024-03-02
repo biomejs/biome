@@ -26,7 +26,7 @@ pub(crate) async fn did_open(
         path: biome_path,
         version,
         content,
-        document_file_source: language_hint,
+        document_file_source: Some(language_hint),
     })?;
 
     session.insert_document(url.clone(), doc);

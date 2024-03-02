@@ -24,31 +24,15 @@ info: json/json/array.json
 ```diff
 --- Prettier
 +++ Biome
-@@ -1 +1,9 @@
+@@ -1 +1 @@
 -[[1, null], [1, null], [null], [0], [false], [""]]
-+[
-+  [
-+1,null],
-+  [1,null,],
-+  [null,],
-+  [0,],
-+  [false,],
-+  ['',]
-+]
++[[1, null], [1, null], [null], [0], [false], ['']]
 ```
 
 # Output
 
 ```json
-[
-  [
-1,null],
-  [1,null,],
-  [null,],
-  [0,],
-  [false,],
-  ['',]
-]
+[[1, null], [1, null], [null], [0], [false], ['']]
 ```
 
 # Errors

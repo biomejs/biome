@@ -47,7 +47,7 @@ this limit will be ignored for performance reasons.
 
 > Default: 1024*1024 (1MB)
 
- ### `files.ignore`
+### `files.ignore`
 
 A list of Unix shell style patterns. Biome ignores files and folders that
 match these patterns.
@@ -96,7 +96,7 @@ Given the following example:
 Only the files that match the pattern `src/**/*.js` will be handled, while the files that match the pattern
 `scripts/**/*.js` will be ignored.
 
- ### `files.ignoreUnknown`
+### `files.ignoreUnknown`
 
 Biome won't emit diagnostics if it encounters files that can't handle.
 
@@ -259,7 +259,7 @@ In the previous example, Biome will enable all rules, exception for rules that b
 
 Options that influence the rules of a single group. Biome supports the following groups:
 
-<LintGroups />
+<LintGroups/>
 
 ### `linter.rules.[group].recommended`
 
@@ -693,6 +693,16 @@ The type of line ending for JSON (and its super languages) files.
 How many characters can be written on a single line in JSON (and its super languages) files.
 
 > Default: `80`
+
+### `json.formatter.trailingComma`
+
+Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
+
+Allowed values:
+- `none`: the trailing comma is removed;
+- `all`: the trailing comma is kept **and** preferred.
+
+> Default: `none`
 
 ## `overrides`
 

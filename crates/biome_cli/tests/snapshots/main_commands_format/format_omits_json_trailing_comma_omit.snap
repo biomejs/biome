@@ -7,7 +7,8 @@ expression: content
 ```json
 {
   "json": {
-    "parser": { "allowTrailingCommas": true }
+    "parser": { "allowTrailingCommas": true },
+    "formatter": { "trailingCommas": "all" }
   }
 }
 ```
@@ -20,7 +21,7 @@ expression: content
 	"loreum_ipsum_lorem_ipsum": "bar",
 	"loreum_ipsum_lorem_ipsum": "bar",
 	"loreum_ipsum_lorem_ipsum": "bar",
-	"loreum_ipsum_lorem_ipsum": "bar"
+	"loreum_ipsum_lorem_ipsum": "bar",
 }
 
 ```
