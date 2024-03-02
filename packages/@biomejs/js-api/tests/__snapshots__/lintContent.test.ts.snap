@@ -1,5 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`Biome WebAssembly lintContent > should fix lint issues and return new content if fileFileMode is SafeAndUnsafeFixes > fixed content 1`] = `"const a = \`foo \${Date.now()} bar\`"`;
+
 exports[`Biome WebAssembly lintContent > should lint content > lint diagnostics 1`] = `
 [
   {
@@ -161,3 +163,5 @@ exports[`Biome WebAssembly lintContent > should lint content > lint diagnostics 
   },
 ]
 `;
+
+exports[`Biome WebAssembly lintContent > should not fix lint issues if fixFileMode is undefined/omitted > original content 1`] = `"let a = "foo " + Date.now() + " bar""`;
