@@ -1,0 +1,1313 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/supports.css
+---
+
+# Input
+
+```css
+@supports (transform-origin: 5% 5%) {}
+@supports (transform-origin:5% 5%) {}
+@supports ( transform-origin : 5% 5% ) {}
+@supports (  transform-origin  :  5%  5%  ) {}
+@supports
+    (transform-origin: 5% 5%) {}
+@supports
+(transform-origin: 5% 5%) {}
+@supports
+(
+transform-origin
+:
+5%
+5%
+) {}
+@supports
+
+(
+
+transform-origin
+
+:
+
+5%
+
+5%
+
+)
+
+{}
+@supports (very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value) {}
+@supports
+  (very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value) {}
+@supports
+(
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop
+:
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+) {}
+@supports
+
+(
+
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop
+
+:
+
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+
+)
+
+{}
+@supports not(transform-origin: 10em 10em 10em) {}
+@supports not (transform-origin: 10em 10em 10em) {}
+@supports  not  ( transform-origin : 10em 10em 10em ) {}
+@supports   not   (  transform-origin  :  10em  10em  10em  ) {}
+@supports not
+  (transform-origin: 10em 10em 10em) {}
+@supports
+    not (transform-origin: 10em 10em 10em) {}
+@supports
+  not
+  (transform-origin: 10em 10em 10em) {}
+@supports
+not
+(
+transform-origin
+:
+10em
+10em
+10em
+) {}
+@supports
+
+not
+
+(
+
+transform-origin
+
+:
+
+10em
+
+10em
+
+10em
+
+)
+
+{}
+@supports not (very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value) {}
+@supports
+  not (very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value) {}
+@supports not
+  (very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value) {}
+@supports
+not
+(
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop
+:
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+) {}
+@supports
+
+not
+
+(
+
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop
+
+:
+
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+
+)
+
+{}
+@supports not (not (transform-origin: 2px)) {}
+@supports not(not(transform-origin:2px)) {}
+@supports not ( not ( transform-origin : 2px ) ) {}
+@supports  not  (  not  (  transform-origin  :  2px  )  ) {}
+@supports not
+  (not (transform-origin: 2px)) {}
+@supports not
+  (
+    not (transform-origin: 2px)
+  ) {}
+@supports
+not
+(
+not
+(
+transform-origin
+:
+2px
+)
+) {}
+@supports
+
+not
+
+(
+
+not
+
+(
+
+transform-origin
+
+:
+
+2px
+
+)
+
+)
+
+{}
+@supports (display: flexbox) and (not (display: inline-grid)) {}
+@supports (display: table-cell) and (display: list-item) {}
+@supports ( display : table-cell ) and ( display : list-item ) {}
+@supports  (  display  :  table-cell  )  and  (  display  :  list-item  ) {}
+@supports
+  (display: table-cell) and (display: list-item) {}
+@supports (display: table-cell) and
+  (display: list-item) {}
+@supports (display: table-cell)
+  and (display: list-item) {}
+@supports
+(
+display
+:
+table-cell
+)
+and
+(
+display
+:
+list-item
+) {}
+@supports
+
+(
+
+display
+
+:
+
+table-cell
+
+)
+
+and
+
+(
+
+display
+
+:
+
+list-item
+
+)
+
+{}
+@supports (display: table-cell) and (display: list-item) and (display: run-in) {}
+@supports (display: table-cell) and ((display: list-item) and (display: run-in)) {}
+@supports
+  (display: table-cell) and ((display: list-item) and (display: run-in)) {}
+@supports (display: table-cell)
+  and ((display: list-item)
+  and (display: run-in)) {}
+@supports (display: table-cell) and
+  ((display: list-item) and
+  (display: run-in)) {}
+@supports
+(
+display
+:
+table-cell
+)
+and
+(
+(
+display
+:
+list-item
+)
+and
+(
+display
+:
+run-in
+)
+) {}
+@supports
+
+(
+
+display
+
+:
+
+table-cell
+
+)
+
+and
+
+(
+
+(
+
+display
+
+:
+
+list-item
+
+)
+
+and
+
+(
+
+display
+
+:
+
+run-in
+
+)
+
+)
+
+{}
+@supports (transform-style: preserve) or (-moz-transform-style: preserve) {}
+@supports (transform-style: preserve) or (-moz-transform-style: preserve) or (-o-transform-style: preserve) or (-webkit-transform-style: preserve) {}
+@supports (transform-style: preserve-3d) or ((-moz-transform-style: preserve-3d) or ((-o-transform-style: preserve-3d) or (-webkit-transform-style: preserve-3d))) {}
+@supports not((text-align-last:justify)or(-moz-text-align-last:justify)){ }
+@supports not((text-align-last:justify)and(-moz-text-align-last:justify)){ }
+@supports (--foo:green) {}
+
+@supports selector(:after) {}
+@supports selector(:focus) {}
+@supports selector(:focus-visible) {}
+@supports selector(A>B) {}
+@supports selector(A       >      B) {}
+@supports selector(A       >
+     B) {}
+@supports selector(A
+>
+B
+) {}
+@supports selector(
+A
+<
+B
+) {}
+@supports selector(.a:not(.b)){}
+@supports selector(:not(.b)){}
+@supports not selector(:after){
+}
+@supports (--foo:green) and selector(:after){
+}
+@supports selector(:before) and selector(:focus-visible){
+}
+@supports selector(:not(.a,.b)) and selector(:focus-visible){
+}
+@supports selector(.a,.b){
+
+}
+@supports selector(){
+
+}
+
+@supports selector(:focus-visible) {
+  button:focus {
+    outline: none;
+  }
+
+  button:focus-visible {
+    outline: 2px solid orange;
+  }
+}
+
+@supports selector(:not(.a,.b)) {
+}
+
+@supports selector(:not(.a,.b), :not(.b,.c)) {
+}
+@supports selector(:not(.a,.b), .b, .c) {
+}
+
+@supports selector(
+  :not(
+  .a,.b)
+  ) {
+}
+@supports selector(
+  :not(
+  .a,.b
+  )
+  ) {
+}
+@supports selector(.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas){
+}
+@supports selector(.parent>.child ){
+}
+@supports selector(> .child-one){
+}
+@supports selector(.parent  ~  .child){
+}
+@supports selector(ns|* ){
+}
+@supports selector(svg|a ){
+}
+@supports selector(|B ){
+}
+@supports selector(*|*){
+}
+@supports selector(|*){
+}
+@supports selector(.a,.b,:not(asdasldaskdhjkashdahsdkjahskdjhakj,asdasldaskdhjkashdahsdkjahskdjhakj)){
+}
+@supports not (selector(:before) or not (not (selector(:before)))) {
+}
+@supports selector(selector(:focus-visible)) {}
+@supports selector(:::selector(:focus-visible)) {}
+@supports selector(--selector(:focus-visible)) {}
+@supports not (transform-origin: 10em 10em 10em) {}
+@supports not (not (transform-origin: 2px)) {}
+@supports (display: grid) and (not (display: inline-grid)) {}
+@supports (display: table-cell) and (display: list-item) and (display:run-in) {}
+@supports (display: table-cell) and ((display: list-item) and (display:run-in)) {}
+@supports (transform-style: preserve) or (-moz-transform-style: preserve) {}
+@supports (transform-style: preserve) or (-moz-transform-style: preserve) or
+          (-o-transform-style: preserve) or (-webkit-transform-style: preserve) {}
+
+@supports (transform-style: preserve-3d) or ((-moz-transform-style: preserve-3d) or
+          ((-o-transform-style: preserve-3d) or (-webkit-transform-style: preserve-3d))) {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -15,24 +15,20 @@
+ @supports (transform-origin: 5% 5%) {
+ }
+ @supports (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+-) {
++    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
++  ) {
+ }
+ @supports (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+-) {
++    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
++  ) {
+ }
+ @supports (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+-) {
++    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
++  ) {
+ }
+ @supports (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+-) {
++    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
++  ) {
+ }
+ @supports not (transform-origin: 10em 10em 10em) {
+ }
+@@ -53,29 +49,24 @@
+ @supports not (transform-origin: 10em 10em 10em) {
+ }
+ @supports not (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+-) {
++    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
++  ) {
+ }
+ @supports not (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+-) {
++    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
++  ) {
+ }
+ @supports not (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+-) {
++    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
++  ) {
+ }
+ @supports not (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+-) {
++    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
++  ) {
+ }
+ @supports not (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+-) {
++    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
++  ) {
+ }
+ @supports not (not (transform-origin: 2px)) {
+ }
+@@ -113,30 +104,38 @@
+ }
+ @supports (display: table-cell) and (display: list-item) and (display: run-in) {
+ }
+-@supports (display: table-cell) and ((display: list-item) and (display: run-in)) {
++@supports (display: table-cell) and
++  ((display: list-item) and (display: run-in)) {
+ }
+-@supports (display: table-cell) and ((display: list-item) and (display: run-in)) {
++@supports (display: table-cell) and
++  ((display: list-item) and (display: run-in)) {
+ }
+-@supports (display: table-cell) and ((display: list-item) and (display: run-in)) {
++@supports (display: table-cell) and
++  ((display: list-item) and (display: run-in)) {
+ }
+-@supports (display: table-cell) and ((display: list-item) and (display: run-in)) {
++@supports (display: table-cell) and
++  ((display: list-item) and (display: run-in)) {
+ }
+-@supports (display: table-cell) and ((display: list-item) and (display: run-in)) {
++@supports (display: table-cell) and
++  ((display: list-item) and (display: run-in)) {
+ }
+-@supports (display: table-cell) and ((display: list-item) and (display: run-in)) {
++@supports (display: table-cell) and
++  ((display: list-item) and (display: run-in)) {
+ }
+ @supports (transform-style: preserve) or (-moz-transform-style: preserve) {
+ }
+-@supports (transform-style: preserve) or (-moz-transform-style: preserve) or
+-  (-o-transform-style: preserve) or (-webkit-transform-style: preserve) {
++@supports (transform-style: preserve) or
++  (-moz-transform-style: preserve) or
++  (-o-transform-style: preserve) or
++  (-webkit-transform-style: preserve) {
+ }
+ @supports (transform-style: preserve-3d) or
+   (
+     (-moz-transform-style: preserve-3d) or
+-      (
+-        (-o-transform-style: preserve-3d) or
+-          (-webkit-transform-style: preserve-3d)
+-      )
++    (
++      (-o-transform-style: preserve-3d) or
++      (-webkit-transform-style: preserve-3d)
++    )
+   ) {
+ }
+ @supports not ((text-align-last: justify) or (-moz-text-align-last: justify)) {
+@@ -152,16 +151,19 @@
+ }
+ @supports selector(:focus-visible) {
+ }
+-@supports selector(A > B) {
++@supports selector(a > b) {
+ }
+-@supports selector(A > B) {
++@supports selector(a > b) {
+ }
+-@supports selector(A > B) {
+-}
+-@supports selector(A > B) {
++@supports selector(a > b) {
+ }
+-@supports selector(A < B) {
++@supports selector(a > b) {
+ }
++@supports selector(
++A
++<
++B
++) {}
+ @supports selector(.a:not(.b)) {
+ }
+ @supports selector(:not(.b)) {
+@@ -174,12 +176,13 @@
+ }
+ @supports selector(:not(.a, .b)) and selector(:focus-visible) {
+ }
+-@supports selector(
+-  .a,
+-  .b
+-) {
++@supports selector(.a
++,
++.b){
++
+ }
+-@supports selector() {
++@supports selector(){
++
+ }
+ 
+ @supports selector(:focus-visible) {
+@@ -195,32 +198,28 @@
+ @supports selector(:not(.a, .b)) {
+ }
+ 
+-@supports selector(
+-  :not(.a, .b),
+-  :not(.b, .c)
+-) {
++@supports selector(:not(.a,.b)
++,
++:not(.b,.c)) {
+ }
+-@supports selector(
+-  :not(.a, .b),
+-  .b,
+-  .c
+-) {
++@supports selector(:not(.a,.b)
++,
++.b, .c) {
+ }
+ 
+ @supports selector(:not(.a, .b)) {
+ }
+ @supports selector(:not(.a, .b)) {
+ }
+-@supports selector(
+-  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+-    .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+-  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+-    .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+-) {
++@supports selector(.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
++,
++.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas){
+ }
+ @supports selector(.parent > .child) {
+ }
+-@supports selector(> .child-one) {
++@supports selector(
++>
++.child-one){
+ }
+ @supports selector(.parent ~ .child) {
+ }
+@@ -228,26 +227,27 @@
+ }
+ @supports selector(svg|a) {
+ }
+-@supports selector(|B) {
++@supports selector(|b) {
+ }
+ @supports selector(*|*) {
+ }
+ @supports selector(|*) {
+ }
+-@supports selector(
+-  .a,
+-  .b,
+-  :not(asdasldaskdhjkashdahsdkjahskdjhakj, asdasldaskdhjkashdahsdkjahskdjhakj)
+-) {
++@supports selector(.a
++,
++.b,:not(asdasldaskdhjkashdahsdkjahskdjhakj,asdasldaskdhjkashdahsdkjahskdjhakj)){
+ }
+ @supports not (selector(:before) or not (not (selector(:before)))) {
+ }
+-@supports selector(selector(:focus-visible)) {
+-}
+-@supports selector(:::selector(:focus-visible)) {
+-}
+-@supports selector(--selector(:focus-visible)) {
+-}
++@supports selector(selector
++(
++:focus-visible)) {}
++@supports selector(:::selector
++(
++:focus-visible)) {}
++@supports selector(--selector
++(
++:focus-visible)) {}
+ @supports not (transform-origin: 10em 10em 10em) {
+ }
+ @supports not (not (transform-origin: 2px)) {
+@@ -256,20 +256,23 @@
+ }
+ @supports (display: table-cell) and (display: list-item) and (display: run-in) {
+ }
+-@supports (display: table-cell) and ((display: list-item) and (display: run-in)) {
++@supports (display: table-cell) and
++  ((display: list-item) and (display: run-in)) {
+ }
+ @supports (transform-style: preserve) or (-moz-transform-style: preserve) {
+ }
+-@supports (transform-style: preserve) or (-moz-transform-style: preserve) or
+-  (-o-transform-style: preserve) or (-webkit-transform-style: preserve) {
++@supports (transform-style: preserve) or
++  (-moz-transform-style: preserve) or
++  (-o-transform-style: preserve) or
++  (-webkit-transform-style: preserve) {
+ }
+ 
+ @supports (transform-style: preserve-3d) or
+   (
+     (-moz-transform-style: preserve-3d) or
+-      (
+-        (-o-transform-style: preserve-3d) or
+-          (-webkit-transform-style: preserve-3d)
+-      )
++    (
++      (-o-transform-style: preserve-3d) or
++      (-webkit-transform-style: preserve-3d)
++    )
+   ) {
+ }
+```
+
+# Output
+
+```css
+@supports (transform-origin: 5% 5%) {
+}
+@supports (transform-origin: 5% 5%) {
+}
+@supports (transform-origin: 5% 5%) {
+}
+@supports (transform-origin: 5% 5%) {
+}
+@supports (transform-origin: 5% 5%) {
+}
+@supports (transform-origin: 5% 5%) {
+}
+@supports (transform-origin: 5% 5%) {
+}
+@supports (transform-origin: 5% 5%) {
+}
+@supports (
+    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+  ) {
+}
+@supports (
+    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+  ) {
+}
+@supports (
+    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+  ) {
+}
+@supports (
+    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+  ) {
+}
+@supports not (transform-origin: 10em 10em 10em) {
+}
+@supports not (transform-origin: 10em 10em 10em) {
+}
+@supports not (transform-origin: 10em 10em 10em) {
+}
+@supports not (transform-origin: 10em 10em 10em) {
+}
+@supports not (transform-origin: 10em 10em 10em) {
+}
+@supports not (transform-origin: 10em 10em 10em) {
+}
+@supports not (transform-origin: 10em 10em 10em) {
+}
+@supports not (transform-origin: 10em 10em 10em) {
+}
+@supports not (transform-origin: 10em 10em 10em) {
+}
+@supports not (
+    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+  ) {
+}
+@supports not (
+    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+  ) {
+}
+@supports not (
+    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+  ) {
+}
+@supports not (
+    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+  ) {
+}
+@supports not (
+    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+  ) {
+}
+@supports not (not (transform-origin: 2px)) {
+}
+@supports not (not (transform-origin: 2px)) {
+}
+@supports not (not (transform-origin: 2px)) {
+}
+@supports not (not (transform-origin: 2px)) {
+}
+@supports not (not (transform-origin: 2px)) {
+}
+@supports not (not (transform-origin: 2px)) {
+}
+@supports not (not (transform-origin: 2px)) {
+}
+@supports not (not (transform-origin: 2px)) {
+}
+@supports (display: flexbox) and (not (display: inline-grid)) {
+}
+@supports (display: table-cell) and (display: list-item) {
+}
+@supports (display: table-cell) and (display: list-item) {
+}
+@supports (display: table-cell) and (display: list-item) {
+}
+@supports (display: table-cell) and (display: list-item) {
+}
+@supports (display: table-cell) and (display: list-item) {
+}
+@supports (display: table-cell) and (display: list-item) {
+}
+@supports (display: table-cell) and (display: list-item) {
+}
+@supports (display: table-cell) and (display: list-item) {
+}
+@supports (display: table-cell) and (display: list-item) and (display: run-in) {
+}
+@supports (display: table-cell) and
+  ((display: list-item) and (display: run-in)) {
+}
+@supports (display: table-cell) and
+  ((display: list-item) and (display: run-in)) {
+}
+@supports (display: table-cell) and
+  ((display: list-item) and (display: run-in)) {
+}
+@supports (display: table-cell) and
+  ((display: list-item) and (display: run-in)) {
+}
+@supports (display: table-cell) and
+  ((display: list-item) and (display: run-in)) {
+}
+@supports (display: table-cell) and
+  ((display: list-item) and (display: run-in)) {
+}
+@supports (transform-style: preserve) or (-moz-transform-style: preserve) {
+}
+@supports (transform-style: preserve) or
+  (-moz-transform-style: preserve) or
+  (-o-transform-style: preserve) or
+  (-webkit-transform-style: preserve) {
+}
+@supports (transform-style: preserve-3d) or
+  (
+    (-moz-transform-style: preserve-3d) or
+    (
+      (-o-transform-style: preserve-3d) or
+      (-webkit-transform-style: preserve-3d)
+    )
+  ) {
+}
+@supports not ((text-align-last: justify) or (-moz-text-align-last: justify)) {
+}
+@supports not ((text-align-last: justify) and (-moz-text-align-last: justify)) {
+}
+@supports (--foo: green) {
+}
+
+@supports selector(:after) {
+}
+@supports selector(:focus) {
+}
+@supports selector(:focus-visible) {
+}
+@supports selector(a > b) {
+}
+@supports selector(a > b) {
+}
+@supports selector(a > b) {
+}
+@supports selector(a > b) {
+}
+@supports selector(
+A
+<
+B
+) {}
+@supports selector(.a:not(.b)) {
+}
+@supports selector(:not(.b)) {
+}
+@supports not selector(:after) {
+}
+@supports (--foo: green) and selector(:after) {
+}
+@supports selector(:before) and selector(:focus-visible) {
+}
+@supports selector(:not(.a, .b)) and selector(:focus-visible) {
+}
+@supports selector(.a
+,
+.b){
+
+}
+@supports selector(){
+
+}
+
+@supports selector(:focus-visible) {
+  button:focus {
+    outline: none;
+  }
+
+  button:focus-visible {
+    outline: 2px solid orange;
+  }
+}
+
+@supports selector(:not(.a, .b)) {
+}
+
+@supports selector(:not(.a,.b)
+,
+:not(.b,.c)) {
+}
+@supports selector(:not(.a,.b)
+,
+.b, .c) {
+}
+
+@supports selector(:not(.a, .b)) {
+}
+@supports selector(:not(.a, .b)) {
+}
+@supports selector(.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+,
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas){
+}
+@supports selector(.parent > .child) {
+}
+@supports selector(
+>
+.child-one){
+}
+@supports selector(.parent ~ .child) {
+}
+@supports selector(ns|*) {
+}
+@supports selector(svg|a) {
+}
+@supports selector(|b) {
+}
+@supports selector(*|*) {
+}
+@supports selector(|*) {
+}
+@supports selector(.a
+,
+.b,:not(asdasldaskdhjkashdahsdkjahskdjhakj,asdasldaskdhjkashdahsdkjahskdjhakj)){
+}
+@supports not (selector(:before) or not (not (selector(:before)))) {
+}
+@supports selector(selector
+(
+:focus-visible)) {}
+@supports selector(:::selector
+(
+:focus-visible)) {}
+@supports selector(--selector
+(
+:focus-visible)) {}
+@supports not (transform-origin: 10em 10em 10em) {
+}
+@supports not (not (transform-origin: 2px)) {
+}
+@supports (display: grid) and (not (display: inline-grid)) {
+}
+@supports (display: table-cell) and (display: list-item) and (display: run-in) {
+}
+@supports (display: table-cell) and
+  ((display: list-item) and (display: run-in)) {
+}
+@supports (transform-style: preserve) or (-moz-transform-style: preserve) {
+}
+@supports (transform-style: preserve) or
+  (-moz-transform-style: preserve) or
+  (-o-transform-style: preserve) or
+  (-webkit-transform-style: preserve) {
+}
+
+@supports (transform-style: preserve-3d) or
+  (
+    (-moz-transform-style: preserve-3d) or
+    (
+      (-o-transform-style: preserve-3d) or
+      (-webkit-transform-style: preserve-3d)
+    )
+  ) {
+}
+```
+
+# Errors
+```
+supports.css:298:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `<`
+  
+    296 │ @supports selector(
+    297 │ A
+  > 298 │ <
+        │ ^
+    299 │ B
+    300 │ ) {}
+  
+  i Remove <
+  
+supports.css:300:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    298 │ <
+    299 │ B
+  > 300 │ ) {}
+        │ ^
+    301 │ @supports selector(.a:not(.b)){}
+    302 │ @supports selector(:not(.b)){}
+  
+  i Remove )
+  
+supports.css:311:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `,`
+  
+    309 │ @supports selector(:not(.a,.b)) and selector(:focus-visible){
+    310 │ }
+  > 311 │ @supports selector(.a,.b){
+        │                      ^
+    312 │ 
+    313 │ }
+  
+  i Remove ,
+  
+supports.css:311:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    309 │ @supports selector(:not(.a,.b)) and selector(:focus-visible){
+    310 │ }
+  > 311 │ @supports selector(.a,.b){
+        │                         ^
+    312 │ 
+    313 │ }
+  
+  i Remove )
+  
+supports.css:331:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `,`
+  
+    329 │ }
+    330 │ 
+  > 331 │ @supports selector(:not(.a,.b), :not(.b,.c)) {
+        │                               ^
+    332 │ }
+    333 │ @supports selector(:not(.a,.b), .b, .c) {
+  
+  i Remove ,
+  
+supports.css:331:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    329 │ }
+    330 │ 
+  > 331 │ @supports selector(:not(.a,.b), :not(.b,.c)) {
+        │                                            ^
+    332 │ }
+    333 │ @supports selector(:not(.a,.b), .b, .c) {
+  
+  i Remove )
+  
+supports.css:333:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `,`
+  
+    331 │ @supports selector(:not(.a,.b), :not(.b,.c)) {
+    332 │ }
+  > 333 │ @supports selector(:not(.a,.b), .b, .c) {
+        │                               ^
+    334 │ }
+    335 │ 
+  
+  i Remove ,
+  
+supports.css:333:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    331 │ @supports selector(:not(.a,.b), :not(.b,.c)) {
+    332 │ }
+  > 333 │ @supports selector(:not(.a,.b), .b, .c) {
+        │                                       ^
+    334 │ }
+    335 │ 
+  
+  i Remove )
+  
+supports.css:347:115 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `,`
+  
+    345 │   ) {
+    346 │ }
+  > 347 │ @supports selector(.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+        │                                                                                                                   ^
+    348 │ .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas){
+    349 │ }
+  
+  i Remove ,
+  
+supports.css:348:96 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    346 │ }
+    347 │ @supports selector(.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+  > 348 │ .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas){
+        │                                                                                                ^
+    349 │ }
+    350 │ @supports selector(.parent>.child ){
+  
+  i Remove )
+  
+supports.css:352:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `>`
+  
+    350 │ @supports selector(.parent>.child ){
+    351 │ }
+  > 352 │ @supports selector(> .child-one){
+        │                    ^
+    353 │ }
+    354 │ @supports selector(.parent  ~  .child){
+  
+  i Remove >
+  
+supports.css:352:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    350 │ @supports selector(.parent>.child ){
+    351 │ }
+  > 352 │ @supports selector(> .child-one){
+        │                                ^
+    353 │ }
+    354 │ @supports selector(.parent  ~  .child){
+  
+  i Remove )
+  
+supports.css:366:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `,`
+  
+    364 │ @supports selector(|*){
+    365 │ }
+  > 366 │ @supports selector(.a,.b,:not(asdasldaskdhjkashdahsdkjahskdjhakj,asdasldaskdhjkashdahsdkjahskdjhakj)){
+        │                      ^
+    367 │ }
+    368 │ @supports not (selector(:before) or not (not (selector(:before)))) {
+  
+  i Remove ,
+  
+supports.css:366:101 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    364 │ @supports selector(|*){
+    365 │ }
+  > 366 │ @supports selector(.a,.b,:not(asdasldaskdhjkashdahsdkjahskdjhakj,asdasldaskdhjkashdahsdkjahskdjhakj)){
+        │                                                                                                     ^
+    367 │ }
+    368 │ @supports not (selector(:before) or not (not (selector(:before)))) {
+  
+  i Remove )
+  
+supports.css:368:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found ':'.
+  
+    366 │ @supports selector(.a,.b,:not(asdasldaskdhjkashdahsdkjahskdjhakj,asdasldaskdhjkashdahsdkjahskdjhakj)){
+    367 │ }
+  > 368 │ @supports not (selector(:before) or not (not (selector(:before)))) {
+        │                                                        ^
+    369 │ }
+    370 │ @supports selector(selector(:focus-visible)) {}
+  
+  i Expected a declaration item here.
+  
+    366 │ @supports selector(.a,.b,:not(asdasldaskdhjkashdahsdkjahskdjhakj,asdasldaskdhjkashdahsdkjahskdjhakj)){
+    367 │ }
+  > 368 │ @supports not (selector(:before) or not (not (selector(:before)))) {
+        │                                                        ^
+    369 │ }
+    370 │ @supports selector(selector(:focus-visible)) {}
+  
+supports.css:368:57 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `before`
+  
+    366 │ @supports selector(.a,.b,:not(asdasldaskdhjkashdahsdkjahskdjhakj,asdasldaskdhjkashdahsdkjahskdjhakj)){
+    367 │ }
+  > 368 │ @supports not (selector(:before) or not (not (selector(:before)))) {
+        │                                                         ^^^^^^
+    369 │ }
+    370 │ @supports selector(selector(:focus-visible)) {}
+  
+  i Remove before
+  
+supports.css:370:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `(`
+  
+    368 │ @supports not (selector(:before) or not (not (selector(:before)))) {
+    369 │ }
+  > 370 │ @supports selector(selector(:focus-visible)) {}
+        │                            ^
+    371 │ @supports selector(:::selector(:focus-visible)) {}
+    372 │ @supports selector(--selector(:focus-visible)) {}
+  
+  i Remove (
+  
+supports.css:370:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    368 │ @supports not (selector(:before) or not (not (selector(:before)))) {
+    369 │ }
+  > 370 │ @supports selector(selector(:focus-visible)) {}
+        │                                           ^
+    371 │ @supports selector(:::selector(:focus-visible)) {}
+    372 │ @supports selector(--selector(:focus-visible)) {}
+  
+  i Remove )
+  
+supports.css:371:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    369 │ }
+    370 │ @supports selector(selector(:focus-visible)) {}
+  > 371 │ @supports selector(:::selector(:focus-visible)) {}
+        │                      ^
+    372 │ @supports selector(--selector(:focus-visible)) {}
+    373 │ @supports not (transform-origin: 10em 10em 10em) {}
+  
+  i Expected one of:
+  
+  - after
+  - backdrop
+  - before
+  - cue
+  - cue-region
+  - first-letter
+  - first-line
+  - file-selector-button
+  - grammar-error
+  - part
+  - placeholder
+  - selection
+  - slotted
+  - spelling-error
+  - target-text
+  
+supports.css:371:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `(`
+  
+    369 │ }
+    370 │ @supports selector(selector(:focus-visible)) {}
+  > 371 │ @supports selector(:::selector(:focus-visible)) {}
+        │                               ^
+    372 │ @supports selector(--selector(:focus-visible)) {}
+    373 │ @supports not (transform-origin: 10em 10em 10em) {}
+  
+  i Remove (
+  
+supports.css:371:46 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    369 │ }
+    370 │ @supports selector(selector(:focus-visible)) {}
+  > 371 │ @supports selector(:::selector(:focus-visible)) {}
+        │                                              ^
+    372 │ @supports selector(--selector(:focus-visible)) {}
+    373 │ @supports not (transform-origin: 10em 10em 10em) {}
+  
+  i Remove )
+  
+supports.css:372:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `(`
+  
+    370 │ @supports selector(selector(:focus-visible)) {}
+    371 │ @supports selector(:::selector(:focus-visible)) {}
+  > 372 │ @supports selector(--selector(:focus-visible)) {}
+        │                              ^
+    373 │ @supports not (transform-origin: 10em 10em 10em) {}
+    374 │ @supports not (not (transform-origin: 2px)) {}
+  
+  i Remove (
+  
+supports.css:372:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    370 │ @supports selector(selector(:focus-visible)) {}
+    371 │ @supports selector(:::selector(:focus-visible)) {}
+  > 372 │ @supports selector(--selector(:focus-visible)) {}
+        │                                             ^
+    373 │ @supports not (transform-origin: 10em 10em 10em) {}
+    374 │ @supports not (not (transform-origin: 2px)) {}
+  
+  i Remove )
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   18:     very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+   22:     very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+   26:     very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+   30:     very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+   52:     very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+   56:     very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+   60:     very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+   64:     very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+   68:     very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-prop: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+  214: @supports selector(.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+  216: .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas){
+```
+
+

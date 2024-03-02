@@ -13,9 +13,6 @@ mod language;
 
 tests_macros::gen_tests! {"tests/specs/prettier/{css}/**/*.{css}", crate::test_snapshot, ""}
 
-// TODO: Re-add CSS Prettier tests once we figure out if/how to handle PostCSS,
-// and once the parser is sufficiently there to parse them all successfully.
-#[allow(unused)]
 fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     countme::enable(true);
 

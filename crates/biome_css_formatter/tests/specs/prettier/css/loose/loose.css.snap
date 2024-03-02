@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/loose/loose.css
+---
+
+# Input
+
+```css
+div {height: calc(-0.5 * var(ei-table-cell-padding));
+  width: -webkit-calc
+(100% + 20px);
+  margin: -moz-calc(
+100%
+-
+320px
+);
+  background: url(
+    var( audience-network-checkbox-image)
+    ) center no-repeat;
+  background-image: url(
+    )
+    center center
+    no-repeat
+    black;}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ div {
+   height: calc(-0.5 * var(ei-table-cell-padding));
+-  width: -webkit-calc (100% + 20px);
++  width: -webkit-calc(100% + 20px);
+   margin: -moz-calc(100% - 320px);
+   background: url(var(audience-network-checkbox-image)) center no-repeat;
+   background-image: url() center center no-repeat black;
+```
+
+# Output
+
+```css
+div {
+  height: calc(-0.5 * var(ei-table-cell-padding));
+  width: -webkit-calc(100% + 20px);
+  margin: -moz-calc(100% - 320px);
+  background: url(var(audience-network-checkbox-image)) center no-repeat;
+  background-image: url() center center no-repeat black;
+}
+```
+
+

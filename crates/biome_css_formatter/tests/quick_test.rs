@@ -13,13 +13,15 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-    div {
-        border: #fff    solid
-        
-        2px;
-        border: THICK   #000;
-        border: medium;
-    }
+.foo {
+    color  /* comment 47 */
+    /* comment 48 */
+    /* comment 49 */ :  /* comment 50 */
+    /* comment 51 */
+    /* comment 52 */ blue  /* comment 53 */
+    /* comment 54 */
+    /* comment 55 */ ;  /* comment 56 */
+}
 
 "#;
     let parse = parse_css(src, CssParserOptions::default());

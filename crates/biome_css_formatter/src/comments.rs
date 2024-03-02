@@ -1,8 +1,9 @@
 use crate::prelude::*;
-use biome_css_syntax::{CssLanguage, TextLen};
+use biome_css_syntax::{AnyCssDeclarationName, CssLanguage, TextLen};
 use biome_diagnostics::category;
 use biome_formatter::comments::{
-    is_doc_comment, CommentKind, CommentStyle, Comments, SourceComment,
+    is_doc_comment, CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments,
+    DecoratedComment, SourceComment,
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{write, FormatResult, FormatRule};
@@ -81,5 +82,27 @@ impl CommentStyle for CssCommentStyle {
         } else {
             CommentKind::Line
         }
+    }
+
+    fn place_comment(
+        &self,
+        comment: DecoratedComment<Self::Language>,
+    ) -> CommentPlacement<Self::Language> {
+        match comment.text_position() {
+            CommentTextPosition::EndOfLine => handle_declaration_name_comment(comment),
+            CommentTextPosition::OwnLine => handle_declaration_name_comment(comment),
+            CommentTextPosition::SameLine => handle_declaration_name_comment(comment),
+        }
+    }
+}
+
+fn handle_declaration_name_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    match comment.preceding_node() {
+        Some(following_node) if AnyCssDeclarationName::can_cast(following_node.kind()) => {
+            CommentPlacement::leading(following_node.clone(), comment)
+        }
+        _ => CommentPlacement::Default(comment),
     }
 }

@@ -1,0 +1,454 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/font-feature-values.css
+---
+
+# Input
+
+```css
+@font-feature-values Font One {
+    @styleset {
+        nice-style: 12;
+    }
+}
+@font-feature-values Font One {
+@styleset {
+nice-style: 12;
+}
+}
+@font-feature-values Font One{
+    @styleset{
+        nice-style: 12;
+    }
+}
+@font-feature-values  Font One  {
+    @styleset  {
+        nice-style: 12;
+    }
+}
+@font-feature-values
+Font One
+{
+@styleset
+{
+nice-style
+:
+12
+;
+}
+}
+
+@font-feature-values
+
+Font One
+
+{
+
+@styleset
+{
+
+nice-style
+
+:
+
+12
+
+;
+
+}
+
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,31 +1,46 @@
+-@font-feature-values Font One {
+-  @styleset {
++@font-feature-values Font
++one {
++  @
++  styleset {
+     nice-style: 12;
+   }
+ }
+-@font-feature-values Font One {
+-  @styleset {
++@font-feature-values Font
++one {
++  @
++  styleset {
+     nice-style: 12;
+   }
+ }
+-@font-feature-values Font One {
+-  @styleset {
++@font-feature-values Font
++one {
++  @
++  styleset {
+     nice-style: 12;
+   }
+ }
+-@font-feature-values Font One {
+-  @styleset {
++@font-feature-values  Font
++one {
++  @
++  styleset {
+     nice-style: 12;
+   }
+ }
+-@font-feature-values Font One {
+-  @styleset {
++@font-feature-values
++Font
++one {
++  @
++  styleset {
+     nice-style: 12;
+   }
+ }
+ 
+-@font-feature-values Font One {
+-  @styleset {
++@font-feature-values
++
++Font
++one {
++  @
++  styleset {
+     nice-style: 12;
+   }
+ }
+```
+
+# Output
+
+```css
+@font-feature-values Font
+one {
+  @
+  styleset {
+    nice-style: 12;
+  }
+}
+@font-feature-values Font
+one {
+  @
+  styleset {
+    nice-style: 12;
+  }
+}
+@font-feature-values Font
+one {
+  @
+  styleset {
+    nice-style: 12;
+  }
+}
+@font-feature-values  Font
+one {
+  @
+  styleset {
+    nice-style: 12;
+  }
+}
+@font-feature-values
+Font
+one {
+  @
+  styleset {
+    nice-style: 12;
+  }
+}
+
+@font-feature-values
+
+Font
+one {
+  @
+  styleset {
+    nice-style: 12;
+  }
+}
+```
+
+# Errors
+```
+font-feature-values.css:1:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `One`
+  
+  > 1 │ @font-feature-values Font One {
+      │                           ^^^
+    2 │     @styleset {
+    3 │         nice-style: 12;
+  
+  i Remove One
+  
+font-feature-values.css:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @font-feature-values Font One {
+  > 2 │     @styleset {
+      │      ^^^^^^^^
+    3 │         nice-style: 12;
+    4 │     }
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+font-feature-values.css:6:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `One`
+  
+    4 │     }
+    5 │ }
+  > 6 │ @font-feature-values Font One {
+      │                           ^^^
+    7 │ @styleset {
+    8 │ nice-style: 12;
+  
+  i Remove One
+  
+font-feature-values.css:7:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    5 │ }
+    6 │ @font-feature-values Font One {
+  > 7 │ @styleset {
+      │  ^^^^^^^^
+    8 │ nice-style: 12;
+    9 │ }
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+font-feature-values.css:11:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `One`
+  
+     9 │ }
+    10 │ }
+  > 11 │ @font-feature-values Font One{
+       │                           ^^^
+    12 │     @styleset{
+    13 │         nice-style: 12;
+  
+  i Remove One
+  
+font-feature-values.css:12:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    10 │ }
+    11 │ @font-feature-values Font One{
+  > 12 │     @styleset{
+       │      ^^^^^^^^
+    13 │         nice-style: 12;
+    14 │     }
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+font-feature-values.css:16:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `One`
+  
+    14 │     }
+    15 │ }
+  > 16 │ @font-feature-values  Font One  {
+       │                            ^^^
+    17 │     @styleset  {
+    18 │         nice-style: 12;
+  
+  i Remove One
+  
+font-feature-values.css:17:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    15 │ }
+    16 │ @font-feature-values  Font One  {
+  > 17 │     @styleset  {
+       │      ^^^^^^^^
+    18 │         nice-style: 12;
+    19 │     }
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+font-feature-values.css:22:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `One`
+  
+    20 │ }
+    21 │ @font-feature-values
+  > 22 │ Font One
+       │      ^^^
+    23 │ {
+    24 │ @styleset
+  
+  i Remove One
+  
+font-feature-values.css:24:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    22 │ Font One
+    23 │ {
+  > 24 │ @styleset
+       │  ^^^^^^^^
+    25 │ {
+    26 │ nice-style
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+font-feature-values.css:35:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `One`
+  
+    33 │ @font-feature-values
+    34 │ 
+  > 35 │ Font One
+       │      ^^^
+    36 │ 
+    37 │ {
+  
+  i Remove One
+  
+font-feature-values.css:39:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    37 │ {
+    38 │ 
+  > 39 │ @styleset
+       │  ^^^^^^^^
+    40 │ {
+    41 │ 
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+
+```
+
+

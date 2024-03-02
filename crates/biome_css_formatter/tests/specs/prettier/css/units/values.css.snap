@@ -1,0 +1,260 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/units/values.css
+---
+
+# Input
+
+```css
+@value 4XLarge 28/36px;
+
+.postCssLowerCasingValueName {
+  font: 4XLarge Helvetica;
+}
+
+.cssUnits {
+  a: 5EM;
+  a: 5REM;
+  a: 5EX;
+  a: 5REX;
+  a: 5CAP;
+  a: 5RCAP;
+  a: 5CH;
+  a: 5RCH;
+  a: 5IC;
+  a: 5RIC;
+  a: 5LH;
+  a: 5RLH;
+  a: 5VH;
+  a: 5VW;
+  a: 5VI;
+  a: 5VB;
+  a: 5VMIN;
+  a: 5VMAX;
+  a: 5CM;
+  a: 5MM;
+  a: 5q;
+  a: 5IN;
+  a: 5PT;
+  a: 5PC;
+  a: 5PX;
+  a: 5DEG;
+  a: 5GRAD;
+  a: 5RAD;
+  a: 5S;
+  a: 5MS;
+  a: 5hZ;
+  a: 5KhZ;
+  a: 5DPI;
+  a: 5DPCM;
+  a: 5DPPX;
+  a: 5X;
+
+  a: 5PROTOTYPE;
+  a: 5constructoR;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,9 @@
+-@value 4XLarge 28/36px;
++@
++value 4XLarge 28/36px
++;
+ 
+ .postCssLowerCasingValueName {
+-  font: 4XLarge Helvetica;
++  font: 4xlarge helvetica;
+ }
+ 
+ .cssUnits {
+@@ -25,7 +27,7 @@
+   a: 5vmax;
+   a: 5cm;
+   a: 5mm;
+-  a: 5Q;
++  a: 5q;
+   a: 5in;
+   a: 5pt;
+   a: 5pc;
+@@ -35,13 +37,13 @@
+   a: 5rad;
+   a: 5s;
+   a: 5ms;
+-  a: 5Hz;
+-  a: 5kHz;
++  a: 5hz;
++  a: 5khz;
+   a: 5dpi;
+   a: 5dpcm;
+   a: 5dppx;
+   a: 5x;
+ 
+-  a: 5PROTOTYPE;
+-  a: 5constructoR;
++  a: 5prototype;
++  a: 5constructor;
+ }
+```
+
+# Output
+
+```css
+@
+value 4XLarge 28/36px
+;
+
+.postCssLowerCasingValueName {
+  font: 4xlarge helvetica;
+}
+
+.cssUnits {
+  a: 5em;
+  a: 5rem;
+  a: 5ex;
+  a: 5rex;
+  a: 5cap;
+  a: 5rcap;
+  a: 5ch;
+  a: 5rch;
+  a: 5ic;
+  a: 5ric;
+  a: 5lh;
+  a: 5rlh;
+  a: 5vh;
+  a: 5vw;
+  a: 5vi;
+  a: 5vb;
+  a: 5vmin;
+  a: 5vmax;
+  a: 5cm;
+  a: 5mm;
+  a: 5q;
+  a: 5in;
+  a: 5pt;
+  a: 5pc;
+  a: 5px;
+  a: 5deg;
+  a: 5grad;
+  a: 5rad;
+  a: 5s;
+  a: 5ms;
+  a: 5hz;
+  a: 5khz;
+  a: 5dpi;
+  a: 5dpcm;
+  a: 5dppx;
+  a: 5x;
+
+  a: 5prototype;
+  a: 5constructor;
+}
+```
+
+# Errors
+```
+values.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ @value 4XLarge 28/36px;
+      │  ^^^^^
+    2 │ 
+    3 │ .postCssLowerCasingValueName {
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+values.css:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '4'.
+  
+  > 1 │ @value 4XLarge 28/36px;
+      │        ^
+    2 │ 
+    3 │ .postCssLowerCasingValueName {
+  
+  i Expected a compound selector here.
+  
+  > 1 │ @value 4XLarge 28/36px;
+      │        ^
+    2 │ 
+    3 │ .postCssLowerCasingValueName {
+  
+values.css:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `XLarge`
+  
+  > 1 │ @value 4XLarge 28/36px;
+      │         ^^^^^^
+    2 │ 
+    3 │ .postCssLowerCasingValueName {
+  
+  i Remove XLarge
+  
+values.css:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '28'.
+  
+  > 1 │ @value 4XLarge 28/36px;
+      │                ^^
+    2 │ 
+    3 │ .postCssLowerCasingValueName {
+  
+  i Expected a compound selector here.
+  
+  > 1 │ @value 4XLarge 28/36px;
+      │                ^^
+    2 │ 
+    3 │ .postCssLowerCasingValueName {
+  
+values.css:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `px`
+  
+  > 1 │ @value 4XLarge 28/36px;
+      │                     ^^
+    2 │ 
+    3 │ .postCssLowerCasingValueName {
+  
+  i Remove px
+  
+values.css:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+  > 1 │ @value 4XLarge 28/36px;
+      │                       ^
+    2 │ 
+    3 │ .postCssLowerCasingValueName {
+  
+  i Remove ;
+  
+
+```
+
+

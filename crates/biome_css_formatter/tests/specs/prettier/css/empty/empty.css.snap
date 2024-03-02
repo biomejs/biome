@@ -1,0 +1,71 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/empty/empty.css
+---
+
+# Input
+
+```css
+
+details[open] {
+}
+
+div {
+  box-sizing: border-box;;
+  color: red;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,5 +3,6 @@
+ 
+ div {
+   box-sizing: border-box;
++  ;
+   color: red;
+ }
+```
+
+# Output
+
+```css
+details[open] {
+}
+
+div {
+  box-sizing: border-box;
+  ;
+  color: red;
+}
+```
+
+# Errors
+```
+empty.css:6:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration, or an at rule but instead found ';'.
+  
+    5 │ div {
+  > 6 │   box-sizing: border-box;;
+      │                          ^
+    7 │   color: red;
+    8 │ }
+  
+  i Expected a declaration, or an at rule here.
+  
+    5 │ div {
+  > 6 │   box-sizing: border-box;;
+      │                          ^
+    7 │   color: red;
+    8 │ }
+  
+
+```
+
+

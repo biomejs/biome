@@ -1,6 +1,8 @@
 use crate::prelude::*;
+use crate::utils::block_like::CssBlockLike;
 use biome_css_syntax::CssFontFeatureValuesBlock;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssFontFeatureValuesBlock;
 impl FormatNodeRule<CssFontFeatureValuesBlock> for FormatCssFontFeatureValuesBlock {
@@ -9,6 +11,15 @@ impl FormatNodeRule<CssFontFeatureValuesBlock> for FormatCssFontFeatureValuesBlo
         node: &CssFontFeatureValuesBlock,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        write!(f, [CssBlockLike::from(node.clone())])
+    }
+
+    fn fmt_dangling_comments(
+        &self,
+        _: &CssFontFeatureValuesBlock,
+        _: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        // Formatted inside of `fmt_fields`
+        Ok(())
     }
 }
