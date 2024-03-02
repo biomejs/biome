@@ -32,6 +32,12 @@ class G extends B {
     }
 }
 
+class H extends B {
+    constructor(name = "default") {
+      super(name);
+    }
+}
+
 ```
 
 

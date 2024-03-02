@@ -228,6 +228,14 @@ fn is_delegating_initialization(
             let arg = arg.ok()?;
             match (param, arg) {
                 (
+                    AnyJsConstructorParameter::AnyJsFormalParameter(
+                        AnyJsFormalParameter::JsFormalParameter(param),
+                    ),
+                    _,
+                ) if param.initializer().is_some() => {
+                    return Some(false);
+                }
+                (
                     AnyJsConstructorParameter::JsRestParameter(param),
                     AnyJsCallArgument::JsSpread(arg),
                 ) => {
