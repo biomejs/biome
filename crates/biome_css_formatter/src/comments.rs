@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_css_syntax::{AnyCssDeclarationName, CssLanguage, TextLen};
+use biome_css_syntax::{AnyCssDeclarationName, CssFunction, CssLanguage, TextLen};
 use biome_diagnostics::category;
 use biome_formatter::comments::{
     is_doc_comment, CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments,
@@ -89,9 +89,15 @@ impl CommentStyle for CssCommentStyle {
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
         match comment.text_position() {
-            CommentTextPosition::EndOfLine => handle_declaration_name_comment(comment),
-            CommentTextPosition::OwnLine => handle_declaration_name_comment(comment),
-            CommentTextPosition::SameLine => handle_declaration_name_comment(comment),
+            CommentTextPosition::EndOfLine => {
+                handle_function_comment(comment).or_else(handle_declaration_name_comment)
+            }
+            CommentTextPosition::OwnLine => {
+                handle_function_comment(comment).or_else(handle_declaration_name_comment)
+            }
+            CommentTextPosition::SameLine => {
+                handle_function_comment(comment).or_else(handle_declaration_name_comment)
+            }
         }
     }
 }
@@ -104,5 +110,23 @@ fn handle_declaration_name_comment(
             CommentPlacement::leading(following_node.clone(), comment)
         }
         _ => CommentPlacement::Default(comment),
+    }
+}
+
+fn handle_function_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let (Some(preceding_node), Some(following_node)) =
+        (comment.preceding_node(), comment.following_node())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let is_inside_function = CssFunction::can_cast(comment.enclosing_node().kind());
+    let is_after_name = AnyCssDeclarationName::can_cast(preceding_node.kind());
+    if is_inside_function && is_after_name {
+        CommentPlacement::leading(following_node.clone(), comment)
+    } else {
+        CommentPlacement::Default(comment)
     }
 }

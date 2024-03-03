@@ -14,13 +14,7 @@ mod language {
 fn quick_test() {
     let src = r#"
 .foo {
-    color  /* comment 47 */
-    /* comment 48 */
-    /* comment 49 */ :  /* comment 50 */
-    /* comment 51 */
-    /* comment 52 */ blue  /* comment 53 */
-    /* comment 54 */
-    /* comment 55 */ ;  /* comment 56 */
+    transform: translate(/* comment 9 */ 10px);
 }
 
 "#;
