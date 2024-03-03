@@ -22,19 +22,19 @@ describe("Biome WebAssembly lintContent", () => {
 	});
 
 	it("should not fix lint issues if fixFileMode is undefined/omitted", () => {
-		const result = biome.lintContent("let a = \"foo \" + Date.now() + \" bar\"", {
+		const result = biome.lintContent('let a = "foo " + Date.now() + " bar"', {
 			filePath: "example.js",
 		});
 
 		expect(result.content).toMatchSnapshot("original content");
-	})
+	});
 
 	it("should fix lint issues and return new content if fileFileMode is SafeAndUnsafeFixes", () => {
-		const result = biome.lintContent("let a = \"foo \" + Date.now() + \" bar\"", {
+		const result = biome.lintContent('let a = "foo " + Date.now() + " bar"', {
 			filePath: "example.js",
 			fixFileMode: "SafeAndUnsafeFixes",
 		});
 
 		expect(result.content).toMatchSnapshot("fixed content");
-	})
+	});
 });

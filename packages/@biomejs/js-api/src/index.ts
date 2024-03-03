@@ -56,11 +56,11 @@ export interface LintContentOptions {
 	 * so Biome knows how to parse the content
 	 */
 	filePath: string;
-	fixFileMode?: FixFileMode
+	fixFileMode?: FixFileMode;
 }
 
 export interface LintResult {
-	content: string
+	content: string;
 	diagnostics: Diagnostic[];
 }
 
@@ -234,10 +234,7 @@ export class Biome {
 	 * @param {String} content The content to lint
 	 * @param {LintContentOptions} options Options needed when linting some content
 	 */
-	lintContent(
-		content: string,
-		options: LintContentOptions,
-	): LintResult {
+	lintContent(content: string, options: LintContentOptions): LintResult {
 		return this.withFile(options.filePath, content, (path) => {
 			let code = content;
 
@@ -247,19 +244,20 @@ export class Biome {
 				max_diagnostics: Number.MAX_SAFE_INTEGER,
 			});
 
-
 			const hasErrors = diagnostics.some(
-				(diag) => diag.severity === "fatal" || diag.severity === "error" && !diag.tags.includes("fixable"),
+				(diag) =>
+					diag.severity === "fatal" ||
+					(diag.severity === "error" && !diag.tags.includes("fixable")),
 			);
 
-			if(options.fixFileMode && !hasErrors){
+			if (options.fixFileMode && !hasErrors) {
 				const result = this.workspace.fixFile({
 					path,
 					fix_file_mode: options.fixFileMode,
-					should_format: false
-				})
+					should_format: false,
+				});
 
-				code = result.code
+				code = result.code;
 			}
 
 			return {
