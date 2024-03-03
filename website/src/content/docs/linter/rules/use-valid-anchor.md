@@ -29,9 +29,11 @@ used for user interaction.
 There are **many reasons** why an anchor should not have a logic with an incorrect `href` attribute:
 
 - it can disrupt the correct flow of the user navigation e.g. a user that wants to open the link
-in another tab, but the default "click" behaviour is prevented
-- it can source of invalid links, and crawlers can't navigate the website, risking to penalise
+in another tab, but the default "click" behavior is prevented
+- it can source of invalid links, and crawlers can't navigate the website, risking to penalize
 SEO ranking
+
+For a detailed explanation, check out https://marcysutton.com/links-vs-buttons-in-modern-web-applications
 
 ## Examples
 
@@ -104,6 +106,24 @@ SEO ranking
     <strong>2 │ </strong>
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The href attribute should be a valid a URL</span>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Check </span><span style="color: lightgreen;"><a href="https://marcysutton.com/links-vs-buttons-in-modern-web-applications">this thorough explanation</a></span><span style="color: lightgreen;"> to better understand the context.</span>
+  
+</code></pre>
+
+```jsx
+<a onClick={something}>navigate here</a>
+```
+
+<pre class="language-text"><code class="language-text">a11y/useValidAnchor.js:1:4 <a href="https://biomejs.dev/linter/rules/use-valid-anchor">lint/a11y/useValidAnchor</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use a </span><span style="color: Tomato;"><strong>button</strong></span><span style="color: Tomato;"> element instead of an </span><span style="color: Tomato;"><strong>a</strong></span><span style="color: Tomato;"> element.</span>
+  
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;a onClick={something}&gt;navigate here&lt;/a&gt;
+   <strong>   │ </strong>   <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Anchor elements should only be used for default sections or page navigation</span>
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Check </span><span style="color: lightgreen;"><a href="https://marcysutton.com/links-vs-buttons-in-modern-web-applications">this thorough explanation</a></span><span style="color: lightgreen;"> to better understand the context.</span>
   
