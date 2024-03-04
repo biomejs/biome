@@ -1,4 +1,4 @@
-use crate::{cli_options::CliOptions, CliDiagnostic};
+use crate::CliDiagnostic;
 use biome_fs::FileSystem;
 use biome_service::{DynRef, PartialConfiguration};
 use std::ffi::OsString;

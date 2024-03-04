@@ -2683,7 +2683,6 @@ fn should_not_process_ignored_file_even_if_its_changed() {
     ));
 }
 
-
 #[test]
 fn should_not_error_for_no_changed_files_with_no_errors_on_unmatched() {
     let mut console = BufferConsole::default();
@@ -2707,7 +2706,7 @@ fn should_not_error_for_no_changed_files_with_no_errors_on_unmatched() {
                 file_path.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 

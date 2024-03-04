@@ -37,7 +37,9 @@ impl Default for MemoryFileSystem {
             files: Default::default(),
             errors: Default::default(),
             allow_write: true,
-            on_get_changed_files: Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(Box::new(|| vec![])))))),
+            on_get_changed_files: Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(Box::new(
+                || vec![],
+            )))))),
         }
     }
 }
