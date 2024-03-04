@@ -96,7 +96,11 @@ impl Rule for NoUnusedTemplateLiteral {
             AnyJsExpression::JsTemplateExpression(node.clone()),
             AnyJsExpression::AnyJsLiteralExpression(
                 AnyJsLiteralExpression::JsStringLiteralExpression(
-                    make::js_string_literal_expression(make::js_string_literal(&inner_content)),
+                    make::js_string_literal_expression(if ctx.as_preferred_quote().is_double() {
+                        make::js_string_literal(&inner_content)
+                    } else {
+                        make::js_string_literal_single_quotes(&inner_content)
+                    }),
                 ),
             ),
         );

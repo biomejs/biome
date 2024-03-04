@@ -347,6 +347,7 @@ where
 {
     fn diagnostic(&self) -> Option<AnalyzerDiagnostic> {
         let globals = self.options.globals();
+        let preferred_quote = self.options.preferred_quote();
         let options = self.options.rule_options::<R>().unwrap_or_default();
         let ctx = RuleContext::new(
             &self.query_result,
@@ -355,6 +356,7 @@ where
             &globals,
             &self.options.file_path,
             &options,
+            preferred_quote,
         )
         .ok()?;
 
@@ -372,6 +374,7 @@ where
             &globals,
             &self.options.file_path,
             &options,
+            &self.options.configuration.preferred_quote,
         )
         .ok();
         if let Some(ctx) = ctx {
@@ -416,6 +419,7 @@ where
             &globals,
             &self.options.file_path,
             &options,
+            &self.options.configuration.preferred_quote,
         )
         .ok();
         if let Some(ctx) = ctx {
