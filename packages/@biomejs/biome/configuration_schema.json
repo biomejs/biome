@@ -1391,6 +1391,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExclusiveTests": {
+					"description": "Disallow exclusive tests.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExportsInTest": {
 					"description": "Disallow using export or module.exports in files containing tests",
 					"anyOf": [

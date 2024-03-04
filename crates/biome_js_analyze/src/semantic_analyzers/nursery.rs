@@ -3,6 +3,7 @@
 use biome_analyze::declare_group;
 
 pub mod no_console;
+pub mod no_exclusive_tests;
 pub mod no_global_assign;
 pub mod no_global_eval;
 pub mod no_invalid_use_before_declaration;
@@ -23,6 +24,7 @@ declare_group! {
         name : "nursery" ,
         rules : [
             self :: no_console :: NoConsole ,
+            self :: no_exclusive_tests :: NoExclusiveTests ,
             self :: no_global_assign :: NoGlobalAssign ,
             self :: no_global_eval :: NoGlobalEval ,
             self :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclaration ,

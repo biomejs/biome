@@ -1,0 +1,250 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+describe.only("bar", function () {});
+it.only("bar", function () {});
+test.only("bar", function () {});
+
+describe.only("bar", () => {});
+it.only("bar", () => {});
+test.only("bar", () => {});
+
+describe["only"]("bar", function () {});
+it["only"]("bar", function () {});
+test["only"]("bar", function () {});
+
+```
+
+# Diagnostics
+```
+invalid.js:1:10 lint/nursery/noExclusiveTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't exclusive the test.
+  
+  > 1 │ describe.only("bar", function () {});
+      │          ^^^^
+    2 │ it.only("bar", function () {});
+    3 │ test.only("bar", function () {});
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove the 'only' method to ensure all tests are executed.
+  
+     1    │ - describe.only("bar",·function·()·{});
+        1 │ + describe("bar",·function·()·{});
+     2  2 │   it.only("bar", function () {});
+     3  3 │   test.only("bar", function () {});
+  
+
+```
+
+```
+invalid.js:2:4 lint/nursery/noExclusiveTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't exclusive the test.
+  
+    1 │ describe.only("bar", function () {});
+  > 2 │ it.only("bar", function () {});
+      │    ^^^^
+    3 │ test.only("bar", function () {});
+    4 │ 
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove the 'only' method to ensure all tests are executed.
+  
+     1  1 │   describe.only("bar", function () {});
+     2    │ - it.only("bar",·function·()·{});
+        2 │ + it("bar",·function·()·{});
+     3  3 │   test.only("bar", function () {});
+     4  4 │   
+  
+
+```
+
+```
+invalid.js:3:6 lint/nursery/noExclusiveTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't exclusive the test.
+  
+    1 │ describe.only("bar", function () {});
+    2 │ it.only("bar", function () {});
+  > 3 │ test.only("bar", function () {});
+      │      ^^^^
+    4 │ 
+    5 │ describe.only("bar", () => {});
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove the 'only' method to ensure all tests are executed.
+  
+     1  1 │   describe.only("bar", function () {});
+     2  2 │   it.only("bar", function () {});
+     3    │ - test.only("bar",·function·()·{});
+        3 │ + test("bar",·function·()·{});
+     4  4 │   
+     5  5 │   describe.only("bar", () => {});
+  
+
+```
+
+```
+invalid.js:5:10 lint/nursery/noExclusiveTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't exclusive the test.
+  
+    3 │ test.only("bar", function () {});
+    4 │ 
+  > 5 │ describe.only("bar", () => {});
+      │          ^^^^
+    6 │ it.only("bar", () => {});
+    7 │ test.only("bar", () => {});
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove the 'only' method to ensure all tests are executed.
+  
+     3  3 │   test.only("bar", function () {});
+     4  4 │   
+     5    │ - describe.only("bar",·()·=>·{});
+        5 │ + describe("bar",·()·=>·{});
+     6  6 │   it.only("bar", () => {});
+     7  7 │   test.only("bar", () => {});
+  
+
+```
+
+```
+invalid.js:6:4 lint/nursery/noExclusiveTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't exclusive the test.
+  
+    5 │ describe.only("bar", () => {});
+  > 6 │ it.only("bar", () => {});
+      │    ^^^^
+    7 │ test.only("bar", () => {});
+    8 │ 
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove the 'only' method to ensure all tests are executed.
+  
+     4  4 │   
+     5  5 │   describe.only("bar", () => {});
+     6    │ - it.only("bar",·()·=>·{});
+        6 │ + it("bar",·()·=>·{});
+     7  7 │   test.only("bar", () => {});
+     8  8 │   
+  
+
+```
+
+```
+invalid.js:7:6 lint/nursery/noExclusiveTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't exclusive the test.
+  
+    5 │ describe.only("bar", () => {});
+    6 │ it.only("bar", () => {});
+  > 7 │ test.only("bar", () => {});
+      │      ^^^^
+    8 │ 
+    9 │ describe["only"]("bar", function () {});
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove the 'only' method to ensure all tests are executed.
+  
+     5  5 │   describe.only("bar", () => {});
+     6  6 │   it.only("bar", () => {});
+     7    │ - test.only("bar",·()·=>·{});
+        7 │ + test("bar",·()·=>·{});
+     8  8 │   
+     9  9 │   describe["only"]("bar", function () {});
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noExclusiveTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't exclusive the test.
+  
+     7 │ test.only("bar", () => {});
+     8 │ 
+   > 9 │ describe["only"]("bar", function () {});
+       │ ^^^^^^^^^^^^^^^^
+    10 │ it["only"]("bar", function () {});
+    11 │ test["only"]("bar", function () {});
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove the 'only' method to ensure all tests are executed.
+  
+    9 │ describe["only"]("bar",·function·()·{});
+      │         --------                        
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noExclusiveTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't exclusive the test.
+  
+     9 │ describe["only"]("bar", function () {});
+  > 10 │ it["only"]("bar", function () {});
+       │ ^^^^^^^^^^
+    11 │ test["only"]("bar", function () {});
+    12 │ 
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove the 'only' method to ensure all tests are executed.
+  
+    10 │ it["only"]("bar",·function·()·{});
+       │   --------                        
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noExclusiveTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't exclusive the test.
+  
+     9 │ describe["only"]("bar", function () {});
+    10 │ it["only"]("bar", function () {});
+  > 11 │ test["only"]("bar", function () {});
+       │ ^^^^^^^^^^^^
+    12 │ 
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove the 'only' method to ensure all tests are executed.
+  
+    11 │ test["only"]("bar",·function·()·{});
+       │     --------                        
+
+```
+
+

@@ -897,6 +897,10 @@ export interface Nursery {
 	 */
 	noExcessiveNestedTestSuites?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow exclusive tests.
+	 */
+	noExclusiveTests?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow using export or module.exports in files containing tests
 	 */
 	noExportsInTest?: RuleConfiguration_for_Null;
@@ -1875,6 +1879,7 @@ export type Category =
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyTypeParameters"
 	| "lint/nursery/noExcessiveNestedTestSuites"
+	| "lint/nursery/noExclusiveTests"
 	| "lint/nursery/noExportsInTest"
 	| "lint/nursery/noFocusedTests"
 	| "lint/nursery/noGlobalAssign"
