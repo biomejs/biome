@@ -7,10 +7,13 @@ template: splash
 description: Web開発のためのたった1つのツールチェーン
 editUrl: false
 next: false
+banner:
+  content: |
+    <a href="https://www.enduringhearts.org/" target="_blank">Enduring Hearts</a> への寄付をご検討ください。
+
 hero:
   title: Web開発のためのたった1つのツールチェーン
-  alt: Biome, ウェブツールチェイン
-  tagline: format、lintなど一瞬で完了させます！
+  tagline: わずか数秒でフォーマット、lint などが完了します!
   image:
     alt: Biome，Web 工具链
     dark: "@/assets/svg/slogan-dark-transparent.svg"
@@ -27,10 +30,114 @@ hero:
 ---
 
 import { Card, CardGrid } from "@astrojs/starlight/components";
+import Inputf from "@/components/formatter/input.md";
+import Outputf from "@/components/formatter/output.md";
+import ProgressBarContainer from "@/playground/components/Progress.tsx";
+import Community from "@/components/Community.astro";
+import { Icon } from "@astrojs/starlight/components";
+import arrow from "@/assets/svg/arrow-right.svg";
+import { Image } from "astro:assets";
+import "@/styles/_performance.scss";
+import "@/styles/_installation.scss";
+import "@/styles/_community.scss";
 import Netlify from "@/components/Netlify.astro";
 import Sponsors from "@/components/Sponsors.astro";
+import LinterExample from "@/components/linter/example.md";
+
+
+<div class="gradient"></div>
+<div class="grid"></div>
+
+
+<div class="hero-code">
+    <h2 class="head">Format code like Prettier, save time</h2>
+
+    **Biome は _JavaScript_, _TypeScript_, _JSX_ そして _JSON_ のための[高速な formatter](https://github.com/biomejs/biome/tree/main/benchmark#formatting)** であり、**_Prettier_ と97%の互換性**を備え、**CIと開発者の時間を節約します**。
+    Biomeは、[お気に入りのエディタ](/ja/guides/integrate-in-editor/)でコードを書く際に、**不正確な形式のコード**さえもフォーマットできます。
+
+    <div class="linter format">
+      <div class="inp">
+        <span>CODE</span>
+        <Inputf />
+      </div>
+      <div class="out">
+        <span>OUTPUT</span>
+        <Outputf />
+      </div>
+      <div class="perf-out">
+        <span>PERFORMANCE</span>
+        <div class="bench-comp">
+          <div class="bench">
+            <div>
+              <ProgressBarContainer
+                client:visible
+                data={[
+                  { duration: 0.41, label: "Biome", color: "#33ff66" },
+                  { duration: 14.35, label: "Prettier", color: "#ff0033" }
+                ]}
+              />
+            </div>
+          </div>
+          <div class="perf-comp">
+            <div class="comp">~35x</div>
+            <div class="comp-des">
+              BiomeはPrettierよりも高速です。
+
+              ※Intel Core i7 1270Pを使用して、2,104ファイルにわたる171,127行のコードをフォーマットする場合
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    [プレイグラウンド](/playground/) または、直接あなたのプロジェクトでBiomeを試す:
+
+    ```shell
+    npm i -D --save-exact @biomejs/biome
+    npx @biomejs/biome format --write ./src
+    ```
+</div>
+
+
+<div class="hero-code">
+    <h2 class="head">Fix problems, learn best practice</h2>
+
+    **Biome は _JavaScript_, _TypeScript_ そして _JSX_ のための [高性能な linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** であり、ESLint, TypeScript ESLint 及び[その他のソース](https://github.com/biomejs/biome/discussions/3)から **[190 以上のルール](https://biomejs.dev/linter/rules/)** を備えています。
+
+    **Biomeは、詳細で文脈を考慮した診断を出力し**、あなたのコードを改善し、より優れたプログラマーになるのに役立ちます！
+
+    <LinterExample />
+
+    [プレイグラウンド](/playground/) または、直接あなたのプロジェクトでBiome linterを試す:
+
+    ```shell
+    npm i -D --save-exact @biomejs/biome
+    npx @biomejs/biome lint --apply ./src
+    ```
+
+</div>
+
+
+<div class="hero-code">
+    <h2 class="head">Everything all at once</h2>
+
+    コードのフォーマットとlint を別々に行うだけでなく、**1つのコマンドで一度に行う**こともできます！
+
+    各ツールは他のツールとシームレスに統合され、Webプロジェクトのための**一貫したツールチェーン**を作成します。
+
+    すべてのツールを`check`コマンドで実行します:
+
+    ```shell
+    npm i -D --save-exact @biomejs/biome
+    npx @biomejs/biome check --apply ./src
+    ```
+
+</div>
+
+
 
 <div class="card-cnt">
+
   <CardGrid>
     <Card title="高速" icon="rocket">
       Rustで構築され、rust-analyzerにインスパイアされた革新的なアーキテクチャを採用しています。
@@ -51,6 +158,61 @@ import Sponsors from "@/components/Sponsors.astro";
       フロントエンド開発で利用される言語に対して、優れたサポートを提供します。特にTypeScriptおよびJSXへのサポートを第一にしています。
     </Card>
   </CardGrid>
+</div>
+<div class="installation-body">
+  <div class="installation">
+    <div class="installation-left">
+      <h2 class="head">Try Biome</h2>
+      <div class="installation-description">
+        好みのパッケージマネージャーを使用してBiomeをインストール、そしてそれをエディターに統合できます。
+      </div>
+      <a class="installation-biome" href="/ja/guides/getting-started/#installation">
+        パッケージマネージャーを使用してBiome をインストール
+        <Image src={arrow} alt="arrow" />
+      </a>
+      <a
+        href="/ja/guides/integrate-in-editor/"
+        class="installation-extension"
+      >
+        Biome をエディタに統合する
+        <Image src={arrow} alt="arrow" />
+      </a>
+    </div>
+
+    <div class="extension-img"></div>
+
+  </div>
+</div>
+
+<div class="community">
+  <div class="community-grid"></div>
+  <h2 class="head">Community</h2>
+  <div class="community-connect">
+    <div class="community-description">
+      Powered by our open-source contributors
+    </div>
+    <div class="community-links">
+      <a href="https://discord.gg/BypW39g6Yc" class="discord">
+        <Icon name="discord" />
+        <p>Discord</p>
+      </a>
+      <a href="https://github.com/biomejs/biome" class="github">
+        <Icon name="github" />
+        <p>Github</p>
+      </a>
+      <a href="https://twitter.com/biomejs" class="x">
+        <Icon name="x.com" />
+        <p>Twitter</p>
+      </a>
+      <a href="https://fosstodon.org/@biomejs" class="mastodon">
+        <Icon name="mastodon" />
+        <p>Mastodon</p>
+      </a>
+    </div>
+  </div>
+  <div class="connect">
+    <Community />
+  </div>
 </div>
 
 <Sponsors title={"スポンサー"} />
