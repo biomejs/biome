@@ -24,9 +24,5 @@ pub(crate) fn get_changed_files(
 
     let filtered_changed_files = changed_files.iter().map(OsString::from).collect::<Vec<_>>();
 
-    if filtered_changed_files.is_empty() {
-        return Err(CliDiagnostic::no_files_processed());
-    }
-
     Ok(filtered_changed_files)
 }

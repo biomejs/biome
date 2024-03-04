@@ -143,7 +143,10 @@ pub(crate) fn traverse(
     inputs: Vec<OsString>,
 ) -> Result<(), CliDiagnostic> {
     init_thread_pool();
-    if inputs.is_empty() && execution.as_stdin_file().is_none() {
+    if inputs.is_empty()
+        && execution.as_stdin_file().is_none()
+        && !cli_options.no_errors_on_unmatched
+    {
         return Err(CliDiagnostic::missing_argument(
             "<INPUT>",
             format!("{}", execution.traversal_mode),
