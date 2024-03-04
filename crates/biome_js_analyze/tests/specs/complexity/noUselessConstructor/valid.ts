@@ -25,3 +25,9 @@ class G extends B {
       super(bar);
     }
 }
+
+class H extends B {
+    constructor(name = "default") {
+      super(name);
+    }
+}

@@ -9,7 +9,7 @@ use tracing::trace;
 #[tracing::instrument(level = "debug", skip(session), err)]
 pub(crate) fn rename(session: &Session, params: RenameParams) -> Result<Option<WorkspaceEdit>> {
     let url = params.text_document_position.text_document.uri;
-    let rome_path = session.file_path(&url)?;
+    let biome_path = session.file_path(&url)?;
 
     trace!("Renaming...");
 
@@ -30,7 +30,7 @@ pub(crate) fn rename(session: &Session, params: RenameParams) -> Result<Option<W
     let result = session
         .workspace
         .rename(biome_service::workspace::RenameParams {
-            path: rome_path,
+            path: biome_path,
             symbol_at: cursor_range,
             new_name: params.new_name,
         })?;
@@ -38,7 +38,7 @@ pub(crate) fn rename(session: &Session, params: RenameParams) -> Result<Option<W
     let mut changes = HashMap::new();
     changes.insert(
         url,
-        utils::text_edit(&doc.line_index, result.indels, position_encoding)?,
+        utils::text_edit(&doc.line_index, result.indels, position_encoding, None)?,
     );
 
     let workspace_edit = WorkspaceEdit {

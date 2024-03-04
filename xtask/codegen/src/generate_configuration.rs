@@ -413,7 +413,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
         #[deserializable(with_validator)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
-        #[serde(rename_all = "camelCase", default)]
+        #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
         /// A list of rules that belong to this group
         pub struct #group_struct_name {
             /// It enables the recommended rules for this group

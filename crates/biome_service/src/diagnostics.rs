@@ -1,4 +1,4 @@
-use crate::file_handlers::Language;
+use crate::workspace::DocumentFileSource;
 use crate::ConfigurationDiagnostic;
 use biome_console::fmt::Bytes;
 use biome_console::markup;
@@ -6,7 +6,7 @@ use biome_diagnostics::{
     category, Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, Severity, Visit,
 };
 use biome_formatter::{FormatError, PrintError};
-use biome_fs::{FileSystemDiagnostic, RomePath};
+use biome_fs::{BiomePath, FileSystemDiagnostic};
 use biome_js_analyze::utils::rename::RenameError;
 use biome_js_analyze::RuleError;
 use serde::{Deserialize, Serialize};
@@ -80,12 +80,12 @@ impl WorkspaceError {
     }
 
     pub fn source_file_not_supported(
-        language: Language,
+        language: DocumentFileSource,
         path: String,
         extension: Option<String>,
     ) -> Self {
         Self::SourceFileNotSupported(SourceFileNotSupported {
-            language,
+            file_source: language,
             path,
             extension,
         })
@@ -472,7 +472,7 @@ impl Diagnostic for FileTooLarge {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SourceFileNotSupported {
-    language: Language,
+    file_source: DocumentFileSource,
     path: String,
     extension: Option<String>,
 }
@@ -491,9 +491,9 @@ impl Diagnostic for SourceFileNotSupported {
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        if self.language != Language::Unknown {
+        if self.file_source != DocumentFileSource::Unknown {
             fmt.write_markup(markup! {
-                "Biome doesn't support this feature for the language "{{&self.language}}
+                "Biome doesn't support this feature for the language "{{&self.file_source}}
             })
         } else if let Some(ext) = self.extension.as_ref() {
             fmt.write_markup(markup! {
@@ -518,10 +518,11 @@ impl Diagnostic for SourceFileNotSupported {
     }
 }
 
-pub fn extension_error(path: &RomePath) -> WorkspaceError {
-    let language = Language::from_path_and_known_filename(path).or(Language::from_path(path));
+pub fn extension_error(path: &BiomePath) -> WorkspaceError {
+    let file_source = DocumentFileSource::from_path_and_known_filename(path)
+        .or(DocumentFileSource::from_path(path));
     WorkspaceError::source_file_not_supported(
-        language,
+        file_source,
         path.clone().display().to_string(),
         path.clone()
             .extension()
@@ -720,11 +721,11 @@ mod test {
         CantReadDirectory, CantReadFile, DirtyWorkspace, FileIgnored, FileTooLarge, NotFound,
         SourceFileNotSupported,
     };
-    use crate::file_handlers::Language;
+    use crate::file_handlers::DocumentFileSource;
     use crate::{TransportError, WorkspaceError};
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use biome_formatter::FormatError;
-    use biome_fs::RomePath;
+    use biome_fs::BiomePath;
     use std::ffi::OsStr;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
@@ -794,11 +795,11 @@ mod test {
 
     #[test]
     fn source_file_not_supported() {
-        let path = RomePath::new("not_supported.toml");
+        let path = BiomePath::new("not_supported.toml");
         snap_diagnostic(
             "source_file_not_supported",
             WorkspaceError::SourceFileNotSupported(SourceFileNotSupported {
-                language: Language::Unknown,
+                file_source: DocumentFileSource::Unknown,
                 path: path.display().to_string(),
                 extension: path
                     .extension()

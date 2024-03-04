@@ -46,13 +46,17 @@ pub(crate) trait FormatAstSeparatedListExtension:
     /// created by calling the `separator_factory` function.
     /// The last trailing separator in the list will only be printed
     /// if the outer group breaks.
-    fn format_separated(&self, separator: &'static str) -> JsonFormatSeparatedIter<Self::Node> {
+    fn format_separated(
+        &self,
+        separator: &'static str,
+        trailing_separator: TrailingSeparator,
+    ) -> JsonFormatSeparatedIter<Self::Node> {
         JsonFormatSeparatedIter::new(
             self.elements(),
             separator,
             JsonFormatSeparatedElementRule { node: PhantomData },
         )
-        .with_trailing_separator(TrailingSeparator::Disallowed)
+        .with_trailing_separator(trailing_separator)
     }
 }
 

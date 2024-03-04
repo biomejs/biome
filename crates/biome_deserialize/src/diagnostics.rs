@@ -129,7 +129,7 @@ impl DeserializationDiagnostic {
     pub fn new_unknown_key(key_name: &str, range: impl AsSpan, allowed_keys: &[&str]) -> Self {
         Self::new(markup!("Found an unknown key `"<Emphasis>{key_name}</Emphasis>"`." ))
             .with_range(range)
-            .note_with_list("Accepted keys", allowed_keys)
+            .note_with_list("Known keys:", allowed_keys)
     }
 
     /// Emitted when there's an unknown value, against a set of known ones

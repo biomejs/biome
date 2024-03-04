@@ -236,6 +236,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
 
             match element {
                 element @ (FormatElement::Space
+                | FormatElement::HardSpace
                 | FormatElement::StaticText { .. }
                 | FormatElement::DynamicText { .. }
                 | FormatElement::LocatedTokenText { .. }) => {
@@ -246,7 +247,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                     in_text = true;
 
                     match element {
-                        FormatElement::Space => {
+                        FormatElement::Space | FormatElement::HardSpace => {
                             write!(f, [text(" ")])?;
                         }
                         element if element.is_text() => f.write_element(element.clone())?,

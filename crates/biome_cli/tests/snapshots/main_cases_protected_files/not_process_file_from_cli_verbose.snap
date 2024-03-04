@@ -2,7 +2,7 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
 ---
-## `tsconfig.json`
+## `package-lock.json`
 
 ```json
 { "name": "test" }
@@ -22,9 +22,9 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-tsconfig.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The file tsconfig.json is protected because is handled by another tool. Biome won't process it.
+  i The file package-lock.json is protected because is handled by another tool. Biome won't process it.
   
   Verbose advice
   
@@ -34,7 +34,7 @@ tsconfig.json project  VERBOSE  ━━━━━━━━━━━━━━━━
 ```
 
 ```block
-Compared 0 file(s) in <TIME>
+Checked 0 files in <TIME>. No fixes needed.
 ```
 
 

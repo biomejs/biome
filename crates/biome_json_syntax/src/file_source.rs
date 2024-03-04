@@ -1,13 +1,19 @@
-use crate::JsonLanguage;
-use biome_rowan::{FileSource, FileSourceError};
+use biome_rowan::FileSourceError;
 use std::path::Path;
 
-#[derive(Debug, Default, Clone)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 pub struct JsonFileSource {
     variant: JsonVariant,
+    allow_trailing_comma: bool,
 }
 
-#[derive(Debug, Default, Clone)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 enum JsonVariant {
     #[default]
     Standard,
@@ -18,21 +24,34 @@ impl JsonFileSource {
     pub fn json() -> Self {
         Self {
             variant: JsonVariant::Standard,
+            allow_trailing_comma: false,
         }
     }
 
     pub fn jsonc() -> Self {
         Self {
             variant: JsonVariant::Jsonc,
+            allow_trailing_comma: false,
         }
+    }
+
+    pub fn with_trailing_comma(mut self, option_value: bool) -> Self {
+        self.allow_trailing_comma = option_value;
+        self
+    }
+
+    pub fn set_allow_trailing_comma(&mut self, option_value: bool) {
+        self.allow_trailing_comma = option_value;
+    }
+
+    pub fn allows_trailing_comma(&self) -> bool {
+        self.allow_trailing_comma
     }
 
     pub const fn is_jsonc(&self) -> bool {
         matches!(self.variant, JsonVariant::Jsonc)
     }
 }
-
-impl<'a> FileSource<'a, JsonLanguage> for JsonFileSource {}
 
 impl TryFrom<&Path> for JsonFileSource {
     type Error = FileSourceError;
@@ -69,7 +88,7 @@ fn compute_source_type_from_path_or_extension(
                 return Err(FileSourceError::UnknownExtension(
                     file_name.into(),
                     extension.into(),
-                ))
+                ));
             }
         }
     };

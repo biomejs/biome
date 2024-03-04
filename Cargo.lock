@@ -194,6 +194,7 @@ dependencies = [
  "libc",
  "mimalloc",
  "rayon",
+ "regex",
  "rustc-hash",
  "serde",
  "serde_json",
@@ -300,6 +301,8 @@ name = "biome_css_syntax"
 version = "0.4.0"
 dependencies = [
  "biome_rowan",
+ "schemars",
+ "serde",
 ]
 
 [[package]]
@@ -633,6 +636,8 @@ dependencies = [
 name = "biome_json_formatter"
 version = "0.4.0"
 dependencies = [
+ "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_formatter",
  "biome_formatter_test",
@@ -645,6 +650,7 @@ dependencies = [
  "biome_suppression",
  "countme",
  "insta",
+ "schemars",
  "serde",
  "serde_json",
  "tests_macros",
@@ -674,6 +680,8 @@ name = "biome_json_syntax"
 version = "0.4.0"
 dependencies = [
  "biome_rowan",
+ "schemars",
+ "serde",
 ]
 
 [[package]]
@@ -692,6 +700,7 @@ dependencies = [
  "biome_text_edit",
  "futures",
  "indexmap 1.9.3",
+ "log",
  "rustc-hash",
  "serde",
  "serde_json",

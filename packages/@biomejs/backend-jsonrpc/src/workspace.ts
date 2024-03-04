@@ -2,10 +2,10 @@
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
 	feature: FeatureName[];
-	path: RomePath;
+	path: BiomePath;
 }
 export type FeatureName = "Format" | "Lint" | "OrganizeImports";
-export interface RomePath {
+export interface BiomePath {
 	path: string;
 }
 export interface SupportsFeatureResult {
@@ -389,6 +389,10 @@ export interface PartialJsonFormatter {
 	 * What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "omit".
+	 */
+	trailingCommas?: TrailingCommas;
 }
 /**
  * Options that changes how the JSON parser behaves
@@ -464,6 +468,7 @@ export type Semicolons = "always" | "asNeeded";
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
  */
 export type TrailingComma = "all" | "es5" | "none";
+export type TrailingCommas = "none" | "all";
 /**
  * A list of rules that belong to this group
  */
@@ -864,6 +869,10 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Disallow the use of barrel file.
+	 */
+	noBarrelFile?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of console.
 	 */
 	noConsole?: RuleConfiguration_for_Null;
@@ -872,6 +881,10 @@ export interface Nursery {
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
 	/**
+	 * A describe block should not contain duplicate hooks.
+	 */
+	noDuplicateTestHooks?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow empty block statements and static blocks.
 	 */
 	noEmptyBlockStatements?: RuleConfiguration_for_Null;
@@ -879,6 +892,14 @@ export interface Nursery {
 	 * Disallow empty type parameters in type aliases and interfaces.
 	 */
 	noEmptyTypeParameters?: RuleConfiguration_for_Null;
+	/**
+	 * This rule enforces a maximum depth to nested describe() in test files.
+	 */
+	noExcessiveNestedTestSuites?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow using export or module.exports in files containing tests
+	 */
+	noExportsInTest?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow focused tests.
 	 */
@@ -915,6 +936,10 @@ export interface Nursery {
 	 * Disallow specified modules when loaded by import or require.
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
+	/**
+	 * It detects possible "wrong" semicolons inside JSX elements.
+	 */
+	noSemicolonInJsx?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow disabled tests.
 	 */
@@ -979,6 +1004,10 @@ export interface Nursery {
 	 * Promotes the use of import type for types.
 	 */
 	useImportType?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow missing key props in iterators/collection literals.
+	 */
+	useJsxKeyInIterable?: RuleConfiguration_for_Null;
 	/**
 	 * Promotes the usage of node:assert/strict over node:assert.
 	 */
@@ -1628,70 +1657,99 @@ export type FilenameCase =
 	| "PascalCase"
 	| "snake_case";
 export interface UpdateProjectParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface OpenProjectParams {
 	content: string;
-	path: RomePath;
+	path: BiomePath;
 	version: number;
 }
 export interface OpenFileParams {
 	content: string;
-	language_hint?: Language;
-	path: RomePath;
+	document_file_source?: DocumentFileSource;
+	path: BiomePath;
 	version: number;
 }
-/**
- * Supported languages by Biome
- */
+export type DocumentFileSource =
+	| "Unknown"
+	| { Js: JsFileSource }
+	| { Json: JsonFileSource }
+	| { Css: CssFileSource };
+export interface JsFileSource {
+	/**
+	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
+	 */
+	embedding_kind: EmbeddingKind;
+	language: Language;
+	module_kind: ModuleKind;
+	variant: LanguageVariant;
+	version: LanguageVersion;
+}
+export interface JsonFileSource {
+	allow_trailing_comma: boolean;
+	variant: JsonVariant;
+}
+export interface CssFileSource {
+	variant: CssVariant;
+}
+export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
-	| "Astro"
-	| "Vue"
-	| "Svelte"
 	| "JavaScript"
-	| "JavaScriptReact"
-	| "TypeScript"
-	| "TypeScriptReact"
-	| "Json"
-	| "Jsonc"
-	| "Css"
-	| "Unknown";
+	| { TypeScript: { definition_file: boolean } };
+/**
+ * Is the source file an ECMAScript Module or Script. Changes the parsing semantic.
+ */
+export type ModuleKind = "Script" | "Module";
+export type LanguageVariant = "Standard" | "StandardRestricted" | "Jsx";
+/**
+	* Enum of the different ECMAScript standard versions. The versions are ordered in increasing order; The newest version comes last.
+
+Defaults to the latest stable ECMAScript standard. 
+	 */
+export type LanguageVersion = "ES2022" | "ESNext";
+export type JsonVariant = "Standard" | "Jsonc";
+/**
+	* The style of CSS contained in the file.
+
+Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
+	 */
+export type CssVariant = "Standard";
 export interface ChangeFileParams {
 	content: string;
-	path: RomePath;
+	path: BiomePath;
 	version: number;
 }
 export interface CloseFileParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface GetSyntaxTreeParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface GetSyntaxTreeResult {
 	ast: string;
 	cst: string;
 }
 export interface OrganizeImportsParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface OrganizeImportsResult {
 	code: string;
 }
 export interface GetFileContentParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface GetControlFlowGraphParams {
 	cursor: TextSize;
-	path: RomePath;
+	path: BiomePath;
 }
 export type TextSize = number;
 export interface GetFormatterIRParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	max_diagnostics: number;
-	path: RomePath;
+	path: BiomePath;
 }
 export type RuleCategories = RuleCategory[];
 export type RuleCategory = "Syntax" | "Lint" | "Action" | "Transformation";
@@ -1810,10 +1868,14 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
+	| "lint/nursery/noBarrelFile"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDuplicateJsonKeys"
+	| "lint/nursery/noDuplicateTestHooks"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyTypeParameters"
+	| "lint/nursery/noExcessiveNestedTestSuites"
+	| "lint/nursery/noExportsInTest"
 	| "lint/nursery/noFocusedTests"
 	| "lint/nursery/noGlobalAssign"
 	| "lint/nursery/noGlobalEval"
@@ -1823,6 +1885,7 @@ export type Category =
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReExportAll"
 	| "lint/nursery/noRestrictedImports"
+	| "lint/nursery/noSemicolonInJsx"
 	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
@@ -1840,6 +1903,7 @@ export type Category =
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useImportType"
+	| "lint/nursery/useJsxKeyInIterable"
 	| "lint/nursery/useNodeAssertStrict"
 	| "lint/nursery/useNodejsImportProtocol"
 	| "lint/nursery/useNumberNamespace"
@@ -2051,7 +2115,7 @@ export interface BacktraceSymbol {
 	name?: string;
 }
 export interface PullActionsParams {
-	path: RomePath;
+	path: BiomePath;
 	range: TextRange;
 }
 export interface PullActionsResult {
@@ -2104,7 +2168,7 @@ export type SourceActionKind =
  */
 export type Applicability = "Always" | "MaybeIncorrect";
 export interface FormatFileParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface Printed {
 	code: string;
@@ -2126,16 +2190,16 @@ export interface SourceMarker {
 	source: TextSize;
 }
 export interface FormatRangeParams {
-	path: RomePath;
+	path: BiomePath;
 	range: TextRange;
 }
 export interface FormatOnTypeParams {
 	offset: TextSize;
-	path: RomePath;
+	path: BiomePath;
 }
 export interface FixFileParams {
 	fix_file_mode: FixFileMode;
-	path: RomePath;
+	path: BiomePath;
 	should_format: boolean;
 }
 /**
@@ -2172,7 +2236,7 @@ export interface FixAction {
 }
 export interface RenameParams {
 	new_name: string;
-	path: RomePath;
+	path: BiomePath;
 	symbol_at: TextSize;
 }
 export interface RenameResult {

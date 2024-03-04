@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `file.vue`
+
+```vue
+<script setup lang="ts">
+import * as vueUse from "vue-use";
+import Button from "./components/Button.vue";
+</script>
+<template></template>
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```
+
+

@@ -2,14 +2,18 @@
 title: Biome
 head:
   - tag: title
-    content: Biome, toolchain of the web
+    content: Biome，Web 工具链
 template: splash
-description: 瞬间完成 Format、Lint 等！
+description: 格式化代码、修复错误，不止于此，就在一瞬间！
 editUrl: false
 next: false
+banner:
+  content: |
+    请考虑向慈善机构 <a href="https://www.enduringhearts.org/" target="_blank">Enduring Hearts</a> 捐款
+
 hero:
-  title: Web 开发完整工具链
-  tagline: 瞬间完成 Format、Lint 等！
+  title: Web 项目开发的一体化工具链
+  tagline: 格式化代码、修复错误，不止于此，就在一瞬间！
   image:
     alt: Biome，Web 工具链
     dark: "@/assets/svg/slogan-dark-transparent.svg"
@@ -19,39 +23,188 @@ hero:
       link: /zh-cn/guides/getting-started/
       icon: right-arrow
       variant: primary
-    - text: GitHub
+    - text: 在 GitHub 上查看
       link: https://github.com/biomejs/biome
       icon: external
       variant: secondary
 ---
 
 import { Card, CardGrid } from "@astrojs/starlight/components";
+import Inputf from "@/components/formatter/input.md";
+import Outputf from "@/components/formatter/output.md";
+import ProgressBarContainer from "@/playground/components/Progress.tsx";
+import Community from "@/components/Community.astro";
+import { Icon } from "@astrojs/starlight/components";
+import arrow from "@/assets/svg/arrow-right.svg";
+import { Image } from "astro:assets";
+import "@/styles/_performance.scss";
+import "@/styles/_installation.scss";
+import "@/styles/_community.scss";
 import Netlify from "@/components/Netlify.astro";
 import Sponsors from "@/components/Sponsors.astro";
+import LinterExample from "@/components/linter/example.md";
+
+<div class="gradient"></div>
+<div class="grid"></div>
+
+<div class="hero-code">
+    <h2 class="head">像 Prettier 一样格式化代码，但是更省时</h2>
+
+    Biome 是一个适用于 _JavaScript_、_TypeScript_、_JSX_ 和 _JSON_ 的[**快速格式化工具**](https://github.com/biomejs/biome/tree/main/benchmark#formatting)，[**与 _Prettier_ 有高达 97% 的兼容覆盖率**](https://console.algora.io/challenges/prettier)，能有效**节约持续化集成和开发者的时间**。
+
+    Biome 甚至允许你在使用[你最爱的编辑器](/zh-cn/guides/integrate-in-editor/)编写代码时，格式化中间形态的**格式错误的代码**。
+
+    <div class="linter format">
+      <div class="inp">
+        <span>代码</span>
+        <Inputf />
+      </div>
+      <div class="out">
+        <span>输出</span>
+        <Outputf />
+      </div>
+      <div class="perf-out">
+        <span>性能</span>
+        <div class="bench-comp">
+          <div class="bench">
+            <div>
+              <ProgressBarContainer
+                client:visible
+                data={[
+                  { duration: 0.41, label: "Biome", color: "#33ff66" },
+                  { duration: 14.35, label: "Prettier", color: "#ff0033" }
+                ]}
+              />
+            </div>
+          </div>
+          <div class="perf-comp">
+            <div class="comp">~35x</div>
+            <div class="comp-des">
+              相较于 Prettier 的速度提升。搭配英特尔酷睿 i7 1270P，格式化 2,104 个文件中的 171,127 行代码。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    你可以在[演练场](/playground/)试用 Biome 格式化工具，或者直接在你的项目中安装使用：
+
+    ```shell
+    npm i -D --save-exact @biomejs/biome
+    npx @biomejs/biome format --write ./src
+    ```
+
+</div>
+
+<div class="hero-code">
+    <h2 class="head">修复错误，学习最佳实践</h2>
+
+    Biome 是一个适用于 _JavaScript_、_TypeScript_ 和 _JSX_ 的[**高性能 linter**](https://github.com/biomejs/biome/tree/main/benchmark#linting)，拥有来自 ESLint、typescript-eslint 以及[其它规则源](https://github.com/biomejs/biome/discussions/3)的[超过 190 条规则](/zh-cn/linter/rules/)。
+
+    **Biome 可以输出详细且上下文相结合的诊断信息**来帮助你改进你的代码，成为更优秀的程序员！
+
+    <LinterExample />
+
+    你可以在[演练场](/playground/)试用 Biome linter，或者直接在你的项目中安装使用：
+
+    ```shell
+    npm i -D --save-exact @biomejs/biome
+    npx @biomejs/biome lint --apply ./src
+    ```
+
+</div>
+
+<div class="hero-code">
+    <h2 class="head">所有操作，一气呵成</h2>
+
+    你不仅可以分别对代码进行格式化和 lint，还可以通过一条命令**同时完成它们**！
+
+    每项工具都能与其他工具无缝集成，为 Web 项目创建**一条连贯的工具链**。
+
+    使用 `check` 命令运行所有工具：
+
+    ```shell
+    npm i -D --save-exact @biomejs/biome
+    npx @biomejs/biome check --apply ./src
+    ```
+
+</div>
 
 <div class="card-cnt">
   <CardGrid>
     <Card title="快速" icon="rocket">
-      使用 Rust 构建，灵感来自 rust-analyzer 的革命性架构。
+      使用 Rust 和受 rust-analyzer 启发的革命性架构构建。
     </Card>
     <Card title="简单" icon="pencil">
-      无需任何配置直接使用。若需要，也有大量配置选项可用。
+      无需任何配置即可开始使用。若需要，亦有大量配置选项可供使用。
     </Card>
     <Card title="可扩展" icon="random">
-      为处理任何规模的代码库而设计。专注于产品的开发而不是工具。
+      专为处理任何规模的代码库而设计。让你专注于产品开发，而不是工具。
     </Card>
     <Card title="优化" icon="setting">
-      每项功能的内部处理都尽可能地进行整合与重复使用。这就使一个工具的改进也可以让其他所有工具都更好用。
+      通过紧密的内部整合以达到工具互相复用的效果。对一种工具的任何改进都会让所有工具更好用。
     </Card>
     <Card title="可操作且信息丰富" icon="information">
-      避免出现晦涩的错误消息，当出现问题时，我们会准确告诉您问题的位置以及如何修复它。
+      避免出现晦涩的错误消息。当出现问题时，我们会准确告诉你问题的位置以及该如何修复它。
     </Card>
     <Card title="一应俱全" icon="add-document">
-      开箱即用，支持前端各种语言特性。尤其对 TypeScript 与 JSX 提供完美支持。
+      开箱即用，支持前端各种语言特性。尤其对 TypeScript 与 JSX 提供一流的支持。
     </Card>
   </CardGrid>
 </div>
+<div class="installation-body">
+  <div class="installation">
+    <div class="installation-left">
+      <h2 class="head">试用 Biome</h2>
+      <div class="installation-description">
+        使用你喜爱的包管理器安装 Biome，并将其集成到你的编辑器中。
+      </div>
+      <a class="installation-biome" href="/zh-cn/guides/getting-started/#installation">
+        使用包管理器安装
+        <Image src={arrow} alt="arrow" />
+      </a>
+      <a
+        href="/zh-cn/guides/integrate-in-editor/"
+        class="installation-extension"
+      >
+        将 Biome 集成到你的编辑器中
+        <Image src={arrow} alt="arrow" />
+      </a>
+    </div>
 
+    <div class="extension-img"></div>
+
+  </div>
+</div>
+
+<div class="community">
+  <div class="community-grid"></div>
+  <h2 class="head">社区</h2>
+  <div class="community-connect">
+    <div class="community-description">由我们的开源贡献者提供支持</div>
+    <div class="community-links">
+      <a href="https://discord.gg/BypW39g6Yc" class="discord">
+        <Icon name="discord" />
+        <p>Discord</p>
+      </a>
+      <a href="https://github.com/biomejs/biome" class="github">
+        <Icon name="github" />
+        <p>Github</p>
+      </a>
+      <a href="https://twitter.com/biomejs" class="x">
+        <Icon name="x.com" />
+        <p>Twitter</p>
+      </a>
+      <a href="https://fosstodon.org/@biomejs" class="mastodon">
+        <Icon name="mastodon" />
+        <p>Mastodon</p>
+      </a>
+    </div>
+  </div>
+  <div class="connect">
+    <Community />
+  </div>
+</div>
 
 <Sponsors title="赞助商" />
 

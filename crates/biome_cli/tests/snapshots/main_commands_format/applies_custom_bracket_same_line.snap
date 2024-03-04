@@ -2,9 +2,9 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
 ---
-## `file.js`
+## `file.jsx`
 
-```js
+```jsx
 <Foo
 	className={style}
 	reallyLongAttributeName1={longComplexValue}
@@ -23,7 +23,7 @@ expression: content
 # Emitted Messages
 
 ```block
-Formatted 1 file(s) in <TIME>
+Formatted 1 file in <TIME>. Fixed 1 file.
 ```
 
 

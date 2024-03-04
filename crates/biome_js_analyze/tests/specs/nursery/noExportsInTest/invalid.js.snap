@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+describe("a test", () => { expect(1).toBe(1); })
+export const myThing = "invalid";
+export default function () { }
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noExportsInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not export from a test file.
+  
+    1 │ describe("a test", () => { expect(1).toBe(1); })
+  > 2 │ export const myThing = "invalid";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ export default function () { }
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/noExportsInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not export from a test file.
+  
+    1 │ describe("a test", () => { expect(1).toBe(1); })
+    2 │ export const myThing = "invalid";
+  > 3 │ export default function () { }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+```
+
+

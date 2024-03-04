@@ -1,24 +1,24 @@
-use super::{ExtensionHandler, Mime};
+use super::{ExtensionHandler, Mime, ParseResult};
+use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
-use crate::file_handlers::{DebugCapabilities, Language as LanguageId};
 use crate::settings::{
     FormatSettings, Language, LanguageListSettings, LanguageSettings, OverrideSettings,
     SettingsHandle,
 };
-use crate::workspace::GetSyntaxTreeResult;
+use crate::workspace::{DocumentFileSource, GetSyntaxTreeResult};
 use crate::WorkspaceError;
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::{can_format_css_yet, format_node};
 use biome_css_parser::CssParserOptions;
-use biome_css_syntax::{CssFileSource, CssLanguage, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_parser::AnyParse;
-use biome_rowan::{FileSource, NodeCache};
+use biome_rowan::NodeCache;
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -52,7 +52,8 @@ impl Language for CssLanguage {
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &RomePath,
+        path: &BiomePath,
+        document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = if let Some(indent_style) = language.indent_style {
             indent_style
@@ -72,11 +73,15 @@ impl Language for CssLanguage {
 
         overrides.override_css_format_options(
             path,
-            CssFormatOptions::new(path.as_path().try_into().unwrap_or_default())
-                .with_indent_style(indent_style)
-                .with_indent_width(indent_width)
-                .with_line_width(line_width)
-                .with_quote_style(language.quote_style.unwrap_or_default()),
+            CssFormatOptions::new(
+                document_file_source
+                    .to_css_file_source()
+                    .unwrap_or_default(),
+            )
+            .with_indent_style(indent_style)
+            .with_indent_width(indent_width)
+            .with_line_width(line_width)
+            .with_quote_style(language.quote_style.unwrap_or_default()),
         )
     }
 }
@@ -85,10 +90,6 @@ impl Language for CssLanguage {
 pub(crate) struct CssFileHandler;
 
 impl ExtensionHandler for CssFileHandler {
-    fn language(&self) -> super::Language {
-        super::Language::Css
-    }
-
     fn mime(&self) -> super::Mime {
         Mime::Css
     }
@@ -135,37 +136,34 @@ impl ExtensionHandler for CssFileHandler {
 }
 
 fn parse(
-    rome_path: &RomePath,
-    language_hint: LanguageId,
+    biome_path: &BiomePath,
+    _file_source: DocumentFileSource,
     text: &str,
     settings: SettingsHandle,
     cache: &mut NodeCache,
-) -> AnyParse {
+) -> ParseResult {
     let parser = &settings.as_ref().languages.css.parser;
     let overrides = &settings.as_ref().override_settings;
-    let source_type =
-        CssFileSource::try_from(rome_path.as_path()).unwrap_or_else(|_| match language_hint {
-            LanguageId::Css => CssFileSource::css(),
-            _ => CssFileSource::css(),
-        });
     let options: CssParserOptions =
         overrides
-            .as_css_parser_options(rome_path)
+            .as_css_parser_options(biome_path)
             .unwrap_or(CssParserOptions {
                 allow_wrong_line_comments: parser.allow_wrong_line_comments,
             });
     let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
-    AnyParse::new(
-        // SAFETY: the parser should always return a root node
-        root.as_send().unwrap(),
-        diagnostics,
-        source_type.as_any_file_source(),
-    )
+    ParseResult {
+        any_parse: AnyParse::new(
+            // SAFETY: the parser should always return a root node
+            root.as_send().unwrap(),
+            diagnostics,
+        ),
+        language: None,
+    }
 }
 
-fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeResult {
+fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
     let syntax: CssSyntaxNode = parse.syntax();
     let tree: CssRoot = parse.tree();
     GetSyntaxTreeResult {
@@ -175,11 +173,12 @@ fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeRes
 }
 
 fn debug_formatter_ir(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(rome_path);
+    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
@@ -190,11 +189,12 @@ fn debug_formatter_ir(
 
 #[tracing::instrument(level = "debug", skip(parse))]
 fn format(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(rome_path);
+    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
     tracing::debug!("Format with the following options: \n{}", options);
 
@@ -208,12 +208,13 @@ fn format(
 }
 
 fn format_range(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(rome_path);
+    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
     let tree = parse.syntax();
     let printed = biome_css_formatter::format_range(options, &tree, range)?;
@@ -221,12 +222,13 @@ fn format_range(
 }
 
 fn format_on_type(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(rome_path);
+    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
     let tree = parse.syntax();
 

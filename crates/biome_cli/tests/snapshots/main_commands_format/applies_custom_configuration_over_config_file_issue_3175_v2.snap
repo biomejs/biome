@@ -26,7 +26,7 @@ function f() {
 # Emitted Messages
 
 ```block
-Compared 1 file(s) in <TIME>
+Checked 1 file in <TIME>. No fixes needed.
 ```
 
 

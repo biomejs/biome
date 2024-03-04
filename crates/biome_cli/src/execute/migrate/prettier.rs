@@ -18,6 +18,7 @@ use indexmap::IndexSet;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug, Deserializable, Eq, PartialEq)]
+#[deserializable(unknown_fields = "allow")]
 pub(crate) struct PrettierConfiguration {
     /// https://prettier.io/docs/en/options#print-width
     print_width: u16,

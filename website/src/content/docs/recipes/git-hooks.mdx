@@ -57,38 +57,27 @@ If you wish more control over which files are handled, you should use `glob`.
 
 Once configured, run `lefthook install` to set up the hooks.
 
-If your project contains a `package.json`,
-you can automatically set up _Lefthook_ hooks upon package installation using `scripts.postinstall`:
-
-```json title="package.json"
-{
-  "scripts": {
-    "postinstall": "lefthook install"
-  }
-}
-```
-
 
 ## Husky
 
 [Husky](https://github.com/typicode/husky) is a widely-used hook manager in the JavaScript ecosystem.
-Husky doesn't hide unstaged changes and is not able to provides the list of staged files.
+Husky doesn't hide unstaged changes and is not able to provide the list of staged files.
 This is why it is often used in tandem with another tool such as _lint-staged_ or _git-format-staged_.
 
 If your project contains a `package.json`,
-you can automatically set up _husky_ hooks upon package installation using `scripts.postinstall`:
+you can automatically set up _husky_ hooks upon package installation using `scripts.prepare`:
 
 ```json title="package.json"
 {
   "scripts": {
-    "postinstall": "husky install"
+    "prepare": "husky"
   }
 }
 ```
 
 ### lint-staged
 
-[lint-staged](https://github.com/lint-staged/lint-staged) is one of the most used tool in the JavaScript ecosystem.
+[lint-staged](https://github.com/lint-staged/lint-staged) is one of the most used tools in the JavaScript ecosystem.
 
 Add the following husky configuration:
 

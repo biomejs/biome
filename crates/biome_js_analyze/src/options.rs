@@ -17,6 +17,8 @@ pub type NoAssignInExpressions = < analyzers :: suspicious :: no_assign_in_expre
 pub type NoAsyncPromiseExecutor = < analyzers :: suspicious :: no_async_promise_executor :: NoAsyncPromiseExecutor as biome_analyze :: Rule > :: Options ;
 pub type NoAutofocus = <analyzers::a11y::no_autofocus::NoAutofocus as biome_analyze::Rule>::Options;
 pub type NoBannedTypes = < semantic_analyzers :: complexity :: no_banned_types :: NoBannedTypes as biome_analyze :: Rule > :: Options ;
+pub type NoBarrelFile =
+    <analyzers::nursery::no_barrel_file::NoBarrelFile as biome_analyze::Rule>::Options;
 pub type NoBlankTarget =
     <analyzers::a11y::no_blank_target::NoBlankTarget as biome_analyze::Rule>::Options;
 pub type NoCatchAssign = < semantic_analyzers :: suspicious :: no_catch_assign :: NoCatchAssign as biome_analyze :: Rule > :: Options ;
@@ -57,6 +59,7 @@ pub type NoDuplicateClassMembers = < analyzers :: suspicious :: no_duplicate_cla
 pub type NoDuplicateJsxProps = < analyzers :: suspicious :: no_duplicate_jsx_props :: NoDuplicateJsxProps as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateObjectKeys = < analyzers :: suspicious :: no_duplicate_object_keys :: NoDuplicateObjectKeys as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateParameters = < semantic_analyzers :: suspicious :: no_duplicate_parameters :: NoDuplicateParameters as biome_analyze :: Rule > :: Options ;
+pub type NoDuplicateTestHooks = < analyzers :: nursery :: no_duplicate_test_hooks :: NoDuplicateTestHooks as biome_analyze :: Rule > :: Options ;
 pub type NoEmptyBlockStatements = < analyzers :: nursery :: no_empty_block_statements :: NoEmptyBlockStatements as biome_analyze :: Rule > :: Options ;
 pub type NoEmptyCharacterClassInRegex = < analyzers :: correctness :: no_empty_character_class_in_regex :: NoEmptyCharacterClassInRegex as biome_analyze :: Rule > :: Options ;
 pub type NoEmptyInterface =
@@ -65,8 +68,11 @@ pub type NoEmptyPattern =
     <analyzers::correctness::no_empty_pattern::NoEmptyPattern as biome_analyze::Rule>::Options;
 pub type NoEmptyTypeParameters = < analyzers :: nursery :: no_empty_type_parameters :: NoEmptyTypeParameters as biome_analyze :: Rule > :: Options ;
 pub type NoExcessiveCognitiveComplexity = < analyzers :: complexity :: no_excessive_cognitive_complexity :: NoExcessiveCognitiveComplexity as biome_analyze :: Rule > :: Options ;
+pub type NoExcessiveNestedTestSuites = < analyzers :: nursery :: no_excessive_nested_test_suites :: NoExcessiveNestedTestSuites as biome_analyze :: Rule > :: Options ;
 pub type NoExplicitAny =
     <analyzers::suspicious::no_explicit_any::NoExplicitAny as biome_analyze::Rule>::Options;
+pub type NoExportsInTest =
+    <analyzers::nursery::no_exports_in_test::NoExportsInTest as biome_analyze::Rule>::Options;
 pub type NoExtraBooleanCast = < analyzers :: complexity :: no_extra_boolean_cast :: NoExtraBooleanCast as biome_analyze :: Rule > :: Options ;
 pub type NoExtraNonNullAssertion = < analyzers :: suspicious :: no_extra_non_null_assertion :: NoExtraNonNullAssertion as biome_analyze :: Rule > :: Options ;
 pub type NoFallthroughSwitchClause = < analyzers :: suspicious :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause as biome_analyze :: Rule > :: Options ;
@@ -139,6 +145,7 @@ pub type NoSelfAssign =
     <analyzers::correctness::no_self_assign::NoSelfAssign as biome_analyze::Rule>::Options;
 pub type NoSelfCompare =
     <analyzers::suspicious::no_self_compare::NoSelfCompare as biome_analyze::Rule>::Options;
+pub type NoSemicolonInJsx = < semantic_analyzers :: nursery :: no_semicolon_in_jsx :: NoSemicolonInJsx as biome_analyze :: Rule > :: Options ;
 pub type NoSetterReturn =
     <analyzers::correctness::no_setter_return::NoSetterReturn as biome_analyze::Rule>::Options;
 pub type NoShadowRestrictedNames = < analyzers :: suspicious :: no_shadow_restricted_names :: NoShadowRestrictedNames as biome_analyze :: Rule > :: Options ;
@@ -246,6 +253,7 @@ pub type UseIsArray =
     <semantic_analyzers::suspicious::use_is_array::UseIsArray as biome_analyze::Rule>::Options;
 pub type UseIsNan =
     <semantic_analyzers::correctness::use_is_nan::UseIsNan as biome_analyze::Rule>::Options;
+pub type UseJsxKeyInIterable = < semantic_analyzers :: nursery :: use_jsx_key_in_iterable :: UseJsxKeyInIterable as biome_analyze :: Rule > :: Options ;
 pub type UseKeyWithClickEvents = < analyzers :: a11y :: use_key_with_click_events :: UseKeyWithClickEvents as biome_analyze :: Rule > :: Options ;
 pub type UseKeyWithMouseEvents = < analyzers :: a11y :: use_key_with_mouse_events :: UseKeyWithMouseEvents as biome_analyze :: Rule > :: Options ;
 pub type UseLiteralEnumMembers = < analyzers :: style :: use_literal_enum_members :: UseLiteralEnumMembers as biome_analyze :: Rule > :: Options ;

@@ -1,16 +1,16 @@
 {
-  "name": "@biomejs/monorepo",
-  "private": true,
-  "version": "0.0.0",
-  "scripts": {
-    "check:apply": "cargo biome-cli-dev check --apply-unsafe editors website packages/@biomejs/js-api",
-		"check": "cargo biome-cli-dev check editors website packages/@biomejs/js-api",
-		"ci": "cargo biome-cli-dev ci editors website packages/@biomejs/js-api"
+	"name": "@biomejs/monorepo",
+	"private": true,
+	"version": "0.0.0",
+	"scripts": {
+		"check:apply": "cargo biome-cli-dev check --apply-unsafe editors website packages/@biomejs/js-api packages/tailwindcss-config-analyzer",
+		"check": "cargo biome-cli-dev check editors website packages/@biomejs/js-api packages/tailwindcss-config-analyzer",
+		"ci": "cargo biome-cli-dev ci editors website packages/@biomejs/js-api packages/tailwindcss-config-analyzer"
 	},
-  "keywords": [],
-  "author": "",
-  "devDependencies": {
+	"keywords": [],
+	"author": "",
+	"devDependencies": {
 		"shared": "file:./shared",
-    "@changesets/cli": "^2.26.2"
-  }
+		"@changesets/cli": "^2.26.2"
+	}
 }

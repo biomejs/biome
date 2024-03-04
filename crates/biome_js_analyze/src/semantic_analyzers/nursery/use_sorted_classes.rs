@@ -5,6 +5,7 @@ mod options;
 mod presets;
 mod sort;
 mod sort_config;
+mod tailwind_preset;
 
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,

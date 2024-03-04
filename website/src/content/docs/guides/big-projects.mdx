@@ -3,6 +3,8 @@ title: Use Biome in big projects
 description: A small guide how to set Biome in big projects
 ---
 
+import { FileTree } from '@astrojs/starlight/components';
+
 Biome can provide some tools that can help you to use it properly in big projects, such as monorepo or workspaces that contain multiple projects.
 
 
@@ -17,18 +19,18 @@ You can leverage this feature to apply different settings based on the project/f
 Let's suppose we have a project that contains a backend app and new frontend app.
 
 
-```
-app
-├── backend
-│   ├── biome.json
-│   └── package.json
-└── frontend
-    ├── biome.json
-    ├── legacy-app
-    │   └── package.json
-    └── new-app
-        └── package.json
-```
+<FileTree>
+- app
+  - backend
+    - biome.json
+    - package.json
+  - frontend
+    - biome.json
+    - legacy-app
+      - package.json
+    - new-app
+      - package.json
+</FileTree>
 
 This means that when you run a script from the file `app/backend/package.json`, Biome will use the configuration file `app/backend/biome.json`.
 
@@ -84,11 +86,11 @@ Let's jump to `app/backend/biome.json`, where we need to enable the linting:
 ```json title="app/backend/biome.json"
 {
   "extends": ["../biome.json"],
-    "linter": {
-      "enabled": "true",
-      "rules": {
-        "recommended": true
-      }
-   }
+  "linter": {
+    "enabled": "true",
+    "rules": {
+      "recommended": true
+    }
+  }
 }
 ```

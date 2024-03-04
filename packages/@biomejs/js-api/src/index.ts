@@ -1,8 +1,8 @@
 import type {
+	BiomePath,
 	Diagnostic,
 	PartialConfiguration,
 	PullDiagnosticsResult,
-	RomePath,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
 import { Distribution, type WasmModule, loadModule, wrapError } from "./wasm";
@@ -136,10 +136,10 @@ export class Biome {
 	private withFile<T>(
 		path: string,
 		content: string,
-		func: (path: RomePath) => T,
+		func: (path: BiomePath) => T,
 	): T {
 		return this.tryCatchWrapper(() => {
-			const biomePath: RomePath = {
+			const biomePath: BiomePath = {
 				path,
 			};
 

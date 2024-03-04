@@ -206,8 +206,8 @@ pub fn to_override_settings(
             formatter,
             linter,
             organize_imports,
-
             languages,
+            ..OverrideSettingPattern::default()
         };
 
         override_settings.patterns.push(pattern_setting);

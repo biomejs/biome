@@ -1,12 +1,12 @@
-use crate::JsLanguage;
-use biome_rowan::{FileSource, FileSourceError};
+use biome_rowan::FileSourceError;
 use std::path::Path;
 
 /// Enum of the different ECMAScript standard versions.
 /// The versions are ordered in increasing order; The newest version comes last.
 ///
 /// Defaults to the latest stable ECMAScript standard.
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum LanguageVersion {
     ES2022,
 
@@ -29,7 +29,10 @@ impl Default for LanguageVersion {
 
 /// Is the source file an ECMAScript Module or Script.
 /// Changes the parsing semantic.
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema,))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 pub enum ModuleKind {
     /// An ECMAScript [Script](https://tc39.es/ecma262/multipage/ecmascript-language-scripts-and-modules.html#sec-scripts)
     Script,
@@ -48,7 +51,10 @@ impl ModuleKind {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Copy, Clone, Eq, PartialEq, Hash, Default, serde::Serialize, serde::Deserialize,
+)]
 pub enum LanguageVariant {
     /// Standard JavaScript or TypeScript syntax without any extensions
     #[default]
@@ -73,7 +79,10 @@ impl LanguageVariant {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Copy, Clone, Eq, PartialEq, Default, Hash, serde::Serialize, serde::Deserialize,
+)]
 pub enum Language {
     #[default]
     JavaScript,
@@ -100,15 +109,41 @@ impl Language {
         )
     }
 }
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+pub enum EmbeddingKind {
+    Astro,
+    Vue,
+    Svelte,
+    #[default]
+    None,
+}
 
-impl<'a> FileSource<'a, JsLanguage> for JsFileSource {}
+impl EmbeddingKind {
+    pub const fn is_astro(&self) -> bool {
+        matches!(self, EmbeddingKind::Astro)
+    }
+    pub const fn is_vue(&self) -> bool {
+        matches!(self, EmbeddingKind::Vue)
+    }
+    pub const fn is_svelte(&self) -> bool {
+        matches!(self, EmbeddingKind::Svelte)
+    }
+}
 
-#[derive(Clone, Copy, Debug, Default)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 pub struct JsFileSource {
     language: Language,
     variant: LanguageVariant,
     module_kind: ModuleKind,
     version: LanguageVersion,
+    /// Used to mark if the source is being used for an Astro, Svelte or Vue file
+    embedding_kind: EmbeddingKind,
 }
 
 impl JsFileSource {
@@ -158,6 +193,21 @@ impl JsFileSource {
         }
     }
 
+    /// Astro file definition
+    pub fn astro() -> Self {
+        Self::ts().with_embedding_kind(EmbeddingKind::Astro)
+    }
+
+    /// Vue file definition
+    pub fn vue() -> Self {
+        Self::js_module().with_embedding_kind(EmbeddingKind::Vue)
+    }
+
+    /// Svelte file definition
+    pub fn svelte() -> Self {
+        Self::js_module().with_embedding_kind(EmbeddingKind::Svelte)
+    }
+
     pub const fn with_module_kind(mut self, kind: ModuleKind) -> Self {
         self.module_kind = kind;
         self
@@ -173,15 +223,20 @@ impl JsFileSource {
         self
     }
 
-    pub fn language(&self) -> Language {
+    pub const fn with_embedding_kind(mut self, kind: EmbeddingKind) -> Self {
+        self.embedding_kind = kind;
+        self
+    }
+
+    pub const fn language(&self) -> Language {
         self.language
     }
 
-    pub fn variant(&self) -> LanguageVariant {
+    pub const fn variant(&self) -> LanguageVariant {
         self.variant
     }
 
-    pub fn version(&self) -> LanguageVersion {
+    pub const fn version(&self) -> LanguageVersion {
         self.version
     }
 
@@ -191,6 +246,18 @@ impl JsFileSource {
 
     pub const fn is_module(&self) -> bool {
         self.module_kind.is_module()
+    }
+
+    pub const fn is_typescript(&self) -> bool {
+        self.language.is_typescript()
+    }
+
+    pub const fn is_jsx(&self) -> bool {
+        self.variant.is_jsx()
+    }
+
+    pub const fn as_embedding_kind(&self) -> &EmbeddingKind {
+        &self.embedding_kind
     }
 
     pub fn file_extension(&self) -> &str {
@@ -253,12 +320,14 @@ fn compute_source_type_from_path_or_extension(
             "mts" | "cts" => JsFileSource::ts_restricted(),
             "tsx" => JsFileSource::tsx(),
             // TODO: Remove once we have full support of astro files
-            "astro" => JsFileSource::ts(),
+            "astro" => JsFileSource::astro(),
+            "vue" => JsFileSource::vue(),
+            "svelte" => JsFileSource::svelte(),
             _ => {
                 return Err(FileSourceError::UnknownExtension(
                     file_name.into(),
                     extension.into(),
-                ))
+                ));
             }
         }
     };

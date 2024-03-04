@@ -6,9 +6,9 @@ use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_service::workspace::{
-    ChangeFileParams, FeaturesBuilder, FixFileParams, FormatFileParams, Language, OpenFileParams,
+    ChangeFileParams, FeaturesBuilder, FixFileParams, FormatFileParams, OpenFileParams,
     OrganizeImportsParams, PullDiagnosticsParams, RuleCategories, SupportsFeatureParams,
 };
 use biome_service::WorkspaceError;
@@ -17,7 +17,7 @@ use std::borrow::Cow;
 pub(crate) fn run<'a>(
     session: CliSession,
     mode: &'a Execution,
-    rome_path: RomePath,
+    biome_path: BiomePath,
     content: &'a str,
     verbose: bool,
 ) -> Result<(), CliDiagnostic> {
@@ -27,12 +27,12 @@ pub(crate) fn run<'a>(
 
     if mode.is_format() {
         let file_features = workspace.file_features(SupportsFeatureParams {
-            path: rome_path.clone(),
+            path: biome_path.clone(),
             feature: FeaturesBuilder::new().with_formatter().build(),
         })?;
         if file_features.is_protected() {
             let protected_diagnostic =
-                WorkspaceError::protected_file(rome_path.display().to_string());
+                WorkspaceError::protected_file(biome_path.display().to_string());
             if protected_diagnostic.tags().is_verbose() {
                 if verbose {
                     console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
@@ -45,12 +45,12 @@ pub(crate) fn run<'a>(
         };
         if file_features.supports_format() {
             workspace.open_file(OpenFileParams {
-                path: rome_path.clone(),
+                path: biome_path.clone(),
                 version: 0,
                 content: content.into(),
-                language_hint: Language::default(),
+                document_file_source: None,
             })?;
-            let printed = workspace.format_file(FormatFileParams { path: rome_path })?;
+            let printed = workspace.format_file(FormatFileParams { path: biome_path })?;
 
             console.append(markup! {
                 {printed.as_code()}
@@ -68,14 +68,14 @@ pub(crate) fn run<'a>(
         let mut new_content = Cow::Borrowed(content);
 
         workspace.open_file(OpenFileParams {
-            path: rome_path.clone(),
+            path: biome_path.clone(),
             version: 0,
             content: content.into(),
-            language_hint: Language::default(),
+            document_file_source: None,
         })?;
         // apply fix file of the linter
         let file_features = workspace.file_features(SupportsFeatureParams {
-            path: rome_path.clone(),
+            path: biome_path.clone(),
             feature: FeaturesBuilder::new()
                 .with_linter()
                 .with_organize_imports()
@@ -85,7 +85,7 @@ pub(crate) fn run<'a>(
 
         if file_features.is_protected() {
             let protected_diagnostic =
-                WorkspaceError::protected_file(rome_path.display().to_string());
+                WorkspaceError::protected_file(biome_path.display().to_string());
             if protected_diagnostic.tags().is_verbose() {
                 if verbose {
                     console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
@@ -101,14 +101,14 @@ pub(crate) fn run<'a>(
             if file_features.supports_lint() {
                 let fix_file_result = workspace.fix_file(FixFileParams {
                     fix_file_mode: *fix_file_mode,
-                    path: rome_path.clone(),
+                    path: biome_path.clone(),
                     should_format: mode.is_check() && file_features.supports_format(),
                 })?;
                 if fix_file_result.code != new_content {
                     version += 1;
                     workspace.change_file(ChangeFileParams {
                         content: fix_file_result.code.clone(),
-                        path: rome_path.clone(),
+                        path: biome_path.clone(),
                         version,
                     })?;
                     new_content = Cow::Owned(fix_file_result.code);
@@ -117,13 +117,13 @@ pub(crate) fn run<'a>(
 
             if file_features.supports_organize_imports() && mode.is_check() {
                 let result = workspace.organize_imports(OrganizeImportsParams {
-                    path: rome_path.clone(),
+                    path: biome_path.clone(),
                 })?;
                 if result.code != new_content {
                     version += 1;
                     workspace.change_file(ChangeFileParams {
                         content: result.code.clone(),
-                        path: rome_path.clone(),
+                        path: biome_path.clone(),
                         version,
                     })?;
                     new_content = Cow::Owned(result.code);
@@ -134,7 +134,7 @@ pub(crate) fn run<'a>(
         if !mode.is_check_apply_unsafe() {
             let result = workspace.pull_diagnostics(PullDiagnosticsParams {
                 categories: RuleCategories::LINT | RuleCategories::SYNTAX,
-                path: rome_path.clone(),
+                path: biome_path.clone(),
                 max_diagnostics: mode.max_diagnostics.into(),
             })?;
             diagnostics.extend(result.diagnostics);
@@ -142,7 +142,7 @@ pub(crate) fn run<'a>(
 
         if file_features.supports_format() && mode.is_check() {
             let printed = workspace.format_file(FormatFileParams {
-                path: rome_path.clone(),
+                path: biome_path.clone(),
             })?;
             if mode.is_check_apply() || mode.is_check_apply_unsafe() {
                 if printed.as_code() != new_content {
@@ -150,7 +150,7 @@ pub(crate) fn run<'a>(
                 }
             } else {
                 let diagnostic = FormatDiffDiagnostic {
-                    file_name: rome_path.display().to_string(),
+                    file_name: biome_path.display().to_string(),
                     diff: ContentDiffAdvice {
                         new: printed.as_code().to_string(),
                         old: content.to_string(),

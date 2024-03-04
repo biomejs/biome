@@ -58,18 +58,6 @@ Se você deseja mais controle sobre os arquivos que são lidados, você deve usa
 
 Uma vez configurado, execute `lefthook install` para inicializar os hooks.
 
-Se o seu projeto possuí um `package.json`,
-você pode configurar automaticamente os hooks do _Lefthook_ após a instalação do pacote usando `scripts.postinstall`:
-
-
-```json title="package.json"
-{
-  "scripts": {
-    "postinstall": "lefthook install"
-  }
-}
-```
-
 
 ## Husky
 
@@ -78,12 +66,12 @@ O Husky não esconde alterações unstaged e não é capaz de fornecer uma lista
 Por isso que ele é normalmente utilizado em conjunto com outra ferramenta como _lint-staged_ ou _git-format-staged_.
 
 Se o seu projeto contém um `package.json`,
-você pode configurar automaticamente os hooks do _husky_ após a instalação do pacote usando `scripts.postinstall`:
+você pode configurar automaticamente os hooks do _husky_ após a instalação do pacote usando `scripts.prepare`:
 
 ```json title="package.json"
 {
   "scripts": {
-    "postinstall": "husky install"
+    "prepare": "husky"
   }
 }
 ```

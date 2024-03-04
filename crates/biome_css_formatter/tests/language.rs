@@ -7,12 +7,12 @@ use biome_formatter::{
 };
 use biome_formatter_test::TestFormatLanguage;
 use biome_parser::AnyParse;
-use biome_rowan::{FileSource, SyntaxNode, TextRange};
+use biome_rowan::{SyntaxNode, TextRange};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default)]
 pub struct CssTestFormatLanguage {
-    source_type: CssFileSource,
+    _source_type: CssFileSource,
 }
 
 impl TestFormatLanguage for CssTestFormatLanguage {
@@ -24,11 +24,7 @@ impl TestFormatLanguage for CssTestFormatLanguage {
     fn parse(&self, text: &str) -> AnyParse {
         let parse = parse_css(text, CssParserOptions::default());
 
-        AnyParse::new(
-            parse.syntax().as_send().unwrap(),
-            parse.into_diagnostics(),
-            self.source_type.as_any_file_source(),
-        )
+        AnyParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics())
     }
 
     fn deserialize_format_options(

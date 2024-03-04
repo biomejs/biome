@@ -1,0 +1,95 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+const Component = () => {
+    return (
+        <div>
+          <div />;
+        </div>
+    );
+}
+
+const Component2 = () => {
+    return (
+        <div>
+          <Component>
+            <div />
+          </Component>;
+        </div>
+    );
+}
+
+const Component3 = () => (
+    <div>
+        <Component />;
+    </div>
+)
+
+```
+
+# Diagnostics
+```
+invalid.jsx:4:18 lint/nursery/noSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! There is a suspicious semicolon in the JSX element.
+  
+    2 │     return (
+    3 │         <div>
+  > 4 │           <div />;
+      │                  ^
+  > 5 │         </div>
+      │         
+    6 │     );
+    7 │ }
+  
+  i This is usually the result of a typo or some refactor gone wrong.
+  
+  i Remove the semicolon, or move it inside a JSX element.
+  
+
+```
+
+```
+invalid.jsx:14:23 lint/nursery/noSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! There is a suspicious semicolon in the JSX element.
+  
+    12 │           <Component>
+    13 │             <div />
+  > 14 │           </Component>;
+       │                       ^
+  > 15 │         </div>
+       │         
+    16 │     );
+    17 │ }
+  
+  i This is usually the result of a typo or some refactor gone wrong.
+  
+  i Remove the semicolon, or move it inside a JSX element.
+  
+
+```
+
+```
+invalid.jsx:21:22 lint/nursery/noSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! There is a suspicious semicolon in the JSX element.
+  
+    19 │ const Component3 = () => (
+    20 │     <div>
+  > 21 │         <Component />;
+       │                      ^
+  > 22 │     </div>
+       │     
+    23 │ )
+    24 │ 
+  
+  i This is usually the result of a typo or some refactor gone wrong.
+  
+  i Remove the semicolon, or move it inside a JSX element.
+  
+
+```

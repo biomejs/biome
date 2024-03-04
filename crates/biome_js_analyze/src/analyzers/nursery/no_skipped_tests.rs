@@ -5,7 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsSyntaxToken};
+use biome_js_syntax::JsCallExpression;
 use biome_rowan::{BatchMutationExt, TextRange};
 
 use crate::JsRuleAction;
@@ -58,7 +58,7 @@ impl Rule for NoSkippedTests {
         if node.is_test_call_expression().ok()? {
             let callee = node.callee().ok()?;
             if callee.contains_a_test_pattern().ok()? {
-                let function_name = get_function_name(&callee)?;
+                let function_name = callee.get_callee_member_name()?;
 
                 if FUNCTION_NAMES.contains(&function_name.text_trimmed()) {
                     return Some(function_name.text_trimmed_range());
@@ -86,7 +86,7 @@ impl Rule for NoSkippedTests {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let callee = node.callee().ok()?;
-        let function_name = get_function_name(&callee)?;
+        let function_name = callee.get_callee_member_name()?;
         let replaced_function;
 
         let mut mutation = ctx.root().begin();
@@ -120,17 +120,5 @@ impl Rule for NoSkippedTests {
             message: markup! { "Enable the test." }.to_owned(),
             mutation,
         })
-    }
-}
-
-fn get_function_name(callee: &AnyJsExpression) -> Option<JsSyntaxToken> {
-    match callee {
-        AnyJsExpression::JsStaticMemberExpression(node) => {
-            let member = node.member().ok()?;
-            let member = member.as_js_name()?;
-            member.value_token().ok()
-        }
-        AnyJsExpression::JsIdentifierExpression(node) => node.name().ok()?.value_token().ok(),
-        _ => None,
     }
 }

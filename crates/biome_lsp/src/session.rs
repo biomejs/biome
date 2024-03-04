@@ -7,11 +7,12 @@ use anyhow::Result;
 use biome_analyze::RuleCategories;
 use biome_console::markup;
 use biome_diagnostics::PrintDescription;
-use biome_fs::{FileSystem, RomePath};
+use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    FeaturesBuilder, OpenProjectParams, PullDiagnosticsParams, SupportsFeatureParams,
-    UpdateProjectParams,
+    FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
+    SupportsFeatureParams, UpdateProjectParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::{ConfigurationBasePath, Workspace};
@@ -254,7 +255,7 @@ impl Session {
         self.documents.write().unwrap().remove(url);
     }
 
-    pub(crate) fn file_path(&self, url: &lsp_types::Url) -> Result<RomePath> {
+    pub(crate) fn file_path(&self, url: &lsp_types::Url) -> Result<BiomePath> {
         let mut path_to_file = match url.to_file_path() {
             Err(_) => {
                 // If we can't create a path, it's probably because the file doesn't exist.
@@ -274,7 +275,7 @@ impl Session {
             path_to_file = relative_path.into();
         }
 
-        Ok(RomePath::new(path_to_file))
+        Ok(BiomePath::new(path_to_file))
     }
 
     /// Computes diagnostics for the file matching the provided url and publishes
@@ -282,14 +283,14 @@ impl Session {
     /// contents changes.
     #[tracing::instrument(level = "trace", skip_all, fields(url = display(&url), diagnostic_count), err)]
     pub(crate) async fn update_diagnostics(&self, url: lsp_types::Url) -> Result<()> {
-        let rome_path = self.file_path(&url)?;
+        let biome_path = self.file_path(&url)?;
         let doc = self.document(&url)?;
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             feature: FeaturesBuilder::new()
                 .with_linter()
                 .with_organize_imports()
                 .build(),
-            path: rome_path.clone(),
+            path: biome_path.clone(),
         })?;
 
         let diagnostics = if self.is_linting_and_formatting_disabled() {
@@ -308,12 +309,21 @@ impl Session {
                 categories |= RuleCategories::ACTION
             }
             let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
-                path: rome_path,
+                path: biome_path.clone(),
                 categories,
                 max_diagnostics: u64::MAX,
             })?;
 
             tracing::trace!("biome diagnostics: {:#?}", result.diagnostics);
+            let content = self.workspace.get_file_content(GetFileContentParams {
+                path: biome_path.clone(),
+            })?;
+            let offset = match biome_path.extension().and_then(|s| s.to_str()) {
+                Some("vue") => VueFileHandler::start(content.as_str()),
+                Some("astro") => AstroFileHandler::start(content.as_str()),
+                Some("svelte") => SvelteFileHandler::start(content.as_str()),
+                _ => None,
+            };
 
             let result = result
                 .diagnostics
@@ -324,6 +334,7 @@ impl Session {
                         &url,
                         &doc.line_index,
                         self.position_encoding(),
+                        offset,
                     ) {
                         Ok(diag) => Some(diag),
                         Err(err) => {
@@ -478,9 +489,9 @@ impl Session {
             match result {
                 Ok(result) => {
                     if let Some(result) = result {
-                        let rome_path = RomePath::new(result.file_path);
+                        let biome_path = BiomePath::new(result.file_path);
                         let result = self.workspace.open_project(OpenProjectParams {
-                            path: rome_path.clone(),
+                            path: biome_path.clone(),
                             content: result.content,
                             version: 0,
                         });
@@ -489,7 +500,7 @@ impl Session {
                         }
                         let result = self
                             .workspace
-                            .update_current_project(UpdateProjectParams { path: rome_path });
+                            .update_current_project(UpdateProjectParams { path: biome_path });
                         if let Err(err) = result {
                             error!("{}", err);
                         }

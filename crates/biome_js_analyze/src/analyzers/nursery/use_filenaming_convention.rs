@@ -61,7 +61,9 @@ declare_rule! {
     /// When the option is set to `false`, anames may include non-ASCII characters.
     /// `café` and `안녕하세요` are so valid.
     ///
-    /// Default: `true`
+    /// Default: `false`
+    ///
+    /// **This option will be turned on by default in Biome 2.0.**
     ///
     /// ### filenameCases
     ///
@@ -246,7 +248,7 @@ pub struct FilenamingConventionOptions {
     pub strict_case: bool,
 
     /// If `false`, then non-ASCII characters are allowed.
-    #[serde(default = "enabled", skip_serializing_if = "is_enabled")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub require_ascii: bool,
 
     /// Allowed cases for _TypeScript_ `enum` member names.
@@ -262,6 +264,10 @@ const fn is_enabled(value: &bool) -> bool {
     *value
 }
 
+fn is_default<T: Default + Eq>(value: &T) -> bool {
+    value == &T::default()
+}
+
 fn is_default_filename_cases(value: &FilenameCases) -> bool {
     value.0.len() == 4 && !value.0.contains(&FilenameCase::Pascal)
 }
@@ -269,8 +275,8 @@ fn is_default_filename_cases(value: &FilenameCases) -> bool {
 impl Default for FilenamingConventionOptions {
     fn default() -> Self {
         Self {
-            strict_case: enabled(),
-            require_ascii: enabled(),
+            strict_case: true,
+            require_ascii: false,
             filename_cases: FilenameCases::default(),
         }
     }

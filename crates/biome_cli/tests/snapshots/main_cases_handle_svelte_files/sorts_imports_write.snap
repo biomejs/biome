@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `file.svelte`
+
+```svelte
+<script setup lang="ts">
+import * as svelteUse from "svelte-use";
+import Button from "./components/Button.svelte";
+</script>
+<div></div>
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```
+
+

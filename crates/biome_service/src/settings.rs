@@ -6,6 +6,7 @@ use crate::configuration::{
     push_to_analyzer_rules, to_override_settings, CssConfiguration, FormatterConfiguration,
     JavascriptConfiguration, JsonConfiguration, LinterConfiguration, PartialConfiguration,
 };
+use crate::workspace::DocumentFileSource;
 use crate::{
     configuration::FilesConfiguration, ConfigurationDiagnostic, Matcher, Rules, WorkspaceError,
 };
@@ -16,7 +17,7 @@ use biome_css_syntax::CssLanguage;
 use biome_deserialize::{Merge, StringSet};
 use biome_diagnostics::Category;
 use biome_formatter::{AttributePosition, IndentStyle, IndentWidth, LineEnding, LineWidth};
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_js_analyze::metadata;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
@@ -222,7 +223,7 @@ impl Default for FormatSettings {
 }
 
 /// Formatter settings for the entire workspace
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct OverrideFormatSettings {
     /// Enabled by default
     pub enabled: Option<bool>,
@@ -263,7 +264,7 @@ impl Default for LinterSettings {
 }
 
 /// Linter settings for the entire workspace
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct OverrideLinterSettings {
     /// Enabled by default
     pub enabled: Option<bool>,
@@ -296,7 +297,7 @@ impl Default for OrganizeImportsSettings {
 }
 
 /// Linter settings for the entire workspace
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct OverrideOrganizeImportsSettings {
     /// Enabled by default
     pub enabled: Option<bool>,
@@ -326,7 +327,6 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.formatter.line_width = formatter.line_width;
         language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
         language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
-
         language_setting.parser.parse_class_parameter_decorators =
             javascript.parser.unsafe_parameter_decorators_enabled;
 
@@ -342,7 +342,7 @@ impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
 
         language_setting.parser.allow_comments = json.parser.allow_comments;
         language_setting.parser.allow_trailing_commas = json.parser.allow_trailing_commas;
-
+        language_setting.formatter.trailing_comma = json.formatter.trailing_commas;
         language_setting.formatter.enabled = Some(json.formatter.enabled);
         language_setting.formatter.line_width = json.formatter.line_width;
         language_setting.formatter.indent_width = json.formatter.indent_width.map(Into::into);
@@ -390,7 +390,8 @@ pub trait Language: biome_rowan::Language {
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &RomePath,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
     ) -> Self::FormatOptions;
 }
 
@@ -502,7 +503,11 @@ impl<'a> AsRef<WorkspaceSettings> for SettingsHandle<'a> {
 
 impl<'a> SettingsHandle<'a> {
     /// Resolve the formatting context for the given language
-    pub(crate) fn format_options<L>(self, path: &RomePath) -> L::FormatOptions
+    pub(crate) fn format_options<L>(
+        self,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> L::FormatOptions
     where
         L: Language,
     {
@@ -511,6 +516,7 @@ impl<'a> SettingsHandle<'a> {
             &self.inner.override_settings,
             &L::lookup_settings(&self.inner.languages).formatter,
             path,
+            file_source,
         )
     }
 }
@@ -555,42 +561,7 @@ impl OverrideSettings {
             }
 
             if included {
-                let js_formatter = &pattern.languages.javascript.formatter;
-                let formatter = &pattern.formatter;
-                if let Some(indent_style) = js_formatter.indent_style.or(formatter.indent_style) {
-                    options.set_indent_style(indent_style);
-                }
-
-                if let Some(indent_width) = js_formatter.indent_width.or(formatter.indent_width) {
-                    options.set_indent_width(indent_width)
-                }
-                if let Some(line_width) = js_formatter.line_width.or(formatter.line_width) {
-                    options.set_line_width(line_width);
-                }
-                if let Some(quote_style) = js_formatter.quote_style {
-                    options.set_quote_style(quote_style);
-                }
-                if let Some(trailing_comma) = js_formatter.trailing_comma {
-                    options.set_trailing_comma(trailing_comma);
-                }
-                if let Some(quote_properties) = js_formatter.quote_properties {
-                    options.set_quote_properties(quote_properties);
-                }
-                if let Some(jsx_quote_style) = js_formatter.jsx_quote_style {
-                    options.set_jsx_quote_style(jsx_quote_style);
-                }
-                if let Some(semicolons) = js_formatter.semicolons {
-                    options.set_semicolons(semicolons);
-                }
-                if let Some(arrow_parentheses) = js_formatter.arrow_parentheses {
-                    options.set_arrow_parentheses(arrow_parentheses);
-                }
-                if let Some(bracket_spacing) = js_formatter.bracket_spacing {
-                    options.set_bracket_spacing(bracket_spacing);
-                }
-                if let Some(bracket_same_line) = js_formatter.bracket_same_line {
-                    options.set_bracket_same_line(bracket_same_line);
-                }
+                pattern.js_format_options(&mut options);
             }
 
             options
@@ -599,7 +570,7 @@ impl OverrideSettings {
 
     pub fn override_js_globals(
         &self,
-        path: &RomePath,
+        path: &BiomePath,
         base_set: &Option<IndexSet<String>>,
     ) -> IndexSet<String> {
         self.patterns
@@ -631,25 +602,7 @@ impl OverrideSettings {
                 return options;
             }
             if included {
-                let json_formatter = &pattern.languages.json.formatter;
-
-                if let Some(indent_style) = json_formatter
-                    .indent_style
-                    .or(pattern.formatter.indent_style)
-                {
-                    options.set_indent_style(indent_style);
-                }
-
-                if let Some(indent_width) = json_formatter
-                    .indent_width
-                    .or(pattern.formatter.indent_width)
-                {
-                    options.set_indent_width(indent_width)
-                }
-                if let Some(line_width) = json_formatter.line_width.or(pattern.formatter.line_width)
-                {
-                    options.set_line_width(line_width);
-                }
+                pattern.json_format_options(&mut options);
             }
 
             options
@@ -669,21 +622,7 @@ impl OverrideSettings {
                 return options;
             }
             if included {
-                let css_formatter = &pattern.languages.css.formatter;
-                let formatter = &pattern.formatter;
-
-                if let Some(indent_style) = css_formatter.indent_style.or(formatter.indent_style) {
-                    options.set_indent_style(indent_style);
-                }
-                if let Some(indent_width) = css_formatter.indent_width.or(formatter.indent_width) {
-                    options.set_indent_width(indent_width)
-                }
-                if let Some(line_width) = css_formatter.line_width.or(formatter.line_width) {
-                    options.set_line_width(line_width);
-                }
-                if let Some(quote_style) = css_formatter.quote_style {
-                    options.set_quote_style(quote_style);
-                }
+                pattern.css_format_options(&mut options);
             }
 
             options
@@ -702,31 +641,28 @@ impl OverrideSettings {
                 return options;
             }
             if included {
-                let js_parser = &pattern.languages.javascript.parser;
-
-                options.parse_class_parameter_decorators =
-                    js_parser.parse_class_parameter_decorators;
+                pattern.js_parser_options(&mut options)
             }
             options
         })
     }
 
-    pub fn as_json_parser_options(&self, path: &Path) -> Option<JsonParserOptions> {
-        for pattern in &self.patterns {
+    pub fn override_json_parser_options(
+        &self,
+        path: &Path,
+        options: JsonParserOptions,
+    ) -> JsonParserOptions {
+        self.patterns.iter().fold(options, |mut options, pattern| {
             let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
             let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
-
-            if included || !excluded {
-                let json_parser = &pattern.languages.json.parser;
-
-                return Some(JsonParserOptions {
-                    allow_comments: json_parser.allow_comments,
-                    allow_trailing_commas: json_parser.allow_trailing_commas,
-                });
+            if excluded {
+                return options;
             }
-        }
-
-        None
+            if included {
+                pattern.json_parser_options(&mut options);
+            }
+            options
+        })
     }
 
     pub fn as_css_parser_options(&self, path: &Path) -> Option<CssParserOptions> {
@@ -814,7 +750,7 @@ impl OverrideSettings {
         None
     }
 }
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct OverrideSettingPattern {
     pub exclude: Matcher,
     pub include: Matcher,
@@ -826,6 +762,150 @@ pub struct OverrideSettingPattern {
     pub organize_imports: OverrideOrganizeImportsSettings,
     /// Language specific settings
     pub languages: LanguageListSettings,
+
+    // Cache
+    pub(crate) cached_js_format_options: RwLock<Option<JsFormatOptions>>,
+    pub(crate) cached_json_format_options: RwLock<Option<JsonFormatOptions>>,
+    pub(crate) cached_css_format_options: RwLock<Option<CssFormatOptions>>,
+    pub(crate) cached_js_parser_options: RwLock<Option<JsParserOptions>>,
+    pub(crate) cached_json_parser_options: RwLock<Option<JsonParserOptions>>,
+}
+
+impl OverrideSettingPattern {
+    fn js_format_options(&self, options: &mut JsFormatOptions) {
+        let cache = self.cached_js_format_options.read().unwrap();
+        if let Some(cached_options) = cache.as_ref() {
+            *options = cached_options.clone();
+            return;
+        }
+        drop(cache);
+
+        let js_formatter = &self.languages.javascript.formatter;
+        let formatter = &self.formatter;
+        if let Some(indent_style) = js_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+
+        if let Some(indent_width) = js_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width)
+        }
+        if let Some(line_width) = js_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+        if let Some(quote_style) = js_formatter.quote_style {
+            options.set_quote_style(quote_style);
+        }
+        if let Some(trailing_comma) = js_formatter.trailing_comma {
+            options.set_trailing_comma(trailing_comma);
+        }
+        if let Some(quote_properties) = js_formatter.quote_properties {
+            options.set_quote_properties(quote_properties);
+        }
+        if let Some(jsx_quote_style) = js_formatter.jsx_quote_style {
+            options.set_jsx_quote_style(jsx_quote_style);
+        }
+        if let Some(semicolons) = js_formatter.semicolons {
+            options.set_semicolons(semicolons);
+        }
+        if let Some(arrow_parentheses) = js_formatter.arrow_parentheses {
+            options.set_arrow_parentheses(arrow_parentheses);
+        }
+        if let Some(bracket_spacing) = js_formatter.bracket_spacing {
+            options.set_bracket_spacing(bracket_spacing);
+        }
+        if let Some(bracket_same_line) = js_formatter.bracket_same_line {
+            options.set_bracket_same_line(bracket_same_line);
+        }
+        let mut cache = self.cached_js_format_options.write().unwrap();
+        let _ = cache.insert(options.clone());
+    }
+
+    fn json_format_options(&self, options: &mut JsonFormatOptions) {
+        let cache = self.cached_json_format_options.read().unwrap();
+        if let Some(cached_options) = cache.as_ref() {
+            *options = cached_options.clone();
+            return;
+        }
+        drop(cache);
+
+        let json_formatter = &self.languages.json.formatter;
+
+        if let Some(indent_style) = json_formatter.indent_style.or(self.formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+
+        if let Some(indent_width) = json_formatter.indent_width.or(self.formatter.indent_width) {
+            options.set_indent_width(indent_width)
+        }
+        if let Some(line_width) = json_formatter.line_width.or(self.formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+        let mut cache = self.cached_json_format_options.write().unwrap();
+        let _ = cache.insert(options.clone());
+    }
+    fn css_format_options(&self, options: &mut CssFormatOptions) {
+        let cache = self.cached_css_format_options.read().unwrap();
+        if let Some(cached_options) = cache.as_ref() {
+            *options = cached_options.clone();
+            return;
+        }
+        drop(cache);
+
+        let css_formatter = &self.languages.css.formatter;
+        let formatter = &self.formatter;
+
+        if let Some(indent_style) = css_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+        if let Some(indent_width) = css_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width)
+        }
+        if let Some(line_width) = css_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+        if let Some(quote_style) = css_formatter.quote_style {
+            options.set_quote_style(quote_style);
+        }
+        let mut cache = self.cached_css_format_options.write().unwrap();
+        let _ = cache.insert(options.clone());
+    }
+
+    fn js_parser_options(&self, options: &mut JsParserOptions) {
+        let cache = self.cached_js_parser_options.read().unwrap();
+        if let Some(cached_options) = cache.as_ref() {
+            *options = cached_options.clone();
+            return;
+        }
+        drop(cache);
+
+        let js_parser = &self.languages.javascript.parser;
+
+        options.parse_class_parameter_decorators = js_parser.parse_class_parameter_decorators;
+
+        let mut cache = self.cached_js_parser_options.write().unwrap();
+        let _ = cache.insert(options.clone());
+    }
+
+    fn json_parser_options(&self, options: &mut JsonParserOptions) {
+        let cache = self.cached_json_parser_options.read().unwrap();
+        if let Some(cached_options) = cache.as_ref() {
+            *options = *cached_options;
+            return;
+        }
+        drop(cache);
+        let json_parser = &self.languages.json.parser;
+
+        options.allow_trailing_commas = json_parser.allow_trailing_commas;
+        options.allow_comments = json_parser.allow_comments;
+
+        let mut cache = self.cached_json_parser_options.write().unwrap();
+        let _ = cache.insert(*options);
+    }
+
+    #[allow(dead_code)]
+    // NOTE: Currently not used because the rule options are typed using TypeId and Any, which isn't thread safe.
+    // TODO: Find a way to cache this
+    fn analyzer_rules_mut(&self, _analyzer_rules: &mut AnalyzerRules) {}
 }
 
 /// Creates a [Matcher] from a [StringSet]
