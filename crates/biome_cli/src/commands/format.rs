@@ -159,7 +159,7 @@ pub(crate) fn format(
     }
 
     if changed {
-        paths = get_changed_files(&session.app.fs, &configuration, &cli_options, since)?;
+        paths = get_changed_files(&session.app.fs, &configuration, since)?;
     }
 
     session

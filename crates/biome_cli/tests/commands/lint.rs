@@ -2683,6 +2683,45 @@ fn should_not_process_ignored_file_even_if_its_changed() {
     ));
 }
 
+
+#[test]
+fn should_not_error_for_no_changed_files_with_no_errors_on_unmatched() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    let file_path = Path::new("file.js");
+    fs.insert(file_path.into(), r#"console.log('file');"#.as_bytes());
+
+    let file_path2 = Path::new("file2.js");
+    fs.insert(file_path2.into(), r#"console.log('file2');"#.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--changed",
+                "--since=main",
+                "--no-errors-on-unmatched",
+                file_path.as_os_str().to_str().unwrap(),
+                file_path2.as_os_str().to_str().unwrap(),
+            ]
+                .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_error_for_no_changed_files_with_no_errors_on_unmatched",
+        fs,
+        console,
+        result,
+    ));
+}
+
 #[test]
 fn lint_syntax_rules() {
     let mut fs = MemoryFileSystem::default();

@@ -98,7 +98,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     }
 
     if changed {
-        paths = get_changed_files(&session.app.fs, &fs_configuration, &cli_options, since)?;
+        paths = get_changed_files(&session.app.fs, &fs_configuration, since)?;
     }
 
     let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "lint")?;

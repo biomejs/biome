@@ -6,7 +6,6 @@ use std::ffi::OsString;
 pub(crate) fn get_changed_files(
     fs: &DynRef<'_, dyn FileSystem>,
     configuration: &PartialConfiguration,
-    cli_options: &CliOptions,
     since: Option<String>,
 ) -> Result<Vec<OsString>, CliDiagnostic> {
     let default_branch = configuration
@@ -24,10 +23,6 @@ pub(crate) fn get_changed_files(
     let changed_files = fs.get_changed_files(base)?;
 
     let filtered_changed_files = changed_files.iter().map(OsString::from).collect::<Vec<_>>();
-
-    if filtered_changed_files.is_empty() && !cli_options.no_errors_on_unmatched {
-        return Err(CliDiagnostic::no_files_processed());
-    }
 
     Ok(filtered_changed_files)
 }
