@@ -298,6 +298,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @ah-yu
 - Fix [#1659](https://github.com/biomejs/biome/issues/1659) and [#1662](https://github.com/biomejs/biome/issues/1662), by correctly taking into account the leading comma inside the formatter options. Contributed by @ematipico
 
+- Fix [#1934](https://github.com/biomejs/biome/pull/1934). Fix invalid formatting of long arrow function for AsNeeded arrow parens Contributed by @fireairforce
+
 ### JavaScript APIs
 
 ### Linter
@@ -550,6 +552,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#1932](https://github.com/biomejs/biome/issues/1932) Allow redeclaration of type parameters in different declarations.
   Contributed by @keita-hino
+
+- Fix [#1945](https://github.com/biomejs/biome/issues/1945) Allow constructor with default parameters in `noUselessConstructor`
 
 ### Parser
 
