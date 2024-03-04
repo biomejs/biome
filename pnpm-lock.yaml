@@ -53,6 +53,10 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0
 
+  packages/@biomejs/wasm-nodejs: {}
+
+  packages/@biomejs/wasm-web: {}
+
   packages/tailwindcss-config-analyzer:
     dependencies:
       tailwindcss:
