@@ -2,20 +2,20 @@
 title: Biome
 head:
   - tag: title
-    content: Biome, toolchain of the web
+    content: Biome、Webのためのツールチェーン
 template: splash
-description: Web開発のためのたった1つのツールチェーン
+description: format、lintなどが一瞬で完了します！
 editUrl: false
 next: false
 banner:
   content: |
-    <a href="https://www.enduringhearts.org/" target="_blank">Enduring Hearts</a> への寄付をご検討ください。
+    <a href="https://www.enduringhearts.org/" target="_blank">Enduring Hearts</a>への寄付をご検討ください。
 
 hero:
   title: Web開発のためのたった1つのツールチェーン
-  tagline: わずか数秒でフォーマット、lint などが完了します!
+  tagline: format、lintなどが一瞬で完了します！
   image:
-    alt: Biome，Web 工具链
+    alt: Biome、Webのためのツールチェーン
     dark: "@/assets/svg/slogan-dark-transparent.svg"
     light: "@/assets/svg/slogan-light-transparent.svg"
   actions:
@@ -50,22 +50,23 @@ import LinterExample from "@/components/linter/example.md";
 
 
 <div class="hero-code">
-    <h2 class="head">Format code like Prettier, save time</h2>
+    <h2 class="head">Prettierのようにコードをformat、しかも高速</h2>
 
-    **Biome は _JavaScript_, _TypeScript_, _JSX_ そして _JSON_ のための[高速な formatter](https://github.com/biomejs/biome/tree/main/benchmark#formatting)** であり、**_Prettier_ と97%の互換性**を備え、**CIと開発者の時間を節約します**。
-    Biomeは、[お気に入りのエディタ](/ja/guides/integrate-in-editor/)でコードを書く際に、**不正確な形式のコード**さえもフォーマットできます。
+    **Biomeは _JavaScript_、_TypeScript_、_JSX_ そして _JSON_ のための[高速なformatter](https://github.com/biomejs/biome/tree/main/benchmark#formatting)** であり、[**_Prettier_ と97%の互換性**](https://console.algora.io/challenges/prettier)を持ち、**CIと開発者の時間を節約します**。
+
+    Biomeは、[お気に入りのエディタ](/ja/guides/integrate-in-editor/)でコードを書く際に、**不正な形式のコード**さえもformatできます。
 
     <div class="linter format">
       <div class="inp">
-        <span>CODE</span>
+        <span>コード</span>
         <Inputf />
       </div>
       <div class="out">
-        <span>OUTPUT</span>
+        <span>出力</span>
         <Outputf />
       </div>
       <div class="perf-out">
-        <span>PERFORMANCE</span>
+        <span>パフォーマンス</span>
         <div class="bench-comp">
           <div class="bench">
             <div>
@@ -81,16 +82,14 @@ import LinterExample from "@/components/linter/example.md";
           <div class="perf-comp">
             <div class="comp">~35x</div>
             <div class="comp-des">
-              BiomeはPrettierよりも高速です。
-
-              ※Intel Core i7 1270Pを使用して、2,104ファイルにわたる171,127行のコードをフォーマットする場合
+              BiomeはPrettierよりも高速です（Intel Core i7 1270Pを使用して、2,104ファイルにわたる171,127行のコードをformatした場合）。
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    [プレイグラウンド](/playground/) または、直接あなたのプロジェクトでBiomeを試す:
+    [プレイグラウンド](/playground/)か、あなたのプロジェクトで直接Biomeのformatterを試してみましょう:
 
     ```shell
     npm i -D --save-exact @biomejs/biome
@@ -100,15 +99,15 @@ import LinterExample from "@/components/linter/example.md";
 
 
 <div class="hero-code">
-    <h2 class="head">Fix problems, learn best practice</h2>
+    <h2 class="head">問題を修正し、ベストプラクティスを学ぶ</h2>
 
-    **Biome は _JavaScript_, _TypeScript_ そして _JSX_ のための [高性能な linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** であり、ESLint, typescript-eslint 及び[その他のソース](https://github.com/biomejs/biome/discussions/3)から **[190 以上のルール](https://biomejs.dev/linter/rules/)** を備えています。
+    **Biomeは _JavaScript_、_TypeScript_ そして _JSX_ のための[高性能なlinter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** であり、ESLint、typescript-eslint、[その他のソース](https://github.com/biomejs/biome/discussions/3)に由来する **[190以上のルール](https://biomejs.dev/linter/rules/)** を備えています。
 
-    **Biomeは、詳細で文脈を考慮した診断を出力し**、あなたのコードを改善し、より優れたプログラマーになるのに役立ちます！
+    **Biomeは、文脈を考慮した詳細な診断を出力**してくれるため、あなたがコードを改善してより優れたプログラマーになるのに役立ちます！
 
     <LinterExample />
 
-    [プレイグラウンド](/playground/) または、直接あなたのプロジェクトでBiome linterを試す:
+    [プレイグラウンド](/playground/)か、あなたのプロジェクトで直接Biomeのlinterを試してみましょう:
 
     ```shell
     npm i -D --save-exact @biomejs/biome
@@ -119,13 +118,13 @@ import LinterExample from "@/components/linter/example.md";
 
 
 <div class="hero-code">
-    <h2 class="head">Everything all at once</h2>
+    <h2 class="head">すべてを一度に</h2>
 
-    コードのフォーマットとlint を別々に行うだけでなく、**1つのコマンドで一度に行う**こともできます！
+    コードのformatとlintを別々に行うだけでなく、**1つのコマンドで一度に行う**こともできます！
 
-    各ツールは他のツールとシームレスに統合され、Webプロジェクトのための**一貫したツールチェーン**を作成します。
+    各ツールは他のツールとシームレスに統合され、Webプロジェクトのための**一貫したツールチェーン**を構成します。
 
-    すべてのツールを`check`コマンドで実行します:
+    `check`コマンドですべてのツールを実行してみましょう:
 
     ```shell
     npm i -D --save-exact @biomejs/biome
@@ -162,19 +161,19 @@ import LinterExample from "@/components/linter/example.md";
 <div class="installation-body">
   <div class="installation">
     <div class="installation-left">
-      <h2 class="head">Try Biome</h2>
+      <h2 class="head">Biomeを試す</h2>
       <div class="installation-description">
-        好みのパッケージマネージャーを使用してBiomeをインストール、そしてそれをエディターに統合できます。
+        好みのパッケージマネージャーを使用してBiomeをインストールし、エディターに組み込みましょう。
       </div>
       <a class="installation-biome" href="/ja/guides/getting-started/#installation">
-        パッケージマネージャーを使用してBiome をインストール
+        パッケージマネージャーでインストール
         <Image src={arrow} alt="arrow" />
       </a>
       <a
         href="/ja/guides/integrate-in-editor/"
         class="installation-extension"
       >
-        Biome をエディタに統合する
+        Biomeをエディタに組み込む
         <Image src={arrow} alt="arrow" />
       </a>
     </div>
@@ -186,10 +185,10 @@ import LinterExample from "@/components/linter/example.md";
 
 <div class="community">
   <div class="community-grid"></div>
-  <h2 class="head">Community</h2>
+  <h2 class="head">コミュニティ</h2>
   <div class="community-connect">
     <div class="community-description">
-      Powered by our open-source contributors
+      OSSコントリビューターにより支えられています
     </div>
     <div class="community-links">
       <a href="https://discord.gg/BypW39g6Yc" class="discord">
