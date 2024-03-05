@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid2.ts
+---
+# Input
+```ts
+export enum Color {
+    Red = "Red",
+    Green = "Green",
+    Blue,
+}
+
+```
+
+# Diagnostics
+```
+invalid2.ts:1:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+  > 1 │ export enum Color {
+      │             ^^^^^
+    2 │     Red = "Red",
+    3 │     Green = "Green",
+  
+  i This enum member should be explicitly initialized.
+  
+    2 │     Red = "Red",
+    3 │     Green = "Green",
+  > 4 │     Blue,
+      │     ^^^^
+    5 │ }
+    6 │ 
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+  i Safe fix: Initialize all enum members.
+  
+    4 │ ····Blue·=·'Blue',
+      │         +++++++++ 
+
+```
+
+
