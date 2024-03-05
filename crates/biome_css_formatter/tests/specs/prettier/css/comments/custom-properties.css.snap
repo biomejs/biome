@@ -1,0 +1,131 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/comments/custom-properties.css
+---
+
+# Input
+
+```css
+   /* comment 1 */
+       :root {
+  /* comment 2 */
+  --prop : {
+  /* comment 3 */
+color/* comment 4 */: /* comment 5 */#fff/* comment 6 */;/* comment 7 */
+  /* comment 8 */
+font-size: 12px;
+  /* comment 9 */
+  };
+  /* comment 10 */
+}
+     /* comment 11 */
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,13 +1,14 @@
+ /* comment 1 */
+ :root {
+   /* comment 2 */
+-  --prop: {
+-    /* comment 3 */
+-    color/* comment 4 */: /* comment 5 */ #fff /* comment 6 */; /* comment 7 */
+-    /* comment 8 */
+-    font-size: 12px;
+-    /* comment 9 */
+-  };
++  --prop : {
++  /* comment 3 */
++color/* comment 4 */: /* comment 5 */#fff /* comment 6 */; /* comment 7 */
++  /* comment 8 */
++  font-size: 12px;
++  /* comment 9 */
++}
++;
+   /* comment 10 */
+ }
+ /* comment 11 */
+```
+
+# Output
+
+```css
+/* comment 1 */
+:root {
+  /* comment 2 */
+  --prop : {
+  /* comment 3 */
+color/* comment 4 */: /* comment 5 */#fff /* comment 6 */; /* comment 7 */
+  /* comment 8 */
+  font-size: 12px;
+  /* comment 9 */
+}
+;
+  /* comment 10 */
+}
+/* comment 11 */
+```
+
+# Errors
+```
+custom-properties.css:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    2 │        :root {
+    3 │   /* comment 2 */
+  > 4 │   --prop : {
+      │            ^
+  > 5 │   /* comment 3 */
+  > 6 │ color/* comment 4 */: /* comment 5 */#fff/* comment 6 */;/* comment 7 */
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   /* comment 8 */
+    8 │ font-size: 12px;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+custom-properties.css:10:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found ';
+      /* comment 10 */
+    }'.
+  
+     8 │ font-size: 12px;
+     9 │   /* comment 9 */
+  > 10 │   };
+       │    ^
+  > 11 │   /* comment 10 */
+  > 12 │ }
+       │ ^
+    13 │      /* comment 11 */
+    14 │ 
+  
+  i Expected a qualified rule, or an at rule here.
+  
+     8 │ font-size: 12px;
+     9 │   /* comment 9 */
+  > 10 │   };
+       │    ^
+  > 11 │   /* comment 10 */
+  > 12 │ }
+       │ ^
+    13 │      /* comment 11 */
+    14 │ 
+  
+
+```
+
+

@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/postcss-8-improment/empty-props.css
+---
+
+# Input
+
+```css
+:root {
+  --empty:;
+     --one-space: ;
+  --two-space:  ;
+--many-space:       ;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ :root {
+-  --empty:;
++  --empty: ;
+   --one-space: ;
+-  --two-space:  ;
+-  --many-space:       ;
++  --two-space: ;
++  --many-space: ;
+ }
+```
+
+# Output
+
+```css
+:root {
+  --empty: ;
+  --one-space: ;
+  --two-space: ;
+  --many-space: ;
+}
+```
+
+

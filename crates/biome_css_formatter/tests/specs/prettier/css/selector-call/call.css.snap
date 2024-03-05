@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selector-call/call.css
+---
+
+# Input
+
+```css
+.e:extend(.f, .g) {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1 @@
+-.e:extend(.f, .g) {
+-}
++.e:extend(.f, .g) {}
+```
+
+# Output
+
+```css
+.e:extend(.f, .g) {}
+```
+
+# Errors
+```
+call.css:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+  > 1 │ .e:extend(.f, .g) {}
+      │          ^
+    2 │ 
+  
+  i Remove (
+  
+call.css:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `.`
+  
+  > 1 │ .e:extend(.f, .g) {}
+      │           ^
+    2 │ 
+  
+  i Remove .
+  
+call.css:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+  > 1 │ .e:extend(.f, .g) {}
+      │                 ^
+    2 │ 
+  
+  i Remove )
+  
+
+```
+
+

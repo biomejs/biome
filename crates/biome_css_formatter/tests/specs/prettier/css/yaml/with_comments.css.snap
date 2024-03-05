@@ -1,0 +1,113 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/yaml/with_comments.css
+---
+
+# Input
+
+```css
+---
+title: Title
+description: Description
+# This is a comment
+---
+
+a {
+    color: red;
+}
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,7 +2,8 @@
+ title: Title
+ description: Description
+ # This is a comment
+----
++--
++-
+ 
+ a {
+   color: red;
+```
+
+# Output
+
+```css
+---
+title: Title
+description: Description
+# This is a comment
+--
+-
+
+a {
+  color: red;
+}
+```
+
+# Errors
+```
+with_comments.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '---'.
+  
+  > 1 │ ---
+      │ ^^^
+    2 │ title: Title
+    3 │ description: Description
+  
+  i Expected a qualified rule, or an at rule here.
+  
+  > 1 │ ---
+      │ ^^^
+    2 │ title: Title
+    3 │ description: Description
+  
+with_comments.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `description`
+  
+    1 │ ---
+    2 │ title: Title
+  > 3 │ description: Description
+      │ ^^^^^^^^^^^
+    4 │ # This is a comment
+    5 │ ---
+  
+  i Remove description
+  
+with_comments.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `-`
+  
+    3 │ description: Description
+    4 │ # This is a comment
+  > 5 │ ---
+      │ ^
+    6 │ 
+    7 │ a {
+  
+  i Remove -
+  
+with_comments.css:5:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `-`
+  
+    3 │ description: Description
+    4 │ # This is a comment
+  > 5 │ ---
+      │   ^
+    6 │ 
+    7 │ a {
+  
+  i Remove -
+  
+
+```
+
+

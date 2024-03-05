@@ -13,13 +13,9 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-    div {
-        border: #fff    solid
-        
-        2px;
-        border: THICK   #000;
-        border: medium;
-    }
+.foo {
+    transform: translate(/* comment 9 */ 10px);
+}
 
 "#;
     let parse = parse_css(src, CssParserOptions::default());

@@ -1,0 +1,9 @@
+.foo {
+  color: #aaa;
+  -o-color: #fabcd3;
+  -webkit-color: #873;
+  -moz-color: #6bcdef;
+  -ms-color: #aabbcc;
+  color: #f09f;
+  color: #ff0099ff;
+}

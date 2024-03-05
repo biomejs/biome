@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/comments/prettier-ignore.css
+---
+
+# Input
+
+```css
+foo {
+  /* prettier-ignore */
+  thing:     foo;
+  -ms-thing: foo;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ foo {
+   /* prettier-ignore */
+-  thing:     foo;
++  thing: foo;
+   -ms-thing: foo;
+ }
+```
+
+# Output
+
+```css
+foo {
+  /* prettier-ignore */
+  thing: foo;
+  -ms-thing: foo;
+}
+```
+
+

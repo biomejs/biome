@@ -1,0 +1,49 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/fill-value/fill.css
+---
+
+# Input
+
+```css
+div {
+  border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
+  $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,11 +1,6 @@
+ div {
+   border-left: 1px solid
+-    mix($warningBackgroundColors, $warningBorderColors, 50%);
+-  $fontFamily:
+-    "Lato",
+-    -apple-system,
+-    "Helvetica Neue",
+-    Helvetica,
+-    Arial,
++    mix($warningbackgroundcolors, $warningbordercolors, 50%);
++  $fontfamily: "Lato" , -apple-system , "Helvetica Neue" , helvetica , arial ,
+     sans-serif;
+ }
+```
+
+# Output
+
+```css
+div {
+  border-left: 1px solid
+    mix($warningbackgroundcolors, $warningbordercolors, 50%);
+  $fontfamily: "Lato" , -apple-system , "Helvetica Neue" , helvetica , arial ,
+    sans-serif;
+}
+```
+
+

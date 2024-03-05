@@ -1,0 +1,403 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/import.css
+---
+
+# Input
+
+```css
+@import url("fineprint.css") print;
+@import url("bluish.css") projection, tv;
+@import 'custom.css';
+@import url("chrome://communicator/skin/");
+@import "common.css" screen, projection;
+@import "common.css" screen projection;
+@import url('landscape.css') screen and (orientation:landscape);
+
+
+#main {
+    @import "example";
+}
+#main {
+@import "example";
+}
+#main {
+    @import "example" ;
+}
+#main {
+    @import  "example"  ;
+}
+#main {
+    @import
+        "example";
+}
+#main
+{
+@import
+"example";
+}
+#main
+
+{
+
+@import
+
+"example";
+
+}
+
+@import url('foo');
+$dir: 'fonts';
+
+@import url("foo.css");
+@import url('foo.css');
+@import  url("foo.css");
+@import   url("foo.css");
+@import url("fineprint.css")print;
+@import url("fineprint.css") print;
+@import url("fineprint.css")  print;
+@import url("fineprint.css")
+  print;
+@import url("bluish.css") projection,tv;
+@import url("bluish.css") projection, tv;
+@import url("bluish.css") projection ,tv;
+@import url("bluish.css") projection , tv;
+@import url("bluish.css") projection  ,  tv;
+@import url("bluish.css")
+  projection,
+  tv;
+@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
+@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+@import url('landscape.css') screen and (orientation:landscape);
+@import url("http://fonts.googleapis.com/css?family=#{$family}");
+@import url( "foo.css");
+@import url("foo.css" );
+@import url( "foo.css" );
+@import url(  "foo.css"  );
+@import url("foo bar baz.css");
+@import url(  "foo bar baz.css"  );
+@import url("foo  bar  baz.css");
+@import url(
+"foo.css"
+);
+@import 'https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600';
+@import url(
+"foo.css,800"
+);
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,16 +1,10 @@
+ @import url("fineprint.css") print;
+ @import url("bluish.css") projection, tv;
+-@import "custom.css";
++@import 'custom.css';
+ @import url("chrome://communicator/skin/");
+ @import "common.css" screen, projection;
+ @import "common.css" screen projection;
+-@import url("landscape.css") screen and (orientation: landscape);
+-
+-@import (multiple) "foo.less";
+-
+-/* This isn't valid CSS, SCSS or Less, but we should be lenient and make sure
+-/* that nothing is lost when printing. */
+-@import "one" two "three";
++@import url('landscape.css') screen and (orientation:landscape);
+ 
+ #main {
+   @import "example";
+@@ -19,62 +13,61 @@
+   @import "example";
+ }
+ #main {
+-  @import "example";
++  @import "example" ;
+ }
+ #main {
+-  @import "example";
++  @import  "example"  ;
+ }
+ #main {
+-  @import "example";
++  @import
++        "example";
+ }
+ #main {
+-  @import "example";
++  @import
++"example";
+ }
+ #main {
+-  @import "example";
+-}
++  @import
+ 
+-@import "test.less" {
+-}
+-@import "test.less" {
+-  a: b;
+-  c: d;
++"example";
+ }
+ 
+-@import url("foo");
+-$dir: "fonts";
++@import url('foo');
++$dir: 'fonts'
++;
+ 
+-@import url("foo.css");
+-@import url("foo.css");
+ @import url("foo.css");
+-@import url("foo.css");
+-@import url("fineprint.css") print;
+-@import url("fineprint.css") print;
+-@import url("fineprint.css") print;
++@import url('foo.css');
++@import  url("foo.css");
++@import   url("foo.css");
++@import url("fineprint.css")print;
+ @import url("fineprint.css") print;
+-@import url("bluish.css") projection, tv;
+-@import url("bluish.css") projection, tv;
+-@import url("bluish.css") projection, tv;
++@import url("fineprint.css")  print;
++@import url("fineprint.css")
++  print;
++@import url("bluish.css") projection,tv;
+ @import url("bluish.css") projection, tv;
+-@import url("bluish.css") projection, tv;
+-@import url("bluish.css") projection, tv;
+-@import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
++@import url("bluish.css") projection ,tv;
++@import url("bluish.css") projection , tv;
++@import url("bluish.css") projection  ,  tv;
++@import url("bluish.css")
+   projection,
+   tv;
+-@import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
+-  projection tv;
+-@import url("landscape.css") screen and (orientation: landscape);
+-@import "rounded-corners", "text-shadow";
+-@import "rounded-corners", "text-shadow";
+-$family: unquote("Droid+Sans");
++@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
++@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
++@import url('landscape.css') screen and (orientation:landscape);
+ @import url("http://fonts.googleapis.com/css?family=#{$family}");
+-@import url("foo.css");
+-@import url("foo.css");
+-@import url("foo.css");
+-@import url("foo.css");
+-@import url("foo bar baz.css");
++@import url( "foo.css");
++@import url("foo.css" );
++@import url( "foo.css" );
++@import url(  "foo.css"  );
+ @import url("foo bar baz.css");
++@import url(  "foo bar baz.css"  );
+ @import url("foo  bar  baz.css");
+-@import url("foo.css");
+-@import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600";
+-@import url("foo.css,800");
++@import url(
++"foo.css"
++);
++@import 'https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600';
++@import url(
++"foo.css,800"
++);
+```
+
+# Output
+
+```css
+@import url("fineprint.css") print;
+@import url("bluish.css") projection, tv;
+@import 'custom.css';
+@import url("chrome://communicator/skin/");
+@import "common.css" screen, projection;
+@import "common.css" screen projection;
+@import url('landscape.css') screen and (orientation:landscape);
+
+#main {
+  @import "example";
+}
+#main {
+  @import "example";
+}
+#main {
+  @import "example" ;
+}
+#main {
+  @import  "example"  ;
+}
+#main {
+  @import
+        "example";
+}
+#main {
+  @import
+"example";
+}
+#main {
+  @import
+
+"example";
+}
+
+@import url('foo');
+$dir: 'fonts'
+;
+
+@import url("foo.css");
+@import url('foo.css');
+@import  url("foo.css");
+@import   url("foo.css");
+@import url("fineprint.css")print;
+@import url("fineprint.css") print;
+@import url("fineprint.css")  print;
+@import url("fineprint.css")
+  print;
+@import url("bluish.css") projection,tv;
+@import url("bluish.css") projection, tv;
+@import url("bluish.css") projection ,tv;
+@import url("bluish.css") projection , tv;
+@import url("bluish.css") projection  ,  tv;
+@import url("bluish.css")
+  projection,
+  tv;
+@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
+@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+@import url('landscape.css') screen and (orientation:landscape);
+@import url("http://fonts.googleapis.com/css?family=#{$family}");
+@import url( "foo.css");
+@import url("foo.css" );
+@import url( "foo.css" );
+@import url(  "foo.css"  );
+@import url("foo bar baz.css");
+@import url(  "foo bar baz.css"  );
+@import url("foo  bar  baz.css");
+@import url(
+"foo.css"
+);
+@import 'https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600';
+@import url(
+"foo.css,800"
+);
+```
+
+# Errors
+```
+import.css:6:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `projection`
+  
+    4 │ @import url("chrome://communicator/skin/");
+    5 │ @import "common.css" screen, projection;
+  > 6 │ @import "common.css" screen projection;
+      │                             ^^^^^^^^^^
+    7 │ @import url('landscape.css') screen and (orientation:landscape);
+    8 │ 
+  
+  i Remove projection
+  
+import.css:42:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    41 │ @import url('foo');
+  > 42 │ $dir: 'fonts';
+       │       ^^^^^^^
+    43 │ 
+    44 │ @import url("foo.css");
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
+  
+import.css:42:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    41 │ @import url('foo');
+  > 42 │ $dir: 'fonts';
+       │              ^
+    43 │ 
+    44 │ @import url("foo.css");
+  
+  i Remove ;
+  
+import.css:62:91 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `tv`
+  
+    60 │   tv;
+    61 │ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
+  > 62 │ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+       │                                                                                           ^^
+    63 │ @import url('landscape.css') screen and (orientation:landscape);
+    64 │ @import url("http://fonts.googleapis.com/css?family=#{$family}");
+  
+  i Remove tv
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   56: @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
+   57: @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+```
+
+

@@ -1,0 +1,17 @@
+-Option/root .public/section ~ .public/section:before {
+}
+
+.x .y {
+}
+.x > .y {
+}
+.x ~ .y {
+}
+.x + .y {
+}
+.x.y {
+}
+.x .y {
+}
+.x .y {
+}

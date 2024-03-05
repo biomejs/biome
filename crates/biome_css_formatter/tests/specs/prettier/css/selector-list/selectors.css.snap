@@ -1,0 +1,2170 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selector-list/selectors.css
+---
+
+# Input
+
+```css
+.a,.b,.c {}
+.r { &, &:hover {} }
+
+@media (min-width: 0px) {
+  .a,.b,:not(asdasldaskdhjkashdahsdkjahskdjhakj,asdasldaskdhjkashdahsdkjahskdjhakj) {color: red}
+}
+
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {}
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+{}
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+
+{}
+
+.parent,.another-parent{}
+.parent ,.another-parent{}
+.parent, .another-parent{}
+.parent , .another-parent {}
+.parent  ,  .another-parent  {}
+.parent
+,
+.another-parent
+{}
+
+.parent.child {}
+.parent .child {}
+.parent  .child {}
+.parent {
+  .child-one {}
+  .child-two {}
+}
+.parent{
+.child-one  {}
+.child-two  {}
+}
+.parent  {
+  .child-one  {}
+  .child-two  {}
+}
+.parent   {
+   .child-one  {}
+   .child-two  {}
+}
+.parent
+{
+  .child-one
+  {}
+  .child-two
+  {}
+}
+.parent
+
+{
+  .child-one
+
+  {}
+  .child-two
+
+  {}
+}
+
+.parent>.child {}
+.parent > .child {}
+.parent  >  .child {}
+.parent>{
+  .child-one {}
+  .child-two {}
+}
+.parent > {
+  .child-one {}
+  .child-two {}
+}
+.parent  >  {
+  .child-one {}
+  .child-two {}
+}
+.parent
+>
+{
+  .child-one
+  {}
+  .child-two
+  {}
+}
+.parent
+
+>
+
+{
+  .child-one
+
+  {}
+  .child-two
+
+  {}
+}
+.parent {
+>.child-one {}
+>.child-two {}
+}
+.parent {
+ > .child-one {}
+ > .child-two {}
+}
+.parent {
+  > .child-one {}
+  > .child-two {}
+}
+.parent {
+  >  .child-one {}
+  >  .child-two {}
+}
+.parent {
+   >   .child-one {}
+   >   .child-two {}
+}
+
+.parent+.child {}
+.parent + .child {}
+.parent  +  .child {}
+.parent+{
+  .child-one {}
+  .child-two {}
+}
+.parent + {
+  .child-one {}
+  .child-two {}
+}
+.parent  +  {
+  .child-one {}
+  .child-two {}
+}
+.parent
++
+{
+  .child-one
+  {}
+  .child-two
+  {}
+}
+.parent
+
++
+
+{
+  .child-one
+
+  {}
+  .child-two
+
+  {}
+}
+.parent {
++.child-one {}
++.child-two {}
+}
+.parent {
+ + .child-one {}
+ + .child-two {}
+}
+.parent {
+  + .child-one {}
+  + .child-two {}
+}
+.parent {
+  +  .child-one {}
+  +  .child-two {}
+}
+.parent {
+   +   .child-one {}
+   +   .child-two {}
+}
+
+.parent~.child {}
+.parent ~ .child {}
+.parent  ~  .child {}
+.parent~{
+  .child-one {}
+  .child-two {}
+}
+.parent ~ {
+  .child-one {}
+  .child-two {}
+}
+.parent  ~  {
+  .child-one {}
+  .child-two {}
+}
+.parent
+~
+{
+  .child-one
+  {}
+  .child-two
+  {}
+}
+.parent
+
+~
+
+{
+  .child-one
+
+  {}
+  .child-two
+
+  {}
+}
+.parent {
+~.child-one {}
+~.child-two {}
+}
+.parent {
+ ~ .child-one {}
+ ~ .child-two {}
+}
+.parent {
+  ~ .child-one {}
+  ~ .child-two {}
+}
+.parent {
+  ~  .child-one {}
+  ~  .child-two {}
+}
+.parent {
+   ~   .child-one {}
+   ~   .child-two {}
+}
+
+.parent>>>.child {}
+.parent >>> .child {}
+.parent  >>>  .child {}
+.parent>>>{
+  .child-one {}
+  .child-two {}
+}
+.parent >>> {
+  .child-one {}
+  .child-two {}
+}
+.parent  >>>  {
+  .child-one {}
+  .child-two {}
+}
+.parent
+>>>
+{
+  .child-one
+  {}
+  .child-two
+  {}
+}
+.parent
+
+>>>
+
+{
+  .child-one
+
+  {}
+  .child-two
+
+  {}
+}
+.parent {
+>>>.child-one {}
+>>>.child-two {}
+}
+.parent {
+ >>> .child-one {}
+ >>> .child-two {}
+}
+.parent {
+  >>> .child-one {}
+  >>> .child-two {}
+}
+.parent {
+  >>>  .child-one {}
+  >>>  .child-two {}
+}
+.parent {
+   >>>   .child-one {}
+   >>>   .child-two {}
+}
+
+/* This matches all XHTML <a> elements, as XHTML is the default unprefixed namespace */
+a {}
+
+/* This matches all SVG <a> elements */
+svg|a {}
+
+/* This matches both XHTML and SVG <a> elements */
+*|a {}
+
+|B {}
+
+ns|* {}
+
+*|* {}
+
+|* {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -21,15 +21,11 @@
+ .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+   .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
+ }
+-.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+-  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+-.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+-  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
++.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
++.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
+ }
+-.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+-  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+-.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+-  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
++.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
++.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
+ }
+ 
+ .parent,
+@@ -100,35 +96,37 @@
+ }
+ .parent > .child {
+ }
+-.parent > {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent>{
++  .child-one {}
++  .child-two {}
+ }
+ .parent > {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++  .child-one {}
++  .child-two {}
+ }
+-.parent > {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent  >  {
++  .child-one {}
++  .child-two {}
+ }
+-.parent > {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent
++>
++{
++  .child-one
++  {}
++  .child-two
++  {}
+ }
+-.parent > {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent
++
++>
++
++{
++  .child-one
++
++  {}
++  .child-two
++
++  {}
+ }
+ .parent {
+   > .child-one {
+@@ -167,35 +165,37 @@
+ }
+ .parent + .child {
+ }
+-.parent + {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent+{
++  .child-one {}
++  .child-two {}
+ }
+ .parent + {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++  .child-one {}
++  .child-two {}
+ }
+-.parent + {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent  +  {
++  .child-one {}
++  .child-two {}
+ }
+-.parent + {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent
+++
++{
++  .child-one
++  {}
++  .child-two
++  {}
+ }
+-.parent + {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent
++
+++
++
++{
++  .child-one
++
++  {}
++  .child-two
++
++  {}
+ }
+ .parent {
+   + .child-one {
+@@ -234,35 +234,37 @@
+ }
+ .parent ~ .child {
+ }
+-.parent ~ {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent~{
++  .child-one {}
++  .child-two {}
+ }
+ .parent ~ {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++  .child-one {}
++  .child-two {}
+ }
+-.parent ~ {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent  ~  {
++  .child-one {}
++  .child-two {}
+ }
+-.parent ~ {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent
++~
++{
++  .child-one
++  {}
++  .child-two
++  {}
+ }
+-.parent ~ {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent
++
++~
++
++{
++  .child-one
++
++  {}
++  .child-two
++
++  {}
+ }
+ .parent {
+   ~ .child-one {
+@@ -295,71 +297,60 @@
+   }
+ }
+ 
+-.parent >>> .child {
+-}
+-.parent >>> .child {
++.parent>>>.child {}
++.parent >>> .child {}
++.parent  >>>  .child {}
++.parent>>>{
++  .child-one {}
++  .child-two {}
+ }
+-.parent >>> .child {
+-}
+ .parent >>> {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++  .child-one {}
++  .child-two {}
+ }
+-.parent >>> {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent  >>>  {
++  .child-one {}
++  .child-two {}
+ }
+-.parent >>> {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent
++>>>
++{
++  .child-one
++  {}
++  .child-two
++  {}
+ }
+-.parent >>> {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
+-}
+-.parent >>> {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
++.parent
++
++>>>
++
++{
++  .child-one
++
++  {}
++  .child-two
++
++  {}
+ }
+ .parent {
+-  >>> .child-one {
+-  }
+-  >>> .child-two {
+-  }
++  >>>.child-one {}
++  >>>.child-two {}
+ }
+ .parent {
+-  >>> .child-one {
+-  }
+-  >>> .child-two {
+-  }
++  >>> .child-one {}
++  >>> .child-two {}
+ }
+ .parent {
+-  >>> .child-one {
+-  }
+-  >>> .child-two {
+-  }
++  >>> .child-one {}
++  >>> .child-two {}
+ }
+ .parent {
+-  >>> .child-one {
+-  }
+-  >>> .child-two {
+-  }
++  >>>  .child-one {}
++  >>>  .child-two {}
+ }
+ .parent {
+-  >>> .child-one {
+-  }
+-  >>> .child-two {
+-  }
++  >>>   .child-one {}
++  >>>   .child-two {}
+ }
+ 
+ /* This matches all XHTML <a> elements, as XHTML is the default unprefixed namespace */
+@@ -374,7 +365,7 @@
+ *|a {
+ }
+ 
+-|B {
++|b {
+ }
+ 
+ ns|* {
+```
+
+# Output
+
+```css
+.a,
+.b,
+.c {
+}
+.r {
+  &,
+  &:hover {
+  }
+}
+
+@media (min-width: 0px) {
+  .a,
+  .b,
+  :not(asdasldaskdhjkashdahsdkjahskdjhakj, asdasldaskdhjkashdahsdkjahskdjhakj) {
+    color: red;
+  }
+}
+
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
+}
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
+}
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
+}
+
+.parent,
+.another-parent {
+}
+.parent,
+.another-parent {
+}
+.parent,
+.another-parent {
+}
+.parent,
+.another-parent {
+}
+.parent,
+.another-parent {
+}
+.parent,
+.another-parent {
+}
+
+.parent.child {
+}
+.parent .child {
+}
+.parent .child {
+}
+.parent {
+  .child-one {
+  }
+  .child-two {
+  }
+}
+.parent {
+  .child-one {
+  }
+  .child-two {
+  }
+}
+.parent {
+  .child-one {
+  }
+  .child-two {
+  }
+}
+.parent {
+  .child-one {
+  }
+  .child-two {
+  }
+}
+.parent {
+  .child-one {
+  }
+  .child-two {
+  }
+}
+.parent {
+  .child-one {
+  }
+  .child-two {
+  }
+}
+
+.parent > .child {
+}
+.parent > .child {
+}
+.parent > .child {
+}
+.parent>{
+  .child-one {}
+  .child-two {}
+}
+.parent > {
+  .child-one {}
+  .child-two {}
+}
+.parent  >  {
+  .child-one {}
+  .child-two {}
+}
+.parent
+>
+{
+  .child-one
+  {}
+  .child-two
+  {}
+}
+.parent
+
+>
+
+{
+  .child-one
+
+  {}
+  .child-two
+
+  {}
+}
+.parent {
+  > .child-one {
+  }
+  > .child-two {
+  }
+}
+.parent {
+  > .child-one {
+  }
+  > .child-two {
+  }
+}
+.parent {
+  > .child-one {
+  }
+  > .child-two {
+  }
+}
+.parent {
+  > .child-one {
+  }
+  > .child-two {
+  }
+}
+.parent {
+  > .child-one {
+  }
+  > .child-two {
+  }
+}
+
+.parent + .child {
+}
+.parent + .child {
+}
+.parent + .child {
+}
+.parent+{
+  .child-one {}
+  .child-two {}
+}
+.parent + {
+  .child-one {}
+  .child-two {}
+}
+.parent  +  {
+  .child-one {}
+  .child-two {}
+}
+.parent
++
+{
+  .child-one
+  {}
+  .child-two
+  {}
+}
+.parent
+
++
+
+{
+  .child-one
+
+  {}
+  .child-two
+
+  {}
+}
+.parent {
+  + .child-one {
+  }
+  + .child-two {
+  }
+}
+.parent {
+  + .child-one {
+  }
+  + .child-two {
+  }
+}
+.parent {
+  + .child-one {
+  }
+  + .child-two {
+  }
+}
+.parent {
+  + .child-one {
+  }
+  + .child-two {
+  }
+}
+.parent {
+  + .child-one {
+  }
+  + .child-two {
+  }
+}
+
+.parent ~ .child {
+}
+.parent ~ .child {
+}
+.parent ~ .child {
+}
+.parent~{
+  .child-one {}
+  .child-two {}
+}
+.parent ~ {
+  .child-one {}
+  .child-two {}
+}
+.parent  ~  {
+  .child-one {}
+  .child-two {}
+}
+.parent
+~
+{
+  .child-one
+  {}
+  .child-two
+  {}
+}
+.parent
+
+~
+
+{
+  .child-one
+
+  {}
+  .child-two
+
+  {}
+}
+.parent {
+  ~ .child-one {
+  }
+  ~ .child-two {
+  }
+}
+.parent {
+  ~ .child-one {
+  }
+  ~ .child-two {
+  }
+}
+.parent {
+  ~ .child-one {
+  }
+  ~ .child-two {
+  }
+}
+.parent {
+  ~ .child-one {
+  }
+  ~ .child-two {
+  }
+}
+.parent {
+  ~ .child-one {
+  }
+  ~ .child-two {
+  }
+}
+
+.parent>>>.child {}
+.parent >>> .child {}
+.parent  >>>  .child {}
+.parent>>>{
+  .child-one {}
+  .child-two {}
+}
+.parent >>> {
+  .child-one {}
+  .child-two {}
+}
+.parent  >>>  {
+  .child-one {}
+  .child-two {}
+}
+.parent
+>>>
+{
+  .child-one
+  {}
+  .child-two
+  {}
+}
+.parent
+
+>>>
+
+{
+  .child-one
+
+  {}
+  .child-two
+
+  {}
+}
+.parent {
+  >>>.child-one {}
+  >>>.child-two {}
+}
+.parent {
+  >>> .child-one {}
+  >>> .child-two {}
+}
+.parent {
+  >>> .child-one {}
+  >>> .child-two {}
+}
+.parent {
+  >>>  .child-one {}
+  >>>  .child-two {}
+}
+.parent {
+  >>>   .child-one {}
+  >>>   .child-two {}
+}
+
+/* This matches all XHTML <a> elements, as XHTML is the default unprefixed namespace */
+a {
+}
+
+/* This matches all SVG <a> elements */
+svg|a {
+}
+
+/* This matches both XHTML and SVG <a> elements */
+*|a {
+}
+
+|b {
+}
+
+ns|* {
+}
+
+*|* {
+}
+
+|* {
+}
+```
+
+# Errors
+```
+selectors.css:75:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    73 │ .parent > .child {}
+    74 │ .parent  >  .child {}
+  > 75 │ .parent>{
+       │         ^
+    76 │   .child-one {}
+    77 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    73 │ .parent > .child {}
+    74 │ .parent  >  .child {}
+  > 75 │ .parent>{
+       │         ^
+    76 │   .child-one {}
+    77 │   .child-two {}
+  
+selectors.css:79:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    77 │   .child-two {}
+    78 │ }
+  > 79 │ .parent > {
+       │           ^
+    80 │   .child-one {}
+    81 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    77 │   .child-two {}
+    78 │ }
+  > 79 │ .parent > {
+       │           ^
+    80 │   .child-one {}
+    81 │   .child-two {}
+  
+selectors.css:83:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    81 │   .child-two {}
+    82 │ }
+  > 83 │ .parent  >  {
+       │             ^
+    84 │   .child-one {}
+    85 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    81 │   .child-two {}
+    82 │ }
+  > 83 │ .parent  >  {
+       │             ^
+    84 │   .child-one {}
+    85 │   .child-two {}
+  
+selectors.css:89:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    87 │ .parent
+    88 │ >
+  > 89 │ {
+       │ ^
+    90 │   .child-one
+    91 │   {}
+  
+  i Expected a compound selector here.
+  
+    87 │ .parent
+    88 │ >
+  > 89 │ {
+       │ ^
+    90 │   .child-one
+    91 │   {}
+  
+selectors.css:99:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+     97 │ >
+     98 │ 
+   > 99 │ {
+        │ ^
+    100 │   .child-one
+    101 │ 
+  
+  i Expected a compound selector here.
+  
+     97 │ >
+     98 │ 
+   > 99 │ {
+        │ ^
+    100 │   .child-one
+    101 │ 
+  
+selectors.css:131:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    129 │ .parent + .child {}
+    130 │ .parent  +  .child {}
+  > 131 │ .parent+{
+        │         ^
+    132 │   .child-one {}
+    133 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    129 │ .parent + .child {}
+    130 │ .parent  +  .child {}
+  > 131 │ .parent+{
+        │         ^
+    132 │   .child-one {}
+    133 │   .child-two {}
+  
+selectors.css:135:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    133 │   .child-two {}
+    134 │ }
+  > 135 │ .parent + {
+        │           ^
+    136 │   .child-one {}
+    137 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    133 │   .child-two {}
+    134 │ }
+  > 135 │ .parent + {
+        │           ^
+    136 │   .child-one {}
+    137 │   .child-two {}
+  
+selectors.css:139:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    137 │   .child-two {}
+    138 │ }
+  > 139 │ .parent  +  {
+        │             ^
+    140 │   .child-one {}
+    141 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    137 │   .child-two {}
+    138 │ }
+  > 139 │ .parent  +  {
+        │             ^
+    140 │   .child-one {}
+    141 │   .child-two {}
+  
+selectors.css:145:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    143 │ .parent
+    144 │ +
+  > 145 │ {
+        │ ^
+    146 │   .child-one
+    147 │   {}
+  
+  i Expected a compound selector here.
+  
+    143 │ .parent
+    144 │ +
+  > 145 │ {
+        │ ^
+    146 │   .child-one
+    147 │   {}
+  
+selectors.css:155:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    153 │ +
+    154 │ 
+  > 155 │ {
+        │ ^
+    156 │   .child-one
+    157 │ 
+  
+  i Expected a compound selector here.
+  
+    153 │ +
+    154 │ 
+  > 155 │ {
+        │ ^
+    156 │   .child-one
+    157 │ 
+  
+selectors.css:187:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    185 │ .parent ~ .child {}
+    186 │ .parent  ~  .child {}
+  > 187 │ .parent~{
+        │         ^
+    188 │   .child-one {}
+    189 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    185 │ .parent ~ .child {}
+    186 │ .parent  ~  .child {}
+  > 187 │ .parent~{
+        │         ^
+    188 │   .child-one {}
+    189 │   .child-two {}
+  
+selectors.css:191:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    189 │   .child-two {}
+    190 │ }
+  > 191 │ .parent ~ {
+        │           ^
+    192 │   .child-one {}
+    193 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    189 │   .child-two {}
+    190 │ }
+  > 191 │ .parent ~ {
+        │           ^
+    192 │   .child-one {}
+    193 │   .child-two {}
+  
+selectors.css:195:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    193 │   .child-two {}
+    194 │ }
+  > 195 │ .parent  ~  {
+        │             ^
+    196 │   .child-one {}
+    197 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    193 │   .child-two {}
+    194 │ }
+  > 195 │ .parent  ~  {
+        │             ^
+    196 │   .child-one {}
+    197 │   .child-two {}
+  
+selectors.css:201:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    199 │ .parent
+    200 │ ~
+  > 201 │ {
+        │ ^
+    202 │   .child-one
+    203 │   {}
+  
+  i Expected a compound selector here.
+  
+    199 │ .parent
+    200 │ ~
+  > 201 │ {
+        │ ^
+    202 │   .child-one
+    203 │   {}
+  
+selectors.css:211:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    209 │ ~
+    210 │ 
+  > 211 │ {
+        │ ^
+    212 │   .child-one
+    213 │ 
+  
+  i Expected a compound selector here.
+  
+    209 │ ~
+    210 │ 
+  > 211 │ {
+        │ ^
+    212 │   .child-one
+    213 │ 
+  
+selectors.css:240:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    238 │ }
+    239 │ 
+  > 240 │ .parent>>>.child {}
+        │         ^
+    241 │ .parent >>> .child {}
+    242 │ .parent  >>>  .child {}
+  
+  i Expected a compound selector here.
+  
+    238 │ }
+    239 │ 
+  > 240 │ .parent>>>.child {}
+        │         ^
+    241 │ .parent >>> .child {}
+    242 │ .parent  >>>  .child {}
+  
+selectors.css:240:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    238 │ }
+    239 │ 
+  > 240 │ .parent>>>.child {}
+        │          ^
+    241 │ .parent >>> .child {}
+    242 │ .parent  >>>  .child {}
+  
+  i Expected a compound selector here.
+  
+    238 │ }
+    239 │ 
+  > 240 │ .parent>>>.child {}
+        │          ^
+    241 │ .parent >>> .child {}
+    242 │ .parent  >>>  .child {}
+  
+selectors.css:241:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    240 │ .parent>>>.child {}
+  > 241 │ .parent >>> .child {}
+        │          ^
+    242 │ .parent  >>>  .child {}
+    243 │ .parent>>>{
+  
+  i Expected a compound selector here.
+  
+    240 │ .parent>>>.child {}
+  > 241 │ .parent >>> .child {}
+        │          ^
+    242 │ .parent  >>>  .child {}
+    243 │ .parent>>>{
+  
+selectors.css:241:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    240 │ .parent>>>.child {}
+  > 241 │ .parent >>> .child {}
+        │           ^
+    242 │ .parent  >>>  .child {}
+    243 │ .parent>>>{
+  
+  i Expected a compound selector here.
+  
+    240 │ .parent>>>.child {}
+  > 241 │ .parent >>> .child {}
+        │           ^
+    242 │ .parent  >>>  .child {}
+    243 │ .parent>>>{
+  
+selectors.css:242:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    240 │ .parent>>>.child {}
+    241 │ .parent >>> .child {}
+  > 242 │ .parent  >>>  .child {}
+        │           ^
+    243 │ .parent>>>{
+    244 │   .child-one {}
+  
+  i Expected a compound selector here.
+  
+    240 │ .parent>>>.child {}
+    241 │ .parent >>> .child {}
+  > 242 │ .parent  >>>  .child {}
+        │           ^
+    243 │ .parent>>>{
+    244 │   .child-one {}
+  
+selectors.css:242:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    240 │ .parent>>>.child {}
+    241 │ .parent >>> .child {}
+  > 242 │ .parent  >>>  .child {}
+        │            ^
+    243 │ .parent>>>{
+    244 │   .child-one {}
+  
+  i Expected a compound selector here.
+  
+    240 │ .parent>>>.child {}
+    241 │ .parent >>> .child {}
+  > 242 │ .parent  >>>  .child {}
+        │            ^
+    243 │ .parent>>>{
+    244 │   .child-one {}
+  
+selectors.css:243:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    241 │ .parent >>> .child {}
+    242 │ .parent  >>>  .child {}
+  > 243 │ .parent>>>{
+        │         ^
+    244 │   .child-one {}
+    245 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    241 │ .parent >>> .child {}
+    242 │ .parent  >>>  .child {}
+  > 243 │ .parent>>>{
+        │         ^
+    244 │   .child-one {}
+    245 │   .child-two {}
+  
+selectors.css:243:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    241 │ .parent >>> .child {}
+    242 │ .parent  >>>  .child {}
+  > 243 │ .parent>>>{
+        │          ^
+    244 │   .child-one {}
+    245 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    241 │ .parent >>> .child {}
+    242 │ .parent  >>>  .child {}
+  > 243 │ .parent>>>{
+        │          ^
+    244 │   .child-one {}
+    245 │   .child-two {}
+  
+selectors.css:243:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    241 │ .parent >>> .child {}
+    242 │ .parent  >>>  .child {}
+  > 243 │ .parent>>>{
+        │           ^
+    244 │   .child-one {}
+    245 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    241 │ .parent >>> .child {}
+    242 │ .parent  >>>  .child {}
+  > 243 │ .parent>>>{
+        │           ^
+    244 │   .child-one {}
+    245 │   .child-two {}
+  
+selectors.css:247:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    245 │   .child-two {}
+    246 │ }
+  > 247 │ .parent >>> {
+        │          ^
+    248 │   .child-one {}
+    249 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    245 │   .child-two {}
+    246 │ }
+  > 247 │ .parent >>> {
+        │          ^
+    248 │   .child-one {}
+    249 │   .child-two {}
+  
+selectors.css:247:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    245 │   .child-two {}
+    246 │ }
+  > 247 │ .parent >>> {
+        │           ^
+    248 │   .child-one {}
+    249 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    245 │   .child-two {}
+    246 │ }
+  > 247 │ .parent >>> {
+        │           ^
+    248 │   .child-one {}
+    249 │   .child-two {}
+  
+selectors.css:247:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    245 │   .child-two {}
+    246 │ }
+  > 247 │ .parent >>> {
+        │             ^
+    248 │   .child-one {}
+    249 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    245 │   .child-two {}
+    246 │ }
+  > 247 │ .parent >>> {
+        │             ^
+    248 │   .child-one {}
+    249 │   .child-two {}
+  
+selectors.css:251:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    249 │   .child-two {}
+    250 │ }
+  > 251 │ .parent  >>>  {
+        │           ^
+    252 │   .child-one {}
+    253 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    249 │   .child-two {}
+    250 │ }
+  > 251 │ .parent  >>>  {
+        │           ^
+    252 │   .child-one {}
+    253 │   .child-two {}
+  
+selectors.css:251:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    249 │   .child-two {}
+    250 │ }
+  > 251 │ .parent  >>>  {
+        │            ^
+    252 │   .child-one {}
+    253 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    249 │   .child-two {}
+    250 │ }
+  > 251 │ .parent  >>>  {
+        │            ^
+    252 │   .child-one {}
+    253 │   .child-two {}
+  
+selectors.css:251:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    249 │   .child-two {}
+    250 │ }
+  > 251 │ .parent  >>>  {
+        │               ^
+    252 │   .child-one {}
+    253 │   .child-two {}
+  
+  i Expected a compound selector here.
+  
+    249 │   .child-two {}
+    250 │ }
+  > 251 │ .parent  >>>  {
+        │               ^
+    252 │   .child-one {}
+    253 │   .child-two {}
+  
+selectors.css:256:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    254 │ }
+    255 │ .parent
+  > 256 │ >>>
+        │  ^
+    257 │ {
+    258 │   .child-one
+  
+  i Expected a compound selector here.
+  
+    254 │ }
+    255 │ .parent
+  > 256 │ >>>
+        │  ^
+    257 │ {
+    258 │   .child-one
+  
+selectors.css:256:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    254 │ }
+    255 │ .parent
+  > 256 │ >>>
+        │   ^
+    257 │ {
+    258 │   .child-one
+  
+  i Expected a compound selector here.
+  
+    254 │ }
+    255 │ .parent
+  > 256 │ >>>
+        │   ^
+    257 │ {
+    258 │   .child-one
+  
+selectors.css:257:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    255 │ .parent
+    256 │ >>>
+  > 257 │ {
+        │ ^
+    258 │   .child-one
+    259 │   {}
+  
+  i Expected a compound selector here.
+  
+    255 │ .parent
+    256 │ >>>
+  > 257 │ {
+        │ ^
+    258 │   .child-one
+    259 │   {}
+  
+selectors.css:265:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    263 │ .parent
+    264 │ 
+  > 265 │ >>>
+        │  ^
+    266 │ 
+    267 │ {
+  
+  i Expected a compound selector here.
+  
+    263 │ .parent
+    264 │ 
+  > 265 │ >>>
+        │  ^
+    266 │ 
+    267 │ {
+  
+selectors.css:265:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '>'.
+  
+    263 │ .parent
+    264 │ 
+  > 265 │ >>>
+        │   ^
+    266 │ 
+    267 │ {
+  
+  i Expected a compound selector here.
+  
+    263 │ .parent
+    264 │ 
+  > 265 │ >>>
+        │   ^
+    266 │ 
+    267 │ {
+  
+selectors.css:267:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    265 │ >>>
+    266 │ 
+  > 267 │ {
+        │ ^
+    268 │   .child-one
+    269 │ 
+  
+  i Expected a compound selector here.
+  
+    265 │ >>>
+    266 │ 
+  > 267 │ {
+        │ ^
+    268 │   .child-one
+    269 │ 
+  
+selectors.css:276:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    274 │ }
+    275 │ .parent {
+  > 276 │ >>>.child-one {}
+        │  ^
+    277 │ >>>.child-two {}
+    278 │ }
+  
+  i Expected a relative selector here.
+  
+    274 │ }
+    275 │ .parent {
+  > 276 │ >>>.child-one {}
+        │  ^
+    277 │ >>>.child-two {}
+    278 │ }
+  
+selectors.css:276:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    274 │ }
+    275 │ .parent {
+  > 276 │ >>>.child-one {}
+        │   ^
+    277 │ >>>.child-two {}
+    278 │ }
+  
+  i Expected a relative selector here.
+  
+    274 │ }
+    275 │ .parent {
+  > 276 │ >>>.child-one {}
+        │   ^
+    277 │ >>>.child-two {}
+    278 │ }
+  
+selectors.css:277:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    275 │ .parent {
+    276 │ >>>.child-one {}
+  > 277 │ >>>.child-two {}
+        │  ^
+    278 │ }
+    279 │ .parent {
+  
+  i Expected a relative selector here.
+  
+    275 │ .parent {
+    276 │ >>>.child-one {}
+  > 277 │ >>>.child-two {}
+        │  ^
+    278 │ }
+    279 │ .parent {
+  
+selectors.css:277:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    275 │ .parent {
+    276 │ >>>.child-one {}
+  > 277 │ >>>.child-two {}
+        │   ^
+    278 │ }
+    279 │ .parent {
+  
+  i Expected a relative selector here.
+  
+    275 │ .parent {
+    276 │ >>>.child-one {}
+  > 277 │ >>>.child-two {}
+        │   ^
+    278 │ }
+    279 │ .parent {
+  
+selectors.css:280:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    278 │ }
+    279 │ .parent {
+  > 280 │  >>> .child-one {}
+        │   ^
+    281 │  >>> .child-two {}
+    282 │ }
+  
+  i Expected a relative selector here.
+  
+    278 │ }
+    279 │ .parent {
+  > 280 │  >>> .child-one {}
+        │   ^
+    281 │  >>> .child-two {}
+    282 │ }
+  
+selectors.css:280:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    278 │ }
+    279 │ .parent {
+  > 280 │  >>> .child-one {}
+        │    ^
+    281 │  >>> .child-two {}
+    282 │ }
+  
+  i Expected a relative selector here.
+  
+    278 │ }
+    279 │ .parent {
+  > 280 │  >>> .child-one {}
+        │    ^
+    281 │  >>> .child-two {}
+    282 │ }
+  
+selectors.css:281:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    279 │ .parent {
+    280 │  >>> .child-one {}
+  > 281 │  >>> .child-two {}
+        │   ^
+    282 │ }
+    283 │ .parent {
+  
+  i Expected a relative selector here.
+  
+    279 │ .parent {
+    280 │  >>> .child-one {}
+  > 281 │  >>> .child-two {}
+        │   ^
+    282 │ }
+    283 │ .parent {
+  
+selectors.css:281:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    279 │ .parent {
+    280 │  >>> .child-one {}
+  > 281 │  >>> .child-two {}
+        │    ^
+    282 │ }
+    283 │ .parent {
+  
+  i Expected a relative selector here.
+  
+    279 │ .parent {
+    280 │  >>> .child-one {}
+  > 281 │  >>> .child-two {}
+        │    ^
+    282 │ }
+    283 │ .parent {
+  
+selectors.css:284:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    282 │ }
+    283 │ .parent {
+  > 284 │   >>> .child-one {}
+        │    ^
+    285 │   >>> .child-two {}
+    286 │ }
+  
+  i Expected a relative selector here.
+  
+    282 │ }
+    283 │ .parent {
+  > 284 │   >>> .child-one {}
+        │    ^
+    285 │   >>> .child-two {}
+    286 │ }
+  
+selectors.css:284:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    282 │ }
+    283 │ .parent {
+  > 284 │   >>> .child-one {}
+        │     ^
+    285 │   >>> .child-two {}
+    286 │ }
+  
+  i Expected a relative selector here.
+  
+    282 │ }
+    283 │ .parent {
+  > 284 │   >>> .child-one {}
+        │     ^
+    285 │   >>> .child-two {}
+    286 │ }
+  
+selectors.css:285:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    283 │ .parent {
+    284 │   >>> .child-one {}
+  > 285 │   >>> .child-two {}
+        │    ^
+    286 │ }
+    287 │ .parent {
+  
+  i Expected a relative selector here.
+  
+    283 │ .parent {
+    284 │   >>> .child-one {}
+  > 285 │   >>> .child-two {}
+        │    ^
+    286 │ }
+    287 │ .parent {
+  
+selectors.css:285:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    283 │ .parent {
+    284 │   >>> .child-one {}
+  > 285 │   >>> .child-two {}
+        │     ^
+    286 │ }
+    287 │ .parent {
+  
+  i Expected a relative selector here.
+  
+    283 │ .parent {
+    284 │   >>> .child-one {}
+  > 285 │   >>> .child-two {}
+        │     ^
+    286 │ }
+    287 │ .parent {
+  
+selectors.css:288:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    286 │ }
+    287 │ .parent {
+  > 288 │   >>>  .child-one {}
+        │    ^
+    289 │   >>>  .child-two {}
+    290 │ }
+  
+  i Expected a relative selector here.
+  
+    286 │ }
+    287 │ .parent {
+  > 288 │   >>>  .child-one {}
+        │    ^
+    289 │   >>>  .child-two {}
+    290 │ }
+  
+selectors.css:288:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    286 │ }
+    287 │ .parent {
+  > 288 │   >>>  .child-one {}
+        │     ^
+    289 │   >>>  .child-two {}
+    290 │ }
+  
+  i Expected a relative selector here.
+  
+    286 │ }
+    287 │ .parent {
+  > 288 │   >>>  .child-one {}
+        │     ^
+    289 │   >>>  .child-two {}
+    290 │ }
+  
+selectors.css:289:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    287 │ .parent {
+    288 │   >>>  .child-one {}
+  > 289 │   >>>  .child-two {}
+        │    ^
+    290 │ }
+    291 │ .parent {
+  
+  i Expected a relative selector here.
+  
+    287 │ .parent {
+    288 │   >>>  .child-one {}
+  > 289 │   >>>  .child-two {}
+        │    ^
+    290 │ }
+    291 │ .parent {
+  
+selectors.css:289:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    287 │ .parent {
+    288 │   >>>  .child-one {}
+  > 289 │   >>>  .child-two {}
+        │     ^
+    290 │ }
+    291 │ .parent {
+  
+  i Expected a relative selector here.
+  
+    287 │ .parent {
+    288 │   >>>  .child-one {}
+  > 289 │   >>>  .child-two {}
+        │     ^
+    290 │ }
+    291 │ .parent {
+  
+selectors.css:292:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    290 │ }
+    291 │ .parent {
+  > 292 │    >>>   .child-one {}
+        │     ^
+    293 │    >>>   .child-two {}
+    294 │ }
+  
+  i Expected a relative selector here.
+  
+    290 │ }
+    291 │ .parent {
+  > 292 │    >>>   .child-one {}
+        │     ^
+    293 │    >>>   .child-two {}
+    294 │ }
+  
+selectors.css:292:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    290 │ }
+    291 │ .parent {
+  > 292 │    >>>   .child-one {}
+        │      ^
+    293 │    >>>   .child-two {}
+    294 │ }
+  
+  i Expected a relative selector here.
+  
+    290 │ }
+    291 │ .parent {
+  > 292 │    >>>   .child-one {}
+        │      ^
+    293 │    >>>   .child-two {}
+    294 │ }
+  
+selectors.css:293:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    291 │ .parent {
+    292 │    >>>   .child-one {}
+  > 293 │    >>>   .child-two {}
+        │     ^
+    294 │ }
+    295 │ 
+  
+  i Expected a relative selector here.
+  
+    291 │ .parent {
+    292 │    >>>   .child-one {}
+  > 293 │    >>>   .child-two {}
+        │     ^
+    294 │ }
+    295 │ 
+  
+selectors.css:293:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '>'.
+  
+    291 │ .parent {
+    292 │    >>>   .child-one {}
+  > 293 │    >>>   .child-two {}
+        │      ^
+    294 │ }
+    295 │ 
+  
+  i Expected a relative selector here.
+  
+    291 │ .parent {
+    292 │    >>>   .child-one {}
+  > 293 │    >>>   .child-two {}
+        │      ^
+    294 │ }
+    295 │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   24: .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+   25: .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
+   27: .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+   28: .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
+  356: /* This matches all XHTML <a> elements, as XHTML is the default unprefixed namespace */
+```
+
+

@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/range/issue2267.css
+---
+
+# Input
+
+```css
+.x{} 
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,2 @@
+-.x{} 
++.x {
++}
+```
+
+# Output
+
+```css
+.x {
+}
+```
+
+

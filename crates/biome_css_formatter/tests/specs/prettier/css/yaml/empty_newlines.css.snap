@@ -1,0 +1,86 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/yaml/empty_newlines.css
+---
+
+# Input
+
+```css
+---
+
+
+
+---
+
+
+
+a {
+    color: red;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,7 @@
+ ---
++
++
++
+ ---
+ 
+ a {
+```
+
+# Output
+
+```css
+---
+
+
+
+---
+
+a {
+  color: red;
+}
+```
+
+# Errors
+```
+empty_newlines.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '---
+    
+    
+    
+    ---'.
+  
+  > 1 │ ---
+      │ ^^^
+  > 2 │ 
+  > 3 │ 
+  > 4 │ 
+  > 5 │ ---
+      │ ^^^
+    6 │ 
+  
+  i Expected a qualified rule, or an at rule here.
+  
+  > 1 │ ---
+      │ ^^^
+  > 2 │ 
+  > 3 │ 
+  > 4 │ 
+  > 5 │ ---
+      │ ^^^
+    6 │ 
+  
+
+```
+
+

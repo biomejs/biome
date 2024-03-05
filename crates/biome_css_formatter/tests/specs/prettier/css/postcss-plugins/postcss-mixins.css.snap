@@ -1,0 +1,631 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/postcss-plugins/postcss-mixins.css
+---
+
+# Input
+
+```css
+a {
+    @mixin $(theme)-colors;
+}
+
+@define-mixin icon $network, $color: blue {
+    .icon.is-$(network) {
+        color: $color;
+        @mixin-content;
+    }
+    .icon.is-$(network):hover {
+       color: white;
+       background: $color;
+   }
+}
+
+@mixin icon twitter {
+    background: url(twt.png);
+}
+@mixin icon youtube, red {
+    background: url(youtube.png);
+}
+
+.search {
+    @mixin icon search;
+}
+
+a {
+    color: black;
+    @mixin parent {
+        @mixin child;
+    }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,32 +1,32 @@
+ a {
+-  @mixin $(theme)-colors;
++    @mixin $(theme)-colors;
+ }
+ 
+ @define-mixin icon $network, $color: blue {
+-  .icon.is-$(network) {
+-    color: $color;
+-    @mixin-content;
+-  }
+-  .icon.is-$(network):hover {
+-    color: white;
+-    background: $color;
+-  }
++    .icon.is-$(network) {
++        color: $color;
++        @mixin-content;
++    }
++    .icon.is-$(network):hover {
++       color: white;
++       background: $color;
++   }
+ }
+ 
+ @mixin icon twitter {
+-  background: url(twt.png);
++    background: url(twt.png);
+ }
+ @mixin icon youtube, red {
+-  background: url(youtube.png);
++    background: url(youtube.png);
+ }
+ 
+ .search {
+-  @mixin icon search;
++    @mixin icon search;
+ }
+ 
+ a {
+-  color: black;
+-  @mixin parent {
+-    @mixin child;
+-  }
++    color: black;
++    @mixin parent {
++        @mixin child;
++    }
+ }
+```
+
+# Output
+
+```css
+a {
+    @mixin $(theme)-colors;
+}
+
+@define-mixin icon $network, $color: blue {
+    .icon.is-$(network) {
+        color: $color;
+        @mixin-content;
+    }
+    .icon.is-$(network):hover {
+       color: white;
+       background: $color;
+   }
+}
+
+@mixin icon twitter {
+    background: url(twt.png);
+}
+@mixin icon youtube, red {
+    background: url(youtube.png);
+}
+
+.search {
+    @mixin icon search;
+}
+
+a {
+    color: black;
+    @mixin parent {
+        @mixin child;
+    }
+}
+```
+
+# Errors
+```
+postcss-mixins.css:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ a {
+  > 2 │     @mixin $(theme)-colors;
+      │      ^^^^^
+    3 │ }
+    4 │ 
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+postcss-mixins.css:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+    1 │ a {
+  > 2 │     @mixin $(theme)-colors;
+      │             ^
+    3 │ }
+    4 │ 
+  
+  i Remove (
+  
+postcss-mixins.css:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `theme`
+  
+    1 │ a {
+  > 2 │     @mixin $(theme)-colors;
+      │              ^^^^^
+    3 │ }
+    4 │ 
+  
+  i Remove theme
+  
+postcss-mixins.css:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    1 │ a {
+  > 2 │     @mixin $(theme)-colors;
+      │                   ^
+    3 │ }
+    4 │ 
+  
+  i Remove )
+  
+postcss-mixins.css:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `-colors`
+  
+    1 │ a {
+  > 2 │     @mixin $(theme)-colors;
+      │                    ^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Remove -colors
+  
+postcss-mixins.css:2:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    1 │ a {
+  > 2 │     @mixin $(theme)-colors;
+      │                           ^
+    3 │ }
+    4 │ 
+  
+  i Remove ;
+  
+postcss-mixins.css:5:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `define-mixin`
+  
+    3 │ }
+    4 │ 
+  > 5 │ @define-mixin icon $network, $color: blue {
+      │  ^^^^^^^^^^^^
+    6 │     .icon.is-$(network) {
+    7 │         color: $color;
+  
+  i Remove define-mixin
+  
+postcss-mixins.css:6:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `$`
+  
+    5 │ @define-mixin icon $network, $color: blue {
+  > 6 │     .icon.is-$(network) {
+      │              ^
+    7 │         color: $color;
+    8 │         @mixin-content;
+  
+  i Remove $
+  
+postcss-mixins.css:6:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+    5 │ @define-mixin icon $network, $color: blue {
+  > 6 │     .icon.is-$(network) {
+      │               ^
+    7 │         color: $color;
+    8 │         @mixin-content;
+  
+  i Remove (
+  
+postcss-mixins.css:6:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `network`
+  
+    5 │ @define-mixin icon $network, $color: blue {
+  > 6 │     .icon.is-$(network) {
+      │                ^^^^^^^
+    7 │         color: $color;
+    8 │         @mixin-content;
+  
+  i Remove network
+  
+postcss-mixins.css:6:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    5 │ @define-mixin icon $network, $color: blue {
+  > 6 │     .icon.is-$(network) {
+      │                       ^
+    7 │         color: $color;
+    8 │         @mixin-content;
+  
+  i Remove )
+  
+postcss-mixins.css:8:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     6 │     .icon.is-$(network) {
+     7 │         color: $color;
+   > 8 │         @mixin-content;
+       │          ^^^^^^^^^^^^^
+     9 │     }
+    10 │     .icon.is-$(network):hover {
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+postcss-mixins.css:8:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+     6 │     .icon.is-$(network) {
+     7 │         color: $color;
+   > 8 │         @mixin-content;
+       │                       ^
+     9 │     }
+    10 │     .icon.is-$(network):hover {
+  
+  i Remove ;
+  
+postcss-mixins.css:10:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `.`
+  
+     8 │         @mixin-content;
+     9 │     }
+  > 10 │     .icon.is-$(network):hover {
+       │     ^
+    11 │        color: white;
+    12 │        background: $color;
+  
+  i Remove .
+  
+postcss-mixins.css:10:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `$`
+  
+     8 │         @mixin-content;
+     9 │     }
+  > 10 │     .icon.is-$(network):hover {
+       │              ^
+    11 │        color: white;
+    12 │        background: $color;
+  
+  i Remove $
+  
+postcss-mixins.css:10:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+     8 │         @mixin-content;
+     9 │     }
+  > 10 │     .icon.is-$(network):hover {
+       │               ^
+    11 │        color: white;
+    12 │        background: $color;
+  
+  i Remove (
+  
+postcss-mixins.css:10:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `network`
+  
+     8 │         @mixin-content;
+     9 │     }
+  > 10 │     .icon.is-$(network):hover {
+       │                ^^^^^^^
+    11 │        color: white;
+    12 │        background: $color;
+  
+  i Remove network
+  
+postcss-mixins.css:10:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+     8 │         @mixin-content;
+     9 │     }
+  > 10 │     .icon.is-$(network):hover {
+       │                       ^
+    11 │        color: white;
+    12 │        background: $color;
+  
+  i Remove )
+  
+postcss-mixins.css:10:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+     8 │         @mixin-content;
+     9 │     }
+  > 10 │     .icon.is-$(network):hover {
+       │                        ^
+    11 │        color: white;
+    12 │        background: $color;
+  
+  i Remove :
+  
+postcss-mixins.css:16:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    14 │ }
+    15 │ 
+  > 16 │ @mixin icon twitter {
+       │  ^^^^^
+    17 │     background: url(twt.png);
+    18 │ }
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+postcss-mixins.css:19:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    17 │     background: url(twt.png);
+    18 │ }
+  > 19 │ @mixin icon youtube, red {
+       │  ^^^^^
+    20 │     background: url(youtube.png);
+    21 │ }
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+postcss-mixins.css:24:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    23 │ .search {
+  > 24 │     @mixin icon search;
+       │      ^^^^^
+    25 │ }
+    26 │ 
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+postcss-mixins.css:24:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    23 │ .search {
+  > 24 │     @mixin icon search;
+       │                       ^
+    25 │ }
+    26 │ 
+  
+  i Remove ;
+  
+postcss-mixins.css:27:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `a`
+  
+    25 │ }
+    26 │ 
+  > 27 │ a {
+       │ ^
+    28 │     color: black;
+    29 │     @mixin parent {
+  
+  i Remove a
+  
+postcss-mixins.css:29:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    27 │ a {
+    28 │     color: black;
+  > 29 │     @mixin parent {
+       │      ^^^^^
+    30 │         @mixin child;
+    31 │     }
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+postcss-mixins.css:30:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    28 │     color: black;
+    29 │     @mixin parent {
+  > 30 │         @mixin child;
+       │          ^^^^^
+    31 │     }
+    32 │ }
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+postcss-mixins.css:30:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    28 │     color: black;
+    29 │     @mixin parent {
+  > 30 │         @mixin child;
+       │                     ^
+    31 │     }
+    32 │ }
+  
+  i Remove ;
+  
+postcss-mixins.css:33:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead the file ends
+  
+    31 │     }
+    32 │ }
+  > 33 │ 
+       │ 
+  
+  i the file ends here
+  
+    31 │     }
+    32 │ }
+  > 33 │ 
+       │ 
+  
+
+```
+
+
