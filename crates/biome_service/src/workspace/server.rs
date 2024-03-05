@@ -6,7 +6,7 @@ use super::{
     SupportsFeatureParams, UpdateProjectParams, UpdateSettingsParams,
 };
 use crate::file_handlers::{
-    Capabilities, CodeActionsParams, FixAllParams, Language, LintParams, ParseResult,
+    Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
@@ -24,10 +24,12 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
+use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::NodeJsProject;
 use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
+use indexmap::IndexSet;
 use std::borrow::Borrow;
 use std::ffi::OsStr;
 use std::path::Path;
@@ -49,6 +51,8 @@ pub(super) struct WorkspaceServer {
     manifests: DashMap<BiomePath, NodeJsProject>,
     /// The current focused project
     current_project_path: RwLock<Option<BiomePath>>,
+    /// Stores the document sources used across the workspace
+    file_sources: RwLock<IndexSet<DocumentFileSource>>,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross
@@ -63,7 +67,9 @@ impl RefUnwindSafe for WorkspaceServer {}
 pub(crate) struct Document {
     pub(crate) content: String,
     pub(crate) version: i32,
-    pub(crate) language_hint: Language,
+    /// The index of where the original file source is saved
+    /// Use `WorkspaceServer#file_sources` to retrieve the file source that belongs to the document.
+    pub(crate) file_source_index: usize,
     node_cache: NodeCache,
 }
 
@@ -82,6 +88,7 @@ impl WorkspaceServer {
             file_features: DashMap::default(),
             manifests: DashMap::default(),
             current_project_path: RwLock::default(),
+            file_sources: RwLock::default(),
         }
     }
 
@@ -91,18 +98,19 @@ impl WorkspaceServer {
 
     /// Get the supported capabilities for a given file path
     fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
-        let language = self.get_language(path);
+        let language = self.get_file_source(path);
 
         debug!("File capabilities: {:?} {:?}", &language, &path);
         self.features.get_capabilities(path, language)
     }
 
     /// Retrieves the supported language of a file
-    fn get_language(&self, path: &BiomePath) -> Language {
+    fn get_file_source(&self, path: &BiomePath) -> DocumentFileSource {
         self.documents
             .get(path)
-            .map(|doc| doc.language_hint)
-            .unwrap_or_default()
+            .map(|doc| doc.file_source_index)
+            .and_then(|index| self.file_sources.read().unwrap().get_index(index).copied())
+            .unwrap_or(DocumentFileSource::from_path(path))
     }
 
     /// Return an error factory function for unsupported features at a given path
@@ -112,13 +120,9 @@ impl WorkspaceServer {
         // feature_name: &'a str,
     ) -> impl FnOnce() -> WorkspaceError + 'a {
         move || {
-            let language_hint = self
-                .documents
-                .get(path)
-                .map(|doc| doc.language_hint)
-                .unwrap_or_default();
+            let file_source = self.get_file_source(path);
 
-            let language = Language::from_path_and_known_filename(path).or(language_hint);
+            let language = DocumentFileSource::from_path_and_known_filename(path).or(file_source);
             WorkspaceError::source_file_not_supported(
                 language,
                 path.clone().display().to_string(),
@@ -203,9 +207,13 @@ impl WorkspaceServer {
                 }
 
                 let settings = self.settings();
+                let mut file_sources = self.file_sources.write().unwrap();
+                let Some(file_source) = file_sources.get_index(document.file_source_index) else {
+                    return Err(WorkspaceError::not_found());
+                };
                 let parsed = parse(
                     biome_path,
-                    document.language_hint,
+                    *file_source,
                     document.content.as_str(),
                     settings,
                     &mut document.node_cache,
@@ -215,7 +223,8 @@ impl WorkspaceServer {
                     any_parse,
                 } = parsed;
                 if let Some(language) = language {
-                    document.language_hint = language
+                    let (index, _) = file_sources.insert_full(language);
+                    document.file_source_index = index;
                 }
                 Ok(entry.insert(any_parse).clone())
             }
@@ -301,7 +310,7 @@ impl Workspace for WorkspaceServer {
             }
             Entry::Vacant(entry) => {
                 let capabilities = self.get_file_capabilities(&params.path);
-                let language = Language::from_path_and_known_filename(&params.path);
+                let language = DocumentFileSource::from_path_and_known_filename(&params.path);
                 let path = params.path.as_path();
                 let settings = self.settings.read().unwrap();
                 let mut file_features = FileFeaturesResult::new();
@@ -311,8 +320,8 @@ impl Workspace for WorkspaceServer {
                     .with_settings_and_language(&settings, &language, path);
 
                 if settings.files.ignore_unknown
-                    && language == Language::Unknown
-                    && self.get_language(&params.path) == Language::Unknown
+                    && language == DocumentFileSource::Unknown
+                    && self.get_file_source(&params.path) == DocumentFileSource::Unknown
                 {
                     file_features.ignore_not_supported();
                 } else if file_name == Some(ConfigName::biome_json())
@@ -367,27 +376,35 @@ impl Workspace for WorkspaceServer {
 
     /// Add a new file to the workspace
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
+        let mut file_sources = self.file_sources.write().unwrap();
+        let (index, _) = file_sources.insert_full(
+            params
+                .document_file_source
+                .unwrap_or(DocumentFileSource::from_path(&params.path)),
+        );
         self.syntax.remove(&params.path);
         self.documents.insert(
             params.path,
             Document {
                 content: params.content,
                 version: params.version,
-                language_hint: params.language_hint,
                 node_cache: NodeCache::default(),
+                file_source_index: index,
             },
         );
         Ok(())
     }
 
     fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError> {
+        let mut file_sources = self.file_sources.write().unwrap();
+        let (index, _) = file_sources.insert_full(JsonFileSource::json().into());
         self.syntax.remove(&params.path);
         self.documents.insert(
             params.path,
             Document {
                 content: params.content,
                 version: params.version,
-                language_hint: Language::Json,
+                file_source_index: index,
                 node_cache: NodeCache::default(),
             },
         );
@@ -445,8 +462,9 @@ impl Workspace for WorkspaceServer {
         if !settings.as_ref().formatter().format_with_errors && parse.has_errors() {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
+        let document_file_source = self.get_file_source(&params.path);
 
-        debug_formatter_ir(&params.path, parse, settings)
+        debug_formatter_ir(&params.path, &document_file_source, parse, settings)
     }
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
@@ -498,7 +516,7 @@ impl Workspace for WorkspaceServer {
                         settings: self.settings(),
                         max_diagnostics: params.max_diagnostics as u32,
                         path: &params.path,
-                        language: self.get_language(&params.path),
+                        language: self.get_file_source(&params.path),
                         categories: params.categories,
                         manifest,
                     });
@@ -547,7 +565,7 @@ impl Workspace for WorkspaceServer {
         let settings = self.settings.read().unwrap();
         let rules = settings.linter().rules.as_ref();
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
-        let language = self.get_language(&params.path);
+        let language = self.get_file_source(&params.path);
         Ok(code_actions(CodeActionsParams {
             parse,
             range: params.range,
@@ -573,8 +591,8 @@ impl Workspace for WorkspaceServer {
         if !settings.as_ref().formatter().format_with_errors && parse.has_errors() {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
-
-        format(&params.path, parse, settings)
+        let document_file_source = self.get_file_source(&params.path);
+        format(&params.path, &document_file_source, parse, settings)
     }
 
     fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError> {
@@ -589,8 +607,14 @@ impl Workspace for WorkspaceServer {
         if !settings.as_ref().formatter().format_with_errors && parse.has_errors() {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
-
-        format_range(&params.path, parse, settings, params.range)
+        let document_file_source = self.get_file_source(&params.path);
+        format_range(
+            &params.path,
+            &document_file_source,
+            parse,
+            settings,
+            params.range,
+        )
     }
 
     fn format_on_type(&self, params: FormatOnTypeParams) -> Result<Printed, WorkspaceError> {
@@ -605,8 +629,15 @@ impl Workspace for WorkspaceServer {
         if !settings.as_ref().formatter().format_with_errors && parse.has_errors() {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
+        let document_file_source = self.get_file_source(&params.path);
 
-        format_on_type(&params.path, parse, settings, params.offset)
+        format_on_type(
+            &params.path,
+            &document_file_source,
+            parse,
+            settings,
+            params.offset,
+        )
     }
 
     fn fix_file(&self, params: super::FixFileParams) -> Result<FixFileResult, WorkspaceError> {
@@ -628,7 +659,7 @@ impl Workspace for WorkspaceServer {
             .collect::<Vec<_>>();
         let filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
-        let language = self.get_language(&params.path);
+        let language = self.get_file_source(&params.path);
         fix_all(FixAllParams {
             parse,
             rules: rules.as_ref().map(|x| x.borrow()),
@@ -638,7 +669,7 @@ impl Workspace for WorkspaceServer {
             should_format: params.should_format,
             biome_path: &params.path,
             manifest,
-            language,
+            document_file_source: language,
         })
     }
 

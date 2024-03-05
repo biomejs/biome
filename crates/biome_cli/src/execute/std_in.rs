@@ -8,7 +8,7 @@ use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::BiomePath;
 use biome_service::workspace::{
-    ChangeFileParams, FeaturesBuilder, FixFileParams, FormatFileParams, Language, OpenFileParams,
+    ChangeFileParams, FeaturesBuilder, FixFileParams, FormatFileParams, OpenFileParams,
     OrganizeImportsParams, PullDiagnosticsParams, RuleCategories, SupportsFeatureParams,
 };
 use biome_service::WorkspaceError;
@@ -48,7 +48,7 @@ pub(crate) fn run<'a>(
                 path: biome_path.clone(),
                 version: 0,
                 content: content.into(),
-                language_hint: Language::default(),
+                document_file_source: None,
             })?;
             let printed = workspace.format_file(FormatFileParams { path: biome_path })?;
 
@@ -71,7 +71,7 @@ pub(crate) fn run<'a>(
             path: biome_path.clone(),
             version: 0,
             content: content.into(),
-            language_hint: Language::default(),
+            document_file_source: None,
         })?;
         // apply fix file of the linter
         let file_features = workspace.file_features(SupportsFeatureParams {

@@ -1,0 +1,1520 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/parens/parens.css
+---
+
+# Input
+
+```css
+a {
+    prop1: func(1px,1px,1px,func(1px,1px,1px,func(1px,1px,1px)));
+    prop2: func( 1px ,1px ,1px ,func( 1px ,1px ,1px ,func( 1px ,1px ,1px ) ) );
+    prop3: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
+    prop4: func( 1px , 1px , 1px , func( 1px , 1px , 1px , func( 1px , 1px , 1px ) ) );
+    prop5: func(  1px  ,  1px  ,  1px  ,  func(  1px  ,  1px  ,  1px  ,  func(  1px  ,  1px  ,  1px  )  )  );
+    prop6: func(
+        1px
+        ,
+        1px
+        ,
+        1px
+        ,
+        func(
+            1px
+            ,
+            1px
+            ,
+            1px
+            ,
+            func(
+                1px
+                ,
+                1px
+                ,
+                1px
+            )
+        )
+    );
+    prop7:
+        func(
+            1px
+            ,
+            1px
+            ,
+            1px
+            ,
+            func(
+                1px
+                ,
+                1px
+                ,
+                1px
+                ,
+                func(
+                    1px
+                    ,
+                    1px
+                    ,
+                    1px
+                )
+            )
+        );
+    prop8: very-very-very-very-very-very-vey-very-very-long-func(1px,1px,1px,very-very-very-very-very-very-vey-very-very-long-func(1px,1px,1px,very-very-very-very-very-very-vey-very-very-long-func(1px,1px,1px)));
+    prop9: very-very-very-very-very-very-vey-very-very-long-func(  1px  ,  1px  ,  1px  ,  very-very-very-very-very-very-vey-very-very-long-func(  1px  ,  1px  ,  1px  ,  very-very-very-very-very-very-vey-very-very-long-func(  1px  ,  1px  ,  1px  )  )  );
+    prop10:
+        very-very-very-very-very-very-vey-very-very-long-func(
+            1px
+            ,
+            1px
+            ,
+            1px
+            ,
+            very-very-very-very-very-very-vey-very-very-long-func(
+                1px
+                ,
+                1px
+                ,
+                1px,
+                very-very-very-very-very-very-vey-very-very-long-func(
+                    1px
+                    ,
+                    1px
+                    ,
+                    1px
+                )
+            )
+        );
+    prop11: very-very-very-very-very-very-vey-very-very-long-func(
+        1px
+        ,
+        1px
+        ,
+        1px
+        ,
+        very-very-very-very-very-very-vey-very-very-long-func(
+            1px
+            ,
+            1px
+            ,
+            1px,
+            very-very-very-very-very-very-vey-very-very-long-func(
+                1px
+                ,
+                1px
+                ,
+                1px
+            )
+        )
+    );
+}
+
+.foo {
+  --paddingC: calc(  var(  --widthB  )  /  2  );
+  content: attr(  data-title  );
+  color: var(  --main-bg-color  );
+  background-color: rgb(  255,  0,  0  );
+  background: element(  #css-source  );
+  padding-top: var(  --paddingC  );
+  margin: 1*1 (1)*1 1*(1) (1)*(1);
+  prop: -1*-1 -(-1)*-1 -1*-(-1) -(-1)*-(-1);
+  prop4: +1;
+  prop5: -1;
+  prop6: word + 1; /* word1 */
+  prop7: word - 1; /* word-1 */
+  prop8: +1 +1 +1 +1; /* +1 +1 +1 +1 */
+  prop9: -1 -1 -1 -1; /* -1 -1 -1 -1 */
+  prop10: (-1);
+  prop11: (+1);
+  prop12: 10px/8px;
+  prop13: round(1.5)/2 round(1.5) /2 round(1.5)/ 2 round(1.5) / 2;
+  prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
+  prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+  prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+  prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
+  prop27: 8px/2px 8px/1 1/2px 1/2;
+  prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
+  prop29: (8px/2px) (8px/1) (1/2px) (1/2);
+  prop30: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
+  prop32: func(8px/2);
+  prop33: 5px + 8px/2px;
+  prop34: func(+20px, + 20px);
+  prop35: 1+1+1+1;
+  prop36: 1 + 1 + 1 + 1;
+  prop37: 1 +1 1 +1;
+  prop38: ++1;
+  prop39: ++(1);
+  prop40: --1;
+  prop41: --(1);
+  prop42: 1px+1px+1px+1px;
+  prop43: 1px + 1px + 1px + 1px;
+  prop44: -1+-1 -(-1)+-1 -1+-(-1) -(-1)+-(-1);
+  prop45: round(1.5)*2 round(1.5) *2 round(1.5)* 2 round(1.5) * 2;
+  prop46: 2*round(1.5) 2 *round(1.5) 2* round(1.5) 2 * round(1.5);
+  prop47: (round(1.5)*2) (round(1.5) *2) (round(1.5)* 2) (round(1.5) * 2);
+  prop48: (2*round(1.5)) (2 *round(1.5)) (2* round(1.5)) (2 * round(1.5));
+  prop57: round(1.5)+2 round(1.5) +2 round(1.5)+ 2 round(1.5) + 2;
+  prop58: 2+round(1.5) 2 +round(1.5) 2+ round(1.5) 2 + round(1.5);
+  prop59: (round(1.5)+2) (round(1.5) +2) (round(1.5)+ 2) (round(1.5) + 2);
+  prop60: (2+round(1.5)) (2 +round(1.5)) (2+ round(1.5)) (2 + round(1.5));
+  prop69: "test"+1 "test" +1 "test"+ 1 "test" + 1;
+  prop70: 1+"test" 1 +"test" 1+ "test" 1 + "test";
+  prop71: "test"-1 "test" -1 "test"- 1 "test" - 1;
+  prop72: 1-"test" 1 -"test" 1- "test" 1 - "test";
+  prop73: calc(100%*2px) calc(100% *2px) calc(100%* 2px) calc(100% * 2px);
+  prop74: calc(100%/2px) calc(100% /2px) calc(100%/ 2px) calc(100% / 2px);
+  prop75: calc(100%+2px) calc(100% +2px) calc(100%+ 2px) calc(100% + 2px);
+  prop76: calc(100%-2px) calc(100% -2px) calc(100%- 2px) calc(100% - 2px);
+  prop77: calc(-5px);
+  prop78: calc(+5px);
+  prop79: calc(-100px + 100px);
+  prop80: calc(+100px + 100px);
+  prop81: calc(100px  -  100px);
+  prop82: calc(100px  +  100px);
+}
+
+.bar {
+    prop1: attr(data-foo);
+    prop2: attr( data-foo );
+    prop3: attr(  data-foo  );
+    prop4: attr(
+        data-foo
+    );
+    prop5: attr(
+        data-foo
+    );
+    prop6:
+        attr(data-foo);
+    prop7:
+        attr(
+            data-foo
+        );
+    prop8:
+    attr(
+    data-foo
+    )
+    ;
+    prop9:"("attr(title)")";
+    prop10: "(" attr( title ) ")";
+    prop11:  "("  attr(  title  )  ")";
+    prop12: "("
+        attr(title)
+    ")";
+    prop13:
+        "("
+        attr(title)
+        ")";
+    prop14:
+        "("
+        attr(
+            title
+        )
+        ")";
+    prop15:
+    "("
+    attr(
+    title
+    )
+    ")"
+    ;
+    prop16: attr(length em);
+    prop17: attr(length  em);
+    prop18: attr(length   em);
+    prop19: attr(
+        length
+        em
+    );
+    prop20:attr(data-size em,20);
+    prop21: attr( data-size em , 20 );
+    prop22:  attr(  data-size  em  ,  20  );
+    prop23: attr(
+        data-size em,
+        20
+    );
+    prop24:
+        attr(
+            data-size em,
+            20
+        );
+    prop25:
+    attr(
+    data-size
+    em,
+    20
+    )
+    ;
+}
+
+.bar {
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+    filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+}
+
+.unicode-ranges
+{
+    /* <unicode-range> values */
+    unicode-range: U+26;               /* single codepoint */
+    unicode-range: U+0-7F;
+    unicode-range: U+0025-00FF;        /* codepoint range */
+    unicode-range: U+4??;              /* wildcard range */
+    unicode-range: U+0025-00FF, U+4??; /* multiple values */
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -7,60 +7,60 @@
+   prop6: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
+   prop7: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
+   prop8: very-very-very-very-very-very-vey-very-very-long-func(
+-    1px,
+-    1px,
+-    1px,
+-    very-very-very-very-very-very-vey-very-very-long-func(
+       1px,
+       1px,
+       1px,
+-      very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
+-    )
+-  );
++      very-very-very-very-very-very-vey-very-very-long-func(
++          1px,
++          1px,
++          1px,
++          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
++        )
++    );
+   prop9: very-very-very-very-very-very-vey-very-very-long-func(
+-    1px,
+-    1px,
+-    1px,
+-    very-very-very-very-very-very-vey-very-very-long-func(
+       1px,
+       1px,
+       1px,
+-      very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
+-    )
+-  );
++      very-very-very-very-very-very-vey-very-very-long-func(
++          1px,
++          1px,
++          1px,
++          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
++        )
++    );
+   prop10: very-very-very-very-very-very-vey-very-very-long-func(
+-    1px,
+-    1px,
+-    1px,
+-    very-very-very-very-very-very-vey-very-very-long-func(
+       1px,
+       1px,
+       1px,
+-      very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
+-    )
+-  );
++      very-very-very-very-very-very-vey-very-very-long-func(
++          1px,
++          1px,
++          1px,
++          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
++        )
++    );
+   prop11: very-very-very-very-very-very-vey-very-very-long-func(
+-    1px,
+-    1px,
+-    1px,
+-    very-very-very-very-very-very-vey-very-very-long-func(
+       1px,
+       1px,
+       1px,
+-      very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
+-    )
+-  );
++      very-very-very-very-very-very-vey-very-very-long-func(
++          1px,
++          1px,
++          1px,
++          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
++        )
++    );
+ }
+ 
+ .foo {
+-  --paddingC: calc(var(--widthB) / 2);
++  --paddingc: calc(var(--widthB) / 2);
+   content: attr(data-title);
+   color: var(--main-bg-color);
+   background-color: rgb(255, 0, 0);
+-  background: element(#css-source);
++  background: element(#c ss-source);
+   padding-top: var(--paddingC);
+-  margin: 1 * 1 (1) * 1 1 * (1) (1) * (1);
+-  prop: -1 * -1 - (-1) * -1 -1 * -(-1) - (-1) * -(-1);
++  margin: 1*1 (1)*1 1*(1) (1)*(1);
++  prop: -1*-1 -(-1)*-1 -1*-(-1) -(-1)*-(-1);
+   prop4: +1;
+   prop5: -1;
+   prop6: word + 1; /* word1 */
+@@ -69,45 +69,45 @@
+   prop9: -1 -1 -1 -1; /* -1 -1 -1 -1 */
+   prop10: (-1);
+   prop11: (+1);
+-  prop12: 10px/8px;
++  prop12: 10px / 8px;
+   prop13: round(1.5) / 2 round(1.5) / 2 round(1.5) / 2 round(1.5) / 2;
+-  prop14: 2 / round(1.5) 2 / round(1.5) 2 / round(1.5) 2 / round(1.5);
+-  prop15: (round(1.5) / 2) (round(1.5) / 2) (round(1.5) / 2) (round(1.5) / 2);
+-  prop16: (2 / round(1.5)) (2 / round(1.5)) (2 / round(1.5)) (2 / round(1.5));
++  prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
++  prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
++  prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+   prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
+   prop27: 8px/2px 8px/1 1/2px 1/2;
+   prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
+   prop29: (8px/2px) (8px/1) (1/2px) (1/2);
+   prop30: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
+-  prop32: func(8px/2);
++  prop32: func(8px / 2);
+   prop33: 5px + 8px/2px;
+-  prop34: func(+20px, +20px);
+-  prop35: 1+1+1+1;
++  prop34: func(+20px, + 20px);
++  prop35: 1 +1 +1 +1;
+   prop36: 1 + 1 + 1 + 1;
+   prop37: 1 +1 1 +1;
+   prop38: ++1;
+   prop39: ++(1);
+   prop40: --1;
+   prop41: --(1);
+-  prop42: 1px+1px+1px+1px;
++  prop42: 1px +1px +1px +1px;
+   prop43: 1px + 1px + 1px + 1px;
+-  prop44: -1+-1 - (-1)+-1 -1+-(-1) - (-1)+-(-1);
+-  prop45: round(1.5) * 2 round(1.5) * 2 round(1.5) * 2 round(1.5) * 2;
+-  prop46: 2 * round(1.5) 2 * round(1.5) 2 * round(1.5) 2 * round(1.5);
+-  prop47: (round(1.5) * 2) (round(1.5) * 2) (round(1.5) * 2) (round(1.5) * 2);
+-  prop48: (2 * round(1.5)) (2 * round(1.5)) (2 * round(1.5)) (2 * round(1.5));
+-  prop57: round(1.5) + 2 round(1.5) + 2 round(1.5) + 2 round(1.5) + 2;
+-  prop58: 2 + round(1.5) 2 + round(1.5) 2 + round(1.5) 2 + round(1.5);
+-  prop59: (round(1.5) + 2) (round(1.5) + 2) (round(1.5) + 2) (round(1.5) + 2);
+-  prop60: (2 + round(1.5)) (2 + round(1.5)) (2 + round(1.5)) (2 + round(1.5));
++  prop44: -1+-1 -(-1)+-1 -1+-(-1) -(-1)+-(-1);
++  prop45: round(1.5)*2 round(1.5) *2 round(1.5)* 2 round(1.5) * 2;
++  prop46: 2*round(1.5) 2 *round(1.5) 2* round(1.5) 2 * round(1.5);
++  prop47: (round(1.5)*2) (round(1.5) *2) (round(1.5)* 2) (round(1.5) * 2);
++  prop48: (2*round(1.5)) (2 *round(1.5)) (2* round(1.5)) (2 * round(1.5));
++  prop57: round(1.5)+2 round(1.5) +2 round(1.5)+ 2 round(1.5) + 2;
++  prop58: 2+round(1.5) 2 +round(1.5) 2+ round(1.5) 2 + round(1.5);
++  prop59: (round(1.5)+2) (round(1.5) +2) (round(1.5)+ 2) (round(1.5) + 2);
++  prop60: (2+round(1.5)) (2 +round(1.5)) (2+ round(1.5)) (2 + round(1.5));
+   prop69: "test"+1 "test" +1 "test"+ 1 "test" + 1;
+   prop70: 1+"test" 1 +"test" 1+ "test" 1 + "test";
+   prop71: "test"-1 "test" -1 "test"- 1 "test" - 1;
+   prop72: 1-"test" 1 -"test" 1- "test" 1 - "test";
+   prop73: calc(100% * 2px) calc(100% * 2px) calc(100% * 2px) calc(100% * 2px);
+   prop74: calc(100% / 2px) calc(100% / 2px) calc(100% / 2px) calc(100% / 2px);
+-  prop75: calc(100%+2px) calc(100% +2px) calc(100%+ 2px) calc(100% + 2px);
+-  prop76: calc(100%-2px) calc(100% -2px) calc(100%- 2px) calc(100% - 2px);
++  prop75: calc(100% +2px) calc(100% +2px) calc(100% + 2px) calc(100% + 2px);
++  prop76: calc(100% -2px) calc(100% -2px) calc(100% - 2px) calc(100% - 2px);
+   prop77: calc(-5px);
+   prop78: calc(+5px);
+   prop79: calc(-100px + 100px);
+@@ -152,9 +152,9 @@
+ 
+ .unicode-ranges {
+   /* <unicode-range> values */
+-  unicode-range: U+26; /* single codepoint */
+-  unicode-range: U+0-7F;
+-  unicode-range: U+0025-00FF; /* codepoint range */
++  unicode-range: u +26; /* single codepoint */
++  unicode-range: u +0 -7f;
++  unicode-range: u +0025 -00ff; /* codepoint range */
+   unicode-range: U+4??; /* wildcard range */
+   unicode-range: U+0025-00FF, U+4??; /* multiple values */
+ }
+```
+
+# Output
+
+```css
+a {
+  prop1: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
+  prop2: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
+  prop3: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
+  prop4: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
+  prop5: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
+  prop6: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
+  prop7: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
+  prop8: very-very-very-very-very-very-vey-very-very-long-func(
+      1px,
+      1px,
+      1px,
+      very-very-very-very-very-very-vey-very-very-long-func(
+          1px,
+          1px,
+          1px,
+          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
+        )
+    );
+  prop9: very-very-very-very-very-very-vey-very-very-long-func(
+      1px,
+      1px,
+      1px,
+      very-very-very-very-very-very-vey-very-very-long-func(
+          1px,
+          1px,
+          1px,
+          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
+        )
+    );
+  prop10: very-very-very-very-very-very-vey-very-very-long-func(
+      1px,
+      1px,
+      1px,
+      very-very-very-very-very-very-vey-very-very-long-func(
+          1px,
+          1px,
+          1px,
+          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
+        )
+    );
+  prop11: very-very-very-very-very-very-vey-very-very-long-func(
+      1px,
+      1px,
+      1px,
+      very-very-very-very-very-very-vey-very-very-long-func(
+          1px,
+          1px,
+          1px,
+          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
+        )
+    );
+}
+
+.foo {
+  --paddingc: calc(var(--widthB) / 2);
+  content: attr(data-title);
+  color: var(--main-bg-color);
+  background-color: rgb(255, 0, 0);
+  background: element(#c ss-source);
+  padding-top: var(--paddingC);
+  margin: 1*1 (1)*1 1*(1) (1)*(1);
+  prop: -1*-1 -(-1)*-1 -1*-(-1) -(-1)*-(-1);
+  prop4: +1;
+  prop5: -1;
+  prop6: word + 1; /* word1 */
+  prop7: word - 1; /* word-1 */
+  prop8: +1 +1 +1 +1; /* +1 +1 +1 +1 */
+  prop9: -1 -1 -1 -1; /* -1 -1 -1 -1 */
+  prop10: (-1);
+  prop11: (+1);
+  prop12: 10px / 8px;
+  prop13: round(1.5) / 2 round(1.5) / 2 round(1.5) / 2 round(1.5) / 2;
+  prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
+  prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+  prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+  prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
+  prop27: 8px/2px 8px/1 1/2px 1/2;
+  prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
+  prop29: (8px/2px) (8px/1) (1/2px) (1/2);
+  prop30: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
+  prop32: func(8px / 2);
+  prop33: 5px + 8px/2px;
+  prop34: func(+20px, + 20px);
+  prop35: 1 +1 +1 +1;
+  prop36: 1 + 1 + 1 + 1;
+  prop37: 1 +1 1 +1;
+  prop38: ++1;
+  prop39: ++(1);
+  prop40: --1;
+  prop41: --(1);
+  prop42: 1px +1px +1px +1px;
+  prop43: 1px + 1px + 1px + 1px;
+  prop44: -1+-1 -(-1)+-1 -1+-(-1) -(-1)+-(-1);
+  prop45: round(1.5)*2 round(1.5) *2 round(1.5)* 2 round(1.5) * 2;
+  prop46: 2*round(1.5) 2 *round(1.5) 2* round(1.5) 2 * round(1.5);
+  prop47: (round(1.5)*2) (round(1.5) *2) (round(1.5)* 2) (round(1.5) * 2);
+  prop48: (2*round(1.5)) (2 *round(1.5)) (2* round(1.5)) (2 * round(1.5));
+  prop57: round(1.5)+2 round(1.5) +2 round(1.5)+ 2 round(1.5) + 2;
+  prop58: 2+round(1.5) 2 +round(1.5) 2+ round(1.5) 2 + round(1.5);
+  prop59: (round(1.5)+2) (round(1.5) +2) (round(1.5)+ 2) (round(1.5) + 2);
+  prop60: (2+round(1.5)) (2 +round(1.5)) (2+ round(1.5)) (2 + round(1.5));
+  prop69: "test"+1 "test" +1 "test"+ 1 "test" + 1;
+  prop70: 1+"test" 1 +"test" 1+ "test" 1 + "test";
+  prop71: "test"-1 "test" -1 "test"- 1 "test" - 1;
+  prop72: 1-"test" 1 -"test" 1- "test" 1 - "test";
+  prop73: calc(100% * 2px) calc(100% * 2px) calc(100% * 2px) calc(100% * 2px);
+  prop74: calc(100% / 2px) calc(100% / 2px) calc(100% / 2px) calc(100% / 2px);
+  prop75: calc(100% +2px) calc(100% +2px) calc(100% + 2px) calc(100% + 2px);
+  prop76: calc(100% -2px) calc(100% -2px) calc(100% - 2px) calc(100% - 2px);
+  prop77: calc(-5px);
+  prop78: calc(+5px);
+  prop79: calc(-100px + 100px);
+  prop80: calc(+100px + 100px);
+  prop81: calc(100px - 100px);
+  prop82: calc(100px + 100px);
+}
+
+.bar {
+  prop1: attr(data-foo);
+  prop2: attr(data-foo);
+  prop3: attr(data-foo);
+  prop4: attr(data-foo);
+  prop5: attr(data-foo);
+  prop6: attr(data-foo);
+  prop7: attr(data-foo);
+  prop8: attr(data-foo);
+  prop9: "(" attr(title) ")";
+  prop10: "(" attr(title) ")";
+  prop11: "(" attr(title) ")";
+  prop12: "(" attr(title) ")";
+  prop13: "(" attr(title) ")";
+  prop14: "(" attr(title) ")";
+  prop15: "(" attr(title) ")";
+  prop16: attr(length em);
+  prop17: attr(length em);
+  prop18: attr(length em);
+  prop19: attr(length em);
+  prop20: attr(data-size em, 20);
+  prop21: attr(data-size em, 20);
+  prop22: attr(data-size em, 20);
+  prop23: attr(data-size em, 20);
+  prop24: attr(data-size em, 20);
+  prop25: attr(data-size em, 20);
+}
+
+.bar {
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+}
+
+.unicode-ranges {
+  /* <unicode-range> values */
+  unicode-range: u +26; /* single codepoint */
+  unicode-range: u +0 -7f;
+  unicode-range: u +0025 -00ff; /* codepoint range */
+  unicode-range: U+4??; /* wildcard range */
+  unicode-range: U+0025-00FF, U+4??; /* multiple values */
+}
+```
+
+# Errors
+```
+parens.css:108:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid color
+  
+    106 │   color: var(  --main-bg-color  );
+    107 │   background-color: rgb(  255,  0,  0  );
+  > 108 │   background: element(  #css-source  );
+        │                          ^
+    109 │   padding-top: var(  --paddingC  );
+    110 │   margin: 1*1 (1)*1 1*(1) (1)*(1);
+  
+parens.css:110:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    108 │   background: element(  #css-source  );
+    109 │   padding-top: var(  --paddingC  );
+  > 110 │   margin: 1*1 (1)*1 1*(1) (1)*(1);
+        │            ^^^^^^^^^^^^^^^^^^^^^^
+    111 │   prop: -1*-1 -(-1)*-1 -1*-(-1) -(-1)*-(-1);
+    112 │   prop4: +1;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:111:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    109 │   padding-top: var(  --paddingC  );
+    110 │   margin: 1*1 (1)*1 1*(1) (1)*(1);
+  > 111 │   prop: -1*-1 -(-1)*-1 -1*-(-1) -(-1)*-(-1);
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    112 │   prop4: +1;
+    113 │   prop5: -1;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:114:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    112 │   prop4: +1;
+    113 │   prop5: -1;
+  > 114 │   prop6: word + 1; /* word1 */
+        │               ^^^
+    115 │   prop7: word - 1; /* word-1 */
+    116 │   prop8: +1 +1 +1 +1; /* +1 +1 +1 +1 */
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:115:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    113 │   prop5: -1;
+    114 │   prop6: word + 1; /* word1 */
+  > 115 │   prop7: word - 1; /* word-1 */
+        │               ^^^
+    116 │   prop8: +1 +1 +1 +1; /* +1 +1 +1 +1 */
+    117 │   prop9: -1 -1 -1 -1; /* -1 -1 -1 -1 */
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:118:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    116 │   prop8: +1 +1 +1 +1; /* +1 +1 +1 +1 */
+    117 │   prop9: -1 -1 -1 -1; /* -1 -1 -1 -1 */
+  > 118 │   prop10: (-1);
+        │           ^^^^
+    119 │   prop11: (+1);
+    120 │   prop12: 10px/8px;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:119:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    117 │   prop9: -1 -1 -1 -1; /* -1 -1 -1 -1 */
+    118 │   prop10: (-1);
+  > 119 │   prop11: (+1);
+        │           ^^^^
+    120 │   prop12: 10px/8px;
+    121 │   prop13: round(1.5)/2 round(1.5) /2 round(1.5)/ 2 round(1.5) / 2;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:122:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a number but instead found 'round'.
+  
+    120 │   prop12: 10px/8px;
+    121 │   prop13: round(1.5)/2 round(1.5) /2 round(1.5)/ 2 round(1.5) / 2;
+  > 122 │   prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
+        │             ^^^^^
+    123 │   prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+  
+  i Expected a number here.
+  
+    120 │   prop12: 10px/8px;
+    121 │   prop13: round(1.5)/2 round(1.5) /2 round(1.5)/ 2 round(1.5) / 2;
+  > 122 │   prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
+        │             ^^^^^
+    123 │   prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+  
+parens.css:122:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a number but instead found 'round'.
+  
+    120 │   prop12: 10px/8px;
+    121 │   prop13: round(1.5)/2 round(1.5) /2 round(1.5)/ 2 round(1.5) / 2;
+  > 122 │   prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
+        │                           ^^^^^
+    123 │   prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+  
+  i Expected a number here.
+  
+    120 │   prop12: 10px/8px;
+    121 │   prop13: round(1.5)/2 round(1.5) /2 round(1.5)/ 2 round(1.5) / 2;
+  > 122 │   prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
+        │                           ^^^^^
+    123 │   prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+  
+parens.css:122:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a number but instead found 'round'.
+  
+    120 │   prop12: 10px/8px;
+    121 │   prop13: round(1.5)/2 round(1.5) /2 round(1.5)/ 2 round(1.5) / 2;
+  > 122 │   prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
+        │                                         ^^^^^
+    123 │   prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+  
+  i Expected a number here.
+  
+    120 │   prop12: 10px/8px;
+    121 │   prop13: round(1.5)/2 round(1.5) /2 round(1.5)/ 2 round(1.5) / 2;
+  > 122 │   prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
+        │                                         ^^^^^
+    123 │   prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+  
+parens.css:122:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a number but instead found 'round'.
+  
+    120 │   prop12: 10px/8px;
+    121 │   prop13: round(1.5)/2 round(1.5) /2 round(1.5)/ 2 round(1.5) / 2;
+  > 122 │   prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
+        │                                                        ^^^^^
+    123 │   prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+  
+  i Expected a number here.
+  
+    120 │   prop12: 10px/8px;
+    121 │   prop13: round(1.5)/2 round(1.5) /2 round(1.5)/ 2 round(1.5) / 2;
+  > 122 │   prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
+        │                                                        ^^^^^
+    123 │   prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+  
+parens.css:123:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    121 │   prop13: round(1.5)/2 round(1.5) /2 round(1.5)/ 2 round(1.5) / 2;
+    122 │   prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
+  > 123 │   prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+    125 │   prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:124:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    122 │   prop14: 2/round(1.5) 2 /round(1.5) 2/ round(1.5) 2 / round(1.5);
+    123 │   prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+  > 124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    125 │   prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
+    126 │   prop27: 8px/2px 8px/1 1/2px 1/2;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:125:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a number but instead found '2'.
+  
+    123 │   prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+  > 125 │   prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
+        │                             ^
+    126 │   prop27: 8px/2px 8px/1 1/2px 1/2;
+    127 │   prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
+  
+  i Expected a number here.
+  
+    123 │   prop15: (round(1.5)/2) (round(1.5) /2) (round(1.5)/ 2) (round(1.5) / 2);
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+  > 125 │   prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
+        │                             ^
+    126 │   prop27: 8px/2px 8px/1 1/2px 1/2;
+    127 │   prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
+  
+parens.css:126:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a number but instead found '2'.
+  
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+    125 │   prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
+  > 126 │   prop27: 8px/2px 8px/1 1/2px 1/2;
+        │                           ^
+    127 │   prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
+    128 │   prop29: (8px/2px) (8px/1) (1/2px) (1/2);
+  
+  i Expected a number here.
+  
+    124 │   prop16: (2/round(1.5)) (2 /round(1.5)) (2/ round(1.5)) (2 / round(1.5));
+    125 │   prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
+  > 126 │   prop27: 8px/2px 8px/1 1/2px 1/2;
+        │                           ^
+    127 │   prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
+    128 │   prop29: (8px/2px) (8px/1) (1/2px) (1/2);
+  
+parens.css:127:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a number but instead found '2'.
+  
+    125 │   prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
+    126 │   prop27: 8px/2px 8px/1 1/2px 1/2;
+  > 127 │   prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
+        │                                 ^
+    128 │   prop29: (8px/2px) (8px/1) (1/2px) (1/2);
+    129 │   prop30: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
+  
+  i Expected a number here.
+  
+    125 │   prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
+    126 │   prop27: 8px/2px 8px/1 1/2px 1/2;
+  > 127 │   prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
+        │                                 ^
+    128 │   prop29: (8px/2px) (8px/1) (1/2px) (1/2);
+    129 │   prop30: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
+  
+parens.css:128:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    126 │   prop27: 8px/2px 8px/1 1/2px 1/2;
+    127 │   prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
+  > 128 │   prop29: (8px/2px) (8px/1) (1/2px) (1/2);
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    129 │   prop30: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
+    130 │   prop32: func(8px/2);
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:129:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    127 │   prop28: 8px / 2px 8px / 1 1 / 2px 1 / 2;
+    128 │   prop29: (8px/2px) (8px/1) (1/2px) (1/2);
+  > 129 │   prop30: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    130 │   prop32: func(8px/2);
+    131 │   prop33: 5px + 8px/2px;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:131:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    129 │   prop30: (8px / 2px) (8px / 1) (1 / 2px) (1 / 2);
+    130 │   prop32: func(8px/2);
+  > 131 │   prop33: 5px + 8px/2px;
+        │               ^^^^^^^^^
+    132 │   prop34: func(+20px, + 20px);
+    133 │   prop35: 1+1+1+1;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:132:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found '+'.
+  
+    130 │   prop32: func(8px/2);
+    131 │   prop33: 5px + 8px/2px;
+  > 132 │   prop34: func(+20px, + 20px);
+        │                       ^
+    133 │   prop35: 1+1+1+1;
+    134 │   prop36: 1 + 1 + 1 + 1;
+  
+  i Expected a declaration item here.
+  
+    130 │   prop32: func(8px/2);
+    131 │   prop33: 5px + 8px/2px;
+  > 132 │   prop34: func(+20px, + 20px);
+        │                       ^
+    133 │   prop35: 1+1+1+1;
+    134 │   prop36: 1 + 1 + 1 + 1;
+  
+parens.css:132:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `20`
+  
+    130 │   prop32: func(8px/2);
+    131 │   prop33: 5px + 8px/2px;
+  > 132 │   prop34: func(+20px, + 20px);
+        │                         ^^
+    133 │   prop35: 1+1+1+1;
+    134 │   prop36: 1 + 1 + 1 + 1;
+  
+  i Remove 20
+  
+parens.css:134:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    132 │   prop34: func(+20px, + 20px);
+    133 │   prop35: 1+1+1+1;
+  > 134 │   prop36: 1 + 1 + 1 + 1;
+        │             ^^^^^^^^^^^
+    135 │   prop37: 1 +1 1 +1;
+    136 │   prop38: ++1;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:136:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    134 │   prop36: 1 + 1 + 1 + 1;
+    135 │   prop37: 1 +1 1 +1;
+  > 136 │   prop38: ++1;
+        │           ^^^
+    137 │   prop39: ++(1);
+    138 │   prop40: --1;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:137:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    135 │   prop37: 1 +1 1 +1;
+    136 │   prop38: ++1;
+  > 137 │   prop39: ++(1);
+        │           ^^^^^
+    138 │   prop40: --1;
+    139 │   prop41: --(1);
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:138:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    136 │   prop38: ++1;
+    137 │   prop39: ++(1);
+  > 138 │   prop40: --1;
+        │           ^^^
+    139 │   prop41: --(1);
+    140 │   prop42: 1px+1px+1px+1px;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:139:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    137 │   prop39: ++(1);
+    138 │   prop40: --1;
+  > 139 │   prop41: --(1);
+        │           ^^^^^
+    140 │   prop42: 1px+1px+1px+1px;
+    141 │   prop43: 1px + 1px + 1px + 1px;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:141:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    139 │   prop41: --(1);
+    140 │   prop42: 1px+1px+1px+1px;
+  > 141 │   prop43: 1px + 1px + 1px + 1px;
+        │               ^^^^^^^^^^^^^^^^^
+    142 │   prop44: -1+-1 -(-1)+-1 -1+-(-1) -(-1)+-(-1);
+    143 │   prop45: round(1.5)*2 round(1.5) *2 round(1.5)* 2 round(1.5) * 2;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:142:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    140 │   prop42: 1px+1px+1px+1px;
+    141 │   prop43: 1px + 1px + 1px + 1px;
+  > 142 │   prop44: -1+-1 -(-1)+-1 -1+-(-1) -(-1)+-(-1);
+        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    143 │   prop45: round(1.5)*2 round(1.5) *2 round(1.5)* 2 round(1.5) * 2;
+    144 │   prop46: 2*round(1.5) 2 *round(1.5) 2* round(1.5) 2 * round(1.5);
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:143:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    141 │   prop43: 1px + 1px + 1px + 1px;
+    142 │   prop44: -1+-1 -(-1)+-1 -1+-(-1) -(-1)+-(-1);
+  > 143 │   prop45: round(1.5)*2 round(1.5) *2 round(1.5)* 2 round(1.5) * 2;
+        │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    144 │   prop46: 2*round(1.5) 2 *round(1.5) 2* round(1.5) 2 * round(1.5);
+    145 │   prop47: (round(1.5)*2) (round(1.5) *2) (round(1.5)* 2) (round(1.5) * 2);
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:144:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    142 │   prop44: -1+-1 -(-1)+-1 -1+-(-1) -(-1)+-(-1);
+    143 │   prop45: round(1.5)*2 round(1.5) *2 round(1.5)* 2 round(1.5) * 2;
+  > 144 │   prop46: 2*round(1.5) 2 *round(1.5) 2* round(1.5) 2 * round(1.5);
+        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    145 │   prop47: (round(1.5)*2) (round(1.5) *2) (round(1.5)* 2) (round(1.5) * 2);
+    146 │   prop48: (2*round(1.5)) (2 *round(1.5)) (2* round(1.5)) (2 * round(1.5));
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:145:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    143 │   prop45: round(1.5)*2 round(1.5) *2 round(1.5)* 2 round(1.5) * 2;
+    144 │   prop46: 2*round(1.5) 2 *round(1.5) 2* round(1.5) 2 * round(1.5);
+  > 145 │   prop47: (round(1.5)*2) (round(1.5) *2) (round(1.5)* 2) (round(1.5) * 2);
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    146 │   prop48: (2*round(1.5)) (2 *round(1.5)) (2* round(1.5)) (2 * round(1.5));
+    147 │   prop57: round(1.5)+2 round(1.5) +2 round(1.5)+ 2 round(1.5) + 2;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:146:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    144 │   prop46: 2*round(1.5) 2 *round(1.5) 2* round(1.5) 2 * round(1.5);
+    145 │   prop47: (round(1.5)*2) (round(1.5) *2) (round(1.5)* 2) (round(1.5) * 2);
+  > 146 │   prop48: (2*round(1.5)) (2 *round(1.5)) (2* round(1.5)) (2 * round(1.5));
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    147 │   prop57: round(1.5)+2 round(1.5) +2 round(1.5)+ 2 round(1.5) + 2;
+    148 │   prop58: 2+round(1.5) 2 +round(1.5) 2+ round(1.5) 2 + round(1.5);
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:147:48 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    145 │   prop47: (round(1.5)*2) (round(1.5) *2) (round(1.5)* 2) (round(1.5) * 2);
+    146 │   prop48: (2*round(1.5)) (2 *round(1.5)) (2* round(1.5)) (2 * round(1.5));
+  > 147 │   prop57: round(1.5)+2 round(1.5) +2 round(1.5)+ 2 round(1.5) + 2;
+        │                                                ^^^^^^^^^^^^^^^^^^
+    148 │   prop58: 2+round(1.5) 2 +round(1.5) 2+ round(1.5) 2 + round(1.5);
+    149 │   prop59: (round(1.5)+2) (round(1.5) +2) (round(1.5)+ 2) (round(1.5) + 2);
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:148:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    146 │   prop48: (2*round(1.5)) (2 *round(1.5)) (2* round(1.5)) (2 * round(1.5));
+    147 │   prop57: round(1.5)+2 round(1.5) +2 round(1.5)+ 2 round(1.5) + 2;
+  > 148 │   prop58: 2+round(1.5) 2 +round(1.5) 2+ round(1.5) 2 + round(1.5);
+        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    149 │   prop59: (round(1.5)+2) (round(1.5) +2) (round(1.5)+ 2) (round(1.5) + 2);
+    150 │   prop60: (2+round(1.5)) (2 +round(1.5)) (2+ round(1.5)) (2 + round(1.5));
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:149:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    147 │   prop57: round(1.5)+2 round(1.5) +2 round(1.5)+ 2 round(1.5) + 2;
+    148 │   prop58: 2+round(1.5) 2 +round(1.5) 2+ round(1.5) 2 + round(1.5);
+  > 149 │   prop59: (round(1.5)+2) (round(1.5) +2) (round(1.5)+ 2) (round(1.5) + 2);
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    150 │   prop60: (2+round(1.5)) (2 +round(1.5)) (2+ round(1.5)) (2 + round(1.5));
+    151 │   prop69: "test"+1 "test" +1 "test"+ 1 "test" + 1;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:150:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    148 │   prop58: 2+round(1.5) 2 +round(1.5) 2+ round(1.5) 2 + round(1.5);
+    149 │   prop59: (round(1.5)+2) (round(1.5) +2) (round(1.5)+ 2) (round(1.5) + 2);
+  > 150 │   prop60: (2+round(1.5)) (2 +round(1.5)) (2+ round(1.5)) (2 + round(1.5));
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    151 │   prop69: "test"+1 "test" +1 "test"+ 1 "test" + 1;
+    152 │   prop70: 1+"test" 1 +"test" 1+ "test" 1 + "test";
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:151:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    149 │   prop59: (round(1.5)+2) (round(1.5) +2) (round(1.5)+ 2) (round(1.5) + 2);
+    150 │   prop60: (2+round(1.5)) (2 +round(1.5)) (2+ round(1.5)) (2 + round(1.5));
+  > 151 │   prop69: "test"+1 "test" +1 "test"+ 1 "test" + 1;
+        │                                    ^^^^^^^^^^^^^^
+    152 │   prop70: 1+"test" 1 +"test" 1+ "test" 1 + "test";
+    153 │   prop71: "test"-1 "test" -1 "test"- 1 "test" - 1;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:152:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    150 │   prop60: (2+round(1.5)) (2 +round(1.5)) (2+ round(1.5)) (2 + round(1.5));
+    151 │   prop69: "test"+1 "test" +1 "test"+ 1 "test" + 1;
+  > 152 │   prop70: 1+"test" 1 +"test" 1+ "test" 1 + "test";
+        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    153 │   prop71: "test"-1 "test" -1 "test"- 1 "test" - 1;
+    154 │   prop72: 1-"test" 1 -"test" 1- "test" 1 - "test";
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:153:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    151 │   prop69: "test"+1 "test" +1 "test"+ 1 "test" + 1;
+    152 │   prop70: 1+"test" 1 +"test" 1+ "test" 1 + "test";
+  > 153 │   prop71: "test"-1 "test" -1 "test"- 1 "test" - 1;
+        │                                    ^^^^^^^^^^^^^^
+    154 │   prop72: 1-"test" 1 -"test" 1- "test" 1 - "test";
+    155 │   prop73: calc(100%*2px) calc(100% *2px) calc(100%* 2px) calc(100% * 2px);
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:154:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    152 │   prop70: 1+"test" 1 +"test" 1+ "test" 1 + "test";
+    153 │   prop71: "test"-1 "test" -1 "test"- 1 "test" - 1;
+  > 154 │   prop72: 1-"test" 1 -"test" 1- "test" 1 - "test";
+        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    155 │   prop73: calc(100%*2px) calc(100% *2px) calc(100%* 2px) calc(100% * 2px);
+    156 │   prop74: calc(100%/2px) calc(100% /2px) calc(100%/ 2px) calc(100% / 2px);
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:240:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    239 │ .bar {
+  > 240 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    241 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+    242 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:241:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    239 │ .bar {
+    240 │     filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  > 241 │     filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    242 │     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+    243 │ }
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parens.css:251:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    249 │     unicode-range: U+0-7F;
+    250 │     unicode-range: U+0025-00FF;        /* codepoint range */
+  > 251 │     unicode-range: U+4??;              /* wildcard range */
+        │                       ^
+    252 │     unicode-range: U+0025-00FF, U+4??; /* multiple values */
+    253 │ }
+  
+parens.css:251:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    249 │     unicode-range: U+0-7F;
+    250 │     unicode-range: U+0025-00FF;        /* codepoint range */
+  > 251 │     unicode-range: U+4??;              /* wildcard range */
+        │                        ^
+    252 │     unicode-range: U+0025-00FF, U+4??; /* multiple values */
+    253 │ }
+  
+parens.css:252:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    250 │     unicode-range: U+0025-00FF;        /* codepoint range */
+    251 │     unicode-range: U+4??;              /* wildcard range */
+  > 252 │     unicode-range: U+0025-00FF, U+4??; /* multiple values */
+        │                                    ^
+    253 │ }
+    254 │ 
+  
+parens.css:252:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    250 │     unicode-range: U+0025-00FF;        /* codepoint range */
+    251 │     unicode-range: U+4??;              /* wildcard range */
+  > 252 │     unicode-range: U+0025-00FF, U+4??; /* multiple values */
+        │                                     ^
+    253 │ }
+    254 │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+  148:   filter: progid:DXImageTransform.Microsoft.gradient(enabled='false',startColorstr='#fff',endColorstr='#000');
+  149:   filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
+  150:   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
+```
+
+

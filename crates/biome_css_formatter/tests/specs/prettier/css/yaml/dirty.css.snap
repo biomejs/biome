@@ -1,0 +1,167 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/yaml/dirty.css
+---
+
+# Input
+
+```css
+---
+hello:     world
+a:       
+            - 123
+            - 666
+---
+
+.class {
+
+
+
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,9 @@
+ ---
+-hello: world
+-a:
+-  - 123
+-  - 666
++hello:     world
++a:       
++            -
++123
++            - 666
+ ---
+ 
+ .class {
+```
+
+# Output
+
+```css
+---
+hello:     world
+a:       
+            -
+123
+            - 666
+---
+
+.class {
+}
+```
+
+# Errors
+```
+dirty.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '---'.
+  
+  > 1 │ ---
+      │ ^^^
+    2 │ hello:     world
+    3 │ a:·······
+  
+  i Expected a qualified rule, or an at rule here.
+  
+  > 1 │ ---
+      │ ^^^
+    2 │ hello:     world
+    3 │ a:·······
+  
+dirty.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `a`
+  
+    1 │ ---
+    2 │ hello:     world
+  > 3 │ a:·······
+      │ ^
+    4 │             - 123
+    5 │             - 666
+  
+  i Remove a
+  
+dirty.css:4:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    2 │ hello:     world
+    3 │ a:·······
+  > 4 │             - 123
+      │             ^
+    5 │             - 666
+    6 │ ---
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
+  
+dirty.css:4:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `123`
+  
+    2 │ hello:     world
+    3 │ a:·······
+  > 4 │             - 123
+      │               ^^^
+    5 │             - 666
+    6 │ ---
+  
+  i Remove 123
+  
+
+```
+
+

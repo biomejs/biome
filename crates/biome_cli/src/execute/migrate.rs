@@ -11,12 +11,10 @@ use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{category, PrintDiagnostic};
 use biome_fs::{BiomePath, ConfigName, FileSystemExt, OpenOptions};
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
-use biome_json_syntax::JsonRoot;
+use biome_json_syntax::{JsonFileSource, JsonRoot};
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::{AstNode, NodeCache};
-use biome_service::workspace::{
-    ChangeFileParams, FixAction, FormatFileParams, Language, OpenFileParams,
-};
+use biome_service::workspace::{ChangeFileParams, FixAction, FormatFileParams, OpenFileParams};
 use biome_service::{PartialConfiguration, VERSION};
 use std::borrow::Cow;
 use std::ffi::OsStr;
@@ -65,7 +63,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         path: biome_path.clone(),
         content: configuration_content.to_string(),
         version: 0,
-        language_hint: Language::Json,
+        document_file_source: Some(JsonFileSource::json().into()),
     })?;
 
     let parsed = parse_json_with_cache(

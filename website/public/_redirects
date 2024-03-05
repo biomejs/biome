@@ -1,1 +1,5 @@
 /ja/* /ja/404 404
+/zh-cn/* /zh-cn/404 404
+/pt-br/* /pt-br/404 404
+https://biomejs.com/* https://biomejs.dev/*:splat 301!
+https://www.biomejs.com/* https://biomejs.dev/*:splat 301!

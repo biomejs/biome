@@ -41,6 +41,24 @@ check.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
+check.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `(` but instead the file ends
+  
+    1 │ if
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ if
+  > 2 │ 
+      │ 
+  
+
+```
+
+```block
 check.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
@@ -50,7 +68,7 @@ check.js format ━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes needed.
-Found 3 errors.
+Found 4 errors.
 ```
 
 

@@ -1,0 +1,174 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/namespaces.css
+---
+
+# Input
+
+```css
+@namespace toto "http://toto.example.org";
+@namespace toto url("http://toto.example.org");
+@namespace toto "http://toto.example.org" ;
+@namespace  toto  "http://toto.example.org"  ;
+@namespace
+toto
+"http://toto.example.org"
+;
+@namespace
+
+toto
+
+"http://toto.example.org"
+
+;
+@namespace very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace "http://toto.example.org";
+@namespace
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace
+"http://toto.example.org"
+;
+@namespace
+
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace
+
+"http://toto.example.org"
+
+;
+@namespace "http://example.com/foo";
+@namespace url("http://example.com/foo");
+@namespace url("http://example.com/foo") ;
+@namespace  url("http://example.com/foo")  ;
+@namespace
+url("http://example.com/foo");
+@namespace
+
+url("http://example.com/foo");
+@namespace url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
+@namespace
+url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
+@namespace
+
+url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,18 +1,42 @@
+ @namespace toto "http://toto.example.org";
+ @namespace toto url("http://toto.example.org");
+-@namespace toto "http://toto.example.org";
+-@namespace toto "http://toto.example.org";
+-@namespace toto "http://toto.example.org";
+-@namespace toto "http://toto.example.org";
++@namespace toto "http://toto.example.org" ;
++@namespace  toto  "http://toto.example.org"  ;
++@namespace
++toto
++"http://toto.example.org"
++;
++@namespace
++
++toto
++
++"http://toto.example.org"
++
++;
+ @namespace very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace "http://toto.example.org";
+-@namespace very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace "http://toto.example.org";
+-@namespace very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace "http://toto.example.org";
++@namespace
++very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace
++"http://toto.example.org"
++;
++@namespace
++
++very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace
++
++"http://toto.example.org"
++
++;
+ @namespace "http://example.com/foo";
+ @namespace url("http://example.com/foo");
+-@namespace url("http://example.com/foo");
+-@namespace url("http://example.com/foo");
+-@namespace url("http://example.com/foo");
+-@namespace url("http://example.com/foo");
++@namespace url("http://example.com/foo") ;
++@namespace  url("http://example.com/foo")  ;
++@namespace
++url("http://example.com/foo");
++@namespace
++
++url("http://example.com/foo");
+ @namespace url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
+-@namespace url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
+-@namespace url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
++@namespace
++url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
++@namespace
++
++url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
+```
+
+# Output
+
+```css
+@namespace toto "http://toto.example.org";
+@namespace toto url("http://toto.example.org");
+@namespace toto "http://toto.example.org" ;
+@namespace  toto  "http://toto.example.org"  ;
+@namespace
+toto
+"http://toto.example.org"
+;
+@namespace
+
+toto
+
+"http://toto.example.org"
+
+;
+@namespace very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace "http://toto.example.org";
+@namespace
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace
+"http://toto.example.org"
+;
+@namespace
+
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace
+
+"http://toto.example.org"
+
+;
+@namespace "http://example.com/foo";
+@namespace url("http://example.com/foo");
+@namespace url("http://example.com/foo") ;
+@namespace  url("http://example.com/foo")  ;
+@namespace
+url("http://example.com/foo");
+@namespace
+
+url("http://example.com/foo");
+@namespace url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
+@namespace
+url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
+@namespace
+
+url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
+```
+
+# Lines exceeding max width of 80 characters
+```
+   16: @namespace very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace "http://toto.example.org";
+   18: very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace
+   23: very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-namespace
+   37: @namespace url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
+   39: url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
+   42: url("http://example.com/foo/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very");
+```
+
+

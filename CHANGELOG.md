@@ -33,10 +33,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```diff
   <script setup lang="ts">
-     - import Button from "./components/Button.vue";
-     - import * as vueUse from "vue-use";
-     + import * as vueUse from "vue-use";
-     + import Button from "./components/Button.vue";
+  - import Button from "./components/Button.vue";
+  - import * as vueUse from "vue-use";
+  + import * as vueUse from "vue-use";
+  + import Button from "./components/Button.vue";
   </script/>
 
   <template></template>
@@ -47,10 +47,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```diff
   <script setup lang="ts">
-    - import Button from "./components/Button.svelte";
-    - import * as svelteUse from "svelte-use";
-    + import * as svelteUse from "svelte-use";
-    + import Button from "./components/Button.svelte";
+  - import Button from "./components/Button.svelte";
+  - import * as svelteUse from "svelte-use";
+  + import * as svelteUse from "svelte-use";
+  + import Button from "./components/Button.svelte";
   </script/>
 
   <div></div>
@@ -101,6 +101,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#1924](https://github.com/biomejs/biome/issues/1924) Use the correct export name to sort in the import clause. Contributed by @ah-yu
 - Fix [#1805](https://github.com/biomejs/biome/issues/1805) fix formatting arrow function which has conditional expression body  Contributed by @mdm317
 
+- Fix [#1781](https://github.com/biomejs/biome/issues/1781) by avoiding the retrieval of the entire static member expression for the reference if the static member expression does not start with the reference. Contributed by @ah-yu
+
 ### CLI
 
 #### New features
@@ -149,6 +151,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```
   Contributed by @ematipico
+- Fix [#1774](https://github.com/biomejs/biome/issues/1774) by taking into account the option `--no-errors-on-unmatched` when running the CLI using `--changed`. Contributed by @antogyn
 
 #### Enhancements
 
@@ -160,6 +163,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
     × The file contains diagnostics that needs to be addressed.
   ```
   Contributed by @ematipico
+- The command `format` now emits parsing diagnostics if there are any, and it will terminate with a non-zero exit code. Contributed by @ematipico 
 
 ### Configuration
 
@@ -296,6 +300,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#1218](https://github.com/biomejs/biome/issues/1218), by correctly preserving empty lines in member chains.
   Contributed by @ah-yu
+- Fix [#1659](https://github.com/biomejs/biome/issues/1659) and [#1662](https://github.com/biomejs/biome/issues/1662), by correctly taking into account the leading comma inside the formatter options. Contributed by @ematipico
+
+- Fix [#1934](https://github.com/biomejs/biome/pull/1934). Fix invalid formatting of long arrow function for AsNeeded arrow parens Contributed by @fireairforce
 
 ### JavaScript APIs
 
@@ -550,6 +557,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#1932](https://github.com/biomejs/biome/issues/1932) Allow redeclaration of type parameters in different declarations.
   Contributed by @keita-hino
 
+- Fix [#1945](https://github.com/biomejs/biome/issues/1945) Allow constructor with default parameters in `noUselessConstructor`
+
 ### Parser
 
 #### Bug fixes
@@ -617,6 +626,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 ### Formatter
+
+#### New features
+
+- Add option `json.formatter.trailingComma`, to provide a better control over the trailing comma in JSON/JSONC files. Its default value is `"none"`.
 
 #### Bug fixes
 

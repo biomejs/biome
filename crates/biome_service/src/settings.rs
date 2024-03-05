@@ -6,6 +6,7 @@ use crate::configuration::{
     push_to_analyzer_rules, to_override_settings, CssConfiguration, FormatterConfiguration,
     JavascriptConfiguration, JsonConfiguration, LinterConfiguration, PartialConfiguration,
 };
+use crate::workspace::DocumentFileSource;
 use crate::{
     configuration::FilesConfiguration, ConfigurationDiagnostic, Matcher, Rules, WorkspaceError,
 };
@@ -326,7 +327,6 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.formatter.line_width = formatter.line_width;
         language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
         language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
-
         language_setting.parser.parse_class_parameter_decorators =
             javascript.parser.unsafe_parameter_decorators_enabled;
 
@@ -342,7 +342,7 @@ impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
 
         language_setting.parser.allow_comments = json.parser.allow_comments;
         language_setting.parser.allow_trailing_commas = json.parser.allow_trailing_commas;
-
+        language_setting.formatter.trailing_comma = json.formatter.trailing_commas;
         language_setting.formatter.enabled = Some(json.formatter.enabled);
         language_setting.formatter.line_width = json.formatter.line_width;
         language_setting.formatter.indent_width = json.formatter.indent_width.map(Into::into);
@@ -391,6 +391,7 @@ pub trait Language: biome_rowan::Language {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         path: &BiomePath,
+        file_source: &DocumentFileSource,
     ) -> Self::FormatOptions;
 }
 
@@ -502,7 +503,11 @@ impl<'a> AsRef<WorkspaceSettings> for SettingsHandle<'a> {
 
 impl<'a> SettingsHandle<'a> {
     /// Resolve the formatting context for the given language
-    pub(crate) fn format_options<L>(self, path: &BiomePath) -> L::FormatOptions
+    pub(crate) fn format_options<L>(
+        self,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> L::FormatOptions
     where
         L: Language,
     {
@@ -511,6 +516,7 @@ impl<'a> SettingsHandle<'a> {
             &self.inner.override_settings,
             &L::lookup_settings(&self.inner.languages).formatter,
             path,
+            file_source,
         )
     }
 }

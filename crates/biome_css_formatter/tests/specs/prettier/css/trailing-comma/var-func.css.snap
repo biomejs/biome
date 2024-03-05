@@ -1,0 +1,50 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/trailing-comma/var-func.css
+---
+
+# Input
+
+```css
+.foo {
+	--bar: var(--baz,);
+  --bar: var(--baz     ,);
+  --bar: var(--baz     ,    );
+  --bar: var(--baz,);
+	--bar: var(   --baz1, --baz2    , );
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ .foo {
+   --bar: var(--baz,);
++  --bar: var(--baz     ,);
++  --bar: var(--baz     ,    );
+   --bar: var(--baz,);
+-  --bar: var(--baz,);
+-  --bar: var(--baz,);
+-  --bar: var(--baz1, --baz2,);
++  --bar: var(   --baz1, --baz2    , );
+ }
+```
+
+# Output
+
+```css
+.foo {
+  --bar: var(--baz,);
+  --bar: var(--baz     ,);
+  --bar: var(--baz     ,    );
+  --bar: var(--baz,);
+  --bar: var(   --baz1, --baz2    , );
+}
+```
+
+

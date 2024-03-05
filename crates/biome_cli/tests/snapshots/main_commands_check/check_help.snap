@@ -70,6 +70,8 @@ The configuration that is contained inside the file `biome.json`
                               languages) files.
         --json-formatter-line-width=NUMBER  What's the max width of a line applied to JSON (and its super
                               languages) files. Defaults to 80.
+        --json-formatter-trailing-commas=<omit|allow>  Print trailing commas wherever possible in multi-line
+                              comma-separated syntactic structures. Defaults to "omit".
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain text,

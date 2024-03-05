@@ -70,7 +70,7 @@ use tracing::debug;
 
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 use crate::configuration::PartialConfiguration;
-pub use crate::file_handlers::Language;
+pub use crate::file_handlers::DocumentFileSource;
 use crate::settings::WorkspaceSettings;
 
 mod client;
@@ -149,17 +149,17 @@ impl FileFeaturesResult {
     pub(crate) fn with_settings_and_language(
         mut self,
         settings: &WorkspaceSettings,
-        language: &Language,
+        file_source: &DocumentFileSource,
         path: &Path,
     ) -> Self {
         let formatter_disabled =
             if let Some(disabled) = settings.override_settings.formatter_disabled(path) {
                 disabled
-            } else if language.is_javascript_like() {
+            } else if file_source.is_javascript_like() {
                 !settings.formatter().enabled || settings.javascript_formatter_disabled()
-            } else if language.is_json_like() {
+            } else if file_source.is_json_like() {
                 !settings.formatter().enabled || settings.json_formatter_disabled()
-            } else if language.is_css_like() {
+            } else if file_source.is_css_like() {
                 !can_format_css_yet()
                     || !settings.formatter().enabled
                     || settings.css_formatter_disabled()
@@ -415,8 +415,7 @@ pub struct OpenFileParams {
     pub path: BiomePath,
     pub content: String,
     pub version: i32,
-    #[serde(default)]
-    pub language_hint: Language,
+    pub document_file_source: Option<DocumentFileSource>,
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]

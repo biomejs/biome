@@ -2,6 +2,7 @@
 // requires Bun installed globally: bun.sh
 
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { readPackageUp } from "read-package-up";
 import { introspectTailwindConfig } from "./introspect.js";
 import { type SortConfig, sortConfigFromSpec } from "./sort-config.js";
@@ -58,7 +59,7 @@ function generateFile(sortConfig: SortConfig) {
 }
 
 async function findRoot() {
-	let nextPath = import.meta.dir;
+	let nextPath = path.dirname(fileURLToPath(import.meta.url));
 	let rootPath: string | false = false;
 	while (!rootPath) {
 		const pkg = await readPackageUp({ cwd: nextPath });

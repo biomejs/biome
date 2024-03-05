@@ -33,6 +33,17 @@ fix.js:1:22 parse ━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
+fix.js:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of `arguments` as an identifier in strict mode
+  
+  > 1 │ function _13_1_3_fun(arguments) { }
+      │                      ^^^^^^^^^
+  
+
+```
+
+```block
 fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
@@ -42,7 +53,7 @@ fix.js format ━━━━━━━━━━━━━━━━━━━━━━
 
 ```block
 Checked 1 file in <TIME>. No fixes needed.
-Found 3 errors.
+Found 4 errors.
 ```
 
 

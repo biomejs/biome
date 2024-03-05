@@ -1,0 +1,158 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/postcss-plugins/postcss-nested-props.css
+---
+
+# Input
+
+```css
+.funky {
+    font: {
+        family: fantasy;
+        size: 30em;
+        weight: bold;
+    }
+}
+
+.funky {
+    font: 20px/24px fantasy {
+        weight: bold;
+    }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,13 +1,13 @@
+ .funky {
+   font: {
+-    family: fantasy;
+-    size: 30em;
+-    weight: bold;
+-  }
++        family: fantasy;
++  size: 30em;
++  weight: bold;
++}
+ }
+ 
+ .funky {
+   font: 20px/24px fantasy {
+-    weight: bold;
+-  }
++        weight: bold;
++}
+ }
+```
+
+# Output
+
+```css
+.funky {
+  font: {
+        family: fantasy;
+  size: 30em;
+  weight: bold;
+}
+}
+
+.funky {
+  font: 20px/24px fantasy {
+        weight: bold;
+}
+}
+```
+
+# Errors
+```
+postcss-nested-props.css:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ .funky {
+  > 2 │     font: {
+      │           ^
+  > 3 │         family: fantasy;
+      │         ^^^^^^^^^^^^^^^
+    4 │         size: 30em;
+    5 │         weight: bold;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+postcss-nested-props.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '}'.
+  
+    5 │         weight: bold;
+    6 │     }
+  > 7 │ }
+      │ ^
+    8 │ 
+    9 │ .funky {
+  
+  i Expected a qualified rule, or an at rule here.
+  
+    5 │         weight: bold;
+    6 │     }
+  > 7 │ }
+      │ ^
+    8 │ 
+    9 │ .funky {
+  
+postcss-nested-props.css:10:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     9 │ .funky {
+  > 10 │     font: 20px/24px fantasy {
+       │                             ^
+  > 11 │         weight: bold;
+       │         ^^^^^^^^^^^^
+    12 │     }
+    13 │ }
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+postcss-nested-props.css:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '}'.
+  
+    11 │         weight: bold;
+    12 │     }
+  > 13 │ }
+       │ ^
+    14 │ 
+  
+  i Expected a qualified rule, or an at rule here.
+  
+    11 │         weight: bold;
+    12 │     }
+  > 13 │ }
+       │ ^
+    14 │ 
+  
+
+```
+
+

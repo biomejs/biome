@@ -1,0 +1,817 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/quotes/quotes.css
+---
+
+# Input
+
+```css
+@charset "UTF-8";
+/* @charset must always have double quotes: https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding */
+/* Also, it has to be the very first thing in the file, but here are some more tests anyway: */
+@charset 'UTF-8'; /* Single quotes are invalid here. Keep them since we don't know what the user is doing. */
+
+@supports (content: one "two" three 'four') {
+  a[href="foo" y],
+  abbr[title^='It\'s a trap!'],
+  img[src=""] {
+    /* Simple strings. */
+    content: "abc";
+    content: 'abc';
+
+    /* Escape. */
+    content: '\A';
+
+    /* Emoji. */
+    content: '🐶';
+
+    /* Empty string. */
+    content: "";
+    content: '';
+
+    /* Single double quote. */
+    content: "\"";
+    content: '"';
+
+    /* Single single quote. */
+    content: "'";
+    content: '\'';
+
+    /* One of each. */
+    content: "\"'";
+    content: '"\'';
+
+    /* One of each with unnecessary escapes. */
+    content: "\"\'";
+    content: '\"\'';
+
+    /* More double quotes than single quotes. */
+    content: "\"'\"";
+    content: '"\'"';
+
+    /* More single quotes than double quotes. */
+    content: "\"''";
+    content: '"\'\'';
+
+    /* Two of each. */
+    content: "\"\"''";
+    content: '""\'\'';
+
+    /* Single backslash. */
+    content: '\\';
+    content: "\\";
+
+    /* Backslases. */
+    content: "\"\\\"\\\\\" '\'\\'\\\'\\\\'";
+    content: '\'\\\'\\\\\' "\"\\"\\\"\\\\"';
+
+    /* Somewhat more real-word example. */
+    content: "He's sayin': \"How's it goin'?\" Don't ask me why.";
+    content: 'He\'s sayin\': "How\'s it goin\'?" Don\'t ask me why.';
+
+    /* Somewhat more real-word example 2. */
+    content: "var backslash = \"\\\", doubleQuote = '\"';";
+    content: 'var backslash = "\\", doubleQuote = \'"\';';
+
+    /* Leave all "escapes" alone. */
+    content: "\Abc4 foo \n" /* "comment" */ "\end";
+    content: '\Abc4 foo \n' /* 'comment' */ '\end';
+  }
+}
+
+@import "file.css";
+@import 'file.css';
+
+@import url("foo.css");
+@import url('foo.css');
+
+@import "foo.css" screen and (orientation: landscape);
+@import 'foo.css' screen and (orientation: landscape);
+
+@foo "one";
+@foo 'one';
+@foo "one" two 'three';
+@foo ("one");
+@foo ('one');
+@foo ("one" two 'three');
+
+one "two" three {}
+one 'two' three {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ @charset "UTF-8";
+ /* @charset must always have double quotes: https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding */
+ /* Also, it has to be the very first thing in the file, but here are some more tests anyway: */
+-@charset 'UTF-8'; /* Single quotes are invalid here. Keep them since we don't know what the user is doing. */
++@charset "UTF-8"; /* Single quotes are invalid here. Keep them since we don't know what the user is doing. */
+ 
+ @supports (content: one "two" three "four") {
+   a[href="foo" y],
+@@ -71,23 +71,33 @@
+   }
+ }
+ 
+-@import "file.css";
+ @import "file.css";
++@import 'file.css';
+ 
+ @import url("foo.css");
+-@import url("foo.css");
++@import url('foo.css');
+ 
+-@import "foo.css" screen and (orientation: landscape);
+ @import "foo.css" screen and (orientation: landscape);
++@import 'foo.css' screen and (orientation: landscape);
+ 
+-@foo "one";
+-@foo 'one';
+-@foo "one" two 'three';
+-@foo ("one");
+-@foo ('one');
+-@foo ("one" two 'three');
++@
++foo "one"
++;
++@
++foo 'one'
++;
++@
++foo "one" two 'three'
++;
++@
++foo ("one")
++;
++@
++foo ('one')
++;
++@
++foo ("one" two 'three')
++;
+ 
+-one "two" three {
+-}
+-one "two" three {
+-}
++one "two" three {}
++one 'two' three {}
+```
+
+# Output
+
+```css
+@charset "UTF-8";
+/* @charset must always have double quotes: https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding */
+/* Also, it has to be the very first thing in the file, but here are some more tests anyway: */
+@charset "UTF-8"; /* Single quotes are invalid here. Keep them since we don't know what the user is doing. */
+
+@supports (content: one "two" three "four") {
+  a[href="foo" y],
+  abbr[title^="It's a trap!"],
+  img[src=""] {
+    /* Simple strings. */
+    content: "abc";
+    content: "abc";
+
+    /* Escape. */
+    content: "\A";
+
+    /* Emoji. */
+    content: "🐶";
+
+    /* Empty string. */
+    content: "";
+    content: "";
+
+    /* Single double quote. */
+    content: '"';
+    content: '"';
+
+    /* Single single quote. */
+    content: "'";
+    content: "'";
+
+    /* One of each. */
+    content: "\"'";
+    content: "\"'";
+
+    /* One of each with unnecessary escapes. */
+    content: "\"'";
+    content: "\"'";
+
+    /* More double quotes than single quotes. */
+    content: '"\'"';
+    content: '"\'"';
+
+    /* More single quotes than double quotes. */
+    content: "\"''";
+    content: "\"''";
+
+    /* Two of each. */
+    content: "\"\"''";
+    content: "\"\"''";
+
+    /* Single backslash. */
+    content: "\\";
+    content: "\\";
+
+    /* Backslases. */
+    content: "\"\\\"\\\\\" ''\\'\\'\\\\'";
+    content: '\'\\\'\\\\\' ""\\"\\"\\\\"';
+
+    /* Somewhat more real-word example. */
+    content: "He's sayin': \"How's it goin'?\" Don't ask me why.";
+    content: "He's sayin': \"How's it goin'?\" Don't ask me why.";
+
+    /* Somewhat more real-word example 2. */
+    content: 'var backslash = "\\", doubleQuote = \'"\';';
+    content: 'var backslash = "\\", doubleQuote = \'"\';';
+
+    /* Leave all "escapes" alone. */
+    content: "\Abc4 foo \n" /* "comment" */ "\end";
+    content: "\Abc4 foo \n" /* 'comment' */ "\end";
+  }
+}
+
+@import "file.css";
+@import 'file.css';
+
+@import url("foo.css");
+@import url('foo.css');
+
+@import "foo.css" screen and (orientation: landscape);
+@import 'foo.css' screen and (orientation: landscape);
+
+@
+foo "one"
+;
+@
+foo 'one'
+;
+@
+foo "one" two 'three'
+;
+@
+foo ("one")
+;
+@
+foo ('one')
+;
+@
+foo ("one" two 'three')
+;
+
+one "two" three {}
+one 'two' three {}
+```
+
+# Errors
+```
+quotes.css:7:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a s, a S, an i, or a I but instead found 'y'.
+  
+    6 │ @supports (content: one "two" three 'four') {
+  > 7 │   a[href="foo" y],
+      │                ^
+    8 │   abbr[title^='It\'s a trap!'],
+    9 │   img[src=""] {
+  
+  i Expected a s, a S, an i, or a I here.
+  
+    6 │ @supports (content: one "two" three 'four') {
+  > 7 │   a[href="foo" y],
+      │                ^
+    8 │   abbr[title^='It\'s a trap!'],
+    9 │   img[src=""] {
+  
+quotes.css:83:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    81 │ @import 'foo.css' screen and (orientation: landscape);
+    82 │ 
+  > 83 │ @foo "one";
+       │  ^^^
+    84 │ @foo 'one';
+    85 │ @foo "one" two 'three';
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+quotes.css:83:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '"one"'.
+  
+    81 │ @import 'foo.css' screen and (orientation: landscape);
+    82 │ 
+  > 83 │ @foo "one";
+       │      ^^^^^
+    84 │ @foo 'one';
+    85 │ @foo "one" two 'three';
+  
+  i Expected a compound selector here.
+  
+    81 │ @import 'foo.css' screen and (orientation: landscape);
+    82 │ 
+  > 83 │ @foo "one";
+       │      ^^^^^
+    84 │ @foo 'one';
+    85 │ @foo "one" two 'three';
+  
+quotes.css:83:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    81 │ @import 'foo.css' screen and (orientation: landscape);
+    82 │ 
+  > 83 │ @foo "one";
+       │           ^
+    84 │ @foo 'one';
+    85 │ @foo "one" two 'three';
+  
+  i Remove ;
+  
+quotes.css:84:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    83 │ @foo "one";
+  > 84 │ @foo 'one';
+       │  ^^^
+    85 │ @foo "one" two 'three';
+    86 │ @foo ("one");
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+quotes.css:84:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found ''one''.
+  
+    83 │ @foo "one";
+  > 84 │ @foo 'one';
+       │      ^^^^^
+    85 │ @foo "one" two 'three';
+    86 │ @foo ("one");
+  
+  i Expected a compound selector here.
+  
+    83 │ @foo "one";
+  > 84 │ @foo 'one';
+       │      ^^^^^
+    85 │ @foo "one" two 'three';
+    86 │ @foo ("one");
+  
+quotes.css:84:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    83 │ @foo "one";
+  > 84 │ @foo 'one';
+       │           ^
+    85 │ @foo "one" two 'three';
+    86 │ @foo ("one");
+  
+  i Remove ;
+  
+quotes.css:85:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    83 │ @foo "one";
+    84 │ @foo 'one';
+  > 85 │ @foo "one" two 'three';
+       │  ^^^
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+quotes.css:85:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '"one"'.
+  
+    83 │ @foo "one";
+    84 │ @foo 'one';
+  > 85 │ @foo "one" two 'three';
+       │      ^^^^^
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  
+  i Expected a compound selector here.
+  
+    83 │ @foo "one";
+    84 │ @foo 'one';
+  > 85 │ @foo "one" two 'three';
+       │      ^^^^^
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  
+quotes.css:85:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `two`
+  
+    83 │ @foo "one";
+    84 │ @foo 'one';
+  > 85 │ @foo "one" two 'three';
+       │            ^^^
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  
+  i Remove two
+  
+quotes.css:85:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found ''three''.
+  
+    83 │ @foo "one";
+    84 │ @foo 'one';
+  > 85 │ @foo "one" two 'three';
+       │                ^^^^^^^
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  
+  i Expected a compound selector here.
+  
+    83 │ @foo "one";
+    84 │ @foo 'one';
+  > 85 │ @foo "one" two 'three';
+       │                ^^^^^^^
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  
+quotes.css:85:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    83 │ @foo "one";
+    84 │ @foo 'one';
+  > 85 │ @foo "one" two 'three';
+       │                       ^
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  
+  i Remove ;
+  
+quotes.css:86:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    84 │ @foo 'one';
+    85 │ @foo "one" two 'three';
+  > 86 │ @foo ("one");
+       │  ^^^
+    87 │ @foo ('one');
+    88 │ @foo ("one" two 'three');
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+quotes.css:86:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '('.
+  
+    84 │ @foo 'one';
+    85 │ @foo "one" two 'three';
+  > 86 │ @foo ("one");
+       │      ^
+    87 │ @foo ('one');
+    88 │ @foo ("one" two 'three');
+  
+  i Expected a compound selector here.
+  
+    84 │ @foo 'one';
+    85 │ @foo "one" two 'three';
+  > 86 │ @foo ("one");
+       │      ^
+    87 │ @foo ('one');
+    88 │ @foo ("one" two 'three');
+  
+quotes.css:86:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    84 │ @foo 'one';
+    85 │ @foo "one" two 'three';
+  > 86 │ @foo ("one");
+       │             ^
+    87 │ @foo ('one');
+    88 │ @foo ("one" two 'three');
+  
+  i Remove ;
+  
+quotes.css:87:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    85 │ @foo "one" two 'three';
+    86 │ @foo ("one");
+  > 87 │ @foo ('one');
+       │  ^^^
+    88 │ @foo ("one" two 'three');
+    89 │ 
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+quotes.css:87:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '('.
+  
+    85 │ @foo "one" two 'three';
+    86 │ @foo ("one");
+  > 87 │ @foo ('one');
+       │      ^
+    88 │ @foo ("one" two 'three');
+    89 │ 
+  
+  i Expected a compound selector here.
+  
+    85 │ @foo "one" two 'three';
+    86 │ @foo ("one");
+  > 87 │ @foo ('one');
+       │      ^
+    88 │ @foo ("one" two 'three');
+    89 │ 
+  
+quotes.css:87:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    85 │ @foo "one" two 'three';
+    86 │ @foo ("one");
+  > 87 │ @foo ('one');
+       │             ^
+    88 │ @foo ("one" two 'three');
+    89 │ 
+  
+  i Remove ;
+  
+quotes.css:88:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  > 88 │ @foo ("one" two 'three');
+       │  ^^^
+    89 │ 
+    90 │ one "two" three {}
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+quotes.css:88:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '('.
+  
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  > 88 │ @foo ("one" two 'three');
+       │      ^
+    89 │ 
+    90 │ one "two" three {}
+  
+  i Expected a compound selector here.
+  
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  > 88 │ @foo ("one" two 'three');
+       │      ^
+    89 │ 
+    90 │ one "two" three {}
+  
+quotes.css:88:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `two`
+  
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  > 88 │ @foo ("one" two 'three');
+       │             ^^^
+    89 │ 
+    90 │ one "two" three {}
+  
+  i Remove two
+  
+quotes.css:88:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found ''three''.
+  
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  > 88 │ @foo ("one" two 'three');
+       │                 ^^^^^^^
+    89 │ 
+    90 │ one "two" three {}
+  
+  i Expected a compound selector here.
+  
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  > 88 │ @foo ("one" two 'three');
+       │                 ^^^^^^^
+    89 │ 
+    90 │ one "two" three {}
+  
+quotes.css:88:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    86 │ @foo ("one");
+    87 │ @foo ('one');
+  > 88 │ @foo ("one" two 'three');
+       │                         ^
+    89 │ 
+    90 │ one "two" three {}
+  
+  i Remove ;
+  
+quotes.css:90:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '"two"'.
+  
+    88 │ @foo ("one" two 'three');
+    89 │ 
+  > 90 │ one "two" three {}
+       │     ^^^^^
+    91 │ one 'two' three {}
+    92 │ 
+  
+  i Expected a compound selector here.
+  
+    88 │ @foo ("one" two 'three');
+    89 │ 
+  > 90 │ one "two" three {}
+       │     ^^^^^
+    91 │ one 'two' three {}
+    92 │ 
+  
+quotes.css:90:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `three`
+  
+    88 │ @foo ("one" two 'three');
+    89 │ 
+  > 90 │ one "two" three {}
+       │           ^^^^^
+    91 │ one 'two' three {}
+    92 │ 
+  
+  i Remove three
+  
+quotes.css:91:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found ''two''.
+  
+    90 │ one "two" three {}
+  > 91 │ one 'two' three {}
+       │     ^^^^^
+    92 │ 
+  
+  i Expected a compound selector here.
+  
+    90 │ one "two" three {}
+  > 91 │ one 'two' three {}
+       │     ^^^^^
+    92 │ 
+  
+quotes.css:91:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `three`
+  
+    90 │ one "two" three {}
+  > 91 │ one 'two' three {}
+       │           ^^^^^
+    92 │ 
+  
+  i Remove three
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: /* @charset must always have double quotes: https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding */
+    3: /* Also, it has to be the very first thing in the file, but here are some more tests anyway: */
+    4: @charset "UTF-8"; /* Single quotes are invalid here. Keep them since we don't know what the user is doing. */
+```
+
+

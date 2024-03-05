@@ -1,0 +1,247 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/parens/empty-lines.css
+---
+
+# Input
+
+```css
+$colours: (
+    "text": $light-100,
+    "background-primary": $dark-300,
+
+
+
+
+
+
+    "background-secondary": $dark-200,
+    "background-tertiary": $dark-100
+);
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,15 @@
+-$colours: (
+-  "text": $light-100,
+-  "background-primary": $dark-300,
++$colours: 
++(
++    "text"
++: $light-100,
++    "background-primary": $dark-300,
++
++
++
++
++
+ 
+-  "background-secondary": $dark-200,
+-  "background-tertiary": $dark-100
+-);
++    "background-secondary": $dark-200,
++    "background-tertiary": $dark-100
++)
++;
+```
+
+# Output
+
+```css
+$colours: 
+(
+    "text"
+: $light-100,
+    "background-primary": $dark-300,
+
+
+
+
+
+
+    "background-secondary": $dark-200,
+    "background-tertiary": $dark-100
+)
+;
+```
+
+# Errors
+```
+empty-lines.css:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ $colours: (
+      │           ^
+    2 │     "text": $light-100,
+    3 │     "background-primary": $dark-300,
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
+  
+empty-lines.css:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found '"background-primary"'.
+  
+    1 │ $colours: (
+    2 │     "text": $light-100,
+  > 3 │     "background-primary": $dark-300,
+      │     ^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Expected a selector here.
+  
+    1 │ $colours: (
+    2 │     "text": $light-100,
+  > 3 │     "background-primary": $dark-300,
+      │     ^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+empty-lines.css:3:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+    1 │ $colours: (
+    2 │     "text": $light-100,
+  > 3 │     "background-primary": $dark-300,
+      │                         ^
+    4 │ 
+  
+  i Remove :
+  
+empty-lines.css:10:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found '"background-secondary"'.
+  
+  > 10 │     "background-secondary": $dark-200,
+       │     ^^^^^^^^^^^^^^^^^^^^^^
+    11 │     "background-tertiary": $dark-100
+    12 │ );
+  
+  i Expected a selector here.
+  
+  > 10 │     "background-secondary": $dark-200,
+       │     ^^^^^^^^^^^^^^^^^^^^^^
+    11 │     "background-tertiary": $dark-100
+    12 │ );
+  
+empty-lines.css:10:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+  > 10 │     "background-secondary": $dark-200,
+       │                           ^
+    11 │     "background-tertiary": $dark-100
+    12 │ );
+  
+  i Remove :
+  
+empty-lines.css:11:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found '"background-tertiary"'.
+  
+    10 │     "background-secondary": $dark-200,
+  > 11 │     "background-tertiary": $dark-100
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    12 │ );
+    13 │ 
+  
+  i Expected a selector here.
+  
+    10 │     "background-secondary": $dark-200,
+  > 11 │     "background-tertiary": $dark-100
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    12 │ );
+    13 │ 
+  
+empty-lines.css:11:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+    10 │     "background-secondary": $dark-200,
+  > 11 │     "background-tertiary": $dark-100
+       │                          ^
+    12 │ );
+    13 │ 
+  
+  i Remove :
+  
+empty-lines.css:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    10 │     "background-secondary": $dark-200,
+    11 │     "background-tertiary": $dark-100
+  > 12 │ );
+       │ ^
+    13 │ 
+  
+  i Remove )
+  
+empty-lines.css:12:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    10 │     "background-secondary": $dark-200,
+    11 │     "background-tertiary": $dark-100
+  > 12 │ );
+       │  ^
+    13 │ 
+  
+  i Remove ;
+  
+
+```
+
+

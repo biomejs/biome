@@ -1,0 +1,111 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/yaml/without-newline-after.css
+---
+
+# Input
+
+```css
+---
+title: Title
+description: Description
+---
+a {
+    color: red;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,8 @@
+ ---
+ title: Title
+ description: Description
+----
+-
++--
++-
+ a {
+   color: red;
+ }
+```
+
+# Output
+
+```css
+---
+title: Title
+description: Description
+--
+-
+a {
+  color: red;
+}
+```
+
+# Errors
+```
+without-newline-after.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '---'.
+  
+  > 1 │ ---
+      │ ^^^
+    2 │ title: Title
+    3 │ description: Description
+  
+  i Expected a qualified rule, or an at rule here.
+  
+  > 1 │ ---
+      │ ^^^
+    2 │ title: Title
+    3 │ description: Description
+  
+without-newline-after.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `description`
+  
+    1 │ ---
+    2 │ title: Title
+  > 3 │ description: Description
+      │ ^^^^^^^^^^^
+    4 │ ---
+    5 │ a {
+  
+  i Remove description
+  
+without-newline-after.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `-`
+  
+    2 │ title: Title
+    3 │ description: Description
+  > 4 │ ---
+      │ ^
+    5 │ a {
+    6 │     color: red;
+  
+  i Remove -
+  
+without-newline-after.css:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `-`
+  
+    2 │ title: Title
+    3 │ description: Description
+  > 4 │ ---
+      │   ^
+    5 │ a {
+    6 │     color: red;
+  
+  i Remove -
+  
+
+```
+
+

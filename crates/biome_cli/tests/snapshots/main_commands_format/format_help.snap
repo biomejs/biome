@@ -106,6 +106,8 @@ Available options:
                               languages) files.
         --json-formatter-line-width=NUMBER  What's the max width of a line applied to JSON (and its super
                               languages) files. Defaults to 80.
+        --json-formatter-trailing-commas=<omit|allow>  Print trailing commas wherever possible in multi-line
+                              comma-separated syntactic structures. Defaults to "omit".
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension of

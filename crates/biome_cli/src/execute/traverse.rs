@@ -143,7 +143,10 @@ pub(crate) fn traverse(
     inputs: Vec<OsString>,
 ) -> Result<(), CliDiagnostic> {
     init_thread_pool();
-    if inputs.is_empty() && execution.as_stdin_file().is_none() {
+    if inputs.is_empty()
+        && execution.as_stdin_file().is_none()
+        && !cli_options.no_errors_on_unmatched
+    {
         return Err(CliDiagnostic::missing_argument(
             "<INPUT>",
             format!("{}", execution.traversal_mode),
@@ -239,9 +242,15 @@ pub(crate) fn traverse(
     }
 
     if skipped > 0 {
-        console.log(markup! {
-            <Warn>"Skipped "{skipped}" file(s)"</Warn>
-        });
+        if skipped == 1 {
+            console.log(markup! {
+                <Warn>"Skipped "{skipped}" file."</Warn>
+            });
+        } else {
+            console.log(markup! {
+                <Warn>"Skipped "{skipped}" files."</Warn>
+            });
+        }
     }
 
     let should_exit_on_warnings = warnings > 0 && cli_options.error_on_warnings;

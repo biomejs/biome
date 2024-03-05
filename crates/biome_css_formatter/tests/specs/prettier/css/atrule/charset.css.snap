@@ -1,0 +1,73 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/charset.css
+---
+
+# Input
+
+```css
+@charset "UTF-8";
+@charset "iso-8859-15";
+@charset 'iso-8859-15'; /* Invalid, wrong quoting style used */
+@charset  "UTF-8"; /* Invalid, more than one space */
+@charset "UTF-8"; /* Invalid, there is a character (a space) before the at-rule */
+@charset UTF-8; /* Invalid, without ' or ", the charset is not a CSS <string> */
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ @charset "UTF-8";
+ @charset "iso-8859-15";
+-@charset 'iso-8859-15'; /* Invalid, wrong quoting style used */
++@charset "iso-8859-15"; /* Invalid, wrong quoting style used */
+ @charset "UTF-8"; /* Invalid, more than one space */
+ @charset "UTF-8"; /* Invalid, there is a character (a space) before the at-rule */
+ @charset UTF-8; /* Invalid, without ' or ", the charset is not a CSS <string> */
+```
+
+# Output
+
+```css
+@charset "UTF-8";
+@charset "iso-8859-15";
+@charset "iso-8859-15"; /* Invalid, wrong quoting style used */
+@charset "UTF-8"; /* Invalid, more than one space */
+@charset "UTF-8"; /* Invalid, there is a character (a space) before the at-rule */
+@charset UTF-8; /* Invalid, without ' or ", the charset is not a CSS <string> */
+```
+
+# Errors
+```
+charset.css:6:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string but instead found 'UTF-8'.
+  
+    4 │ @charset  "UTF-8"; /* Invalid, more than one space */
+    5 │ @charset "UTF-8"; /* Invalid, there is a character (a space) before the at-rule */
+  > 6 │ @charset UTF-8; /* Invalid, without ' or ", the charset is not a CSS <string> */
+      │          ^^^^^
+    7 │ 
+  
+  i Expected a string here.
+  
+    4 │ @charset  "UTF-8"; /* Invalid, more than one space */
+    5 │ @charset "UTF-8"; /* Invalid, there is a character (a space) before the at-rule */
+  > 6 │ @charset UTF-8; /* Invalid, without ' or ", the charset is not a CSS <string> */
+      │          ^^^^^
+    7 │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    5: @charset "UTF-8"; /* Invalid, there is a character (a space) before the at-rule */
+```
+
+
