@@ -3,6 +3,12 @@ title: Language support
 description: Languages and features supported by Biome.
 ---
 
+Legend:
+- ✅: Supported
+- 🚫: Not in progress
+- ⌛️: In progress
+- ⚠️: Partially supported (with some caveats)
+
 | Language                                | Parsing                                                 | Formatting                                              | Linting                                                 |
 |-----------------------------------------|---------------------------------------------------------|---------------------------------------------------------|---------------------------------------------------------|
 | [JavaScript](#javascript-support)       | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
@@ -11,11 +17,11 @@ description: Languages and features supported by Biome.
 | TSX                                     | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
 | JSON                                    | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
 | JSONC                                   | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
-| HTML                                    | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
-| [Vue](#html-super-languages-support)    | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
-| [Svelte](#html-super-languages-support) | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
-| [Astro](#html-super-languages-support)  | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
-| CSS                                     | <span aria-label="In Progress" role="img">⌛️</span>     | <span aria-label="In Progress" role="img">⌛️</span>     | <span aria-label="Not in Progress" role="img">🚫</span> |
+| HTML                                    | <span aria-label="In Progress" role="img">⌛️</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
+| [Vue](#html-super-languages-support)    | <span aria-label="Partially supported" role="img">⚠️</span> | <span aria-label="Partially supported" role="img">⚠️</span> | <span aria-label="Partially supported" role="img">⚠️</span> |
+| [Svelte](#html-super-languages-support) | <span aria-label="Partially supported" role="img">⚠️</span> | <span aria-label="Partially supported" role="img">⚠️</span> | <span aria-label="Partially supported" role="img">⚠️</span> |
+| [Astro](#html-super-languages-support)  | <span aria-label="Partially supported" role="img">⚠️</span> | <span aria-label="Partially supported" role="img">⚠️</span> | <span aria-label="Partially supported" role="img">⚠️</span> |
+| CSS                                     | <span aria-label="Supported" role="img">✅️</span>     | <span aria-label="In Progress" role="img">⌛️</span>     | <span aria-label="Not in Progress" role="img">🚫</span> |
 | Markdown                                | <span aria-label="Not in progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
 
 
@@ -32,5 +38,9 @@ Biome supports TypeScript version 5.2.
 
 ## HTML super languages support
 
-These languages require CSS, HTML and JavaScript parsing to be supported properly. Once those parsers are
-available, the works around these super languages can start.
+From version `v1.6.0`, these languages are **partially** supported. There are some expectations and limitations to take in considerations:
+- For `.astro` file, **only** the **frontmatter** portion of the file is supported.
+- For `.vue` and `.svelte` files, **only** the **\<script\>** tags portion of the file is supported.
+- Diagnostics will only show code frames that belong to the portions before mentioned.
+- When **formatting** `.vue` and `.svelte` files, the indentation of the JavaScript/TypeScript code will start from the beginning.
+- When **linting** `.astro` files, you have to add `"Astro"` to `linter.globals`, to avoid possible false positives from some lint rules.

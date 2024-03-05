@@ -240,7 +240,6 @@ export default defineConfig({
 						{
 							label: "Git Hooks",
 							link: "/recipes/git-hooks",
-							badge: "New",
 						},
 					],
 				},
