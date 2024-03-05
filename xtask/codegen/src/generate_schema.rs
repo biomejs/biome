@@ -99,7 +99,7 @@ fn rename_partial_references_in_schema_object(object: &mut SchemaObject) {
             *reference = "#/definitions/RuleConfiguration".to_string();
         } else if let Some(stripped) = reference.strip_prefix("#/definitions/RuleWithOptions_for_")
         {
-            *reference = format!("RuleWith{stripped}");
+            *reference = format!("#/definitions/RuleWith{stripped}");
         } else if let Some(stripped) = reference
             .strip_prefix("#/definitions/RuleConfiguration_for_")
             .map(|x| x.strip_suffix("Options").unwrap_or(x))
