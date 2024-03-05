@@ -57,6 +57,7 @@ pub use linter::{
     RuleConfiguration, Rules,
 };
 pub use overrides::to_override_settings;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::io::ErrorKind;
@@ -65,46 +66,11 @@ use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
 
 /// The configuration that is contained inside the file `biome.json`
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(deny_unknown_fields, rename_all = "camelCase"))]
 pub struct Configuration {
-    /// A field for the [JSON schema](https://json-schema.org/) specification
-    #[partial(serde(rename = "$schema"))]
-    #[partial(bpaf(hide))]
-    pub schema: String,
-
-    /// The configuration of the VCS integration
-    #[partial(type, bpaf(external(partial_vcs_configuration), optional, hide_usage))]
-    pub vcs: VcsConfiguration,
-
-    /// The configuration of the filesystem
-    #[partial(
-        type,
-        bpaf(external(partial_files_configuration), optional, hide_usage)
-    )]
-    pub files: FilesConfiguration,
-
-    /// The configuration of the formatter
-    #[partial(type, bpaf(external(partial_formatter_configuration), optional))]
-    pub formatter: FormatterConfiguration,
-
-    /// The configuration of the import sorting
-    #[partial(type, bpaf(external(partial_organize_imports), optional))]
-    pub organize_imports: OrganizeImports,
-
-    /// The configuration for the linter
-    #[partial(type, bpaf(external(partial_linter_configuration), optional))]
-    pub linter: LinterConfiguration,
-
-    /// Specific configuration for the JavaScript language
-    #[partial(type, bpaf(external(partial_javascript_configuration), optional))]
-    pub javascript: JavascriptConfiguration,
-
-    /// Specific configuration for the Json language
-    #[partial(type, bpaf(external(partial_json_configuration), optional))]
-    pub json: JsonConfiguration,
     /// Allows to pass a path to a JSON schema file.
     ///
     /// We publish a JSON schema file for the `biome.json`.
@@ -127,10 +93,9 @@ pub struct Configuration {
     ///   "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json"
     /// }
     /// ```
-    #[serde(rename(serialize = "$schema", deserialize = "$schema"))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub schema: Option<String>,
+    #[partial(serde(rename = "$schema"))]
+    #[partial(bpaf(hide))]
+    pub schema: String,
 
     /// Set of properties to integrate Biome with a VCS software.
     ///
@@ -160,9 +125,8 @@ pub struct Configuration {
     /// If Biome can't find the configuration, it will attempt to use the current working directory.
     /// If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
     /// will be emitted
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(vcs_configuration), optional, hide_usage)]
-    pub vcs: Option<VcsConfiguration>,
+    #[partial(type, bpaf(external(partial_vcs_configuration), optional, hide_usage))]
+    pub vcs: VcsConfiguration,
 
     /// ### `files.maxSize`
     ///
@@ -204,9 +168,11 @@ pub struct Configuration {
     /// > Default: false
     ///
     /// For advanced configuration options, see the [documentation](/referece/configuration_example/##files).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(files_configuration), optional, hide_usage)]
-    pub files: Option<FilesConfiguration>,
+    #[partial(
+        type,
+        bpaf(external(partial_files_configuration), optional, hide_usage)
+    )]
+    pub files: FilesConfiguration,
 
     /// These options apply to all languages.  There are additional language-specific formatting options below.
     ///
@@ -294,9 +260,8 @@ pub struct Configuration {
     /// > Default: true
     ///
     /// For advanced configuration options, see the [documentation](/referece/configuration_example/##formatter.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(formatter_configuration), optional)]
-    pub formatter: Option<FormatterConfiguration>,
+    #[partial(type, bpaf(external(partial_formatter_configuration), optional))]
+    pub formatter: FormatterConfiguration,
 
     /// ### `organizeImports.enabled`
     ///
@@ -325,9 +290,8 @@ pub struct Configuration {
     /// `scripts/**/*.js` will be ignored.
     ///
     /// For advanced configuration options, see the [documentation](/referece/configuration_example/##organizeImports.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external, optional)]
-    pub organize_imports: Option<OrganizeImports>,
+    #[partial(type, bpaf(external(partial_organize_imports), optional))]
+    pub organize_imports: OrganizeImports,
 
     /// ### `linter.enabled`
     ///
@@ -337,9 +301,8 @@ pub struct Configuration {
     ///
     /// For detailed examples and advanced configuration options, see the [documentation]
     /// (/referece/configuration_example/##linter).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(linter_configuration), optional)]
-    pub linter: Option<LinterConfiguration>,
+    #[partial(type, bpaf(external(partial_linter_configuration), optional))]
+    pub linter: LinterConfiguration,
 
     /// These options apply only to JavaScript (and TypeScript) files.
     ///
@@ -465,9 +428,8 @@ pub struct Configuration {
     ///   }
     /// }
     /// ```
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(javascript_configuration), optional)]
-    pub javascript: Option<JavascriptConfiguration>,
+    #[partial(type, bpaf(external(partial_javascript_configuration), optional))]
+    pub javascript: JavascriptConfiguration,
 
     /// Options applied to the JSON files.
     ///
@@ -537,9 +499,9 @@ pub struct Configuration {
     /// How many characters can be written on a single line in JSON (and its super languages) files.
     ///
     /// > Default: `80`
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(json_configuration), optional)]
-    pub json: Option<JsonConfiguration>,
+    /// Specific configuration for the Json language
+    #[partial(type, bpaf(external(partial_json_configuration), optional))]
+    pub json: JsonConfiguration,
 
     /// Specific configuration for the Css language
     #[partial(type, bpaf(external(partial_css_configuration), optional, hide))]
@@ -556,9 +518,8 @@ pub struct Configuration {
     /// - can override the same properties, but ultimately only the last one will be used by Biome;
     ///
     /// For advanced configuration options, see the [documentation](/referece/configuration_example/##extends).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub extends: Option<StringSet>,
+    #[partial(bpaf(hide))]
+    pub extends: StringSet,
 
     /// A list of patterns.
     ///
@@ -707,9 +668,8 @@ pub struct Configuration {
     ///
     /// For advanced configuration options, see the [documentation]
     /// (/referece/configuration_example/##override).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub overrides: Option<Overrides>,
+    #[partial(bpaf(hide))]
+    pub overrides: Overrides,
 }
 
 impl PartialConfiguration {
@@ -801,7 +761,7 @@ impl PartialConfiguration {
 }
 
 /// The configuration of the filesystem
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]

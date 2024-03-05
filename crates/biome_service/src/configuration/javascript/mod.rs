@@ -6,10 +6,11 @@ use bpaf::Bpaf;
 pub use formatter::{
     partial_javascript_formatter, JavascriptFormatter, PartialJavascriptFormatter,
 };
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// A set of options applied to the JavaScript files
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(default, deny_unknown_fields))]
@@ -32,14 +33,14 @@ pub struct JavascriptConfiguration {
     pub organize_imports: JavascriptOrganizeImports,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(default, deny_unknown_fields))]
 pub struct JavascriptOrganizeImports {}
 
 /// Options that changes how the JavaScript parser behaves
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]

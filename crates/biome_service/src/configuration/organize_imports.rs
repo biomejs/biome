@@ -4,10 +4,11 @@ use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
