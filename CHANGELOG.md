@@ -163,6 +163,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
     × The file contains diagnostics that needs to be addressed.
   ```
   Contributed by @ematipico
+- The command `format` now emits parsing diagnostics if there are any, and it will terminate with a non-zero exit code. Contributed by @ematipico 
 
 ### Configuration
 

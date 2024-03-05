@@ -280,6 +280,31 @@ fn write() {
 }
 
 #[test]
+fn format_shows_parse_diagnostics() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("format.js");
+    fs.insert(file_path.into(), "while ) {}".as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_shows_parse_diagnostics",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn write_only_files_in_correct_base() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

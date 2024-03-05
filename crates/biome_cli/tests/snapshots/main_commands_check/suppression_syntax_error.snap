@@ -35,8 +35,20 @@ check.js:1:15 suppressions/parse ━━━━━━━━━━━━━━━�
 ```
 
 ```block
+check.js:1:15 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected token, expected one of ':' or whitespace
+  
+  > 1 │ // rome-ignore(:
+      │               ^
+    2 │ 
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. No fixes needed.
-Found 3 errors.
+Found 4 errors.
 ```
 
 
