@@ -290,9 +290,13 @@ fn get_whole_static_member_expression(reference: &JsSyntaxNode) -> Option<AnyJsM
         .skip(1) // JS_REFERENCE_IDENTIFIER
         .take_while(|x| {
             x.parent().is_some_and(|parent| {
-                parent.cast::<AnyJsMemberExpression>().is_some_and(|member_expr| {
-                    member_expr.object().is_ok_and(|object| object.syntax() == x)
-                })
+                parent
+                    .cast::<AnyJsMemberExpression>()
+                    .is_some_and(|member_expr| {
+                        member_expr
+                            .object()
+                            .is_ok_and(|object| object.syntax() == x)
+                    })
             })
         })
         .last()?
