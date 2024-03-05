@@ -3069,7 +3069,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             GRIT_NAMED_ARG_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
-                GritMaybeNamedArg::can_cast,
+                AnyGritMaybeNamedArg::can_cast,
                 T ! [,],
                 true,
             ),

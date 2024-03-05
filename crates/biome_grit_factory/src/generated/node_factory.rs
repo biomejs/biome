@@ -55,14 +55,14 @@ pub fn grit_boolean_literal(value_token: SyntaxToken) -> GritBooleanLiteral {
 }
 pub fn grit_bracketed_pattern(
     l_paren_token: SyntaxToken,
-    any_grit_pattern: AnyGritPattern,
+    pattern: AnyGritPattern,
     r_paren_token: SyntaxToken,
 ) -> GritBracketedPattern {
     GritBracketedPattern::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_BRACKETED_PATTERN,
         [
             Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(any_grit_pattern.into_syntax())),
+            Some(SyntaxElement::Node(pattern.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
@@ -1603,7 +1603,7 @@ where
 }
 pub fn grit_named_arg_list<I, S>(items: I, separators: S) -> GritNamedArgList
 where
-    I: IntoIterator<Item = GritMaybeNamedArg>,
+    I: IntoIterator<Item = AnyGritMaybeNamedArg>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = GritSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
