@@ -66,6 +66,10 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
                         let method_name = field.method_name(language_kind);
                         if is_list {
+                            if *optional {
+                                panic!("Lists cannot be optional. Instead, the grammar should handle the situation where the list is empty.");
+                            }
+
                             quote! {
                                 pub fn #method_name(&self) -> #ty {
                                     support::list(&self.syntax, #slot_index_access)

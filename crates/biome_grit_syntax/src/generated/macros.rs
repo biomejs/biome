@@ -16,18 +16,6 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::GritSyntaxNode::kind(&node) {
-                $crate::GritSyntaxKind::BRACKETED_GRIT_PATTERN => {
-                    let $pattern = unsafe { $crate::BracketedGritPattern::new_unchecked(node) };
-                    $body
-                }
-                $crate::GritSyntaxKind::BRACKETED_GRIT_PREDICATE => {
-                    let $pattern = unsafe { $crate::BracketedGritPredicate::new_unchecked(node) };
-                    $body
-                }
-                $crate::GritSyntaxKind::CURLY_GRIT_PATTERN => {
-                    let $pattern = unsafe { $crate::CurlyGritPattern::new_unchecked(node) };
-                    $body
-                }
                 $crate::GritSyntaxKind::GRIT_ADD_OPERATION => {
                     let $pattern = unsafe { $crate::GritAddOperation::new_unchecked(node) };
                     $body
@@ -49,6 +37,14 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritBooleanLiteral::new_unchecked(node) };
                     $body
                 }
+                $crate::GritSyntaxKind::GRIT_BRACKETED_PATTERN => {
+                    let $pattern = unsafe { $crate::GritBracketedPattern::new_unchecked(node) };
+                    $body
+                }
+                $crate::GritSyntaxKind::GRIT_BRACKETED_PREDICATE => {
+                    let $pattern = unsafe { $crate::GritBracketedPredicate::new_unchecked(node) };
+                    $body
+                }
                 $crate::GritSyntaxKind::GRIT_BUBBLE => {
                     let $pattern = unsafe { $crate::GritBubble::new_unchecked(node) };
                     $body
@@ -59,6 +55,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::GritSyntaxKind::GRIT_CODE_SNIPPET => {
                     let $pattern = unsafe { $crate::GritCodeSnippet::new_unchecked(node) };
+                    $body
+                }
+                $crate::GritSyntaxKind::GRIT_CURLY_PATTERN => {
+                    let $pattern = unsafe { $crate::GritCurlyPattern::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_CURLY_PREDICATE_LIST => {

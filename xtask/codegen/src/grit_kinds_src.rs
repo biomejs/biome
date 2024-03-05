@@ -109,9 +109,9 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
         "GRIT_VARIABLE",
     ],
     nodes: &[
-        "BRACKETED_GRIT_PATTERN",
-        "BRACKETED_GRIT_PREDICATE",
-        "CURLY_GRIT_PATTERN",
+        "GRIT_BRACKETED_PATTERN",
+        "GRIT_BRACKETED_PREDICATE",
+        "GRIT_CURLY_PATTERN",
         "GRIT_ROOT",
         "GRIT_SEQUENTIAL",
         "GRIT_FILES",

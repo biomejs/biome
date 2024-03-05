@@ -9,35 +9,17 @@ use biome_json_syntax::{
 use biome_rowan::AstNode;
 pub fn json_array_value(
     l_brack_token: SyntaxToken,
+    elements: JsonArrayElementList,
     r_brack_token: SyntaxToken,
-) -> JsonArrayValueBuilder {
-    JsonArrayValueBuilder {
-        l_brack_token,
-        r_brack_token,
-        elements: None,
-    }
-}
-pub struct JsonArrayValueBuilder {
-    l_brack_token: SyntaxToken,
-    r_brack_token: SyntaxToken,
-    elements: Option<JsonArrayElementList>,
-}
-impl JsonArrayValueBuilder {
-    pub fn with_elements(mut self, elements: JsonArrayElementList) -> Self {
-        self.elements = Some(elements);
-        self
-    }
-    pub fn build(self) -> JsonArrayValue {
-        JsonArrayValue::unwrap_cast(SyntaxNode::new_detached(
-            JsonSyntaxKind::JSON_ARRAY_VALUE,
-            [
-                Some(SyntaxElement::Token(self.l_brack_token)),
-                self.elements
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_brack_token)),
-            ],
-        ))
-    }
+) -> JsonArrayValue {
+    JsonArrayValue::unwrap_cast(SyntaxNode::new_detached(
+        JsonSyntaxKind::JSON_ARRAY_VALUE,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(elements.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
 }
 pub fn json_boolean_value(value_token_token: SyntaxToken) -> JsonBooleanValue {
     JsonBooleanValue::unwrap_cast(SyntaxNode::new_detached(
@@ -79,35 +61,17 @@ pub fn json_number_value(value_token: SyntaxToken) -> JsonNumberValue {
 }
 pub fn json_object_value(
     l_curly_token: SyntaxToken,
+    json_member_list: JsonMemberList,
     r_curly_token: SyntaxToken,
-) -> JsonObjectValueBuilder {
-    JsonObjectValueBuilder {
-        l_curly_token,
-        r_curly_token,
-        json_member_list: None,
-    }
-}
-pub struct JsonObjectValueBuilder {
-    l_curly_token: SyntaxToken,
-    r_curly_token: SyntaxToken,
-    json_member_list: Option<JsonMemberList>,
-}
-impl JsonObjectValueBuilder {
-    pub fn with_json_member_list(mut self, json_member_list: JsonMemberList) -> Self {
-        self.json_member_list = Some(json_member_list);
-        self
-    }
-    pub fn build(self) -> JsonObjectValue {
-        JsonObjectValue::unwrap_cast(SyntaxNode::new_detached(
-            JsonSyntaxKind::JSON_OBJECT_VALUE,
-            [
-                Some(SyntaxElement::Token(self.l_curly_token)),
-                self.json_member_list
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_curly_token)),
-            ],
-        ))
-    }
+) -> JsonObjectValue {
+    JsonObjectValue::unwrap_cast(SyntaxNode::new_detached(
+        JsonSyntaxKind::JSON_OBJECT_VALUE,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(json_member_list.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
 }
 pub fn json_root(value: AnyJsonValue, eof_token: SyntaxToken) -> JsonRootBuilder {
     JsonRootBuilder {

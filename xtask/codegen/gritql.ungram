@@ -49,42 +49,36 @@ GritRoot =
     bom: 'UNICODE_BOM'?
     version: GritVersion?
     language: GritLanguageDeclaration?
-    definitions: GritDefinitionList?
+    definitions: GritDefinitionList
     pattern: AnyGritPattern?
-    definitions_continued: GritDefinitionList?
+    definitions_continued: GritDefinitionList
     eof: 'EOF'
 
-GritSequential = 'sequential' '{' sequential: GritPatternList '}'
+// engine biome(1.0)
+// ^^^^^^ ^^^^^^^^^^
+GritVersion = 'engine' 'biome' '(' version: GritDoubleLiteral ')'
 
-GritFiles = 'multifile' '{' files: GritPatternList '}'
-
-AnyGritDefinition =
-    GritPatternDefinition
-    | GritPredicateDefinition
-    | GritFunctionDefinition
-    | GritBogusDefinition
-
-GritDefinitionList = AnyGritDefinition ('newline' AnyGritDefinition)* 'newline'?
-
-GritVersion = 'engine' 'biome' '(' GritDoubleLiteral ')'
-
+// language js(typescript, jsx);
+// ^^^^^^^^ ^^^^^^^^^^^^^^ ^^^^^
 GritLanguageDeclaration =
     'language'
     name: GritLanguageName
     flavor: GritLanguageFlavor?
-    GritBogus?
     ';'?
 
-GritLanguageFlavor = '(' GritLanguageFlavorList ')'
+// language js(typescript, jsx);
+//            ^^^^^^^^^^^^ ^^^^
+GritLanguageFlavor = '(' flavors: GritLanguageFlavorList ')'
 GritLanguageFlavorList = GritLanguageFlavorKind (',' GritLanguageFlavorKind)* ','?
 GritLanguageFlavorKind =
     flavor_kind: (
         // JavaScript flavors:
         'typescript' | 'jsx'
     )
-    GritBogus?
 
-// --- patterns
+////////////
+/// PATTERNS
+////////////
 
 AnyGritPattern =
     AnyGritLiteral
@@ -124,13 +118,13 @@ AnyGritPattern =
     | GritSubOperation
     | GritSequential
     | GritFiles
-    | BracketedGritPattern
+    | GritBracketedPattern
     | GritBogusPattern
 
-BracketedGritPattern = '(' AnyGritPattern ')'
+GritBracketedPattern = '(' pattern: AnyGritPattern ')'
 
-MaybeCurlyGritPattern = AnyGritPattern | CurlyGritPattern
-CurlyGritPattern = '{' AnyGritPattern '}'
+AnyGritMaybeCurlyPattern = AnyGritPattern | GritCurlyPattern
+GritCurlyPattern = '{' pattern: AnyGritPattern '}'
 
 GritPatternList = AnyGritPattern (',' AnyGritPattern)* ','?
 
@@ -178,33 +172,37 @@ AnyGritLiteral =
     | GritBogusLiteral
 
 GritPatternNot =
-    GritNot
+    not: GritNot
     pattern: AnyGritPattern
 
 GritPatternOr = 'or' '{' patterns: GritPatternList '}'
 
-GritPatternOrElse = 'orelse' '{' patterns: GritPatternList? '}'
+GritPatternOrElse = 'orelse' '{' patterns: GritPatternList '}'
 
-GritPatternAny = 'any' '{' patterns: GritPatternList? '}'
+GritPatternAny = 'any' '{' patterns: GritPatternList '}'
 
-GritPatternAnd = 'and' '{' patterns: GritPatternList? '}'
+GritPatternAnd = 'and' '{' patterns: GritPatternList '}'
 
-GritPatternMaybe = 'maybe' pattern: MaybeCurlyGritPattern
+GritPatternMaybe = 'maybe' pattern: AnyGritMaybeCurlyPattern
 
 GritPatternAfter = 'after' pattern: AnyGritPattern
 
 GritPatternBefore = 'before' pattern: AnyGritPattern
 
+GritSequential = 'sequential' '{' sequential: GritPatternList '}'
+
+GritFiles = 'multifile' '{' files: GritPatternList '}'
+
 GritPatternContains =
     'contains'
-    contains: MaybeCurlyGritPattern
-    GritPatternContainsUntilClause?
+    contains: AnyGritMaybeCurlyPattern
+    until_clause: GritPatternContainsUntilClause?
 
 GritPatternContainsUntilClause =
     'until'
     until: AnyGritPattern
 
-GritPatternIncludes = 'includes' includes: MaybeCurlyGritPattern
+GritPatternIncludes = 'includes' includes: AnyGritMaybeCurlyPattern
 
 GritRewrite =
     left: AnyGritPattern
@@ -218,47 +216,54 @@ GritPatternIfElse =
     '('
     if_predicate: AnyGritPredicate
     ')'
-    then_pattern: MaybeCurlyGritPattern
-    GritPatternElseClause?
+    then_pattern: AnyGritMaybeCurlyPattern
+    else_clause: GritPatternElseClause?
 
 GritPatternElseClause =
     'else'
-    else_pattern: MaybeCurlyGritPattern
+    else_pattern: AnyGritMaybeCurlyPattern
 // --- conditional pattern ------------
 
 GritWithin =
     'within'
-    pattern: MaybeCurlyGritPattern
+    pattern: AnyGritMaybeCurlyPattern
 
-GritBubbleScope = '(' GritVariableList? ')'
+// $body <: contains bubble($name) `pattern` => with_its_own($name)
+//                         ^^^^^^^
+GritBubbleScope = '(' variables: GritVariableList ')'
 
+// $body <: contains bubble($name) `pattern` => with_its_own($name)
+//                   ^^^^^^^^^^^^^ ^^^^^^^^^ ^^ ^^^^^^^^^^^^^^^^^^^
 GritBubble =
     'bubble'
     variables: GritBubbleScope?
-    pattern: MaybeCurlyGritPattern
+    pattern: AnyGritMaybeCurlyPattern
 
-MaybeGritNamedArg =
+AnyGritMaybeNamedArg =
     AnyGritPattern
     | GritNamedArg
     | GritBogusNamedArg
 
+// return split($string, separator=`\n`)
+//                       ^^^^^^^^^^^^^^
 GritNamedArg =
     name: GritName
     '='
     pattern: AnyGritPattern
 
-GritNamedArgList = MaybeGritNamedArg (',' MaybeGritNamedArg)* ','?
+// return split($string, separator=`\n`)
+//              ^^^^^^^^ ^^^^^^^^^^^^^^
+GritNamedArgList = AnyGritMaybeNamedArg (',' AnyGritMaybeNamedArg)* ','?
 
-// maybe we should have a different fieldname for each choice?
 GritNodeLike =
     name: GritName
     '('
-    named_args: GritNamedArgList?
+    named_args: GritNamedArgList
     ')'
 
 GritLike =
     'like'
-    GritLikeThreshold?
+    threshold: GritLikeThreshold?
     '{'
     example: AnyGritPattern
     '}'
@@ -268,58 +273,73 @@ GritLikeThreshold =
     threshold: AnyGritPattern
     ')'
 
+// { key: `pattern` }
+// ^ ^^^^ ^^^^^^^^^ ^
 GritMap =
     '{'
-    elements: GritMapElementList?
+    elements: GritMapElementList
     '}'
 
 GritMapElementList = GritMapElement (',' GritMapElement)* ','?
 
+// { key: `pattern` }
+//   ^^^^ ^^^^^^^^^
 GritMapElement =
     key: GritName
     ':'
     value: AnyGritPattern
 
+// $map.value
+// ^^^^^^^^^^
 GritMapAccessor =
-    map: GritMapAccessorSubject
+    map: AnyGritMapAccessorSubject
     '.'
-    key: GritMapKey
-    GritBogus?
+    key: AnyGritMapKey
 
-GritMapAccessorSubject = GritMap | AnyGritContainer
-GritMapKey = GritName | GritVariable
+AnyGritMapAccessorSubject = GritMap | AnyGritContainer
+AnyGritMapKey = GritName | GritVariable
 
+// list [ `one`, 2, ..., $many ]
+// ^^^^ ^ ^^^^^^ ^^ ^^^^ ^^^^^ ^
 GritList =
-    GritName?
+    name: GritName?
     '['
-    patterns: GritListPatternList?
+    patterns: GritListPatternList
     ']'
 
 GritListPatternList = AnyGritListPattern (',' AnyGritListPattern)* ','?
 
+// list [ `one`, 2, ..., $many ]
+//        ^^^^^  ^  ^^^  ^^^^^
 AnyGritListPattern = AnyGritPattern | GritDotdotdot
 
-GritListAccessor =
-    list: GritListAccessorSubject
-    '['
-    index: GritListIndex
-    ']'
-    GritBogus?
-
-GritListAccessorSubject = GritList | AnyGritContainer
-GritListIndex = AnyGritContainer | GritNegativeIntLiteral | GritIntLiteral
-
-GritDot = '.'
-
-GritSome = 'some' pattern: MaybeCurlyGritPattern
-GritEvery = 'every' pattern: MaybeCurlyGritPattern
-
+// list [ `one`, 2, ..., $many ]
+//                  ^^^
 GritDotdotdot =
     dotdotdot: '...'
-    MaybeCurlyGritPattern?
+    pattern: AnyGritMaybeCurlyPattern?
 
+// $list[0]
+// ^^^^^^^^
+GritListAccessor =
+    list: AnyGritListAccessorSubject
+    '['
+    index: AnyGritListIndex
+    ']'
+
+AnyGritListAccessorSubject = GritList | AnyGritContainer
+AnyGritListIndex = AnyGritContainer | GritNegativeIntLiteral | GritIntLiteral
+
+// only valid as a pattern
+GritDot =
+    dot: '.'
+
+GritSome = 'some' pattern: AnyGritMaybeCurlyPattern
+GritEvery = 'every' pattern: AnyGritMaybeCurlyPattern
+
+// only valid as a pattern
 GritUnderscore =
-    dollar_underscore: '$_'
+    token: '$_'
 
 GritRegexPattern =
     regex: AnyGritRegex
@@ -327,49 +347,17 @@ GritRegexPattern =
 
 GritRegexPatternVariables =
     '('
-    GritPatternArgList?
+    args: GritPatternArgList
     ')'
-
-GritPatternDefinitionBody =
-    '{'
-    patterns: GritPatternList?
-    '}'
-
-GritPatternDefinition =
-    visibility: 'private'?
-    'pattern'
-    name: GritName
-    '('
-    args: GritPatternArgList?
-    ')'
-    language: GritLanguageDeclaration?
-    body: GritPatternDefinitionBody
 
 GritPatternArgList = GritVariableList
 
-GritPredicateList = AnyGritPredicate (',' AnyGritPredicate)* ','?
+//////////////
+/// PREDICATES
+//////////////
 
-GritCurlyPredicateList =
-    '{'
-    predicates: GritPredicateList?
-    '}'
-
-GritPredicateDefinition =
-    'predicate'
-    name: GritName
-    '('
-    args: GritPatternArgList?
-    ')'
-    body: GritCurlyPredicateList
-
-GritFunctionDefinition =
-    'function'
-    name: GritName
-    '('
-    args: GritVariableList?
-    ')'
-    body: GritCurlyPredicateList
-
+// `pattern` where { predicates }
+//                 ^^^^^^^^^^^^^^ 
 AnyGritPredicate =
     GritPredicateNot
     | GritPredicateMaybe
@@ -388,15 +376,17 @@ AnyGritPredicate =
     | GritPredicateEqual
     | GritPredicateMatch
     | GritPredicateCall
-    | BracketedGritPredicate
+    | GritBracketedPredicate
     | GritBooleanLiteral
     | GritPredicateReturn
     | GritBogusPredicate
 
-BracketedGritPredicate = '(' AnyGritPredicate ')'
+GritPredicateList = AnyGritPredicate (',' AnyGritPredicate)* ','?
+
+GritBracketedPredicate = '(' predicate: AnyGritPredicate ')'
 
 GritPredicateNot =
-    GritNot
+    not: GritNot
     predicate: AnyGritPredicate
 
 GritPredicateMaybe =
@@ -406,19 +396,19 @@ GritPredicateMaybe =
 GritPredicateAnd =
     'and'?
     '{'
-    predicates: GritPredicateList?
+    predicates: GritPredicateList
     '}'
 
 GritPredicateOr =
     'or'
     '{'
-    predicates: GritPredicateList?
+    predicates: GritPredicateList
     '}'
 
 GritPredicateAny =
     'any'
     '{'
-    predicates: GritPredicateList?
+    predicates: GritPredicateList
     '}'
 
 GritPredicateIfElse =
@@ -427,7 +417,7 @@ GritPredicateIfElse =
     if_predicate: AnyGritPredicate
     ')'
     then_predicate: AnyGritPredicate
-    GritPredicateElseClause?
+    else_clause: GritPredicateElseClause?
 
 GritPredicateElseClause =
     'else'
@@ -438,13 +428,11 @@ GritPredicateRewrite =
     annotation: GritAnnotation?
     '=>'
     right: AnyGritPattern
-    GritBogus?
 
 GritPredicateAssignment =
     container: AnyGritContainer
     '='
     pattern: AnyGritPattern
-    GritBogus?
 
 GritPredicateAccumulate =
     left: GritVariable
@@ -481,34 +469,91 @@ GritPredicateEqual =
     '=='
     right: AnyGritPattern
 
+// `log($message)` where $message <: `Hello, world!`
+//                       ^^^^^^^^ ^^ ^^^^^^^^^^^^^^^ 
 GritPredicateMatch =
-    left: GritPredicateMatchSubject
+    left: AnyGritPredicateMatchSubject
     match: '<:'
     right: AnyGritPattern
-    GritBogus?
 
-GritPredicateMatchSubject = AnyGritContainer | AnyGritLiteral
+AnyGritPredicateMatchSubject = AnyGritContainer | AnyGritLiteral
 
 GritPredicateCall =
     name: GritName
     '('
-    named_args: GritNamedArgList?
+    named_args: GritNamedArgList
     ')'
 
 GritPredicateReturn =
     'return'
     pattern: AnyGritPattern
 
-// --- tokens and lexical definitions
+///////////////
+/// DEFINITIONS
+///////////////
+
+AnyGritDefinition =
+    GritPatternDefinition
+    | GritPredicateDefinition
+    | GritFunctionDefinition
+    | GritBogusDefinition
+
+GritDefinitionList = AnyGritDefinition ('newline' AnyGritDefinition)* 'newline'?
+
+// function my_function($arg1, $arg2) { ... }
+// ^^^^^^^^ ^^^^^^^^^^^^^^^^^^ ^^^^^^ ^ ^^^ ^
+GritFunctionDefinition =
+    'function'
+    name: GritName
+    '('
+    args: GritVariableList
+    ')'
+    body: GritCurlyPredicateList
+
+// private pattern my_function($arg1, $arg2) { ... }
+// ^^^^^^^ ^^^^^^^ ^^^^^^^^^^^^^^^^^^ ^^^^^^ ^ ^^^ ^
+GritPatternDefinition =
+    visibility: 'private'?
+    'pattern'
+    name: GritName
+    '('
+    args: GritPatternArgList
+    ')'
+    language: GritLanguageDeclaration?
+    body: GritPatternDefinitionBody
+
+GritPatternDefinitionBody =
+    '{'
+    patterns: GritPatternList
+    '}'
+
+// predicate my_function($arg1, $arg2) { ... }
+// ^^^^^^^^^ ^^^^^^^^^^^^^^^^^^ ^^^^^^ ^ ^^^ ^
+GritPredicateDefinition =
+    'predicate'
+    name: GritName
+    '('
+    args: GritPatternArgList
+    ')'
+    body: GritCurlyPredicateList
+
+GritCurlyPredicateList =
+    '{'
+    predicates: GritPredicateList
+    '}'
+
+//////////////////////////////////
+/// TOKENS AND LEXICAL DEFINITIONS
+//////////////////////////////////
 
 GritBooleanLiteral =
     value: ('true' | 'false')
 
-GritVariable = 'grit_variable'
+GritVariable = value: 'grit_variable'
 GritVariableList = GritVariable (',' GritVariable)* ','?
 
 // name for variables, labels
-GritName = 'grit_name'
+GritName = value: 'grit_name'
 
 // These are target languages
 GritLanguageName =
@@ -524,11 +569,10 @@ GritLanguageSpecificSnippet =
 
 // a code snippet may be prefixed by a label;
 // the label may be prefixed by a module or sort name (separated from the label by a dot)
-// used to be: /((?:[A-Za-z0-9_]+\.)?[A-Za-z0-9_]*)?`(?:[^`\\]|\\`|\\n)*`/
 GritCodeSnippet =
-    source: GritCodeSnippetSource
+    source: AnyGritCodeSnippetSource
 
-GritCodeSnippetSource =
+AnyGritCodeSnippetSource =
     GritBacktickSnippetLiteral
     | GritLanguageSpecificSnippet
     | GritRawBacktickSnippetLiteral
@@ -536,7 +580,7 @@ GritCodeSnippetSource =
 GritNot =
     token: ('not' | '!')
 
-GritUndefinedLiteral = 'undefined'
+GritUndefinedLiteral = token: 'undefined'
 
 GritIntLiteral = value: 'grit_int'
 GritNegativeIntLiteral = value: 'grit_negative_int'
@@ -551,4 +595,4 @@ GritRegexLiteral = value: 'grit_regex'
 
 GritSnippetRegexLiteral = value: 'grit_snippet_regex'
 
-GritAnnotation = 'grit_annotation'
+GritAnnotation = value: 'grit_annotation'
