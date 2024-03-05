@@ -79,7 +79,7 @@ export default defineConfig({
 							link: "/guides/big-projects",
 							translations: {
 								ja: "大きなプロジェクトでのBiomeの使用方法",
-								"zh-CN": "大型项目使用 Biome",
+								"zh-CN": "大型项目中使用 Biome",
 								"pt-BR": "Usando o Biome em projetos grandes",
 							},
 						},
@@ -105,6 +105,7 @@ export default defineConfig({
 							label: "Integrate Biome with your VCS",
 							link: "/guides/integrate-in-vcs",
 							translations: {
+								"zh-CN": "与版本控制系统集成",
 								"pt-BR": "Integrando o Biome com o seu VCS",
 							},
 						},
