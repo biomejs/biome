@@ -4,7 +4,7 @@ use crate::execute::process_file::{
     DiffKind, FileResult, FileStatus, Message, SharedTraversalOptions,
 };
 use crate::execute::TraversalMode;
-use biome_diagnostics::{category, DiagnosticExt};
+use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Error, Severity};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::RuleCategories;
 use std::path::Path;
@@ -53,6 +53,23 @@ pub(crate) fn format_with_guard<'ctx>(
                     SkippedDiagnostic.with_file_path(workspace_file.path.display().to_string()),
                 ));
             }
+
+            ctx.push_message(Message::Diagnostics {
+                name: workspace_file.path.display().to_string(),
+                content: input.clone(),
+                diagnostics: diagnostics_result
+                    .diagnostics
+                    .into_iter()
+                    .filter_map(|diag| {
+                        if diag.severity() >= Severity::Error && ignore_errors {
+                            None
+                        } else {
+                            Some(Error::from(diag))
+                        }
+                    })
+                    .collect(),
+                skipped_diagnostics: diagnostics_result.skipped_diagnostics as u32,
+            });
 
             let printed = workspace_file
                 .guard()

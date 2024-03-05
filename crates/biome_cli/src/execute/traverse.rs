@@ -242,9 +242,15 @@ pub(crate) fn traverse(
     }
 
     if skipped > 0 {
-        console.log(markup! {
-            <Warn>"Skipped "{skipped}" file(s)"</Warn>
-        });
+        if skipped == 1 {
+            console.log(markup! {
+                <Warn>"Skipped "{skipped}" file."</Warn>
+            });
+        } else {
+            console.log(markup! {
+                <Warn>"Skipped "{skipped}" files."</Warn>
+            });
+        }
     }
 
     let should_exit_on_warnings = warnings > 0 && cli_options.error_on_warnings;
