@@ -222,7 +222,12 @@ function component() {
 
 ## Options
 
-Allows to specify custom hooks - from libraries or internal projects - that can be considered stable.
+Allows to specify custom hooks - from libraries or internal projects -
+for which dependencies should be checked.
+
+For every hook, you should specify the index of the closure (whose
+dependencies should be checked) and the index of the dependencies array
+to validate against.
 
 ```json
 {

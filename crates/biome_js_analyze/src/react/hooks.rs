@@ -85,13 +85,19 @@ impl ReactCallWithDependencyResult {
 pub struct ReactHookConfiguration {
     pub closure_index: Option<usize>,
     pub dependencies_index: Option<usize>,
+
+    /// `true` if it's a built-in React hook. For built-in hooks, we verify
+    /// whether they are imported from the React library. For user-defined
+    /// hooks, we don't.
+    pub builtin: bool,
 }
 
-impl From<(usize, usize)> for ReactHookConfiguration {
-    fn from((closure, dependencies): (usize, usize)) -> Self {
+impl From<(usize, usize, bool)> for ReactHookConfiguration {
+    fn from((closure, dependencies, builtin): (usize, usize, bool)) -> Self {
         Self {
             closure_index: Some(closure),
             dependencies_index: Some(dependencies),
+            builtin,
         }
     }
 }
@@ -139,15 +145,6 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
     is_react_hook(name.text_trimmed())
 }
 
-const HOOKS_WITH_DEPS_API: [&str; 6] = [
-    "useEffect",
-    "useLayoutEffect",
-    "useInsertionEffect",
-    "useCallback",
-    "useMemo",
-    "useImperativeHandle",
-];
-
 /// Returns the [TextRange] of the hook name; the node of the
 /// expression of the argument that correspond to the closure of
 /// the hook; and the node of the dependency list of the hook.
@@ -178,14 +175,13 @@ pub(crate) fn react_hook_with_dependency(
     let function_name_range = name.range();
     let name = name.text();
 
+    let hook = hooks.get(name)?;
+
     // check if the hooks api is imported from the react library
-    if HOOKS_WITH_DEPS_API.contains(&name)
-        && !is_react_call_api(&expression, model, ReactLibrary::React, name)
-    {
+    if hook.builtin && !is_react_call_api(&expression, model, ReactLibrary::React, name) {
         return None;
     }
 
-    let hook = hooks.get(name)?;
     let closure_index = hook.closure_index?;
     let dependencies_index = hook.dependencies_index?;
 

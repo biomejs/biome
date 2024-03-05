@@ -77,6 +77,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @ah-yu
 
+- Fix [#1931](https://github.com/biomejs/biome/issues/1931). Built-in React hooks such as
+  `useEffect()` can now be validated by the
+  [`useExhaustiveDependendies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/), even
+  when they're not being imported from the React library. To do so, simply configure them like
+  any other user-provided hooks.
+
+  Contributed by @arendjr
+
 #### Bug fixes
 
 - Fix [#1748](https://github.com/biomejs/biome/issues/1748). Now for the following case we won't provide an unsafe fix
