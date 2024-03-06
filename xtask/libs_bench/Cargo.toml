@@ -8,8 +8,8 @@ version = "0.0.0"
 regex = { version = "1.6.0" }
 
 [dev-dependencies]
-criterion    = "0.4.0"
-fastbloom-rs = "0.3.0"
+criterion    = "0.5.1"
+fastbloom-rs = "0.5.9"
 fst          = "0.4.7"
 iai          = "0.1.1"
 memchr       = "2.5.0"
