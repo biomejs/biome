@@ -405,8 +405,7 @@ Additionally, the following rules are now recommended:
   <div></div>
   ```
 
-- Add partial support for `.vue` files. Biome is able to lint and fix the script block of the Vue files. Contributed by
-  @nhedger
+- Add partial support for `.vue` files. Biome is able to lint and fix the script block of the Vue files.
 
   ```diff
   <script setup lang="ts">
@@ -416,6 +415,8 @@ Additionally, the following rules are now recommended:
 
   <template></template>
   ```
+
+  Contributed by @nhedger
 
 - Add rule [useNodeAssertStrict](https://biomejs.dev/linter/rules/use-node-assert-strict), which promotes the use
   of `node:assert/strict` over `node:assert`. Contributed by @ematipico
@@ -517,6 +518,13 @@ Additionally, the following rules are now recommended:
     }
   }
   ```
+
+  Contributed by @Conaclos
+
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) no longer reports unused imports.
+
+  We now have a dedicated rule for reporting unused imports:
+  [noUnusedImpoorts](https://biomejs.dev/linter/rules/no-unused-imports)
 
   Contributed by @Conaclos
 
