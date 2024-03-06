@@ -114,6 +114,11 @@ jobs:
         if: matrix.code-target == 'linux-x64'
         run: cargo audit
 
+      - name: Set jemalloc page size for linux-arm64
+        if: matrix.code-target == 'linux-arm64'
+        run: |
+          echo "JEMALLOC_SYS_WITH_LG_PAGE=16" >> $GITHUB_ENV
+
       # Build the CLI binary
       - name: Build binaries
         run: cargo build -p biome_cli --release --target ${{ matrix.target }}
