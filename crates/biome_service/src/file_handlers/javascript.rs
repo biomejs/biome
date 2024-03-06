@@ -15,6 +15,7 @@ use crate::{
     },
     WorkspaceError,
 };
+use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Never,
     QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
@@ -800,6 +801,19 @@ pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult,
 
 fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> AnalyzerOptions {
     let settings = settings.as_ref();
+    let preferred_quote = settings
+        .languages
+        .javascript
+        .formatter
+        .quote_style
+        .map(|quote_style: QuoteStyle| {
+            if quote_style == QuoteStyle::Single {
+                PreferredQuote::Single
+            } else {
+                PreferredQuote::Double
+            }
+        })
+        .unwrap_or_default();
     let configuration = AnalyzerConfiguration {
         rules: to_analyzer_rules(settings, file_path.as_path()),
         globals: settings
@@ -810,6 +824,7 @@ fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> An
             )
             .into_iter()
             .collect(),
+        preferred_quote,
     };
 
     AnalyzerOptions {
