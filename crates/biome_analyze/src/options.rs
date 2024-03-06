@@ -53,6 +53,9 @@ pub struct AnalyzerConfiguration {
     ///
     /// For example, lint rules should ignore them.
     pub globals: Vec<String>,
+
+    /// Allows to choose a different quote when applying fixes inside the lint rules
+    pub preferred_quote: PreferredQuote,
 }
 
 /// A set of information useful to the analyzer infrastructure
@@ -82,5 +85,28 @@ impl AnalyzerOptions {
             .rules
             .get_rule_options::<R::Options>(&RuleKey::rule::<R>())
             .map(R::Options::clone)
+    }
+
+    pub fn preferred_quote(&self) -> &PreferredQuote {
+        &self.configuration.preferred_quote
+    }
+}
+
+#[derive(Debug, Default)]
+pub enum PreferredQuote {
+    /// Double quotes
+    #[default]
+    Double,
+    /// Single quotes
+    Single,
+}
+
+impl PreferredQuote {
+    pub const fn is_double(&self) -> bool {
+        matches!(self, Self::Double)
+    }
+
+    pub const fn is_single(&self) -> bool {
+        matches!(self, Self::Single)
     }
 }

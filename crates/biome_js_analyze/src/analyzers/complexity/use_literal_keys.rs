@@ -155,8 +155,10 @@ impl Rule for UseLiteralKeys {
             AnyJsMember::JsComputedMemberName(member) => {
                 let name_token = if is_js_ident(identifier) {
                     make::ident(identifier)
-                } else {
+                } else if ctx.as_preferred_quote().is_double() {
                     make::js_string_literal(identifier)
+                } else {
+                    make::js_string_literal_single_quotes(identifier)
                 };
                 let literal_member_name = js_literal_member_name(name_token);
                 mutation.replace_node(

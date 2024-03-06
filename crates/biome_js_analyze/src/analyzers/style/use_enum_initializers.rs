@@ -159,7 +159,13 @@ impl Rule for UseEnumInitializers {
                         let enum_name = enum_member.name().ok()?.name()?;
                         let enum_name = enum_name.text();
                         Some(AnyJsLiteralExpression::JsStringLiteralExpression(
-                            make::js_string_literal_expression(make::js_string_literal(enum_name)),
+                            make::js_string_literal_expression(
+                                if ctx.as_preferred_quote().is_double() {
+                                    make::js_string_literal(enum_name)
+                                } else {
+                                    make::js_string_literal_single_quotes(enum_name)
+                                },
+                            ),
                         ))
                     }
                     EnumInitializer::Other => None,

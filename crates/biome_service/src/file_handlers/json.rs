@@ -13,6 +13,7 @@ use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
 };
 use crate::WorkspaceError;
+use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
 };
@@ -406,6 +407,7 @@ fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> An
     let configuration = AnalyzerConfiguration {
         rules: to_analyzer_rules(settings.as_ref(), file_path.as_path()),
         globals: vec![],
+        preferred_quote: PreferredQuote::Double,
     };
     AnalyzerOptions {
         configuration,

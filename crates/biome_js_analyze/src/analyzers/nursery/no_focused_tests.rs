@@ -95,7 +95,6 @@ impl Rule for NoFocusedTests {
                 let member = callee.as_js_static_member_expression()?;
                 let member_name = member.member().ok()?;
                 let operator_token = member.operator_token().ok()?;
-                // let member = member.as_js_name()?;
                 mutation.remove_element(member_name.into());
                 mutation.remove_element(operator_token.into());
             }

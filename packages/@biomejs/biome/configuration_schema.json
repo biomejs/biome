@@ -506,7 +506,7 @@
 		"ComplexityConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "RuleWithComplexityOptions" }
+				{ "$ref": "#/definitions/RuleWithComplexityOptions" }
 			]
 		},
 		"ComplexityOptions": {
@@ -540,7 +540,7 @@
 		"ConsistentArrayTypeConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "RuleWithConsistentArrayTypeOptions" }
+				{ "$ref": "#/definitions/RuleWithConsistentArrayTypeOptions" }
 			]
 		},
 		"ConsistentArrayTypeOptions": {
@@ -897,7 +897,7 @@
 		"DeprecatedHooksConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "RuleWithDeprecatedHooksOptions" }
+				{ "$ref": "#/definitions/RuleWithDeprecatedHooksOptions" }
 			]
 		},
 		"DeprecatedHooksOptions": {
@@ -955,7 +955,7 @@
 		"FilenamingConventionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "RuleWithFilenamingConventionOptions" }
+				{ "$ref": "#/definitions/RuleWithFilenamingConventionOptions" }
 			]
 		},
 		"FilenamingConventionOptions": {
@@ -1079,7 +1079,7 @@
 		"HooksConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "RuleWithHooksOptions" }
+				{ "$ref": "#/definitions/RuleWithHooksOptions" }
 			]
 		},
 		"HooksOptions": {
@@ -1354,7 +1354,7 @@
 		"NamingConventionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "RuleWithNamingConventionOptions" }
+				{ "$ref": "#/definitions/RuleWithNamingConventionOptions" }
 			]
 		},
 		"NamingConventionOptions": {
@@ -1721,7 +1721,7 @@
 		"RestrictedGlobalsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "RuleWithRestrictedGlobalsOptions" }
+				{ "$ref": "#/definitions/RuleWithRestrictedGlobalsOptions" }
 			]
 		},
 		"RestrictedGlobalsOptions": {
@@ -1740,7 +1740,7 @@
 		"RestrictedImportsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "RuleWithRestrictedImportsOptions" }
+				{ "$ref": "#/definitions/RuleWithRestrictedImportsOptions" }
 			]
 		},
 		"RestrictedImportsOptions": {
@@ -2642,7 +2642,7 @@
 		"UtilityClassSortingConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "RuleWithUtilityClassSortingOptions" }
+				{ "$ref": "#/definitions/RuleWithUtilityClassSortingOptions" }
 			]
 		},
 		"UtilityClassSortingOptions": {
@@ -2664,7 +2664,7 @@
 		"ValidAriaRoleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "RuleWithValidAriaRoleOptions" }
+				{ "$ref": "#/definitions/RuleWithValidAriaRoleOptions" }
 			]
 		},
 		"ValidAriaRoleOptions": {

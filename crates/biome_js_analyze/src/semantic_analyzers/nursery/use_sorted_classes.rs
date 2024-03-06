@@ -13,8 +13,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
-    js_string_literal, js_string_literal_expression, js_template_chunk, js_template_chunk_element,
-    jsx_string,
+    js_string_literal, js_string_literal_expression, js_string_literal_single_quotes,
+    js_template_chunk, js_template_chunk_element, jsx_string,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 use lazy_static::lazy_static;
@@ -186,11 +186,20 @@ impl Rule for UseSortedClasses {
         let mut mutation = ctx.root().begin();
         match ctx.query() {
             AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
-                let replacement = js_string_literal_expression(js_string_literal(state));
+                let replacement =
+                    js_string_literal_expression(if ctx.as_preferred_quote().is_double() {
+                        js_string_literal(state)
+                    } else {
+                        js_string_literal_single_quotes(state)
+                    });
                 mutation.replace_node(string_literal.clone(), replacement);
             }
             AnyClassStringLike::JsxString(jsx_string_node) => {
-                let replacement = jsx_string(js_string_literal(state));
+                let replacement = jsx_string(if ctx.as_preferred_quote().is_double() {
+                    js_string_literal(state)
+                } else {
+                    js_string_literal_single_quotes(state)
+                });
                 mutation.replace_node(jsx_string_node.clone(), replacement);
             }
             AnyClassStringLike::JsTemplateChunkElement(chunk) => {
