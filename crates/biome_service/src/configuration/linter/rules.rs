@@ -52,7 +52,7 @@ pub struct Rules {
 }
 impl DeserializableValidator for Rules {
     fn validate(
-        &self,
+        &mut self,
         _name: &str,
         range: TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
@@ -448,7 +448,7 @@ pub struct A11y {
 }
 impl DeserializableValidator for A11y {
     fn validate(
-        &self,
+        &mut self,
         _name: &str,
         range: TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
@@ -1164,7 +1164,7 @@ pub struct Complexity {
 }
 impl DeserializableValidator for Complexity {
     fn validate(
-        &self,
+        &mut self,
         _name: &str,
         range: TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
@@ -1812,7 +1812,7 @@ pub struct Correctness {
 }
 impl DeserializableValidator for Correctness {
     fn validate(
-        &self,
+        &mut self,
         _name: &str,
         range: TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
@@ -2614,7 +2614,7 @@ pub struct Nursery {
 }
 impl DeserializableValidator for Nursery {
     fn validate(
-        &self,
+        &mut self,
         _name: &str,
         range: TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
@@ -3375,7 +3375,7 @@ pub struct Performance {
 }
 impl DeserializableValidator for Performance {
     fn validate(
-        &self,
+        &mut self,
         _name: &str,
         range: TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
@@ -3511,7 +3511,7 @@ pub struct Security {
 }
 impl DeserializableValidator for Security {
     fn validate(
-        &self,
+        &mut self,
         _name: &str,
         range: TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
@@ -3745,7 +3745,7 @@ pub struct Style {
 }
 impl DeserializableValidator for Style {
     fn validate(
-        &self,
+        &mut self,
         _name: &str,
         range: TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
@@ -4547,7 +4547,7 @@ pub struct Suspicious {
 }
 impl DeserializableValidator for Suspicious {
     fn validate(
-        &self,
+        &mut self,
         _name: &str,
         range: TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,

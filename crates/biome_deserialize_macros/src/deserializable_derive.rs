@@ -231,7 +231,7 @@ fn generate_deserializable_enum(
 
     let validator = if data.with_validator {
         quote! {
-            if !biome_deserialize::DeserializableValidator::validate(&result, name, range, diagnostics) {
+            if !biome_deserialize::DeserializableValidator::validate(&mut result, name, range, diagnostics) {
                 return None;
             }
         }
@@ -274,7 +274,7 @@ fn generate_deserializable_newtype(
 ) -> TokenStream {
     let validator = if data.with_validator {
         quote! {
-            if !biome_deserialize::DeserializableValidator::validate(&result, name, value.range(), diagnostics) {
+            if !biome_deserialize::DeserializableValidator::validate(&mut result, name, value.range(), diagnostics) {
                 return None;
             }
         }
@@ -436,7 +436,7 @@ fn generate_deserializable_struct(
     let validator = if data.with_validator {
         quote! {
             #validator
-            if !biome_deserialize::DeserializableValidator::validate(&result, name, range, diagnostics) {
+            if !biome_deserialize::DeserializableValidator::validate(&mut result, name, range, diagnostics) {
                 return None;
             }
         }

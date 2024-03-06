@@ -241,9 +241,8 @@ mod tests {
     use biome_js_syntax::{JsFileSource, TextRange, TextSize};
     use std::slice;
 
-    use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::{
-        Hooks, HooksOptions,
-    };
+    use crate::react::hooks::StableHookResult;
+    use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::{Hook, HooksOptions};
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
     // #[ignore]
@@ -260,18 +259,16 @@ mod tests {
 
         const SOURCE: &str = r#"<a href="class/html-css1/navigation/links#" onclick="window.location.href=index.html"> Home </a>
         "#;
-        // const SOURCE: &str = r#"document.querySelector("foo").value = document.querySelector("foo").value
-        //
-        // "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let mut options = AnalyzerOptions::default();
-        let hook = Hooks {
+        let hook = Hook {
             name: "myEffect".to_string(),
             closure_index: Some(0),
             dependencies_index: Some(1),
+            stable_result: StableHookResult::None,
         };
         let rule_filter = RuleFilter::Rule("a11y", "useValidAnchor");
 

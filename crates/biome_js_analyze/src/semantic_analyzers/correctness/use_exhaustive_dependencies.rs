@@ -3,7 +3,7 @@ use crate::semantic_services::Semantic;
 use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_deserialize::non_empty;
+use biome_deserialize::{non_empty, DeserializableValidator, DeserializationDiagnostic};
 use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
@@ -193,28 +193,21 @@ impl Default for ReactExtensiveDependenciesOptions {
             ("useCallback".to_string(), (0, 1, true).into()),
             ("useMemo".to_string(), (0, 1, true).into()),
             ("useImperativeHandle".to_string(), (1, 2, true).into()),
-            ("useState".to_string(), ReactHookConfiguration::default()),
-            ("useReducer".to_string(), ReactHookConfiguration::default()),
-            ("useRef".to_string(), ReactHookConfiguration::default()),
-            (
-                "useDebugValue".to_string(),
-                ReactHookConfiguration::default(),
-            ),
-            (
-                "useDeferredValue".to_string(),
-                ReactHookConfiguration::default(),
-            ),
-            (
-                "useTransition".to_string(),
-                ReactHookConfiguration::default(),
-            ),
         ]);
 
         let stable_config = FxHashSet::from_iter([
-            StableReactHookConfiguration::new("useState", Some(1)),
-            StableReactHookConfiguration::new("useReducer", Some(1)),
-            StableReactHookConfiguration::new("useTransition", Some(1)),
-            StableReactHookConfiguration::new("useRef", None),
+            StableReactHookConfiguration::new("useState", StableHookResult::Indices(vec![1]), true),
+            StableReactHookConfiguration::new(
+                "useReducer",
+                StableHookResult::Indices(vec![1]),
+                true,
+            ),
+            StableReactHookConfiguration::new(
+                "useTransition",
+                StableHookResult::Indices(vec![1]),
+                true,
+            ),
+            StableReactHookConfiguration::new("useRef", StableHookResult::Identity, true),
         ]);
 
         Self {
@@ -229,41 +222,95 @@ impl Default for ReactExtensiveDependenciesOptions {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct HooksOptions {
-    /// List of safe hooks
+    /// List of hooks of which the dependencies should be validated.
     #[deserializable(validate = "non_empty")]
-    pub hooks: Vec<Hooks>,
+    pub hooks: Vec<Hook>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct Hooks {
-    /// The name of the hook
+#[deserializable(with_validator)]
+pub struct Hook {
+    /// The name of the hook.
     #[deserializable(validate = "non_empty")]
     pub name: String,
+
     /// The "position" of the closure function, starting from zero.
     ///
-    /// ### Example
-    pub closure_index: Option<usize>,
+    /// For example, for React's `useEffect()` hook, the closure index is 0.
+    pub closure_index: Option<u8>,
+
     /// The "position" of the array of dependencies, starting from zero.
-    pub dependencies_index: Option<usize>,
+    ///
+    /// For example, for React's `useEffect()` hook, the dependencies index is 1.
+    pub dependencies_index: Option<u8>,
+
+    /// Whether the result of the hook is stable.
+    ///
+    /// Set to `true` to mark the identity of the hook's return value as stable,
+    /// or use a number/an array of numbers to mark the "positions" in the
+    /// return array as stable.
+    ///
+    /// For example, for React's `useRef()` hook the value would be `true`,
+    /// while for `useState()` it would be `[1]`.
+    pub stable_result: StableHookResult,
+}
+
+impl DeserializableValidator for Hook {
+    fn validate(
+        &mut self,
+        _name: &str,
+        range: biome_rowan::TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> bool {
+        match (self.closure_index, self.dependencies_index) {
+            (Some(closure_index), Some(dependencies_index))
+                if closure_index == dependencies_index =>
+            {
+                diagnostics.push(
+                    DeserializationDiagnostic::new(markup! {
+                        <Emphasis>"closureIndex"</Emphasis>" and "<Emphasis>"dependenciesIndex"</Emphasis>" may not be the same"
+                    })
+                    .with_range(range),
+                );
+
+                self.closure_index = None;
+                self.dependencies_index = None;
+            }
+            _ => {}
+        }
+
+        true
+    }
 }
 
 impl ReactExtensiveDependenciesOptions {
     pub fn new(hooks: HooksOptions) -> Self {
-        let mut default = ReactExtensiveDependenciesOptions::default();
+        let mut result = ReactExtensiveDependenciesOptions::default();
         for hook in hooks.hooks {
-            default.hooks_config.insert(
-                hook.name,
-                ReactHookConfiguration {
-                    closure_index: hook.closure_index,
-                    dependencies_index: hook.dependencies_index,
+            if hook.stable_result != StableHookResult::None {
+                result.stable_config.insert(StableReactHookConfiguration {
+                    hook_name: hook.name.clone(),
+                    result: hook.stable_result,
                     builtin: false,
-                },
-            );
+                });
+            }
+            if let (Some(closure_index), Some(dependencies_index)) =
+                (hook.closure_index, hook.dependencies_index)
+            {
+                result.hooks_config.insert(
+                    hook.name,
+                    ReactHookConfiguration {
+                        closure_index,
+                        dependencies_index,
+                        builtin: false,
+                    },
+                );
+            }
         }
 
-        default
+        result
     }
 }
 

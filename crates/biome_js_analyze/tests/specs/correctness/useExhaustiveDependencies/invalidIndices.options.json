@@ -8,14 +8,11 @@
                     "options": {
                         "hooks": [
                             {
-                                "name": "useEffect",
+                                "name": "useMyEffect",
                                 "closureIndex": 0,
-                                "dependenciesIndex": 1
-                            },
-                            {
-                                "name": "useState",
+                                "dependenciesIndex": 0,
                                 "stableResult": [
-                                    1
+                                    -1
                                 ]
                             }
                         ]
