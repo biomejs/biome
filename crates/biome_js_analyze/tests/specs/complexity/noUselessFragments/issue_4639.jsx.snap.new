@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 83
+expression: issue_4639.jsx
+---
+# Input
+```jsx
+export function SomeComponent() {
+  return <div x-some-prop={<>Foo</>} />;
+}
+
+```
+
+
