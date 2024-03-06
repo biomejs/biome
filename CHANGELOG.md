@@ -22,8 +22,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ---
   - import { getLocale } from "astro:i18n";
   - import { Code } from "astro:components";
-  + import { getLocale } from "astro:i18n";
   + import { Code } from "astro:components";
+  + import { getLocale } from "astro:i18n";
   ---
 
   <div></div>
