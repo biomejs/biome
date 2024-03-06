@@ -225,4 +225,13 @@ Due to the different nature of `.prettierignore` globs and Biomeâ€™s globs, itâ€
 Prettier's globs are **git globs**, while Biome's globs are **unix-style** globs.
 :::
 
-###
+### Linter
+
+
+### Miscellaneous
+
+- We drastically reduced the protected files, which means you can now format your `package.json`, `tsconfig.json`, etc. with Biome. Lock files are still considered protected.
+- The CLI now does a better job at reporting the total number of files and the files that were really changed.
+- When a diagnostic shows a file name on the terminal that is integrated with your editor, you can click it and the editor will open the file for you.
+- The command `biome rage` now accepts two nice options: `--formatter` and `--linter`.
+- We removed some superfluous error diagnostic when running the `biome check` command.
