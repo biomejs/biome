@@ -28,8 +28,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ---
   - import { getLocale } from "astro:i18n";
   - import { Code } from "astro:components";
-  + import { getLocale } from "astro:i18n";
   + import { Code } from "astro:components";
+  + import { getLocale } from "astro:i18n";
   ---
 
   <div></div>
@@ -693,7 +693,7 @@ Additionally, the following rules are now recommended:
 
 #### New features
 
-- Add option `json.formatter.trailingComma`, to provide a better control over the trailing comma in JSON/JSONC files. Its default value is `"none"`.
+- Add option `json.formatter.trailingCommas`, to provide a better control over the trailing comma in JSON/JSONC files. Its default value is `"none"`.
 
 #### Bug fixes
 
