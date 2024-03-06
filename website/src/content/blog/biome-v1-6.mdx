@@ -3,7 +3,7 @@ title: Biome v1.6
 description: Partial support for Astro, Svelte and Vue, extend configuration from dependencies, formatter goodies.
 summary: |
   Partial support for Astro, Svelte and Vue files, both CLI and LSP.
-  Now, the `extends` field is able to pick configuration files that are exported as a dependency, very useful in monorepo and big projects.
+  Now, the `extends` field is able to pick configuration files that are exported from a dependency.
   The formatter has new options.
 authors:
   - ema
@@ -31,11 +31,11 @@ npx @biomejs/biome migrate
 
 ## Partial support for Astro, Svelte and Vue files
 
-In this release, we're happy to provide partial support for Astor, Svelte and Vue files. What does **partial** support mean?
+In this release, we're happy to provide partial support for Astro, Svelte and Vue files. What does **partial** support mean?
 
-While the team is working on a [unified data structure](https://github.com/biomejs/biome/discussions/1726) for HTML-ish languages, we discovered that we could provide Biome functionalities to those files with just few changes, albeit some expectations.
+While the team is working on a [unified data structure](https://github.com/biomejs/biome/discussions/1726) for HTML-ish languages, we discovered that we could provide Biome functionalities to those files with just a few changes, albeit with some limitations.
 
-This means that Biome is able to analyse the JavaScript/TypeScript portion of said files, and all features are available: formatting, linting and import sorting! Here's an example that you should expect in terms of developer experience:
+This means that Biome is able to analyze the JavaScript/TypeScript portion of said files, and all features are available: formatting, linting and import sorting! Here's an example of what you should expect in terms of developer experience:
 
 <Tabs>
     <TabItem label="Astro" icon="astro">
@@ -65,7 +65,7 @@ Biome now accepts the file `biome.jsonc` as configuration! Now, you can insert a
 
 ### `extends` resolves dependencies
 
-From this version, Biome can the `extends` property can *resolve* other configuration files that are installed and exported as a dependency.
+From this version, Biome can use the `extends` property to *resolve* other configuration files that are inside installed dependencies.
 
 There are few important steps in order to make the configuration discoverable. The file must be exported from a `"module"` package, and the file should be exported in your `package.json` like this:
 
@@ -109,7 +109,7 @@ We **reduced** the size our configuration **by a factor of 6.5**! This change mi
 
 ## New formatting options
 
-Other than fixes, the formatter provides two new options that should improve the compatibility with Prettier parity
+Other than fixes, the formatter provides two new options that should improve the compatibility with Prettier.
 
 ### Option `attributePosition`
 
@@ -151,7 +151,7 @@ When `formatter.attributePosition` has the value `multiline`, all attributes of 
 Previously, Biome parser introduced an option that would allow to parse JSON and JSONC files that contained a trailing comma. This was required to ease the friction caused by other tools that
 tolerate trailing commas by default (e.g. VSCode, Prettier, etc.).
 
-Although, our formatter wasn't as tolerant. With the option `json.formatter.trailingComma`, you can apply the same rules that `js.formatter.trailingComma` applies.
+Unfortunately, our formatter wasn't as tolerant. But with this release, we've introduced the option `json.formatter.trailingComma`. It allows you to apply the same rules as with `js.formatter.trailingComma`.
 
 <div class="card">
     <div class="card-column">
