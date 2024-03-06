@@ -390,7 +390,7 @@ export interface PartialJsonFormatter {
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "omit".
+	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
 	 */
 	trailingCommas?: TrailingCommas;
 }
@@ -956,10 +956,6 @@ export interface Nursery {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
-	/**
-	 * Enforce the use of import type when an import only has specifiers with type qualifier.
-	 */
-	useGroupedTypeImport?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -1891,7 +1887,6 @@ export type Category =
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUselessTernary"
 	| "lint/nursery/useBiomeSuppressionComment"
-	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxKeyInIterable"
 	| "lint/nursery/useNodeAssertStrict"

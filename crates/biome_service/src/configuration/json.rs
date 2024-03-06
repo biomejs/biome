@@ -70,11 +70,7 @@ pub struct JsonFormatter {
     pub line_width: Option<LineWidth>,
 
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
-    #[partial(bpaf(
-        long("json-formatter-trailing-commas"),
-        argument("none|all"),
-        optional
-    ))]
+    #[partial(bpaf(long("json-formatter-trailing-commas"), argument("none|all"), optional))]
     pub trailing_commas: Option<TrailingCommas>,
 }
 

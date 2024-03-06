@@ -1493,13 +1493,6 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
-				"useGroupedTypeImport": {
-					"description": "Enforce the use of import type when an import only has specifiers with type qualifier.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
 					"anyOf": [

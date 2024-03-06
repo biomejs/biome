@@ -13,7 +13,6 @@ pub mod no_restricted_imports;
 pub mod no_skipped_tests;
 pub mod no_undeclared_dependencies;
 pub mod no_useless_ternary;
-pub mod use_grouped_type_import;
 pub mod use_import_restrictions;
 pub mod use_node_assert_strict;
 
@@ -32,7 +31,6 @@ declare_group! {
             self :: no_skipped_tests :: NoSkippedTests ,
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
             self :: no_useless_ternary :: NoUselessTernary ,
-            self :: use_grouped_type_import :: UseGroupedTypeImport ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_node_assert_strict :: UseNodeAssertStrict ,
         ]

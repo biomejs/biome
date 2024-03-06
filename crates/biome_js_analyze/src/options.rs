@@ -236,7 +236,6 @@ pub type UseForOf =
 pub type UseFragmentSyntax = < semantic_analyzers :: style :: use_fragment_syntax :: UseFragmentSyntax as biome_analyze :: Rule > :: Options ;
 pub type UseGetterReturn =
     <analyzers::suspicious::use_getter_return::UseGetterReturn as biome_analyze::Rule>::Options;
-pub type UseGroupedTypeImport = < analyzers :: nursery :: use_grouped_type_import :: UseGroupedTypeImport as biome_analyze :: Rule > :: Options ;
 pub type UseHeadingContent =
     <analyzers::a11y::use_heading_content::UseHeadingContent as biome_analyze::Rule>::Options;
 pub type UseHookAtTopLevel = < semantic_analyzers :: correctness :: use_hook_at_top_level :: UseHookAtTopLevel as biome_analyze :: Rule > :: Options ;

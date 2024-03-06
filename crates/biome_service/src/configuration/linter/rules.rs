@@ -2661,9 +2661,6 @@ pub struct Nursery {
     #[doc = "Disallow ternary operators when simpler alternatives exist."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_ternary: Option<RuleConfiguration<NoUselessTernary>>,
-    #[doc = "Enforce the use of import type when an import only has specifiers with type qualifier."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_grouped_type_import: Option<RuleConfiguration<UseGroupedTypeImport>>,
     #[doc = "Disallows package private imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_import_restrictions: Option<RuleConfiguration<UseImportRestrictions>>,
@@ -2693,7 +2690,7 @@ impl DeserializableValidator for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 20] = [
+    pub(crate) const GROUP_RULES: [&'static str; 19] = [
         "noBarrelFile",
         "noConsole",
         "noDuplicateJsonKeys",
@@ -2709,13 +2706,12 @@ impl Nursery {
         "noSkippedTests",
         "noUndeclaredDependencies",
         "noUselessTernary",
-        "useGroupedTypeImport",
         "useImportRestrictions",
         "useJsxKeyInIterable",
         "useNodeAssertStrict",
         "useSortedClasses",
     ];
-    const RECOMMENDED_RULES: [&'static str; 8] = [
+    const RECOMMENDED_RULES: [&'static str; 7] = [
         "noDuplicateJsonKeys",
         "noDuplicateTestHooks",
         "noExcessiveNestedTestSuites",
@@ -2723,9 +2719,8 @@ impl Nursery {
         "noFocusedTests",
         "noSemicolonInJsx",
         "noUselessTernary",
-        "useGroupedTypeImport",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 8] = [
+    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 7] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
@@ -2733,9 +2728,8 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 20] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 19] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2755,7 +2749,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended(&self) -> bool {
@@ -2847,29 +2840,24 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.use_grouped_type_import.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
+        if let Some(rule) = self.use_node_assert_strict.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.use_node_assert_strict.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
-            }
-        }
         if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
         index_set
@@ -2951,29 +2939,24 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.use_grouped_type_import.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
+        if let Some(rule) = self.use_node_assert_strict.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.use_node_assert_strict.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
-            }
-        }
         if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
         index_set
@@ -2986,10 +2969,10 @@ impl Nursery {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 8] {
+    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 7] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 20] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 19] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3073,10 +3056,6 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUselessTernary" => self
                 .no_useless_ternary
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useGroupedTypeImport" => self
-                .use_grouped_type_import
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useImportRestrictions" => self

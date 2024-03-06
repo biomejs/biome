@@ -125,7 +125,6 @@ define_categories! {
     "lint/nursery/noUndeclaredDependencies": "https://biomejs.dev/linter/rules/no-undeclared-dependencies",
     "lint/nursery/noUselessTernary": "https://biomejs.dev/linter/rules/no-useless-ternary",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
-    "lint/nursery/useGroupedTypeImport": "https://biomejs.dev/linter/rules/use-grouped-type-import",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useJsxKeyInIterable": "https://biomejs.dev/linter/rules/use-jsx-key-in-iterable",
     "lint/nursery/useNodeAssertStrict": "https://biomejs.dev/linter/rules/use-node-assert-strict",
