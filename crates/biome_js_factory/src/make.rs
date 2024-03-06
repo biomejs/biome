@@ -29,11 +29,31 @@ pub fn js_string_literal(text: &str) -> JsSyntaxToken {
     )
 }
 
+/// Create a new string literal token with no attached trivia, using single quotes
+pub fn js_string_literal_single_quotes(text: &str) -> JsSyntaxToken {
+    JsSyntaxToken::new_detached(
+        JsSyntaxKind::JS_STRING_LITERAL,
+        &format!("'{text}'"),
+        [],
+        [],
+    )
+}
+
 /// Create a new string literal token with no attached trivia
 pub fn jsx_string_literal(text: &str) -> JsSyntaxToken {
     JsSyntaxToken::new_detached(
         JsSyntaxKind::JSX_STRING_LITERAL,
         &format!("\"{text}\""),
+        [],
+        [],
+    )
+}
+
+/// Create a new string literal token with no attached trivia, using single quotes
+pub fn jsx_string_literal_single_quotes(text: &str) -> JsSyntaxToken {
+    JsSyntaxToken::new_detached(
+        JsSyntaxKind::JSX_STRING_LITERAL,
+        &format!("'{text}'"),
         [],
         [],
     )

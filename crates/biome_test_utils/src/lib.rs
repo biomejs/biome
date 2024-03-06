@@ -1,3 +1,4 @@
+use biome_analyze::options::PreferredQuote;
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
@@ -40,6 +41,7 @@ pub fn create_analyzer_options(
     let mut analyzer_configuration = AnalyzerConfiguration {
         rules: AnalyzerRules::default(),
         globals: vec![],
+        preferred_quote: PreferredQuote::Double,
     };
     let options_file = input_file.with_extension("options.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
@@ -65,6 +67,20 @@ pub fn create_analyzer_options(
         } else {
             let configuration = deserialized.into_deserialized().unwrap_or_default();
             let mut settings = WorkspaceSettings::default();
+            analyzer_configuration.preferred_quote = configuration
+                .javascript
+                .as_ref()
+                .and_then(|js| js.formatter.as_ref())
+                .and_then(|f| {
+                    f.quote_style.map(|quote_style| {
+                        if quote_style.is_double() {
+                            PreferredQuote::Double
+                        } else {
+                            PreferredQuote::Single
+                        }
+                    })
+                })
+                .unwrap_or_default();
             settings
                 .merge_with_configuration(configuration, None, None, &[])
                 .unwrap();

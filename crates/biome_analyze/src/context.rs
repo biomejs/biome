@@ -1,3 +1,4 @@
+use crate::options::PreferredQuote;
 use crate::{registry::RuleRoot, FromServices, Queryable, Rule, RuleKey, ServiceBag};
 use biome_diagnostics::{Error, Result};
 use std::ops::Deref;
@@ -17,6 +18,7 @@ where
     globals: &'a [&'a str],
     file_path: &'a Path,
     options: &'a R::Options,
+    preferred_quote: &'a PreferredQuote,
 }
 
 impl<'a, R> RuleContext<'a, R>
@@ -30,6 +32,7 @@ where
         globals: &'a [&'a str],
         file_path: &'a Path,
         options: &'a R::Options,
+        preferred_quote: &'a PreferredQuote,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
@@ -40,6 +43,7 @@ where
             globals,
             file_path,
             options,
+            preferred_quote,
         })
     }
 
@@ -108,6 +112,11 @@ where
     /// The file path of the current file
     pub fn file_path(&self) -> &Path {
         self.file_path
+    }
+
+    /// Returns the preferred quote that should be used when providing code actions
+    pub fn as_preferred_quote(&self) -> &PreferredQuote {
+        self.preferred_quote
     }
 }
 
