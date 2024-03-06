@@ -109,8 +109,10 @@ impl WorkspaceServer {
         self.documents
             .get(path)
             .map(|doc| doc.file_source_index)
-            .and_then(|index| self.file_sources.read().unwrap().get_index(index).copied())
-            .unwrap_or(DocumentFileSource::from_path(path))
+            .and_then(|index| self.get_source(index))
+            .unwrap_or(
+                DocumentFileSource::from_path(path)
+            )
     }
 
     /// Return an error factory function for unsupported features at a given path
@@ -168,6 +170,17 @@ impl WorkspaceServer {
         }
     }
 
+    fn get_source(&self, index: usize) -> Option<DocumentFileSource> {
+        let file_sources = self.file_sources.read().unwrap();
+        file_sources.get_index(index).copied()
+    }
+
+    fn set_source(&self, document_file_source: DocumentFileSource) -> usize {
+        let mut file_sources = self.file_sources.write().unwrap();
+        let (index, _) = file_sources.insert_full(document_file_source);
+        index
+    }
+
     /// Get the parser result for a given file
     ///
     /// Returns and error if no file exists in the workspace with this path or
@@ -207,13 +220,12 @@ impl WorkspaceServer {
                 }
 
                 let settings = self.settings();
-                let mut file_sources = self.file_sources.write().unwrap();
-                let Some(file_source) = file_sources.get_index(document.file_source_index) else {
+                let Some(file_source) = self.get_source(document.file_source_index) else {
                     return Err(WorkspaceError::not_found());
                 };
                 let parsed = parse(
                     biome_path,
-                    *file_source,
+                    file_source,
                     document.content.as_str(),
                     settings,
                     &mut document.node_cache,
@@ -223,8 +235,7 @@ impl WorkspaceServer {
                     any_parse,
                 } = parsed;
                 if let Some(language) = language {
-                    let (index, _) = file_sources.insert_full(language);
-                    document.file_source_index = index;
+                    document.file_source_index = self.set_source(language);
                 }
                 Ok(entry.insert(any_parse).clone())
             }
@@ -376,12 +387,9 @@ impl Workspace for WorkspaceServer {
 
     /// Add a new file to the workspace
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        let mut file_sources = self.file_sources.write().unwrap();
-        let (index, _) = file_sources.insert_full(
-            params
-                .document_file_source
-                .unwrap_or(DocumentFileSource::from_path(&params.path)),
-        );
+        let index = self.set_source(params
+            .document_file_source
+            .unwrap_or(DocumentFileSource::from_path(&params.path)));
         self.syntax.remove(&params.path);
         self.documents.insert(
             params.path,
@@ -396,8 +404,7 @@ impl Workspace for WorkspaceServer {
     }
 
     fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError> {
-        let mut file_sources = self.file_sources.write().unwrap();
-        let (index, _) = file_sources.insert_full(JsonFileSource::json().into());
+        let index = self.set_source(JsonFileSource::json().into());
         self.syntax.remove(&params.path);
         self.documents.insert(
             params.path,
