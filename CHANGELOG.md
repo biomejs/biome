@@ -335,7 +335,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @DaniGuardiola
 
 - Add rule [noUndeclaredependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies), to detect the use of
-  dependencies that aren't present in the `package.json`
+  dependencies that aren't present in the `package.json`.
+
+  The rule ignores imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
+
+  Contributed by @ematipico and @Conaclos
 
 - Add rule [noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import), to report namespace imports:
 
