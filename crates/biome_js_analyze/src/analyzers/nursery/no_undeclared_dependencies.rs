@@ -10,6 +10,8 @@ declare_rule! {
     /// Indirect dependencies will trigger the rule because they aren't declared in the `package.json`. This means that if package `@org/foo` has a dependency on `lodash`, and then you use
     /// `import "lodash"` somewhere in your project, the rule will trigger a diagnostic for this import.
     ///
+    /// The rule ignores imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -18,6 +20,15 @@ declare_rule! {
     /// import "vite";
     /// ```
     ///
+    /// ### Valid
+    ///
+    /// ```js,ignore
+    /// import { A } from "./local.js";
+    /// ```
+    ///
+    /// ```js,ignore
+    /// import assert from "node:assert";
+    /// ```
     pub NoUndeclaredDependencies {
         version: "next",
         name: "noUndeclaredDependencies",
@@ -35,6 +46,8 @@ impl Rule for NoUndeclaredDependencies {
         let node = ctx.query();
         let text = node.inner_string_text()?;
         if !text.text().starts_with('.')
+            // Ignore imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`, and so on.
+            && !text.text().contains(':')
             && !ctx.is_dependency(text.text())
             && !ctx.is_dev_dependency(text.text())
         {

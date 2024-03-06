@@ -57,6 +57,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
 - Add lint rule useJsxKeyInIterable from Eslint rule [`react/jsx-key`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-key.md). Contributed by @vohoanglong0107
+- The analyzer now **infers** the correct quote from `javascript.formatter.quoteStyle`, if set. This means that code fixes suggested by the analyzer will use the same quote of the formatter. Contributed by @ematipico
 
 #### Enhancements
 
@@ -70,6 +71,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @ah-yu
+
+- Fix [#1931](https://github.com/biomejs/biome/issues/1931). Built-in React hooks such as
+  `useEffect()` can now be validated by the
+  [`useExhaustiveDependendies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/), even
+  when they're not being imported from the React library. To do so, simply configure them like
+  any other user-provided hooks.
+
+  Contributed by @arendjr
 
 #### Bug fixes
 
@@ -335,7 +344,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @DaniGuardiola
 
 - Add rule [noUndeclaredependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies), to detect the use of
-  dependencies that aren't present in the `package.json`
+  dependencies that aren't present in the `package.json`.
+
+  The rule ignores imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
+
+  Contributed by @ematipico and @Conaclos
 
 - Add rule [noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import), to report namespace imports:
 

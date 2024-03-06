@@ -93,9 +93,11 @@ impl Rule for NoStringCaseMismatch {
             state.literal.clone(),
             AnyJsExpression::AnyJsLiteralExpression(
                 AnyJsLiteralExpression::JsStringLiteralExpression(
-                    make::js_string_literal_expression(make::js_string_literal(
-                        &state.expected_value,
-                    )),
+                    make::js_string_literal_expression(if ctx.as_preferred_quote().is_double() {
+                        make::js_string_literal(&state.expected_value)
+                    } else {
+                        make::js_string_literal_single_quotes(&state.expected_value)
+                    }),
                 ),
             ),
         );

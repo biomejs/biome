@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue1931.js
+---
+# Input
+```jsx
+import { useEffect, useState } from 'library-reexporting-react';
+
+function MyComponent25() {
+    const [calc, setCalc] = useState(0);
+    // Built-in hooks such as `useEffect()` normally only get validated when
+    // they're imported from the "react" library. Explicitly configuring them
+    // in the hooks array (as if they are user-provided hooks) overrides this.
+    useEffect(() => {
+        if (calc === 0) {
+            setCalc(1);
+        }
+    }, []);
+}
+
+```
+
+# Diagnostics
+```
+issue1931.js:8:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook does not specify all of its dependencies: calc
+  
+     6 │     // they're imported from the "react" library. Explicitly configuring them
+     7 │     // in the hooks array (as if they are user-provided hooks) overrides this.
+   > 8 │     useEffect(() => {
+       │     ^^^^^^^^^
+     9 │         if (calc === 0) {
+    10 │             setCalc(1);
+  
+  i This dependency is not specified in the hook dependency list.
+  
+     7 │     // in the hooks array (as if they are user-provided hooks) overrides this.
+     8 │     useEffect(() => {
+   > 9 │         if (calc === 0) {
+       │             ^^^^
+    10 │             setCalc(1);
+    11 │         }
+  
+  i Either include it or remove the dependency array
+  
+
+```
+
+```
+issue1931.js:8:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook does not specify all of its dependencies: setCalc
+  
+     6 │     // they're imported from the "react" library. Explicitly configuring them
+     7 │     // in the hooks array (as if they are user-provided hooks) overrides this.
+   > 8 │     useEffect(() => {
+       │     ^^^^^^^^^
+     9 │         if (calc === 0) {
+    10 │             setCalc(1);
+  
+  i This dependency is not specified in the hook dependency list.
+  
+     8 │     useEffect(() => {
+     9 │         if (calc === 0) {
+  > 10 │             setCalc(1);
+       │             ^^^^^^^
+    11 │         }
+    12 │     }, []);
+  
+  i Either include it or remove the dependency array
+  
+
+```

@@ -146,10 +146,9 @@ schemars          = { version = "0.8.12" }
 serde             = { version = "1.0.163", features = ["derive"] }
 serde_json        = "1.0.96"
 smallvec          = { version = "1.10.0", features = ["union", "const_new"] }
+tokio             = { version = "1.36.0" }
 tracing           = { version = "0.1.37", default-features = false, features = ["std"] }
 unicode-bom       = "2.0.3"
-# pinning to version 1.18 to avoid multiple versions of windows-sys as dependency
-tokio = { version = "~1.18.5" }
 
 
 [profile.dev.package.biome_wasm]

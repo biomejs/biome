@@ -391,6 +391,10 @@ impl QuoteStyle {
             QuoteStyle::Single => QuoteStyle::Double,
         }
     }
+
+    pub const fn is_double(&self) -> bool {
+        matches!(self, Self::Double)
+    }
 }
 
 impl FromStr for QuoteStyle {

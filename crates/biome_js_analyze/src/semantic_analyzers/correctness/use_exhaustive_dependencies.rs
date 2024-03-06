@@ -142,7 +142,12 @@ declare_rule! {
     ///
     /// ## Options
     ///
-    /// Allows to specify custom hooks - from libraries or internal projects - that can be considered stable.
+    /// Allows to specify custom hooks - from libraries or internal projects -
+    /// for which dependencies should be checked.
+    ///
+    /// For every hook, you should specify the index of the closure (whose
+    /// dependencies should be checked) and the index of the dependencies array
+    /// to validate against.
     ///
     /// ```json
     /// {
@@ -182,12 +187,12 @@ pub struct ReactExtensiveDependenciesOptions {
 impl Default for ReactExtensiveDependenciesOptions {
     fn default() -> Self {
         let hooks_config = FxHashMap::from_iter([
-            ("useEffect".to_string(), (0, 1).into()),
-            ("useLayoutEffect".to_string(), (0, 1).into()),
-            ("useInsertionEffect".to_string(), (0, 1).into()),
-            ("useCallback".to_string(), (0, 1).into()),
-            ("useMemo".to_string(), (0, 1).into()),
-            ("useImperativeHandle".to_string(), (1, 2).into()),
+            ("useEffect".to_string(), (0, 1, true).into()),
+            ("useLayoutEffect".to_string(), (0, 1, true).into()),
+            ("useInsertionEffect".to_string(), (0, 1, true).into()),
+            ("useCallback".to_string(), (0, 1, true).into()),
+            ("useMemo".to_string(), (0, 1, true).into()),
+            ("useImperativeHandle".to_string(), (1, 2, true).into()),
             ("useState".to_string(), ReactHookConfiguration::default()),
             ("useReducer".to_string(), ReactHookConfiguration::default()),
             ("useRef".to_string(), ReactHookConfiguration::default()),
@@ -253,6 +258,7 @@ impl ReactExtensiveDependenciesOptions {
                 ReactHookConfiguration {
                     closure_index: hook.closure_index,
                     dependencies_index: hook.dependencies_index,
+                    builtin: false,
                 },
             );
         }
