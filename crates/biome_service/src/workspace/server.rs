@@ -110,9 +110,7 @@ impl WorkspaceServer {
             .get(path)
             .map(|doc| doc.file_source_index)
             .and_then(|index| self.get_source(index))
-            .unwrap_or(
-                DocumentFileSource::from_path(path)
-            )
+            .unwrap_or(DocumentFileSource::from_path(path))
     }
 
     /// Return an error factory function for unsupported features at a given path
@@ -387,9 +385,11 @@ impl Workspace for WorkspaceServer {
 
     /// Add a new file to the workspace
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        let index = self.set_source(params
-            .document_file_source
-            .unwrap_or(DocumentFileSource::from_path(&params.path)));
+        let index = self.set_source(
+            params
+                .document_file_source
+                .unwrap_or(DocumentFileSource::from_path(&params.path)),
+        );
         self.syntax.remove(&params.path);
         self.documents.insert(
             params.path,
