@@ -676,7 +676,7 @@ Additionally, the following rules are now recommended:
 
 #### New features
 
-- Add option `json.formatter.trailingComma`, to provide a better control over the trailing comma in JSON/JSONC files. Its default value is `"none"`.
+- Add option `json.formatter.trailingCommas`, to provide a better control over the trailing comma in JSON/JSONC files. Its default value is `"none"`.
 
 #### Bug fixes
 
