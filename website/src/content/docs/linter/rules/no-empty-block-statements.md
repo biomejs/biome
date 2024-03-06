@@ -2,11 +2,7 @@
 title: noEmptyBlockStatements (since v1.3.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noEmptyBlockStatements`**
-
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
-:::
+**Diagnostic Category: `lint/suspicious/noEmptyBlockStatements`**
 
 Source: <a href="https://eslint.org/docs/latest/rules/no-empty" target="_blank"><code>no-empty</code></a>
 
@@ -25,7 +21,7 @@ This rule ignores block statements or static blocks which contain a comment (for
 function emptyFunctionBody () {}
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:1:31 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noEmptyBlockStatements.js:1:31 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/suspicious/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected empty block.</span>
   
@@ -45,7 +41,7 @@ try {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:3:13 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noEmptyBlockStatements.js:3:13 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/suspicious/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected empty block.</span>
   
@@ -68,7 +64,7 @@ class Foo {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:2:3 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noEmptyBlockStatements.js:2:3 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/suspicious/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected empty block.</span>
   

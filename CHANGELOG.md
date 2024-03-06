@@ -308,6 +308,47 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### Promoted rules
+
+New rules are incubated in the nursery group.
+Once stable, we promote them to a stable group.
+The following rules are promoted:
+
+- [complexity/noEmptyTypeParameters](https://biomejs.dev/linter/rules/no-empty-type-parameters)
+- [complexity/noUselessLoneBlockStatements](https://biomejs.dev/linter/rules/no-useless-lone-block-statements)
+- [correctness/noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports)
+- [correctness/noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration)
+- [correctness/noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members)
+- [correctness/useAwait](https://biomejs.dev/linter/rules/use-await)
+- [security/noGlobalEval](https://biomejs.dev/linter/rules/no-global-eval)
+- [style/useConsistentArrayType](https://biomejs.dev/linter/rules/use-consistent-array-type)
+- [style/useExportType](https://biomejs.dev/linter/rules/use-export-type)
+- [style/useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention)
+- [style/useForOf](https://biomejs.dev/linter/rules/use-for-of)
+- [style/useImportType](https://biomejs.dev/linter/rules/use-import-type)
+- [style/useNodejsImportProtocol](https://biomejs.dev/linter/rules/use-nodejs-import-protocol)
+- [style/useNumberNamespace](https://biomejs.dev/linter/rules/use-number-namespace)
+- [style/useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type)
+- [suspicious/noEmptyBlockStatements](https://biomejs.dev/linter/rules/no-empty-block-statements)
+- [suspicious/noGlobalAssign](https://biomejs.dev/linter/rules/no-global-assign)
+- [suspicious/noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class)
+- [suspicious/noThenProperty](https://biomejs.dev/linter/rules/no-then-property)
+
+Additionally, the following rules are now recommended:
+
+- [suspicious/noApproximativeNumericConstant](https://biomejs.dev/linter/rules/no-approximative-numeric-constant)
+- [suspicious/noMisrefactoredShorthandAssign](https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign)
+
+#### Removed rules
+
+- Remove [nursery/useGroupedTypeImport](https://biomejs.dev/linter/rules/use-grouped-type-import).
+
+  [style/useImportType](https://biomejs.dev/linter/rules/use-import-type) covers the behavior of this rule.
+
+  Note that removing a nursery rule is not breaking change according to our [versionning phillosophy](https://biomejs.dev/internals/versioning).
+
+  Contributed by @Conaclos
+
 #### New features
 
 - Add the rule [noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests), to disallow skipped tests:

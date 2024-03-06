@@ -314,6 +314,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmptyTypeParameters": {
+					"description": "Disallow empty type parameters in type aliases and interfaces.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveCognitiveComplexity": {
 					"description": "Disallow functions that exceed a given Cognitive Complexity score.",
 					"anyOf": [
@@ -386,6 +393,13 @@
 				},
 				"noUselessLabel": {
 					"description": "Disallow unnecessary labels.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessLoneBlockStatements": {
+					"description": "Disallow unnecessary nested block statements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -615,6 +629,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noInvalidUseBeforeDeclaration": {
+					"description": "Disallow the use of variables and function parameters before their declaration",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNewSymbol": {
 					"description": "Disallow new operators with the Symbol object.",
 					"anyOf": [
@@ -713,8 +734,22 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnusedImports": {
+					"description": "Disallow unused imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedLabels": {
 					"description": "Disallow unused labels.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnusedPrivateClassMembers": {
+					"description": "Disallow unused private class members",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -744,6 +779,13 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useAwait": {
+					"description": "Ensure async functions utilize await.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"useExhaustiveDependencies": {
 					"description": "Enforce all dependencies are correctly specified in a React hook.",
@@ -1370,20 +1412,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noEmptyBlockStatements": {
-					"description": "Disallow empty block statements and static blocks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noEmptyTypeParameters": {
-					"description": "Disallow empty type parameters in type aliases and interfaces.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noExcessiveNestedTestSuites": {
 					"description": "This rule enforces a maximum depth to nested describe() in test files.",
 					"anyOf": [
@@ -1400,34 +1428,6 @@
 				},
 				"noFocusedTests": {
 					"description": "Disallow focused tests.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noGlobalAssign": {
-					"description": "Disallow assignments to native objects and read-only global variables.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noGlobalEval": {
-					"description": "Disallow the use of global eval().",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noInvalidUseBeforeDeclaration": {
-					"description": "Disallow the use of variables and function parameters before their declaration",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noMisleadingCharacterClass": {
-					"description": "Disallow characters made with multiple code points in character class syntax.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1475,36 +1475,8 @@
 						{ "type": "null" }
 					]
 				},
-				"noThenProperty": {
-					"description": "Disallow then property.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noUndeclaredDependencies": {
 					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnusedImports": {
-					"description": "Disallow unused imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnusedPrivateClassMembers": {
-					"description": "Disallow unused private class members",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessLoneBlockStatements": {
-					"description": "Disallow unnecessary nested block statements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1521,41 +1493,6 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
-				"useAwait": {
-					"description": "Ensure async functions utilize await.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useConsistentArrayType": {
-					"description": "Require consistently using either T[] or Array<T>",
-					"anyOf": [
-						{ "$ref": "#/definitions/ConsistentArrayTypeConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useExportType": {
-					"description": "Promotes the use of export type for types.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useFilenamingConvention": {
-					"description": "Enforce naming conventions for JavaScript and TypeScript filenames.",
-					"anyOf": [
-						{ "$ref": "#/definitions/FilenamingConventionConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useForOf": {
-					"description": "This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useGroupedTypeImport": {
 					"description": "Enforce the use of import type when an import only has specifiers with type qualifier.",
 					"anyOf": [
@@ -1570,13 +1507,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useImportType": {
-					"description": "Promotes the use of import type for types.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useJsxKeyInIterable": {
 					"description": "Disallow missing key props in iterators/collection literals.",
 					"anyOf": [
@@ -1586,27 +1516,6 @@
 				},
 				"useNodeAssertStrict": {
 					"description": "Promotes the usage of node:assert/strict over node:assert.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useNodejsImportProtocol": {
-					"description": "Enforces using the node: protocol for Node.js builtin modules.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useNumberNamespace": {
-					"description": "Use the Number properties instead of global ones.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useShorthandFunctionType": {
-					"description": "Enforce using function types instead of object type with call signatures.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2016,6 +1925,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noGlobalEval": {
+					"description": "Disallow the use of global eval().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -2167,6 +2083,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentArrayType": {
+					"description": "Require consistently using either T[] or Array<T>",
+					"anyOf": [
+						{ "$ref": "#/definitions/ConsistentArrayTypeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConst": {
 					"description": "Require const declarations for variables that are never reassigned after declared.",
 					"anyOf": [
@@ -2195,8 +2118,36 @@
 						{ "type": "null" }
 					]
 				},
+				"useExportType": {
+					"description": "Promotes the use of export type for types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useFilenamingConvention": {
+					"description": "Enforce naming conventions for JavaScript and TypeScript filenames.",
+					"anyOf": [
+						{ "$ref": "#/definitions/FilenamingConventionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useForOf": {
+					"description": "This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useFragmentSyntax": {
 					"description": "This rule enforces the use of <>...</> over <Fragment>...</Fragment>.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useImportType": {
+					"description": "Promotes the use of import type for types.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2213,6 +2164,20 @@
 					"description": "Enforce naming conventions for everything across a codebase.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NamingConventionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNodejsImportProtocol": {
+					"description": "Enforces using the node: protocol for Node.js builtin modules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNumberNamespace": {
+					"description": "Use the Number properties instead of global ones.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2239,6 +2204,13 @@
 				},
 				"useShorthandAssign": {
 					"description": "Require assignment operator shorthand where possible.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useShorthandFunctionType": {
+					"description": "Enforce using function types instead of object type with call signatures.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2423,6 +2395,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmptyBlockStatements": {
+					"description": "Disallow empty block statements and static blocks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmptyInterface": {
 					"description": "Disallow the declaration of empty interfaces.",
 					"anyOf": [
@@ -2458,6 +2437,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noGlobalAssign": {
+					"description": "Disallow assignments to native objects and read-only global variables.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noGlobalIsFinite": {
 					"description": "Use Number.isFinite instead of global isFinite.",
 					"anyOf": [
@@ -2488,6 +2474,13 @@
 				},
 				"noLabelVar": {
 					"description": "Disallow labels that share a name with a variable",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noMisleadingCharacterClass": {
+					"description": "Disallow characters made with multiple code points in character class syntax.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2544,6 +2537,13 @@
 				},
 				"noSparseArray": {
 					"description": "Disallow sparse arrays",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noThenProperty": {
+					"description": "Disallow then property.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

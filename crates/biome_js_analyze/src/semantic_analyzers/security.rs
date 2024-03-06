@@ -4,6 +4,7 @@ use biome_analyze::declare_group;
 
 pub mod no_dangerously_set_inner_html;
 pub mod no_dangerously_set_inner_html_with_children;
+pub mod no_global_eval;
 
 declare_group! {
     pub Security {
@@ -11,6 +12,7 @@ declare_group! {
         rules : [
             self :: no_dangerously_set_inner_html :: NoDangerouslySetInnerHtml ,
             self :: no_dangerously_set_inner_html_with_children :: NoDangerouslySetInnerHtmlWithChildren ,
+            self :: no_global_eval :: NoGlobalEval ,
         ]
      }
 }

@@ -61,7 +61,8 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Status:                       Loaded successfully
+  Error:                        Found an unknown key `useConsistentArrayType`.
+  Status:                       Loaded with errors
   Formatter disabled:           false
   Linter disabled:              false
   Organize imports disabled:    false
@@ -74,7 +75,6 @@ Linter:
                                 a11y/noAutofocus = "off"
                                 complexity/recommended = true
                                 correctness/all = true
-                                nursery/useConsistentArrayType = {"level":"warn","options":{"syntax":"shorthand"}}
                                 style/noNonNullAssertion = "off"
                                 suspicious/noCommentText = {"level":"warn","options":null}
 

@@ -55,6 +55,7 @@ declare_rule! {
         source: RuleSource::EslintTypeScript("array-type"),
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
+        deprecated: "Use `useConsistentArrayType` instead.",
         fix_kind: FixKind::Unsafe,
     }
 }

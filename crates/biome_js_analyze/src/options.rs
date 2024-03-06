@@ -60,13 +60,13 @@ pub type NoDuplicateJsxProps = < analyzers :: suspicious :: no_duplicate_jsx_pro
 pub type NoDuplicateObjectKeys = < analyzers :: suspicious :: no_duplicate_object_keys :: NoDuplicateObjectKeys as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateParameters = < semantic_analyzers :: suspicious :: no_duplicate_parameters :: NoDuplicateParameters as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateTestHooks = < analyzers :: nursery :: no_duplicate_test_hooks :: NoDuplicateTestHooks as biome_analyze :: Rule > :: Options ;
-pub type NoEmptyBlockStatements = < analyzers :: nursery :: no_empty_block_statements :: NoEmptyBlockStatements as biome_analyze :: Rule > :: Options ;
+pub type NoEmptyBlockStatements = < analyzers :: suspicious :: no_empty_block_statements :: NoEmptyBlockStatements as biome_analyze :: Rule > :: Options ;
 pub type NoEmptyCharacterClassInRegex = < analyzers :: correctness :: no_empty_character_class_in_regex :: NoEmptyCharacterClassInRegex as biome_analyze :: Rule > :: Options ;
 pub type NoEmptyInterface =
     <analyzers::suspicious::no_empty_interface::NoEmptyInterface as biome_analyze::Rule>::Options;
 pub type NoEmptyPattern =
     <analyzers::correctness::no_empty_pattern::NoEmptyPattern as biome_analyze::Rule>::Options;
-pub type NoEmptyTypeParameters = < analyzers :: nursery :: no_empty_type_parameters :: NoEmptyTypeParameters as biome_analyze :: Rule > :: Options ;
+pub type NoEmptyTypeParameters = < analyzers :: complexity :: no_empty_type_parameters :: NoEmptyTypeParameters as biome_analyze :: Rule > :: Options ;
 pub type NoExcessiveCognitiveComplexity = < analyzers :: complexity :: no_excessive_cognitive_complexity :: NoExcessiveCognitiveComplexity as biome_analyze :: Rule > :: Options ;
 pub type NoExcessiveNestedTestSuites = < analyzers :: nursery :: no_excessive_nested_test_suites :: NoExcessiveNestedTestSuites as biome_analyze :: Rule > :: Options ;
 pub type NoExplicitAny =
@@ -81,10 +81,9 @@ pub type NoFocusedTests =
 pub type NoForEach =
     <analyzers::complexity::no_for_each::NoForEach as biome_analyze::Rule>::Options;
 pub type NoFunctionAssign = < semantic_analyzers :: suspicious :: no_function_assign :: NoFunctionAssign as biome_analyze :: Rule > :: Options ;
-pub type NoGlobalAssign =
-    <semantic_analyzers::nursery::no_global_assign::NoGlobalAssign as biome_analyze::Rule>::Options;
+pub type NoGlobalAssign = < semantic_analyzers :: suspicious :: no_global_assign :: NoGlobalAssign as biome_analyze :: Rule > :: Options ;
 pub type NoGlobalEval =
-    <semantic_analyzers::nursery::no_global_eval::NoGlobalEval as biome_analyze::Rule>::Options;
+    <semantic_analyzers::security::no_global_eval::NoGlobalEval as biome_analyze::Rule>::Options;
 pub type NoGlobalIsFinite = < semantic_analyzers :: suspicious :: no_global_is_finite :: NoGlobalIsFinite as biome_analyze :: Rule > :: Options ;
 pub type NoGlobalIsNan = < semantic_analyzers :: suspicious :: no_global_is_nan :: NoGlobalIsNan as biome_analyze :: Rule > :: Options ;
 pub type NoGlobalObjectCalls = < semantic_analyzers :: correctness :: no_global_object_calls :: NoGlobalObjectCalls as biome_analyze :: Rule > :: Options ;
@@ -101,10 +100,10 @@ pub type NoInnerDeclarations = < analyzers :: correctness :: no_inner_declaratio
 pub type NoInteractiveElementToNoninteractiveRole = < aria_analyzers :: a11y :: no_interactive_element_to_noninteractive_role :: NoInteractiveElementToNoninteractiveRole as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidConstructorSuper = < analyzers :: correctness :: no_invalid_constructor_super :: NoInvalidConstructorSuper as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidNewBuiltin = < semantic_analyzers :: correctness :: no_invalid_new_builtin :: NoInvalidNewBuiltin as biome_analyze :: Rule > :: Options ;
-pub type NoInvalidUseBeforeDeclaration = < semantic_analyzers :: nursery :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclaration as biome_analyze :: Rule > :: Options ;
+pub type NoInvalidUseBeforeDeclaration = < semantic_analyzers :: correctness :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclaration as biome_analyze :: Rule > :: Options ;
 pub type NoLabelVar =
     <semantic_analyzers::suspicious::no_label_var::NoLabelVar as biome_analyze::Rule>::Options;
-pub type NoMisleadingCharacterClass = < semantic_analyzers :: nursery :: no_misleading_character_class :: NoMisleadingCharacterClass as biome_analyze :: Rule > :: Options ;
+pub type NoMisleadingCharacterClass = < semantic_analyzers :: suspicious :: no_misleading_character_class :: NoMisleadingCharacterClass as biome_analyze :: Rule > :: Options ;
 pub type NoMisleadingInstantiator = < analyzers :: suspicious :: no_misleading_instantiator :: NoMisleadingInstantiator as biome_analyze :: Rule > :: Options ;
 pub type NoMisrefactoredShorthandAssign = < analyzers :: suspicious :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign as biome_analyze :: Rule > :: Options ;
 pub type NoMultipleSpacesInRegularExpressionLiterals = < analyzers :: complexity :: no_multiple_spaces_in_regular_expression_literals :: NoMultipleSpacesInRegularExpressionLiterals as biome_analyze :: Rule > :: Options ;
@@ -159,8 +158,7 @@ pub type NoStringCaseMismatch = < analyzers :: correctness :: no_string_case_mis
 pub type NoSvgWithoutTitle =
     <analyzers::a11y::no_svg_without_title::NoSvgWithoutTitle as biome_analyze::Rule>::Options;
 pub type NoSwitchDeclarations = < analyzers :: correctness :: no_switch_declarations :: NoSwitchDeclarations as biome_analyze :: Rule > :: Options ;
-pub type NoThenProperty =
-    <semantic_analyzers::nursery::no_then_property::NoThenProperty as biome_analyze::Rule>::Options;
+pub type NoThenProperty = < semantic_analyzers :: suspicious :: no_then_property :: NoThenProperty as biome_analyze :: Rule > :: Options ;
 pub type NoThisInStatic = < semantic_analyzers :: complexity :: no_this_in_static :: NoThisInStatic as biome_analyze :: Rule > :: Options ;
 pub type NoUndeclaredDependencies = < analyzers :: nursery :: no_undeclared_dependencies :: NoUndeclaredDependencies as biome_analyze :: Rule > :: Options ;
 pub type NoUndeclaredVariables = < semantic_analyzers :: correctness :: no_undeclared_variables :: NoUndeclaredVariables as biome_analyze :: Rule > :: Options ;
@@ -174,10 +172,10 @@ pub type NoUnsafeFinally =
 pub type NoUnsafeNegation =
     <analyzers::suspicious::no_unsafe_negation::NoUnsafeNegation as biome_analyze::Rule>::Options;
 pub type NoUnsafeOptionalChaining = < analyzers :: correctness :: no_unsafe_optional_chaining :: NoUnsafeOptionalChaining as biome_analyze :: Rule > :: Options ;
-pub type NoUnusedImports = < semantic_analyzers :: nursery :: no_unused_imports :: NoUnusedImports as biome_analyze :: Rule > :: Options ;
+pub type NoUnusedImports = < semantic_analyzers :: correctness :: no_unused_imports :: NoUnusedImports as biome_analyze :: Rule > :: Options ;
 pub type NoUnusedLabels =
     <analyzers::correctness::no_unused_labels::NoUnusedLabels as biome_analyze::Rule>::Options;
-pub type NoUnusedPrivateClassMembers = < analyzers :: nursery :: no_unused_private_class_members :: NoUnusedPrivateClassMembers as biome_analyze :: Rule > :: Options ;
+pub type NoUnusedPrivateClassMembers = < analyzers :: correctness :: no_unused_private_class_members :: NoUnusedPrivateClassMembers as biome_analyze :: Rule > :: Options ;
 pub type NoUnusedTemplateLiteral = < analyzers :: style :: no_unused_template_literal :: NoUnusedTemplateLiteral as biome_analyze :: Rule > :: Options ;
 pub type NoUnusedVariables = < semantic_analyzers :: correctness :: no_unused_variables :: NoUnusedVariables as biome_analyze :: Rule > :: Options ;
 pub type NoUselessCatch =
@@ -189,7 +187,7 @@ pub type NoUselessEmptyExport = < analyzers :: complexity :: no_useless_empty_ex
 pub type NoUselessFragments = < semantic_analyzers :: complexity :: no_useless_fragments :: NoUselessFragments as biome_analyze :: Rule > :: Options ;
 pub type NoUselessLabel =
     <analyzers::complexity::no_useless_label::NoUselessLabel as biome_analyze::Rule>::Options;
-pub type NoUselessLoneBlockStatements = < analyzers :: nursery :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements as biome_analyze :: Rule > :: Options ;
+pub type NoUselessLoneBlockStatements = < analyzers :: complexity :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements as biome_analyze :: Rule > :: Options ;
 pub type NoUselessRename =
     <analyzers::complexity::no_useless_rename::NoUselessRename as biome_analyze::Rule>::Options;
 pub type NoUselessSwitchCase = < analyzers :: complexity :: no_useless_switch_case :: NoUselessSwitchCase as biome_analyze :: Rule > :: Options ;
@@ -212,14 +210,14 @@ pub type UseArrowFunction =
     <analyzers::complexity::use_arrow_function::UseArrowFunction as biome_analyze::Rule>::Options;
 pub type UseAsConstAssertion =
     <analyzers::style::use_as_const_assertion::UseAsConstAssertion as biome_analyze::Rule>::Options;
-pub type UseAwait = <analyzers::nursery::use_await::UseAwait as biome_analyze::Rule>::Options;
+pub type UseAwait = <analyzers::correctness::use_await::UseAwait as biome_analyze::Rule>::Options;
 pub type UseBlockStatements =
     <analyzers::style::use_block_statements::UseBlockStatements as biome_analyze::Rule>::Options;
 pub type UseButtonType =
     <semantic_analyzers::a11y::use_button_type::UseButtonType as biome_analyze::Rule>::Options;
 pub type UseCollapsedElseIf =
     <analyzers::style::use_collapsed_else_if::UseCollapsedElseIf as biome_analyze::Rule>::Options;
-pub type UseConsistentArrayType = < analyzers :: nursery :: use_consistent_array_type :: UseConsistentArrayType as biome_analyze :: Rule > :: Options ;
+pub type UseConsistentArrayType = < analyzers :: style :: use_consistent_array_type :: UseConsistentArrayType as biome_analyze :: Rule > :: Options ;
 pub type UseConst =
     <semantic_analyzers::style::use_const::UseConst as biome_analyze::Rule>::Options;
 pub type UseDefaultParameterLast = < analyzers :: style :: use_default_parameter_last :: UseDefaultParameterLast as biome_analyze :: Rule > :: Options ;
@@ -229,12 +227,12 @@ pub type UseEnumInitializers =
 pub type UseExhaustiveDependencies = < semantic_analyzers :: correctness :: use_exhaustive_dependencies :: UseExhaustiveDependencies as biome_analyze :: Rule > :: Options ;
 pub type UseExponentiationOperator = < analyzers :: style :: use_exponentiation_operator :: UseExponentiationOperator as biome_analyze :: Rule > :: Options ;
 pub type UseExportType =
-    <semantic_analyzers::nursery::use_export_type::UseExportType as biome_analyze::Rule>::Options;
-pub type UseFilenamingConvention = < analyzers :: nursery :: use_filenaming_convention :: UseFilenamingConvention as biome_analyze :: Rule > :: Options ;
+    <semantic_analyzers::style::use_export_type::UseExportType as biome_analyze::Rule>::Options;
+pub type UseFilenamingConvention = < analyzers :: style :: use_filenaming_convention :: UseFilenamingConvention as biome_analyze :: Rule > :: Options ;
 pub type UseFlatMap =
     <analyzers::complexity::use_flat_map::UseFlatMap as biome_analyze::Rule>::Options;
 pub type UseForOf =
-    <semantic_analyzers::nursery::use_for_of::UseForOf as biome_analyze::Rule>::Options;
+    <semantic_analyzers::style::use_for_of::UseForOf as biome_analyze::Rule>::Options;
 pub type UseFragmentSyntax = < semantic_analyzers :: style :: use_fragment_syntax :: UseFragmentSyntax as biome_analyze :: Rule > :: Options ;
 pub type UseGetterReturn =
     <analyzers::suspicious::use_getter_return::UseGetterReturn as biome_analyze::Rule>::Options;
@@ -248,7 +246,7 @@ pub type UseIframeTitle =
     <analyzers::a11y::use_iframe_title::UseIframeTitle as biome_analyze::Rule>::Options;
 pub type UseImportRestrictions = < analyzers :: nursery :: use_import_restrictions :: UseImportRestrictions as biome_analyze :: Rule > :: Options ;
 pub type UseImportType =
-    <semantic_analyzers::nursery::use_import_type::UseImportType as biome_analyze::Rule>::Options;
+    <semantic_analyzers::style::use_import_type::UseImportType as biome_analyze::Rule>::Options;
 pub type UseIsArray =
     <semantic_analyzers::suspicious::use_is_array::UseIsArray as biome_analyze::Rule>::Options;
 pub type UseIsNan =
@@ -264,8 +262,8 @@ pub type UseMediaCaption =
 pub type UseNamespaceKeyword = < analyzers :: suspicious :: use_namespace_keyword :: UseNamespaceKeyword as biome_analyze :: Rule > :: Options ;
 pub type UseNamingConvention = < semantic_analyzers :: style :: use_naming_convention :: UseNamingConvention as biome_analyze :: Rule > :: Options ;
 pub type UseNodeAssertStrict = < analyzers :: nursery :: use_node_assert_strict :: UseNodeAssertStrict as biome_analyze :: Rule > :: Options ;
-pub type UseNodejsImportProtocol = < analyzers :: nursery :: use_nodejs_import_protocol :: UseNodejsImportProtocol as biome_analyze :: Rule > :: Options ;
-pub type UseNumberNamespace = < semantic_analyzers :: nursery :: use_number_namespace :: UseNumberNamespace as biome_analyze :: Rule > :: Options ;
+pub type UseNodejsImportProtocol = < analyzers :: style :: use_nodejs_import_protocol :: UseNodejsImportProtocol as biome_analyze :: Rule > :: Options ;
+pub type UseNumberNamespace = < semantic_analyzers :: style :: use_number_namespace :: UseNumberNamespace as biome_analyze :: Rule > :: Options ;
 pub type UseNumericLiterals =
     <analyzers::style::use_numeric_literals::UseNumericLiterals as biome_analyze::Rule>::Options;
 pub type UseOptionalChain =
@@ -276,7 +274,7 @@ pub type UseSelfClosingElements = < analyzers :: style :: use_self_closing_eleme
 pub type UseShorthandArrayType = < analyzers :: style :: use_shorthand_array_type :: UseShorthandArrayType as biome_analyze :: Rule > :: Options ;
 pub type UseShorthandAssign =
     <analyzers::style::use_shorthand_assign::UseShorthandAssign as biome_analyze::Rule>::Options;
-pub type UseShorthandFunctionType = < analyzers :: nursery :: use_shorthand_function_type :: UseShorthandFunctionType as biome_analyze :: Rule > :: Options ;
+pub type UseShorthandFunctionType = < analyzers :: style :: use_shorthand_function_type :: UseShorthandFunctionType as biome_analyze :: Rule > :: Options ;
 pub type UseSimpleNumberKeys = < analyzers :: complexity :: use_simple_number_keys :: UseSimpleNumberKeys as biome_analyze :: Rule > :: Options ;
 pub type UseSimplifiedLogicExpression = < analyzers :: complexity :: use_simplified_logic_expression :: UseSimplifiedLogicExpression as biome_analyze :: Rule > :: Options ;
 pub type UseSingleCaseStatement = < analyzers :: style :: use_single_case_statement :: UseSingleCaseStatement as biome_analyze :: Rule > :: Options ;

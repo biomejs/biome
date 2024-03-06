@@ -2,10 +2,10 @@
 title: useShorthandFunctionType (since v1.5.0)
 ---
 
-**Diagnostic Category: `lint/nursery/useShorthandFunctionType`**
+**Diagnostic Category: `lint/style/useShorthandFunctionType`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Source: <a href="https://typescript-eslint.io/rules/prefer-function-type" target="_blank"><code>prefer-function-type</code></a>
@@ -31,9 +31,9 @@ interface Example {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useShorthandFunctionType.js:2:3 <a href="https://biomejs.dev/linter/rules/use-shorthand-function-type">lint/nursery/useShorthandFunctionType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useShorthandFunctionType.js:2:3 <a href="https://biomejs.dev/linter/rules/use-shorthand-function-type">lint/style/useShorthandFunctionType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use a function type instead of a call signature.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use a function type instead of a call signature.</span>
   
     <strong>1 │ </strong>interface Example {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>  (): string;
@@ -59,9 +59,9 @@ function foo(example: { (): number }): number {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useShorthandFunctionType.js:1:25 <a href="https://biomejs.dev/linter/rules/use-shorthand-function-type">lint/nursery/useShorthandFunctionType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useShorthandFunctionType.js:1:25 <a href="https://biomejs.dev/linter/rules/use-shorthand-function-type">lint/style/useShorthandFunctionType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use a function type instead of a call signature.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use a function type instead of a call signature.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>function foo(example: { (): number }): number {
    <strong>   │ </strong>                        <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>

@@ -2,10 +2,10 @@
 title: useImportType (since v1.5.0)
 ---
 
-**Diagnostic Category: `lint/nursery/useImportType`**
+**Diagnostic Category: `lint/style/useImportType`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Inspired from: <a href="https://typescript-eslint.io/rules/consistent-type-imports" target="_blank"><code>consistent-type-imports</code></a>
@@ -29,7 +29,7 @@ type TypeOfA = typeof A;
 let a: A;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useImportType.js:1:1 <a href="https://biomejs.dev/linter/rules/use-import-type">lint/nursery/useImportType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useImportType.js:1:1 <a href="https://biomejs.dev/linter/rules/use-import-type">lint/style/useImportType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">All these imports are only used as types.</span>
   
@@ -50,7 +50,7 @@ let a: A;
 import { type A, type B } from "./mod.js";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useImportType.js:1:1 <a href="https://biomejs.dev/linter/rules/use-import-type">lint/nursery/useImportType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useImportType.js:1:1 <a href="https://biomejs.dev/linter/rules/use-import-type">lint/style/useImportType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">All these imports are only used as types.</span>
   

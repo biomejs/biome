@@ -615,6 +615,10 @@ export interface Complexity {
 	 */
 	noBannedTypes?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow empty type parameters in type aliases and interfaces.
+	 */
+	noEmptyTypeParameters?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow functions that exceed a given Cognitive Complexity score.
 	 */
 	noExcessiveCognitiveComplexity?: RuleConfiguration_for_ComplexityOptions;
@@ -658,6 +662,10 @@ export interface Complexity {
 	 * Disallow unnecessary labels.
 	 */
 	noUselessLabel?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unnecessary nested block statements.
+	 */
+	noUselessLoneBlockStatements?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow renaming import, export, and destructured assignments to the same name.
 	 */
@@ -764,6 +772,10 @@ export interface Correctness {
 	 */
 	noInvalidNewBuiltin?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of variables and function parameters before their declaration
+	 */
+	noInvalidUseBeforeDeclaration?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow new operators with the Symbol object.
 	 */
 	noNewSymbol?: RuleConfiguration_for_Null;
@@ -820,9 +832,17 @@ export interface Correctness {
 	 */
 	noUnsafeOptionalChaining?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unused imports.
+	 */
+	noUnusedImports?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unused labels.
 	 */
 	noUnusedLabels?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unused private class members
+	 */
+	noUnusedPrivateClassMembers?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unused variables.
 	 */
@@ -839,6 +859,10 @@ export interface Correctness {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Ensure async functions utilize await.
+	 */
+	useAwait?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
@@ -885,14 +909,6 @@ export interface Nursery {
 	 */
 	noDuplicateTestHooks?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow empty block statements and static blocks.
-	 */
-	noEmptyBlockStatements?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow empty type parameters in type aliases and interfaces.
-	 */
-	noEmptyTypeParameters?: RuleConfiguration_for_Null;
-	/**
 	 * This rule enforces a maximum depth to nested describe() in test files.
 	 */
 	noExcessiveNestedTestSuites?: RuleConfiguration_for_Null;
@@ -904,22 +920,6 @@ export interface Nursery {
 	 * Disallow focused tests.
 	 */
 	noFocusedTests?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow assignments to native objects and read-only global variables.
-	 */
-	noGlobalAssign?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow the use of global eval().
-	 */
-	noGlobalEval?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow the use of variables and function parameters before their declaration
-	 */
-	noInvalidUseBeforeDeclaration?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow characters made with multiple code points in character class syntax.
-	 */
-	noMisleadingCharacterClass?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of namespace imports.
 	 */
@@ -945,25 +945,9 @@ export interface Nursery {
 	 */
 	noSkippedTests?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow then property.
-	 */
-	noThenProperty?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unused imports.
-	 */
-	noUnusedImports?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unused private class members
-	 */
-	noUnusedPrivateClassMembers?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unnecessary nested block statements.
-	 */
-	noUselessLoneBlockStatements?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow ternary operators when simpler alternatives exist.
 	 */
@@ -973,26 +957,6 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
-	 * Ensure async functions utilize await.
-	 */
-	useAwait?: RuleConfiguration_for_Null;
-	/**
-	 * Require consistently using either T[] or Array<T>
-	 */
-	useConsistentArrayType?: RuleConfiguration_for_ConsistentArrayTypeOptions;
-	/**
-	 * Promotes the use of export type for types.
-	 */
-	useExportType?: RuleConfiguration_for_Null;
-	/**
-	 * Enforce naming conventions for JavaScript and TypeScript filenames.
-	 */
-	useFilenamingConvention?: RuleConfiguration_for_FilenamingConventionOptions;
-	/**
-	 * This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.
-	 */
-	useForOf?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce the use of import type when an import only has specifiers with type qualifier.
 	 */
 	useGroupedTypeImport?: RuleConfiguration_for_Null;
@@ -1001,10 +965,6 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
 	/**
-	 * Promotes the use of import type for types.
-	 */
-	useImportType?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow missing key props in iterators/collection literals.
 	 */
 	useJsxKeyInIterable?: RuleConfiguration_for_Null;
@@ -1012,18 +972,6 @@ export interface Nursery {
 	 * Promotes the usage of node:assert/strict over node:assert.
 	 */
 	useNodeAssertStrict?: RuleConfiguration_for_Null;
-	/**
-	 * Enforces using the node: protocol for Node.js builtin modules.
-	 */
-	useNodejsImportProtocol?: RuleConfiguration_for_Null;
-	/**
-	 * Use the Number properties instead of global ones.
-	 */
-	useNumberNamespace?: RuleConfiguration_for_Null;
-	/**
-	 * Enforce using function types instead of object type with call signatures.
-	 */
-	useShorthandFunctionType?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -1066,6 +1014,10 @@ export interface Security {
 	 * Report when a DOM element or a component uses both children and dangerouslySetInnerHTML prop.
 	 */
 	noDangerouslySetInnerHtmlWithChildren?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow the use of global eval().
+	 */
+	noGlobalEval?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1156,6 +1108,10 @@ export interface Style {
 	 */
 	useCollapsedElseIf?: RuleConfiguration_for_Null;
 	/**
+	 * Require consistently using either T[] or Array<T>
+	 */
+	useConsistentArrayType?: RuleConfiguration_for_ConsistentArrayTypeOptions;
+	/**
 	 * Require const declarations for variables that are never reassigned after declared.
 	 */
 	useConst?: RuleConfiguration_for_Null;
@@ -1172,9 +1128,25 @@ export interface Style {
 	 */
 	useExponentiationOperator?: RuleConfiguration_for_Null;
 	/**
+	 * Promotes the use of export type for types.
+	 */
+	useExportType?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce naming conventions for JavaScript and TypeScript filenames.
+	 */
+	useFilenamingConvention?: RuleConfiguration_for_FilenamingConventionOptions;
+	/**
+	 * This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.
+	 */
+	useForOf?: RuleConfiguration_for_Null;
+	/**
 	 * This rule enforces the use of <>...</> over <Fragment>...</Fragment>.
 	 */
 	useFragmentSyntax?: RuleConfiguration_for_Null;
+	/**
+	 * Promotes the use of import type for types.
+	 */
+	useImportType?: RuleConfiguration_for_Null;
 	/**
 	 * Require all enum members to be literal values.
 	 */
@@ -1183,6 +1155,14 @@ export interface Style {
 	 * Enforce naming conventions for everything across a codebase.
 	 */
 	useNamingConvention?: RuleConfiguration_for_NamingConventionOptions;
+	/**
+	 * Enforces using the node: protocol for Node.js builtin modules.
+	 */
+	useNodejsImportProtocol?: RuleConfiguration_for_Null;
+	/**
+	 * Use the Number properties instead of global ones.
+	 */
+	useNumberNamespace?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals
 	 */
@@ -1199,6 +1179,10 @@ export interface Style {
 	 * Require assignment operator shorthand where possible.
 	 */
 	useShorthandAssign?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce using function types instead of object type with call signatures.
+	 */
+	useShorthandFunctionType?: RuleConfiguration_for_Null;
 	/**
 	 * Enforces switch clauses have a single statement, emits a quick fix wrapping the statements in a block.
 	 */
@@ -1305,6 +1289,10 @@ export interface Suspicious {
 	 */
 	noDuplicateParameters?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow empty block statements and static blocks.
+	 */
+	noEmptyBlockStatements?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the declaration of empty interfaces.
 	 */
 	noEmptyInterface?: RuleConfiguration_for_Null;
@@ -1325,6 +1313,10 @@ export interface Suspicious {
 	 */
 	noFunctionAssign?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow assignments to native objects and read-only global variables.
+	 */
+	noGlobalAssign?: RuleConfiguration_for_Null;
+	/**
 	 * Use Number.isFinite instead of global isFinite.
 	 */
 	noGlobalIsFinite?: RuleConfiguration_for_Null;
@@ -1344,6 +1336,10 @@ export interface Suspicious {
 	 * Disallow labels that share a name with a variable
 	 */
 	noLabelVar?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow characters made with multiple code points in character class syntax.
+	 */
+	noMisleadingCharacterClass?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce proper usage of new and constructor.
 	 */
@@ -1376,6 +1372,10 @@ export interface Suspicious {
 	 * Disallow sparse arrays
 	 */
 	noSparseArray?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow then property.
+	 */
+	noThenProperty?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unsafe declaration merging between interfaces and classes.
 	 */
@@ -1474,18 +1474,18 @@ export type RuleConfiguration_for_DeprecatedHooksOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
-export type RuleConfiguration_for_ConsistentArrayTypeOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_ConsistentArrayTypeOptions;
-export type RuleConfiguration_for_FilenamingConventionOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_FilenamingConventionOptions;
 export type RuleConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UtilityClassSortingOptions;
 export type RuleConfiguration_for_RestrictedGlobalsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedGlobalsOptions;
+export type RuleConfiguration_for_ConsistentArrayTypeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_ConsistentArrayTypeOptions;
+export type RuleConfiguration_for_FilenamingConventionOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_FilenamingConventionOptions;
 export type RuleConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NamingConventionOptions;
@@ -1514,14 +1514,6 @@ export interface RuleWithOptions_for_RestrictedImportsOptions {
 	level: RulePlainConfiguration;
 	options: RestrictedImportsOptions;
 }
-export interface RuleWithOptions_for_ConsistentArrayTypeOptions {
-	level: RulePlainConfiguration;
-	options: ConsistentArrayTypeOptions;
-}
-export interface RuleWithOptions_for_FilenamingConventionOptions {
-	level: RulePlainConfiguration;
-	options: FilenamingConventionOptions;
-}
 export interface RuleWithOptions_for_UtilityClassSortingOptions {
 	level: RulePlainConfiguration;
 	options: UtilityClassSortingOptions;
@@ -1529,6 +1521,14 @@ export interface RuleWithOptions_for_UtilityClassSortingOptions {
 export interface RuleWithOptions_for_RestrictedGlobalsOptions {
 	level: RulePlainConfiguration;
 	options: RestrictedGlobalsOptions;
+}
+export interface RuleWithOptions_for_ConsistentArrayTypeOptions {
+	level: RulePlainConfiguration;
+	options: ConsistentArrayTypeOptions;
+}
+export interface RuleWithOptions_for_FilenamingConventionOptions {
+	level: RulePlainConfiguration;
+	options: FilenamingConventionOptions;
 }
 export interface RuleWithOptions_for_NamingConventionOptions {
 	level: RulePlainConfiguration;
@@ -1569,6 +1569,25 @@ export interface RestrictedImportsOptions {
 	 */
 	paths: {};
 }
+export interface UtilityClassSortingOptions {
+	/**
+	 * Additional attributes that will be sorted.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be sorted.
+	 */
+	functions?: string[];
+}
+/**
+ * Options for the rule `noRestrictedGlobals`.
+ */
+export interface RestrictedGlobalsOptions {
+	/**
+	 * A list of names that should trigger the rule
+	 */
+	deniedGlobals: string[];
+}
 export interface ConsistentArrayTypeOptions {
 	syntax: ConsistentArrayType;
 }
@@ -1588,25 +1607,6 @@ export interface FilenamingConventionOptions {
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
 	strictCase: boolean;
-}
-export interface UtilityClassSortingOptions {
-	/**
-	 * Additional attributes that will be sorted.
-	 */
-	attributes?: string[];
-	/**
-	 * Names of the functions or tagged templates that will be sorted.
-	 */
-	functions?: string[];
-}
-/**
- * Options for the rule `noRestrictedGlobals`.
- */
-export interface RestrictedGlobalsOptions {
-	/**
-	 * A list of names that should trigger the rule
-	 */
-	deniedGlobals: string[];
 }
 /**
  * Rule's options.
@@ -1810,6 +1810,7 @@ export type Category =
 	| "lint/a11y/useValidAriaValues"
 	| "lint/a11y/useValidLang"
 	| "lint/complexity/noBannedTypes"
+	| "lint/complexity/noEmptyTypeParameters"
 	| "lint/complexity/noExcessiveCognitiveComplexity"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
@@ -1821,6 +1822,7 @@ export type Category =
 	| "lint/complexity/noUselessEmptyExport"
 	| "lint/complexity/noUselessFragments"
 	| "lint/complexity/noUselessLabel"
+	| "lint/complexity/noUselessLoneBlockStatements"
 	| "lint/complexity/noUselessRename"
 	| "lint/complexity/noUselessSwitchCase"
 	| "lint/complexity/noUselessThisAlias"
@@ -1844,6 +1846,7 @@ export type Category =
 	| "lint/correctness/noInnerDeclarations"
 	| "lint/correctness/noInvalidConstructorSuper"
 	| "lint/correctness/noInvalidNewBuiltin"
+	| "lint/correctness/noInvalidUseBeforeDeclaration"
 	| "lint/correctness/noNewSymbol"
 	| "lint/correctness/noNonoctalDecimalEscape"
 	| "lint/correctness/noPrecisionLoss"
@@ -1858,10 +1861,13 @@ export type Category =
 	| "lint/correctness/noUnreachableSuper"
 	| "lint/correctness/noUnsafeFinally"
 	| "lint/correctness/noUnsafeOptionalChaining"
+	| "lint/correctness/noUnusedImports"
 	| "lint/correctness/noUnusedLabels"
+	| "lint/correctness/noUnusedPrivateClassMembers"
 	| "lint/correctness/noUnusedVariables"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
+	| "lint/correctness/useAwait"
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useIsNan"
@@ -1872,47 +1878,29 @@ export type Category =
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateTestHooks"
-	| "lint/nursery/noEmptyBlockStatements"
-	| "lint/nursery/noEmptyTypeParameters"
 	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noExportsInTest"
 	| "lint/nursery/noFocusedTests"
-	| "lint/nursery/noGlobalAssign"
-	| "lint/nursery/noGlobalEval"
-	| "lint/nursery/noInvalidUseBeforeDeclaration"
-	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNamespaceImport"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReExportAll"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noSemicolonInJsx"
 	| "lint/nursery/noSkippedTests"
-	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
-	| "lint/nursery/noUnusedImports"
-	| "lint/nursery/noUnusedPrivateClassMembers"
-	| "lint/nursery/noUselessLoneBlockStatements"
 	| "lint/nursery/noUselessTernary"
-	| "lint/nursery/useAwait"
 	| "lint/nursery/useBiomeSuppressionComment"
-	| "lint/nursery/useConsistentArrayType"
-	| "lint/nursery/useExportType"
-	| "lint/nursery/useFilenamingConvention"
-	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useImportType"
 	| "lint/nursery/useJsxKeyInIterable"
 	| "lint/nursery/useNodeAssertStrict"
-	| "lint/nursery/useNodejsImportProtocol"
-	| "lint/nursery/useNumberNamespace"
-	| "lint/nursery/useShorthandFunctionType"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
+	| "lint/security/noGlobalEval"
 	| "lint/style/noArguments"
 	| "lint/style/noCommaOperator"
 	| "lint/style/noDefaultExport"
@@ -1931,17 +1919,25 @@ export type Category =
 	| "lint/style/useAsConstAssertion"
 	| "lint/style/useBlockStatements"
 	| "lint/style/useCollapsedElseIf"
+	| "lint/style/useConsistentArrayType"
 	| "lint/style/useConst"
 	| "lint/style/useDefaultParameterLast"
 	| "lint/style/useEnumInitializers"
 	| "lint/style/useExponentiationOperator"
+	| "lint/style/useExportType"
+	| "lint/style/useFilenamingConvention"
+	| "lint/style/useForOf"
 	| "lint/style/useFragmentSyntax"
+	| "lint/style/useImportType"
 	| "lint/style/useLiteralEnumMembers"
 	| "lint/style/useNamingConvention"
+	| "lint/style/useNodejsImportProtocol"
+	| "lint/style/useNumberNamespace"
 	| "lint/style/useNumericLiterals"
 	| "lint/style/useSelfClosingElements"
 	| "lint/style/useShorthandArrayType"
 	| "lint/style/useShorthandAssign"
+	| "lint/style/useShorthandFunctionType"
 	| "lint/style/useSingleCaseStatement"
 	| "lint/style/useSingleVarDeclarator"
 	| "lint/style/useTemplate"
@@ -1966,16 +1962,19 @@ export type Category =
 	| "lint/suspicious/noDuplicateJsxProps"
 	| "lint/suspicious/noDuplicateObjectKeys"
 	| "lint/suspicious/noDuplicateParameters"
+	| "lint/suspicious/noEmptyBlockStatements"
 	| "lint/suspicious/noEmptyInterface"
 	| "lint/suspicious/noExplicitAny"
 	| "lint/suspicious/noExtraNonNullAssertion"
 	| "lint/suspicious/noFallthroughSwitchClause"
 	| "lint/suspicious/noFunctionAssign"
+	| "lint/suspicious/noGlobalAssign"
 	| "lint/suspicious/noGlobalIsFinite"
 	| "lint/suspicious/noGlobalIsNan"
 	| "lint/suspicious/noImplicitAnyLet"
 	| "lint/suspicious/noImportAssign"
 	| "lint/suspicious/noLabelVar"
+	| "lint/suspicious/noMisleadingCharacterClass"
 	| "lint/suspicious/noMisleadingInstantiator"
 	| "lint/suspicious/noMisrefactoredShorthandAssign"
 	| "lint/suspicious/noPrototypeBuiltins"
@@ -1984,6 +1983,7 @@ export type Category =
 	| "lint/suspicious/noSelfCompare"
 	| "lint/suspicious/noShadowRestrictedNames"
 	| "lint/suspicious/noSparseArray"
+	| "lint/suspicious/noThenProperty"
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
 	| "lint/suspicious/useDefaultSwitchClauseLast"

@@ -2,11 +2,7 @@
 title: noUnusedPrivateClassMembers (since v1.3.3)
 ---
 
-**Diagnostic Category: `lint/nursery/noUnusedPrivateClassMembers`**
-
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
-:::
+**Diagnostic Category: `lint/correctness/noUnusedPrivateClassMembers`**
 
 Source: <a href="https://eslint.org/docs/latest/rules/no-unused-private-class-members" target="_blank"><code>no-unused-private-class-members</code></a>
 
@@ -29,7 +25,7 @@ class OnlyWrite {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUnusedPrivateClassMembers.js:2:3 <a href="https://biomejs.dev/linter/rules/no-unused-private-class-members">lint/nursery/noUnusedPrivateClassMembers</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedPrivateClassMembers.js:2:3 <a href="https://biomejs.dev/linter/rules/no-unused-private-class-members">lint/correctness/noUnusedPrivateClassMembers</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This private class member is defined but never used.</span>
   
@@ -54,7 +50,7 @@ class OnlyWrite {
  }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUnusedPrivateClassMembers.js:2:12 <a href="https://biomejs.dev/linter/rules/no-unused-private-class-members">lint/nursery/noUnusedPrivateClassMembers</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedPrivateClassMembers.js:2:12 <a href="https://biomejs.dev/linter/rules/no-unused-private-class-members">lint/correctness/noUnusedPrivateClassMembers</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This private class member is defined but never used.</span>
   
@@ -79,7 +75,7 @@ class OnlyWrite {
  }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUnusedPrivateClassMembers.js:2:12 <a href="https://biomejs.dev/linter/rules/no-unused-private-class-members">lint/nursery/noUnusedPrivateClassMembers</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedPrivateClassMembers.js:2:12 <a href="https://biomejs.dev/linter/rules/no-unused-private-class-members">lint/correctness/noUnusedPrivateClassMembers</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This private class member is defined but never used.</span>
   

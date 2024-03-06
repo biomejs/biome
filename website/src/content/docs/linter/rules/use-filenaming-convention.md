@@ -2,11 +2,7 @@
 title: useFilenamingConvention (since v1.5.0)
 ---
 
-**Diagnostic Category: `lint/nursery/useFilenamingConvention`**
-
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
-:::
+**Diagnostic Category: `lint/style/useFilenamingConvention`**
 
 Inspired from: <a href="https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/filename-case.md" target="_blank"><code>filename-case</code></a>
 

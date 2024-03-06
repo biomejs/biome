@@ -2,10 +2,10 @@
 title: noInvalidUseBeforeDeclaration (since v1.5.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noInvalidUseBeforeDeclaration`**
+**Diagnostic Category: `lint/correctness/noInvalidUseBeforeDeclaration`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Source: <a href="https://typescript-eslint.io/rules/no-use-before-define" target="_blank"><code>no-use-before-define</code></a>
@@ -28,7 +28,7 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noInvalidUseBeforeDeclaration.js:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noInvalidUseBeforeDeclaration.js:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Const declarations must have an initialized value.</span>
   
@@ -50,9 +50,9 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noInvalidUseBeforeDeclaration.js:2:17 <a href="https://biomejs.dev/linter/rules/no-invalid-use-before-declaration">lint/nursery/noInvalidUseBeforeDeclaration</a> ━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noInvalidUseBeforeDeclaration.js:2:17 <a href="https://biomejs.dev/linter/rules/no-invalid-use-before-declaration">lint/correctness/noInvalidUseBeforeDeclaration</a> ━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This variable is used before its declaration.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable is used before its declaration.</span>
   
     <strong>1 │ </strong>function f() {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    console.log(x);
@@ -75,9 +75,9 @@ function f() {
 function f(a = b, b = 0) {}
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noInvalidUseBeforeDeclaration.js:1:16 <a href="https://biomejs.dev/linter/rules/no-invalid-use-before-declaration">lint/nursery/noInvalidUseBeforeDeclaration</a> ━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noInvalidUseBeforeDeclaration.js:1:16 <a href="https://biomejs.dev/linter/rules/no-invalid-use-before-declaration">lint/correctness/noInvalidUseBeforeDeclaration</a> ━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This parameter is used before its declaration.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This parameter is used before its declaration.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>function f(a = b, b = 0) {}
    <strong>   │ </strong>               <strong><span style="color: Tomato;">^</span></strong>

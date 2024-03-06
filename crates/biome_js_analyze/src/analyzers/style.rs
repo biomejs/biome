@@ -15,14 +15,18 @@ pub mod no_useless_else;
 pub mod use_as_const_assertion;
 pub mod use_block_statements;
 pub mod use_collapsed_else_if;
+pub mod use_consistent_array_type;
 pub mod use_default_parameter_last;
 pub mod use_enum_initializers;
 pub mod use_exponentiation_operator;
+pub mod use_filenaming_convention;
 pub mod use_literal_enum_members;
+pub mod use_nodejs_import_protocol;
 pub mod use_numeric_literals;
 pub mod use_self_closing_elements;
 pub mod use_shorthand_array_type;
 pub mod use_shorthand_assign;
+pub mod use_shorthand_function_type;
 pub mod use_single_case_statement;
 pub mod use_single_var_declarator;
 pub mod use_template;
@@ -45,14 +49,18 @@ declare_group! {
             self :: use_as_const_assertion :: UseAsConstAssertion ,
             self :: use_block_statements :: UseBlockStatements ,
             self :: use_collapsed_else_if :: UseCollapsedElseIf ,
+            self :: use_consistent_array_type :: UseConsistentArrayType ,
             self :: use_default_parameter_last :: UseDefaultParameterLast ,
             self :: use_enum_initializers :: UseEnumInitializers ,
             self :: use_exponentiation_operator :: UseExponentiationOperator ,
+            self :: use_filenaming_convention :: UseFilenamingConvention ,
             self :: use_literal_enum_members :: UseLiteralEnumMembers ,
+            self :: use_nodejs_import_protocol :: UseNodejsImportProtocol ,
             self :: use_numeric_literals :: UseNumericLiterals ,
             self :: use_self_closing_elements :: UseSelfClosingElements ,
             self :: use_shorthand_array_type :: UseShorthandArrayType ,
             self :: use_shorthand_assign :: UseShorthandAssign ,
+            self :: use_shorthand_function_type :: UseShorthandFunctionType ,
             self :: use_single_case_statement :: UseSingleCaseStatement ,
             self :: use_single_var_declarator :: UseSingleVarDeclarator ,
             self :: use_template :: UseTemplate ,

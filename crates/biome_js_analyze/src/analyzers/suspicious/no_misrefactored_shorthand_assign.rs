@@ -53,7 +53,7 @@ declare_rule! {
         version: "1.3.0",
         name: "noMisrefactoredShorthandAssign",
         source: RuleSource::Clippy("misrefactored_assign_op"),
-        recommended: false,
+        recommended: true,
         fix_kind: FixKind::Unsafe,
     }
 }
