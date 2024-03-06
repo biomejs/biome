@@ -12,7 +12,7 @@ pubDate: 2024-01-08
 coverImage:
   lightSrc: "@/assets/blog/roadmap-2024/banner-light.png"
   darkSrc: "@/assets/blog/roadmap-2024/banner-dark.png"
-  alt: The Prettier challenge banner, with the Biome logo over it
+  alt: The brand of the project. It says "Biome, toolchain of the web"
 socialImage: "@/assets/social-logo.png"
 ---
 

@@ -19,11 +19,13 @@ const { post } = Astro.props;
             alt={post.coverImage.alt}
             src={post.coverImage.lightSrc}
             class="dark:sl-hidden"
+            loading="eager"
           />
           <Image
             alt={post.coverImage.alt}
             src={post.coverImage.darkSrc}
             class="light:sl-hidden"
+            loading="eager"
           />
         </picture>
 

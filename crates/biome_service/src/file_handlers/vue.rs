@@ -63,7 +63,7 @@ impl VueFileHandler {
 
     /// Returns the start byte offset of the Vue `<script>` tag
     pub fn start(input: &str) -> Option<u32> {
-        Self::matches_script(input).map(|m| m.start() as u32 - 1)
+        Self::matches_script(input).map(|m| m.start() as u32)
     }
 
     fn matches_script(input: &str) -> Option<Match> {
