@@ -86,7 +86,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @arendjr
 
 - Implemented [#1128](https://github.com/biomejs/biome/issues/1128). User-provided React hooks can
-  now be configured to return stable results. For example:
+  now be configured to track stable results. For example:
 
   ```json
   "useExhaustiveDependencies": {

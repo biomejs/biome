@@ -143,11 +143,16 @@ declare_rule! {
     /// ## Options
     ///
     /// Allows to specify custom hooks - from libraries or internal projects -
-    /// for which dependencies should be checked.
+    /// for which dependencies should be checked and/or which are known to have
+    /// stable return values.
     ///
-    /// For every hook, you should specify the index of the closure (whose
-    /// dependencies should be checked) and the index of the dependencies array
-    /// to validate against.
+    /// ### Validating dependencies
+    ///
+    /// For every hook for which you want the dependencies to be validated, you
+    /// should specify the index of the closure and the index of the
+    /// dependencies array to validate against.
+    ///
+    /// #### Example
     ///
     /// ```json
     /// {
@@ -168,6 +173,44 @@ declare_rule! {
     ///     const location = useLocation(() => {}, []);
     ///     const query = useQuery([], () => {});
     /// }
+    /// ```
+    ///
+    /// ### Stable results
+    ///
+    /// When a hook is known to have a stable return value (its identity doesn't
+    /// change across invocations), that value doesn't need to be specified in
+    /// dependency arrays. For example, setters returned by React's `useState`
+    /// hook always have the same identity and should be omitted as such.
+    ///
+    /// You can configure custom hooks that return stable results in one of
+    /// three ways:
+    ///
+    /// * `"stableResult": true` -- marks the return value as stable. An example
+    ///   of a React hook that would be configured like this is `useRef()`.
+    /// * `"stableResult": [1]` -- expects the return value to be an array and
+    ///   marks the given index or indices to be stable. An example of a React
+    ///   hook that would be configured like this is `useState()`.
+    /// * `"stableResult": 1` -- shorthand for `"stableResult": [1]`.
+    ///
+    /// #### Example
+    ///
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options": {
+    ///         "hooks": [
+    ///             { "name": "useDispatch", "stableResult": true }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// With this configuration, the following is valid:
+    ///
+    /// ```js
+    /// const dispatch = useDispatch();
+    /// // No need to list `dispatch` as dependency:
+    /// const doAction = useCallback(() => dispatch(someAction()), []);
     /// ```
     ///
     pub UseExhaustiveDependencies {
