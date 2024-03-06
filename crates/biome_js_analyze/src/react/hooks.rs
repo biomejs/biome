@@ -1,7 +1,9 @@
 use crate::react::{is_react_call_api, ReactLibrary};
 
 use biome_console::markup;
-use biome_deserialize::{DeserializationDiagnostic, DeserializationVisitor, VisitableType};
+use biome_deserialize::{
+    DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, VisitableType,
+};
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
@@ -252,7 +254,7 @@ pub enum StableHookResult {
 
 impl biome_deserialize::Deserializable for StableHookResult {
     fn deserialize(
-        value: &impl biome_deserialize::DeserializableValue,
+        value: &impl DeserializableValue,
         name: &str,
         diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
@@ -270,18 +272,22 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_array(
         self,
-        items: impl Iterator<Item = Option<impl biome_deserialize::DeserializableValue>>,
+        items: impl Iterator<Item = Option<impl DeserializableValue>>,
         _range: TextRange,
         _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
-        let indices = items
+        let indices: Vec<u8> = items
             .filter_map(|value| {
-                biome_deserialize::Deserializable::deserialize(&value?, "", diagnostics)
+                DeserializableValue::deserialize(&value?, StableResultIndexVisitor, "", diagnostics)
             })
             .collect();
 
-        Some(StableHookResult::Indices(indices))
+        Some(if indices.is_empty() {
+            StableHookResult::None
+        } else {
+            StableHookResult::Indices(indices)
+        })
     }
 
     fn visit_bool(
@@ -310,11 +316,35 @@ impl DeserializationVisitor for StableResultVisitor {
         self,
         value: biome_deserialize::TextNumber,
         range: TextRange,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        StableResultIndexVisitor::visit_number(
+            StableResultIndexVisitor,
+            value,
+            range,
+            name,
+            diagnostics,
+        )
+        .map(|index| StableHookResult::Indices(vec![index]))
+    }
+}
+
+struct StableResultIndexVisitor;
+impl DeserializationVisitor for StableResultIndexVisitor {
+    type Output = u8;
+
+    const EXPECTED_TYPE: VisitableType = VisitableType::NUMBER;
+
+    fn visit_number(
+        self,
+        value: biome_deserialize::TextNumber,
+        range: TextRange,
         _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         match value.parse::<u8>() {
-            Ok(index) => Some(StableHookResult::Indices(vec![index])),
+            Ok(index) => Some(index),
             Err(_) => {
                 diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
                     0, 255, range,
