@@ -4,6 +4,10 @@ title: noMisrefactoredShorthandAssign (since v1.3.0)
 
 **Diagnostic Category: `lint/suspicious/noMisrefactoredShorthandAssign`**
 
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::
+
 Source: <a href="https://rust-lang.github.io/rust-clippy/master/#/misrefactored_assign_op" target="_blank"><code>misrefactored_assign_op</code></a>
 
 Disallow shorthand assign when variable appears on both sides.
@@ -21,7 +25,7 @@ a += a + b
 
 <pre class="language-text"><code class="language-text">suspicious/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign">lint/suspicious/noMisrefactoredShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable appears on both sides of an assignment operation.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Variable appears on both sides of an assignment operation.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>a += a + b
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -41,7 +45,7 @@ a -= a - b
 
 <pre class="language-text"><code class="language-text">suspicious/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign">lint/suspicious/noMisrefactoredShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable appears on both sides of an assignment operation.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Variable appears on both sides of an assignment operation.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>a -= a - b
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -61,7 +65,7 @@ a *= a * b
 
 <pre class="language-text"><code class="language-text">suspicious/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign">lint/suspicious/noMisrefactoredShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable appears on both sides of an assignment operation.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Variable appears on both sides of an assignment operation.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>a *= a * b
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>

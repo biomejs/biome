@@ -2,10 +2,10 @@
 title: useAwait (since v1.4.0)
 ---
 
-**Diagnostic Category: `lint/nursery/useAwait`**
+**Diagnostic Category: `lint/correctness/useAwait`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Source: <a href="https://eslint.org/docs/latest/rules/require-await" target="_blank"><code>require-await</code></a>
@@ -29,7 +29,7 @@ async function fetchData() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useAwait.js:1:1 <a href="https://biomejs.dev/linter/rules/use-await">lint/nursery/useAwait</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/useAwait.js:1:1 <a href="https://biomejs.dev/linter/rules/use-await">lint/correctness/useAwait</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>async</strong></span><span style="color: Tomato;"> function lacks an </span><span style="color: Tomato;"><strong>await</strong></span><span style="color: Tomato;"> expression.</span>
   

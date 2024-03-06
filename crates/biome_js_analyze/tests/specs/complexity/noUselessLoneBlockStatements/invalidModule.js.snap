@@ -1,0 +1,216 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidModule.js
+---
+# Input
+```jsx
+export {}
+
+{}
+
+if (foo) {
+ bar();
+ {
+  baz();
+ }
+}
+
+if (foo) {
+ // this is bar
+ bar();
+ {
+  // this is baz
+  baz();
+ }
+}
+
+function bar() {
+ {
+  baz();
+ }
+}
+
+{
+ function foo() {}
+}
+
+{
+ // a comment
+ function foo() {}
+}
+
+{
+ aLabel: {
+ }
+}
+
+class C {
+ static {
+  {
+   foo();
+  }
+ }
+}
+```
+
+# Diagnostics
+```
+invalidModule.js:3:1 lint/complexity/noUselessLoneBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block statement doesn't serve any purpose and can be safely removed.
+  
+    1 │ export {}
+    2 │ 
+  > 3 │ {}
+      │ ^^
+    4 │ 
+    5 │ if (foo) {
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+
+```
+
+```
+invalidModule.js:7:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block statement doesn't serve any purpose and can be safely removed.
+  
+     5 │ if (foo) {
+     6 │  bar();
+   > 7 │  {
+       │  ^
+   > 8 │   baz();
+   > 9 │  }
+       │  ^
+    10 │ }
+    11 │ 
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+     5  5 │   if (foo) {
+     6  6 │    bar();
+     7    │ - ·{
+     8  7 │     baz();
+     9    │ - ·}
+    10  8 │   }
+    11  9 │   
+  
+
+```
+
+```
+invalidModule.js:15:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block statement doesn't serve any purpose and can be safely removed.
+  
+    13 │  // this is bar
+    14 │  bar();
+  > 15 │  {
+       │  ^
+  > 16 │   // this is baz
+  > 17 │   baz();
+  > 18 │  }
+       │  ^
+    19 │ }
+    20 │ 
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+    13 13 │    // this is bar
+    14 14 │    bar();
+    15    │ - ·{
+    16 15 │     // this is baz
+    17 16 │     baz();
+    18    │ - ·}
+    19 17 │   }
+    20 18 │   
+  
+
+```
+
+```
+invalidModule.js:22:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block statement doesn't serve any purpose and can be safely removed.
+  
+    21 │ function bar() {
+  > 22 │  {
+       │  ^
+  > 23 │   baz();
+  > 24 │  }
+       │  ^
+    25 │ }
+    26 │ 
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+    20 20 │   
+    21 21 │   function bar() {
+    22    │ - ·{
+    23 22 │     baz();
+    24    │ - ·}
+    25 23 │   }
+    26 24 │   
+  
+
+```
+
+```
+invalidModule.js:36:1 lint/complexity/noUselessLoneBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block statement doesn't serve any purpose and can be safely removed.
+  
+    34 │ }
+    35 │ 
+  > 36 │ {
+       │ ^
+  > 37 │  aLabel: {
+  > 38 │  }
+  > 39 │ }
+       │ ^
+    40 │ 
+    41 │ class C {
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+
+```
+
+```
+invalidModule.js:43:3 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block statement doesn't serve any purpose and can be safely removed.
+  
+    41 │ class C {
+    42 │  static {
+  > 43 │   {
+       │   ^
+  > 44 │    foo();
+  > 45 │   }
+       │   ^
+    46 │  }
+    47 │ }
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+    41 41 │   class C {
+    42 42 │    static {
+    43    │ - ··{
+    44 43 │      foo();
+    45    │ - ··}
+    46 44 │    }
+    47 45 │   }
+  
+
+```
+
+

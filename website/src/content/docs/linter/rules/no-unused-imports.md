@@ -2,11 +2,7 @@
 title: noUnusedImports (since v1.3.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noUnusedImports`**
-
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
-:::
+**Diagnostic Category: `lint/correctness/noUnusedImports`**
 
 Disallow unused imports.
 
@@ -22,7 +18,7 @@ See the last invalid example.
 import A from 'mod';
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUnusedImports.js:1:8 <a href="https://biomejs.dev/linter/rules/no-unused-imports">lint/nursery/noUnusedImports</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedImports.js:1:8 <a href="https://biomejs.dev/linter/rules/no-unused-imports">lint/correctness/noUnusedImports</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>import</strong></span><span style="color: Orange;"> is unused.</span>
   
@@ -43,7 +39,7 @@ import A from 'mod';
 import * as A from 'mod';
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUnusedImports.js:1:13 <a href="https://biomejs.dev/linter/rules/no-unused-imports">lint/nursery/noUnusedImports</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedImports.js:1:13 <a href="https://biomejs.dev/linter/rules/no-unused-imports">lint/correctness/noUnusedImports</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>import</strong></span><span style="color: Orange;"> is unused.</span>
   
@@ -66,7 +62,7 @@ import { type A, B } from 'mod';
 export { B }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUnusedImports.js:1:15 <a href="https://biomejs.dev/linter/rules/no-unused-imports">lint/nursery/noUnusedImports</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedImports.js:1:15 <a href="https://biomejs.dev/linter/rules/no-unused-imports">lint/correctness/noUnusedImports</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>import</strong></span><span style="color: Orange;"> is unused.</span>
   
@@ -98,7 +94,7 @@ import {
 export { B }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUnusedImports.js:7:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedImports.js:7:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">'import { type x ident }' are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.</span>
   

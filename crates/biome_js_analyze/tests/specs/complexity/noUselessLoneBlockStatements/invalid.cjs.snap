@@ -1,0 +1,145 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.cjs
+---
+# Input
+```cjs
+{}
+
+{
+ aLabel: {
+ }
+}
+
+{
+ function foo() {}
+}
+
+{
+ // a comment
+ function foo() {}
+}
+
+
+
+```
+
+# Diagnostics
+```
+invalid.cjs:1:1 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block statement doesn't serve any purpose and can be safely removed.
+  
+  > 1 │ {}
+      │ ^^
+    2 │ 
+    3 │ {
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+    1 │ {}
+      │ --
+
+```
+
+```
+invalid.cjs:3:1 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block statement doesn't serve any purpose and can be safely removed.
+  
+    1 │ {}
+    2 │ 
+  > 3 │ {
+      │ ^
+  > 4 │  aLabel: {
+  > 5 │  }
+  > 6 │ }
+      │ ^
+    7 │ 
+    8 │ {
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+     1  1 │   {}
+     2    │ - 
+     3    │ - {
+     4  2 │    aLabel: {
+     5    │ - ·}
+     6    │ - }
+        3 │ + ·}
+     7  4 │   
+     8  5 │   {
+  
+
+```
+
+```
+invalid.cjs:8:1 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block statement doesn't serve any purpose and can be safely removed.
+  
+     6 │ }
+     7 │ 
+   > 8 │ {
+       │ ^
+   > 9 │  function foo() {}
+  > 10 │ }
+       │ ^
+    11 │ 
+    12 │ {
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+     5  5 │    }
+     6  6 │   }
+     7    │ - 
+     8    │ - {
+     9    │ - ·function·foo()·{}
+    10    │ - }
+        7 │ + ·function·foo()·{}
+    11  8 │   
+    12  9 │   {
+  
+
+```
+
+```
+invalid.cjs:12:1 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block statement doesn't serve any purpose and can be safely removed.
+  
+    10 │ }
+    11 │ 
+  > 12 │ {
+       │ ^
+  > 13 │  // a comment
+  > 14 │  function foo() {}
+  > 15 │ }
+       │ ^
+    16 │ 
+  
+  i Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.
+  
+  i Safe fix: Remove redundant block.
+  
+     9  9 │    function foo() {}
+    10 10 │   }
+    11    │ - 
+    12    │ - {
+    13 11 │    // a comment
+    14    │ - ·function·foo()·{}
+    15    │ - }
+       12 │ + ·function·foo()·{}
+    16 13 │   
+    17 14 │   
+  
+
+```
+
+

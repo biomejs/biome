@@ -1,0 +1,402 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+
+
+for (let i = 0; i < array.length; i++) {
+	console.log(array[i])
+}
+
+for (var a = 0; a < obj.arr.length; a++) {
+  console.log(obj.arr[a]);
+}
+
+for (var b = 0; b < arr.length; b++) console.log(arr[b]);
+
+for (let a = 0; a < arr.length; a++) {
+  console.log(arr[a]);
+}
+
+for (var b = 0; b < arr.length; b++) console?.log(arr[b]);
+
+
+for (let a = 0; a < arr.length; a++) {
+  console?.log(arr[a]);
+}
+
+for (let a = 0; a < arr.length; ++a) {
+  arr[a].whatever();
+}
+
+for (let x = 0; x < arr.length; x++) {
+	console.log(arr[x])
+}
+
+for (let x = 0; x < arr.length; x += 1) {
+	console.log(arr[x])
+}
+
+for (let x = 0; x < arr.length; x = x + 1) {}
+
+for (let shadow = 0; shadow < arr.length; shadow++) {
+  for (let shadow = 0; shadow < arr.length; shadow++) {}
+}
+
+for (let i = 0; i < arr.length; i++) {
+  obj[arr[i]] = 1;
+}
+
+for (let i = 0; i < arr.length; i++) {
+  delete obj[arr[i]];
+}
+
+for (let i = 0; i < arr.length; i++) {
+  [obj[arr[i]]] = [1];
+}
+
+for (let i = 0; i < arr.length; i++) {
+  [...obj[arr[i]]] = [1];
+}
+
+for (let i = 0; i < arr.length; i++) {
+  ({ foo: obj[arr[i]] } = { foo: 1 });
+}
+
+for (let i = 0; i < this.item.length; ++i) {
+  this.item[i];
+}
+
+for (let i = 0; i < this.array.length; ++i) {
+  yield this.array[i];
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+  > 3 │ for (let i = 0; i < array.length; i++) {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │ 	console.log(array[i])
+  > 5 │ }
+      │ ^
+    6 │ 
+    7 │ for (var a = 0; a < obj.arr.length; a++) {
+  
+
+```
+
+```
+invalid.js:7:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+     5 │ }
+     6 │ 
+   > 7 │ for (var a = 0; a < obj.arr.length; a++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │   console.log(obj.arr[a]);
+   > 9 │ }
+       │ ^
+    10 │ 
+    11 │ for (var b = 0; b < arr.length; b++) console.log(arr[b]);
+  
+
+```
+
+```
+invalid.js:11:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+     9 │ }
+    10 │ 
+  > 11 │ for (var b = 0; b < arr.length; b++) console.log(arr[b]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ for (let a = 0; a < arr.length; a++) {
+  
+
+```
+
+```
+invalid.js:13:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    11 │ for (var b = 0; b < arr.length; b++) console.log(arr[b]);
+    12 │ 
+  > 13 │ for (let a = 0; a < arr.length; a++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 14 │   console.log(arr[a]);
+  > 15 │ }
+       │ ^
+    16 │ 
+    17 │ for (var b = 0; b < arr.length; b++) console?.log(arr[b]);
+  
+
+```
+
+```
+invalid.js:17:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    15 │ }
+    16 │ 
+  > 17 │ for (var b = 0; b < arr.length; b++) console?.log(arr[b]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+  
+
+```
+
+```
+invalid.js:20:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+  > 20 │ for (let a = 0; a < arr.length; a++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 21 │   console?.log(arr[a]);
+  > 22 │ }
+       │ ^
+    23 │ 
+    24 │ for (let a = 0; a < arr.length; ++a) {
+  
+
+```
+
+```
+invalid.js:24:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    22 │ }
+    23 │ 
+  > 24 │ for (let a = 0; a < arr.length; ++a) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 25 │   arr[a].whatever();
+  > 26 │ }
+       │ ^
+    27 │ 
+    28 │ for (let x = 0; x < arr.length; x++) {
+  
+
+```
+
+```
+invalid.js:28:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    26 │ }
+    27 │ 
+  > 28 │ for (let x = 0; x < arr.length; x++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 29 │ 	console.log(arr[x])
+  > 30 │ }
+       │ ^
+    31 │ 
+    32 │ for (let x = 0; x < arr.length; x += 1) {
+  
+
+```
+
+```
+invalid.js:32:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    30 │ }
+    31 │ 
+  > 32 │ for (let x = 0; x < arr.length; x += 1) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 33 │ 	console.log(arr[x])
+  > 34 │ }
+       │ ^
+    35 │ 
+    36 │ for (let x = 0; x < arr.length; x = x + 1) {}
+  
+
+```
+
+```
+invalid.js:36:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    34 │ }
+    35 │ 
+  > 36 │ for (let x = 0; x < arr.length; x = x + 1) {}
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ 
+    38 │ for (let shadow = 0; shadow < arr.length; shadow++) {
+  
+
+```
+
+```
+invalid.js:38:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    36 │ for (let x = 0; x < arr.length; x = x + 1) {}
+    37 │ 
+  > 38 │ for (let shadow = 0; shadow < arr.length; shadow++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 39 │   for (let shadow = 0; shadow < arr.length; shadow++) {}
+  > 40 │ }
+       │ ^
+    41 │ 
+    42 │ for (let i = 0; i < arr.length; i++) {
+  
+
+```
+
+```
+invalid.js:39:3 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    38 │ for (let shadow = 0; shadow < arr.length; shadow++) {
+  > 39 │   for (let shadow = 0; shadow < arr.length; shadow++) {}
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ }
+    41 │ 
+  
+
+```
+
+```
+invalid.js:42:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    40 │ }
+    41 │ 
+  > 42 │ for (let i = 0; i < arr.length; i++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 43 │   obj[arr[i]] = 1;
+  > 44 │ }
+       │ ^
+    45 │ 
+    46 │ for (let i = 0; i < arr.length; i++) {
+  
+
+```
+
+```
+invalid.js:46:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    44 │ }
+    45 │ 
+  > 46 │ for (let i = 0; i < arr.length; i++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 47 │   delete obj[arr[i]];
+  > 48 │ }
+       │ ^
+    49 │ 
+    50 │ for (let i = 0; i < arr.length; i++) {
+  
+
+```
+
+```
+invalid.js:50:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    48 │ }
+    49 │ 
+  > 50 │ for (let i = 0; i < arr.length; i++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 51 │   [obj[arr[i]]] = [1];
+  > 52 │ }
+       │ ^
+    53 │ 
+    54 │ for (let i = 0; i < arr.length; i++) {
+  
+
+```
+
+```
+invalid.js:54:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    52 │ }
+    53 │ 
+  > 54 │ for (let i = 0; i < arr.length; i++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 55 │   [...obj[arr[i]]] = [1];
+  > 56 │ }
+       │ ^
+    57 │ 
+    58 │ for (let i = 0; i < arr.length; i++) {
+  
+
+```
+
+```
+invalid.js:58:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    56 │ }
+    57 │ 
+  > 58 │ for (let i = 0; i < arr.length; i++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 59 │   ({ foo: obj[arr[i]] } = { foo: 1 });
+  > 60 │ }
+       │ ^
+    61 │ 
+    62 │ for (let i = 0; i < this.item.length; ++i) {
+  
+
+```
+
+```
+invalid.js:62:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    60 │ }
+    61 │ 
+  > 62 │ for (let i = 0; i < this.item.length; ++i) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 63 │   this.item[i];
+  > 64 │ }
+       │ ^
+    65 │ 
+    66 │ for (let i = 0; i < this.array.length; ++i) {
+  
+
+```
+
+```
+invalid.js:66:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use for-of loop instead of a for loop.
+  
+    64 │ }
+    65 │ 
+  > 66 │ for (let i = 0; i < this.array.length; ++i) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 67 │   yield this.array[i];
+  > 68 │ }
+       │ ^
+    69 │ 
+  
+
+```
+
+
