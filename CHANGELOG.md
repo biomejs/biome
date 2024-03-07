@@ -353,10 +353,9 @@ The following rules are promoted:
 
 - [complexity/noEmptyTypeParameters](https://biomejs.dev/linter/rules/no-empty-type-parameters)
 - [complexity/noUselessLoneBlockStatements](https://biomejs.dev/linter/rules/no-useless-lone-block-statements)
-- [correctness/noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports)
 - [correctness/noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration)
+- [correctness/noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports)
 - [correctness/noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members)
-- [correctness/useAwait](https://biomejs.dev/linter/rules/use-await)
 - [security/noGlobalEval](https://biomejs.dev/linter/rules/no-global-eval)
 - [style/useConsistentArrayType](https://biomejs.dev/linter/rules/use-consistent-array-type)
 - [style/useExportType](https://biomejs.dev/linter/rules/use-export-type)
@@ -370,6 +369,7 @@ The following rules are promoted:
 - [suspicious/noGlobalAssign](https://biomejs.dev/linter/rules/no-global-assign)
 - [suspicious/noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class)
 - [suspicious/noThenProperty](https://biomejs.dev/linter/rules/no-then-property)
+- [suspicious/useAwait](https://biomejs.dev/linter/rules/use-await)
 
 Additionally, the following rules are now recommended:
 

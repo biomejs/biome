@@ -860,10 +860,6 @@ export interface Correctness {
 	 */
 	recommended?: boolean;
 	/**
-	 * Ensure async functions utilize await.
-	 */
-	useAwait?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
 	useExhaustiveDependencies?: RuleConfiguration_for_HooksOptions;
@@ -1385,6 +1381,10 @@ export interface Suspicious {
 	 */
 	recommended?: boolean;
 	/**
+	 * Ensure async functions utilize await.
+	 */
+	useAwait?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce default clauses in switch statements to be last
 	 */
 	useDefaultSwitchClauseLast?: RuleConfiguration_for_Null;
@@ -1874,7 +1874,6 @@ export type Category =
 	| "lint/correctness/noUnusedVariables"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
-	| "lint/correctness/useAwait"
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useIsNan"
@@ -1992,6 +1991,7 @@ export type Category =
 	| "lint/suspicious/noThenProperty"
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
+	| "lint/suspicious/useAwait"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
 	| "lint/suspicious/useGetterReturn"
 	| "lint/suspicious/useIsArray"

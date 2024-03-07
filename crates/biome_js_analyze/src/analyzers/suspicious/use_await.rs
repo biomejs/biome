@@ -49,7 +49,7 @@ declare_rule! {
         version: "1.4.0",
         name: "useAwait",
         source: RuleSource::Eslint("require-await"),
-        recommended: true,
+        recommended: false,
     }
 }
 

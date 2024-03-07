@@ -74,7 +74,7 @@ async function withoutForAwait () {
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   
@@ -102,7 +102,7 @@ invalid.js:1:1 lint/correctness/useAwait ━━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:5:2 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   
@@ -134,7 +134,7 @@ invalid.js:5:2 lint/correctness/useAwait ━━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:10:2 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   
@@ -164,7 +164,7 @@ invalid.js:10:2 lint/correctness/useAwait ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:16:2 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   
@@ -194,7 +194,7 @@ invalid.js:16:2 lint/correctness/useAwait ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:22:2 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   
@@ -224,7 +224,7 @@ invalid.js:22:2 lint/correctness/useAwait ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:21:1 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   
@@ -260,7 +260,7 @@ invalid.js:21:1 lint/correctness/useAwait ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:28:2 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   
@@ -290,7 +290,7 @@ invalid.js:28:2 lint/correctness/useAwait ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:27:1 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   
@@ -328,7 +328,7 @@ invalid.js:27:1 lint/correctness/useAwait ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:34:1 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   
@@ -366,7 +366,7 @@ invalid.js:34:1 lint/correctness/useAwait ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:43:3 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   
@@ -398,7 +398,7 @@ invalid.js:43:3 lint/correctness/useAwait ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:49:3 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:49:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   
@@ -428,7 +428,7 @@ invalid.js:49:3 lint/correctness/useAwait ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:41:1 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:41:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   
@@ -464,7 +464,7 @@ invalid.js:41:1 lint/correctness/useAwait ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:59:1 lint/correctness/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:59:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This async function lacks an await expression.
   

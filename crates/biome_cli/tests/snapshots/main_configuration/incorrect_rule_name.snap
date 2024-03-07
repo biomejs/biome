@@ -80,7 +80,6 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnusedVariables
   - noVoidElementsWithChildren
   - noVoidTypeReturn
-  - useAwait
   - useExhaustiveDependencies
   - useHookAtTopLevel
   - useIsNan

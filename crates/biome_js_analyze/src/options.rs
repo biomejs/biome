@@ -210,7 +210,7 @@ pub type UseArrowFunction =
     <analyzers::complexity::use_arrow_function::UseArrowFunction as biome_analyze::Rule>::Options;
 pub type UseAsConstAssertion =
     <analyzers::style::use_as_const_assertion::UseAsConstAssertion as biome_analyze::Rule>::Options;
-pub type UseAwait = <analyzers::correctness::use_await::UseAwait as biome_analyze::Rule>::Options;
+pub type UseAwait = <analyzers::suspicious::use_await::UseAwait as biome_analyze::Rule>::Options;
 pub type UseBlockStatements =
     <analyzers::style::use_block_statements::UseBlockStatements as biome_analyze::Rule>::Options;
 pub type UseButtonType =

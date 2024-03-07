@@ -31,6 +31,7 @@ pub mod no_self_compare;
 pub mod no_shadow_restricted_names;
 pub mod no_sparse_array;
 pub mod no_unsafe_negation;
+pub mod use_await;
 pub mod use_default_switch_clause_last;
 pub mod use_getter_return;
 pub mod use_namespace_keyword;
@@ -69,6 +70,7 @@ declare_group! {
             self :: no_shadow_restricted_names :: NoShadowRestrictedNames ,
             self :: no_sparse_array :: NoSparseArray ,
             self :: no_unsafe_negation :: NoUnsafeNegation ,
+            self :: use_await :: UseAwait ,
             self :: use_default_switch_clause_last :: UseDefaultSwitchClauseLast ,
             self :: use_getter_return :: UseGetterReturn ,
             self :: use_namespace_keyword :: UseNamespaceKeyword ,
