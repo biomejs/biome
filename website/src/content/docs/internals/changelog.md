@@ -86,6 +86,34 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @arendjr
 
+- Implemented [#1128](https://github.com/biomejs/biome/issues/1128). User-provided React hooks can
+  now be configured to track stable results. For example:
+
+  ```json
+  "useExhaustiveDependencies": {
+      "level": "error",
+      "options": {
+          "hooks": [{
+              "name": "useMyState",
+              "stableResult": [
+                  1
+              ]
+          }]
+      }
+  }
+  ```
+
+  This will allow the following to be validated:
+
+  ```js
+  const [myState, setMyState] = useMyState();
+  const toggleMyState = useCallback(() => {
+    setMyState(!myState);
+  }, [myState]); // Only `myState` needs to be specified here.
+  ```
+
+  Contributed by @arendjr
+
 #### Bug fixes
 
 - Fix [#1748](https://github.com/biomejs/biome/issues/1748). Now for the following case we won't provide an unsafe fix

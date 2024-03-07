@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIndices.js
+---
+# Input
+```jsx
+
+```
+
+# Diagnostics
+```
+invalidIndices.options:15:37 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The number should be an integer between 0 and 255.
+  
+    13 │                                 "dependenciesIndex": 0,
+    14 │                                 "stableResult": [
+  > 15 │                                     -1
+       │                                     ^^
+    16 │                                 ]
+    17 │                             }
+  
+
+```
+
+```
+invalidIndices.options:10:29 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × closureIndex and dependenciesIndex may not be the same
+  
+     8 │                     "options": {
+     9 │                         "hooks": [
+  > 10 │                             {
+       │                             ^
+  > 11 │                                 "name": "useMyEffect",
+        ...
+  > 16 │                                 ]
+  > 17 │                             }
+       │                             ^
+    18 │                         ]
+    19 │                     }
+  
+
+```

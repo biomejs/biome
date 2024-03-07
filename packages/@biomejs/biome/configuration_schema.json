@@ -1014,23 +1014,27 @@
 			},
 			"additionalProperties": false
 		},
-		"Hooks": {
+		"Hook": {
 			"type": "object",
-			"required": ["name"],
+			"required": ["name", "stableResult"],
 			"properties": {
 				"closureIndex": {
-					"description": "The \"position\" of the closure function, starting from zero.\n\n### Example",
+					"description": "The \"position\" of the closure function, starting from zero.\n\nFor example, for React's `useEffect()` hook, the closure index is 0.",
 					"type": ["integer", "null"],
-					"format": "uint",
+					"format": "uint8",
 					"minimum": 0.0
 				},
 				"dependenciesIndex": {
-					"description": "The \"position\" of the array of dependencies, starting from zero.",
+					"description": "The \"position\" of the array of dependencies, starting from zero.\n\nFor example, for React's `useEffect()` hook, the dependencies index is 1.",
 					"type": ["integer", "null"],
-					"format": "uint",
+					"format": "uint8",
 					"minimum": 0.0
 				},
-				"name": { "description": "The name of the hook", "type": "string" }
+				"name": { "description": "The name of the hook.", "type": "string" },
+				"stableResult": {
+					"description": "Whether the result of the hook is stable.\n\nSet to `true` to mark the identity of the hook's return value as stable, or use a number/an array of numbers to mark the \"positions\" in the return array as stable.\n\nFor example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`.",
+					"allOf": [{ "$ref": "#/definitions/StableHookResult" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -1046,9 +1050,9 @@
 			"required": ["hooks"],
 			"properties": {
 				"hooks": {
-					"description": "List of safe hooks",
+					"description": "List of hooks of which the dependencies should be validated.",
 					"type": "array",
-					"items": { "$ref": "#/definitions/Hooks" }
+					"items": { "$ref": "#/definitions/Hook" }
 				}
 			},
 			"additionalProperties": false
@@ -2024,6 +2028,32 @@
 			"additionalProperties": false
 		},
 		"Semicolons": { "type": "string", "enum": ["always", "asNeeded"] },
+		"StableHookResult": {
+			"oneOf": [
+				{
+					"description": "Used to indicate the hook does not have a stable result.",
+					"type": "string",
+					"enum": ["None"]
+				},
+				{
+					"description": "Used to indicate the identity of the result value is stable.\n\nNote this does not imply internal stability. For instance, the ref objects returned by React's `useRef()` always have a stable identity, but their internal value may be mutable.",
+					"type": "string",
+					"enum": ["Identity"]
+				},
+				{
+					"description": "Used to indicate the hook returns an array and some of its indices have stable identities.\n\nFor example, React's `useState()` hook returns a stable function at index 1.",
+					"type": "object",
+					"required": ["Indices"],
+					"properties": {
+						"Indices": {
+							"type": "array",
+							"items": { "type": "integer", "format": "uint8", "minimum": 0.0 }
+						}
+					},
+					"additionalProperties": false
+				}
+			]
+		},
 		"StringSet": {
 			"type": "array",
 			"items": { "type": "string" },

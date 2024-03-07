@@ -1552,9 +1552,9 @@ export interface ComplexityOptions {
  */
 export interface HooksOptions {
 	/**
-	 * List of safe hooks
+	 * List of hooks of which the dependencies should be validated.
 	 */
-	hooks: Hooks[];
+	hooks: Hook[];
 }
 /**
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
@@ -1625,21 +1625,31 @@ export interface NamingConventionOptions {
 	 */
 	strictCase: boolean;
 }
-export interface Hooks {
+export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
 
-### Example 
+For example, for React's `useEffect()` hook, the closure index is 0. 
 	 */
 	closureIndex?: number;
 	/**
-	 * The "position" of the array of dependencies, starting from zero.
+	* The "position" of the array of dependencies, starting from zero.
+
+For example, for React's `useEffect()` hook, the dependencies index is 1. 
 	 */
 	dependenciesIndex?: number;
 	/**
-	 * The name of the hook
+	 * The name of the hook.
 	 */
 	name: string;
+	/**
+	* Whether the result of the hook is stable.
+
+Set to `true` to mark the identity of the hook's return value as stable, or use a number/an array of numbers to mark the "positions" in the return array as stable.
+
+For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`. 
+	 */
+	stableResult: StableHookResult;
 }
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
@@ -1647,6 +1657,7 @@ export type FilenameCases = FilenameCase[];
  * Supported cases for TypeScript `enum` member names.
  */
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
+export type StableHookResult = "None" | "Identity" | { Indices: number[] };
 /**
  * Supported cases for TypeScript `enum` member names.
  */
