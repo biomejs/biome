@@ -1,0 +1,3 @@
+function jsxExpressionChild() {
+    return <>{foo}</>
+}

@@ -257,7 +257,7 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"<a href="class/html-css1/navigation/links#" onclick="window.location.href=index.html"> Home </a>
+        const SOURCE: &str = r#"<>{provider}</>
         "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
@@ -270,7 +270,7 @@ mod tests {
             dependencies_index: Some(1),
             stable_result: StableHookResult::None,
         };
-        let rule_filter = RuleFilter::Rule("a11y", "useValidAnchor");
+        let rule_filter = RuleFilter::Rule("complexity", "noUselessFragments");
 
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
