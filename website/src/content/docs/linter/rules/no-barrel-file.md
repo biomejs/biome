@@ -19,6 +19,7 @@ Disallow the use of barrel file.
 A barrel file is a file that re-exports all of the exports from other files in a directory.
 This structure results in the unnecessary loading of many modules, significantly impacting performance in large-scale applications.
 Additionally, it complicates the codebase, making it difficult to navigate and understand the project's dependency graph.
+This rule ignores .d.ts files and type-only exports.
 
 For a more detailed explanation, check out https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/
 

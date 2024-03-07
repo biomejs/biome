@@ -206,7 +206,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
     × The file contains diagnostics that needs to be addressed.
   ```
   Contributed by @ematipico
-- The command `format` now emits parsing diagnostics if there are any, and it will terminate with a non-zero exit code. Contributed by @ematipico 
+- The command `format` now emits parsing diagnostics if there are any, and it will terminate with a non-zero exit code. Contributed by @ematipico
 
 ### Configuration
 
@@ -626,6 +626,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @keita-hino
 
 - Fix [#1945](https://github.com/biomejs/biome/issues/1945) Allow constructor with default parameters in `noUselessConstructor`
+
+- Fix [#1982](https://github.com/biomejs/biome/issues/1982) Change to iterate over the module item lists and ignore .d.ts files. Contributed by @togami2864
 
 ### Parser
 
