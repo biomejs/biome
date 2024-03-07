@@ -604,6 +604,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @printfn
 
+### Website
+
+#### Bug fixes
+
+- Fix [#1981](https://github.com/biomejs/biome/issues/1981). Identify TypeScript definition files by their file path within the playground. Contributed by @ah-yu
+
 ## 1.5.3 (2024-01-22)
 
 ### LSP
