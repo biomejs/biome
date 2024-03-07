@@ -1,5 +1,5 @@
 use super::literals::{parse_boolean_literal, parse_literal};
-use super::parse_error::expected_pattern;
+use super::parse_error::{expected_pattern, expected_predicate};
 use super::patterns::{parse_container, parse_pattern};
 use super::{constants::*, parse_name, parse_named_arg_list};
 use super::{parse_not, GritParser};
@@ -33,17 +33,20 @@ fn parse_bracketed_predicate(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T!['(']);
 
-    let result = parse_predicate(p);
+    parse_expected_predicate(p);
 
-    p.eat(T![')']);
+    p.expect(T![')']);
 
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_BRACKETED_PREDICATE)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_BRACKETED_PREDICATE))
+}
+
+#[inline]
+pub(crate) fn parse_expected_predicate(p: &mut GritParser) {
+    let _ = parse_predicate(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PREDICATE_RECOVERY_SET),
+        expected_predicate,
+    );
 }
 
 enum InfixPredicateKind {
@@ -131,15 +134,11 @@ fn parse_predicate_and(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     p.eat(AND_KW);
-    p.eat(T!['{']);
-
-    if p.eat(T!['}']) {
-        return Present(m.complete(p, GRIT_PREDICATE_AND));
-    }
+    p.expect(T!['{']);
 
     let _ = parse_predicate_list(p);
 
-    p.eat(T!['}']);
+    p.expect(T!['}']);
 
     Present(m.complete(p, GRIT_PREDICATE_AND))
 }
@@ -152,23 +151,13 @@ fn parse_predicate_any(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(ANY_KW);
-    p.eat(T!['{']);
+    p.expect(T!['{']);
 
-    if p.eat(T!['}']) {
-        return Present(m.complete(p, GRIT_PREDICATE_ANY));
-    }
+    let _ = parse_predicate_list(p);
 
-    let result = parse_predicate_list(p);
+    p.expect(T!['}']);
 
-    p.eat(T!['}']);
-
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_PREDICATE_ANY)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_PREDICATE_ANY))
 }
 
 #[inline]
@@ -180,9 +169,11 @@ fn parse_predicate_call(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
 
     let _ = parse_name(p);
-    p.eat(T!['(']);
+    p.expect(T!['(']);
+
     let _ = parse_named_arg_list(p);
-    p.eat(T![')']);
+
+    p.expect(T![')']);
 
     Present(m.complete(p, GRIT_PREDICATE_CALL))
 }
@@ -195,13 +186,13 @@ fn parse_predicate_if_else(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(IF_KW);
-    p.eat(T!['(']);
+    p.expect(T!['(']);
 
-    let _ = parse_predicate(p);
+    parse_expected_predicate(p);
 
-    p.eat(T![')']);
+    p.expect(T![')']);
 
-    let _ = parse_predicate(p);
+    parse_expected_predicate(p);
 
     let _ = parse_predicate_else_clause(p);
 
@@ -217,13 +208,9 @@ fn parse_predicate_else_clause(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(ELSE_KW);
 
-    match parse_predicate(p) {
-        Present(_) => Present(m.complete(p, GRIT_PREDICATE_ELSE_CLAUSE)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    parse_expected_predicate(p);
+
+    Present(m.complete(p, GRIT_PREDICATE_ELSE_CLAUSE))
 }
 
 #[inline]
@@ -247,13 +234,10 @@ fn parse_predicate_maybe(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(MAYBE_KW);
-    match parse_predicate(p) {
-        Present(_) => Present(m.complete(p, GRIT_PREDICATE_MAYBE)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+
+    parse_expected_predicate(p);
+
+    Present(m.complete(p, GRIT_PREDICATE_MAYBE))
 }
 
 #[inline]
@@ -263,13 +247,9 @@ fn parse_predicate_not(p: &mut GritParser) -> ParsedSyntax {
         Absent => return Absent,
     };
 
-    match parse_predicate(p) {
-        Present(_) => Present(m.complete(p, GRIT_PREDICATE_NOT)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    parse_expected_predicate(p);
+
+    Present(m.complete(p, GRIT_PREDICATE_NOT))
 }
 
 #[inline]
@@ -280,19 +260,13 @@ fn parse_predicate_or(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(OR_KW);
-    p.eat(T!['{']);
+    p.expect(T!['{']);
 
-    let result = parse_predicate_list(p);
+    let _ = parse_predicate_list(p);
 
-    p.eat(T!['}']);
+    p.expect(T!['}']);
 
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_PREDICATE_OR)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_PREDICATE_OR))
 }
 
 #[inline]

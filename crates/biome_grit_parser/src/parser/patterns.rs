@@ -1,7 +1,7 @@
 use super::constants::*;
 use super::literals::*;
-use super::parse_error::expected_pattern;
-use super::predicates::parse_predicate;
+use super::parse_error::*;
+use super::predicates::parse_expected_predicate;
 use super::{parse_name, parse_not, parse_variable, parse_variable_list, GritParser};
 use biome_grit_syntax::GritSyntaxKind;
 use biome_grit_syntax::GritSyntaxKind::*;
@@ -115,7 +115,7 @@ fn parse_assignment_as_pattern(p: &mut GritParser, left: CompletedMarker) -> Par
     let m = left.precede(p);
     p.bump(T![=]);
 
-    let _ = parse_pattern(p);
+    parse_expected_pattern(p);
 
     Present(m.complete(p, GRIT_ASSIGNMENT_AS_PATTERN))
 }
@@ -129,17 +129,11 @@ fn parse_bracketed_pattern(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T!['(']);
 
-    let result = parse_pattern(p);
+    parse_expected_pattern(p);
 
-    p.eat(T![')']);
+    p.expect(T![')']);
 
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_BRACKETED_PATTERN)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_BRACKETED_PATTERN))
 }
 
 #[inline]
@@ -153,13 +147,9 @@ fn parse_bubble(p: &mut GritParser) -> ParsedSyntax {
 
     let _ = parse_bubble_scope(p);
 
-    match parse_maybe_curly_pattern(p) {
-        Present(_) => Present(m.complete(p, GRIT_BUBBLE)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    parse_expected_pattern(p);
+
+    Present(m.complete(p, GRIT_BUBBLE))
 }
 
 #[inline]
@@ -171,13 +161,9 @@ fn parse_bubble_scope(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T!['(']);
 
-    if p.eat(T![')']) {
-        return Present(m.complete(p, GRIT_BUBBLE_SCOPE));
-    }
-
     let _ = parse_variable_list(p);
 
-    p.eat(T![')']);
+    p.expect(T![')']);
 
     Present(m.complete(p, GRIT_BUBBLE_SCOPE))
 }
@@ -212,17 +198,11 @@ fn parse_curly_pattern(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T!['{']);
 
-    let result = parse_pattern(p);
+    parse_expected_pattern(p);
 
-    p.eat(T!['}']);
+    p.expect(T!['}']);
 
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_CURLY_PATTERN)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_CURLY_PATTERN))
 }
 
 #[inline]
@@ -245,13 +225,22 @@ fn parse_every(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(EVERY_KW);
 
-    match parse_maybe_curly_pattern(p) {
-        Present(_) => Present(m.complete(p, GRIT_EVERY)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    let _ = parse_maybe_curly_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
+        expected_pattern,
+    );
+
+    Present(m.complete(p, GRIT_EVERY))
+}
+
+#[inline]
+fn parse_expected_pattern(p: &mut GritParser) {
+    let _ = parse_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
+        expected_pattern,
+    );
 }
 
 #[inline]
@@ -263,19 +252,13 @@ fn parse_files(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(MULTIFILE_KW);
 
-    p.eat(T!['{']);
+    p.expect(T!['{']);
 
-    let result = parse_pattern_list(p);
+    let _ = parse_pattern_list(p);
 
-    p.eat(T!['}']);
+    p.expect(T!['}']);
 
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_FILES)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_FILES))
 }
 
 #[inline]
@@ -300,19 +283,13 @@ fn parse_like(p: &mut GritParser) -> ParsedSyntax {
 
     let _ = parse_like_threshold(p);
 
-    p.eat(T!['{']);
+    p.expect(T!['{']);
 
-    let result = parse_pattern(p);
+    parse_expected_pattern(p);
 
-    p.eat(T!['}']);
+    p.expect(T!['}']);
 
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_LIKE)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_LIKE))
 }
 
 #[inline]
@@ -324,17 +301,11 @@ fn parse_like_threshold(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T!['(']);
 
-    let result = parse_pattern(p);
+    parse_expected_pattern(p);
 
-    p.eat(T![')']);
+    p.expect(T![')']);
 
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_LIKE_THRESHOLD)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_LIKE_THRESHOLD))
 }
 
 #[inline]
@@ -348,7 +319,7 @@ pub(crate) fn parse_list_accessor(p: &mut GritParser, left: CompletedMarker) -> 
 
     let _ = parse_list_index(p);
 
-    p.eat(T![']']);
+    p.expect(T![']']);
 
     // FIXME: We should check whether the accessor needs to be extended.
 
@@ -430,13 +401,17 @@ fn parse_named_arg(p: &mut GritParser) -> ParsedSyntax {
     }
 
     let m = p.start();
+
     let _ = parse_name(p);
-    p.eat(T![=]);
+
+    p.expect(T![=]);
+
     let _ = parse_pattern(p).or_recover_with_token_set(
         p,
         &ParseRecoveryTokenSet::new(GRIT_BOGUS, ARG_LIST_RECOVERY_SET),
         expected_pattern,
     );
+
     Present(m.complete(p, GRIT_NAMED_ARG))
 }
 
@@ -461,14 +436,11 @@ fn parse_node_like(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     let _ = parse_name(p);
-    p.eat(T!['(']);
+    p.expect(T!['(']);
 
-    if parse_named_arg_list(p) == Absent {
-        m.abandon(p);
-        return Absent;
-    }
+    let _ = parse_named_arg_list(p);
 
-    p.eat(T![')']);
+    p.expect(T![')']);
 
     Present(m.complete(p, GRIT_NODE_LIKE))
 }
@@ -508,11 +480,7 @@ fn parse_pattern_accumulate(p: &mut GritParser, left: CompletedMarker) -> Parsed
     let m = left.precede(p);
     p.bump(T![+=]);
 
-    let _ = parse_pattern(p).or_recover_with_token_set(
-        p,
-        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
-        expected_pattern,
-    );
+    parse_expected_pattern(p);
 
     Present(m.complete(p, GRIT_PATTERN_ACCUMULATE))
 }
@@ -525,13 +493,10 @@ fn parse_pattern_after(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(AFTER_KW);
-    match parse_pattern(p) {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_AFTER)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+
+    parse_expected_pattern(p);
+
+    Present(m.complete(p, GRIT_PATTERN_AFTER))
 }
 
 #[inline]
@@ -542,23 +507,13 @@ fn parse_pattern_and(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(AND_KW);
-    p.eat(T!['{']);
+    p.expect(T!['{']);
 
-    if p.eat(T!['}']) {
-        return Present(m.complete(p, GRIT_PATTERN_AND));
-    }
+    let _ = parse_pattern_list(p);
 
-    let result = parse_pattern_list(p);
+    p.expect(T!['}']);
 
-    p.eat(T!['}']);
-
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_AND)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_PATTERN_AND))
 }
 
 #[inline]
@@ -569,23 +524,13 @@ fn parse_pattern_any(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(ANY_KW);
-    p.eat(T!['{']);
+    p.expect(T!['{']);
 
-    if p.eat(T!['}']) {
-        return Present(m.complete(p, GRIT_PATTERN_ANY));
-    }
+    let _ = parse_pattern_list(p);
 
-    let result = parse_pattern_list(p);
+    p.expect(T!['}']);
 
-    p.eat(T!['}']);
-
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_ANY)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_PATTERN_ANY))
 }
 
 #[inline]
@@ -604,13 +549,11 @@ fn parse_pattern_as(p: &mut GritParser, left: CompletedMarker) -> ParsedSyntax {
     let m = left.precede(p);
     p.bump(AS_KW);
 
-    match parse_variable(p) {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_AS)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
+    if parse_variable(p) == Absent {
+        p.err_and_bump(expected_variable(p, p.cur_range()), GRIT_BOGUS);
     }
+
+    Present(m.complete(p, GRIT_PATTERN_AS))
 }
 
 #[inline]
@@ -621,13 +564,10 @@ fn parse_pattern_before(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(BEFORE_KW);
-    match parse_pattern(p) {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_BEFORE)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+
+    parse_expected_pattern(p);
+
+    Present(m.complete(p, GRIT_PATTERN_BEFORE))
 }
 
 #[inline]
@@ -639,17 +579,14 @@ fn parse_pattern_contains(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(CONTAINS_KW);
 
-    match parse_maybe_curly_pattern(p) {
-        Present(_) => {
-            let _ = parse_pattern_contains_until_clause(p);
+    let _ = parse_maybe_curly_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_UNTIL_RECOVERY_SET),
+        expected_pattern,
+    );
+    let _ = parse_pattern_contains_until_clause(p);
 
-            Present(m.complete(p, GRIT_PATTERN_CONTAINS))
-        }
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_PATTERN_CONTAINS))
 }
 
 #[inline]
@@ -661,13 +598,9 @@ fn parse_pattern_contains_until_clause(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(UNTIL_KW);
 
-    match parse_pattern(p) {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    parse_expected_pattern(p);
+
+    Present(m.complete(p, GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE))
 }
 
 #[inline]
@@ -678,14 +611,17 @@ fn parse_pattern_if_else(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(IF_KW);
-    p.eat(T!['(']);
+    p.expect(T!['(']);
 
-    let _ = parse_predicate(p);
+    parse_expected_predicate(p);
 
-    p.eat(T![')']);
+    p.expect(T![')']);
 
-    let _ = parse_maybe_curly_pattern(p);
-
+    let _ = parse_maybe_curly_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_ELSE_RECOVERY_SET),
+        expected_pattern,
+    );
     let _ = parse_pattern_else_clause(p);
 
     Present(m.complete(p, GRIT_PATTERN_IF_ELSE))
@@ -700,13 +636,13 @@ fn parse_pattern_else_clause(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(ELSE_KW);
 
-    match parse_maybe_curly_pattern(p) {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_ELSE_CLAUSE)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    let _ = parse_maybe_curly_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
+        expected_pattern,
+    );
+
+    Present(m.complete(p, GRIT_PATTERN_ELSE_CLAUSE))
 }
 
 #[inline]
@@ -718,13 +654,13 @@ fn parse_pattern_includes(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(INCLUDES_KW);
 
-    match parse_maybe_curly_pattern(p) {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_INCLUDES)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    let _ = parse_maybe_curly_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
+        expected_pattern,
+    );
+
+    Present(m.complete(p, GRIT_PATTERN_INCLUDES))
 }
 
 #[inline]
@@ -736,13 +672,11 @@ fn parse_pattern_limit(p: &mut GritParser, left: CompletedMarker) -> ParsedSynta
     let m = left.precede(p);
     p.bump(LIMIT_KW);
 
-    match parse_int_literal(p) {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_LIMIT)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
+    if parse_int_literal(p) == Absent {
+        p.err_and_bump(expected_int_literal(p, p.cur_range()), GRIT_BOGUS);
     }
+
+    Present(m.complete(p, GRIT_PATTERN_LIMIT))
 }
 
 #[inline]
@@ -766,13 +700,13 @@ fn parse_pattern_maybe(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(MAYBE_KW);
-    match parse_maybe_curly_pattern(p) {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_MAYBE)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    let _ = parse_maybe_curly_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
+        expected_pattern,
+    );
+
+    Present(m.complete(p, GRIT_PATTERN_MAYBE))
 }
 
 #[inline]
@@ -782,13 +716,13 @@ fn parse_pattern_not(p: &mut GritParser) -> ParsedSyntax {
         Absent => return Absent,
     };
 
-    match parse_pattern(p) {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_NOT)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    let _ = parse_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
+        expected_pattern,
+    );
+
+    Present(m.complete(p, GRIT_PATTERN_NOT))
 }
 
 #[inline]
@@ -801,17 +735,11 @@ fn parse_pattern_or(p: &mut GritParser) -> ParsedSyntax {
     p.bump(OR_KW);
     p.eat(T!['{']);
 
-    let result = parse_pattern_list(p);
+    let _ = parse_pattern_list(p);
 
     p.eat(T!['}']);
 
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_OR)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_PATTERN_OR))
 }
 
 #[inline]
@@ -844,13 +772,9 @@ fn parse_pattern_where(p: &mut GritParser, left: CompletedMarker) -> ParsedSynta
     let m = left.precede(p);
     p.bump(WHERE_KW);
 
-    match parse_predicate(p) {
-        Present(_) => Present(m.complete(p, GRIT_PATTERN_WHERE)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    parse_expected_predicate(p);
+
+    Present(m.complete(p, GRIT_PATTERN_WHERE))
 }
 
 #[inline]
@@ -862,13 +786,13 @@ fn parse_pattern_within(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(WITHIN_KW);
 
-    match parse_maybe_curly_pattern(p) {
-        Present(_) => Present(m.complete(p, GRIT_WITHIN)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    let _ = parse_maybe_curly_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
+        expected_pattern,
+    );
+
+    Present(m.complete(p, GRIT_WITHIN))
 }
 
 #[inline]
@@ -918,13 +842,13 @@ fn parse_rewrite(p: &mut GritParser, left: CompletedMarker) -> ParsedSyntax {
     let m = left.precede(p);
     p.bump(T![=>]);
 
-    match parse_pattern(p) {
-        Present(_) => Present(m.complete(p, GRIT_REWRITE)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    let _ = parse_pattern(p).or_recover_with_token_set(
+        p,
+        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
+        expected_pattern,
+    );
+
+    Present(m.complete(p, GRIT_REWRITE))
 }
 
 #[inline]
@@ -938,17 +862,11 @@ fn parse_sequential(p: &mut GritParser) -> ParsedSyntax {
 
     p.eat(T!['{']);
 
-    let result = parse_pattern_list(p);
+    let _ = parse_pattern_list(p);
 
     p.eat(T!['}']);
 
-    match result {
-        Present(_) => Present(m.complete(p, GRIT_SEQUENTIAL)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    Present(m.complete(p, GRIT_SEQUENTIAL))
 }
 
 #[inline]

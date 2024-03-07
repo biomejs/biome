@@ -16,7 +16,13 @@ pub(crate) const ELEMENT_LIST_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set
 
 pub(crate) const NOT_SET: TokenSet<GritSyntaxKind> = token_set![NOT_KW, T![!]];
 
-pub(crate) const PATTERN_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(T![')'], EOF);
+pub(crate) const PATTERN_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(T![')'], T!['}'], EOF);
+
+pub(crate) const PATTERN_ELSE_RECOVERY_SET: TokenSet<GritSyntaxKind> =
+    token_set!(T![')'], T!['}'], UNTIL_KW, EOF);
+
+pub(crate) const PATTERN_UNTIL_RECOVERY_SET: TokenSet<GritSyntaxKind> =
+    token_set!(T![')'], T!['}'], UNTIL_KW, EOF);
 
 pub(crate) const PREDICATE_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(T![')']);
 
