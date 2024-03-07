@@ -350,11 +350,9 @@ Additionally, the following rules are now recommended:
 
 #### Removed rules
 
-- Remove [nursery/useGroupedTypeImport](https://biomejs.dev/linter/rules/use-grouped-type-import).
+- [nursery/useGroupedTypeImport](https://biomejs.dev/linter/rules/use-grouped-type-import). The rule [style/useImportType](https://biomejs.dev/linter/rules/use-import-type) covers the behavior of this rule.
 
-  [style/useImportType](https://biomejs.dev/linter/rules/use-import-type) covers the behavior of this rule.
-
-  Note that removing a nursery rule is not breaking change according to our [versionning phillosophy](https://biomejs.dev/internals/versioning).
+  Note that removing a nursery rule is not breaking change according to our [semantic versioning](https://biomejs.dev/internals/versioning).
 
   Contributed by @Conaclos
 
@@ -524,7 +522,7 @@ Additionally, the following rules are now recommended:
 - [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) no longer reports unused imports.
 
   We now have a dedicated rule for reporting unused imports:
-  [noUnusedImpoorts](https://biomejs.dev/linter/rules/no-unused-imports)
+  [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports)
 
   Contributed by @Conaclos
 
