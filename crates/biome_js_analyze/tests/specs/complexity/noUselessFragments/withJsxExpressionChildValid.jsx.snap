@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: withJsxExpressionChildValid.jsx
+---
+# Input
+```jsx
+function jsxExpressionChild() {
+    return <>{foo}</>
+}
+
+```

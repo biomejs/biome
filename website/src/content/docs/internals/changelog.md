@@ -442,6 +442,27 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Enhancements
 
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now rule not triggered for jsx attributes when
+   the fragment child is simple text.
+
+  ```js
+  export function SomeComponent() {
+    return <div x-some-prop={<>Foo</>} />;
+  }
+  ```
+
+   Also fixes code action when the fragment child is of type `JsxExpressionChild`.
+
+  ```js
+  <>
+    <Hello leftIcon={<>{provider?.icon}</>} />
+    {<>{provider?.icon}</>}
+    <>{provider?.icon}</>
+  </>
+  ```
+
+  Contributed by @vasucp1207
+
 - [noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary) now provides unsafe code fixes. Contributed by
   @vasucp1207
 
