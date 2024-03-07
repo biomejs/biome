@@ -1,7 +1,9 @@
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_analyze::{Ast, RuleSource, RuleSourceKind};
 use biome_console::markup;
-use biome_js_syntax::{JsExport, JsExportFromClause, JsExportNamedFromClause, JsModule};
+use biome_js_syntax::{
+    JsExport, JsExportFromClause, JsExportNamedFromClause, JsFileSource, JsModule,
+};
 use biome_rowan::AstNode;
 
 declare_rule! {
@@ -10,6 +12,7 @@ declare_rule! {
     /// A barrel file is a file that re-exports all of the exports from other files in a directory.
     /// This structure results in the unnecessary loading of many modules, significantly impacting performance in large-scale applications.
     /// Additionally, it complicates the codebase, making it difficult to navigate and understand the project's dependency graph.
+    /// This rule ignores .d.ts files and type-only exports.
     ///
     /// For a more detailed explanation, check out https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/
     ///
@@ -54,6 +57,13 @@ impl Rule for NoBarrelFile {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx
+            .source_type::<JsFileSource>()
+            .language()
+            .is_definition_file()
+        {
+            return None;
+        }
         let items = ctx.query().items();
 
         for i in items {
@@ -62,8 +72,8 @@ impl Rule for NoBarrelFile {
                     if let Some(export_from_clause) =
                         JsExportFromClause::cast(export_from_clause.clone().into())
                     {
-                        if export_from_clause.type_token().is_some() {
-                            return None;
+                        if export_from_clause.type_token().is_none() {
+                            return Some(export);
                         }
                     }
 
@@ -71,18 +81,18 @@ impl Rule for NoBarrelFile {
                         JsExportNamedFromClause::cast(export_from_clause.into())
                     {
                         if export_from_clause.type_token().is_some() {
-                            return None;
+                            continue;
                         }
-                        if export_from_clause
+                        if !export_from_clause
                             .specifiers()
                             .into_iter()
                             .flatten()
                             .all(|s| s.type_token().is_some())
                         {
-                            return None;
+                            return Some(export);
                         }
                     }
-                    return Some(export);
+                    continue;
                 }
             }
         }
