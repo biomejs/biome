@@ -243,7 +243,7 @@ fn handle_any_file<'scope>(
     mut path: PathBuf,
     mut file_type: FileType,
     // The unresolved origin path in case the directory is behind a symbolic link
-    mut origin_path: Option<PathBuf>,
+    origin_path: Option<PathBuf>,
 ) {
     if file_type.is_symlink() {
         if !ctx.can_handle(&BiomePath::new(path.clone())) {
@@ -254,8 +254,15 @@ fn handle_any_file<'scope>(
         };
 
         if target_file_type.is_dir() {
-            // Override the origin path of the symbolic link
-            origin_path = Some(path);
+            if !ctx.interner().intern_path(target_path.clone()) {
+                // If the path was already inserted, it could have been pointed at by
+                // multiple symlinks. No need to traverse again.
+                return;
+            }
+            scope.spawn(move |scope| {
+                handle_dir(scope, ctx, &target_path, Some(path));
+            });
+            return;
         }
 
         path = target_path;
