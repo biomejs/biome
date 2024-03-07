@@ -262,10 +262,14 @@ Additionally, the following rules are now recommended:
 
 - Remove `nursery/useGroupedTypeImport`. The rule [style/useImportType](https://biomejs.dev/linter/rules/use-import-type) covers the behavior of this rule.
 
-
 ### Miscellaneous
 
-- We drastically reduced the protected files, which means you can now format your `package.json`, `tsconfig.json`, etc. with Biome. Lock files are still considered protected.
+:::caution
+Among other fixes, we fixed a bug where Biome traversed *ignored* folders. Biome doesn't traverse ignored folders anymore. This could cause unexpected changes in behaviour. For example, if you configured globs a way similar to `files.ignore: ["./src/**/__folder__"]` and
+`files.include: ["./src/**/*.ts"]`, the `./src` won't be traversed anymore because `files.ignore` is matched before, and the `src/**` matches all folders inside the `src` directory.
+:::
+
+- We drastically reduced the number of protected files, which means you can now format your `package.json`, `tsconfig.json`, etc. with Biome. Lock files are still considered protected.
 - The CLI now does a better job at reporting the total number of files and the files that were really changed.
 - When a diagnostic shows a file name on the terminal that is integrated with your editor, you can click it and the editor will open the file for you.
 - The command `biome rage` now accepts two nice options: `--formatter` and `--linter`.
