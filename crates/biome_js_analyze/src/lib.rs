@@ -257,7 +257,7 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"<>{foo}</>
+        const SOURCE: &str = r#"<>{provider}</>
         "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
