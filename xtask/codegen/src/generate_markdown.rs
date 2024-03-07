@@ -44,7 +44,7 @@ category: reference
 description: How to customize and configure Biome with biome.json.
 ---
 
-import LintGroups from "@src/components/generated/Groups.astro";
+import LintGroups from "@/components/generated/Groups.astro";
 
 {/** Make sure to update the redirect in `static/_redirects` when changing the configuration title --> **/}
 "#;
