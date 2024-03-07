@@ -378,9 +378,9 @@ Additionally, the following rules are now recommended:
 
 #### Removed rules
 
-- Re;ove `nursery/useGroupedTypeImport`. The rule [style/useImportType](https://biomejs.dev/linter/rules/use-import-type) covers the behavior of this rule.
+- Remove `nursery/useGroupedTypeImport`. The rule [style/useImportType](https://biomejs.dev/linter/rules/use-import-type) covers the behavior of this rule.
 
-  Note that removing a nursery rule is not breaking change according to our [semantic versioning](https://biomejs.dev/internals/versioning).
+  Note that removing a nursery rule is not considered a breaking change according to our [semantic versioning](https://biomejs.dev/internals/versioning).
 
   Contributed by @Conaclos
 
