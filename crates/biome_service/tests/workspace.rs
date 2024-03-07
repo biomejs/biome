@@ -28,3 +28,22 @@ fn debug_control_flow() {
 
     assert_eq!(cfg, GRAPH);
 }
+
+#[test]
+fn recognize_typescript_definition_file() {
+    let workspace = server();
+
+    let file = FileGuard::open(
+        workspace.as_ref(),
+        OpenFileParams {
+            path: BiomePath::new("file.d.ts"),
+            // the following code snippet can be correctly parsed in .d.ts file but not in .ts file
+            content: "export const foo: number".into(),
+            version: 0,
+            document_file_source: None,
+        },
+    )
+    .unwrap();
+
+    assert!(file.format_file().is_ok());
+}

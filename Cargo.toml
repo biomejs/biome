@@ -88,6 +88,8 @@ biome_diagnostics_macros     = { version = "0.5.0", path = "./crates/biome_diagn
 biome_file_source            = { version = "0.5.0", path = "./crates/biome_file_source" }
 biome_formatter              = { version = "0.5.0", path = "./crates/biome_formatter" }
 biome_fs                     = { version = "0.5.0", path = "./crates/biome_fs" }
+biome_grit_factory           = { version = "0.5.0", path = "./crates/biome_grit_factory" }
+biome_grit_syntax            = { version = "0.5.0", path = "./crates/biome_grit_syntax" }
 biome_html_factory           = { version = "0.5.0", path = "./crates/biome_html_factory" }
 biome_html_syntax            = { version = "0.5.0", path = "./crates/biome_html_syntax" }
 biome_js_analyze             = { version = "0.5.0", path = "./crates/biome_js_analyze" }

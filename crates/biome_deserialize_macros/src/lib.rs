@@ -90,7 +90,7 @@ use syn::{parse_macro_input, DeriveInput};
 /// }
 ///
 /// impl DeserializableValidator for ValidatedStruct {
-///     fn fn validate(
+///     fn validate(
 ///         &self,
 ///         name: &str,
 ///         range: biome_rowan::TextRange,

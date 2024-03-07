@@ -1,4 +1,5 @@
 use crate::css_kinds_src::CSS_KINDS_SRC;
+use crate::grit_kinds_src::GRIT_KINDS_SRC;
 use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::js_kinds_src::{AstNodeSrc, AstSrc, Field, TokenKind, JS_KINDS_SRC};
 use crate::json_kinds_src::JSON_KINDS_SRC;
@@ -65,6 +66,10 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
                         let method_name = field.method_name(language_kind);
                         if is_list {
+                            if *optional {
+                                panic!("Lists cannot be optional. Instead, the grammar should handle the situation where the list is empty.");
+                            }
+
                             quote! {
                                 pub fn #method_name(&self) -> #ty {
                                     support::list(&self.syntax, #slot_index_access)
@@ -347,7 +352,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .iter()
                 .map(|variant| {
                     let variant_name = format_ident!("{}", variant);
-                    let fn_name = format_ident!("as_{}", (to_lower_snake_case(variant)));
+                    let fn_name = format_ident!("as_{}", to_lower_snake_case(variant));
                     quote! {
                         pub fn #fn_name(&self) -> Option<&#variant_name> {
                            match &self {
@@ -962,6 +967,7 @@ pub(crate) fn token_kind_to_code(
         LanguageKind::Js => JS_KINDS_SRC,
         LanguageKind::Css => CSS_KINDS_SRC,
         LanguageKind::Json => JSON_KINDS_SRC,
+        LanguageKind::Grit => GRIT_KINDS_SRC,
         LanguageKind::Html => HTML_KINDS_SRC,
     };
     if kind_source.literals.contains(&kind_variant_name.as_str())
@@ -977,7 +983,7 @@ pub(crate) fn token_kind_to_code(
     } else {
         // $ is valid syntax in rust and it's part of macros,
         // so we need to decorate the tokens with quotes
-        if name == "$=" {
+        if matches!(name, "$=" | "$_") {
             let token = Literal::string(name);
             quote! { T![#token] }
         } else {

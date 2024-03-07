@@ -67,7 +67,7 @@ impl PartialVcsConfiguration {
 
 impl DeserializableValidator for PartialVcsConfiguration {
     fn validate(
-        &self,
+        &mut self,
         _name: &str,
         range: biome_rowan::TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,

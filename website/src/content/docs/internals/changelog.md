@@ -86,6 +86,34 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @arendjr
 
+- Implemented [#1128](https://github.com/biomejs/biome/issues/1128). User-provided React hooks can
+  now be configured to track stable results. For example:
+
+  ```json
+  "useExhaustiveDependencies": {
+      "level": "error",
+      "options": {
+          "hooks": [{
+              "name": "useMyState",
+              "stableResult": [
+                  1
+              ]
+          }]
+      }
+  }
+  ```
+
+  This will allow the following to be validated:
+
+  ```js
+  const [myState, setMyState] = useMyState();
+  const toggleMyState = useCallback(() => {
+    setMyState(!myState);
+  }, [myState]); // Only `myState` needs to be specified here.
+  ```
+
+  Contributed by @arendjr
+
 #### Bug fixes
 
 - Fix [#1748](https://github.com/biomejs/biome/issues/1748). Now for the following case we won't provide an unsafe fix
@@ -389,7 +417,11 @@ Additionally, the following rules are now recommended:
   Contributed by @DaniGuardiola
 
 - Add rule [noUndeclaredependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies), to detect the use of
-  dependencies that aren't present in the `package.json`
+  dependencies that aren't present in the `package.json`.
+
+  The rule ignores imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
+
+  Contributed by @ematipico and @Conaclos
 
 - Add rule [noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import), to report namespace imports:
 
@@ -652,6 +684,12 @@ Additionally, the following rules are now recommended:
   ```
 
   Contributed by @printfn
+
+### Website
+
+#### Bug fixes
+
+- Fix [#1981](https://github.com/biomejs/biome/issues/1981). Identify TypeScript definition files by their file path within the playground. Contributed by @ah-yu
 
 ## 1.5.3 (2024-01-22)
 

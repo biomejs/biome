@@ -11,6 +11,7 @@ mod generate_nodes;
 mod generate_nodes_mut;
 mod generate_syntax_factory;
 mod generate_syntax_kinds;
+mod grit_kinds_src;
 mod js_kinds_src;
 mod json_kinds_src;
 
@@ -44,6 +45,7 @@ pub enum LanguageKind {
     Js,
     Css,
     Json,
+    Grit,
     Html,
 }
 
@@ -53,15 +55,17 @@ impl std::fmt::Display for LanguageKind {
             LanguageKind::Js => write!(f, "js"),
             LanguageKind::Css => write!(f, "css"),
             LanguageKind::Json => write!(f, "json"),
+            LanguageKind::Grit => write!(f, "gritql"),
             LanguageKind::Html => write!(f, "html"),
         }
     }
 }
 
-pub const ALL_LANGUAGE_KIND: [LanguageKind; 4] = [
+pub const ALL_LANGUAGE_KIND: [LanguageKind; 5] = [
     LanguageKind::Js,
     LanguageKind::Css,
     LanguageKind::Json,
+    LanguageKind::Grit,
     LanguageKind::Html,
 ];
 
@@ -73,9 +77,10 @@ impl FromStr for LanguageKind {
             "js" => Ok(LanguageKind::Js),
             "css" => Ok(LanguageKind::Css),
             "json" => Ok(LanguageKind::Json),
+            "gritql" => Ok(LanguageKind::Grit),
             "html" => Ok(LanguageKind::Html),
             _ => Err(format!(
-                "Language {} not supported, please use: `js`, `css` or `json`",
+                "Language {} not supported, please use: `js`, `css`, `json`, `gritql` or `html`",
                 kind
             )),
         }
@@ -92,6 +97,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxKind },
             LanguageKind::Css => quote! { CssSyntaxKind },
             LanguageKind::Json => quote! { JsonSyntaxKind },
+            LanguageKind::Grit => quote! { GritSyntaxKind },
             LanguageKind::Html => quote! { HtmlSyntaxKind },
         }
     }
@@ -101,6 +107,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxNode },
             LanguageKind::Css => quote! { CssSyntaxNode },
             LanguageKind::Json => quote! { JsonSyntaxNode },
+            LanguageKind::Grit => quote! { GritSyntaxNode },
             LanguageKind::Html => quote! { HtmlSyntaxNode },
         }
     }
@@ -110,6 +117,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxElement },
             LanguageKind::Css => quote! { CssSyntaxElement },
             LanguageKind::Json => quote! { JsonSyntaxElement },
+            LanguageKind::Grit => quote! { GritSyntaxElement },
             LanguageKind::Html => quote! { HtmlSyntaxElement },
         }
     }
@@ -119,6 +127,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxToken },
             LanguageKind::Css => quote! { CssSyntaxToken },
             LanguageKind::Json => quote! { JsonSyntaxToken },
+            LanguageKind::Grit => quote! { GritSyntaxToken },
             LanguageKind::Html => quote! { HtmlSyntaxToken },
         }
     }
@@ -128,6 +137,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxElementChildren },
             LanguageKind::Css => quote! { CssSyntaxElementChildren },
             LanguageKind::Json => quote! { JsonSyntaxElementChildren },
+            LanguageKind::Grit => quote! { GritSyntaxElementChildren },
             LanguageKind::Html => quote! { HtmlSyntaxElementChildren },
         }
     }
@@ -137,6 +147,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxList },
             LanguageKind::Css => quote! { CssSyntaxList },
             LanguageKind::Json => quote! { JsonSyntaxList },
+            LanguageKind::Grit => quote! { GritSyntaxList },
             LanguageKind::Html => quote! { HtmlSyntaxList },
         }
     }
@@ -146,6 +157,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsLanguage },
             LanguageKind::Css => quote! { CssLanguage },
             LanguageKind::Json => quote! { JsonLanguage },
+            LanguageKind::Grit => quote! { GritLanguage },
             LanguageKind::Html => quote! { HtmlLanguage },
         }
     }
@@ -155,6 +167,7 @@ impl LanguageKind {
             LanguageKind::Js => "biome_js_formatter",
             LanguageKind::Css => "biome_css_formatter",
             LanguageKind::Json => "biome_json_formatter",
+            LanguageKind::Grit => "biome_grit_formatter",
             LanguageKind::Html => "biome_html_formatter",
         }
     }
@@ -164,6 +177,7 @@ impl LanguageKind {
             LanguageKind::Js => "biome_js_syntax",
             LanguageKind::Css => "biome_css_syntax",
             LanguageKind::Json => "biome_json_syntax",
+            LanguageKind::Grit => "biome_grit_syntax",
             LanguageKind::Html => "biome_html_syntax",
         }
     }
@@ -173,6 +187,7 @@ impl LanguageKind {
             LanguageKind::Js => "biome_js_factory",
             LanguageKind::Css => "biome_css_factory",
             LanguageKind::Json => "biome_json_factory",
+            LanguageKind::Grit => "biome_grit_factory",
             LanguageKind::Html => "biome_html_factory",
         }
     }
@@ -213,9 +228,9 @@ pub fn to_pascal_case(s: &str) -> String {
     to_pascal_camel_case(s, true)
 }
 
-fn to_pascal_camel_case(s: &str, is_ascal: bool) -> String {
+fn to_pascal_camel_case(s: &str, is_pascal: bool) -> String {
     let mut buf = String::with_capacity(s.len());
-    let mut prev = is_ascal;
+    let mut prev = is_pascal;
     for c in s.chars() {
         if c == '_' {
             prev = true;

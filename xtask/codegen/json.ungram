@@ -47,7 +47,7 @@ JsonRoot =
 
 AnyJsonValue =  JsonStringValue | JsonBooleanValue | JsonNullValue | JsonNumberValue | JsonArrayValue | JsonObjectValue | JsonBogusValue
 
-JsonObjectValue = '{' JsonMemberList? '}'
+JsonObjectValue = '{' JsonMemberList '}'
 
 JsonMemberList = (JsonMember (',' JsonMember)* ','?)
 
@@ -55,7 +55,7 @@ JsonMember = name: JsonMemberName ':' value: AnyJsonValue
 
 JsonMemberName = value: 'json_string_literal'
 
-JsonArrayValue = '[' elements: JsonArrayElementList? ']'
+JsonArrayValue = '[' elements: JsonArrayElementList ']'
 
 JsonArrayElementList = (AnyJsonValue (',' AnyJsonValue)* ','?)
 

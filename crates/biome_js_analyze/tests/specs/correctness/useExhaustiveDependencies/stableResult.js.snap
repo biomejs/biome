@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: stableResult.js
+---
+# Input
+```jsx
+import { useCallback } from "react";
+import { useDispatch } from "react-redux";
+
+function MyComponent25() {
+    const dispatch = useDispatch();
+    const doAction = useCallback(() => dispatch(someAction()), []);
+}
+
+```
