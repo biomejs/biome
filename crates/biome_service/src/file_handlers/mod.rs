@@ -110,6 +110,7 @@ impl DocumentFileSource {
             "cts" => JsFileSource::ts()
                 .with_module_kind(ModuleKind::Script)
                 .into(),
+            "d.ts" | "d.mts" | "d.cts" => JsFileSource::d_ts().into(),
             "tsx" => JsFileSource::tsx().into(),
             "json" => JsonFileSource::json().into(),
             "jsonc" => JsonFileSource::jsonc().into(),
@@ -154,8 +155,14 @@ impl DocumentFileSource {
 
     /// Returns the language corresponding to the file path
     pub fn from_path(path: &Path) -> Self {
-        path.extension()
-            .and_then(|path| path.to_str())
+        let extension = match path {
+            _ if path.to_str().is_some_and(|p| p.ends_with(".d.ts")) => Some("d.ts"),
+            _ if path.to_str().is_some_and(|p| p.ends_with(".d.mts")) => Some("d.mts"),
+            _ if path.to_str().is_some_and(|p| p.ends_with(".d.cts")) => Some("d.cts"),
+            path => path.extension().and_then(|path| path.to_str()),
+        };
+
+        extension
             .map(DocumentFileSource::from_extension)
             .unwrap_or(DocumentFileSource::Unknown)
     }
@@ -163,8 +170,14 @@ impl DocumentFileSource {
     /// Returns the language corresponding to the file path
     /// relying on the file extension and the known files.
     pub fn from_path_and_known_filename(path: &Path) -> Self {
-        path.extension()
-            .and_then(OsStr::to_str)
+        let extension = match path {
+            _ if path.to_str().is_some_and(|p| p.ends_with(".d.ts")) => Some("d.ts"),
+            _ if path.to_str().is_some_and(|p| p.ends_with(".d.mts")) => Some("d.mts"),
+            _ if path.to_str().is_some_and(|p| p.ends_with(".d.cts")) => Some("d.cts"),
+            path => path.extension().and_then(|path| path.to_str()),
+        };
+
+        extension
             .map(DocumentFileSource::from_extension)
             .or(path
                 .file_name()
