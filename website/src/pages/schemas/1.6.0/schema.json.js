@@ -335,6 +335,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noEmptyTypeParameters: {
+						description:
+							"Disallow empty type parameters in type aliases and interfaces.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noExcessiveCognitiveComplexity: {
 						description:
 							"Disallow functions that exceed a given Cognitive Complexity score.",
@@ -411,6 +419,13 @@ export function GET() {
 					},
 					noUselessLabel: {
 						description: "Disallow unnecessary labels.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noUselessLoneBlockStatements: {
+						description: "Disallow unnecessary nested block statements.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -524,7 +539,7 @@ export function GET() {
 			ComplexityConfiguration: {
 				anyOf: [
 					{ $ref: "#/definitions/RulePlainConfiguration" },
-					{ $ref: "RuleWithComplexityOptions" },
+					{ $ref: "#/definitions/RuleWithComplexityOptions" },
 				],
 			},
 			ComplexityOptions: {
@@ -559,7 +574,7 @@ export function GET() {
 			ConsistentArrayTypeConfiguration: {
 				anyOf: [
 					{ $ref: "#/definitions/RulePlainConfiguration" },
-					{ $ref: "RuleWithConsistentArrayTypeOptions" },
+					{ $ref: "#/definitions/RuleWithConsistentArrayTypeOptions" },
 				],
 			},
 			ConsistentArrayTypeOptions: {
@@ -649,6 +664,14 @@ export function GET() {
 					noInvalidNewBuiltin: {
 						description:
 							"Disallow new operators with global non-constructor functions.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noInvalidUseBeforeDeclaration: {
+						description:
+							"Disallow the use of variables and function parameters before their declaration",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -759,8 +782,22 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noUnusedImports: {
+						description: "Disallow unused imports.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noUnusedLabels: {
 						description: "Disallow unused labels.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noUnusedPrivateClassMembers: {
+						description: "Disallow unused private class members",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -792,6 +829,13 @@ export function GET() {
 					recommended: {
 						description: "It enables the recommended rules for this group",
 						type: ["boolean", "null"],
+					},
+					useAwait: {
+						description: "Ensure async functions utilize await.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
 					},
 					useExhaustiveDependencies: {
 						description:
@@ -910,7 +954,7 @@ export function GET() {
 			DeprecatedHooksConfiguration: {
 				anyOf: [
 					{ $ref: "#/definitions/RulePlainConfiguration" },
-					{ $ref: "RuleWithDeprecatedHooksOptions" },
+					{ $ref: "#/definitions/RuleWithDeprecatedHooksOptions" },
 				],
 			},
 			DeprecatedHooksOptions: {
@@ -969,7 +1013,7 @@ export function GET() {
 			FilenamingConventionConfiguration: {
 				anyOf: [
 					{ $ref: "#/definitions/RulePlainConfiguration" },
-					{ $ref: "RuleWithFilenamingConventionOptions" },
+					{ $ref: "#/definitions/RuleWithFilenamingConventionOptions" },
 				],
 			},
 			FilenamingConventionOptions: {
@@ -1079,32 +1123,37 @@ export function GET() {
 				},
 				additionalProperties: false,
 			},
-			Hooks: {
+			Hook: {
 				type: "object",
-				required: ["name"],
+				required: ["name", "stableResult"],
 				properties: {
 					closureIndex: {
 						description:
-							'The "position" of the closure function, starting from zero.\n\n### Example',
+							'The "position" of the closure function, starting from zero.\n\nFor example, for React\'s `useEffect()` hook, the closure index is 0.',
 						type: ["integer", "null"],
-						format: "uint",
+						format: "uint8",
 						minimum: 0.0,
 					},
 					dependenciesIndex: {
 						description:
-							'The "position" of the array of dependencies, starting from zero.',
+							'The "position" of the array of dependencies, starting from zero.\n\nFor example, for React\'s `useEffect()` hook, the dependencies index is 1.',
 						type: ["integer", "null"],
-						format: "uint",
+						format: "uint8",
 						minimum: 0.0,
 					},
-					name: { description: "The name of the hook", type: "string" },
+					name: { description: "The name of the hook.", type: "string" },
+					stableResult: {
+						description:
+							"Whether the result of the hook is stable.\n\nSet to `true` to mark the identity of the hook's return value as stable, or use a number/an array of numbers to mark the \"positions\" in the return array as stable.\n\nFor example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`.",
+						allOf: [{ $ref: "#/definitions/StableHookResult" }],
+					},
 				},
 				additionalProperties: false,
 			},
 			HooksConfiguration: {
 				anyOf: [
 					{ $ref: "#/definitions/RulePlainConfiguration" },
-					{ $ref: "RuleWithHooksOptions" },
+					{ $ref: "#/definitions/RuleWithHooksOptions" },
 				],
 			},
 			HooksOptions: {
@@ -1113,9 +1162,10 @@ export function GET() {
 				required: ["hooks"],
 				properties: {
 					hooks: {
-						description: "List of safe hooks",
+						description:
+							"List of hooks of which the dependencies should be validated.",
 						type: "array",
-						items: { $ref: "#/definitions/Hooks" },
+						items: { $ref: "#/definitions/Hook" },
 					},
 				},
 				additionalProperties: false,
@@ -1400,7 +1450,7 @@ export function GET() {
 			NamingConventionConfiguration: {
 				anyOf: [
 					{ $ref: "#/definitions/RulePlainConfiguration" },
-					{ $ref: "RuleWithNamingConventionOptions" },
+					{ $ref: "#/definitions/RuleWithNamingConventionOptions" },
 				],
 			},
 			NamingConventionOptions: {
@@ -1460,21 +1510,6 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
-					noEmptyBlockStatements: {
-						description: "Disallow empty block statements and static blocks.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noEmptyTypeParameters: {
-						description:
-							"Disallow empty type parameters in type aliases and interfaces.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					noExcessiveNestedTestSuites: {
 						description:
 							"This rule enforces a maximum depth to nested describe() in test files.",
@@ -1493,37 +1528,6 @@ export function GET() {
 					},
 					noFocusedTests: {
 						description: "Disallow focused tests.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noGlobalAssign: {
-						description:
-							"Disallow assignments to native objects and read-only global variables.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noGlobalEval: {
-						description: "Disallow the use of global eval().",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noInvalidUseBeforeDeclaration: {
-						description:
-							"Disallow the use of variables and function parameters before their declaration",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noMisleadingCharacterClass: {
-						description:
-							"Disallow characters made with multiple code points in character class syntax.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1573,37 +1577,9 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
-					noThenProperty: {
-						description: "Disallow then property.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					noUndeclaredDependencies: {
 						description:
 							"Disallow the use of dependencies that aren't specified in the package.json.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noUnusedImports: {
-						description: "Disallow unused imports.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noUnusedPrivateClassMembers: {
-						description: "Disallow unused private class members",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noUselessLoneBlockStatements: {
-						description: "Disallow unnecessary nested block statements.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1621,60 +1597,8 @@ export function GET() {
 						description: "It enables the recommended rules for this group",
 						type: ["boolean", "null"],
 					},
-					useAwait: {
-						description: "Ensure async functions utilize await.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useConsistentArrayType: {
-						description: "Require consistently using either T[] or Array<T>",
-						anyOf: [
-							{ $ref: "#/definitions/ConsistentArrayTypeConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useExportType: {
-						description: "Promotes the use of export type for types.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useFilenamingConvention: {
-						description:
-							"Enforce naming conventions for JavaScript and TypeScript filenames.",
-						anyOf: [
-							{ $ref: "#/definitions/FilenamingConventionConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useForOf: {
-						description:
-							"This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useGroupedTypeImport: {
-						description:
-							"Enforce the use of import type when an import only has specifiers with type qualifier.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					useImportRestrictions: {
 						description: "Disallows package private imports.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useImportType: {
-						description: "Promotes the use of import type for types.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1691,29 +1615,6 @@ export function GET() {
 					useNodeAssertStrict: {
 						description:
 							"Promotes the usage of node:assert/strict over node:assert.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useNodejsImportProtocol: {
-						description:
-							"Enforces using the node: protocol for Node.js builtin modules.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useNumberNamespace: {
-						description: "Use the Number properties instead of global ones.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useShorthandFunctionType: {
-						description:
-							"Enforce using function types instead of object type with call signatures.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1928,7 +1829,7 @@ export function GET() {
 			RestrictedGlobalsConfiguration: {
 				anyOf: [
 					{ $ref: "#/definitions/RulePlainConfiguration" },
-					{ $ref: "RuleWithRestrictedGlobalsOptions" },
+					{ $ref: "#/definitions/RuleWithRestrictedGlobalsOptions" },
 				],
 			},
 			RestrictedGlobalsOptions: {
@@ -1947,7 +1848,7 @@ export function GET() {
 			RestrictedImportsConfiguration: {
 				anyOf: [
 					{ $ref: "#/definitions/RulePlainConfiguration" },
-					{ $ref: "RuleWithRestrictedImportsOptions" },
+					{ $ref: "#/definitions/RuleWithRestrictedImportsOptions" },
 				],
 			},
 			RestrictedImportsOptions: {
@@ -2135,6 +2036,13 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noGlobalEval: {
+						description: "Disallow the use of global eval().",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					recommended: {
 						description: "It enables the recommended rules for this group",
 						type: ["boolean", "null"],
@@ -2143,6 +2051,35 @@ export function GET() {
 				additionalProperties: false,
 			},
 			Semicolons: { type: "string", enum: ["always", "asNeeded"] },
+			StableHookResult: {
+				oneOf: [
+					{
+						description:
+							"Used to indicate the hook does not have a stable result.",
+						type: "string",
+						enum: ["None"],
+					},
+					{
+						description:
+							"Used to indicate the identity of the result value is stable.\n\nNote this does not imply internal stability. For instance, the ref objects returned by React's `useRef()` always have a stable identity, but their internal value may be mutable.",
+						type: "string",
+						enum: ["Identity"],
+					},
+					{
+						description:
+							"Used to indicate the hook returns an array and some of its indices have stable identities.\n\nFor example, React's `useState()` hook returns a stable function at index 1.",
+						type: "object",
+						required: ["Indices"],
+						properties: {
+							Indices: {
+								type: "array",
+								items: { type: "integer", format: "uint8", minimum: 0.0 },
+							},
+						},
+						additionalProperties: false,
+					},
+				],
+			},
 			StringSet: {
 				type: "array",
 				items: { type: "string" },
@@ -2296,6 +2233,13 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					useConsistentArrayType: {
+						description: "Require consistently using either T[] or Array<T>",
+						anyOf: [
+							{ $ref: "#/definitions/ConsistentArrayTypeConfiguration" },
+							{ type: "null" },
+						],
+					},
 					useConst: {
 						description:
 							"Require const declarations for variables that are never reassigned after declared.",
@@ -2328,9 +2272,39 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					useExportType: {
+						description: "Promotes the use of export type for types.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					useFilenamingConvention: {
+						description:
+							"Enforce naming conventions for JavaScript and TypeScript filenames.",
+						anyOf: [
+							{ $ref: "#/definitions/FilenamingConventionConfiguration" },
+							{ type: "null" },
+						],
+					},
+					useForOf: {
+						description:
+							"This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					useFragmentSyntax: {
 						description:
 							"This rule enforces the use of <>...</> over <Fragment>...</Fragment>.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					useImportType: {
+						description: "Promotes the use of import type for types.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -2348,6 +2322,21 @@ export function GET() {
 							"Enforce naming conventions for everything across a codebase.",
 						anyOf: [
 							{ $ref: "#/definitions/NamingConventionConfiguration" },
+							{ type: "null" },
+						],
+					},
+					useNodejsImportProtocol: {
+						description:
+							"Enforces using the node: protocol for Node.js builtin modules.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					useNumberNamespace: {
+						description: "Use the Number properties instead of global ones.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
 						],
 					},
@@ -2378,6 +2367,14 @@ export function GET() {
 					useShorthandAssign: {
 						description:
 							"Require assignment operator shorthand where possible.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					useShorthandFunctionType: {
+						description:
+							"Enforce using function types instead of object type with call signatures.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -2571,6 +2568,13 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noEmptyBlockStatements: {
+						description: "Disallow empty block statements and static blocks.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noEmptyInterface: {
 						description: "Disallow the declaration of empty interfaces.",
 						anyOf: [
@@ -2607,6 +2611,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noGlobalAssign: {
+						description:
+							"Disallow assignments to native objects and read-only global variables.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noGlobalIsFinite: {
 						description: "Use Number.isFinite instead of global isFinite.",
 						anyOf: [
@@ -2638,6 +2650,14 @@ export function GET() {
 					},
 					noLabelVar: {
 						description: "Disallow labels that share a name with a variable",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noMisleadingCharacterClass: {
+						description:
+							"Disallow characters made with multiple code points in character class syntax.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -2698,6 +2718,13 @@ export function GET() {
 					},
 					noSparseArray: {
 						description: "Disallow sparse arrays",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noThenProperty: {
+						description: "Disallow then property.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -2803,7 +2830,7 @@ export function GET() {
 			UtilityClassSortingConfiguration: {
 				anyOf: [
 					{ $ref: "#/definitions/RulePlainConfiguration" },
-					{ $ref: "RuleWithUtilityClassSortingOptions" },
+					{ $ref: "#/definitions/RuleWithUtilityClassSortingOptions" },
 				],
 			},
 			UtilityClassSortingOptions: {
@@ -2826,7 +2853,7 @@ export function GET() {
 			ValidAriaRoleConfiguration: {
 				anyOf: [
 					{ $ref: "#/definitions/RulePlainConfiguration" },
-					{ $ref: "RuleWithValidAriaRoleOptions" },
+					{ $ref: "#/definitions/RuleWithValidAriaRoleOptions" },
 				],
 			},
 			ValidAriaRoleOptions: {
