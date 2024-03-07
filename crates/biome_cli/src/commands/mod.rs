@@ -259,6 +259,9 @@ pub enum BiomeCommand {
         /// Allows to set a custom path when discovering the configuration file `biome.json`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
         Option<PathBuf>,
+        /// Bogus argument to make the command work with vscode-languageclient
+        #[bpaf(long("stdio"), hide, hide_usage, switch)]
+        bool,
     ),
     /// It updates the configuration when there are breaking changes
     #[bpaf(command)]
@@ -327,7 +330,7 @@ impl BiomeCommand {
             | BiomeCommand::Ci { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Migrate { cli_options, .. } => cli_options.colors.as_ref(),
-            BiomeCommand::LspProxy(_)
+            BiomeCommand::LspProxy(_, _)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init(_)
@@ -350,7 +353,7 @@ impl BiomeCommand {
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Explain { .. }
-            | BiomeCommand::LspProxy(_)
+            | BiomeCommand::LspProxy(_, _)
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => false,
         }
@@ -373,7 +376,7 @@ impl BiomeCommand {
             | BiomeCommand::Stop
             | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
-            | BiomeCommand::LspProxy(_)
+            | BiomeCommand::LspProxy(_, _)
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => false,
         }
@@ -387,7 +390,7 @@ impl BiomeCommand {
             | BiomeCommand::Ci { cli_options, .. }
             | BiomeCommand::Migrate { cli_options, .. } => cli_options.log_level.clone(),
             BiomeCommand::Version(_)
-            | BiomeCommand::LspProxy(_)
+            | BiomeCommand::LspProxy(_, _)
             | BiomeCommand::Rage(..)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
@@ -406,7 +409,7 @@ impl BiomeCommand {
             | BiomeCommand::Migrate { cli_options, .. } => cli_options.log_kind.clone(),
             BiomeCommand::Version(_)
             | BiomeCommand::Rage(..)
-            | BiomeCommand::LspProxy(_)
+            | BiomeCommand::LspProxy(_, _)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init(_)
