@@ -36,7 +36,7 @@ declare_rule! {
     /// ```
     ///
     pub UseJsxKeyInIterable {
-        version: "next",
+        version: "1.6.0",
         name: "useJsxKeyInIterable",
         source: RuleSource::EslintReact("jsx-key"),
         source_kind: RuleSourceKind::SameLogic,

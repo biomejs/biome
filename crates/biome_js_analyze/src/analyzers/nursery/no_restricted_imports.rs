@@ -25,7 +25,7 @@ declare_rule! {
     /// }
     /// ```
     pub NoRestrictedImports {
-        version: "next",
+        version: "1.6.0",
         name: "noRestrictedImports",
         source: RuleSource::Eslint("no-restricted-imports"),
         recommended: false,

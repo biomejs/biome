@@ -39,7 +39,7 @@ declare_rule! {
     /// ```
     ///
     pub NoBarrelFile {
-        version: "next",
+        version: "1.6.0",
         name: "noBarrelFile",
         recommended: false,
         source: RuleSource::EslintBarrelFiles("avoid-namespace-import"),

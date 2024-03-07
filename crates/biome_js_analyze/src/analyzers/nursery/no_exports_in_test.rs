@@ -37,7 +37,7 @@ declare_rule! {
     /// ```
     ///
     pub NoExportsInTest {
-        version: "next",
+        version: "1.6.0",
         name: "noExportsInTest",
         recommended: true,
         source: RuleSource::EslintJest("no-export"),

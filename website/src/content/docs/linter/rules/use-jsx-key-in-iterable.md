@@ -1,12 +1,8 @@
 ---
-title: useJsxKeyInIterable (not released)
+title: useJsxKeyInIterable (since v1.6.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useJsxKeyInIterable`**
-
-:::danger
-This rule hasn't been released yet.
-:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

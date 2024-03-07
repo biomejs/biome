@@ -34,7 +34,7 @@ declare_rule! {
     /// test("foo", () => {});
     /// ```
     pub NoFocusedTests {
-        version: "next",
+        version: "1.6.0",
         name: "noFocusedTests",
         recommended: true,
         source: RuleSource::EslintJest("no-focused-tests"),

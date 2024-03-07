@@ -31,7 +31,7 @@ declare_rule! {
     /// ```
     ///
     pub NoReExportAll {
-        version: "next",
+        version: "1.6.0",
         name: "noReExportAll",
         recommended: false,
         source: RuleSource::EslintBarrelFiles("avoid-re-export-all"),

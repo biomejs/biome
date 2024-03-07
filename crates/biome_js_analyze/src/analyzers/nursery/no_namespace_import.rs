@@ -29,7 +29,7 @@ declare_rule! {
     /// ```
     ///
     pub NoNamespaceImport {
-        version: "next",
+        version: "1.6.0",
         name: "noNamespaceImport",
         recommended: false,
         source: RuleSource::EslintBarrelFiles("avoid-namespace-import"),
