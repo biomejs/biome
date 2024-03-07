@@ -65,7 +65,7 @@ Biome now accepts the file `biome.jsonc` as configuration! Now, you can insert a
 
 ### `extends` resolves dependencies
 
-From this version, Biome can use the `extends` property to *resolve* other configuration files that are inside installed dependencies.
+From this version, Biome can use the `extends` property to _resolve_ other configuration files that are inside installed dependencies.
 
 There are few important steps in order to make the configuration discoverable. The file must be exported from a `"module"` package, and the file should be exported in your `package.json` like this:
 
@@ -113,8 +113,6 @@ Other than fixes, the formatter provides two new options that should improve the
 
 ### Option `attributePosition`
 
-The contributor [@octoshikari](https://github.com/octoshikari) implemented this new feature by themselves! Huge thank you for helping the Biome project.
-
 When `formatter.attributePosition` has the value `multiline`, all attributes of HTML-ish languages (JSX/TSX as for time of writing) will be collapsed on multiple lines regardless of their numbers:
 
 
@@ -145,6 +143,7 @@ When `formatter.attributePosition` has the value `multiline`, all attributes of 
     </div>
 </div>
 
+The contributor [@octoshikari](https://github.com/octoshikari) implemented this new feature by themselves! Huge thank you for helping the Biome project.
 
 ### Option `json.formatter.trailingCommas`
 
@@ -263,10 +262,14 @@ Additionally, the following rules are now recommended:
 
 - Remove `nursery/useGroupedTypeImport`. The rule [style/useImportType](https://biomejs.dev/linter/rules/use-import-type) covers the behavior of this rule.
 
-
 ### Miscellaneous
 
-- We drastically reduced the protected files, which means you can now format your `package.json`, `tsconfig.json`, etc. with Biome. Lock files are still considered protected.
+:::caution
+Among other fixes, we fixed a bug where Biome traversed *ignored* folders. Biome doesn't traverse ignored folders anymore. This could cause unexpected changes in behaviour. For example, if you configured globs a way similar to `files.ignore: ["./src/**/__folder__"]` and
+`files.include: ["./src/**/*.ts"]`, the `./src` won't be traversed anymore because `files.ignore` is matched before, and the `src/**` matches all folders inside the `src` directory.
+:::
+
+- We drastically reduced the number of protected files, which means you can now format your `package.json`, `tsconfig.json`, etc. with Biome. Lock files are still considered protected.
 - The CLI now does a better job at reporting the total number of files and the files that were really changed.
 - When a diagnostic shows a file name on the terminal that is integrated with your editor, you can click it and the editor will open the file for you.
 - The command `biome rage` now accepts two nice options: `--formatter` and `--linter`.
