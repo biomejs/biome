@@ -9,6 +9,30 @@ import LintGroups from "@src/components/generated/Groups.astro";
 
 {/** Make sure to update the redirect in `static/_redirects` when changing the configuration title --> **/}
 
+## `$schema`
+
+Allows to pass a path to a JSON schema file.
+
+We publish a JSON schema file for the `biome.json`.
+
+You can specify a relative path to the schema of the `@biomejs/biome` npm package if `@biomejs/biome` is installed in the `node_modules` folder:
+
+```json title="biome.json"
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json"
+}
+
+
+If you have problems with resolving the physical file, you can use the one published in this site:
+
+```json title="biome.json"
+{
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json"
+}
+
+
+
+
 ## `css`
 
 Specific configuration for the Css language
@@ -377,7 +401,7 @@ Enables Biome's linter
 For detailed examples and advanced configuration options, see the [documentation] (/referece/configuration_example/##linter).
 
 
-## `organize_imports`
+## `organizeImports`
 
 Enables Biome's sort imports.
 
@@ -553,30 +577,6 @@ You can enable parsing features for certain JSON files:
 
 
 For advanced configuration options, see the [documentation] (/referece/configuration_example/##override).
-
-
-
-## `schema`
-
-Allows to pass a path to a JSON schema file.
-
-We publish a JSON schema file for the `biome.json`.
-
-You can specify a relative path to the schema of the `@biomejs/biome` npm package if `@biomejs/biome` is installed in the `node_modules` folder:
-
-```json title="biome.json"
-{
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json"
-}
-
-
-If you have problems with resolving the physical file, you can use the one published in this site:
-
-```json title="biome.json"
-{
-  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json"
-}
-
 
 
 

@@ -5,11 +5,11 @@ use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons};
 use bpaf::Bpaf;
-use schemars::JsonSchema;
+
 use serde::{Deserialize, Serialize};
 
 /// Formatting options specific to the JavaScript files
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]

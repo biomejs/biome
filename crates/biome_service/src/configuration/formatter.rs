@@ -5,13 +5,12 @@ use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{AttributePosition, IndentStyle, LineEnding, LineWidth};
 use bpaf::Bpaf;
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::str::FromStr;
 
 /// Generic options applied to all files
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]

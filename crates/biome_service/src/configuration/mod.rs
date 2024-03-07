@@ -57,7 +57,6 @@ pub use linter::{
     RuleConfiguration, Rules,
 };
 pub use overrides::to_override_settings;
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::io::ErrorKind;
@@ -66,7 +65,7 @@ use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
 
 /// The configuration that is contained inside the file `biome.json`
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(deny_unknown_fields, rename_all = "camelCase"))]
@@ -761,7 +760,7 @@ impl PartialConfiguration {
 }
 
 /// The configuration of the filesystem
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]

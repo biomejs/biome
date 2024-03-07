@@ -3,11 +3,10 @@ use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{LineEnding, LineWidth};
 use biome_json_formatter::context::TrailingCommas;
 use bpaf::Bpaf;
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// Options applied to JSON files
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(default, deny_unknown_fields))]
@@ -22,7 +21,7 @@ pub struct JsonConfiguration {
 }
 
 /// Options that changes how the JSON parser behaves
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
@@ -36,7 +35,7 @@ pub struct JsonParser {
     pub allow_trailing_commas: bool,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize, JsonSchema)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]

@@ -2,13 +2,13 @@
 use std::fs::File;
 use std::io::Write;
 
-use biome_service::Configuration;
+use biome_service::PartialConfiguration;
 use schemars::schema_for;
 use serde_json::{to_string_pretty, Value};
 use xtask::Result;
 
 pub(crate) fn generate_configuration_markdown() -> Result<()> {
-    let schema = schema_for!(Configuration);
+    let schema = schema_for!(PartialConfiguration);
     let json_schema = to_string_pretty(&schema)?;
     let schema: Value = serde_json::from_str(&json_schema)?;
     let mut markdown = File::create("website/src/content/docs/reference/configuration.mdx")?;
