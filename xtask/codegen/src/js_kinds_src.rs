@@ -2,6 +2,7 @@
 //! Based on the rust analyzer parser and ast definitions
 
 use crate::css_kinds_src::CSS_KINDS_SRC;
+use crate::grit_kinds_src::GRIT_KINDS_SRC;
 use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::json_kinds_src::JSON_KINDS_SRC;
 use crate::kind_src::{KindsSrc, LANGUAGE_PREFIXES};
@@ -691,6 +692,7 @@ impl Field {
                     LanguageKind::Js => JS_KINDS_SRC,
                     LanguageKind::Css => CSS_KINDS_SRC,
                     LanguageKind::Json => JSON_KINDS_SRC,
+                    LanguageKind::Grit => GRIT_KINDS_SRC,
                     LanguageKind::Html => HTML_KINDS_SRC,
                 };
 

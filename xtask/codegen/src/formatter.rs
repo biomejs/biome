@@ -781,6 +781,9 @@ fn get_node_concept(
                 _ => NodeConcept::Auxiliary,
             },
 
+            // TODO: I will handle formatting in a follow-up PR.
+            LanguageKind::Grit => NodeConcept::Auxiliary,
+
             LanguageKind::Html => match name {
                 _ if name.ends_with("Value") => NodeConcept::Value,
                 _ => NodeConcept::Auxiliary,
@@ -846,6 +849,7 @@ impl LanguageKind {
             LanguageKind::Js => "JsFormatter",
             LanguageKind::Css => "CssFormatter",
             LanguageKind::Json => "JsonFormatter",
+            LanguageKind::Grit => "GritFormatter",
             LanguageKind::Html => "HtmlFormatter",
         };
 
@@ -857,6 +861,7 @@ impl LanguageKind {
             LanguageKind::Js => "JsFormatContext",
             LanguageKind::Css => "CssFormatContext",
             LanguageKind::Json => "JsonFormatContext",
+            LanguageKind::Grit => "GritFormatContext",
             LanguageKind::Html => "HtmlFormatContext",
         };
 

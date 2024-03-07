@@ -10,11 +10,11 @@ impl JsonArrayValue {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_elements(self, element: Option<JsonArrayElementList>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            1usize..=1usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
+    pub fn with_elements(self, element: JsonArrayElementList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
     }
     pub fn with_r_brack_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -82,11 +82,11 @@ impl JsonObjectValue {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_json_member_list(self, element: Option<JsonMemberList>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            1usize..=1usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
+    pub fn with_json_member_list(self, element: JsonMemberList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
     }
     pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
