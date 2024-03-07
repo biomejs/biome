@@ -41,6 +41,7 @@ GritBogus = SyntaxElement*
 GritBogusContainer = SyntaxElement*
 GritBogusDefinition = SyntaxElement*
 GritBogusPattern = SyntaxElement*
+GritBogusLanguageDeclaration = SyntaxElement*
 GritBogusLiteral = SyntaxElement*
 GritBogusNamedArg = SyntaxElement*
 GritBogusPredicate = SyntaxElement*
@@ -48,7 +49,7 @@ GritBogusPredicate = SyntaxElement*
 GritRoot =
     bom: 'UNICODE_BOM'?
     version: GritVersion?
-    language: GritLanguageDeclaration?
+    language: AnyGritLanguageDeclaration?
     definitions: GritDefinitionList
     pattern: AnyGritPattern?
     definitions_continued: GritDefinitionList
@@ -57,6 +58,10 @@ GritRoot =
 // engine biome(1.0)
 // ^^^^^^ ^^^^^^^^^^
 GritVersion = 'engine' 'biome' '(' version: GritDoubleLiteral ')'
+
+AnyGritLanguageDeclaration =
+    GritLanguageDeclaration
+    | GritBogusLanguageDeclaration
 
 // language js(typescript, jsx);
 // ^^^^^^^^ ^^^^^^^^^^^^^^ ^^^^^

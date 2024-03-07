@@ -3864,7 +3864,7 @@ impl GritRoot {
     pub fn version(&self) -> Option<GritVersion> {
         support::node(&self.syntax, 1usize)
     }
-    pub fn language(&self) -> Option<GritLanguageDeclaration> {
+    pub fn language(&self) -> Option<AnyGritLanguageDeclaration> {
         support::node(&self.syntax, 2usize)
     }
     pub fn definitions(&self) -> GritDefinitionList {
@@ -3893,7 +3893,7 @@ impl Serialize for GritRoot {
 pub struct GritRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub version: Option<GritVersion>,
-    pub language: Option<GritLanguageDeclaration>,
+    pub language: Option<AnyGritLanguageDeclaration>,
     pub definitions: GritDefinitionList,
     pub pattern: Option<AnyGritPattern>,
     pub definitions_continued: GritDefinitionList,
@@ -4405,6 +4405,26 @@ impl AnyGritDefinition {
     pub fn as_grit_predicate_definition(&self) -> Option<&GritPredicateDefinition> {
         match &self {
             AnyGritDefinition::GritPredicateDefinition(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyGritLanguageDeclaration {
+    GritBogusLanguageDeclaration(GritBogusLanguageDeclaration),
+    GritLanguageDeclaration(GritLanguageDeclaration),
+}
+impl AnyGritLanguageDeclaration {
+    pub fn as_grit_bogus_language_declaration(&self) -> Option<&GritBogusLanguageDeclaration> {
+        match &self {
+            AnyGritLanguageDeclaration::GritBogusLanguageDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_grit_language_declaration(&self) -> Option<&GritLanguageDeclaration> {
+        match &self {
+            AnyGritLanguageDeclaration::GritLanguageDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -9562,6 +9582,79 @@ impl From<AnyGritDefinition> for SyntaxElement {
         node.into()
     }
 }
+impl From<GritBogusLanguageDeclaration> for AnyGritLanguageDeclaration {
+    fn from(node: GritBogusLanguageDeclaration) -> AnyGritLanguageDeclaration {
+        AnyGritLanguageDeclaration::GritBogusLanguageDeclaration(node)
+    }
+}
+impl From<GritLanguageDeclaration> for AnyGritLanguageDeclaration {
+    fn from(node: GritLanguageDeclaration) -> AnyGritLanguageDeclaration {
+        AnyGritLanguageDeclaration::GritLanguageDeclaration(node)
+    }
+}
+impl AstNode for AnyGritLanguageDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        GritBogusLanguageDeclaration::KIND_SET.union(GritLanguageDeclaration::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            GRIT_BOGUS_LANGUAGE_DECLARATION | GRIT_LANGUAGE_DECLARATION
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            GRIT_BOGUS_LANGUAGE_DECLARATION => {
+                AnyGritLanguageDeclaration::GritBogusLanguageDeclaration(
+                    GritBogusLanguageDeclaration { syntax },
+                )
+            }
+            GRIT_LANGUAGE_DECLARATION => {
+                AnyGritLanguageDeclaration::GritLanguageDeclaration(GritLanguageDeclaration {
+                    syntax,
+                })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyGritLanguageDeclaration::GritBogusLanguageDeclaration(it) => &it.syntax,
+            AnyGritLanguageDeclaration::GritLanguageDeclaration(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyGritLanguageDeclaration::GritBogusLanguageDeclaration(it) => it.syntax,
+            AnyGritLanguageDeclaration::GritLanguageDeclaration(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyGritLanguageDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyGritLanguageDeclaration::GritBogusLanguageDeclaration(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyGritLanguageDeclaration::GritLanguageDeclaration(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyGritLanguageDeclaration> for SyntaxNode {
+    fn from(n: AnyGritLanguageDeclaration) -> SyntaxNode {
+        match n {
+            AnyGritLanguageDeclaration::GritBogusLanguageDeclaration(it) => it.into(),
+            AnyGritLanguageDeclaration::GritLanguageDeclaration(it) => it.into(),
+        }
+    }
+}
+impl From<AnyGritLanguageDeclaration> for SyntaxElement {
+    fn from(n: AnyGritLanguageDeclaration) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<GritList> for AnyGritListAccessorSubject {
     fn from(node: GritList) -> AnyGritListAccessorSubject {
         AnyGritListAccessorSubject::GritList(node)
@@ -11160,6 +11253,11 @@ impl std::fmt::Display for AnyGritDefinition {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyGritLanguageDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyGritListAccessorSubject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -11863,6 +11961,63 @@ impl From<GritBogusDefinition> for SyntaxNode {
 }
 impl From<GritBogusDefinition> for SyntaxElement {
     fn from(n: GritBogusDefinition) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct GritBogusLanguageDeclaration {
+    syntax: SyntaxNode,
+}
+impl GritBogusLanguageDeclaration {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for GritBogusLanguageDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_BOGUS_LANGUAGE_DECLARATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_BOGUS_LANGUAGE_DECLARATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritBogusLanguageDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritBogusLanguageDeclaration")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<GritBogusLanguageDeclaration> for SyntaxNode {
+    fn from(n: GritBogusLanguageDeclaration) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritBogusLanguageDeclaration> for SyntaxElement {
+    fn from(n: GritBogusLanguageDeclaration) -> SyntaxElement {
         n.syntax.into()
     }
 }

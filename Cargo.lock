@@ -436,6 +436,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_grit_parser"
+version = "0.4.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_grit_factory",
+ "biome_grit_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_unicode_table",
+ "bitflags 2.3.1",
+ "insta",
+ "quickcheck",
+ "quickcheck_macros",
+ "schemars",
+ "serde",
+ "serde_json",
+ "smallvec",
+ "tests_macros",
+ "tracing",
+ "unicode-bom",
+]
+
+[[package]]
 name = "biome_grit_syntax"
 version = "0.4.0"
 dependencies = [

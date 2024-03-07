@@ -1,0 +1,6 @@
+predicate program_contains_logger() {
+  $program <: contains `logger`
+}
+`console.log` => `logger.info` where {
+  program_contains_logger()
+}

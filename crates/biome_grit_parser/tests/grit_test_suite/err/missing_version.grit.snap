@@ -1,0 +1,61 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+engine biome
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: GritVersion {
+        engine_token: ENGINE_KW@0..7 "engine" [] [Whitespace(" ")],
+        biome_token: BIOME_KW@7..12 "biome" [] [],
+        l_paren_token: missing (required),
+        version: missing (required),
+        r_paren_token: missing (required),
+    },
+    language: missing (optional),
+    definitions: GritDefinitionList [],
+    pattern: missing (optional),
+    definitions_continued: GritDefinitionList [],
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..13
+  0: (empty)
+  1: GRIT_VERSION@0..12
+    0: ENGINE_KW@0..7 "engine" [] [Whitespace(" ")]
+    1: BIOME_KW@7..12 "biome" [] []
+    2: (empty)
+    3: (empty)
+    4: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@12..12
+  4: (empty)
+  5: GRIT_DEFINITION_LIST@12..12
+  6: EOF@12..13 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+missing_version.grit:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an engine version
+  
+  > 1 │ engine biome
+      │             
+    2 │ 
+  
+```

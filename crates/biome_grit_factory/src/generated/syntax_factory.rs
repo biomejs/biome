@@ -17,6 +17,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             GRIT_BOGUS
             | GRIT_BOGUS_CONTAINER
             | GRIT_BOGUS_DEFINITION
+            | GRIT_BOGUS_LANGUAGE_DECLARATION
             | GRIT_BOGUS_LITERAL
             | GRIT_BOGUS_NAMED_ARG
             | GRIT_BOGUS_PATTERN
@@ -2729,7 +2730,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GritLanguageDeclaration::can_cast(element.kind()) {
+                    if AnyGritLanguageDeclaration::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }

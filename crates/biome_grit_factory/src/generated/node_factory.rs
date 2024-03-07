@@ -1381,7 +1381,7 @@ pub struct GritRootBuilder {
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
     version: Option<GritVersion>,
-    language: Option<GritLanguageDeclaration>,
+    language: Option<AnyGritLanguageDeclaration>,
     pattern: Option<AnyGritPattern>,
 }
 impl GritRootBuilder {
@@ -1393,7 +1393,7 @@ impl GritRootBuilder {
         self.version = Some(version);
         self
     }
-    pub fn with_language(mut self, language: GritLanguageDeclaration) -> Self {
+    pub fn with_language(mut self, language: AnyGritLanguageDeclaration) -> Self {
         self.language = Some(language);
         self
     }
@@ -1709,6 +1709,16 @@ where
 {
     GritBogusDefinition::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_BOGUS_DEFINITION,
+        slots,
+    ))
+}
+pub fn grit_bogus_language_declaration<I>(slots: I) -> GritBogusLanguageDeclaration
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GritBogusLanguageDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BOGUS_LANGUAGE_DECLARATION,
         slots,
     ))
 }

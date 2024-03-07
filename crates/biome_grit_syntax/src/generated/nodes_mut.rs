@@ -1630,7 +1630,7 @@ impl GritRoot {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_language(self, element: Option<GritLanguageDeclaration>) -> Self {
+    pub fn with_language(self, element: Option<AnyGritLanguageDeclaration>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             2usize..=2usize,
             once(element.map(|element| element.into_syntax().into())),
