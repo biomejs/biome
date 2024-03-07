@@ -1483,6 +1483,49 @@ fn does_not_format_ignored_file_in_included_directory() {
 }
 
 #[test]
+fn does_format_included_files() {
+    let config = r#"{
+        "formatter": {
+          "include": ["./**/*.js"]
+        }
+    }"#;
+    let files = [("src/file1.js", true), ("src/file2.js", true)];
+
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config);
+    for (file_path, _) in files {
+        let file_path = Path::new(file_path);
+        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+    }
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("."), ("--write")].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    for (file_path, expect_formatted) in files {
+        let expected = if expect_formatted {
+            FORMATTED
+        } else {
+            UNFORMATTED
+        };
+        assert_file_contents(&fs, Path::new(file_path), expected);
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_format_included_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn include_ignore_cascade() {
     // Only `file1.js` will be formatted:
     // - `file2.js` is ignored at top-level
