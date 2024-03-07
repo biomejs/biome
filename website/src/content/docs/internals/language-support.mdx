@@ -39,9 +39,9 @@ Biome supports TypeScript version 5.2.
 ## HTML super languages support
 
 From version `v1.6.0`, these languages are **partially** supported. Biome will get better over time, and it will provide more options to tweak your project. As for today, there are some expectations and limitations to take in considerations:
-- For `.astro` file, **only** the **frontmatter** portion of the file is supported.
+- For `.astro` files, **only** the **frontmatter** portion of the file is supported.
 - For `.vue` and `.svelte` files, **only** the **\<script\>** tags portion of the file is supported.
-- Diagnostics will only show code frames that belong to the portions before mentioned.
+- Diagnostics will only show code frames that belong to the portions mentioned above.
 - When **formatting** `.vue` and `.svelte` files, the indentation of the JavaScript/TypeScript code will start from the beginning.
 
   ```vue title="file.vue" del={2} ins={3}
