@@ -266,7 +266,7 @@ Additionally, the following rules are now recommended:
 
 :::caution
 Among other fixes, we fixed a bug where Biome traversed *ignored* folders. Biome doesn't traverse ignored folders anymore. This could cause unexpected changes in behaviour. For example, if you configured globs a way similar to `files.ignore: ["./src/**/__folder__"]` and
-`files.include: ["./src/**/*.ts"]`, the `./src` won't be traversed anymore because `files.ignore` is matched before, and the `src/**` matches all folders inside the `src` directory.
+`files.include: ["./src/**/*.ts"]`, `./src` won't be traversed anymore because `files.ignore` is matched before, and `src/**` matches all folders inside the `src` directory.
 :::
 
 - We drastically reduced the number of protected files, which means you can now format your `package.json`, `tsconfig.json`, etc. with Biome. Lock files are still considered protected.
