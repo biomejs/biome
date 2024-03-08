@@ -243,8 +243,14 @@ fn handle_any_file<'scope>(
     mut path: PathBuf,
     mut file_type: FileType,
     // The unresolved origin path in case the directory is behind a symbolic link
-    origin_path: Option<PathBuf>,
+    mut origin_path: Option<PathBuf>,
 ) {
+    if !ctx.interner().intern_path(path.clone()) {
+        // If the path was already inserted, it could have been pointed at by
+        // multiple symlinks. No need to traverse again.
+        return;
+    }
+
     if file_type.is_symlink() {
         if !ctx.can_handle(&BiomePath::new(path.clone())) {
             return;
@@ -253,12 +259,13 @@ fn handle_any_file<'scope>(
             return;
         };
 
+        if !ctx.interner().intern_path(target_path.clone()) {
+            // If the path was already inserted, it could have been pointed at by
+            // multiple symlinks. No need to traverse again.
+            return;
+        }
+
         if target_file_type.is_dir() {
-            if !ctx.interner().intern_path(target_path.clone()) {
-                // If the path was already inserted, it could have been pointed at by
-                // multiple symlinks. No need to traverse again.
-                return;
-            }
             scope.spawn(move |scope| {
                 handle_dir(scope, ctx, &target_path, Some(path));
             });
@@ -269,19 +276,14 @@ fn handle_any_file<'scope>(
         file_type = target_file_type;
     }
 
-    let inserted = ctx.interner().intern_path(path.clone());
-    if !inserted {
-        // If the path was already inserted, it could have been pointed at by
-        // multiple symlinks. No need to traverse again.
-        return;
-    }
-
     // In case the file is inside a directory that is behind a symbolic link,
     // the unresolved origin path is used to construct a new path.
     // This is required to support ignore patterns to symbolic links.
-    let biome_path = if let Some(origin_path) = &origin_path {
+    let biome_path = if let Some(old_origin_path) = &origin_path {
         if let Some(file_name) = path.file_name() {
-            BiomePath::new(origin_path.join(file_name))
+            let new_origin_path = old_origin_path.join(file_name);
+            origin_path = Some(new_origin_path.clone());
+            BiomePath::new(new_origin_path)
         } else {
             ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
                 path: path.to_string_lossy().to_string(),
