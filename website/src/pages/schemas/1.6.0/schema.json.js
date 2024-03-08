@@ -830,13 +830,6 @@ export function GET() {
 						description: "It enables the recommended rules for this group",
 						type: ["boolean", "null"],
 					},
-					useAwait: {
-						description: "Ensure async functions utilize await.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					useExhaustiveDependencies: {
 						description:
 							"Enforce all dependencies are correctly specified in a React hook.",
@@ -2748,6 +2741,13 @@ export function GET() {
 					recommended: {
 						description: "It enables the recommended rules for this group",
 						type: ["boolean", "null"],
+					},
+					useAwait: {
+						description: "Ensure async functions utilize await.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
 					},
 					useDefaultSwitchClauseLast: {
 						description:
