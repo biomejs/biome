@@ -36,7 +36,7 @@ countme = { workspace = true }
 mimalloc = "0.1.29"
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
-tikv-jemallocator = "0.5.0"
+tikv-jemallocator = "0.5.1"
 
 [features]
 codspeed = ["codspeed-criterion-compat"]
