@@ -21,7 +21,7 @@
 		},
 		"files": {
 			"title": "`files.maxSize`",
-			"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons.\n\n> Default: 1024*1024 (1MB)\n\n:::caution When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include` :::\n\nGiven the following example:\n\n```json title=\"biome.json\" { \"files\": { \"include\": [\"scripts/**/*.js\", \"src/**/*.js\"], \"ignore\": [\"scripts/**/*.js\"] } } ```\n\nOnly the files that match the pattern `src/**/*.js` will be handled, while the files that match the pattern `scripts/**/*.js` will be ignored.\n\n### `files.ignoreUnknown`\n\nBiome won't emit diagnostics if it encounters files that can't handle.\n\n```json title=\"biome.json\" { \"files\": { \"ignoreUnknown\": true } } ```\n\n> Default: false\n\nFor advanced configuration options, see the [documentation](/referece/configuration_example/##files).",
+			"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons.\n\n> Default: 1024*1024 (1MB)\n\n### `files.ignoreUnknown`\n\nBiome won't emit diagnostics if it encounters files that can't handle.\n\n```json title=\"biome.json\" { \"files\": { \"ignoreUnknown\": true } } ```\n\n> Default: false\n\nFor advanced configuration options, see the [documentation](/referece/configuration_example/##files).",
 			"anyOf": [
 				{ "$ref": "#/definitions/FilesConfiguration" },
 				{ "type": "null" }
@@ -66,7 +66,7 @@
 			"anyOf": [{ "$ref": "#/definitions/Overrides" }, { "type": "null" }]
 		},
 		"vcs": {
-			"description": "Set of properties to integrate Biome with a VCS software.\n\n### `vcs.enabled`\n\nWhether Biome should integrate itself with the VCS client\n\n> Default: false\n\n### `vcs.clientKind`\n\nThe kind of client.\n\nValues: - `\"git\"`\n\n### `vcs.useIgnoreFile`\n\nWhether Biome should use the VCS ignore file. When `true`, Biome will ignore the files specified in the ignore file.\n\n### `vcs.root`\n\nThe folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.\n\nIf Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted",
+			"description": "Set of properties to integrate Biome with a VCS software.\n\n### `vcs.enabled`\n\nWhether Biome should integrate itself with the VCS client\n\n> Default: false\n\n### `vcs.clientKind`\n\nThe kind of client.\n\nValues: - `\"git\"`\n\n### `vcs.useIgnoreFile`\n\nWhether Biome should use the VCS ignore file. When `true`, Biome will ignore the files specified in the ignore file.\n\n### `vcs.root`\n\nThe folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.\n\nIf Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted\n\n### `vcs.defaultBranch`\n\nThe main branch of the project. Biome will use this branch when evaluating the changed files.",
 			"anyOf": [
 				{ "$ref": "#/definitions/VcsConfiguration" },
 				{ "type": "null" }

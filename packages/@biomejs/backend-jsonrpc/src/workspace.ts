@@ -58,14 +58,6 @@ For advanced configuration options, see the [documentation](/referece/configurat
 
 > Default: 1024*1024 (1MB)
 
-:::caution When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include` :::
-
-Given the following example:
-
-```json title="biome.json" { "files": { "include": ["scripts/**/*.js", "src/**/*.js"], "ignore": ["scripts/**/*.js"] } } ```
-
-Only the files that match the pattern `src/**/*.js` will be handled, while the files that match the pattern `scripts/**/*.js` will be ignored.
-
 ### `files.ignoreUnknown`
 
 Biome won't emit diagnostics if it encounters files that can't handle.
@@ -380,7 +372,11 @@ Whether Biome should use the VCS ignore file. When `true`, Biome will ignore the
 
 The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
 
-If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted 
+If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
+
+### `vcs.defaultBranch`
+
+The main branch of the project. Biome will use this branch when evaluating the changed files. 
 	 */
 	vcs?: PartialVcsConfiguration;
 }

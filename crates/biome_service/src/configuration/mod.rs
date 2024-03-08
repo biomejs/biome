@@ -124,6 +124,10 @@ pub struct Configuration {
     /// If Biome can't find the configuration, it will attempt to use the current working directory.
     /// If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
     /// will be emitted
+    ///
+    /// ### `vcs.defaultBranch`
+    ///
+    /// The main branch of the project. Biome will use this branch when evaluating the changed files.
     #[partial(type, bpaf(external(partial_vcs_configuration), optional, hide_usage))]
     pub vcs: VcsConfiguration,
 
@@ -133,24 +137,6 @@ pub struct Configuration {
     /// this limit will be ignored for performance reasons.
     ///
     /// > Default: 1024*1024 (1MB)
-    ///
-    /// :::caution
-    /// When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include`
-    /// :::
-    ///
-    /// Given the following example:
-    ///
-    /// ```json title="biome.json"
-    /// {
-    ///   "files": {
-    ///     "include": ["scripts/**/*.js", "src/**/*.js"],
-    ///     "ignore": ["scripts/**/*.js"]
-    ///   }
-    /// }
-    /// ```
-    ///
-    /// Only the files that match the pattern `src/**/*.js` will be handled, while the files that match the pattern
-    /// `scripts/**/*.js` will be ignored.
     ///
     ///  ### `files.ignoreUnknown`
     ///
@@ -181,7 +167,7 @@ pub struct Configuration {
     ///
     /// > Default: `true`
     ///
-    ///Given the following example:
+    /// Given the following example:
     ///
     ///
     ///
