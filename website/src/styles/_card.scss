@@ -26,7 +26,7 @@
         margin-bottom: 30px;
 
 
-        .column {
+        .card-column {
             border-right: none !important;
             border-bottom: 1px solid #E9ECEF;
         }
@@ -41,9 +41,10 @@
         padding: 0;
     }
 
-    .column {
+    .card-column {
+        margin-top: 0;
         min-width: 100px;
-        padding: 8px 24px;
+        padding: 8px 24px 24px;
         flex-basis: 0px;
         flex-grow: 1;
         display: flex;

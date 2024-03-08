@@ -20,7 +20,9 @@ pub(crate) fn check_file<'ctx>(
                 let lint_result = lint_with_guard(ctx, &mut workspace_file);
                 match lint_result {
                     Ok(status) => {
-                        changed = status.is_changed();
+                        if status.is_changed() {
+                            changed = true
+                        }
                         if let FileStatus::Message(msg) = status {
                             if msg.is_error() {
                                 has_errors = true
@@ -38,7 +40,9 @@ pub(crate) fn check_file<'ctx>(
                 let organize_imports_result = organize_imports_with_guard(ctx, &mut workspace_file);
                 match organize_imports_result {
                     Ok(status) => {
-                        changed = status.is_changed();
+                        if status.is_changed() {
+                            changed = true
+                        }
                         if let FileStatus::Message(msg) = status {
                             if msg.is_error() {
                                 has_errors = true
@@ -57,7 +61,9 @@ pub(crate) fn check_file<'ctx>(
                 let format_result = format_with_guard(ctx, &mut workspace_file);
                 match format_result {
                     Ok(status) => {
-                        changed = status.is_changed();
+                        if status.is_changed() {
+                            changed = true
+                        }
                         if let FileStatus::Message(msg) = status {
                             if msg.is_error() {
                                 has_errors = true

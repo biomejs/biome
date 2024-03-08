@@ -1,0 +1,285 @@
+---
+title: Biome v1.6
+description: Partial support for Astro, Svelte and Vue, extend configuration from dependencies, formatter goodies.
+summary: |
+  Partial support for Astro, Svelte and Vue files, both CLI and LSP.
+  Now, the `extends` field is able to pick configuration files that are exported from a dependency.
+  The formatter has new options.
+authors:
+  - ema
+  - team
+pubDate: 2024-03-08
+coverImage:
+  lightSrc: "@/assets/blog/roadmap-2024/banner-light.png"
+  darkSrc: "@/assets/blog/roadmap-2024/banner-dark.png"
+  alt: The brand of the project. It says "Biome, toolchain of the web"
+socialImage: "@/assets/social-logo.png"
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Image } from "astro:assets";
+import astroLint from "../../assets/blog/biome-v1-6/astro-linter.png"
+import vueLint from "../../assets/blog/biome-v1-6/vue-linter.png"
+import svelteLint from "../../assets/blog/biome-v1-6/svelte-linter.png"
+
+Update Biome using the following commands:
+
+```shell
+npm install --save-dev --save-exact @biomejs/biome@latest
+npx @biomejs/biome migrate
+```
+
+## Partial support for Astro, Svelte and Vue files
+
+In this release, we're happy to provide partial support for Astro, Svelte and Vue files. What does **partial** support mean?
+
+While the team is working on a [unified data structure](https://github.com/biomejs/biome/discussions/1726) for HTML-ish languages, we discovered that we could provide Biome functionalities to those files with just a few changes, albeit with some limitations.
+
+This means that Biome is able to analyze the JavaScript/TypeScript portion of said files, and all features are available: formatting, linting and import sorting! Here's an example of what you should expect in terms of developer experience:
+
+<Tabs>
+    <TabItem label="Astro" icon="astro">
+        <div align="center">
+            <Image src={astroLint} alt="Screenshot of Biome linting in action for an Astro file in VSCode" width="500"  />
+        </div>
+    </TabItem>
+    <TabItem label="Vue" icon="seti:vue">
+        <div align="center">
+            <Image src={vueLint} alt="Screenshot of Biome linting in action for an Vue file in VSCode" width="500"  />
+        </div>
+    </TabItem>
+    <TabItem label="Svelte" icon="seti:svelte">
+        <div align="center">
+            <Image src={svelteLint} alt="Screenshot of Biome  linting in action for an Svelte file in VSCode" width="500"  />
+        </div>
+    </TabItem>
+</Tabs>
+
+Make sure to read the [documentation about expectations and limitations](/internals/language-support#html-super-languages-support).
+
+## Configuration, lighter and more powerful
+
+### Support for `biome.jsonc`
+
+Biome now accepts the `biome.jsonc` file as configuration! You can insert all the comments you want in there.
+
+### `extends` resolves dependencies
+
+From this version, Biome can use the `extends` property to _resolve_ other configuration files that are inside installed dependencies.
+
+There are few important steps in order to make the configuration discoverable. The file must be exported from a `"module"` package, and the file should be exported in your `package.json` like this:
+
+```json name="shared-configs/package.json"
+{
+  "name": "@shared-configs",
+  "type": "module",
+  "exports": {
+    "./biome": "./biome.json"
+  }
+}
+```
+
+This set up allows to expose a specifier `@shared-configs/biome`, which you use inside your `biome.json` file.
+
+```json name="project/biome.json"
+{
+  "extends": ["@shared-configs/biome"]
+}
+```
+
+The resolution of the dependencies is powered by the library [`oxc-resolver`](https://github.com/oxc-project/oxc-resolver), one of the many libraries provided by the [OXC project](https://oxc-project.github.io/). It's battle-tested and spec compliant!
+
+:::note
+You can also export `biome.jsonc` files!
+
+```json name="shared-configs/package.json" ins="./biome.jsonc"
+{
+  "name": "@shared-configs",
+  "type": "module",
+  "exports": {
+    "./biome": "./biome.jsonc"
+  }
+}
+```
+:::
+
+### Reduced memory footprint
+
+We **reduced** the size our configuration **by a factor of 6.5**! This change might not have massive effects on the speed of the program, but it greatly reduced the memory used when running the CLI or the LSP.
+
+## New formatting options
+
+Other than fixes, the formatter provides two new options that should improve the compatibility with Prettier.
+
+### Option `attributePosition`
+
+When `formatter.attributePosition` has the value `multiline`, all attributes of HTML-ish languages (JSX/TSX as for time of writing) will be collapsed on multiple lines regardless of their numbers:
+
+
+<div class="card">
+    <div class="card-column">
+        <h4>With variant `auto` (default)</h4>
+        The attributes are automatically formatted, and they will collapse in multiple lines only when they hit certain criteria.
+
+        ```jsx title="file.jsx"
+        <Button as="link" style="primary" href="https://example.com">
+            Hit me
+        </Button>
+        ```
+    </div>
+    <div class="card-column">
+        <h4>With variant `multiline`</h4>
+        The attributes are always formatted on multiple lines, regardless.
+
+        ```jsx title="file.jsx"
+        <Button
+            as="link"
+            style="primary"
+            href="https://example.com"
+        >
+            Hit me
+        </Button>
+        ```
+    </div>
+</div>
+
+The contributor [@octoshikari](https://github.com/octoshikari) implemented this new feature by themselves! Huge thank you for helping the Biome project.
+
+### Option `json.formatter.trailingCommas`
+
+Previously, Biome parser introduced an option that would allow to parse JSON and JSONC files that contained a trailing comma. This was required to ease the friction caused by other tools that
+tolerate trailing commas by default (e.g. VSCode, Prettier, etc.).
+
+Unfortunately, our formatter wasn't as tolerant. But with this release, we've introduced the option `json.formatter.trailingCommas`. It allows you to apply the same rules as with `js.formatter.trailingComma`.
+
+<div class="card">
+    <div class="card-column">
+        <h4>With variant `none` (default)</h4>
+        The formatter removes the trailing comma upon formatting.
+
+        ```json title="file.json" ins="\"ipsum_last\""
+        {
+            "lorem": "ipsum",
+            "lorem": "ipsum",
+            "lorem": "ipsum",
+            "lorem": "ipsum_last"
+        }
+        ```
+    </div>
+    <div class="card-column">
+        <h4>With variant `all`</h4>
+        The formatter adds the trailing comma upon formatting.
+
+        ```json title="file.json" ins="\"ipsum_last\","
+        {
+            "lorem": "ipsum",
+            "lorem": "ipsum",
+            "lorem": "ipsum",
+            "lorem": "ipsum_last",
+        }
+        ```
+    </div>
+</div>
+
+## Easier migration from Prettier
+
+This release introduces a new command called `biome migrate prettier`. This command will read your Prettier `.prettierrc`/`prettier.json` and `.prettierignore`, and attempt to port its options and globs in Biome.
+
+Given a `prettier.json` file, Biome will **modify** the existing configuration file to match Prettier's options:
+
+```json title="prettier.json"
+{ "useTabs": false, "semi": true, "singleQuote": true }
+```
+
+```json title="biome.json"
+{
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80,
+    "attributePosition": "auto"
+  },
+  "linter": { "enabled": true },
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingComma": "all",
+      "semicolons": "always",
+      "arrowParentheses": "always",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "quoteStyle": "single",
+      "attributePosition": "auto"
+    }
+  }
+}
+```
+
+:::caution
+Due to the different nature of `.prettierignore` globs and Biome’s globs, it’s **highly advised** to make sure that those globs still work under Biome.
+Prettier's globs are **git globs**, while Biome's globs are **unix-style** globs.
+:::
+
+### Linter
+
+
+#### Promoted rules
+
+New rules are incubated in the nursery group.
+Once stable, we promote them to a stable group.
+The following rules are promoted:
+
+- [complexity/noEmptyTypeParameters](https://biomejs.dev/linter/rules/no-empty-type-parameters)
+- [complexity/noUselessLoneBlockStatements](https://biomejs.dev/linter/rules/no-useless-lone-block-statements)
+- [correctness/noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports)
+- [correctness/noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration)
+- [correctness/noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members)
+- [suspicious/useAwait](https://biomejs.dev/linter/rules/use-await)
+- [security/noGlobalEval](https://biomejs.dev/linter/rules/no-global-eval)
+- [style/useConsistentArrayType](https://biomejs.dev/linter/rules/use-consistent-array-type)
+- [style/useExportType](https://biomejs.dev/linter/rules/use-export-type)
+- [style/useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention)
+- [style/useForOf](https://biomejs.dev/linter/rules/use-for-of)
+- [style/useImportType](https://biomejs.dev/linter/rules/use-import-type)
+- [style/useNodejsImportProtocol](https://biomejs.dev/linter/rules/use-nodejs-import-protocol)
+- [style/useNumberNamespace](https://biomejs.dev/linter/rules/use-number-namespace)
+- [style/useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type)
+- [suspicious/noEmptyBlockStatements](https://biomejs.dev/linter/rules/no-empty-block-statements)
+- [suspicious/noGlobalAssign](https://biomejs.dev/linter/rules/no-global-assign)
+- [suspicious/noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class)
+- [suspicious/noThenProperty](https://biomejs.dev/linter/rules/no-then-property)
+
+Additionally, the following rules are now recommended:
+
+- [suspicious/noApproximativeNumericConstant](https://biomejs.dev/linter/rules/no-approximative-numeric-constant)
+- [suspicious/noMisrefactoredShorthandAssign](https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign)
+
+#### Removed rules
+
+- Remove `nursery/useGroupedTypeImport`. The rule [style/useImportType](https://biomejs.dev/linter/rules/use-import-type) covers the behavior of this rule.
+
+#### New rules
+
+New rules are now available:
+
+- [nursery/noBarrelFile](https://biomejs.dev/linter/rules/no-barrel-file)
+- [nursery/noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test)
+- [nursery/noFocusedTests](https://biomejs.dev/linter/rules/no-focused-tests)
+- [nursery/noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import)
+- [nursery/noSemicolonInJsx](https://biomejs.dev/linter/rules/no-semicolon-in-jsx)
+- [nursery/noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests)
+- [nursery/noUndeclaredependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies)
+- [nursery/useNodeAssertStrict](https://biomejs.dev/linter/rules/use-node-assert-strict)
+- [nursery/useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes)
+
+### Miscellaneous
+
+- We drastically reduced the number of protected files, which means you can now format your `package.json`, `tsconfig.json`, etc. with Biome. Lock files are still considered protected.
+- The CLI now does a better job at reporting the total number of files and the files that were really changed.
+- When a diagnostic shows a file name on the terminal that is integrated with your editor, you can click it and the editor will open the file for you.
+- The command `biome rage` now accepts two nice options: `--formatter` and `--linter`.
+- We removed some superfluous error diagnostic when running the `biome check` command.

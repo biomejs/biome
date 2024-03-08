@@ -2,10 +2,10 @@
 title: useNodejsImportProtocol (since v1.5.0)
 ---
 
-**Diagnostic Category: `lint/nursery/useNodejsImportProtocol`**
+**Diagnostic Category: `lint/style/useNodejsImportProtocol`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Source: <a href="https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-node-protocol.md" target="_blank"><code>prefer-node-protocol</code></a>
@@ -23,9 +23,9 @@ suggesting the format `import fs from "node:fs";` instead.
 import fs from 'fs';
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useNodejsImportProtocol.js:1:16 <a href="https://biomejs.dev/linter/rules/use-nodejs-import-protocol">lint/nursery/useNodejsImportProtocol</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useNodejsImportProtocol.js:1:16 <a href="https://biomejs.dev/linter/rules/use-nodejs-import-protocol">lint/style/useNodejsImportProtocol</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">A Node.js builtin module should be imported with the </span><span style="color: Orange;"><strong>node:</strong></span><span style="color: Orange;"> protocol.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">A Node.js builtin module should be imported with the </span><span style="color: Tomato;"><strong>node:</strong></span><span style="color: Tomato;"> protocol.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>import fs from 'fs';
    <strong>   │ </strong>               <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -45,9 +45,9 @@ import fs from 'fs';
 import os from 'os';
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useNodejsImportProtocol.js:1:16 <a href="https://biomejs.dev/linter/rules/use-nodejs-import-protocol">lint/nursery/useNodejsImportProtocol</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useNodejsImportProtocol.js:1:16 <a href="https://biomejs.dev/linter/rules/use-nodejs-import-protocol">lint/style/useNodejsImportProtocol</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">A Node.js builtin module should be imported with the </span><span style="color: Orange;"><strong>node:</strong></span><span style="color: Orange;"> protocol.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">A Node.js builtin module should be imported with the </span><span style="color: Tomato;"><strong>node:</strong></span><span style="color: Tomato;"> protocol.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>import os from 'os';
    <strong>   │ </strong>               <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -67,9 +67,9 @@ import os from 'os';
 import path from 'path';
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useNodejsImportProtocol.js:1:18 <a href="https://biomejs.dev/linter/rules/use-nodejs-import-protocol">lint/nursery/useNodejsImportProtocol</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useNodejsImportProtocol.js:1:18 <a href="https://biomejs.dev/linter/rules/use-nodejs-import-protocol">lint/style/useNodejsImportProtocol</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">A Node.js builtin module should be imported with the </span><span style="color: Orange;"><strong>node:</strong></span><span style="color: Orange;"> protocol.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">A Node.js builtin module should be imported with the </span><span style="color: Tomato;"><strong>node:</strong></span><span style="color: Tomato;"> protocol.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>import path from 'path';
    <strong>   │ </strong>                 <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>

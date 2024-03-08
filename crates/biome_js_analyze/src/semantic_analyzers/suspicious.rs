@@ -8,11 +8,14 @@ pub mod no_class_assign;
 pub mod no_console_log;
 pub mod no_duplicate_parameters;
 pub mod no_function_assign;
+pub mod no_global_assign;
 pub mod no_global_is_finite;
 pub mod no_global_is_nan;
 pub mod no_import_assign;
 pub mod no_label_var;
+pub mod no_misleading_character_class;
 pub mod no_redeclare;
+pub mod no_then_property;
 pub mod no_unsafe_declaration_merging;
 pub mod use_is_array;
 
@@ -26,11 +29,14 @@ declare_group! {
             self :: no_console_log :: NoConsoleLog ,
             self :: no_duplicate_parameters :: NoDuplicateParameters ,
             self :: no_function_assign :: NoFunctionAssign ,
+            self :: no_global_assign :: NoGlobalAssign ,
             self :: no_global_is_finite :: NoGlobalIsFinite ,
             self :: no_global_is_nan :: NoGlobalIsNan ,
             self :: no_import_assign :: NoImportAssign ,
             self :: no_label_var :: NoLabelVar ,
+            self :: no_misleading_character_class :: NoMisleadingCharacterClass ,
             self :: no_redeclare :: NoRedeclare ,
+            self :: no_then_property :: NoThenProperty ,
             self :: no_unsafe_declaration_merging :: NoUnsafeDeclarationMerging ,
             self :: use_is_array :: UseIsArray ,
         ]

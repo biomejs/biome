@@ -1,12 +1,8 @@
 ---
-title: noReExportAll (not released)
+title: noReExportAll (since v1.6.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noReExportAll`**
-
-:::danger
-This rule hasn't been released yet.
-:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

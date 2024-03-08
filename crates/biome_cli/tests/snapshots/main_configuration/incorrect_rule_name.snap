@@ -59,6 +59,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noInnerDeclarations
   - noInvalidConstructorSuper
   - noInvalidNewBuiltin
+  - noInvalidUseBeforeDeclaration
   - noNewSymbol
   - noNonoctalDecimalEscape
   - noPrecisionLoss
@@ -73,7 +74,9 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnreachableSuper
   - noUnsafeFinally
   - noUnsafeOptionalChaining
+  - noUnusedImports
   - noUnusedLabels
+  - noUnusedPrivateClassMembers
   - noUnusedVariables
   - noVoidElementsWithChildren
   - noVoidTypeReturn
@@ -120,17 +123,25 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useAsConstAssertion
   - useBlockStatements
   - useCollapsedElseIf
+  - useConsistentArrayType
   - useConst
   - useDefaultParameterLast
   - useEnumInitializers
   - useExponentiationOperator
+  - useExportType
+  - useFilenamingConvention
+  - useForOf
   - useFragmentSyntax
+  - useImportType
   - useLiteralEnumMembers
   - useNamingConvention
+  - useNodejsImportProtocol
+  - useNumberNamespace
   - useNumericLiterals
   - useSelfClosingElements
   - useShorthandArrayType
   - useShorthandAssign
+  - useShorthandFunctionType
   - useSingleCaseStatement
   - useSingleVarDeclarator
   - useTemplate

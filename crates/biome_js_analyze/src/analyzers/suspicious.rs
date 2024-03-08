@@ -17,6 +17,7 @@ pub mod no_duplicate_case;
 pub mod no_duplicate_class_members;
 pub mod no_duplicate_jsx_props;
 pub mod no_duplicate_object_keys;
+pub mod no_empty_block_statements;
 pub mod no_empty_interface;
 pub mod no_explicit_any;
 pub mod no_extra_non_null_assertion;
@@ -30,6 +31,7 @@ pub mod no_self_compare;
 pub mod no_shadow_restricted_names;
 pub mod no_sparse_array;
 pub mod no_unsafe_negation;
+pub mod use_await;
 pub mod use_default_switch_clause_last;
 pub mod use_getter_return;
 pub mod use_namespace_keyword;
@@ -54,6 +56,7 @@ declare_group! {
             self :: no_duplicate_class_members :: NoDuplicateClassMembers ,
             self :: no_duplicate_jsx_props :: NoDuplicateJsxProps ,
             self :: no_duplicate_object_keys :: NoDuplicateObjectKeys ,
+            self :: no_empty_block_statements :: NoEmptyBlockStatements ,
             self :: no_empty_interface :: NoEmptyInterface ,
             self :: no_explicit_any :: NoExplicitAny ,
             self :: no_extra_non_null_assertion :: NoExtraNonNullAssertion ,
@@ -67,6 +70,7 @@ declare_group! {
             self :: no_shadow_restricted_names :: NoShadowRestrictedNames ,
             self :: no_sparse_array :: NoSparseArray ,
             self :: no_unsafe_negation :: NoUnsafeNegation ,
+            self :: use_await :: UseAwait ,
             self :: use_default_switch_clause_last :: UseDefaultSwitchClauseLast ,
             self :: use_getter_return :: UseGetterReturn ,
             self :: use_namespace_keyword :: UseNamespaceKeyword ,

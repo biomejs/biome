@@ -2,10 +2,10 @@
 title: noUselessLoneBlockStatements (since v1.3.3)
 ---
 
-**Diagnostic Category: `lint/nursery/noUselessLoneBlockStatements`**
+**Diagnostic Category: `lint/complexity/noUselessLoneBlockStatements`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Source: <a href="https://eslint.org/docs/latest/rules/no-lone-blocks" target="_blank"><code>no-lone-blocks</code></a>
@@ -24,9 +24,9 @@ In ES6, code blocks may create a new scope if a block-level binding (let and con
 {}
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessLoneBlockStatements.js:1:1 <a href="https://biomejs.dev/linter/rules/no-useless-lone-block-statements">lint/nursery/noUselessLoneBlockStatements</a> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessLoneBlockStatements.js:1:1 <a href="https://biomejs.dev/linter/rules/no-useless-lone-block-statements">lint/complexity/noUselessLoneBlockStatements</a> ━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This block statement doesn't serve any purpose and can be safely removed.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This block statement doesn't serve any purpose and can be safely removed.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>{}
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -45,9 +45,9 @@ if (foo) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessLoneBlockStatements.js:3:3 <a href="https://biomejs.dev/linter/rules/no-useless-lone-block-statements">lint/nursery/noUselessLoneBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessLoneBlockStatements.js:3:3 <a href="https://biomejs.dev/linter/rules/no-useless-lone-block-statements">lint/complexity/noUselessLoneBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This block statement doesn't serve any purpose and can be safely removed.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This block statement doesn't serve any purpose and can be safely removed.</span>
   
     <strong>1 │ </strong>if (foo) {
     <strong>2 │ </strong>  bar();

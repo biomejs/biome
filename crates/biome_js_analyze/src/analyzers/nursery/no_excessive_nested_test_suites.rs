@@ -52,7 +52,7 @@ declare_rule! {
     /// ```
     ///
     pub NoExcessiveNestedTestSuites {
-        version: "next",
+        version: "1.6.0",
         name: "noExcessiveNestedTestSuites",
         recommended: true,
         source: RuleSource::EslintJest("max-nested-describe"),

@@ -30,7 +30,7 @@ declare_rule! {
     /// import assert from "node:assert";
     /// ```
     pub NoUndeclaredDependencies {
-        version: "next",
+        version: "1.6.0",
         name: "noUndeclaredDependencies",
         recommended: false,
     }

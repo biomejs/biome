@@ -3,9 +3,9 @@
 	"private": true,
 	"version": "0.0.0",
 	"scripts": {
-		"check:apply": "cargo biome-cli-dev check --apply-unsafe editors website packages/@biomejs/js-api packages/tailwindcss-config-analyzer",
-		"check": "cargo biome-cli-dev check editors website packages/@biomejs/js-api packages/tailwindcss-config-analyzer",
-		"ci": "cargo biome-cli-dev ci editors website packages/@biomejs/js-api packages/tailwindcss-config-analyzer"
+		"check:apply": "cargo biome-cli-dev check --apply-unsafe website packages/@biomejs/js-api packages/tailwindcss-config-analyzer",
+		"check": "cargo biome-cli-dev check website packages/@biomejs/js-api packages/tailwindcss-config-analyzer",
+		"ci": "cargo biome-cli-dev ci website packages/@biomejs/js-api packages/tailwindcss-config-analyzer"
 	},
 	"keywords": [],
 	"author": "",

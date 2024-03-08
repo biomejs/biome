@@ -1,12 +1,8 @@
 ---
-title: noExportsInTest (not released)
+title: noExportsInTest (since v1.6.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noExportsInTest`**
-
-:::danger
-This rule hasn't been released yet.
-:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

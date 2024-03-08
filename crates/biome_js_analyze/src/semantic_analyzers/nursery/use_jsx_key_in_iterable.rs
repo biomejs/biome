@@ -22,7 +22,9 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// [<Hello />, <Hello />, <Hello />];
+    /// [<Hello />];
+    /// ```
+    /// ```js,expect_diagnostic
     /// data.map((x) => <Hello>{x}</Hello>);
     /// ```
     ///
@@ -34,7 +36,7 @@ declare_rule! {
     /// ```
     ///
     pub UseJsxKeyInIterable {
-        version: "next",
+        version: "1.6.0",
         name: "useJsxKeyInIterable",
         source: RuleSource::EslintReact("jsx-key"),
         source_kind: RuleSourceKind::SameLogic,

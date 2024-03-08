@@ -78,14 +78,14 @@ The `extends` option allows to break down a configuration in multiple file and "
 
 ```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.0/schema.json",
   "extends": ["./formatter.json", "./linter.json"]
 }
 ```
 
 ```json title="formatter.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.0/schema.json",
   "formatter": {
     "indentSize": 2
   },
@@ -99,7 +99,7 @@ The `extends` option allows to break down a configuration in multiple file and "
 
 ```json title="linter.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.0/schema.json",
   "linter": {
     "rules": {
       "complexity": {
@@ -125,9 +125,10 @@ From version `v1.6.0`, Biome is able to resolve configuration files from `node_m
 
 In order to do so, the first thing to do is to set up your "shared" Biome configuration in a certain way. Let's suppose that your library is called `@org/shared-configs`, and you want to import the Biome configuration using the specifier `@org/shared-configs/biome`. You have to set up the `package.json` is a specific way:
 
-```json title="package.json" ins={4}
+```json title="package.json" ins={5,3}
 {
   "name": "@org/shared-configs",
+  "type": "module",
   "exports": {
     "./biome": "./biome.json"
   }

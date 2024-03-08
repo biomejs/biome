@@ -35,7 +35,7 @@ declare_rule! {
     /// ```
     ///
     pub NoSkippedTests {
-        version: "next",
+        version: "1.6.0",
         name: "noSkippedTests",
         recommended: false,
         source: RuleSource::EslintJest("no-disabled-tests"),

@@ -8,17 +8,15 @@ Source: <a href="https://eslint.org/docs/latest/rules/no-unused-vars" target="_b
 
 Disallow unused variables.
 
-There are two exceptions to this rule:
-
-1. variables that starts with underscore, ex: `let _something;`
-2. the `React` variable;
+There is an exception to this rule:
+variables that starts with underscore, e.g. `let _something;`.
 
 The pattern of having an underscore as prefix of a name of variable is a very diffuse
 pattern among programmers, and Biome decided to follow it.
 
-Importing the `React` variable was a mandatory pattern until some time ago:
-
-For the time being this rule will ignore it, but this **might change in the future releases**.
+This rule won't report unused imports.
+If you want to report unused imports,
+enable [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/).
 
 ## Examples
 
@@ -172,14 +170,6 @@ foo();
 
 ```jsx
 export function foo(_unused) {}
-```
-
-```jsx
-import React from 'react';
-function foo() {
-    return <div />;
-};
-foo();
 ```
 
 ```ts

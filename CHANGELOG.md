@@ -9,7 +9,7 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## 1.6.0 (TBD)
 
 ### Analyzer
 
@@ -22,8 +22,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ---
   - import { getLocale } from "astro:i18n";
   - import { Code } from "astro:components";
-  + import { getLocale } from "astro:i18n";
   + import { Code } from "astro:components";
+  + import { getLocale } from "astro:i18n";
   ---
 
   <div></div>
@@ -376,6 +376,45 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### Promoted rules
+
+New rules are incubated in the nursery group.
+Once stable, we promote them to a stable group.
+The following rules are promoted:
+
+- [complexity/noEmptyTypeParameters](https://biomejs.dev/linter/rules/no-empty-type-parameters)
+- [complexity/noUselessLoneBlockStatements](https://biomejs.dev/linter/rules/no-useless-lone-block-statements)
+- [correctness/noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration)
+- [correctness/noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports)
+- [correctness/noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members)
+- [security/noGlobalEval](https://biomejs.dev/linter/rules/no-global-eval)
+- [style/useConsistentArrayType](https://biomejs.dev/linter/rules/use-consistent-array-type)
+- [style/useExportType](https://biomejs.dev/linter/rules/use-export-type)
+- [style/useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention)
+- [style/useForOf](https://biomejs.dev/linter/rules/use-for-of)
+- [style/useImportType](https://biomejs.dev/linter/rules/use-import-type)
+- [style/useNodejsImportProtocol](https://biomejs.dev/linter/rules/use-nodejs-import-protocol)
+- [style/useNumberNamespace](https://biomejs.dev/linter/rules/use-number-namespace)
+- [style/useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type)
+- [suspicious/noEmptyBlockStatements](https://biomejs.dev/linter/rules/no-empty-block-statements)
+- [suspicious/noGlobalAssign](https://biomejs.dev/linter/rules/no-global-assign)
+- [suspicious/noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class)
+- [suspicious/noThenProperty](https://biomejs.dev/linter/rules/no-then-property)
+- [suspicious/useAwait](https://biomejs.dev/linter/rules/use-await)
+
+Additionally, the following rules are now recommended:
+
+- [suspicious/noApproximativeNumericConstant](https://biomejs.dev/linter/rules/no-approximative-numeric-constant)
+- [suspicious/noMisrefactoredShorthandAssign](https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign)
+
+#### Removed rules
+
+- Remove `nursery/useGroupedTypeImport`. The rule [style/useImportType](https://biomejs.dev/linter/rules/use-import-type) covers the behavior of this rule.
+
+  Note that removing a nursery rule is not considered a breaking change according to our [semantic versioning](https://biomejs.dev/internals/versioning).
+
+  Contributed by @Conaclos
+
 #### New features
 
 - Add the rule [noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests), to disallow skipped tests:
@@ -427,8 +466,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   <div></div>
   ```
 
-- Add partial support for `.vue` files. Biome is able to lint and fix the script block of the Vue files. Contributed by
-  @nhedger
+- Add partial support for `.vue` files. Biome is able to lint and fix the script block of the Vue files.
 
   ```diff
   <script setup lang="ts">
@@ -438,6 +476,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   <template></template>
   ```
+
+  Contributed by @nhedger
 
 - Add rule [useNodeAssertStrict](https://biomejs.dev/linter/rules/use-node-assert-strict), which promotes the use
   of `node:assert/strict` over `node:assert`. Contributed by @ematipico
@@ -560,6 +600,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
     }
   }
   ```
+
+  Contributed by @Conaclos
+
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) no longer reports unused imports.
+
+  We now have a dedicated rule for reporting unused imports:
+  [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports)
 
   Contributed by @Conaclos
 
@@ -730,7 +777,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Add option `json.formatter.trailingComma`, to provide a better control over the trailing comma in JSON/JSONC files. Its default value is `"none"`.
+- Add option `json.formatter.trailingCommas`, to provide a better control over the trailing comma in JSON/JSONC files. Its default value is `"none"`.
 
 #### Bug fixes
 
