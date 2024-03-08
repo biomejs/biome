@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_1926.jsx
+---
+# Input
+```jsx
+<>
+    <Hello leftIcon={<>{provider?.icon}</>} />
+    {<>{provider?.icon}</>}
+    <>{provider?.icon}</>
+</>
+
+```
+
+# Diagnostics
+```
+issue_1926.jsx:2:22 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+    1 │ <>
+  > 2 │     <Hello leftIcon={<>{provider?.icon}</>} />
+      │                      ^^^^^^^^^^^^^^^^^^^^^
+    3 │     {<>{provider?.icon}</>}
+    4 │     <>{provider?.icon}</>
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    2 │ ····<Hello·leftIcon={<>{provider?.icon}</>}·/>
+      │                      ---              ----    
+
+```
+
+```
+issue_1926.jsx:3:6 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+    1 │ <>
+    2 │     <Hello leftIcon={<>{provider?.icon}</>} />
+  > 3 │     {<>{provider?.icon}</>}
+      │      ^^^^^^^^^^^^^^^^^^^^^
+    4 │     <>{provider?.icon}</>
+    5 │ </>
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    3 │ ····{<>{provider?.icon}</>}
+      │      ---              ---- 
+
+```
+
+```
+issue_1926.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+    2 │     <Hello leftIcon={<>{provider?.icon}</>} />
+    3 │     {<>{provider?.icon}</>}
+  > 4 │     <>{provider?.icon}</>
+      │     ^^^^^^^^^^^^^^^^^^^^^
+    5 │ </>
+    6 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    4 │ ····<>{provider?.icon}</>
+      │     --                ---
+
+```

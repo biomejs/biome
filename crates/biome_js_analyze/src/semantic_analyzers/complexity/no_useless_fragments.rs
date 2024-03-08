@@ -6,11 +6,13 @@ use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
-    ident, js_expression_statement, js_string_literal_expression, jsx_string, jsx_tag_expression,
+    ident, js_expression_statement, js_string_literal_expression, jsx_expression_child, jsx_string,
+    jsx_tag_expression, token, JsxExpressionChildBuilder,
 };
 use biome_js_syntax::{
     AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsParenthesizedExpression, JsSyntaxKind,
-    JsxChildList, JsxElement, JsxExpressionAttributeValue, JsxFragment, JsxTagExpression,
+    JsxChildList, JsxElement, JsxExpressionAttributeValue, JsxFragment, JsxTagExpression, JsxText,
+    T,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
 
@@ -120,6 +122,7 @@ impl Rule for NoUselessFragments {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
+        let mut in_jsx_attr_expr = false;
         match node {
             NoUselessFragmentsQuery::JsxFragment(fragment) => {
                 let parents_where_fragments_must_be_preserved = node
@@ -130,6 +133,9 @@ impl Rule for NoUselessFragments {
                             .syntax()
                             .parent()
                             .and_then(|parent| {
+                                if JsxExpressionAttributeValue::can_cast(parent.kind()) {
+                                    in_jsx_attr_expr = true;
+                                }
                                 if let Some(parenthesized_expression) =
                                     JsParenthesizedExpression::cast_ref(&parent)
                                 {
@@ -160,6 +166,9 @@ impl Rule for NoUselessFragments {
                 if !parents_where_fragments_must_be_preserved {
                     match child_list.first() {
                         Some(first) if child_list.len() == 1 => {
+                            if JsxText::can_cast(first.syntax().kind()) && in_jsx_attr_expr {
+                                return None;
+                            }
                             Some(NoUselessFragmentsState::Child(first))
                         }
                         None => Some(NoUselessFragmentsState::Empty),
@@ -222,10 +231,15 @@ impl Rule for NoUselessFragments {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
+        let in_jsx_attr = node.syntax().grand_parent().map_or(false, |parent| {
+            JsxExpressionAttributeValue::can_cast(parent.kind())
+        });
+
         let is_in_list = node
             .syntax()
             .parent()
             .map_or(false, |parent| JsxChildList::can_cast(parent.kind()));
+
         if is_in_list {
             let new_child = match state {
                 NoUselessFragmentsState::Empty => None,
@@ -238,7 +252,6 @@ impl Rule for NoUselessFragments {
                 node.remove_node_from_list(&mut mutation);
             }
         } else if let Some(parent) = node.parent::<JsxTagExpression>() {
-            // We need to remove {} if the fragment is inside an attribute value: <div x-some-prop={<>Foo</>} />
             let parent = match parent.parent::<JsxExpressionAttributeValue>() {
                 Some(grand_parent) => grand_parent.into_syntax(),
                 None => parent.into_syntax(),
@@ -266,9 +279,24 @@ impl Rule for NoUselessFragments {
                         }
                     }
                     AnyJsxChild::JsxExpressionChild(child) => {
-                        child.expression().map(|expression| {
-                            js_expression_statement(expression).build().into_syntax()
-                        })
+                        if in_jsx_attr
+                            || !JsxTagExpression::can_cast(node.syntax().parent()?.kind())
+                        {
+                            child.expression().map(|expression| {
+                                let jsx_expr_child =
+                                    jsx_expression_child(token(T!['{']), token(T!['}']));
+                                JsxExpressionChildBuilder::with_expression(
+                                    jsx_expr_child,
+                                    expression,
+                                )
+                                .build()
+                                .into_syntax()
+                            })
+                        } else {
+                            child.expression().map(|expression| {
+                                js_expression_statement(expression).build().into_syntax()
+                            })
+                        }
                     }
 
                     // can't apply a code action because it will create invalid syntax

@@ -167,7 +167,38 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Previously, Biome processed all files in the traversed hierarchy,
   even the files under an ignored directory.
-  Now, it completly skip the content of ignored directories.
+  Now, it completely skips the content of ignored directories.
+
+  For now, directories cannot be ignored using `files.include` in the configuration file.
+  This is a known limitation that we want to address in a future release.
+
+  For instance, if you have a project with a folder `src` and a folder `test`,
+  the following configuration doesn't completely ignore `test`.
+
+  ```json
+  {
+    "files": {
+      "include": ["src"]
+    }
+  }
+  ```
+
+  Biome will traverse `test`,
+  however all files of the directory are correctly ignored.
+  This can result in file system errors,
+  if Biome encounters dangling symbolic links or files with higher permissions.
+
+  To avoid traversing the `test` directory,
+  you should ignore the directory using `ignore`:
+
+  ```json
+  {
+    "files": {
+      "include": ["src"],
+      "ignore": ["test"]
+    }
+  }
+  ```
 
 - Fix [#1508](https://github.com/biomejs/biome/issues/1508) by excluding deleted files from being processed. Contributed
   by @ematipico
@@ -200,7 +231,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
     × The file contains diagnostics that needs to be addressed.
   ```
   Contributed by @ematipico
-- The command `format` now emits parsing diagnostics if there are any, and it will terminate with a non-zero exit code. Contributed by @ematipico 
+- The command `format` now emits parsing diagnostics if there are any, and it will terminate with a non-zero exit code. Contributed by @ematipico
 
 ### Configuration
 
@@ -476,6 +507,27 @@ Additionally, the following rules are now recommended:
 
 #### Enhancements
 
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now rule not triggered for jsx attributes when
+   the fragment child is simple text.
+
+  ```js
+  export function SomeComponent() {
+    return <div x-some-prop={<>Foo</>} />;
+  }
+  ```
+
+   Also fixes code action when the fragment child is of type `JsxExpressionChild`.
+
+  ```js
+  <>
+    <Hello leftIcon={<>{provider?.icon}</>} />
+    {<>{provider?.icon}</>}
+    <>{provider?.icon}</>
+  </>
+  ```
+
+  Contributed by @vasucp1207
+
 - [noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary) now provides unsafe code fixes. Contributed by
   @vasucp1207
 
@@ -646,6 +698,8 @@ Additionally, the following rules are now recommended:
   Contributed by @keita-hino
 
 - Fix [#1945](https://github.com/biomejs/biome/issues/1945) Allow constructor with default parameters in `noUselessConstructor`
+
+- Fix [#1982](https://github.com/biomejs/biome/issues/1982) Change to iterate over the module item lists and ignore .d.ts files. Contributed by @togami2864
 
 ### Parser
 

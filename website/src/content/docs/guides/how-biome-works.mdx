@@ -202,6 +202,10 @@ Inside the `frontend/` project, you have your `package.json` with some scripts t
 - biome.json
 - frontend
   - package.json
+  - src
+    - ...
+  - test
+    - ...
 </FileTree>
 
 ```json title="biome.json"
@@ -228,8 +232,16 @@ When you run the script `format` inside `frontend/package.json`,
 the working directory resolved by that script will be `frontend/`,
 the globs `src/**/*.js` and `src/**/*.ts` will have as "base" directory `frontend/`.
 
+Although `include` doesn't contain `test`, Biome will still traverse the folder.
+This i
+
 :::note
-When both `include` and `ignore` are specified, Biome gives **precedence** to `ignore`.
+`include` and `ignore` have a slightly different semantics.
+`ignore` applies to both regular files and folders,
+while `include` is only tested on regular files.
+This means that if you want to prevent Biome from traversing a folder,
+you have to add the folder to `ignore`.
+This is a current limitation that we will fix in a future release.
 :::
 
 :::caution
