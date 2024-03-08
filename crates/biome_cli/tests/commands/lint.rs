@@ -1138,6 +1138,105 @@ fn fs_files_ignore_symlink() {
 }
 
 #[test]
+fn include_files_in_subdir() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{
+        "files": {
+            "include": ["./**/*.js"]
+        }
+    }"#;
+
+    let root_path = temp_dir().join("include_files_in_subdir");
+    let _ = remove_dir_all(&root_path);
+    create_dir(&root_path).unwrap();
+    File::create(root_path.join("biome.json"))
+        .unwrap()
+        .write_all(config.as_bytes())
+        .unwrap();
+    let subdir = root_path.join("subdir");
+    create_dir(&subdir).unwrap();
+    File::create(subdir.join("file.js"))
+        .unwrap()
+        .write_all(APPLY_SUGGESTED_BEFORE.as_bytes())
+        .unwrap();
+
+    let result = run_cli(
+        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+        &mut console,
+        Args::from([("lint"), root_path.display().to_string().as_str()].as_slice()),
+    );
+
+    remove_dir_all(root_path).unwrap();
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "include_files_in_subdir",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn include_files_in_symlinked_subdir() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{
+        "files": {
+            "include": ["./**/*.js"]
+        }
+    }"#;
+
+    let root_path = temp_dir().join("include_files_in_symlinked_subdir");
+    let _ = remove_dir_all(&root_path);
+    create_dir(&root_path).unwrap();
+
+    let symlinked = root_path.join("symlinked");
+    create_dir(&symlinked).unwrap();
+    File::create(symlinked.join("file.js"))
+        .unwrap()
+        .write_all(APPLY_SUGGESTED_BEFORE.as_bytes())
+        .unwrap();
+
+    let subroot_path = root_path.join("subroot");
+    create_dir(&subroot_path).unwrap();
+    File::create(subroot_path.join("biome.json"))
+        .unwrap()
+        .write_all(config.as_bytes())
+        .unwrap();
+
+    #[cfg(target_family = "unix")]
+    {
+        symlink(root_path.join("symlinked"), subroot_path.join("symlink")).unwrap();
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        check_windows_symlink!(symlink_file(
+            root_path.join("symlinked"),
+            subroot_path.join("symlink")
+        ));
+    }
+
+    let result = run_cli(
+        DynRef::Owned(Box::new(OsFileSystem::new(subroot_path.clone()))),
+        &mut console,
+        Args::from([("lint"), subroot_path.display().to_string().as_str()].as_slice()),
+    );
+
+    remove_dir_all(root_path).unwrap();
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "include_files_in_symlinked_subdir",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn file_too_large() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
