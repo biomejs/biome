@@ -145,7 +145,8 @@ impl Rule for UseShorthandFunctionType {
                     node,
                 )?),
             )
-            .build();
+            .build()
+            .with_type_parameters(interface_decl.type_parameters());
 
             mutation.replace_node(
                 AnyJsDeclarationClause::from(interface_decl),

@@ -31,3 +31,8 @@ type GenericCallSignature<T> = { (arg: T): T };
 
 // Object type with optional call signature
 let optionalCall: { (): number | undefined };
+
+// Generic interface with a call signature
+interface GenericInterface<T> {
+	(value: T): boolean;
+}
