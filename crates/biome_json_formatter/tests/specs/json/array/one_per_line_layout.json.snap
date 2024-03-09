@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/array/one_per_line_layout.json
 ---
-
 # Input
 
 ```json
@@ -32,7 +31,7 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
-Trailing comma: None
+Trailing commas: None
 -----
 
 ```json
@@ -80,5 +79,3 @@ Trailing comma: None
 	]
 }
 ```
-
-

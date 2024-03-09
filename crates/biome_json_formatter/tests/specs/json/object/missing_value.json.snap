@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/object/missing_value.json
 ---
-
 # Input
 
 ```json
@@ -30,7 +29,7 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
-Trailing comma: None
+Trailing commas: None
 -----
 
 ```json
@@ -45,5 +44,3 @@ Trailing comma: None
 	"d": 3
 }
 ```
-
-
