@@ -5,6 +5,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_js_factory::make;
 use biome_js_syntax::{JsCallExpression, TextRange};
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken};
 
@@ -41,7 +42,7 @@ declare_rule! {
     }
 }
 
-const FUNCTION_NAMES: [&str; 1] = ["only"];
+const FUNCTION_NAMES: [&str; 3] = ["only", "fdescribe", "fit"];
 const CALEE_NAMES: [&str; 3] = ["describe", "it", "test"];
 
 impl Rule for NoFocusedTests {
@@ -108,30 +109,43 @@ impl Rule for NoFocusedTests {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let callee = node.callee().ok()?;
+        let function_name = callee.get_callee_member_name()?;
+        let replaced_function;
+
         let mut mutation = ctx.root().begin();
 
-        if let Some(expression) = callee.as_js_static_member_expression() {
-            let member_name = expression.member().ok()?;
-            let operator_token = expression.operator_token().ok()?;
-
-            mutation.remove_element(member_name.into());
-            mutation.remove_element(operator_token.into());
-        } else if let Some(expression) = callee.as_js_computed_member_expression() {
-            let l_brack = expression.l_brack_token().ok()?;
-            let r_brack = expression.r_brack_token().ok()?;
-            let member = expression.member().ok()?;
-            let expression = member.as_any_js_literal_expression()?;
-
-            mutation.remove_token(l_brack);
-            mutation.remove_element(NodeOrToken::Node(expression.syntax().clone()));
-            mutation.remove_token(r_brack);
-        }
+        match function_name.text_trimmed() {
+            "only" => {
+                if let Some(expression) = callee.as_js_static_member_expression() {
+                    let member_name = expression.member().ok()?;
+                    let operator_token = expression.operator_token().ok()?;
+                    mutation.remove_element(member_name.into());
+                    mutation.remove_element(operator_token.into());
+                } else if let Some(expression) = callee.as_js_computed_member_expression() {
+                    let l_brack = expression.l_brack_token().ok()?;
+                    let r_brack = expression.r_brack_token().ok()?;
+                    let member = expression.member().ok()?;
+                    let expression = member.as_any_js_literal_expression()?;
+                    mutation.remove_token(l_brack);
+                    mutation.remove_element(NodeOrToken::Node(expression.syntax().clone()));
+                    mutation.remove_token(r_brack);
+                }
+            }
+            "fdescribe" => {
+                replaced_function = make::js_reference_identifier(make::ident("describe"));
+                mutation.replace_element(function_name.into(), replaced_function.into());
+            }
+            "fit" => {
+                replaced_function = make::js_reference_identifier(make::ident("it"));
+                mutation.replace_element(function_name.into(), replaced_function.into());
+            }
+            _ => {}
+        };
 
         Some(JsRuleAction {
             category: biome_analyze::ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the 'only' method to ensure all tests are executed." }
-                .to_owned(),
+            message: markup! { "Remove focus from test." }.to_owned(),
             mutation,
         })
     }
