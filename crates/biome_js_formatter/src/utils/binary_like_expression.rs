@@ -234,7 +234,7 @@ fn should_flatten(parent_operator: BinaryLikeOperator, operator: BinaryLikeOpera
     }
 }
 
-/// There are cases where the parent decides to inline the the element; in
+/// There are cases where the parent decides to inline the element; in
 /// these cases the decide to actually break on a new line and indent it.
 ///
 /// This function checks what the parents adheres to this behaviour
