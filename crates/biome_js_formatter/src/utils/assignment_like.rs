@@ -891,7 +891,7 @@ impl AnyJsAssignmentLike {
         Ok(is_complex_destructuring || has_complex_type_annotation || is_complex_type_alias)
     }
 
-    /// Checks if the the current assignment is eligible for [AssignmentLikeLayout::BreakAfterOperator]
+    /// Checks if the current assignment is eligible for [AssignmentLikeLayout::BreakAfterOperator]
     ///
     /// This function is small wrapper around [should_break_after_operator] because it has to work
     /// for nodes that belong to TypeScript too.

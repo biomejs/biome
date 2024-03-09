@@ -122,7 +122,7 @@ pub trait ParseSeparatedList {
         false
     }
 
-    /// Method called at each iteration of the the loop and checks if the expected
+    /// Method called at each iteration of the loop and checks if the expected
     /// separator is present.
     ///
     /// If present, it [parses](Self::separating_element_kind) it and continues with loop.
