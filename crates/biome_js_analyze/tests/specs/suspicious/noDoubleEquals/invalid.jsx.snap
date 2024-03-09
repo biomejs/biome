@@ -35,7 +35,7 @@ invalid.jsx:3:51 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━�
     4 │     style="color: red"
     5 │ >
   
-  i Using === may be unsafe if you are relying on type coercion
+  i Using == may be unsafe if you are relying on type coercion
   
   i Unsafe fix: Use ===
   
@@ -43,5 +43,3 @@ invalid.jsx:3:51 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━�
       │                                                     +       
 
 ```
-
-

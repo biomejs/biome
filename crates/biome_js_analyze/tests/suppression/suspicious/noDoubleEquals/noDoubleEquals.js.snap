@@ -49,7 +49,7 @@ noDoubleEquals.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     4 │ `;
     5 │ 
   
-  i Using === may be unsafe if you are relying on type coercion
+  i Using == may be unsafe if you are relying on type coercion
   
   i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
   
@@ -83,7 +83,7 @@ noDoubleEquals.js:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     8 │ 
     9 │ if (a == b) {
   
-  i Using === may be unsafe if you are relying on type coercion
+  i Using == may be unsafe if you are relying on type coercion
   
   i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
   
@@ -117,7 +117,7 @@ noDoubleEquals.js:9:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     10 │     false;
     11 │ }
   
-  i Using === may be unsafe if you are relying on type coercion
+  i Using == may be unsafe if you are relying on type coercion
   
   i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
   
@@ -149,7 +149,7 @@ noDoubleEquals.js:14:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
     15 │ 
     16 │     }
   
-  i Using === may be unsafe if you are relying on type coercion
+  i Using == may be unsafe if you are relying on type coercion
   
   i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
   
@@ -183,7 +183,7 @@ noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
     20 │   linter: ${linter}
     21 │ `;
   
-  i Using === may be unsafe if you are relying on type coercion
+  i Using == may be unsafe if you are relying on type coercion
   
   i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
   
@@ -197,5 +197,3 @@ noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
   
 
 ```
-
-

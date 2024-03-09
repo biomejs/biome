@@ -13,7 +13,7 @@ Source: <a href="https://eslint.org/docs/latest/rules/eqeqeq" target="_blank"><c
 Require the use of `===` and `!==`
 
 It is generally bad practice to use `==` for comparison instead of
-`===`. Double operators will triger implicit [type coercion](https://developer.mozilla.org/en-US/docs/Glossary/Type_coercion)
+`===`. Double operators will trigger implicit [type coercion](https://developer.mozilla.org/en-US/docs/Glossary/Type_coercion)
 and are thus not prefered. Using strict equality operators is almost
 always best practice.
 
@@ -42,7 +42,7 @@ foo == bar
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Using </span><span style="color: lightgreen;"><strong>===</strong></span><span style="color: lightgreen;"> may be unsafe if you are relying on type coercion</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Using </span><span style="color: lightgreen;"><strong>==</strong></span><span style="color: lightgreen;"> may be unsafe if you are relying on type coercion</span>
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Use </span><span style="color: lightgreen;"><strong>===</strong></span>
   

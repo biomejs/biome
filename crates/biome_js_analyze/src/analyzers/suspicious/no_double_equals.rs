@@ -15,7 +15,7 @@ declare_rule! {
     /// Require the use of `===` and `!==`
     ///
     /// It is generally bad practice to use `==` for comparison instead of
-    /// `===`. Double operators will triger implicit [type coercion](https://developer.mozilla.org/en-US/docs/Glossary/Type_coercion)
+    /// `===`. Double operators will trigger implicit [type coercion](https://developer.mozilla.org/en-US/docs/Glossary/Type_coercion)
     /// and are thus not prefered. Using strict equality operators is almost
     /// always best practice.
     ///
@@ -96,7 +96,7 @@ impl Rule for NoDoubleEquals {
         .detail(op.text_trimmed_range(), markup! {
             <Emphasis>{text_trimmed}</Emphasis>" is only allowed when comparing against "<Emphasis>"null"</Emphasis>
         }).note(markup! {
-            "Using "<Emphasis>{suggestion}</Emphasis>" may be unsafe if you are relying on type coercion"
+            "Using "<Emphasis>{text_trimmed}</Emphasis>" may be unsafe if you are relying on type coercion"
         })
         .description(description))
     }
