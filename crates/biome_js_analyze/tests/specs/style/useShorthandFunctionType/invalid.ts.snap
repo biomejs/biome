@@ -38,6 +38,11 @@ type GenericCallSignature<T> = { (arg: T): T };
 // Object type with optional call signature
 let optionalCall: { (): number | undefined };
 
+// Generic interface with a call signature
+interface GenericInterface<T> {
+	(value: T): boolean;
+}
+
 ```
 
 # Diagnostics
@@ -229,6 +234,7 @@ invalid.ts:33:21 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━�
   > 33 │ let optionalCall: { (): number | undefined };
        │                     ^^^^^^^^^^^^^^^^^^^^^^
     34 │ 
+    35 │ // Generic interface with a call signature
   
   i Types containing only a call signature can be shortened to a function type.
   
@@ -239,8 +245,34 @@ invalid.ts:33:21 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━�
     33    │ - let·optionalCall:·{·():·number·|·undefined·};
        33 │ + let·optionalCall:·()·=>·number·|·undefined;
     34 34 │   
+    35 35 │   // Generic interface with a call signature
   
 
 ```
 
+```
+invalid.ts:37:2 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Use a function type instead of a call signature.
+  
+    35 │ // Generic interface with a call signature
+    36 │ interface GenericInterface<T> {
+  > 37 │ 	(value: T): boolean;
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    38 │ }
+    39 │ 
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Alias a function type instead of using an interface with a call signature.
+  
+    34 34 │   
+    35 35 │   // Generic interface with a call signature
+    36    │ - interface·GenericInterface<T>·{
+    37    │ - → (value:·T):·boolean;
+    38    │ - }
+       36 │ + type·GenericInterface<T>·=·(value:·T)·=>·boolean
+    39 37 │   
+  
+
+```
