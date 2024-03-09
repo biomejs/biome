@@ -234,34 +234,35 @@ export class Biome {
 	 * @param {String} content The content to lint
 	 * @param {LintContentOptions} options Options needed when linting some content
 	 */
-	lintContent(content: string, options: LintContentOptions): LintResult {
-		return this.withFile(options.filePath, content, (path) => {
-			let code = content;
+	lintContent(
+		content: string,
+		{ filePath, fixFileMode }: LintContentOptions,
+	): LintResult {
+		const maybeFixed = fixFileMode
+			? this.withFile(filePath, content, (path) => {
+					let code = content;
 
+					const result = this.workspace.fixFile({
+						path,
+						fix_file_mode: fixFileMode,
+						should_format: false,
+					});
+
+					code = result.code;
+
+					return { content: code };
+			  })
+			: { content };
+
+		return this.withFile(filePath, maybeFixed.content, (path) => {
 			const { diagnostics } = this.workspace.pullDiagnostics({
 				path,
 				categories: ["Syntax", "Lint"],
 				max_diagnostics: Number.MAX_SAFE_INTEGER,
 			});
 
-			const hasErrors = diagnostics.some(
-				(diag) =>
-					diag.severity === "fatal" ||
-					(diag.severity === "error" && !diag.tags.includes("fixable")),
-			);
-
-			if (options.fixFileMode && !hasErrors) {
-				const result = this.workspace.fixFile({
-					path,
-					fix_file_mode: options.fixFileMode,
-					should_format: false,
-				});
-
-				code = result.code;
-			}
-
 			return {
-				content: code,
+				content: maybeFixed.content,
 				diagnostics,
 			};
 		});
