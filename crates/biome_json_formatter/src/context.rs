@@ -77,9 +77,9 @@ pub struct JsonFormatOptions {
 )]
 pub enum TrailingCommas {
     #[default]
-    /// The formatter will remove the trailing comma
+    /// The formatter will remove the trailing commas
     None,
-    /// The trailing comma is allowed and advised
+    /// The trailing commas are allowed and advised
     All,
 }
 
@@ -131,8 +131,8 @@ impl JsonFormatOptions {
         self
     }
 
-    pub fn with_trailing_comma(mut self, trailing_comma: TrailingCommas) -> Self {
-        self.trailing_commas = trailing_comma;
+    pub fn with_trailing_commas(mut self, trailing_commas: TrailingCommas) -> Self {
+        self.trailing_commas = trailing_commas;
         self
     }
 
@@ -150,6 +150,10 @@ impl JsonFormatOptions {
 
     pub fn set_line_width(&mut self, line_width: LineWidth) {
         self.line_width = line_width;
+    }
+
+    pub fn set_trailing_commas(&mut self, trailing_commas: TrailingCommas) {
+        self.trailing_commas = trailing_commas;
     }
 
     pub(crate) fn to_trailing_separator(&self) -> TrailingSeparator {
@@ -192,6 +196,6 @@ impl fmt::Display for JsonFormatOptions {
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.get())?;
-        writeln!(f, "Trailing comma: {}", self.trailing_commas)
+        writeln!(f, "Trailing commas: {}", self.trailing_commas)
     }
 }

@@ -342,7 +342,7 @@ impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
 
         language_setting.parser.allow_comments = json.parser.allow_comments;
         language_setting.parser.allow_trailing_commas = json.parser.allow_trailing_commas;
-        language_setting.formatter.trailing_comma = json.formatter.trailing_commas;
+        language_setting.formatter.trailing_commas = Some(json.formatter.trailing_commas);
         language_setting.formatter.enabled = Some(json.formatter.enabled);
         language_setting.formatter.line_width = json.formatter.line_width;
         language_setting.formatter.indent_width = json.formatter.indent_width.map(Into::into);
@@ -833,12 +833,14 @@ impl OverrideSettingPattern {
         if let Some(indent_style) = json_formatter.indent_style.or(self.formatter.indent_style) {
             options.set_indent_style(indent_style);
         }
-
         if let Some(indent_width) = json_formatter.indent_width.or(self.formatter.indent_width) {
             options.set_indent_width(indent_width)
         }
         if let Some(line_width) = json_formatter.line_width.or(self.formatter.line_width) {
             options.set_line_width(line_width);
+        }
+        if let Some(trailing_commas) = json_formatter.trailing_commas {
+            options.set_trailing_commas(trailing_commas);
         }
         let mut cache = self.cached_json_format_options.write().unwrap();
         let _ = cache.insert(options.clone());

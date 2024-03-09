@@ -110,7 +110,7 @@ JSON Formatter:
   Indent size:                  unset
   Line ending:                  Lf
   Line width:                   100
-  Trailing Commas:              unset
+  Trailing Commas:              None
 
 Server:
   Version:                      0.0.0
@@ -121,5 +121,3 @@ Server:
 Workspace:
   Open Documents:               0
 ```
-
-

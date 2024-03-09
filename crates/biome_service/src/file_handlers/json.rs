@@ -38,7 +38,7 @@ pub struct JsonFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
-    pub trailing_comma: Option<TrailingCommas>,
+    pub trailing_commas: Option<TrailingCommas>,
     pub enabled: Option<bool>,
 }
 
@@ -95,7 +95,7 @@ impl Language for JsonLanguage {
                 .with_indent_style(indent_style)
                 .with_indent_width(indent_width)
                 .with_line_width(line_width)
-                .with_trailing_comma(language.trailing_comma.unwrap_or_default()),
+                .with_trailing_commas(language.trailing_commas.unwrap_or_default()),
         )
     }
 }
