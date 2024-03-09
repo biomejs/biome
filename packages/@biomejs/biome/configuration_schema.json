@@ -2651,12 +2651,12 @@
 		"TrailingCommas": {
 			"oneOf": [
 				{
-					"description": "The formatter will remove the trailing comma",
+					"description": "The formatter will remove the trailing commas",
 					"type": "string",
 					"enum": ["none"]
 				},
 				{
-					"description": "The trailing comma is allowed and advised",
+					"description": "The trailing commas are allowed and advised",
 					"type": "string",
 					"enum": ["all"]
 				}
