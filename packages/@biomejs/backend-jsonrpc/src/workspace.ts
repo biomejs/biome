@@ -897,6 +897,10 @@ export interface Nursery {
 	 */
 	noConsole?: RuleConfiguration_for_Null;
 	/**
+	 * This rule checks the function parameter of hooks & tests for use of the done argument, suggesting you return a promise instead.
+	 */
+	noDoneCallback?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
@@ -1882,6 +1886,7 @@ export type Category =
 	| "lint/nursery/noApproximativeNumericConstant"
 	| "lint/nursery/noBarrelFile"
 	| "lint/nursery/noConsole"
+	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateTestHooks"
 	| "lint/nursery/noExcessiveNestedTestSuites"

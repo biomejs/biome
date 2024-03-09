@@ -27,6 +27,15 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add rule [noDoneCallback](https://biomejs.dev/linter/rules/no-done-callback), this rule checks the function parameter of hooks & tests
+  for use of the done argument, suggesting you return a promise instead. Contributed by @vasucp1207
+
+  ```js
+  beforeEach(done => {
+    // ...
+  });
+  ```
+
 #### Enhamcements
 
 #### Bug fixes
@@ -57,7 +66,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### Parser
 
 
-## 1.6.0 (2024-03-08)
+## 1.6.0 (2024-04-08)
 
 ### Analyzer
 

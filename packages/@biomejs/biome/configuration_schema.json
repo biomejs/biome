@@ -1395,6 +1395,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDoneCallback": {
+					"description": "This rule checks the function parameter of hooks & tests for use of the done argument, suggesting you return a promise instead.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateJsonKeys": {
 					"description": "Disallow two keys with the same name inside a JSON object.",
 					"anyOf": [
