@@ -206,7 +206,14 @@ fn handle_iterators(
             let body = callback.body().ok()?;
             match body {
                 AnyJsFunctionBody::AnyJsExpression(expr) => {
-                    handle_potential_react_component(&expr, model, is_inside_jsx)
+                    // unwrap parenthesized expression
+                    let mut inner_expr = expr;
+                    while let AnyJsExpression::JsParenthesizedExpression(parenthesized_expr) =
+                        inner_expr
+                    {
+                        inner_expr = parenthesized_expr.expression().ok()?;
+                    }
+                    handle_potential_react_component(&inner_expr, model, is_inside_jsx)
                         .map(|state| vec![state])
                 }
                 AnyJsFunctionBody::JsFunctionBody(body) => {
