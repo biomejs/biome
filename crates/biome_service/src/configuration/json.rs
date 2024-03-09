@@ -71,7 +71,7 @@ pub struct JsonFormatter {
 
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
     #[partial(bpaf(long("json-formatter-trailing-commas"), argument("none|all"), optional))]
-    pub trailing_commas: TrailingCommas,
+    pub trailing_commas: Option<TrailingCommas>,
 }
 
 impl PartialJsonFormatter {
@@ -83,7 +83,7 @@ impl PartialJsonFormatter {
             indent_size: self.indent_size,
             line_ending: self.line_ending,
             line_width: self.line_width,
-            trailing_commas: self.trailing_commas.unwrap_or_default(),
+            trailing_commas: self.trailing_commas,
         }
     }
 }

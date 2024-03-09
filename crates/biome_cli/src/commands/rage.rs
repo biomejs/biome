@@ -263,7 +263,7 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Indent size", markup!({DebugDisplayOption(json_formatter_configuration.indent_size)}))}
                             {KeyValuePair("Line ending", markup!({DebugDisplayOption(json_formatter_configuration.line_ending)}))}
                             {KeyValuePair("Line width", markup!({DebugDisplayOption(json_formatter_configuration.line_width.map(|lw| lw.get()))}))}
-                            {KeyValuePair("Trailing Commas", markup!({DebugDisplay(json_formatter_configuration.trailing_commas)}))}
+                            {KeyValuePair("Trailing Commas", markup!({DebugDisplayOption(json_formatter_configuration.trailing_commas)}))}
                         ).fmt(fmt)?;
                     }
 
