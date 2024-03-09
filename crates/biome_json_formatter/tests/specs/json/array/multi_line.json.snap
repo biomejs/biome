@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/array/multi_line.json
 ---
+
 # Input
 
 ```json
@@ -45,3 +46,4 @@ Trailing commas: None
 	]
 }
 ```
+

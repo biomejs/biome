@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/object/one_line_long.json
 ---
+
 # Input
 
 ```json
@@ -30,3 +31,4 @@ Trailing commas: None
 	"string": "some-long-long-long-long-long-long-long-string"
 }
 ```
+

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/empty.json
 ---
+
 # Input
 
 ```json
@@ -31,3 +32,4 @@ Trailing commas: None
 ## Unimplemented nodes/tokens
 
 "" => 0..0
+
