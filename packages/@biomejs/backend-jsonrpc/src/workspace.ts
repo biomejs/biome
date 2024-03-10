@@ -897,7 +897,7 @@ export interface Nursery {
 	 */
 	noConsole?: RuleConfiguration_for_Null;
 	/**
-	 * This rule checks the function parameter of hooks & tests for use of the done argument, suggesting you return a promise instead.
+	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
 	noDoneCallback?: RuleConfiguration_for_Null;
 	/**

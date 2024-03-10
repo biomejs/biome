@@ -14,6 +14,8 @@ This rule is part of the [nursery](/linter/rules/#nursery) group.
 
 Inspired from: <a href="https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-done-callback.md" target="_blank"><code>no-done-callback</code></a>
 
+Disallow using a callback in asynchronous tests and hooks.
+
 This rule checks the function parameter of hooks & tests for use of the done argument, suggesting you return a promise instead.
 
 ## Examples

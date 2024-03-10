@@ -2601,7 +2601,7 @@ pub struct Nursery {
     #[doc = "Disallow the use of console."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_console: Option<RuleConfiguration<NoConsole>>,
-    #[doc = "This rule checks the function parameter of hooks & tests for use of the done argument, suggesting you return a promise instead."]
+    #[doc = "Disallow using a callback in asynchronous tests and hooks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_done_callback: Option<RuleConfiguration<NoDoneCallback>>,
     #[doc = "Disallow two keys with the same name inside a JSON object."]

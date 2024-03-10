@@ -9,6 +9,8 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, TextRange};
 
 declare_rule! {
+    /// Disallow using a callback in asynchronous tests and hooks.
+    ///
     /// This rule checks the function parameter of hooks & tests for use of the done argument, suggesting you return a promise instead.
     ///
     /// ## Examples
@@ -61,13 +63,9 @@ impl Rule for NoDoneCallback {
 
         let callee = node.callee().ok()?;
 
-        let mut is_test_each = false;
-        let callee_member = callee.get_callee_member_name();
-        if let Some(member_name) = callee_member {
-            if member_name.text_trimmed() == "each" {
-                is_test_each = true;
-            }
-        }
+        let is_test_each = callee
+            .get_callee_member_name()
+            .map_or(false, |m| m.text_trimmed() == "each");
 
         if is_test_each && !JsTemplateExpression::can_cast(callee.syntax().kind()) {
             return None;
@@ -76,20 +74,15 @@ impl Rule for NoDoneCallback {
         let arguments = &node.arguments().ok()?;
         let callee_name = callee.get_callee_object_name()?;
 
-        let argument = match callee_name.text_trimmed() {
-            "after" | "afterAll" | "afterEach" | "before" | "beforeAll" | "beforeEach" => {
-                let argument_by_index = arguments.get_arguments_by_index([0]);
-                let top_arg = argument_by_index.first()?;
-                top_arg.clone()
-            }
-            "it" | "test" => {
-                // for test.each() and test() we want the second argument
-                let argument_by_index = arguments.get_arguments_by_index([1]);
-                let top_arg = argument_by_index.first()?;
-                top_arg.clone()
-            }
-            _ => None,
+        let argument_index = match callee_name.text_trimmed() {
+            "after" | "afterAll" | "afterEach" | "before" | "beforeAll" | "beforeEach" => 0,
+            "it" | "test" => 1, // for test.each() and test() we want the second argument
+            _ => return None,
         };
+        let argument = arguments
+            .get_arguments_by_index([argument_index])
+            .first()?
+            .clone();
 
         let callback = argument?;
         let callback = callback.as_any_js_expression()?;
