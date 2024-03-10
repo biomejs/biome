@@ -32,6 +32,14 @@ In contrast, using a for loop or a `for...of` loop can make the code more explic
 We consider all objects with a method named `forEach` to be iterable.
 This way, this rule applies to all objects with a method called `forEach`, not just `Array` instances.
 
+## Exception for Index Usage
+
+When the index is explicitly used in the `forEach` callback, it is acceptable to use `forEach`. This is because:
+
+- The index is directly available as the second argument in `forEach`, making it convenient for scenarios where the index is necessary.
+- In sparse arrays, `forEach` will skip undefined entries, which differs from the behavior of `for...of` with `Object.entries` that includes these entries.
+This can be important for certain array operations, particularly in TypeScript environments with strict type checking.
+
 ## Examples
 
 ### Invalid
