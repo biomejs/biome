@@ -29,7 +29,7 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
-Trailing comma: None
+Trailing commas: None
 -----
 
 ```json
@@ -38,5 +38,4 @@ Trailing comma: None
 	"indented": [1111, 2222, true]
 }
 ```
-
 

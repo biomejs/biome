@@ -22,11 +22,10 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
-Trailing comma: None
+Trailing commas: None
 -----
 
 ```json
 { "number": 123, "string": "some-string" }
 ```
-
 
