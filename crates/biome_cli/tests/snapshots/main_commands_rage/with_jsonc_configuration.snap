@@ -2,9 +2,9 @@
 source: crates/biome_cli/tests/commands/rage.rs
 expression: content
 ---
-## `/dir/biome.jsonc`
+## `biome.jsonc`
 
-```jsonc
+```json
 {
   "formatter": {
     // disable formatter
@@ -33,7 +33,11 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Status:                       unset
+  Status:                       Loaded successfully
+  Formatter disabled:           true
+  Linter disabled:              false
+  Organize imports disabled:    false
+  VCS disabled:                 true
 
 Server:
   Version:                      0.0.0

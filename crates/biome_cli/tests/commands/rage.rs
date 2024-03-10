@@ -87,11 +87,8 @@ fn with_configuration() {
 fn with_jsonc_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-
-    // issue #2008 is only reproducible when using absolute paths
-    // so we insert an absolute path here
     fs.insert(
-        PathBuf::from("/dir/biome.jsonc"),
+        Path::new("biome.jsonc").to_path_buf(),
         r#"{
   "formatter": {
     // disable formatter
@@ -100,7 +97,6 @@ fn with_jsonc_configuration() {
 }"#,
     );
 
-    // TODO: but how to cd into dir and run rage?
     let result = run_rage(
         DynRef::Borrowed(&mut fs),
         &mut console,
