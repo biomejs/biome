@@ -81,61 +81,26 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
         should_error_if_file_not_found: bool,
     ) -> AutoSearchResultAlias {
         let mut from_parent = false;
-        let mut auto_search_result = None;
-        'alternatives_loop: for file_name in file_names {
-            let mut file_directory_path = file_path.join(file_name);
-            'search: loop {
+        // outer loop is for searching parent directories
+        'search: loop {
+            // inner loop is for searching config file alternatives: biome.json, biome.jsonc
+            'alternatives_loop: for file_name in file_names {
+                let file_directory_path = file_path.join(file_name);
                 let options = OpenOptions::default().read(true);
                 let file = self.open_with_options(&file_directory_path, options);
                 match file {
                     Ok(mut file) => {
                         let mut buffer = String::new();
-                        file.read_to_string(&mut buffer)
-                            .map_err(|_| FileSystemDiagnostic {
-                                path: file_directory_path.display().to_string(),
-                                severity: Severity::Error,
-                                error_kind: ErrorKind::CantReadFile(
-                                    file_directory_path.display().to_string(),
-                                ),
-                            })?;
-
-                        if from_parent {
-                            info!(
-                            "Biome auto discovered the file at following path that wasn't in the working directory: {}",
-                            file_path.display()
-                        );
-                        }
-
-                        auto_search_result = Some(AutoSearchResult {
-                            content: buffer,
-                            file_path: file_directory_path,
-                            directory_path: file_path,
-                        });
-                        break 'alternatives_loop;
-                    }
-                    Err(err) => {
-                        // base paths from users are not eligible for auto discovery
-                        if !should_error_if_file_not_found {
-                            let parent_directory = if let Some(path) = file_path.parent() {
-                                if path.is_dir() {
-                                    Some(PathBuf::from(path))
-                                } else {
-                                    None
-                                }
-                            } else {
-                                None
-                            };
-                            if let Some(parent_directory) = parent_directory {
-                                file_path = parent_directory;
-                                file_directory_path = file_path.join(file_name);
-                                from_parent = true;
-                                continue 'search;
+                        if let Err(err) = file.read_to_string(&mut buffer) {
+                            // base paths from users are not eligible for auto discovery
+                            if !should_error_if_file_not_found {
+                                continue 'alternatives_loop;
                             }
-                        }
-                        // We skip the error when the configuration file is not found.
-                        // Not having a configuration file is only an error when the `base_path` is
-                        // set to `BasePath::FromUser`.
-                        if should_error_if_file_not_found || err.kind() != io::ErrorKind::NotFound {
+                            error!(
+                                "Could not read the file from {:?}, reason:\n {}",
+                                file_directory_path.display(),
+                                err
+                            );
                             return Err(FileSystemDiagnostic {
                                 path: file_directory_path.display().to_string(),
                                 severity: Severity::Error,
@@ -144,18 +109,55 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                                 ),
                             });
                         }
+                        if from_parent {
+                            info!(
+                                "Biome auto discovered the file at following path that wasn't in the working directory: {}",
+                                file_path.display()
+                            );
+                        }
+                        return Ok(Some(AutoSearchResult {
+                            content: buffer,
+                            file_path: file_directory_path,
+                            directory_path: file_path,
+                        }));
+                    }
+                    Err(err) => {
+                        // base paths from users are not eligible for auto discovery
+                        if !should_error_if_file_not_found {
+                            continue 'alternatives_loop;
+                        }
                         error!(
                             "Could not read the file from {:?}, reason:\n {}",
                             file_directory_path.display(),
                             err
                         );
-                        continue 'alternatives_loop;
+                        return Err(FileSystemDiagnostic {
+                            path: file_directory_path.display().to_string(),
+                            severity: Severity::Error,
+                            error_kind: ErrorKind::CantReadFile(
+                                file_directory_path.display().to_string(),
+                            ),
+                        });
                     }
                 }
             }
+            let parent_directory = if let Some(path) = file_path.parent() {
+                if path.is_dir() {
+                    Some(PathBuf::from(path))
+                } else {
+                    None
+                }
+            } else {
+                None
+            };
+            if let Some(parent_directory) = parent_directory {
+                file_path = parent_directory;
+                from_parent = true;
+                continue 'search;
+            }
+            break 'search;
         }
-
-        Ok(auto_search_result)
+        Ok(None)
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>>;
