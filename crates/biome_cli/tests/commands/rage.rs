@@ -84,6 +84,41 @@ fn with_configuration() {
 }
 
 #[test]
+fn with_jsonc_configuration() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // issue #2008 is only reproducible when using absolute paths
+    // so we insert an absolute path here
+    fs.insert(
+        PathBuf::from("/dir/biome.jsonc"),
+        r#"{
+  "formatter": {
+    // disable formatter
+    "enabled": false,
+  }
+}"#,
+    );
+
+    // TODO: but how to cd into dir and run rage?
+    let result = run_rage(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("rage")].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_jsonc_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn with_malformed_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
