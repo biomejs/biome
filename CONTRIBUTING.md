@@ -68,16 +68,11 @@ git clone https://github.com/biomejs/biome
 cd biome
 ```
 
-Compile all packages and dependencies:
+You can use cargo to run Biome CLI in development mode:
 
 ```bash
-cargo build
-```
-
-Biome can be used via the `biome` bin:
-
-```bash
-cargo run --bin biome -- --help
+# This is like running "biome --help"
+cargo biome-cli-dev --help
 ```
 
 ## Install the required tools
@@ -90,14 +85,20 @@ You can install `just` using cargo:
 cargo install just
 ```
 
-But we **highly recommend** to [install it using an OS package manager](https://github.com/casey/just#packages),
-so you won't need to prefix every command with `cargo`.
+But we **highly recommend** to [install it using an OS package manager](https://github.com/casey/just#packages),  so you won't need to prefix every command with `cargo`.
 
 Once installed, run the following command install the required tools:
 
 ```shell
 just install-tools
 ```
+
+This command will install:
+- `cargo-binstall`, to install binary extensions for `cargo`.
+- `cargo-insta`, a `cargo` extension to manage snapshot testing inside the repository.
+- `cargo-nextest`, a `cargo` extension to for optionally running tests faster.
+- `taplo-cli`, a small tool for formatting TOML files.
+- `wasm-pack` and `wasm-tools` for managing the WASM build of Biome.
 
 And you're good to go hack with Biome and Rust! 🚀
 
@@ -117,7 +118,45 @@ To know the technical details of how our formatter works and how to write test, 
 
 ### Testing
 
-To run the tests, just run
+You can either use `cargo` or `just` to run tests. For simplicity and running tests real quick, use `cargo`.
+
+With `cargo`, you can run tests with using the `test` command:
+
+```shell
+# run tests
+cargo test
+
+# or use the shortcut
+cargo t
+```
+
+If you run `cargo t` from the root, it will run **all** tests of the whole repository. If you're inside a crate folder, `cargo` will run **tests of that crate**:
+
+```shell
+cd crates/biome_cli
+
+# it will run only the tests of the `biome_cli` crate
+cargo t
+```
+
+You can run **a single test** with cargo by passing the test name after the `test` command:
+
+```shell
+cd crate/biome_js_formatter
+
+cargo t quick_test
+```
+
+This will run the `quick_test` test inside he `biome_js_formatter` crate. You should see an output similar to this:
+
+```shell
+running 1 test
+test quick_test::quick_test ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 224 filtered out; finished in 0.02s
+```
+
+You can also use `just` for running tests. With `just`, the scripts will use the same test runner we use in the CI.
 
 ```shell
 just test
@@ -135,15 +174,27 @@ To run only the doctests, you would need to pass an argument to the command:
 just test-doc
 ```
 
-In some crates, we use snapshot testing.
-The majority of snapshot testing is done using [`insta`](https://insta.rs).
-`insta` is already installed by the command `just install-tools`.
+In some crates, we use snapshot testing. The majority of snapshot testing is done using [`insta`](https://insta.rs). `insta` is already installed by the command `just install-tools`.
 
 When a snapshot test fails, you can run:
 
 - `cargo insta accept` to accept all the changes and update all the snapshots;
 - `cargo insta reject` to reject all the changes;
 - `cargo insta review` to review snapshots singularly;
+
+### Debugging
+
+Sometimes you want to debug something when running tests. Like `console.log`, in JavaScript, in Rust you can use the macro `dbg!()` to print something during debugging something. Then, pass the option `--show-output` to `cargo`:
+
+```rs
+fn some_function() {
+    dbg!(&some_variable);
+}
+```
+
+```shell
+cargo t --show-output
+```
 
 ### Checks
 
@@ -156,27 +207,6 @@ just ready
 
 This command will run the same commands of the CI: format, lint, tests and code generation.
 Eventually everything should be "green" 🟢 and commit all the code that was generated.
-
-#### Generated files
-
-If you work on some parser and create new nodes or modify existing ones, you must run a command to update some auto-generated files.
-
-##### `cargo codegen grammar`
-
-This command will update the syntax of the parsers.
-
-The source is generated from the [`ungram` files](https://github.com/biomejs/biome/blob/main/xtask/codegen/js.ungram).
-
-##### `cargo codegen test`
-
-This command will create new tests for JS or JSON parser.
-These tests are generated from inline comments found inside the source code.
-
-On the other hand, we are moving away from this approach and have a straightforward process in other parser implementation like CSS.
-
-##### `cargo codegen analyzer`
-
-This command will detect linter rules declared in the `analyzers`, `assists` and `syntax` directories in the analyzer crates, e.g. `biome_js_analyze`, `biome_json_analyze`, etc., and regenerate the `registry.rs` file and its dependents to include all the rules.
 
 ### crate dependencies
 
