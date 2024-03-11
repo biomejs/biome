@@ -120,7 +120,7 @@ dependencies = [
 
 [[package]]
 name = "biome_analyze"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -134,7 +134,7 @@ dependencies = [
 
 [[package]]
 name = "biome_aria"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_aria_metadata",
  "rustc-hash",
@@ -142,7 +142,7 @@ dependencies = [
 
 [[package]]
 name = "biome_aria_metadata"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "case",
  "proc-macro2",
@@ -197,7 +197,7 @@ dependencies = [
 
 [[package]]
 name = "biome_console"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_markup",
  "biome_text_size",
@@ -211,7 +211,7 @@ dependencies = [
 
 [[package]]
 name = "biome_control_flow"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_rowan",
  "rustc-hash",
@@ -219,7 +219,7 @@ dependencies = [
 
 [[package]]
 name = "biome_css_analyze"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_analyze",
  "biome_console",
@@ -238,7 +238,7 @@ dependencies = [
 
 [[package]]
 name = "biome_css_factory"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_css_syntax",
  "biome_rowan",
@@ -246,7 +246,7 @@ dependencies = [
 
 [[package]]
 name = "biome_css_formatter"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_css_factory",
  "biome_css_parser",
@@ -267,7 +267,7 @@ dependencies = [
 
 [[package]]
 name = "biome_css_parser"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_css_factory",
@@ -287,7 +287,7 @@ dependencies = [
 
 [[package]]
 name = "biome_css_syntax"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_rowan",
  "schemars",
@@ -296,7 +296,7 @@ dependencies = [
 
 [[package]]
 name = "biome_deserialize"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_deserialize_macros",
@@ -314,7 +314,7 @@ dependencies = [
 
 [[package]]
 name = "biome_deserialize_macros"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "convert_case",
  "proc-macro-error",
@@ -325,7 +325,7 @@ dependencies = [
 
 [[package]]
 name = "biome_diagnostics"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "backtrace",
  "biome_console",
@@ -347,7 +347,7 @@ dependencies = [
 
 [[package]]
 name = "biome_diagnostics_categories"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "quote",
  "schemars",
@@ -356,7 +356,7 @@ dependencies = [
 
 [[package]]
 name = "biome_diagnostics_macros"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -370,7 +370,7 @@ version = "0.0.0"
 
 [[package]]
 name = "biome_formatter"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_deserialize",
@@ -411,7 +411,7 @@ dependencies = [
 
 [[package]]
 name = "biome_fs"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -429,7 +429,7 @@ dependencies = [
 
 [[package]]
 name = "biome_grit_factory"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_grit_syntax",
  "biome_rowan",
@@ -437,7 +437,7 @@ dependencies = [
 
 [[package]]
 name = "biome_grit_syntax"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_rowan",
  "schemars",
@@ -446,7 +446,7 @@ dependencies = [
 
 [[package]]
 name = "biome_html_factory"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_html_syntax",
  "biome_rowan",
@@ -454,14 +454,14 @@ dependencies = [
 
 [[package]]
 name = "biome_html_syntax"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_rowan",
 ]
 
 [[package]]
 name = "biome_js_analyze"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_analyze",
  "biome_aria",
@@ -497,7 +497,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_factory"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_js_syntax",
  "biome_rowan",
@@ -505,7 +505,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_formatter"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_deserialize",
@@ -540,7 +540,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_parser"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -568,7 +568,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_semantic"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -582,7 +582,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_syntax"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -595,7 +595,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_transform"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_analyze",
  "biome_console",
@@ -613,7 +613,7 @@ dependencies = [
 
 [[package]]
 name = "biome_json_analyze"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_analyze",
  "biome_console",
@@ -632,7 +632,7 @@ dependencies = [
 
 [[package]]
 name = "biome_json_factory"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_json_syntax",
  "biome_rowan",
@@ -640,7 +640,7 @@ dependencies = [
 
 [[package]]
 name = "biome_json_formatter"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_deserialize",
  "biome_deserialize_macros",
@@ -664,7 +664,7 @@ dependencies = [
 
 [[package]]
 name = "biome_json_parser"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -683,7 +683,7 @@ dependencies = [
 
 [[package]]
 name = "biome_json_syntax"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_rowan",
  "schemars",
@@ -718,7 +718,7 @@ dependencies = [
 
 [[package]]
 name = "biome_markup"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -745,7 +745,7 @@ dependencies = [
 
 [[package]]
 name = "biome_parser"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -756,7 +756,7 @@ dependencies = [
 
 [[package]]
 name = "biome_project"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_deserialize",
@@ -776,7 +776,7 @@ dependencies = [
 
 [[package]]
 name = "biome_rowan"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_text_edit",
  "biome_text_size",
@@ -840,7 +840,7 @@ dependencies = [
 
 [[package]]
 name = "biome_suppression"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -871,7 +871,7 @@ dependencies = [
 
 [[package]]
 name = "biome_text_edit"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "biome_text_size",
  "schemars",
@@ -881,7 +881,7 @@ dependencies = [
 
 [[package]]
 name = "biome_text_size"
-version = "0.5.0"
+version = "0.5.4"
 dependencies = [
  "schemars",
  "serde",
@@ -895,7 +895,7 @@ version = "0.3.1"
 
 [[package]]
 name = "biome_unicode_table"
-version = "0.5.0"
+version = "0.5.4"
 
 [[package]]
 name = "biome_wasm"
