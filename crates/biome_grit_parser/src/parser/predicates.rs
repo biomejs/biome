@@ -1,5 +1,5 @@
 use super::literals::{parse_boolean_literal, parse_literal};
-use super::parse_error::{expected_pattern, expected_predicate};
+use super::parse_error::*;
 use super::patterns::{parse_container, parse_pattern};
 use super::{constants::*, parse_name, parse_named_arg_list};
 use super::{parse_not, GritParser};
@@ -60,6 +60,7 @@ enum InfixPredicateKind {
     Match,
     NotEqual,
     Rewrite,
+    Bogus,
 }
 
 /// Parses any of the infix predicates without need for backtracking.
@@ -85,8 +86,11 @@ fn parse_infix_predicate(p: &mut GritParser) -> ParsedSyntax {
         T![!=] => NotEqual,
         T![=>] => Rewrite,
         _ => {
-            m.abandon(p);
-            return Absent;
+            p.err_and_bump(
+                expected_predicate_infix_operator(p, p.cur_range()),
+                GRIT_BOGUS,
+            );
+            Bogus
         }
     };
 
@@ -122,6 +126,7 @@ fn parse_infix_predicate(p: &mut GritParser) -> ParsedSyntax {
         Match => GRIT_PREDICATE_MATCH,
         NotEqual => GRIT_PREDICATE_NOT_EQUAL,
         Rewrite => GRIT_PREDICATE_REWRITE,
+        Bogus => GRIT_BOGUS_PREDICATE,
     };
     Present(m.complete(p, kind))
 }

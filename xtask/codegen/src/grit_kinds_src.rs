@@ -161,7 +161,6 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
         "GRIT_LIST",
         "GRIT_LIST_PATTERN_LIST",
         "GRIT_LIST_ACCESSOR",
-        "GRIT_LIST_INDEX",
         "GRIT_DOT",
         "GRIT_DOTDOTDOT",
         "GRIT_SOME",

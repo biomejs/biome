@@ -130,14 +130,11 @@ pub(crate) fn parse_list(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     let _ = parse_name(p);
 
-    if !p.eat(T!['[']) {
-        m.abandon(p);
-        return Absent;
-    }
+    p.expect(T!['[']);
 
     let _ = parse_list_pattern_list(p);
 
-    p.eat(T![']']);
+    p.expect(T![']']);
     Present(m.complete(p, GRIT_LIST))
 }
 
@@ -159,7 +156,7 @@ fn parse_list_pattern(p: &mut GritParser) -> ParsedSyntax {
     if p.at(DOT3) {
         parse_dotdotdot(p)
     } else {
-        parse_literal(p)
+        parse_pattern(p)
     }
 }
 

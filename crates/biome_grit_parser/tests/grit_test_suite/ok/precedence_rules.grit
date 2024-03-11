@@ -1,0 +1,13 @@
+js"math($a)" where {
+  // Should be evaluated as:
+  // $b = ((1 + $a) * (2 + $a)) / (3 - $a),
+  //      ^-------------------^----- evaluation goes from left to right
+  $b = (1 + $a) * (2 + $a) / (3 - $a),
+  // Should be evaluated as:
+  // $c = ((1 + ($b * 2)) + ($b / 3)) - $b,
+  $c = 1 + $b * 2 + $b / 3 - $b,
+  $d = { c: $c },
+  $e = { d: $d },
+  $f = [$e],
+  $a => $f[0].d.c
+}

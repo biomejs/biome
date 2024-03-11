@@ -30,6 +30,16 @@ pub(crate) fn expected_predicate(p: &GritParser, range: TextRange) -> ParseDiagn
     expected_node("predicate", range, p)
 }
 
+pub(crate) fn expected_predicate_infix_operator(
+    p: &GritParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected an operator valid inside predicates; must be one of `+=`, `=`, `==`, `>`, `>=`, `<`, `<=`, `<:`, `!=`, or `=>`.",
+        range,
+    )
+}
+
 pub(crate) fn expected_variable(p: &GritParser, range: TextRange) -> ParseDiagnostic {
     expected_node("variable", range, p)
 }

@@ -24,6 +24,19 @@ pub(crate) const PATTERN_ELSE_RECOVERY_SET: TokenSet<GritSyntaxKind> =
 pub(crate) const PATTERN_UNTIL_RECOVERY_SET: TokenSet<GritSyntaxKind> =
     token_set!(T![')'], T!['}'], UNTIL_KW, EOF);
 
+pub(crate) const PRECEDENCE_NOT: isize = 0;
+pub(crate) const PRECEDENCE_PATTERN_AS: isize = 10;
+pub(crate) const PRECEDENCE_MUL: isize = 8;
+pub(crate) const PRECEDENCE_DIV: isize = 8;
+pub(crate) const PRECEDENCE_MOD: isize = 8;
+pub(crate) const PRECEDENCE_ADD: isize = 7;
+pub(crate) const PRECEDENCE_SUB: isize = 7;
+pub(crate) const PRECEDENCE_REWRITE: isize = 3;
+pub(crate) const PRECEDENCE_ACCUMULATE: isize = 3;
+pub(crate) const PRECEDENCE_PATTERN_LIMIT: isize = 1;
+pub(crate) const PRECEDENCE_PATTERN_WHERE: isize = 1;
+pub(crate) const PRECEDENCE_PATTERN: isize = -20;
+
 pub(crate) const PREDICATE_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(T![')']);
 
 pub(crate) const REGEX_SET: TokenSet<GritSyntaxKind> = token_set![GRIT_REGEX, GRIT_SNIPPET_REGEX];

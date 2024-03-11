@@ -10,7 +10,77 @@ use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::{ParsedSyntax::*, *};
 
 pub(crate) fn parse_pattern(p: &mut GritParser) -> ParsedSyntax {
-    let left = match p.cur() {
+    parse_pattern_with_precedence(p, PRECEDENCE_PATTERN)
+}
+
+#[inline]
+fn parse_pattern_with_precedence(p: &mut GritParser, min_precedence: isize) -> ParsedSyntax {
+    let Present(mut left) = parse_pattern_left(p) else {
+        return Absent;
+    };
+
+    if min_precedence <= PRECEDENCE_PATTERN_AS && p.cur() == AS_KW {
+        match parse_pattern_as(p, left) {
+            Present(syntax) => left = syntax,
+            Absent => return Absent,
+        }
+    }
+
+    if let Some(math_operator) = MathOperator::from_token(p.cur()) {
+        if min_precedence <= math_operator.precedence() {
+            match parse_math_pattern(p, left, math_operator) {
+                Present(syntax) => left = syntax,
+                Absent => return Absent,
+            }
+        }
+    }
+
+    if min_precedence <= PRECEDENCE_REWRITE && p.cur() == T![=>] {
+        match parse_rewrite(p, left) {
+            Present(syntax) => left = syntax,
+            Absent => return Absent,
+        }
+    }
+
+    if min_precedence <= PRECEDENCE_ACCUMULATE && p.cur() == T![+=] {
+        match parse_pattern_accumulate(p, left) {
+            Present(syntax) => left = syntax,
+            Absent => return Absent,
+        }
+    }
+
+    if min_precedence <= PRECEDENCE_PATTERN_LIMIT && p.cur() == LIMIT_KW {
+        match parse_pattern_limit(p, left) {
+            Present(syntax) => left = syntax,
+            Absent => return Absent,
+        }
+    }
+
+    if min_precedence <= PRECEDENCE_PATTERN_WHERE && p.cur() == WHERE_KW {
+        match parse_pattern_where(p, left) {
+            Present(syntax) => left = syntax,
+            Absent => return Absent,
+        }
+    }
+
+    if min_precedence <= PRECEDENCE_NOT && p.cur() == T![=] && CONTAINER_SET.contains(left.kind(p))
+    {
+        match parse_assignment_as_pattern(p, left) {
+            Present(syntax) => left = syntax,
+            Absent => return Absent,
+        }
+    }
+
+    match p.cur() {
+        T![.] => parse_map_accessor(p, left),
+        T!['['] => parse_list_accessor(p, left),
+        _ => Present(left),
+    }
+}
+
+#[inline]
+fn parse_pattern_left(p: &mut GritParser) -> ParsedSyntax {
+    match p.cur() {
         NOT_KW | T![!] => parse_pattern_not(p),
         OR_KW => parse_pattern_or(p),
         ORELSE_KW => parse_pattern_orelse(p),
@@ -36,73 +106,6 @@ pub(crate) fn parse_pattern(p: &mut GritParser) -> ParsedSyntax {
         MULTIFILE_KW => parse_files(p),
         T!['('] => parse_bracketed_pattern(p),
         _ => parse_literal(p),
-    };
-
-    let Present(left) = left else {
-        return Absent;
-    };
-
-    // precedence: 10
-    let left = match p.cur() {
-        AS_KW => parse_pattern_as(p, left),
-        _ => Present(left),
-    };
-
-    let Present(left) = left else {
-        return Absent;
-    };
-
-    // precedence: 8
-    let left = match p.cur() {
-        T![*] => parse_pattern_operation(p, left, T![*]),
-        T![/] => parse_pattern_operation(p, left, T![/]),
-        T![%] => parse_pattern_operation(p, left, T![%]),
-        _ => Present(left),
-    };
-
-    let Present(left) = left else {
-        return Absent;
-    };
-
-    // precedence: 7
-    let left = match p.cur() {
-        T![+] => parse_pattern_operation(p, left, T![+]),
-        T![-] => parse_pattern_operation(p, left, T![-]),
-        _ => Present(left),
-    };
-
-    let Present(left) = left else {
-        return Absent;
-    };
-
-    // precedence: 3
-    let left = match p.cur() {
-        T![=>] => parse_rewrite(p, left),
-        T![+=] => parse_pattern_accumulate(p, left),
-        T![.] => parse_map_accessor(p, left),
-        T!['['] => parse_list_accessor(p, left),
-        _ => Present(left),
-    };
-
-    let Present(left) = left else {
-        return Absent;
-    };
-
-    // precedence: 1
-    let left = match p.cur() {
-        LIMIT_KW => parse_pattern_limit(p, left),
-        WHERE_KW => parse_pattern_where(p, left),
-        _ => Present(left),
-    };
-
-    let Present(left) = left else {
-        return Absent;
-    };
-
-    // precedence: 0
-    match p.cur() {
-        T![=] if CONTAINER_SET.contains(left.kind(p)) => parse_assignment_as_pattern(p, left),
-        _ => Present(left),
     }
 }
 
@@ -115,7 +118,7 @@ fn parse_assignment_as_pattern(p: &mut GritParser, left: CompletedMarker) -> Par
     let m = left.precede(p);
     p.bump(T![=]);
 
-    parse_expected_pattern(p);
+    parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN_AS);
 
     Present(m.complete(p, GRIT_ASSIGNMENT_AS_PATTERN))
 }
@@ -129,7 +132,7 @@ fn parse_bracketed_pattern(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T!['(']);
 
-    parse_expected_pattern(p);
+    parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN);
 
     p.expect(T![')']);
 
@@ -147,7 +150,7 @@ fn parse_bubble(p: &mut GritParser) -> ParsedSyntax {
 
     let _ = parse_bubble_scope(p);
 
-    parse_expected_pattern(p);
+    parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN);
 
     Present(m.complete(p, GRIT_BUBBLE))
 }
@@ -198,7 +201,7 @@ fn parse_curly_pattern(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T!['{']);
 
-    parse_expected_pattern(p);
+    parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN);
 
     p.expect(T!['}']);
 
@@ -235,8 +238,8 @@ fn parse_every(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_expected_pattern(p: &mut GritParser) {
-    let _ = parse_pattern(p).or_recover_with_token_set(
+fn parse_expected_pattern_with_precedence(p: &mut GritParser, min_precedence: isize) {
+    let _ = parse_pattern_with_precedence(p, min_precedence).or_recover_with_token_set(
         p,
         &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
         expected_pattern,
@@ -285,7 +288,7 @@ fn parse_like(p: &mut GritParser) -> ParsedSyntax {
 
     p.expect(T!['{']);
 
-    parse_expected_pattern(p);
+    parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN);
 
     p.expect(T!['}']);
 
@@ -301,7 +304,7 @@ fn parse_like_threshold(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T!['(']);
 
-    parse_expected_pattern(p);
+    parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN);
 
     p.expect(T![')']);
 
@@ -321,28 +324,22 @@ pub(crate) fn parse_list_accessor(p: &mut GritParser, left: CompletedMarker) -> 
 
     p.expect(T![']']);
 
-    // FIXME: We should check whether the accessor needs to be extended.
+    let left = m.complete(p, GRIT_LIST_ACCESSOR);
 
-    Present(m.complete(p, GRIT_LIST_ACCESSOR))
+    match p.cur() {
+        T!['['] => parse_list_accessor(p, left),
+        T![.] => parse_map_accessor(p, left),
+        _ => Present(left),
+    }
 }
 
 #[inline]
 fn parse_list_index(p: &mut GritParser) -> ParsedSyntax {
-    let m = p.start();
-
-    let _ = match p.cur() {
+    match p.cur() {
         GRIT_INT => parse_int_literal(p),
         GRIT_NEGATIVE_INT => parse_negative_int_literal(p),
-        _ => match parse_container(p) {
-            Present(syntax) => Present(syntax),
-            Absent => {
-                m.abandon(p);
-                return Absent;
-            }
-        },
-    };
-
-    Present(m.complete(p, GRIT_LIST_INDEX))
+        _ => parse_container(p),
+    }
 }
 
 #[inline]
@@ -356,9 +353,13 @@ pub(crate) fn parse_map_accessor(p: &mut GritParser, left: CompletedMarker) -> P
 
     let _ = parse_map_key(p);
 
-    // FIXME: We should check whether the accessor needs to be extended.
+    let left = m.complete(p, GRIT_MAP_ACCESSOR);
 
-    Present(m.complete(p, GRIT_MAP_ACCESSOR))
+    match p.cur() {
+        T!['['] => parse_list_accessor(p, left),
+        T![.] => parse_map_accessor(p, left),
+        _ => Present(left),
+    }
 }
 
 #[inline]
@@ -367,6 +368,102 @@ fn parse_map_key(p: &mut GritParser) -> ParsedSyntax {
         GRIT_NAME => parse_name(p),
         GRIT_VARIABLE => parse_variable(p),
         _ => Absent,
+    }
+}
+
+#[derive(Clone, Copy)]
+enum MathOperator {
+    Mul,
+    Div,
+    Mod,
+    Add,
+    Sub,
+}
+
+impl MathOperator {
+    #[inline]
+    fn from_token(token_kind: GritSyntaxKind) -> Option<Self> {
+        use MathOperator::*;
+        match token_kind {
+            T![*] => Some(Mul),
+            T![/] => Some(Div),
+            T![%] => Some(Mod),
+            T![+] => Some(Add),
+            T![-] => Some(Sub),
+            _ => None,
+        }
+    }
+
+    #[inline]
+    fn operation_kind(self) -> GritSyntaxKind {
+        use MathOperator::*;
+        match self {
+            Mul => GRIT_MUL_OPERATION,
+            Div => GRIT_DIV_OPERATION,
+            Mod => GRIT_MOD_OPERATION,
+            Add => GRIT_ADD_OPERATION,
+            Sub => GRIT_SUB_OPERATION,
+        }
+    }
+
+    #[inline]
+    fn precedence(self) -> isize {
+        use MathOperator::*;
+        match self {
+            Mul => PRECEDENCE_MUL,
+            Div => PRECEDENCE_DIV,
+            Mod => PRECEDENCE_MOD,
+            Add => PRECEDENCE_ADD,
+            Sub => PRECEDENCE_SUB,
+        }
+    }
+
+    #[inline]
+    fn token_kind(self) -> GritSyntaxKind {
+        use MathOperator::*;
+        match self {
+            Mul => T![*],
+            Div => T![/],
+            Mod => T![%],
+            Add => T![+],
+            Sub => T![-],
+        }
+    }
+}
+
+#[inline]
+fn parse_math_pattern(
+    p: &mut GritParser,
+    left: CompletedMarker,
+    operator: MathOperator,
+) -> ParsedSyntax {
+    if !p.at(operator.token_kind()) {
+        return Absent;
+    }
+
+    let m = left.precede(p);
+    p.bump(operator.token_kind());
+
+    let right = parse_pattern_left(p);
+
+    match (MathOperator::from_token(p.cur()), right) {
+        (Some(next_operator), _) if next_operator.precedence() <= operator.precedence() => {
+
+        }
+
+    match MathOperator::from_token(p.cur()) {
+        Some(next_operator) => {
+            if next_operator.precedence() <= operator.precedence() {
+                let left = m.complete(p, operator.operation_kind());
+                parse_math_pattern(p, left, operator)
+            } else if let Present(right) = right {
+                let _ = parse_math_pattern(p, right, operator);
+                Present(m.complete(p, operator.operation_kind()))
+            } else {
+                Present(m.complete(p, operator.operation_kind()))
+            }
+        }
+        _ => Present(m.complete(p, operator.operation_kind())),
     }
 }
 
@@ -446,32 +543,6 @@ fn parse_node_like(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_pattern_operation(
-    p: &mut GritParser,
-    left: CompletedMarker,
-    operator: GritSyntaxKind,
-) -> ParsedSyntax {
-    if !p.at(operator) {
-        return Absent;
-    }
-
-    let m = left.precede(p);
-    p.bump(operator);
-
-    let _ = parse_pattern(p);
-
-    let kind = match operator {
-        T![*] => GRIT_MUL_OPERATION,
-        T![/] => GRIT_DIV_OPERATION,
-        T![%] => GRIT_MOD_OPERATION,
-        T![+] => GRIT_ADD_OPERATION,
-        T![-] => GRIT_SUB_OPERATION,
-        _ => unreachable!("invalid operator: {operator:?}"),
-    };
-    Present(m.complete(p, kind))
-}
-
-#[inline]
 fn parse_pattern_accumulate(p: &mut GritParser, left: CompletedMarker) -> ParsedSyntax {
     if !p.at(T![+=]) {
         return Absent;
@@ -480,7 +551,7 @@ fn parse_pattern_accumulate(p: &mut GritParser, left: CompletedMarker) -> Parsed
     let m = left.precede(p);
     p.bump(T![+=]);
 
-    parse_expected_pattern(p);
+    parse_expected_pattern_with_precedence(p, PRECEDENCE_ACCUMULATE);
 
     Present(m.complete(p, GRIT_PATTERN_ACCUMULATE))
 }
@@ -494,7 +565,7 @@ fn parse_pattern_after(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(AFTER_KW);
 
-    parse_expected_pattern(p);
+    parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN);
 
     Present(m.complete(p, GRIT_PATTERN_AFTER))
 }
@@ -565,7 +636,7 @@ fn parse_pattern_before(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(BEFORE_KW);
 
-    parse_expected_pattern(p);
+    parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN);
 
     Present(m.complete(p, GRIT_PATTERN_BEFORE))
 }
@@ -598,7 +669,7 @@ fn parse_pattern_contains_until_clause(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(UNTIL_KW);
 
-    parse_expected_pattern(p);
+    parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN);
 
     Present(m.complete(p, GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE))
 }
@@ -716,7 +787,7 @@ fn parse_pattern_not(p: &mut GritParser) -> ParsedSyntax {
         Absent => return Absent,
     };
 
-    let _ = parse_pattern(p).or_recover_with_token_set(
+    let _ = parse_pattern_with_precedence(p, PRECEDENCE_NOT).or_recover_with_token_set(
         p,
         &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
         expected_pattern,
@@ -842,7 +913,7 @@ fn parse_rewrite(p: &mut GritParser, left: CompletedMarker) -> ParsedSyntax {
     let m = left.precede(p);
     p.bump(T![=>]);
 
-    let _ = parse_pattern(p).or_recover_with_token_set(
+    let _ = parse_pattern_with_precedence(p, PRECEDENCE_REWRITE).or_recover_with_token_set(
         p,
         &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
         expected_pattern,
