@@ -11,14 +11,14 @@ impl FormatRule<AnyJsDeclarationClause> for FormatAnyJsDeclarationClause {
             AnyJsDeclarationClause::JsClassDeclaration(node) => node.format().fmt(f),
             AnyJsDeclarationClause::JsFunctionDeclaration(node) => node.format().fmt(f),
             AnyJsDeclarationClause::JsVariableDeclarationClause(node) => node.format().fmt(f),
-            AnyJsDeclarationClause::TsEnumDeclaration(node) => node.format().fmt(f),
-            AnyJsDeclarationClause::TsTypeAliasDeclaration(node) => node.format().fmt(f),
-            AnyJsDeclarationClause::TsInterfaceDeclaration(node) => node.format().fmt(f),
             AnyJsDeclarationClause::TsDeclareFunctionDeclaration(node) => node.format().fmt(f),
-            AnyJsDeclarationClause::TsModuleDeclaration(node) => node.format().fmt(f),
+            AnyJsDeclarationClause::TsEnumDeclaration(node) => node.format().fmt(f),
             AnyJsDeclarationClause::TsExternalModuleDeclaration(node) => node.format().fmt(f),
             AnyJsDeclarationClause::TsGlobalDeclaration(node) => node.format().fmt(f),
             AnyJsDeclarationClause::TsImportEqualsDeclaration(node) => node.format().fmt(f),
+            AnyJsDeclarationClause::TsInterfaceDeclaration(node) => node.format().fmt(f),
+            AnyJsDeclarationClause::TsModuleDeclaration(node) => node.format().fmt(f),
+            AnyJsDeclarationClause::TsTypeAliasDeclaration(node) => node.format().fmt(f),
         }
     }
 }

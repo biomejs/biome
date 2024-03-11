@@ -8,10 +8,10 @@ impl FormatRule<AnyTsTupleTypeElement> for FormatAnyTsTupleTypeElement {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyTsTupleTypeElement, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyTsTupleTypeElement::TsNamedTupleTypeElement(node) => node.format().fmt(f),
             AnyTsTupleTypeElement::AnyTsType(node) => node.format().fmt(f),
-            AnyTsTupleTypeElement::TsRestTupleTypeElement(node) => node.format().fmt(f),
+            AnyTsTupleTypeElement::TsNamedTupleTypeElement(node) => node.format().fmt(f),
             AnyTsTupleTypeElement::TsOptionalTupleTypeElement(node) => node.format().fmt(f),
+            AnyTsTupleTypeElement::TsRestTupleTypeElement(node) => node.format().fmt(f),
         }
     }
 }

@@ -8,9 +8,9 @@ impl FormatRule<AnyCssDocumentMatcher> for FormatAnyCssDocumentMatcher {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssDocumentMatcher, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssDocumentMatcher::CssUrlFunction(node) => node.format().fmt(f),
-            AnyCssDocumentMatcher::CssDocumentCustomMatcher(node) => node.format().fmt(f),
             AnyCssDocumentMatcher::CssBogusDocumentMatcher(node) => node.format().fmt(f),
+            AnyCssDocumentMatcher::CssDocumentCustomMatcher(node) => node.format().fmt(f),
+            AnyCssDocumentMatcher::CssUrlFunction(node) => node.format().fmt(f),
         }
     }
 }

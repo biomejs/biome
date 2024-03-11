@@ -8,23 +8,23 @@ impl FormatRule<AnyJsClassMember> for FormatAnyJsClassMember {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsClassMember, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
+            AnyJsClassMember::JsBogusMember(node) => node.format().fmt(f),
             AnyJsClassMember::JsConstructorClassMember(node) => node.format().fmt(f),
-            AnyJsClassMember::JsStaticInitializationBlockClassMember(node) => node.format().fmt(f),
-            AnyJsClassMember::JsPropertyClassMember(node) => node.format().fmt(f),
-            AnyJsClassMember::JsMethodClassMember(node) => node.format().fmt(f),
+            AnyJsClassMember::JsEmptyClassMember(node) => node.format().fmt(f),
             AnyJsClassMember::JsGetterClassMember(node) => node.format().fmt(f),
+            AnyJsClassMember::JsMethodClassMember(node) => node.format().fmt(f),
+            AnyJsClassMember::JsPropertyClassMember(node) => node.format().fmt(f),
             AnyJsClassMember::JsSetterClassMember(node) => node.format().fmt(f),
+            AnyJsClassMember::JsStaticInitializationBlockClassMember(node) => node.format().fmt(f),
             AnyJsClassMember::TsConstructorSignatureClassMember(node) => node.format().fmt(f),
-            AnyJsClassMember::TsPropertySignatureClassMember(node) => node.format().fmt(f),
+            AnyJsClassMember::TsGetterSignatureClassMember(node) => node.format().fmt(f),
+            AnyJsClassMember::TsIndexSignatureClassMember(node) => node.format().fmt(f),
             AnyJsClassMember::TsInitializedPropertySignatureClassMember(node) => {
                 node.format().fmt(f)
             }
             AnyJsClassMember::TsMethodSignatureClassMember(node) => node.format().fmt(f),
-            AnyJsClassMember::TsGetterSignatureClassMember(node) => node.format().fmt(f),
+            AnyJsClassMember::TsPropertySignatureClassMember(node) => node.format().fmt(f),
             AnyJsClassMember::TsSetterSignatureClassMember(node) => node.format().fmt(f),
-            AnyJsClassMember::TsIndexSignatureClassMember(node) => node.format().fmt(f),
-            AnyJsClassMember::JsEmptyClassMember(node) => node.format().fmt(f),
-            AnyJsClassMember::JsBogusMember(node) => node.format().fmt(f),
         }
     }
 }

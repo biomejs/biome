@@ -56,6 +56,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+#### Bug fixes
+
+- JavaScript lexer is now able to lex regular expression literals with escaped non-ascii chars ([#1941](https://github.com/biomejs/biome/issues/1941)).
+
+  Contributed by @Sec-ant
 
 ## 1.6.0 (2024-03-08)
 

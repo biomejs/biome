@@ -8,9 +8,9 @@ impl FormatRule<AnyJsMethodModifier> for FormatAnyJsMethodModifier {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsMethodModifier, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyJsMethodModifier::TsAccessibilityModifier(node) => node.format().fmt(f),
-            AnyJsMethodModifier::JsStaticModifier(node) => node.format().fmt(f),
             AnyJsMethodModifier::JsDecorator(node) => node.format().fmt(f),
+            AnyJsMethodModifier::JsStaticModifier(node) => node.format().fmt(f),
+            AnyJsMethodModifier::TsAccessibilityModifier(node) => node.format().fmt(f),
             AnyJsMethodModifier::TsOverrideModifier(node) => node.format().fmt(f),
         }
     }

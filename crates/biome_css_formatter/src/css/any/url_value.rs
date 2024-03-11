@@ -8,8 +8,8 @@ impl FormatRule<AnyCssUrlValue> for FormatAnyCssUrlValue {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssUrlValue, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssUrlValue::CssUrlValueRaw(node) => node.format().fmt(f),
             AnyCssUrlValue::CssString(node) => node.format().fmt(f),
+            AnyCssUrlValue::CssUrlValueRaw(node) => node.format().fmt(f),
         }
     }
 }

@@ -8,10 +8,10 @@ impl FormatRule<AnyCssContainerQuery> for FormatAnyCssContainerQuery {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssContainerQuery, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
+            AnyCssContainerQuery::AnyCssContainerQueryInParens(node) => node.format().fmt(f),
+            AnyCssContainerQuery::CssContainerAndQuery(node) => node.format().fmt(f),
             AnyCssContainerQuery::CssContainerNotQuery(node) => node.format().fmt(f),
             AnyCssContainerQuery::CssContainerOrQuery(node) => node.format().fmt(f),
-            AnyCssContainerQuery::CssContainerAndQuery(node) => node.format().fmt(f),
-            AnyCssContainerQuery::AnyCssContainerQueryInParens(node) => node.format().fmt(f),
         }
     }
 }

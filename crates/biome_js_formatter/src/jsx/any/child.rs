@@ -9,11 +9,11 @@ impl FormatRule<AnyJsxChild> for FormatAnyJsxChild {
     fn fmt(&self, node: &AnyJsxChild, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyJsxChild::JsxElement(node) => node.format().fmt(f),
-            AnyJsxChild::JsxSelfClosingElement(node) => node.format().fmt(f),
-            AnyJsxChild::JsxText(node) => node.format().fmt(f),
             AnyJsxChild::JsxExpressionChild(node) => node.format().fmt(f),
-            AnyJsxChild::JsxSpreadChild(node) => node.format().fmt(f),
             AnyJsxChild::JsxFragment(node) => node.format().fmt(f),
+            AnyJsxChild::JsxSelfClosingElement(node) => node.format().fmt(f),
+            AnyJsxChild::JsxSpreadChild(node) => node.format().fmt(f),
+            AnyJsxChild::JsxText(node) => node.format().fmt(f),
         }
     }
 }

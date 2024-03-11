@@ -8,8 +8,8 @@ impl FormatRule<AnyCssFontFeatureValuesBlock> for FormatAnyCssFontFeatureValuesB
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssFontFeatureValuesBlock, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssFontFeatureValuesBlock::CssFontFeatureValuesBlock(node) => node.format().fmt(f),
             AnyCssFontFeatureValuesBlock::CssBogusBlock(node) => node.format().fmt(f),
+            AnyCssFontFeatureValuesBlock::CssFontFeatureValuesBlock(node) => node.format().fmt(f),
         }
     }
 }
