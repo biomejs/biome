@@ -14,3 +14,12 @@ const YY = Y;
 
 import { type X, type Y, type Z } from "";
 export type { X, Y, Z };
+
+// multiline
+import {
+    U,
+    V,
+    // leading comment
+    W,
+} from "";
+export { U, type V, type W };

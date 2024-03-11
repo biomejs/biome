@@ -4,77 +4,43 @@ use crate::{
     AsFormat, FormatBogusNodeRule, FormatNodeRule, IntoFormat, JsonFormatContext, JsonFormatter,
 };
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatRule};
-impl FormatRule<biome_json_syntax::JsonRoot> for crate::json::auxiliary::root::FormatJsonRoot {
-    type Context = JsonFormatContext;
-    #[inline(always)]
-    fn fmt(&self, node: &biome_json_syntax::JsonRoot, f: &mut JsonFormatter) -> FormatResult<()> {
-        FormatNodeRule::<biome_json_syntax::JsonRoot>::fmt(self, node, f)
-    }
-}
-impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonRoot {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_json_syntax::JsonRoot,
-        crate::json::auxiliary::root::FormatJsonRoot,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::json::auxiliary::root::FormatJsonRoot::default(),
-        )
-    }
-}
-impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonRoot {
-    type Format = FormatOwnedWithRule<
-        biome_json_syntax::JsonRoot,
-        crate::json::auxiliary::root::FormatJsonRoot,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::json::auxiliary::root::FormatJsonRoot::default(),
-        )
-    }
-}
-impl FormatRule<biome_json_syntax::JsonStringValue>
-    for crate::json::value::string_value::FormatJsonStringValue
+impl FormatRule<biome_json_syntax::JsonArrayValue>
+    for crate::json::value::array_value::FormatJsonArrayValue
 {
     type Context = JsonFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_json_syntax::JsonStringValue,
+        node: &biome_json_syntax::JsonArrayValue,
         f: &mut JsonFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_json_syntax::JsonStringValue>::fmt(self, node, f)
+        FormatNodeRule::<biome_json_syntax::JsonArrayValue>::fmt(self, node, f)
     }
 }
-impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonStringValue {
+impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonArrayValue {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_json_syntax::JsonStringValue,
-        crate::json::value::string_value::FormatJsonStringValue,
+        biome_json_syntax::JsonArrayValue,
+        crate::json::value::array_value::FormatJsonArrayValue,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::json::value::string_value::FormatJsonStringValue::default(),
+            crate::json::value::array_value::FormatJsonArrayValue::default(),
         )
     }
 }
-impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonStringValue {
+impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonArrayValue {
     type Format = FormatOwnedWithRule<
-        biome_json_syntax::JsonStringValue,
-        crate::json::value::string_value::FormatJsonStringValue,
+        biome_json_syntax::JsonArrayValue,
+        crate::json::value::array_value::FormatJsonArrayValue,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::json::value::string_value::FormatJsonStringValue::default(),
+            crate::json::value::array_value::FormatJsonArrayValue::default(),
         )
     }
 }
@@ -115,6 +81,82 @@ impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonBooleanValue {
         FormatOwnedWithRule::new(
             self,
             crate::json::value::boolean_value::FormatJsonBooleanValue::default(),
+        )
+    }
+}
+impl FormatRule<biome_json_syntax::JsonMember>
+    for crate::json::auxiliary::member::FormatJsonMember
+{
+    type Context = JsonFormatContext;
+    #[inline(always)]
+    fn fmt(&self, node: &biome_json_syntax::JsonMember, f: &mut JsonFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_json_syntax::JsonMember>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonMember {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_json_syntax::JsonMember,
+        crate::json::auxiliary::member::FormatJsonMember,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::json::auxiliary::member::FormatJsonMember::default(),
+        )
+    }
+}
+impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonMember {
+    type Format = FormatOwnedWithRule<
+        biome_json_syntax::JsonMember,
+        crate::json::auxiliary::member::FormatJsonMember,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::json::auxiliary::member::FormatJsonMember::default(),
+        )
+    }
+}
+impl FormatRule<biome_json_syntax::JsonMemberName>
+    for crate::json::auxiliary::member_name::FormatJsonMemberName
+{
+    type Context = JsonFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_json_syntax::JsonMemberName,
+        f: &mut JsonFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_json_syntax::JsonMemberName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonMemberName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_json_syntax::JsonMemberName,
+        crate::json::auxiliary::member_name::FormatJsonMemberName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::json::auxiliary::member_name::FormatJsonMemberName::default(),
+        )
+    }
+}
+impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonMemberName {
+    type Format = FormatOwnedWithRule<
+        biome_json_syntax::JsonMemberName,
+        crate::json::auxiliary::member_name::FormatJsonMemberName,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::json::auxiliary::member_name::FormatJsonMemberName::default(),
         )
     }
 }
@@ -198,46 +240,6 @@ impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonNumberValue {
         )
     }
 }
-impl FormatRule<biome_json_syntax::JsonArrayValue>
-    for crate::json::value::array_value::FormatJsonArrayValue
-{
-    type Context = JsonFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_json_syntax::JsonArrayValue,
-        f: &mut JsonFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_json_syntax::JsonArrayValue>::fmt(self, node, f)
-    }
-}
-impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonArrayValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_json_syntax::JsonArrayValue,
-        crate::json::value::array_value::FormatJsonArrayValue,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::json::value::array_value::FormatJsonArrayValue::default(),
-        )
-    }
-}
-impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonArrayValue {
-    type Format = FormatOwnedWithRule<
-        biome_json_syntax::JsonArrayValue,
-        crate::json::value::array_value::FormatJsonArrayValue,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::json::value::array_value::FormatJsonArrayValue::default(),
-        )
-    }
-}
 impl FormatRule<biome_json_syntax::JsonObjectValue>
     for crate::json::value::object_value::FormatJsonObjectValue
 {
@@ -278,79 +280,77 @@ impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonObjectValue {
         )
     }
 }
-impl FormatRule<biome_json_syntax::JsonMember>
-    for crate::json::auxiliary::member::FormatJsonMember
-{
+impl FormatRule<biome_json_syntax::JsonRoot> for crate::json::auxiliary::root::FormatJsonRoot {
     type Context = JsonFormatContext;
     #[inline(always)]
-    fn fmt(&self, node: &biome_json_syntax::JsonMember, f: &mut JsonFormatter) -> FormatResult<()> {
-        FormatNodeRule::<biome_json_syntax::JsonMember>::fmt(self, node, f)
+    fn fmt(&self, node: &biome_json_syntax::JsonRoot, f: &mut JsonFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_json_syntax::JsonRoot>::fmt(self, node, f)
     }
 }
-impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonMember {
+impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonRoot {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_json_syntax::JsonMember,
-        crate::json::auxiliary::member::FormatJsonMember,
+        biome_json_syntax::JsonRoot,
+        crate::json::auxiliary::root::FormatJsonRoot,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::json::auxiliary::member::FormatJsonMember::default(),
+            crate::json::auxiliary::root::FormatJsonRoot::default(),
         )
     }
 }
-impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonMember {
+impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonRoot {
     type Format = FormatOwnedWithRule<
-        biome_json_syntax::JsonMember,
-        crate::json::auxiliary::member::FormatJsonMember,
+        biome_json_syntax::JsonRoot,
+        crate::json::auxiliary::root::FormatJsonRoot,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::json::auxiliary::member::FormatJsonMember::default(),
+            crate::json::auxiliary::root::FormatJsonRoot::default(),
         )
     }
 }
-impl FormatRule<biome_json_syntax::JsonMemberName>
-    for crate::json::auxiliary::member_name::FormatJsonMemberName
+impl FormatRule<biome_json_syntax::JsonStringValue>
+    for crate::json::value::string_value::FormatJsonStringValue
 {
     type Context = JsonFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_json_syntax::JsonMemberName,
+        node: &biome_json_syntax::JsonStringValue,
         f: &mut JsonFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_json_syntax::JsonMemberName>::fmt(self, node, f)
+        FormatNodeRule::<biome_json_syntax::JsonStringValue>::fmt(self, node, f)
     }
 }
-impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonMemberName {
+impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonStringValue {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_json_syntax::JsonMemberName,
-        crate::json::auxiliary::member_name::FormatJsonMemberName,
+        biome_json_syntax::JsonStringValue,
+        crate::json::value::string_value::FormatJsonStringValue,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::json::auxiliary::member_name::FormatJsonMemberName::default(),
+            crate::json::value::string_value::FormatJsonStringValue::default(),
         )
     }
 }
-impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonMemberName {
+impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonStringValue {
     type Format = FormatOwnedWithRule<
-        biome_json_syntax::JsonMemberName,
-        crate::json::auxiliary::member_name::FormatJsonMemberName,
+        biome_json_syntax::JsonStringValue,
+        crate::json::value::string_value::FormatJsonStringValue,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::json::auxiliary::member_name::FormatJsonMemberName::default(),
+            crate::json::value::string_value::FormatJsonStringValue::default(),
         )
     }
 }

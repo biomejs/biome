@@ -2,31 +2,27 @@
 //! This is derived from rust-analyzer/xtask/codegen
 
 use std::collections::{HashMap, HashSet, VecDeque};
-use std::str::FromStr;
 use std::vec;
 
 use super::{
     js_kinds_src::{AstSrc, Field},
     to_lower_snake_case, Mode,
 };
-use crate::css_kinds_src::CSS_KINDS_SRC;
 use crate::generate_node_factory::generate_node_factory;
 use crate::generate_nodes_mut::generate_nodes_mut;
 use crate::generate_syntax_factory::generate_syntax_factory;
-use crate::grit_kinds_src::GRIT_KINDS_SRC;
-use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::js_kinds_src::{
-    AstEnumSrc, AstListSeparatorConfiguration, AstListSrc, AstNodeSrc, TokenKind, JS_KINDS_SRC,
+    AstEnumSrc, AstListSeparatorConfiguration, AstListSrc, AstNodeSrc, TokenKind,
 };
-use crate::json_kinds_src::JSON_KINDS_SRC;
+use crate::language_kind::{LanguageKind, ALL_LANGUAGE_KIND};
 use crate::termcolorful::{println_string_with_fg_color, Color};
-use crate::ALL_LANGUAGE_KIND;
 use crate::{
     generate_macros::generate_macros, generate_nodes::generate_nodes,
-    generate_syntax_kinds::generate_syntax_kinds, update, LanguageKind,
+    generate_syntax_kinds::generate_syntax_kinds, update,
 };
 use biome_ungrammar::{Grammar, Rule, Token};
 use std::fmt::Write;
+use std::str::FromStr;
 use xtask::{project_root, Result};
 
 // these node won't generate any code
@@ -52,8 +48,7 @@ pub fn generate_ast(mode: Mode, language_kind_list: Vec<String>) -> Result<()> {
             format!("-------------------Generating Grammar for {kind}-------------------"),
             Color::Green,
         );
-        let mut ast = load_ast(kind);
-        ast.sort();
+        let ast = load_ast(kind);
         generate_syntax(ast, &mode, kind)?;
     }
 
@@ -61,13 +56,14 @@ pub fn generate_ast(mode: Mode, language_kind_list: Vec<String>) -> Result<()> {
 }
 
 pub(crate) fn load_ast(language: LanguageKind) -> AstSrc {
-    match language {
-        LanguageKind::Js => load_js_ast(),
-        LanguageKind::Css => load_css_ast(),
-        LanguageKind::Json => load_json_ast(),
-        LanguageKind::Grit => load_gritql_ast(),
-        LanguageKind::Html => load_html_ast(),
+    let grammar_src = language.load_grammar();
+    let grammar: Grammar = grammar_src.parse().unwrap();
+    let mut ast: AstSrc = make_ast(&grammar);
+    if language == LanguageKind::Js {
+        check_unions(&ast.unions);
     }
+    ast.sort();
+    ast
 }
 
 pub(crate) fn generate_syntax(ast: AstSrc, mode: &Mode, language_kind: LanguageKind) -> Result<()> {
@@ -80,13 +76,7 @@ pub(crate) fn generate_syntax(ast: AstSrc, mode: &Mode, language_kind: LanguageK
         .join(language_kind.factory_crate_name())
         .join("src/generated");
 
-    let kind_src = match language_kind {
-        LanguageKind::Js => JS_KINDS_SRC,
-        LanguageKind::Css => CSS_KINDS_SRC,
-        LanguageKind::Json => JSON_KINDS_SRC,
-        LanguageKind::Grit => GRIT_KINDS_SRC,
-        LanguageKind::Html => HTML_KINDS_SRC,
-    };
+    let kind_src = language_kind.kinds();
 
     let ast_nodes_file = syntax_generated_path.join("nodes.rs");
     let contents = generate_nodes(&ast, language_kind)?;
@@ -164,38 +154,6 @@ fn check_unions(unions: &[AstEnumSrc]) {
             }
         }
     }
-}
-
-pub(crate) fn load_js_ast() -> AstSrc {
-    let grammar_src = include_str!("../js.ungram");
-    let grammar: Grammar = grammar_src.parse().unwrap();
-    let ast: AstSrc = make_ast(&grammar);
-    check_unions(&ast.unions);
-    ast
-}
-
-pub(crate) fn load_css_ast() -> AstSrc {
-    let grammar_src = include_str!("../css.ungram");
-    let grammar: Grammar = grammar_src.parse().unwrap();
-    make_ast(&grammar)
-}
-
-pub(crate) fn load_json_ast() -> AstSrc {
-    let grammar_src = include_str!("../json.ungram");
-    let grammar: Grammar = grammar_src.parse().unwrap();
-    make_ast(&grammar)
-}
-
-pub(crate) fn load_gritql_ast() -> AstSrc {
-    let grammar_src = include_str!("../gritql.ungram");
-    let grammar: Grammar = grammar_src.parse().unwrap();
-    make_ast(&grammar)
-}
-
-pub(crate) fn load_html_ast() -> AstSrc {
-    let grammar_src = include_str!("../html.ungram");
-    let grammar: Grammar = grammar_src.parse().unwrap();
-    make_ast(&grammar)
 }
 
 pub(crate) fn append_css_property_value_implied_alternatives(variants: Vec<String>) -> Vec<String> {

@@ -8,13 +8,13 @@ impl FormatRule<AnyJsonValue> for FormatAnyJsonValue {
     type Context = JsonFormatContext;
     fn fmt(&self, node: &AnyJsonValue, f: &mut JsonFormatter) -> FormatResult<()> {
         match node {
-            AnyJsonValue::JsonStringValue(node) => node.format().fmt(f),
+            AnyJsonValue::JsonArrayValue(node) => node.format().fmt(f),
+            AnyJsonValue::JsonBogusValue(node) => node.format().fmt(f),
             AnyJsonValue::JsonBooleanValue(node) => node.format().fmt(f),
             AnyJsonValue::JsonNullValue(node) => node.format().fmt(f),
             AnyJsonValue::JsonNumberValue(node) => node.format().fmt(f),
-            AnyJsonValue::JsonArrayValue(node) => node.format().fmt(f),
             AnyJsonValue::JsonObjectValue(node) => node.format().fmt(f),
-            AnyJsonValue::JsonBogusValue(node) => node.format().fmt(f),
+            AnyJsonValue::JsonStringValue(node) => node.format().fmt(f),
         }
     }
 }

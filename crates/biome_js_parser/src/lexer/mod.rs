@@ -1608,16 +1608,19 @@ impl<'src> JsLexer<'src> {
                 b'\\' => {
                     self.next_byte();
 
-                    if self.next_byte_bounded().is_none() {
-                        self.diagnostics.push(
-                            ParseDiagnostic::new(
-                                "expected a character after a regex escape, but found none",
-                                self.position..self.position + 1,
-                            )
-                            .with_hint("expected a character following this"),
-                        );
-
-                        return JsSyntaxKind::JS_REGEX_LITERAL;
+                    match self.current_byte() {
+                        None => {
+                            self.diagnostics.push(
+                                ParseDiagnostic::new(
+                                    "expected a character after a regex escape, but found none",
+                                    self.position..self.position + 1,
+                                )
+                                .with_hint("expected a character following this"),
+                            );
+                            return JsSyntaxKind::JS_REGEX_LITERAL;
+                        }
+                        // eat the next ascii or unicode char followed by the escape char.
+                        Some(current_chr) => self.advance_byte_or_char(current_chr),
                     }
                 }
                 b'\r' | b'\n' => {

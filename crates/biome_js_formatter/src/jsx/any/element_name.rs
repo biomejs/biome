@@ -8,10 +8,10 @@ impl FormatRule<AnyJsxElementName> for FormatAnyJsxElementName {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsxElementName, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyJsxElementName::JsxName(node) => node.format().fmt(f),
-            AnyJsxElementName::JsxReferenceIdentifier(node) => node.format().fmt(f),
             AnyJsxElementName::JsxMemberName(node) => node.format().fmt(f),
+            AnyJsxElementName::JsxName(node) => node.format().fmt(f),
             AnyJsxElementName::JsxNamespaceName(node) => node.format().fmt(f),
+            AnyJsxElementName::JsxReferenceIdentifier(node) => node.format().fmt(f),
         }
     }
 }

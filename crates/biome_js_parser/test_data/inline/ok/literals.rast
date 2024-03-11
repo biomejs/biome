@@ -87,15 +87,21 @@ JsModule {
             },
             semicolon_token: SEMICOLON@150..151 ";" [] [],
         },
+        JsExpressionStatement {
+            expression: JsRegexLiteralExpression {
+                value_token: JS_REGEX_LITERAL@151..158 "/\\’/" [Newline("\n")] [],
+            },
+            semicolon_token: SEMICOLON@158..211 ";" [] [Whitespace(" "), Comments("// regex with escaped ...")],
+        },
     ],
-    eof_token: EOF@151..152 "" [Newline("\n")] [],
+    eof_token: EOF@211..212 "" [Newline("\n")] [],
 }
 
-0: JS_MODULE@0..152
+0: JS_MODULE@0..212
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..151
+  3: JS_MODULE_ITEM_LIST@0..211
     0: JS_EXPRESSION_STATEMENT@0..1
       0: JS_NUMBER_LITERAL_EXPRESSION@0..1
         0: JS_NUMBER_LITERAL@0..1 "5" [] []
@@ -152,4 +158,8 @@ JsModule {
       0: JS_REGEX_LITERAL_EXPRESSION@125..150
         0: JS_REGEX_LITERAL@125..150 "/[\\p{Control}--[\\t\\n]]/v" [Newline("\n")] []
       1: SEMICOLON@150..151 ";" [] []
-  4: EOF@151..152 "" [Newline("\n")] []
+    11: JS_EXPRESSION_STATEMENT@151..211
+      0: JS_REGEX_LITERAL_EXPRESSION@151..158
+        0: JS_REGEX_LITERAL@151..158 "/\\’/" [Newline("\n")] []
+      1: SEMICOLON@158..211 ";" [] [Whitespace(" "), Comments("// regex with escaped ...")]
+  4: EOF@211..212 "" [Newline("\n")] []

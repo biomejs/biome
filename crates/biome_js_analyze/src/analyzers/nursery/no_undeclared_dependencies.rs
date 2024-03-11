@@ -44,16 +44,33 @@ impl Rule for NoUndeclaredDependencies {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let text = node.inner_string_text()?;
-        if !text.text().starts_with('.')
-            // Ignore imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`, and so on.
-            && !text.text().contains(':')
-            && !ctx.is_dependency(text.text())
-            && !ctx.is_dev_dependency(text.text())
-        {
-            return Some(());
+
+        let token_text = node.inner_string_text()?;
+        let text = token_text.text();
+
+        // Ignore relative path imports
+        // Ignore imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`, and so on.
+        if text.starts_with('.') || text.contains(':') {
+            return None;
         }
-        None
+
+        let mut parts = text.split('/');
+        let mut pointer = 0;
+        if let Some(maybe_scope) = parts.next() {
+            pointer += maybe_scope.len();
+            if maybe_scope.starts_with('@') {
+                // scoped package: @mui/material/Button
+                // the package name is @mui/material, not @mui
+                pointer += parts.next().map_or(0, |s| s.len() + 1)
+            }
+        }
+        let package_name = &text[..pointer];
+
+        if ctx.is_dependency(package_name) || ctx.is_dev_dependency(package_name) {
+            return None;
+        }
+
+        Some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

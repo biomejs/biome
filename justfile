@@ -11,12 +11,12 @@ alias qt := test-quick
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
-	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools cargo-workspaces
+	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
-	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools cargo-workspaces --force
+	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen:
@@ -39,6 +39,7 @@ gen-lint:
   just gen-bindings
   just format
   cargo lintdoc
+  just gen-web
 
 # Generates code generated files for the website
 gen-web:

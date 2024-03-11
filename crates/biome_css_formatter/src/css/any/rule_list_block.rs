@@ -8,8 +8,8 @@ impl FormatRule<AnyCssRuleListBlock> for FormatAnyCssRuleListBlock {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssRuleListBlock, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssRuleListBlock::CssRuleListBlock(node) => node.format().fmt(f),
             AnyCssRuleListBlock::CssBogusBlock(node) => node.format().fmt(f),
+            AnyCssRuleListBlock::CssRuleListBlock(node) => node.format().fmt(f),
         }
     }
 }

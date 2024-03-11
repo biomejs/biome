@@ -9,8 +9,8 @@ impl FormatRule<AnyTsPropertyParameterModifier> for FormatAnyTsPropertyParameter
     fn fmt(&self, node: &AnyTsPropertyParameterModifier, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyTsPropertyParameterModifier::TsAccessibilityModifier(node) => node.format().fmt(f),
-            AnyTsPropertyParameterModifier::TsReadonlyModifier(node) => node.format().fmt(f),
             AnyTsPropertyParameterModifier::TsOverrideModifier(node) => node.format().fmt(f),
+            AnyTsPropertyParameterModifier::TsReadonlyModifier(node) => node.format().fmt(f),
         }
     }
 }

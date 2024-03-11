@@ -8,8 +8,8 @@ impl FormatRule<AnyCssAttributeMatcherValue> for FormatAnyCssAttributeMatcherVal
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssAttributeMatcherValue, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssAttributeMatcherValue::CssString(node) => node.format().fmt(f),
             AnyCssAttributeMatcherValue::CssIdentifier(node) => node.format().fmt(f),
+            AnyCssAttributeMatcherValue::CssString(node) => node.format().fmt(f),
         }
     }
 }

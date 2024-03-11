@@ -15,6 +15,70 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+#### Enhamcements
+
+#### Bug fixes
+
+- Code fixes of [useImportType](https://biomejs.dev/linter/rules/use-import-type) and [useExportType](https://biomejs.dev/linter/rules/use-export-type) now handle multiline statements ([#2041](https://github.com/biomejs/biome/issues/2041)).
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports type parameter and parameter with identical names ([#1992](https://github.com/biomejs/biome/issues/1992)).
+
+  The following code is no longer reported:
+
+  ```ts
+  function f<a>(a: a) {}
+  ```
+
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) now reports duplicate type parameters in a same declaration.
+
+  The following type parameters are now reported as a redeclaraion:
+
+  ```ts
+  function f<T, T>() {}
+  ```
+
+  Contributed by @Conaclos
+
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) now recognizes imports of subpath exports.
+
+  E.g., the following import statements no longer report errors if `@mui/material` and `tailwindcss` are installed as dependencies:
+
+  ```ts
+  import Button from "@mui/material/Button";
+  import { fontFamily } from "tailwindcss/defaultTheme";
+  ```
+
+  Contributed by @Sec-ant
+
+### Parser
+
+#### Bug fixes
+
+- JavaScript lexer is now able to lex regular expression literals with escaped non-ascii chars ([#1941](https://github.com/biomejs/biome/issues/1941)).
+
+  Contributed by @Sec-ant
+
 ## 1.6.0 (2024-03-08)
 
 ### Analyzer

@@ -12,10 +12,10 @@ impl FormatRule<AnyTsPropertySignatureAnnotation> for FormatAnyTsPropertySignatu
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
         match node {
-            AnyTsPropertySignatureAnnotation::TsTypeAnnotation(node) => node.format().fmt(f),
             AnyTsPropertySignatureAnnotation::TsOptionalPropertyAnnotation(node) => {
                 node.format().fmt(f)
             }
+            AnyTsPropertySignatureAnnotation::TsTypeAnnotation(node) => node.format().fmt(f),
         }
     }
 }

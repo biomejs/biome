@@ -8,8 +8,8 @@ impl FormatRule<AnyJsForInitializer> for FormatAnyJsForInitializer {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsForInitializer, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyJsForInitializer::JsVariableDeclaration(node) => node.format().fmt(f),
             AnyJsForInitializer::AnyJsExpression(node) => node.format().fmt(f),
+            AnyJsForInitializer::JsVariableDeclaration(node) => node.format().fmt(f),
         }
     }
 }

@@ -12,7 +12,7 @@ use quote::quote;
 use xtask::project_root;
 
 use crate::ast::load_ast;
-use crate::{LanguageKind, ALL_LANGUAGE_KIND};
+use crate::language_kind::{LanguageKind, ALL_LANGUAGE_KIND};
 
 struct GitRepo {
     repo: Repository,
