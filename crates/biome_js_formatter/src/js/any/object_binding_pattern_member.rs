@@ -8,6 +8,7 @@ impl FormatRule<AnyJsObjectBindingPatternMember> for FormatAnyJsObjectBindingPat
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsObjectBindingPatternMember, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
+            AnyJsObjectBindingPatternMember::JsBogusBinding(node) => node.format().fmt(f),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(node) => {
                 node.format().fmt(f)
             }
@@ -17,7 +18,6 @@ impl FormatRule<AnyJsObjectBindingPatternMember> for FormatAnyJsObjectBindingPat
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(node) => {
                 node.format().fmt(f)
             }
-            AnyJsObjectBindingPatternMember::JsBogusBinding(node) => node.format().fmt(f),
         }
     }
 }

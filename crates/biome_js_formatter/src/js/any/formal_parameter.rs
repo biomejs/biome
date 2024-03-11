@@ -8,8 +8,8 @@ impl FormatRule<AnyJsFormalParameter> for FormatAnyJsFormalParameter {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsFormalParameter, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyJsFormalParameter::JsFormalParameter(node) => node.format().fmt(f),
             AnyJsFormalParameter::JsBogusParameter(node) => node.format().fmt(f),
+            AnyJsFormalParameter::JsFormalParameter(node) => node.format().fmt(f),
         }
     }
 }

@@ -8,8 +8,8 @@ impl FormatRule<AnyJsArrowFunctionParameters> for FormatAnyJsArrowFunctionParame
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsArrowFunctionParameters, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyJsArrowFunctionParameters::JsParameters(node) => node.format().fmt(f),
             AnyJsArrowFunctionParameters::AnyJsBinding(node) => node.format().fmt(f),
+            AnyJsArrowFunctionParameters::JsParameters(node) => node.format().fmt(f),
         }
     }
 }

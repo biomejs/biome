@@ -12,16 +12,16 @@ impl FormatRule<AnyJsObjectAssignmentPatternMember> for FormatAnyJsObjectAssignm
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
         match node {
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(
-                node,
-            ) => node.format().fmt(f),
+            AnyJsObjectAssignmentPatternMember::JsBogusAssignment(node) => node.format().fmt(f),
             AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(node) => {
                 node.format().fmt(f)
             }
             AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternRest(node) => {
                 node.format().fmt(f)
             }
-            AnyJsObjectAssignmentPatternMember::JsBogusAssignment(node) => node.format().fmt(f),
+            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(
+                node,
+            ) => node.format().fmt(f),
         }
     }
 }

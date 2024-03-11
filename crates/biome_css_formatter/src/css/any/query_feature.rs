@@ -8,11 +8,11 @@ impl FormatRule<AnyCssQueryFeature> for FormatAnyCssQueryFeature {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssQueryFeature, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssQueryFeature::CssQueryFeaturePlain(node) => node.format().fmt(f),
             AnyCssQueryFeature::CssQueryFeatureBoolean(node) => node.format().fmt(f),
+            AnyCssQueryFeature::CssQueryFeaturePlain(node) => node.format().fmt(f),
             AnyCssQueryFeature::CssQueryFeatureRange(node) => node.format().fmt(f),
-            AnyCssQueryFeature::CssQueryFeatureReverseRange(node) => node.format().fmt(f),
             AnyCssQueryFeature::CssQueryFeatureRangeInterval(node) => node.format().fmt(f),
+            AnyCssQueryFeature::CssQueryFeatureReverseRange(node) => node.format().fmt(f),
         }
     }
 }

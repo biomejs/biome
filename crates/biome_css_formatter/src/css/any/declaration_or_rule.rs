@@ -9,8 +9,8 @@ impl FormatRule<AnyCssDeclarationOrRule> for FormatAnyCssDeclarationOrRule {
     fn fmt(&self, node: &AnyCssDeclarationOrRule, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssDeclarationOrRule::AnyCssRule(node) => node.format().fmt(f),
-            AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(node) => node.format().fmt(f),
             AnyCssDeclarationOrRule::CssBogus(node) => node.format().fmt(f),
+            AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(node) => node.format().fmt(f),
         }
     }
 }

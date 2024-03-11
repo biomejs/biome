@@ -8,12 +8,12 @@ impl FormatRule<AnyJsLiteralExpression> for FormatAnyJsLiteralExpression {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsLiteralExpression, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyJsLiteralExpression::JsStringLiteralExpression(node) => node.format().fmt(f),
-            AnyJsLiteralExpression::JsNumberLiteralExpression(node) => node.format().fmt(f),
             AnyJsLiteralExpression::JsBigintLiteralExpression(node) => node.format().fmt(f),
             AnyJsLiteralExpression::JsBooleanLiteralExpression(node) => node.format().fmt(f),
             AnyJsLiteralExpression::JsNullLiteralExpression(node) => node.format().fmt(f),
+            AnyJsLiteralExpression::JsNumberLiteralExpression(node) => node.format().fmt(f),
             AnyJsLiteralExpression::JsRegexLiteralExpression(node) => node.format().fmt(f),
+            AnyJsLiteralExpression::JsStringLiteralExpression(node) => node.format().fmt(f),
         }
     }
 }

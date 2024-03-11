@@ -12,10 +12,10 @@ impl FormatRule<AnyCssContainerAndCombinableQuery> for FormatAnyCssContainerAndC
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         match node {
-            AnyCssContainerAndCombinableQuery::CssContainerAndQuery(node) => node.format().fmt(f),
             AnyCssContainerAndCombinableQuery::AnyCssContainerQueryInParens(node) => {
                 node.format().fmt(f)
             }
+            AnyCssContainerAndCombinableQuery::CssContainerAndQuery(node) => node.format().fmt(f),
         }
     }
 }

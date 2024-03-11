@@ -8,8 +8,8 @@ impl FormatRule<AnyCssNamespaceUrl> for FormatAnyCssNamespaceUrl {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssNamespaceUrl, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssNamespaceUrl::CssUrlFunction(node) => node.format().fmt(f),
             AnyCssNamespaceUrl::CssString(node) => node.format().fmt(f),
+            AnyCssNamespaceUrl::CssUrlFunction(node) => node.format().fmt(f),
         }
     }
 }

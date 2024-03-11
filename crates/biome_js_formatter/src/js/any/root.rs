@@ -8,9 +8,9 @@ impl FormatRule<AnyJsRoot> for FormatAnyJsRoot {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsRoot, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyJsRoot::JsScript(node) => node.format().fmt(f),
-            AnyJsRoot::JsModule(node) => node.format().fmt(f),
             AnyJsRoot::JsExpressionSnipped(node) => node.format().fmt(f),
+            AnyJsRoot::JsModule(node) => node.format().fmt(f),
+            AnyJsRoot::JsScript(node) => node.format().fmt(f),
         }
     }
 }

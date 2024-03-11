@@ -8,8 +8,8 @@ impl FormatRule<AnyJsObjectMemberName> for FormatAnyJsObjectMemberName {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsObjectMemberName, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyJsObjectMemberName::JsLiteralMemberName(node) => node.format().fmt(f),
             AnyJsObjectMemberName::JsComputedMemberName(node) => node.format().fmt(f),
+            AnyJsObjectMemberName::JsLiteralMemberName(node) => node.format().fmt(f),
         }
     }
 }

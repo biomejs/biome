@@ -8,20 +8,20 @@ impl FormatRule<AnyCssPseudoClass> for FormatAnyCssPseudoClass {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssPseudoClass, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssPseudoClass::CssPseudoClassIdentifier(node) => node.format().fmt(f),
-            AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(node) => node.format().fmt(f),
-            AnyCssPseudoClass::CssPseudoClassFunctionSelector(node) => node.format().fmt(f),
-            AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(node) => node.format().fmt(f),
+            AnyCssPseudoClass::CssBogusPseudoClass(node) => node.format().fmt(f),
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(node) => node.format().fmt(f),
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(node) => {
                 node.format().fmt(f)
             }
+            AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(node) => node.format().fmt(f),
+            AnyCssPseudoClass::CssPseudoClassFunctionNth(node) => node.format().fmt(f),
             AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(node) => {
                 node.format().fmt(f)
             }
+            AnyCssPseudoClass::CssPseudoClassFunctionSelector(node) => node.format().fmt(f),
+            AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(node) => node.format().fmt(f),
             AnyCssPseudoClass::CssPseudoClassFunctionValueList(node) => node.format().fmt(f),
-            AnyCssPseudoClass::CssPseudoClassFunctionNth(node) => node.format().fmt(f),
-            AnyCssPseudoClass::CssBogusPseudoClass(node) => node.format().fmt(f),
+            AnyCssPseudoClass::CssPseudoClassIdentifier(node) => node.format().fmt(f),
         }
     }
 }

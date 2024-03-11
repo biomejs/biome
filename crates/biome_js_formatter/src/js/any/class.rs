@@ -9,8 +9,8 @@ impl FormatRule<AnyJsClass> for FormatAnyJsClass {
     fn fmt(&self, node: &AnyJsClass, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyJsClass::JsClassDeclaration(node) => node.format().fmt(f),
-            AnyJsClass::JsClassExpression(node) => node.format().fmt(f),
             AnyJsClass::JsClassExportDefaultDeclaration(node) => node.format().fmt(f),
+            AnyJsClass::JsClassExpression(node) => node.format().fmt(f),
         }
     }
 }

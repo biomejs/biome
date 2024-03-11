@@ -9,8 +9,8 @@ impl FormatRule<AnyTsReturnType> for FormatAnyTsReturnType {
     fn fmt(&self, node: &AnyTsReturnType, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyTsReturnType::AnyTsType(node) => node.format().fmt(f),
-            AnyTsReturnType::TsPredicateReturnType(node) => node.format().fmt(f),
             AnyTsReturnType::TsAssertsReturnType(node) => node.format().fmt(f),
+            AnyTsReturnType::TsPredicateReturnType(node) => node.format().fmt(f),
         }
     }
 }
