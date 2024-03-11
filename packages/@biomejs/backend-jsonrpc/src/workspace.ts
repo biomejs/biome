@@ -897,6 +897,10 @@ export interface Nursery {
 	 */
 	noConsole?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate conditions in if-else-if chains
+	 */
+	noDuplicateElseIf?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
@@ -1882,6 +1886,7 @@ export type Category =
 	| "lint/nursery/noApproximativeNumericConstant"
 	| "lint/nursery/noBarrelFile"
 	| "lint/nursery/noConsole"
+	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateTestHooks"
 	| "lint/nursery/noExcessiveNestedTestSuites"

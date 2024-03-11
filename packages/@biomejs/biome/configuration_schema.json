@@ -1395,6 +1395,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateElseIf": {
+					"description": "Disallow duplicate conditions in if-else-if chains",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateJsonKeys": {
 					"description": "Disallow two keys with the same name inside a JSON object.",
 					"anyOf": [
