@@ -21,6 +21,15 @@ const YY = Y;
 import { type X, type Y, type Z } from "";
 export type { X, Y, Z };
 
+// multiline
+import {
+    U,
+    V,
+    // leading comment
+    W,
+} from "";
+export { U, type V, type W };
+
 ```
 
 # Diagnostics
@@ -116,6 +125,58 @@ invalid-named-imports.ts:15:1 lint/style/useImportType  FIXABLE  ━━━━━
        15 │ + import·type·{·X,·Y,·Z·}·from·"";
     16 16 │   export type { X, Y, Z };
     17 17 │   
+  
+
+```
+
+```
+invalid-named-imports.ts:19:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+    18 │ // multiline
+  > 19 │ import {
+       │ ^^^^^^^^
+  > 20 │     U,
+  > 21 │     V,
+  > 22 │     // leading comment
+  > 23 │     W,
+  > 24 │ } from "";
+       │ ^^^^^^^^^^
+    25 │ export { U, type V, type W };
+    26 │ 
+  
+  i This import is only used as a type.
+  
+    19 │ import {
+    20 │     U,
+  > 21 │     V,
+       │     ^
+    22 │     // leading comment
+    23 │     W,
+  
+  i This import is only used as a type.
+  
+    21 │     V,
+    22 │     // leading comment
+  > 23 │     W,
+       │     ^
+    24 │ } from "";
+    25 │ export { U, type V, type W };
+  
+  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    19 19 │   import {
+    20 20 │       U,
+    21    │ - ····V,
+       21 │ + ····type·V,
+    22 22 │       // leading comment
+    23    │ - ····W,
+       23 │ + ····type·W,
+    24 24 │   } from "";
+    25 25 │   export { U, type V, type W };
   
 
 ```
