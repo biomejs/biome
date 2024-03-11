@@ -4,3 +4,5 @@ class C {
 		var a;
 	}
 }
+
+function f<T, T>() {}

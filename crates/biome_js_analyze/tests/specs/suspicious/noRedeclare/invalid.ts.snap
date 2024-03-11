@@ -11,6 +11,8 @@ class C {
 	}
 }
 
+function f<T, T>() {}
+
 ```
 
 # Diagnostics
@@ -34,6 +36,28 @@ invalid.ts:4:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━�
       │ 		    ^
     4 │ 		var a;
     5 │ 	}
+  
+
+```
+
+```
+invalid.ts:8:15 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Shouldn't redeclare 'T'. Consider to delete it or rename it.
+  
+    6 │ }
+    7 │ 
+  > 8 │ function f<T, T>() {}
+      │               ^
+    9 │ 
+  
+  i 'T' is defined here:
+  
+    6 │ }
+    7 │ 
+  > 8 │ function f<T, T>() {}
+      │            ^
+    9 │ 
   
 
 ```
