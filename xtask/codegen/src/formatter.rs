@@ -6,12 +6,14 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use biome_ungrammar::Grammar;
 use git2::{Repository, Status, StatusOptions};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use xtask::project_root;
 
 use crate::ast::load_ast;
+use crate::js_kinds_src::AstSrc;
 use crate::{LanguageKind, ALL_LANGUAGE_KIND};
 
 struct GitRepo {

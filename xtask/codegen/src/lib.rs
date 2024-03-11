@@ -27,6 +27,12 @@ use quote::quote;
 use std::path::Path;
 use std::str::FromStr;
 
+use crate::css_kinds_src::CSS_KINDS_SRC;
+use crate::grit_kinds_src::GRIT_KINDS_SRC;
+use crate::html_kinds_src::HTML_KINDS_SRC;
+use crate::js_kinds_src::JS_KINDS_SRC;
+use crate::json_kinds_src::JSON_KINDS_SRC;
+use crate::kind_src::KindsSrc;
 use xtask::{glue::fs2, Mode, Result};
 
 pub use self::ast::generate_ast;
@@ -89,7 +95,7 @@ impl FromStr for LanguageKind {
 
 impl LanguageKind {
     pub(crate) fn syntax_crate_ident(&self) -> Ident {
-        Ident::new(self.syntax_crate_name(), Span::call_site())
+        Ident::new(self.syntax_crate_name().as_str(), Span::call_site())
     }
 
     pub(crate) fn syntax_kind(&self) -> TokenStream {
@@ -162,33 +168,35 @@ impl LanguageKind {
         }
     }
 
-    pub fn formatter_crate_name(&self) -> &'static str {
+    pub fn formatter_crate_name(&self) -> String {
+        format!("biome_{}_formatter", self)
+    }
+
+    pub fn syntax_crate_name(&self) -> String {
+        format!("biome_{}_syntax", self)
+    }
+
+    pub fn factory_crate_name(&self) -> String {
+        format!("biome_{}_factory", self)
+    }
+
+    pub fn to_kinds(&self) -> KindsSrc {
         match self {
-            LanguageKind::Js => "biome_js_formatter",
-            LanguageKind::Css => "biome_css_formatter",
-            LanguageKind::Json => "biome_json_formatter",
-            LanguageKind::Grit => "biome_grit_formatter",
-            LanguageKind::Html => "biome_html_formatter",
+            LanguageKind::Js => JS_KINDS_SRC,
+            LanguageKind::Css => CSS_KINDS_SRC,
+            LanguageKind::Json => JSON_KINDS_SRC,
+            LanguageKind::Grit => GRIT_KINDS_SRC,
+            LanguageKind::Html => HTML_KINDS_SRC,
         }
     }
 
-    pub fn syntax_crate_name(&self) -> &'static str {
+    pub fn load_grammar(&self) -> &'static str {
         match self {
-            LanguageKind::Js => "biome_js_syntax",
-            LanguageKind::Css => "biome_css_syntax",
-            LanguageKind::Json => "biome_json_syntax",
-            LanguageKind::Grit => "biome_grit_syntax",
-            LanguageKind::Html => "biome_html_syntax",
-        }
-    }
-
-    pub fn factory_crate_name(&self) -> &'static str {
-        match self {
-            LanguageKind::Js => "biome_js_factory",
-            LanguageKind::Css => "biome_css_factory",
-            LanguageKind::Json => "biome_json_factory",
-            LanguageKind::Grit => "biome_grit_factory",
-            LanguageKind::Html => "biome_html_factory",
+            LanguageKind::Js => include_str!("../js.ungram"),
+            LanguageKind::Css => include_str!("../css.ungram"),
+            LanguageKind::Json => include_str!("../json.ungram"),
+            LanguageKind::Grit => include_str!("../gritql.ungram"),
+            LanguageKind::Html => include_str!("../html.ungram"),
         }
     }
 }
