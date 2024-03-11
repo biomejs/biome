@@ -39,7 +39,6 @@ gen-lint:
   just gen-bindings
   just format
   cargo lintdoc
-  just gen-bindings
   just gen-web
 
 # Generates code generated files for the website
