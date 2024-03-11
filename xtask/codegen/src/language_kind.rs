@@ -8,7 +8,7 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use std::str::FromStr;
 
-pub const LANGUAGE_PREFIXES: [&str; 7] = ["js_", "ts_", "jsx_", "tsx_", "css_", "json_", "grit_", "html_"];
+pub const LANGUAGE_PREFIXES: [&str; 8] = ["js_", "ts_", "jsx_", "tsx_", "css_", "json_", "grit_", "html_"];
 
 #[derive(Debug, Eq, Copy, Clone, PartialEq)]
 pub enum LanguageKind {
