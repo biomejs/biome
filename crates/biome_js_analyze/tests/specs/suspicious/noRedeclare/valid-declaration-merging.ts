@@ -126,3 +126,7 @@ function g(A, { B }) {
 	interface A {}
 	interface B {}
 }
+
+export function h<a>(a: a) {
+	return a;
+}
