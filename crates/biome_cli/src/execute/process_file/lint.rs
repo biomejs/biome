@@ -37,20 +37,19 @@ pub(crate) fn lint_with_guard<'ctx>(
 
                 let mut output = fix_result.code;
 
-                if output != input {
-                    match workspace_file.as_extension() {
-                        Some("astro") => {
-                            output = AstroFileHandler::output(input.as_str(), output.as_str());
-                        }
-                        Some("vue") => {
-                            output = VueFileHandler::output(input.as_str(), output.as_str());
-                        }
-                        Some("svelte") => {
-                            output = SvelteFileHandler::output(input.as_str(), output.as_str());
-                        }
-                        _ => {}
+                match workspace_file.as_extension() {
+                    Some("astro") => {
+                        output = AstroFileHandler::output(input.as_str(), output.as_str());
                     }
-
+                    Some("vue") => {
+                        output = VueFileHandler::output(input.as_str(), output.as_str());
+                    }
+                    Some("svelte") => {
+                        output = SvelteFileHandler::output(input.as_str(), output.as_str());
+                    }
+                    _ => {}
+                }
+                if output != input {
                     changed = true;
                     workspace_file.update_file(output)?;
                     input = workspace_file.input()?;
