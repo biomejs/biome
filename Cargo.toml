@@ -107,12 +107,12 @@ biome_json_syntax            = { version = "0.5.4", path = "./crates/biome_json_
 
 biome_markup        = { version = "0.5.4", path = "./crates/biome_markup" }
 biome_parser        = { version = "0.5.4", path = "./crates/biome_parser" }
+biome_project       = { version = "0.5.4", path = "./crates/biome_project" }
 biome_rowan         = { version = "0.5.4", path = "./crates/biome_rowan" }
 biome_suppression   = { version = "0.5.4", path = "./crates/biome_suppression" }
 biome_text_edit     = { version = "0.5.4", path = "./crates/biome_text_edit" }
 biome_text_size     = { version = "0.5.4", path = "./crates/biome_text_size" }
 biome_unicode_table = { version = "0.5.4", path = "./crates/biome_unicode_table" }
-biome_project        = { version = "0.5.4", path = "./crates/biome_project" }
 # not publish
 biome_cli            = { path = "./crates/biome_cli" }
 biome_flags          = { path = "./crates/biome_flags" }
