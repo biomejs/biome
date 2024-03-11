@@ -12,6 +12,8 @@ This rule hasn't been released yet.
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-dupe-else-if" target="_blank"><code>no-dupe-else-if</code></a>
+
 Disallow duplicate conditions in if-else-if chains
 
 if-else-if chains are commonly used when there is a need to execute only one branch

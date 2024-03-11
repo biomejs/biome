@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsIfStatement, JsLogicalOperator, JsSyntaxKind};
 use biome_rowan::{AstNode, SyntaxNodeCast};
@@ -46,6 +48,8 @@ declare_rule! {
         version: "next",
         name: "noDuplicateElseIf",
         recommended: true,
+        source: RuleSource::Eslint("no-dupe-else-if"),
+        source_kind: RuleSourceKind::SameLogic,
     }
 }
 
