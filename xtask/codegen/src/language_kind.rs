@@ -153,7 +153,7 @@ impl LanguageKind {
         format!("biome_{}_factory", self)
     }
 
-    pub fn to_kinds(&self) -> KindsSrc {
+    pub fn kinds(&self) -> KindsSrc {
         match self {
             LanguageKind::Js => JS_KINDS_SRC,
             LanguageKind::Css => CSS_KINDS_SRC,

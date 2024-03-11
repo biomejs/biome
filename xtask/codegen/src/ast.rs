@@ -76,7 +76,7 @@ pub(crate) fn generate_syntax(ast: AstSrc, mode: &Mode, language_kind: LanguageK
         .join(language_kind.factory_crate_name())
         .join("src/generated");
 
-    let kind_src = language_kind.to_kinds();
+    let kind_src = language_kind.kinds();
 
     let ast_nodes_file = syntax_generated_path.join("nodes.rs");
     let contents = generate_nodes(&ast, language_kind)?;

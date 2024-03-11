@@ -684,7 +684,7 @@ impl Field {
                     _ => name,
                 };
 
-                let kind_source = language_kind.to_kinds();
+                let kind_source = language_kind.kinds();
 
                 // we need to replace "-" with "_" for the keywords
                 // e.g. we have `color-profile` in css but it's an invalid ident in rust code
