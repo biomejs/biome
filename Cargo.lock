@@ -160,7 +160,6 @@ dependencies = [
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
- "biome_flags",
  "biome_formatter",
  "biome_fs",
  "biome_js_formatter",
@@ -172,7 +171,6 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_text_edit",
- "biome_text_size",
  "bpaf",
  "crossbeam",
  "dashmap",
@@ -232,7 +230,6 @@ dependencies = [
  "biome_test_utils",
  "insta",
  "lazy_static",
- "rustc-hash",
  "tests_macros",
 ]
 
@@ -308,8 +305,6 @@ dependencies = [
  "indexmap 1.9.3",
  "schemars",
  "serde",
- "serde_json",
- "tracing",
 ]
 
 [[package]]
@@ -413,7 +408,6 @@ dependencies = [
 name = "biome_fs"
 version = "0.5.4"
 dependencies = [
- "biome_console",
  "biome_diagnostics",
  "crossbeam",
  "directories",
@@ -474,8 +468,6 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
- "biome_json_factory",
- "biome_json_syntax",
  "biome_project",
  "biome_rowan",
  "biome_test_utils",
@@ -484,13 +476,11 @@ dependencies = [
  "countme",
  "insta",
  "lazy_static",
- "log",
  "natord",
  "roaring",
  "rustc-hash",
  "schemars",
  "serde",
- "serde_json",
  "smallvec",
  "tests_macros",
 ]
@@ -507,7 +497,6 @@ dependencies = [
 name = "biome_js_formatter"
 version = "0.5.4"
 dependencies = [
- "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
@@ -518,12 +507,10 @@ dependencies = [
  "biome_js_factory",
  "biome_js_parser",
  "biome_js_syntax",
- "biome_json_syntax",
  "biome_parser",
  "biome_rowan",
  "biome_text_size",
  "biome_unicode_table",
- "cfg-if",
  "countme",
  "iai",
  "insta",
@@ -534,7 +521,6 @@ dependencies = [
  "serde_json",
  "smallvec",
  "tests_macros",
- "tracing",
  "unicode-width",
 ]
 
@@ -550,7 +536,6 @@ dependencies = [
  "biome_rowan",
  "biome_unicode_table",
  "bitflags 2.3.1",
- "cfg-if",
  "drop_bomb",
  "expect-test",
  "indexmap 1.9.3",
@@ -598,7 +583,6 @@ name = "biome_js_transform"
 version = "0.5.4"
 dependencies = [
  "biome_analyze",
- "biome_console",
  "biome_diagnostics",
  "biome_js_factory",
  "biome_js_formatter",
@@ -698,15 +682,11 @@ dependencies = [
  "biome_analyze",
  "biome_console",
  "biome_diagnostics",
- "biome_formatter",
  "biome_fs",
- "biome_js_formatter",
  "biome_rowan",
  "biome_service",
  "biome_text_edit",
  "futures",
- "indexmap 1.9.3",
- "log",
  "rustc-hash",
  "serde",
  "serde_json",
@@ -855,16 +835,12 @@ dependencies = [
  "biome_console",
  "biome_deserialize",
  "biome_diagnostics",
- "biome_js_parser",
- "biome_js_syntax",
  "biome_json_parser",
- "biome_json_syntax",
  "biome_project",
  "biome_rowan",
  "biome_service",
  "countme",
  "json_comments",
- "serde",
  "serde_json",
  "similar",
 ]
@@ -3716,11 +3692,9 @@ version = "0.0.0"
 dependencies = [
  "ansi_rgb",
  "biome_analyze",
- "biome_console",
  "biome_css_formatter",
  "biome_css_parser",
  "biome_css_syntax",
- "biome_diagnostics",
  "biome_formatter",
  "biome_js_analyze",
  "biome_js_formatter",
@@ -3732,10 +3706,8 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "codspeed-criterion-compat",
- "countme",
  "criterion",
  "mimalloc",
- "regex",
  "tikv-jemallocator",
  "ureq",
  "url",
@@ -3747,7 +3719,6 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "biome_analyze",
- "biome_aria",
  "biome_cli",
  "biome_diagnostics",
  "biome_js_analyze",
@@ -3786,7 +3757,6 @@ dependencies = [
  "html-escape",
  "pico-args",
  "serde",
- "serde_json",
  "ureq",
  "xtask",
 ]
@@ -3839,7 +3809,6 @@ dependencies = [
  "biome_analyze",
  "biome_console",
  "biome_diagnostics",
- "biome_formatter",
  "biome_js_analyze",
  "biome_js_parser",
  "biome_js_syntax",

@@ -24,7 +24,6 @@ biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
-biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true }
 biome_fs                 = { workspace = true }
 biome_js_formatter       = { workspace = true }
@@ -36,7 +35,6 @@ biome_migrate            = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_service            = { workspace = true }
 biome_text_edit          = { workspace = true }
-biome_text_size          = { workspace = true }
 bpaf                     = { workspace = true, features = ["bright-color"] }
 crossbeam                = { workspace = true }
 dashmap                  = { workspace = true }
