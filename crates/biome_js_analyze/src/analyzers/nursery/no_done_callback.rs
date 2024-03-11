@@ -48,7 +48,7 @@ declare_rule! {
         name: "noDoneCallback",
         recommended: true,
         source: RuleSource::EslintJest("no-done-callback"),
-        source_kind: RuleSourceKind::Inspired,
+        source_kind: RuleSourceKind::SameLogic,
     }
 }
 
@@ -98,19 +98,13 @@ impl Rule for NoDoneCallback {
                         return Some(text_range);
                     }
                     AnyJsArrowFunctionParameters::JsParameters(js_parameters) => {
-                        if let Some(text_range) =
-                            analyze_js_parameters(&js_parameters, is_test_each)
-                        {
-                            return Some(text_range);
-                        }
+                        return analyze_js_parameters(&js_parameters, is_test_each)
                     }
                 }
             }
             AnyJsExpression::JsFunctionExpression(js_function) => {
                 let js_parameters = js_function.parameters().ok()?;
-                if let Some(text_range) = analyze_js_parameters(&js_parameters, is_test_each) {
-                    return Some(text_range);
-                }
+                return analyze_js_parameters(&js_parameters, is_test_each);
             }
             _ => {}
         }
