@@ -4,11 +4,20 @@ expression: invalid.js
 ---
 # Input
 ```jsx
-describe.only("test", () => {});
-it.only("test", () => {});
-test.only("test", () => {});
-fdescribe('foo', () => {});
-fit('foo', () => {});
+describe.only("bar", function () {});
+it.only("bar", function () {});
+test.only("bar", function () {});
+
+describe.only("bar", () => {});
+it.only("bar", () => {});
+test.only("bar", () => {});
+
+describe["only"]("bar", function () {});
+it["only"]("bar", function () {});
+test["only"]("bar", function () {});
+
+fdescribe("foo", () => {});
+fit("foo", () => {});
 
 ```
 
@@ -18,21 +27,21 @@ invalid.js:1:10 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━�
 
   ! Don't focus the test.
   
-  > 1 │ describe.only("test", () => {});
+  > 1 │ describe.only("bar", function () {});
       │          ^^^^
-    2 │ it.only("test", () => {});
-    3 │ test.only("test", () => {});
+    2 │ it.only("bar", function () {});
+    3 │ test.only("bar", function () {});
   
-  i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Remove it.
+  i Consider removing 'only' to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
-    1   │ - describe.only("test",·()·=>·{});
-      1 │ + describe("test",·()·=>·{});
-    2 2 │   it.only("test", () => {});
-    3 3 │   test.only("test", () => {});
+     1    │ - describe.only("bar",·function·()·{});
+        1 │ + describe("bar",·function·()·{});
+     2  2 │   it.only("bar", function () {});
+     3  3 │   test.only("bar", function () {});
   
 
 ```
@@ -42,23 +51,23 @@ invalid.js:2:4 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━
 
   ! Don't focus the test.
   
-    1 │ describe.only("test", () => {});
-  > 2 │ it.only("test", () => {});
+    1 │ describe.only("bar", function () {});
+  > 2 │ it.only("bar", function () {});
       │    ^^^^
-    3 │ test.only("test", () => {});
-    4 │ fdescribe('foo', () => {});
+    3 │ test.only("bar", function () {});
+    4 │ 
   
-  i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Remove it.
+  i Consider removing 'only' to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
-    1 1 │   describe.only("test", () => {});
-    2   │ - it.only("test",·()·=>·{});
-      2 │ + it("test",·()·=>·{});
-    3 3 │   test.only("test", () => {});
-    4 4 │   fdescribe('foo', () => {});
+     1  1 │   describe.only("bar", function () {});
+     2    │ - it.only("bar",·function·()·{});
+        2 │ + it("bar",·function·()·{});
+     3  3 │   test.only("bar", function () {});
+     4  4 │   
   
 
 ```
@@ -68,79 +77,229 @@ invalid.js:3:6 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━
 
   ! Don't focus the test.
   
-    1 │ describe.only("test", () => {});
-    2 │ it.only("test", () => {});
-  > 3 │ test.only("test", () => {});
+    1 │ describe.only("bar", function () {});
+    2 │ it.only("bar", function () {});
+  > 3 │ test.only("bar", function () {});
       │      ^^^^
-    4 │ fdescribe('foo', () => {});
-    5 │ fit('foo', () => {});
+    4 │ 
+    5 │ describe.only("bar", () => {});
   
-  i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Remove it.
+  i Consider removing 'only' to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
-    1 1 │   describe.only("test", () => {});
-    2 2 │   it.only("test", () => {});
-    3   │ - test.only("test",·()·=>·{});
-      3 │ + test("test",·()·=>·{});
-    4 4 │   fdescribe('foo', () => {});
-    5 5 │   fit('foo', () => {});
+     1  1 │   describe.only("bar", function () {});
+     2  2 │   it.only("bar", function () {});
+     3    │ - test.only("bar",·function·()·{});
+        3 │ + test("bar",·function·()·{});
+     4  4 │   
+     5  5 │   describe.only("bar", () => {});
   
 
 ```
 
 ```
-invalid.js:4:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:10 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
-    2 │ it.only("test", () => {});
-    3 │ test.only("test", () => {});
-  > 4 │ fdescribe('foo', () => {});
-      │ ^^^^^^^^^
-    5 │ fit('foo', () => {});
-    6 │ 
+    3 │ test.only("bar", function () {});
+    4 │ 
+  > 5 │ describe.only("bar", () => {});
+      │          ^^^^
+    6 │ it.only("bar", () => {});
+    7 │ test.only("bar", () => {});
   
-  i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Remove it.
+  i Consider removing 'only' to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
-    2 2 │   it.only("test", () => {});
-    3 3 │   test.only("test", () => {});
-    4   │ - fdescribe('foo',·()·=>·{});
-      4 │ + describe('foo',·()·=>·{});
-    5 5 │   fit('foo', () => {});
-    6 6 │   
+     3  3 │   test.only("bar", function () {});
+     4  4 │   
+     5    │ - describe.only("bar",·()·=>·{});
+        5 │ + describe("bar",·()·=>·{});
+     6  6 │   it.only("bar", () => {});
+     7  7 │   test.only("bar", () => {});
   
 
 ```
 
 ```
-invalid.js:5:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:4 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
-    3 │ test.only("test", () => {});
-    4 │ fdescribe('foo', () => {});
-  > 5 │ fit('foo', () => {});
-      │ ^^^
-    6 │ 
+    5 │ describe.only("bar", () => {});
+  > 6 │ it.only("bar", () => {});
+      │    ^^^^
+    7 │ test.only("bar", () => {});
+    8 │ 
   
-  i This is likely a change done during debugging or implementation phases, but it's unlikely what you want in production.
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
   
-  i Remove it.
+  i Consider removing 'only' to ensure all tests are executed.
   
   i Unsafe fix: Remove focus from test.
   
-    3 3 │   test.only("test", () => {});
-    4 4 │   fdescribe('foo', () => {});
-    5   │ - fit('foo',·()·=>·{});
-      5 │ + it('foo',·()·=>·{});
-    6 6 │   
+     4  4 │   
+     5  5 │   describe.only("bar", () => {});
+     6    │ - it.only("bar",·()·=>·{});
+        6 │ + it("bar",·()·=>·{});
+     7  7 │   test.only("bar", () => {});
+     8  8 │   
+  
+
+```
+
+```
+invalid.js:7:6 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    5 │ describe.only("bar", () => {});
+    6 │ it.only("bar", () => {});
+  > 7 │ test.only("bar", () => {});
+      │      ^^^^
+    8 │ 
+    9 │ describe["only"]("bar", function () {});
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+     5  5 │   describe.only("bar", () => {});
+     6  6 │   it.only("bar", () => {});
+     7    │ - test.only("bar",·()·=>·{});
+        7 │ + test("bar",·()·=>·{});
+     8  8 │   
+     9  9 │   describe["only"]("bar", function () {});
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+     7 │ test.only("bar", () => {});
+     8 │ 
+   > 9 │ describe["only"]("bar", function () {});
+       │ ^^^^^^^^^^^^^^^^
+    10 │ it["only"]("bar", function () {});
+    11 │ test["only"]("bar", function () {});
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    9 │ describe["only"]("bar",·function·()·{});
+      │         --------                        
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+     9 │ describe["only"]("bar", function () {});
+  > 10 │ it["only"]("bar", function () {});
+       │ ^^^^^^^^^^
+    11 │ test["only"]("bar", function () {});
+    12 │ 
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    10 │ it["only"]("bar",·function·()·{});
+       │   --------                        
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+     9 │ describe["only"]("bar", function () {});
+    10 │ it["only"]("bar", function () {});
+  > 11 │ test["only"]("bar", function () {});
+       │ ^^^^^^^^^^^^
+    12 │ 
+    13 │ fdescribe("foo", () => {});
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    11 │ test["only"]("bar",·function·()·{});
+       │     --------                        
+
+```
+
+```
+invalid.js:13:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    11 │ test["only"]("bar", function () {});
+    12 │ 
+  > 13 │ fdescribe("foo", () => {});
+       │ ^^^^^^^^^
+    14 │ fit("foo", () => {});
+    15 │ 
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    11 11 │   test["only"]("bar", function () {});
+    12 12 │   
+    13    │ - fdescribe("foo",·()·=>·{});
+       13 │ + describe("foo",·()·=>·{});
+    14 14 │   fit("foo", () => {});
+    15 15 │   
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    13 │ fdescribe("foo", () => {});
+  > 14 │ fit("foo", () => {});
+       │ ^^^
+    15 │ 
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    12 12 │   
+    13 13 │   fdescribe("foo", () => {});
+    14    │ - fit("foo",·()·=>·{});
+       14 │ + it("foo",·()·=>·{});
+    15 15 │   
   
 
 ```
