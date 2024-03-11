@@ -54,23 +54,17 @@ impl Rule for NoUndeclaredDependencies {
             return None;
         }
 
-        let package_name = match text.chars().position(|c| c == '/') {
-            Some(slash_index) => {
+        let mut parts = text.split('/');
+        let mut pointer = 0;
+        if let Some(maybe_scope) = parts.next() {
+            pointer += maybe_scope.len();
+            if maybe_scope.starts_with('@') {
                 // scoped package: @mui/material/Button
                 // the package name is @mui/material, not @mui
-                if text.starts_with('@') {
-                    &text[..text[slash_index + 1..]
-                        .chars()
-                        .position(|c| c == '/')
-                        .map_or(text.len(), |i| i + slash_index + 1)]
-                }
-                // unscoped package
-                else {
-                    &text[..slash_index]
-                }
+                pointer += parts.next().map_or(0, |s| s.len() + 1)
             }
-            None => text,
-        };
+        }
+        let package_name = &text[..pointer];
 
         if ctx.is_dependency(package_name) || ctx.is_dev_dependency(package_name) {
             return None;
