@@ -3,60 +3,66 @@
 This crate contains local commands used to auto-generate source code.
 
 ## `cargo codegen grammar`
-This command transforms the `js.ungram` file into the `biome_js_syntax` crate.
+This command transforms the `*.ungram` files into the `biome_*_syntax` and `biome_*_factory` crates.
 
-The project uses [`ungrammar`](https://github.com/rust-analyzer/ungrammar) to define the syntax of the language.
+The project a fork of [`ungrammar`](https://github.com/rust-analyzer/ungrammar) to define the syntax of the language.
 
 `ungrammar` uses a DSL to define and parse the grammar of a language.
 
 Once the library parses the DSL files, some custom logic generates the AST APIs.
 
-### Conventions to create syntax
+## Create a new language
 
-Here's a list of internal conventions that we follow to write grammar:
+Let's say you want to create a new language that has the extension `html`, you'll have to follow this instructions:
 
-1. use the prefix `manual__` to mark methods that are implemented manually;
+1. Create a new `html.ungram` file in this very folder.
+   Add this legend to the `.ungram` file
 
-	```text
-	MyDeclaration = manual__decl:Body
-	```
+  ```
+  // This grammar specifies the structure of Rust's concrete syntax tree.
+  // It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
+  // Tokens are processed -- contextual keywords are recognised, compound operators glued.
+  //
+  // Legend:
+  //
+  //   //          				-- comment
+  //   Name =      				-- non-terminal definition
+  //   'ident'     				-- token (terminal)
+  //   A B         				-- sequence
+  //   A | B       				-- alternation
+  //   A*          				-- zero or more repetition
+  //   (A (',' A)* ','?)	        -- repetition of node A separated by ',' and allowing a trailing comma
+  //   (A (',' A)*)	            -- repetition of node A separated by ',' without a trailing comma
+  //   A?          				-- zero or one repetition
+  //   (A)         				-- same as A
+  //   label:A     				-- suggested name for field of AST node
+  ```
+1. Create a new file called `src/html_kinds_src.rs`. This file must return a static `KindSrc`.
+1. Create two new creates: `biome_html_syntax` and `biome_html_factory`. Use `cargo new --lib crates/biome_html_syntax`.
+1. Create a `generated/` folder inside the `src/` folder of the newly created crates.
+1. Add a new variant to `LanguageKind`, inside `language_kind.rs` file. The new variant will be `Html`. You'll have to implement
+  all methods and cover the new variant.
+1. Add a new prefix `html_` to `LANGUAGE_PREFIXES` inside `language_kind.rs`.
+1. Once you covered all variants, run the command `cargo codegen grammar`.
 
-	If you define like this, it means that somewhere in your code you will create something like:
 
-	```rust
-	impl MyDeclaration {
-		fn decl(self) -> Option<Body> {
-			// custom logic goes here
-		}
-	}
-	```
+## Conventions when writing a new grammar in Biome
 
-1. unions of tokens have to have a label. In this way, the code generation can handle it properly and generate a better AST.
-
-	```text
-	BinExpr = left: Expr op: ('+' | '-' | '*') right: Expr
-	```
-
-	This will generate the correct implantation:
-
-	```rust
-	impl BinExpr {
-		fn op(self) -> Option<SyntaxToken> {
-			// custom logic goes here
-			support::find_token(
-			&self.syntax,
-			&[
-				T![+],
-				T![-],
-				T![*],
-			],
-		)
-		}
-	}
-	```
-
-1. Nodes used to track broken code should contain the **Bogus** word in its name (case sensitive).
-This is needed because it will generate a different type of code, useful in case of errors inside the source code Biome will parse.
+- All nodes **must** start with the prefix of the language, e.g. `HtmlSimpleAttribute`.
+- Unions of nodes **must** start with `Any*`, e.g. `AnyHtmlAttribute`.
+- Nodes that are used for enclosing syntax errors must have the **Bogus** word, e.g. `HtmlBogusAttribute`.
+- **Bogus** nodes **must be part of a variant**, e.g. 
+  ```
+  AnyHtmlAttribute = 
+    HtmlSimpleAttribute
+    HtmlBogusAttribute
+  ```
+- Nodes that represent a list **must** end with the postfix **List**, e.g. `HtmlAttributeList`.
+- Lists are **never** optional. They are mandatory and empty by default, e.g.
+  ```
+  HtmlTag = 
+    attributes: HtmlAttributeList
+  ```
 
 ## `cargo codegen test`
 This command extracts inline comment tests inside `biome_js_parser` into the directory `biome_js_parser/test_data/`.
@@ -70,5 +76,5 @@ UPDATE_EXPECT=1 cargo test parser # for committing the changes
 ```
 
 ## `cargo codegen unicode`
-This command downloads unicode data from unicode.org and writes it `crates/rome_js_lexer/src/tables.rs`.
+This command downloads unicode data from unicode.org and writes it `crates/biome_js_lexer/src/tables.rs`.
 Use this command when unicode support has changed.

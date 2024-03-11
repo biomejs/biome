@@ -20,7 +20,7 @@
 		"@astrojs/prism": "^3.0.0",
 		"@astrojs/react": "^3.0.10",
 		"@astrojs/rss": "^4.0.5",
-		"@astrojs/starlight": "^0.21.0",
+		"@astrojs/starlight": "^0.21.1",
 		"@biomejs/wasm-web": "link:../packages/@biomejs/wasm-web",
 		"@codemirror/lang-javascript": "^6.2.2",
 		"@codemirror/lang-json": "^6.0.1",
@@ -66,7 +66,7 @@
 		"pnpm": "^8.0.0"
 	},
 	"dependencies": {
-		"astro": "^4.4.8",
+		"astro": "^4.5.0",
 		"astro-og-canvas": "^0.4.2",
 		"canvaskit-wasm": "^0.39.1"
 	}
