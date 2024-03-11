@@ -1,0 +1,109 @@
+## npm packages
+[packages."@biomejs/biome"]
+versioned_files = ["packages/@biomejs/biome/package.json"]
+changelog = "CHANGELOG_NEW.md"
+extra_changelog_sections = [
+    { name = "Enhancements", footers = ["Enhancements"], types = ["enhancement"] }
+]
+[packages."@biomejs/backend_jsonrpc"]
+versioned_files = ["packages/@biomejs/backend-jsonrpc/package.json"]
+changelog = "packages/@biomejs/backend_jsonrpc/CHANGELOG.md"
+
+
+## Rust crates
+[packages.biome_analyze]
+versioned_files = ["crates/biome_analyze/Cargo.toml"]
+changelog = "crates/biome_analyze/CHANGELOG.md"
+[packages.biome_aria]
+versioned_files = ["crates/biome_aria/Cargo.toml"]
+changelog = "crates/biome_aria/CHANGELOG.md"
+[packages.biome_aria_metadata]
+versioned_files = ["crates/biome_aria_metadata/Cargo.toml"]
+changelog = "crates/biome_aria_metadata/CHANGELOG.md"
+[packages.biome_console]
+versioned_files = ["crates/biome_console/Cargo.toml"]
+changelog = "crates/biome_console/CHANGELOG.md"
+[packages.biome_control_flow]
+versioned_files = ["crates/biome_control_flow/Cargo.toml"]
+changelog = "crates/biome_control_flow/CHANGELOG.md"
+[packages.biome_css_factory]
+versioned_files = ["crates/biome_css_factory/Cargo.toml"]
+changelog = "crates/biome_css_factory/CHANGELOG.md"
+[packages.biome_css_formatter]
+versioned_files = ["crates/biome_css_formatter/Cargo.toml"]
+changelog = "crates/biome_css_formatter/CHANGELOG.md"
+[packages.biome_css_parser]
+versioned_files = ["crates/biome_css_parser/Cargo.toml"]
+changelog = "crates/biome_css_parser/CHANGELOG.md"
+[packages.biome_css_syntax]
+versioned_files = ["crates/biome_css_syntax/Cargo.toml"]
+changelog = "crates/biome_css_syntax/CHANGELOG.md"
+[packages.biome_deserialize]
+versioned_files = ["crates/biome_deserialize/Cargo.toml"]
+changelog = "crates/biome_deserialize/CHANGELOG.md"
+[packages.biome_deserialize_macros]
+versioned_files = ["crates/biome_deserialize_macros/Cargo.toml"]
+changelog = "crates/biome_deserialize_macros/CHANGELOG.md"
+[packages.biome_diagnostics]
+versioned_files = ["crates/biome_diagnostics/Cargo.toml"]
+changelog = "crates/biome_diagnostics/CHANGELOG.md"
+[packages.biome_diagnostics_categories]
+versioned_files = ["crates/biome_diagnostics_categories/Cargo.toml"]
+changelog = "crates/biome_diagnostics_categories/CHANGELOG.md"
+[packages.biome_diagnostics_macros]
+versioned_files = ["crates/biome_diagnostics_macros/Cargo.toml"]
+changelog = "crates/biome_diagnostics_macros/CHANGELOG.md"
+[packages.biome_formatter]
+versioned_files = ["crates/biome_formatter/Cargo.toml"]
+changelog = "crates/biome_formatter/CHANGELOG.md"
+[packages.biome_fs]
+versioned_files = ["crates/biome_fs/Cargo.toml"]
+changelog = "crates/biome_fs/CHANGELOG.md"
+[packages.biome_grit_factory]
+versioned_files = ["crates/biome_grit_factory/Cargo.toml"]
+changelog = "crates/biome_grit_factory/CHANGELOG.md"
+[packages.biome_grit_syntax]
+versioned_files = ["crates/biome_grit_syntax/Cargo.toml"]
+changelog = "crates/biome_grit_syntax/CHANGELOG.md"
+[packages.biome_html_factory]
+versioned_files = ["crates/biome_html_factory/Cargo.toml"]
+changelog = "crates/biome_html_factory/CHANGELOG.md"
+[packages.biome_html_syntax]
+versioned_files = ["crates/biome_html_syntax/Cargo.toml"]
+changelog = "crates/biome_html_syntax/CHANGELOG.md"
+[packages.biome_js_analyze]
+versioned_files = ["crates/biome_js_analyze/Cargo.toml"]
+changelog = "crates/biome_js_analyze/CHANGELOG.md"
+[packages.biome_js_factory]
+versioned_files = ["crates/biome_js_factory/Cargo.toml"]
+changelog = "crates/biome_js_factory/CHANGELOG.md"
+[packages.biome_js_formatter]
+versioned_files = ["crates/biome_js_formatter/Cargo.toml"]
+changelog = "crates/biome_js_formatter/CHANGELOG.md"
+[packages.biome_js_parser]
+versioned_files = ["crates/biome_js_parser/Cargo.toml"]
+changelog = "crates/biome_js_parser/CHANGELOG.md"
+[packages.biome_js_semantic]
+versioned_files = ["crates/biome_js_semantic/Cargo.toml"]
+changelog = "crates/biome_js_semantic/CHANGELOG.md"
+[packages.biome_js_syntax]
+versioned_files = ["crates/biome_js_syntax/Cargo.toml"]
+changelog = "crates/biome_js_syntax/CHANGELOG.md"
+[packages.biome_js_transform]
+versioned_files = ["crates/biome_js_transform/Cargo.toml"]
+changelog = "crates/biome_js_transform/CHANGELOG.md"
+[packages.biome_json_analyze]
+versioned_files = ["crates/biome_json_analyze/Cargo.toml"]
+changelog = "crates/biome_json_analyze/CHANGELOG.md"
+[packages.biome_json_factory]
+versioned_files = ["crates/biome_json_factory/Cargo.toml"]
+changelog = "crates/biome_json_factory/CHANGELOG.md"
+[packages.biome_json_formatter]
+versioned_files = ["crates/biome_json_formatter/Cargo.toml"]
+changelog = "crates/biome_json_formatter/CHANGELOG.md"
+[packages.biome_json_parser]
+versioned_files = ["crates/biome_json_parser/Cargo.toml"]
+changelog = "crates/biome_json_parser/CHANGELOG.md"
+[packages.biome_json_syntax]
+versioned_files = ["crates/biome_json_syntax/Cargo.toml"]
+changelog = "crates/biome_json_syntax/CHANGELOG.md"

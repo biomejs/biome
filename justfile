@@ -11,12 +11,12 @@ alias qt := test-quick
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
-	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools
+	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools knope
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
-	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools --force
+	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools knope --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen:
@@ -127,3 +127,10 @@ ready:
   just test
   just test-doc
   git diff --exit-code --quiet
+
+# Changelogs
+change:
+    knope document-change
+
+dry-run:
+    knope release --dry-run > out.txt
