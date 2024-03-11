@@ -21,7 +21,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Bug fixes
+
+- CLI is now able to automatically search and resolve `biome.jsonc` ([#2008](https://github.com/biomejs/biome/issues/2008)).
+
+  Contributed by @Sec-ant
+
 ### Configuration
+
+#### Bug fixes
+
+- `json.formatter.trailingCommas` option now works in `overrides` ([#2009](https://github.com/biomejs/biome/issues/2009)).
+
+  Contributed by @Sec-ant
 
 ### Editors
 
@@ -36,6 +48,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Enhamcements
 
 #### Bug fixes
+
+- [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable) now recognizes function bodies wrapped in parentheses ([#2011](https://github.com/biomejs/biome/issues/2011)).
+
+  Contributed by @Sec-ant
+
+- [useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type) now preserves type parameters of generic interfaces when applying fixes ([#2015](https://github.com/biomejs/biome/issues/2015)).
+
+  Contributed by @Sec-ant
 
 - Code fixes of [useImportType](https://biomejs.dev/linter/rules/use-import-type) and [useExportType](https://biomejs.dev/linter/rules/use-export-type) now handle multiline statements ([#2041](https://github.com/biomejs/biome/issues/2041)).
   Contributed by @Conaclos
