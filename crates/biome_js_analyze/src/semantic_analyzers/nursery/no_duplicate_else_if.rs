@@ -1,76 +1,8 @@
-use crate::semantic_services::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsIfStatement, JsLogicalOperator, JsSyntaxKind};
 use biome_rowan::{AstNode, SyntaxNodeCast};
 
-fn flatten_parent(node: &AnyJsExpression) -> AnyJsExpression {
-    let expression_inside_parent = node
-        .as_js_parenthesized_expression()
-        .and_then(|parent| parent.expression().ok());
-
-    if let Some(expression) = expression_inside_parent {
-        return expression;
-    }
-    node.clone()
-}
-
-fn split_by_logical_operator(
-    operator: JsLogicalOperator,
-    node: &AnyJsExpression,
-) -> Vec<AnyJsExpression> {
-    match node {
-        AnyJsExpression::JsLogicalExpression(logic_expression) => {
-            if let Ok(operator_token) = logic_expression.operator() {
-                if operator_token != operator {
-                    return vec![node.clone()];
-                }
-            }
-            if let (Ok(left_node), Ok(right_node)) =
-                (logic_expression.left(), logic_expression.right())
-            {
-                let left = split_by_logical_operator(operator, &flatten_parent(&left_node));
-                let right = split_by_logical_operator(operator, &flatten_parent(&right_node));
-                let combined = [left.as_slice(), right.as_slice()].concat();
-                return combined;
-            }
-            vec![node.clone()]
-        }
-        _ => {
-            vec![node.clone()]
-        }
-    }
-}
-fn equal(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
-    if a.syntax().kind() != b.syntax().kind() {
-        return false;
-    }
-    if a.syntax().kind() == JsSyntaxKind::JS_LOGICAL_EXPRESSION {
-        if let (Some(a_exp), Some(b_exp)) =
-            (a.as_js_logical_expression(), b.as_js_logical_expression())
-        {
-            if a_exp.operator() == b_exp.operator()
-                && (a_exp.operator() == Ok(JsLogicalOperator::LogicalAnd)
-                    || a_exp.operator() == Ok(JsLogicalOperator::LogicalOr))
-            {
-                match (a_exp.left(), a_exp.right(), b_exp.left(), b_exp.right()) {
-                    (Ok(left_a), Ok(right_a), Ok(left_b), Ok(right_b)) => {
-                        return (equal(&left_a, &left_b) && equal(&right_a, &right_b))
-                            || (equal(&left_a, &right_b) && equal(&right_a, &left_b));
-                    }
-                    _ => return false,
-                }
-            }
-            return false;
-        }
-        return false;
-    }
-    a.text() == b.text()
-}
-
-fn is_subset(arr_a: &[AnyJsExpression], arr_b: &[AnyJsExpression]) -> bool {
-    arr_a.iter().all(|a| arr_b.iter().any(|b| equal(a, b)))
-}
 declare_rule! {
     /// Disallow duplicate conditions in if-else-if chains
     ///
@@ -83,8 +15,6 @@ declare_rule! {
     /// meaning that its branch can never execute.
     ///
     /// Please note that this rule does not compare conditions from the chain with conditions inside statements
-    ///
-    /// Source: https://github.com/eslint/eslint/blob/main/lib/rules/no-dupe-else-if.js
     ///
     /// ## Examples
     ///
@@ -115,77 +45,78 @@ declare_rule! {
     pub NoDuplicateElseIf {
         version: "next",
         name: "noDuplicateElseIf",
-        recommended: false,
+        recommended: true,
     }
 }
 
 impl Rule for NoDuplicateElseIf {
-    type Query = Semantic<JsIfStatement>;
+    type Query = Ast<JsIfStatement>;
     type State = AnyJsExpression;
 
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let binding = ctx.query();
-        if binding.syntax().kind() == JsSyntaxKind::JS_IF_STATEMENT {
-            if let Ok(expr) = binding.test() {
-                let mut conditions_to_check: Vec<AnyJsExpression> = vec![];
-                conditions_to_check.push(expr.clone());
+        let node = ctx.query();
+        let expr = node.test().ok()?;
+        let mut conditions_to_check: Vec<AnyJsExpression> = vec![];
+        conditions_to_check.push(expr.clone());
 
-                if let Some(logical_expression) = expr.as_js_logical_expression() {
-                    if let Ok(operator_token) = logical_expression.operator() {
-                        conditions_to_check
-                            .append(&mut split_by_logical_operator(operator_token, &expr));
-                    }
-                }
-                let mut list_to_check: Vec<Vec<Vec<AnyJsExpression>>> = conditions_to_check
+        if let Some(logical_expression) = expr.as_js_logical_expression() {
+            if let Ok(operator_token) = logical_expression.operator() {
+                conditions_to_check.append(&mut split_by_logical_operator_wrapper(
+                    operator_token,
+                    &expr,
+                ));
+            }
+        }
+        let mut list_to_check: Vec<Vec<Vec<AnyJsExpression>>> = conditions_to_check
+            .iter()
+            .map(|c| {
+                split_by_logical_operator_wrapper(JsLogicalOperator::LogicalOr, c)
                     .iter()
-                    .map(|c| {
-                        split_by_logical_operator(JsLogicalOperator::LogicalOr, c)
+                    .map(|f| split_by_logical_operator_wrapper(JsLogicalOperator::LogicalAnd, f))
+                    .collect()
+            })
+            .collect();
+        let mut current = node.syntax().clone();
+
+        while let Some(grand_parent_node) = current.grand_parent() {
+            current = grand_parent_node.clone();
+
+            let ifexpr = match grand_parent_node.kind() {
+                JsSyntaxKind::JS_IF_STATEMENT => {
+                    grand_parent_node.cast::<JsIfStatement>()?.test().ok()
+                }
+                _ => {
+                    break;
+                }
+            };
+            if let Some(expr) = ifexpr {
+                let current_or_operands: Vec<Vec<AnyJsExpression>> =
+                    split_by_logical_operator_wrapper(JsLogicalOperator::LogicalOr, &expr)
+                        .iter()
+                        .map(|f| {
+                            split_by_logical_operator_wrapper(JsLogicalOperator::LogicalAnd, f)
+                        })
+                        .collect();
+
+                list_to_check = list_to_check
+                    .iter()
+                    .map(|or_operands| {
+                        or_operands
                             .iter()
-                            .map(|f| split_by_logical_operator(JsLogicalOperator::LogicalAnd, f))
+                            .filter(|&or_operand| {
+                                !current_or_operands.iter().any(|current_or_operand| {
+                                    is_subset(current_or_operand, or_operand)
+                                })
+                            })
+                            .cloned()
                             .collect()
                     })
                     .collect();
-                let mut current = binding.syntax().clone();
-
-                while let Some(node) = current.grand_parent() {
-                    current = node.clone();
-
-                    let ifexpr = match node.kind() {
-                        JsSyntaxKind::JS_IF_STATEMENT => node.cast::<JsIfStatement>()?.test().ok(),
-                        _ => {
-                            break;
-                        }
-                    };
-                    if let Some(expr) = ifexpr {
-                        let current_or_operands: Vec<Vec<AnyJsExpression>> =
-                            split_by_logical_operator(JsLogicalOperator::LogicalOr, &expr)
-                                .iter()
-                                .map(|f| {
-                                    split_by_logical_operator(JsLogicalOperator::LogicalAnd, f)
-                                })
-                                .collect();
-
-                        list_to_check = list_to_check
-                            .iter()
-                            .map(|or_operands| {
-                                or_operands
-                                    .iter()
-                                    .filter(|&or_operand| {
-                                        !current_or_operands.iter().any(|current_or_operand| {
-                                            is_subset(current_or_operand, or_operand)
-                                        })
-                                    })
-                                    .cloned()
-                                    .collect()
-                            })
-                            .collect();
-                        if list_to_check.iter().any(|f| f.is_empty()) {
-                            return binding.clone().test().ok();
-                        }
-                    }
+                if list_to_check.iter().any(|f| f.is_empty()) {
+                    return node.clone().test().ok();
                 }
             }
         }
@@ -205,4 +136,81 @@ impl Rule for NoDuplicateElseIf {
             },
         ))
     }
+}
+
+fn flatten_parent(node: &AnyJsExpression) -> AnyJsExpression {
+    let expression_inside_parent = node
+        .as_js_parenthesized_expression()
+        .and_then(|parent| parent.expression().ok());
+
+    if let Some(expression) = expression_inside_parent {
+        return expression;
+    }
+    node.clone()
+}
+fn split_by_logical_operator_wrapper(
+    operator: JsLogicalOperator,
+    node: &AnyJsExpression,
+) -> Vec<AnyJsExpression> {
+    let mut result: Vec<AnyJsExpression> = vec![];
+    split_by_logical_operator(operator, node, &mut result);
+    result
+}
+fn split_by_logical_operator(
+    operator: JsLogicalOperator,
+    node: &AnyJsExpression,
+    result: &mut Vec<AnyJsExpression>,
+) {
+    match node {
+        AnyJsExpression::JsLogicalExpression(logic_expression) => {
+            if let Ok(operator_token) = logic_expression.operator() {
+                if operator_token != operator {
+                    result.push(node.clone());
+                    return;
+                }
+            }
+            if let (Ok(left_node), Ok(right_node)) =
+                (logic_expression.left(), logic_expression.right())
+            {
+                split_by_logical_operator(operator, &flatten_parent(&left_node), result);
+                split_by_logical_operator(operator, &flatten_parent(&right_node), result);
+            } else {
+                result.push(node.clone());
+            }
+        }
+        _ => {
+            result.push(node.clone());
+        }
+    }
+}
+
+fn equal(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
+    if a.syntax().kind() != b.syntax().kind() {
+        return false;
+    }
+    if a.syntax().kind() == JsSyntaxKind::JS_LOGICAL_EXPRESSION {
+        if let (Some(a_exp), Some(b_exp)) =
+            (a.as_js_logical_expression(), b.as_js_logical_expression())
+        {
+            if a_exp.operator() == b_exp.operator()
+                && (a_exp.operator() == Ok(JsLogicalOperator::LogicalAnd)
+                    || a_exp.operator() == Ok(JsLogicalOperator::LogicalOr))
+            {
+                match (a_exp.left(), a_exp.right(), b_exp.left(), b_exp.right()) {
+                    (Ok(left_a), Ok(right_a), Ok(left_b), Ok(right_b)) => {
+                        return (equal(&left_a, &left_b) && equal(&right_a, &right_b))
+                            || (equal(&left_a, &right_b) && equal(&right_a, &left_b));
+                    }
+                    _ => return false,
+                }
+            }
+            return false;
+        }
+        return false;
+    }
+    a.text() == b.text()
+}
+
+fn is_subset(arr_a: &[AnyJsExpression], arr_b: &[AnyJsExpression]) -> bool {
+    arr_a.iter().all(|a| arr_b.iter().any(|b| equal(a, b)))
 }
