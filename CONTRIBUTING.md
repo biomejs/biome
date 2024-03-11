@@ -102,21 +102,7 @@ This command will install:
 
 And you're good to go hack with Biome and Rust! 🚀
 
-## Crates development
-
-### Analyzers and lint rules
-
-To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal page](https://docs.rs/biome_analyze/latest/biome_analyze/)
-
-### Parser
-
-To know the technical details of how our parser works and how to write test, please check our [internal page](https://docs.rs/biome_parser/latest/biome_parser/)
-
-### Formatter
-
-To know the technical details of how our formatter works and how to write test, please check our [internal page](https://docs.rs/biome_js_formatter/latest/biome_js_formatter/)
-
-### Testing
+## Testing
 
 You can either use `cargo` or `just` to run tests. For simplicity and running tests real quick, use `cargo`.
 
@@ -168,7 +154,20 @@ If you want to test the tests for a single crate:
 just test-crate biome_cli
 ```
 
-To run only the doctests, you would need to pass an argument to the command:
+Rust has a concept of **doctest**. A doc test is a doc comment that runs some code. Usually, it looks something like this:
+
+```rust
+/// I am a doc test
+/// ```
+/// assert_eq!(true, true) // this is a doc test, and the assertion must pass
+/// ```
+fn some_fn() {
+
+}
+```
+The code inside the code blocks is **run** during the testing phase.
+
+To run only the doctest, you can run the command:
 
 ```shell
 just test-doc
@@ -180,35 +179,59 @@ When a snapshot test fails, you can run:
 
 - `cargo insta accept` to accept all the changes and update all the snapshots;
 - `cargo insta reject` to reject all the changes;
-- `cargo insta review` to review snapshots singularly;
+- `cargo insta review` to review snapshots singularly.
 
 ### Debugging
 
 Sometimes you want to debug something when running tests. Like `console.log`, in JavaScript, in Rust you can use the macro `dbg!()` to print something during debugging something. Then, pass the option `--show-output` to `cargo`:
 
-```rs
-fn some_function() {
+```rust
+fn some_function() -> &'static str {
+    let some_variable = "some_variable";
     dbg!(&some_variable);
+    some_variable
+}
+#[test]
+fn test_some_function() {
+    let result = some_function();
+    assert_eq!(result, "some_variable")
 }
 ```
 
 ```shell
-cargo t --show-output
+cargo t test_some_function --show-output
 ```
 
 ### Checks
 
-When you finished your work, and you are ready to **commit and open a PR**,
-run the following command:
+When you finished your work, and you are ready to **commit and open a PR**, there are few other 
+things you would need to run and check:
+- `just f` (alias for `just format`), formats Rust and TOML files.
+- `just l` (alias for `just lint`), run the linter for the whole project.
+- Code generation. The code generation of the repository is spread in the different parts of the code base. Sometimes is needed and sometime it isn't:
+  - run `just gen-lint` when you're working on the **linter**;
+  - run `just gen-bindings` in case you worked around the **workspace**;
+  - run `just gen-web` when you update the `CHANGELOG.md`.
 
-```shell
-just ready
-```
+> [!NOTE]
+> You can run `just ready` as well, although it's a command that runs the codegen of the whole repository, which will take some time
 
-This command will run the same commands of the CI: format, lint, tests and code generation.
-Eventually everything should be "green" 🟢 and commit all the code that was generated.
+## Crates development
 
-### crate dependencies
+### Analyzers and lint rules
+
+To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal page](https://docs.rs/biome_analyze/latest/biome_analyze/)
+
+### Parser
+
+To know the technical details of how our parser works and how to write test, please check our [internal page](https://docs.rs/biome_parser/latest/biome_parser/)
+
+### Formatter
+
+To know the technical details of how our formatter works and how to write test, please check our [internal page](https://docs.rs/biome_js_formatter/latest/biome_js_formatter/)
+
+
+## Crate dependencies
 
 [Workspace dependencies](https://doc.rust-lang.org/cargo/reference/workspaces.html#the-dependencies-table) are used, and many dependencies are defined in Cargo.toml in the root.
 
@@ -216,7 +239,7 @@ Internal crates are loaded with `workspace = true` for each crate. About `dev-de
 
 ## Node.js development
 
-The npm module `npm/biome` contains Biome's Node JS API that supports different backends:
+The npm module `packages/@biomejs/biome` contains Biome's Node.js API that supports different backends:
 
 - `wasm-nodejs` (WebAssembly)
 - `backend-jsonrpc` (Connection to the daemon)
@@ -225,8 +248,8 @@ For testing and developing, you need to build these packages, following the step
 
 1. install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) globally;
 2. run the `build` command inside the package `backend-jsonrpc`;
-3. run the `build` and `build:wasm-node-dev` commands inside the package `js-api` (folder `npm/js-api`);
-4. run `pnpm i` inside the package `js-api` (folder `npm/js-api`), this will link the WebAssembly bindings and the
+3. run the `build` and `build:wasm-node-dev` commands inside the package `js-api` (folder `packages/@biomejs/js-api`);
+4. run `pnpm i` inside the package `js-api` (folder `packages/@biomejs/js-api`), this will link the WebAssembly bindings and the
    JSON-RPC bindings;
 
 The tests are run against the compiled files, which means that you need to run the
