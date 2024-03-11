@@ -24,8 +24,6 @@ meaning that its branch can never execute.
 
 Please note that this rule does not compare conditions from the chain with conditions inside statements
 
-Source: https://github.com/eslint/eslint/blob/main/lib/rules/no-dupe-else-if.js
-
 ## Examples
 
 ### Invalid
@@ -42,7 +40,7 @@ if (a) {
 
 <pre class="language-text"><code class="language-text">nursery/noDuplicateElseIf.js:5:12 <a href="https://biomejs.dev/linter/rules/no-duplicate-else-if">lint/nursery/noDuplicateElseIf</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.</span>
   
     <strong>3 │ </strong>} else if (b) {
     <strong>4 │ </strong>    bar();
