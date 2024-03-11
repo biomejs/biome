@@ -1,5 +1,6 @@
 use super::js_kinds_src::AstSrc;
-use crate::{to_upper_snake_case, LanguageKind, Result};
+use crate::language_kind::LanguageKind;
+use crate::{to_upper_snake_case, Result};
 use quote::{format_ident, quote};
 
 pub fn generate_macros(ast: &AstSrc, language_kind: LanguageKind) -> Result<String> {

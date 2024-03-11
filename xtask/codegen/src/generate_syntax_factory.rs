@@ -1,38 +1,16 @@
 use super::js_kinds_src::AstSrc;
 use crate::generate_nodes::{get_field_predicate, group_fields_for_ordering, token_kind_to_code};
-use crate::{to_upper_snake_case, LanguageKind};
+use crate::language_kind::LanguageKind;
+use crate::to_upper_snake_case;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use xtask::Result;
 
 pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Result<String> {
-    let (syntax_crate, syntax_kind, factory_kind) = match language_kind {
-        LanguageKind::Js => (
-            quote! { biome_js_syntax },
-            quote! { JsSyntaxKind },
-            quote! { JsSyntaxFactory },
-        ),
-        LanguageKind::Css => (
-            quote! { biome_css_syntax },
-            quote! { CssSyntaxKind },
-            quote! { CssSyntaxFactory },
-        ),
-        LanguageKind::Json => (
-            quote! { biome_json_syntax },
-            quote! { JsonSyntaxKind },
-            quote! { JsonSyntaxFactory },
-        ),
-        LanguageKind::Grit => (
-            quote! { biome_grit_syntax },
-            quote! { GritSyntaxKind },
-            quote! { GritSyntaxFactory },
-        ),
-        LanguageKind::Html => (
-            quote! { biome_html_syntax },
-            quote! { HtmlSyntaxKind },
-            quote! { HtmlSyntaxFactory },
-        ),
-    };
+    let syntax_crate = language_kind.syntax_crate_ident();
+    let syntax_kind = language_kind.syntax_kind();
+    let factory_kind = language_kind.syntax_factory();
+
     let normal_node_arms = ast.nodes.iter().map(|node| {
         let kind = format_ident!("{}", to_upper_snake_case(&node.name));
         let expected_len = node.fields.len();

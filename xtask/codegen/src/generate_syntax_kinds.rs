@@ -1,5 +1,6 @@
 use crate::kind_src::KindsSrc;
-use crate::{to_upper_snake_case, LanguageKind, Result};
+use crate::language_kind::LanguageKind;
+use crate::{to_upper_snake_case, Result};
 use proc_macro2::{Literal, Punct, Spacing};
 use quote::{format_ident, quote};
 

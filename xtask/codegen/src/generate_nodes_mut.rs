@@ -1,5 +1,5 @@
 use crate::js_kinds_src::{AstSrc, Field};
-use crate::LanguageKind;
+use crate::language_kind::LanguageKind;
 use quote::{format_ident, quote};
 use xtask::Result;
 
