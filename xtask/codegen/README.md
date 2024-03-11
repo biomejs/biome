@@ -5,7 +5,7 @@ This crate contains local commands used to auto-generate source code.
 ## `cargo codegen grammar`
 This command transforms the `*.ungram` files into the `biome_*_syntax` and `biome_*_factory` crates.
 
-The project a fork of [`ungrammar`](https://github.com/rust-analyzer/ungrammar) to define the syntax of the language.
+The project uses a fork of [`ungrammar`](https://github.com/rust-analyzer/ungrammar) to define the syntax of the language.
 
 `ungrammar` uses a DSL to define and parse the grammar of a language.
 
@@ -38,7 +38,7 @@ Let's say you want to create a new language that has the extension `html`, you'l
   //   label:A     				-- suggested name for field of AST node
   ```
 1. Create a new file called `src/html_kinds_src.rs`. This file must return a static `KindSrc`.
-1. Create two new creates: `biome_html_syntax` and `biome_html_factory`. Use `cargo new --lib crates/biome_html_syntax`.
+1. Create two new crates: `biome_html_syntax` and `biome_html_factory`. Use `cargo new --lib crates/biome_html_syntax`.
 1. Create a `generated/` folder inside the `src/` folder of the newly created crates.
 1. Add a new variant to `LanguageKind`, inside `language_kind.rs` file. The new variant will be `Html`. You'll have to implement
   all methods and cover the new variant.
