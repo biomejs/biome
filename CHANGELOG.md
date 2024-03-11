@@ -54,6 +54,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) now recognizes imports of subpath exports.
+
+  E.g., the following import statements no longer report errors if `@mui/material` and `tailwindcss` are installed as dependencies:
+
+  ```ts
+  import Button from "@mui/material/Button";
+  import { fontFamily } from "tailwindcss/defaultTheme";
+  ```
+
+  Contributed by @Sec-ant
+
 ### Parser
 
 #### Bug fixes

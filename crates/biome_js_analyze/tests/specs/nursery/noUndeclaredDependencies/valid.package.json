@@ -1,6 +1,8 @@
 {
 	"dependencies": {
-		"react": "1.0.0"
+		"react": "1.0.0",
+		"@mui/material": "5.15.12",
+		"tailwindcss": "3.4.1"
 	},
 	"devDependencies": {
 		"@testing-library/react": "1.0.0"
