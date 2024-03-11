@@ -10,3 +10,4 @@ null
 new-line";
 /^[يفمئامئ‍ئاسۆند]/i; //regex with unicode
 /[\p{Control}--[\t\n]]/v;
+/\’/; // regex with escaped non-ascii chars (issue #1941)
