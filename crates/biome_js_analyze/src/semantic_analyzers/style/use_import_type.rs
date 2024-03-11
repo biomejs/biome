@@ -444,10 +444,16 @@ impl Rule for UseImportType {
             }
             ImportTypeFix::AddInlineTypeQualifiers(specifiers) => {
                 for specifier in specifiers {
-                    let new_specifier = specifier.clone().with_type_token(Some(
-                        make::token(T![type])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                    ));
+                    let new_specifier = specifier
+                        .clone()
+                        .with_leading_trivia_pieces([])?
+                        .with_type_token(Some(
+                            make::token(T![type])
+                                .with_leading_trivia_pieces(
+                                    specifier.syntax().first_leading_trivia()?.pieces(),
+                                )
+                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        ));
                     mutation.replace_node(specifier.clone(), new_specifier);
                 }
             }

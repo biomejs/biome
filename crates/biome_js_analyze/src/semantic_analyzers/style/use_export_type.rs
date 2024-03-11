@@ -151,8 +151,6 @@ impl Rule for UseExportType {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let export_named_clause = ctx.query();
         let mut mutation = ctx.root().begin();
-        let type_token =
-            Some(make::token(T![type]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]));
         let diagnostic = match state {
             ExportTypeFix::GroupTypeExports => {
                 let specifier_list = export_named_clause.specifiers();
@@ -181,7 +179,10 @@ impl Rule for UseExportType {
                     export_named_clause.clone(),
                     export_named_clause
                         .clone()
-                        .with_type_token(type_token)
+                        .with_type_token(Some(
+                            make::token(T![type])
+                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        ))
                         .with_specifiers(new_specifier_list),
                 );
                 JsRuleAction {
@@ -196,7 +197,16 @@ impl Rule for UseExportType {
                 for specifier in specifiers {
                     mutation.replace_node(
                         specifier.clone(),
-                        specifier.clone().with_type_token(type_token.clone()),
+                        specifier
+                            .clone()
+                            .with_leading_trivia_pieces([])?
+                            .with_type_token(Some(
+                                make::token(T![type])
+                                    .with_leading_trivia_pieces(
+                                        specifier.syntax().first_leading_trivia()?.pieces(),
+                                    )
+                                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                            )),
                     );
                 }
                 JsRuleAction {

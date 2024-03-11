@@ -7,6 +7,15 @@ export { T2, T3 };
 import type T4 from "./mod.ts";
 export { T4 };
 
+// multiline
+import { type T5, type T6, V2 } from "./mod.ts";
+export {
+    // leading comment
+    T5,
+    T6,
+    V2,
+};
+
 import type * as ns from "./mod.ts";
 export { ns };
 
