@@ -184,7 +184,7 @@ invalid.js:7:6 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.js:9:1 lint/nursery/noFocusedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -199,11 +199,15 @@ invalid.js:9:1 lint/nursery/noFocusedTests ━━━━━━━━━━━━�
   
   i Consider removing 'only' to ensure all tests are executed.
   
+  i Unsafe fix: Remove focus from test.
+  
+    9 │ describe["only"]("bar",·function·()·{});
+      │         --------                        
 
 ```
 
 ```
-invalid.js:10:1 lint/nursery/noFocusedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -217,11 +221,15 @@ invalid.js:10:1 lint/nursery/noFocusedTests ━━━━━━━━━━━━
   
   i Consider removing 'only' to ensure all tests are executed.
   
+  i Unsafe fix: Remove focus from test.
+  
+    10 │ it["only"]("bar",·function·()·{});
+       │   --------                        
 
 ```
 
 ```
-invalid.js:11:1 lint/nursery/noFocusedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -236,6 +244,10 @@ invalid.js:11:1 lint/nursery/noFocusedTests ━━━━━━━━━━━━
   
   i Consider removing 'only' to ensure all tests are executed.
   
+  i Unsafe fix: Remove focus from test.
+  
+    11 │ test["only"]("bar",·function·()·{});
+       │     --------                        
 
 ```
 
