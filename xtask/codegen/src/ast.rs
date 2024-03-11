@@ -2,7 +2,6 @@
 //! This is derived from rust-analyzer/xtask/codegen
 
 use std::collections::{HashMap, HashSet, VecDeque};
-use std::str::FromStr;
 use std::vec;
 
 use super::{
@@ -15,14 +14,15 @@ use crate::generate_syntax_factory::generate_syntax_factory;
 use crate::js_kinds_src::{
     AstEnumSrc, AstListSeparatorConfiguration, AstListSrc, AstNodeSrc, TokenKind,
 };
+use crate::language_kind::{LanguageKind, ALL_LANGUAGE_KIND};
 use crate::termcolorful::{println_string_with_fg_color, Color};
-use crate::ALL_LANGUAGE_KIND;
 use crate::{
     generate_macros::generate_macros, generate_nodes::generate_nodes,
-    generate_syntax_kinds::generate_syntax_kinds, update, LanguageKind,
+    generate_syntax_kinds::generate_syntax_kinds, update,
 };
 use biome_ungrammar::{Grammar, Rule, Token};
 use std::fmt::Write;
+use std::str::FromStr;
 use xtask::{project_root, Result};
 
 // these node won't generate any code

@@ -1,10 +1,10 @@
 //! Definitions for the ECMAScript AST used for codegen
 //! Based on the rust analyzer parser and ast definitions
 
-use crate::kind_src::{KindsSrc, LANGUAGE_PREFIXES};
+use crate::kind_src::KindsSrc;
+use crate::language_kind::{LanguageKind, LANGUAGE_PREFIXES};
 use quote::format_ident;
 use std::collections::BTreeMap;
-use crate::language_kind::LanguageKind;
 
 pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
     punct: &[

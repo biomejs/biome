@@ -1,12 +1,12 @@
-use std::str::FromStr;
-use proc_macro2::{Ident, Span, TokenStream};
-use quote::quote;
 use crate::css_kinds_src::CSS_KINDS_SRC;
 use crate::grit_kinds_src::GRIT_KINDS_SRC;
 use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::js_kinds_src::JS_KINDS_SRC;
 use crate::json_kinds_src::JSON_KINDS_SRC;
 use crate::kind_src::KindsSrc;
+use proc_macro2::{Ident, Span, TokenStream};
+use quote::quote;
+use std::str::FromStr;
 
 pub const LANGUAGE_PREFIXES: [&str; 7] = ["js_", "ts_", "jsx_", "tsx_", "css_", "json_", "html_"];
 
@@ -69,6 +69,15 @@ impl LanguageKind {
             LanguageKind::Json => quote! { JsonSyntaxKind },
             LanguageKind::Grit => quote! { GritSyntaxKind },
             LanguageKind::Html => quote! { HtmlSyntaxKind },
+        }
+    }
+    pub(crate) fn syntax_factory(&self) -> TokenStream {
+        match self {
+            LanguageKind::Js => quote! { JsSyntaxFactory },
+            LanguageKind::Css => quote! { CssSyntaxFactory },
+            LanguageKind::Json => quote! { JsonSyntaxFactory },
+            LanguageKind::Grit => quote! { GritSyntaxFactory },
+            LanguageKind::Html => quote! { HtmlSyntaxFactory },
         }
     }
 

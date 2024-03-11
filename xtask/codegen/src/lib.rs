@@ -17,11 +17,11 @@ mod json_kinds_src;
 
 mod html_kinds_src;
 mod kind_src;
+mod language_kind;
 mod parser_tests;
 pub mod promote_rule;
 mod termcolorful;
 mod unicode;
-mod language_kind;
 
 use std::path::Path;
 
@@ -37,7 +37,6 @@ pub enum UpdateResult {
     NotUpdated,
     Updated,
 }
-
 
 /// A helper to update file on disk if it has changed.
 /// With verify = false,
