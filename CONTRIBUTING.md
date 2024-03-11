@@ -4,39 +4,33 @@ We can use help in a bunch of areas and any help is greatly appreciated!
 
 ## Table of Contents
 
-- [🚀 Contributing](#-contributing)
-  - [Table of Contents](#table-of-contents)
-  - [Asking questions, making proposals](#asking-questions-making-proposals)
-  - [Reporting bugs](#reporting-bugs)
-  - [Getting Started](#getting-started)
-  - [Install the required tools](#install-the-required-tools)
-  - [Crates development](#crates-development)
-    - [Analyzers and lint rules](#analyzers-and-lint-rules)
-    - [Parser](#parser)
-    - [Formatter](#formatter)
-    - [Testing](#testing)
-    - [Checks](#checks)
-      - [Generated files](#generated-files)
-        - [`cargo codegen grammar`](#cargo-codegen-grammar)
-        - [`cargo codegen test`](#cargo-codegen-test)
-        - [`cargo codegen analyzer`](#cargo-codegen-analyzer)
-    - [crate dependencies](#crate-dependencies)
-  - [Node.js development](#nodejs-development)
-  - [Website development](#website-development)
-    - [Translations](#translations)
-  - [Commit messages](#commit-messages)
-  - [Creating pull requests](#creating-pull-requests)
-    - [Changelog](#changelog)
-      - [Writing a changelog line](#writing-a-changelog-line)
-    - [Documentation](#documentation)
-    - [Magic comments](#magic-comments)
-    - [Versioning](#versioning)
-  - [Releasing](#releasing)
-  - [Resources](#resources)
-  - [Current Members](#current-members)
-    - [Lead team](#lead-team)
-    - [Core Contributors team](#core-contributors-team)
-    - [Maintainers team](#maintainers-team)
+* [Asking questions, making proposals](#asking-questions-making-proposals)
+* [Reporting bugs](#reporting-bugs)
+* [Getting Started](#getting-started)
+* [Install the required tools](#install-the-required-tools)
+* [Testing](#testing)
+  + [Debugging](#debugging)
+* [Checks](#checks)
+* [Crates development](#crates-development)
+  + [Analyzers and lint rules](#analyzers-and-lint-rules)
+  + [Parser](#parser)
+  + [Formatter](#formatter)
+* [Crate dependencies](#crate-dependencies)
+* [Node.js development](#nodejs-development)
+* [Website development](#website-development)
+  + [Translations](#translations)
+* [Commit messages](#commit-messages)
+* [Creating pull requests](#creating-pull-requests)
+  + [Changelog](#changelog)
+    - [Writing a changelog line](#writing-a-changelog-line)
+  + [Documentation](#documentation)
+  + [Versioning](#versioning)
+* [Releasing](#releasing)
+* [Resources](#resources)
+* [Current Members](#current-members)
+  + [Lead team](#lead-team)
+  + [Core Contributors team](#core-contributors-team)
+  + [Maintainers team](#maintainers-team)
 
 ## Asking questions, making proposals
 
@@ -202,7 +196,7 @@ fn test_some_function() {
 cargo t test_some_function --show-output
 ```
 
-### Checks
+## Checks
 
 When you finished your work, and you are ready to **commit and open a PR**, there are few other 
 things you would need to run and check:
@@ -395,7 +389,7 @@ When releasing a new version of a Biome, follow these steps:
    Then execute `just gen-lint`.
 
 1. [ ] Update the website with the new version number:
-   `BIOME_VERSION=<version> cargo codegen-website`.
+   `BIOME_VERSION=<version> just gen-web`.
    This will also copy the configuration schema in the right place.
 
 1. [ ] Once the PR is merged, the CI will trigger the `Release: *` workflows. Once these workflows finish compiling the final artefact, **they need to be approved manually**.
