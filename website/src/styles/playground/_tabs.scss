@@ -4,7 +4,7 @@
 .react-tabs__tab-panel  {
   display: none;
   flex-direction: column;
-  height: 100%;
+  flex-grow: 1;
   overflow: hidden;
 
   > pre[class*=language-] {
