@@ -28,12 +28,7 @@
 	],
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
-	"keywords": [
-		"JavaScript",
-		"bindings",
-		"APIs",
-		"biome"
-	],
+	"keywords": ["JavaScript", "bindings", "APIs", "biome"],
 	"license": "MIT OR Apache-2.0",
 	"homepage": "https://biomejs.dev",
 	"repository": {
