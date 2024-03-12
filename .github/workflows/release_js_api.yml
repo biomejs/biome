@@ -76,8 +76,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-
       - uses: pnpm/action-setup@v3
-        with:
-          version: 8
 
       - name: Set release infos
         if: needs.check.outputs.prerelease == 'true'

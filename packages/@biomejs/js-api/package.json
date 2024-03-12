@@ -4,11 +4,11 @@
 	"description": "JavaScript APIs for the Biome package",
 	"scripts": {
 		"tsc": "tsc --noEmit",
-		"format": "cargo biome-cli-dev format ./ --write",
+		"format": "cargo biome-cli-dev format --write .",
 		"ci": "cargo biome-cli-dev ci ./src && tsc --noEmit",
 		"check": "pnpm biome:check && tsc --noEmit",
-		"biome:check": "cargo biome-cli-dev check ./",
-		"check:apply": "cargo biome-cli-dev check ./ --apply-unsafe",
+		"biome:check": "cargo biome-cli-dev check .",
+		"check:apply": "cargo biome-cli-dev check --apply-unsafe .",
 		"build:wasm-bundler-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --dev --scope biomedev ../../../crates/biome_wasm",
 		"build:wasm-bundler": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --release --scope biomedev ../../../crates/biome_wasm",
 		"build:wasm-node-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --dev --scope biomedev ../../../crates/biome_wasm",
@@ -16,8 +16,8 @@
 		"build:wasm-web-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --dev --scope biomedev ../../../crates/biome_wasm",
 		"build:wasm-web": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomedev ../../../crates/biome_wasm",
 		"test": "vitest",
-		"test:ci": "vitest --run",
-		"build": "tsc "
+		"test:ci": "vitest run",
+		"build": "tsc"
 	},
 	"files": [
 		"README.md",
@@ -28,7 +28,12 @@
 	],
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
-	"keywords": ["JavaScript", "bindings", "APIs", "biome"],
+	"keywords": [
+		"JavaScript",
+		"bindings",
+		"APIs",
+		"biome"
+	],
 	"license": "MIT OR Apache-2.0",
 	"homepage": "https://biomejs.dev",
 	"repository": {
@@ -39,17 +44,17 @@
 	"author": "Biome Developers and Contributors",
 	"bugs": "https://github.com/biomejs/biome/issues",
 	"devDependencies": {
-		"typescript": "^4.8.2",
-		"vitest": "^1.3.0",
-		"vite": "^5.1.3",
-		"@biomejs/wasm-bundler": "../wasm-bundler",
-		"@biomejs/wasm-nodejs": "../wasm-nodejs",
-		"@biomejs/wasm-web": "../wasm-web"
+		"@biomejs/wasm-bundler": "link:../wasm-bundler",
+		"@biomejs/wasm-nodejs": "link:../wasm-nodejs",
+		"@biomejs/wasm-web": "link:../wasm-web",
+		"typescript": "^5.4.2",
+		"vite": "^5.1.6",
+		"vitest": "^1.3.1"
 	},
 	"peerDependencies": {
-		"@biomejs/wasm-bundler": "^1.5.3",
-		"@biomejs/wasm-nodejs": "^1.5.3",
-		"@biomejs/wasm-web": "^1.5.3"
+		"@biomejs/wasm-bundler": "^1.6.1",
+		"@biomejs/wasm-nodejs": "^1.6.1",
+		"@biomejs/wasm-web": "^1.6.1"
 	},
 	"peerDependenciesMeta": {
 		"@biomejs/wasm-bundler": {

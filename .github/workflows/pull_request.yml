@@ -125,8 +125,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-
       - uses: pnpm/action-setup@v3
-        with:
-          version: 8
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
