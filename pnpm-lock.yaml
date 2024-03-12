@@ -35,13 +35,13 @@ importers:
   packages/@biomejs/js-api:
     devDependencies:
       '@biomejs/wasm-bundler':
-        specifier: link:..\wasm-bundler
+        specifier: link:../wasm-bundler
         version: link:../wasm-bundler
       '@biomejs/wasm-nodejs':
-        specifier: link:..\wasm-nodejs
+        specifier: link:../wasm-nodejs
         version: link:../wasm-nodejs
       '@biomejs/wasm-web':
-        specifier: link:..\wasm-web
+        specifier: link:../wasm-web
         version: link:../wasm-web
       typescript:
         specifier: ^5.4.2
@@ -99,7 +99,7 @@ importers:
         specifier: ^0.21.1
         version: 0.21.1(astro@4.5.2)
       '@biomejs/wasm-web':
-        specifier: link:..\packages\@biomejs\wasm-web
+        specifier: link:../packages/@biomejs/wasm-web
         version: link:../packages/@biomejs/wasm-web
       '@codemirror/lang-javascript':
         specifier: ^6.2.2
