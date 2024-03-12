@@ -10,8 +10,7 @@
 	"keywords": [],
 	"author": "",
 	"devDependencies": {
-		"@biomejs/shared": "workspace:^",
-		"@changesets/cli": "^2.27.1"
+		"@biomejs/shared": "workspace:^"
 	},
 	"packageManager": "pnpm@8.15.4"
 }
