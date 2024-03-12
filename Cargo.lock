@@ -311,7 +311,7 @@ dependencies = [
 name = "biome_deserialize_macros"
 version = "0.5.7"
 dependencies = [
- "convert_case",
+ "biome_string_case",
  "proc-macro-error",
  "proc-macro2",
  "quote",
@@ -470,6 +470,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_project",
  "biome_rowan",
+ "biome_string_case",
  "biome_test_utils",
  "biome_text_edit",
  "biome_unicode_table",
@@ -819,6 +820,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_string_case"
+version = "0.0.0"
+
+[[package]]
 name = "biome_suppression"
 version = "0.5.7"
 dependencies = [
@@ -1110,15 +1115,6 @@ checksum = "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
 dependencies = [
  "cfg-if",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "convert_case"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec182b0ca2f35d8fc196cf3404988fd8b8c739a4d270ff118a398feb0cbec1ca"
-dependencies = [
- "unicode-segmentation",
 ]
 
 [[package]]
@@ -3732,9 +3728,9 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "biome_service",
+ "biome_string_case",
  "biome_ungrammar",
  "case",
- "convert_case",
  "filetime",
  "fs_extra",
  "git2",
@@ -3816,7 +3812,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_service",
- "convert_case",
+ "biome_string_case",
  "pulldown-cmark",
  "xtask",
 ]

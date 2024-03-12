@@ -1,10 +1,11 @@
-use crate::{semantic_services::SemanticServices, utils::case::Case};
+use crate::semantic_services::SemanticServices;
 use biome_analyze::{
     context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
+use biome_string_case::Case;
 use rustc_hash::FxHashSet;
 use serde::{Deserialize, Serialize};
 use std::{hash::Hash, str::FromStr};

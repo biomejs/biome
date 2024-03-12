@@ -3,7 +3,6 @@ use biome_rowan::{AstNode, Direction, WalkEvent};
 use std::iter;
 
 pub mod batch;
-pub mod case;
 pub mod rename;
 #[cfg(test)]
 pub mod tests;

@@ -6,7 +6,7 @@ use self::container_attrs::{ContainerAttrs, UnknownFields};
 use self::struct_field_attrs::DeprecatedField;
 use crate::deserializable_derive::enum_variant_attrs::EnumVariantAttrs;
 use crate::deserializable_derive::struct_field_attrs::StructFieldAttrs;
-use convert_case::{Case, Casing};
+use biome_string_case::Case;
 use proc_macro2::{Ident, TokenStream};
 use proc_macro_error::*;
 use quote::quote;
@@ -59,7 +59,7 @@ impl DeriveInput {
                         let ident = variant.ident;
                         let key = attrs
                             .rename
-                            .unwrap_or_else(|| ident.to_string().to_case(Case::Camel));
+                            .unwrap_or_else(|| Case::Camel.convert(&ident.to_string()));
 
                         DeserializableVariantData { ident, key }
                     })
@@ -82,7 +82,7 @@ impl DeriveInput {
                                     .expect("Could not parse field attributes");
                                 let key = attrs
                                     .rename
-                                    .unwrap_or_else(|| ident.to_string().to_case(Case::Camel));
+                                    .unwrap_or_else(|| Case::Camel.convert(&ident.to_string()));
 
                                 DeserializableFieldData {
                                     bail_on_error: attrs.bail_on_error,

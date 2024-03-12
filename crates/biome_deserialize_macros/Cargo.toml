@@ -14,11 +14,11 @@ version              = "0.5.7"
 proc-macro = true
 
 [dependencies]
-convert_case     = { workspace = true }
-proc-macro-error = { version = "1.0.4", default-features = false }
-proc-macro2      = "1.0.63"
-quote            = "1.0.14"
-syn              = { version = "1.0.85", features = ["extra-traits"] }
+biome_string_case = { workspace = true }
+proc-macro-error  = { version = "1.0.4", default-features = false }
+proc-macro2       = "1.0.63"
+quote             = "1.0.14"
+syn               = { version = "1.0.85", features = ["extra-traits"] }
 
 [lints]
 workspace = true
