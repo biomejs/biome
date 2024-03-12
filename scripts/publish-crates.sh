@@ -10,6 +10,7 @@ set -eo pipefail
 
 # publish crates (order is important)
 published_crates=(
+  "biome_string_case"
   "biome_diagnostics_categories"
   "biome_diagnostics_macros"
   "biome_deserialize_macros"
