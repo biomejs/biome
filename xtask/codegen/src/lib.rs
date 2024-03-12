@@ -67,3 +67,65 @@ pub fn to_capitalized(s: &str) -> String {
         Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
     }
 }
+
+#[derive(Debug, Clone, Bpaf)]
+pub enum TaskCommand {
+    /// Generates formatters for each language
+    #[bpaf(command)]
+    Formatter,
+    #[bpaf(command)]
+    /// Generate factory functions for the analyzer and the configuration of the analyzers
+    #[bpaf(command)]
+    Analyzer,
+    /// Generate the part of the configuration that depends on some metadata
+    Configuration,
+    /// Generate the JSON schema for the Biome configuration file format
+    #[bpaf(command)]
+    Schema,
+    /// Generate TypeScript definitions for the JavaScript bindings to the Workspace API
+    #[bpaf(command)]
+    Bindings,
+    /// It updates the file that contains licenses
+    #[bpaf(command)]
+    License,
+    /// Transforms ungram files into AST
+    #[bpaf(command)]
+    Grammar(Vec<String>),
+    /// Extracts parser inline comments into test files
+    #[bpaf(command)]
+    Test,
+    /// Generates unicode table inside lexer
+    #[bpaf(command)]
+    Unicode,
+    /// Creates a new lint rule
+    #[bpaf(command, long("new-lintrule"))]
+    NewLintRule(
+        /// Path of the rule
+        #[bpaf(long("path"))]
+        PathBuf,
+        /// Name of the rule
+        #[bpaf(long("name"))]
+        String,
+    ),
+    /// Promotes a nursery rule
+    #[bpaf(command, long("promote-rule"))]
+    PromoteRule {
+        /// Path of the rule
+        #[bpaf(long("name"), argument("STRING"))]
+        name: String,
+        /// Name of the rule
+        #[bpaf(long("group"), argument("STRING"))]
+        group: String,
+    },
+    /// Generates website files
+    Website,
+    /// Runs ALL the codegen
+    All,
+    /// Creates a new crate
+    #[bpaf(command, long("new-crate"))]
+    NewCrate {
+        /// The name of the crate
+        #[bpaf(long("name"), argument("STRING"))]
+        name: String
+    }
+}

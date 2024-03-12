@@ -10,8 +10,7 @@ mod generate_schema;
 #[cfg(feature = "website")]
 mod generate_website;
 mod promote_rule;
-
-use bpaf::{Parser};
+use bpaf::Parser;
 use xtask::{project_root, pushd, Result};
 
 #[cfg(feature = "schema")]
@@ -72,10 +71,7 @@ fn main() -> Result<()> {
             generate_tables()?;
         }
         TaskCommand::NewLintRule(path, rule_name) => {
-            //             let path: String = args.value_from_str("--path").unwrap();
-            //             let rule_name: String = args.value_from_str("--name").unwrap();
             generate_new_lintrule(&path, &rule_name);
-            //             Ok(())
         }
         TaskCommand::PromoteRule { name, group } => {
             promote_rule(&name, &group);
