@@ -1488,6 +1488,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noDoneCallback: {
+						description:
+							"Disallow using a callback in asynchronous tests and hooks.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noDuplicateJsonKeys: {
 						description:
 							"Disallow two keys with the same name inside a JSON object.",
