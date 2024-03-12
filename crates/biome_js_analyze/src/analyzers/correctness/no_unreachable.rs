@@ -551,8 +551,7 @@ fn find_catch_handlers(handlers: &[ExceptionHandler]) -> Option<&[ExceptionHandl
     let handlers = handlers
         .iter()
         .position(|handler| matches!(handler.kind, ExceptionHandlerKind::Catch))
-        .map(|index| &handlers[index..])
-        .unwrap_or(handlers);
+        .map_or(handlers, |index| &handlers[index..]);
 
     if handlers.is_empty() {
         None

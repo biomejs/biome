@@ -958,10 +958,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
     Ok(pretty)
 }
 
-pub(crate) fn token_kind_to_code(
-    name: &str,
-    language_kind: LanguageKind,
-) -> proc_macro2::TokenStream {
+pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> TokenStream {
     let kind_variant_name = Case::Constant.convert(name);
 
     let kind_source = match language_kind {
@@ -979,7 +976,7 @@ pub(crate) fn token_kind_to_code(
     } else if kind_source.keywords.contains(&name) {
         // we need to replace "-" with "_" for the keywords
         // e.g. we have `color-profile` in css but it's an invalid ident in rust code
-        let token: proc_macro2::TokenStream = name.replace('-', "_").parse().unwrap();
+        let token: TokenStream = name.replace('-', "_").parse().unwrap();
         quote! { T![#token] }
     } else {
         // $ is valid syntax in rust and it's part of macros,
@@ -988,7 +985,7 @@ pub(crate) fn token_kind_to_code(
             let token = Literal::string(name);
             quote! { T![#token] }
         } else {
-            let token: proc_macro2::TokenStream = name.parse().unwrap();
+            let token: TokenStream = name.parse().unwrap();
             quote! { T![#token] }
         }
     }

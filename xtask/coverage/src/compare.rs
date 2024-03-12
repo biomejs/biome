@@ -1,6 +1,5 @@
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::Read;
+use std::fs;
 use std::path::{Path, PathBuf};
 use xtask::project_root;
 
@@ -68,11 +67,7 @@ pub fn coverage_compare(
 }
 
 fn read_test_results(path: &Path, name: &'static str) -> HashMap<String, TestResults> {
-    let mut file = File::open(path)
-        .unwrap_or_else(|err| panic!("Can't read the file of the {} results: {:?}", name, err));
-
-    let mut buffer = Vec::new();
-    file.read_to_end(&mut buffer)
+    let buffer = fs::read(path)
         .unwrap_or_else(|err| panic!("Can't read the file of the {} results: {:?}", name, err));
 
     let content = decode_maybe_utf16_string(&buffer)

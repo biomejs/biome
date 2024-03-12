@@ -155,7 +155,7 @@ impl SemanticModelBuilder {
                 });
                 self.bindings_by_start.insert(range.start(), binding_id);
 
-                let scope = self.scopes.get_mut(binding_scope_id).unwrap();
+                let scope = &mut self.scopes[binding_scope_id];
 
                 scope.bindings.push(binding_id);
                 // Handle bindings with a bogus name

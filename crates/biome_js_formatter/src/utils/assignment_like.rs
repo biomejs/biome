@@ -1281,19 +1281,19 @@ fn is_complex_type_arguments(type_arguments: TsTypeArguments) -> SyntaxResult<bo
         return Ok(true);
     }
 
-    let is_first_argument_complex = ts_type_argument_list
-        .iter()
-        .next()
-        .transpose()?
-        .map(|first_argument| {
-            matches!(
-                first_argument,
-                AnyTsType::TsUnionType(_)
-                    | AnyTsType::TsIntersectionType(_)
-                    | AnyTsType::TsObjectType(_)
-            )
-        })
-        .unwrap_or(false);
+    let is_first_argument_complex =
+        ts_type_argument_list
+            .iter()
+            .next()
+            .transpose()?
+            .map_or(false, |first_argument| {
+                matches!(
+                    first_argument,
+                    AnyTsType::TsUnionType(_)
+                        | AnyTsType::TsIntersectionType(_)
+                        | AnyTsType::TsObjectType(_)
+                )
+            });
 
     if is_first_argument_complex {
         return Ok(true);

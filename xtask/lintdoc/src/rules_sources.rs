@@ -60,8 +60,7 @@ description: A page that maps lint rules from other sources to Biome
                     source_rule_name: source.as_rule_name().to_string(),
                     inspired: metadata
                         .source_kind
-                        .map(|kind| kind.is_inspired())
-                        .unwrap_or(false),
+                        .map_or(false, |kind| kind.is_inspired()),
                 });
             } else {
                 let mut set = BTreeSet::new();
@@ -70,10 +69,7 @@ description: A page that maps lint rules from other sources to Biome
                     biome_link: format!("/linter/rules/{}", kebab_rule_name),
                     source_link: source.to_rule_url(),
                     source_rule_name: source.as_rule_name().to_string(),
-                    inspired: metadata
-                        .source_kind
-                        .map(|kind| kind.is_inspired())
-                        .unwrap_or(true),
+                    inspired: metadata.source_kind.map_or(true, |kind| kind.is_inspired()),
                 });
                 rules_by_source.insert(format!("{source}"), set);
             }

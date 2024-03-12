@@ -12,6 +12,14 @@ members = [
 ]
 resolver = "2"
 
+[workspace.lints.rust]
+absolute_paths_not_starting_with_crate = "warn"
+trivial_numeric_casts                  = "warn"
+unused_import_braces                   = "warn"
+unused_lifetimes                       = "warn"
+unused_macro_rules                     = "warn"
+unused_tuple_struct_fields             = "warn"
+
 [workspace.lints.clippy]
 cargo_common_metadata   = "allow"
 multiple_crate_versions = "allow"
@@ -21,6 +29,7 @@ checked_conversions          = "warn"
 cloned_instead_of_copied     = "warn"
 copy_iterator                = "warn"
 dbg_macro                    = "warn"
+doc_link_with_quotes         = "warn"
 empty_enum                   = "warn"
 expl_impl_clone_on_copy      = "warn"
 explicit_into_iter_loop      = "warn"
@@ -39,6 +48,8 @@ large_types_passed_by_value  = "warn"
 macro_use_imports            = "warn"
 manual_ok_or                 = "warn"
 manual_string_new            = "warn"
+map_flatten                  = "warn"
+map_unwrap_or                = "warn"
 mismatching_type_param_order = "warn"
 mut_mut                      = "warn"
 naive_bytecount              = "warn"
@@ -55,6 +66,18 @@ unnested_or_patterns         = "warn"
 unreadable_literal           = "warn"
 verbose_bit_mask             = "warn"
 zero_sized_map_values        = "warn"
+
+# restriction
+empty_drop                      = "warn"
+float_cmp_const                 = "warn"
+get_unwrap                      = "warn"
+infinite_loop                   = "warn"
+lossy_float_literal             = "warn"
+mem_forget                      = "warn"
+rc_buffer                       = "warn"
+rc_mutex                        = "warn"
+rest_pat_in_fully_bound_structs = "warn"
+verbose_file_reads              = "warn"
 
 [workspace.package]
 authors    = ["Biome Developers and Contributors"]

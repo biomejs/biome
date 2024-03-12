@@ -122,7 +122,7 @@ impl super::Diagnostic for Diagnostic {
 /// prints the description of the diagnostic as a string.
 struct PrintDescription<'fmt, D: ?Sized>(pub &'fmt D);
 
-impl<'fmt, D: super::Diagnostic + ?Sized> std::fmt::Display for PrintDescription<'fmt, D> {
+impl<D: super::Diagnostic + ?Sized> std::fmt::Display for PrintDescription<'_, D> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.description(fmt).map_err(|_| std::fmt::Error)
     }

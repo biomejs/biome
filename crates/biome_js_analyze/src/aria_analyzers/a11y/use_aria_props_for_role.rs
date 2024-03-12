@@ -85,11 +85,7 @@ impl Rule for UseAriaPropsForRole {
         let is_inside_element = node
             .syntax()
             .ancestors()
-            .find_map(|ancestor| {
-                AnyJsxElement::cast(ancestor)
-                    .map(|element| Some(element.is_element()))
-                    .unwrap_or(None)
-            })
+            .find_map(|ancestor| AnyJsxElement::cast(ancestor).map(|element| element.is_element()))
             .unwrap_or(false);
 
         if is_inside_element {

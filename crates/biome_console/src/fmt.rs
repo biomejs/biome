@@ -131,7 +131,7 @@ pub trait Display {
 }
 
 // Blanket implementations of Display for reference types
-impl<'a, T> Display for &'a T
+impl<T> Display for &T
 where
     T: Display + ?Sized,
 {
@@ -140,7 +140,7 @@ where
     }
 }
 
-impl<'a, T> Display for Cow<'a, T>
+impl<T> Display for Cow<'_, T>
 where
     T: Display + ToOwned + ?Sized,
 {
@@ -164,13 +164,13 @@ impl Display for String {
 }
 
 // Implement Display for Markup and Rust format Arguments
-impl<'a> Display for Markup<'a> {
+impl Display for Markup<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         fmt.write_markup(*self)
     }
 }
 
-impl<'a> Display for std::fmt::Arguments<'a> {
+impl Display for std::fmt::Arguments<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         fmt.write_fmt(*self)
     }
