@@ -240,7 +240,7 @@ The npm module `packages/@biomejs/biome` contains Biome's Node.js API that suppo
 
 For testing and developing, you need to build these packages, following the steps:
 
-1. install pnpm via [corepack](https://nodejs.org/api/corepack.html) by running `corepack enable`
+1. install pnpm via [corepack](https://nodejs.org/api/corepack.html) by running `corepack enable`;
 2. install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) globally;
 3. run `pnpm --filter "@biomejs/backend-jsonrpc" build`;
 4. run the `pnpm --filter "@biomejs/js-api" build:wasm-dev` and `pnpm --filter "@biomejs/js-api" build` commands;
