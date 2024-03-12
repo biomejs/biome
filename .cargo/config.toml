@@ -4,6 +4,8 @@ biome-cli-dev = "run -p biome_cli --"
 codegen = "run -p xtask_codegen --"
 codegen-bindings = "run -p xtask_codegen --features schema -- bindings"
 codegen-configuration = "run -p xtask_codegen --features configuration -- configuration"
+# updates a newly created crate
+new-crate = "run -p xtask_codegen -- new-crate"
 codegen-license = "run -p xtask_codegen --features license -- license"
 codegen-schema = "run -p xtask_codegen --features schema -- schema"
 codegen-website = "run -p xtask_codegen --features website -- website"

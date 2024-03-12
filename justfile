@@ -128,9 +128,14 @@ ready:
   just test-doc
   git diff --exit-code --quiet
 
+new-crate name:
+   cargo new --lib crates/{{snakecase(name)}}
+   cargo new-crate -- --name {{snakecase(name)}}
+
 # Changelogs
 change:
     knope document-change
 
 dry-run:
     knope release --dry-run > out.txt
+

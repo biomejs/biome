@@ -22,6 +22,7 @@ mod parser_tests;
 pub mod promote_rule;
 mod termcolorful;
 mod unicode;
+mod generate_crate;
 
 use std::path::Path;
 
@@ -32,6 +33,7 @@ pub use self::formatter::generate_formatters;
 pub use self::generate_analyzer::generate_analyzer;
 pub use self::parser_tests::generate_parser_tests;
 pub use self::unicode::generate_tables;
+pub use self::generate_crate::generate_crate;
 
 pub enum UpdateResult {
     NotUpdated,
