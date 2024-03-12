@@ -116,14 +116,13 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 .#property_group_name
                 .as_ref()
                 .and_then(|#property_group_name| #property_group_name.get_rule_configuration(rule_name))
-                .map(|(level, _)| level.into())
-                .unwrap_or_else(|| {
+                .map_or_else(|| {
                     if #group_struct_name::is_recommended_rule(rule_name) {
                         Severity::Error
                     } else {
                         Severity::Warning
                     }
-                })
+                }, |(level, _)| level.into())
         });
         group_match_code.push(quote! {
            #group => #group_struct_name::has_rule(rule_name).then_some((category, rule_name))

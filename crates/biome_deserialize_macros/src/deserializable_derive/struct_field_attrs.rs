@@ -49,7 +49,7 @@ pub enum DeprecatedField {
 impl TryFrom<&Vec<Attribute>> for StructFieldAttrs {
     type Error = Error;
 
-    fn try_from(attrs: &Vec<Attribute>) -> std::prelude::v1::Result<Self, Self::Error> {
+    fn try_from(attrs: &Vec<Attribute>) -> Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
             if attr.path.is_ident("deserializable") {

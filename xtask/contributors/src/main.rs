@@ -124,8 +124,7 @@ fn contributors_request(url: &str, token: &str, contributors: &mut Vec<Contribut
                 if link.contains("rel=\"next\"") {
                     let start_index = link
                         .find("rel=\"prev\", ")
-                        .map(|index| index + "rel=\"prev\", ".len())
-                        .unwrap_or(0);
+                        .map_or(0, |index| index + "rel=\"prev\", ".len());
                     // SAFETY: checked before
                     let end_index = link.find("; rel=\"next\"").unwrap();
                     let url = &link[start_index..end_index];

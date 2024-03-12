@@ -361,9 +361,7 @@ fn handle_rule(
         }
         Rule::Node(node) => {
             let ty = grammar[*node].name.clone();
-            let name = label
-                .map(String::from)
-                .unwrap_or_else(|| Case::Snake.convert(&ty));
+            let name = label.map_or_else(|| Case::Snake.convert(&ty), String::from);
             let field = Field::Node {
                 name,
                 ty,
@@ -381,7 +379,7 @@ fn handle_rule(
             }
 
             let field = Field::Token {
-                name: label.map(String::from).unwrap_or_else(|| name.clone()),
+                name: label.map_or_else(|| name.clone(), String::from),
                 kind: TokenKind::Single(name),
                 optional,
                 unordered,

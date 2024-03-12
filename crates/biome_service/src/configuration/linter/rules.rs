@@ -103,98 +103,114 @@ impl Rules {
                     .a11y
                     .as_ref()
                     .and_then(|a11y| a11y.get_rule_configuration(rule_name))
-                    .map(|(level, _)| level.into())
-                    .unwrap_or_else(|| {
-                        if A11y::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    }),
+                    .map_or_else(
+                        || {
+                            if A11y::is_recommended_rule(rule_name) {
+                                Severity::Error
+                            } else {
+                                Severity::Warning
+                            }
+                        },
+                        |(level, _)| level.into(),
+                    ),
                 "complexity" => self
                     .complexity
                     .as_ref()
                     .and_then(|complexity| complexity.get_rule_configuration(rule_name))
-                    .map(|(level, _)| level.into())
-                    .unwrap_or_else(|| {
-                        if Complexity::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    }),
+                    .map_or_else(
+                        || {
+                            if Complexity::is_recommended_rule(rule_name) {
+                                Severity::Error
+                            } else {
+                                Severity::Warning
+                            }
+                        },
+                        |(level, _)| level.into(),
+                    ),
                 "correctness" => self
                     .correctness
                     .as_ref()
                     .and_then(|correctness| correctness.get_rule_configuration(rule_name))
-                    .map(|(level, _)| level.into())
-                    .unwrap_or_else(|| {
-                        if Correctness::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    }),
+                    .map_or_else(
+                        || {
+                            if Correctness::is_recommended_rule(rule_name) {
+                                Severity::Error
+                            } else {
+                                Severity::Warning
+                            }
+                        },
+                        |(level, _)| level.into(),
+                    ),
                 "nursery" => self
                     .nursery
                     .as_ref()
                     .and_then(|nursery| nursery.get_rule_configuration(rule_name))
-                    .map(|(level, _)| level.into())
-                    .unwrap_or_else(|| {
-                        if Nursery::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    }),
+                    .map_or_else(
+                        || {
+                            if Nursery::is_recommended_rule(rule_name) {
+                                Severity::Error
+                            } else {
+                                Severity::Warning
+                            }
+                        },
+                        |(level, _)| level.into(),
+                    ),
                 "performance" => self
                     .performance
                     .as_ref()
                     .and_then(|performance| performance.get_rule_configuration(rule_name))
-                    .map(|(level, _)| level.into())
-                    .unwrap_or_else(|| {
-                        if Performance::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    }),
+                    .map_or_else(
+                        || {
+                            if Performance::is_recommended_rule(rule_name) {
+                                Severity::Error
+                            } else {
+                                Severity::Warning
+                            }
+                        },
+                        |(level, _)| level.into(),
+                    ),
                 "security" => self
                     .security
                     .as_ref()
                     .and_then(|security| security.get_rule_configuration(rule_name))
-                    .map(|(level, _)| level.into())
-                    .unwrap_or_else(|| {
-                        if Security::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    }),
+                    .map_or_else(
+                        || {
+                            if Security::is_recommended_rule(rule_name) {
+                                Severity::Error
+                            } else {
+                                Severity::Warning
+                            }
+                        },
+                        |(level, _)| level.into(),
+                    ),
                 "style" => self
                     .style
                     .as_ref()
                     .and_then(|style| style.get_rule_configuration(rule_name))
-                    .map(|(level, _)| level.into())
-                    .unwrap_or_else(|| {
-                        if Style::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    }),
+                    .map_or_else(
+                        || {
+                            if Style::is_recommended_rule(rule_name) {
+                                Severity::Error
+                            } else {
+                                Severity::Warning
+                            }
+                        },
+                        |(level, _)| level.into(),
+                    ),
                 "suspicious" => self
                     .suspicious
                     .as_ref()
                     .and_then(|suspicious| suspicious.get_rule_configuration(rule_name))
-                    .map(|(level, _)| level.into())
-                    .unwrap_or_else(|| {
-                        if Suspicious::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    }),
+                    .map_or_else(
+                        || {
+                            if Suspicious::is_recommended_rule(rule_name) {
+                                Severity::Error
+                            } else {
+                                Severity::Warning
+                            }
+                        },
+                        |(level, _)| level.into(),
+                    ),
                 _ => unreachable!("this group should not exist, found {}", group),
             };
             Some(severity)
