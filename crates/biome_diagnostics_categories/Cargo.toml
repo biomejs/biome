@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_diagnostics_categories"
 repository.workspace = true
-version              = "0.5.4"
+version              = "0.5.5"
 
 [dependencies]
 schemars = { workspace = true, optional = true }
