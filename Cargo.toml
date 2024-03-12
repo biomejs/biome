@@ -107,6 +107,7 @@ biome_markup                 = { version = "0.5.7", path = "./crates/biome_marku
 biome_parser                 = { version = "0.5.7", path = "./crates/biome_parser" }
 biome_project                = { version = "0.5.7", path = "./crates/biome_project" }
 biome_rowan                  = { version = "0.5.7", path = "./crates/biome_rowan" }
+biome_string_case            = { version = "0.5.7", path = "./crates/biome_string_case" }
 biome_suppression            = { version = "0.5.7", path = "./crates/biome_suppression" }
 biome_text_edit              = { version = "0.5.7", path = "./crates/biome_text_edit" }
 biome_text_size              = { version = "0.5.7", path = "./crates/biome_text_size" }
@@ -119,7 +120,6 @@ biome_formatter_test = { path = "./crates/biome_formatter_test" }
 biome_lsp            = { path = "./crates/biome_lsp" }
 biome_migrate        = { path = "./crates/biome_migrate" }
 biome_service        = { path = "./crates/biome_service" }
-biome_string_case    = { path = "./crates/biome_string_case" }
 biome_test_utils     = { path = "./crates/biome_test_utils" }
 biome_ungrammar      = { path = "./crates/biome_ungrammar" }
 tests_macros         = { path = "./crates/tests_macros" }
