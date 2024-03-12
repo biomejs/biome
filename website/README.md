@@ -2,13 +2,13 @@
 
 ## Installation
 
-First install pnpm by enabling [corepack](https://nodejs.org/api/corepack.html)
+First install pnpm by enabling [corepack](https://nodejs.org/api/corepack.html):
 
 ```shell
 corepack enable
 ```
 
-Then install the required dependencies
+Then install the required dependencies:
 
 ```shell
 pnpm i --filter "@biomejs/website" --frozen-lockfile
