@@ -1,3 +1,5 @@
+//! Identify string case and convert to various string cases.
+
 /// Represents the [Case] of a string.
 ///
 /// Note that some cases are superset of others.
@@ -38,10 +40,8 @@ impl Case {
     /// A figure is considered both uppercase and lowercase.
     /// Thus, `V8_ENGINE` is in _CONSTANt_CASE_ and `V8Engine` is in _PascalCase_.
     ///
-    /// ### Examples
-    ///
     /// ```
-    /// use biome_js_analyze::utils::case::Case;
+    /// use biome_string_case::Case;
     ///
     /// assert_eq!(Case::identify("aHttpServer", /* no effect */ true), Case::Camel);
     /// assert_eq!(Case::identify("aHTTPServer", true), Case::Unknown);
@@ -158,10 +158,8 @@ impl Case {
     ///               Uni ─────────────────────────┘
     /// ```
     ///
-    /// ### Examples
-    ///
     /// ```
-    /// use biome_js_analyze::utils::case::Case;
+    /// use biome_string_case::Case;
     ///
     /// assert!(Case::Lower.is_compatible_with(Case::Camel));
     /// assert!(Case::Lower.is_compatible_with(Case::Kebab));
@@ -191,10 +189,8 @@ impl Case {
 
     /// Convert `value` to the `self` [Case].
     ///
-    /// ### Examples
-    ///
     /// ```
-    /// use biome_js_analyze::utils::case::Case;
+    /// use biome_string_case::Case;
     ///
     /// assert_eq!(Case::Camel.convert("Http_SERVER"), "httpServer");
     /// assert_eq!(Case::Camel.convert("v8-Engine"), "v8Engine");

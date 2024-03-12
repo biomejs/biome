@@ -18,7 +18,7 @@ use biome_js_syntax::{JsFileSource, JsLanguage, Language, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_service::settings::WorkspaceSettings;
-use convert_case::{Case, Casing};
+use biome_string_case::Case;
 use pulldown_cmark::{html::write_html, CodeBlockKind, Event, LinkType, Parser, Tag};
 use std::{
     collections::BTreeMap,
@@ -222,7 +222,7 @@ fn generate_group(
 
     for (rule, meta) in rules {
         let is_recommended = !is_nursery && meta.recommended;
-        let dashed_rule = rule.to_case(Case::Kebab);
+        let dashed_rule = Case::Kebab.convert(rule);
         if is_recommended {
             recommended_rules.push_str(&format!(
                 "\t<li><a href='/linter/rules/{dashed_rule}'>{rule}</a></li>\n"
@@ -351,7 +351,7 @@ fn generate_rule(
     writeln!(content, "- [Disable a rule](/linter/#disable-a-lint-rule)")?;
     writeln!(content, "- [Rule options](/linter/#rule-options)")?;
 
-    let dashed_rule = rule.to_case(Case::Kebab);
+    let dashed_rule = Case::Kebab.convert(rule);
     fs2::write(root.join(format!("{dashed_rule}.md")), content)?;
 
     Ok(summary)

@@ -4,7 +4,7 @@ use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::js_kinds_src::{AstNodeSrc, AstSrc, Field, TokenKind, JS_KINDS_SRC};
 use crate::json_kinds_src::JSON_KINDS_SRC;
 use crate::language_kind::LanguageKind;
-use crate::{to_lower_snake_case, to_upper_snake_case};
+use biome_string_case::Case;
 use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
 use std::collections::HashMap;
@@ -16,7 +16,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         .iter()
         .map(|node| {
             let name = format_ident!("{}", node.name);
-            let node_kind = format_ident!("{}", to_upper_snake_case(node.name.as_str()));
+            let node_kind = format_ident!("{}", Case::Constant.convert(node.name.as_str()));
             let needs_dynamic_slots = node.dynamic;
 
             let methods = node
@@ -353,7 +353,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .iter()
                 .map(|variant| {
                     let variant_name = format_ident!("{}", variant);
-                    let fn_name = format_ident!("as_{}", to_lower_snake_case(variant));
+                    let fn_name = format_ident!("as_{}", Case::Snake.convert(variant));
                     quote! {
                         pub fn #fn_name(&self) -> Option<&#variant_name> {
                            match &self {
@@ -385,7 +385,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
             let kinds: Vec<_> = variants
                 .iter()
-                .map(|name| format_ident!("{}", to_upper_snake_case(&name.to_string())))
+                .map(|name| format_ident!("{}", Case::Constant.convert(&name.to_string())))
                 .collect();
 
             let variant_cast: Vec<_> = simple_variants
@@ -418,7 +418,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .enumerate()
                 .map(|(i, en)| {
                     let variant_name = format_ident!("{}", en);
-                    let variable_name = format_ident!("{}", to_lower_snake_case(en.as_str()));
+                    let variable_name = format_ident!("{}", Case::Snake.convert(en.as_str()));
                     (
                         // cast() code
                         if i != variant_of_variants.len() - 1 {
@@ -640,7 +640,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
     let bogus = ast.bogus.iter().map(|bogus_name| {
         let ident = format_ident!("{}", bogus_name);
         let string_name = bogus_name;
-        let kind = format_ident!("{}", to_upper_snake_case(bogus_name));
+        let kind = format_ident!("{}", Case::Constant.convert(bogus_name));
 
         quote! {
             #[derive(Clone, PartialEq, Eq, Hash)]
@@ -714,7 +714,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
     let lists = ast.lists().map(|(name, list)| {
         let list_name = format_ident!("{}", name);
-        let list_kind = format_ident!("{}", to_upper_snake_case(name));
+        let list_kind = format_ident!("{}", Case::Constant.convert(name));
         let element_type = format_ident!("{}", list.element_name);
 
         let node_impl = quote! {
@@ -962,7 +962,7 @@ pub(crate) fn token_kind_to_code(
     name: &str,
     language_kind: LanguageKind,
 ) -> proc_macro2::TokenStream {
-    let kind_variant_name = to_upper_snake_case(name);
+    let kind_variant_name = Case::Constant.convert(name);
 
     let kind_source = match language_kind {
         LanguageKind::Js => JS_KINDS_SRC,

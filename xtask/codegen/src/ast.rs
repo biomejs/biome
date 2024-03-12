@@ -6,7 +6,7 @@ use std::vec;
 
 use super::{
     js_kinds_src::{AstSrc, Field},
-    to_lower_snake_case, Mode,
+    Mode,
 };
 use crate::generate_node_factory::generate_node_factory;
 use crate::generate_nodes_mut::generate_nodes_mut;
@@ -20,6 +20,7 @@ use crate::{
     generate_macros::generate_macros, generate_nodes::generate_nodes,
     generate_syntax_kinds::generate_syntax_kinds, update,
 };
+use biome_string_case::Case;
 use biome_ungrammar::{Grammar, Rule, Token};
 use std::fmt::Write;
 use std::str::FromStr;
@@ -362,7 +363,7 @@ fn handle_rule(
             let ty = grammar[*node].name.clone();
             let name = label
                 .map(String::from)
-                .unwrap_or_else(|| to_lower_snake_case(&ty));
+                .unwrap_or_else(|| Case::Snake.convert(&ty));
             let field = Field::Node {
                 name,
                 ty,

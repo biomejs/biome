@@ -3,7 +3,6 @@ use std::str::FromStr;
 use crate::{
     control_flow::AnyJsControlFlowRoot,
     semantic_services::Semantic,
-    utils::case::Case,
     utils::rename::{AnyJsRenamableDeclaration, RenameSymbolExtensions},
     JsRuleAction,
 };
@@ -24,6 +23,7 @@ use biome_js_syntax::{
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxResult, TokenText,
 };
+use biome_string_case::Case;
 use biome_unicode_table::is_js_ident;
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;

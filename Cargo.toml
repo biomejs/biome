@@ -103,15 +103,15 @@ biome_json_factory           = { version = "0.5.7", path = "./crates/biome_json_
 biome_json_formatter         = { version = "0.5.7", path = "./crates/biome_json_formatter" }
 biome_json_parser            = { version = "0.5.7", path = "./crates/biome_json_parser" }
 biome_json_syntax            = { version = "0.5.7", path = "./crates/biome_json_syntax" }
+biome_markup                 = { version = "0.5.7", path = "./crates/biome_markup" }
+biome_parser                 = { version = "0.5.7", path = "./crates/biome_parser" }
+biome_project                = { version = "0.5.7", path = "./crates/biome_project" }
+biome_rowan                  = { version = "0.5.7", path = "./crates/biome_rowan" }
+biome_suppression            = { version = "0.5.7", path = "./crates/biome_suppression" }
+biome_text_edit              = { version = "0.5.7", path = "./crates/biome_text_edit" }
+biome_text_size              = { version = "0.5.7", path = "./crates/biome_text_size" }
+biome_unicode_table          = { version = "0.5.7", path = "./crates/biome_unicode_table" }
 
-biome_markup        = { version = "0.5.7", path = "./crates/biome_markup" }
-biome_parser        = { version = "0.5.7", path = "./crates/biome_parser" }
-biome_project       = { version = "0.5.7", path = "./crates/biome_project" }
-biome_rowan         = { version = "0.5.7", path = "./crates/biome_rowan" }
-biome_suppression   = { version = "0.5.7", path = "./crates/biome_suppression" }
-biome_text_edit     = { version = "0.5.7", path = "./crates/biome_text_edit" }
-biome_text_size     = { version = "0.5.7", path = "./crates/biome_text_size" }
-biome_unicode_table = { version = "0.5.7", path = "./crates/biome_unicode_table" }
 # not publish
 biome_cli            = { path = "./crates/biome_cli" }
 biome_flags          = { path = "./crates/biome_flags" }
@@ -119,6 +119,7 @@ biome_formatter_test = { path = "./crates/biome_formatter_test" }
 biome_lsp            = { path = "./crates/biome_lsp" }
 biome_migrate        = { path = "./crates/biome_migrate" }
 biome_service        = { path = "./crates/biome_service" }
+biome_string_case    = { path = "./crates/biome_string_case" }
 biome_test_utils     = { path = "./crates/biome_test_utils" }
 biome_ungrammar      = { path = "./crates/biome_ungrammar" }
 tests_macros         = { path = "./crates/tests_macros" }
@@ -126,7 +127,6 @@ tests_macros         = { path = "./crates/tests_macros" }
 # Crates needed in the workspace
 bitflags          = "2.3.1"
 bpaf              = { version = "0.9.5", features = ["derive"] }
-convert_case      = "0.6.0"
 countme           = "3.0.1"
 crossbeam         = "0.8.4"
 dashmap           = "5.4.0"
