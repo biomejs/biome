@@ -14,6 +14,7 @@ website/src/pages/lint/rules/**/*.md linguist-generated=true text=auto eol=lf
 website/src/components/generated/.astro linguist-generated=true text=auto eol=lf
 packages/@biomejs/biome/configuration_schema.json linguist-generated=true text=auto eol=lf
 crates/biome_service/src/configuration/parse/json/rules.rs linguist-generated=true text=auto eol=lf
+**/pnpm-lock.yaml linguist-generated=true text=auto eol=lf
 crates/biome_js_formatter/tests/**/*.ts.prettier-snap linguist-language=TypeScript
 crates/biome_js_formatter/tests/**/*.js.prettier-snap linguist-language=JavaScript
 crates/biome_js_formatter/tests/**/*.ts.snap linguist-language=Markdown
