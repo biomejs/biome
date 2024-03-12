@@ -14,7 +14,6 @@ version              = "0.5.7"
 
 [dependencies]
 biome_analyze     = { workspace = true }
-biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
 biome_js_factory  = { workspace = true }
 biome_js_syntax   = { workspace = true }

@@ -21,7 +21,6 @@ walkdir        = "2.3.2"
 xtask          = { path = '../', version = "0.0" }
 
 biome_analyze        = { workspace = true, optional = true }
-biome_aria           = { workspace = true, optional = true }
 biome_cli            = { workspace = true, optional = true }
 biome_diagnostics    = { workspace = true, optional = true }
 biome_js_analyze     = { workspace = true, optional = true }
