@@ -15,6 +15,7 @@ mod grit_kinds_src;
 mod js_kinds_src;
 mod json_kinds_src;
 
+mod generate_crate;
 mod html_kinds_src;
 mod kind_src;
 mod language_kind;
@@ -22,18 +23,18 @@ mod parser_tests;
 pub mod promote_rule;
 mod termcolorful;
 mod unicode;
-mod generate_crate;
 
-use std::path::Path;
+use bpaf::Bpaf;
+use std::path::{Path, PathBuf};
 
 use xtask::{glue::fs2, Mode, Result};
 
 pub use self::ast::generate_ast;
 pub use self::formatter::generate_formatters;
 pub use self::generate_analyzer::generate_analyzer;
+pub use self::generate_crate::generate_crate;
 pub use self::parser_tests::generate_parser_tests;
 pub use self::unicode::generate_tables;
-pub use self::generate_crate::generate_crate;
 
 pub enum UpdateResult {
     NotUpdated,

@@ -1,9 +1,9 @@
 use std::fs;
-use xtask::Mode;
 use xtask::*;
 
 fn cargo_template(name: &str) -> String {
-    format!(r#"
+    format!(
+        r#"
 [package]
 authors.workspace    = true
 categories.workspace = true
@@ -17,18 +17,22 @@ repository.workspace = true
 version              = "0.0.0"
 [lints]
 workspace = true    
-"#)
+"#
+    )
 }
 
 fn knope_template(name: &str) -> String {
-    format!(r#"\n[package.{name}]
+    format!(
+        r#"
+[package."{name}"]
 versioned_files = ["creates/{name}/Cargo.toml"]
 changelog = "crates/{name}/CHANGELOG.md"    
-"#)
+"#
+    )
 }
 
 pub fn generate_crate(crate_name: String) -> Result<()> {
-    let crate_root = project_root().join("crates").join(crate_name);
+    let crate_root = project_root().join("crates").join(crate_name.as_str());
     let cargo_file = crate_root.join("Cargo.toml");
     let knope_config = project_root().join("knope.toml");
     

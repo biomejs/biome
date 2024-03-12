@@ -129,11 +129,11 @@ ready:
   git diff --exit-code --quiet
 
 new-crate name:
-   cargo new --lib crates/{{snakecase(name)}}
-   cargo new-crate -- --name {{snakecase(name)}}
+  cargo new --lib crates/{{snakecase(name)}}
+  cargo run -p xtask_codegen -- new-crate --name={{snakecase(name)}}
 
-# Changelogs
-change:
+# Creates a new changeset for the final changelog. ONLY FOR CRATES, FOR NOW
+new-changeset:
     knope document-change
 
 dry-run:

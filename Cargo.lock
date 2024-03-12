@@ -912,9 +912,9 @@ checksum = "6776fc96284a0bb647b615056fc496d1fe1644a7ab01829818a6d91cae888b84"
 
 [[package]]
 name = "bpaf"
-version = "0.9.5"
+version = "0.9.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1dc3b1bd654a8d16eea03586c3eee8ffd25c7f242b9eae9730cc442834fe56d9"
+checksum = "edc932b40b31d9bea0196f54c5b1b721b9aff3882fc08d9fe4082970c7e94d3d"
 dependencies = [
  "bpaf_derive",
  "owo-colors",
@@ -923,9 +923,9 @@ dependencies = [
 
 [[package]]
 name = "bpaf_derive"
-version = "0.5.5"
+version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22cbaba260bbcbb69b0d54e9f0d83038a4568f3a5d1c95591fed5e8fee964539"
+checksum = "efeab2975f8102de445dcf898856a638332403c50216144653a89aec22fd79e0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3730,11 +3730,11 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_ungrammar",
+ "bpaf",
  "case",
  "filetime",
  "fs_extra",
  "git2",
- "pico-args",
  "proc-macro2",
  "pulldown-cmark",
  "quote",
