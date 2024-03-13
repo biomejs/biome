@@ -87,12 +87,12 @@ impl FormatRule<AnyJsConditional> for FormatJsAnyConditionalRule {
                     f,
                     [
                         if_group_fits_on_line(&text("(")),
-                        align(2, &consequent),
+                        indent(&consequent),
                         if_group_fits_on_line(&text(")"))
                     ]
                 )?;
             } else {
-                write!(f, [align(2, &consequent)])?;
+                write!(f, [indent(&consequent)])?;
             }
 
             write!(
@@ -103,7 +103,7 @@ impl FormatRule<AnyJsConditional> for FormatJsAnyConditionalRule {
                     space()
                 ]
             )?;
-            write!(f, [align(2, &alternate)])
+            write!(f, [indent(&alternate)])
         });
 
         let format_tail_with_indent = format_with(|f: &mut JsFormatter| {
@@ -505,7 +505,7 @@ impl Format<JsFormatContext> for FormatConditionalTest<'_> {
         });
 
         if self.layout.is_nested_alternate() {
-            align(2, &format_inner).fmt(f)
+            write!(f, [indent(&format_inner)])
         } else {
             format_inner.fmt(f)
         }

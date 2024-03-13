@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/type/conditional.ts
 ---
-
 # Input
 
 ```ts
@@ -60,24 +59,22 @@ type T1 = test extends string
 type T2 = test extends string
 	? unknown
 	: test extends number
-	  ? undefined
-	  : undefined;
+		? undefined
+		: undefined;
 
 type T3 = test extends string
 	? // something
-	  unknown
+		unknown
 	: test extends number
-	  ? undefined
-	  : // else
-		  undefined;
+		? undefined
+		: // else
+			undefined;
 
 type T4 = test extends string
 	? // something
-	  unknown
+		unknown
 	: test extends number
-	  ? undefined
-	  : // else
-		  undefined;
+		? undefined
+		: // else
+			undefined;
 ```
-
-

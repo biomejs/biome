@@ -9,6 +9,28 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+#### Bug fixes
+
+- Fix [https://github.com/biomejs/biome/issues/1661](https://github.com/biomejs/biome/issues/1661). Now nested conditionals are aligned with Prettier's logic, and won't contain mixed spaced and tabs. Contributed by @ematipico
+
+### JavaScript APIs
+
+### Linter
+
+### Parser
+
 ## 1.6.1 (2024-03-12)
 
 ### CLI
