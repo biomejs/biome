@@ -9,6 +9,28 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Ureleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+#### Bug fixes
+
+- Fix enabled rules calculation. The precendence of individual rules, `all` and `recommend` presets in top-level and group-level configs is now correctly respected. More details can be seen in ([#2072](https://github.com/biomejs/biome/pull/2072)) ([#2028](https://github.com/biomejs/biome/issues/2028)). Contributed by @Sec-ant
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+### Parser
+
 ## 1.6.1 (2024-03-12)
 
 ### CLI
