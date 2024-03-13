@@ -243,11 +243,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 matches!(self.all, Some(true))
             }
 
-            #[allow(dead_code)]
-            pub(crate) const fn is_not_all(&self) -> bool {
-                matches!(self.all, Some(false))
-            }
-
             /// It returns the enabled rules by default.
             ///
             /// The enabled rules are calculated from the difference with the disabled rules.
