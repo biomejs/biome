@@ -44,7 +44,7 @@ impl fmt::Display for MarkupElement<'_> {
     }
 }
 
-impl<'fmt> MarkupElement<'fmt> {
+impl MarkupElement<'_> {
     /// Mutate a [ColorSpec] object in place to apply this element's associated
     /// style to it
     pub(crate) fn update_color(&self, color: &mut ColorSpec) {
@@ -174,7 +174,7 @@ impl Debug for MarkupNodeBuf {
 #[derive(Copy, Clone)]
 pub struct Markup<'fmt>(pub &'fmt [MarkupNode<'fmt>]);
 
-impl<'fmt> Markup<'fmt> {
+impl Markup<'_> {
     pub fn to_owned(&self) -> MarkupBuf {
         let mut result = MarkupBuf(Vec::new());
         // SAFETY: The implementation of Write for MarkupBuf below always returns Ok

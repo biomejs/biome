@@ -344,8 +344,7 @@ pub(crate) fn apply_document_changes(
         .iter()
         .rev()
         .position(|change| change.range.is_none())
-        .map(|idx| content_changes.len() - idx - 1)
-        .unwrap_or(0);
+        .map_or(0, |idx| content_changes.len() - idx - 1);
 
     let mut text: String = match content_changes.get_mut(start) {
         // peek at the first content change as an optimization

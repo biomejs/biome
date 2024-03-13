@@ -615,9 +615,8 @@ impl SemanticAssertions {
                         .get(&at_scope_assertion.scope_name)
                     {
                         Some(scope_start_assertion) => {
-                            let scope_started_at = scope_start
-                                .get(&hoisted_scope_id.unwrap_or(*scope_id))
-                                .unwrap();
+                            let scope_started_at =
+                                &scope_start[&hoisted_scope_id.unwrap_or(*scope_id)];
                             if scope_start_assertion.range.start() != *scope_started_at {
                                 show_all_events(test_name, code, events_by_pos, is_scope_event);
                                 show_unmatched_assertion(

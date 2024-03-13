@@ -91,21 +91,27 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
             #property_group_name: None
         });
 
-        let global_recommended = if group == "nursery" {
-            quote! { self.is_recommended() && biome_flags::is_unstable() }
+        let (global_all, global_recommended) = if group == "nursery" {
+            (
+                quote! { self.is_all() && biome_flags::is_unstable() },
+                quote! { self.is_recommended() && biome_flags::is_unstable() },
+            )
         } else {
-            quote! { self.is_recommended() }
+            (quote! { self.is_all() }, quote! { self.is_recommended() })
         };
 
         group_as_default_rules.push(quote! {
             if let Some(group) = self.#property_group_name.as_ref() {
-                group.collect_preset_rules(self.is_recommended(), &mut enabled_rules, &mut disabled_rules);
+                group.collect_preset_rules(
+                    #global_all,
+                    #global_recommended,
+                    &mut enabled_rules,
+                    &mut disabled_rules,
+                );
                 enabled_rules.extend(&group.get_enabled_rules());
                 disabled_rules.extend(&group.get_disabled_rules());
-            } else if self.is_all() {
+            } else if #global_all {
                 enabled_rules.extend(#group_struct_name::all_rules_as_filters());
-            } else if self.is_not_all() {
-                disabled_rules.extend(#group_struct_name::all_rules_as_filters());
             } else if #global_recommended {
                 enabled_rules.extend(#group_struct_name::recommended_rules_as_filters());
             }
@@ -116,14 +122,13 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 .#property_group_name
                 .as_ref()
                 .and_then(|#property_group_name| #property_group_name.get_rule_configuration(rule_name))
-                .map(|(level, _)| level.into())
-                .unwrap_or_else(|| {
+                .map_or_else(|| {
                     if #group_struct_name::is_recommended_rule(rule_name) {
                         Severity::Error
                     } else {
                         Severity::Warning
                     }
-                })
+                }, |(level, _)| level.into())
         });
         group_match_code.push(quote! {
            #group => #group_struct_name::has_rule(rule_name).then_some((category, rule_name))
@@ -236,10 +241,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
 
             pub(crate) const fn is_all(&self) -> bool {
                 matches!(self.all, Some(true))
-            }
-
-            pub(crate) const fn is_not_all(&self) -> bool {
-                matches!(self.all, Some(false))
             }
 
             /// It returns the enabled rules by default.
@@ -399,17 +400,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
     let group_struct_name = Ident::new(&to_capitalized(group), Span::call_site());
 
     let number_of_recommended_rules = Literal::u8_unsuffixed(number_of_recommended_rules);
-    let (group_recommended, parent_parameter) = if group == "nursery" {
-        (
-            quote! { self.is_recommended() },
-            quote! { _parent_is_recommended: bool, },
-        )
-    } else {
-        (
-            quote! { parent_is_recommended || self.is_recommended() },
-            quote! { parent_is_recommended: bool, },
-        )
-    };
+
     quote! {
         #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
         #[deserializable(with_validator)]
@@ -519,19 +510,23 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             /// Select preset rules
             pub(crate) fn collect_preset_rules(
                 &self,
-                #parent_parameter
+                parent_is_all: bool,
+                parent_is_recommended: bool,
                 enabled_rules: &mut IndexSet<RuleFilter>,
                 disabled_rules: &mut IndexSet<RuleFilter>,
             ) {
                 if self.is_all() {
                     enabled_rules.extend(Self::all_rules_as_filters());
-                } else if #group_recommended {
+                } else if self.is_recommended() {
                     enabled_rules.extend(Self::recommended_rules_as_filters());
-                }
-                if self.is_not_all() {
+                } else if self.is_not_all() {
                     disabled_rules.extend(Self::all_rules_as_filters());
                 } else if self.is_not_recommended() {
                     disabled_rules.extend(Self::recommended_rules_as_filters());
+                } else if parent_is_all {
+                    enabled_rules.extend(Self::all_rules_as_filters());
+                } else if parent_is_recommended {
+                    enabled_rules.extend(Self::recommended_rules_as_filters());
                 }
             }
 

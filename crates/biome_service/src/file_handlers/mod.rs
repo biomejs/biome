@@ -162,9 +162,10 @@ impl DocumentFileSource {
             path => path.extension().and_then(|path| path.to_str()),
         };
 
-        extension
-            .map(DocumentFileSource::from_extension)
-            .unwrap_or(DocumentFileSource::Unknown)
+        extension.map_or(
+            DocumentFileSource::Unknown,
+            DocumentFileSource::from_extension,
+        )
     }
 
     /// Returns the language corresponding to the file path
@@ -542,12 +543,14 @@ pub(crate) fn is_diagnostic_error(
     let severity = diagnostic
         .category()
         .filter(|category| category.name().starts_with("lint/"))
-        .map(|category| {
-            rules
-                .and_then(|rules| rules.get_severity_from_code(category))
-                .unwrap_or(Severity::Warning)
-        })
-        .unwrap_or_else(|| diagnostic.severity());
+        .map_or_else(
+            || diagnostic.severity(),
+            |category| {
+                rules
+                    .and_then(|rules| rules.get_severity_from_code(category))
+                    .unwrap_or(Severity::Warning)
+            },
+        );
 
     severity >= Severity::Error
 }
