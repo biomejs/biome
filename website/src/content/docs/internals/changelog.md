@@ -90,7 +90,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Sec-ant
 
-## 1.6.0 (2024-04-08)
+## 1.6.0 (2024-03-08)
 
 ### Analyzer
 
