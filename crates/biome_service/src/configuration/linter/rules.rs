@@ -224,10 +224,6 @@ impl Rules {
     pub(crate) const fn is_all(&self) -> bool {
         matches!(self.all, Some(true))
     }
-    #[allow(dead_code)]
-    pub(crate) const fn is_not_all(&self) -> bool {
-        matches!(self.all, Some(false))
-    }
     #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
     #[doc = r" The enabled rules are calculated from the difference with the disabled rules."]
