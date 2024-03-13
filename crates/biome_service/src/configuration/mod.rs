@@ -140,10 +140,7 @@ impl PartialConfiguration {
     }
 
     pub fn is_formatter_disabled(&self) -> bool {
-        self.formatter
-            .as_ref()
-            .map(|f| f.is_disabled())
-            .unwrap_or(false)
+        self.formatter.as_ref().map_or(false, |f| f.is_disabled())
     }
 
     pub fn get_formatter_configuration(&self) -> FormatterConfiguration {
@@ -178,10 +175,7 @@ impl PartialConfiguration {
     }
 
     pub fn is_linter_disabled(&self) -> bool {
-        self.linter
-            .as_ref()
-            .map(|f| f.is_disabled())
-            .unwrap_or(false)
+        self.linter.as_ref().map_or(false, |f| f.is_disabled())
     }
 
     pub fn get_linter_rules(&self) -> Rules {
@@ -194,12 +188,11 @@ impl PartialConfiguration {
     pub fn is_organize_imports_disabled(&self) -> bool {
         self.organize_imports
             .as_ref()
-            .map(|f| f.is_disabled())
-            .unwrap_or(false)
+            .map_or(false, |f| f.is_disabled())
     }
 
     pub fn is_vcs_disabled(&self) -> bool {
-        self.vcs.as_ref().map(|f| f.is_disabled()).unwrap_or(true)
+        self.vcs.as_ref().map_or(true, |f| f.is_disabled())
     }
 
     pub fn is_vcs_enabled(&self) -> bool {

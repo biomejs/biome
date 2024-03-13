@@ -76,11 +76,8 @@ impl SvelteFileHandler {
         let matches = SVELTE_FENCE.captures(text);
         matches
             .and_then(|captures| captures.name("lang"))
-            .map(|lang| match lang.as_str() {
-                "ts" => JsFileSource::ts(),
-                _ => JsFileSource::js_module(),
-            })
-            .unwrap_or(JsFileSource::js_module())
+            .filter(|lang| lang.as_str() == "ts")
+            .map_or(JsFileSource::js_module(), |_| JsFileSource::ts())
     }
 }
 
@@ -128,11 +125,8 @@ fn parse(
 
     let language = matches
         .and_then(|captures| captures.name("lang"))
-        .map(|lang| match lang.as_str() {
-            "ts" => JsFileSource::ts(),
-            _ => JsFileSource::js_module(),
-        })
-        .unwrap_or(JsFileSource::js_module());
+        .filter(|lang| lang.as_str() == "ts")
+        .map_or(JsFileSource::js_module(), |_| JsFileSource::ts());
 
     debug!("Parsing file with language {:?}", language);
 

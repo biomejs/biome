@@ -51,6 +51,8 @@ pub type NoDefaultExport =
     <analyzers::style::no_default_export::NoDefaultExport as biome_analyze::Rule>::Options;
 pub type NoDelete = <analyzers::performance::no_delete::NoDelete as biome_analyze::Rule>::Options;
 pub type NoDistractingElements = < analyzers :: a11y :: no_distracting_elements :: NoDistractingElements as biome_analyze :: Rule > :: Options ;
+pub type NoDoneCallback =
+    <analyzers::nursery::no_done_callback::NoDoneCallback as biome_analyze::Rule>::Options;
 pub type NoDoubleEquals =
     <analyzers::suspicious::no_double_equals::NoDoubleEquals as biome_analyze::Rule>::Options;
 pub type NoDuplicateCase =

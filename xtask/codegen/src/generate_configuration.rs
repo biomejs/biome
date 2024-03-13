@@ -3,12 +3,13 @@ use biome_analyze::{
 };
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
+use biome_string_case::Case;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use pulldown_cmark::{Event, Parser, Tag};
 use quote::quote;
 use std::collections::BTreeMap;
 use xtask::*;
-use xtask_codegen::{to_capitalized, to_lower_snake_case, update};
+use xtask_codegen::{to_capitalized, update};
 
 pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let config_root = project_root().join("crates/biome_service/src/configuration/linter");
@@ -75,7 +76,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let mut push_rule_list = Vec::new();
     for (group, rules) in groups {
         group_name_list.push(group);
-        let property_group_name = Ident::new(&to_lower_snake_case(group), Span::call_site());
+        let property_group_name = Ident::new(&Case::Snake.convert(group), Span::call_site());
         let group_struct_name = Ident::new(&to_capitalized(group), Span::call_site());
         let group_name_string_literal = Literal::string(group);
 
@@ -115,14 +116,13 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 .#property_group_name
                 .as_ref()
                 .and_then(|#property_group_name| #property_group_name.get_rule_configuration(rule_name))
-                .map(|(level, _)| level.into())
-                .unwrap_or_else(|| {
+                .map_or_else(|| {
                     if #group_struct_name::is_recommended_rule(rule_name) {
                         Severity::Error
                     } else {
                         Severity::Warning
                     }
-                })
+                }, |(level, _)| level.into())
         });
         group_match_code.push(quote! {
            #group => #group_struct_name::has_rule(rule_name).then_some((category, rule_name))
@@ -345,7 +345,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         };
 
         let rule_position = Literal::u8_unsuffixed(index as u8);
-        let rule_identifier = Ident::new(&to_lower_snake_case(rule), Span::call_site());
+        let rule_identifier = Ident::new(&Case::Snake.convert(rule), Span::call_site());
         let rule_name = Ident::new(&to_capitalized(rule), Span::call_site());
         if metadata.recommended {
             lines_recommended_rule_as_filter.push(quote! {

@@ -897,6 +897,10 @@ export interface Nursery {
 	 */
 	noConsole?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow using a callback in asynchronous tests and hooks.
+	 */
+	noDoneCallback?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
@@ -1887,6 +1891,7 @@ export type Category =
 	| "lint/nursery/noBarrelFile"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDuplicateElseIf"
+	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateTestHooks"
 	| "lint/nursery/noExcessiveNestedTestSuites"

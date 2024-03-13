@@ -30,7 +30,7 @@ impl Default for Attrs {
 impl TryFrom<&Vec<Attribute>> for Attrs {
     type Error = Error;
 
-    fn try_from(attrs: &Vec<Attribute>) -> std::prelude::v1::Result<Self, Self::Error> {
+    fn try_from(attrs: &Vec<Attribute>) -> Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
             if attr.path.is_ident("partial") {
@@ -66,7 +66,7 @@ pub struct FieldAttrs {
 impl TryFrom<&Vec<Attribute>> for FieldAttrs {
     type Error = Error;
 
-    fn try_from(attrs: &Vec<Attribute>) -> std::prelude::v1::Result<Self, Self::Error> {
+    fn try_from(attrs: &Vec<Attribute>) -> Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
             if attr.path.is_ident("partial") {

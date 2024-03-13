@@ -1395,6 +1395,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDoneCallback": {
+					"description": "Disallow using a callback in asynchronous tests and hooks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateElseIf": {
 					"description": "Disallow duplicate conditions in if-else-if chains",
 					"anyOf": [

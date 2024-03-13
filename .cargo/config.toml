@@ -27,6 +27,7 @@ documentation = """
     -p biome_js_semantic \
     -p biome_markup \
     -p biome_rowan
+    -p biome_string_case \
     --no-deps
 """
 format = "fmt --all --verbose"

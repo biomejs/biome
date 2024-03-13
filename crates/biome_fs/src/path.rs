@@ -3,8 +3,7 @@
 //! give additional information around the file that holds:
 //! - the [FileHandlers] for the specific file
 //! - shortcuts to open/write to the file
-use std::fs::read_to_string;
-use std::io::Read;
+use std::fs::{self, read_to_string};
 use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
@@ -31,12 +30,6 @@ impl BiomePath {
         }
     }
 
-    // TODO: handle error with diagnostic?
-    /// Opens a file and returns a [File] in write mode
-    pub fn open(&self) -> File {
-        File::open(&self.path).expect("cannot open the file to format")
-    }
-
     /// Accepts a file opened in read mode and saves into it
     pub fn save(&mut self, content: &str) -> Result<(), std::io::Error> {
         let mut file_to_write = File::create(&self.path).unwrap();
@@ -46,13 +39,8 @@ impl BiomePath {
 
     /// Returns the contents of a file, if it exists
     pub fn get_buffer_from_file(&mut self) -> String {
-        let mut file = self.open();
-        let mut buffer = String::new();
         // we assume we have permissions
-        file.read_to_string(&mut buffer)
-            .expect("cannot read the file to format");
-
-        buffer
+        fs::read_to_string(&self.path).expect("cannot read the file to format")
     }
 
     /// Small wrapper for [read_to_string]

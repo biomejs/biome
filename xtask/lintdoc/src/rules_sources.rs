@@ -1,5 +1,5 @@
 use biome_analyze::RuleMetadata;
-use convert_case::{Case, Casing};
+use biome_string_case::Case;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::Write;
@@ -49,37 +49,34 @@ description: A page that maps lint rules from other sources to Biome
     let mut exclusive_biome_rules = BTreeSet::<(String, String)>::new();
 
     for (rule_name, metadata) in rules {
+        let kebab_rule_name = Case::Kebab.convert(rule_name);
         if let Some(source) = &metadata.source {
             let set = rules_by_source.get_mut(&format!("{source}"));
             if let Some(set) = set {
                 set.insert(SourceSet {
                     biome_rule_name: rule_name.to_string(),
-                    biome_link: format!("/linter/rules/{}", rule_name.to_case(Case::Kebab)),
+                    biome_link: format!("/linter/rules/{}", kebab_rule_name),
                     source_link: source.to_rule_url(),
                     source_rule_name: source.as_rule_name().to_string(),
                     inspired: metadata
                         .source_kind
-                        .map(|kind| kind.is_inspired())
-                        .unwrap_or(false),
+                        .map_or(false, |kind| kind.is_inspired()),
                 });
             } else {
                 let mut set = BTreeSet::new();
                 set.insert(SourceSet {
                     biome_rule_name: rule_name.to_string(),
-                    biome_link: format!("/linter/rules/{}", rule_name.to_case(Case::Kebab)),
+                    biome_link: format!("/linter/rules/{}", kebab_rule_name),
                     source_link: source.to_rule_url(),
                     source_rule_name: source.as_rule_name().to_string(),
-                    inspired: metadata
-                        .source_kind
-                        .map(|kind| kind.is_inspired())
-                        .unwrap_or(true),
+                    inspired: metadata.source_kind.map_or(true, |kind| kind.is_inspired()),
                 });
                 rules_by_source.insert(format!("{source}"), set);
             }
         } else {
             exclusive_biome_rules.insert((
                 rule_name.to_string(),
-                format!("/linter/rules/{}", rule_name.to_case(Case::Kebab)),
+                format!("/linter/rules/{}", kebab_rule_name),
             ));
         }
     }

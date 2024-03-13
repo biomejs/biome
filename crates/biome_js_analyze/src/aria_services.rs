@@ -164,11 +164,11 @@ mod tests {
         let attribute_name_to_values = services.extract_attributes(&attribute_list).unwrap();
 
         assert_eq!(
-            attribute_name_to_values.get("class").unwrap(),
+            &attribute_name_to_values["class"],
             &vec!["wrapper".to_string(), "document".to_string()]
         );
         assert_eq!(
-            attribute_name_to_values.get("role").unwrap(),
+            &attribute_name_to_values["role"],
             &vec!["article".to_string()]
         )
     }

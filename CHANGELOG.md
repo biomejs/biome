@@ -9,30 +9,41 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
-
-### Analyzer
+## 1.6.1 (2024-03-12)
 
 ### CLI
 
+#### Bug fixes
+
+- CLI is now able to automatically search and resolve `biome.jsonc` ([#2008](https://github.com/biomejs/biome/issues/2008)). Contributed by @Sec-ant
+- Fix a false positive where some files were counted as "fixed" even though they weren't modified. Contributed by @ematipico
+
 ### Configuration
 
-### Editors
+#### Bug fixes
 
-### Formatter
-
-### JavaScript APIs
+- `json.formatter.trailingCommas` option now works in `overrides` ([#2009](https://github.com/biomejs/biome/issues/2009)). Contributed by @Sec-ant
 
 ### Linter
 
 #### New features
 
-#### Enhamcements
+- Add rule [noDoneCallback](https://biomejs.dev/linter/rules/no-done-callback), this rule checks the function parameter of hooks & tests
+  for use of the done argument, suggesting you return a promise instead. Contributed by @vasucp1207
+
+  ```js
+  beforeEach(done => {
+    // ...
+  });
+  ```
 
 #### Bug fixes
 
-- Code fixes of [useImportType](https://biomejs.dev/linter/rules/use-import-type) and [useExportType](https://biomejs.dev/linter/rules/use-export-type) now handle multiline statements ([#2041](https://github.com/biomejs/biome/issues/2041)).
-  Contributed by @Conaclos
+- [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable) now recognizes function bodies wrapped in parentheses ([#2011](https://github.com/biomejs/biome/issues/2011)). Contributed by @Sec-ant
+
+- [useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type) now preserves type parameters of generic interfaces when applying fixes ([#2015](https://github.com/biomejs/biome/issues/2015)). Contributed by @Sec-ant
+
+- Code fixes of [useImportType](https://biomejs.dev/linter/rules/use-import-type) and [useExportType](https://biomejs.dev/linter/rules/use-export-type) now handle multiline statements ([#2041](https://github.com/biomejs/biome/issues/2041)). Contributed by @Conaclos
 
 - [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports type parameter and parameter with identical names ([#1992](https://github.com/biomejs/biome/issues/1992)).
 

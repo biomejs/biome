@@ -1,6 +1,6 @@
 {
     "name": "@biomejs/biome",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "bin": "bin/biome",
     "scripts": {
         "postinstall": "node scripts/postinstall.js"
@@ -35,8 +35,8 @@
     "engines": {
         "node": ">=14.*"
     },
-		"funding": {
-			"type": "opencollective",
-			"url": "https://opencollective.com/biome"
-		}
+    "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/biome"
+    }
 }

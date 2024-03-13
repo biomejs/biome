@@ -168,8 +168,7 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
     let is_github = std::env::var("GITHUB_ACTIONS")
         .ok()
-        .map(|value| value == "true")
-        .unwrap_or(false);
+        .map_or(false, |value| value == "true");
 
     if is_github {
         // GitHub actions sets the env var GITHUB_ACTIONS=true in CI

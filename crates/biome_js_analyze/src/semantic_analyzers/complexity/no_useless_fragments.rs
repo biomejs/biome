@@ -125,10 +125,9 @@ impl Rule for NoUselessFragments {
         let mut in_jsx_attr_expr = false;
         match node {
             NoUselessFragmentsQuery::JsxFragment(fragment) => {
-                let parents_where_fragments_must_be_preserved = node
-                    .syntax()
-                    .parent()
-                    .map(|parent| match JsxTagExpression::try_cast(parent) {
+                let parents_where_fragments_must_be_preserved = node.syntax().parent().map_or(
+                    false,
+                    |parent| match JsxTagExpression::try_cast(parent) {
                         Ok(parent) => parent
                             .syntax()
                             .parent()
@@ -144,7 +143,7 @@ impl Rule for NoUselessFragments {
                                     Some(parent)
                                 }
                             })
-                            .map(|parent| {
+                            .map_or(false, |parent| {
                                 matches!(
                                     parent.kind(),
                                     JsSyntaxKind::JS_RETURN_STATEMENT
@@ -155,11 +154,10 @@ impl Rule for NoUselessFragments {
                                         | JsSyntaxKind::JS_FUNCTION_DECLARATION
                                         | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
                                 )
-                            })
-                            .unwrap_or(false),
+                            }),
                         Err(_) => false,
-                    })
-                    .unwrap_or(false);
+                    },
+                );
 
                 let child_list = fragment.children();
 

@@ -81,7 +81,7 @@ impl TestSuite for BabelJsxTestSuite {
     }
 
     fn is_test(&self, path: &std::path::Path) -> bool {
-        path.extension().map(|x| x == "js").unwrap_or(false)
+        path.extension().map_or(false, |x| x == "js")
     }
 
     fn load_test(&self, path: &std::path::Path) -> Option<Box<dyn crate::runner::TestCase>> {

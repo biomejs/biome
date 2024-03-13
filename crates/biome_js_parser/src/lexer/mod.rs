@@ -1093,7 +1093,7 @@ impl<'src> JsLexer<'src> {
 
     #[inline]
     fn special_number_start<F: Fn(char) -> bool>(&mut self, func: F) -> bool {
-        if self.byte_at(2).map(|b| func(b as char)).unwrap_or(false) {
+        if self.byte_at(2).map_or(false, |b| func(b as char)) {
             self.advance(1);
             true
         } else {
