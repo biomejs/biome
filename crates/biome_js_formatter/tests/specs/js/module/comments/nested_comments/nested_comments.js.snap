@@ -72,12 +72,12 @@ Attribute Position: Auto
 ```js
 condition
     ? {
-            a: "a",
-        }
+          a: "a",
+      }
     : {
-            /**
-             * comment
-             */
-            b: "b",
-        };
+          /**
+           * comment
+           */
+          b: "b",
+      };
 ```
