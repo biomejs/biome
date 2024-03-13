@@ -6,6 +6,7 @@ use bpaf::Bpaf;
 pub use formatter::{
     partial_javascript_formatter, JavascriptFormatter, PartialJavascriptFormatter,
 };
+
 use serde::{Deserialize, Serialize};
 
 /// A set of options applied to the JavaScript files

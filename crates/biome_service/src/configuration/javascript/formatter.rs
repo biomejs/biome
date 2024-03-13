@@ -5,6 +5,7 @@ use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons};
 use bpaf::Bpaf;
+
 use serde::{Deserialize, Serialize};
 
 /// Formatting options specific to the JavaScript files
