@@ -78,6 +78,7 @@ pub enum TaskCommand {
     #[bpaf(command)]
     Analyzer,
     /// Generate the part of the configuration that depends on some metadata
+    #[bpaf(command)]
     Configuration,
     /// Generate the JSON schema for the Biome configuration file format
     #[bpaf(command)]
@@ -118,8 +119,10 @@ pub enum TaskCommand {
         group: String,
     },
     /// Generates website files
+    #[bpaf(command)]
     Website,
     /// Runs ALL the codegen
+    #[bpaf(command)]
     All,
     /// Creates a new crate
     #[bpaf(command, long("new-crate"))]

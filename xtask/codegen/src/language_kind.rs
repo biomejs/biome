@@ -27,7 +27,7 @@ impl std::fmt::Display for LanguageKind {
             LanguageKind::Js => write!(f, "js"),
             LanguageKind::Css => write!(f, "css"),
             LanguageKind::Json => write!(f, "json"),
-            LanguageKind::Grit => write!(f, "gritql"),
+            LanguageKind::Grit => write!(f, "grit"),
             LanguageKind::Html => write!(f, "html"),
         }
     }
@@ -49,7 +49,7 @@ impl FromStr for LanguageKind {
             "js" => Ok(LanguageKind::Js),
             "css" => Ok(LanguageKind::Css),
             "json" => Ok(LanguageKind::Json),
-            "gritql" => Ok(LanguageKind::Grit),
+            "grit" => Ok(LanguageKind::Grit),
             "html" => Ok(LanguageKind::Html),
             _ => Err(format!(
                 "Language {} not supported, please use: `js`, `css`, `json`, `gritql` or `html`",
