@@ -36,16 +36,10 @@ pub fn generate_crate(crate_name: String) -> Result<()> {
     let crate_root = project_root().join("crates").join(crate_name.as_str());
     let cargo_file = crate_root.join("Cargo.toml");
     let knope_config = project_root().join("knope.toml");
-    
+
     let mut knope_contents = fs::read_to_string(&knope_config)?;
-    fs::write(
-        cargo_file,
-        cargo_template(crate_name.as_str())
-    )?;
+    fs::write(cargo_file, cargo_template(crate_name.as_str()))?;
     knope_contents.push_str(knope_template(crate_name.as_str()).as_str());
-    fs::write(
-        knope_config,
-        knope_contents
-    )?;
+    fs::write(knope_config, knope_contents)?;
     Ok(())
 }

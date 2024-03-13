@@ -129,6 +129,6 @@ pub enum TaskCommand {
     NewCrate {
         /// The name of the crate
         #[bpaf(long("name"), argument("STRING"))]
-        name: String
-    }
+        name: String,
+    },
 }

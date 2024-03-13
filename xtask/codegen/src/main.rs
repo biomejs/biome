@@ -45,21 +45,20 @@ fn main() -> Result<()> {
         }
 
         TaskCommand::Configuration => {
-                #[cfg(feature = "configuration")]
-                generate_rules_configuration(Overwrite)?;
+            #[cfg(feature = "configuration")]
+            generate_rules_configuration(Overwrite)?;
         }
         TaskCommand::Schema => {
-                #[cfg(feature = "schema")]
-                generate_configuration_schema(Overwrite)?;
+            #[cfg(feature = "schema")]
+            generate_configuration_schema(Overwrite)?;
         }
         TaskCommand::Bindings => {
             #[cfg(feature = "schema")]
-
             generate_workspace_bindings(Overwrite)?;
         }
         TaskCommand::License => {
             #[cfg(feature = "schema")]
-                generate_license(Overwrite)?;
+            generate_license(Overwrite)?;
         }
         TaskCommand::Grammar(language_list) => {
             generate_ast(Overwrite, language_list)?;
@@ -78,7 +77,7 @@ fn main() -> Result<()> {
         }
         TaskCommand::Website => {
             #[cfg(feature = "website")]
-                generate_files()?;
+            generate_files()?;
         }
         TaskCommand::All => {
             generate_tables()?;
