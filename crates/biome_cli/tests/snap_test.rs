@@ -17,7 +17,7 @@ use std::fmt::Write as _;
 use std::path::{Path, PathBuf, MAIN_SEPARATOR};
 
 lazy_static! {
-    static ref TIME_REGEX: Regex = Regex::new("\\s[0-9]+[m|µ|n]?s.").unwrap();
+    static ref TIME_REGEX: Regex = Regex::new("\\s[0-9]+[mµn]?s.").unwrap();
 }
 
 #[derive(Default)]
