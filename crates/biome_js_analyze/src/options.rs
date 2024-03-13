@@ -58,6 +58,8 @@ pub type NoDoubleEquals =
 pub type NoDuplicateCase =
     <analyzers::suspicious::no_duplicate_case::NoDuplicateCase as biome_analyze::Rule>::Options;
 pub type NoDuplicateClassMembers = < analyzers :: suspicious :: no_duplicate_class_members :: NoDuplicateClassMembers as biome_analyze :: Rule > :: Options ;
+pub type NoDuplicateElseIf =
+    <analyzers::nursery::no_duplicate_else_if::NoDuplicateElseIf as biome_analyze::Rule>::Options;
 pub type NoDuplicateJsxProps = < analyzers :: suspicious :: no_duplicate_jsx_props :: NoDuplicateJsxProps as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateObjectKeys = < analyzers :: suspicious :: no_duplicate_object_keys :: NoDuplicateObjectKeys as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateParameters = < semantic_analyzers :: suspicious :: no_duplicate_parameters :: NoDuplicateParameters as biome_analyze :: Rule > :: Options ;
