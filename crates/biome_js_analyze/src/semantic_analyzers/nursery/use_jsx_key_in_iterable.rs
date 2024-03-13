@@ -130,7 +130,7 @@ fn handle_collections(
             let node = node.ok()?;
             // no need to handle spread case, if the spread argument is itself a list it
             // will be handled during list declaration
-            let node = node.as_any_js_expression()?;
+            let node = AnyJsExpression::cast(node.into_syntax())?;
             handle_potential_react_component(node, model, is_inside_jsx)
         })
         .collect()
@@ -196,7 +196,7 @@ fn handle_iterators(
                 .filter_map(|statement| {
                     let statement = statement.as_js_return_statement()?;
                     let returned_value = statement.argument()?;
-                    handle_potential_react_component(&returned_value, model, is_inside_jsx)
+                    handle_potential_react_component(returned_value, model, is_inside_jsx)
                 })
                 .collect::<Vec<_>>();
 
@@ -206,14 +206,7 @@ fn handle_iterators(
             let body = callback.body().ok()?;
             match body {
                 AnyJsFunctionBody::AnyJsExpression(expr) => {
-                    // unwrap parenthesized expression
-                    let mut inner_expr = expr;
-                    while let AnyJsExpression::JsParenthesizedExpression(parenthesized_expr) =
-                        inner_expr
-                    {
-                        inner_expr = parenthesized_expr.expression().ok()?;
-                    }
-                    handle_potential_react_component(&inner_expr, model, is_inside_jsx)
+                    handle_potential_react_component(expr, model, is_inside_jsx)
                         .map(|state| vec![state])
                 }
                 AnyJsFunctionBody::JsFunctionBody(body) => {
@@ -223,7 +216,7 @@ fn handle_iterators(
                         .filter_map(|statement| {
                             let statement = statement.as_js_return_statement()?;
                             let returned_value = statement.argument()?;
-                            handle_potential_react_component(&returned_value, model, is_inside_jsx)
+                            handle_potential_react_component(returned_value, model, is_inside_jsx)
                         })
                         .collect::<Vec<_>>();
                     Some(res)
@@ -235,10 +228,11 @@ fn handle_iterators(
 }
 
 fn handle_potential_react_component(
-    node: &AnyJsExpression,
+    node: AnyJsExpression,
     model: &SemanticModel,
     is_inside_jsx: bool,
 ) -> Option<UseJsxKeyInIterableState> {
+    let node = unwrap_parenthesis(node)?;
     if is_inside_jsx {
         if let Some(node) = ReactComponentExpression::cast_ref(node.syntax()) {
             let range = handle_react_component(node, model)?;
@@ -358,4 +352,13 @@ fn has_key_prop(props: &JsObjectExpression) -> bool {
             _ => false,
         }
     })
+}
+
+// unwrap parenthesized expression
+fn unwrap_parenthesis(expr: AnyJsExpression) -> Option<AnyJsExpression> {
+    let mut inner_expr = expr;
+    while let AnyJsExpression::JsParenthesizedExpression(parenthesized_expr) = inner_expr {
+        inner_expr = parenthesized_expr.expression().ok()?;
+    }
+    Some(inner_expr)
 }
