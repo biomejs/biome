@@ -69,11 +69,11 @@ pub fn to_capitalized(s: &str) -> String {
 }
 
 #[derive(Debug, Clone, Bpaf)]
+#[bpaf(options)]
 pub enum TaskCommand {
     /// Generates formatters for each language
     #[bpaf(command)]
     Formatter,
-    #[bpaf(command)]
     /// Generate factory functions for the analyzer and the configuration of the analyzers
     #[bpaf(command)]
     Analyzer,
