@@ -50,12 +50,12 @@ As of version `1.6.0`, these languages are **partially** supported. Biome will g
   import Component from "./Component.vue";
   </script>
   ```
-- When **linting** `.astro` files, you have to add `"Astro"` to `linter.globals`, to avoid possible false positives from some lint rules.
+- When **linting** `.astro` files, you have to add `"Astro"` to `javascript.globals`, to avoid possible false positives from some lint rules.
 
   ```json title="biome.json"
   {
-    "linter": {
-      "globals": "Astro"
+    "javascript": {
+      "globals": ["Astro"]
     }
   }
   ```
