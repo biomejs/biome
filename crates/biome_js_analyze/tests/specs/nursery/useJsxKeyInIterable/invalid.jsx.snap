@@ -43,6 +43,8 @@ React.Children.map(c => React.cloneElement(c));
 (<h1>{data.map(c => xyz)}</h1>)
 
 (<h1>{data.map(c => (<h1></h1>))}</h1>)
+
+(<h1>{data.map(c => {return (<h1></h1>)})}</h1>)
 ```
 
 # Diagnostics
@@ -605,6 +607,25 @@ invalid.jsx:39:22 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
     38 │ 
   > 39 │ (<h1>{data.map(c => (<h1></h1>))}</h1>)
        │                      ^^^^
+    40 │ 
+    41 │ (<h1>{data.map(c => {return (<h1></h1>)})}</h1>)
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:41:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing key property for this element in iterable.
+  
+    39 │ (<h1>{data.map(c => (<h1></h1>))}</h1>)
+    40 │ 
+  > 41 │ (<h1>{data.map(c => {return (<h1></h1>)})}</h1>)
+       │                              ^^^^
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   
