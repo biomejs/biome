@@ -81,7 +81,7 @@ export default function PlaygroundLoader({
 					? {
 							...state,
 							cursorPosition,
-					  }
+						}
 					: state,
 			);
 		},
