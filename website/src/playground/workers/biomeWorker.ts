@@ -206,7 +206,7 @@ self.addEventListener("message", async (e) => {
 				? workspace.getControlFlowGraph({
 						path,
 						cursor: cursorPosition,
-				  })
+					})
 				: "";
 
 			const formatterIr = workspace.getFormatterIr({
