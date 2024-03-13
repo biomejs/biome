@@ -212,6 +212,17 @@ things you would need to run and check:
 
 ## Crates development
 
+### Create new crates
+
+If you happen to create a new _crate_ inside the workspace, use the command `just new-crate`, e.g.:
+
+```shell
+just new-crate biome_new_crate
+```
+
+Where `biome_new_crate` is going to be the name of the new crate. This script takes care of adding the correct template for the `Cargo.toml` file, and it adds the crate
+to the `knope.toml` file, which we use for changelog generation.
+
 ### Analyzers and lint rules
 
 To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal page](https://docs.rs/biome_analyze/latest/biome_analyze/)
