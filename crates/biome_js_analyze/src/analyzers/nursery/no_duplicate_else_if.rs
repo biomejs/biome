@@ -1,6 +1,4 @@
-use biome_analyze::{
-    context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
-};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsIfStatement, JsLogicalOperator, JsSyntaxKind};
 use biome_rowan::{AstNode, SyntaxNodeCast};
@@ -49,7 +47,6 @@ declare_rule! {
         name: "noDuplicateElseIf",
         recommended: true,
         source: RuleSource::Eslint("no-dupe-else-if"),
-        source_kind: RuleSourceKind::SameLogic,
     }
 }
 
@@ -192,23 +189,21 @@ fn equal(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
     if a.syntax().kind() != b.syntax().kind() {
         return false;
     }
-    if a.syntax().kind() == JsSyntaxKind::JS_LOGICAL_EXPRESSION {
-        if let (Some(a_exp), Some(b_exp)) =
-            (a.as_js_logical_expression(), b.as_js_logical_expression())
+    if let (Some(a_exp), Some(b_exp)) = (a.as_js_logical_expression(), b.as_js_logical_expression())
+    {
+        if a_exp.operator() == b_exp.operator()
+            && matches!(
+                a_exp.operator(),
+                Ok(JsLogicalOperator::LogicalAnd | JsLogicalOperator::LogicalOr)
+            )
         {
-            if a_exp.operator() == b_exp.operator()
-                && (a_exp.operator() == Ok(JsLogicalOperator::LogicalAnd)
-                    || a_exp.operator() == Ok(JsLogicalOperator::LogicalOr))
-            {
-                match (a_exp.left(), a_exp.right(), b_exp.left(), b_exp.right()) {
-                    (Ok(left_a), Ok(right_a), Ok(left_b), Ok(right_b)) => {
-                        return (equal(&left_a, &left_b) && equal(&right_a, &right_b))
-                            || (equal(&left_a, &right_b) && equal(&right_a, &left_b));
-                    }
-                    _ => return false,
+            match (a_exp.left(), a_exp.right(), b_exp.left(), b_exp.right()) {
+                (Ok(left_a), Ok(right_a), Ok(left_b), Ok(right_b)) => {
+                    return (equal(&left_a, &left_b) && equal(&right_a, &right_b))
+                        || (equal(&left_a, &right_b) && equal(&right_a, &left_b));
                 }
+                _ => return false,
             }
-            return false;
         }
         return false;
     }
