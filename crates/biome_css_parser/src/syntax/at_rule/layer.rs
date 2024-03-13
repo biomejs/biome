@@ -1,6 +1,6 @@
 use crate::parser::CssParser;
 
-use crate::syntax::block::parse_rule_list_block;
+use crate::syntax::block::parse_rule_block;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::parse_regular_identifier;
 use biome_css_syntax::CssSyntaxKind::*;
@@ -38,7 +38,7 @@ pub(crate) fn parse_any_layer(p: &mut CssParser) -> CompletedMarker {
     LayerReferenceList.parse_list(p);
 
     if p.at(T!['{']) {
-        parse_rule_list_block(p);
+        parse_rule_block(p);
         m.complete(p, CSS_LAYER_DECLARATION)
     } else {
         let kind = if p.expect(T![;]) {

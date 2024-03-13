@@ -164,7 +164,7 @@ pub fn css_color(hash_token: SyntaxToken, value_token: SyntaxToken) -> CssColor 
 pub fn css_color_profile_at_rule(
     color_profile_token: SyntaxToken,
     name: CssCustomIdentifier,
-    block: AnyCssDeclarationListBlock,
+    block: AnyCssDeclarationBlock,
 ) -> CssColorProfileAtRule {
     CssColorProfileAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COLOR_PROFILE_AT_RULE,
@@ -240,7 +240,7 @@ pub fn css_container_and_query(
 pub fn css_container_at_rule(
     container_token: SyntaxToken,
     query: AnyCssContainerQuery,
-    block: AnyCssRuleListBlock,
+    block: AnyCssRuleBlock,
 ) -> CssContainerAtRuleBuilder {
     CssContainerAtRuleBuilder {
         container_token,
@@ -252,7 +252,7 @@ pub fn css_container_at_rule(
 pub struct CssContainerAtRuleBuilder {
     container_token: SyntaxToken,
     query: AnyCssContainerQuery,
-    block: AnyCssRuleListBlock,
+    block: AnyCssRuleBlock,
     name: Option<CssCustomIdentifier>,
 }
 impl CssContainerAtRuleBuilder {
@@ -400,7 +400,7 @@ pub fn css_container_style_query_in_parens(
 pub fn css_counter_style_at_rule(
     counter_style_token: SyntaxToken,
     name: CssCustomIdentifier,
-    block: AnyCssDeclarationListBlock,
+    block: AnyCssDeclarationBlock,
 ) -> CssCounterStyleAtRule {
     CssCounterStyleAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COUNTER_STYLE_AT_RULE,
@@ -449,6 +449,20 @@ impl CssDeclarationBuilder {
         ))
     }
 }
+pub fn css_declaration_block(
+    l_curly_token: SyntaxToken,
+    declarations: CssDeclarationList,
+    r_curly_token: SyntaxToken,
+) -> CssDeclarationBlock {
+    CssDeclarationBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DECLARATION_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(declarations.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn css_declaration_important(
     excl_token: SyntaxToken,
     important_token: SyntaxToken,
@@ -458,20 +472,6 @@ pub fn css_declaration_important(
         [
             Some(SyntaxElement::Token(excl_token)),
             Some(SyntaxElement::Token(important_token)),
-        ],
-    ))
-}
-pub fn css_declaration_list_block(
-    l_curly_token: SyntaxToken,
-    declarations: CssDeclarationList,
-    r_curly_token: SyntaxToken,
-) -> CssDeclarationListBlock {
-    CssDeclarationListBlock::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_DECLARATION_LIST_BLOCK,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(declarations.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
         ],
     ))
 }
@@ -534,7 +534,7 @@ impl CssDeclarationWithSemicolonBuilder {
 pub fn css_document_at_rule(
     document_token: SyntaxToken,
     matchers: CssDocumentMatcherList,
-    block: AnyCssRuleListBlock,
+    block: AnyCssRuleBlock,
 ) -> CssDocumentAtRule {
     CssDocumentAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_DOCUMENT_AT_RULE,
@@ -563,7 +563,7 @@ pub fn css_document_custom_matcher(
 }
 pub fn css_font_face_at_rule(
     font_face_token: SyntaxToken,
-    block: AnyCssDeclarationListBlock,
+    block: AnyCssDeclarationBlock,
 ) -> CssFontFaceAtRule {
     CssFontFaceAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_FONT_FACE_AT_RULE,
@@ -604,7 +604,7 @@ pub fn css_font_feature_values_block(
 pub fn css_font_feature_values_item(
     at_token: SyntaxToken,
     name_token: SyntaxToken,
-    block: AnyCssDeclarationListBlock,
+    block: AnyCssDeclarationBlock,
 ) -> CssFontFeatureValuesItem {
     CssFontFeatureValuesItem::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_FONT_FEATURE_VALUES_ITEM,
@@ -618,7 +618,7 @@ pub fn css_font_feature_values_item(
 pub fn css_font_palette_values_at_rule(
     font_palette_values_token: SyntaxToken,
     name: CssDashedIdentifier,
-    block: AnyCssDeclarationListBlock,
+    block: AnyCssDeclarationBlock,
 ) -> CssFontPaletteValuesAtRule {
     CssFontPaletteValuesAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_FONT_PALETTE_VALUES_AT_RULE,
@@ -802,7 +802,7 @@ pub fn css_keyframes_ident_selector(selector_token: SyntaxToken) -> CssKeyframes
 }
 pub fn css_keyframes_item(
     selectors: CssKeyframesSelectorList,
-    block: AnyCssDeclarationListBlock,
+    block: AnyCssDeclarationBlock,
 ) -> CssKeyframesItem {
     CssKeyframesItem::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_KEYFRAMES_ITEM,
@@ -831,7 +831,7 @@ pub fn css_layer_at_rule(layer_token: SyntaxToken, layer: AnyCssLayer) -> CssLay
 }
 pub fn css_layer_declaration(
     references: CssLayerReferenceList,
-    block: AnyCssRuleListBlock,
+    block: AnyCssRuleBlock,
 ) -> CssLayerDeclaration {
     CssLayerDeclaration::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_LAYER_DECLARATION,
@@ -908,7 +908,7 @@ pub fn css_media_and_type_query(
 pub fn css_media_at_rule(
     media_token: SyntaxToken,
     queries: CssMediaQueryList,
-    block: AnyCssRuleListBlock,
+    block: AnyCssRuleBlock,
 ) -> CssMediaAtRule {
     CssMediaAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_MEDIA_AT_RULE,
@@ -1218,7 +1218,7 @@ pub fn css_percentage(value_token: SyntaxToken, percent_token: SyntaxToken) -> C
 pub fn css_property_at_rule(
     property_token: SyntaxToken,
     name: CssDashedIdentifier,
-    block: AnyCssDeclarationListBlock,
+    block: AnyCssDeclarationBlock,
 ) -> CssPropertyAtRule {
     CssPropertyAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PROPERTY_AT_RULE,
@@ -1703,13 +1703,13 @@ impl CssRootBuilder {
         ))
     }
 }
-pub fn css_rule_list_block(
+pub fn css_rule_block(
     l_curly_token: SyntaxToken,
     rules: CssRuleList,
     r_curly_token: SyntaxToken,
-) -> CssRuleListBlock {
-    CssRuleListBlock::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_RULE_LIST_BLOCK,
+) -> CssRuleBlock {
+    CssRuleBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_RULE_BLOCK,
         [
             Some(SyntaxElement::Token(l_curly_token)),
             Some(SyntaxElement::Node(rules.into_syntax())),
@@ -1719,7 +1719,7 @@ pub fn css_rule_list_block(
 }
 pub fn css_scope_at_rule(
     scope_token: SyntaxToken,
-    block: AnyCssRuleListBlock,
+    block: AnyCssRuleBlock,
 ) -> CssScopeAtRuleBuilder {
     CssScopeAtRuleBuilder {
         scope_token,
@@ -1729,7 +1729,7 @@ pub fn css_scope_at_rule(
 }
 pub struct CssScopeAtRuleBuilder {
     scope_token: SyntaxToken,
-    block: AnyCssRuleListBlock,
+    block: AnyCssRuleBlock,
     range: Option<AnyCssScopeRange>,
 }
 impl CssScopeAtRuleBuilder {
@@ -1827,7 +1827,7 @@ pub fn css_supports_and_condition(
 pub fn css_supports_at_rule(
     supports_token: SyntaxToken,
     condition: AnyCssSupportsCondition,
-    block: AnyCssRuleListBlock,
+    block: AnyCssRuleBlock,
 ) -> CssSupportsAtRule {
     CssSupportsAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_SUPPORTS_AT_RULE,

@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -76,7 +75,7 @@ CssRoot {
             rule: CssScopeAtRule {
                 scope_token: SCOPE_KW@1..7 "scope" [] [Whitespace(" ")],
                 range: missing (optional),
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@7..8 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -145,7 +144,7 @@ CssRoot {
                         r_paren_token: R_PAREN@110..112 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@112..113 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -226,7 +225,7 @@ CssRoot {
                         r_paren_token: R_PAREN@213..215 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@215..216 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -366,7 +365,7 @@ CssRoot {
                         r_paren_token: R_PAREN@317..319 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@319..320 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -488,7 +487,7 @@ CssRoot {
                         r_paren_token: R_PAREN@405..407 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@407..408 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -598,7 +597,7 @@ CssRoot {
                         r_paren_token: R_PAREN@484..486 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@486..487 "{" [] [],
                     rules: CssRuleList [
                         CssAtRule {
@@ -617,7 +616,7 @@ CssRoot {
                                                     selector: TO_KW@510..515 "to" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                                                 },
                                             ],
-                                            block: CssDeclarationListBlock {
+                                            block: CssDeclarationBlock {
                                                 l_curly_token: L_CURLY@515..516 "{" [] [],
                                                 declarations: CssDeclarationList [
                                                     CssDeclarationWithSemicolon {
@@ -775,7 +774,7 @@ CssRoot {
                         r_paren_token: R_PAREN@620..622 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@622..623 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@623..624 "}" [] [],
@@ -798,7 +797,7 @@ CssRoot {
       1: CSS_SCOPE_AT_RULE@1..87
         0: SCOPE_KW@1..7 "scope" [] [Whitespace(" ")]
         1: (empty)
-        2: CSS_RULE_LIST_BLOCK@7..87
+        2: CSS_RULE_BLOCK@7..87
           0: L_CURLY@7..8 "{" [] []
           1: CSS_RULE_LIST@8..85
             0: CSS_QUALIFIED_RULE@8..85
@@ -843,7 +842,7 @@ CssRoot {
                     1: CSS_CUSTOM_IDENTIFIER@98..110
                       0: IDENT@98..110 "light-scheme" [] []
             2: R_PAREN@110..112 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@112..188
+        2: CSS_RULE_BLOCK@112..188
           0: L_CURLY@112..113 "{" [] []
           1: CSS_RULE_LIST@113..186
             0: CSS_QUALIFIED_RULE@113..186
@@ -897,7 +896,7 @@ CssRoot {
                     1: STAR@212..213 "*" [] []
                   2: CSS_SUB_SELECTOR_LIST@213..213
             2: R_PAREN@213..215 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@215..276
+        2: CSS_RULE_BLOCK@215..276
           0: L_CURLY@215..216 "{" [] []
           1: CSS_RULE_LIST@216..274
             0: CSS_QUALIFIED_RULE@216..245
@@ -990,7 +989,7 @@ CssRoot {
                     1: STAR@316..317 "*" [] []
                   2: CSS_SUB_SELECTOR_LIST@317..317
             2: R_PAREN@317..319 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@319..380
+        2: CSS_RULE_BLOCK@319..380
           0: L_CURLY@319..320 "{" [] []
           1: CSS_RULE_LIST@320..378
             0: CSS_QUALIFIED_RULE@320..349
@@ -1071,7 +1070,7 @@ CssRoot {
                     1: STAR@404..405 "*" [] []
                   2: CSS_SUB_SELECTOR_LIST@405..405
             2: R_PAREN@405..407 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@407..468
+        2: CSS_RULE_BLOCK@407..468
           0: L_CURLY@407..408 "{" [] []
           1: CSS_RULE_LIST@408..466
             0: CSS_QUALIFIED_RULE@408..437
@@ -1143,7 +1142,7 @@ CssRoot {
                     1: CSS_CUSTOM_IDENTIFIER@479..484
                       0: IDENT@479..484 "inner" [] []
             2: R_PAREN@484..486 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@486..559
+        2: CSS_RULE_BLOCK@486..559
           0: L_CURLY@486..487 "{" [] []
           1: CSS_RULE_LIST@487..557
             0: CSS_AT_RULE@487..557
@@ -1159,7 +1158,7 @@ CssRoot {
                       0: CSS_KEYFRAMES_SELECTOR_LIST@510..515
                         0: CSS_KEYFRAMES_IDENT_SELECTOR@510..515
                           0: TO_KW@510..515 "to" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-                      1: CSS_DECLARATION_LIST_BLOCK@515..555
+                      1: CSS_DECLARATION_BLOCK@515..555
                         0: L_CURLY@515..516 "{" [] []
                         1: CSS_DECLARATION_LIST@516..552
                           0: CSS_DECLARATION_WITH_SEMICOLON@516..552
@@ -1258,12 +1257,10 @@ CssRoot {
                       0: CSS_IDENTIFIER@615..620
                         0: IDENT@615..620 "hover" [] []
             2: R_PAREN@620..622 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@622..624
+        2: CSS_RULE_BLOCK@622..624
           0: L_CURLY@622..623 "{" [] []
           1: CSS_RULE_LIST@623..623
           2: R_CURLY@623..624 "}" [] []
   2: EOF@624..625 "" [Newline("\n")] []
 
 ```
-
-

@@ -14,8 +14,8 @@ pub(crate) use crate::context::CssFormatContext;
 use crate::context::CssFormatOptions;
 use crate::cst::FormatCssSyntaxNode;
 use biome_css_syntax::{
-    AnyCssDeclarationListBlock, AnyCssRule, AnyCssRuleListBlock, AnyCssValue, CssLanguage,
-    CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
+    AnyCssDeclarationBlock, AnyCssRule, AnyCssRuleBlock, AnyCssValue, CssLanguage, CssSyntaxKind,
+    CssSyntaxNode, CssSyntaxToken,
 };
 use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
@@ -253,8 +253,8 @@ impl FormatLanguage for CssFormatLanguage {
     // - any individual value
     // - a complete value definition for a declaration
     fn is_range_formatting_node(&self, node: &SyntaxNode<Self::SyntaxLanguage>) -> bool {
-        AnyCssDeclarationListBlock::can_cast(node.kind())
-            || AnyCssRuleListBlock::can_cast(node.kind())
+        AnyCssDeclarationBlock::can_cast(node.kind())
+            || AnyCssRuleBlock::can_cast(node.kind())
             || AnyCssValue::can_cast(node.kind())
             || AnyCssRule::can_cast(node.kind())
             || matches!(

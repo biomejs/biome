@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -25,7 +24,7 @@ CssRoot {
                 name: CssDashedIdentifier {
                     value_token: IDENT@21..29 "--ident" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationListBlock {
+                block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@29..32 "{" [] [Whitespace("  ")],
                     declarations: CssDeclarationList [],
                     r_curly_token: R_CURLY@32..33 "}" [] [],
@@ -39,7 +38,7 @@ CssRoot {
                 name: CssDashedIdentifier {
                     value_token: IDENT@55..73 "--AnyCASInG-works" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationListBlock {
+                block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@73..76 "{" [] [Whitespace("  ")],
                     declarations: CssDeclarationList [],
                     r_curly_token: R_CURLY@76..77 "}" [] [],
@@ -63,7 +62,7 @@ CssRoot {
         0: FONT_PALETTE_VALUES_KW@1..21 "font-palette-values" [] [Whitespace(" ")]
         1: CSS_DASHED_IDENTIFIER@21..29
           0: IDENT@21..29 "--ident" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_LIST_BLOCK@29..33
+        2: CSS_DECLARATION_BLOCK@29..33
           0: L_CURLY@29..32 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@32..32
           2: R_CURLY@32..33 "}" [] []
@@ -73,12 +72,10 @@ CssRoot {
         0: FONT_PALETTE_VALUES_KW@35..55 "font-palette-values" [] [Whitespace(" ")]
         1: CSS_DASHED_IDENTIFIER@55..73
           0: IDENT@55..73 "--AnyCASInG-works" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_LIST_BLOCK@73..77
+        2: CSS_DECLARATION_BLOCK@73..77
           0: L_CURLY@73..76 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@76..76
           2: R_CURLY@76..77 "}" [] []
   2: EOF@77..78 "" [Newline("\n")] []
 
 ```
-
-
