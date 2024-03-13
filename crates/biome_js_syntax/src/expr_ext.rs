@@ -960,20 +960,26 @@ impl AnyJsExpression {
     }
 
     pub fn get_callee_object_name(&self) -> Option<JsSyntaxToken> {
+        let identifier = self.get_callee_object_identifier()?;
+        identifier.value_token().ok()
+
+
+    }
+
+    pub fn get_callee_object_identifier(&self) -> Option<JsReferenceIdentifier> {
         match self {
             AnyJsExpression::JsStaticMemberExpression(node) => {
                 let member = node.object().ok()?;
-                let member = member.as_js_identifier_expression()?.name().ok()?;
-                member.value_token().ok()
+                member.as_js_identifier_expression()?.name().ok()
             }
             AnyJsExpression::JsTemplateExpression(node) => {
                 let tag = node.tag()?;
                 let tag = tag.as_js_static_member_expression()?;
                 let member = tag.object().ok()?;
-                let member = member.as_js_identifier_expression()?.name().ok()?;
-                member.value_token().ok()
+                member.as_js_identifier_expression()?.name().ok()
+
             }
-            AnyJsExpression::JsIdentifierExpression(node) => node.name().ok()?.value_token().ok(),
+            AnyJsExpression::JsIdentifierExpression(node) => node.name().ok(),
             _ => None,
         }
     }
@@ -1092,15 +1098,15 @@ impl AnyJsExpression {
         false
     }
 
-    pub fn is_assertion_call(&self) -> bool {
+    pub fn to_assertion_call(&self) -> Option<JsSyntaxToken> {
         let name = self.get_callee_object_name();
         if let Some(name) = name {
             if matches!(name.text_trimmed(), "expect" | "assert") {
-                return true;
+                return Some(name);
             }
         }
 
-        false
+        None
     }
 }
 

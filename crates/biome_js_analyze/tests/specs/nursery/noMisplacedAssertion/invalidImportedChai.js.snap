@@ -14,15 +14,17 @@ describe(() => {
 ```
 invalidImportedChai.js:3:2 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assertion isn't inside an it call.
+  ! The assertion isn't inside a it() function call.
   
     1 │ import { expect } from "chai";
     2 │ describe(() => {
   > 3 │ 	expect("something").toBeTrue()
-      │ 	^^^^^^^^^^^^^^^^^^^
+      │ 	^^^^^^
     4 │ })
+  
+  i This will result in unexpected behaviours from your test suite.
+  
+  i Move the assertion inside a it() function call.
   
 
 ```
-
-

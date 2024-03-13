@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImportedNode.js
+---
+# Input
+```jsx
+import assert from "node:assert";
+import { describe } from "node:test";
+
+describe(() => {
+	assert.equal("something", "something")
+})
+```
+
+# Diagnostics
+```
+invalidImportedNode.js:5:2 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The assertion isn't inside a it() function call.
+  
+    4 │ describe(() => {
+  > 5 │ 	assert.equal("something", "something")
+      │ 	^^^^^^
+    6 │ })
+  
+  i This will result in unexpected behaviours from your test suite.
+  
+  i Move the assertion inside a it() function call.
+  
+
+```
