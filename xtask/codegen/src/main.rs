@@ -93,8 +93,6 @@ fn main() -> Result<()> {
             generate_configuration_schema(Overwrite)?;
             #[cfg(feature = "schema")]
             generate_workspace_bindings(Overwrite)?;
-            #[cfg(feature = "license")]
-            generate_license(Overwrite)?;
         }
         TaskCommand::NewCrate { name } => {
             generate_crate(name)?;
