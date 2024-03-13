@@ -10,7 +10,6 @@ mod generate_schema;
 #[cfg(feature = "website")]
 mod generate_website;
 mod promote_rule;
-use bpaf::Parser;
 use xtask::{project_root, pushd, Result};
 
 #[cfg(feature = "schema")]
