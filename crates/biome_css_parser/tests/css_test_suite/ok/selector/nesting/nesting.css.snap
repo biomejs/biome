@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -2474,7 +2473,7 @@ CssRoot {
                             },
                         ],
                     ],
-                    block: CssRuleListBlock {
+                    block: CssRuleBlock {
                         l_curly_token: L_CURLY@1609..1610 "{" [] [],
                         rules: CssRuleList [
                             CssQualifiedRule {
@@ -2574,7 +2573,7 @@ CssRoot {
                             },
                         ],
                     ],
-                    block: CssRuleListBlock {
+                    block: CssRuleBlock {
                         l_curly_token: L_CURLY@1698..1699 "{" [] [],
                         rules: CssRuleList [
                             CssQualifiedRule {
@@ -2627,7 +2626,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     ],
-                                                    block: CssRuleListBlock {
+                                                    block: CssRuleBlock {
                                                         l_curly_token: L_CURLY@1751..1752 "{" [] [],
                                                         rules: CssRuleList [
                                                             CssQualifiedRule {
@@ -2830,7 +2829,7 @@ CssRoot {
                                     },
                                 },
                             ],
-                            block: CssRuleListBlock {
+                            block: CssRuleBlock {
                                 l_curly_token: L_CURLY@1914..1915 "{" [] [],
                                 rules: CssRuleList [
                                     CssQualifiedRule {
@@ -4390,7 +4389,7 @@ CssRoot {
             0: CSS_LAYER_NAME_LIST@1604..1609
               0: CSS_IDENTIFIER@1604..1609
                 0: IDENT@1604..1609 "base" [] [Whitespace(" ")]
-          1: CSS_RULE_LIST_BLOCK@1609..1684
+          1: CSS_RULE_BLOCK@1609..1684
             0: L_CURLY@1609..1610 "{" [] []
             1: CSS_RULE_LIST@1610..1682
               0: CSS_QUALIFIED_RULE@1610..1682
@@ -4455,7 +4454,7 @@ CssRoot {
             0: CSS_LAYER_NAME_LIST@1693..1698
               0: CSS_IDENTIFIER@1693..1698
                 0: IDENT@1693..1698 "base" [] [Whitespace(" ")]
-          1: CSS_RULE_LIST_BLOCK@1698..1804
+          1: CSS_RULE_BLOCK@1698..1804
             0: L_CURLY@1698..1699 "{" [] []
             1: CSS_RULE_LIST@1699..1802
               0: CSS_QUALIFIED_RULE@1699..1802
@@ -4494,7 +4493,7 @@ CssRoot {
                               1: DOT@1742..1743 "." [] []
                               2: CSS_IDENTIFIER@1743..1751
                                 0: IDENT@1743..1751 "support" [] [Whitespace(" ")]
-                          1: CSS_RULE_LIST_BLOCK@1751..1799
+                          1: CSS_RULE_BLOCK@1751..1799
                             0: L_CURLY@1751..1752 "{" [] []
                             1: CSS_RULE_LIST@1752..1795
                               0: CSS_QUALIFIED_RULE@1752..1795
@@ -4623,7 +4622,7 @@ CssRoot {
                         0: CSS_NUMBER_LITERAL@1907..1910 "480" [] []
                         1: IDENT@1910..1912 "px" [] []
                     2: R_PAREN@1912..1914 ")" [] [Whitespace(" ")]
-              2: CSS_RULE_LIST_BLOCK@1914..1953
+              2: CSS_RULE_BLOCK@1914..1953
                 0: L_CURLY@1914..1915 "{" [] []
                 1: CSS_RULE_LIST@1915..1950
                   0: CSS_QUALIFIED_RULE@1915..1950
@@ -4663,5 +4662,3 @@ CssRoot {
   2: EOF@1955..1956 "" [Newline("\n")] []
 
 ```
-
-

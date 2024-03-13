@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -203,7 +202,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@24..26 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@26..27 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -270,7 +269,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@82..84 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@84..85 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -341,7 +340,7 @@ CssRoot {
                                         },
                                     },
                                 ],
-                                block: CssRuleListBlock {
+                                block: CssRuleBlock {
                                     l_curly_token: L_CURLY@151..152 "{" [] [],
                                     rules: CssRuleList [
                                         CssQualifiedRule {
@@ -413,7 +412,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@229..233 ")" [] [Whitespace("   ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@233..234 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@234..235 "}" [] [],
@@ -445,7 +444,7 @@ CssRoot {
                         r_paren_token: R_PAREN@264..266 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@266..267 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@267..268 "}" [] [],
@@ -477,7 +476,7 @@ CssRoot {
                         r_paren_token: R_PAREN@297..299 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@299..300 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@300..301 "}" [] [],
@@ -621,7 +620,7 @@ CssRoot {
                         },
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@477..478 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@478..479 "}" [] [],
@@ -765,7 +764,7 @@ CssRoot {
                         },
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@665..666 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@666..669 "}" [Newline("\n"), Newline("\n")] [],
@@ -856,7 +855,7 @@ CssRoot {
                         r_paren_token: R_PAREN@765..767 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@767..768 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@768..769 "}" [] [],
@@ -947,7 +946,7 @@ CssRoot {
                         r_paren_token: R_PAREN@865..867 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@867..868 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@868..869 "}" [] [],
@@ -1038,7 +1037,7 @@ CssRoot {
                         r_paren_token: R_PAREN@1015..1019 ")" [] [Whitespace("   ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1019..1020 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@1020..1021 "}" [] [],
@@ -1129,7 +1128,7 @@ CssRoot {
                         r_paren_token: R_PAREN@1111..1112 ")" [] [],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1112..1113 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@1113..1114 "}" [] [],
@@ -1162,7 +1161,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@1141..1143 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1143..1144 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@1144..1145 "}" [] [],
@@ -1194,7 +1193,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@1181..1183 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1183..1184 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@1184..1185 "}" [] [],
@@ -1226,7 +1225,7 @@ CssRoot {
                         r_paren_token: R_PAREN@1214..1216 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1216..1217 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@1217..1218 "}" [] [],
@@ -1317,7 +1316,7 @@ CssRoot {
                         r_paren_token: R_PAREN@1314..1316 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1316..1317 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@1317..1318 "}" [] [],
@@ -1408,7 +1407,7 @@ CssRoot {
                         r_paren_token: R_PAREN@1414..1416 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1416..1417 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@1417..1418 "}" [] [],
@@ -1444,7 +1443,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@1449..1451 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1451..1452 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@1452..1453 "}" [] [],
@@ -1483,7 +1482,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@1483..1485 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1485..1486 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -1571,7 +1570,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@1567..1569 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1569..1570 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -1651,7 +1650,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@1651..1653 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1653..1654 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@1654..1657 "}" [Newline("\n"), Newline("\n")] [],
@@ -1680,7 +1679,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@1678..1680 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1680..1681 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -1749,7 +1748,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@1730..1732 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1732..1733 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -1814,7 +1813,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@1784..1786 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1786..1787 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -1883,7 +1882,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@1840..1842 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1842..1843 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -1968,7 +1967,7 @@ CssRoot {
                     ],
                     r_paren_token: R_PAREN@1896..1898 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1898..1899 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -2057,7 +2056,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@1954..1956 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@1956..1957 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -2146,7 +2145,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@2033..2035 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@2035..2036 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -2211,7 +2210,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@2095..2097 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@2097..2098 "{" [] [],
                     rules: CssRuleList [
                         CssAtRule {
@@ -2230,7 +2229,7 @@ CssRoot {
                                                     selector: FROM_KW@2117..2125 "from" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
                                                 },
                                             ],
-                                            block: CssDeclarationListBlock {
+                                            block: CssDeclarationBlock {
                                                 l_curly_token: L_CURLY@2125..2126 "{" [] [],
                                                 declarations: CssDeclarationList [
                                                     CssDeclarationWithSemicolon {
@@ -2260,7 +2259,7 @@ CssRoot {
                                                     selector: TO_KW@2147..2153 "to" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
                                                 },
                                             ],
-                                            block: CssDeclarationListBlock {
+                                            block: CssDeclarationBlock {
                                                 l_curly_token: L_CURLY@2153..2154 "{" [] [],
                                                 declarations: CssDeclarationList [
                                                     CssDeclarationWithSemicolon {
@@ -2316,7 +2315,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@2204..2206 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@2206..2207 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -2425,7 +2424,7 @@ CssRoot {
                         r_paren_token: R_PAREN@2279..2281 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@2281..2282 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -2566,7 +2565,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@2365..2367 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@2367..2368 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -2726,7 +2725,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@2489..2491 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@2491..2492 "{" [] [],
                     rules: CssRuleList [
                         CssAtRule {
@@ -2745,7 +2744,7 @@ CssRoot {
                                                     selector: FROM_KW@2511..2519 "from" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
                                                 },
                                             ],
-                                            block: CssDeclarationListBlock {
+                                            block: CssDeclarationBlock {
                                                 l_curly_token: L_CURLY@2519..2520 "{" [] [],
                                                 declarations: CssDeclarationList [
                                                     CssDeclarationWithSemicolon {
@@ -2775,7 +2774,7 @@ CssRoot {
                                                     selector: TO_KW@2541..2547 "to" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
                                                 },
                                             ],
-                                            block: CssDeclarationListBlock {
+                                            block: CssDeclarationBlock {
                                                 l_curly_token: L_CURLY@2547..2548 "{" [] [],
                                                 declarations: CssDeclarationList [
                                                     CssDeclarationWithSemicolon {
@@ -2832,7 +2831,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@2608..2610 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@2610..2611 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -2924,7 +2923,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@2688..2690 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@2690..2691 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -2995,7 +2994,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@2742..2744 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@2744..2745 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -3074,7 +3073,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@2815..2817 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@2817..2818 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -3165,7 +3164,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@2898..2900 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@2900..2901 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -3230,7 +3229,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@2961..2963 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@2963..2964 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -3284,7 +3283,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@3008..3010 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@3010..3011 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -3353,7 +3352,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@3072..3074 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@3074..3075 "{" [] [],
                     rules: CssRuleList [
                         CssQualifiedRule {
@@ -3432,7 +3431,7 @@ CssRoot {
                   0: IDENT@20..24 "grid" [] []
             1: (empty)
           2: R_PAREN@24..26 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@26..56
+        2: CSS_RULE_BLOCK@26..56
           0: L_CURLY@26..27 "{" [] []
           1: CSS_RULE_LIST@27..54
             0: CSS_QUALIFIED_RULE@27..54
@@ -3476,7 +3475,7 @@ CssRoot {
                   0: IDENT@78..82 "flex" [] []
             1: (empty)
           2: R_PAREN@82..84 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@84..191
+        2: CSS_RULE_BLOCK@84..191
           0: L_CURLY@84..85 "{" [] []
           1: CSS_RULE_LIST@85..189
             0: CSS_QUALIFIED_RULE@85..111
@@ -3525,7 +3524,7 @@ CssRoot {
                           0: CSS_NUMBER_LITERAL@144..147 "900" [] []
                           1: IDENT@147..149 "px" [] []
                       2: R_PAREN@149..151 ")" [] [Whitespace(" ")]
-                2: CSS_RULE_LIST_BLOCK@151..189
+                2: CSS_RULE_BLOCK@151..189
                   0: L_CURLY@151..152 "{" [] []
                   1: CSS_RULE_LIST@152..186
                     0: CSS_QUALIFIED_RULE@152..186
@@ -3570,7 +3569,7 @@ CssRoot {
                   0: IDENT@222..229 "flex" [] [Whitespace("   ")]
             1: (empty)
           2: R_PAREN@229..233 ")" [] [Whitespace("   ")]
-        2: CSS_RULE_LIST_BLOCK@233..235
+        2: CSS_RULE_BLOCK@233..235
           0: L_CURLY@233..234 "{" [] []
           1: CSS_RULE_LIST@234..234
           2: R_CURLY@234..235 "}" [] []
@@ -3592,7 +3591,7 @@ CssRoot {
                     0: IDENT@260..264 "flex" [] []
               1: (empty)
             2: R_PAREN@264..266 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@266..268
+        2: CSS_RULE_BLOCK@266..268
           0: L_CURLY@266..267 "{" [] []
           1: CSS_RULE_LIST@267..267
           2: R_CURLY@267..268 "}" [] []
@@ -3614,7 +3613,7 @@ CssRoot {
                     0: IDENT@293..297 "flex" [] []
               1: (empty)
             2: R_PAREN@297..299 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@299..301
+        2: CSS_RULE_BLOCK@299..301
           0: L_CURLY@299..300 "{" [] []
           1: CSS_RULE_LIST@300..300
           2: R_CURLY@300..301 "}" [] []
@@ -3712,7 +3711,7 @@ CssRoot {
                         0: IDENT@469..475 "inset" [] [Whitespace(" ")]
                   1: (empty)
                 2: R_PAREN@475..477 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@477..479
+        2: CSS_RULE_BLOCK@477..479
           0: L_CURLY@477..478 "{" [] []
           1: CSS_RULE_LIST@478..478
           2: R_CURLY@478..479 "}" [] []
@@ -3810,7 +3809,7 @@ CssRoot {
                         0: IDENT@657..663 "inset" [] [Whitespace(" ")]
                   1: (empty)
                 2: R_PAREN@663..665 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@665..669
+        2: CSS_RULE_BLOCK@665..669
           0: L_CURLY@665..666 "{" [] []
           1: CSS_RULE_LIST@666..666
           2: R_CURLY@666..669 "}" [Newline("\n"), Newline("\n")] []
@@ -3871,7 +3870,7 @@ CssRoot {
                     3: R_PAREN@764..765 ")" [] []
               1: (empty)
             2: R_PAREN@765..767 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@767..769
+        2: CSS_RULE_BLOCK@767..769
           0: L_CURLY@767..768 "{" [] []
           1: CSS_RULE_LIST@768..768
           2: R_CURLY@768..769 "}" [] []
@@ -3932,7 +3931,7 @@ CssRoot {
                   1: (empty)
                 2: R_PAREN@864..865 ")" [] []
             2: R_PAREN@865..867 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@867..869
+        2: CSS_RULE_BLOCK@867..869
           0: L_CURLY@867..868 "{" [] []
           1: CSS_RULE_LIST@868..868
           2: R_CURLY@868..869 "}" [] []
@@ -3993,7 +3992,7 @@ CssRoot {
                   1: (empty)
                 2: R_PAREN@1011..1015 ")" [] [Whitespace("   ")]
             2: R_PAREN@1015..1019 ")" [] [Whitespace("   ")]
-        2: CSS_RULE_LIST_BLOCK@1019..1021
+        2: CSS_RULE_BLOCK@1019..1021
           0: L_CURLY@1019..1020 "{" [] []
           1: CSS_RULE_LIST@1020..1020
           2: R_CURLY@1020..1021 "}" [] []
@@ -4054,7 +4053,7 @@ CssRoot {
                   1: (empty)
                 2: R_PAREN@1110..1111 ")" [] []
             2: R_PAREN@1111..1112 ")" [] []
-        2: CSS_RULE_LIST_BLOCK@1112..1114
+        2: CSS_RULE_BLOCK@1112..1114
           0: L_CURLY@1112..1113 "{" [] []
           1: CSS_RULE_LIST@1113..1113
           2: R_CURLY@1113..1114 "}" [] []
@@ -4077,7 +4076,7 @@ CssRoot {
               1: (empty)
             2: R_PAREN@1140..1141 ")" [] []
           2: R_PAREN@1141..1143 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1143..1145
+        2: CSS_RULE_BLOCK@1143..1145
           0: L_CURLY@1143..1144 "{" [] []
           1: CSS_RULE_LIST@1144..1144
           2: R_CURLY@1144..1145 "}" [] []
@@ -4099,7 +4098,7 @@ CssRoot {
               0: BANG@1171..1172 "!" [] []
               1: IMPORTANT_KW@1172..1181 "important" [] []
           2: R_PAREN@1181..1183 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1183..1185
+        2: CSS_RULE_BLOCK@1183..1185
           0: L_CURLY@1183..1184 "{" [] []
           1: CSS_RULE_LIST@1184..1184
           2: R_CURLY@1184..1185 "}" [] []
@@ -4121,7 +4120,7 @@ CssRoot {
                     0: IDENT@1210..1214 "flex" [] []
               1: (empty)
             2: R_PAREN@1214..1216 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1216..1218
+        2: CSS_RULE_BLOCK@1216..1218
           0: L_CURLY@1216..1217 "{" [] []
           1: CSS_RULE_LIST@1217..1217
           2: R_CURLY@1217..1218 "}" [] []
@@ -4182,7 +4181,7 @@ CssRoot {
                     3: R_PAREN@1313..1314 ")" [] []
               1: (empty)
             2: R_PAREN@1314..1316 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1316..1318
+        2: CSS_RULE_BLOCK@1316..1318
           0: L_CURLY@1316..1317 "{" [] []
           1: CSS_RULE_LIST@1317..1317
           2: R_CURLY@1317..1318 "}" [] []
@@ -4243,7 +4242,7 @@ CssRoot {
                   1: (empty)
                 2: R_PAREN@1413..1414 ")" [] []
             2: R_PAREN@1414..1416 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1416..1418
+        2: CSS_RULE_BLOCK@1416..1418
           0: L_CURLY@1416..1417 "{" [] []
           1: CSS_RULE_LIST@1417..1417
           2: R_CURLY@1417..1418 "}" [] []
@@ -4268,7 +4267,7 @@ CssRoot {
                 1: (empty)
               2: R_PAREN@1448..1449 ")" [] []
           2: R_PAREN@1449..1451 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1451..1453
+        2: CSS_RULE_BLOCK@1451..1453
           0: L_CURLY@1451..1452 "{" [] []
           1: CSS_RULE_LIST@1452..1452
           2: R_CURLY@1452..1453 "}" [] []
@@ -4296,7 +4295,7 @@ CssRoot {
                   0: IDENT@1481..1483 "td" [] []
               2: CSS_SUB_SELECTOR_LIST@1483..1483
           3: R_PAREN@1483..1485 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1485..1532
+        2: CSS_RULE_BLOCK@1485..1532
           0: L_CURLY@1485..1486 "{" [] []
           1: CSS_RULE_LIST@1486..1530
             0: CSS_QUALIFIED_RULE@1486..1530
@@ -4354,7 +4353,7 @@ CssRoot {
                   0: CSS_IDENTIFIER@1554..1567
                     0: IDENT@1554..1567 "focus-visible" [] []
           3: R_PAREN@1567..1569 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1569..1616
+        2: CSS_RULE_BLOCK@1569..1616
           0: L_CURLY@1569..1570 "{" [] []
           1: CSS_RULE_LIST@1570..1614
             0: CSS_QUALIFIED_RULE@1570..1614
@@ -4405,7 +4404,7 @@ CssRoot {
                       0: CSS_STRING_LITERAL@1639..1650 "\".minwidth\"" [] []
             3: R_PAREN@1650..1651 ")" [] []
           2: R_PAREN@1651..1653 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1653..1657
+        2: CSS_RULE_BLOCK@1653..1657
           0: L_CURLY@1653..1654 "{" [] []
           1: CSS_RULE_LIST@1654..1654
           2: R_CURLY@1654..1657 "}" [Newline("\n"), Newline("\n")] []
@@ -4425,7 +4424,7 @@ CssRoot {
                   0: CSS_NUMBER_LITERAL@1677..1678 "1" [] []
             1: (empty)
           2: R_PAREN@1678..1680 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1680..1707
+        2: CSS_RULE_BLOCK@1680..1707
           0: L_CURLY@1680..1681 "{" [] []
           1: CSS_RULE_LIST@1681..1705
             0: CSS_QUALIFIED_RULE@1681..1705
@@ -4471,7 +4470,7 @@ CssRoot {
               1: (empty)
             2: R_PAREN@1729..1730 ")" [] []
           2: R_PAREN@1730..1732 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1732..1759
+        2: CSS_RULE_BLOCK@1732..1759
           0: L_CURLY@1732..1733 "{" [] []
           1: CSS_RULE_LIST@1733..1757
             0: CSS_QUALIFIED_RULE@1733..1757
@@ -4514,7 +4513,7 @@ CssRoot {
                   0: CSS_STRING_LITERAL@1779..1784 "\"str\"" [] []
             1: (empty)
           2: R_PAREN@1784..1786 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1786..1813
+        2: CSS_RULE_BLOCK@1786..1813
           0: L_CURLY@1786..1787 "{" [] []
           1: CSS_RULE_LIST@1787..1811
             0: CSS_QUALIFIED_RULE@1787..1811
@@ -4560,7 +4559,7 @@ CssRoot {
               1: (empty)
             2: R_PAREN@1839..1840 ")" [] []
           2: R_PAREN@1840..1842 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1842..1869
+        2: CSS_RULE_BLOCK@1842..1869
           0: L_CURLY@1842..1843 "{" [] []
           1: CSS_RULE_LIST@1843..1867
             0: CSS_QUALIFIED_RULE@1843..1867
@@ -4614,7 +4613,7 @@ CssRoot {
                   0: CSS_NUMBER@1894..1896
                     0: CSS_NUMBER_LITERAL@1894..1896 "40" [] []
           3: R_PAREN@1896..1898 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1898..1925
+        2: CSS_RULE_BLOCK@1898..1925
           0: L_CURLY@1898..1899 "{" [] []
           1: CSS_RULE_LIST@1899..1923
             0: CSS_QUALIFIED_RULE@1899..1923
@@ -4671,7 +4670,7 @@ CssRoot {
                       0: CSS_NUMBER_LITERAL@1951..1953 "40" [] []
             3: R_PAREN@1953..1954 ")" [] []
           2: R_PAREN@1954..1956 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@1956..1983
+        2: CSS_RULE_BLOCK@1956..1983
           0: L_CURLY@1956..1957 "{" [] []
           1: CSS_RULE_LIST@1957..1981
             0: CSS_QUALIFIED_RULE@1957..1981
@@ -4728,7 +4727,7 @@ CssRoot {
                       0: CSS_NUMBER_LITERAL@2025..2030 "40" [] [Whitespace("   ")]
             3: R_PAREN@2030..2033 ")" [] [Whitespace("  ")]
           2: R_PAREN@2033..2035 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@2035..2062
+        2: CSS_RULE_BLOCK@2035..2062
           0: L_CURLY@2035..2036 "{" [] []
           1: CSS_RULE_LIST@2036..2060
             0: CSS_QUALIFIED_RULE@2036..2060
@@ -4771,7 +4770,7 @@ CssRoot {
                   0: IDENT@2091..2095 "test" [] []
             1: (empty)
           2: R_PAREN@2095..2097 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@2097..2179
+        2: CSS_RULE_BLOCK@2097..2179
           0: L_CURLY@2097..2098 "{" [] []
           1: CSS_RULE_LIST@2098..2177
             0: CSS_AT_RULE@2098..2177
@@ -4787,7 +4786,7 @@ CssRoot {
                       0: CSS_KEYFRAMES_SELECTOR_LIST@2117..2125
                         0: CSS_KEYFRAMES_IDENT_SELECTOR@2117..2125
                           0: FROM_KW@2117..2125 "from" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
-                      1: CSS_DECLARATION_LIST_BLOCK@2125..2147
+                      1: CSS_DECLARATION_BLOCK@2125..2147
                         0: L_CURLY@2125..2126 "{" [] []
                         1: CSS_DECLARATION_LIST@2126..2143
                           0: CSS_DECLARATION_WITH_SEMICOLON@2126..2143
@@ -4806,7 +4805,7 @@ CssRoot {
                       0: CSS_KEYFRAMES_SELECTOR_LIST@2147..2153
                         0: CSS_KEYFRAMES_IDENT_SELECTOR@2147..2153
                           0: TO_KW@2147..2153 "to" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
-                      1: CSS_DECLARATION_LIST_BLOCK@2153..2174
+                      1: CSS_DECLARATION_BLOCK@2153..2174
                         0: L_CURLY@2153..2154 "{" [] []
                         1: CSS_DECLARATION_LIST@2154..2170
                           0: CSS_DECLARATION_WITH_SEMICOLON@2154..2170
@@ -4839,7 +4838,7 @@ CssRoot {
                   0: IDENT@2199..2204 "green" [] []
             1: (empty)
           2: R_PAREN@2204..2206 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@2206..2245
+        2: CSS_RULE_BLOCK@2206..2245
           0: L_CURLY@2206..2207 "{" [] []
           1: CSS_RULE_LIST@2207..2243
             0: CSS_QUALIFIED_RULE@2207..2243
@@ -4912,7 +4911,7 @@ CssRoot {
                         2: CSS_SUB_SELECTOR_LIST@2278..2278
                     3: R_PAREN@2278..2279 ")" [] []
             3: R_PAREN@2279..2281 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@2281..2322
+        2: CSS_RULE_BLOCK@2281..2322
           0: L_CURLY@2281..2282 "{" [] []
           1: CSS_RULE_LIST@2282..2320
             0: CSS_QUALIFIED_RULE@2282..2320
@@ -5009,7 +5008,7 @@ CssRoot {
                           2: CSS_SUB_SELECTOR_LIST@2364..2364
                   3: R_PAREN@2364..2365 ")" [] []
           3: R_PAREN@2365..2367 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@2367..2456
+        2: CSS_RULE_BLOCK@2367..2456
           0: L_CURLY@2367..2368 "{" [] []
           1: CSS_RULE_LIST@2368..2454
             0: CSS_QUALIFIED_RULE@2368..2454
@@ -5118,7 +5117,7 @@ CssRoot {
                   0: IDENT@2485..2489 "test" [] []
             1: (empty)
           2: R_PAREN@2489..2491 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@2491..2573
+        2: CSS_RULE_BLOCK@2491..2573
           0: L_CURLY@2491..2492 "{" [] []
           1: CSS_RULE_LIST@2492..2571
             0: CSS_AT_RULE@2492..2571
@@ -5134,7 +5133,7 @@ CssRoot {
                       0: CSS_KEYFRAMES_SELECTOR_LIST@2511..2519
                         0: CSS_KEYFRAMES_IDENT_SELECTOR@2511..2519
                           0: FROM_KW@2511..2519 "from" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
-                      1: CSS_DECLARATION_LIST_BLOCK@2519..2541
+                      1: CSS_DECLARATION_BLOCK@2519..2541
                         0: L_CURLY@2519..2520 "{" [] []
                         1: CSS_DECLARATION_LIST@2520..2537
                           0: CSS_DECLARATION_WITH_SEMICOLON@2520..2537
@@ -5153,7 +5152,7 @@ CssRoot {
                       0: CSS_KEYFRAMES_SELECTOR_LIST@2541..2547
                         0: CSS_KEYFRAMES_IDENT_SELECTOR@2541..2547
                           0: TO_KW@2541..2547 "to" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
-                      1: CSS_DECLARATION_LIST_BLOCK@2547..2568
+                      1: CSS_DECLARATION_BLOCK@2547..2568
                         0: L_CURLY@2547..2548 "{" [] []
                         1: CSS_DECLARATION_LIST@2548..2564
                           0: CSS_DECLARATION_WITH_SEMICOLON@2548..2564
@@ -5187,7 +5186,7 @@ CssRoot {
                   0: CSS_IDENTIFIER@2595..2608
                     0: IDENT@2595..2608 "focus-visible" [] []
           3: R_PAREN@2608..2610 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@2610..2657
+        2: CSS_RULE_BLOCK@2610..2657
           0: L_CURLY@2610..2611 "{" [] []
           1: CSS_RULE_LIST@2611..2655
             0: CSS_QUALIFIED_RULE@2611..2655
@@ -5246,7 +5245,7 @@ CssRoot {
                   3: R_PAREN@2687..2688 ")" [] []
             1: (empty)
           2: R_PAREN@2688..2690 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@2690..2722
+        2: CSS_RULE_BLOCK@2690..2722
           0: L_CURLY@2690..2691 "{" [] []
           1: CSS_RULE_LIST@2691..2720
             0: CSS_QUALIFIED_RULE@2691..2720
@@ -5292,7 +5291,7 @@ CssRoot {
                       0: CSS_NUMBER_LITERAL@2740..2741 "1" [] []
             3: R_PAREN@2741..2742 ")" [] []
           2: R_PAREN@2742..2744 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@2744..2771
+        2: CSS_RULE_BLOCK@2744..2771
           0: L_CURLY@2744..2745 "{" [] []
           1: CSS_RULE_LIST@2745..2769
             0: CSS_QUALIFIED_RULE@2745..2769
@@ -5346,7 +5345,7 @@ CssRoot {
                 2: CSS_SUB_SELECTOR_LIST@2811..2811
             3: R_PAREN@2811..2815 ")" [] [Whitespace("   ")]
           2: R_PAREN@2815..2817 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@2817..2864
+        2: CSS_RULE_BLOCK@2817..2864
           0: L_CURLY@2817..2818 "{" [] []
           1: CSS_RULE_LIST@2818..2862
             0: CSS_QUALIFIED_RULE@2818..2862
@@ -5405,7 +5404,7 @@ CssRoot {
                       0: CSS_STRING_LITERAL@2885..2894 "\"example\"" [] []
             3: R_PAREN@2894..2898 ")" [] [Whitespace("   ")]
           2: R_PAREN@2898..2900 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@2900..2927
+        2: CSS_RULE_BLOCK@2900..2927
           0: L_CURLY@2900..2901 "{" [] []
           1: CSS_RULE_LIST@2901..2925
             0: CSS_QUALIFIED_RULE@2901..2925
@@ -5448,7 +5447,7 @@ CssRoot {
                   0: CSS_STRING_LITERAL@2952..2961 "\"test\"" [] [Whitespace("   ")]
             1: (empty)
           2: R_PAREN@2961..2963 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@2963..2990
+        2: CSS_RULE_BLOCK@2963..2990
           0: L_CURLY@2963..2964 "{" [] []
           1: CSS_RULE_LIST@2964..2988
             0: CSS_QUALIFIED_RULE@2964..2988
@@ -5484,7 +5483,7 @@ CssRoot {
           1: CSS_DASHED_IDENTIFIER@3003..3008
             0: IDENT@3003..3008 "--var" [] []
           2: R_PAREN@3008..3010 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@3010..3037
+        2: CSS_RULE_BLOCK@3010..3037
           0: L_CURLY@3010..3011 "{" [] []
           1: CSS_RULE_LIST@3011..3035
             0: CSS_QUALIFIED_RULE@3011..3035
@@ -5529,7 +5528,7 @@ CssRoot {
                       0: CSS_STRING_LITERAL@3060..3071 "\".minwidth\"" [] []
             3: R_PAREN@3071..3072 ")" [] []
           2: R_PAREN@3072..3074 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@3074..3119
+        2: CSS_RULE_BLOCK@3074..3119
           0: L_CURLY@3074..3075 "{" [] []
           1: CSS_RULE_LIST@3075..3117
             0: CSS_QUALIFIED_RULE@3075..3117
@@ -5565,5 +5564,3 @@ CssRoot {
   2: EOF@3119..3120 "" [Newline("\n")] []
 
 ```
-
-

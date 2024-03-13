@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -30,7 +29,7 @@ CssRoot {
             rule: CssBogusAtRule {
                 items: [
                     COUNTER_STYLE_KW@1..16 "counter-style" [] [Whitespace("  ")],
-                    CssDeclarationListBlock {
+                    CssDeclarationBlock {
                         l_curly_token: L_CURLY@16..19 "{" [] [Whitespace("  ")],
                         declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@19..20 "}" [] [],
@@ -48,7 +47,7 @@ CssRoot {
                             CSS_NUMBER_LITERAL@36..41 "6788" [] [Whitespace(" ")],
                         ],
                     },
-                    CssDeclarationListBlock {
+                    CssDeclarationBlock {
                         l_curly_token: L_CURLY@41..44 "{" [] [Whitespace("  ")],
                         declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@44..45 "}" [] [],
@@ -66,7 +65,7 @@ CssRoot {
                             CSS_STRING_LITERAL@61..70 "'string'" [] [Whitespace(" ")],
                         ],
                     },
-                    CssDeclarationListBlock {
+                    CssDeclarationBlock {
                         l_curly_token: L_CURLY@70..73 "{" [] [Whitespace("  ")],
                         declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@73..74 "}" [] [],
@@ -96,7 +95,7 @@ CssRoot {
                             INHERIT_KW@112..120 "inherit" [] [Whitespace(" ")],
                         ],
                     },
-                    CssDeclarationListBlock {
+                    CssDeclarationBlock {
                         l_curly_token: L_CURLY@120..122 "{" [] [Whitespace(" ")],
                         declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@122..123 "}" [] [],
@@ -114,7 +113,7 @@ CssRoot {
                             INITIAL_KW@139..147 "initial" [] [Whitespace(" ")],
                         ],
                     },
-                    CssDeclarationListBlock {
+                    CssDeclarationBlock {
                         l_curly_token: L_CURLY@147..149 "{" [] [Whitespace(" ")],
                         declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@149..150 "}" [] [],
@@ -132,7 +131,7 @@ CssRoot {
                             UNSET_KW@166..172 "unset" [] [Whitespace(" ")],
                         ],
                     },
-                    CssDeclarationListBlock {
+                    CssDeclarationBlock {
                         l_curly_token: L_CURLY@172..174 "{" [] [Whitespace(" ")],
                         declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@174..175 "}" [] [],
@@ -150,7 +149,7 @@ CssRoot {
                             REVERT_KW@191..198 "revert" [] [Whitespace(" ")],
                         ],
                     },
-                    CssDeclarationListBlock {
+                    CssDeclarationBlock {
                         l_curly_token: L_CURLY@198..200 "{" [] [Whitespace(" ")],
                         declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@200..201 "}" [] [],
@@ -168,7 +167,7 @@ CssRoot {
                             REVERT_LAYER_KW@217..230 "revert-layer" [] [Whitespace(" ")],
                         ],
                     },
-                    CssDeclarationListBlock {
+                    CssDeclarationBlock {
                         l_curly_token: L_CURLY@230..232 "{" [] [Whitespace(" ")],
                         declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@232..233 "}" [] [],
@@ -191,7 +190,7 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: CSS_BOGUS_AT_RULE@1..20
         0: COUNTER_STYLE_KW@1..16 "counter-style" [] [Whitespace("  ")]
-        1: CSS_DECLARATION_LIST_BLOCK@16..20
+        1: CSS_DECLARATION_BLOCK@16..20
           0: L_CURLY@16..19 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@19..19
           2: R_CURLY@19..20 "}" [] []
@@ -201,7 +200,7 @@ CssRoot {
         0: COUNTER_STYLE_KW@22..36 "counter-style" [] [Whitespace(" ")]
         1: CSS_BOGUS@36..41
           0: CSS_NUMBER_LITERAL@36..41 "6788" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_LIST_BLOCK@41..45
+        2: CSS_DECLARATION_BLOCK@41..45
           0: L_CURLY@41..44 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@44..44
           2: R_CURLY@44..45 "}" [] []
@@ -211,7 +210,7 @@ CssRoot {
         0: COUNTER_STYLE_KW@47..61 "counter-style" [] [Whitespace(" ")]
         1: CSS_BOGUS@61..70
           0: CSS_STRING_LITERAL@61..70 "'string'" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_LIST_BLOCK@70..74
+        2: CSS_DECLARATION_BLOCK@70..74
           0: L_CURLY@70..73 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@73..73
           2: R_CURLY@73..74 "}" [] []
@@ -228,7 +227,7 @@ CssRoot {
         0: COUNTER_STYLE_KW@98..112 "counter-style" [] [Whitespace(" ")]
         1: CSS_BOGUS@112..120
           0: INHERIT_KW@112..120 "inherit" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_LIST_BLOCK@120..123
+        2: CSS_DECLARATION_BLOCK@120..123
           0: L_CURLY@120..122 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@122..122
           2: R_CURLY@122..123 "}" [] []
@@ -238,7 +237,7 @@ CssRoot {
         0: COUNTER_STYLE_KW@125..139 "counter-style" [] [Whitespace(" ")]
         1: CSS_BOGUS@139..147
           0: INITIAL_KW@139..147 "initial" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_LIST_BLOCK@147..150
+        2: CSS_DECLARATION_BLOCK@147..150
           0: L_CURLY@147..149 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@149..149
           2: R_CURLY@149..150 "}" [] []
@@ -248,7 +247,7 @@ CssRoot {
         0: COUNTER_STYLE_KW@152..166 "counter-style" [] [Whitespace(" ")]
         1: CSS_BOGUS@166..172
           0: UNSET_KW@166..172 "unset" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_LIST_BLOCK@172..175
+        2: CSS_DECLARATION_BLOCK@172..175
           0: L_CURLY@172..174 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@174..174
           2: R_CURLY@174..175 "}" [] []
@@ -258,7 +257,7 @@ CssRoot {
         0: COUNTER_STYLE_KW@177..191 "counter-style" [] [Whitespace(" ")]
         1: CSS_BOGUS@191..198
           0: REVERT_KW@191..198 "revert" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_LIST_BLOCK@198..201
+        2: CSS_DECLARATION_BLOCK@198..201
           0: L_CURLY@198..200 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@200..200
           2: R_CURLY@200..201 "}" [] []
@@ -268,7 +267,7 @@ CssRoot {
         0: COUNTER_STYLE_KW@203..217 "counter-style" [] [Whitespace(" ")]
         1: CSS_BOGUS@217..230
           0: REVERT_LAYER_KW@217..230 "revert-layer" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_LIST_BLOCK@230..233
+        2: CSS_DECLARATION_BLOCK@230..233
           0: L_CURLY@230..232 "{" [] [Whitespace(" ")]
           1: CSS_DECLARATION_LIST@232..232
           2: R_CURLY@232..233 "}" [] []
@@ -408,5 +407,3 @@ at_rule_counter_style_error.css:10:16 parse ━━━━━━━━━━━━
   i 'revert-layer' is a CSS-wide keyword that cannot be used here
   
 ```
-
-

@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -54,7 +53,7 @@ CssRoot {
                         r_paren_token: R_PAREN@107..109 ")" [] [Whitespace(" ")],
                     },
                 ],
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@109..110 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@110..114 "}" [Newline("\n"), Whitespace("\t\t")] [],
@@ -83,7 +82,7 @@ CssRoot {
                     },
                     COMMA@164..199 "," [] [Whitespace(" "), Comments("/* Error in URL, reco ..."), Whitespace(" ")],
                 ],
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@199..200 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@200..203 "}" [Newline("\n"), Whitespace(" ")] [],
@@ -124,7 +123,7 @@ CssRoot {
               0: CSS_URL_VALUE_RAW_LITERAL@89..107 "http://example.org" [] []
             3: CSS_URL_MODIFIER_LIST@107..107
             4: R_PAREN@107..109 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@109..114
+        2: CSS_RULE_BLOCK@109..114
           0: L_CURLY@109..110 "{" [] []
           1: CSS_RULE_LIST@110..110
           2: R_CURLY@110..114 "}" [Newline("\n"), Whitespace("\t\t")] []
@@ -144,7 +143,7 @@ CssRoot {
           2: CSS_BOGUS_DOCUMENT_MATCHER@151..164
             0: IDENT@151..164 "invalid-url" [Newline("\n"), Whitespace(" ")] []
           3: COMMA@164..199 "," [] [Whitespace(" "), Comments("/* Error in URL, reco ..."), Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@199..203
+        2: CSS_RULE_BLOCK@199..203
           0: L_CURLY@199..200 "{" [] []
           1: CSS_RULE_LIST@200..200
           2: R_CURLY@200..203 "}" [Newline("\n"), Whitespace(" ")] []
@@ -210,5 +209,3 @@ at_rule_document_error.css:6:48 parse ━━━━━━━━━━━━━━
   - regexp(<string>)
   
 ```
-
-
