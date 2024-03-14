@@ -26,13 +26,13 @@
 		"@codemirror/lang-json": "^6.0.1",
 		"@codemirror/lint": "^6.5.0",
 		"@codemirror/state": "^6.4.1",
-		"@codemirror/view": "^6.25.1",
+		"@codemirror/view": "^6.26.0",
 		"@docsearch/css": "^3.6.0",
 		"@docsearch/js": "^3.6.0",
 		"@fontsource/inter": "^5.0.17",
-		"@types/node": "^20.11.26",
-		"@types/react": "^18.2.65",
-		"@types/react-dom": "^18.2.21",
+		"@types/node": "^20.11.27",
+		"@types/react": "^18.2.66",
+		"@types/react-dom": "^18.2.22",
 		"@uiw/react-codemirror": "^4.21.24",
 		"@vitejs/plugin-react": "^4.2.1",
 		"autoprefixer": "^10.4.18",
@@ -52,7 +52,7 @@
 		"rehype-autolink-headings": "^7.1.0",
 		"rehype-slug": "^6.0.0",
 		"remark-toc": "^9.0.0",
-		"sass": "^1.71.1",
+		"sass": "^1.72.0",
 		"sharp": "^0.33.2",
 		"textlint": "^14.0.4",
 		"textlint-rule-preset-jtf-style": "^2.3.14",
@@ -62,7 +62,7 @@
 		"vite-plugin-svgr": "^4.2.0"
 	},
 	"dependencies": {
-		"astro": "^4.5.2",
+		"astro": "^4.5.3",
 		"astro-og-canvas": "^0.4.2",
 		"canvaskit-wasm": "^0.39.1"
 	}
