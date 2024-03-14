@@ -96,7 +96,7 @@ importers:
         specifier: ^0.21.1
         version: 0.21.1(astro@4.5.3)
       '@biomejs/wasm-web':
-        specifier: link:../packages\@biomejs\wasm-web
+        specifier: link:../packages/@biomejs/wasm-web
         version: link:../packages/@biomejs/wasm-web
       '@codemirror/lang-javascript':
         specifier: ^6.2.2
