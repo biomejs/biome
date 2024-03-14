@@ -72,7 +72,7 @@ pub trait LexContext {
 /// of the current position (and what the `nth` token is). This means, that every token
 /// only gets lexed once except if the buffer cached some lookahead tokens and:
 ///
-/// * `next_token` is called with a context other than [LexContext::default()].
+/// * `next_token` is called with a context other than `LexContext::default.
 /// * the lexer gets rewinded to a previous position
 /// * re-lexing the current token changes the kind of the token. That means,
 ///   that any following token may turn out to be different as well, thus, it's necessary to clear the

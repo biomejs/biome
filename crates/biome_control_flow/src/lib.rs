@@ -95,7 +95,7 @@ pub struct Instruction<L: Language> {
 /// The different types of supported [Instruction]
 #[derive(Copy, Clone, Debug)]
 pub enum InstructionKind {
-    /// Indicates the [SyntaxNode](biome_rowan::SyntaxNode) associated with this
+    /// Indicates the [SyntaxNode] associated with this
     /// instruction is to be evaluated at this point in the program
     Statement,
     /// This instruction may cause the control flow to diverge towards `block`,
