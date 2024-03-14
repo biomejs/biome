@@ -30,7 +30,7 @@
         "format",
         "lint",
         "toolchain",
-				"JSON"
+        "JSON"
     ],
     "engines": {
         "node": ">=14.*"
