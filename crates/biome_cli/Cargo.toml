@@ -17,6 +17,7 @@ version              = "0.0.0"
 name = "biome"
 path = "src/main.rs"
 
+
 [dependencies]
 anyhow                   = "1.0.52"
 biome_analyze            = { workspace = true }
@@ -26,6 +27,7 @@ biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_formatter          = { workspace = true }
 biome_fs                 = { workspace = true }
+biome_css_formatter  		 = { workspace = true }
 biome_js_formatter       = { workspace = true }
 biome_json_formatter     = { workspace = true }
 biome_json_parser        = { workspace = true }
@@ -72,6 +74,7 @@ tokio                = { workspace = true, features = ["io-util"] }
 
 [features]
 docgen = ["bpaf/docgen"]
+format_css = ["biome_css_formatter/format_css"]
 
 [lints]
 workspace = true

@@ -376,7 +376,7 @@ pub fn format_sub_tree(options: CssFormatOptions, root: &CssSyntaxNode) -> Forma
 /// meantime. This flag controls that visibility, and only returns true for
 /// non-release builds.
 pub const fn can_format_css_yet() -> bool {
-    cfg!(debug_assertions)
+    cfg!(debug_assertions) || cfg!(feature = "format_css")
 }
 
 #[cfg(test)]
