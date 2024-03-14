@@ -142,8 +142,8 @@ jobs:
           pnpm --filter @biomejs/js-api run build
       - name: Run JS tests
         run: |
-          pnpm --filter @biomejs/backend-jsonrpc test:ci
-          pnpm --filter @biomejs/js-api test:ci
+          pnpm --filter @biomejs/backend-jsonrpc run test:ci
+          pnpm --filter @biomejs/js-api run test:ci
 
   documentation:
     name: Documentation

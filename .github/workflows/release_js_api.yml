@@ -90,7 +90,7 @@ jobs:
 
       - name: Compile backends
         run: |
-          pnpm --filter @biomejs/js-api build:wasm
+          pnpm --filter @biomejs/js-api run build:wasm
           pnpm --filter @biomejs/backend-jsonrpc i
           pnpm --filter @biomejs/backend-jsonrpc run build
 
