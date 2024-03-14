@@ -1,12 +1,7 @@
 {
 	"incremental": false,
-  "typescript": {
-  },
-  "includes": ["**/*.{ts,tsx,js,jsx,cjs,mjs}"],
-  "excludes": [
-    "**/node_modules"
-  ],
-  "plugins": [
-    "https://plugins.dprint.dev/typescript-0.77.0.wasm"
-  ]
+	"typescript": {},
+	"includes": ["**/*.{ts,tsx,js,jsx,cjs,mjs}"],
+	"excludes": ["**/node_modules"],
+	"plugins": ["https://plugins.dprint.dev/typescript-0.77.0.wasm"]
 }

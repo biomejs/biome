@@ -3,12 +3,13 @@
 	"extends": ["@biomejs/shared/biome"],
 	"files": {
 		"ignore": [
+			"crates/**",
 			"dist/**",
 			".astro/**",
 			"assets/**",
+			"packages/@biomejs/backend-jsonrpc/src/workspace.ts",
 			"public/**",
 			"**/__snapshots__",
-			"**/editors/intellij/**",
 			"**/undefined/**",
 			"_fonts/**"
 		]
