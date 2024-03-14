@@ -76,6 +76,7 @@ jobs:
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
+        if: matrix.os == 'ubuntu-latest'
         with:
           android: true
           dotnet: true

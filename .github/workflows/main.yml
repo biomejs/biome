@@ -76,11 +76,13 @@ jobs:
           - os: macos-latest
     steps:
       - name: Free Disk Space (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         uses: jlumbroso/free-disk-space@main
         with:
           android: true
           dotnet: true
           haskell: true
+          docker-images: true
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install toolchain
