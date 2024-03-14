@@ -1,6 +1,6 @@
 {
 	"$schema": "./packages/@biomejs/biome/configuration_schema.json",
-	"extends": ["shared/biome"],
+	"extends": ["@biomejs/shared/biome"],
 	"files": {
 		"ignore": [
 			"dist/**",

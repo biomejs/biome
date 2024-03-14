@@ -2,14 +2,22 @@
 
 ## Installation
 
+First install pnpm by enabling [corepack](https://nodejs.org/api/corepack.html):
+
 ```shell
-pnpm install
+corepack enable
+```
+
+Then install the required dependencies:
+
+```shell
+pnpm i --filter "@biomejs/website" --frozen-lockfile
 ```
 
 ## Local Development
 
 ```shell
-pnpm start
+pnpm --filter "@biomejs/website" start
 ```
 
 This command starts a local development server. Most changes are reflected live without having to restart the server.
@@ -17,13 +25,13 @@ This command starts a local development server. Most changes are reflected live 
 If you want to work on the playground, additional artifacts are required and the following command must be used instead:
 
 ```shell
-pnpm start:playground
+pnpm --filter "@biomejs/website" start:playground
 ```
 
 ## Build
 
 ```shell
-pnpm build
+pnpm --filter "@biomejs/website" build
 ```
 
 This command generates static content into the build directory and can be served using any static contents hosting service.

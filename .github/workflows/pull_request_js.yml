@@ -42,8 +42,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-
       - uses: pnpm/action-setup@v3
-        with:
-          version: 8
       - name: Run Biome Format
         run: |
           pnpm i
@@ -63,8 +61,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-
       - uses: pnpm/action-setup@v3
-        with:
-          version: 8
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
       - name: Install wasm-pack

@@ -1,9 +1,10 @@
 {
-	"name": "shared",
+	"name": "@biomejs/shared",
 	"version": "0.0.0",
+	"private": true,
 	"exports": {
 		"./biome": "./biome.json"
 	},
 	"keywords": [],
-	"license": "ISC"
+	"license": "MIT OR Apache-2.0"
 }
