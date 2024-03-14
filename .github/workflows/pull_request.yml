@@ -137,7 +137,9 @@ jobs:
         run: |
           pnpm --filter @biomejs/backend-jsonrpc i
           pnpm --filter @biomejs/backend-jsonrpc run build
-          pnpm --filter @biomejs/js-api run build:wasm
+          pnpm --filter @biomejs/js-api run build:wasm-bundler
+          pnpm --filter @biomejs/js-api run build:wasm-node
+          pnpm --filter @biomejs/js-api run build:wasm-web
           pnpm --filter @biomejs/js-api i
           pnpm --filter @biomejs/js-api run build
       - name: Run JS tests
