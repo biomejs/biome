@@ -84,7 +84,10 @@ type JsonRpcMessage = JsonRpcRequest | JsonRpcNotification | JsonRpcResponse;
 
 function isJsonRpcMessage(message: unknown): message is JsonRpcMessage {
 	return (
-		typeof message === "object" && message !== null && message.jsonrpc === "2.0"
+		typeof message === "object" &&
+		message !== null &&
+		"jsonrpc" in message &&
+		message.jsonrpc === "2.0"
 	);
 }
 
