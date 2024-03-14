@@ -27,10 +27,10 @@ jobs:
     name: Format and Lint Rust Files
     runs-on: ubuntu-latest
     steps:
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
         with:
@@ -45,10 +45,10 @@ jobs:
     name: Lint Rust Files
     runs-on: ubuntu-latest
     steps:
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Checkout PR Branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
         with:
@@ -60,10 +60,10 @@ jobs:
     name: Check Dependencies
     runs-on: ubuntu-latest
     steps:
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Checkout PR Branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         run: rustup toolchain install nightly
       - name: Install udeps
@@ -80,10 +80,10 @@ jobs:
           - os: windows-latest
           - os: ubuntu-latest
     steps:
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
         with:
@@ -110,10 +110,10 @@ jobs:
     name: Test node.js API
     runs-on: ubuntu-latest
     steps:
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
       - name: Build main binary
@@ -151,10 +151,10 @@ jobs:
     name: Documentation
     runs-on: ubuntu-latest
     steps:
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
       - name: Run doc command
@@ -164,10 +164,10 @@ jobs:
     name: Codegen
     runs-on: ubuntu-latest
     steps:
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
       - name: Run the grammar codegen
