@@ -82,7 +82,6 @@ jobs:
           android: true
           dotnet: true
           haskell: true
-          docker-images: true
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install toolchain
