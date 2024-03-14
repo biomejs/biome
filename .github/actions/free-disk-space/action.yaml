@@ -1,0 +1,12 @@
+name: Free Disk Space
+description: Free up disk space on the runner
+runs:
+  using: composite
+  steps:
+    - name: Free Disk Space (Ubuntu)
+      if: runner.os == 'Linux'
+      uses: jlumbroso/free-disk-space@main
+      with:
+        android: true
+        dotnet: true
+        haskell: true

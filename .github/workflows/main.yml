@@ -54,6 +54,8 @@ jobs:
     name: Check Dependencies
     runs-on: ubuntu-latest
     steps:
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install toolchain
@@ -75,13 +77,8 @@ jobs:
           - os: ubuntu-latest
           - os: macos-latest
     steps:
-      - name: Free Disk Space (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        uses: jlumbroso/free-disk-space@main
-        with:
-          android: true
-          dotnet: true
-          haskell: true
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install toolchain
@@ -101,6 +98,8 @@ jobs:
       matrix:
         os: [windows-latest, ubuntu-latest]
     steps:
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       # ref: https://github.com/orgs/community/discussions/26952
       - name: Support longpaths
         if: matrix.os == 'windows-latest'
