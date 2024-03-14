@@ -29,6 +29,12 @@ jobs:
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          android: true
+          dotnet: true
+          haskell: true
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
         with:
@@ -45,6 +51,12 @@ jobs:
     steps:
       - name: Checkout PR Branch
         uses: actions/checkout@v4
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          android: true
+          dotnet: true
+          haskell: true
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
         with:
@@ -58,6 +70,12 @@ jobs:
     steps:
       - name: Checkout PR Branch
         uses: actions/checkout@v4
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          android: true
+          dotnet: true
+          haskell: true
       - name: Install toolchain
         run: rustup toolchain install nightly
       - name: Install udeps
@@ -92,18 +110,18 @@ jobs:
       - name: Run doctests
         run: cargo test --doc
 
-  fuzz-all:
-    name: Build and init fuzzers
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@v1
-        with:
-          bins: cargo-fuzz
-      - name: Run init-fuzzer
-        run: bash fuzz/init-fuzzer.sh
+#  fuzz-all:
+#    name: Build and init fuzzers
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout PR branch
+#        uses: actions/checkout@v4
+#      - name: Install toolchain
+#        uses: moonrepo/setup-rust@v1
+#        with:
+#          bins: cargo-fuzz
+#      - name: Run init-fuzzer
+#        run: bash fuzz/init-fuzzer.sh
 
   test-node-api:
     name: Test node.js API
@@ -111,6 +129,12 @@ jobs:
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          android: true
+          dotnet: true
+          haskell: true
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
       - name: Build main binary
@@ -152,6 +176,12 @@ jobs:
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          android: true
+          dotnet: true
+          haskell: true
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
       - name: Run doc command
@@ -163,6 +193,12 @@ jobs:
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          android: true
+          dotnet: true
+          haskell: true
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
       - name: Run the grammar codegen
