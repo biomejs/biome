@@ -1,3 +1,4 @@
+# Generated files, sorted alphabetically.
 * text=auto eol=lf
 **/generated/* linguist-generated=true text=auto eol=lf
 crates/biome_js_analyze/src/analyzers.rs linguist-generated=true text=auto eol=lf
@@ -15,6 +16,8 @@ packages/@biomejs/biome/configuration_schema.json linguist-generated=true text=a
 pnpm-lock.yaml linguist-generated=true text=auto eol=lf
 website/src/pages/lint/rules/**/*.md linguist-generated=true text=auto eol=lf
 website/src/components/generated/.astro linguist-generated=true text=auto eol=lf
+
+# Files with the language manually specified, sorted alphabetically.
 crates/biome_cli/tests/**/*.snap linguist-language=Markdown
 crates/biome_js_analyze/tests/specs/**/*.snap linguist-language=Markdown
 crates/biome_css_formatter/tests/**/*.css.prettier-snap linguist-language=CSS
