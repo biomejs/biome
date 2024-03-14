@@ -45,11 +45,9 @@ jobs:
         run: pnpm i
       - name: Compile backends
         run: |
-          pnpm --prefix packages/@biomejs/js-api build:wasm-bundler
-          pnpm --prefix packages/@biomejs/js-api build:wasm-node
-          pnpm --prefix packages/@biomejs/js-api build:wasm-web
-          pnpm --prefix packages/@biomejs/backend-jsonrpc i
-          pnpm --prefix packages/@biomejs/backend-jsonrpc run build
+          pnpm --filter @biomejs/js-api build:wasm
+          pnpm --filter @biomejs/backend-jsonrpc i
+          pnpm --filter @biomejs/backend-jsonrpc run build
       - name: CI checks
         working-directory: packages/@biomejs/js-api
         run: pnpm run ci

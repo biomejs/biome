@@ -40,7 +40,7 @@ jobs:
       - name: Run Biome Format
         run: |
           pnpm i
-          pnpm run check
+          pnpm run ci
 
   type-check:
     name: Type-check JS Files
