@@ -75,6 +75,12 @@ jobs:
           - os: ubuntu-latest
           - os: macos-latest
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          android: true
+          dotnet: true
+          haskell: true
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install toolchain

@@ -75,10 +75,11 @@ jobs:
           - os: ubuntu-latest
     steps:
       - name: Free Disk Space (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
         uses: jlumbroso/free-disk-space@main
         with:
           android: true
+          dotnet: true
+          haskell: true
       - name: Checkout PR branch
         uses: actions/checkout@v4
       - name: Install toolchain
