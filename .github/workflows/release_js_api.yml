@@ -97,10 +97,9 @@ jobs:
           pnpm --filter @biomejs/backend-jsonrpc run build
 
       - name: Build package
-        working-directory: packages/@biomejs/js-api
         run: |
-          pnpm i
-          pnpm build
+          pnpm --filter @biomejs/js-api i
+          pnpm --filter @biomejs/js-api run build
 
       - name: Upload JS API artifact
         uses: actions/upload-artifact@v3

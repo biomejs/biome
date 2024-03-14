@@ -23,8 +23,6 @@ jobs:
             ${{ runner.os }}-
       - uses: pnpm/action-setup@v3
       - name: Install libraries
-        working-directory: website
-        run: pnpm i
+        run: pnpm --filter @biomejs/website i
       - name: Run textlint
-        working-directory: website
-        run: pnpm textlint
+        run: pnpm --filter @biomejs/website run textlint

@@ -65,8 +65,7 @@ jobs:
       - name: Build WASM module for the web
         run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --scope biomedev crates/biome_wasm
       - name: Install libraries
-        working-directory: website
-        run: pnpm i
+        run: pnpm i --filter @biomejs/website
       - name: Build JS
         working-directory: website
         run: pnpm build:js

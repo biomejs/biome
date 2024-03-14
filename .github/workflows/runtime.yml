@@ -41,8 +41,7 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
       - name: Install libraries
-        working-directory: packages/@biomejs/js-api
-        run: pnpm i
+        run: pnpm --filter @biomejs/js-api i
       - name: Compile backends
         run: |
           pnpm --filter @biomejs/js-api run build:wasm-bundler
