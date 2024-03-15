@@ -4,6 +4,7 @@ mod generate_bindings;
 mod generate_configuration;
 #[cfg(feature = "license")]
 mod generate_license;
+mod generate_new_css_lintrule;
 mod generate_new_lintrule;
 #[cfg(feature = "schema")]
 mod generate_schema;
@@ -24,6 +25,7 @@ use crate::generate_schema::generate_configuration_schema;
 use crate::generate_website::generate_files;
 use crate::promote_rule::promote_rule;
 
+use generate_new_css_lintrule::*;
 use generate_new_lintrule::*;
 use xtask::Mode::Overwrite;
 use xtask_codegen::{
@@ -70,6 +72,9 @@ fn main() -> Result<()> {
         }
         TaskCommand::NewLintRule(path, rule_name) => {
             generate_new_lintrule(&path, &rule_name);
+        }
+        TaskCommand::NewCssLintRule(path, rule_name) => {
+            generate_new_css_lint_rule(&path, &rule_name);
         }
         TaskCommand::PromoteRule { name, group } => {
             promote_rule(&name, &group);
