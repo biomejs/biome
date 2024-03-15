@@ -60,13 +60,13 @@ documentation:
 
 # Creates a new lint rule in the given path, with the given name. Name has to be camel case.
 new-lintrule path rulename:
-  cargo run -p xtask_codegen -- newlintrule --path={{path}} --name={{rulename}}
+  cargo run -p xtask_codegen -- new-lintrule --path={{path}} --name={{rulename}}
   just gen-lint
   just documentation
 
 # Promotes a rule from the nursery group to a new group
 promote-rule rulename group:
-	cargo run -p xtask_codegen -- promoterule --rule={{rulename}} --group={{group}}
+	cargo run -p xtask_codegen -- promote-rule --name={{rulename}} --group={{group}}
 	just gen-lint
 	just documentation
 	-cargo test -p biome_js_analyze -- {{snakecase(rulename)}}
