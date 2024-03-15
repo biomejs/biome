@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -128,7 +127,7 @@ CssRoot {
                                     selector: FROM_KW@116..123 "from" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@123..124 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -174,7 +173,7 @@ CssRoot {
                                     selector: TO_KW@156..162 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@162..163 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -238,7 +237,7 @@ CssRoot {
                                     },
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@233..235 "{" [] [Whitespace(" ")],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -288,7 +287,7 @@ CssRoot {
                                     },
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@259..261 "{" [] [Whitespace(" ")],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -329,7 +328,7 @@ CssRoot {
                                     },
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@284..286 "{" [] [Whitespace(" ")],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -363,7 +362,7 @@ CssRoot {
                                     },
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@306..308 "{" [] [Whitespace(" ")],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -469,7 +468,7 @@ CssRoot {
                                     selector: FROM_KW@435..443 "from" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@443..444 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -503,7 +502,7 @@ CssRoot {
                                     },
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@474..475 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -554,7 +553,7 @@ CssRoot {
                                     },
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@521..522 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -584,7 +583,7 @@ CssRoot {
                                     selector: TO_KW@541..547 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@547..548 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -630,7 +629,7 @@ CssRoot {
                                     selector: FROM_KW@606..613 "fRoM" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@613..614 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -676,7 +675,7 @@ CssRoot {
                                     selector: TO_KW@646..652 "tO" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@652..653 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -775,7 +774,7 @@ CssRoot {
               0: CSS_KEYFRAMES_SELECTOR_LIST@116..123
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@116..123
                   0: FROM_KW@116..123 "from" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@123..156
+              1: CSS_DECLARATION_BLOCK@123..156
                 0: L_CURLY@123..124 "{" [] []
                 1: CSS_DECLARATION_LIST@124..153
                   0: CSS_DECLARATION_WITH_SEMICOLON@124..153
@@ -804,7 +803,7 @@ CssRoot {
               0: CSS_KEYFRAMES_SELECTOR_LIST@156..162
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@156..162
                   0: TO_KW@156..162 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@162..197
+              1: CSS_DECLARATION_BLOCK@162..197
                 0: L_CURLY@162..163 "{" [] []
                 1: CSS_DECLARATION_LIST@163..194
                   0: CSS_DECLARATION_WITH_SEMICOLON@163..194
@@ -845,7 +844,7 @@ CssRoot {
                   0: CSS_PERCENTAGE@228..233
                     0: CSS_NUMBER_LITERAL@228..231 "0" [Newline("\n"), Whitespace("\t")] []
                     1: PERCENT@231..233 "%" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@233..253
+              1: CSS_DECLARATION_BLOCK@233..253
                 0: L_CURLY@233..235 "{" [] [Whitespace(" ")]
                 1: CSS_DECLARATION_LIST@235..252
                   0: CSS_DECLARATION_WITH_SEMICOLON@235..243
@@ -877,7 +876,7 @@ CssRoot {
                   0: CSS_PERCENTAGE@253..259
                     0: CSS_NUMBER_LITERAL@253..257 "30" [Newline("\n"), Whitespace("\t")] []
                     1: PERCENT@257..259 "%" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@259..273
+              1: CSS_DECLARATION_BLOCK@259..273
                 0: L_CURLY@259..261 "{" [] [Whitespace(" ")]
                 1: CSS_DECLARATION_LIST@261..272
                   0: CSS_DECLARATION_WITH_SEMICOLON@261..272
@@ -904,7 +903,7 @@ CssRoot {
                   0: CSS_PERCENTAGE@280..284
                     0: CSS_NUMBER_LITERAL@280..282 "72" [] []
                     1: PERCENT@282..284 "%" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@284..299
+              1: CSS_DECLARATION_BLOCK@284..299
                 0: L_CURLY@284..286 "{" [] [Whitespace(" ")]
                 1: CSS_DECLARATION_LIST@286..298
                   0: CSS_DECLARATION_WITH_SEMICOLON@286..298
@@ -926,7 +925,7 @@ CssRoot {
                   0: CSS_PERCENTAGE@299..306
                     0: CSS_NUMBER_LITERAL@299..304 "100" [Newline("\n"), Whitespace("\t")] []
                     1: PERCENT@304..306 "%" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@306..333
+              1: CSS_DECLARATION_BLOCK@306..333
                 0: L_CURLY@306..308 "{" [] [Whitespace(" ")]
                 1: CSS_DECLARATION_LIST@308..332
                   0: CSS_DECLARATION_WITH_SEMICOLON@308..320
@@ -998,7 +997,7 @@ CssRoot {
               0: CSS_KEYFRAMES_SELECTOR_LIST@435..443
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@435..443
                   0: FROM_KW@435..443 "from" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@443..467
+              1: CSS_DECLARATION_BLOCK@443..467
                 0: L_CURLY@443..444 "{" [] []
                 1: CSS_DECLARATION_LIST@444..464
                   0: CSS_DECLARATION_WITH_SEMICOLON@444..464
@@ -1020,7 +1019,7 @@ CssRoot {
                   0: CSS_PERCENTAGE@467..474
                     0: CSS_NUMBER_LITERAL@467..472 "50" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
                     1: PERCENT@472..474 "%" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@474..514
+              1: CSS_DECLARATION_BLOCK@474..514
                 0: L_CURLY@474..475 "{" [] []
                 1: CSS_DECLARATION_LIST@475..511
                   0: CSS_DECLARATION_WITH_SEMICOLON@475..497
@@ -1053,7 +1052,7 @@ CssRoot {
                   0: CSS_PERCENTAGE@514..521
                     0: CSS_NUMBER_LITERAL@514..519 "50" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
                     1: PERCENT@519..521 "%" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@521..541
+              1: CSS_DECLARATION_BLOCK@521..541
                 0: L_CURLY@521..522 "{" [] []
                 1: CSS_DECLARATION_LIST@522..538
                   0: CSS_DECLARATION_WITH_SEMICOLON@522..538
@@ -1072,7 +1071,7 @@ CssRoot {
               0: CSS_KEYFRAMES_SELECTOR_LIST@541..547
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@541..547
                   0: TO_KW@541..547 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@547..573
+              1: CSS_DECLARATION_BLOCK@547..573
                 0: L_CURLY@547..548 "{" [] []
                 1: CSS_DECLARATION_LIST@548..570
                   0: CSS_DECLARATION_WITH_SEMICOLON@548..570
@@ -1102,7 +1101,7 @@ CssRoot {
               0: CSS_KEYFRAMES_SELECTOR_LIST@606..613
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@606..613
                   0: FROM_KW@606..613 "fRoM" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@613..646
+              1: CSS_DECLARATION_BLOCK@613..646
                 0: L_CURLY@613..614 "{" [] []
                 1: CSS_DECLARATION_LIST@614..643
                   0: CSS_DECLARATION_WITH_SEMICOLON@614..643
@@ -1131,7 +1130,7 @@ CssRoot {
               0: CSS_KEYFRAMES_SELECTOR_LIST@646..652
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@646..652
                   0: TO_KW@646..652 "tO" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@652..687
+              1: CSS_DECLARATION_BLOCK@652..687
                 0: L_CURLY@652..653 "{" [] []
                 1: CSS_DECLARATION_LIST@653..684
                   0: CSS_DECLARATION_WITH_SEMICOLON@653..684
@@ -1160,5 +1159,3 @@ CssRoot {
   2: EOF@689..690 "" [Newline("\n")] []
 
 ```
-
-

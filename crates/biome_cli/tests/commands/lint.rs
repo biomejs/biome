@@ -1138,6 +1138,165 @@ fn fs_files_ignore_symlink() {
 }
 
 #[test]
+fn include_files_in_subdir() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{
+        "files": {
+            "include": ["./**/*.js"]
+        }
+    }"#;
+
+    let root_path = temp_dir().join("include_files_in_subdir");
+    let _ = remove_dir_all(&root_path);
+    create_dir(&root_path).unwrap();
+    File::create(root_path.join("biome.json"))
+        .unwrap()
+        .write_all(config.as_bytes())
+        .unwrap();
+    let subdir = root_path.join("subdir");
+    create_dir(&subdir).unwrap();
+    File::create(subdir.join("file.js"))
+        .unwrap()
+        .write_all(APPLY_SUGGESTED_BEFORE.as_bytes())
+        .unwrap();
+
+    let result = run_cli(
+        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+        &mut console,
+        Args::from([("lint"), root_path.display().to_string().as_str()].as_slice()),
+    );
+
+    remove_dir_all(root_path).unwrap();
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "include_files_in_subdir",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn include_files_in_symlinked_subdir() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{
+        "files": {
+            "include": ["./**/*.js"]
+        }
+    }"#;
+
+    let root_path = temp_dir().join("include_files_in_symlinked_subdir");
+    let _ = remove_dir_all(&root_path);
+    create_dir(&root_path).unwrap();
+
+    let symlinked = root_path.join("symlinked");
+    create_dir(&symlinked).unwrap();
+    File::create(symlinked.join("file.js"))
+        .unwrap()
+        .write_all(APPLY_SUGGESTED_BEFORE.as_bytes())
+        .unwrap();
+
+    let subroot_path = root_path.join("subroot");
+    create_dir(&subroot_path).unwrap();
+    File::create(subroot_path.join("biome.json"))
+        .unwrap()
+        .write_all(config.as_bytes())
+        .unwrap();
+
+    #[cfg(target_family = "unix")]
+    {
+        symlink(root_path.join("symlinked"), subroot_path.join("symlink")).unwrap();
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        check_windows_symlink!(symlink_file(
+            root_path.join("symlinked"),
+            subroot_path.join("symlink")
+        ));
+    }
+
+    let result = run_cli(
+        DynRef::Owned(Box::new(OsFileSystem::new(subroot_path.clone()))),
+        &mut console,
+        Args::from([("lint"), subroot_path.display().to_string().as_str()].as_slice()),
+    );
+
+    remove_dir_all(root_path).unwrap();
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "include_files_in_symlinked_subdir",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn ignore_file_in_subdir_in_symlinked_dir() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{
+        "files": {
+            "ignore": ["./symlink/subdir/file.js"]
+        }
+    }"#;
+
+    let root_path = temp_dir().join("ignore_file_in_subdir_in_symlinked_dir");
+    let _ = remove_dir_all(&root_path);
+    create_dir(&root_path).unwrap();
+
+    let symlinked = root_path.join("symlinked");
+    create_dir(&symlinked).unwrap();
+    let sundir_path = symlinked.join("subdir");
+    create_dir(&sundir_path).unwrap();
+    File::create(sundir_path.join("file.js"))
+        .unwrap()
+        .write_all(APPLY_SUGGESTED_BEFORE.as_bytes())
+        .unwrap();
+
+    let subroot_path = root_path.join("subroot");
+    create_dir(&subroot_path).unwrap();
+    File::create(subroot_path.join("biome.json"))
+        .unwrap()
+        .write_all(config.as_bytes())
+        .unwrap();
+
+    #[cfg(target_family = "unix")]
+    {
+        symlink(root_path.join("symlinked"), subroot_path.join("symlink")).unwrap();
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        check_windows_symlink!(symlink_file(
+            root_path.join("symlinked"),
+            subroot_path.join("symlink")
+        ));
+    }
+
+    let result = run_cli(
+        DynRef::Owned(Box::new(OsFileSystem::new(subroot_path.clone()))),
+        &mut console,
+        Args::from([("lint"), subroot_path.display().to_string().as_str()].as_slice()),
+    );
+
+    remove_dir_all(root_path).unwrap();
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "ignore_file_in_subdir_in_symlinked_dir",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn file_too_large() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -1701,6 +1860,58 @@ fn top_level_not_all_down_level_all() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "top_level_not_all_down_level_all",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn top_level_all_down_level_empty() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // style rules that are not recommended should be enabled.
+    let biome_json = r#"{
+        "linter": {
+            "rules": {
+                "all": true,
+                "nursery": {
+                    "all": false
+                },
+                "suspicious": {
+                    "all": false
+                },
+                "style": {}
+            }
+        }
+    }"#;
+
+    // style/noRestrictedGlobals
+    // style/noShoutyConstants
+    let code = r#"
+    console.log(event);
+    const FOO = "FOO";
+    console.log(FOO);
+    "#;
+
+    let file_path = Path::new("fix.js");
+    fs.insert(file_path.into(), code.as_bytes());
+
+    let config_path = Path::new("biome.json");
+    fs.insert(config_path.into(), biome_json.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "top_level_all_down_level_empty",
         fs,
         console,
         result,

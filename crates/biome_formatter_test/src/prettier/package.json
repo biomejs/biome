@@ -5,8 +5,5 @@
 	},
 	"dependencies": {
 		"prettier": "3.1.0"
-	},
-	"engines": {
-		"pnpm": "^8.0.0"
 	}
 }

@@ -8,15 +8,15 @@ impl FormatRule<AnyCssValue> for FormatAnyCssValue {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssValue, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssValue::CssIdentifier(node) => node.format().fmt(f),
-            AnyCssValue::CssCustomIdentifier(node) => node.format().fmt(f),
-            AnyCssValue::CssDashedIdentifier(node) => node.format().fmt(f),
-            AnyCssValue::CssString(node) => node.format().fmt(f),
-            AnyCssValue::CssNumber(node) => node.format().fmt(f),
             AnyCssValue::AnyCssDimension(node) => node.format().fmt(f),
-            AnyCssValue::CssRatio(node) => node.format().fmt(f),
             AnyCssValue::AnyCssFunction(node) => node.format().fmt(f),
             AnyCssValue::CssColor(node) => node.format().fmt(f),
+            AnyCssValue::CssCustomIdentifier(node) => node.format().fmt(f),
+            AnyCssValue::CssDashedIdentifier(node) => node.format().fmt(f),
+            AnyCssValue::CssIdentifier(node) => node.format().fmt(f),
+            AnyCssValue::CssNumber(node) => node.format().fmt(f),
+            AnyCssValue::CssRatio(node) => node.format().fmt(f),
+            AnyCssValue::CssString(node) => node.format().fmt(f),
         }
     }
 }

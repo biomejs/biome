@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_js_semantic"
 repository.workspace = true
-version              = "0.4.0"
+version              = "0.5.7"
 
 [dependencies]
 biome_js_syntax = { workspace = true }

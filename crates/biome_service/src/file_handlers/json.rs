@@ -38,7 +38,7 @@ pub struct JsonFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
-    pub trailing_comma: Option<TrailingCommas>,
+    pub trailing_commas: Option<TrailingCommas>,
     pub enabled: Option<bool>,
 }
 
@@ -95,7 +95,7 @@ impl Language for JsonLanguage {
                 .with_indent_style(indent_style)
                 .with_indent_width(indent_width)
                 .with_line_width(line_width)
-                .with_trailing_comma(language.trailing_comma.unwrap_or_default()),
+                .with_trailing_commas(language.trailing_commas.unwrap_or_default()),
         )
     }
 }
@@ -338,13 +338,15 @@ fn lint(params: LintParams) -> LintResults {
                     let severity = diagnostic
                         .category()
                         .filter(|category| category.name().starts_with("lint/"))
-                        .map(|category| {
-                            rules
-                                .as_ref()
-                                .and_then(|rules| rules.get_severity_from_code(category))
-                                .unwrap_or(Severity::Warning)
-                        })
-                        .unwrap_or_else(|| diagnostic.severity());
+                        .map_or_else(
+                            || diagnostic.severity(),
+                            |category| {
+                                rules
+                                    .as_ref()
+                                    .and_then(|rules| rules.get_severity_from_code(category))
+                                    .unwrap_or(Severity::Warning)
+                            },
+                        );
 
                     if severity <= Severity::Error {
                         errors += 1;

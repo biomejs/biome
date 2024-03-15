@@ -8,12 +8,12 @@ impl FormatRule<AnyCssSubSelector> for FormatAnyCssSubSelector {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssSubSelector, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssSubSelector::CssIdSelector(node) => node.format().fmt(f),
-            AnyCssSubSelector::CssClassSelector(node) => node.format().fmt(f),
             AnyCssSubSelector::CssAttributeSelector(node) => node.format().fmt(f),
+            AnyCssSubSelector::CssBogusSubSelector(node) => node.format().fmt(f),
+            AnyCssSubSelector::CssClassSelector(node) => node.format().fmt(f),
+            AnyCssSubSelector::CssIdSelector(node) => node.format().fmt(f),
             AnyCssSubSelector::CssPseudoClassSelector(node) => node.format().fmt(f),
             AnyCssSubSelector::CssPseudoElementSelector(node) => node.format().fmt(f),
-            AnyCssSubSelector::CssBogusSubSelector(node) => node.format().fmt(f),
         }
     }
 }

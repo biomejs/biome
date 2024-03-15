@@ -8,11 +8,11 @@ impl FormatRule<AnyCssQueryFeatureValue> for FormatAnyCssQueryFeatureValue {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssQueryFeatureValue, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssQueryFeatureValue::CssNumber(node) => node.format().fmt(f),
             AnyCssQueryFeatureValue::AnyCssDimension(node) => node.format().fmt(f),
-            AnyCssQueryFeatureValue::CssIdentifier(node) => node.format().fmt(f),
-            AnyCssQueryFeatureValue::CssRatio(node) => node.format().fmt(f),
             AnyCssQueryFeatureValue::AnyCssFunction(node) => node.format().fmt(f),
+            AnyCssQueryFeatureValue::CssIdentifier(node) => node.format().fmt(f),
+            AnyCssQueryFeatureValue::CssNumber(node) => node.format().fmt(f),
+            AnyCssQueryFeatureValue::CssRatio(node) => node.format().fmt(f),
         }
     }
 }

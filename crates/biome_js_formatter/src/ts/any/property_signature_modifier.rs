@@ -8,14 +8,14 @@ impl FormatRule<AnyTsPropertySignatureModifier> for FormatAnyTsPropertySignature
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyTsPropertySignatureModifier, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyTsPropertySignatureModifier::TsDeclareModifier(node) => node.format().fmt(f),
-            AnyTsPropertySignatureModifier::TsAccessibilityModifier(node) => node.format().fmt(f),
-            AnyTsPropertySignatureModifier::JsStaticModifier(node) => node.format().fmt(f),
-            AnyTsPropertySignatureModifier::JsDecorator(node) => node.format().fmt(f),
             AnyTsPropertySignatureModifier::JsAccessorModifier(node) => node.format().fmt(f),
-            AnyTsPropertySignatureModifier::TsReadonlyModifier(node) => node.format().fmt(f),
-            AnyTsPropertySignatureModifier::TsOverrideModifier(node) => node.format().fmt(f),
+            AnyTsPropertySignatureModifier::JsDecorator(node) => node.format().fmt(f),
+            AnyTsPropertySignatureModifier::JsStaticModifier(node) => node.format().fmt(f),
             AnyTsPropertySignatureModifier::TsAbstractModifier(node) => node.format().fmt(f),
+            AnyTsPropertySignatureModifier::TsAccessibilityModifier(node) => node.format().fmt(f),
+            AnyTsPropertySignatureModifier::TsDeclareModifier(node) => node.format().fmt(f),
+            AnyTsPropertySignatureModifier::TsOverrideModifier(node) => node.format().fmt(f),
+            AnyTsPropertySignatureModifier::TsReadonlyModifier(node) => node.format().fmt(f),
         }
     }
 }

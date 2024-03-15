@@ -8,8 +8,8 @@ impl FormatRule<AnyCssKeyframesBlock> for FormatAnyCssKeyframesBlock {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssKeyframesBlock, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssKeyframesBlock::CssKeyframesBlock(node) => node.format().fmt(f),
             AnyCssKeyframesBlock::CssBogusBlock(node) => node.format().fmt(f),
+            AnyCssKeyframesBlock::CssKeyframesBlock(node) => node.format().fmt(f),
         }
     }
 }

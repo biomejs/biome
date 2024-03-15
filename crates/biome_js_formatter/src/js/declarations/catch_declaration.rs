@@ -24,10 +24,10 @@ impl FormatNodeRule<JsCatchDeclaration> for FormatJsCatchDeclaration {
             .iter()
             .any(|comment| comment.lines_after() > 0 || comment.kind().is_line());
 
-        let last_parameter_node = type_annotation
-            .as_ref()
-            .map(|type_annotation| type_annotation.syntax())
-            .unwrap_or_else(|| binding.syntax());
+        let last_parameter_node = type_annotation.as_ref().map_or_else(
+            || binding.syntax(),
+            |type_annotation| type_annotation.syntax(),
+        );
 
         let trailing_comment_with_break = f
             .comments()

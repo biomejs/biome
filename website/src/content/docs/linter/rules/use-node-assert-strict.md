@@ -1,12 +1,8 @@
 ---
-title: useNodeAssertStrict (not released)
+title: useNodeAssertStrict (since v1.6.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useNodeAssertStrict`**
-
-:::danger
-This rule hasn't been released yet.
-:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

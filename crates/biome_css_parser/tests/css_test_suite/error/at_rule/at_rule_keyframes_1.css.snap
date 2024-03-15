@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -100,7 +99,7 @@ CssRoot {
                                     selector: TO_KW@41..46 "to" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@46..47 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -277,7 +276,7 @@ CssRoot {
                                     ],
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@237..238 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -321,7 +320,7 @@ CssRoot {
                                     },
                                 },
                             ],
-                            block: CssDeclarationListBlock {
+                            block: CssDeclarationBlock {
                                 l_curly_token: L_CURLY@287..288 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclarationWithSemicolon {
@@ -433,7 +432,7 @@ CssRoot {
               0: CSS_KEYFRAMES_SELECTOR_LIST@41..46
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@41..46
                   0: TO_KW@41..46 "to" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@46..65
+              1: CSS_DECLARATION_BLOCK@46..65
                 0: L_CURLY@46..47 "{" [] []
                 1: CSS_DECLARATION_LIST@47..62
                   0: CSS_DECLARATION_WITH_SEMICOLON@47..62
@@ -542,7 +541,7 @@ CssRoot {
                 1: COMMA@216..218 "," [] [Whitespace(" ")]
                 2: CSS_BOGUS_SELECTOR@218..237
                   0: IDENT@218..237 "someivalidselector" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@237..255
+              1: CSS_DECLARATION_BLOCK@237..255
                 0: L_CURLY@237..238 "{" [] []
                 1: CSS_DECLARATION_LIST@238..252
                   0: CSS_DECLARATION_WITH_SEMICOLON@238..252
@@ -570,7 +569,7 @@ CssRoot {
                   0: CSS_PERCENTAGE@283..287
                     0: CSS_NUMBER_LITERAL@283..285 "50" [] []
                     1: PERCENT@285..287 "%" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_LIST_BLOCK@287..305
+              1: CSS_DECLARATION_BLOCK@287..305
                 0: L_CURLY@287..288 "{" [] []
                 1: CSS_DECLARATION_LIST@288..302
                   0: CSS_DECLARATION_WITH_SEMICOLON@288..302
@@ -749,5 +748,3 @@ at_rule_keyframes_1.css:35:3 parse ━━━━━━━━━━━━━━━
   i Remove color
   
 ```
-
-

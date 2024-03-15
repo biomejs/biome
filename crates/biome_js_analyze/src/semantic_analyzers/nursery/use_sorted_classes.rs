@@ -139,7 +139,7 @@ declare_rule! {
     /// This is a deliberate decision. We're unsure about this behavior, and would appreciate feedback on it. If this is a problem for you, please share a detailed explanation of your use case in [the GitHub issue](https://github.com/biomejs/biome/issues/1274).
     ///
     pub UseSortedClasses {
-        version: "next",
+        version: "1.6.0",
         name: "useSortedClasses",
         recommended: false,
         fix_kind: FixKind::Unsafe,

@@ -14,7 +14,7 @@ import PackageManagerCommand from "@/components/PackageManagerCommand.astro";
 
 ## インストール方法
 
-Biomeをインストールする最も速い方法は、 `npm` またはお好みのパッケージマネージャーを使用することです。Node.jsをインストールせずにBiomeを使用したい場合は、[スタンドアロン実行形式](/guides/manual-installation)としてCLIを利用できます。
+Biomeをインストールする最も速い方法は、 `npm` またはお好みのパッケージマネージャーを使用することです。Node.jsをインストールせずにBiomeを使用したい場合は、[スタンドアロン実行形式](/ja/guides/manual-installation)としてCLIを利用できます。
 
 Biomeをインストールするには、 `package.json` ファイルが含まれるディレクトリで次のコマンドを実行します。
 
@@ -29,7 +29,7 @@ Biomeをインストールするには、 `package.json` ファイルが含ま�
 Biomeをローカルではなくグローバルにインストールすることも可能ですが、推奨されていません。
 :::
 
-Biomeをインストールする際には、バージョン範囲演算子を使用しないことを**強く推奨**しています。詳しくは、[バージョニング ページ](/internals/versioning/)をご覧ください。
+Biomeをインストールする際には、バージョン範囲演算子を使用しないことを**強く推奨**しています。詳しくは、[バージョニング ページ](/ja/internals/versioning/)をご覧ください。
 
 ## 設定
 
@@ -44,7 +44,7 @@ Biomeをインストールする際には、バージョン範囲演算子を使
 
 ```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
   "organizeImports": {
     "enabled": false
   },
@@ -57,23 +57,23 @@ Biomeをインストールする際には、バージョン範囲演算子を使
 }
 ```
 
-`linter.enabled: true` はlinterを有効にし、 `rules.recommended: true` は[推奨ルール](/linter/rules/)を有効にします。
+`linter.enabled: true` はlinterを有効にし、 `rules.recommended: true` は[推奨ルール](/ja/linter/rules/)を有効にします。
 
-この設定では、`formatter.enabled: false` で明示的にformatを[無効化](/reference/configuration/#formatterenabled)していないため、formatは有効になっています。
+この設定では、`formatter.enabled: false` で明示的にformatを[無効化](/ja/reference/configuration/#formatterenabled)していないため、formatは有効になっています。
 
 ## 使い方
 
 Biome CLIには多くのコマンドとオプションが用意されているので、あなたが必要なものだけを使用できます。
 
-[`format`](/reference/cli#biome-format) コマンドを `--write` オプションを指定し実行することで、ファイルやディレクトリをformatできます。
+[`format`](/ja/reference/cli#biome-format) コマンドを `--write` オプションを指定し実行することで、ファイルやディレクトリをformatできます。
 
 <PackageManagerBiomeCommand command="format <files> --write" />
 
-[`lint`](/reference/cli#biome-lint) コマンドを `--apply` オプションを指定し実行することで、ファイルやディレクトリに対してLintを実行し、[安全な修正](/linter#safe-fixes)を適用できます。
+[`lint`](/ja/reference/cli#biome-lint) コマンドを `--apply` オプションを指定し実行することで、ファイルやディレクトリに対してLintを実行し、[安全な修正](/ja/linter#安全な修正safe-fixes)を適用できます。
 
 <PackageManagerBiomeCommand command="lint <files>" />
 
-[`check`](/reference/cli#biome-check) コマンドを実行することで、それら**両方**のコマンドを実行できます。
+[`check`](/ja/reference/cli#biome-check) コマンドを実行することで、それら**両方**のコマンドを実行できます。
 
 <PackageManagerBiomeCommand command="check --apply <files>" />
 
@@ -85,19 +85,19 @@ Biome CLIには多くのコマンドとオプションが用意されている�
 
 ## エディタプラグインのインストール
 
-Biomeの機能を最大限活用するために、エディタプラグインをインストールすることを推奨しています。[エディタのページ](/guides/integrate-in-editor)を参照して、どのエディタがBiomeをサポートしているかを確認してください。
+Biomeの機能を最大限活用するために、エディタプラグインをインストールすることを推奨しています。[エディタのページ](/ja/guides/integrate-in-editor)を参照して、どのエディタがBiomeをサポートしているかを確認してください。
 
 ## CIのセットアップ
 
-Node.jsを使用している場合、BiomeをCIで実行するには、[お気に入りのパッケージマネージャ](/guides/getting-started#installation)を使用することが推奨されます。
+Node.jsを使用している場合、BiomeをCIで実行するには、[お気に入りのパッケージマネージャ](/ja/guides/getting-started#インストール方法)を使用することが推奨されます。
 このようにすることで、CIパイプラインがエディタ上やローカルでCLIコマンドを実行するときと同じバージョンのBiomeを使用することを保証できます。
 
 ## 次のステップ
 
 成功です！これでBiomeを使う準備が整いました。🥳
 
-- [Formatter](/formatter)の使い方と設定方法について詳しく知る
-- [Linter](/linter)の使い方と設定方法について詳しく知る
-- [CLIオプション](/reference/cli)を使いこなす
-- [設定オプション](/reference/configuration)を使いこなす
+- [Formatter](/ja/formatter)の使い方と設定方法について詳しく知る
+- [Linter](/ja/linter)の使い方と設定方法について詳しく知る
+- [CLIオプション](/ja/reference/cli)を使いこなす
+- [設定オプション](/ja/reference/configuration)を使いこなす
 - [Discordのコミュニティ](https://discord.gg/BypW39g6Yc)に参加する

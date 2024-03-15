@@ -1,9 +1,10 @@
 [alias]
-biome-cli = "run -p biome_cli --release --"
-biome-cli-dev = "run -p biome_cli --"
-codegen = "run -p xtask_codegen --"
-codegen-bindings = "run -p xtask_codegen --features schema -- bindings"
+biome-cli             = "run -p biome_cli --release --"
+biome-cli-dev         = "run -p biome_cli --"
+codegen               = "run -p xtask_codegen --"
+codegen-bindings      = "run -p xtask_codegen --features schema -- bindings"
 codegen-configuration = "run -p xtask_codegen --features configuration -- configuration"
+# updates a newly created crate
 codegen-license = "run -p xtask_codegen --features license -- license"
 codegen-schema = "run -p xtask_codegen --features schema -- schema"
 codegen-website = "run -p xtask_codegen --features website -- website"
@@ -27,11 +28,13 @@ documentation = """
     -p biome_js_semantic \
     -p biome_markup \
     -p biome_rowan
+    -p biome_string_case \
     --no-deps
 """
 format = "fmt --all --verbose"
 lint = "clippy --workspace --all-targets -- --deny warnings"
 lintdoc = "run -p xtask_lintdoc --"
+new-crate = "run -p xtask_codegen -- new-crate"
 
 [profile.release]
 lto = true

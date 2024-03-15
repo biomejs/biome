@@ -42,3 +42,7 @@ React.Children.map(c => React.cloneElement(c, {key: c}));
 (<h1>{[<h1 key={1}></h1>, <h1 key={2}></h1>, <h1 key={3}></h1>]}</h1>)
 
 (<h1>{data.map(c => <h1 key={c}></h1>)}</h1>)
+
+(<h1>{data.map(c => (<h1 key={c}></h1>))}</h1>)
+
+(<h1>{data.map(c => {return (<h1 key={c}></h1>)})}</h1>)

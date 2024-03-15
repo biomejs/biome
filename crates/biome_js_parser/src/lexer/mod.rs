@@ -1093,7 +1093,7 @@ impl<'src> JsLexer<'src> {
 
     #[inline]
     fn special_number_start<F: Fn(char) -> bool>(&mut self, func: F) -> bool {
-        if self.byte_at(2).map(|b| func(b as char)).unwrap_or(false) {
+        if self.byte_at(2).map_or(false, |b| func(b as char)) {
             self.advance(1);
             true
         } else {
@@ -1608,16 +1608,19 @@ impl<'src> JsLexer<'src> {
                 b'\\' => {
                     self.next_byte();
 
-                    if self.next_byte_bounded().is_none() {
-                        self.diagnostics.push(
-                            ParseDiagnostic::new(
-                                "expected a character after a regex escape, but found none",
-                                self.position..self.position + 1,
-                            )
-                            .with_hint("expected a character following this"),
-                        );
-
-                        return JsSyntaxKind::JS_REGEX_LITERAL;
+                    match self.current_byte() {
+                        None => {
+                            self.diagnostics.push(
+                                ParseDiagnostic::new(
+                                    "expected a character after a regex escape, but found none",
+                                    self.position..self.position + 1,
+                                )
+                                .with_hint("expected a character following this"),
+                            );
+                            return JsSyntaxKind::JS_REGEX_LITERAL;
+                        }
+                        // eat the next ascii or unicode char followed by the escape char.
+                        Some(current_chr) => self.advance_byte_or_char(current_chr),
                     }
                 }
                 b'\r' | b'\n' => {

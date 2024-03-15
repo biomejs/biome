@@ -7,9 +7,9 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_project"
-publish              = false
+publish              = true
 repository.workspace = true
-version              = "0.0.0"
+version              = "0.5.7"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

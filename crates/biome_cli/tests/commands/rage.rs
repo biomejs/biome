@@ -84,6 +84,37 @@ fn with_configuration() {
 }
 
 #[test]
+fn with_jsonc_configuration() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        Path::new("biome.jsonc").to_path_buf(),
+        r#"{
+  "formatter": {
+    // disable formatter
+    "enabled": false,
+  }
+}"#,
+    );
+
+    let result = run_rage(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("rage")].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_jsonc_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn with_malformed_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

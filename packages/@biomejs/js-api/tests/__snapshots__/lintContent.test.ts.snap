@@ -47,7 +47,7 @@ exports[`Biome WebAssembly lintContent > should lint content > lint diagnostics 
                 "elements": [],
               },
               {
-                "content": "===",
+                "content": "==",
                 "elements": [
                   "Emphasis",
                 ],

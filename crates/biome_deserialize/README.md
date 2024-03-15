@@ -332,3 +332,197 @@ impl DeserializationVisitor for UnionVisitor {
     }
 }
 ```
+
+### Implementing `Deserializable` for an enumeration of values
+
+Let's assume that we want to deserialize a JSON string that is either `A`, or `B`.
+We represent this string by a Rust's `enum`:
+
+To implement `Deserializable` for `Variant`, we can reuse the `String`,
+because `biome_deserialize` implements `Deserializable` for the `String` type.
+
+Our implementation attempts to deserialize a string and creates the corresponding variant.
+If the variant is not known, we report a diagnostic.
+
+```rust
+use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic};
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
+pub enum Variant { A, B }
+
+impl Deserializable for Variant {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        match String::deserialize(value, name, diagnostics)? {
+            "A" => Some(Variant::A),
+            "B" => Some(Variant::B),
+            unknown_variant => {
+                const ALLOWED_VARIANTS: &[&str] = &["A", "B"];
+                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                    unknown_variant,
+                    value.range(),
+                    ALLOWED_VARIANTS,
+                ));
+                None
+            }
+        }
+    }
+}
+
+use biome_deserialize::json::deserialize_from_json_str;
+use biome_deserialize::Deserialized;
+use biome_json_parser::JsonParserOptions;
+
+let json = "\"A\"";
+let Deserialized {
+    deserialized,
+    diagnostics,
+} = deserialize_from_json_str::<Day>(&source, JsonParserOptions::default());
+assert_eq!(deserialized, Some(Variant::A));
+assert!(diagnostics.is_empty());
+```
+
+We can improve our implementation by avoiding the heap-allocation of a string.
+To do this, we use `Text` instead of `String`.
+Internally `Text` borrows a slice of the source.
+
+```rust
+use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, Text};
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
+pub enum Variant { A, B }
+
+impl Deserializable for Variant {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        match Text::deserialize(value, name, diagnostics)?.text() {
+            "A" => Some(Variant::A),
+            "B" => Some(Variant::B),
+            unknown_variant => {
+                const ALLOWED_VARIANTS: &[&str] = &["A", "B"];
+                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                    unknown_variant,
+                    value.range(),
+                    ALLOWED_VARIANTS,
+                ));
+                None
+            }
+        }
+    }
+}
+```
+
+### Implementing `Deserializable` for a struct
+
+Let's assume we want to deserialize a _JSON_ map (object) into an instance of a Rust `struct`.
+
+Because a `struct` has custom fields and types, we cannot reuse an existing deserializable type.
+We have to delegate the deserialization to a visitor.
+
+To do that, we create a zero-sized struct `PersonViistor` that implements `DeserializationVisitor`.
+A `DeserializationVisitor` provides several `visit_` methods.
+You must implement the `visit_` methods of the type you expect.
+Here we expect a map of key-value pairs.
+Thus, we implement `visit_map` and set the associated constant `EXPECTED_TYPE` to `VisitableType::MAP`.
+We also set the associated type `Output` to the type that we want to produce: `Person`.
+
+The implementation of `Deserialziable` for `Person` simply delegates the deserialization of the visitor.
+Internally, the deserialization of `value` calls the `visit_` method that corresponds to its type.
+If the value is a map of key-value pairs, then `visit_map` is called.
+Otherwise, another `visit_` method is called.
+The default implementation of a `visit_` method reports an incorrect type diagnostic.
+
+Our implementation of `visit_map` traverses the map of key-value pairs.
+It attempts to deserialize every key as a string and deserialize the value according the key's content.
+If the key is `name`, then we deserialize a `String`.
+If the key is `age`, then we deserialize a `u8`.
+`String` and `u8` implements `Deserializable`.
+Thus, we can reuse `String::deserialize` and `u8::deserialize`.
+
+Note that if you use _Serde_ in tandem with `biome_deserialize`, you have to disambiguate the call to `deserialize`.
+Thus, instead of using `String::deserialize` and `u8::deserialize`, you should use `Deserialize::deserialize`.
+
+```rust
+use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, VisitableType};
+use biome_rowan::TextRange;
+
+#[derive(Debug, Default, Eq, PartialEq, Clone)]
+pub struct Person { name: String, age: u8 }
+
+impl Deserializable for Person {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        // Delegate the deserialization to `PersonVisitor`.
+        // `value` will call the `PersonVisitor::viist_` method that corresponds to its type.
+        value.deserialize(PersonVisitor, name, diagnostics)
+    }
+}
+
+struct PersonVisitor;
+impl DeserializationVisitor for PersonVisitor {
+    // The visitor deserialize a [Person].
+    type Output = Person;
+
+    // We expect a `map` as data type.
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+
+    // Because we expect a `map`, we have to implement the associated method `visit_map`.
+    fn visit_map(
+        self,
+        // Iterator of key-value pairs.
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        // range of the map in the source text.
+        range: TextRange,
+        _name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        let mut result = Person::default();
+        for (key, value) in members.flatten() {
+            // Try to deserialize the key as a string.
+            // We use `Text` to avoid an heap-allocation.
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                // If this failed, then pass to the next key-value pair.
+                continue;
+            };
+            match key_text.text() {
+                "name" => {
+                    if let Some(name) = String::deserialize(&value, &key_text, diagnostics) {
+                        result.name = name;
+                    }
+                },
+                "age" => {
+                    if let Some(age) = u8::deserialize(&value, &key_text, diagnostics) {
+                        result.age = age;
+                    }
+                },
+                unknown_key => {
+                    const ALLOWED_KEYS: &[&str] = &["name"];
+                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                        unknown_key,
+                        key.range(),
+                        ALLOWED_KEYS,
+                    ));
+                }
+            }
+        }
+        Some(result)
+    }
+}
+
+use biome_deserialize::json::deserialize_from_json_str;
+use biome_json_parser::JsonParserOptions;
+
+let source = r#"{ "name": "Isaac Asimov" }"#;
+let deserialized = deserialize_from_json_str::<Person>(&source, JsonParserOptions::default());
+assert!(!deserialized.has_errors());
+assert_eq!(deserialized.into_deserialized(), Some(Person { name: "Isaac Asimov".to_string() }));
+```

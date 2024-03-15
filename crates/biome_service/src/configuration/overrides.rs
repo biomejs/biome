@@ -324,6 +324,9 @@ fn to_json_language_settings(
         .indent_style
         .map(Into::into)
         .or(parent_formatter.indent_style);
+    language_setting.formatter.trailing_commas = formatter
+        .trailing_commas
+        .or(parent_formatter.trailing_commas);
 
     let parser = conf.parser.take().unwrap_or_default();
     let parent_parser = &parent_settings.parser;

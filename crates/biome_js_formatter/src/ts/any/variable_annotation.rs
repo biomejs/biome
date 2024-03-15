@@ -8,8 +8,8 @@ impl FormatRule<AnyTsVariableAnnotation> for FormatAnyTsVariableAnnotation {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyTsVariableAnnotation, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyTsVariableAnnotation::TsTypeAnnotation(node) => node.format().fmt(f),
             AnyTsVariableAnnotation::TsDefiniteVariableAnnotation(node) => node.format().fmt(f),
+            AnyTsVariableAnnotation::TsTypeAnnotation(node) => node.format().fmt(f),
         }
     }
 }

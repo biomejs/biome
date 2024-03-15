@@ -1,0 +1,110 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+type Example = () => string;
+
+function foo(example: () => number): number {
+	return bar();
+}
+
+// returns the function itself, not the `this` argument.
+type ReturnsSelf = (arg: string) => ReturnsSelf;
+
+interface Foo {
+	bar: string;
+}
+
+interface Bar extends Foo {
+	(): void;
+}
+
+// multiple call signatures (overloads) is allowed:
+interface Overloaded {
+	(data: string): number;
+	(id: number): string;
+}
+
+// this is equivelent to Overloaded interface.
+type Intersection = ((data: string) => number) & ((id: number) => string);
+
+interface ReturnsSelf {
+	// returns the function itself, not the `this` argument.
+	(arg: string): this;
+}
+
+// Simple shorthand function type with no arguments
+type NoArgFunction = () => void;
+
+// Function type with multiple arguments
+type MultiArgFunction = (arg1: string, arg2: number) => boolean;
+
+// Function type with rest parameters
+type RestParamsFunction = (...args: number[]) => number;
+
+// Nested function types
+type NestedFunction = () => () => number;
+
+// Function type with tuple types as parameters
+type TupleFunction = ([a, b]: [string, number]) => boolean;
+
+// Function type in a type union
+type UnionFunction = (() => string) | (() => number);
+
+// Using shorthand function type in a generic type
+type GenericFunction<T> = (arg: T) => T;
+
+// Function type with optional parameter
+type OptionalParamFunction = (arg?: string) => void;
+
+// If there are inner comments, they should be ignored
+interface Example2 {
+	// Inner comment
+	(): string; // Inner trailing comment
+}
+
+type G = {
+	// Inner comment
+	(): number // Inner trailing comment
+}
+
+```
+
+# Diagnostics
+```
+valid.ts:59:2 lint/style/useShorthandFunctionType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a function type instead of a call signature.
+  
+    57 │ interface Example2 {
+    58 │ 	// Inner comment
+  > 59 │ 	(): string; // Inner trailing comment
+       │ 	^^^^^^^^^^^
+    60 │ }
+    61 │ 
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+
+```
+
+```
+valid.ts:64:2 lint/style/useShorthandFunctionType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a function type instead of a call signature.
+  
+    62 │ type G = {
+    63 │ 	// Inner comment
+  > 64 │ 	(): number // Inner trailing comment
+       │ 	^^^^^^^^^^
+    65 │ }
+    66 │ 
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+
+```
+
+

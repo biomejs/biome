@@ -9,8 +9,8 @@ impl FormatRule<AnyJsxTag> for FormatAnyJsxTag {
     fn fmt(&self, node: &AnyJsxTag, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyJsxTag::JsxElement(node) => node.format().fmt(f),
-            AnyJsxTag::JsxSelfClosingElement(node) => node.format().fmt(f),
             AnyJsxTag::JsxFragment(node) => node.format().fmt(f),
+            AnyJsxTag::JsxSelfClosingElement(node) => node.format().fmt(f),
         }
     }
 }

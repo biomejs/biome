@@ -9,8 +9,8 @@ impl FormatRule<AnyJsArrayElement> for FormatAnyJsArrayElement {
     fn fmt(&self, node: &AnyJsArrayElement, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyJsArrayElement::AnyJsExpression(node) => node.format().fmt(f),
-            AnyJsArrayElement::JsSpread(node) => node.format().fmt(f),
             AnyJsArrayElement::JsArrayHole(node) => node.format().fmt(f),
+            AnyJsArrayElement::JsSpread(node) => node.format().fmt(f),
         }
     }
 }

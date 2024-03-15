@@ -1,0 +1,15 @@
+name: Free Disk Space
+description: Free up disk space on the runner
+runs:
+  using: composite
+  steps:
+    - name: Free Disk Space (Ubuntu)
+      if: runner.os == 'Linux'
+      uses: jlumbroso/free-disk-space@main
+      with:
+        # We need to reclaim some space, but uninstalling everyting takes
+        # too long. So we'll just remove some of the larger packages.
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: false

@@ -8,11 +8,11 @@ impl FormatRule<AnyJsNamedImportSpecifier> for FormatAnyJsNamedImportSpecifier {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsNamedImportSpecifier, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
+            AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(node) => node.format().fmt(f),
+            AnyJsNamedImportSpecifier::JsNamedImportSpecifier(node) => node.format().fmt(f),
             AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(node) => {
                 node.format().fmt(f)
             }
-            AnyJsNamedImportSpecifier::JsNamedImportSpecifier(node) => node.format().fmt(f),
-            AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(node) => node.format().fmt(f),
         }
     }
 }

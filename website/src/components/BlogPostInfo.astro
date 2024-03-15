@@ -27,7 +27,7 @@ const authors = await getAuthorsData(
     {
       authors.map(({ data: author }) => (
         <span class="avatar">
-          <Image src={author.avatar} alt="" height="36" width="36" />
+          <Image src={author.avatar} alt="" height="36" width="36" loading="eager" />
         </span>
       ))
     }

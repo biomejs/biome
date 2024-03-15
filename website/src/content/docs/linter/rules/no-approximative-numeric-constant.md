@@ -4,6 +4,10 @@ title: noApproximativeNumericConstant (since v1.3.0)
 
 **Diagnostic Category: `lint/suspicious/noApproximativeNumericConstant`**
 
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::
+
 Source: <a href="https://rust-lang.github.io/rust-clippy/master/#/approx_constant" target="_blank"><code>approx_constant</code></a>
 
 Use standard constants instead of approximated literals.
@@ -21,7 +25,7 @@ let x = 3.141;
 
 <pre class="language-text"><code class="language-text">suspicious/noApproximativeNumericConstant.js:1:9 <a href="https://biomejs.dev/linter/rules/no-approximative-numeric-constant">lint/suspicious/noApproximativeNumericConstant</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Prefer constants from the standard library.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Prefer constants from the standard library.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>let x = 3.141;
    <strong>   │ </strong>        <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -41,7 +45,7 @@ let x = 2.302;
 
 <pre class="language-text"><code class="language-text">suspicious/noApproximativeNumericConstant.js:1:9 <a href="https://biomejs.dev/linter/rules/no-approximative-numeric-constant">lint/suspicious/noApproximativeNumericConstant</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Prefer constants from the standard library.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Prefer constants from the standard library.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>let x = 2.302;
    <strong>   │ </strong>        <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>

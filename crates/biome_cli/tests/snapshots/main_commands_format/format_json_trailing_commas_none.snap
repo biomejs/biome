@@ -1,0 +1,33 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "json": {
+    "parser": { "allowTrailingCommas": true },
+    "formatter": { "trailingCommas": "none" }
+  }
+}
+```
+
+## `file.json`
+
+```json
+{
+	"loreum_ipsum_lorem_ipsum": "bar",
+	"loreum_ipsum_lorem_ipsum": "bar",
+	"loreum_ipsum_lorem_ipsum": "bar",
+	"loreum_ipsum_lorem_ipsum": "bar",
+	"loreum_ipsum_lorem_ipsum": "bar"
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

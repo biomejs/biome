@@ -27,7 +27,7 @@ declare_rule! {
     /// ```
     ///
     pub UseNodeAssertStrict {
-        version: "next",
+        version: "1.6.0",
         name: "useNodeAssertStrict",
         recommended: false,
         fix_kind: FixKind::Safe,

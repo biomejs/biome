@@ -8,8 +8,12 @@ pub mod no_restricted_globals;
 pub mod no_shouty_constants;
 pub mod no_var;
 pub mod use_const;
+pub mod use_export_type;
+pub mod use_for_of;
 pub mod use_fragment_syntax;
+pub mod use_import_type;
 pub mod use_naming_convention;
+pub mod use_number_namespace;
 
 declare_group! {
     pub Style {
@@ -21,8 +25,12 @@ declare_group! {
             self :: no_shouty_constants :: NoShoutyConstants ,
             self :: no_var :: NoVar ,
             self :: use_const :: UseConst ,
+            self :: use_export_type :: UseExportType ,
+            self :: use_for_of :: UseForOf ,
             self :: use_fragment_syntax :: UseFragmentSyntax ,
+            self :: use_import_type :: UseImportType ,
             self :: use_naming_convention :: UseNamingConvention ,
+            self :: use_number_namespace :: UseNumberNamespace ,
         ]
      }
 }

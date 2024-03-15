@@ -146,7 +146,7 @@ impl<L: Language> FunctionBuilder<L> {
 
 pub struct InstructionBuilder<'a, L: Language>(&'a mut Instruction<L>);
 
-impl<'a, L: Language> InstructionBuilder<'a, L> {
+impl<L: Language> InstructionBuilder<'_, L> {
     pub fn with_node(self, node: impl Into<SyntaxElement<L>>) -> Self {
         self.0.node = Some(node.into());
         self

@@ -576,8 +576,7 @@ where
     let range = ParseRecoveryTokenSet::new(CSS_BOGUS, SELECTOR_FUNCTION_RECOVERY_SET)
         .enable_recovery_on_line_break()
         .recover(p)
-        .map(|m| m.range(p))
-        .unwrap_or_else(|_| p.cur_range());
+        .map_or_else(|_| p.cur_range(), |m| m.range(p));
 
     let diagnostic = error_builder(p, TextRange::new(start, range.end()));
     p.error(diagnostic);

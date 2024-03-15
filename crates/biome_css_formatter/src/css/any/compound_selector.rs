@@ -8,8 +8,8 @@ impl FormatRule<AnyCssCompoundSelector> for FormatAnyCssCompoundSelector {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssCompoundSelector, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssCompoundSelector::CssCompoundSelector(node) => node.format().fmt(f),
             AnyCssCompoundSelector::CssBogusSelector(node) => node.format().fmt(f),
+            AnyCssCompoundSelector::CssCompoundSelector(node) => node.format().fmt(f),
         }
     }
 }

@@ -21,7 +21,7 @@ declare_rule! {
     /// ```
     ///
     pub NoConsole {
-        version: "next",
+        version: "1.6.0",
         name: "noConsole",
         source: RuleSource::Eslint("no-console"),
         recommended: false,

@@ -12,10 +12,10 @@ impl FormatRule<AnyCssSupportsOrCombinableCondition> for FormatAnyCssSupportsOrC
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         match node {
-            AnyCssSupportsOrCombinableCondition::CssSupportsOrCondition(node) => {
+            AnyCssSupportsOrCombinableCondition::AnyCssSupportsInParens(node) => {
                 node.format().fmt(f)
             }
-            AnyCssSupportsOrCombinableCondition::AnyCssSupportsInParens(node) => {
+            AnyCssSupportsOrCombinableCondition::CssSupportsOrCondition(node) => {
                 node.format().fmt(f)
             }
         }

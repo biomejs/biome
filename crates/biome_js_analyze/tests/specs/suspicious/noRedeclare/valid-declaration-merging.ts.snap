@@ -133,6 +133,10 @@ function g(A, { B }) {
 	interface B {}
 }
 
+export function h<a>(a: a) {
+	return a;
+}
+
 ```
 
 

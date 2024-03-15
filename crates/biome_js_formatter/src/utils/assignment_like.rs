@@ -891,7 +891,7 @@ impl AnyJsAssignmentLike {
         Ok(is_complex_destructuring || has_complex_type_annotation || is_complex_type_alias)
     }
 
-    /// Checks if the the current assignment is eligible for [AssignmentLikeLayout::BreakAfterOperator]
+    /// Checks if the current assignment is eligible for [AssignmentLikeLayout::BreakAfterOperator]
     ///
     /// This function is small wrapper around [should_break_after_operator] because it has to work
     /// for nodes that belong to TypeScript too.
@@ -1281,19 +1281,19 @@ fn is_complex_type_arguments(type_arguments: TsTypeArguments) -> SyntaxResult<bo
         return Ok(true);
     }
 
-    let is_first_argument_complex = ts_type_argument_list
-        .iter()
-        .next()
-        .transpose()?
-        .map(|first_argument| {
-            matches!(
-                first_argument,
-                AnyTsType::TsUnionType(_)
-                    | AnyTsType::TsIntersectionType(_)
-                    | AnyTsType::TsObjectType(_)
-            )
-        })
-        .unwrap_or(false);
+    let is_first_argument_complex =
+        ts_type_argument_list
+            .iter()
+            .next()
+            .transpose()?
+            .map_or(false, |first_argument| {
+                matches!(
+                    first_argument,
+                    AnyTsType::TsUnionType(_)
+                        | AnyTsType::TsIntersectionType(_)
+                        | AnyTsType::TsObjectType(_)
+                )
+            });
 
     if is_first_argument_complex {
         return Ok(true);

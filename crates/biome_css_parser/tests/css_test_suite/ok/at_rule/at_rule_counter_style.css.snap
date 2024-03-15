@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -24,7 +23,7 @@ CssRoot {
                 name: CssCustomIdentifier {
                     value_token: IDENT@15..22 "thumbs" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationListBlock {
+                block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@22..25 "{" [] [Whitespace("  ")],
                     declarations: CssDeclarationList [],
                     r_curly_token: R_CURLY@25..26 "}" [] [],
@@ -48,12 +47,10 @@ CssRoot {
         0: COUNTER_STYLE_KW@1..15 "counter-style" [] [Whitespace(" ")]
         1: CSS_CUSTOM_IDENTIFIER@15..22
           0: IDENT@15..22 "thumbs" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_LIST_BLOCK@22..26
+        2: CSS_DECLARATION_BLOCK@22..26
           0: L_CURLY@22..25 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@25..25
           2: R_CURLY@25..26 "}" [] []
   2: EOF@26..27 "" [Newline("\n")] []
 
 ```
-
-

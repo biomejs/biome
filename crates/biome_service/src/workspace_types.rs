@@ -259,8 +259,7 @@ fn schema_object_type<'a>(
     let has_defaults = schema
         .metadata
         .as_ref()
-        .map(|metadata| metadata.default.is_some())
-        .unwrap_or(false);
+        .map_or(false, |metadata| metadata.default.is_some());
 
     (ts_type, is_nullable || has_defaults, description)
 }
@@ -320,17 +319,16 @@ pub fn generate_type<'a>(
     while let Some((name, schema)) = queue.pop_front() {
         // Detect if the type being emitted is an object, emit it as an
         // interface definition if that's the case
-        let is_interface = schema
-            .instance_type
-            .as_ref()
-            .map(|instance_type| {
+        let is_interface = schema.instance_type.as_ref().map_or_else(
+            || schema.object.is_some(),
+            |instance_type| {
                 if let SingleOrVec::Single(instance_type) = instance_type {
                     matches!(**instance_type, InstanceType::Object)
                 } else {
                     false
                 }
-            })
-            .unwrap_or_else(|| schema.object.is_some());
+            },
+        );
 
         if is_interface {
             let mut members = Vec::new();

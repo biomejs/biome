@@ -17,7 +17,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintGitHubDiagnostic<'fmt, D> {
     }
 }
 
-impl<'fmt, D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnostic<'fmt, D> {
+impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnostic<'_, D> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
         let diagnostic = self.diag.as_diagnostic();
         let location = diagnostic.location();
@@ -63,7 +63,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnostic<'fmt
                 end.line_number, // integer, doesn't need escaping
                 start.column_number, // integer, doesn't need escaping
                 end.column_number, // integer, doesn't need escaping
-                title.map(escape_data).unwrap_or(String::new()),
+                title.map_or_else(String::new, escape_data),
             }
             .as_str(),
         )?;
@@ -74,7 +74,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnostic<'fmt
 
 struct PrintDiagnosticMessage<'fmt, D: ?Sized>(&'fmt D);
 
-impl<'fmt, D: Diagnostic + ?Sized> fmt::Display for PrintDiagnosticMessage<'fmt, D> {
+impl<D: Diagnostic + ?Sized> fmt::Display for PrintDiagnosticMessage<'_, D> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
         let Self(diagnostic) = *self;
         diagnostic.message(fmt)?;

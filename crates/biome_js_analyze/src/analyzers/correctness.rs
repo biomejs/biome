@@ -19,6 +19,7 @@ pub mod no_unreachable_super;
 pub mod no_unsafe_finally;
 pub mod no_unsafe_optional_chaining;
 pub mod no_unused_labels;
+pub mod no_unused_private_class_members;
 pub mod no_void_type_return;
 pub mod use_valid_for_direction;
 pub mod use_yield;
@@ -44,6 +45,7 @@ declare_group! {
             self :: no_unsafe_finally :: NoUnsafeFinally ,
             self :: no_unsafe_optional_chaining :: NoUnsafeOptionalChaining ,
             self :: no_unused_labels :: NoUnusedLabels ,
+            self :: no_unused_private_class_members :: NoUnusedPrivateClassMembers ,
             self :: no_void_type_return :: NoVoidTypeReturn ,
             self :: use_valid_for_direction :: UseValidForDirection ,
             self :: use_yield :: UseYield ,

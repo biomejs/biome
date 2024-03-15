@@ -8,9 +8,9 @@ impl FormatRule<AnyCssPseudoClassNth> for FormatAnyCssPseudoClassNth {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssPseudoClassNth, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssPseudoClassNth::CssPseudoClassNthNumber(node) => node.format().fmt(f),
-            AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(node) => node.format().fmt(f),
             AnyCssPseudoClassNth::CssPseudoClassNth(node) => node.format().fmt(f),
+            AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(node) => node.format().fmt(f),
+            AnyCssPseudoClassNth::CssPseudoClassNthNumber(node) => node.format().fmt(f),
         }
     }
 }

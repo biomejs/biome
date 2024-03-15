@@ -9,7 +9,109 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## Ureleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+#### Bug fixes
+
+- Fix enabled rules calculation. The precendence of individual rules, `all` and `recommend` presets in top-level and group-level configs is now correctly respected. More details can be seen in ([#2072](https://github.com/biomejs/biome/pull/2072)) ([#2028](https://github.com/biomejs/biome/issues/2028)). Contributed by @Sec-ant
+
+### Editors
+
+### Formatter
+
+#### Bug fixes
+
+- Fix [https://github.com/biomejs/biome/issues/1661](https://github.com/biomejs/biome/issues/1661). Now nested conditionals are aligned with Prettier's logic, and won't contain mixed spaced and tabs. Contributed by @ematipico
+
+
+### JavaScript APIs
+
+### Linter
+
+### Parser
+
+## 1.6.1 (2024-03-12)
+
+### CLI
+
+#### Bug fixes
+
+- CLI is now able to automatically search and resolve `biome.jsonc` ([#2008](https://github.com/biomejs/biome/issues/2008)). Contributed by @Sec-ant
+- Fix a false positive where some files were counted as "fixed" even though they weren't modified. Contributed by @ematipico
+
+### Configuration
+
+#### Bug fixes
+
+- `json.formatter.trailingCommas` option now works in `overrides` ([#2009](https://github.com/biomejs/biome/issues/2009)). Contributed by @Sec-ant
+
+### Linter
+
+#### New features
+
+- Add rule [noDoneCallback](https://biomejs.dev/linter/rules/no-done-callback), this rule checks the function parameter of hooks & tests
+  for use of the done argument, suggesting you return a promise instead. Contributed by @vasucp1207
+
+  ```js
+  beforeEach(done => {
+    // ...
+  });
+  ```
+
+#### Bug fixes
+
+- [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable) now recognizes function bodies wrapped in parentheses ([#2011](https://github.com/biomejs/biome/issues/2011)). Contributed by @Sec-ant
+
+- [useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type) now preserves type parameters of generic interfaces when applying fixes ([#2015](https://github.com/biomejs/biome/issues/2015)). Contributed by @Sec-ant
+
+- Code fixes of [useImportType](https://biomejs.dev/linter/rules/use-import-type) and [useExportType](https://biomejs.dev/linter/rules/use-export-type) now handle multiline statements ([#2041](https://github.com/biomejs/biome/issues/2041)). Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports type parameter and parameter with identical names ([#1992](https://github.com/biomejs/biome/issues/1992)).
+
+  The following code is no longer reported:
+
+  ```ts
+  function f<a>(a: a) {}
+  ```
+
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) now reports duplicate type parameters in a same declaration.
+
+  The following type parameters are now reported as a redeclaraion:
+
+  ```ts
+  function f<T, T>() {}
+  ```
+
+  Contributed by @Conaclos
+
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) now recognizes imports of subpath exports.
+
+  E.g., the following import statements no longer report errors if `@mui/material` and `tailwindcss` are installed as dependencies:
+
+  ```ts
+  import Button from "@mui/material/Button";
+  import { fontFamily } from "tailwindcss/defaultTheme";
+  ```
+
+  Contributed by @Sec-ant
+
+### Parser
+
+#### Bug fixes
+
+- JavaScript lexer is now able to lex regular expression literals with escaped non-ascii chars ([#1941](https://github.com/biomejs/biome/issues/1941)).
+
+  Contributed by @Sec-ant
+
+## 1.6.0 (2024-03-08)
 
 ### Analyzer
 
@@ -22,8 +124,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ---
   - import { getLocale } from "astro:i18n";
   - import { Code } from "astro:components";
-  + import { getLocale } from "astro:i18n";
   + import { Code } from "astro:components";
+  + import { getLocale } from "astro:i18n";
   ---
 
   <div></div>
@@ -167,7 +269,38 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Previously, Biome processed all files in the traversed hierarchy,
   even the files under an ignored directory.
-  Now, it completly skip the content of ignored directories.
+  Now, it completely skips the content of ignored directories.
+
+  For now, directories cannot be ignored using `files.include` in the configuration file.
+  This is a known limitation that we want to address in a future release.
+
+  For instance, if you have a project with a folder `src` and a folder `test`,
+  the following configuration doesn't completely ignore `test`.
+
+  ```json
+  {
+    "files": {
+      "include": ["src"]
+    }
+  }
+  ```
+
+  Biome will traverse `test`,
+  however all files of the directory are correctly ignored.
+  This can result in file system errors,
+  if Biome encounters dangling symbolic links or files with higher permissions.
+
+  To avoid traversing the `test` directory,
+  you should ignore the directory using `ignore`:
+
+  ```json
+  {
+    "files": {
+      "include": ["src"],
+      "ignore": ["test"]
+    }
+  }
+  ```
 
 - Fix [#1508](https://github.com/biomejs/biome/issues/1508) by excluding deleted files from being processed. Contributed
   by @ematipico
@@ -345,6 +478,45 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### Promoted rules
+
+New rules are incubated in the nursery group.
+Once stable, we promote them to a stable group.
+The following rules are promoted:
+
+- [complexity/noEmptyTypeParameters](https://biomejs.dev/linter/rules/no-empty-type-parameters)
+- [complexity/noUselessLoneBlockStatements](https://biomejs.dev/linter/rules/no-useless-lone-block-statements)
+- [correctness/noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration)
+- [correctness/noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports)
+- [correctness/noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members)
+- [security/noGlobalEval](https://biomejs.dev/linter/rules/no-global-eval)
+- [style/useConsistentArrayType](https://biomejs.dev/linter/rules/use-consistent-array-type)
+- [style/useExportType](https://biomejs.dev/linter/rules/use-export-type)
+- [style/useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention)
+- [style/useForOf](https://biomejs.dev/linter/rules/use-for-of)
+- [style/useImportType](https://biomejs.dev/linter/rules/use-import-type)
+- [style/useNodejsImportProtocol](https://biomejs.dev/linter/rules/use-nodejs-import-protocol)
+- [style/useNumberNamespace](https://biomejs.dev/linter/rules/use-number-namespace)
+- [style/useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type)
+- [suspicious/noEmptyBlockStatements](https://biomejs.dev/linter/rules/no-empty-block-statements)
+- [suspicious/noGlobalAssign](https://biomejs.dev/linter/rules/no-global-assign)
+- [suspicious/noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class)
+- [suspicious/noThenProperty](https://biomejs.dev/linter/rules/no-then-property)
+- [suspicious/useAwait](https://biomejs.dev/linter/rules/use-await)
+
+Additionally, the following rules are now recommended:
+
+- [suspicious/noApproximativeNumericConstant](https://biomejs.dev/linter/rules/no-approximative-numeric-constant)
+- [suspicious/noMisrefactoredShorthandAssign](https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign)
+
+#### Removed rules
+
+- Remove `nursery/useGroupedTypeImport`. The rule [style/useImportType](https://biomejs.dev/linter/rules/use-import-type) covers the behavior of this rule.
+
+  Note that removing a nursery rule is not considered a breaking change according to our [semantic versioning](https://biomejs.dev/internals/versioning).
+
+  Contributed by @Conaclos
+
 #### New features
 
 - Add the rule [noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests), to disallow skipped tests:
@@ -396,8 +568,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   <div></div>
   ```
 
-- Add partial support for `.vue` files. Biome is able to lint and fix the script block of the Vue files. Contributed by
-  @nhedger
+- Add partial support for `.vue` files. Biome is able to lint and fix the script block of the Vue files.
 
   ```diff
   <script setup lang="ts">
@@ -407,6 +578,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   <template></template>
   ```
+
+  Contributed by @nhedger
 
 - Add rule [useNodeAssertStrict](https://biomejs.dev/linter/rules/use-node-assert-strict), which promotes the use
   of `node:assert/strict` over `node:assert`. Contributed by @ematipico
@@ -529,6 +702,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
     }
   }
   ```
+
+  Contributed by @Conaclos
+
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) no longer reports unused imports.
+
+  We now have a dedicated rule for reporting unused imports:
+  [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports)
 
   Contributed by @Conaclos
 
@@ -699,7 +879,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Add option `json.formatter.trailingComma`, to provide a better control over the trailing comma in JSON/JSONC files. Its default value is `"none"`.
+- Add option `json.formatter.trailingCommas`, to provide a better control over the trailing comma in JSON/JSONC files. Its default value is `"none"`.
 
 #### Bug fixes
 

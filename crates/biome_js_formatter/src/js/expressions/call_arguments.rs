@@ -765,7 +765,7 @@ fn arguments_grouped_layout(
     }
 }
 
-/// Checks if the the first argument requires grouping
+/// Checks if the first argument requires grouping
 fn should_group_first_argument(
     list: &JsCallArgumentList,
     comments: &JsComments,

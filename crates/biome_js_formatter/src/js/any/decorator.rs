@@ -8,11 +8,11 @@ impl FormatRule<AnyJsDecorator> for FormatAnyJsDecorator {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsDecorator, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyJsDecorator::JsParenthesizedExpression(node) => node.format().fmt(f),
-            AnyJsDecorator::JsCallExpression(node) => node.format().fmt(f),
-            AnyJsDecorator::JsStaticMemberExpression(node) => node.format().fmt(f),
-            AnyJsDecorator::JsIdentifierExpression(node) => node.format().fmt(f),
             AnyJsDecorator::JsBogusExpression(node) => node.format().fmt(f),
+            AnyJsDecorator::JsCallExpression(node) => node.format().fmt(f),
+            AnyJsDecorator::JsIdentifierExpression(node) => node.format().fmt(f),
+            AnyJsDecorator::JsParenthesizedExpression(node) => node.format().fmt(f),
+            AnyJsDecorator::JsStaticMemberExpression(node) => node.format().fmt(f),
         }
     }
 }

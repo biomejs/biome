@@ -551,8 +551,7 @@ fn find_catch_handlers(handlers: &[ExceptionHandler]) -> Option<&[ExceptionHandl
     let handlers = handlers
         .iter()
         .position(|handler| matches!(handler.kind, ExceptionHandlerKind::Catch))
-        .map(|index| &handlers[index..])
-        .unwrap_or(handlers);
+        .map_or(handlers, |index| &handlers[index..]);
 
     if handlers.is_empty() {
         None
@@ -568,7 +567,7 @@ fn handle_jump<'cfg>(
     block: BlockId,
     finally_fallthrough: bool,
 ) {
-    // If this jump is exiting a finally clause and and this path is visiting
+    // If this jump is exiting a finally clause and this path is visiting
     // an exception handlers chain
     if finally_fallthrough && path.exception_handlers.is_some() {
         // Jump towards the corresponding block if there are pending exception

@@ -15,182 +15,30 @@ mod grit_kinds_src;
 mod js_kinds_src;
 mod json_kinds_src;
 
+mod generate_crate;
 mod html_kinds_src;
 mod kind_src;
+mod language_kind;
 mod parser_tests;
 pub mod promote_rule;
 mod termcolorful;
 mod unicode;
 
-use proc_macro2::{Ident, Span, TokenStream};
-use quote::quote;
-use std::path::Path;
-use std::str::FromStr;
+use bpaf::Bpaf;
+use std::path::{Path, PathBuf};
 
 use xtask::{glue::fs2, Mode, Result};
 
 pub use self::ast::generate_ast;
 pub use self::formatter::generate_formatters;
 pub use self::generate_analyzer::generate_analyzer;
+pub use self::generate_crate::generate_crate;
 pub use self::parser_tests::generate_parser_tests;
 pub use self::unicode::generate_tables;
 
 pub enum UpdateResult {
     NotUpdated,
     Updated,
-}
-
-#[derive(Debug, Eq, Copy, Clone, PartialEq)]
-pub enum LanguageKind {
-    Js,
-    Css,
-    Json,
-    Grit,
-    Html,
-}
-
-impl std::fmt::Display for LanguageKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            LanguageKind::Js => write!(f, "js"),
-            LanguageKind::Css => write!(f, "css"),
-            LanguageKind::Json => write!(f, "json"),
-            LanguageKind::Grit => write!(f, "gritql"),
-            LanguageKind::Html => write!(f, "html"),
-        }
-    }
-}
-
-pub const ALL_LANGUAGE_KIND: [LanguageKind; 5] = [
-    LanguageKind::Js,
-    LanguageKind::Css,
-    LanguageKind::Json,
-    LanguageKind::Grit,
-    LanguageKind::Html,
-];
-
-impl FromStr for LanguageKind {
-    type Err = String;
-
-    fn from_str(kind: &str) -> Result<Self, Self::Err> {
-        match kind {
-            "js" => Ok(LanguageKind::Js),
-            "css" => Ok(LanguageKind::Css),
-            "json" => Ok(LanguageKind::Json),
-            "gritql" => Ok(LanguageKind::Grit),
-            "html" => Ok(LanguageKind::Html),
-            _ => Err(format!(
-                "Language {} not supported, please use: `js`, `css`, `json`, `gritql` or `html`",
-                kind
-            )),
-        }
-    }
-}
-
-impl LanguageKind {
-    pub(crate) fn syntax_crate_ident(&self) -> Ident {
-        Ident::new(self.syntax_crate_name(), Span::call_site())
-    }
-
-    pub(crate) fn syntax_kind(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxKind },
-            LanguageKind::Css => quote! { CssSyntaxKind },
-            LanguageKind::Json => quote! { JsonSyntaxKind },
-            LanguageKind::Grit => quote! { GritSyntaxKind },
-            LanguageKind::Html => quote! { HtmlSyntaxKind },
-        }
-    }
-
-    pub(crate) fn syntax_node(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxNode },
-            LanguageKind::Css => quote! { CssSyntaxNode },
-            LanguageKind::Json => quote! { JsonSyntaxNode },
-            LanguageKind::Grit => quote! { GritSyntaxNode },
-            LanguageKind::Html => quote! { HtmlSyntaxNode },
-        }
-    }
-
-    pub(crate) fn syntax_element(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxElement },
-            LanguageKind::Css => quote! { CssSyntaxElement },
-            LanguageKind::Json => quote! { JsonSyntaxElement },
-            LanguageKind::Grit => quote! { GritSyntaxElement },
-            LanguageKind::Html => quote! { HtmlSyntaxElement },
-        }
-    }
-
-    pub(crate) fn syntax_token(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxToken },
-            LanguageKind::Css => quote! { CssSyntaxToken },
-            LanguageKind::Json => quote! { JsonSyntaxToken },
-            LanguageKind::Grit => quote! { GritSyntaxToken },
-            LanguageKind::Html => quote! { HtmlSyntaxToken },
-        }
-    }
-
-    pub(crate) fn syntax_element_children(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxElementChildren },
-            LanguageKind::Css => quote! { CssSyntaxElementChildren },
-            LanguageKind::Json => quote! { JsonSyntaxElementChildren },
-            LanguageKind::Grit => quote! { GritSyntaxElementChildren },
-            LanguageKind::Html => quote! { HtmlSyntaxElementChildren },
-        }
-    }
-
-    pub(crate) fn syntax_list(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxList },
-            LanguageKind::Css => quote! { CssSyntaxList },
-            LanguageKind::Json => quote! { JsonSyntaxList },
-            LanguageKind::Grit => quote! { GritSyntaxList },
-            LanguageKind::Html => quote! { HtmlSyntaxList },
-        }
-    }
-
-    pub(crate) fn language(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsLanguage },
-            LanguageKind::Css => quote! { CssLanguage },
-            LanguageKind::Json => quote! { JsonLanguage },
-            LanguageKind::Grit => quote! { GritLanguage },
-            LanguageKind::Html => quote! { HtmlLanguage },
-        }
-    }
-
-    pub fn formatter_crate_name(&self) -> &'static str {
-        match self {
-            LanguageKind::Js => "biome_js_formatter",
-            LanguageKind::Css => "biome_css_formatter",
-            LanguageKind::Json => "biome_json_formatter",
-            LanguageKind::Grit => "biome_grit_formatter",
-            LanguageKind::Html => "biome_html_formatter",
-        }
-    }
-
-    pub fn syntax_crate_name(&self) -> &'static str {
-        match self {
-            LanguageKind::Js => "biome_js_syntax",
-            LanguageKind::Css => "biome_css_syntax",
-            LanguageKind::Json => "biome_json_syntax",
-            LanguageKind::Grit => "biome_grit_syntax",
-            LanguageKind::Html => "biome_html_syntax",
-        }
-    }
-
-    pub fn factory_crate_name(&self) -> &'static str {
-        match self {
-            LanguageKind::Js => "biome_js_factory",
-            LanguageKind::Css => "biome_css_factory",
-            LanguageKind::Json => "biome_json_factory",
-            LanguageKind::Grit => "biome_grit_factory",
-            LanguageKind::Html => "biome_html_factory",
-        }
-    }
 }
 
 /// A helper to update file on disk if it has changed.
@@ -220,54 +68,67 @@ pub fn to_capitalized(s: &str) -> String {
     }
 }
 
-pub fn to_lower_camel_case(s: &str) -> String {
-    to_pascal_camel_case(s, false)
-}
-
-pub fn to_pascal_case(s: &str) -> String {
-    to_pascal_camel_case(s, true)
-}
-
-fn to_pascal_camel_case(s: &str, is_pascal: bool) -> String {
-    let mut buf = String::with_capacity(s.len());
-    let mut prev = is_pascal;
-    for c in s.chars() {
-        if c == '_' {
-            prev = true;
-        } else if prev {
-            buf.push(c.to_ascii_uppercase());
-            prev = false;
-        } else {
-            buf.push(c);
-        }
-    }
-    buf
-}
-
-pub fn to_upper_snake_case(s: &str) -> String {
-    let mut buf = String::with_capacity(s.len());
-    let mut prev = false;
-    for c in s.chars() {
-        if c.is_ascii_uppercase() && prev {
-            buf.push('_')
-        }
-        prev = true;
-
-        buf.push(c.to_ascii_uppercase());
-    }
-    buf
-}
-
-pub fn to_lower_snake_case(s: &str) -> String {
-    let mut buf = String::with_capacity(s.len());
-    let mut prev = false;
-    for c in s.chars() {
-        if c.is_ascii_uppercase() && prev {
-            buf.push('_')
-        }
-        prev = true;
-
-        buf.push(c.to_ascii_lowercase());
-    }
-    buf
+#[derive(Debug, Clone, Bpaf)]
+#[bpaf(options)]
+pub enum TaskCommand {
+    /// Generates formatters for each language
+    #[bpaf(command)]
+    Formatter,
+    /// Generate factory functions for the analyzer and the configuration of the analyzers
+    #[bpaf(command)]
+    Analyzer,
+    /// Generate the part of the configuration that depends on some metadata
+    #[bpaf(command)]
+    Configuration,
+    /// Generate the JSON schema for the Biome configuration file format
+    #[bpaf(command)]
+    Schema,
+    /// Generate TypeScript definitions for the JavaScript bindings to the Workspace API
+    #[bpaf(command)]
+    Bindings,
+    /// It updates the file that contains licenses
+    #[bpaf(command)]
+    License,
+    /// Transforms ungram files into AST
+    #[bpaf(command)]
+    Grammar(Vec<String>),
+    /// Extracts parser inline comments into test files
+    #[bpaf(command)]
+    Test,
+    /// Generates unicode table inside lexer
+    #[bpaf(command)]
+    Unicode,
+    /// Creates a new lint rule
+    #[bpaf(command, long("new-lintrule"))]
+    NewLintRule(
+        /// Path of the rule
+        #[bpaf(long("path"))]
+        PathBuf,
+        /// Name of the rule
+        #[bpaf(long("name"))]
+        String,
+    ),
+    /// Promotes a nursery rule
+    #[bpaf(command, long("promote-rule"))]
+    PromoteRule {
+        /// Path of the rule
+        #[bpaf(long("name"), argument("STRING"))]
+        name: String,
+        /// Name of the rule
+        #[bpaf(long("group"), argument("STRING"))]
+        group: String,
+    },
+    /// Generates website files
+    #[bpaf(command)]
+    Website,
+    /// Runs ALL the codegen
+    #[bpaf(command)]
+    All,
+    /// Creates a new crate
+    #[bpaf(command, long("new-crate"))]
+    NewCrate {
+        /// The name of the crate
+        #[bpaf(long("name"), argument("STRING"))]
+        name: String,
+    },
 }

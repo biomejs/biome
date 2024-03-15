@@ -356,13 +356,15 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                         let severity = diagnostic
                             .category()
                             .filter(|category| category.name().starts_with("lint/"))
-                            .map(|category| {
-                                rules
-                                    .as_ref()
-                                    .and_then(|rules| rules.get_severity_from_code(category))
-                                    .unwrap_or(Severity::Warning)
-                            })
-                            .unwrap_or_else(|| diagnostic.severity());
+                            .map_or_else(
+                                || diagnostic.severity(),
+                                |category| {
+                                    rules
+                                        .as_ref()
+                                        .and_then(|rules| rules.get_severity_from_code(category))
+                                        .unwrap_or(Severity::Warning)
+                                },
+                            );
 
                         if severity >= Severity::Error {
                             errors += 1;

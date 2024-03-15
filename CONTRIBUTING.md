@@ -4,39 +4,33 @@ We can use help in a bunch of areas and any help is greatly appreciated!
 
 ## Table of Contents
 
-- [🚀 Contributing](#-contributing)
-  - [Table of Contents](#table-of-contents)
-  - [Asking questions, making proposals](#asking-questions-making-proposals)
-  - [Reporting bugs](#reporting-bugs)
-  - [Getting Started](#getting-started)
-  - [Install the required tools](#install-the-required-tools)
-  - [Crates development](#crates-development)
-    - [Analyzers and lint rules](#analyzers-and-lint-rules)
-    - [Parser](#parser)
-    - [Formatter](#formatter)
-    - [Testing](#testing)
-    - [Checks](#checks)
-      - [Generated files](#generated-files)
-        - [`cargo codegen grammar`](#cargo-codegen-grammar)
-        - [`cargo codegen test`](#cargo-codegen-test)
-        - [`cargo codegen analyzer`](#cargo-codegen-analyzer)
-    - [crate dependencies](#crate-dependencies)
-  - [Node.js development](#nodejs-development)
-  - [Website development](#website-development)
-    - [Translations](#translations)
-  - [Commit messages](#commit-messages)
-  - [Creating pull requests](#creating-pull-requests)
-    - [Changelog](#changelog)
-      - [Writing a changelog line](#writing-a-changelog-line)
-    - [Documentation](#documentation)
-    - [Magic comments](#magic-comments)
-    - [Versioning](#versioning)
-  - [Releasing](#releasing)
-  - [Resources](#resources)
-  - [Current Members](#current-members)
-    - [Lead team](#lead-team)
-    - [Core Contributors team](#core-contributors-team)
-    - [Maintainers team](#maintainers-team)
+* [Asking questions, making proposals](#asking-questions-making-proposals)
+* [Reporting bugs](#reporting-bugs)
+* [Getting Started](#getting-started)
+* [Install the required tools](#install-the-required-tools)
+* [Testing](#testing)
+  + [Debugging](#debugging)
+* [Checks](#checks)
+* [Crates development](#crates-development)
+  + [Analyzers and lint rules](#analyzers-and-lint-rules)
+  + [Parser](#parser)
+  + [Formatter](#formatter)
+* [Crate dependencies](#crate-dependencies)
+* [Node.js development](#nodejs-development)
+* [Website development](#website-development)
+  + [Translations](#translations)
+* [Commit messages](#commit-messages)
+* [Creating pull requests](#creating-pull-requests)
+  + [Changelog](#changelog)
+    - [Writing a changelog line](#writing-a-changelog-line)
+  + [Documentation](#documentation)
+  + [Versioning](#versioning)
+* [Releasing](#releasing)
+* [Resources](#resources)
+* [Current Members](#current-members)
+  + [Lead team](#lead-team)
+  + [Core Contributors team](#core-contributors-team)
+  + [Maintainers team](#maintainers-team)
 
 ## Asking questions, making proposals
 
@@ -68,16 +62,11 @@ git clone https://github.com/biomejs/biome
 cd biome
 ```
 
-Compile all packages and dependencies:
+You can use cargo to run Biome CLI in development mode:
 
 ```bash
-cargo build
-```
-
-Biome can be used via the `biome` bin:
-
-```bash
-cargo run --bin biome -- --help
+# This is like running "biome --help"
+cargo biome-cli-dev --help
 ```
 
 ## Install the required tools
@@ -90,8 +79,7 @@ You can install `just` using cargo:
 cargo install just
 ```
 
-But we **highly recommend** to [install it using an OS package manager](https://github.com/casey/just#packages),
-so you won't need to prefix every command with `cargo`.
+But we **highly recommend** to [install it using an OS package manager](https://github.com/casey/just#packages),  so you won't need to prefix every command with `cargo`.
 
 Once installed, run the following command install the required tools:
 
@@ -99,9 +87,141 @@ Once installed, run the following command install the required tools:
 just install-tools
 ```
 
+This command will install:
+- `cargo-binstall`, to install binary extensions for `cargo`.
+- `cargo-insta`, a `cargo` extension to manage snapshot testing inside the repository.
+- `cargo-nextest`, a `cargo` extension to for optionally running tests faster.
+- `taplo-cli`, a small tool for formatting TOML files.
+- `wasm-pack` and `wasm-tools` for managing the WASM build of Biome.
+
 And you're good to go hack with Biome and Rust! 🚀
 
+## Testing
+
+You can either use `cargo` or `just` to run tests. For simplicity and running tests real quick, use `cargo`.
+
+With `cargo`, you can run tests with using the `test` command:
+
+```shell
+# run tests
+cargo test
+
+# or use the shortcut
+cargo t
+```
+
+If you run `cargo t` from the root, it will run **all** tests of the whole repository. If you're inside a crate folder, `cargo` will run **tests of that crate**:
+
+```shell
+cd crates/biome_cli
+
+# it will run only the tests of the `biome_cli` crate
+cargo t
+```
+
+You can run **a single test** with cargo by passing the test name after the `test` command:
+
+```shell
+cd crate/biome_js_formatter
+
+cargo t quick_test
+```
+
+This will run the `quick_test` test inside he `biome_js_formatter` crate. You should see an output similar to this:
+
+```shell
+running 1 test
+test quick_test::quick_test ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 224 filtered out; finished in 0.02s
+```
+
+You can also use `just` for running tests. With `just`, the scripts will use the same test runner we use in the CI.
+
+```shell
+just test
+```
+
+If you want to test the tests for a single crate:
+
+```shell
+just test-crate biome_cli
+```
+
+Rust has a concept of **doctest**. A doc test is a doc comment that runs some code. Usually, it looks something like this:
+
+```rust
+/// I am a doc test
+/// ```
+/// assert_eq!(true, true) // this is a doc test, and the assertion must pass
+/// ```
+fn some_fn() {
+
+}
+```
+The code inside the code blocks is **run** during the testing phase.
+
+To run only the doctest, you can run the command:
+
+```shell
+just test-doc
+```
+
+In some crates, we use snapshot testing. The majority of snapshot testing is done using [`insta`](https://insta.rs). `insta` is already installed by the command `just install-tools`.
+
+When a snapshot test fails, you can run:
+
+- `cargo insta accept` to accept all the changes and update all the snapshots;
+- `cargo insta reject` to reject all the changes;
+- `cargo insta review` to review snapshots singularly.
+
+### Debugging
+
+Sometimes you want to debug something when running tests. Like `console.log`, in JavaScript, in Rust you can use the macro `dbg!()` to print something during debugging something. Then, pass the option `--show-output` to `cargo`:
+
+```rust
+fn some_function() -> &'static str {
+    let some_variable = "some_variable";
+    dbg!(&some_variable);
+    some_variable
+}
+#[test]
+fn test_some_function() {
+    let result = some_function();
+    assert_eq!(result, "some_variable")
+}
+```
+
+```shell
+cargo t test_some_function --show-output
+```
+
+## Checks
+
+When you finished your work, and you are ready to **commit and open a PR**, there are few other 
+things you would need to run and check:
+- `just f` (alias for `just format`), formats Rust and TOML files.
+- `just l` (alias for `just lint`), run the linter for the whole project.
+- Code generation. The code generation of the repository is spread in the different parts of the code base. Sometimes is needed and sometime it isn't:
+  - run `just gen-lint` when you're working on the **linter**;
+  - run `just gen-bindings` in case you worked around the **workspace**;
+  - run `just gen-web` when you update the `CHANGELOG.md`.
+
+> [!NOTE]
+> You can run `just ready` as well, although it's a command that runs the codegen of the whole repository, which will take some time
+
 ## Crates development
+
+### Create new crates
+
+If you happen to create a new _crate_ inside the workspace, use the command `just new-crate`, e.g.:
+
+```shell
+just new-crate biome_new_crate
+```
+
+Where `biome_new_crate` is going to be the name of the new crate. This script takes care of adding the correct template for the `Cargo.toml` file, and it adds the crate
+to the `knope.toml` file, which we use for changelog generation.
 
 ### Analyzers and lint rules
 
@@ -115,70 +235,8 @@ To know the technical details of how our parser works and how to write test, ple
 
 To know the technical details of how our formatter works and how to write test, please check our [internal page](https://docs.rs/biome_js_formatter/latest/biome_js_formatter/)
 
-### Testing
 
-To run the tests, just run
-
-```shell
-just test
-```
-
-If you want to test the tests for a single crate:
-
-```shell
-just test-crate biome_cli
-```
-
-To run only the doctests, you would need to pass an argument to the command:
-
-```shell
-just test-doc
-```
-
-In some crates, we use snapshot testing.
-The majority of snapshot testing is done using [`insta`](https://insta.rs).
-`insta` is already installed by the command `just install-tools`.
-
-When a snapshot test fails, you can run:
-
-- `cargo insta accept` to accept all the changes and update all the snapshots;
-- `cargo insta reject` to reject all the changes;
-- `cargo insta review` to review snapshots singularly;
-
-### Checks
-
-When you finished your work, and you are ready to **commit and open a PR**,
-run the following command:
-
-```shell
-just ready
-```
-
-This command will run the same commands of the CI: format, lint, tests and code generation.
-Eventually everything should be "green" 🟢 and commit all the code that was generated.
-
-#### Generated files
-
-If you work on some parser and create new nodes or modify existing ones, you must run a command to update some auto-generated files.
-
-##### `cargo codegen grammar`
-
-This command will update the syntax of the parsers.
-
-The source is generated from the [`ungram` files](https://github.com/biomejs/biome/blob/main/xtask/codegen/js.ungram).
-
-##### `cargo codegen test`
-
-This command will create new tests for JS or JSON parser.
-These tests are generated from inline comments found inside the source code.
-
-On the other hand, we are moving away from this approach and have a straightforward process in other parser implementation like CSS.
-
-##### `cargo codegen analyzer`
-
-This command will detect linter rules declared in the `analyzers`, `assists` and `syntax` directories in the analyzer crates, e.g. `biome_js_analyze`, `biome_json_analyze`, etc., and regenerate the `registry.rs` file and its dependents to include all the rules.
-
-### crate dependencies
+## Crate dependencies
 
 [Workspace dependencies](https://doc.rust-lang.org/cargo/reference/workspaces.html#the-dependencies-table) are used, and many dependencies are defined in Cargo.toml in the root.
 
@@ -186,26 +244,26 @@ Internal crates are loaded with `workspace = true` for each crate. About `dev-de
 
 ## Node.js development
 
-The npm module `npm/biome` contains Biome's Node JS API that supports different backends:
+The npm module `packages/@biomejs/biome` contains Biome's Node.js API that supports different backends:
 
 - `wasm-nodejs` (WebAssembly)
 - `backend-jsonrpc` (Connection to the daemon)
 
 For testing and developing, you need to build these packages, following the steps:
 
-1. install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) globally;
-2. run the `build` command inside the package `backend-jsonrpc`;
-3. run the `build` and `build:wasm-node-dev` commands inside the package `js-api` (folder `npm/js-api`);
-4. run `pnpm i` inside the package `js-api` (folder `npm/js-api`), this will link the WebAssembly bindings and the
-   JSON-RPC bindings;
+1. install pnpm via [corepack](https://nodejs.org/api/corepack.html) by running `corepack enable`;
+2. install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) globally;
+3. run `pnpm --filter "@biomejs/backend-jsonrpc" build`;
+4. run the `pnpm --filter "@biomejs/js-api" build:wasm-dev` and `pnpm --filter "@biomejs/js-api" build` commands;
+5. run `pnpm i --filter "@biomejs/js-api" --frozen-lockfile` to link the WebAssembly bindings and the JSON-RPC bindings
 
 The tests are run against the compiled files, which means that you need to run the
-`build` command after you implemented features/bug fixes.
+`build` script after you implemented features/bug fixes.
 
 ## Website development
 
 The [Biome website](https://biomejs.dev/) is built with [Astro](https://astro.build).
-To start a development please check our [README](./website/README.md)
+To contribute to its development please check our [README](./website/README.md)
 
 ### Translations
 
@@ -331,18 +389,21 @@ When releasing a new version of a Biome, follow these steps:
    See our [versioning guide](https://biomejs.dev/internals/versioning/) for more details.
 
 1. [ ] Rename `Unreleased` to `<version> (iso-date)` in the [changelog](./CHANGELOG.md).
-   Then update the website using `BIOME_VERSION=<version> cargo codegen-website`.
 
 1. [ ] Update `version` in [Biome's `package.json`](./packages/@biomejs/biome/package.json) if applicable.
 
-2. [ ] **Update to the same `version` in all crates** if you publish crates. (`Cargo.toml` and `crates/**/Cargo.toml`)
+1. [ ] **Update to the same `version` in all crates** if you publish crates. (`Cargo.toml` and `crates/**/Cargo.toml`)
 
-3. [ ] Linter rules have a `version` metadata directly defined in their implementation.
+1. [ ] Linter rules have a `version` metadata directly defined in their implementation.
    This field is set to `next` for newly created rules.
    This field must be updated to the new version.
    Then execute `just gen-lint`.
 
-4. [ ] Once the PR is merged, the CI will trigger the `Release: *` workflows. Once these workflows finish compiling the final artefact, **they need to be approved manually**.
+1. [ ] Update the website with the new version number:
+   `BIOME_VERSION=<version> just gen-web`.
+   This will also copy the configuration schema in the right place.
+
+1. [ ] Once the PR is merged, the CI will trigger the `Release: *` workflows. Once these workflows finish compiling the final artefact, **they need to be approved manually**.
 
 ## Resources
 

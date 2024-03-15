@@ -2,10 +2,10 @@
 title: noEmptyTypeParameters (since v1.5.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noEmptyTypeParameters`**
+**Diagnostic Category: `lint/complexity/noEmptyTypeParameters`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Disallow empty type parameters in type aliases and interfaces.
@@ -22,7 +22,7 @@ This rule disallows empty type parameter lists in type alias and interface decla
 interface Foo<> {}
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEmptyTypeParameters.js:1:14 <a href="https://biomejs.dev/linter/rules/no-empty-type-parameters">lint/nursery/noEmptyTypeParameters</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noEmptyTypeParameters.js:1:14 <a href="https://biomejs.dev/linter/rules/no-empty-type-parameters">lint/complexity/noEmptyTypeParameters</a> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using an </span><span style="color: Tomato;"><strong>empty type parameter list</strong></span><span style="color: Tomato;"> is confusing.</span>
   
@@ -38,7 +38,7 @@ interface Foo<> {}
 type Bar<> = {};
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEmptyTypeParameters.js:1:9 <a href="https://biomejs.dev/linter/rules/no-empty-type-parameters">lint/nursery/noEmptyTypeParameters</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noEmptyTypeParameters.js:1:9 <a href="https://biomejs.dev/linter/rules/no-empty-type-parameters">lint/complexity/noEmptyTypeParameters</a> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using an </span><span style="color: Tomato;"><strong>empty type parameter list</strong></span><span style="color: Tomato;"> is confusing.</span>
   

@@ -8,10 +8,10 @@ impl FormatRule<AnyCssSupportsCondition> for FormatAnyCssSupportsCondition {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssSupportsCondition, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
+            AnyCssSupportsCondition::AnyCssSupportsInParens(node) => node.format().fmt(f),
+            AnyCssSupportsCondition::CssSupportsAndCondition(node) => node.format().fmt(f),
             AnyCssSupportsCondition::CssSupportsNotCondition(node) => node.format().fmt(f),
             AnyCssSupportsCondition::CssSupportsOrCondition(node) => node.format().fmt(f),
-            AnyCssSupportsCondition::CssSupportsAndCondition(node) => node.format().fmt(f),
-            AnyCssSupportsCondition::AnyCssSupportsInParens(node) => node.format().fmt(f),
         }
     }
 }

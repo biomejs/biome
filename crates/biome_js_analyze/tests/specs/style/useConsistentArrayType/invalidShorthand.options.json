@@ -1,0 +1,14 @@
+{
+	"linter": {
+		"rules": {
+			"style": {
+				"useConsistentArrayType": {
+					"level": "error",
+					"options": {
+						"syntax": "generic"
+					}
+				}
+			}
+		}
+	}
+}

@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_group;
 
+pub mod no_empty_type_parameters;
 pub mod no_excessive_cognitive_complexity;
 pub mod no_extra_boolean_cast;
 pub mod no_for_each;
@@ -11,6 +12,7 @@ pub mod no_useless_catch;
 pub mod no_useless_constructor;
 pub mod no_useless_empty_export;
 pub mod no_useless_label;
+pub mod no_useless_lone_block_statements;
 pub mod no_useless_rename;
 pub mod no_useless_switch_case;
 pub mod no_useless_type_constraint;
@@ -28,6 +30,7 @@ declare_group! {
     pub Complexity {
         name : "complexity" ,
         rules : [
+            self :: no_empty_type_parameters :: NoEmptyTypeParameters ,
             self :: no_excessive_cognitive_complexity :: NoExcessiveCognitiveComplexity ,
             self :: no_extra_boolean_cast :: NoExtraBooleanCast ,
             self :: no_for_each :: NoForEach ,
@@ -37,6 +40,7 @@ declare_group! {
             self :: no_useless_constructor :: NoUselessConstructor ,
             self :: no_useless_empty_export :: NoUselessEmptyExport ,
             self :: no_useless_label :: NoUselessLabel ,
+            self :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements ,
             self :: no_useless_rename :: NoUselessRename ,
             self :: no_useless_switch_case :: NoUselessSwitchCase ,
             self :: no_useless_type_constraint :: NoUselessTypeConstraint ,

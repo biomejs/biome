@@ -32,6 +32,7 @@ use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
 use std::borrow::Borrow;
 use std::ffi::OsStr;
+use std::fs;
 use std::path::Path;
 use std::{panic::RefUnwindSafe, sync::RwLock};
 use tracing::{debug, info, info_span};
@@ -256,6 +257,7 @@ impl WorkspaceServer {
     fn is_ignored_by_top_level_config(&self, path: &Path) -> bool {
         let settings = self.settings();
         let is_included = settings.as_ref().files.included_files.is_empty()
+            || is_dir(path)
             || settings.as_ref().files.included_files.matches_path(path);
         !is_included
             || settings.as_ref().files.ignored_files.matches_path(path)
@@ -300,8 +302,9 @@ impl WorkspaceServer {
                 )
             }
         };
-        let is_feature_included =
-            feature_included_files.is_empty() || feature_included_files.matches_path(path);
+        let is_feature_included = feature_included_files.is_empty()
+            || is_dir(path)
+            || feature_included_files.matches_path(path);
         !is_feature_included || feature_ignored_files.matches_path(path)
     }
 }
@@ -721,4 +724,10 @@ impl Workspace for WorkspaceServer {
 
         Ok(result)
     }
+}
+
+/// Returns `true` if `path` is a directory or
+/// if it is a symlink that resolves to a directory.
+fn is_dir(path: &Path) -> bool {
+    path.is_dir() || (path.is_symlink() && fs::read_link(path).is_ok_and(|path| path.is_dir()))
 }

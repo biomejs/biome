@@ -57,7 +57,7 @@ declare_rule! {
     /// ```
     ///
     pub NoDuplicateTestHooks {
-        version: "next",
+        version: "1.6.0",
         name: "noDuplicateTestHooks",
         recommended: true,
         source: RuleSource::EslintJest("no-focused-tests"),
