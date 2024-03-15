@@ -22,12 +22,12 @@ path = "src/main.rs"
 anyhow                   = "1.0.52"
 biome_analyze            = { workspace = true }
 biome_console            = { workspace = true }
+biome_css_formatter      = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_formatter          = { workspace = true }
 biome_fs                 = { workspace = true }
-biome_css_formatter  		 = { workspace = true }
 biome_js_formatter       = { workspace = true }
 biome_json_formatter     = { workspace = true }
 biome_json_parser        = { workspace = true }
@@ -73,7 +73,7 @@ regex                = { workspace = true }
 tokio                = { workspace = true, features = ["io-util"] }
 
 [features]
-docgen = ["bpaf/docgen"]
+docgen     = ["bpaf/docgen"]
 format_css = ["biome_css_formatter/format_css"]
 
 [lints]

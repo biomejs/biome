@@ -24,9 +24,9 @@ import {
 	isTypeScriptFilename,
 	useWindowSize,
 } from "@/playground/utils";
+import { css } from "@codemirror/lang-css";
 import { javascript } from "@codemirror/lang-javascript";
 import { json } from "@codemirror/lang-json";
-import { css } from "@codemirror/lang-css";
 import { EditorSelection } from "@codemirror/state";
 import type { ViewUpdate } from "@codemirror/view";
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
