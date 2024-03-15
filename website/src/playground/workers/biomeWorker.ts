@@ -134,7 +134,7 @@ self.addEventListener("message", async (e) => {
 					},
 					parser: {
 						allowWrongLineComments: true,
-					}
+					},
 				},
 				json: {
 					parser: {
