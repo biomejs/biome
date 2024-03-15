@@ -128,6 +128,14 @@ self.addEventListener("message", async (e) => {
 						unsafeParameterDecoratorsEnabled,
 					},
 				},
+				css: {
+					formatter: {
+						quoteStyle: quoteStyle === QuoteStyle.Double ? "double" : "single",
+					},
+					parser: {
+						allowWrongLineComments: true,
+					}
+				},
 				json: {
 					parser: {
 						allowComments,
