@@ -19,7 +19,7 @@ Let's say you want to create a new language that has the extension `html`, you'l
    Add this legend to the `.ungram` file.
 
   ```
-  // This grammar specifies the structure of Rust's concrete syntax tree.
+  // This grammar specifies the structure of [LANGUAGE]'s concrete syntax tree.
   // It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
   // Tokens are processed -- contextual keywords are recognised, compound operators glued.
   //
