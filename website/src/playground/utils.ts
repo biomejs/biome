@@ -229,6 +229,10 @@ export function isJsonFilename(filename: string): boolean {
 	return filename.endsWith(".json");
 }
 
+export function isCssFilename(filename: string): boolean {
+	return filename.endsWith(".css");
+}
+
 export function modifyFilename(
 	filename: string,
 	opts: ExtensionOptions,
@@ -274,7 +278,8 @@ export function isValidExtension(filename: string): boolean {
 		isModuleFilename(filename) ||
 		isTypeScriptFilename(filename) ||
 		isJsxFilename(filename) ||
-		isJsonFilename(filename)
+		isJsonFilename(filename) ||
+		isCssFilename(filename)
 	);
 }
 

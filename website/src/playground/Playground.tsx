@@ -18,11 +18,13 @@ import type {
 import {
 	getCurrentCode,
 	getFileState,
+	isCssFilename,
 	isJsonFilename,
 	isJsxFilename,
 	isTypeScriptFilename,
 	useWindowSize,
 } from "@/playground/utils";
+import { css } from "@codemirror/lang-css";
 import { javascript } from "@codemirror/lang-javascript";
 import { json } from "@codemirror/lang-json";
 import { EditorSelection } from "@codemirror/state";
@@ -54,6 +56,9 @@ export default function PlaygroundLoader({
 	const codeMirrorExtensions = useMemo(() => {
 		if (isJsonFilename(playgroundState.currentFile)) {
 			return [json()];
+		}
+		if (isCssFilename(playgroundState.currentFile)) {
+			return [css()];
 		}
 		return [
 			javascript({
