@@ -6,8 +6,11 @@ js"math($a)" where {
   // Should be evaluated as:
   // $c = ((1 + ($b * 2)) + ($b / 3)) - $b,
   $c = 1 + $b * 2 + $b / 3 - $b,
-  $d = { c: $c },
+  // Should be evaluated as:
+  // $d = (2 * $c) + (3 * $b),
+  $d = 2 * $c + 3 * $b,
   $e = { d: $d },
-  $f = [$e],
-  $a => $f[0].d.c
+  $f = { e: $e },
+  $g = [$f],
+  $a => $g[0].e.d
 }

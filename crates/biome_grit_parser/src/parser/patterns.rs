@@ -15,60 +15,60 @@ pub(crate) fn parse_pattern(p: &mut GritParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_pattern_with_precedence(p: &mut GritParser, min_precedence: isize) -> ParsedSyntax {
-    let Present(mut left) = parse_pattern_left(p) else {
+    let Present(mut left) = parse_pattern_non_greedy(p) else {
         return Absent;
     };
 
-    if min_precedence <= PRECEDENCE_PATTERN_AS && p.cur() == AS_KW {
-        match parse_pattern_as(p, left) {
-            Present(syntax) => left = syntax,
-            Absent => return Absent,
+    loop {
+        macro_rules! parse_and_continue {
+            ($parse:expr) => {
+                match $parse {
+                    Present(syntax) => {
+                        left = syntax;
+                        continue;
+                    }
+                    // This should never happen, but if it does we cannot uphold
+                    // the parser's invariants while also satisfying the borrow
+                    // checker. Safest to just panic here.
+                    Absent => panic!("failed to parse subpattern"),
+                }
+            };
         }
-    }
 
-    if let Some(math_operator) = MathOperator::from_token(p.cur()) {
-        if min_precedence <= math_operator.precedence() {
-            match parse_math_pattern(p, left, math_operator) {
-                Present(syntax) => left = syntax,
-                Absent => return Absent,
+        if PRECEDENCE_PATTERN_AS > min_precedence && p.cur() == AS_KW {
+            parse_and_continue!(parse_pattern_as(p, left));
+        }
+
+        if let Some(math_operator) = MathOperator::from_token(p.cur()) {
+            if math_operator.precedence() > min_precedence {
+                parse_and_continue!(parse_math_pattern(p, left, math_operator));
             }
         }
-    }
 
-    if min_precedence <= PRECEDENCE_REWRITE && p.cur() == T![=>] {
-        match parse_rewrite(p, left) {
-            Present(syntax) => left = syntax,
-            Absent => return Absent,
+        if PRECEDENCE_REWRITE > min_precedence && p.cur() == T![=>] {
+            parse_and_continue!(parse_rewrite(p, left));
         }
-    }
 
-    if min_precedence <= PRECEDENCE_ACCUMULATE && p.cur() == T![+=] {
-        match parse_pattern_accumulate(p, left) {
-            Present(syntax) => left = syntax,
-            Absent => return Absent,
+        if PRECEDENCE_ACCUMULATE > min_precedence && p.cur() == T![+=] {
+            parse_and_continue!(parse_pattern_accumulate(p, left));
         }
-    }
 
-    if min_precedence <= PRECEDENCE_PATTERN_LIMIT && p.cur() == LIMIT_KW {
-        match parse_pattern_limit(p, left) {
-            Present(syntax) => left = syntax,
-            Absent => return Absent,
+        if PRECEDENCE_PATTERN_LIMIT > min_precedence && p.cur() == LIMIT_KW {
+            parse_and_continue!(parse_pattern_limit(p, left));
         }
-    }
 
-    if min_precedence <= PRECEDENCE_PATTERN_WHERE && p.cur() == WHERE_KW {
-        match parse_pattern_where(p, left) {
-            Present(syntax) => left = syntax,
-            Absent => return Absent,
+        if PRECEDENCE_PATTERN_WHERE > min_precedence && p.cur() == WHERE_KW {
+            parse_and_continue!(parse_pattern_where(p, left));
         }
-    }
 
-    if min_precedence <= PRECEDENCE_NOT && p.cur() == T![=] && CONTAINER_SET.contains(left.kind(p))
-    {
-        match parse_assignment_as_pattern(p, left) {
-            Present(syntax) => left = syntax,
-            Absent => return Absent,
+        if PRECEDENCE_NOT > min_precedence
+            && p.cur() == T![=]
+            && CONTAINER_SET.contains(left.kind(p))
+        {
+            parse_and_continue!(parse_assignment_as_pattern(p, left));
         }
+
+        break;
     }
 
     match p.cur() {
@@ -79,7 +79,7 @@ fn parse_pattern_with_precedence(p: &mut GritParser, min_precedence: isize) -> P
 }
 
 #[inline]
-fn parse_pattern_left(p: &mut GritParser) -> ParsedSyntax {
+fn parse_pattern_non_greedy(p: &mut GritParser) -> ParsedSyntax {
     match p.cur() {
         NOT_KW | T![!] => parse_pattern_not(p),
         OR_KW => parse_pattern_or(p),
@@ -431,40 +431,57 @@ impl MathOperator {
     }
 }
 
-#[inline]
+trait OptionalMathOperator {
+    fn with_min_precedence(self, min_precedence: isize) -> Self;
+}
+
+impl OptionalMathOperator for Option<MathOperator> {
+    #[inline]
+    fn with_min_precedence(self, min_precedence: isize) -> Self {
+        self.filter(|operator| operator.precedence() >= min_precedence)
+    }
+}
+
+// This is the only place we need an operator-precedence parser for GritQL,
+// since math operators are the only ones in the grammar that have
+// left-associativity.
+//
+// See also: https://en.wikipedia.org/wiki/Operator-precedence_parser
 fn parse_math_pattern(
     p: &mut GritParser,
-    left: CompletedMarker,
+    mut left: CompletedMarker,
     operator: MathOperator,
 ) -> ParsedSyntax {
     if !p.at(operator.token_kind()) {
         return Absent;
     }
 
-    let m = left.precede(p);
-    p.bump(operator.token_kind());
+    let min_precedence = operator.precedence();
 
-    let right = parse_pattern_left(p);
+    let mut lookahead = MathOperator::from_token(p.cur());
+    while let Some(operator) = lookahead.with_min_precedence(min_precedence) {
+        let m = left.precede(p);
 
-    match (MathOperator::from_token(p.cur()), right) {
-        (Some(next_operator), _) if next_operator.precedence() <= operator.precedence() => {
+        p.bump(operator.token_kind());
 
-        }
+        if let Present(mut right) = parse_pattern_non_greedy(p) {
+            lookahead = MathOperator::from_token(p.cur());
+            while let Some(tighter_operator) =
+                lookahead.with_min_precedence(operator.precedence() + 1)
+            {
+                right = match parse_math_pattern(p, right, tighter_operator) {
+                    Present(right) => right,
+                    Absent => break,
+                };
 
-    match MathOperator::from_token(p.cur()) {
-        Some(next_operator) => {
-            if next_operator.precedence() <= operator.precedence() {
-                let left = m.complete(p, operator.operation_kind());
-                parse_math_pattern(p, left, operator)
-            } else if let Present(right) = right {
-                let _ = parse_math_pattern(p, right, operator);
-                Present(m.complete(p, operator.operation_kind()))
-            } else {
-                Present(m.complete(p, operator.operation_kind()))
+                lookahead = MathOperator::from_token(p.cur());
             }
         }
-        _ => Present(m.complete(p, operator.operation_kind())),
+
+        left = m.complete(p, operator.operation_kind())
     }
+
+    Present(left)
 }
 
 #[inline]
@@ -913,11 +930,13 @@ fn parse_rewrite(p: &mut GritParser, left: CompletedMarker) -> ParsedSyntax {
     let m = left.precede(p);
     p.bump(T![=>]);
 
-    let _ = parse_pattern_with_precedence(p, PRECEDENCE_REWRITE).or_recover_with_token_set(
-        p,
-        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
-        expected_pattern,
-    );
+    parse_pattern_with_precedence(p, PRECEDENCE_REWRITE)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS, PATTERN_RECOVERY_SET),
+            expected_pattern,
+        )
+        .ok();
 
     Present(m.complete(p, GRIT_REWRITE))
 }
@@ -933,7 +952,7 @@ fn parse_sequential(p: &mut GritParser) -> ParsedSyntax {
 
     p.eat(T!['{']);
 
-    let _ = parse_pattern_list(p);
+    parse_pattern_list(p).ok();
 
     p.eat(T!['}']);
 
@@ -949,11 +968,7 @@ fn parse_some(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(SOME_KW);
 
-    match parse_maybe_curly_pattern(p) {
-        Present(_) => Present(m.complete(p, GRIT_SOME)),
-        Absent => {
-            m.abandon(p);
-            Absent
-        }
-    }
+    parse_maybe_curly_pattern(p).ok();
+
+    Present(m.complete(p, GRIT_SOME))
 }

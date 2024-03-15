@@ -1,6 +1,5 @@
 ---
 source: crates/biome_grit_parser/tests/spec_test.rs
-assertion_line: 114
 expression: snapshot
 ---
 ## Input
@@ -13,10 +12,13 @@ js"math($a)" where {
   // Should be evaluated as:
   // $c = ((1 + ($b * 2)) + ($b / 3)) - $b,
   $c = 1 + $b * 2 + $b / 3 - $b,
-  $d = { c: $c },
+  // Should be evaluated as:
+  // $d = (2 * $c) + (3 * $b),
+  $d = 2 * $c + 3 * $b,
   $e = { d: $d },
-  $f = [$e],
-  $a => $f[0].d.c
+  $f = { e: $e },
+  $g = [$f],
+  $a => $g[0].e.d
 }
 
 ```
@@ -101,31 +103,31 @@ GritRoot {
                     },
                     eq_token: EQ@283..285 "=" [] [Whitespace(" ")],
                     pattern: GritSubOperation {
-                        left: GritDivOperation {
+                        left: GritAddOperation {
                             left: GritAddOperation {
-                                left: GritMulOperation {
-                                    left: GritAddOperation {
-                                        left: GritIntLiteral {
-                                            value_token: GRIT_INT@285..287 "1" [] [Whitespace(" ")],
-                                        },
-                                        plus_token: PLUS@287..289 "+" [] [Whitespace(" ")],
-                                        right: GritVariable {
-                                            value_token: GRIT_VARIABLE@289..292 "$b" [] [Whitespace(" ")],
-                                        },
+                                left: GritIntLiteral {
+                                    value_token: GRIT_INT@285..287 "1" [] [Whitespace(" ")],
+                                },
+                                plus_token: PLUS@287..289 "+" [] [Whitespace(" ")],
+                                right: GritMulOperation {
+                                    left: GritVariable {
+                                        value_token: GRIT_VARIABLE@289..292 "$b" [] [Whitespace(" ")],
                                     },
                                     star_token: STAR@292..294 "*" [] [Whitespace(" ")],
                                     right: GritIntLiteral {
                                         value_token: GRIT_INT@294..296 "2" [] [Whitespace(" ")],
                                     },
                                 },
-                                plus_token: PLUS@296..298 "+" [] [Whitespace(" ")],
-                                right: GritVariable {
+                            },
+                            plus_token: PLUS@296..298 "+" [] [Whitespace(" ")],
+                            right: GritDivOperation {
+                                left: GritVariable {
                                     value_token: GRIT_VARIABLE@298..301 "$b" [] [Whitespace(" ")],
                                 },
-                            },
-                            slash_token: SLASH@301..303 "/" [] [Whitespace(" ")],
-                            right: GritIntLiteral {
-                                value_token: GRIT_INT@303..305 "3" [] [Whitespace(" ")],
+                                slash_token: SLASH@301..303 "/" [] [Whitespace(" ")],
+                                right: GritIntLiteral {
+                                    value_token: GRIT_INT@303..305 "3" [] [Whitespace(" ")],
+                                },
                             },
                         },
                         minus_token: MINUS@305..307 "-" [] [Whitespace(" ")],
@@ -137,122 +139,150 @@ GritRoot {
                 COMMA@309..310 "," [] [],
                 GritPredicateAssignment {
                     container: GritVariable {
-                        value_token: GRIT_VARIABLE@310..316 "$d" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        value_token: GRIT_VARIABLE@310..376 "$d" [Newline("\n"), Whitespace("  "), Comments("// Should be evaluate ..."), Newline("\n"), Whitespace("  "), Comments("// $d = (2 * $c) + (3 ..."), Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
                     },
-                    eq_token: EQ@316..318 "=" [] [Whitespace(" ")],
+                    eq_token: EQ@376..378 "=" [] [Whitespace(" ")],
+                    pattern: GritAddOperation {
+                        left: GritMulOperation {
+                            left: GritIntLiteral {
+                                value_token: GRIT_INT@378..380 "2" [] [Whitespace(" ")],
+                            },
+                            star_token: STAR@380..382 "*" [] [Whitespace(" ")],
+                            right: GritVariable {
+                                value_token: GRIT_VARIABLE@382..385 "$c" [] [Whitespace(" ")],
+                            },
+                        },
+                        plus_token: PLUS@385..387 "+" [] [Whitespace(" ")],
+                        right: GritMulOperation {
+                            left: GritIntLiteral {
+                                value_token: GRIT_INT@387..389 "3" [] [Whitespace(" ")],
+                            },
+                            star_token: STAR@389..391 "*" [] [Whitespace(" ")],
+                            right: GritVariable {
+                                value_token: GRIT_VARIABLE@391..393 "$b" [] [],
+                            },
+                        },
+                    },
+                },
+                COMMA@393..394 "," [] [],
+                GritPredicateAssignment {
+                    container: GritVariable {
+                        value_token: GRIT_VARIABLE@394..400 "$e" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                    },
+                    eq_token: EQ@400..402 "=" [] [Whitespace(" ")],
                     pattern: GritMap {
-                        l_curly_token: L_CURLY@318..320 "{" [] [Whitespace(" ")],
+                        l_curly_token: L_CURLY@402..404 "{" [] [Whitespace(" ")],
                         elements: GritMapElementList [
                             GritMapElement {
                                 key: GritName {
-                                    value_token: GRIT_NAME@320..321 "c" [] [],
+                                    value_token: GRIT_NAME@404..405 "d" [] [],
                                 },
-                                colon_token: COLON@321..323 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@405..407 ":" [] [Whitespace(" ")],
                                 value: GritVariable {
-                                    value_token: GRIT_VARIABLE@323..326 "$c" [] [Whitespace(" ")],
+                                    value_token: GRIT_VARIABLE@407..410 "$d" [] [Whitespace(" ")],
                                 },
                             },
                         ],
-                        r_curly_token: R_CURLY@326..327 "}" [] [],
+                        r_curly_token: R_CURLY@410..411 "}" [] [],
                     },
                 },
-                COMMA@327..328 "," [] [],
+                COMMA@411..412 "," [] [],
                 GritPredicateAssignment {
                     container: GritVariable {
-                        value_token: GRIT_VARIABLE@328..334 "$e" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        value_token: GRIT_VARIABLE@412..418 "$f" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
                     },
-                    eq_token: EQ@334..336 "=" [] [Whitespace(" ")],
+                    eq_token: EQ@418..420 "=" [] [Whitespace(" ")],
                     pattern: GritMap {
-                        l_curly_token: L_CURLY@336..338 "{" [] [Whitespace(" ")],
+                        l_curly_token: L_CURLY@420..422 "{" [] [Whitespace(" ")],
                         elements: GritMapElementList [
                             GritMapElement {
                                 key: GritName {
-                                    value_token: GRIT_NAME@338..339 "d" [] [],
+                                    value_token: GRIT_NAME@422..423 "e" [] [],
                                 },
-                                colon_token: COLON@339..341 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@423..425 ":" [] [Whitespace(" ")],
                                 value: GritVariable {
-                                    value_token: GRIT_VARIABLE@341..344 "$d" [] [Whitespace(" ")],
+                                    value_token: GRIT_VARIABLE@425..428 "$e" [] [Whitespace(" ")],
                                 },
                             },
                         ],
-                        r_curly_token: R_CURLY@344..345 "}" [] [],
+                        r_curly_token: R_CURLY@428..429 "}" [] [],
                     },
                 },
-                COMMA@345..346 "," [] [],
+                COMMA@429..430 "," [] [],
                 GritPredicateAssignment {
                     container: GritVariable {
-                        value_token: GRIT_VARIABLE@346..352 "$f" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        value_token: GRIT_VARIABLE@430..436 "$g" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
                     },
-                    eq_token: EQ@352..354 "=" [] [Whitespace(" ")],
+                    eq_token: EQ@436..438 "=" [] [Whitespace(" ")],
                     pattern: GritList {
                         name: missing (optional),
-                        l_brack_token: L_BRACK@354..355 "[" [] [],
+                        l_brack_token: L_BRACK@438..439 "[" [] [],
                         patterns: GritListPatternList [
                             GritVariable {
-                                value_token: GRIT_VARIABLE@355..357 "$e" [] [],
+                                value_token: GRIT_VARIABLE@439..441 "$f" [] [],
                             },
                         ],
-                        r_brack_token: R_BRACK@357..358 "]" [] [],
+                        r_brack_token: R_BRACK@441..442 "]" [] [],
                     },
                 },
-                COMMA@358..359 "," [] [],
+                COMMA@442..443 "," [] [],
                 GritPredicateRewrite {
                     left: GritVariable {
-                        value_token: GRIT_VARIABLE@359..365 "$a" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        value_token: GRIT_VARIABLE@443..449 "$a" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
                     },
                     annotation: missing (optional),
-                    fat_arrow_token: FAT_ARROW@365..368 "=>" [] [Whitespace(" ")],
+                    fat_arrow_token: FAT_ARROW@449..452 "=>" [] [Whitespace(" ")],
                     right: GritMapAccessor {
                         map: GritMapAccessor {
                             map: GritListAccessor {
                                 list: GritVariable {
-                                    value_token: GRIT_VARIABLE@368..370 "$f" [] [],
+                                    value_token: GRIT_VARIABLE@452..454 "$g" [] [],
                                 },
-                                l_brack_token: L_BRACK@370..371 "[" [] [],
+                                l_brack_token: L_BRACK@454..455 "[" [] [],
                                 index: GritIntLiteral {
-                                    value_token: GRIT_INT@371..372 "0" [] [],
+                                    value_token: GRIT_INT@455..456 "0" [] [],
                                 },
-                                r_brack_token: R_BRACK@372..373 "]" [] [],
+                                r_brack_token: R_BRACK@456..457 "]" [] [],
                             },
-                            dot_token: DOT@373..374 "." [] [],
+                            dot_token: DOT@457..458 "." [] [],
                             key: GritName {
-                                value_token: GRIT_NAME@374..375 "d" [] [],
+                                value_token: GRIT_NAME@458..459 "e" [] [],
                             },
                         },
-                        dot_token: DOT@375..376 "." [] [],
+                        dot_token: DOT@459..460 "." [] [],
                         key: GritName {
-                            value_token: GRIT_NAME@376..377 "c" [] [],
+                            value_token: GRIT_NAME@460..461 "d" [] [],
                         },
                     },
                 },
             ],
-            r_curly_token: R_CURLY@377..379 "}" [Newline("\n")] [],
+            r_curly_token: R_CURLY@461..463 "}" [Newline("\n")] [],
         },
     },
     definitions_continued: GritDefinitionList [],
-    eof_token: EOF@379..380 "" [Newline("\n")] [],
+    eof_token: EOF@463..464 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: GRIT_ROOT@0..380
+0: GRIT_ROOT@0..464
   0: (empty)
   1: (empty)
   2: (empty)
   3: GRIT_DEFINITION_LIST@0..0
-  4: GRIT_PATTERN_WHERE@0..379
+  4: GRIT_PATTERN_WHERE@0..463
     0: GRIT_CODE_SNIPPET@0..13
       0: GRIT_LANGUAGE_SPECIFIC_SNIPPET@0..13
         0: GRIT_LANGUAGE_NAME@0..2
           0: JS_KW@0..2 "js" [] []
         1: GRIT_STRING@2..13 "\"math($a)\"" [] [Whitespace(" ")]
     1: WHERE_KW@13..19 "where" [] [Whitespace(" ")]
-    2: GRIT_PREDICATE_AND@19..379
+    2: GRIT_PREDICATE_AND@19..463
       0: (empty)
       1: L_CURLY@19..20 "{" [] []
-      2: GRIT_PREDICATE_LIST@20..377
+      2: GRIT_PREDICATE_LIST@20..461
         0: GRIT_PREDICATE_ASSIGNMENT@20..203
           0: GRIT_VARIABLE@20..171
             0: GRIT_VARIABLE@20..171 "$b" [Newline("\n"), Whitespace("  "), Comments("// Should be evaluate ..."), Newline("\n"), Whitespace("  "), Comments("// $b = ((1 + $a) * ( ..."), Newline("\n"), Whitespace("  "), Comments("//      ^------------ ..."), Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
@@ -294,94 +324,111 @@ GritRoot {
             0: GRIT_VARIABLE@204..283 "$c" [Newline("\n"), Whitespace("  "), Comments("// Should be evaluate ..."), Newline("\n"), Whitespace("  "), Comments("// $c = ((1 + ($b * 2 ..."), Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
           1: EQ@283..285 "=" [] [Whitespace(" ")]
           2: GRIT_SUB_OPERATION@285..309
-            0: GRIT_DIV_OPERATION@285..305
-              0: GRIT_ADD_OPERATION@285..301
-                0: GRIT_MUL_OPERATION@285..296
-                  0: GRIT_ADD_OPERATION@285..292
-                    0: GRIT_INT_LITERAL@285..287
-                      0: GRIT_INT@285..287 "1" [] [Whitespace(" ")]
-                    1: PLUS@287..289 "+" [] [Whitespace(" ")]
-                    2: GRIT_VARIABLE@289..292
-                      0: GRIT_VARIABLE@289..292 "$b" [] [Whitespace(" ")]
+            0: GRIT_ADD_OPERATION@285..305
+              0: GRIT_ADD_OPERATION@285..296
+                0: GRIT_INT_LITERAL@285..287
+                  0: GRIT_INT@285..287 "1" [] [Whitespace(" ")]
+                1: PLUS@287..289 "+" [] [Whitespace(" ")]
+                2: GRIT_MUL_OPERATION@289..296
+                  0: GRIT_VARIABLE@289..292
+                    0: GRIT_VARIABLE@289..292 "$b" [] [Whitespace(" ")]
                   1: STAR@292..294 "*" [] [Whitespace(" ")]
                   2: GRIT_INT_LITERAL@294..296
                     0: GRIT_INT@294..296 "2" [] [Whitespace(" ")]
-                1: PLUS@296..298 "+" [] [Whitespace(" ")]
-                2: GRIT_VARIABLE@298..301
+              1: PLUS@296..298 "+" [] [Whitespace(" ")]
+              2: GRIT_DIV_OPERATION@298..305
+                0: GRIT_VARIABLE@298..301
                   0: GRIT_VARIABLE@298..301 "$b" [] [Whitespace(" ")]
-              1: SLASH@301..303 "/" [] [Whitespace(" ")]
-              2: GRIT_INT_LITERAL@303..305
-                0: GRIT_INT@303..305 "3" [] [Whitespace(" ")]
+                1: SLASH@301..303 "/" [] [Whitespace(" ")]
+                2: GRIT_INT_LITERAL@303..305
+                  0: GRIT_INT@303..305 "3" [] [Whitespace(" ")]
             1: MINUS@305..307 "-" [] [Whitespace(" ")]
             2: GRIT_VARIABLE@307..309
               0: GRIT_VARIABLE@307..309 "$b" [] []
         3: COMMA@309..310 "," [] []
-        4: GRIT_PREDICATE_ASSIGNMENT@310..327
-          0: GRIT_VARIABLE@310..316
-            0: GRIT_VARIABLE@310..316 "$d" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
-          1: EQ@316..318 "=" [] [Whitespace(" ")]
-          2: GRIT_MAP@318..327
-            0: L_CURLY@318..320 "{" [] [Whitespace(" ")]
-            1: GRIT_MAP_ELEMENT_LIST@320..326
-              0: GRIT_MAP_ELEMENT@320..326
-                0: GRIT_NAME@320..321
-                  0: GRIT_NAME@320..321 "c" [] []
-                1: COLON@321..323 ":" [] [Whitespace(" ")]
-                2: GRIT_VARIABLE@323..326
-                  0: GRIT_VARIABLE@323..326 "$c" [] [Whitespace(" ")]
-            2: R_CURLY@326..327 "}" [] []
-        5: COMMA@327..328 "," [] []
-        6: GRIT_PREDICATE_ASSIGNMENT@328..345
-          0: GRIT_VARIABLE@328..334
-            0: GRIT_VARIABLE@328..334 "$e" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
-          1: EQ@334..336 "=" [] [Whitespace(" ")]
-          2: GRIT_MAP@336..345
-            0: L_CURLY@336..338 "{" [] [Whitespace(" ")]
-            1: GRIT_MAP_ELEMENT_LIST@338..344
-              0: GRIT_MAP_ELEMENT@338..344
-                0: GRIT_NAME@338..339
-                  0: GRIT_NAME@338..339 "d" [] []
-                1: COLON@339..341 ":" [] [Whitespace(" ")]
-                2: GRIT_VARIABLE@341..344
-                  0: GRIT_VARIABLE@341..344 "$d" [] [Whitespace(" ")]
-            2: R_CURLY@344..345 "}" [] []
-        7: COMMA@345..346 "," [] []
-        8: GRIT_PREDICATE_ASSIGNMENT@346..358
-          0: GRIT_VARIABLE@346..352
-            0: GRIT_VARIABLE@346..352 "$f" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
-          1: EQ@352..354 "=" [] [Whitespace(" ")]
-          2: GRIT_LIST@354..358
+        4: GRIT_PREDICATE_ASSIGNMENT@310..393
+          0: GRIT_VARIABLE@310..376
+            0: GRIT_VARIABLE@310..376 "$d" [Newline("\n"), Whitespace("  "), Comments("// Should be evaluate ..."), Newline("\n"), Whitespace("  "), Comments("// $d = (2 * $c) + (3 ..."), Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+          1: EQ@376..378 "=" [] [Whitespace(" ")]
+          2: GRIT_ADD_OPERATION@378..393
+            0: GRIT_MUL_OPERATION@378..385
+              0: GRIT_INT_LITERAL@378..380
+                0: GRIT_INT@378..380 "2" [] [Whitespace(" ")]
+              1: STAR@380..382 "*" [] [Whitespace(" ")]
+              2: GRIT_VARIABLE@382..385
+                0: GRIT_VARIABLE@382..385 "$c" [] [Whitespace(" ")]
+            1: PLUS@385..387 "+" [] [Whitespace(" ")]
+            2: GRIT_MUL_OPERATION@387..393
+              0: GRIT_INT_LITERAL@387..389
+                0: GRIT_INT@387..389 "3" [] [Whitespace(" ")]
+              1: STAR@389..391 "*" [] [Whitespace(" ")]
+              2: GRIT_VARIABLE@391..393
+                0: GRIT_VARIABLE@391..393 "$b" [] []
+        5: COMMA@393..394 "," [] []
+        6: GRIT_PREDICATE_ASSIGNMENT@394..411
+          0: GRIT_VARIABLE@394..400
+            0: GRIT_VARIABLE@394..400 "$e" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+          1: EQ@400..402 "=" [] [Whitespace(" ")]
+          2: GRIT_MAP@402..411
+            0: L_CURLY@402..404 "{" [] [Whitespace(" ")]
+            1: GRIT_MAP_ELEMENT_LIST@404..410
+              0: GRIT_MAP_ELEMENT@404..410
+                0: GRIT_NAME@404..405
+                  0: GRIT_NAME@404..405 "d" [] []
+                1: COLON@405..407 ":" [] [Whitespace(" ")]
+                2: GRIT_VARIABLE@407..410
+                  0: GRIT_VARIABLE@407..410 "$d" [] [Whitespace(" ")]
+            2: R_CURLY@410..411 "}" [] []
+        7: COMMA@411..412 "," [] []
+        8: GRIT_PREDICATE_ASSIGNMENT@412..429
+          0: GRIT_VARIABLE@412..418
+            0: GRIT_VARIABLE@412..418 "$f" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+          1: EQ@418..420 "=" [] [Whitespace(" ")]
+          2: GRIT_MAP@420..429
+            0: L_CURLY@420..422 "{" [] [Whitespace(" ")]
+            1: GRIT_MAP_ELEMENT_LIST@422..428
+              0: GRIT_MAP_ELEMENT@422..428
+                0: GRIT_NAME@422..423
+                  0: GRIT_NAME@422..423 "e" [] []
+                1: COLON@423..425 ":" [] [Whitespace(" ")]
+                2: GRIT_VARIABLE@425..428
+                  0: GRIT_VARIABLE@425..428 "$e" [] [Whitespace(" ")]
+            2: R_CURLY@428..429 "}" [] []
+        9: COMMA@429..430 "," [] []
+        10: GRIT_PREDICATE_ASSIGNMENT@430..442
+          0: GRIT_VARIABLE@430..436
+            0: GRIT_VARIABLE@430..436 "$g" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+          1: EQ@436..438 "=" [] [Whitespace(" ")]
+          2: GRIT_LIST@438..442
             0: (empty)
-            1: L_BRACK@354..355 "[" [] []
-            2: GRIT_LIST_PATTERN_LIST@355..357
-              0: GRIT_VARIABLE@355..357
-                0: GRIT_VARIABLE@355..357 "$e" [] []
-            3: R_BRACK@357..358 "]" [] []
-        9: COMMA@358..359 "," [] []
-        10: GRIT_PREDICATE_REWRITE@359..377
-          0: GRIT_VARIABLE@359..365
-            0: GRIT_VARIABLE@359..365 "$a" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: L_BRACK@438..439 "[" [] []
+            2: GRIT_LIST_PATTERN_LIST@439..441
+              0: GRIT_VARIABLE@439..441
+                0: GRIT_VARIABLE@439..441 "$f" [] []
+            3: R_BRACK@441..442 "]" [] []
+        11: COMMA@442..443 "," [] []
+        12: GRIT_PREDICATE_REWRITE@443..461
+          0: GRIT_VARIABLE@443..449
+            0: GRIT_VARIABLE@443..449 "$a" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
           1: (empty)
-          2: FAT_ARROW@365..368 "=>" [] [Whitespace(" ")]
-          3: GRIT_MAP_ACCESSOR@368..377
-            0: GRIT_MAP_ACCESSOR@368..375
-              0: GRIT_LIST_ACCESSOR@368..373
-                0: GRIT_VARIABLE@368..370
-                  0: GRIT_VARIABLE@368..370 "$f" [] []
-                1: L_BRACK@370..371 "[" [] []
-                2: GRIT_INT_LITERAL@371..372
-                  0: GRIT_INT@371..372 "0" [] []
-                3: R_BRACK@372..373 "]" [] []
-              1: DOT@373..374 "." [] []
-              2: GRIT_NAME@374..375
-                0: GRIT_NAME@374..375 "d" [] []
-            1: DOT@375..376 "." [] []
-            2: GRIT_NAME@376..377
-              0: GRIT_NAME@376..377 "c" [] []
-      3: R_CURLY@377..379 "}" [Newline("\n")] []
-  5: GRIT_DEFINITION_LIST@379..379
-  6: EOF@379..380 "" [Newline("\n")] []
+          2: FAT_ARROW@449..452 "=>" [] [Whitespace(" ")]
+          3: GRIT_MAP_ACCESSOR@452..461
+            0: GRIT_MAP_ACCESSOR@452..459
+              0: GRIT_LIST_ACCESSOR@452..457
+                0: GRIT_VARIABLE@452..454
+                  0: GRIT_VARIABLE@452..454 "$g" [] []
+                1: L_BRACK@454..455 "[" [] []
+                2: GRIT_INT_LITERAL@455..456
+                  0: GRIT_INT@455..456 "0" [] []
+                3: R_BRACK@456..457 "]" [] []
+              1: DOT@457..458 "." [] []
+              2: GRIT_NAME@458..459
+                0: GRIT_NAME@458..459 "e" [] []
+            1: DOT@459..460 "." [] []
+            2: GRIT_NAME@460..461
+              0: GRIT_NAME@460..461 "d" [] []
+      3: R_CURLY@461..463 "}" [Newline("\n")] []
+  5: GRIT_DEFINITION_LIST@463..463
+  6: EOF@463..464 "" [Newline("\n")] []
 
 ```
-
-
