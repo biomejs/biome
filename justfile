@@ -22,6 +22,7 @@ upgrade-tools:
 gen-all:
   cargo run -p xtask_codegen -- all
   cargo run -p xtask_codegen -- configuration
+  cargo run -p xtask_codegen --features configuration -- migrate-eslint
   cargo lintdoc
   just gen-bindings
   just gen-web
@@ -34,8 +35,9 @@ gen-bindings:
 
 # Generates code generated files for the linter
 gen-lint:
-  cargo codegen analyzer
+  cargo run -p xtask_codegen -- analyzer
   cargo codegen-configuration
+  cargo run -p xtask_codegen --features configuration -- migrate-eslint
   just gen-bindings
   just format
   cargo lintdoc
@@ -47,7 +49,7 @@ gen-web:
 
 # Generates the initial files for all formatter crates
 gen-formatter:
-    run -p xtask_codegen -- formatter
+  cargo run -p xtask_codegen -- formatter
 
 # Generates the Tailwind CSS preset for utility class sorting (requires Bun)
 gen-tw:

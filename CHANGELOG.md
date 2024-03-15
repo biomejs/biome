@@ -21,6 +21,72 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add a command to migrate from ESLint
+
+  `@biomejs/biome migrate eslint` allows you to migrate an ESLint configuration to Biome.
+  The command supports [legacy ESLint configurations](https://eslint.org/docs/latest/use/configure/configuration-files) and [new flat ESLint configurations](https://eslint.org/docs/latest/use/configure/configuration-files-new).
+  Legacy ESLint configurations using the YAML format are not supported.
+
+  When loading a legacy ESLint configuration, Biome resolves the `extends` field.
+  It resolves both shared configurations and plugin presets!
+  To do this, it invokes NodeJS.
+
+  Biome relies on the metadata of its rules to determine the [equivalent rule of an ESLint rule](https://biomejs.dev/linter/rules-sources/).
+  A Biome rule is either inspired or roughly identical to an ESLint rules.
+  By default, inspired and nursery rules are excluded from the migration.
+  You can use the CLI flags `--include-inspired` and `--include-nursery` to migrate them as well.
+
+  Note that this is a best-effort approach.
+   You are not guaranteed to get the same behavior as ESLint.
+
+  Given the following ESLint configuration:
+
+  ```json
+  {
+        "ignore_patterns": ["**/*.test.js"],
+        "globals": { "var2": "readonly" },
+        "rules": {
+            "eqeqeq": "error"
+        },
+        "overrides": [{
+            "files": ["lib/*.js"],
+            "rules": {
+              "default-param-last": "off"
+            }
+        }]
+  }
+  ```
+
+  `@biomejs/biome migrate eslint --write` changes the Biome configuration as follows:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "recommended": false,
+        "suspicious": {
+          "noDoubleEquals": "error"
+        }
+      }
+    },
+    "javascript": { "globals": ["var2"] },
+    "overrides": [{
+      "include": ["lib/*.js"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useDefaultParameterLast": "off"
+          }
+        }
+      }
+    }]
+  }
+  ```
+
+  If you find any issue, please don't hesitate to report them.
+
+  Contributed by @Conaclos
+
 #### Enhancements
 
 ### Configuration
@@ -714,7 +780,7 @@ Additionally, the following rules are now recommended:
 
   ```diff
   - <div class="px-2 foo p-4 bar" />
-  + <div class="foo·bar·p-4·px-2" />
+  + <div class="foo bar p-4 px-2" />
   ```
   Contributed by @DaniGuardiola
 
@@ -936,7 +1002,7 @@ Additionally, the following rules are now recommended:
 - Fix [#1656](https://github.com/biomejs/biome/issues/1656). [useOptionalChain](https://biomejs.dev/linter/rules/use-optional-chain/) code action now correctly handles logical and chains where methods with the same name are invoked with different arguments:
 
   ```diff
-  - tags·&&·tags.includes('a')·&&·tags.includes('b')
+  - tags && tags.includes('a') && tags.includes('b')
   + tags?.includes('a') && tags.includes('b')
   ```
 

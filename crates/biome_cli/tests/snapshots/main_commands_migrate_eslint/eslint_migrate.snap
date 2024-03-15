@@ -1,0 +1,102 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": { "enabled": true }
+}
+```
+
+## `./.eslintrc.json`
+
+```json
+{
+        "ignore_patterns": [
+            "**/*.test.js", // support trailing commas amd comments
+        ],
+        "globals": {
+            "var1": "writable",
+            "var2": "readonly"
+        },
+        "rules": {
+            "dot-notation": 0,
+            "default-param-last": "off",
+            "eqeqeq": "warn",
+            "getter-return": [2,
+                // support unknown options
+                { allowImplicit: true }
+            ],
+            "no-eval": 1
+            "no-extra-label": ["error"]
+        },
+        "overrides": [{
+            "files": ["bin/*.js", "lib/*.js"],
+            "excludedFiles": "*.test.js",
+            "rules": {
+                "eqeqeq": ["off"]
+            }
+        }],
+        "unknownField": "ignored"
+    }
+```
+
+# Emitted Messages
+
+```block
+./.eslintrc.json parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Property key must be double quoted
+  
+
+```
+
+```block
+./.eslintrc.json parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `"no-extra-label"`
+  
+  i Remove "no-extra-label"
+  
+
+```
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1  1 │   {
+    2    │ - ········"linter":·{·"enabled":·true·}
+    3    │ - ····}
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{
+       5 │ + → → → "complexity":·{·"noUselessLabel":·"error",·"useLiteralKeys":·"off"·},
+       6 │ + → → → "security":·{·"noGlobalEval":·"warn"·},
+       7 │ + → → → "style":·{·"useDefaultParameterLast":·"off"·},
+       8 │ + → → → "suspicious":·{·"noDoubleEquals":·"warn",·"useGetterReturn":·"error"·}
+       9 │ + → → }
+      10 │ + → },
+      11 │ + → "javascript":·{·"globals":·["var2",·"var1"]·},
+      12 │ + → "overrides":·[
+      13 │ + → → {
+      14 │ + → → → "ignore":·["bin/*.js",·"lib/*.js"],
+      15 │ + → → → "linter":·{·"rules":·{·"suspicious":·{·"noDoubleEquals":·"off"·}·}·}
+      16 │ + → → }
+      17 │ + → ]
+      18 │ + }
+      19 │ + 
+  
+
+```
+
+```block
+Run the command with the option --write to apply the changes.
+```
+
+```block
+Run the command with the option --include-inspired to also migrate inspired rules.
+```

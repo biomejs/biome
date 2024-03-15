@@ -1,0 +1,79 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.eslintrc.json`
+
+```json
+{
+        "ignore_patterns": [
+            "**/*.test.js", // trailing comma amd comment
+        ],
+        "globals": {
+            "var1": "writable",
+            "var2": "readonly"
+        },
+        "rules": {
+            "dot-notation": 0,
+            "default-param-last": "off",
+            "eqeqeq": "warn",
+            "getter-return": [2,
+                // support unknown options
+                { "allowImplicit": true }
+            ],
+            "no-eval": 1,
+            "no-extra-label": ["error"]
+        },
+        "overrides": [{
+            "files": ["bin/*.js", "lib/*.js"],
+            "excludedFiles": "*.test.js",
+            "rules": {
+                "eqeqeq": ["off"]
+            }
+        }],
+        "unknownField": "ignored"
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{
+       5 │ + → → → "recommended":·false,
+       6 │ + → → → "complexity":·{·"noUselessLabel":·"error",·"useLiteralKeys":·"off"·},
+       7 │ + → → → "security":·{·"noGlobalEval":·"warn"·},
+       8 │ + → → → "style":·{·"useDefaultParameterLast":·"off"·},
+       9 │ + → → → "suspicious":·{·"noDoubleEquals":·"warn",·"useGetterReturn":·"error"·}
+      10 │ + → → }
+      11 │ + → },
+      12 │ + → "javascript":·{·"globals":·["var2",·"var1"]·},
+      13 │ + → "overrides":·[
+      14 │ + → → {
+      15 │ + → → → "ignore":·["*.test.js"],
+      16 │ + → → → "include":·["bin/*.js",·"lib/*.js"],
+      17 │ + → → → "linter":·{·"rules":·{·"suspicious":·{·"noDoubleEquals":·"off"·}·}·}
+      18 │ + → → }
+      19 │ + → ]
+      20 │ + }
+      21 │ + 
+  
+
+```
+
+```block
+Run the command with the option --write to apply the changes.
+```

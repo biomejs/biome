@@ -6,5 +6,7 @@ mod init;
 mod lint;
 mod lsp_proxy;
 mod migrate;
+mod migrate_eslint;
+mod migrate_prettier;
 mod rage;
 mod version;
