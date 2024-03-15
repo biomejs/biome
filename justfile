@@ -19,9 +19,9 @@ upgrade-tools:
 	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools knope --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
-gen:
-  cargo codegen all
-  cargo codegen-configuration
+gen-all:
+  cargo run -p xtask_codegen -- all
+  cargo run -p xtask_codegen -- configuration
   cargo lintdoc
   just gen-bindings
   just gen-web
@@ -49,6 +49,10 @@ gen-web:
 gen-tw:
   bun packages/tailwindcss-config-analyzer/src/generate-tailwind-preset.ts
 
+# Generates the code of the grammars available in Biome
+gen-grammar *args='':
+    cargo run -p xtask_codegen -- grammar {{args}}
+
 # Generates the linter documentation and Rust documentation
 documentation:
   cargo lintdoc
@@ -73,8 +77,6 @@ promote-rule rulename group:
 format:
 	cargo format
 	taplo format
-
-
 
 [unix]
 _touch file:
@@ -120,9 +122,9 @@ lint:
 # When you finished coding, run this command to run the same commands in the CI.
 ready:
   git diff --exit-code --quiet
-  just gen
+  just gen-all
   just documentation
-  #just format # format is already run in `just gen`
+  #just format # format is already run in `just gen-all`
   just lint
   just test
   just test-doc
