@@ -802,7 +802,7 @@ impl SemanticEventExtractor {
                             // If a dual binding exists, then it exports to the dual binding.
                             continue;
                         }
-                        Reference::Typeof(range) => {
+                        Reference::Typeof(range) | Reference::Qualified(range) => {
                             // A typeof can only use a value,
                             // but also an imported type (with `type` modifier)
                             if let Some(info) = &dual_binding {
