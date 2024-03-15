@@ -249,7 +249,7 @@ impl Reference {
             | Self::ExportType(range)
             | Self::Read(range)
             | Self::Typeof(range)
-            | Self::Write(range) 
+            | Self::Write(range)
             | Self::Qualified(range) => range,
         }
     }
@@ -566,9 +566,15 @@ impl SemanticEventExtractor {
                     {
                         Some(TS_REFERENCE_TYPE | TS_NAME_WITH_TYPE_ARGUMENTS) => {
                             if matches!(node.syntax().parent().kind(), Some(TS_QUALIFIED_NAME)) {
-                                self.push_reference(BindingName::Value(name), Reference::Qualified(range))
+                                self.push_reference(
+                                    BindingName::Value(name),
+                                    Reference::Qualified(range),
+                                )
                             } else {
-                                self.push_reference(BindingName::Type(name), Reference::Read(range));
+                                self.push_reference(
+                                    BindingName::Type(name),
+                                    Reference::Read(range),
+                                );
                             }
                         }
                         // ignore binding `<X>` from `import().<X>`
@@ -747,7 +753,9 @@ impl SemanticEventExtractor {
                                 }
                             }
                         }
-                        Reference::Read(range) | Reference::Typeof(range) | Reference::Qualified(range) => {
+                        Reference::Read(range)
+                        | Reference::Typeof(range)
+                        | Reference::Qualified(range) => {
                             if declaration_before_reference {
                                 SemanticEvent::Read {
                                     range,
