@@ -2,11 +2,11 @@ use super::rename::*;
 use crate::utils::batch::JsBatchMutation;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{semantic_model, SemanticModelOptions};
-use biome_js_syntax::{JsSyntaxNode, TsIdentifierBinding};
 use biome_js_syntax::{
     AnyJsObjectMember, JsFileSource, JsFormalParameter, JsIdentifierBinding, JsLanguage,
     JsVariableDeclarator,
 };
+use biome_js_syntax::{JsSyntaxNode, TsIdentifierBinding};
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast};
 use std::{any::type_name, fmt::Debug};
 
@@ -45,13 +45,8 @@ pub fn assert_rename_binding_a_to_b_ok(before: &str, expected: &str) {
     assert!(!biome_js_parser::test_utils::has_bogus_nodes_or_empty_slots(&root));
 }
 
-
 pub fn assert_rename_ts_binding_a_to_b_ok(before: &str, expected: &str) {
-    let r = biome_js_parser::parse(
-        before,
-        JsFileSource::tsx(),
-        JsParserOptions::default(),
-    );
+    let r = biome_js_parser::parse(before, JsFileSource::tsx(), JsParserOptions::default());
     let model = semantic_model(&r.tree(), SemanticModelOptions::default());
 
     let bindings: Vec<TsIdentifierBinding> = r
