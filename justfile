@@ -68,9 +68,9 @@ new-lintrule path rulename:
 new-css-lintrule path rulename:
   cargo run -p xtask_codegen -- new-css-lintrule --path={{path}} --name={{rulename}}
   cargo codegen analyzer
-  cargo codegen-configuration
-  just gen-bindings
-  just format
+  # cargo codegen-configuration
+  # just gen-bindings
+  # just format
 # TODO: lintdoc, website
 
 # Promotes a rule from the nursery group to a new group

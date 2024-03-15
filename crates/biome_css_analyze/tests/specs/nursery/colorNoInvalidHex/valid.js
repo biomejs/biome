@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+
+ p {{ 
+color: red;
+ text-align: center;
+}}
