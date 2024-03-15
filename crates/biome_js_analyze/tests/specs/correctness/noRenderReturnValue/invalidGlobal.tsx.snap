@@ -30,7 +30,7 @@ invalidGlobal.tsx:1:11 lint/correctness/noRenderReturnValue ━━━━━━�
     2 │ const foo = bar && ReactDOM.render(<div />, document.body);
     3 │ const foo = bar ? ReactDOM.render(<div />, document.body) : null
   
-  i The returned value is legacy and future versions of react might return that value asynchronously.
+  i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
 
@@ -47,7 +47,7 @@ invalidGlobal.tsx:2:20 lint/correctness/noRenderReturnValue ━━━━━━�
     3 │ const foo = bar ? ReactDOM.render(<div />, document.body) : null
     4 │ const foo = () => ReactDOM.render(<div />, document.body);
   
-  i The returned value is legacy and future versions of react might return that value asynchronously.
+  i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
 
@@ -65,7 +65,7 @@ invalidGlobal.tsx:3:19 lint/correctness/noRenderReturnValue ━━━━━━�
     4 │ const foo = () => ReactDOM.render(<div />, document.body);
     5 │ const foo = {
   
-  i The returned value is legacy and future versions of react might return that value asynchronously.
+  i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
 
@@ -83,7 +83,7 @@ invalidGlobal.tsx:4:19 lint/correctness/noRenderReturnValue ━━━━━━�
     5 │ const foo = {
     6 │     react: ReactDOM.render(<div />, document.body)
   
-  i The returned value is legacy and future versions of react might return that value asynchronously.
+  i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
 
@@ -101,7 +101,7 @@ invalidGlobal.tsx:6:12 lint/correctness/noRenderReturnValue ━━━━━━�
     7 │ };
     8 │ let lorem;
   
-  i The returned value is legacy and future versions of react might return that value asynchronously.
+  i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
 
@@ -119,7 +119,7 @@ invalidGlobal.tsx:9:9 lint/correctness/noRenderReturnValue ━━━━━━━
     10 │ function render() {
     11 │     return ReactDOM.render(<div />, document.body)
   
-  i The returned value is legacy and future versions of react might return that value asynchronously.
+  i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
 
@@ -137,10 +137,8 @@ invalidGlobal.tsx:11:12 lint/correctness/noRenderReturnValue ━━━━━━�
     12 │ }
     13 │ 
   
-  i The returned value is legacy and future versions of react might return that value asynchronously.
+  i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
 
 ```
-
-
