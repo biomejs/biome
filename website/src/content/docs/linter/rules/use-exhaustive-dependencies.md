@@ -14,7 +14,7 @@ Enforce all dependencies are correctly specified in a React hook.
 
 This rule is a port of the rule [react-hooks/exhaustive-deps](https://legacy.reactjs.org/docs/hooks-rules.html#eslint-plugin), and it's meant to target projects that uses React.
 
-If your project _doesn't_ use React, **you shouldn't use this rule**.
+If your project _doesn't_ use React (or Preact), **you shouldn't use this rule**.
 
 The rule will inspect the following **known** hooks:
 
@@ -292,6 +292,11 @@ const dispatch = useDispatch();
 // No need to list `dispatch` as dependency:
 const doAction = useCallback(() => dispatch(someAction()), []);
 ```
+
+## Preact support
+
+This rule recognizes rules imported from `preact/compat` and
+`preact/hooks` and applies the same rules as for React hooks.
 
 ## Related links
 

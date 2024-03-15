@@ -33,12 +33,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- Fix [https://github.com/biomejs/biome/issues/1661](https://github.com/biomejs/biome/issues/1661). Now nested conditionals are aligned with Prettier's logic, and won't contain mixed spaced and tabs. Contributed by @ematipico
+- Fix [#1661](https://github.com/biomejs/biome/issues/1661). Now nested conditionals are aligned with Prettier's logic, and won't contain mixed spaced and tabs. Contributed by @ematipico
 
 
 ### JavaScript APIs
 
 ### Linter
+
+#### New features
+
+- Implement [#2043](https://github.com/biomejs/biome/issues/2043): The React rule [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) is now also compatible with Preact hooks imported from `preact/hooks` or `preact/compat`. Contributed by @arendjr
 
 ### Parser
 
