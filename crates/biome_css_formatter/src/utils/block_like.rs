@@ -96,7 +96,10 @@ impl Format<CssFormatContext> for CssBlockLike {
                 write!(f, [soft_line_break()])?;
             }
         } else {
-            write!(f, [soft_block_indent(&format_with(|f| self.write_items(f)))])?;
+            write!(
+                f,
+                [soft_block_indent(&format_with(|f| self.write_items(f)))]
+            )?;
         }
         write!(f, [r_curly_token.format()])
     }
