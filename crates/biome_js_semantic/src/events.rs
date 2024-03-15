@@ -227,6 +227,14 @@ enum Reference {
     /// a += 1;
     /// ```
     Write(TextRange),
+    /// TS_QUALIFIED_NAME
+    /// ```ts
+    /// namespace A {
+    ///   type B = number;
+    /// }
+    /// let a: A.B = 1;
+    /// ```
+    Qualified(TextRange),
 }
 
 impl Reference {
@@ -241,7 +249,8 @@ impl Reference {
             | Self::ExportType(range)
             | Self::Read(range)
             | Self::Typeof(range)
-            | Self::Write(range) => range,
+            | Self::Write(range) 
+            | Self::Qualified(range) => range,
         }
     }
 }
@@ -556,7 +565,11 @@ impl SemanticEventExtractor {
                         .kind()
                     {
                         Some(TS_REFERENCE_TYPE | TS_NAME_WITH_TYPE_ARGUMENTS) => {
-                            self.push_reference(BindingName::Type(name), Reference::Read(range));
+                            if matches!(node.syntax().parent().kind(), Some(TS_QUALIFIED_NAME)) {
+                                self.push_reference(BindingName::Value(name), Reference::Qualified(range))
+                            } else {
+                                self.push_reference(BindingName::Type(name), Reference::Read(range));
+                            }
                         }
                         // ignore binding `<X>` from `import().<X>`
                         Some(TS_IMPORT_TYPE_QUALIFIER) => return,
@@ -734,7 +747,7 @@ impl SemanticEventExtractor {
                                 }
                             }
                         }
-                        Reference::Read(range) | Reference::Typeof(range) => {
+                        Reference::Read(range) | Reference::Typeof(range) | Reference::Qualified(range) => {
                             if declaration_before_reference {
                                 SemanticEvent::Read {
                                     range,
