@@ -19,6 +19,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### Bug fixes
+
+- The `noSuperWithoutExtends` rule now allows for calling `super()` in derived class constructors of class expressions ([#2108](https://github.com/biomejs/biome/issues/2108)). Contributed by @Sec-ant
+
 ### CLI
 
 ### Configuration
