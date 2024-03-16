@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/comments/at-rules.css
 ---
-
 # Input
 
 ```css
@@ -126,7 +125,7 @@ info: css/comments/at-rules.css
  
 -/* comment 45 */
 -@font-feature-values /* comment 46 */ Font Two /* comment 47 */ {
-+/* comment 45 */ @font-feature-values /* comment 46 */ Font
++/* comment 45 */ @font-feature-values /* comment 46 */ Font 
 +two /* comment 47 */ {
    /* comment 48 */
 -  /* comment 49 */
@@ -317,7 +316,7 @@ info: css/comments/at-rules.css
 @keyframes /* comment 43 */ slidein /* comment 44 */ {
 }
 
-/* comment 45 */ @font-feature-values /* comment 46 */ Font
+/* comment 45 */ @font-feature-values /* comment 46 */ Font 
 two /* comment 47 */ {
   /* comment 48 */
   /* comment 49 */ @
@@ -531,5 +530,3 @@ at-rules.css:27:19 parse ━━━━━━━━━━━━━━━━━━�
   116:   /* comment 204 */ @media /* comment 205 */ screen /* comment 206 */ and /* comment 207 */ (
   117:       /* comment 208 */ /* comment 209 */ /* comment 210 */ min-width: 900px /* comment 211 */
 ```
-
-
