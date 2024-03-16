@@ -93,10 +93,13 @@ impl Format<CssFormatContext> for CssBlockLike {
                     [format_dangling_comments(self.syntax()).with_block_indent()]
                 )?;
             } else {
-                write!(f, [hard_line_break()])?;
+                write!(f, [soft_line_break()])?;
             }
         } else {
-            write!(f, [block_indent(&format_with(|f| self.write_items(f)))])?;
+            write!(
+                f,
+                [soft_block_indent(&format_with(|f| self.write_items(f)))]
+            )?;
         }
         write!(f, [r_curly_token.format()])
     }
