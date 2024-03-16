@@ -52,15 +52,15 @@ Let's say you want to create a new language that has the extension `html`, you'l
 - Unions of nodes **must** start with `Any*`, e.g. `AnyHtmlAttribute`.
 - Nodes for enclosing syntax errors must have the **Bogus** word, e.g. `HtmlBogusAttribute`.
 - **Bogus** nodes **must be part of a variant**, e.g.
-  ```ignore
-  AnyHtmlAttribute = 
+  ```text
+  AnyHtmlAttribute =
     HtmlSimpleAttribute
     HtmlBogusAttribute
   ```
 - Nodes that represent a list **must** end with the postfix **List**, e.g. `HtmlAttributeList`.
 - Lists are **never** optional. They are mandatory and empty by default, e.g.
-  ```ignore
-  HtmlTag = 
+  ```text
+  HtmlTag =
     attributes: HtmlAttributeList
   ```
 
@@ -70,7 +70,7 @@ Once you're finished, you'll have to generate the files from the grammar. Use th
 
 ```shell
 # generate grammar of the HTML language
-just gen-grammar html 
+just gen-grammar html
 
 # generate grammar of the HTML and CSS languages
 just gen-grammar html css
