@@ -1381,6 +1381,13 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
+				"colorNoInvalidHex": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBarrelFile": {
 					"description": "Disallow the use of barrel file.",
 					"anyOf": [
@@ -1495,6 +1502,13 @@
 				},
 				"noUselessTernary": {
 					"description": "Disallow ternary operators when simpler alternatives exist.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noop": {
+					"description": "Noop rule",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

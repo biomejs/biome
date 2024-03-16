@@ -780,6 +780,7 @@ version = "0.0.0"
 dependencies = [
  "biome_analyze",
  "biome_console",
+ "biome_css_analyze",
  "biome_css_formatter",
  "biome_css_parser",
  "biome_css_syntax",
@@ -3716,6 +3717,8 @@ dependencies = [
  "anyhow",
  "biome_analyze",
  "biome_cli",
+ "biome_css_analyze",
+ "biome_css_syntax",
  "biome_diagnostics",
  "biome_js_analyze",
  "biome_js_factory",

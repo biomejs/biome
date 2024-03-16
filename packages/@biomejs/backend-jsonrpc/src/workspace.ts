@@ -889,6 +889,10 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Succinct description of the rule.
+	 */
+	colorNoInvalidHex?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of barrel file.
 	 */
 	noBarrelFile?: RuleConfiguration_for_Null;
@@ -956,6 +960,10 @@ export interface Nursery {
 	 * Disallow ternary operators when simpler alternatives exist.
 	 */
 	noUselessTernary?: RuleConfiguration_for_Null;
+	/**
+	 * Noop rule
+	 */
+	noop?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1887,11 +1895,12 @@ export type Category =
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
+	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noApproximativeNumericConstant"
 	| "lint/nursery/noBarrelFile"
 	| "lint/nursery/noConsole"
-	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDoneCallback"
+	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateTestHooks"
 	| "lint/nursery/noExcessiveNestedTestSuites"

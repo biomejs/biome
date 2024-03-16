@@ -106,7 +106,7 @@ define_categories! {
     "lint/correctness/useIsNan": "https://biomejs.dev/linter/rules/use-is-nan",
     "lint/correctness/useValidForDirection": "https://biomejs.dev/linter/rules/use-valid-for-direction",
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
-    "lint/css/nursery/colorNoInvalidHex": "https://biomejs.dev/linter/rules/color-no-invalid-hex",
+    "lint/nursery/colorNoInvalidHex": "https://biomejs.dev/linter/rules/color-no-invalid-hex",
     "lint/nursery/noApproximativeNumericConstant": "https://biomejs.dev/linter/rules/no-approximative-numeric-constant",
     "lint/nursery/noBarrelFile": "https://biomejs.dev/linter/rules/no-barrel-file",
     "lint/nursery/noConsole": "https://biomejs.dev/linter/rules/no-console",
