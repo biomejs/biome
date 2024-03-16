@@ -52,14 +52,14 @@ Let's say you want to create a new language that has the extension `html`, you'l
 - Unions of nodes **must** start with `Any*`, e.g. `AnyHtmlAttribute`.
 - Nodes for enclosing syntax errors must have the **Bogus** word, e.g. `HtmlBogusAttribute`.
 - **Bogus** nodes **must be part of a variant**, e.g.
-  ```
+  ```ignore
   AnyHtmlAttribute = 
     HtmlSimpleAttribute
     HtmlBogusAttribute
   ```
 - Nodes that represent a list **must** end with the postfix **List**, e.g. `HtmlAttributeList`.
 - Lists are **never** optional. They are mandatory and empty by default, e.g.
-  ```
+  ```ignore
   HtmlTag = 
     attributes: HtmlAttributeList
   ```

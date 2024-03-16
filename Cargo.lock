@@ -439,7 +439,6 @@ dependencies = [
  "biome_grit_syntax",
  "biome_parser",
  "biome_rowan",
- "biome_unicode_table",
  "bitflags 2.3.1",
  "insta",
  "quickcheck",

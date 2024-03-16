@@ -301,7 +301,7 @@ impl<'src> Lexer<'src> {
             b'$' => self.lex_variable(),
             b'!' => self.eat_byte(T![!]),
             _ if is_leading_identifier_byte(current) => self.lex_name(current),
-            _ if (b'0'..=b'9').contains(&current) || current == b'-' => self.lex_number(current),
+            _ if current.is_ascii_digit() || current == b'-' => self.lex_number(current),
             _ if self.position == 0 && self.consume_potential_bom().is_some() => UNICODE_BOM,
             _ => self.eat_unexpected_character(),
         }
@@ -416,7 +416,7 @@ impl<'src> Lexer<'src> {
 
                     match state {
                         LexNumberState::FirstDigit
-                            if matches!(self.current_byte(), Some(b'0'..=b'9')) =>
+                            if self.current_byte().is_some_and(|b| b.is_ascii_digit()) =>
                         {
                             LexNumberState::Invalid {
                                 position,
@@ -427,7 +427,7 @@ impl<'src> Lexer<'src> {
                         state => state,
                     }
                 }
-                Some(b'0'..=b'9') => {
+                Some(b'1'..=b'9') => {
                     self.advance(1);
 
                     match state {
@@ -442,7 +442,7 @@ impl<'src> Lexer<'src> {
 
                     match state {
                         LexNumberState::IntegerPart
-                            if matches!(self.current_byte(), Some(b'0'..=b'9')) =>
+                            if self.current_byte().is_some_and(|b| b.is_ascii_digit()) =>
                         {
                             LexNumberState::FractionalPart
                         }
@@ -467,7 +467,7 @@ impl<'src> Lexer<'src> {
 
                     match state {
                         LexNumberState::IntegerPart | LexNumberState::FractionalPart
-                            if matches!(self.current_byte(), Some(b'0'..=b'9')) =>
+                            if self.current_byte().is_some_and(|b| b.is_ascii_digit()) =>
                         {
                             LexNumberState::Exponent
                         }
@@ -1127,12 +1127,9 @@ enum LexRegexState {
 }
 
 fn is_identifier_byte(byte: u8) -> bool {
-    (b'a'..=b'z').contains(&byte)
-        || (b'A'..=b'Z').contains(&byte)
-        || (b'0'..=b'9').contains(&byte)
-        || byte == b'_'
+    byte.is_ascii_alphanumeric() || byte == b'_'
 }
 
 fn is_leading_identifier_byte(byte: u8) -> bool {
-    (b'a'..=b'z').contains(&byte) || (b'A'..=b'Z').contains(&byte) || byte == b'_'
+    byte.is_ascii_alphabetic() || byte == b'_'
 }
