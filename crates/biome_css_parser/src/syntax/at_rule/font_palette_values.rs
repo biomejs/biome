@@ -1,4 +1,4 @@
-use crate::syntax::block::parse_declaration_list_block;
+use crate::syntax::block::parse_declaration_block;
 use crate::syntax::parse_dashed_identifier;
 use crate::{parser::CssParser, syntax::parse_error::expected_dashed_identifier};
 use biome_css_syntax::{
@@ -41,7 +41,7 @@ pub(crate) fn parse_font_palette_values_at_rule(p: &mut CssParser) -> ParsedSynt
         CSS_BOGUS_AT_RULE
     };
 
-    parse_declaration_list_block(p);
+    parse_declaration_block(p);
 
     Present(m.complete(p, kind))
 }

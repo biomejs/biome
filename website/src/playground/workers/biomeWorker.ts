@@ -10,7 +10,7 @@ import {
 	QuoteStyle,
 	Semicolons,
 } from "@/playground/types";
-import { isJsonFilename } from "@/playground/utils";
+import { isCssFilename, isJsonFilename } from "@/playground/utils";
 import init, {
 	DiagnosticPrinter,
 	type PartialConfiguration as Configuration,
@@ -128,6 +128,14 @@ self.addEventListener("message", async (e) => {
 						unsafeParameterDecoratorsEnabled,
 					},
 				},
+				css: {
+					formatter: {
+						quoteStyle: quoteStyle === QuoteStyle.Double ? "double" : "single",
+					},
+					parser: {
+						allowWrongLineComments: true,
+					},
+				},
 				json: {
 					parser: {
 						allowComments,
@@ -202,11 +210,13 @@ self.addEventListener("message", async (e) => {
 				path,
 			});
 
-			const controlFlowGraph = !isJsonFilename(filename)
+			const controlFlowGraph = !(
+				isJsonFilename(filename) || isCssFilename(filename)
+			)
 				? workspace.getControlFlowGraph({
 						path,
 						cursor: cursorPosition,
-				  })
+					})
 				: "";
 
 			const formatterIr = workspace.getFormatterIr({

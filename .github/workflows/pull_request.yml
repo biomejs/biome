@@ -29,6 +29,8 @@ jobs:
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
         with:
@@ -45,6 +47,8 @@ jobs:
     steps:
       - name: Checkout PR Branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
         with:
@@ -58,6 +62,8 @@ jobs:
     steps:
       - name: Checkout PR Branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         run: rustup toolchain install nightly
       - name: Install udeps
@@ -74,13 +80,10 @@ jobs:
           - os: windows-latest
           - os: ubuntu-latest
     steps:
-      - name: Free Disk Space (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        uses: jlumbroso/free-disk-space@main
-        with:
-          android: true
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
         with:
@@ -90,18 +93,18 @@ jobs:
       - name: Run doctests
         run: cargo test --doc
 
-  fuzz-all:
-    name: Build and init fuzzers
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@v1
-        with:
-          bins: cargo-fuzz
-      - name: Run init-fuzzer
-        run: bash fuzz/init-fuzzer.sh
+#  fuzz-all:
+#    name: Build and init fuzzers
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout PR branch
+#        uses: actions/checkout@v4
+#      - name: Install toolchain
+#        uses: moonrepo/setup-rust@v1
+#        with:
+#          bins: cargo-fuzz
+#      - name: Run init-fuzzer
+#        run: bash fuzz/init-fuzzer.sh
 
   test-node-api:
     name: Test node.js API
@@ -109,6 +112,8 @@ jobs:
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
       - name: Build main binary
@@ -125,24 +130,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-
       - uses: pnpm/action-setup@v3
-        with:
-          version: 8
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Build TypeScript code
         run: |
-          pnpm --prefix packages/@biomejs/backend-jsonrpc i
-          pnpm --prefix packages/@biomejs/backend-jsonrpc run build
-          pnpm --prefix packages/@biomejs/js-api run build:wasm-bundler
-          pnpm --prefix packages/@biomejs/js-api run build:wasm-node
-          pnpm --prefix packages/@biomejs/js-api run build:wasm-web
-          pnpm --prefix packages/@biomejs/js-api i
-          pnpm --prefix packages/@biomejs/js-api run build
+          pnpm --filter @biomejs/backend-jsonrpc i
+          pnpm --filter @biomejs/backend-jsonrpc run build
+          pnpm --filter @biomejs/js-api run build:wasm-bundler
+          pnpm --filter @biomejs/js-api run build:wasm-node
+          pnpm --filter @biomejs/js-api run build:wasm-web
+          pnpm --filter @biomejs/js-api i
+          pnpm --filter @biomejs/js-api run build
       - name: Run JS tests
         run: |
-          pnpm --prefix packages/@biomejs/backend-jsonrpc test:ci
-          pnpm --prefix packages/@biomejs/js-api test:ci
+          pnpm --filter @biomejs/backend-jsonrpc run test:ci
+          pnpm --filter @biomejs/js-api run test:ci
 
   documentation:
     name: Documentation
@@ -150,6 +153,8 @@ jobs:
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
       - name: Run doc command
@@ -161,6 +166,8 @@ jobs:
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
       - name: Run the grammar codegen

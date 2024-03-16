@@ -454,22 +454,22 @@ CssDeclarationWithSemicolon =
     declaration: CssDeclaration
     ';'?
 
-AnyCssDeclarationListBlock =
-	CssDeclarationListBlock
+AnyCssDeclarationBlock =
+	CssDeclarationBlock
 	| CssBogusBlock
 
-CssDeclarationListBlock =
+CssDeclarationBlock =
 	'{'
 	declarations: CssDeclarationList
  	'}'
 
 CssDeclarationList = CssDeclarationWithSemicolon*
 
-AnyCssRuleListBlock =
-	CssRuleListBlock
+AnyCssRuleBlock =
+	CssRuleBlock
 	| CssBogusBlock
 
-CssRuleListBlock =
+CssRuleBlock =
 	'{'
 	rules: CssRuleList
  	'}'
@@ -547,8 +547,8 @@ AnyCssAtRule =
 	| CssNamespaceAtRule
 	| CssStartingStyleAtRule
 	| CssDocumentAtRule
-	| CssBogusAtRule
 	| CssPropertyAtRule
+	| CssBogusAtRule
 
 // @charset "UTF-8";
 // ^^^^^^^^^^^^^^^^^
@@ -565,23 +565,23 @@ CssCharsetAtRule =
 CssColorProfileAtRule =
 	'color-profile'
 	name: CssCustomIdentifier
-	block: AnyCssDeclarationListBlock
+	block: AnyCssDeclarationBlock
 
 CssCounterStyleAtRule =
 	'counter-style'
 	name: CssCustomIdentifier
-	block: AnyCssDeclarationListBlock
+	block: AnyCssDeclarationBlock
 
 CssPropertyAtRule =
 	'property'
 	name: CssDashedIdentifier
-	block: AnyCssDeclarationListBlock
+	block: AnyCssDeclarationBlock
 
 // @font-face {}
 // ^^^^^^^^^^^^^
 CssFontFaceAtRule =
 	'font-face'
-	block: AnyCssDeclarationListBlock
+	block: AnyCssDeclarationBlock
 
 
 // https://drafts.csswg.org/css-fonts/#font-feature-values
@@ -639,14 +639,14 @@ CssFontFeatureValuesItem =
 		| 'ornaments'
 		| 'annotation'
 	)
-	block: AnyCssDeclarationListBlock
+	block: AnyCssDeclarationBlock
 
 // @font-palette-values --ident {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssFontPaletteValuesAtRule =
 	'font-palette-values'
 	name: CssDashedIdentifier
-	block: AnyCssDeclarationListBlock
+	block: AnyCssDeclarationBlock
 
 
 // https://drafts.csswg.org/css-contain-3/#container-rule
@@ -677,7 +677,7 @@ CssContainerAtRule =
 	'container'
 	name: CssCustomIdentifier?
 	query: AnyCssContainerQuery
-	block: AnyCssRuleListBlock
+	block: AnyCssRuleBlock
 
 // <container-query>
 AnyCssContainerQuery =
@@ -835,7 +835,7 @@ AnyCssKeyframesItem =
 //                          ^^^^^^^^^^^
 CssKeyframesItem =
 	selectors: CssKeyframesSelectorList
-	block: AnyCssDeclarationListBlock
+	block: AnyCssDeclarationBlock
 
 CssKeyframesSelectorList =  (AnyCssKeyframesSelector (',' AnyCssKeyframesSelector)*)
 
@@ -891,7 +891,7 @@ CssKeyframesPercentageSelector =
 CssMediaAtRule =
 	'media'
 	queries: CssMediaQueryList
-	block: AnyCssRuleListBlock
+	block: AnyCssRuleBlock
 
 // @media screen, (width > 500px), print {}
 // 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1155,7 +1155,7 @@ AnyCssLayer =
 //        ^^^^^^^^^^^^^^^^
 CssLayerDeclaration =
 	references: CssLayerReferenceList
-	block: AnyCssRuleListBlock
+	block: AnyCssRuleBlock
 
 // @layer framework, bar.baz;
 //        ^^^^^^^^^^^^^^^^^^^
@@ -1191,7 +1191,7 @@ CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
 CssSupportsAtRule =
 	'supports'
 	condition: AnyCssSupportsCondition
-	block: AnyCssRuleListBlock
+	block: AnyCssRuleBlock
 
 AnyCssSupportsCondition =
 	CssSupportsNotCondition
@@ -1268,7 +1268,7 @@ CssSupportsFeatureSelector =
 CssScopeAtRule =
 	'scope'
 	range: AnyCssScopeRange?
-	block: AnyCssRuleListBlock
+	block: AnyCssRuleBlock
 
 AnyCssScopeRange =
 	CssScopeRangeStart
@@ -1374,8 +1374,8 @@ CssStartingStyleAtRule =
 	block: AnyCssStartingStyleBlock
 
 AnyCssStartingStyleBlock =
-	CssRuleListBlock
-	| CssDeclarationListBlock
+	CssRuleBlock
+	| CssDeclarationBlock
 	| CssBogusBlock
 
 // https://www.w3.org/TR/2012/WD-css3-conditional-20120911/#at-document
@@ -1390,7 +1390,7 @@ AnyCssStartingStyleBlock =
 CssDocumentAtRule =
 	'document'
 	matchers: CssDocumentMatcherList
-	block: AnyCssRuleListBlock
+	block: AnyCssRuleBlock
 
 CssDocumentMatcherList = AnyCssDocumentMatcher (',' AnyCssDocumentMatcher)* ','?
 

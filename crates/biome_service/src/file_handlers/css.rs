@@ -7,7 +7,7 @@ use crate::settings::{
     FormatSettings, Language, LanguageListSettings, LanguageSettings, OverrideSettings,
     SettingsHandle,
 };
-use crate::workspace::{DocumentFileSource, GetSyntaxTreeResult};
+use crate::workspace::{DocumentFileSource, GetSyntaxTreeResult, OrganizeImportsResult};
 use crate::WorkspaceError;
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::{can_format_css_yet, format_node};
@@ -111,7 +111,7 @@ impl ExtensionHandler for CssFileHandler {
                 code_actions: None,
                 rename: None,
                 fix_all: None,
-                organize_imports: None,
+                organize_imports: Some(organize_imports),
             },
             // TODO(faulty): Once the CSS formatter is sufficiently stable, we
             // will unhide its capabilities from services. But in the meantime,
@@ -256,4 +256,10 @@ fn format_on_type(
 
     let printed = biome_css_formatter::format_sub_tree(options, &root_node)?;
     Ok(printed)
+}
+
+fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
+    Ok(OrganizeImportsResult {
+        code: parse.syntax::<CssLanguage>().to_string(),
+    })
 }

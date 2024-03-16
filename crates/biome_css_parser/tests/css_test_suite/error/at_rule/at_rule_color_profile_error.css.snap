@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -31,7 +30,7 @@ CssRoot {
                             CSS_NUMBER_LITERAL@15..22 "112321" [] [Whitespace(" ")],
                         ],
                     },
-                    CssDeclarationListBlock {
+                    CssDeclarationBlock {
                         l_curly_token: L_CURLY@22..25 "{" [] [Whitespace("  ")],
                         declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@25..26 "}" [] [],
@@ -49,7 +48,7 @@ CssRoot {
                             CSS_STRING_LITERAL@42..51 "'string'" [] [Whitespace(" ")],
                         ],
                     },
-                    CssDeclarationListBlock {
+                    CssDeclarationBlock {
                         l_curly_token: L_CURLY@51..54 "{" [] [Whitespace("  ")],
                         declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@54..55 "}" [] [],
@@ -62,7 +61,7 @@ CssRoot {
             rule: CssBogusAtRule {
                 items: [
                     COLOR_PROFILE_KW@57..72 "color-profile" [] [Whitespace("  ")],
-                    CssDeclarationListBlock {
+                    CssDeclarationBlock {
                         l_curly_token: L_CURLY@72..75 "{" [] [Whitespace("  ")],
                         declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@75..76 "}" [] [],
@@ -110,7 +109,7 @@ CssRoot {
         0: COLOR_PROFILE_KW@1..15 "color-profile" [] [Whitespace(" ")]
         1: CSS_BOGUS@15..22
           0: CSS_NUMBER_LITERAL@15..22 "112321" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_LIST_BLOCK@22..26
+        2: CSS_DECLARATION_BLOCK@22..26
           0: L_CURLY@22..25 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@25..25
           2: R_CURLY@25..26 "}" [] []
@@ -120,7 +119,7 @@ CssRoot {
         0: COLOR_PROFILE_KW@28..42 "color-profile" [] [Whitespace(" ")]
         1: CSS_BOGUS@42..51
           0: CSS_STRING_LITERAL@42..51 "'string'" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_LIST_BLOCK@51..55
+        2: CSS_DECLARATION_BLOCK@51..55
           0: L_CURLY@51..54 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@54..54
           2: R_CURLY@54..55 "}" [] []
@@ -128,7 +127,7 @@ CssRoot {
       0: AT@55..57 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@57..76
         0: COLOR_PROFILE_KW@57..72 "color-profile" [] [Whitespace("  ")]
-        1: CSS_DECLARATION_LIST_BLOCK@72..76
+        1: CSS_DECLARATION_BLOCK@72..76
           0: L_CURLY@72..75 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@75..75
           2: R_CURLY@75..76 "}" [] []
@@ -234,5 +233,3 @@ at_rule_color_profile_error.css:6:1 parse ━━━━━━━━━━━━�
       │ 
   
 ```
-
-

@@ -1,10 +1,9 @@
-use std::{path::PathBuf, str::FromStr};
+use std::path::Path;
 
 use biome_string_case::Case;
 use case::CaseExt;
 
-pub fn generate_new_lintrule(path: &str, rule_name: &str) {
-    let rule_folder = PathBuf::from_str(path).unwrap();
+pub fn generate_new_lintrule(rule_folder: &Path, rule_name: &str) {
     match rule_folder.file_stem().and_then(|x| x.to_str()) {
         Some("nursery") => {}
         _ => {
@@ -91,7 +90,7 @@ impl Rule for {rule_name_upper_camel} {{
 }}
 "#
     );
-    let file_name = format!("{path}/{rule_name_snake}.rs");
+    let file_name = format!("{}/{rule_name_snake}.rs", rule_folder.display());
     std::fs::write(file_name, code).unwrap();
 
     let categories_path = "crates/biome_diagnostics_categories/src/categories.rs";

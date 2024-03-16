@@ -1,11 +1,12 @@
 const { platform, arch } = process;
+// biome-ignore lint/style/useNodejsImportProtocol: would be a breaking change, consider bumping node version next major version
 const { execSync } = require("child_process");
 
 function isMusl() {
 	let stderr;
 	try {
 		stderr = execSync("ldd --version", {
-			stdio: ['pipe', 'pipe', 'pipe']
+			stdio: ["pipe", "pipe", "pipe"],
 		});
 	} catch (err) {
 		stderr = err.stderr;
@@ -46,13 +47,13 @@ if (binName) {
 		binPath = require.resolve(binName);
 	} catch {
 		console.warn(
-			`The Biome CLI postinstall script failed to resolve the binary file "${binName}". Running Biome from the npm package will probably not work correctly.`
+			`The Biome CLI postinstall script failed to resolve the binary file "${binName}". Running Biome from the npm package will probably not work correctly.`,
 		);
 	}
 } else {
 	console.warn(
 		"The Biome CLI package doesn't ship with prebuilt binaries for your platform yet. " +
 			"You can still use the CLI by cloning the biomejs/biome repo from GitHub, " +
-			"and follow the instructions there to build the CLI for your platform."
+			"and follow the instructions there to build the CLI for your platform.",
 	);
 }

@@ -212,6 +212,17 @@ things you would need to run and check:
 
 ## Crates development
 
+### Create new crates
+
+If you happen to create a new _crate_ inside the workspace, use the command `just new-crate`, e.g.:
+
+```shell
+just new-crate biome_new_crate
+```
+
+Where `biome_new_crate` is going to be the name of the new crate. This script takes care of adding the correct template for the `Cargo.toml` file, and it adds the crate
+to the `knope.toml` file, which we use for changelog generation.
+
 ### Analyzers and lint rules
 
 To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal page](https://docs.rs/biome_analyze/latest/biome_analyze/)
@@ -240,19 +251,19 @@ The npm module `packages/@biomejs/biome` contains Biome's Node.js API that suppo
 
 For testing and developing, you need to build these packages, following the steps:
 
-1. install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) globally;
-2. run the `build` command inside the package `backend-jsonrpc`;
-3. run the `build` and `build:wasm-node-dev` commands inside the package `js-api` (folder `packages/@biomejs/js-api`);
-4. run `pnpm i` inside the package `js-api` (folder `packages/@biomejs/js-api`), this will link the WebAssembly bindings and the
-   JSON-RPC bindings;
+1. install pnpm via [corepack](https://nodejs.org/api/corepack.html) by running `corepack enable`;
+2. install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) globally;
+3. run `pnpm --filter "@biomejs/backend-jsonrpc" build`;
+4. run the `pnpm --filter "@biomejs/js-api" build:wasm-dev` and `pnpm --filter "@biomejs/js-api" build` commands;
+5. run `pnpm i --filter "@biomejs/js-api" --frozen-lockfile` to link the WebAssembly bindings and the JSON-RPC bindings
 
 The tests are run against the compiled files, which means that you need to run the
-`build` command after you implemented features/bug fixes.
+`build` script after you implemented features/bug fixes.
 
 ## Website development
 
 The [Biome website](https://biomejs.dev/) is built with [Astro](https://astro.build).
-To start a development please check our [README](./website/README.md)
+To contribute to its development please check our [README](./website/README.md)
 
 ### Translations
 

@@ -130,12 +130,12 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssDeclaration::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_DECLARATION_IMPORTANT => {
-                    let $pattern = unsafe { $crate::CssDeclarationImportant::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_DECLARATION_BLOCK => {
+                    let $pattern = unsafe { $crate::CssDeclarationBlock::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_DECLARATION_LIST_BLOCK => {
-                    let $pattern = unsafe { $crate::CssDeclarationListBlock::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_DECLARATION_IMPORTANT => {
+                    let $pattern = unsafe { $crate::CssDeclarationImportant::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_DECLARATION_OR_AT_RULE_BLOCK => {
@@ -501,8 +501,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssRoot::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_RULE_LIST_BLOCK => {
-                    let $pattern = unsafe { $crate::CssRuleListBlock::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_RULE_BLOCK => {
+                    let $pattern = unsafe { $crate::CssRuleBlock::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_SCOPE_AT_RULE => {

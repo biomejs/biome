@@ -1,6 +1,6 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::block::parse_declaration_list_block;
+use crate::syntax::block::parse_declaration_block;
 use crate::syntax::parse_custom_identifier;
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
 use biome_css_syntax::CssSyntaxKind::*;
@@ -39,7 +39,7 @@ pub(crate) fn parse_counter_style_at_rule(p: &mut CssParser) -> ParsedSyntax {
         CSS_BOGUS_AT_RULE
     };
 
-    parse_declaration_list_block(p);
+    parse_declaration_block(p);
 
     Present(m.complete(p, kind))
 }

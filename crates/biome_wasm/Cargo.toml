@@ -16,7 +16,8 @@ version     = "0.0.0"
 crate-type = ["cdylib", "rlib"]
 
 [features]
-default = ["console_error_panic_hook"]
+default    = ["console_error_panic_hook"]
+format_css = ["biome_service/format_css"]
 
 [dependencies]
 biome_console      = { workspace = true }

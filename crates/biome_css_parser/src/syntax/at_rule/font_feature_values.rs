@@ -1,5 +1,5 @@
 use super::parse_error::{expected_any_font_feature_value_item, expected_font_feature_values_item};
-use crate::syntax::block::{parse_declaration_list_block, ParseBlockBody};
+use crate::syntax::block::{parse_declaration_block, ParseBlockBody};
 use crate::{
     lexer::CssLexContext,
     parser::CssParser,
@@ -125,7 +125,7 @@ fn parse_font_feature_values_item(p: &mut CssParser) -> ParsedSyntax {
         _ => p.error(expected_any_font_feature_value_item(p, p.cur_range())),
     };
 
-    parse_declaration_list_block(p);
+    parse_declaration_block(p);
 
     Present(m.complete(p, CSS_FONT_FEATURE_VALUES_ITEM))
 }

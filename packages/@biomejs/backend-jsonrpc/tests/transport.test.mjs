@@ -1,14 +1,11 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { Transport } from "../dist/transport";
 
 function makeMessage(body) {
 	const content = JSON.stringify(body);
 	return Buffer.from(
-		`Content-Length: ${content.length}\r\n` +
-			`Content-Type: application/vscode-jsonrpc;charset=utf-8\r\n` +
-			`\r\n` +
-			content,
+		`Content-Length: ${content.length}\r\nContent-Type: application/vscode-jsonrpc;charset=utf-8\r\n\r\n${content}`,
 	);
 }
 
@@ -65,7 +62,7 @@ describe("Transport Layer", () => {
 
 		const transport = new Transport(socket);
 
-		expect(() => onData(Buffer.from(`\r\n`))).toThrowError(
+		expect(() => onData(Buffer.from("\r\n"))).toThrowError(
 			"incoming message from the remote workspace is missing the Content-Length header",
 		);
 
@@ -86,7 +83,7 @@ describe("Transport Layer", () => {
 
 		const transport = new Transport(socket);
 
-		expect(() => onData(Buffer.from(`Content-Length\r\n`))).toThrowError(
+		expect(() => onData(Buffer.from("Content-Length\r\n"))).toThrowError(
 			'could not find colon token in "Content-Length\r\n"',
 		);
 
@@ -108,7 +105,7 @@ describe("Transport Layer", () => {
 		const transport = new Transport(socket);
 
 		expect(() =>
-			onData(Buffer.from(`Content-Type: text/plain\r\n`)),
+			onData(Buffer.from("Content-Type: text/plain\r\n")),
 		).toThrowError(
 			'invalid value for Content-Type expected "application/vscode-jsonrpc", got "text/plain"',
 		);
