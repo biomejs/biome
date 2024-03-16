@@ -69,6 +69,8 @@ pub type NoEmptyInterface =
 pub type NoEmptyPattern =
     <analyzers::correctness::no_empty_pattern::NoEmptyPattern as biome_analyze::Rule>::Options;
 pub type NoEmptyTypeParameters = < analyzers :: complexity :: no_empty_type_parameters :: NoEmptyTypeParameters as biome_analyze :: Rule > :: Options ;
+pub type NoEvolvingAny =
+    <analyzers::nursery::no_evolving_any::NoEvolvingAny as biome_analyze::Rule>::Options;
 pub type NoExcessiveCognitiveComplexity = < analyzers :: complexity :: no_excessive_cognitive_complexity :: NoExcessiveCognitiveComplexity as biome_analyze :: Rule > :: Options ;
 pub type NoExcessiveNestedTestSuites = < analyzers :: nursery :: no_excessive_nested_test_suites :: NoExcessiveNestedTestSuites as biome_analyze :: Rule > :: Options ;
 pub type NoExplicitAny =
