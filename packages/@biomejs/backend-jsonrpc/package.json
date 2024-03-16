@@ -1,13 +1,13 @@
 {
-  "name": "@biomejs/backend-jsonrpc",
-  "version": "0.0.0",
-  "main": "dist/index.js",
-  "scripts": {
-    "test": "vitest",
-    "test:ci": "pnpm build && vitest --run",
-    "tsc": "tsc --noEmit",
-    "build": "tsc"
-  },
+	"name": "@biomejs/backend-jsonrpc",
+	"version": "0.0.0",
+	"main": "dist/index.js",
+	"scripts": {
+		"test": "vitest",
+		"test:ci": "pnpm build && vitest run",
+		"tsc": "tsc --noEmit",
+		"build": "tsc"
+	},
 	"files": [
 		"dist/",
 		"README.md",
@@ -16,29 +16,23 @@
 		"ROME-LICENSE-MIT"
 	],
 	"homepage": "https://biomejs.dev",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/biomejs/biome.git",
-    "directory": "npm/backend-jsonrpc"
-  },
-  "author": "Biome Developers and Contributors",
-  "bugs": "https://github.com/biomejs/biome/issues",
-  "description": "Bindings to the JSON-RPC Workspace API of the Biome daemon",
-  "keywords": [
-    "JavaScript",
-    "TypeScript",
-    "format",
-    "lint",
-    "toolchain"
-  ],
-  "engines": {
-    "node": ">=14.*"
-  },
-  "license": "MIT OR Apache-2.0",
-  "devDependencies": {
-    "@types/node": "^18.7.2",
-    "typescript": "^4.8.2",
-    "vite": "^3.0.8",
-    "vitest": "^0.22.0"
-  }
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/biomejs/biome.git",
+		"directory": "npm/backend-jsonrpc"
+	},
+	"author": "Biome Developers and Contributors",
+	"bugs": "https://github.com/biomejs/biome/issues",
+	"description": "Bindings to the JSON-RPC Workspace API of the Biome daemon",
+	"keywords": ["JavaScript", "TypeScript", "format", "lint", "toolchain"],
+	"engines": {
+		"node": ">=14.*"
+	},
+	"license": "MIT OR Apache-2.0",
+	"devDependencies": {
+		"@types/node": "^20.11.27",
+		"typescript": "^5.4.2",
+		"vite": "^5.1.6",
+		"vitest": "^1.3.1"
+	}
 }

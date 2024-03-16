@@ -9,8 +9,9 @@ use biome_js_syntax::{
 };
 use biome_rowan::AstNode;
 use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
+use biome_string_case::Case;
 use xtask::{project_root, Mode, Result};
-use xtask_codegen::{to_lower_camel_case, update};
+use xtask_codegen::update;
 
 pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     let bindings_path = project_root().join("packages/@biomejs/backend-jsonrpc/src/workspace.ts");
@@ -25,7 +26,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
         let params = generate_type(&mut declarations, &mut queue, &method.params);
         let result = generate_type(&mut declarations, &mut queue, &method.result);
 
-        let camel_case = to_lower_camel_case(method.name);
+        let camel_case = Case::Camel.convert(method.name);
 
         member_definitions.push(AnyTsTypeMember::TsMethodSignatureTypeMember(
             make::ts_method_signature_type_member(

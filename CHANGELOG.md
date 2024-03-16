@@ -9,31 +9,47 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## Ureleased
 
 ### Analyzer
 
 ### CLI
 
-#### Bug fixes
-
-- CLI is now able to automatically search and resolve `biome.jsonc` ([#2008](https://github.com/biomejs/biome/issues/2008)).
-
-  Contributed by @Sec-ant
-
 ### Configuration
 
 #### Bug fixes
 
-- `json.formatter.trailingCommas` option now works in `overrides` ([#2009](https://github.com/biomejs/biome/issues/2009)).
-
-  Contributed by @Sec-ant
+- Fix enabled rules calculation. The precendence of individual rules, `all` and `recommend` presets in top-level and group-level configs is now correctly respected. More details can be seen in ([#2072](https://github.com/biomejs/biome/pull/2072)) ([#2028](https://github.com/biomejs/biome/issues/2028)). Contributed by @Sec-ant
 
 ### Editors
 
 ### Formatter
 
+#### Bug fixes
+
+- Fix [https://github.com/biomejs/biome/issues/1661](https://github.com/biomejs/biome/issues/1661). Now nested conditionals are aligned with Prettier's logic, and won't contain mixed spaced and tabs. Contributed by @ematipico
+
+
 ### JavaScript APIs
+
+### Linter
+
+### Parser
+
+## 1.6.1 (2024-03-12)
+
+### CLI
+
+#### Bug fixes
+
+- CLI is now able to automatically search and resolve `biome.jsonc` ([#2008](https://github.com/biomejs/biome/issues/2008)). Contributed by @Sec-ant
+- Fix a false positive where some files were counted as "fixed" even though they weren't modified. Contributed by @ematipico
+
+### Configuration
+
+#### Bug fixes
+
+- `json.formatter.trailingCommas` option now works in `overrides` ([#2009](https://github.com/biomejs/biome/issues/2009)). Contributed by @Sec-ant
 
 ### Linter
 
@@ -48,20 +64,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   });
   ```
 
-#### Enhamcements
-
 #### Bug fixes
 
-- [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable) now recognizes function bodies wrapped in parentheses ([#2011](https://github.com/biomejs/biome/issues/2011)).
+- [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable) now recognizes function bodies wrapped in parentheses ([#2011](https://github.com/biomejs/biome/issues/2011)). Contributed by @Sec-ant
 
-  Contributed by @Sec-ant
+- [useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type) now preserves type parameters of generic interfaces when applying fixes ([#2015](https://github.com/biomejs/biome/issues/2015)). Contributed by @Sec-ant
 
-- [useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type) now preserves type parameters of generic interfaces when applying fixes ([#2015](https://github.com/biomejs/biome/issues/2015)).
-
-  Contributed by @Sec-ant
-
-- Code fixes of [useImportType](https://biomejs.dev/linter/rules/use-import-type) and [useExportType](https://biomejs.dev/linter/rules/use-export-type) now handle multiline statements ([#2041](https://github.com/biomejs/biome/issues/2041)).
-  Contributed by @Conaclos
+- Code fixes of [useImportType](https://biomejs.dev/linter/rules/use-import-type) and [useExportType](https://biomejs.dev/linter/rules/use-export-type) now handle multiline statements ([#2041](https://github.com/biomejs/biome/issues/2041)). Contributed by @Conaclos
 
 - [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports type parameter and parameter with identical names ([#1992](https://github.com/biomejs/biome/issues/1992)).
 
@@ -102,7 +111,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Sec-ant
 
-## 1.6.0 (2024-04-08)
+## 1.6.0 (2024-03-08)
 
 ### Analyzer
 

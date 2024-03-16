@@ -1,16 +1,17 @@
 {
 	"name": "@biomejs/monorepo",
-	"private": true,
 	"version": "0.0.0",
+	"private": true,
 	"scripts": {
-		"check:apply": "cargo biome-cli-dev check --apply-unsafe website packages/@biomejs/js-api packages/tailwindcss-config-analyzer",
-		"check": "cargo biome-cli-dev check website packages/@biomejs/js-api packages/tailwindcss-config-analyzer",
-		"ci": "cargo biome-cli-dev ci website packages/@biomejs/js-api packages/tailwindcss-config-analyzer"
+		"check:apply": "cargo biome-cli-dev check --apply-unsafe .",
+		"check": "cargo biome-cli-dev check .",
+		"ci": "cargo biome-cli-dev ci ."
 	},
 	"keywords": [],
-	"author": "",
+	"author": "Biome Developers and Contributors",
+	"license": "MIT OR Apache-2.0",
 	"devDependencies": {
-		"shared": "file:./shared",
-		"@changesets/cli": "^2.26.2"
-	}
+		"@biomejs/shared": "workspace:^"
+	},
+	"packageManager": "pnpm@8.15.4+sha256.cea6d0bdf2de3a0549582da3983c70c92ffc577ff4410cbf190817ddc35137c2"
 }

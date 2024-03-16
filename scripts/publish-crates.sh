@@ -10,6 +10,7 @@ set -eo pipefail
 
 # publish crates (order is important)
 published_crates=(
+  "biome_string_case"
   "biome_diagnostics_categories"
   "biome_diagnostics_macros"
   "biome_deserialize_macros"
@@ -37,6 +38,7 @@ published_crates=(
   "biome_css_factory"
   "biome_css_parser"
   "biome_deserialize"
+  "biome_project"
   "biome_formatter"
   "biome_js_semantic"
   "biome_js_analyze"

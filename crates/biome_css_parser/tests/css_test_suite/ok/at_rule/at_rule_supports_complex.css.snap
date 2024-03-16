@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -44,7 +43,7 @@ CssRoot {
                     },
                     r_paren_token: R_PAREN@24..26 ")" [] [Whitespace(" ")],
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@26..29 "{" [] [Whitespace("  ")],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@29..30 "}" [] [],
@@ -136,7 +135,7 @@ CssRoot {
                         },
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@115..118 "{" [] [Whitespace("  ")],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@118..119 "}" [] [],
@@ -228,7 +227,7 @@ CssRoot {
                         },
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@207..210 "{" [] [Whitespace("  ")],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@210..211 "}" [] [],
@@ -308,7 +307,7 @@ CssRoot {
                         r_paren_token: R_PAREN@295..297 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@297..300 "{" [] [Whitespace("  ")],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@300..301 "}" [] [],
@@ -395,7 +394,7 @@ CssRoot {
                         r_paren_token: R_PAREN@391..393 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@393..396 "{" [] [Whitespace("  ")],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@396..397 "}" [] [],
@@ -503,7 +502,7 @@ CssRoot {
                         },
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@509..512 "{" [] [Whitespace("  ")],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@512..513 "}" [] [],
@@ -537,7 +536,7 @@ CssRoot {
                   0: IDENT@20..24 "flex" [] []
             1: (empty)
           2: R_PAREN@24..26 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@26..30
+        2: CSS_RULE_BLOCK@26..30
           0: L_CURLY@26..29 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@29..29
           2: R_CURLY@29..30 "}" [] []
@@ -599,7 +598,7 @@ CssRoot {
                         0: IDENT@108..112 "flex" [] []
                   1: (empty)
                 2: R_PAREN@112..115 ")" [] [Whitespace("  ")]
-        2: CSS_RULE_LIST_BLOCK@115..119
+        2: CSS_RULE_BLOCK@115..119
           0: L_CURLY@115..118 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@118..118
           2: R_CURLY@118..119 "}" [] []
@@ -661,7 +660,7 @@ CssRoot {
                         0: IDENT@200..204 "flex" [] []
                   1: (empty)
                 2: R_PAREN@204..207 ")" [] [Whitespace("  ")]
-        2: CSS_RULE_LIST_BLOCK@207..211
+        2: CSS_RULE_BLOCK@207..211
           0: L_CURLY@207..210 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@210..210
           2: R_CURLY@210..211 "}" [] []
@@ -716,7 +715,7 @@ CssRoot {
                   2: R_PAREN@293..294 ")" [] []
                 2: R_PAREN@294..295 ")" [] []
             2: R_PAREN@295..297 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@297..301
+        2: CSS_RULE_BLOCK@297..301
           0: L_CURLY@297..300 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@300..300
           2: R_CURLY@300..301 "}" [] []
@@ -776,7 +775,7 @@ CssRoot {
                     2: R_PAREN@389..390 ")" [] []
                 2: R_PAREN@390..391 ")" [] []
             2: R_PAREN@391..393 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@393..397
+        2: CSS_RULE_BLOCK@393..397
           0: L_CURLY@393..396 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@396..396
           2: R_CURLY@396..397 "}" [] []
@@ -850,12 +849,10 @@ CssRoot {
                       0: IDENT@503..507 "flex" [] []
                 1: (empty)
               2: R_PAREN@507..509 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@509..513
+        2: CSS_RULE_BLOCK@509..513
           0: L_CURLY@509..512 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@512..512
           2: R_CURLY@512..513 "}" [] []
   2: EOF@513..514 "" [Newline("\n")] []
 
 ```
-
-

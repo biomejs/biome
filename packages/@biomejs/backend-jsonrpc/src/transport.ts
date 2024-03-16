@@ -5,8 +5,8 @@ interface Socket {
 }
 
 enum ReaderStateKind {
-	Header,
-	Body,
+	Header = 0,
+	Body = 1,
 }
 
 interface ReaderStateHeader {
@@ -27,7 +27,7 @@ interface JsonRpcRequest {
 	jsonrpc: "2.0";
 	id: number;
 	method: string;
-	params: any;
+	params: unknown;
 }
 
 function isJsonRpcRequest(message: JsonRpcMessage): message is JsonRpcRequest {
@@ -43,7 +43,7 @@ function isJsonRpcRequest(message: JsonRpcMessage): message is JsonRpcRequest {
 interface JsonRpcNotification {
 	jsonrpc: "2.0";
 	method: string;
-	params: any;
+	params: unknown;
 }
 
 function isJsonRpcNotification(
@@ -61,12 +61,12 @@ type JsonRpcResponse =
 	| {
 			jsonrpc: "2.0";
 			id: number;
-			result: any;
+			result: unknown;
 	  }
 	| {
 			jsonrpc: "2.0";
 			id: number;
-			error: any;
+			error: unknown;
 	  };
 
 function isJsonRpcResponse(
@@ -82,15 +82,18 @@ function isJsonRpcResponse(
 
 type JsonRpcMessage = JsonRpcRequest | JsonRpcNotification | JsonRpcResponse;
 
-function isJsonRpcMessage(message: any): message is JsonRpcMessage {
+function isJsonRpcMessage(message: unknown): message is JsonRpcMessage {
 	return (
-		typeof message === "object" && message !== null && message.jsonrpc === "2.0"
+		typeof message === "object" &&
+		message !== null &&
+		"jsonrpc" in message &&
+		message.jsonrpc === "2.0"
 	);
 }
 
 interface PendingRequest {
-	resolve(result: any): void;
-	reject(error: any): void;
+	resolve(result: unknown): void;
+	reject(error: unknown): void;
 }
 
 const MIME_JSONRPC = "application/vscode-jsonrpc";
@@ -123,7 +126,8 @@ export class Transport {
 	 * @param params Parameters object the remote method should be called with
 	 * @return Promise resolving with the value returned by the remote method, or rejecting with an RPC error if the remote call failed
 	 */
-	request(method: string, params: any): Promise<any> {
+	// biome-ignore lint/suspicious/noExplicitAny: if i change it to Promise<unknown> typescript breaks
+	request(method: string, params: unknown): Promise<any> {
 		return new Promise((resolve, reject) => {
 			const id = this.nextRequestId++;
 			this.pendingRequests.set(id, { resolve, reject });
@@ -142,7 +146,7 @@ export class Transport {
 	 * @param method Name of the remote method to call
 	 * @param params Parameters object the remote method should be called with
 	 */
-	notify(method: string, params: any) {
+	notify(method: string, params: unknown) {
 		this.sendMessage({
 			jsonrpc: "2.0",
 			method,
@@ -160,9 +164,7 @@ export class Transport {
 	private sendMessage(message: JsonRpcMessage) {
 		const body = Buffer.from(JSON.stringify(message));
 		const headers = Buffer.from(
-			`Content-Length: ${body.length}\r\n` +
-				`Content-Type: ${MIME_JSONRPC};charset=utf-8\r\n` +
-				`\r\n`,
+			`Content-Length: ${body.length}\r\nContent-Type: ${MIME_JSONRPC};charset=utf-8\r\n\r\n`,
 		);
 		this.socket.write(Buffer.concat([headers, body]));
 	}
@@ -209,7 +211,7 @@ export class Transport {
 			const { contentLength, contentType } = readerState;
 			if (typeof contentLength !== "number") {
 				throw new Error(
-					`incoming message from the remote workspace is missing the Content-Length header`,
+					"incoming message from the remote workspace is missing the Content-Length header",
 				);
 			}
 
@@ -231,7 +233,7 @@ export class Transport {
 
 		switch (headerName) {
 			case "Content-Length": {
-				const value = parseInt(headerValue);
+				const value = Number.parseInt(headerValue);
 				readerState.contentLength = value;
 				break;
 			}

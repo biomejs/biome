@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_js_parser"
 repository.workspace = true
-version              = "0.5.4"
+version              = "0.5.7"
 
 [dependencies]
 biome_console       = { workspace = true }
@@ -19,7 +19,6 @@ biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_unicode_table = { workspace = true }
 bitflags            = { workspace = true }
-cfg-if              = "1.0.0"
 drop_bomb           = "0.1.5"
 indexmap            = { workspace = true }
 rustc-hash          = { workspace = true }

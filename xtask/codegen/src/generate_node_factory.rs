@@ -1,6 +1,7 @@
 use super::js_kinds_src::AstSrc;
+use crate::js_kinds_src::Field;
 use crate::language_kind::LanguageKind;
-use crate::{js_kinds_src::Field, to_lower_snake_case, to_upper_snake_case};
+use biome_string_case::Case;
 use quote::{format_ident, quote};
 use xtask::Result;
 
@@ -14,8 +15,8 @@ pub fn generate_node_factory(ast: &AstSrc, language_kind: LanguageKind) -> Resul
     let nodes =
         ast.nodes.iter().map(|node| {
             let type_name = format_ident!("{}", node.name);
-            let kind = format_ident!("{}", to_upper_snake_case(&node.name));
-            let factory_name = format_ident!("{}", to_lower_snake_case(&node.name));
+            let kind = format_ident!("{}", Case::Constant.convert(&node.name));
+            let factory_name = format_ident!("{}", Case::Snake.convert(&node.name));
 
             let (optional, required): (Vec<_>, Vec<_>) =
                 node.fields.iter().partition(|field| field.is_optional());
@@ -138,8 +139,8 @@ pub fn generate_node_factory(ast: &AstSrc, language_kind: LanguageKind) -> Resul
 
     let lists = ast.lists().map(|(name, list)| {
         let list_name = format_ident!("{}", name);
-        let kind = format_ident!("{}", to_upper_snake_case(name));
-        let factory_name = format_ident!("{}", to_lower_snake_case(name));
+        let kind = format_ident!("{}", Case::Constant.convert(name));
+        let factory_name = format_ident!("{}", Case::Snake.convert(name));
         let item = format_ident!("{}", list.element_name);
 
         if list.separator.is_some() {
@@ -186,8 +187,8 @@ pub fn generate_node_factory(ast: &AstSrc, language_kind: LanguageKind) -> Resul
 
     let bogus = ast.bogus.iter().map(|name| {
         let bogus_name = format_ident!("{}", name);
-        let kind = format_ident!("{}", to_upper_snake_case(name));
-        let factory_name = format_ident!("{}", to_lower_snake_case(name));
+        let kind = format_ident!("{}", Case::Constant.convert(name));
+        let factory_name = format_ident!("{}", Case::Snake.convert(name));
 
         quote! {
             pub fn #factory_name<I>(slots: I) -> #bogus_name

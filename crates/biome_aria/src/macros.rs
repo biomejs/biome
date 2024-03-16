@@ -14,11 +14,11 @@ macro_rules! define_role {
         }
 
         impl $crate::AriaRoleDefinition for $id {
-            fn properties(&self) -> std::slice::Iter<(&str, bool)> {
+            fn properties(&self) -> Iter<(&str, bool)> {
                 $id::PROPS.iter()
             }
 
-            fn roles(&self) -> std::slice::Iter<&str> {
+            fn roles(&self) -> Iter<&str> {
                 $id::ROLES.iter()
             }
         }
@@ -40,11 +40,11 @@ macro_rules! define_role {
         }
 
         impl $crate::AriaRoleDefinition for $id {
-            fn properties(&self) -> std::slice::Iter<(&str, bool)> {
+            fn properties(&self) -> Iter<(&str, bool)> {
                 $id::PROPS.iter()
             }
 
-            fn roles(&self) -> std::slice::Iter<&str> {
+            fn roles(&self) -> Iter<&str> {
                 $id::ROLES.iter()
             }
         }
@@ -80,7 +80,7 @@ macro_rules! define_property {
         }
 
         impl AriaPropertyDefinition for $id {
-            fn values(&self) -> std::slice::Iter<&'static str> {
+            fn values(&self) -> Iter<&'static str> {
                 $id::VALUES.iter()
             }
 

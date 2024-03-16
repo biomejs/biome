@@ -154,9 +154,7 @@ impl ModuleIndex {
                     continue;
                 }
 
-                if file_type.is_file() {
-                    unused_files.insert(path);
-                }
+                unused_files.insert(path);
             }
         }
 

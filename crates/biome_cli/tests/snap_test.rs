@@ -17,7 +17,7 @@ use std::fmt::Write as _;
 use std::path::{Path, PathBuf, MAIN_SEPARATOR};
 
 lazy_static! {
-    static ref TIME_REGEX: Regex = Regex::new("\\s[0-9]+[(m|µ|n)]s.").unwrap();
+    static ref TIME_REGEX: Regex = Regex::new("\\s[0-9]+[mµn]?s\\.").unwrap();
 }
 
 #[derive(Default)]
@@ -168,8 +168,7 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
     let is_github = std::env::var("GITHUB_ACTIONS")
         .ok()
-        .map(|value| value == "true")
-        .unwrap_or(false);
+        .map_or(false, |value| value == "true");
 
     if is_github {
         // GitHub actions sets the env var GITHUB_ACTIONS=true in CI

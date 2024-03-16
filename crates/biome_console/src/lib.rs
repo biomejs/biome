@@ -1,5 +1,5 @@
 use std::io;
-use std::io::{stderr, stdin, stdout, IsTerminal, Read, Stdin, Write};
+use std::io::{IsTerminal, Read, Write};
 use std::panic::RefUnwindSafe;
 use termcolor::{ColorChoice, StandardStream};
 use write::Termcolor;
@@ -75,7 +75,7 @@ pub struct EnvConsole {
     /// Channel to print errors
     err: StandardStream,
     /// Channel to read arbitrary input
-    r#in: Stdin,
+    r#in: io::Stdin,
 }
 
 #[derive(Debug, Clone)]
@@ -96,13 +96,13 @@ impl EnvConsole {
             ColorMode::Enabled => (ColorChoice::Always, ColorChoice::Always),
             ColorMode::Disabled => (ColorChoice::Never, ColorChoice::Never),
             ColorMode::Auto => {
-                let stdout = if stdout().is_terminal() {
+                let stdout = if io::stdout().is_terminal() {
                     ColorChoice::Auto
                 } else {
                     ColorChoice::Never
                 };
 
-                let stderr = if stderr().is_terminal() {
+                let stderr = if io::stderr().is_terminal() {
                     ColorChoice::Auto
                 } else {
                     ColorChoice::Never
@@ -168,7 +168,7 @@ impl Console for EnvConsole {
         //
         // Doing this check allows us to pipe stdin to rome, without expecting
         // user content when we call `read_to_string`
-        if stdin().is_terminal() {
+        if io::stdin().is_terminal() {
             return None;
         }
         let mut handle = self.r#in.lock();

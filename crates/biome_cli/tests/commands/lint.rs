@@ -1867,6 +1867,58 @@ fn top_level_not_all_down_level_all() {
 }
 
 #[test]
+fn top_level_all_down_level_empty() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // style rules that are not recommended should be enabled.
+    let biome_json = r#"{
+        "linter": {
+            "rules": {
+                "all": true,
+                "nursery": {
+                    "all": false
+                },
+                "suspicious": {
+                    "all": false
+                },
+                "style": {}
+            }
+        }
+    }"#;
+
+    // style/noRestrictedGlobals
+    // style/noShoutyConstants
+    let code = r#"
+    console.log(event);
+    const FOO = "FOO";
+    console.log(FOO);
+    "#;
+
+    let file_path = Path::new("fix.js");
+    fs.insert(file_path.into(), code.as_bytes());
+
+    let config_path = Path::new("biome.json");
+    fs.insert(config_path.into(), biome_json.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "top_level_all_down_level_empty",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn ignore_configured_globals() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

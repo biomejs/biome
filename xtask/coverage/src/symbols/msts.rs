@@ -250,7 +250,7 @@ fn parse_symbol(input: &str) -> Option<Symbol> {
         let (_, decls) = parse_separated_list(
             input,
             parse_decl,
-            |s| parse_str(s, ",").map(|x| x.0).unwrap_or(s),
+            |s| parse_str(s, ",").map_or(s, |x| x.0),
             |s| parse_whitespace0(s).0,
         );
         decls

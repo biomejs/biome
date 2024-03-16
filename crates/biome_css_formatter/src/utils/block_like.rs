@@ -3,15 +3,11 @@ use biome_formatter::{CstFormatContext, Format, FormatResult};
 use biome_rowan::{declare_node_union, SyntaxResult};
 
 use crate::CssFormatter;
-use biome_css_syntax::{
-    CssDeclarationListBlock, CssDeclarationOrAtRuleBlock, CssDeclarationOrRuleBlock,
-    CssFontFeatureValuesBlock, CssKeyframesBlock, CssPageAtRuleBlock, CssRuleListBlock,
-    CssSyntaxToken,
-};
+use biome_css_syntax::*;
 use biome_formatter::write;
 
 declare_node_union! {
-    pub CssBlockLike = CssKeyframesBlock | CssDeclarationOrAtRuleBlock | CssDeclarationListBlock | CssRuleListBlock | CssFontFeatureValuesBlock | CssPageAtRuleBlock | CssDeclarationOrRuleBlock
+    pub CssBlockLike = CssKeyframesBlock | CssDeclarationOrAtRuleBlock | CssDeclarationBlock | CssRuleBlock | CssFontFeatureValuesBlock | CssPageAtRuleBlock | CssDeclarationOrRuleBlock
 }
 
 impl CssBlockLike {
@@ -19,8 +15,8 @@ impl CssBlockLike {
         match self {
             CssBlockLike::CssKeyframesBlock(block) => block.l_curly_token(),
             CssBlockLike::CssDeclarationOrAtRuleBlock(block) => block.l_curly_token(),
-            CssBlockLike::CssDeclarationListBlock(block) => block.l_curly_token(),
-            CssBlockLike::CssRuleListBlock(block) => block.l_curly_token(),
+            CssBlockLike::CssDeclarationBlock(block) => block.l_curly_token(),
+            CssBlockLike::CssRuleBlock(block) => block.l_curly_token(),
             CssBlockLike::CssFontFeatureValuesBlock(block) => block.l_curly_token(),
             CssBlockLike::CssPageAtRuleBlock(block) => block.l_curly_token(),
             CssBlockLike::CssDeclarationOrRuleBlock(block) => block.l_curly_token(),
@@ -31,8 +27,8 @@ impl CssBlockLike {
         match self {
             CssBlockLike::CssKeyframesBlock(block) => block.r_curly_token(),
             CssBlockLike::CssDeclarationOrAtRuleBlock(block) => block.r_curly_token(),
-            CssBlockLike::CssDeclarationListBlock(block) => block.r_curly_token(),
-            CssBlockLike::CssRuleListBlock(block) => block.r_curly_token(),
+            CssBlockLike::CssDeclarationBlock(block) => block.r_curly_token(),
+            CssBlockLike::CssRuleBlock(block) => block.r_curly_token(),
             CssBlockLike::CssFontFeatureValuesBlock(block) => block.r_curly_token(),
             CssBlockLike::CssPageAtRuleBlock(block) => block.r_curly_token(),
             CssBlockLike::CssDeclarationOrRuleBlock(block) => block.r_curly_token(),
@@ -43,8 +39,8 @@ impl CssBlockLike {
         match self {
             CssBlockLike::CssKeyframesBlock(block) => block.items().is_empty(),
             CssBlockLike::CssDeclarationOrAtRuleBlock(block) => block.items().is_empty(),
-            CssBlockLike::CssDeclarationListBlock(block) => block.declarations().is_empty(),
-            CssBlockLike::CssRuleListBlock(block) => block.rules().is_empty(),
+            CssBlockLike::CssDeclarationBlock(block) => block.declarations().is_empty(),
+            CssBlockLike::CssRuleBlock(block) => block.rules().is_empty(),
             CssBlockLike::CssFontFeatureValuesBlock(block) => block.items().is_empty(),
             CssBlockLike::CssPageAtRuleBlock(block) => block.items().is_empty(),
             CssBlockLike::CssDeclarationOrRuleBlock(block) => block.items().is_empty(),
@@ -59,10 +55,10 @@ impl CssBlockLike {
             CssBlockLike::CssDeclarationOrAtRuleBlock(block) => {
                 write!(f, [block.items().format()])
             }
-            CssBlockLike::CssDeclarationListBlock(block) => {
+            CssBlockLike::CssDeclarationBlock(block) => {
                 write!(f, [block.declarations().format()])
             }
-            CssBlockLike::CssRuleListBlock(block) => {
+            CssBlockLike::CssRuleBlock(block) => {
                 write!(f, [block.rules().format()])
             }
             CssBlockLike::CssFontFeatureValuesBlock(block) => {

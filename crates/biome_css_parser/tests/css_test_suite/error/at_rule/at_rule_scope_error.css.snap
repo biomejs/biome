@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -73,7 +72,7 @@ CssRoot {
                         r_paren_token: missing (required),
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@40..41 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@41..42 "}" [] [],
@@ -104,7 +103,7 @@ CssRoot {
                         r_paren_token: missing (required),
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@65..66 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@66..67 "}" [] [],
@@ -182,7 +181,7 @@ CssRoot {
                         r_paren_token: R_PAREN@106..108 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssRuleListBlock {
+                block: CssRuleBlock {
                     l_curly_token: L_CURLY@108..109 "{" [] [],
                     rules: CssRuleList [],
                     r_curly_token: R_CURLY@109..110 "}" [] [],
@@ -238,7 +237,7 @@ CssRoot {
                     1: STAR@38..40 "*" [] [Whitespace(" ")]
                   2: CSS_SUB_SELECTOR_LIST@40..40
             2: (empty)
-        2: CSS_RULE_LIST_BLOCK@40..42
+        2: CSS_RULE_BLOCK@40..42
           0: L_CURLY@40..41 "{" [] []
           1: CSS_RULE_LIST@41..41
           2: R_CURLY@41..42 "}" [] []
@@ -259,7 +258,7 @@ CssRoot {
                     1: CSS_CUSTOM_IDENTIFIER@52..65
                       0: IDENT@52..65 "media-object" [] [Whitespace(" ")]
             2: (empty)
-        2: CSS_RULE_LIST_BLOCK@65..67
+        2: CSS_RULE_BLOCK@65..67
           0: L_CURLY@65..66 "{" [] []
           1: CSS_RULE_LIST@66..66
           2: R_CURLY@66..67 "}" [] []
@@ -312,7 +311,7 @@ CssRoot {
                     1: STAR@105..106 "*" [] []
                   2: CSS_SUB_SELECTOR_LIST@106..106
             2: R_PAREN@106..108 ")" [] [Whitespace(" ")]
-        2: CSS_RULE_LIST_BLOCK@108..110
+        2: CSS_RULE_BLOCK@108..110
           0: L_CURLY@108..109 "{" [] []
           1: CSS_RULE_LIST@109..109
           2: R_CURLY@109..110 "}" [] []
@@ -377,5 +376,3 @@ at_rule_scope_error.css:3:27 parse ━━━━━━━━━━━━━━━
   i Remove .
   
 ```
-
-

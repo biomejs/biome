@@ -199,7 +199,7 @@ impl From<TokenStream> for StringOrMarkup {
 }
 
 struct DiagnosticAttrs {
-    _paren_token: syn::token::Paren,
+    _paren_token: Paren,
     attrs: Punctuated<DiagnosticAttr, Token![,]>,
 }
 
@@ -310,7 +310,7 @@ impl Parse for MessageAttr {
 }
 
 struct SplitMessageAttrs {
-    _paren_token: syn::token::Paren,
+    _paren_token: Paren,
     attrs: Punctuated<SplitMessageAttr, Token![,]>,
 }
 

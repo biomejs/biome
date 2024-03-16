@@ -591,7 +591,8 @@ impl Session {
     pub fn position_encoding(&self) -> PositionEncoding {
         self.initialize_params
             .get()
-            .map(|params| negotiated_encoding(&params.client_capabilities))
-            .unwrap_or(PositionEncoding::Wide(WideEncoding::Utf16))
+            .map_or(PositionEncoding::Wide(WideEncoding::Utf16), |params| {
+                negotiated_encoding(&params.client_capabilities)
+            })
     }
 }

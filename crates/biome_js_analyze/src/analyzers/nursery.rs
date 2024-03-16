@@ -4,6 +4,7 @@ use biome_analyze::declare_group;
 
 pub mod no_barrel_file;
 pub mod no_done_callback;
+pub mod no_duplicate_else_if;
 pub mod no_duplicate_test_hooks;
 pub mod no_excessive_nested_test_suites;
 pub mod no_exports_in_test;
@@ -23,6 +24,7 @@ declare_group! {
         rules : [
             self :: no_barrel_file :: NoBarrelFile ,
             self :: no_done_callback :: NoDoneCallback ,
+            self :: no_duplicate_else_if :: NoDuplicateElseIf ,
             self :: no_duplicate_test_hooks :: NoDuplicateTestHooks ,
             self :: no_excessive_nested_test_suites :: NoExcessiveNestedTestSuites ,
             self :: no_exports_in_test :: NoExportsInTest ,
