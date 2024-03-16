@@ -18,12 +18,7 @@ impl FormatNodeRule<CssFontFeatureValuesItem> for FormatCssFontFeatureValuesItem
 
         write!(
             f,
-            [
-                at_token.format(),
-                name.format(),
-                space(),
-                block.format()
-            ]
+            [at_token.format(), name.format(), space(), block.format()]
         )
     }
 }

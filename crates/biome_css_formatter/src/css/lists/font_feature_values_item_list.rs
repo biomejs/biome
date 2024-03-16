@@ -10,10 +10,7 @@ impl FormatRule<CssFontFeatureValuesItemList> for FormatCssFontFeatureValuesItem
         let mut join = f.join_nodes_with_hardline();
 
         for item in node {
-            join.entry(
-                item.syntax(),
-                &format_or_verbatim(item.format()),
-            );
+            join.entry(item.syntax(), &format_or_verbatim(item.format()));
         }
 
         join.finish()
