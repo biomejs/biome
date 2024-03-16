@@ -16,13 +16,10 @@ pub fn generate_new_css_lint_rule(rule_folder: &Path, rule_name: &str) {
 
     // Generate rule code
     let code = format!(
-        r#"use crate::semantic_services::Semantic;
-use biome_analyze::{{
-    context::RuleContext, declare_rule, Rule, RuleDiagnostic,
-}};
+        r#"use biome_analyze::{{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic}};
 use biome_console::markup;
-use biome_js_semantic::{{Reference, ReferencesExtensions}};
-use biome_js_syntax::JsIdentifierBinding;
+use biome_css_syntax::CssDeclarationOrRuleBlock;
+use biome_rowan::AstNode;
 
 declare_rule! {{
     /// Succinct description of the rule.
@@ -32,15 +29,14 @@ declare_rule! {{
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
     ///
-    /// Add a link to the corresponding ESLint rule (if any):
+    /// Add a link to the corresponding stylelint rule (if any):
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```css,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// p {{}}
     /// ```
     ///
     /// ### Valid
@@ -48,7 +44,6 @@ declare_rule! {{
     /// ```css
     /// p {{
     ///   color: red;
-    ///   text-align: center;
     /// }}
     /// ```
     ///
@@ -60,32 +55,35 @@ declare_rule! {{
 }}
 
 impl Rule for {rule_name_upper_camel} {{
-    type Query = Semantic<JsIdentifierBinding>;
-    type State = Reference;
-    type Signals = Vec<Self::State>;
+    type Query = Ast<CssDeclarationOrRuleBlock>;
+    type State = CssDeclarationOrRuleBlock;
+    type Signals = Option<Self::State>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
-        let binding = ctx.query();
-        let model = ctx.model();
-        binding.all_references(model).collect()
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {{
+        let node = ctx.query();
+        if node.items().into_iter().next().is_none() {{
+            return Some(node.clone());
+        }}
+        None
     }}
 
-    fn diagnostic(_: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {{
+    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {{
         //
         // Read our guidelines to write great diagnostics:
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
+        let span = node.range();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                reference.range(),
+                span,
                 markup! {{
-                    "Variable is read here."
+                    "Unexpected empty block is not allowed"
                 }},
             )
             .note(markup! {{
-                "This note will give you more information."
+                    "This note will give you more information."
             }}),
         )
     }}
