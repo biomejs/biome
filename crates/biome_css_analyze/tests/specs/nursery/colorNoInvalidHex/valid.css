@@ -1,6 +1,5 @@
 /* should not generate diagnostics */
-
- p {{ 
-color: red;
+p { 
+ color: red;
  text-align: center;
-}}
+}

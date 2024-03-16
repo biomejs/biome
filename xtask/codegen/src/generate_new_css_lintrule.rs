@@ -122,20 +122,17 @@ impl Rule for {rule_name_upper_camel} {{
     let _ = std::fs::create_dir_all(tests_path);
 
     let test_file =
-        format!("crates/biome_css_analyze/tests/specs/nursery/{rule_name_lower_camel}/valid.js");
+        format!("crates/biome_css_analyze/tests/specs/nursery/{rule_name_lower_camel}/valid.css");
     if std::fs::File::open(&test_file).is_err() {
         let _ = std::fs::write(
             test_file,
-            "/* should not generate diagnostics */\n\n p {{ \ncolor: red;\n text-align: center;\n}}",
+            "/* should not generate diagnostics */\np { \n color: red;\n text-align: center;\n}",
         );
     }
 
     let test_file =
-        format!("crates/biome_css_analyze/tests/specs/nursery/{rule_name_lower_camel}/invalid.js");
+        format!("crates/biome_css_analyze/tests/specs/nursery/{rule_name_lower_camel}/invalid.css");
     if std::fs::File::open(&test_file).is_err() {
-        let _ = std::fs::write(
-            test_file,
-            "\n\n p {{ \ncolor: red;\n text-align: center;\n}}",
-        );
+        let _ = std::fs::write(test_file, "p { \n color: red;\n text-align: center;\n}");
     }
 }
