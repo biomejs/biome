@@ -961,10 +961,6 @@ export interface Nursery {
 	 */
 	noUselessTernary?: RuleConfiguration_for_Null;
 	/**
-	 * Noop rule
-	 */
-	noop?: RuleConfiguration_for_Null;
-	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;

@@ -1507,13 +1507,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noop": {
-					"description": "Noop rule",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
