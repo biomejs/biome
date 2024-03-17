@@ -29,14 +29,14 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub ColorNoInvalidHex {
+    pub NoColorInvalidHex {
         version: "next",
-        name: "colorNoInvalidHex",
+        name: "noColorInvalidHex",
         recommended: false,
     }
 }
 
-impl Rule for ColorNoInvalidHex {
+impl Rule for NoColorInvalidHex {
     type Query = Ast<CssDeclarationOrRuleBlock>;
     type State = CssDeclarationOrRuleBlock;
     type Signals = Option<Self::State>;

@@ -889,13 +889,13 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Succinct description of the rule.
-	 */
-	colorNoInvalidHex?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow the use of barrel file.
 	 */
 	noBarrelFile?: RuleConfiguration_for_Null;
+	/**
+	 * Succinct description of the rule.
+	 */
+	noColorInvalidHex?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of console.
 	 */
@@ -1894,6 +1894,7 @@ export type Category =
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noApproximativeNumericConstant"
 	| "lint/nursery/noBarrelFile"
+	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateElseIf"

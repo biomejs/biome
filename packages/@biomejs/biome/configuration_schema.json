@@ -1381,15 +1381,15 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"colorNoInvalidHex": {
-					"description": "Succinct description of the rule.",
+				"noBarrelFile": {
+					"description": "Disallow the use of barrel file.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"noBarrelFile": {
-					"description": "Disallow the use of barrel file.",
+				"noColorInvalidHex": {
+					"description": "Succinct description of the rule.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

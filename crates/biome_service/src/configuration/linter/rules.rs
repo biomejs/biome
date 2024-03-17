@@ -2613,12 +2613,12 @@ pub struct Nursery {
     #[doc = r" It enables ALL rules for this group."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub all: Option<bool>,
-    #[doc = "Succinct description of the rule."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub color_no_invalid_hex: Option<RuleConfiguration<ColorNoInvalidHex>>,
     #[doc = "Disallow the use of barrel file."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_barrel_file: Option<RuleConfiguration<NoBarrelFile>>,
+    #[doc = "Succinct description of the rule."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_color_invalid_hex: Option<RuleConfiguration<NoColorInvalidHex>>,
     #[doc = "Disallow the use of console."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_console: Option<RuleConfiguration<NoConsole>>,
@@ -2697,8 +2697,8 @@ impl DeserializableValidator for Nursery {
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
     pub(crate) const GROUP_RULES: [&'static str; 22] = [
-        "colorNoInvalidHex",
         "noBarrelFile",
+        "noColorInvalidHex",
         "noConsole",
         "noDoneCallback",
         "noDuplicateElseIf",
@@ -2781,12 +2781,12 @@ impl Nursery {
     }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
-        if let Some(rule) = self.color_no_invalid_hex.as_ref() {
+        if let Some(rule) = self.no_barrel_file.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
         }
-        if let Some(rule) = self.no_barrel_file.as_ref() {
+        if let Some(rule) = self.no_color_invalid_hex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
@@ -2895,12 +2895,12 @@ impl Nursery {
     }
     pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
-        if let Some(rule) = self.color_no_invalid_hex.as_ref() {
+        if let Some(rule) = self.no_barrel_file.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
         }
-        if let Some(rule) = self.no_barrel_file.as_ref() {
+        if let Some(rule) = self.no_color_invalid_hex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
@@ -3048,12 +3048,12 @@ impl Nursery {
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
         match rule_name {
-            "colorNoInvalidHex" => self
-                .color_no_invalid_hex
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
             "noBarrelFile" => self
                 .no_barrel_file
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noColorInvalidHex" => self
+                .no_color_invalid_hex
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noConsole" => self

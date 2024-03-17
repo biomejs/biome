@@ -2,5 +2,5 @@
 
 use crate::analyzers;
 
-pub type ColorNoInvalidHex =
-    <analyzers::nursery::color_no_invalid_hex::ColorNoInvalidHex as biome_analyze::Rule>::Options;
+pub type NoColorInvalidHex =
+    <analyzers::nursery::no_color_invalid_hex::NoColorInvalidHex as biome_analyze::Rule>::Options;
