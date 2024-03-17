@@ -2630,7 +2630,7 @@ pub struct Nursery {
     #[doc = "A describe block should not contain duplicate hooks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_test_hooks: Option<RuleConfiguration<NoDuplicateTestHooks>>,
-    #[doc = "Disallow variables from evolving into any type through reassignments. In TypeScript, variables without explicit type annotations can evolve their types based on subsequent assignments. This behavior can inadvertently lead to variables with an any type, weakening type safety. Just like the any type, evolved any types disable many type checking rules and should be avoided to maintain strong type safety. This rule prevents such cases by ensuring variables do not evolve into any type, encouraging explicit type annotations and controlled type evolutions."]
+    #[doc = "Disallow variables from evolving into any type through reassignments."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_evolving_any: Option<RuleConfiguration<NoEvolvingAny>>,
     #[doc = "This rule enforces a maximum depth to nested describe() in test files."]

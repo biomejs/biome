@@ -4,6 +4,7 @@ use biome_js_syntax::{JsFileSource, JsVariableDeclaration, JsVariableDeclarator}
 
 declare_rule! {
     /// Disallow variables from evolving into `any` type through reassignments.
+    ///
     /// In TypeScript, variables without explicit type annotations can evolve their types based on subsequent assignments.
     /// This behavior can inadvertently lead to variables with an `any` type, weakening type safety.
     /// Just like the `any` type, evolved `any` types disable many type checking rules and should be avoided to maintain strong type safety.

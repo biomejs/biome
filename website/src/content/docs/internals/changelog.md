@@ -40,6 +40,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### New features
+
+- Add rule [noEvolvingAny](https://biomejs.dev/linter/rules/no-evolving-any) to disallow variables from evolving into `any` type through reassignments.
+
+Contributed by @fujiyamaorange
+
 ### Parser
 
 ## 1.6.1 (2024-03-12)
