@@ -85,6 +85,7 @@ impl Rule for NoEvolvingAny {
                     if js_literal_expression
                         .as_js_null_literal_expression()
                         .is_some()
+                        && !is_type_annotated
                     {
                         return Some(variable);
                     }

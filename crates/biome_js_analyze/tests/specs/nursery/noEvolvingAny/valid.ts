@@ -8,6 +8,7 @@ const e: never[] = [];
 const f = [null];
 const g = ['1'];
 const h = [1];
+let workspace: Workspace | null = null;
 
 const x = 0;
 for(let y of xs) {}
