@@ -19,7 +19,7 @@ use biome_css_syntax::CssFileSource;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, ModuleKind, TextRange, TextSize};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, TextRange, TextSize};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
@@ -95,23 +95,15 @@ impl DocumentFileSource {
         "typescript.json",
     ];
 
-    /// Returns the language corresponding to this language ID
-    ///
-    /// See the [microsoft spec]
-    /// for a list of language identifiers
-    ///
-    /// [microsoft spec]: https://code.visualstudio.com/docs/languages/identifiers
+    /// Returns the language corresponding to this file extension
     pub fn from_extension(s: &str) -> Self {
         match s.to_lowercase().as_str() {
-            "js" | "mjs" => JsFileSource::jsx().into(),
+            "js" | "mjs" | "jsx" => JsFileSource::jsx().into(),
             "cjs" => JsFileSource::js_script().into(),
-            "jsx" => JsFileSource::jsx().into(),
-            "ts" | "mts" => JsFileSource::ts().into(),
-            "cts" => JsFileSource::ts()
-                .with_module_kind(ModuleKind::Script)
-                .into(),
-            "d.ts" | "d.mts" | "d.cts" => JsFileSource::d_ts().into(),
+            "ts" => JsFileSource::ts().into(),
+            "mts" | "cts" => JsFileSource::ts_restricted().into(),
             "tsx" => JsFileSource::tsx().into(),
+            "d.ts" | "d.mts" | "d.cts" => JsFileSource::d_ts().into(),
             "json" => JsonFileSource::json().into(),
             "jsonc" => JsonFileSource::jsonc().into(),
             "astro" => JsFileSource::astro().into(),
@@ -135,7 +127,7 @@ impl DocumentFileSource {
             "javascriptreact" => JsFileSource::jsx().into(),
             "typescriptreact" => JsFileSource::tsx().into(),
             "json" => JsonFileSource::json().into(),
-            "jsonc" => JsonFileSource::json().into(),
+            "jsonc" => JsonFileSource::jsonc().into(),
             "astro" => JsFileSource::astro().into(),
             "vue" => JsFileSource::vue().into(),
             "svelte" => JsFileSource::svelte().into(),
