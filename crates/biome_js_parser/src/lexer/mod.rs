@@ -19,13 +19,7 @@
 mod errors;
 mod tests;
 
-#[cfg(feature = "highlight")]
-mod highlight;
-
 use bitflags::bitflags;
-#[cfg(feature = "highlight")]
-pub use highlight::*;
-
 use biome_js_syntax::JsSyntaxKind::*;
 pub use biome_js_syntax::*;
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -34,7 +28,6 @@ use biome_unicode_table::{
     is_js_id_continue, is_js_id_start, lookup_byte,
     Dispatch::{self, *},
 };
-use unicode_bom::Bom;
 
 use self::errors::invalid_digits_after_unicode_escape_sequence;
 
