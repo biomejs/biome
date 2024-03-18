@@ -1,0 +1,28 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "timezone": "Europe/Gibraltar",
+  "schedule": ["0 9 * * 1"],
+  "assignees": ["@biomejs/maintainers", "@biomejs/core-contributors"],
+  "packageRules": [
+    {
+      "groupName": "github-actions",
+      "matchManagers": ["github-actions"]
+    },
+    {
+      "groupName": "Rust crates",
+      "matchManagers": ["cargo"],
+      "matchFileNames": ["crates/**", "xtask/**"],
+      "ignoreDeps": ["syn", "quote"]
+    },
+    {
+      "groupName": "Website",
+      "matchFileNames": ["website/package.json"],
+      "matchManagers": ["npm"]
+    },
+    {
+      "groupName": "@biomjes packages",
+      "matchFileNames": ["packages/**"],
+      "matchManagers": ["npm"]
+    }
+  ]
+}
