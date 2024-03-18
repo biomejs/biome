@@ -9,13 +9,15 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Ureleased
+## Unreleased
 
 ### Analyzer
 
 #### Bug fixes
 
 - The `noSuperWithoutExtends` rule now allows for calling `super()` in derived class constructors of class expressions ([#2108](https://github.com/biomejs/biome/issues/2108)). Contributed by @Sec-ant
+
+- Fix discrepancies on file source detection. Allow module syntax in `.cts` files ([#2114](https://github.com/biomejs/biome/issues/2114)). Contributed by @Sec-ant
 
 ### CLI
 
@@ -31,7 +33,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- Fix [#1661](https://github.com/biomejs/biome/issues/1661). Now nested conditionals are aligned with Prettier's logic, and won't contain mixed spaced and tabs. Contributed by @ematipico
+- Fix [#1661](https://github.com/biomejs/biome/issues/1661). Now nested conditionals are aligned with Prettier's logic, and won't contain mixed spaces and tabs. Contributed by @ematipico
 
 ### JavaScript APIs
 

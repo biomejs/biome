@@ -314,8 +314,8 @@ fn compute_source_type_from_path_or_extension(
         JsFileSource::d_ts()
     } else {
         match extension {
-            "cjs" => JsFileSource::js_module().with_module_kind(ModuleKind::Script),
             "js" | "mjs" | "jsx" => JsFileSource::jsx(),
+            "cjs" => JsFileSource::js_script(),
             "ts" => JsFileSource::ts(),
             "mts" | "cts" => JsFileSource::ts_restricted(),
             "tsx" => JsFileSource::tsx(),
