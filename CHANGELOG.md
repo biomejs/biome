@@ -31,12 +31,15 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- Fix [https://github.com/biomejs/biome/issues/1661](https://github.com/biomejs/biome/issues/1661). Now nested conditionals are aligned with Prettier's logic, and won't contain mixed spaced and tabs. Contributed by @ematipico
-
+- Fix [#1661](https://github.com/biomejs/biome/issues/1661). Now nested conditionals are aligned with Prettier's logic, and won't contain mixed spaced and tabs. Contributed by @ematipico
 
 ### JavaScript APIs
 
 ### Linter
+
+#### Bug fixes
+
+- Fix [#1925](https://github.com/biomejs/biome/issues/1925). The fix for `useOptionalChain` would sometimes suggest an incorrect fix that discarded optional chaining operators on the left-hand side of logical expressions. These are now preserved. Contributed by @arendjr
 
 ### Parser
 
