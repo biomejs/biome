@@ -208,15 +208,6 @@ pub trait Lexer<'src> {
     fn text_position(&self) -> TextSize {
         TextSize::try_from(self.position()).expect("Input to be smaller than 4 GB")
     }
-    #[inline]
-    /// Returns the length of the BOM byte
-    fn get_bom(&self) -> Option<(usize, Bom)> {
-        self.source().get(0..3).map(|first| {
-            let bom = Bom::from(first.as_bytes());
-            (bom.len(), bom)
-        })
-    }
-
 
     /// Check if the source starts with a Unicode BOM character. If it does,
     /// consume it and return the UNICODE_BOM token kind.
@@ -225,17 +216,18 @@ pub trait Lexer<'src> {
     /// Must be called at a valid UT8 char boundary (and realistically only at
     /// the start position of the source).
     #[inline]
-    fn consume_potential_bom<K>(&mut self, kind: K) -> Option<K> {
+    fn consume_potential_bom<K>(&mut self, kind: K) -> Option<(K, usize)> {
         // Bom needs at least the first three bytes of the source to know if it
         // matches the UTF-8 BOM and not an alternative. This can be expanded
         // to more bytes to support other BOM characters if Biome decides to
         // support other encodings like UTF-16.
-        if let Some((len, bom)) = self.get_bom() {
-            self.advance(len);
+        if let Some(first) = self.source().get(0..3) {
+            let bom = Bom::from(first.as_bytes());
+            self.advance(bom.len());
 
             match bom {
                 Bom::Null => None,
-                _ => Some(kind),
+                _ => Some((kind, bom.len())),
             }
         } else {
             None

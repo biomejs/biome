@@ -371,8 +371,9 @@ impl<'src> CssLexer<'src> {
                 // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
                 // perform the check. At any other position, the BOM is just considered plain whitespace.
                 if self.position == 0 {
-                    if let Some(bom) = self.consume_potential_bom(UNICODE_BOM) {
-                        return bom
+                    if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
+                        self.unicode_bom_length = bom_size;
+                        return bom;
                     }
                 }
                 self.consume_unexpected_character()

@@ -19,7 +19,6 @@
 mod errors;
 mod tests;
 
-use bitflags::bitflags;
 use biome_js_syntax::JsSyntaxKind::*;
 pub use biome_js_syntax::*;
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -28,6 +27,7 @@ use biome_unicode_table::{
     is_js_id_continue, is_js_id_start, lookup_byte,
     Dispatch::{self, *},
 };
+use bitflags::bitflags;
 
 use self::errors::invalid_digits_after_unicode_escape_sequence;
 
@@ -484,7 +484,6 @@ impl<'src> JsLexer<'src> {
             }
         }
     }
-
 
     /// Get the UTF8 char which starts at the current byte
     ///
@@ -1928,10 +1927,10 @@ impl<'src> JsLexer<'src> {
 
             // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
             // perform the check. At any other position, the BOM is just considered plain whitespace.
-            
             UNI => {
                 if self.position == 0 {
-                    if let Some(bom) = self.consume_potential_bom(UNICODE_BOM) {
+                    if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
+                        self.unicode_bom_length = bom_size;
                         return bom;
                     }
                 }
