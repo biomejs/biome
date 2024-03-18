@@ -20,7 +20,7 @@
       "matchManagers": ["npm"]
     },
     {
-      "groupName": "@biomjes packages",
+      "groupName": "@biomejs packages",
       "matchFileNames": ["packages/**"],
       "matchManagers": ["npm"]
     }
