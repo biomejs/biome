@@ -448,24 +448,6 @@ impl<'src> CssLexer<'src> {
         CSS_URL_VALUE_RAW_LITERAL
     }
 
-    // fn consume_potential_bom(&mut self) -> Option<CssSyntaxKind> {
-    //     // Bom needs at least the first three bytes of the source to know if it
-    //     // matches the UTF-8 BOM and not an alternative. This can be expanded
-    //     // to more bytes to support other BOM characters if Biome decides to
-    //     // support other encodings like UTF-16.
-    //     if let Some((len, bom)) = self.get_bom() {
-    //         self.unicode_bom_length = len;
-    //         self.advance(self.unicode_bom_length);
-    // 
-    //         match bom {
-    //             Bom::Null => None,
-    //             _ => Some(UNICODE_BOM),
-    //         }
-    //     } else {
-    //         None
-    //     }
-    // }
-
     fn consume_pseudo_nth_selector_token(&mut self, current: u8) -> CssSyntaxKind {
         match current {
             b'-' => self.consume_byte(T![-]),
