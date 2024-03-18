@@ -10,7 +10,6 @@ use biome_unicode_table::{
     is_css_id_continue, is_css_id_start, lookup_byte, Dispatch, Dispatch::*,
 };
 use std::char::REPLACEMENT_CHARACTER;
-use unicode_bom::Bom;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum CssLexContext {
@@ -371,11 +370,12 @@ impl<'src> CssLexer<'src> {
             UNI => {
                 // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
                 // perform the check. At any other position, the BOM is just considered plain whitespace.
-                if self.position == 0 && self.consume_potential_bom().is_some() {
-                    UNICODE_BOM
-                } else {
-                    self.consume_unexpected_character()
+                if self.position == 0 {
+                    if let Some(bom) = self.consume_potential_bom(UNICODE_BOM) {
+                        return bom
+                    }
                 }
+                self.consume_unexpected_character()
             }
 
             _ => self.consume_unexpected_character(),
@@ -448,23 +448,23 @@ impl<'src> CssLexer<'src> {
         CSS_URL_VALUE_RAW_LITERAL
     }
 
-    fn consume_potential_bom(&mut self) -> Option<CssSyntaxKind> {
-        // Bom needs at least the first three bytes of the source to know if it
-        // matches the UTF-8 BOM and not an alternative. This can be expanded
-        // to more bytes to support other BOM characters if Biome decides to
-        // support other encodings like UTF-16.
-        if let Some((len, bom)) = self.get_bom() {
-            self.unicode_bom_length = len;
-            self.advance(self.unicode_bom_length);
-
-            match bom {
-                Bom::Null => None,
-                _ => Some(UNICODE_BOM),
-            }
-        } else {
-            None
-        }
-    }
+    // fn consume_potential_bom(&mut self) -> Option<CssSyntaxKind> {
+    //     // Bom needs at least the first three bytes of the source to know if it
+    //     // matches the UTF-8 BOM and not an alternative. This can be expanded
+    //     // to more bytes to support other BOM characters if Biome decides to
+    //     // support other encodings like UTF-16.
+    //     if let Some((len, bom)) = self.get_bom() {
+    //         self.unicode_bom_length = len;
+    //         self.advance(self.unicode_bom_length);
+    // 
+    //         match bom {
+    //             Bom::Null => None,
+    //             _ => Some(UNICODE_BOM),
+    //         }
+    //     } else {
+    //         None
+    //     }
+    // }
 
     fn consume_pseudo_nth_selector_token(&mut self, current: u8) -> CssSyntaxKind {
         match current {

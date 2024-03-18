@@ -492,30 +492,6 @@ impl<'src> JsLexer<'src> {
         }
     }
 
-    /// Check if the source starts with a Unicode BOM character. If it does,
-    /// consume it and return the UNICODE_BOM token kind.
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary (and realistically only at
-    /// the start position of the source).
-    fn consume_potential_bom(&mut self) -> Option<JsSyntaxKind> {
-        // Bom needs at least the first three bytes of the source to know if it
-        // matches the UTF-8 BOM and not an alternative. This can be expanded
-        // to more bytes to support other BOM characters if Biome decides to
-        // support other encodings like UTF-16.
-        if let Some(first) = self.source().get(0..3) {
-            let bom = Bom::from(first.as_bytes());
-            self.unicode_bom_length = bom.len();
-            self.advance(self.unicode_bom_length);
-
-            match bom {
-                Bom::Null => None,
-                _ => Some(UNICODE_BOM),
-            }
-        } else {
-            None
-        }
-    }
 
     /// Get the UTF8 char which starts at the current byte
     ///
@@ -1959,8 +1935,13 @@ impl<'src> JsLexer<'src> {
 
             // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
             // perform the check. At any other position, the BOM is just considered plain whitespace.
-            UNI if self.position == 0 && self.consume_potential_bom().is_some() => UNICODE_BOM,
+            
             UNI => {
+                if self.position == 0 {
+                    if let Some(bom) = self.consume_potential_bom(UNICODE_BOM) {
+                        return bom;
+                    }
+                }
                 let chr = self.current_char_unchecked();
                 if is_linebreak(chr)
                     || (UNICODE_WHITESPACE_STARTS.contains(&byte) && UNICODE_SPACES.contains(&chr))
