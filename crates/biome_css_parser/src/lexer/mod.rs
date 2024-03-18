@@ -210,8 +210,8 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
             WHITESPACE
         }
     }
-    #[inline]
 
+    #[inline]
     fn advance_char_unchecked(&mut self) {
         let c = self.current_char_unchecked();
         self.position += c.len_utf8();
