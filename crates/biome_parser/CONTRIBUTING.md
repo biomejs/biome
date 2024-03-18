@@ -105,6 +105,7 @@ pub(crate) struct BetaLexer<'source> {
     /// The start byte position in the source text of the next token.
     position: usize,
     
+    /// the current token
     current_kind: BetaSyntaxKind, 
     
     /// diagnostics emitted during the parsing phase

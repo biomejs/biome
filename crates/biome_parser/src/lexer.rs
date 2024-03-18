@@ -1,10 +1,10 @@
 use super::diagnostic::ParseDiagnostic;
 use biome_rowan::{SyntaxKind, TextRange, TextSize};
+use biome_unicode_table::{lookup_byte, Dispatch::WHS};
 use bitflags::bitflags;
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
 use unicode_bom::Bom;
-use biome_unicode_table::{lookup_byte, Dispatch::WHS};
 
 /// `Lexer` trait defines the necessary methods a lexer must implement.
 /// Lexer is responsible for dividing the source code into meaningful parsing units (kinds).
@@ -106,7 +106,6 @@ pub trait Lexer<'src> {
         }
     }
 
-
     /// Asserts that the lexer is currently positioned at `byte`
     fn assert_byte(&self, byte: u8) {
         debug_assert_eq!(self.source().as_bytes()[self.position()], byte);
@@ -122,7 +121,6 @@ pub trait Lexer<'src> {
     fn is_eof(&self) -> bool {
         self.position() >= self.source().len()
     }
-    
 
     fn advance_byte_or_char(&mut self, chr: u8) {
         if chr.is_ascii() {
@@ -131,7 +129,6 @@ pub trait Lexer<'src> {
             self.advance_char_unchecked();
         }
     }
-
 
     /// Asserts that the lexer is at a UTF8 char boundary
     #[inline]
@@ -179,7 +176,6 @@ pub trait Lexer<'src> {
         debug_assert!(self.source().is_char_boundary(self.position()));
     }
 
-
     /// Gets the current byte.
     ///
     /// ## Returns
@@ -202,7 +198,10 @@ pub trait Lexer<'src> {
     /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
     #[inline]
     fn byte_at(&self, offset: usize) -> Option<u8> {
-        self.source().as_bytes().get(self.position() + offset).copied()
+        self.source()
+            .as_bytes()
+            .get(self.position() + offset)
+            .copied()
     }
 
     #[inline]

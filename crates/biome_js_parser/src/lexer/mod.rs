@@ -202,8 +202,6 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
 
         kind
     }
-    
-    
 
     fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind {
         let old_position = self.position;
@@ -269,7 +267,6 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
         self.current_flags
     }
 
-
     fn push_diagnostic(&mut self, diagnostic: ParseDiagnostic) {
         self.diagnostics.push(diagnostic);
     }
@@ -280,9 +277,8 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
 
     fn advance(&mut self, n: usize) {
         self.position += n;
-
     }
-    
+
     /// Consume one newline or all whitespace until a non-whitespace or a newline is found.
     ///
     /// ## Safety
@@ -496,7 +492,6 @@ impl<'src> JsLexer<'src> {
         }
     }
 
-
     /// Check if the source starts with a Unicode BOM character. If it does,
     /// consume it and return the UNICODE_BOM token kind.
     ///
@@ -625,8 +620,6 @@ impl<'src> JsLexer<'src> {
             self.advance_char_unchecked();
         }
     }
-
-
 
     /// Returns `true` if the parser is at or passed the end of the file.
     #[inline]

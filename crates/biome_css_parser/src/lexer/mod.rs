@@ -100,7 +100,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
     }
 
     fn push_diagnostic(&mut self, diagnostic: ParseDiagnostic) {
-       self.diagnostics.push(diagnostic);
+        self.diagnostics.push(diagnostic);
     }
 
     fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
@@ -218,13 +218,11 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         self.position += c.len_utf8();
     }
 
-
     /// Advances the current position by `n` bytes.
     #[inline]
     fn advance(&mut self, n: usize) {
         self.position += n;
     }
-
 }
 
 impl<'src> CssLexer<'src> {
@@ -261,7 +259,6 @@ impl<'src> CssLexer<'src> {
         self.char_unchecked_at(0)
     }
 
-
     /// Peek the UTF8 char which starts at the current byte
     ///
     /// ## Safety
@@ -269,9 +266,6 @@ impl<'src> CssLexer<'src> {
     fn peek_char_unchecked(&self) -> char {
         self.char_unchecked_at(1)
     }
-
-
-
 
     /// Get the UTF8 char which starts at the current byte
     ///
@@ -309,7 +303,6 @@ impl<'src> CssLexer<'src> {
             Some(_) => true,
         }
     }
-
 
     /// Lexes the next token
     ///
