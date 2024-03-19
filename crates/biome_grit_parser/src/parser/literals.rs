@@ -1,8 +1,8 @@
-use super::constants::*;
 use super::parse_error::expected_pattern;
 use super::parse_name;
 use super::patterns::{parse_maybe_curly_pattern, parse_pattern};
 use super::GritParser;
+use crate::constants::*;
 use biome_grit_syntax::GritSyntaxKind::*;
 use biome_grit_syntax::T;
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
@@ -76,7 +76,7 @@ fn parse_dotdotdot(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(DOT3);
-    let _ = parse_maybe_curly_pattern(p);
+    parse_maybe_curly_pattern(p).ok();
     Present(m.complete(p, GRIT_DOTDOTDOT))
 }
 
@@ -128,11 +128,11 @@ pub(crate) fn parse_list(p: &mut GritParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    let _ = parse_name(p);
+    parse_name(p).ok();
 
     p.expect(T!['[']);
 
-    let _ = parse_list_pattern_list(p);
+    parse_list_pattern_list(p).ok();
 
     p.expect(T![']']);
     Present(m.complete(p, GRIT_LIST))
@@ -169,7 +169,7 @@ pub(crate) fn parse_map(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T!['{']);
 
-    let _ = parse_map_element_list(p);
+    parse_map_element_list(p).ok();
 
     p.eat(T!['}']);
     Present(m.complete(p, GRIT_MAP))
@@ -195,14 +195,16 @@ fn parse_map_element(p: &mut GritParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    let _ = parse_name(p);
+    parse_name(p).ok();
     p.eat(T![:]);
 
-    let _ = parse_pattern(p).or_recover_with_token_set(
-        p,
-        &ParseRecoveryTokenSet::new(GRIT_BOGUS, ELEMENT_LIST_RECOVERY_SET),
-        expected_pattern,
-    );
+    parse_pattern(p)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_PATTERN, ELEMENT_LIST_RECOVERY_SET),
+            expected_pattern,
+        )
+        .ok();
 
     Present(m.complete(p, GRIT_MAP_ELEMENT))
 }

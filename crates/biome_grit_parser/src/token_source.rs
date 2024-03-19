@@ -1,13 +1,14 @@
-use crate::lexer::Lexer;
+use crate::lexer::GritLexer;
 use biome_grit_syntax::GritSyntaxKind::{EOF, TOMBSTONE};
 use biome_grit_syntax::{GritSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
+use biome_parser::lexer::Lexer;
 use biome_parser::prelude::TokenSource;
 use biome_parser::token_source::Trivia;
 use biome_rowan::TriviaPieceKind;
 
 pub(crate) struct GritTokenSource<'source> {
-    lexer: Lexer<'source>,
+    lexer: GritLexer<'source>,
     trivia: Vec<Trivia>,
     current: NonTriviaToken,
     next: Option<NonTriviaToken>,
@@ -31,7 +32,7 @@ impl Default for NonTriviaToken {
 
 impl<'source> GritTokenSource<'source> {
     pub fn from_str(source: &'source str) -> Self {
-        let lexer = Lexer::from_str(source);
+        let lexer = GritLexer::from_str(source);
 
         let mut source = Self {
             lexer,
@@ -70,14 +71,15 @@ impl<'source> GritTokenSource<'source> {
 
         let mut trailing = !first_token;
 
-        while let Some(token) = self.lexer.next_token() {
-            let trivia_kind = TriviaPieceKind::try_from(token.kind());
+        loop {
+            let kind = self.lexer.next_token(());
+            let trivia_kind = TriviaPieceKind::try_from(kind);
 
             match trivia_kind {
                 Err(_) => {
                     // Not trivia
-                    non_trivia_token.kind = token.kind();
-                    non_trivia_token.range = token.range();
+                    non_trivia_token.kind = kind;
+                    non_trivia_token.range = self.lexer.current_range();
                     break;
                 }
                 Ok(trivia_kind) => {
@@ -86,8 +88,11 @@ impl<'source> GritTokenSource<'source> {
                         non_trivia_token.preceding_line_break = true;
                     }
 
-                    self.trivia
-                        .push(Trivia::new(trivia_kind, token.range(), trailing));
+                    self.trivia.push(Trivia::new(
+                        trivia_kind,
+                        self.lexer.current_range(),
+                        trailing,
+                    ));
                 }
             }
         }

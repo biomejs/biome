@@ -1,22 +1,46 @@
-use super::patterns::parse_pattern_list;
-use super::predicates::parse_predicate_list;
-use super::{parse_language_declaration, parse_name, parse_variable_list, GritParser};
-use biome_grit_syntax::{GritSyntaxKind::*, T};
+use super::parse_error::expected_definition;
+use super::patterns::PatternList;
+use super::predicates::PredicateList;
+use super::{
+    parse_language_declaration, parse_name, parse_pattern_arg_list, GritParser, VariableList,
+};
+use crate::constants::*;
+use biome_grit_syntax::GritSyntaxKind::{self, *};
+use biome_grit_syntax::T;
+use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
+use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::ParsedSyntax::*;
+use biome_parser::TokenSet;
 use biome_parser::{parsed_syntax::ParsedSyntax, Parser};
 
-pub(crate) fn parse_definition_list(p: &mut GritParser) -> ParsedSyntax {
-    let m = p.start();
+pub(crate) struct DefinitionList;
 
-    if parse_definition(p) != Absent {
-        loop {
-            if !p.has_preceding_line_break() || parse_definition(p) == Absent {
-                break;
-            }
-        }
+impl ParseNodeList for DefinitionList {
+    type Kind = GritSyntaxKind;
+    type Parser<'source> = GritParser<'source>;
+
+    const LIST_KIND: Self::Kind = GRIT_DEFINITION_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_definition(p)
     }
 
-    Present(m.complete(p, GRIT_DEFINITION_LIST))
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        !p.at_ts(DEFINITION_SET)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> biome_parser::parse_recovery::RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_DEFINITION, TokenSet::EMPTY)
+                .enable_recovery_on_line_break(),
+            expected_definition,
+        )
+    }
 }
 
 #[inline]
@@ -38,22 +62,26 @@ fn parse_function_definition(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(FUNCTION_KW);
-    let _ = parse_name(p);
-    p.eat(T!['(']);
-    let _ = parse_variable_list(p);
-    p.eat(T![')']);
-    let _ = parse_curly_predicate_list(p);
+    parse_name(p).ok();
+    p.expect(T!['(']);
+    VariableList.parse_list(p);
+    p.expect(T![')']);
+    parse_curly_predicate_list(p).ok();
 
     Present(m.complete(p, GRIT_FUNCTION_DEFINITION))
 }
 
 #[inline]
 fn parse_curly_predicate_list(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(T!['{']) {
+        return Absent;
+    }
+
     let m = p.start();
 
-    p.eat(T!['{']);
-    let _ = parse_predicate_list(p);
-    p.eat(T!['}']);
+    p.bump(T!['{']);
+    PredicateList.parse_list(p);
+    p.expect(T!['}']);
 
     Present(m.complete(p, GRIT_CURLY_PREDICATE_LIST))
 }
@@ -68,19 +96,14 @@ fn parse_pattern_definition(p: &mut GritParser) -> ParsedSyntax {
 
     p.eat(PRIVATE_KW);
     p.bump(PATTERN_KW);
-    let _ = parse_name(p);
-    p.eat(T!['(']);
-    let _ = parse_pattern_arg_list(p);
-    p.eat(T![')']);
-    let _ = parse_language_declaration(p);
-    let _ = parse_pattern_definition_body(p);
+    parse_name(p).ok();
+    p.expect(T!['(']);
+    parse_pattern_arg_list(p).ok();
+    p.expect(T![')']);
+    parse_language_declaration(p).ok();
+    parse_pattern_definition_body(p).ok();
 
     Present(m.complete(p, GRIT_PATTERN_DEFINITION))
-}
-
-#[inline]
-fn parse_pattern_arg_list(p: &mut GritParser) -> ParsedSyntax {
-    parse_variable_list(p).map(|syntax| syntax.precede(p).complete(p, GRIT_PATTERN_ARG_LIST))
 }
 
 #[inline]
@@ -92,8 +115,8 @@ fn parse_pattern_definition_body(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['{']);
-    let _ = parse_pattern_list(p);
-    p.eat(T!['}']);
+    PatternList.parse_list(p);
+    p.expect(T!['}']);
 
     Present(m.complete(p, GRIT_PATTERN_DEFINITION_BODY))
 }
@@ -107,11 +130,11 @@ fn parse_predicate_definition(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(PREDICATE_KW);
-    let _ = parse_name(p);
-    p.eat(T!['(']);
-    let _ = parse_pattern_arg_list(p);
-    p.eat(T![')']);
-    let _ = parse_curly_predicate_list(p);
+    parse_name(p).ok();
+    p.expect(T!['(']);
+    parse_pattern_arg_list(p).ok();
+    p.expect(T![')']);
+    parse_curly_predicate_list(p).ok();
 
     Present(m.complete(p, GRIT_PREDICATE_DEFINITION))
 }

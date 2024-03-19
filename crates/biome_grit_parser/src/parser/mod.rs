@@ -1,27 +1,28 @@
-mod constants;
 mod definitions;
 mod literals;
 mod parse_error;
 mod patterns;
 mod predicates;
 
+use crate::constants::*;
 use crate::token_source::GritTokenSource;
 use biome_grit_syntax::GritSyntaxKind::{self, *};
 use biome_grit_syntax::T;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
+use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::{ParsedSyntax::*, *};
 use biome_parser::token_source::Trivia;
 use biome_parser::ParserContext;
 use biome_rowan::TextRange;
-use constants::*;
-use definitions::parse_definition_list;
+use definitions::DefinitionList;
 use literals::parse_double_literal;
-use parse_error::expected_pattern;
 use patterns::parse_pattern;
 
-use self::parse_error::{expected_language_flavor, expected_language_name};
+use self::parse_error::{
+    expected_engine_version, expected_language_flavor, expected_language_name, expected_variable,
+};
 
 pub(crate) struct GritParser<'source> {
     context: ParserContext<GritSyntaxKind>,
@@ -82,11 +83,11 @@ pub(crate) fn parse_root(p: &mut GritParser) -> CompletedMarker {
 
     p.eat(UNICODE_BOM);
 
-    let _ = parse_version(p);
-    let _ = parse_language_declaration(p);
-    let _ = parse_definition_list(p);
-    let _ = parse_pattern(p);
-    let _ = parse_definition_list(p);
+    parse_version(p).ok();
+    parse_language_declaration(p).ok();
+    DefinitionList.parse_list(p);
+    parse_pattern(p).ok();
+    DefinitionList.parse_list(p);
 
     p.eat(EOF);
 
@@ -108,12 +109,12 @@ fn parse_version(p: &mut GritParser) -> ParsedSyntax {
                 Present(_) => {
                     p.eat(T![')']);
                 }
-                Absent => p.error(p.err_builder("Expected version as a double", p.cur_range())),
+                Absent => p.error(p.err_builder("Expected version to be a double", p.cur_range())),
             }
         } else {
             let engine_end = engine_range.end();
-            p.error(p.err_builder(
-                "Expected an engine version",
+            p.error(expected_engine_version(
+                p,
                 TextRange::new(engine_end, engine_end),
             ))
         }
@@ -135,7 +136,8 @@ fn parse_language_declaration(p: &mut GritParser) -> ParsedSyntax {
     let mut is_supported = true;
 
     if parse_language_name(p) == Absent {
-        p.err_and_bump(expected_language_name(p, p.cur_range()), GRIT_BOGUS);
+        p.error(expected_language_name(p, p.cur_range()));
+        p.eat(GRIT_NAME);
         is_supported = false;
     }
 
@@ -152,7 +154,8 @@ fn parse_language_declaration(p: &mut GritParser) -> ParsedSyntax {
                 }
 
                 if parse_language_flavor_kind(p) == Absent {
-                    p.err_and_bump(expected_language_flavor(p, p.cur_range()), GRIT_BOGUS);
+                    p.error(expected_language_flavor(p, p.cur_range()));
+                    p.eat(GRIT_NAME);
                     is_supported = false;
                 }
 
@@ -206,14 +209,7 @@ fn parse_maybe_named_arg(p: &mut GritParser) -> ParsedSyntax {
     match p.cur() {
         T![')'] => Absent,
         GRIT_NAME => parse_named_arg(p),
-        _ => parse_pattern(p)
-            .or_recover_with_token_set(
-                p,
-                &ParseRecoveryTokenSet::new(GRIT_BOGUS, ARG_LIST_RECOVERY_SET),
-                expected_pattern,
-            )
-            .ok()
-            .into(),
+        _ => parse_pattern(p),
     }
 }
 
@@ -235,27 +231,10 @@ fn parse_named_arg(p: &mut GritParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    let _ = parse_name(p);
+    parse_name(p).ok();
     p.eat(T![=]);
-    let _ = parse_pattern(p).or_recover_with_token_set(
-        p,
-        &ParseRecoveryTokenSet::new(GRIT_BOGUS, ARG_LIST_RECOVERY_SET),
-        expected_pattern,
-    );
+    parse_pattern(p).ok();
     Present(m.complete(p, GRIT_NAMED_ARG))
-}
-
-#[inline]
-fn parse_named_arg_list(p: &mut GritParser) -> ParsedSyntax {
-    let m = p.start();
-
-    loop {
-        if parse_maybe_named_arg(p) == Absent || !p.eat(T![,]) {
-            break;
-        }
-    }
-
-    Present(m.complete(p, GRIT_NAMED_ARG_LIST))
 }
 
 #[inline]
@@ -270,6 +249,13 @@ fn parse_not(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn parse_pattern_arg_list(p: &mut GritParser) -> ParsedSyntax {
+    let m = p.start();
+    VariableList.parse_list(p);
+    Present(m.complete(p, GRIT_PATTERN_ARG_LIST))
+}
+
+#[inline]
 fn parse_variable(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(GRIT_VARIABLE) {
         return Absent;
@@ -280,15 +266,35 @@ fn parse_variable(p: &mut GritParser) -> ParsedSyntax {
     Present(m.complete(p, GRIT_VARIABLE))
 }
 
-#[inline]
-fn parse_variable_list(p: &mut GritParser) -> ParsedSyntax {
-    let m = p.start();
+pub(crate) struct VariableList;
 
-    loop {
-        if parse_variable(p) == Absent || !p.eat(T![,]) {
-            break;
-        }
+impl ParseSeparatedList for VariableList {
+    type Kind = GritSyntaxKind;
+    type Parser<'source> = GritParser<'source>;
+
+    const LIST_KIND: Self::Kind = GRIT_VARIABLE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_variable(p)
     }
 
-    Present(m.complete(p, GRIT_VARIABLE_LIST))
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at_ts(token_set!(T![')']))
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> biome_parser::parse_recovery::RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS, ARG_LIST_RECOVERY_SET),
+            expected_variable,
+        )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
 }

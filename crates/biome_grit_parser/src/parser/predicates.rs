@@ -1,10 +1,12 @@
 use super::literals::{parse_boolean_literal, parse_literal};
-use super::parse_error::*;
+use super::parse_name;
 use super::patterns::{parse_container, parse_pattern};
-use super::{constants::*, parse_name, parse_named_arg_list};
+use super::{parse_error::*, parse_maybe_named_arg};
 use super::{parse_not, GritParser};
-use biome_grit_syntax::GritSyntaxKind::*;
+use crate::constants::*;
+use biome_grit_syntax::GritSyntaxKind::{self, *};
 use biome_grit_syntax::T;
+use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::{ParsedSyntax::*, *};
 
@@ -42,11 +44,13 @@ fn parse_bracketed_predicate(p: &mut GritParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn parse_expected_predicate(p: &mut GritParser) {
-    let _ = parse_predicate(p).or_recover_with_token_set(
-        p,
-        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PREDICATE_RECOVERY_SET),
-        expected_predicate,
-    );
+    parse_predicate(p)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_PREDICATE, PREDICATE_RECOVERY_SET),
+            expected_predicate,
+        )
+        .ok();
 }
 
 enum InfixPredicateKind {
@@ -88,7 +92,7 @@ fn parse_infix_predicate(p: &mut GritParser) -> ParsedSyntax {
         _ => {
             p.err_and_bump(
                 expected_predicate_infix_operator(p, p.cur_range()),
-                GRIT_BOGUS,
+                GRIT_BOGUS_PREDICATE,
             );
             Bogus
         }
@@ -109,11 +113,13 @@ fn parse_infix_predicate(p: &mut GritParser) -> ParsedSyntax {
 
     p.bump_any();
 
-    let _ = parse_pattern(p).or_recover_with_token_set(
-        p,
-        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PREDICATE_RECOVERY_SET),
-        expected_pattern,
-    );
+    parse_pattern(p)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_PATTERN, PREDICATE_RECOVERY_SET),
+            expected_pattern,
+        )
+        .ok();
 
     let kind = match kind {
         Accumulate => GRIT_PREDICATE_ACCUMULATE,
@@ -141,7 +147,7 @@ fn parse_predicate_and(p: &mut GritParser) -> ParsedSyntax {
     p.eat(AND_KW);
     p.expect(T!['{']);
 
-    let _ = parse_predicate_list(p);
+    PredicateList.parse_list(p);
 
     p.expect(T!['}']);
 
@@ -158,11 +164,44 @@ fn parse_predicate_any(p: &mut GritParser) -> ParsedSyntax {
     p.bump(ANY_KW);
     p.expect(T!['{']);
 
-    let _ = parse_predicate_list(p);
+    PredicateList.parse_list(p);
 
     p.expect(T!['}']);
 
     Present(m.complete(p, GRIT_PREDICATE_ANY))
+}
+
+pub(crate) struct PredicateCallArgList;
+
+impl ParseSeparatedList for PredicateCallArgList {
+    type Kind = GritSyntaxKind;
+    type Parser<'source> = GritParser<'source>;
+
+    const LIST_KIND: Self::Kind = GRIT_NAMED_ARG_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_maybe_named_arg(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at_ts(token_set!(T![')']))
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> biome_parser::parse_recovery::RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_NAMED_ARG, ARG_LIST_RECOVERY_SET),
+            expected_predicate_call_arg,
+        )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
 }
 
 #[inline]
@@ -173,10 +212,10 @@ fn parse_predicate_call(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    let _ = parse_name(p);
+    parse_name(p).ok();
     p.expect(T!['(']);
 
-    let _ = parse_named_arg_list(p);
+    PredicateCallArgList.parse_list(p);
 
     p.expect(T![')']);
 
@@ -199,7 +238,7 @@ fn parse_predicate_if_else(p: &mut GritParser) -> ParsedSyntax {
 
     parse_expected_predicate(p);
 
-    let _ = parse_predicate_else_clause(p);
+    parse_predicate_else_clause(p).ok();
 
     Present(m.complete(p, GRIT_PREDICATE_IF_ELSE))
 }
@@ -218,17 +257,37 @@ fn parse_predicate_else_clause(p: &mut GritParser) -> ParsedSyntax {
     Present(m.complete(p, GRIT_PREDICATE_ELSE_CLAUSE))
 }
 
-#[inline]
-pub(crate) fn parse_predicate_list(p: &mut GritParser) -> ParsedSyntax {
-    let m = p.start();
+pub(crate) struct PredicateList;
 
-    loop {
-        if parse_predicate(p) == Absent || !p.eat(T![,]) {
-            break;
-        }
+impl ParseSeparatedList for PredicateList {
+    type Kind = GritSyntaxKind;
+    type Parser<'source> = GritParser<'source>;
+
+    const LIST_KIND: Self::Kind = GRIT_PREDICATE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_predicate(p)
     }
 
-    Present(m.complete(p, GRIT_PREDICATE_LIST))
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at_ts(token_set!(T![')'], T!['}']))
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> biome_parser::parse_recovery::RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_PREDICATE, PREDICATE_RECOVERY_SET),
+            expected_predicate,
+        )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
 }
 
 #[inline]
@@ -267,7 +326,7 @@ fn parse_predicate_or(p: &mut GritParser) -> ParsedSyntax {
     p.bump(OR_KW);
     p.expect(T!['{']);
 
-    let _ = parse_predicate_list(p);
+    PredicateList.parse_list(p);
 
     p.expect(T!['}']);
 
@@ -283,11 +342,13 @@ fn parse_predicate_return(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(RETURN_KW);
 
-    let _ = parse_pattern(p).or_recover_with_token_set(
-        p,
-        &ParseRecoveryTokenSet::new(GRIT_BOGUS, PREDICATE_RECOVERY_SET),
-        expected_pattern,
-    );
+    parse_pattern(p)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_PATTERN, PREDICATE_RECOVERY_SET),
+            expected_pattern,
+        )
+        .ok();
 
     Present(m.complete(p, GRIT_PREDICATE_RETURN))
 }

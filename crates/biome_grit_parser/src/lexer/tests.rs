@@ -1,18 +1,41 @@
 #![cfg(test)]
 #![allow(unused_mut, unused_variables, unused_assignments)]
 
-use super::{Lexer, TextSize};
+use super::{GritLexer, TextSize};
 use biome_grit_syntax::GritSyntaxKind::{self, *};
+use biome_parser::lexer::Lexer;
+use biome_rowan::TextRange;
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
 
+pub struct Token {
+    kind: GritSyntaxKind,
+    range: TextRange,
+}
+
+impl Iterator for GritLexer<'_> {
+    type Item = Token;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let kind = self.next_token(());
+        if kind == EOF {
+            None
+        } else {
+            Some(Token {
+                kind,
+                range: self.current_range(),
+            })
+        }
+    }
+}
+
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
     ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let mut lexer = Lexer::from_str($src);
+        let mut lexer = GritLexer::from_str($src);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 
@@ -67,7 +90,7 @@ fn losslessness(string: String) -> bool {
     let cloned = string.clone();
     let (sender, receiver) = channel();
     thread::spawn(move || {
-        let mut lexer = Lexer::from_str(&cloned);
+        let mut lexer = GritLexer::from_str(&cloned);
         let tokens: Vec<_> = lexer.map(|token| token.range).collect();
 
         sender
@@ -98,7 +121,6 @@ fn losslessness(string: String) -> bool {
 fn empty() {
     assert_lex! {
         "",
-        EOF:0
     }
 }
 
@@ -107,7 +129,6 @@ fn int() {
     assert_lex! {
         "5098382",
         GRIT_INT:7,
-        EOF:0
     }
 }
 
@@ -116,7 +137,6 @@ fn float() {
     assert_lex! {
         "345.893872",
         GRIT_DOUBLE:10,
-        EOF:0
     }
 }
 
@@ -125,7 +145,6 @@ fn float_invalid() {
     assert_lex! {
         "345.893872.43322",
         ERROR_TOKEN:16,
-        EOF:0
     }
 }
 
@@ -134,7 +153,6 @@ fn negative() {
     assert_lex! {
         "-5098382",
         GRIT_NEGATIVE_INT:8,
-        EOF:0
     }
 }
 
@@ -143,7 +161,6 @@ fn minus_without_number() {
     assert_lex! {
         "-",
         MINUS:1,
-        EOF:0
     }
 }
 
@@ -152,13 +169,11 @@ fn exponent() {
     assert_lex! {
         "-493e+534",
         GRIT_DOUBLE:9,
-        EOF:0
     }
 
     assert_lex! {
         "-493E-534",
         GRIT_DOUBLE:9,
-        EOF:0
     }
 }
 
@@ -167,13 +182,11 @@ fn multiple_exponent() {
     assert_lex! {
         "-493e5E3",
         ERROR_TOKEN:8,
-        EOF:0
     }
 
     assert_lex! {
         "-493e4E45",
         ERROR_TOKEN:9,
-        EOF:0
     }
 }
 
@@ -193,7 +206,6 @@ fn array() {
         WHITESPACE:1,
         GRIT_INT:1,
         R_BRACK:1,
-        EOF:0,
     }
 }
 
@@ -217,7 +229,6 @@ fn object() {
         GRIT_INT:1,
         WHITESPACE:1,
         R_CURLY:1,
-        EOF:0,
     }
 }
 
@@ -226,7 +237,6 @@ fn basic_string() {
     assert_lex! {
         r#""A string consisting of ASCII characters only""#,
         GRIT_STRING:46,
-        EOF:0
     }
 }
 
@@ -235,7 +245,6 @@ fn single_quote_string() {
     assert_lex! {
         r#"'A string token using single quotes that are not supported in GritQL'"#,
         ERROR_TOKEN:69,
-        EOF:0
     }
 }
 
@@ -244,7 +253,6 @@ fn unterminated_string() {
     assert_lex! {
         r#""A string without the closing quote"#,
         ERROR_TOKEN:35,
-        EOF:0
     }
 }
 
@@ -253,25 +261,21 @@ fn simple_escape_sequences() {
     assert_lex! {
         r#""Escaped \$""#,
         GRIT_STRING:12,
-        EOF:0
     }
 
     assert_lex! {
         r#""Escaped \"""#,
         GRIT_STRING:12,
-        EOF:0
     }
 
     assert_lex! {
         r#""Escaped \\""#,
         GRIT_STRING:12,
-        EOF:0
     }
 
     assert_lex! {
         r#""Escaped \n""#,
         GRIT_STRING:12,
-        EOF:0
     }
 }
 
@@ -280,13 +284,11 @@ fn unicode_escape() {
     assert_lex! {
         r#""Escaped \u002F""#,
         GRIT_STRING:16,
-        EOF:0
     }
 
     assert_lex! {
         r#""Escaped \u002f""#,
         GRIT_STRING:16,
-        EOF:0
     }
 }
 
@@ -295,13 +297,11 @@ fn invalid_unicode_escape() {
     assert_lex! {
         r#""Escaped \u0""#,
         ERROR_TOKEN:13,
-        EOF:0
     }
 
     assert_lex! {
         r#""Escaped \u002G""#,
         ERROR_TOKEN:16,
-        EOF:0
     }
 }
 
@@ -310,13 +310,11 @@ fn invalid_escape() {
     assert_lex! {
         r#""\"#,
         ERROR_TOKEN:2,
-        EOF:0
     }
 
     assert_lex! {
         r#""Invalid escape \'""#,
         ERROR_TOKEN:19,
-        EOF:0
     }
 }
 
@@ -325,7 +323,6 @@ fn single_quote_escape_in_single_quote_string() {
     assert_lex! {
         r"'A single \' escape'",
         ERROR_TOKEN:20,
-        EOF:0
     }
 }
 
@@ -334,20 +331,17 @@ fn names() {
     assert_lex! {
         r#"asciiIdentifier"#,
         GRIT_NAME:15,
-        EOF:0
     }
 
     assert_lex! {
         r#"with_underscore_here"#,
         GRIT_NAME:20,
-        EOF:0
     }
 
     assert_lex! {
         r#"with_unicodeà"#,
         GRIT_NAME:12,
         ERROR_TOKEN:2,
-        EOF:0
     }
 
     assert_lex! {
@@ -356,7 +350,6 @@ fn names() {
         GRIT_NAME:12,
         ERROR_TOKEN:2,
         ERROR_TOKEN:2,
-        EOF:0
     }
 }
 
@@ -365,25 +358,21 @@ fn regex() {
     assert_lex! {
         r#"r"a+b?""#,
         GRIT_REGEX:7,
-        EOF:0
     }
 
     assert_lex! {
         r#"r"a\\.b?""#,
         GRIT_REGEX:9,
-        EOF:0
     }
 
     assert_lex! {
         r#"r"a\"b?""#,
         GRIT_REGEX:8,
-        EOF:0
     }
 
     assert_lex! {
         r#"r"a+b?"#,
         ERROR_TOKEN: 6,
-        EOF:0
     }
 }
 
@@ -392,25 +381,21 @@ fn snippet_regex() {
     assert_lex! {
         r#"r`a+b?`"#,
         GRIT_SNIPPET_REGEX:7,
-        EOF:0
     }
 
     assert_lex! {
         r#"r`a\\.b?`"#,
         GRIT_SNIPPET_REGEX:9,
-        EOF:0
     }
 
     assert_lex! {
         r#"r`a\`b?`"#,
         GRIT_SNIPPET_REGEX:8,
-        EOF:0
     }
 
     assert_lex! {
         r#"r`a+b?"#,
         ERROR_TOKEN: 6,
-        EOF:0
     }
 }
 
@@ -419,25 +404,21 @@ fn snippets() {
     assert_lex! {
         r#"`console.log()`"#,
         GRIT_BACKTICK_SNIPPET:15,
-        EOF:0
     }
 
     assert_lex! {
         r#"`console.log($message)`"#,
         GRIT_BACKTICK_SNIPPET:23,
-        EOF:0
     }
 
     assert_lex! {
         r#"`console.log(\$message)`"#,
         GRIT_BACKTICK_SNIPPET:24,
-        EOF:0
     }
 
     assert_lex! {
         r#"`console.log(\/message)`"#,
         ERROR_TOKEN:24,
-        EOF:0
     }
 }
 
@@ -446,25 +427,21 @@ fn raw_snippets() {
     assert_lex! {
         r#"raw`console.log()`"#,
         GRIT_RAW_BACKTICK_SNIPPET:18,
-        EOF:0
     }
 
     assert_lex! {
         r#"raw`console.log($message)`"#,
         GRIT_RAW_BACKTICK_SNIPPET:26,
-        EOF:0
     }
 
     assert_lex! {
         r#"raw`console.log(\$message)`"#,
         GRIT_RAW_BACKTICK_SNIPPET:27,
-        EOF:0
     }
 
     assert_lex! {
         r#"raw`console.log(\/message)`"#,
         ERROR_TOKEN:27,
-        EOF:0
     }
 }
 
@@ -476,13 +453,11 @@ fn single_line_comments() {
         COMMENT:5,
         NEWLINE:1,
         WHITESPACE:4,
-        EOF:0
     }
 
     assert_lex! {
         "//a",
         COMMENT:3,
-        EOF:0
     }
 }
 
@@ -492,19 +467,16 @@ fn block_comment() {
         "/*
         */",
         MULTILINE_COMMENT:13,
-        EOF:0
     }
 
     assert_lex! {
         "/* */",
         COMMENT:5,
-        EOF:0
     }
 
     assert_lex! {
         "/* *",
         COMMENT:4,
-        EOF:0
     }
 }
 
@@ -517,23 +489,22 @@ fn keywords() {
             "Expected `GritSyntaxKind::from_keyword` to return a kind for keyword {keyword}.",
         );
 
-        let mut lexer = Lexer::from_str(keyword);
-        let current = lexer.next_token().expect("To have lexed keyword");
+        let mut lexer = GritLexer::from_str(keyword);
+        let next_kind = lexer.next_token(());
 
         assert_eq!(
-            current.kind, kind,
-            "Expected token '{keyword}' to be of kind {:?} but is {:?}.",
-            kind, current.kind
+            next_kind, kind,
+            "Expected token '{keyword}' to be of kind {kind:?} but is {next_kind:?}."
         );
 
         assert_eq!(
-            current.range.len(),
+            lexer.current_range().len(),
             TextSize::from(keyword.len() as u32),
             "Expected lexed keyword to be of len {} but has length {:?}",
             keyword.len(),
-            current.range.len()
+            lexer.current_range().len()
         );
 
-        assert_eq!(lexer.next_token().expect("Expected EOF token").kind, EOF);
+        assert_eq!(lexer.next_token(()), EOF);
     }
 }

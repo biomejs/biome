@@ -1,3 +1,4 @@
+mod constants;
 mod lexer;
 mod parser;
 mod token_source;
@@ -29,7 +30,6 @@ pub fn parse_grit_with_cache(source: &str, cache: &mut NodeCache) -> GritParse {
         let mut tree_sink = GritLosslessTreeSink::with_cache(source, &trivia, cache);
         biome_parser::event::process(&mut tree_sink, events, diagnostics);
         let (green, diagnostics) = tree_sink.finish();
-        println!("{green:#?}");
 
         GritParse::new(green, diagnostics)
     })

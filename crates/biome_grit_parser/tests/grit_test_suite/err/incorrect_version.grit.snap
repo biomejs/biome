@@ -54,7 +54,7 @@ GritRoot {
 ```
 incorrect_version.grit:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected version as a double
+  × Expected version to be a double
   
   > 1 │ engine biome ("1.0")
       │               ^^^^^

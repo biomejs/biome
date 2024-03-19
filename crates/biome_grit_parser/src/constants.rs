@@ -30,7 +30,8 @@ pub(crate) const PATTERN_ELSE_RECOVERY_SET: TokenSet<GritSyntaxKind> =
 pub(crate) const PATTERN_UNTIL_RECOVERY_SET: TokenSet<GritSyntaxKind> =
     token_set!(T![')'], T!['}'], UNTIL_KW, EOF);
 
-pub(crate) const PREDICATE_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(T![')']);
+pub(crate) const PREDICATE_RECOVERY_SET: TokenSet<GritSyntaxKind> =
+    token_set!(T![')'], T!['}'], ELSE_KW);
 
 // Other sets.
 pub(crate) const BOOLEAN_VALUE_SET: TokenSet<GritSyntaxKind> = token_set![TRUE_KW, FALSE_KW];
@@ -41,6 +42,9 @@ pub(crate) const CODE_SNIPPET_SET: TokenSet<GritSyntaxKind> =
 pub(crate) const CONTAINER_SET: TokenSet<GritSyntaxKind> =
     token_set![GRIT_VARIABLE, GRIT_MAP_ACCESSOR, GRIT_LIST_ACCESSOR];
 
+pub(crate) const DEFINITION_SET: TokenSet<GritSyntaxKind> =
+    token_set![FUNCTION_KW, PATTERN_KW, PREDICATE_KW, PRIVATE_KW];
+
 pub(crate) const NOT_SET: TokenSet<GritSyntaxKind> = token_set![NOT_KW, T![!]];
 
 pub(crate) const REGEX_SET: TokenSet<GritSyntaxKind> = token_set![GRIT_REGEX, GRIT_SNIPPET_REGEX];
@@ -48,5 +52,9 @@ pub(crate) const REGEX_SET: TokenSet<GritSyntaxKind> = token_set![GRIT_REGEX, GR
 pub(crate) const SUPPORTED_LANGUAGE_SET: TokenSet<GritSyntaxKind> =
     token_set![T![js], T![json], T![css], T![grit], T![html]];
 
+pub(crate) const SUPPORTED_LANGUAGE_SET_STR: &[&str] = &["js", "json", "css", "grit", "html"];
+
 pub(crate) const SUPPORTED_LANGUAGE_FLAVOR_SET: TokenSet<GritSyntaxKind> =
     token_set![T![typescript], T![jsx]];
+
+pub(crate) const SUPPORTED_LANGUAGE_FLAVOR_SET_STR: &[&str] = &["typescript", "jsx"];

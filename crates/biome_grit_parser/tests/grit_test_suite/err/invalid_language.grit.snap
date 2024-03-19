@@ -17,11 +17,7 @@ GritRoot {
     language: GritBogusLanguageDeclaration {
         items: [
             LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")],
-            GritBogus {
-                items: [
-                    GRIT_NAME@9..21 "non_existing" [] [],
-                ],
-            },
+            GRIT_NAME@9..21 "non_existing" [] [],
             SEMICOLON@21..22 ";" [] [],
         ],
     },
@@ -40,8 +36,7 @@ GritRoot {
   1: (empty)
   2: GRIT_BOGUS_LANGUAGE_DECLARATION@0..22
     0: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")]
-    1: GRIT_BOGUS@9..21
-      0: GRIT_NAME@9..21 "non_existing" [] []
+    1: GRIT_NAME@9..21 "non_existing" [] []
     2: SEMICOLON@21..22 ";" [] []
   3: GRIT_DEFINITION_LIST@22..22
   4: (empty)
@@ -55,10 +50,18 @@ GritRoot {
 ```
 invalid_language.grit:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a supported language; must be one of `js`, `json`, `css`, `html`, or `grit`
+  × Unexpected language.
   
   > 1 │ language non_existing;
       │          ^^^^^^^^^^^^
     2 │ 
+  
+  i Expected one of:
+  
+  - js
+  - json
+  - css
+  - grit
+  - html
   
 ```

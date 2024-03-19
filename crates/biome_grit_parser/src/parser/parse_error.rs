@@ -1,24 +1,37 @@
+use super::{SUPPORTED_LANGUAGE_FLAVOR_SET_STR, SUPPORTED_LANGUAGE_SET_STR};
 use crate::parser::GritParser;
 use biome_parser::diagnostic::expected_node;
 use biome_parser::prelude::ParseDiagnostic;
 use biome_parser::Parser;
 use biome_rowan::TextRange;
 
+pub(crate) fn expected_definition(p: &GritParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected a definition.", range)
+        .with_hint("Definitions can be functions, patterns, or predicates.")
+}
+
+pub(crate) fn expected_engine_version(p: &GritParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected an engine version.", range)
+        .with_hint("Add a version between parentheses. For example: `(1.0)`")
+}
+
 pub(crate) fn expected_int_literal(p: &GritParser, range: TextRange) -> ParseDiagnostic {
     expected_node("integer", range, p)
 }
 
 pub(crate) fn expected_language_name(p: &GritParser, range: TextRange) -> ParseDiagnostic {
-    p.err_builder(
-        "Expected a supported language; must be one of `js`, `json`, `css`, `html`, or `grit`",
-        range,
-    )
+    p.err_builder("Unexpected language.", range)
+        .with_alternatives("Expected one of:", SUPPORTED_LANGUAGE_SET_STR)
 }
 
 pub(crate) fn expected_language_flavor(p: &GritParser, range: TextRange) -> ParseDiagnostic {
-    p.err_builder(
-        "Expected a supported language flavor; must be one of `typescript` or `jsx`",
-        range,
+    p.err_builder("Unexpected language flavor.", range)
+        .with_alternatives("Expected one of:", SUPPORTED_LANGUAGE_FLAVOR_SET_STR)
+}
+
+pub(crate) fn expected_node_arg(p: &GritParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Unexpected node argument.", range).with_hint(
+        "Node arguments must be patterns, optionally preceeded by a name and an equal sign.",
     )
 }
 
@@ -30,14 +43,21 @@ pub(crate) fn expected_predicate(p: &GritParser, range: TextRange) -> ParseDiagn
     expected_node("predicate", range, p)
 }
 
+pub(crate) fn expected_predicate_call_arg(p: &GritParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Unexpected predicate call argument.", range).with_hint(
+        "Predicate call arguments must be patterns, optionally preceeded by a name and an equal sign.",
+    )
+}
+
 pub(crate) fn expected_predicate_infix_operator(
     p: &GritParser,
     range: TextRange,
 ) -> ParseDiagnostic {
-    p.err_builder(
-        "Expected an operator valid inside predicates; must be one of `+=`, `=`, `==`, `>`, `>=`, `<`, `<=`, `<:`, `!=`, or `=>`.",
-        range,
-    )
+    p.err_builder("Expected an operator valid inside predicates.", range)
+        .with_alternatives(
+            "Must be one of:",
+            &["+=", "=", "==", ">", ">=", "<", "<=", "<:", "!=", "=>"],
+        )
 }
 
 pub(crate) fn expected_variable(p: &GritParser, range: TextRange) -> ParseDiagnostic {

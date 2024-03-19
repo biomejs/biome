@@ -3,124 +3,185 @@
 #[rustfmt::skip]
 mod tests;
 
+use crate::constants::SUPPORTED_LANGUAGE_SET_STR;
 use biome_grit_syntax::{GritSyntaxKind, GritSyntaxKind::*, TextLen, TextRange, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
-use std::iter::FusedIterator;
+use biome_parser::lexer::{Lexer, LexerCheckpoint};
 use std::ops::Add;
-use unicode_bom::Bom;
 
-pub struct Token {
-    kind: GritSyntaxKind,
-    range: TextRange,
-}
-
-impl Token {
-    pub fn kind(&self) -> GritSyntaxKind {
-        self.kind
-    }
-
-    pub fn range(&self) -> TextRange {
-        self.range
-    }
-}
-
-/// An extremely fast, lookup table based, lossless JSON lexer
+/// An extremely fast, lookup table based, lossless Grit lexer
 #[derive(Debug)]
-pub(crate) struct Lexer<'src> {
+pub(crate) struct GritLexer<'src> {
     /// Source text
     source: &'src str,
 
     /// The start byte position in the source text of the next token.
     position: usize,
 
+    /// Byte offset of the current token from the start of the source
+    /// The range of the current token can be computed by
+    /// `self.position - self.current_start`.
+    current_start: TextSize,
+
+    /// The kind of the current token
+    current_kind: GritSyntaxKind,
+
+    /// `true` if there has been a line break between the last non-trivia token
+    /// and the next non-trivia token.
+    after_newline: bool,
+
     diagnostics: Vec<ParseDiagnostic>,
 }
 
-impl<'src> Lexer<'src> {
+impl<'src> Lexer<'src> for GritLexer<'src> {
+    type Kind = GritSyntaxKind;
+
+    type LexContext = ();
+    type ReLexContext = ();
+
+    fn source(&self) -> &'src str {
+        self.source
+    }
+
+    fn current(&self) -> Self::Kind {
+        self.current_kind
+    }
+
+    fn current_start(&self) -> TextSize {
+        self.current_start
+    }
+
+    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
+        unimplemented!("Grit lexer doesn't support checkpoints");
+    }
+
+    fn next_token(&mut self, _context: Self::LexContext) -> Self::Kind {
+        self.current_start = self.text_position();
+
+        let kind = match self.current_byte() {
+            Some(current) => {
+                let kind = self.lex_token(current);
+
+                debug_assert!(
+                    self.current_start < self.text_position(),
+                    "Lexer did not progress"
+                );
+                kind
+            }
+            None => EOF,
+        };
+
+        self.current_kind = kind;
+
+        if !kind.is_trivia() {
+            self.after_newline = false;
+        }
+
+        kind
+    }
+
+    fn re_lex(&mut self, _context: Self::ReLexContext) -> Self::Kind {
+        unimplemented!("Grit lexer doesn't support re-lexing");
+    }
+
+    fn has_preceding_line_break(&self) -> bool {
+        self.after_newline
+    }
+
+    fn has_unicode_escape(&self) -> bool {
+        false // Grit identifiers do not support Unicode escapes
+    }
+
+    fn rewind(&mut self, _checkpoint: LexerCheckpoint<Self::Kind>) {
+        unimplemented!("Grit lexer doesn't support rewinding");
+    }
+
+    fn finish(self) -> Vec<ParseDiagnostic> {
+        self.diagnostics
+    }
+
+    fn position(&self) -> usize {
+        self.position
+    }
+
+    fn push_diagnostic(&mut self, diagnostic: ParseDiagnostic) {
+        self.diagnostics.push(diagnostic);
+    }
+
+    fn consume_newline_or_whitespaces(&mut self) -> Self::Kind {
+        if self.consume_newline() {
+            self.after_newline = true;
+            NEWLINE
+        } else {
+            self.consume_whitespaces();
+            WHITESPACE
+        }
+    }
+
+    #[inline]
+    fn advance_char_unchecked(&mut self) {
+        let c = self.current_char_unchecked();
+        self.position += c.len_utf8();
+    }
+
+    #[inline]
+    fn advance(&mut self, n: usize) {
+        self.position += n;
+    }
+}
+
+impl<'src> GritLexer<'src> {
     /// Make a new lexer from a str, this is safe because strs are valid utf8
     pub fn from_str(string: &'src str) -> Self {
         Self {
             source: string,
             position: 0,
+            current_kind: TOMBSTONE,
+            current_start: TextSize::from(0),
+            after_newline: false,
             diagnostics: Vec::new(),
         }
     }
 
-    /// Returns the source code
-    pub fn source(&self) -> &'src str {
-        self.source
-    }
-
-    pub fn finish(self) -> Vec<ParseDiagnostic> {
-        self.diagnostics
-    }
-
-    /// Lexes the next token.
+    /// Get the UTF8 char which starts at the current byte
     ///
-    /// ## Return
-    /// Returns its kind and any potential error.
-    pub(crate) fn next_token(&mut self) -> Option<Token> {
-        let start = self.text_position();
+    /// ## Safety
+    /// Must be called at a valid UT8 char boundary
+    #[inline]
+    fn current_char_unchecked(&self) -> char {
+        // Precautionary measure for making sure the unsafe code below does not
+        // read over memory boundary.
+        debug_assert!(!self.is_eof());
+        self.assert_current_char_boundary();
 
-        match self.current_byte() {
-            Some(current) => {
-                let kind = self.lex_token(current);
-
-                debug_assert!(start < self.text_position(), "Lexer did not progress");
-                Some(Token {
-                    kind,
-                    range: TextRange::new(start, self.text_position()),
-                })
-            }
-            None if self.position == self.source.len() => {
-                self.advance(1);
-                Some(Token {
-                    kind: EOF,
-                    range: TextRange::new(start, start),
-                })
-            }
-            None => None,
+        // Safety: We know this is safe because we require the input to the
+        // lexer to be valid utf8 and we always call this when we are at a char.
+        unsafe {
+            let Some(chr) = self
+                .source
+                .get_unchecked(self.position..self.source.len())
+                .chars()
+                .next()
+            else {
+                core::hint::unreachable_unchecked();
+            };
+            chr
         }
-    }
-
-    fn text_position(&self) -> TextSize {
-        TextSize::try_from(self.position).expect("Input to be smaller than 4 GB")
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind.
-    fn eat_byte(&mut self, tok: GritSyntaxKind) -> GritSyntaxKind {
+    #[inline]
+    fn consume_byte(&mut self, tok: GritSyntaxKind) -> GritSyntaxKind {
         self.advance(1);
         tok
-    }
-
-    /// Eats just one newline/line break and spits out the lexed token.
-    ///
-    /// ## Safety
-    /// Must be called at a newline character.
-    fn eat_newline(&mut self) -> GritSyntaxKind {
-        self.assert_at_char_boundary();
-
-        match self.current_byte() {
-            Some(b'\n') => self.advance(1),
-            Some(b'\r') => {
-                if self.peek_byte() == Some(b'\n') {
-                    self.advance(2)
-                } else {
-                    self.advance(1)
-                }
-            }
-            _ => {}
-        }
-
-        NEWLINE
     }
 
     /// Eats all whitespace until a non-whitespace or a newline is found.
     ///
     /// ## Safety
     /// Must be called at a whitespace character.
-    fn eat_whitespace(&mut self) -> GritSyntaxKind {
-        self.assert_at_char_boundary();
+    fn consume_whitespaces(&mut self) -> GritSyntaxKind {
+        self.assert_current_char_boundary();
 
         while let Some(byte) = self.current_byte() {
             match byte {
@@ -149,165 +210,47 @@ impl<'src> Lexer<'src> {
         WHITESPACE
     }
 
-    /// Check if the source starts with a Unicode BOM character. If it does,
-    /// consume it and return the UNICODE_BOM token kind.
-    ///
-    /// Note that JSON explicitly forbids BOM characters from appearing in a
-    /// network-transmitted JSON Text: https://datatracker.ietf.org/doc/html/rfc8259#section-8.1.
-    /// However, Windows editors in particular will occasionally add a BOM
-    /// anyway, and Biome should not remove those characters when present, so
-    /// they need to be tracked.
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary (and realistically only at
-    /// the start position of the source).
-    fn consume_potential_bom(&mut self) -> Option<GritSyntaxKind> {
-        // Bom needs at least the first three bytes of the source to know if it
-        // matches the UTF-8 BOM and not an alternative. This can be expanded
-        // to more bytes to support other BOM characters if Biome decides to
-        // support other encodings like UTF-16.
-        if let Some(first) = self.source().get(0..3) {
-            let bom = Bom::from(first.as_bytes());
-            self.advance(bom.len());
-
-            match bom {
-                Bom::Null => None,
-                _ => Some(UNICODE_BOM),
-            }
-        } else {
-            None
-        }
-    }
-
-    /// Get the UTF8 char which starts at the current byte
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    fn current_char_unchecked(&self) -> char {
-        // Precautionary measure for making sure the unsafe code below does not read over memory boundary
-        debug_assert!(!self.is_eof());
-        self.assert_at_char_boundary();
-
-        // Safety: We know this is safe because we require the input to the lexer to be valid utf8 and we always call this when we are at a char
-        let string = unsafe {
-            std::str::from_utf8_unchecked(self.source.as_bytes().get_unchecked(self.position..))
-        };
-        let chr = if let Some(chr) = string.chars().next() {
-            chr
-        } else {
-            // Safety: we always call this when we are at a valid char, so this branch is completely unreachable
-            unsafe {
-                core::hint::unreachable_unchecked();
-            }
-        };
-
-        chr
-    }
-
-    /// Gets the current byte.
-    ///
-    /// ## Returns
-    /// The current byte if the lexer isn't at the end of the file.
-    #[inline]
-    fn current_byte(&self) -> Option<u8> {
-        if self.is_eof() {
-            None
-        } else {
-            Some(self.source.as_bytes()[self.position])
-        }
-    }
-
-    /// Asserts that the lexer is at a UTF8 char boundary
-    #[inline]
-    fn assert_at_char_boundary(&self) {
-        debug_assert!(self.source.is_char_boundary(self.position));
-    }
-
-    /// Asserts that the lexer is currently positioned at `byte`
-    #[inline]
-    fn assert_byte(&self, byte: u8) {
-        debug_assert_eq!(self.source.as_bytes()[self.position], byte);
-    }
-
-    /// Peeks at the next byte
-    #[inline]
-    fn peek_byte(&self) -> Option<u8> {
-        self.byte_at(1)
-    }
-
-    /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
-    #[inline]
-    fn byte_at(&self, offset: usize) -> Option<u8> {
-        self.source.as_bytes().get(self.position + offset).copied()
-    }
-
-    /// Advances the current position by `n` bytes.
-    #[inline]
-    fn advance(&mut self, n: usize) {
-        self.position += n;
-    }
-
-    #[inline]
-    fn advance_byte_or_char(&mut self, chr: u8) {
-        if chr.is_ascii() {
-            self.advance(1);
-        } else {
-            self.advance_char_unchecked();
-        }
-    }
-
-    /// Advances the current position by the current char UTF8 length
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    #[inline]
-    fn advance_char_unchecked(&mut self) {
-        let c = self.current_char_unchecked();
-        self.position += c.len_utf8();
-    }
-
-    /// Returns `true` if the parser is at or passed the end of the file.
-    #[inline]
-    fn is_eof(&self) -> bool {
-        self.position >= self.source.len()
-    }
-
     /// Lexes the next token
     ///
     /// Guaranteed to not be at the end of the file
     fn lex_token(&mut self, current: u8) -> GritSyntaxKind {
         match current {
-            b'\n' | b'\r' => self.eat_newline(),
-            b'\t' | b' ' => self.eat_whitespace(),
-            b'\'' | b'"' => self.lex_string_literal(current),
-            b'`' => self.lex_backtick_snippet(),
-            b'/' => self.lex_slash(),
-            b'=' => self.eat_equals_or_rewrite(),
-            b'<' => self.eat_lt_or_match(),
-            b'>' => self.eat_gt(),
-            b':' => self.eat_byte(T![:]),
-            b';' => self.eat_byte(T![;]),
-            b'.' => self.eat_dots(),
-            b',' => self.eat_byte(T![,]),
-            b'+' => self.eat_plus_or_acc(),
-            b'*' => self.eat_byte(T![*]),
-            b'%' => self.eat_byte(T![%]),
-            b'[' => self.eat_byte(T!['[']),
-            b']' => self.eat_byte(T![']']),
-            b'{' => self.eat_byte(T!['{']),
-            b'}' => self.eat_byte(T!['}']),
-            b'(' => self.eat_byte(T!['(']),
-            b')' => self.eat_byte(T![')']),
-            b'$' => self.lex_variable(),
-            b'!' => self.eat_byte(T![!]),
-            _ if is_leading_identifier_byte(current) => self.lex_name(current),
-            _ if current.is_ascii_digit() || current == b'-' => self.lex_number(current),
-            _ if self.position == 0 && self.consume_potential_bom().is_some() => UNICODE_BOM,
-            _ => self.eat_unexpected_character(),
+            b'\n' | b'\r' => {
+                debug_assert!(self.consume_newline());
+                NEWLINE
+            }
+            b'\t' | b' ' => self.consume_whitespaces(),
+            b'\'' | b'"' => self.consume_string_literal(current),
+            b'`' => self.consume_backtick_snippet(),
+            b'/' => self.consume_comment_or_slash(),
+            b'=' => self.consume_equals_or_rewrite(),
+            b'<' => self.consume_lt_or_match(),
+            b'>' => self.consume_gt(),
+            b':' => self.consume_byte(T![:]),
+            b';' => self.consume_byte(T![;]),
+            b'.' => self.consume_dots(),
+            b',' => self.consume_byte(T![,]),
+            b'+' => self.consume_plus_or_acc(),
+            b'*' => self.consume_byte(T![*]),
+            b'%' => self.consume_byte(T![%]),
+            b'[' => self.consume_byte(T!['[']),
+            b']' => self.consume_byte(T![']']),
+            b'{' => self.consume_byte(T!['{']),
+            b'}' => self.consume_byte(T!['}']),
+            b'(' => self.consume_byte(T!['(']),
+            b')' => self.consume_byte(T![')']),
+            b'$' => self.consume_variable(),
+            b'!' => self.consume_byte(T![!]),
+            _ if is_leading_identifier_byte(current) => self.consume_name(current),
+            _ if current.is_ascii_digit() || current == b'-' => self.consume_number(current),
+            _ if self.position == 0 && self.consume_potential_bom(UNICODE_BOM).is_some() => {
+                UNICODE_BOM
+            }
+            _ => self.consume_unexpected_character(),
         }
     }
 
-    fn eat_dots(&mut self) -> GritSyntaxKind {
+    fn consume_dots(&mut self) -> GritSyntaxKind {
         assert_eq!(self.current_byte(), Some(b'.'));
         self.advance(1);
 
@@ -320,7 +263,7 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    fn eat_equals_or_rewrite(&mut self) -> GritSyntaxKind {
+    fn consume_equals_or_rewrite(&mut self) -> GritSyntaxKind {
         assert_eq!(self.current_byte(), Some(b'='));
         self.advance(1);
 
@@ -337,7 +280,7 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    fn eat_lt_or_match(&mut self) -> GritSyntaxKind {
+    fn consume_lt_or_match(&mut self) -> GritSyntaxKind {
         assert_eq!(self.current_byte(), Some(b'<'));
         self.advance(1);
 
@@ -354,7 +297,7 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    fn eat_gt(&mut self) -> GritSyntaxKind {
+    fn consume_gt(&mut self) -> GritSyntaxKind {
         assert_eq!(self.current_byte(), Some(b'>'));
         self.advance(1);
 
@@ -367,7 +310,7 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    fn eat_plus_or_acc(&mut self) -> GritSyntaxKind {
+    fn consume_plus_or_acc(&mut self) -> GritSyntaxKind {
         assert_eq!(self.current_byte(), Some(b'+'));
         self.advance(1);
 
@@ -381,8 +324,8 @@ impl<'src> Lexer<'src> {
     }
 
     #[inline]
-    fn eat_unexpected_character(&mut self) -> GritSyntaxKind {
-        self.assert_at_char_boundary();
+    fn consume_unexpected_character(&mut self) -> GritSyntaxKind {
+        self.assert_current_char_boundary();
 
         let char = self.current_char_unchecked();
         let err = ParseDiagnostic::new(
@@ -395,13 +338,14 @@ impl<'src> Lexer<'src> {
         ERROR_TOKEN
     }
 
-    /// Lexes a JSON number literal
-    fn lex_number(&mut self, first: u8) -> GritSyntaxKind {
-        self.assert_at_char_boundary();
+    /// Lexes a Grit number literal
+    fn consume_number(&mut self, first: u8) -> GritSyntaxKind {
+        self.assert_current_char_boundary();
 
         let start = self.text_position();
 
-        if first == b'-' {
+        let is_negative = first == b'-';
+        if is_negative {
             self.advance(1);
         }
 
@@ -491,7 +435,7 @@ impl<'src> Lexer<'src> {
         }
 
         match state {
-            LexNumberState::IntegerPart if first == b'-' => GRIT_NEGATIVE_INT,
+            LexNumberState::IntegerPart if is_negative => GRIT_NEGATIVE_INT,
             LexNumberState::IntegerPart => GRIT_INT,
             LexNumberState::FractionalPart | LexNumberState::Exponent => GRIT_DOUBLE,
             LexNumberState::FirstDigit => MINUS,
@@ -528,13 +472,14 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    fn lex_string_literal(&mut self, quote: u8) -> GritSyntaxKind {
-        // Handle invalid quotes
-        self.assert_at_char_boundary();
+    fn consume_string_literal(&mut self, quote: u8) -> GritSyntaxKind {
+        self.assert_current_char_boundary();
         let start = self.text_position();
 
         self.advance(1); // Skip over the quote
+
         let mut state = match quote {
+            // Handle invalid quotes
             b'\'' => LexStringState::InvalidQuote,
             _ => LexStringState::InString,
         };
@@ -557,7 +502,7 @@ impl<'src> Lexer<'src> {
                     match self.current_byte() {
                         Some(b'$' | b'\\' | b'"' | b'n') => self.advance(1),
 
-                        Some(b'u') => match (self.lex_unicode_escape(), state) {
+                        Some(b'u') => match (self.consume_unicode_escape(), state) {
                             (Ok(_), _) => {}
                             (Err(err), LexStringState::InString) => {
                                 self.diagnostics.push(err);
@@ -643,9 +588,8 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    fn lex_backtick_snippet(&mut self) -> GritSyntaxKind {
-        // Handle invalid quotes
-        self.assert_at_char_boundary();
+    fn consume_backtick_snippet(&mut self) -> GritSyntaxKind {
+        self.assert_current_char_boundary();
         let start = self.text_position();
 
         self.advance(1); // Skip over the backtick
@@ -723,9 +667,9 @@ impl<'src> Lexer<'src> {
     /// Lexes a `\u0000` escape sequence. Assumes that the lexer is positioned at the `u` token.
     ///
     /// A unicode escape sequence must consist of 4 hex characters.
-    fn lex_unicode_escape(&mut self) -> Result<(), ParseDiagnostic> {
+    fn consume_unicode_escape(&mut self) -> Result<(), ParseDiagnostic> {
         self.assert_byte(b'u');
-        self.assert_at_char_boundary();
+        self.assert_current_char_boundary();
 
         let start = self.text_position();
 
@@ -734,7 +678,7 @@ impl<'src> Lexer<'src> {
             .checked_sub(TextSize::from(1))
             .unwrap_or(start);
 
-        self.advance(1); // Advance over `u'`
+        self.advance(1); // Advance over `u`
 
         for _ in 0..4 {
             match self.current_byte() {
@@ -753,7 +697,6 @@ impl<'src> Lexer<'src> {
                 None => {
                     // Reached the end of the file before processing 4 hex digits
                     return Err(ParseDiagnostic::new(
-
                         "Unicode escape sequence with two few hexadecimal numbers.",
                         start..self.text_position(),
                     )
@@ -771,13 +714,14 @@ impl<'src> Lexer<'src> {
 
     /// Lexes a name for variables (without leading `$`), labels, and keywords.
     ///
-    /// Branches into regular expressions and raw backticks, which have named prefixes.
-    fn lex_name(&mut self, first: u8) -> GritSyntaxKind {
+    /// Branches into regular expressions and raw backticks, which have named
+    /// prefixes.
+    fn consume_name(&mut self, first: u8) -> GritSyntaxKind {
         let name_start = self.text_position();
-        self.assert_at_char_boundary();
+        self.assert_current_char_boundary();
 
-        // Note to keep the buffer large enough to fit every possible keyword that
-        // the lexer can return
+        // Note to keep the buffer large enough to fit every possible keyword
+        // that the lexer can return.
         const BUFFER_SIZE: usize = 14;
         let mut buffer = [0u8; BUFFER_SIZE];
         buffer[0] = first;
@@ -795,7 +739,7 @@ impl<'src> Lexer<'src> {
                 self.advance(1)
             } else if byte == b'"' {
                 return match &buffer[..len] {
-                    b"r" => self.lex_regex(),
+                    b"r" => self.consume_regex(),
                     b"js" => T![js],
                     b"json" => T![json],
                     b"css" => T![css],
@@ -808,7 +752,7 @@ impl<'src> Lexer<'src> {
                                 name_start..self.text_position(),
                             )
                             .with_hint("Use a language annotation to create a language-specific snippet or use the `r` prefix to create a regex literal.")
-                            .with_hint("Supported language annotations are `js`, `json`, `css`, `grit`, and `html`."),
+                            .with_alternatives("Supported language annotations are:", SUPPORTED_LANGUAGE_SET_STR),
                         );
 
                         ERROR_TOKEN
@@ -816,11 +760,11 @@ impl<'src> Lexer<'src> {
                 };
             } else if byte == b'`' {
                 return match &buffer[..len] {
-                    b"r" => match self.lex_backtick_snippet() {
+                    b"r" => match self.consume_backtick_snippet() {
                         GRIT_BACKTICK_SNIPPET => GRIT_SNIPPET_REGEX,
                         other => other,
                     },
-                    b"raw" => match self.lex_backtick_snippet() {
+                    b"raw" => match self.consume_backtick_snippet() {
                         GRIT_BACKTICK_SNIPPET => GRIT_RAW_BACKTICK_SNIPPET,
                         other => other,
                     },
@@ -888,9 +832,9 @@ impl<'src> Lexer<'src> {
     }
 
     /// Lexes a regular expression.
-    fn lex_regex(&mut self) -> GritSyntaxKind {
+    fn consume_regex(&mut self) -> GritSyntaxKind {
         // Handle invalid quotes
-        self.assert_at_char_boundary();
+        self.assert_current_char_boundary();
         let start = self.text_position();
 
         self.advance(1); // Skip over the quote
@@ -958,8 +902,8 @@ impl<'src> Lexer<'src> {
     }
 
     /// Lexes a variable (with leading `$`).
-    fn lex_variable(&mut self) -> GritSyntaxKind {
-        self.assert_at_char_boundary();
+    fn consume_variable(&mut self) -> GritSyntaxKind {
+        assert_eq!(self.current_byte(), Some(b'$'));
         self.advance(1); // Skip the leading `$`.
 
         if self.current_byte() == Some(b'_') {
@@ -978,8 +922,8 @@ impl<'src> Lexer<'src> {
         GRIT_VARIABLE
     }
 
-    /// Lexes a comment.
-    fn lex_slash(&mut self) -> GritSyntaxKind {
+    /// Lexes a comment or a plain slash token.
+    fn consume_comment_or_slash(&mut self) -> GritSyntaxKind {
         let start = self.text_position();
         match self.peek_byte() {
             Some(b'*') => {
@@ -1041,16 +985,6 @@ impl<'src> Lexer<'src> {
         }
     }
 }
-
-impl Iterator for Lexer<'_> {
-    type Item = Token;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.next_token()
-    }
-}
-
-impl FusedIterator for Lexer<'_> {}
 
 #[derive(Debug, Copy, Clone)]
 enum LexNumberState {

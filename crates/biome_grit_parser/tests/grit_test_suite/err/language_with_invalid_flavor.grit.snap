@@ -25,11 +25,7 @@ GritRoot {
                     L_PAREN@11..12 "(" [] [],
                     GritBogus {
                         items: [
-                            GritBogus {
-                                items: [
-                                    GRIT_NAME@12..19 "vanilla" [] [],
-                                ],
-                            },
+                            GRIT_NAME@12..19 "vanilla" [] [],
                         ],
                     },
                     R_PAREN@19..20 ")" [] [],
@@ -58,8 +54,7 @@ GritRoot {
     2: GRIT_BOGUS@11..20
       0: L_PAREN@11..12 "(" [] []
       1: GRIT_BOGUS@12..19
-        0: GRIT_BOGUS@12..19
-          0: GRIT_NAME@12..19 "vanilla" [] []
+        0: GRIT_NAME@12..19 "vanilla" [] []
       2: R_PAREN@19..20 ")" [] []
     3: SEMICOLON@20..21 ";" [] []
   3: GRIT_DEFINITION_LIST@21..21
@@ -74,10 +69,15 @@ GritRoot {
 ```
 language_with_invalid_flavor.grit:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a supported language flavor; must be one of `typescript` or `jsx`
+  × Unexpected language flavor.
   
   > 1 │ language js(vanilla);
       │             ^^^^^^^
     2 │ 
+  
+  i Expected one of:
+  
+  - typescript
+  - jsx
   
 ```

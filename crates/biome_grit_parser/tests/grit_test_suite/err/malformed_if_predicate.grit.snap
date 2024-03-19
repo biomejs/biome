@@ -146,7 +146,7 @@ GritRoot {
 ```
 malformed_if_predicate.grit:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `}` but instead found `else`
+  × Expected a predicate but instead found 'else'.
   
     1 │ `$method('$message')` where {
     2 │   if ($message <: r"Hello, .*!") {
@@ -155,6 +155,13 @@ malformed_if_predicate.grit:3:4 parse ━━━━━━━━━━━━━━
     4 │     $method => `console.warn`
     5 │   }
   
-  i Remove else
+  i Expected a predicate here.
+  
+    1 │ `$method('$message')` where {
+    2 │   if ($message <: r"Hello, .*!") {
+  > 3 │    else {
+      │    ^^^^
+    4 │     $method => `console.warn`
+    5 │   }
   
 ```
