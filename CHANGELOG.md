@@ -41,6 +41,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- Rule `noUndeclaredDependencies` now also validates `peerDependencies` and `optionalDependencies` ([#2122](https://github.com/biomejs/biome/issues/2122)). Contributed by @Sec-ant
+- Rule `noUndeclaredDependencies` won't check `declare module` statements anymore ([#2123](https://github.com/biomejs/biome/issues/2123)). Contributed by @Sec-ant
 - Fix [#1925](https://github.com/biomejs/biome/issues/1925). The fix for `useOptionalChain` would sometimes suggest an incorrect fix that discarded optional chaining operators on the left-hand side of logical expressions. These are now preserved. Contributed by @arendjr
 
 ### Parser

@@ -15,3 +15,6 @@ import "bun:test";
 
 import Button from "@mui/material/Button";
 import { fontFamily } from "tailwindcss/defaultTheme";
+
+import "peer-dep";
+import "optional-dep";
