@@ -1892,6 +1892,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/doNotThatThing"
 	| "lint/nursery/noApproximativeNumericConstant"
 	| "lint/nursery/noBarrelFile"
 	| "lint/nursery/noColorInvalidHex"
