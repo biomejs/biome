@@ -43,6 +43,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### JavaScript APIs
 
+#### Enhancements
+
+- Support applying lint fixes when calling the `lintContent` method of the `Biome` class ([#1956](https://github.com/biomejs/biome/pull/1956)). Contributed by @mnahkies
+
 ### Linter
 
 #### Bug fixes
