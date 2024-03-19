@@ -66,7 +66,11 @@ impl Rule for NoUndeclaredDependencies {
         }
         let package_name = &text[..pointer];
 
-        if ctx.is_dependency(package_name) || ctx.is_dev_dependency(package_name) {
+        if ctx.is_dependency(package_name)
+            || ctx.is_dev_dependency(package_name)
+            || ctx.is_peer_dependency(package_name)
+            || ctx.is_optional_dependency(package_name)
+        {
             return None;
         }
 

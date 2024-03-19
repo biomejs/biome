@@ -15,6 +15,7 @@ pub struct PackageJson {
     pub description: Option<String>,
     pub dependencies: Dependencies,
     pub dev_dependencies: Dependencies,
+    pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
     pub license: Option<(String, TextRange)>,
 }
@@ -103,6 +104,12 @@ impl DeserializationVisitor for PackageJsonVisitor {
                         result.dev_dependencies = deps;
                     }
                 }
+                "peerDependencies" => {
+                    if let Some(deps) = Deserializable::deserialize(&value, &key_text, diagnostics)
+                    {
+                        result.peer_dependencies = deps;
+                    }
+                }
                 "optionalDependencies" => {
                     if let Some(deps) = Deserializable::deserialize(&value, &key_text, diagnostics)
                     {
@@ -111,7 +118,7 @@ impl DeserializationVisitor for PackageJsonVisitor {
                 }
                 _ => {
                     // each package can add their own field, so we should ignore any extraneous key
-                    // and only deserialize the ones that Rome deems important
+                    // and only deserialize the ones that Biome deems important
                 }
             }
         }
