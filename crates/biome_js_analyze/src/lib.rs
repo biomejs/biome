@@ -8,9 +8,9 @@ use biome_analyze::{
 };
 use biome_aria::{AriaProperties, AriaRoles};
 use biome_diagnostics::{category, Diagnostic, Error as DiagnosticError};
-use biome_js_syntax::suppression::SuppressionDiagnostic;
-use biome_js_syntax::{suppression::parse_suppression_comment, JsFileSource, JsLanguage};
+use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_project::PackageJson;
+use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::{borrow::Cow, error::Error};

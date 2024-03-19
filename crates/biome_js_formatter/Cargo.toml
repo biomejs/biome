@@ -20,6 +20,7 @@ biome_formatter              = { workspace = true }
 biome_js_factory             = { workspace = true }
 biome_js_syntax              = { workspace = true }
 biome_rowan                  = { workspace = true }
+biome_suppression            = { workspace = true }
 biome_text_size              = { workspace = true }
 biome_unicode_table          = { workspace = true }
 schemars                     = { workspace = true, optional = true }
