@@ -251,7 +251,7 @@ export class Biome {
 					code = result.code;
 
 					return code;
-			  })
+				})
 			: content;
 
 		return this.withFile(filePath, maybeFixedContent, (path) => {
