@@ -238,7 +238,7 @@ export class Biome {
 		content: string,
 		{ filePath, fixFileMode }: LintContentOptions,
 	): LintResult {
-		const maybeFixed = fixFileMode
+		const maybeFixedContent = fixFileMode
 			? this.withFile(filePath, content, (path) => {
 					let code = content;
 
@@ -250,11 +250,11 @@ export class Biome {
 
 					code = result.code;
 
-					return { content: code };
+					return code;
 			  })
-			: { content };
+			: content;
 
-		return this.withFile(filePath, maybeFixed.content, (path) => {
+		return this.withFile(filePath, maybeFixedContent, (path) => {
 			const { diagnostics } = this.workspace.pullDiagnostics({
 				path,
 				categories: ["Syntax", "Lint"],
@@ -262,7 +262,7 @@ export class Biome {
 			});
 
 			return {
-				content: maybeFixed.content,
+				content: maybeFixedContent,
 				diagnostics,
 			};
 		});
