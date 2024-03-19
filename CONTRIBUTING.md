@@ -225,15 +225,15 @@ to the `knope.toml` file, which we use for changelog generation.
 
 ### Analyzers and lint rules
 
-To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal page](https://docs.rs/biome_analyze/latest/biome_analyze/)
+To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal page](https://github.com/biomejs/biome/blob/main/crates/biome_analyzer/CONTRIBUTING.md)
 
 ### Parser
 
-To know the technical details of how our parser works and how to write test, please check our [internal page](https://docs.rs/biome_parser/latest/biome_parser/)
+To know the technical details of how our parser works and how to write test, please check our [internal page](https://github.com/biomejs/biome/blob/main/crates/biome_parser/CONTRIBUTING.md)
 
 ### Formatter
 
-To know the technical details of how our formatter works and how to write test, please check our [internal page](https://docs.rs/biome_js_formatter/latest/biome_js_formatter/)
+To know the technical details of how our formatter works and how to write test, please check our [internal page](https://github.com/biomejs/biome/blob/main/crates/biome_formatter/CONTRIBUTING.md)
 
 
 ## Crate dependencies
