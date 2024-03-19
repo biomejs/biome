@@ -320,11 +320,12 @@ pub(super) struct FitsIndentStack<'print> {
 impl<'print> FitsIndentStack<'print> {
     pub(super) fn new(
         print: &'print PrintIndentStack,
-        saved: Vec<Indention>,
-        saved2: Vec<Indention>,
+        saved_indent_stack: Vec<Indention>,
+        saved_stack_tem_indent: Vec<Indention>,
     ) -> Self {
-        let indentions = StackedStack::with_vec(&print.indentions, saved);
-        let temp_indentions = StackedStack::with_vec(&print.temp_indentions, saved2);
+        let indentions = StackedStack::with_vec(&print.indentions, saved_indent_stack);
+        let temp_indentions =
+            StackedStack::with_vec(&print.temp_indentions, saved_stack_tem_indent);
 
         Self {
             indentions,

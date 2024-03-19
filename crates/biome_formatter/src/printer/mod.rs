@@ -92,7 +92,6 @@ impl<'a> Printer<'a> {
 
         let args = stack.top();
 
-        println!("args: {:?}", args);
         match element {
             FormatElement::Space | FormatElement::HardSpace => {
                 if self.state.line_width > 0 {
@@ -927,6 +926,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
         let saved_stack_tem_indent = std::mem::take(&mut printer.state.fits_stack_tem_indent);
         debug_assert!(saved_stack.is_empty());
         debug_assert!(saved_queue.is_empty());
+        debug_assert!(saved_indent_stack.is_empty());
+        debug_assert!(saved_stack_tem_indent.is_empty());
 
         let fits_queue = FitsQueue::new(print_queue, saved_queue);
         let fits_stack = FitsCallStack::new(print_stack, saved_stack);

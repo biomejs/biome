@@ -25,6 +25,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix discrepancies on file source detection. Allow module syntax in `.cts` files ([#2114](https://github.com/biomejs/biome/issues/2114)). Contributed by @Sec-ant
 
+- Fix dedent logic inconsistent with prettier where the indent-style is space and the indent-width is not 2. Contributed by @mdm317
 ### CLI
 
 ### Configuration
