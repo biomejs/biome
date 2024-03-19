@@ -1388,6 +1388,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noColorInvalidHex": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConsole": {
 					"description": "Disallow the use of console.",
 					"anyOf": [

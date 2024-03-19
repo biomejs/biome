@@ -51,19 +51,15 @@ fn generate_json_analyzer() -> Result<()> {
     generate_category("analyzers", &mut analyzers, &base_path)?;
 
     generate_options(&["analyzers"], &base_path)?;
-
-    update_css_registry_builder(analyzers)
+    update_json_registry_builder(analyzers)
 }
 
 fn generate_css_analyzer() -> Result<()> {
+    let base_path = project_root().join("crates/biome_css_analyze/src");
     let mut analyzers = BTreeMap::new();
-    generate_category(
-        "analyzers",
-        &mut analyzers,
-        &(project_root().join("crates/biome_css_analyze/src")),
-    )?;
-
-    update_json_registry_builder(analyzers)
+    generate_category("analyzers", &mut analyzers, &base_path)?;
+    generate_options(&["analyzers"], &base_path)?;
+    update_css_registry_builder(analyzers)
 }
 
 fn generate_options(categories: &[&str], base_path: &Path) -> Result<()> {

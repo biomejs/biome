@@ -108,6 +108,16 @@ pub enum TaskCommand {
         #[bpaf(long("name"))]
         String,
     ),
+    /// Creates a new css lint rule
+    #[bpaf(command, long("new-css-lintrule"))]
+    NewCssLintRule(
+        /// Path of the rule
+        #[bpaf(long("path"))]
+        PathBuf,
+        /// Name of the rule
+        #[bpaf(long("name"))]
+        String,
+    ),
     /// Promotes a nursery rule
     #[bpaf(command, long("promote-rule"))]
     PromoteRule {

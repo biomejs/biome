@@ -4,7 +4,8 @@ expression: invalid.css
 ---
 # Input
 ```css
-
+p { 
+ color: red;
+ text-align: center;
+}
 ```
-
-
