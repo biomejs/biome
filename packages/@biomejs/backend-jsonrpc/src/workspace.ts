@@ -893,6 +893,10 @@ export interface Nursery {
 	 */
 	noBarrelFile?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noColorInvalidHex?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of console.
 	 */
 	noConsole?: RuleConfiguration_for_Null;
@@ -1887,11 +1891,13 @@ export type Category =
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
+	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noApproximativeNumericConstant"
 	| "lint/nursery/noBarrelFile"
+	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
-	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDoneCallback"
+	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateTestHooks"
 	| "lint/nursery/noExcessiveNestedTestSuites"
