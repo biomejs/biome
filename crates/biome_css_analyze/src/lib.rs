@@ -1,4 +1,4 @@
-mod analyzers;
+mod lint;
 pub mod options;
 mod registry;
 

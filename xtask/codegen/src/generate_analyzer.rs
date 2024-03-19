@@ -17,13 +17,7 @@ pub fn generate_analyzer() -> Result<()> {
 fn generate_js_analyzer() -> Result<()> {
     let base_path = project_root().join("crates/biome_js_analyze/src");
     let mut analyzers = BTreeMap::new();
-    generate_category("analyzers", &mut analyzers, &base_path)?;
-
-    let mut semantic_analyzers = BTreeMap::new();
-    generate_category("semantic_analyzers", &mut semantic_analyzers, &base_path)?;
-
-    let mut aria_analyzers = BTreeMap::new();
-    generate_category("aria_analyzers", &mut aria_analyzers, &base_path)?;
+    generate_category("lint", &mut analyzers, &base_path)?;
 
     let mut assists = BTreeMap::new();
     generate_category("assists", &mut assists, &base_path)?;
@@ -31,61 +25,48 @@ fn generate_js_analyzer() -> Result<()> {
     let mut syntax = BTreeMap::new();
     generate_category("syntax", &mut syntax, &base_path)?;
 
-    generate_options(
-        &["aria_analyzers", "analyzers", "semantic_analyzers"],
-        &base_path,
-    )?;
+    generate_options(&base_path)?;
 
-    update_js_registry_builder(
-        analyzers,
-        semantic_analyzers,
-        aria_analyzers,
-        assists,
-        syntax,
-    )
+    update_js_registry_builder(analyzers, assists, syntax)
 }
 
 fn generate_json_analyzer() -> Result<()> {
     let base_path = project_root().join("crates/biome_json_analyze/src");
     let mut analyzers = BTreeMap::new();
-    generate_category("analyzers", &mut analyzers, &base_path)?;
+    generate_category("lint", &mut analyzers, &base_path)?;
 
-    generate_options(&["analyzers"], &base_path)?;
+    generate_options(&base_path)?;
     update_json_registry_builder(analyzers)
 }
 
 fn generate_css_analyzer() -> Result<()> {
     let base_path = project_root().join("crates/biome_css_analyze/src");
     let mut analyzers = BTreeMap::new();
-    generate_category("analyzers", &mut analyzers, &base_path)?;
-    generate_options(&["analyzers"], &base_path)?;
+    generate_category("lint", &mut analyzers, &base_path)?;
+    generate_options(&base_path)?;
     update_css_registry_builder(analyzers)
 }
 
-fn generate_options(categories: &[&str], base_path: &Path) -> Result<()> {
-    let mut category_names = Vec::with_capacity(categories.len());
+fn generate_options(base_path: &Path) -> Result<()> {
     let mut rules_options = BTreeMap::new();
     let nl = Punct::new('\n', Spacing::Alone);
-    for category in categories {
-        let category_path = base_path.join(category);
-        let category_name = format_ident!("{}", filename(&category_path)?);
-        category_names.push(category_name.clone());
-        for group_path in list_entry_paths(&category_path)?.filter(|path| path.is_dir()) {
-            let group_name = format_ident!("{}", filename(&group_path)?.to_string());
-            for rule_path in list_entry_paths(&group_path)?.filter(|path| !path.is_dir()) {
-                let rule_filename = filename(&rule_path)?;
-                let rule_name = Case::Pascal.convert(rule_filename);
-                let rule_module_name = format_ident!("{}", rule_filename);
-                let rule_name = format_ident!("{}", rule_name);
-                rules_options.insert(rule_filename.to_string(), quote! {
+    let category_path = base_path.join("lint");
+    let category_name = format_ident!("{}", filename(&category_path)?);
+    for group_path in list_entry_paths(&category_path)?.filter(|path| path.is_dir()) {
+        let group_name = format_ident!("{}", filename(&group_path)?.to_string());
+        for rule_path in list_entry_paths(&group_path)?.filter(|path| !path.is_dir()) {
+            let rule_filename = filename(&rule_path)?;
+            let rule_name = Case::Pascal.convert(rule_filename);
+            let rule_module_name = format_ident!("{}", rule_filename);
+            let rule_name = format_ident!("{}", rule_name);
+            rules_options.insert(rule_filename.to_string(), quote! {
                     pub type #rule_name = <#category_name::#group_name::#rule_module_name::#rule_name as biome_analyze::Rule>::Options;
                 });
-            }
         }
     }
     let rules_options = rules_options.values();
     let tokens = xtask::reformat(quote! {
-        #( use crate::#category_names; )* #nl #nl
+        use crate::lint; #nl #nl
 
         #( #rules_options )*
     })?;
@@ -140,7 +121,7 @@ fn generate_category(
 
     let kind = match name {
         "syntax" => format_ident!("Syntax"),
-        "analyzers" | "semantic_analyzers" | "aria_analyzers" => format_ident!("Lint"),
+        "lint" => format_ident!("Lint"),
         "assists" => format_ident!("Action"),
         _ => panic!("unimplemented analyzer category {name:?}"),
     };
@@ -229,18 +210,14 @@ fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Resu
 }
 
 fn update_js_registry_builder(
-    analyzers: BTreeMap<&'static str, TokenStream>,
-    semantic_analyzers: BTreeMap<&'static str, TokenStream>,
-    aria_analyzers: BTreeMap<&'static str, TokenStream>,
+    rules: BTreeMap<&'static str, TokenStream>,
     assists: BTreeMap<&'static str, TokenStream>,
     syntax: BTreeMap<&'static str, TokenStream>,
 ) -> Result<()> {
     let path = project_root().join("crates/biome_js_analyze/src/registry.rs");
 
-    let categories = analyzers
+    let categories = rules
         .into_iter()
-        .chain(semantic_analyzers)
-        .chain(aria_analyzers)
         .chain(assists)
         .chain(syntax)
         .map(|(_, tokens)| tokens);
