@@ -3,5 +3,5 @@
 use biome_analyze::RegistryVisitor;
 use biome_css_syntax::CssLanguage;
 pub fn visit_registry<V: RegistryVisitor<CssLanguage>>(registry: &mut V) {
-    registry.record_category::<crate::analyzers::Analyzers>();
+    registry.record_category::<crate::lint::Lint>();
 }

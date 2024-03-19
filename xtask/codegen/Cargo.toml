@@ -37,8 +37,8 @@ biome_rowan          = { workspace = true, optional = true }
 biome_service        = { workspace = true, features = ["schema"], optional = true }
 biome_string_case    = { workspace = true }
 biome_ungrammar      = { workspace = true }
-schemars             = { version = "0.8.10", optional = true }
-serde_json           = { version = "1.0.74", optional = true }
+schemars             = { workspace = true, optional = true }
+serde_json           = { workspace = true, optional = true }
 
 [features]
 configuration = [
