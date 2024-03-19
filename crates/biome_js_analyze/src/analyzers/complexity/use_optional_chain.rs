@@ -137,17 +137,22 @@ impl Rule for UseOptionalChain {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         match state {
             UseOptionalChainState::LogicalAnd(optional_chain_expression_nodes) => {
-                let mut prev_expression = None;
-                for expression in optional_chain_expression_nodes {
-                    let next_expression = prev_expression
+                let mut chain_with_replacement = None;
+                // We process the expression nodes in order to find the
+                // outermost expression node that needs replacement
+                // (the subject), while iteratively constructing the replacement
+                // for the chain as a whole.
+                for subject in optional_chain_expression_nodes {
+                    // For longer chains, we need to update the subject to take
+                    // previous replacements into account. Otherwise, the new
+                    // replacement would discard the previous ones.
+                    let updated_subject = chain_with_replacement
                         .take()
-                        .and_then(|(prev_expression, new_expression)| {
-                            expression
-                                .clone()
-                                .replace_node(prev_expression, new_expression)
+                        .and_then(|(prev_subject, prev_replacement)| {
+                            subject.clone().replace_node(prev_subject, prev_replacement)
                         })
-                        .unwrap_or_else(|| expression.clone());
-                    let next_expression = match next_expression {
+                        .unwrap_or_else(|| subject.clone());
+                    let replacement = match updated_subject {
                         AnyJsExpression::JsCallExpression(call_expression) => {
                             let optional_chain_token = call_expression
                                 .optional_chain_token()
@@ -178,18 +183,23 @@ impl Rule for UseOptionalChain {
                         }
                         _ => return None,
                     };
-                    prev_expression = Some((expression.clone(), next_expression));
+                    chain_with_replacement = Some((subject.clone(), replacement));
                 }
-                let (prev_expression, new_expression) = prev_expression?;
+
+                // At this point we have the chain and its replacement, but we
+                // still need to transform the logical expression into the chain.
                 let logical = ctx.query();
-                let next_right = logical
-                    .right()
-                    .ok()?
-                    .replace_node(prev_expression, new_expression.clone())
-                    .unwrap_or(new_expression);
+                let replacement = {
+                    let (chain, chain_replacement) = chain_with_replacement?;
+                    logical
+                        .right()
+                        .ok()?
+                        .replace_node(chain, chain_replacement.clone())
+                        .unwrap_or(chain_replacement)
+                };
 
                 let mut mutation = ctx.root().begin();
-                mutation.replace_node(AnyJsExpression::from(logical.clone()), next_right);
+                mutation.replace_node(AnyJsExpression::from(logical.clone()), replacement);
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
                     applicability: Applicability::MaybeIncorrect,
@@ -260,26 +270,37 @@ fn normalized_optional_chain_like(expression: AnyJsExpression) -> SyntaxResult<A
     Ok(expression)
 }
 
-/// `LogicalAndChainOrdering` is the result of a comparison between two logical and chain.
+/// `LogicalAndChainOrdering` is the result of a comparison between two logical
+/// AND chains.
 enum LogicalAndChainOrdering {
     /// An ordering where a chain is a sub-chain of another.
+    ///
     /// ```js
-    /// (foo && foo.bar) /* is sub-chain of */ (foo && foo.bar && foo.bar.baz)
+    /// (foo.bar) /* is a sub-chain of */ (foo.bar.baz)
+    /// ```
+    ///
+    /// Chains can be considered subchains even when they have unequal
+    /// optional chaining internally. For instance:
+    ///
+    /// ```js
+    /// (foo?.bar) /* is also a sub-chain of */ (foo.bar.baz)
     /// ```
     SubChain,
     /// An ordering where a chain is equal to another.
     /// ```js
-    /// (foo && foo.bar) /* is equal */ (foo && foo.bar)
+    /// (foo.bar) /* is equal to */ (foo.bar)
     /// ```
     Equal,
     /// An ordering where a chain is different to another.
     /// ```js
-    /// (foo && foo.bar) /* is different */ (bar && bar.bar && bar.bar.baz)
+    /// (foo.bar) /* is different from */ (bar.bar)
     /// ```
     Different,
 }
 
-/// `LogicalAndChain` handles cases with `JsLogicalExpression` which has `JsLogicalOperator::LogicalAnd` operator:
+/// `LogicalAndChain` handles cases with `JsLogicalExpression` which has
+/// `JsLogicalOperator::LogicalAnd` operator:
+///
 /// ```js
 /// foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz;
 ///
@@ -287,27 +308,49 @@ enum LogicalAndChainOrdering {
 ///
 /// foo !== undefined && foo.bar;
 /// ```
+///
 /// The main idea of the `LogicalAndChain`:
-/// 1. Check that the current chain isn't in another `LogicalAndChain`. We need to find the topmost logical expression which will be the head of the first current chain.
-/// 2. Go down thought logical expressions and collect other chains and compare them with the current one.
-/// 3. If a chain is a sub-chain of the current chain, we assign that sub-chain to new current one. Difference between current chain and sub-chain is a tail.
+/// 1. Check that the current chain isn't in another `LogicalAndChain`. We need
+///    to find the topmost logical expression which will be the head of the
+///    first current chain.
+/// 2. Go down through logical expressions and collect other chains and compare
+///    them with the current one.
+/// 3. If a chain is a sub-chain of the current chain, we assign that sub-chain
+///    to new current one. Difference between current chain and sub-chain is a
+///    tail.
 /// 4. Save the first tail `JsAnyExpression` to the buffer.
 /// 5. Transform every `JsAnyExpression` from the buffer to optional expression.
 ///
-/// E.g. `foo && foo.bar.baz && foo.bar.baz.zoo;`.
-/// The logical expression `foo && foo.bar.baz` isn't the topmost. We skip it.
-/// `foo && foo.bar.baz && foo.bar.baz.zoo;` is the topmost and it'll be a start point.
-/// We start collecting a chain. We collect `JsAnyExpression` but for clarity let's use string identifiers.
-/// `foo.bar.baz.zoo;` -> `[foo, bar, baz, zoo]`
-/// Next step we take a next chain and also collect it.
+/// ### Example
+///
+/// ```js
+/// foo && foo.bar.baz && foo.bar.baz.zoo;`
+/// ```
+///
+/// The logical expression `foo && foo.bar.baz` isn't the topmost. We check this
+/// using `is_inside_another_chain()` and we skip it because it returns `true`.
+/// `foo && foo.bar.baz && foo.bar.baz.zoo;` is the topmost and it'll be the
+/// starting point.
+///
+/// We start collecting a chain. We collect `JsAnyExpression` but for clarity
+/// let's use string identifiers: `foo.bar.baz.zoo;` -> `[foo, bar, baz, zoo]`
+///
+/// Now we go left to the next expression, and also collect it.
 /// `foo.bar.baz` -> `[foo, bar, baz]`
-/// By comparing them we understand that one is a sub-chain of the other. `[foo, bar, baz]` is new current chain. `[zoo]` is a tail.
-/// We save `zoo` expression to the buffer.
-/// Next step we take a next chain and also collect it.
+///
+/// By comparing them we understand that one is a sub-chain of the other.
+/// `[foo, bar, baz]` is the new current chain. `[zoo]` is the tail.
+/// We save the `zoo` expression to the buffer.
+///
+/// Next step we take the next chain and also collect it.
 /// `foo` -> `[foo]`
-/// By comparing them we understand that one is a sub-chain of the other. `[foo]` is new current chain. `[bar, baz]` is a tail.
+///
+/// By comparing them we understand that one is a sub-chain of the other.
+/// `[foo]` is the new current chain. `[bar, baz]` is a tail.
 /// We save `bar` expression to the buffer.
-/// Iterate buffer `[bar, zoo]` we need to make every `JsAnyExpression` optional: `foo?.bar.baz?.zoo;`
+///
+/// Iterate buffer `[bar, zoo]` we need to make every `JsAnyExpression`
+/// optional: `foo?.bar.baz?.zoo;`
 ///
 #[derive(Debug)]
 pub struct LogicalAndChain {
@@ -318,11 +361,20 @@ pub struct LogicalAndChain {
 
 impl LogicalAndChain {
     fn from_expression(head: AnyJsExpression) -> SyntaxResult<LogicalAndChain> {
-        /// Iterate over `JsAnyExpression` and collect every expression which is a part of the chain:
+        /// Iterate over `JsAnyExpression` and collect every expression that is
+        /// a part of the chain:
+        ///
+        /// ### Example
+        ///
         /// ```js
         /// foo.bar[baz];
         /// ```
-        /// `[JsReferenceIdentifier, JsStaticMemberExpression, JsComputedMemberExpression]`
+        ///
+        /// Yields a chain with expressions of type:
+        ///
+        /// ```rust,ignore
+        /// [JsReferenceIdentifier, JsStaticMemberExpression, JsComputedMemberExpression]
+        /// ```
         fn collect_chain(expression: AnyJsExpression) -> SyntaxResult<VecDeque<AnyJsExpression>> {
             let mut buf = VecDeque::new();
             let mut current_expression = Some(expression);
@@ -356,10 +408,11 @@ impl LogicalAndChain {
         Ok(LogicalAndChain { head, buf })
     }
 
-    /// This function checks if `LogicalAndChain` is inside another parent `LogicalAndChain`
-    /// and the chain is sub-chain of parent chain.
+    /// This function checks if `LogicalAndChain` is inside another parent
+    /// `LogicalAndChain` and the chain is a sub-chain of the parent chain.
     fn is_inside_another_chain(&self) -> SyntaxResult<bool> {
-        // Because head of the chain is right expression of logical expression we need to take a parent and a grand-parent.
+        // Because head of the chain is right expression of logical expression
+        // we need to take a parent and a grand-parent.
         // E.g. `foo && foo.bar && foo.bar.baz`
         // The head of the sub-chain is `foo.bar`.
         // The parent of the head is logical expression `foo && foo.bar`
@@ -390,8 +443,9 @@ impl LogicalAndChain {
         Ok(false)
     }
 
-    /// This function compares two `LogicalAndChain` and returns `LogicalAndChainOrdering`
-    /// by comparing their `token_text_trimmed` for every `JsAnyExpression` node.
+    /// This function compares two `LogicalAndChain` and returns
+    /// `LogicalAndChainOrdering` by comparing their `token_text_trimmed` for
+    /// every `JsAnyExpression` node.
     fn cmp_chain(&self, other: &LogicalAndChain) -> SyntaxResult<LogicalAndChainOrdering> {
         let chain_ordering = match self.buf.len().cmp(&other.buf.len()) {
             Ordering::Less => return Ok(LogicalAndChainOrdering::Different),
@@ -402,8 +456,8 @@ impl LogicalAndChain {
             let (
                 main_expression,
                 branch_expression,
-                main_call_expression_arguments,
-                branch_call_expression_arguments,
+                main_call_expression_args,
+                branch_call_expression_args,
             ) = match (&main_expression, &branch_expression) {
                 (
                     AnyJsExpression::JsCallExpression(main_expression),
@@ -467,16 +521,16 @@ impl LogicalAndChain {
             };
             if main_value_token.token_text_trimmed() != branch_value_token.token_text_trimmed() {
                 return Ok(LogicalAndChainOrdering::Different);
-            } else if main_call_expression_arguments.is_some()
-                && branch_call_expression_arguments.is_some()
+            } else if let (Some(main_call_expression_args), Some(branch_call_expression_args)) =
+                (main_call_expression_args, branch_call_expression_args)
             {
                 // When comparing chains of call expressions with the same name,
                 // e.g., `foo.bar('a') && foo.bar('b')`,
                 // they should be considered different even if `main_value_token`
                 // and `branch_value_token` are the same.
                 // Therefore, we need to check their arguments here.
-                if main_call_expression_arguments.unwrap().args().text()
-                    != branch_call_expression_arguments.unwrap().args().text()
+                if main_call_expression_args.args().text()
+                    != branch_call_expression_args.args().text()
                 {
                     return Ok(LogicalAndChainOrdering::Different);
                 }
@@ -485,7 +539,8 @@ impl LogicalAndChain {
         Ok(chain_ordering)
     }
 
-    /// This function returns a list of `JsAnyExpression` which we need to transform into an option chain expression.
+    /// This function returns a list of `JsAnyExpression` which we need to
+    /// transform into an optional chain expression.
     fn optional_chain_expression_nodes(mut self) -> Option<VecDeque<AnyJsExpression>> {
         let mut optional_chain_expression_nodes = VecDeque::with_capacity(self.buf.len());
         // Take a head of a next sub-chain
@@ -494,9 +549,13 @@ impl LogicalAndChain {
         // The parent of the head is a logical expression `foo && foo.bar && foo.bar.baz`.
         // The next chain head is a left part of the logical expression `foo && foo.bar`
         let mut next_chain_head = self.head.parent::<JsLogicalExpression>()?.left().ok();
+        // Keep track of previous branches, so we can inspect them for optional
+        // chains that were already present in said branches.
+        let mut prev_branch: Option<LogicalAndChain> = None;
         while let Some(expression) = next_chain_head.take() {
             let expression = match expression {
-                // Extract a left `JsAnyExpression` from `JsBinaryExpression` if it's optional chain like
+                // Extract a left `JsAnyExpression` from `JsBinaryExpression` if
+                // it's an optional chain-like.
                 // ```js
                 // (foo === undefined) && foo.bar;
                 // ```
@@ -531,20 +590,88 @@ impl LogicalAndChain {
                     .ok()?;
             match self.cmp_chain(&branch).ok()? {
                 LogicalAndChainOrdering::SubChain => {
-                    // Here we reduce our main `JsAnyExpression` buffer by splitting the main buffer.
+                    // If the previous branch had other expressions that already
+                    // included the optional chaining operators, we need to
+                    // include them as well.
+                    if let Some(mut prev_branch) = prev_branch {
+                        let mut parts_to_pop = prev_branch.buf.len() - branch.buf.len() - 1;
+                        while parts_to_pop > 0 {
+                            if let (Some(left_part), Some(right_part)) =
+                                (prev_branch.buf.pop_back(), self.buf.pop_back())
+                            {
+                                match left_part {
+                                    AnyJsExpression::JsStaticMemberExpression(ref expr)
+                                        if expr
+                                            .operator_token()
+                                            .is_ok_and(|token| token.kind() == T![?.]) =>
+                                    {
+                                        optional_chain_expression_nodes.push_front(right_part);
+                                    }
+                                    AnyJsExpression::JsComputedMemberExpression(ref expr)
+                                        if expr.optional_chain_token().is_some() =>
+                                    {
+                                        optional_chain_expression_nodes.push_front(right_part);
+                                    }
+                                    AnyJsExpression::JsCallExpression(ref expr)
+                                        if expr.optional_chain_token().is_some() =>
+                                    {
+                                        optional_chain_expression_nodes.push_front(right_part);
+                                    }
+                                    _ => {}
+                                }
+                            }
+
+                            parts_to_pop -= 1;
+                        }
+                    }
+
+                    // Here we reduce our main `JsAnyExpression` buffer by
+                    // splitting the main buffer.
                     // Let's say that we have two buffers:
                     // The main is `[foo, bar, baz]` and a branch is `[foo]`
                     // After splitting the main buffer will be `[foo]` and the tail will be `[bar, baz]`.
                     // It means that we need to transform `bar` (first tail expression) into the optional one.
                     let mut tail = self.buf.split_off(branch.buf.len());
                     if let Some(part) = tail.pop_front() {
-                        optional_chain_expression_nodes.push_front(part)
-                    };
+                        optional_chain_expression_nodes.push_front(part);
+                    }
+
+                    prev_branch = Some(branch);
                 }
                 LogicalAndChainOrdering::Equal => continue,
                 LogicalAndChainOrdering::Different => return None,
             }
         }
+
+        // If the last branch had other expressions that already included the
+        // optional chaining operators, we need to include them as well.
+        if let Some(mut prev_branch) = prev_branch {
+            while let (Some(left_part), Some(right_part)) =
+                (prev_branch.buf.pop_back(), self.buf.pop_back())
+            {
+                match left_part {
+                    AnyJsExpression::JsStaticMemberExpression(ref expr)
+                        if expr
+                            .operator_token()
+                            .is_ok_and(|token| token.kind() == T![?.]) =>
+                    {
+                        optional_chain_expression_nodes.push_front(right_part);
+                    }
+                    AnyJsExpression::JsComputedMemberExpression(ref expr)
+                        if expr.optional_chain_token().is_some() =>
+                    {
+                        optional_chain_expression_nodes.push_front(right_part);
+                    }
+                    AnyJsExpression::JsCallExpression(ref expr)
+                        if expr.optional_chain_token().is_some() =>
+                    {
+                        optional_chain_expression_nodes.push_front(right_part);
+                    }
+                    _ => {}
+                }
+            }
+        }
+
         if optional_chain_expression_nodes.is_empty() {
             return None;
         }
@@ -552,26 +679,43 @@ impl LogicalAndChain {
     }
 }
 
-/// `LogicalOrLikeChain` handles cases with `JsLogicalExpression` which has `JsLogicalOperator::NullishCoalescing` or `JsLogicalOperator::LogicalOr` operator:
+/// `LogicalOrLikeChain` handles cases with `JsLogicalExpression` which has
+/// `JsLogicalOperator::NullishCoalescing` or `JsLogicalOperator::LogicalOr`
+/// operator:
+///
 /// ```js
 /// (foo || {}).bar;
 /// (foo ?? {}).bar;
 /// ((foo ?? {}).bar || {}).baz;
 /// ```
-/// The main idea of the `LogicalOrLikeChain`:
-/// 1. Check that the current member expressions isn't in another `LogicalOrLikeChain`. We need to find the topmost member expression.
-/// 2. Go down thought logical expressions and collect left and member expressions to buffer.
-/// 3. Transform every left `JsAnyExpression` and member `JsAnyMemberExpression` expressions into optional `JsAnyMemberExpression`.
 ///
-/// E.g. `((foo ?? {}).bar || {}).baz;`.
+/// The main idea of the `LogicalOrLikeChain`:
+/// 1. Check that the current member expressions isn't in another
+///    `LogicalOrLikeChain`. We need to find the topmost member expression.
+/// 2. Go down through logical expressions and collect left and member
+///    expressions to buffer.
+/// 3. Transform every left `JsAnyExpression` and member `JsAnyMemberExpression`
+///    expressions into optional `JsAnyMemberExpression`.
+///
+/// ### Example
+///
+/// ```js
+/// ((foo ?? {}).bar || {}).baz;`
+/// ```
+///
 /// The member expression `(foo ?? {}).bar` isn't the topmost. We skip it.
-/// `((foo ?? {}).bar || {}).baz;` is the topmost and it'll be a start point.
+///
+/// `((foo ?? {}).bar || {}).baz` is the topmost and it'll be a start point.
 /// We start collecting pairs of a left and member expressions to buffer.
-/// First expression is `((foo ?? {}).bar || {}).baz;`:
-/// Buffer is `[((foo ?? {}).bar, ((foo ?? {}).bar || {}).baz;)]`
-/// Next expressions is `((foo ?? {}).bar || {}).baz;`:
-/// Buffer is `[(foo, (foo ?? {}).bar), ((foo ?? {}).bar, ((foo ?? {}).bar || {}).baz;)]`
-/// Iterate buffer, take member expressions and replace object with left parts and make the expression optional chain:
+///
+/// First expression is `((foo ?? {}).bar || {}).baz`:
+/// Buffer is `[((foo ?? {}).bar, ((foo ?? {}).bar || {}).baz)]`
+///
+/// Next expressions is `(foo ?? {}).bar)`:
+/// Buffer is `[(foo, (foo ?? {}).bar), ((foo ?? {}).bar, ((foo ?? {}).bar || {}).baz)]`
+///
+/// Iterate buffer, take member expressions and replace object with left parts
+/// and make the expression optional chain:
 /// `foo?.bar?.baz;`
 ///
 #[derive(Debug)]
@@ -580,7 +724,10 @@ pub struct LogicalOrLikeChain {
 }
 
 impl LogicalOrLikeChain {
-    /// Create a `LogicalOrLikeChain` if `JsLogicalExpression` is optional chain like and the `JsLogicalExpression` is inside member expression.
+    /// Create a `LogicalOrLikeChain` if `JsLogicalExpression` is an optional
+    /// chain-like and the `JsLogicalExpression` is inside a member expression.
+    ///
+    /// ### Example
     /// ```js
     /// (foo || {}).bar;
     /// ```
@@ -600,8 +747,10 @@ impl LogicalOrLikeChain {
         Some(LogicalOrLikeChain { member })
     }
 
-    /// This function checks if `LogicalOrLikeChain` is inside another parent `LogicalOrLikeChain`.
-    /// E.g.
+    /// This function checks if `LogicalOrLikeChain` is inside another parent
+    /// `LogicalOrLikeChain`.
+    ///
+    /// ### Example
     /// `(foo ?? {}).bar` is inside `((foo ?? {}).bar || {}).baz;`
     fn is_inside_another_chain(&self) -> bool {
         LogicalOrLikeChain::get_chain_parent(&self.member).map_or(false, |parent| {
@@ -618,7 +767,9 @@ impl LogicalOrLikeChain {
         })
     }
 
-    /// This function returns a list of pairs `(JsAnyExpression, JsAnyMemberExpression)` which we need to transform into an option chain expression.
+    /// This function returns a list of pairs
+    /// `(JsAnyExpression, JsAnyMemberExpression)` which we need to transform
+    /// into an option chain expression.
     fn optional_chain_expression_nodes(
         &self,
     ) -> VecDeque<(AnyJsExpression, AnyJsMemberExpression)> {
