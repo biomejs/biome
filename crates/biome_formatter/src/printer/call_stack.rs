@@ -51,13 +51,12 @@ impl PrintElementArgs {
         self
     }
 
-    pub fn decrement_indent(mut self) -> Self {
-        self.indent = self.indent.decrement();
-        self
-    }
-
     pub fn reset_indent(mut self) -> Self {
         self.indent = Indention::default();
+        self
+    }
+    pub fn set_indent(mut self, indent: Indention) -> Self {
+        self.indent = indent;
         self
     }
 
@@ -231,5 +230,124 @@ impl<'a> CallStack for FitsCallStack<'a> {
 
     fn stack_mut(&mut self) -> &mut Self::Stack {
         &mut self.stack
+    }
+}
+
+/// Indent stack that stores the history of indention.
+///
+/// When the element kind is [indent] or [align], push the current indentation onto the stack of indentations.
+/// When the element kind is [dedent], pop the last item from the indentations stack and push it onto the temp_indentations stack.
+/// When the element kind is [end_dedent], pop the last item from the temp_indentations stack and push it onto the indentations stack.
+pub(super) trait IndentStack {
+    type Stack: Stack<Indention> + Debug;
+    type TempStack: Stack<Indention> + Debug;
+
+    fn stack(&self) -> &Self::Stack;
+    fn temp_stack(&self) -> &Self::TempStack;
+
+    fn stack_mut(&mut self) -> &mut Self::Stack;
+    fn temp_stack_mut(&mut self) -> &mut Self::TempStack;
+
+    fn push(&mut self, indention: Indention) -> Indention {
+        self.stack_mut().push(indention);
+        indention
+    }
+    fn start_dedent(&mut self) -> Indention {
+        if self.stack().is_empty() {
+            return Indention::default();
+        }
+        let indent = self.stack_mut().pop().unwrap();
+        self.temp_stack_mut().push(indent);
+        if self.stack().is_empty() {
+            return Indention::default();
+        }
+        *self.stack_mut().top().unwrap()
+    }
+    fn end_dedent(&mut self) {
+        if self.temp_stack_mut().is_empty() {
+            return;
+        }
+        let indent = self.temp_stack_mut().pop().unwrap();
+        self.stack_mut().push(indent);
+    }
+    fn pop(&mut self) -> Indention {
+        self.stack_mut().pop().unwrap()
+    }
+}
+
+/// Indent stack used for storing indetion history when printing the [FormatElement]s
+#[derive(Debug, Clone)]
+pub(super) struct PrintIndentStack {
+    indentions: Vec<Indention>,
+    temp_indentions: Vec<Indention>,
+}
+
+impl PrintIndentStack {
+    pub(super) fn new() -> Self {
+        Self {
+            indentions: Vec::new(),
+            temp_indentions: Vec::new(),
+        }
+    }
+}
+impl IndentStack for PrintIndentStack {
+    type Stack = Vec<Indention>;
+    type TempStack = Vec<Indention>;
+
+    fn stack(&self) -> &Self::Stack {
+        &self.indentions
+    }
+    fn temp_stack(&self) -> &Self::TempStack {
+        &self.temp_indentions
+    }
+
+    fn stack_mut(&mut self) -> &mut Self::Stack {
+        &mut self.indentions
+    }
+    fn temp_stack_mut(&mut self) -> &mut Self::TempStack {
+        &mut self.temp_indentions
+    }
+}
+
+/// Indent stack used for storing the history of indention when measuring fits on the line.
+///
+/// The stack is a view on top of the [PrintIndentStack] because the stack frames are still necessary when printing.
+pub(super) struct FitsIndentStack<'print> {
+    indentions: StackedStack<'print, Indention>,
+    temp_indentions: StackedStack<'print, Indention>,
+}
+
+impl<'print> FitsIndentStack<'print> {
+    pub(super) fn new(
+        print: &'print PrintIndentStack,
+        saved: Vec<Indention>,
+        saved2: Vec<Indention>,
+    ) -> Self {
+        let indentions = StackedStack::with_vec(&print.indentions, saved);
+        let temp_indentions = StackedStack::with_vec(&print.temp_indentions, saved2);
+
+        Self {
+            indentions,
+            temp_indentions,
+        }
+    }
+}
+
+impl<'a> IndentStack for FitsIndentStack<'a> {
+    type Stack = StackedStack<'a, Indention>;
+    type TempStack = StackedStack<'a, Indention>;
+
+    fn stack(&self) -> &Self::Stack {
+        &self.indentions
+    }
+    fn temp_stack(&self) -> &Self::TempStack {
+        &self.temp_indentions
+    }
+
+    fn stack_mut(&mut self) -> &mut Self::Stack {
+        &mut self.indentions
+    }
+    fn temp_stack_mut(&mut self) -> &mut Self::TempStack {
+        &mut self.temp_indentions
     }
 }
