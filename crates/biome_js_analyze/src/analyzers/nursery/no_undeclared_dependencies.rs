@@ -1,8 +1,8 @@
 use crate::manifest_services::Manifest;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::AnyJsImportSpecifierLike;
-use biome_rowan::AstNode;
+use biome_js_syntax::{AnyJsImportSpecifierLike, TsExternalModuleDeclaration};
+use biome_rowan::{AstNode, SyntaxNodeOptionExt};
 
 declare_rule! {
     /// Disallow the use of dependencies that aren't specified in the `package.json`.
@@ -45,6 +45,14 @@ impl Rule for NoUndeclaredDependencies {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
+        if let Some(parent_syntax_kind) = node.syntax().parent().kind() {
+            // Ignore module declaration statements:
+            // declare module "jest";
+            if TsExternalModuleDeclaration::can_cast(parent_syntax_kind) {
+                return None;
+            }
+        }
+
         let token_text = node.inner_string_text()?;
         let text = token_text.text();
 
@@ -66,7 +74,11 @@ impl Rule for NoUndeclaredDependencies {
         }
         let package_name = &text[..pointer];
 
-        if ctx.is_dependency(package_name) || ctx.is_dev_dependency(package_name) {
+        if ctx.is_dependency(package_name)
+            || ctx.is_dev_dependency(package_name)
+            || ctx.is_peer_dependency(package_name)
+            || ctx.is_optional_dependency(package_name)
+        {
             return None;
         }
 

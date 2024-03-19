@@ -21,7 +21,10 @@ impl ManifestServices {
         self.manifest.dev_dependencies.contains(specifier)
     }
 
-    #[allow(dead_code)]
+    pub(crate) fn is_peer_dependency(&self, specifier: &str) -> bool {
+        self.manifest.peer_dependencies.contains(specifier)
+    }
+
     pub(crate) fn is_optional_dependency(&self, specifier: &str) -> bool {
         self.manifest.optional_dependencies.contains(specifier)
     }
