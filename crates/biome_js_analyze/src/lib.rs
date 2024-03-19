@@ -22,14 +22,13 @@ pub mod lint;
 pub mod options;
 mod react;
 mod registry;
+mod services;
 mod suppression_action;
 mod syntax;
 pub mod utils;
-mod services;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::control_flow::ControlFlowGraph;
-
 
 pub(crate) type JsRuleAction = RuleAction<JsLanguage>;
 

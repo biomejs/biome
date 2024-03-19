@@ -1,4 +1,6 @@
-use crate::{services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic, JsRuleAction};
+use crate::{
+    services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic, JsRuleAction,
+};
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
     RuleSourceKind,
