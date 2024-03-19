@@ -276,24 +276,24 @@ enum LogicalAndChainOrdering {
     /// An ordering where a chain is a sub-chain of another.
     ///
     /// ```js
-    /// (foo && foo.bar) /* is sub-chain of */ (foo && foo.bar && foo.bar.baz)
+    /// (foo.bar) /* is a sub-chain of */ (foo.bar.baz)
     /// ```
     ///
     /// Chains can be considered subchains even when they have unequal
     /// optional chaining internally. For instance:
     ///
     /// ```js
-    /// (foo?.bar) /* is also a sub-chain of */ (foo?.bar && foo.bar.baz)
+    /// (foo?.bar) /* is also a sub-chain of */ (foo.bar.baz)
     /// ```
     SubChain,
     /// An ordering where a chain is equal to another.
     /// ```js
-    /// (foo && foo.bar) /* is equal */ (foo && foo.bar)
+    /// (foo.bar) /* is equal to */ (foo.bar)
     /// ```
     Equal,
     /// An ordering where a chain is different to another.
     /// ```js
-    /// (foo && foo.bar) /* is different */ (bar && bar.bar && bar.bar.baz)
+    /// (foo.bar) /* is different from */ (bar.bar)
     /// ```
     Different,
 }
