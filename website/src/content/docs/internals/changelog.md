@@ -15,13 +15,15 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Ureleased
+## Unreleased
 
 ### Analyzer
 
 #### Bug fixes
 
 - The `noSuperWithoutExtends` rule now allows for calling `super()` in derived class constructors of class expressions ([#2108](https://github.com/biomejs/biome/issues/2108)). Contributed by @Sec-ant
+
+- Fix discrepancies on file source detection. Allow module syntax in `.cts` files ([#2114](https://github.com/biomejs/biome/issues/2114)). Contributed by @Sec-ant
 
 ### CLI
 
@@ -39,10 +41,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [https://github.com/biomejs/biome/issues/1661](https://github.com/biomejs/biome/issues/1661). Now nested conditionals are aligned with Prettier's logic, and won't contain mixed spaced and tabs. Contributed by @ematipico
 
-
 ### JavaScript APIs
 
 ### Linter
+
+#### Bug fixes
+
+- Rule `noUndeclaredDependencies` now also validates `peerDependencies` and `optionalDependencies` ([#2122](https://github.com/biomejs/biome/issues/2122)). Contributed by @Sec-ant
+- Rule `noUndeclaredDependencies` won't check `declare module` statements anymore ([#2123](https://github.com/biomejs/biome/issues/2123)). Contributed by @Sec-ant
 
 ### Parser
 
