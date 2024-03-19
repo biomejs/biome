@@ -731,8 +731,10 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_rowan",
+ "biome_unicode_table",
  "bitflags 2.3.1",
  "drop_bomb",
+ "unicode-bom",
 ]
 
 [[package]]
