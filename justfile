@@ -75,6 +75,7 @@ new-css-lintrule rulename:
   cargo codegen-configuration
   just gen-bindings
   just format
+  cargo lintdoc
 # TODO: lintdoc, website, cargo doc
 
 # Promotes a rule from the nursery group to a new group
