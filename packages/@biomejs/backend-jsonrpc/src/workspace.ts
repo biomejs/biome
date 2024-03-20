@@ -1705,7 +1705,8 @@ export interface JsFileSource {
 	version: LanguageVersion;
 }
 export interface JsonFileSource {
-	allow_trailing_comma: boolean;
+	allow_comments: boolean;
+	allow_trailing_commas: boolean;
 	variant: JsonVariant;
 }
 export interface CssFileSource {
