@@ -1,4 +1,4 @@
-use crate::globals::node::is_node_builtin_module;
+use crate::globals::is_node_builtin_module;
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike};

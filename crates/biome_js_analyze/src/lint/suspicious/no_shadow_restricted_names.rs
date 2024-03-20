@@ -1,4 +1,4 @@
-use crate::globals::runtime::BUILTIN;
+use crate::globals::javascript::language::ES_BUILTIN;
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::JsIdentifierBinding;
@@ -53,7 +53,7 @@ impl Rule for NoShadowRestrictedNames {
         let name = binding.name_token().ok()?;
         let name = name.text_trimmed();
 
-        if BUILTIN.contains(&name) {
+        if ES_BUILTIN.contains(&name) {
             Some(State {
                 shadowed_name: name.to_string(),
             })

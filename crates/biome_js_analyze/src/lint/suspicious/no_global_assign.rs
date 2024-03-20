@@ -1,6 +1,4 @@
-use crate::globals::browser::BROWSER;
-use crate::globals::node::NODE;
-use crate::globals::runtime::{BUILTIN, ES_2021};
+use crate::globals::is_js_global;
 
 use crate::services::semantic::SemanticServices;
 use biome_analyze::RuleSource;
@@ -62,10 +60,7 @@ impl Rule for NoGlobalAssign {
             if is_write {
                 let identifier = global_ref.syntax().text_trimmed();
                 let text = identifier.to_string();
-                let is_global_var = NODE.binary_search(&text.as_str()).is_ok()
-                    || BROWSER.binary_search(&text.as_str()).is_ok()
-                    || BUILTIN.binary_search(&text.as_str()).is_ok()
-                    || ES_2021.binary_search(&text.as_str()).is_ok();
+                let is_global_var = is_js_global(text.as_str());
                 if is_global_var {
                     result.push(*global_ref.range());
                 }
