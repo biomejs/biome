@@ -28,7 +28,7 @@ The rule provides two options that are detailed in the following subsections.
     "//": "...",
     "options": {
         "strictCase": false,
-        "enumMemberCase": ["camelCase", "export"]
+        "filenameCases": ["camelCase", "export"]
     }
 }
 ```
