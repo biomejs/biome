@@ -12,14 +12,9 @@ This rule hasn't been released yet.
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-Succinct description of the rule.
+**[WIP] This rule hasn't been implemented yet.**
 
-Put context and details about the rule.
-As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-
-Try to stay consistent with the descriptions of implemented rules.
-
-Add a link to the corresponding stylelint rule (if any):
+This is sample rule
 
 ## Examples
 
