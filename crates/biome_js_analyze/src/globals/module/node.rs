@@ -1,77 +1,7 @@
-/// Sorted array of Node builtin
-pub const BUILTIN: [&str; 29] = [
-    "AbortController",
-    "AbortSignal",
-    "Buffer",
-    "DOMException",
-    "Event",
-    "EventTarget",
-    "Intl",
-    "MessageChannel",
-    "MessageEvent",
-    "MessagePort",
-    "TextDecoder",
-    "TextEncoder",
-    "URL",
-    "URLSearchParams",
-    "atob",
-    "btoa",
-    "clearImmediate",
-    "clearInterval",
-    "clearTimeout",
-    "console",
-    "fetch",
-    "global",
-    "performance",
-    "process",
-    "queueMicrotask",
-    "setImmediate",
-    "setInterval",
-    "setTimeout",
-    "structuredClone",
-];
-
-pub const NODE: [&str; 34] = [
-    "AbortController",
-    "AbortSignal",
-    "Buffer",
-    "DOMException",
-    "Event",
-    "EventTarget",
-    "Intl",
-    "MessageChannel",
-    "MessageEvent",
-    "MessagePort",
-    "TextDecoder",
-    "TextEncoder",
-    "URL",
-    "URLSearchParams",
-    "__dirname",
-    "__filename",
-    "atob",
-    "btoa",
-    "clearImmediate",
-    "clearInterval",
-    "clearTimeout",
-    "console",
-    "exports",
-    "fetch",
-    "global",
-    "module",
-    "performance",
-    "process",
-    "queueMicrotask",
-    "require",
-    "setImmediate",
-    "setInterval",
-    "setTimeout",
-    "structuredClone",
-];
-
 /// Sorted array of Node builtin modules
 ///
-/// Source: https://github.com/inspect-js/is-core-module/blob/main/core.json
-pub const NODE_BUILTIN_MODULES: &[&str] = &[
+/// Source: https://github.com/inspect-js/is-core-module/blob/8317b311856a61935d7257ad5f31f9b0cfd13b5f/core.json#L1-L158
+pub const BUILTIN_MODULES: &[&str; 156] = &[
     "_debug_agent",
     "_debugger",
     "_http_agent",
@@ -230,32 +160,20 @@ pub const NODE_BUILTIN_MODULES: &[&str] = &[
     "zlib",
 ];
 
-/// Sorted array of CommonJs builtin
-pub const COMMON_JS: [&str; 4] = ["exports", "global", "module", "require"];
-
 /// Returns `true` if `name` is a Node builtin module.
 ///
 /// ```
-/// use biome_js_analyze::globals::node::is_node_builtin_module;
+/// use biome_js_analyze::globals::module::node::is_builtin_module;
 ///
-/// assert!(is_node_builtin_module(&"fs"));
+/// assert!(is_builtin_module(&"fs"));
 /// ```
-pub fn is_node_builtin_module(name: &str) -> bool {
-    NODE_BUILTIN_MODULES.binary_search(&name).is_ok()
+pub fn is_builtin_module(name: &str) -> bool {
+    BUILTIN_MODULES.binary_search(&name).is_ok()
 }
 
 #[test]
 fn test_order() {
-    for items in BUILTIN.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
-    }
-    for items in NODE.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
-    }
-    for items in COMMON_JS.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
-    }
-    for items in NODE_BUILTIN_MODULES.windows(2) {
+    for items in BUILTIN_MODULES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }

@@ -1,5 +1,7 @@
-/// Sorted array of builtin
-pub const BUILTIN: [&str; 66] = [
+/// Sorted array of ES builtin
+///
+/// Source: https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L2-L70
+pub const ES_BUILTIN: &[&str; 67] = &[
     "AggregateError",
     "Array",
     "ArrayBuffer",
@@ -20,6 +22,7 @@ pub const BUILTIN: [&str; 66] = [
     "Int16Array",
     "Int32Array",
     "Int8Array",
+    "Intl",
     "JSON",
     "Map",
     "Math",
@@ -68,7 +71,10 @@ pub const BUILTIN: [&str; 66] = [
     "valueOf",
 ];
 
-pub const ES_5: [&str; 38] = [
+/// Sorted array of ES5 builtin
+///
+/// Source: https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L71-L110
+pub const ES_5: &[&str; 38] = &[
     "Array",
     "Boolean",
     "Date",
@@ -109,7 +115,10 @@ pub const ES_5: [&str; 38] = [
     "valueOf",
 ];
 
-pub const ES_2015: [&str; 57] = [
+/// Sorted array of ES2015 builtin
+///
+/// Source: https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L111-L170
+pub const ES_2015: &[&str; 58] = &[
     "Array",
     "ArrayBuffer",
     "Boolean",
@@ -124,6 +133,7 @@ pub const ES_2015: [&str; 57] = [
     "Int16Array",
     "Int32Array",
     "Int8Array",
+    "Intl",
     "JSON",
     "Map",
     "Math",
@@ -169,7 +179,10 @@ pub const ES_2015: [&str; 57] = [
     "valueOf",
 ];
 
-pub const ES_2017: [&str; 59] = [
+/// Sorted array of ES2017 builtin
+///
+/// Source: https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L171-L232
+pub const ES_2017: &[&str; 60] = &[
     "Array",
     "ArrayBuffer",
     "Atomics",
@@ -185,6 +198,7 @@ pub const ES_2017: [&str; 59] = [
     "Int16Array",
     "Int32Array",
     "Int8Array",
+    "Intl",
     "JSON",
     "Map",
     "Math",
@@ -231,7 +245,10 @@ pub const ES_2017: [&str; 59] = [
     "valueOf",
 ];
 
-pub const ES_2020: [&str; 63] = [
+/// Sorted array of ES2020 builtin
+///
+/// Source: https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L233-L298
+pub const ES_2020: &[&str; 64] = &[
     "Array",
     "ArrayBuffer",
     "Atomics",
@@ -250,6 +267,7 @@ pub const ES_2020: [&str; 63] = [
     "Int16Array",
     "Int32Array",
     "Int8Array",
+    "Intl",
     "JSON",
     "Map",
     "Math",
@@ -297,7 +315,10 @@ pub const ES_2020: [&str; 63] = [
     "valueOf",
 ];
 
-pub const ES_2021: [&str; 66] = [
+/// Sorted array of ES2021 builtin
+///
+/// Source: https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L299-L367
+pub const ES_2021: &[&str; 67] = &[
     "AggregateError",
     "Array",
     "ArrayBuffer",
@@ -318,6 +339,7 @@ pub const ES_2021: [&str; 66] = [
     "Int16Array",
     "Int32Array",
     "Int8Array",
+    "Intl",
     "JSON",
     "Map",
     "Math",
@@ -365,10 +387,36 @@ pub const ES_2021: [&str; 66] = [
     "unescape",
     "valueOf",
 ];
+
+/// Returns `true` if `name` is a JavaScript language global
+///
+/// ```
+/// use biome_js_analyze::globals::javascript::language::is_global;
+///
+/// assert!(is_global(&"Math"));
+/// ```
+pub fn is_global(name: &str) -> bool {
+    ES_BUILTIN.binary_search(&name).is_ok()
+}
 
 #[test]
 fn test_order() {
-    for items in BUILTIN.windows(2) {
+    for items in ES_BUILTIN.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in ES_5.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in ES_2015.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in ES_2017.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in ES_2020.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in ES_2021.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }

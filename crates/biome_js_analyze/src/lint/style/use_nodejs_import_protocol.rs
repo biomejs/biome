@@ -7,7 +7,7 @@ use biome_diagnostics::Applicability;
 use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike, JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::BatchMutationExt;
 
-use crate::{globals::node::is_node_builtin_module, JsRuleAction};
+use crate::{globals::is_node_builtin_module, JsRuleAction};
 
 declare_rule! {
     /// Enforces using the `node:` protocol for Node.js builtin modules.

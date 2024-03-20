@@ -1,7 +1,4 @@
-use crate::globals::browser::BROWSER;
-use crate::globals::node::NODE;
-use crate::globals::runtime::{BUILTIN, ES_2021};
-use crate::globals::typescript::TYPESCRIPT_BUILTIN;
+use crate::globals::{is_js_global, is_ts_global};
 use crate::services::semantic::SemanticServices;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
@@ -92,14 +89,8 @@ impl Rule for NoUndeclaredVariables {
 }
 
 fn is_global(reference_name: &str, source_type: &JsFileSource) -> bool {
-    ES_2021.binary_search(&reference_name).is_ok()
-        || BROWSER.binary_search(&reference_name).is_ok()
-        || NODE.binary_search(&reference_name).is_ok()
-        || match source_type.language() {
-            Language::JavaScript => BUILTIN.binary_search(&reference_name).is_ok(),
-            Language::TypeScript { .. } => {
-                BUILTIN.binary_search(&reference_name).is_ok()
-                    || TYPESCRIPT_BUILTIN.binary_search(&reference_name).is_ok()
-            }
-        }
+    match source_type.language() {
+        Language::JavaScript => is_js_global(reference_name),
+        Language::TypeScript { .. } => is_js_global(reference_name) || is_ts_global(reference_name),
+    }
 }
