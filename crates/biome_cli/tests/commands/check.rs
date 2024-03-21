@@ -2797,3 +2797,52 @@ fn use_literal_keys_should_emit_correct_ast_issue_266() {
         result,
     ));
 }
+
+#[test]
+fn should_show_diagnostics_for_formatter_when_linter_ignores_folder() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("build/file.js");
+    fs.insert(
+        file_path.into(),
+        r#"
+	value['optimizelyService'] = optimizelyService;
+		"#,
+    );
+
+    let biome_json = Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+    "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+    "organizeImports": {
+        "enabled": true
+    },
+    "linter": {
+        "ignore": ["build/**"],
+        "enabled": true,
+        "rules": {
+            "recommended": true
+        }
+    }
+}
+        "#,
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("check"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_show_diagnostics_for_formatter_when_linter_ignores_folder",
+        fs,
+        console,
+        result,
+    ));
+}

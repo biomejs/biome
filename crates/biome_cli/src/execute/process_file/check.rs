@@ -16,6 +16,7 @@ pub(crate) fn check_file<'ctx>(
     let mut changed = false;
     tracing::info_span!("Process check", path =? workspace_file.path.display()).in_scope(
         move || {
+            dbg!(&path);
             if file_features.supports_lint() {
                 let lint_result = lint_with_guard(ctx, &mut workspace_file);
                 match lint_result {

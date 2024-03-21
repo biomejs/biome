@@ -13,7 +13,7 @@ use biome_diagnostics::PrintGitHubDiagnostic;
 use biome_diagnostics::{category, DiagnosticExt, Error, PrintDiagnostic, Resource, Severity};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
-use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
+use biome_service::workspace::IsPathIgnoredParams;
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
@@ -713,11 +713,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
 
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             path: biome_path.clone(),
-            feature: FeaturesBuilder::new()
-                .with_linter()
-                .with_formatter()
-                .with_organize_imports()
-                .build(),
+            feature: self.execution.to_features(),
         });
 
         let file_features = match file_features {

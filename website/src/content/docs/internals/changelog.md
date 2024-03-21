@@ -27,6 +27,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Bug fixes
+
+- Fixes [#2131](https://github.com/biomejs/biome/issues/2131), where folders were incorrectly ignored when running the command `check`. Now folders are correctly ignored based on their command. Contributed by @ematipico
+
 ### Configuration
 
 #### Bug fixes

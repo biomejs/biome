@@ -30,19 +30,14 @@ pub(crate) struct Execution {
 impl Execution {
     pub(crate) fn to_features(&self) -> Vec<FeatureName> {
         match self.traversal_mode {
-            TraversalMode::Format { .. } => FeaturesBuilder::new()
-                .with_formatter()
-                .build(),
-            TraversalMode::Lint { ..} => FeaturesBuilder::new()
-                .with_linter()
-                .build(),
+            TraversalMode::Format { .. } => FeaturesBuilder::new().with_formatter().build(),
+            TraversalMode::Lint { .. } => FeaturesBuilder::new().with_linter().build(),
             TraversalMode::Check { .. } | TraversalMode::CI { .. } => FeaturesBuilder::new()
                 .with_organize_imports()
                 .with_formatter()
                 .with_linter()
                 .build(),
-            TraversalMode::Migrate { .. } => vec![]
-
+            TraversalMode::Migrate { .. } => vec![],
         }
     }
 }

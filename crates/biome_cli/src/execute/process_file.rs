@@ -132,11 +132,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
             .workspace
             .file_features(SupportsFeatureParams {
                 path: biome_path,
-                feature: FeaturesBuilder::new()
-                    .with_formatter()
-                    .with_linter()
-                    .with_organize_imports()
-                    .build(),
+                feature: ctx.execution.to_features(),
             })
             .with_file_path_and_code_and_tags(
                 path.display().to_string(),

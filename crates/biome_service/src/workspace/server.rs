@@ -246,10 +246,10 @@ impl WorkspaceServer {
     fn is_ignored(&self, path: &Path, features: Vec<FeatureName>) -> bool {
         let file_name = path.file_name().and_then(|s| s.to_str());
         let ignored_by_features = {
-          let mut ignored = false;
+            let mut ignored = false;
             for feature in features {
                 // a path is ignored if it's ignored by all features
-               ignored &= self.is_ignored_by_feature_config(path, feature)
+                ignored &= self.is_ignored_by_feature_config(path, feature)
             }
             ignored
         };
