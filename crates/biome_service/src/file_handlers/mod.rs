@@ -76,13 +76,9 @@ impl From<&Path> for DocumentFileSource {
 }
 
 impl DocumentFileSource {
-    /// Sorted array of files that are known as JSONC (JSON with comments).
-    ///
-    /// TODO: We might want to narrow the list according to
-    /// https://github.com/prettier/prettier/issues/15945#issuecomment-1895371835
-    ///
-    /// We can settle with these for now until someone raise a issue
-    pub(crate) const WELL_KNOWN_JSONC_FILES: &'static [&'static str; 15] = &[
+    // Well known json-like files that support comments and trailing commas
+    // This list should be SORTED!
+    const WELL_KNOWN_JSON_WITH_COMMENTS_AND_TRAILING_COMMAS_FILES: &'static [&'static str] = &[
         ".babelrc",
         ".babelrc.json",
         ".ember-cli",
@@ -100,6 +96,10 @@ impl DocumentFileSource {
         "typescript.json",
     ];
 
+    // Well known json-like files that support comments but no trailing commas
+    // This list should be SORTED!
+    const WELL_KNOWN_JSON_WITH_COMMENTS_FILES: &'static [&'static str] = &[];
+
     /// Returns the language corresponding to this file extension
     pub fn from_extension(s: &str) -> Self {
         match s.to_lowercase().as_str() {
@@ -110,7 +110,7 @@ impl DocumentFileSource {
             "tsx" => JsFileSource::tsx().into(),
             "d.ts" | "d.mts" | "d.cts" => JsFileSource::d_ts().into(),
             "json" => JsonFileSource::json().into(),
-            "jsonc" => JsonFileSource::jsonc().into(),
+            "jsonc" => JsonFileSource::json().with_comments(true).into(),
             "astro" => JsFileSource::astro().into(),
             "vue" => JsFileSource::vue().into(),
             "svelte" => JsFileSource::svelte().into(),
@@ -132,7 +132,7 @@ impl DocumentFileSource {
             "javascriptreact" => JsFileSource::jsx().into(),
             "typescriptreact" => JsFileSource::tsx().into(),
             "json" => JsonFileSource::json().into(),
-            "jsonc" => JsonFileSource::jsonc().into(),
+            "jsonc" => JsonFileSource::json().with_comments(true).into(),
             "astro" => JsFileSource::astro().into(),
             "vue" => JsFileSource::vue().into(),
             "svelte" => JsFileSource::svelte().into(),
@@ -142,46 +142,51 @@ impl DocumentFileSource {
         }
     }
 
-    pub fn from_known_filename(s: &str) -> Self {
-        if Self::WELL_KNOWN_JSONC_FILES.binary_search(&s).is_ok() {
-            JsonFileSource::jsonc().into()
-        } else {
-            DocumentFileSource::Unknown
-        }
-    }
-
     /// Returns the language corresponding to the file path
     pub fn from_path(path: &Path) -> Self {
+        // check well known files
+        if let Some(file_source) = path
+            .file_name()
+            .and_then(OsStr::to_str)
+            .and_then(DocumentFileSource::try_from_well_known_filename)
+        {
+            return file_source;
+        }
+
+        // extract extensions
         let extension = match path {
             _ if path.to_str().is_some_and(|p| p.ends_with(".d.ts")) => Some("d.ts"),
             _ if path.to_str().is_some_and(|p| p.ends_with(".d.mts")) => Some("d.mts"),
             _ if path.to_str().is_some_and(|p| p.ends_with(".d.cts")) => Some("d.cts"),
-            path => path.extension().and_then(|path| path.to_str()),
+            path => path.extension().and_then(|e| e.to_str()),
         };
 
+        // from extensions
         extension.map_or(
             DocumentFileSource::Unknown,
             DocumentFileSource::from_extension,
         )
     }
 
-    /// Returns the language corresponding to the file path
-    /// relying on the file extension and the known files.
-    pub fn from_path_and_known_filename(path: &Path) -> Self {
-        let extension = match path {
-            _ if path.to_str().is_some_and(|p| p.ends_with(".d.ts")) => Some("d.ts"),
-            _ if path.to_str().is_some_and(|p| p.ends_with(".d.mts")) => Some("d.mts"),
-            _ if path.to_str().is_some_and(|p| p.ends_with(".d.cts")) => Some("d.cts"),
-            path => path.extension().and_then(|path| path.to_str()),
-        };
-
-        extension
-            .map(DocumentFileSource::from_extension)
-            .or(path
-                .file_name()
-                .and_then(OsStr::to_str)
-                .map(DocumentFileSource::from_known_filename))
-            .unwrap_or_default()
+    fn try_from_well_known_filename(filename: &str) -> Option<DocumentFileSource> {
+        if Self::WELL_KNOWN_JSON_WITH_COMMENTS_AND_TRAILING_COMMAS_FILES
+            .binary_search(&filename)
+            .is_ok()
+        {
+            return Some(
+                JsonFileSource::json()
+                    .with_comments(true)
+                    .with_trailing_commas(true)
+                    .into(),
+            );
+        }
+        if Self::WELL_KNOWN_JSON_WITH_COMMENTS_FILES
+            .binary_search(&filename)
+            .is_ok()
+        {
+            return Some(JsonFileSource::json().with_comments(true).into());
+        }
+        None
     }
 
     /// Returns the language if it's not unknown, otherwise returns `other`.
@@ -288,7 +293,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
                 }
             }
             DocumentFileSource::Json(json) => {
-                if json.is_jsonc() {
+                if json.get_allow_comments() {
                     fmt.write_markup(markup! { "JSONC" })
                 } else {
                     fmt.write_markup(markup! { "JSON" })
@@ -509,7 +514,7 @@ impl Features {
         biome_path: &BiomePath,
         language_hint: DocumentFileSource,
     ) -> Capabilities {
-        match DocumentFileSource::from_path_and_known_filename(biome_path).or(language_hint) {
+        match DocumentFileSource::from_path(biome_path).or(language_hint) {
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro => self.astro.capabilities(),
                 EmbeddingKind::Vue => self.vue.capabilities(),
@@ -554,7 +559,12 @@ pub(crate) fn is_diagnostic_error(
 
 #[test]
 fn test_order() {
-    for items in DocumentFileSource::WELL_KNOWN_JSONC_FILES.windows(2) {
+    for items in
+        DocumentFileSource::WELL_KNOWN_JSON_WITH_COMMENTS_AND_TRAILING_COMMAS_FILES.windows(2)
+    {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in DocumentFileSource::WELL_KNOWN_JSON_WITH_COMMENTS_FILES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }

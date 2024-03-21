@@ -123,7 +123,7 @@ impl WorkspaceServer {
         move || {
             let file_source = self.get_file_source(path);
 
-            let language = DocumentFileSource::from_path_and_known_filename(path).or(file_source);
+            let language = DocumentFileSource::from_path(path).or(file_source);
             WorkspaceError::source_file_not_supported(
                 language,
                 path.clone().display().to_string(),
@@ -322,7 +322,7 @@ impl Workspace for WorkspaceServer {
             }
             Entry::Vacant(entry) => {
                 let capabilities = self.get_file_capabilities(&params.path);
-                let language = DocumentFileSource::from_path_and_known_filename(&params.path);
+                let language = DocumentFileSource::from_path(&params.path);
                 let path = params.path.as_path();
                 let settings = self.settings.read().unwrap();
                 let mut file_features = FileFeaturesResult::new();
