@@ -134,29 +134,22 @@ impl Rule for NoUselessThisAlias {
     fn action(ctx: &RuleContext<Self>, id: &Self::State) -> Option<JsRuleAction> {
         let declarator = ctx.query();
         let model = ctx.model();
-        let Some(var_decl) = declarator
+        let var_decl = declarator
             .syntax()
             .ancestors()
-            .find_map(JsVariableDeclaration::cast)
-        else {
-            return None;
-        };
+            .find_map(JsVariableDeclaration::cast)?;
         let mut mutation = ctx.root().begin();
         let this_expr = AnyJsExpression::from(make::js_this_expression(make::token(T![this])));
         for read in id.all_reads(model) {
             let syntax = read.syntax();
             let syntax = syntax.parent()?;
-            let Some(expr) = JsIdentifierExpression::cast(syntax) else {
-                return None;
-            };
+            let expr = JsIdentifierExpression::cast(syntax)?;
             mutation.replace_node(expr.into(), this_expr.clone());
         }
         for write in id.all_writes(model) {
             let syntax = write.syntax();
             let syntax = syntax.parent()?;
-            let Some(statement) = JsExpressionStatement::cast(syntax.parent()?) else {
-                return None;
-            };
+            let statement = JsExpressionStatement::cast(syntax.parent()?)?;
             mutation.remove_node(statement);
         }
         let var_declarator_list = var_decl.declarators();

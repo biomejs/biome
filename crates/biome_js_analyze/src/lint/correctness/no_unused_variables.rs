@@ -291,9 +291,7 @@ impl Rule for NoUnusedVariables {
             return None;
         }
 
-        let Some(suggestion) = suggested_fix_if_unused(binding) else {
-            return None;
-        };
+        let suggestion = suggested_fix_if_unused(binding)?;
 
         let model = ctx.model();
         if model.is_exported(binding) {
