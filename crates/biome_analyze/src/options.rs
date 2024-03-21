@@ -84,7 +84,7 @@ impl AnalyzerOptions {
         self.configuration
             .rules
             .get_rule_options::<R::Options>(&RuleKey::rule::<R>())
-            .map(R::Options::clone)
+            .cloned()
     }
 
     pub fn preferred_quote(&self) -> &PreferredQuote {
