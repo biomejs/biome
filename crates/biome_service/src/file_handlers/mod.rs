@@ -77,7 +77,12 @@ impl From<&Path> for DocumentFileSource {
 
 impl DocumentFileSource {
     /// Sorted array of files that are known as JSONC (JSON with comments).
-    pub(crate) const KNOWN_FILES_AS_JSONC: &'static [&'static str; 15] = &[
+    ///
+    /// TODO: We might want to narrow the list according to
+    /// https://github.com/prettier/prettier/issues/15945#issuecomment-1895371835
+    ///
+    /// We can settle with these for now until someone raise a issue
+    pub(crate) const WELL_KNOWN_JSONC_FILES: &'static [&'static str; 15] = &[
         ".babelrc",
         ".babelrc.json",
         ".ember-cli",
@@ -138,7 +143,7 @@ impl DocumentFileSource {
     }
 
     pub fn from_known_filename(s: &str) -> Self {
-        if Self::KNOWN_FILES_AS_JSONC.binary_search(&s).is_ok() {
+        if Self::WELL_KNOWN_JSONC_FILES.binary_search(&s).is_ok() {
             JsonFileSource::jsonc().into()
         } else {
             DocumentFileSource::Unknown
@@ -549,7 +554,7 @@ pub(crate) fn is_diagnostic_error(
 
 #[test]
 fn test_order() {
-    for items in DocumentFileSource::KNOWN_FILES_AS_JSONC.windows(2) {
+    for items in DocumentFileSource::WELL_KNOWN_JSONC_FILES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }

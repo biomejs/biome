@@ -47,3 +47,21 @@ fn recognize_typescript_definition_file() {
 
     assert!(file.format_file().is_ok());
 }
+
+#[test]
+fn recognize_jsonc_file() {
+    let workspace = server();
+
+    let file = FileGuard::open(
+        workspace.as_ref(),
+        OpenFileParams {
+            path: BiomePath::new("a.jsonc"),
+            content: r#"{"a": 42,}//comment"#.into(),
+            version: 0,
+            document_file_source: None,
+        },
+    )
+    .unwrap();
+
+    assert!(file.format_file().is_ok());
+}

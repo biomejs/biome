@@ -53,6 +53,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Rule `noUndeclaredVariables` now also checks for worker globals ([#2121](https://github.com/biomejs/biome/issues/2121)). Contributed by @Sec-ant
 
+### LSP
+
+#### Bug fixes
+
+- Correctly parse `.jsonc` files. Contributed by @Sec-ant
+
 ### Parser
 
 ## 1.6.1 (2024-03-12)
