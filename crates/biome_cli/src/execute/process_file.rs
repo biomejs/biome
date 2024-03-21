@@ -12,7 +12,7 @@ use crate::execute::traverse::TraversalOptions;
 use crate::execute::TraversalMode;
 use biome_diagnostics::{category, DiagnosticExt, DiagnosticTags, Error};
 use biome_fs::BiomePath;
-use biome_service::workspace::{FeatureName, FeaturesBuilder, SupportKind, SupportsFeatureParams};
+use biome_service::workspace::{FeatureName, SupportKind, SupportsFeatureParams};
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::path::Path;
@@ -132,11 +132,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
             .workspace
             .file_features(SupportsFeatureParams {
                 path: biome_path,
-                feature: FeaturesBuilder::new()
-                    .with_formatter()
-                    .with_linter()
-                    .with_organize_imports()
-                    .build(),
+                features: ctx.execution.to_features(),
             })
             .with_file_path_and_code_and_tags(
                 path.display().to_string(),
