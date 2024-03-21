@@ -18,6 +18,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             | GRIT_BOGUS_CONTAINER
             | GRIT_BOGUS_DEFINITION
             | GRIT_BOGUS_LANGUAGE_DECLARATION
+            | GRIT_BOGUS_LANGUAGE_FLAVOR_KIND
             | GRIT_BOGUS_LITERAL
             | GRIT_BOGUS_NAMED_ARG
             | GRIT_BOGUS_PATTERN
@@ -3036,7 +3037,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             GRIT_LANGUAGE_FLAVOR_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
-                GritLanguageFlavorKind::can_cast,
+                AnyGritLanguageFlavorKind::can_cast,
                 T ! [,],
                 true,
             ),

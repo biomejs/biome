@@ -164,29 +164,9 @@ fn parse_language_declaration(p: &mut GritParser) -> ParsedSyntax {
         let m = p.start();
         p.bump(T!['(']);
 
-        {
-            let m = p.start();
+        LanguageFlavorList.parse_list(p);
 
-            loop {
-                if p.at(T![')']) {
-                    break;
-                }
-
-                if parse_language_flavor_kind(p) == Absent {
-                    p.error(expected_language_flavor(p, p.cur_range()));
-                    p.eat(GRIT_NAME);
-                    is_supported = false;
-                }
-
-                if !p.eat(T![,]) {
-                    break;
-                }
-            }
-
-            m.complete(p, GRIT_LANGUAGE_FLAVOR_LIST);
-        }
-
-        p.eat(T![')']);
+        p.expect(T![')']);
 
         m.complete(p, GRIT_LANGUAGE_FLAVOR);
     }
@@ -201,6 +181,39 @@ fn parse_language_declaration(p: &mut GritParser) -> ParsedSyntax {
             GRIT_BOGUS_LANGUAGE_DECLARATION
         },
     ))
+}
+
+pub(crate) struct LanguageFlavorList;
+
+impl ParseSeparatedList for LanguageFlavorList {
+    type Kind = GritSyntaxKind;
+    type Parser<'source> = GritParser<'source>;
+
+    const LIST_KIND: Self::Kind = GRIT_LANGUAGE_FLAVOR_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_language_flavor_kind(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![')'])
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> biome_parser::parse_recovery::RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_LANGUAGE_FLAVOR_KIND, ARG_LIST_RECOVERY_SET),
+            expected_language_flavor,
+        )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
 }
 
 fn parse_language_name(p: &mut GritParser) -> ParsedSyntax {
@@ -298,7 +311,7 @@ impl ParseSeparatedList for VariableList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(token_set!(T![')']))
+        p.at(T![')'])
     }
 
     fn recover(

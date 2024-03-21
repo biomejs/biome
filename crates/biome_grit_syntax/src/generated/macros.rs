@@ -420,6 +420,11 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::GritBogusLanguageDeclaration::new_unchecked(node) };
                     $body
                 }
+                $crate::GritSyntaxKind::GRIT_BOGUS_LANGUAGE_FLAVOR_KIND => {
+                    let $pattern =
+                        unsafe { $crate::GritBogusLanguageFlavorKind::new_unchecked(node) };
+                    $body
+                }
                 $crate::GritSyntaxKind::GRIT_BOGUS_LITERAL => {
                     let $pattern = unsafe { $crate::GritBogusLiteral::new_unchecked(node) };
                     $body

@@ -42,6 +42,7 @@ GritBogusContainer = SyntaxElement*
 GritBogusDefinition = SyntaxElement*
 GritBogusPattern = SyntaxElement*
 GritBogusLanguageDeclaration = SyntaxElement*
+GritBogusLanguageFlavorKind = SyntaxElement*
 GritBogusLiteral = SyntaxElement*
 GritBogusNamedArg = SyntaxElement*
 GritBogusPredicate = SyntaxElement*
@@ -77,7 +78,12 @@ GritLanguageDeclaration =
 // language js(typescript, jsx);
 //            ^^^^^^^^^^^^ ^^^^
 GritLanguageFlavor = '(' flavors: GritLanguageFlavorList ')'
-GritLanguageFlavorList = GritLanguageFlavorKind (',' GritLanguageFlavorKind)* ','?
+GritLanguageFlavorList = AnyGritLanguageFlavorKind (',' AnyGritLanguageFlavorKind)* ','?
+
+AnyGritLanguageFlavorKind =
+    GritLanguageFlavorKind
+    | GritBogusLanguageFlavorKind
+
 GritLanguageFlavorKind =
     flavor_kind: (
         // JavaScript flavors:

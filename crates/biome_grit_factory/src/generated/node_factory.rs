@@ -1523,7 +1523,7 @@ where
 }
 pub fn grit_language_flavor_list<I, S>(items: I, separators: S) -> GritLanguageFlavorList
 where
-    I: IntoIterator<Item = GritLanguageFlavorKind>,
+    I: IntoIterator<Item = AnyGritLanguageFlavorKind>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = GritSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -1702,6 +1702,16 @@ where
 {
     GritBogusLanguageDeclaration::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_BOGUS_LANGUAGE_DECLARATION,
+        slots,
+    ))
+}
+pub fn grit_bogus_language_flavor_kind<I>(slots: I) -> GritBogusLanguageFlavorKind
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GritBogusLanguageFlavorKind::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BOGUS_LANGUAGE_FLAVOR_KIND,
         slots,
     ))
 }

@@ -910,7 +910,7 @@ fn parse_regex_pattern(p: &mut GritParser) -> ParsedSyntax {
         m.complete(p, GRIT_REGEX_LITERAL);
     } else {
         let m = p.start();
-        p.bump(GRIT_SNIPPET_REGEX);
+        p.expect(GRIT_SNIPPET_REGEX);
         m.complete(p, GRIT_SNIPPET_REGEX_LITERAL);
     }
 

@@ -4428,6 +4428,26 @@ impl AnyGritLanguageDeclaration {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyGritLanguageFlavorKind {
+    GritBogusLanguageFlavorKind(GritBogusLanguageFlavorKind),
+    GritLanguageFlavorKind(GritLanguageFlavorKind),
+}
+impl AnyGritLanguageFlavorKind {
+    pub fn as_grit_bogus_language_flavor_kind(&self) -> Option<&GritBogusLanguageFlavorKind> {
+        match &self {
+            AnyGritLanguageFlavorKind::GritBogusLanguageFlavorKind(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_grit_language_flavor_kind(&self) -> Option<&GritLanguageFlavorKind> {
+        match &self {
+            AnyGritLanguageFlavorKind::GritLanguageFlavorKind(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyGritListAccessorSubject {
     AnyGritContainer(AnyGritContainer),
     GritList(GritList),
@@ -9681,6 +9701,77 @@ impl From<AnyGritLanguageDeclaration> for SyntaxElement {
         node.into()
     }
 }
+impl From<GritBogusLanguageFlavorKind> for AnyGritLanguageFlavorKind {
+    fn from(node: GritBogusLanguageFlavorKind) -> AnyGritLanguageFlavorKind {
+        AnyGritLanguageFlavorKind::GritBogusLanguageFlavorKind(node)
+    }
+}
+impl From<GritLanguageFlavorKind> for AnyGritLanguageFlavorKind {
+    fn from(node: GritLanguageFlavorKind) -> AnyGritLanguageFlavorKind {
+        AnyGritLanguageFlavorKind::GritLanguageFlavorKind(node)
+    }
+}
+impl AstNode for AnyGritLanguageFlavorKind {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        GritBogusLanguageFlavorKind::KIND_SET.union(GritLanguageFlavorKind::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            GRIT_BOGUS_LANGUAGE_FLAVOR_KIND | GRIT_LANGUAGE_FLAVOR_KIND
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            GRIT_BOGUS_LANGUAGE_FLAVOR_KIND => {
+                AnyGritLanguageFlavorKind::GritBogusLanguageFlavorKind(
+                    GritBogusLanguageFlavorKind { syntax },
+                )
+            }
+            GRIT_LANGUAGE_FLAVOR_KIND => {
+                AnyGritLanguageFlavorKind::GritLanguageFlavorKind(GritLanguageFlavorKind { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyGritLanguageFlavorKind::GritBogusLanguageFlavorKind(it) => &it.syntax,
+            AnyGritLanguageFlavorKind::GritLanguageFlavorKind(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyGritLanguageFlavorKind::GritBogusLanguageFlavorKind(it) => it.syntax,
+            AnyGritLanguageFlavorKind::GritLanguageFlavorKind(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyGritLanguageFlavorKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyGritLanguageFlavorKind::GritBogusLanguageFlavorKind(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyGritLanguageFlavorKind::GritLanguageFlavorKind(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyGritLanguageFlavorKind> for SyntaxNode {
+    fn from(n: AnyGritLanguageFlavorKind) -> SyntaxNode {
+        match n {
+            AnyGritLanguageFlavorKind::GritBogusLanguageFlavorKind(it) => it.into(),
+            AnyGritLanguageFlavorKind::GritLanguageFlavorKind(it) => it.into(),
+        }
+    }
+}
+impl From<AnyGritLanguageFlavorKind> for SyntaxElement {
+    fn from(n: AnyGritLanguageFlavorKind) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<GritList> for AnyGritListAccessorSubject {
     fn from(node: GritList) -> AnyGritListAccessorSubject {
         AnyGritListAccessorSubject::GritList(node)
@@ -11344,6 +11435,11 @@ impl std::fmt::Display for AnyGritLanguageDeclaration {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyGritLanguageFlavorKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyGritListAccessorSubject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -12114,6 +12210,63 @@ impl From<GritBogusLanguageDeclaration> for SyntaxElement {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct GritBogusLanguageFlavorKind {
+    syntax: SyntaxNode,
+}
+impl GritBogusLanguageFlavorKind {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for GritBogusLanguageFlavorKind {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_BOGUS_LANGUAGE_FLAVOR_KIND as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_BOGUS_LANGUAGE_FLAVOR_KIND
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritBogusLanguageFlavorKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritBogusLanguageFlavorKind")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<GritBogusLanguageFlavorKind> for SyntaxNode {
+    fn from(n: GritBogusLanguageFlavorKind) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritBogusLanguageFlavorKind> for SyntaxElement {
+    fn from(n: GritBogusLanguageFlavorKind) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GritBogusLiteral {
     syntax: SyntaxNode,
 }
@@ -12535,7 +12688,7 @@ impl Serialize for GritLanguageFlavorList {
 }
 impl AstSeparatedList for GritLanguageFlavorList {
     type Language = Language;
-    type Node = GritLanguageFlavorKind;
+    type Node = AnyGritLanguageFlavorKind;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -12550,15 +12703,15 @@ impl Debug for GritLanguageFlavorList {
     }
 }
 impl IntoIterator for GritLanguageFlavorList {
-    type Item = SyntaxResult<GritLanguageFlavorKind>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, GritLanguageFlavorKind>;
+    type Item = SyntaxResult<AnyGritLanguageFlavorKind>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyGritLanguageFlavorKind>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for &GritLanguageFlavorList {
-    type Item = SyntaxResult<GritLanguageFlavorKind>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, GritLanguageFlavorKind>;
+    type Item = SyntaxResult<AnyGritLanguageFlavorKind>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyGritLanguageFlavorKind>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
