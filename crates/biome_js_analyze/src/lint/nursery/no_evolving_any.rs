@@ -6,8 +6,8 @@ declare_rule! {
     /// Disallow variables from evolving into `any` type through reassignments.
     ///
     /// In TypeScript, variables without explicit type annotations can evolve their types based on subsequent assignments.
-    /// This behavior can accidentally lead to variables with an `any` type, weakening type safety.
-    /// Just like the `any` type, evolved `any` types disable many type checking rules and should be avoided to maintain strong type safety.
+    /// This behaviour can accidentally lead to variables with an `any` type, weakening type safety.
+    /// Just like the `any` type, evolved `any` types disable many type-checking rules and should be avoided to maintain strong type safety.
     /// This rule prevents such cases by ensuring variables do not evolve into `any` type, encouraging explicit type annotations and controlled type evolutions.
     ///
     /// ## Examples
@@ -30,13 +30,15 @@ declare_rule! {
     /// ### Valid
     ///
     /// ```ts
-    /// var a = 1;
-    /// let a:number;
-    /// var b:number;
-    /// var b = 10;
-    /// let a = 'hello';
-    /// const b = ['hello'];
-    /// const c = null;
+    /// let a: number;
+    /// let b = 1;
+    /// var c : string;
+    /// var d = "abn";
+    /// const e: never[] = [];
+    /// const f = [null];
+    /// const g = ['1'];
+    /// const h = [1];
+    /// let workspace: Workspace | null = null;
     /// ```
     ///
     pub NoEvolvingAny {
@@ -110,11 +112,11 @@ impl Rule for NoEvolvingAny {
                 rule_category!(),
                 variable.text_trimmed_range(),
                 markup! {
-                    "This variable's type is allowed to evolve implicitly, leading to potential "<Emphasis>"any"</Emphasis>" types."
+                    "This variable's type is not allowed to evolve implicitly, leading to potential "<Emphasis>"any"</Emphasis>" types."
                 },
             )
             .note(markup! {
-                "Variable's type may evolve, leading to "<Emphasis>"any"</Emphasis>". Use explicit type or initialization. Specify an explicit type or initial value to avoid implicit type evolution."
+                "The variable's type may evolve, leading to "<Emphasis>"any"</Emphasis>". Use explicit type or initialization. Specifying an explicit type or initial value to avoid implicit type evolution."
             }),
         )
     }
