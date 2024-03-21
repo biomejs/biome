@@ -35,7 +35,7 @@ pub(crate) const PATTERN_UNTIL_RECOVERY_SET: TokenSet<GritSyntaxKind> =
     token_set!(T![')'], T!['}'], UNTIL_KW, EOF);
 
 pub(crate) const PREDICATE_RECOVERY_SET: TokenSet<GritSyntaxKind> =
-    token_set!(T![')'], T!['}'], ELSE_KW);
+    token_set!(T![')'], T!['}'], T![,], ELSE_KW);
 
 // Other sets.
 pub(crate) const BOOLEAN_VALUE_SET: TokenSet<GritSyntaxKind> = token_set![TRUE_KW, FALSE_KW];

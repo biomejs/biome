@@ -6,6 +6,7 @@ use super::{parse_not, GritParser};
 use crate::constants::*;
 use biome_grit_syntax::GritSyntaxKind::{self, *};
 use biome_grit_syntax::T;
+use biome_parser::diagnostic::expected_node;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::{ParsedSyntax::*, *};
@@ -100,9 +101,20 @@ fn parse_infix_predicate(p: &mut GritParser) -> ParsedSyntax {
         Accumulate | Equal | Greater | GreaterEqual | Less | LessEqual | NotEqual | Rewrite
             if subject.kind(p) != GRIT_VARIABLE =>
         {
+            p.error(
+                ParseDiagnostic::new("Expected a variable.", subject.range(p))
+                    .with_detail(p.cur_range(), "This operator only works on variables."),
+            );
             subject.change_to_bogus(p);
         }
         Assignment if !CONTAINER_SET.contains(subject.kind(p)) => {
+            p.error(
+                ParseDiagnostic::new("Expected a variable or container.", subject.range(p))
+                    .with_detail(
+                        p.cur_range(),
+                        "Assignment only works on variables and containers.",
+                    ),
+            );
             subject.change_to_bogus(p);
         }
         _ => {}
@@ -279,10 +291,19 @@ impl ParseSeparatedList for PredicateList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> biome_parser::parse_recovery::RecoveryResult {
+        let current_token = p.cur();
+        let current_range = p.cur_range();
         parsed_element.or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(GRIT_BOGUS_PREDICATE, PREDICATE_RECOVERY_SET),
-            expected_predicate,
+            |p, range| {
+                if current_token == GRIT_NAME {
+                    ParseDiagnostic::new("Expected a predicate here.", range)
+                        .with_detail(current_range, "Should this be a variable?")
+                } else {
+                    expected_node("predicate", range, p)
+                }
+            },
         )
     }
 

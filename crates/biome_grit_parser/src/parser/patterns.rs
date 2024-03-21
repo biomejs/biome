@@ -98,7 +98,7 @@ fn parse_pattern_non_greedy(p: &mut GritParser) -> ParsedSyntax {
         BEFORE_KW => parse_pattern_before(p),
         WITHIN_KW => parse_pattern_within(p),
         BUBBLE_KW => parse_bubble(p),
-        GRIT_NAME => parse_node_like(p),
+        GRIT_NAME if p.lookahead() == T!['('] => parse_node_like(p),
         T![.] => parse_dot(p),
         SOME_KW => parse_some(p),
         EVERY_KW => parse_every(p),
@@ -180,7 +180,8 @@ pub(crate) fn parse_container(p: &mut GritParser) -> ParsedSyntax {
     let left = match p.cur() {
         GRIT_VARIABLE => parse_variable(p),
         T!['{'] => parse_map(p),
-        GRIT_NAME | T!['['] => parse_list(p),
+        GRIT_NAME if p.lookahead() == T!['['] => parse_list(p),
+        T!['['] => parse_list(p),
         _ => Absent,
     };
 

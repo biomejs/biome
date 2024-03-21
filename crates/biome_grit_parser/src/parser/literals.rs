@@ -18,7 +18,8 @@ pub(crate) fn parse_literal(p: &mut GritParser) -> ParsedSyntax {
         GRIT_STRING => parse_string_literal(p),
         UNDEFINED_KW => parse_undefined_literal(p),
         T!['{'] => parse_map(p),
-        GRIT_NAME | T!['['] => parse_list(p),
+        GRIT_NAME if p.lookahead() == T!['['] => parse_list(p),
+        T!['['] => parse_list(p),
         kind if CODE_SNIPPET_SET.contains(kind) => parse_code_snippet(p),
         _ => Absent,
     }
