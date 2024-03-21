@@ -1,0 +1,4 @@
+`const capital = $val` where {
+  $capitals = { england: `london`, $val: `paris` },
+  $val => $capitals.england,
+}

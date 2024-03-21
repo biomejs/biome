@@ -4604,6 +4604,26 @@ impl AnyGritMapAccessorSubject {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyGritMapElement {
+    GritBogusMapElement(GritBogusMapElement),
+    GritMapElement(GritMapElement),
+}
+impl AnyGritMapElement {
+    pub fn as_grit_bogus_map_element(&self) -> Option<&GritBogusMapElement> {
+        match &self {
+            AnyGritMapElement::GritBogusMapElement(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_grit_map_element(&self) -> Option<&GritMapElement> {
+        match &self {
+            AnyGritMapElement::GritMapElement(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyGritMapKey {
     GritName(GritName),
     GritVariable(GritVariable),
@@ -10191,6 +10211,68 @@ impl From<AnyGritMapAccessorSubject> for SyntaxElement {
         node.into()
     }
 }
+impl From<GritBogusMapElement> for AnyGritMapElement {
+    fn from(node: GritBogusMapElement) -> AnyGritMapElement {
+        AnyGritMapElement::GritBogusMapElement(node)
+    }
+}
+impl From<GritMapElement> for AnyGritMapElement {
+    fn from(node: GritMapElement) -> AnyGritMapElement {
+        AnyGritMapElement::GritMapElement(node)
+    }
+}
+impl AstNode for AnyGritMapElement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        GritBogusMapElement::KIND_SET.union(GritMapElement::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, GRIT_BOGUS_MAP_ELEMENT | GRIT_MAP_ELEMENT)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            GRIT_BOGUS_MAP_ELEMENT => {
+                AnyGritMapElement::GritBogusMapElement(GritBogusMapElement { syntax })
+            }
+            GRIT_MAP_ELEMENT => AnyGritMapElement::GritMapElement(GritMapElement { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyGritMapElement::GritBogusMapElement(it) => &it.syntax,
+            AnyGritMapElement::GritMapElement(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyGritMapElement::GritBogusMapElement(it) => it.syntax,
+            AnyGritMapElement::GritMapElement(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyGritMapElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyGritMapElement::GritBogusMapElement(it) => std::fmt::Debug::fmt(it, f),
+            AnyGritMapElement::GritMapElement(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyGritMapElement> for SyntaxNode {
+    fn from(n: AnyGritMapElement) -> SyntaxNode {
+        match n {
+            AnyGritMapElement::GritBogusMapElement(it) => it.into(),
+            AnyGritMapElement::GritMapElement(it) => it.into(),
+        }
+    }
+}
+impl From<AnyGritMapElement> for SyntaxElement {
+    fn from(n: AnyGritMapElement) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<GritName> for AnyGritMapKey {
     fn from(node: GritName) -> AnyGritMapKey {
         AnyGritMapKey::GritName(node)
@@ -11465,6 +11547,11 @@ impl std::fmt::Display for AnyGritMapAccessorSubject {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyGritMapElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyGritMapKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -12324,6 +12411,63 @@ impl From<GritBogusLiteral> for SyntaxElement {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct GritBogusMapElement {
+    syntax: SyntaxNode,
+}
+impl GritBogusMapElement {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for GritBogusMapElement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_BOGUS_MAP_ELEMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_BOGUS_MAP_ELEMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritBogusMapElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritBogusMapElement")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<GritBogusMapElement> for SyntaxNode {
+    fn from(n: GritBogusMapElement) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritBogusMapElement> for SyntaxElement {
+    fn from(n: GritBogusMapElement) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GritBogusNamedArg {
     syntax: SyntaxNode,
 }
@@ -12854,7 +12998,7 @@ impl Serialize for GritMapElementList {
 }
 impl AstSeparatedList for GritMapElementList {
     type Language = Language;
-    type Node = GritMapElement;
+    type Node = AnyGritMapElement;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -12869,15 +13013,15 @@ impl Debug for GritMapElementList {
     }
 }
 impl IntoIterator for GritMapElementList {
-    type Item = SyntaxResult<GritMapElement>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, GritMapElement>;
+    type Item = SyntaxResult<AnyGritMapElement>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyGritMapElement>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for &GritMapElementList {
-    type Item = SyntaxResult<GritMapElement>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, GritMapElement>;
+    type Item = SyntaxResult<AnyGritMapElement>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyGritMapElement>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

@@ -223,7 +223,7 @@ impl ParseSeparatedList for MapElementList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(GRIT_BOGUS_PATTERN, ELEMENT_LIST_RECOVERY_SET),
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_MAP_ELEMENT, ELEMENT_LIST_RECOVERY_SET),
             expected_map_element,
         )
     }

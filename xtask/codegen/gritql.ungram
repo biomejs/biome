@@ -40,11 +40,12 @@ SyntaxElement = SyntaxElement
 GritBogus = SyntaxElement*
 GritBogusContainer = SyntaxElement*
 GritBogusDefinition = SyntaxElement*
-GritBogusPattern = SyntaxElement*
+GritBogusMapElement = SyntaxElement*
 GritBogusLanguageDeclaration = SyntaxElement*
 GritBogusLanguageFlavorKind = SyntaxElement*
 GritBogusLiteral = SyntaxElement*
 GritBogusNamedArg = SyntaxElement*
+GritBogusPattern = SyntaxElement*
 GritBogusPredicate = SyntaxElement*
 GritBogusVersion = SyntaxElement*
 
@@ -294,7 +295,11 @@ GritMap =
     elements: GritMapElementList
     '}'
 
-GritMapElementList = GritMapElement (',' GritMapElement)* ','?
+GritMapElementList = AnyGritMapElement (',' AnyGritMapElement)* ','?
+
+AnyGritMapElement =
+    GritMapElement
+    | GritBogusMapElement
 
 // { key: `pattern` }
 //   ^^^^ ^^^^^^^^^

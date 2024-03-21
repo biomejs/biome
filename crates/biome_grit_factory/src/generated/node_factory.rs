@@ -1565,7 +1565,7 @@ where
 }
 pub fn grit_map_element_list<I, S>(items: I, separators: S) -> GritMapElementList
 where
-    I: IntoIterator<Item = GritMapElement>,
+    I: IntoIterator<Item = AnyGritMapElement>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = GritSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -1722,6 +1722,16 @@ where
 {
     GritBogusLiteral::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_BOGUS_LITERAL,
+        slots,
+    ))
+}
+pub fn grit_bogus_map_element<I>(slots: I) -> GritBogusMapElement
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GritBogusMapElement::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BOGUS_MAP_ELEMENT,
         slots,
     ))
 }
