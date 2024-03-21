@@ -38,7 +38,8 @@ declare_rule! {
     ///     "//": "...",
     ///     "options": {
     ///         "strictCase": false,
-    ///         "enumMemberCase": ["camelCase", "export"]
+    ///         "requireAscii": true,
+    ///         "filenameCases": ["camelCase", "export"]
     ///     }
     /// }
     /// ```
@@ -252,7 +253,7 @@ pub struct FilenamingConventionOptions {
     #[serde(default, skip_serializing_if = "is_default")]
     pub require_ascii: bool,
 
-    /// Allowed cases for _TypeScript_ `enum` member names.
+    /// Allowed cases for file names.
     #[serde(default, skip_serializing_if = "is_default_filename_cases")]
     pub filename_cases: FilenameCases,
 }
@@ -328,7 +329,7 @@ impl biome_deserialize::Deserializable for FilenameCases {
     }
 }
 
-/// Supported cases for TypeScript `enum` member names.
+/// Supported cases for file names.
 #[derive(Clone, Copy, Debug, Deserialize, Deserializable, Eq, Hash, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 pub enum FilenameCase {
