@@ -10,7 +10,7 @@ use crate::execute::traverse::traverse;
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
-use biome_service::workspace::{FeatureName, FixFileMode};
+use biome_service::workspace::{FeatureName, FeaturesBuilder, FixFileMode};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
@@ -28,10 +28,21 @@ pub(crate) struct Execution {
 }
 
 impl Execution {
-    pub(crate) fn as_feature_name(&self) -> FeatureName {
+    pub(crate) fn to_features(&self) -> Vec<FeatureName> {
         match self.traversal_mode {
-            TraversalMode::Format { .. } => FeatureName::Format,
-            _ => FeatureName::Lint,
+            TraversalMode::Format { .. } => FeaturesBuilder::new()
+                .with_formatter()
+                .build(),
+            TraversalMode::Lint { ..} => FeaturesBuilder::new()
+                .with_linter()
+                .build(),
+            TraversalMode::Check { .. } | TraversalMode::CI { .. } => FeaturesBuilder::new()
+                .with_organize_imports()
+                .with_formatter()
+                .with_linter()
+                .build(),
+            TraversalMode::Migrate { .. } => vec![]
+
         }
     }
 }

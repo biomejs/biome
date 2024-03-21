@@ -243,14 +243,22 @@ impl WorkspaceServer {
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
     /// or in the feature `ignore`/`include`
-    fn is_ignored(&self, path: &Path, feature: FeatureName) -> bool {
+    fn is_ignored(&self, path: &Path, features: Vec<FeatureName>) -> bool {
         let file_name = path.file_name().and_then(|s| s.to_str());
+        let ignored_by_features = {
+          let mut ignored = false;
+            for feature in features {
+                // a path is ignored if it's ignored by all features
+               ignored &= self.is_ignored_by_feature_config(path, feature)
+            }
+            ignored
+        };
         // Never ignore Biome's config file regardless `include`/`ignore`
         (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
             // Apply top-level `include`/`ignore`
             (self.is_ignored_by_top_level_config(path) ||
                 // Apply feature-level `include`/`ignore`
-                self.is_ignored_by_feature_config(path, feature))
+                ignored_by_features)
     }
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
@@ -363,7 +371,7 @@ impl Workspace for WorkspaceServer {
         }
     }
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        Ok(self.is_ignored(params.biome_path.as_path(), params.feature))
+        Ok(self.is_ignored(params.biome_path.as_path(), params.features))
     }
     /// Update the global settings for this workspace
     ///

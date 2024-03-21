@@ -659,7 +659,7 @@ impl RageEntry {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IsPathIgnoredParams {
     pub biome_path: BiomePath,
-    pub feature: FeatureName,
+    pub features: Vec<FeatureName>,
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {

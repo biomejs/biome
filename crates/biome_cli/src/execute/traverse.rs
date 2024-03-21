@@ -702,7 +702,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
                 .workspace
                 .is_path_ignored(IsPathIgnoredParams {
                     biome_path: biome_path.clone(),
-                    feature: self.execution.as_feature_name(),
+                    features: self.execution.to_features(),
                 })
                 .unwrap_or_else(|err| {
                     self.push_diagnostic(err.into());
