@@ -65,8 +65,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Correctly resolve external `extends` configs. Contributed by @Sec-ant
 
-### Parser
-
 ## 1.6.1 (2024-03-12)
 
 ### CLI
