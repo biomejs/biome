@@ -8,32 +8,27 @@ use biome_analyze::{
 };
 use biome_aria::{AriaProperties, AriaRoles};
 use biome_diagnostics::{category, Diagnostic, Error as DiagnosticError};
-use biome_js_syntax::suppression::SuppressionDiagnostic;
-use biome_js_syntax::{suppression::parse_suppression_comment, JsFileSource, JsLanguage};
+use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_project::PackageJson;
+use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::{borrow::Cow, error::Error};
 
-pub mod analyzers;
-pub mod aria_analyzers;
-mod aria_services;
 mod assists;
 mod ast_utils;
-mod control_flow;
 pub mod globals;
-mod manifest_services;
+pub mod lint;
 pub mod options;
 mod react;
 mod registry;
-mod semantic_analyzers;
-mod semantic_services;
+mod services;
 mod suppression_action;
 mod syntax;
 pub mod utils;
 
-pub use crate::control_flow::ControlFlowGraph;
 pub use crate::registry::visit_registry;
+pub use crate::services::control_flow::ControlFlowGraph;
 
 pub(crate) type JsRuleAction = RuleAction<JsLanguage>;
 
@@ -241,8 +236,8 @@ mod tests {
     use biome_js_syntax::{JsFileSource, TextRange, TextSize};
     use std::slice;
 
+    use crate::lint::correctness::use_exhaustive_dependencies::{Hook, HooksOptions};
     use crate::react::hooks::StableHookResult;
-    use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::{Hook, HooksOptions};
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
     // #[ignore]

@@ -20,7 +20,6 @@ pub mod numbers;
 pub mod parameter_ext;
 pub mod static_value;
 pub mod stmt_ext;
-pub mod suppression;
 mod syntax_node;
 pub mod type_ext;
 mod union_ext;

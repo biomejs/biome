@@ -1,7 +1,7 @@
 // Generated file, do not edit by hand, see `xtask/codegen`
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
-	feature: FeatureName[];
+	features: FeatureName[];
 	path: BiomePath;
 }
 export type FeatureName = "Format" | "Lint" | "OrganizeImports";
@@ -1604,7 +1604,7 @@ export interface ConsistentArrayTypeOptions {
  */
 export interface FilenamingConventionOptions {
 	/**
-	 * Allowed cases for _TypeScript_ `enum` member names.
+	 * Allowed cases for file names.
 	 */
 	filenameCases: FilenameCases;
 	/**
@@ -1667,7 +1667,7 @@ export type FilenameCases = FilenameCase[];
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
 export type StableHookResult = "None" | "Identity" | { Indices: number[] };
 /**
- * Supported cases for TypeScript `enum` member names.
+ * Supported cases for file names.
  */
 export type FilenameCase =
 	| "camelCase"
@@ -1705,8 +1705,8 @@ export interface JsFileSource {
 	version: LanguageVersion;
 }
 export interface JsonFileSource {
-	allow_trailing_comma: boolean;
-	variant: JsonVariant;
+	allow_comments: boolean;
+	allow_trailing_commas: boolean;
 }
 export interface CssFileSource {
 	variant: CssVariant;
@@ -1726,7 +1726,6 @@ export type LanguageVariant = "Standard" | "StandardRestricted" | "Jsx";
 Defaults to the latest stable ECMAScript standard. 
 	 */
 export type LanguageVersion = "ES2022" | "ESNext";
-export type JsonVariant = "Standard" | "Jsonc";
 /**
 	* The style of CSS contained in the file.
 

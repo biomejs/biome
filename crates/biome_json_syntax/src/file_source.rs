@@ -6,50 +6,42 @@ use std::path::Path;
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
 pub struct JsonFileSource {
-    variant: JsonVariant,
-    allow_trailing_comma: bool,
-}
-
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[derive(
-    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
-)]
-enum JsonVariant {
-    #[default]
-    Standard,
-    Jsonc,
+    allow_trailing_commas: bool,
+    allow_comments: bool,
 }
 
 impl JsonFileSource {
     pub fn json() -> Self {
         Self {
-            variant: JsonVariant::Standard,
-            allow_trailing_comma: false,
+            allow_trailing_commas: false,
+            allow_comments: false,
         }
     }
 
-    pub fn jsonc() -> Self {
-        Self {
-            variant: JsonVariant::Jsonc,
-            allow_trailing_comma: false,
-        }
-    }
-
-    pub fn with_trailing_comma(mut self, option_value: bool) -> Self {
-        self.allow_trailing_comma = option_value;
+    pub fn with_trailing_commas(mut self, option_value: bool) -> Self {
+        self.allow_trailing_commas = option_value;
         self
     }
 
-    pub fn set_allow_trailing_comma(&mut self, option_value: bool) {
-        self.allow_trailing_comma = option_value;
+    pub fn set_allow_trailing_commas(&mut self, option_value: bool) {
+        self.allow_trailing_commas = option_value;
     }
 
-    pub fn allows_trailing_comma(&self) -> bool {
-        self.allow_trailing_comma
+    pub fn get_allow_trailing_commas(&self) -> bool {
+        self.allow_trailing_commas
     }
 
-    pub const fn is_jsonc(&self) -> bool {
-        matches!(self.variant, JsonVariant::Jsonc)
+    pub fn with_comments(mut self, option_value: bool) -> Self {
+        self.allow_comments = option_value;
+        self
+    }
+
+    pub fn set_allow_comments(&mut self, option_value: bool) {
+        self.allow_comments = option_value;
+    }
+
+    pub fn get_allow_comments(&self) -> bool {
+        self.allow_comments
     }
 }
 
@@ -83,7 +75,7 @@ fn compute_source_type_from_path_or_extension(
     } else {
         match extension {
             "json" => JsonFileSource::json(),
-            "jsonc" => JsonFileSource::jsonc(),
+            "jsonc" => JsonFileSource::json().with_comments(true),
             _ => {
                 return Err(FileSourceError::UnknownExtension(
                     file_name.into(),
