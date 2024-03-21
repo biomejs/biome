@@ -12,7 +12,7 @@ pub(crate) fn expected_definition(p: &GritParser, range: TextRange) -> ParseDiag
 
 pub(crate) fn expected_engine_version(p: &GritParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Expected an engine version.", range)
-        .with_hint("Add a version between parentheses. For example: `(1.0)`")
+        .with_hint("Add a version between parentheses. For example: '(1.0)'")
 }
 
 pub(crate) fn expected_int_literal(p: &GritParser, range: TextRange) -> ParseDiagnostic {
@@ -27,6 +27,15 @@ pub(crate) fn expected_language_name(p: &GritParser, range: TextRange) -> ParseD
 pub(crate) fn expected_language_flavor(p: &GritParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Unexpected language flavor.", range)
         .with_alternatives("Expected one of:", SUPPORTED_LANGUAGE_FLAVOR_SET_STR)
+}
+
+pub(crate) fn expected_list_pattern(p: &GritParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("pattern or '...'", range, p)
+}
+
+pub(crate) fn expected_map_element(p: &GritParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected a map element.", range)
+        .with_hint("Map elements consist of a name, followed by a colon and a pattern.")
 }
 
 pub(crate) fn expected_node_arg(p: &GritParser, range: TextRange) -> ParseDiagnostic {

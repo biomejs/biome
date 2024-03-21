@@ -50,6 +50,6 @@ missing_version.grit:1:13 parse ━━━━━━━━━━━━━━━━
       │             
     2 │ 
   
-  i Add a version between parentheses. For example: `(1.0)`
+  i Add a version between parentheses. For example: '(1.0)'
   
 ```

@@ -1,11 +1,12 @@
-use super::parse_error::expected_pattern;
+use super::parse_error::{expected_list_pattern, expected_map_element, expected_pattern};
 use super::parse_name;
 use super::patterns::{parse_maybe_curly_pattern, parse_pattern};
 use super::GritParser;
 use crate::constants::*;
-use biome_grit_syntax::GritSyntaxKind::*;
+use biome_grit_syntax::GritSyntaxKind::{self, *};
 use biome_grit_syntax::T;
-use biome_parser::parse_recovery::ParseRecoveryTokenSet;
+use biome_parser::parse_lists::ParseSeparatedList;
+use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::{ParsedSyntax::*, *};
 
 pub(crate) fn parse_literal(p: &mut GritParser) -> ParsedSyntax {
@@ -132,23 +133,47 @@ pub(crate) fn parse_list(p: &mut GritParser) -> ParsedSyntax {
 
     p.expect(T!['[']);
 
-    parse_list_pattern_list(p).ok();
+    ListPatternList.parse_list(p);
 
     p.expect(T![']']);
     Present(m.complete(p, GRIT_LIST))
 }
 
-#[inline]
-fn parse_list_pattern_list(p: &mut GritParser) -> ParsedSyntax {
-    let m = p.start();
+struct ListPatternList;
 
-    loop {
-        if parse_list_pattern(p) == Absent || !p.eat(T![,]) {
-            break;
-        }
+impl ParseSeparatedList for ListPatternList {
+    type Kind = GritSyntaxKind;
+    type Parser<'source> = GritParser<'source>;
+
+    const LIST_KIND: Self::Kind = GRIT_LIST_PATTERN_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_list_pattern(p)
     }
 
-    Present(m.complete(p, GRIT_LIST_PATTERN_LIST))
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![']'])
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_PATTERN, PATTERN_LIST_RECOVERY_SET),
+            expected_list_pattern,
+        )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
+    }
 }
 
 #[inline]
@@ -169,23 +194,47 @@ pub(crate) fn parse_map(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T!['{']);
 
-    parse_map_element_list(p).ok();
+    MapElementList.parse_list(p);
 
     p.eat(T!['}']);
     Present(m.complete(p, GRIT_MAP))
 }
 
-#[inline]
-fn parse_map_element_list(p: &mut GritParser) -> ParsedSyntax {
-    let m = p.start();
+struct MapElementList;
 
-    loop {
-        if parse_map_element(p) == Absent || !p.eat(T![,]) {
-            break;
-        }
+impl ParseSeparatedList for MapElementList {
+    type Kind = GritSyntaxKind;
+    type Parser<'source> = GritParser<'source>;
+
+    const LIST_KIND: Self::Kind = GRIT_MAP_ELEMENT_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_map_element(p)
     }
 
-    Present(m.complete(p, GRIT_MAP_ELEMENT_LIST))
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T!['}'])
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_PATTERN, ELEMENT_LIST_RECOVERY_SET),
+            expected_map_element,
+        )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
+    }
 }
 
 #[inline]
@@ -196,8 +245,7 @@ fn parse_map_element(p: &mut GritParser) -> ParsedSyntax {
 
     let m = p.start();
     parse_name(p).ok();
-    p.eat(T![:]);
-
+    p.expect(T![:]);
     parse_pattern(p)
         .or_recover_with_token_set(
             p,
