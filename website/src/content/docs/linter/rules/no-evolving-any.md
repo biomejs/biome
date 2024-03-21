@@ -25,8 +25,6 @@ This rule prevents such cases by ensuring variables do not evolve into `any` typ
 
 ```ts
 let a;
-const b = [];
-let c = null;
 ```
 
 <pre class="language-text"><code class="language-text">nursery/noEvolvingAny.js:1:5 <a href="https://biomejs.dev/linter/rules/no-evolving-any">lint/nursery/noEvolvingAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -35,20 +33,39 @@ let c = null;
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>let a;
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
-    <strong>2 │ </strong>const b = [];
-    <strong>3 │ </strong>let c = null;
+    <strong>2 │ </strong>
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Variable's type may evolve, leading to </span><span style="color: lightgreen;"><strong>any</strong></span><span style="color: lightgreen;">. Use explicit type or initialization. Specify an explicit type or initial value to avoid implicit type evolution.</span>
   
-nursery/noEvolvingAny.js:2:7 <a href="https://biomejs.dev/linter/rules/no-evolving-any">lint/nursery/noEvolvingAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+</code></pre>
+
+```ts
+const b = [];
+```
+
+<pre class="language-text"><code class="language-text">nursery/noEvolvingAny.js:1:7 <a href="https://biomejs.dev/linter/rules/no-evolving-any">lint/nursery/noEvolvingAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable's type is allowed to evolve implicitly, leading to potential </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> types.</span>
   
-    <strong>1 │ </strong>let a;
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>const b = [];
-   <strong>   │ </strong>      <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>3 │ </strong>let c = null;
-    <strong>4 │ </strong>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>const b = [];
+   <strong>   │ </strong>      <strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Variable's type may evolve, leading to </span><span style="color: lightgreen;"><strong>any</strong></span><span style="color: lightgreen;">. Use explicit type or initialization. Specify an explicit type or initial value to avoid implicit type evolution.</span>
+  
+</code></pre>
+
+```ts
+let c = null;
+```
+
+<pre class="language-text"><code class="language-text">nursery/noEvolvingAny.js:1:5 <a href="https://biomejs.dev/linter/rules/no-evolving-any">lint/nursery/noEvolvingAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable's type is allowed to evolve implicitly, leading to potential </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> types.</span>
+  
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>let c = null;
+   <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Variable's type may evolve, leading to </span><span style="color: lightgreen;"><strong>any</strong></span><span style="color: lightgreen;">. Use explicit type or initialization. Specify an explicit type or initial value to avoid implicit type evolution.</span>
   
@@ -73,7 +90,7 @@ nursery/noEvolvingAny.js:7:7 <a href="https://biomejs.dev/linter/rules/no-evolvi
     <strong>5 │ </strong>let a = 'hello';
     <strong>6 │ </strong>const b = ['hello'];
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>7 │ </strong>const c = null;
-   <strong>   │ </strong>      <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+   <strong>   │ </strong>      <strong><span style="color: Tomato;">^</span></strong>
     <strong>8 │ </strong>
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Variable's type may evolve, leading to </span><span style="color: lightgreen;"><strong>any</strong></span><span style="color: lightgreen;">. Use explicit type or initialization. Specify an explicit type or initial value to avoid implicit type evolution.</span>

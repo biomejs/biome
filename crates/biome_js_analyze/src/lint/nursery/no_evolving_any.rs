@@ -16,7 +16,13 @@ declare_rule! {
     ///
     /// ```ts,expect_diagnostic
     /// let a;
+    /// ````
+    ///
+    /// ```ts,expect_diagnostic
     /// const b = [];
+    /// ````
+    ///
+    /// ```ts,expect_diagnostic
     /// let c = null;
     /// ````
     ///
@@ -102,7 +108,7 @@ impl Rule for NoEvolvingAny {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                variable.text_range(),
+                variable.text_trimmed_range(),
                 markup! {
                     "This variable's type is allowed to evolve implicitly, leading to potential "<Emphasis>"any"</Emphasis>" types."
                 },
