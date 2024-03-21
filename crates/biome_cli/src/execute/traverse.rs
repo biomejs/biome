@@ -713,7 +713,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
 
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             path: biome_path.clone(),
-            feature: self.execution.to_features(),
+            features: self.execution.to_features(),
         });
 
         let file_features = match file_features {

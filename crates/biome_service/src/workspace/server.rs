@@ -351,7 +351,7 @@ impl Workspace for WorkspaceServer {
                 } else if self.is_ignored_by_top_level_config(path) {
                     file_features.set_ignored_for_all_features();
                 } else {
-                    for feature in params.feature {
+                    for feature in params.features {
                         if self.is_ignored_by_feature_config(path, feature) {
                             file_features.ignored(feature);
                         }

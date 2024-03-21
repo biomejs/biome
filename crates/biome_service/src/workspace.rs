@@ -80,7 +80,7 @@ mod server;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SupportsFeatureParams {
     pub path: BiomePath,
-    pub feature: Vec<FeatureName>,
+    pub features: Vec<FeatureName>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]

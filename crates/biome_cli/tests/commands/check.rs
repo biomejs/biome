@@ -2799,7 +2799,7 @@ fn use_literal_keys_should_emit_correct_ast_issue_266() {
 }
 
 #[test]
-fn should_show_diagnostics_for_formatter_when_linter_ignores_folder() {
+fn should_show_formatter_diagnostics_for_files_ignored_by_linter() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -2840,7 +2840,7 @@ fn should_show_diagnostics_for_formatter_when_linter_ignores_folder() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "should_show_diagnostics_for_formatter_when_linter_ignores_folder",
+        "should_show_formatter_diagnostics_for_files_ignored_by_linter",
         fs,
         console,
         result,

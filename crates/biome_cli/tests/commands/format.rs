@@ -3463,7 +3463,7 @@ fn format_empty_svelte_ts_files_write() {
 }
 
 #[test]
-fn should_fix_file_ignored_by_linter_inside_folder() {
+fn should_format_files_in_folders_ignored_by_linter() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -3511,7 +3511,7 @@ fn should_fix_file_ignored_by_linter_inside_folder() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "should_fix_file_ignored_by_linter_inside_folder",
+        "should_format_files_in_folders_ignored_by_linter",
         fs,
         console,
         result,

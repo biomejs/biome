@@ -1,7 +1,7 @@
 // Generated file, do not edit by hand, see `xtask/codegen`
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
-	feature: FeatureName[];
+	features: FeatureName[];
 	path: BiomePath;
 }
 export type FeatureName = "Format" | "Lint" | "OrganizeImports";
