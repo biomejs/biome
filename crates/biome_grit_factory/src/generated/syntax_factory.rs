@@ -21,7 +21,8 @@ impl SyntaxFactory for GritSyntaxFactory {
             | GRIT_BOGUS_LITERAL
             | GRIT_BOGUS_NAMED_ARG
             | GRIT_BOGUS_PATTERN
-            | GRIT_BOGUS_PREDICATE => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
+            | GRIT_BOGUS_PREDICATE
+            | GRIT_BOGUS_VERSION => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
             GRIT_ADD_OPERATION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -2713,7 +2714,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             }
             GRIT_ROOT => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T![UNICODE_BOM] {
@@ -2723,7 +2724,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GritVersion::can_cast(element.kind()) {
+                    if AnyGritVersion::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2731,20 +2732,6 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if AnyGritLanguageDeclaration::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if GritDefinitionList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyGritPattern::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }

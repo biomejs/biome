@@ -45,15 +45,18 @@ GritBogusLanguageDeclaration = SyntaxElement*
 GritBogusLiteral = SyntaxElement*
 GritBogusNamedArg = SyntaxElement*
 GritBogusPredicate = SyntaxElement*
+GritBogusVersion = SyntaxElement*
 
 GritRoot =
     bom: 'UNICODE_BOM'?
-    version: GritVersion?
+    version: AnyGritVersion?
     language: AnyGritLanguageDeclaration?
     definitions: GritDefinitionList
-    pattern: AnyGritPattern?
-    definitions_continued: GritDefinitionList
     eof: 'EOF'
+
+AnyGritVersion =
+    GritVersion
+    | GritBogusVersion
 
 // engine biome(1.0)
 // ^^^^^^ ^^^^^^^^^^
@@ -501,6 +504,9 @@ AnyGritDefinition =
     GritPatternDefinition
     | GritPredicateDefinition
     | GritFunctionDefinition
+    | AnyGritPattern // This is not allowed by the GritQL reference grammar, but
+                     // we let the parser verify there is only a single pattern
+                     // between the definitions.
     | GritBogusDefinition
 
 GritDefinitionList = AnyGritDefinition ('newline' AnyGritDefinition)* 'newline'?

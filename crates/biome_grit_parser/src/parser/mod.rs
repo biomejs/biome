@@ -85,11 +85,10 @@ pub(crate) fn parse_root(p: &mut GritParser) -> CompletedMarker {
 
     parse_version(p).ok();
     parse_language_declaration(p).ok();
-    DefinitionList.parse_list(p);
-    parse_pattern(p).ok();
-    DefinitionList.parse_list(p);
 
-    p.eat(EOF);
+    DefinitionList::new().parse_list(p);
+
+    p.expect(EOF);
 
     m.complete(p, GRIT_ROOT)
 }
@@ -102,27 +101,47 @@ fn parse_version(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T![engine]);
 
+    let mut is_supported = true;
+
     let engine_range = p.cur_range();
     if p.eat(T![biome]) {
         if p.eat(T!['(']) {
             match parse_double_literal(p) {
                 Present(_) => {
-                    p.eat(T![')']);
+                    p.expect(T![')']);
                 }
-                Absent => p.error(p.err_builder("Expected version to be a double", p.cur_range())),
+                Absent => {
+                    if p.at(T![')']) {
+                        p.error(expected_engine_version(p, p.cur_range()));
+                    } else {
+                        p.error(p.err_builder("Expected version to be a double", p.cur_range()));
+                        p.bump_any();
+                    }
+                    p.bump(T![')']);
+                    is_supported = false;
+                }
             }
         } else {
             let engine_end = engine_range.end();
             p.error(expected_engine_version(
                 p,
                 TextRange::new(engine_end, engine_end),
-            ))
+            ));
+            is_supported = false;
         }
     } else {
         p.error(p.err_builder("Engine must be `biome`", engine_range));
+        is_supported = false;
     }
 
-    Present(m.complete(p, GRIT_VERSION))
+    Present(m.complete(
+        p,
+        if is_supported {
+            GRIT_VERSION
+        } else {
+            GRIT_BOGUS_VERSION
+        },
+    ))
 }
 
 fn parse_language_declaration(p: &mut GritParser) -> ParsedSyntax {

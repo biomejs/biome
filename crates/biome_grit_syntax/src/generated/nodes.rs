@@ -3853,15 +3853,13 @@ impl GritRoot {
             version: self.version(),
             language: self.language(),
             definitions: self.definitions(),
-            pattern: self.pattern(),
-            definitions_continued: self.definitions_continued(),
             eof_token: self.eof_token(),
         }
     }
     pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn version(&self) -> Option<GritVersion> {
+    pub fn version(&self) -> Option<AnyGritVersion> {
         support::node(&self.syntax, 1usize)
     }
     pub fn language(&self) -> Option<AnyGritLanguageDeclaration> {
@@ -3870,14 +3868,8 @@ impl GritRoot {
     pub fn definitions(&self) -> GritDefinitionList {
         support::list(&self.syntax, 3usize)
     }
-    pub fn pattern(&self) -> Option<AnyGritPattern> {
-        support::node(&self.syntax, 4usize)
-    }
-    pub fn definitions_continued(&self) -> GritDefinitionList {
-        support::list(&self.syntax, 5usize)
-    }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 6usize)
+        support::required_token(&self.syntax, 4usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -3892,11 +3884,9 @@ impl Serialize for GritRoot {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GritRootFields {
     pub bom_token: Option<SyntaxToken>,
-    pub version: Option<GritVersion>,
+    pub version: Option<AnyGritVersion>,
     pub language: Option<AnyGritLanguageDeclaration>,
     pub definitions: GritDefinitionList,
-    pub pattern: Option<AnyGritPattern>,
-    pub definitions_continued: GritDefinitionList,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4378,12 +4368,19 @@ impl AnyGritContainer {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyGritDefinition {
+    AnyGritPattern(AnyGritPattern),
     GritBogusDefinition(GritBogusDefinition),
     GritFunctionDefinition(GritFunctionDefinition),
     GritPatternDefinition(GritPatternDefinition),
     GritPredicateDefinition(GritPredicateDefinition),
 }
 impl AnyGritDefinition {
+    pub fn as_any_grit_pattern(&self) -> Option<&AnyGritPattern> {
+        match &self {
+            AnyGritDefinition::AnyGritPattern(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_grit_bogus_definition(&self) -> Option<&GritBogusDefinition> {
         match &self {
             AnyGritDefinition::GritBogusDefinition(item) => Some(item),
@@ -5120,6 +5117,26 @@ impl AnyGritRegex {
     pub fn as_grit_snippet_regex_literal(&self) -> Option<&GritSnippetRegexLiteral> {
         match &self {
             AnyGritRegex::GritSnippetRegexLiteral(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyGritVersion {
+    GritBogusVersion(GritBogusVersion),
+    GritVersion(GritVersion),
+}
+impl AnyGritVersion {
+    pub fn as_grit_bogus_version(&self) -> Option<&GritBogusVersion> {
+        match &self {
+            AnyGritVersion::GritBogusVersion(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_grit_version(&self) -> Option<&GritVersion> {
+        match &self {
+            AnyGritVersion::GritVersion(item) => Some(item),
             _ => None,
         }
     }
@@ -8858,8 +8875,6 @@ impl std::fmt::Debug for GritRoot {
             .field("version", &support::DebugOptionalElement(self.version()))
             .field("language", &support::DebugOptionalElement(self.language()))
             .field("definitions", &self.definitions())
-            .field("pattern", &support::DebugOptionalElement(self.pattern()))
-            .field("definitions_continued", &self.definitions_continued())
             .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
             .finish()
     }
@@ -9508,18 +9523,20 @@ impl From<GritPredicateDefinition> for AnyGritDefinition {
 }
 impl AstNode for AnyGritDefinition {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = GritBogusDefinition::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyGritPattern::KIND_SET
+        .union(GritBogusDefinition::KIND_SET)
         .union(GritFunctionDefinition::KIND_SET)
         .union(GritPatternDefinition::KIND_SET)
         .union(GritPredicateDefinition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
+        match kind {
             GRIT_BOGUS_DEFINITION
-                | GRIT_FUNCTION_DEFINITION
-                | GRIT_PATTERN_DEFINITION
-                | GRIT_PREDICATE_DEFINITION
-        )
+            | GRIT_FUNCTION_DEFINITION
+            | GRIT_PATTERN_DEFINITION
+            | GRIT_PREDICATE_DEFINITION => true,
+            k if AnyGritPattern::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -9535,7 +9552,12 @@ impl AstNode for AnyGritDefinition {
             GRIT_PREDICATE_DEFINITION => {
                 AnyGritDefinition::GritPredicateDefinition(GritPredicateDefinition { syntax })
             }
-            _ => return None,
+            _ => {
+                if let Some(any_grit_pattern) = AnyGritPattern::cast(syntax) {
+                    return Some(AnyGritDefinition::AnyGritPattern(any_grit_pattern));
+                }
+                return None;
+            }
         };
         Some(res)
     }
@@ -9545,6 +9567,7 @@ impl AstNode for AnyGritDefinition {
             AnyGritDefinition::GritFunctionDefinition(it) => &it.syntax,
             AnyGritDefinition::GritPatternDefinition(it) => &it.syntax,
             AnyGritDefinition::GritPredicateDefinition(it) => &it.syntax,
+            AnyGritDefinition::AnyGritPattern(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -9553,12 +9576,14 @@ impl AstNode for AnyGritDefinition {
             AnyGritDefinition::GritFunctionDefinition(it) => it.syntax,
             AnyGritDefinition::GritPatternDefinition(it) => it.syntax,
             AnyGritDefinition::GritPredicateDefinition(it) => it.syntax,
+            AnyGritDefinition::AnyGritPattern(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyGritDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyGritDefinition::AnyGritPattern(it) => std::fmt::Debug::fmt(it, f),
             AnyGritDefinition::GritBogusDefinition(it) => std::fmt::Debug::fmt(it, f),
             AnyGritDefinition::GritFunctionDefinition(it) => std::fmt::Debug::fmt(it, f),
             AnyGritDefinition::GritPatternDefinition(it) => std::fmt::Debug::fmt(it, f),
@@ -9569,6 +9594,7 @@ impl std::fmt::Debug for AnyGritDefinition {
 impl From<AnyGritDefinition> for SyntaxNode {
     fn from(n: AnyGritDefinition) -> SyntaxNode {
         match n {
+            AnyGritDefinition::AnyGritPattern(it) => it.into(),
             AnyGritDefinition::GritBogusDefinition(it) => it.into(),
             AnyGritDefinition::GritFunctionDefinition(it) => it.into(),
             AnyGritDefinition::GritPatternDefinition(it) => it.into(),
@@ -11238,6 +11264,66 @@ impl From<AnyGritRegex> for SyntaxElement {
         node.into()
     }
 }
+impl From<GritBogusVersion> for AnyGritVersion {
+    fn from(node: GritBogusVersion) -> AnyGritVersion {
+        AnyGritVersion::GritBogusVersion(node)
+    }
+}
+impl From<GritVersion> for AnyGritVersion {
+    fn from(node: GritVersion) -> AnyGritVersion {
+        AnyGritVersion::GritVersion(node)
+    }
+}
+impl AstNode for AnyGritVersion {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        GritBogusVersion::KIND_SET.union(GritVersion::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, GRIT_BOGUS_VERSION | GRIT_VERSION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            GRIT_BOGUS_VERSION => AnyGritVersion::GritBogusVersion(GritBogusVersion { syntax }),
+            GRIT_VERSION => AnyGritVersion::GritVersion(GritVersion { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyGritVersion::GritBogusVersion(it) => &it.syntax,
+            AnyGritVersion::GritVersion(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyGritVersion::GritBogusVersion(it) => it.syntax,
+            AnyGritVersion::GritVersion(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyGritVersion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyGritVersion::GritBogusVersion(it) => std::fmt::Debug::fmt(it, f),
+            AnyGritVersion::GritVersion(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyGritVersion> for SyntaxNode {
+    fn from(n: AnyGritVersion) -> SyntaxNode {
+        match n {
+            AnyGritVersion::GritBogusVersion(it) => it.into(),
+            AnyGritVersion::GritVersion(it) => it.into(),
+        }
+    }
+}
+impl From<AnyGritVersion> for SyntaxElement {
+    fn from(n: AnyGritVersion) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl std::fmt::Display for AnyGritCodeSnippetSource {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -11314,6 +11400,11 @@ impl std::fmt::Display for AnyGritPredicateMatchSubject {
     }
 }
 impl std::fmt::Display for AnyGritRegex {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyGritVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -12246,6 +12337,63 @@ impl From<GritBogusPredicate> for SyntaxNode {
 }
 impl From<GritBogusPredicate> for SyntaxElement {
     fn from(n: GritBogusPredicate) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct GritBogusVersion {
+    syntax: SyntaxNode,
+}
+impl GritBogusVersion {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for GritBogusVersion {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_BOGUS_VERSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_BOGUS_VERSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritBogusVersion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritBogusVersion")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<GritBogusVersion> for SyntaxNode {
+    fn from(n: GritBogusVersion) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritBogusVersion> for SyntaxElement {
+    fn from(n: GritBogusVersion) -> SyntaxElement {
         n.syntax.into()
     }
 }

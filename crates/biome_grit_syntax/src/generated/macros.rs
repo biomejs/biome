@@ -436,6 +436,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritBogusPredicate::new_unchecked(node) };
                     $body
                 }
+                $crate::GritSyntaxKind::GRIT_BOGUS_VERSION => {
+                    let $pattern = unsafe { $crate::GritBogusVersion::new_unchecked(node) };
+                    $body
+                }
                 $crate::GritSyntaxKind::GRIT_DEFINITION_LIST => {
                     let $pattern = unsafe { $crate::GritDefinitionList::new_unchecked(node) };
                     $body

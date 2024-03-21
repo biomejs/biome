@@ -208,6 +208,7 @@ pub enum GritSyntaxKind {
     GRIT_BOGUS_LITERAL,
     GRIT_BOGUS_NAMED_ARG,
     GRIT_BOGUS_PREDICATE,
+    GRIT_BOGUS_VERSION,
     #[doc(hidden)]
     __LAST,
 }

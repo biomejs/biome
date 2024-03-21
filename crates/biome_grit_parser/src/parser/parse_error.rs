@@ -63,3 +63,9 @@ pub(crate) fn expected_predicate_infix_operator(
 pub(crate) fn expected_variable(p: &GritParser, range: TextRange) -> ParseDiagnostic {
     expected_node("variable", range, p)
 }
+
+pub(crate) fn too_many_patterns(p: &GritParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Too many patterns.", range).with_hint(
+        "Grit files may only contain a single pattern. Use `sequential` if you would like to match multiple patterns.",
+    )
+}

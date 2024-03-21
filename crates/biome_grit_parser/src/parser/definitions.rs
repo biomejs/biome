@@ -1,5 +1,5 @@
-use super::parse_error::expected_definition;
-use super::patterns::PatternList;
+use super::parse_error::{expected_definition, too_many_patterns};
+use super::patterns::{parse_pattern, PatternList};
 use super::predicates::PredicateList;
 use super::{
     parse_language_declaration, parse_name, parse_pattern_arg_list, GritParser, VariableList,
@@ -10,10 +10,17 @@ use biome_grit_syntax::T;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::ParsedSyntax::*;
-use biome_parser::TokenSet;
 use biome_parser::{parsed_syntax::ParsedSyntax, Parser};
 
-pub(crate) struct DefinitionList;
+pub(crate) struct DefinitionList {
+    has_pattern: bool,
+}
+
+impl DefinitionList {
+    pub(crate) fn new() -> Self {
+        Self { has_pattern: false }
+    }
+}
 
 impl ParseNodeList for DefinitionList {
     type Kind = GritSyntaxKind;
@@ -22,11 +29,24 @@ impl ParseNodeList for DefinitionList {
     const LIST_KIND: Self::Kind = GRIT_DEFINITION_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_definition(p)
+        let mut syntax = parse_definition(p);
+
+        if syntax == Absent {
+            if let Present(pattern) = parse_pattern(p) {
+                if self.has_pattern {
+                    p.error(too_many_patterns(p, pattern.range(p)));
+                }
+
+                syntax = Present(pattern);
+                self.has_pattern = true
+            }
+        }
+
+        syntax
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        !p.at_ts(DEFINITION_SET)
+        p.at(EOF)
     }
 
     fn recover(
@@ -36,7 +56,7 @@ impl ParseNodeList for DefinitionList {
     ) -> biome_parser::parse_recovery::RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(GRIT_BOGUS_DEFINITION, TokenSet::EMPTY)
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_DEFINITION, DEFINITION_LIST_RECOVERY_SET)
                 .enable_recovery_on_line_break(),
             expected_definition,
         )

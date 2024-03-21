@@ -116,7 +116,7 @@ fn parse_language_specific_snippet(p: &mut GritParser) -> ParsedSyntax {
         m.complete(p, GRIT_LANGUAGE_NAME);
     }
 
-    p.eat(GRIT_STRING);
+    p.expect(GRIT_STRING);
 
     Present(m.complete(p, GRIT_LANGUAGE_SPECIFIC_SNIPPET))
 }

@@ -1360,45 +1360,33 @@ impl GritRewriteBuilder {
         ))
     }
 }
-pub fn grit_root(
-    definitions: GritDefinitionList,
-    definitions_continued: GritDefinitionList,
-    eof_token: SyntaxToken,
-) -> GritRootBuilder {
+pub fn grit_root(definitions: GritDefinitionList, eof_token: SyntaxToken) -> GritRootBuilder {
     GritRootBuilder {
         definitions,
-        definitions_continued,
         eof_token,
         bom_token: None,
         version: None,
         language: None,
-        pattern: None,
     }
 }
 pub struct GritRootBuilder {
     definitions: GritDefinitionList,
-    definitions_continued: GritDefinitionList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
-    version: Option<GritVersion>,
+    version: Option<AnyGritVersion>,
     language: Option<AnyGritLanguageDeclaration>,
-    pattern: Option<AnyGritPattern>,
 }
 impl GritRootBuilder {
     pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
         self.bom_token = Some(bom_token);
         self
     }
-    pub fn with_version(mut self, version: GritVersion) -> Self {
+    pub fn with_version(mut self, version: AnyGritVersion) -> Self {
         self.version = Some(version);
         self
     }
     pub fn with_language(mut self, language: AnyGritLanguageDeclaration) -> Self {
         self.language = Some(language);
-        self
-    }
-    pub fn with_pattern(mut self, pattern: AnyGritPattern) -> Self {
-        self.pattern = Some(pattern);
         self
     }
     pub fn build(self) -> GritRoot {
@@ -1411,11 +1399,6 @@ impl GritRootBuilder {
                 self.language
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.definitions.into_syntax())),
-                self.pattern
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(
-                    self.definitions_continued.into_syntax(),
-                )),
                 Some(SyntaxElement::Token(self.eof_token)),
             ],
         ))
@@ -1759,6 +1742,16 @@ where
 {
     GritBogusPredicate::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_BOGUS_PREDICATE,
+        slots,
+    ))
+}
+pub fn grit_bogus_version<I>(slots: I) -> GritBogusVersion
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GritBogusVersion::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BOGUS_VERSION,
         slots,
     ))
 }

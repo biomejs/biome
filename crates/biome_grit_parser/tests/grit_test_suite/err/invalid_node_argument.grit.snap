@@ -15,24 +15,24 @@ GritRoot {
     bom_token: missing (optional),
     version: missing (optional),
     language: missing (optional),
-    definitions: GritDefinitionList [],
-    pattern: GritNodeLike {
-        name: GritName {
-            value_token: GRIT_NAME@0..4 "stmt" [] [],
-        },
-        l_paren_token: L_PAREN@4..5 "(" [] [],
-        named_args: GritNamedArgList [
-            GritBogusNamedArg {
-                items: [
-                    FUNCTION_KW@5..13 "function" [] [],
-                    EQ@13..14 "=" [] [],
-                    GRIT_STRING@14..23 "\"unknown\"" [] [],
-                ],
+    definitions: GritDefinitionList [
+        GritNodeLike {
+            name: GritName {
+                value_token: GRIT_NAME@0..4 "stmt" [] [],
             },
-        ],
-        r_paren_token: R_PAREN@23..24 ")" [] [],
-    },
-    definitions_continued: GritDefinitionList [],
+            l_paren_token: L_PAREN@4..5 "(" [] [],
+            named_args: GritNamedArgList [
+                GritBogusNamedArg {
+                    items: [
+                        FUNCTION_KW@5..13 "function" [] [],
+                        EQ@13..14 "=" [] [],
+                        GRIT_STRING@14..23 "\"unknown\"" [] [],
+                    ],
+                },
+            ],
+            r_paren_token: R_PAREN@23..24 ")" [] [],
+        },
+    ],
     eof_token: EOF@24..25 "" [Newline("\n")] [],
 }
 ```
@@ -44,19 +44,18 @@ GritRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: GRIT_DEFINITION_LIST@0..0
-  4: GRIT_NODE_LIKE@0..24
-    0: GRIT_NAME@0..4
-      0: GRIT_NAME@0..4 "stmt" [] []
-    1: L_PAREN@4..5 "(" [] []
-    2: GRIT_NAMED_ARG_LIST@5..23
-      0: GRIT_BOGUS_NAMED_ARG@5..23
-        0: FUNCTION_KW@5..13 "function" [] []
-        1: EQ@13..14 "=" [] []
-        2: GRIT_STRING@14..23 "\"unknown\"" [] []
-    3: R_PAREN@23..24 ")" [] []
-  5: GRIT_DEFINITION_LIST@24..24
-  6: EOF@24..25 "" [Newline("\n")] []
+  3: GRIT_DEFINITION_LIST@0..24
+    0: GRIT_NODE_LIKE@0..24
+      0: GRIT_NAME@0..4
+        0: GRIT_NAME@0..4 "stmt" [] []
+      1: L_PAREN@4..5 "(" [] []
+      2: GRIT_NAMED_ARG_LIST@5..23
+        0: GRIT_BOGUS_NAMED_ARG@5..23
+          0: FUNCTION_KW@5..13 "function" [] []
+          1: EQ@13..14 "=" [] []
+          2: GRIT_STRING@14..23 "\"unknown\"" [] []
+      3: R_PAREN@23..24 ")" [] []
+  4: EOF@24..25 "" [Newline("\n")] []
 
 ```
 

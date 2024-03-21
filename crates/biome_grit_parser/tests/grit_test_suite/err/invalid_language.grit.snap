@@ -22,8 +22,6 @@ GritRoot {
         ],
     },
     definitions: GritDefinitionList [],
-    pattern: missing (optional),
-    definitions_continued: GritDefinitionList [],
     eof_token: EOF@22..23 "" [Newline("\n")] [],
 }
 ```
@@ -39,9 +37,7 @@ GritRoot {
     1: GRIT_NAME@9..21 "non_existing" [] []
     2: SEMICOLON@21..22 ";" [] []
   3: GRIT_DEFINITION_LIST@22..22
-  4: (empty)
-  5: GRIT_DEFINITION_LIST@22..22
-  6: EOF@22..23 "" [Newline("\n")] []
+  4: EOF@22..23 "" [Newline("\n")] []
 
 ```
 

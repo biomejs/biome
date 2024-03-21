@@ -20,6 +20,8 @@ pub(crate) const PRECEDENCE_PATTERN: isize = -20;
 // Recovery sets.
 pub(crate) const ARG_LIST_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(T![,], T![')']);
 
+pub(crate) const DEFINITION_LIST_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(EOF);
+
 pub(crate) const ELEMENT_LIST_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(T![,], T!['}']);
 
 pub(crate) const PATTERN_RECOVERY_SET: TokenSet<GritSyntaxKind> = token_set!(T![')'], T!['}'], EOF);
@@ -41,9 +43,6 @@ pub(crate) const CODE_SNIPPET_SET: TokenSet<GritSyntaxKind> =
 
 pub(crate) const CONTAINER_SET: TokenSet<GritSyntaxKind> =
     token_set![GRIT_VARIABLE, GRIT_MAP_ACCESSOR, GRIT_LIST_ACCESSOR];
-
-pub(crate) const DEFINITION_SET: TokenSet<GritSyntaxKind> =
-    token_set![FUNCTION_KW, PATTERN_KW, PREDICATE_KW, PRIVATE_KW];
 
 pub(crate) const NOT_SET: TokenSet<GritSyntaxKind> = token_set![NOT_KW, T![!]];
 
