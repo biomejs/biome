@@ -1,6 +1,7 @@
 import type {
 	BiomePath,
 	Diagnostic,
+	FixFileMode,
 	PartialConfiguration,
 	PullDiagnosticsResult,
 	Workspace,
@@ -55,6 +56,12 @@ export interface LintContentOptions {
 	 * so Biome knows how to parse the content
 	 */
 	filePath: string;
+	fixFileMode?: FixFileMode;
+}
+
+export interface LintResult {
+	content: string;
+	diagnostics: Diagnostic[];
 }
 
 function isFormatContentDebug(
@@ -229,14 +236,35 @@ export class Biome {
 	 */
 	lintContent(
 		content: string,
-		options: LintContentOptions,
-	): PullDiagnosticsResult {
-		return this.withFile(options.filePath, content, (path) => {
-			return this.workspace.pullDiagnostics({
+		{ filePath, fixFileMode }: LintContentOptions,
+	): LintResult {
+		const maybeFixedContent = fixFileMode
+			? this.withFile(filePath, content, (path) => {
+					let code = content;
+
+					const result = this.workspace.fixFile({
+						path,
+						fix_file_mode: fixFileMode,
+						should_format: false,
+					});
+
+					code = result.code;
+
+					return code;
+				})
+			: content;
+
+		return this.withFile(filePath, maybeFixedContent, (path) => {
+			const { diagnostics } = this.workspace.pullDiagnostics({
 				path,
 				categories: ["Syntax", "Lint"],
 				max_diagnostics: Number.MAX_SAFE_INTEGER,
 			});
+
+			return {
+				content: maybeFixedContent,
+				diagnostics,
+			};
 		});
 	}
 

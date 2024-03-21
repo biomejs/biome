@@ -140,7 +140,7 @@ fn is_file_allowed(path: &Path) -> bool {
     path.file_name()
         .and_then(|f| f.to_str())
         .map(|f| {
-            super::DocumentFileSource::KNOWN_FILES_AS_JSONC
+            super::DocumentFileSource::WELL_KNOWN_JSONC_FILES
                 .binary_search(&f)
                 .is_ok()
         })
@@ -150,24 +150,28 @@ fn is_file_allowed(path: &Path) -> bool {
 
 fn parse(
     biome_path: &BiomePath,
-    mut file_source: DocumentFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let parser = &settings.as_ref().languages.json.parser;
     let overrides = &settings.as_ref().override_settings;
+    let optional_json_file_source = file_source.to_json_file_source();
     let options: JsonParserOptions = overrides.override_json_parser_options(
         biome_path,
         JsonParserOptions {
             allow_comments: parser.allow_comments
-                || file_source.to_json_file_source().map(|fs| fs.is_jsonc()) == Some(true)
+                || optional_json_file_source.map_or(false, |x| x.get_allow_comments())
                 || is_file_allowed(biome_path),
-            allow_trailing_commas: parser.allow_trailing_commas || is_file_allowed(biome_path),
+            allow_trailing_commas: parser.allow_trailing_commas
+                || optional_json_file_source.map_or(false, |x| x.get_allow_trailing_commas())
+                || is_file_allowed(biome_path),
         },
     );
-    if let DocumentFileSource::Json(file_source) = &mut file_source {
-        file_source.set_allow_trailing_comma(options.allow_trailing_commas);
+    if let Some(mut json_file_source) = optional_json_file_source {
+        json_file_source.set_allow_trailing_commas(options.allow_trailing_commas);
+        json_file_source.set_allow_comments(options.allow_comments);
     }
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
     let root = parse.syntax();

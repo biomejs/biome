@@ -103,7 +103,7 @@ A maintainer can be self-nominated. They will have to message a [lead maintainer
 
 When the verdict is reached, the thread will be deleted, and a [core contributor](#core-contributor) or [lead](#lead) will reach out to the nominee.
 
-If vote is successful, the lead will ask the nominee if they want to accept the title.
+If vote is successful, the person reaching out will ask the nominee if they want to accept the title.
 
 In the event of a rejection, the nominated person will be privately given the requirements they have not met. Details of the discussion, such as the names of those who objected the nomination, will not be disclosed.
 

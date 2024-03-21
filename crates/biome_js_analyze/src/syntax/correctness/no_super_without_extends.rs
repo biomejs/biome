@@ -2,7 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::category;
-use biome_js_syntax::{JsClassDeclaration, JsSuperExpression};
+use biome_js_syntax::{JsClassDeclaration, JsClassExpression, JsSuperExpression};
 use biome_rowan::AstNode;
 
 declare_rule! {
@@ -32,11 +32,20 @@ impl Rule for NoSuperWithoutExtends {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if let Some(class_declaration) =
-            node.syntax().ancestors().find_map(JsClassDeclaration::cast)
-        {
-            if class_declaration.extends_clause().is_none() {
-                return Some(());
+        for syntax in node.syntax().ancestors() {
+            // ancestor is class declaration
+            if let Some(class_declaration) = JsClassDeclaration::cast_ref(&syntax) {
+                if class_declaration.extends_clause().is_none() {
+                    return Some(());
+                }
+                return None;
+            }
+            // ancestor is class expression
+            else if let Some(class_expression) = JsClassExpression::cast_ref(&syntax) {
+                if class_expression.extends_clause().is_none() {
+                    return Some(());
+                }
+                return None;
             }
         }
 

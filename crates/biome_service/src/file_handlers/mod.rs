@@ -19,7 +19,7 @@ use biome_css_syntax::CssFileSource;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, ModuleKind, TextRange, TextSize};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, TextRange, TextSize};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
@@ -77,7 +77,12 @@ impl From<&Path> for DocumentFileSource {
 
 impl DocumentFileSource {
     /// Sorted array of files that are known as JSONC (JSON with comments).
-    pub(crate) const KNOWN_FILES_AS_JSONC: &'static [&'static str; 15] = &[
+    ///
+    /// TODO: We might want to narrow the list according to
+    /// https://github.com/prettier/prettier/issues/15945#issuecomment-1895371835
+    ///
+    /// We can settle with these for now until someone raise a issue
+    pub(crate) const WELL_KNOWN_JSONC_FILES: &'static [&'static str; 15] = &[
         ".babelrc",
         ".babelrc.json",
         ".ember-cli",
@@ -95,23 +100,15 @@ impl DocumentFileSource {
         "typescript.json",
     ];
 
-    /// Returns the language corresponding to this language ID
-    ///
-    /// See the [microsoft spec]
-    /// for a list of language identifiers
-    ///
-    /// [microsoft spec]: https://code.visualstudio.com/docs/languages/identifiers
+    /// Returns the language corresponding to this file extension
     pub fn from_extension(s: &str) -> Self {
         match s.to_lowercase().as_str() {
-            "js" | "mjs" => JsFileSource::jsx().into(),
+            "js" | "mjs" | "jsx" => JsFileSource::jsx().into(),
             "cjs" => JsFileSource::js_script().into(),
-            "jsx" => JsFileSource::jsx().into(),
-            "ts" | "mts" => JsFileSource::ts().into(),
-            "cts" => JsFileSource::ts()
-                .with_module_kind(ModuleKind::Script)
-                .into(),
-            "d.ts" | "d.mts" | "d.cts" => JsFileSource::d_ts().into(),
+            "ts" => JsFileSource::ts().into(),
+            "mts" | "cts" => JsFileSource::ts_restricted().into(),
             "tsx" => JsFileSource::tsx().into(),
+            "d.ts" | "d.mts" | "d.cts" => JsFileSource::d_ts().into(),
             "json" => JsonFileSource::json().into(),
             "jsonc" => JsonFileSource::jsonc().into(),
             "astro" => JsFileSource::astro().into(),
@@ -135,7 +132,7 @@ impl DocumentFileSource {
             "javascriptreact" => JsFileSource::jsx().into(),
             "typescriptreact" => JsFileSource::tsx().into(),
             "json" => JsonFileSource::json().into(),
-            "jsonc" => JsonFileSource::json().into(),
+            "jsonc" => JsonFileSource::jsonc().into(),
             "astro" => JsFileSource::astro().into(),
             "vue" => JsFileSource::vue().into(),
             "svelte" => JsFileSource::svelte().into(),
@@ -146,7 +143,7 @@ impl DocumentFileSource {
     }
 
     pub fn from_known_filename(s: &str) -> Self {
-        if Self::KNOWN_FILES_AS_JSONC.binary_search(&s).is_ok() {
+        if Self::WELL_KNOWN_JSONC_FILES.binary_search(&s).is_ok() {
             JsonFileSource::jsonc().into()
         } else {
             DocumentFileSource::Unknown
@@ -557,7 +554,7 @@ pub(crate) fn is_diagnostic_error(
 
 #[test]
 fn test_order() {
-    for items in DocumentFileSource::KNOWN_FILES_AS_JSONC.windows(2) {
+    for items in DocumentFileSource::WELL_KNOWN_JSONC_FILES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }

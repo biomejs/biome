@@ -893,6 +893,10 @@ export interface Nursery {
 	 */
 	noBarrelFile?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noColorInvalidHex?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of console.
 	 */
 	noConsole?: RuleConfiguration_for_Null;
@@ -1604,7 +1608,7 @@ export interface ConsistentArrayTypeOptions {
  */
 export interface FilenamingConventionOptions {
 	/**
-	 * Allowed cases for _TypeScript_ `enum` member names.
+	 * Allowed cases for file names.
 	 */
 	filenameCases: FilenameCases;
 	/**
@@ -1667,7 +1671,7 @@ export type FilenameCases = FilenameCase[];
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
 export type StableHookResult = "None" | "Identity" | { Indices: number[] };
 /**
- * Supported cases for TypeScript `enum` member names.
+ * Supported cases for file names.
  */
 export type FilenameCase =
 	| "camelCase"
@@ -1705,7 +1709,8 @@ export interface JsFileSource {
 	version: LanguageVersion;
 }
 export interface JsonFileSource {
-	allow_trailing_comma: boolean;
+	allow_comments: boolean;
+	allow_trailing_commas: boolean;
 	variant: JsonVariant;
 }
 export interface CssFileSource {
@@ -1891,11 +1896,13 @@ export type Category =
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
+	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noApproximativeNumericConstant"
 	| "lint/nursery/noBarrelFile"
+	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
-	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDoneCallback"
+	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateTestHooks"
 	| "lint/nursery/noEvolvingAny"

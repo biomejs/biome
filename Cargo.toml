@@ -99,6 +99,7 @@ biome_aria                   = { version = "0.5.7", path = "./crates/biome_aria"
 biome_aria_metadata          = { version = "0.5.7", path = "./crates/biome_aria_metadata" }
 biome_console                = { version = "0.5.7", path = "./crates/biome_console" }
 biome_control_flow           = { version = "0.5.7", path = "./crates/biome_control_flow" }
+biome_css_analyze            = { version = "0.5.7", path = "./crates/biome_css_analyze" }
 biome_css_factory            = { version = "0.5.7", path = "./crates/biome_css_factory" }
 biome_css_formatter          = { version = "0.5.7", path = "./crates/biome_css_formatter" }
 biome_css_parser             = { version = "0.5.7", path = "./crates/biome_css_parser" }

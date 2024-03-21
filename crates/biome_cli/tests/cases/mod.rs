@@ -3,6 +3,7 @@
 
 mod biome_json_support;
 mod config_extends;
+mod cts_files;
 mod diagnostics;
 mod handle_astro_files;
 mod handle_svelte_files;

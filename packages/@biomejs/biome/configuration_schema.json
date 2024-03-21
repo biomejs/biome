@@ -915,7 +915,7 @@
 			]
 		},
 		"FilenameCase": {
-			"description": "Supported cases for TypeScript `enum` member names.",
+			"description": "Supported cases for file names.",
 			"oneOf": [
 				{ "description": "camelCase", "type": "string", "enum": ["camelCase"] },
 				{
@@ -956,7 +956,7 @@
 			"type": "object",
 			"properties": {
 				"filenameCases": {
-					"description": "Allowed cases for _TypeScript_ `enum` member names.",
+					"description": "Allowed cases for file names.",
 					"allOf": [{ "$ref": "#/definitions/FilenameCases" }]
 				},
 				"requireAscii": {
@@ -1383,6 +1383,13 @@
 				},
 				"noBarrelFile": {
 					"description": "Disallow the use of barrel file.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noColorInvalidHex": {
+					"description": "Succinct description of the rule.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

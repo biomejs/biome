@@ -59,10 +59,19 @@ documentation:
   cargo documentation
 
 # Creates a new lint rule in the given path, with the given name. Name has to be camel case.
-new-lintrule path rulename:
-  cargo run -p xtask_codegen -- new-lintrule --path={{path}} --name={{rulename}}
+new-js-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=js --name={{rulename}}
   just gen-lint
   just documentation
+
+# WIP: Creates a new css lint rule in the given path, with the given name. Name has to be camel case.
+new-css-lintrule rulename:
+  cargo run -p xtask_codegen -- new-css-lintrule --kind=css --name={{rulename}}
+  cargo codegen analyzer
+  cargo codegen-configuration
+  just gen-bindings
+  just format
+# TODO: lintdoc, website, cargo doc
 
 # Promotes a rule from the nursery group to a new group
 promote-rule rulename group:
