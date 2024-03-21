@@ -286,7 +286,7 @@ impl Session {
         let biome_path = self.file_path(&url)?;
         let doc = self.document(&url)?;
         let file_features = self.workspace.file_features(SupportsFeatureParams {
-            feature: FeaturesBuilder::new()
+            features: FeaturesBuilder::new()
                 .with_linter()
                 .with_organize_imports()
                 .build(),

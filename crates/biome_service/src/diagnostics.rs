@@ -519,8 +519,7 @@ impl Diagnostic for SourceFileNotSupported {
 }
 
 pub fn extension_error(path: &BiomePath) -> WorkspaceError {
-    let file_source = DocumentFileSource::from_path_and_known_filename(path)
-        .or(DocumentFileSource::from_path(path));
+    let file_source = DocumentFileSource::from_path(path);
     WorkspaceError::source_file_not_supported(
         file_source,
         path.clone().display().to_string(),
