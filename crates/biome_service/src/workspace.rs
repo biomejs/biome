@@ -221,7 +221,6 @@ impl FileFeaturesResult {
 
     /// Checks whether the file support the given `feature`
     fn supports_for(&self, feature: &FeatureName) -> bool {
-        dbg!(&self.features_supported);
         self.features_supported
             .get(feature)
             .map(|support_kind| matches!(support_kind, SupportKind::Supported))
