@@ -38,7 +38,8 @@ declare_rule! {
     ///     "//": "...",
     ///     "options": {
     ///         "strictCase": false,
-    ///         "enumMemberCase": ["camelCase", "export"]
+    ///         "requireAscii": true,
+    ///         "filenameCases": ["camelCase", "export"]
     ///     }
     /// }
     /// ```

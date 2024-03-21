@@ -28,7 +28,8 @@ The rule provides two options that are detailed in the following subsections.
     "//": "...",
     "options": {
         "strictCase": false,
-        "enumMemberCase": ["camelCase", "export"]
+        "requireAscii": true,
+        "filenameCases": ["camelCase", "export"]
     }
 }
 ```
