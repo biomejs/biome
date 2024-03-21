@@ -252,12 +252,41 @@ impl<'src> GritLexer<'src> {
 
     fn consume_dots(&mut self) -> GritSyntaxKind {
         assert_eq!(self.current_byte(), Some(b'.'));
+        let start = self.position;
         self.advance(1);
 
         match self.current_byte() {
-            Some(b'.') if self.byte_at(1) == Some(b'.') => {
-                self.advance(2);
-                DOT3
+            Some(b'.') => {
+                if self.byte_at(1) == Some(b'.') {
+                    self.advance(2);
+
+                    if self.current_byte() == Some(b'.') {
+                        while self.current_byte() == Some(b'.') {
+                            self.advance(1);
+                        }
+
+                        let end = self.position;
+                        self.diagnostics.push(
+                            ParseDiagnostic::new(
+                                format!("'{}' is not a valid token", ".".repeat(end - start)),
+                                start..end,
+                            )
+                            .with_hint("Did you mean '...'?"),
+                        );
+
+                        ERROR_TOKEN
+                    } else {
+                        DOT3
+                    }
+                } else {
+                    self.advance(1);
+                    self.diagnostics.push(
+                        ParseDiagnostic::new("'..' is not a valid token", start..self.position)
+                            .with_hint("Did you mean '...'?"),
+                    );
+
+                    ERROR_TOKEN
+                }
             }
             _ => T![.],
         }
