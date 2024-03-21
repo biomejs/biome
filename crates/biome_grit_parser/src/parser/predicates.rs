@@ -90,6 +90,10 @@ fn parse_infix_predicate(p: &mut GritParser) -> ParsedSyntax {
         T![<:] => Match,
         T![!=] => NotEqual,
         T![=>] => Rewrite,
+        T![,] | T!['}'] => {
+            p.error(expected_node("operator", p.cur_range(), p));
+            return Present(m.complete(p, GRIT_BOGUS_PREDICATE));
+        }
         _ => {
             p.error(expected_predicate_infix_operator(p, p.cur_range()));
             Bogus
