@@ -156,6 +156,7 @@ dependencies = [
  "anyhow",
  "biome_analyze",
  "biome_console",
+ "biome_css_formatter",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
