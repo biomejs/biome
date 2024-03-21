@@ -1,12 +1,12 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::{JsFileSource, JsVariableDeclaration, JsVariableDeclarator};
+use biome_js_syntax::{AnyJsExpression, JsFileSource, JsVariableDeclaration, JsVariableDeclarator};
 
 declare_rule! {
     /// Disallow variables from evolving into `any` type through reassignments.
     ///
     /// In TypeScript, variables without explicit type annotations can evolve their types based on subsequent assignments.
-    /// This behavior can inadvertently lead to variables with an `any` type, weakening type safety.
+    /// This behavior can accidentally lead to variables with an `any` type, weakening type safety.
     /// Just like the `any` type, evolved `any` types disable many type checking rules and should be avoided to maintain strong type safety.
     /// This rule prevents such cases by ensuring variables do not evolve into `any` type, encouraging explicit type annotations and controlled type evolutions.
     ///
@@ -20,11 +20,6 @@ declare_rule! {
     /// let c = null;
     /// ````
     ///
-    /// ```ts,expect_diagnostic
-    /// let a = 'hello';
-    /// const b = ['hello'];
-    /// const c = null;
-    /// ```
     ///
     /// ### Valid
     ///
@@ -33,6 +28,9 @@ declare_rule! {
     /// let a:number;
     /// var b:number;
     /// var b = 10;
+    /// let a = 'hello';
+    /// const b = ['hello'];
+    /// const c = null;
     /// ```
     ///
     pub NoEvolvingAny {
@@ -69,28 +67,24 @@ impl Rule for NoEvolvingAny {
             }
 
             if is_initialized {
-                let initializer = variable.initializer().unwrap();
+                let initializer = variable.initializer()?;
                 let expression = initializer.expression().ok()?;
-                let optional_array_expression = expression.as_js_array_expression();
-                let optional_js_literal_expression = expression.as_any_js_literal_expression();
-
-                if let Some(array_expression) = optional_array_expression {
-                    if array_expression.elements().into_iter().next().is_none()
-                        && !is_type_annotated
-                    {
-                        return Some(variable);
+                match expression {
+                    AnyJsExpression::AnyJsLiteralExpression(literal_expr) => {
+                        if literal_expr.as_js_null_literal_expression().is_some()
+                            && !is_type_annotated
+                        {
+                            return Some(variable);
+                        }
                     }
-                }
-
-                if let Some(js_literal_expression) = optional_js_literal_expression {
-                    if js_literal_expression
-                        .as_js_null_literal_expression()
-                        .is_some()
-                        && !is_type_annotated
-                    {
-                        return Some(variable);
+                    AnyJsExpression::JsArrayExpression(array_expr) => {
+                        if array_expr.elements().into_iter().next().is_none() && !is_type_annotated
+                        {
+                            return Some(variable);
+                        }
                     }
-                }
+                    _ => continue,
+                };
             }
         }
 
@@ -110,11 +104,11 @@ impl Rule for NoEvolvingAny {
                 rule_category!(),
                 variable.text_range(),
                 markup! {
-                    "This variable's type is allowed to evolve implicitly, leading to potential "<Emphasis>"any"</Emphasis>" types. Specify an explicit type or initialization to avoid implicit type evolution."
+                    "This variable's type is allowed to evolve implicitly, leading to potential "<Emphasis>"any"</Emphasis>" types."
                 },
             )
             .note(markup! {
-                "Variable's type may evolve, leading to "<Emphasis>"any"</Emphasis>". Use explicit type or initialization, e.g., 'let x: number;' or 'let x = 0;'."
+                "Variable's type may evolve, leading to "<Emphasis>"any"</Emphasis>". Use explicit type or initialization. Specify an explicit type or initial value to avoid implicit type evolution."
             }),
         )
     }
