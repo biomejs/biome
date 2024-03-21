@@ -51,7 +51,7 @@ impl GritParse {
     ///
     /// ```
     /// # use biome_grit_parser::parse_grit;
-    /// # use biome_grit_syntax::{GritSyntaxKind, AnyGritLiteral, AnyGritPattern};
+    /// # use biome_grit_syntax::{GritSyntaxKind, AnyGritLiteral, AnyGritPattern, GritRootExt};
     /// # use biome_rowan::{AstNode, AstNodeList, SyntaxError};
     ///
     /// # fn main() {
