@@ -23,8 +23,6 @@ GritRoot {
         semicolon_token: SEMICOLON@11..12 ";" [] [],
     },
     definitions: GritDefinitionList [],
-    pattern: missing (optional),
-    definitions_continued: GritDefinitionList [],
     eof_token: EOF@12..13 "" [Newline("\n")] [],
 }
 ```
@@ -42,8 +40,6 @@ GritRoot {
     2: (empty)
     3: SEMICOLON@11..12 ";" [] []
   3: GRIT_DEFINITION_LIST@12..12
-  4: (empty)
-  5: GRIT_DEFINITION_LIST@12..12
-  6: EOF@12..13 "" [Newline("\n")] []
+  4: EOF@12..13 "" [Newline("\n")] []
 
 ```

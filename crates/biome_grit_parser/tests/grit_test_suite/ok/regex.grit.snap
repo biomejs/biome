@@ -15,14 +15,14 @@ GritRoot {
     bom_token: missing (optional),
     version: missing (optional),
     language: missing (optional),
-    definitions: GritDefinitionList [],
-    pattern: GritRegexPattern {
-        regex: GritRegexLiteral {
-            value_token: GRIT_REGEX@0..17 "r\"test\\\\.*[^'\\\"]\"" [] [],
+    definitions: GritDefinitionList [
+        GritRegexPattern {
+            regex: GritRegexLiteral {
+                value_token: GRIT_REGEX@0..17 "r\"test\\\\.*[^'\\\"]\"" [] [],
+            },
+            variables: missing (optional),
         },
-        variables: missing (optional),
-    },
-    definitions_continued: GritDefinitionList [],
+    ],
     eof_token: EOF@17..18 "" [Newline("\n")] [],
 }
 ```
@@ -34,12 +34,11 @@ GritRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: GRIT_DEFINITION_LIST@0..0
-  4: GRIT_REGEX_PATTERN@0..17
-    0: GRIT_REGEX_LITERAL@0..17
-      0: GRIT_REGEX@0..17 "r\"test\\\\.*[^'\\\"]\"" [] []
-    1: (empty)
-  5: GRIT_DEFINITION_LIST@17..17
-  6: EOF@17..18 "" [Newline("\n")] []
+  3: GRIT_DEFINITION_LIST@0..17
+    0: GRIT_REGEX_PATTERN@0..17
+      0: GRIT_REGEX_LITERAL@0..17
+        0: GRIT_REGEX@0..17 "r\"test\\\\.*[^'\\\"]\"" [] []
+      1: (empty)
+  4: EOF@17..18 "" [Newline("\n")] []
 
 ```

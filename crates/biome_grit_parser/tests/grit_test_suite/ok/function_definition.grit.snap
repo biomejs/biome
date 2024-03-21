@@ -333,53 +333,53 @@ GritRoot {
                 r_curly_token: R_CURLY@615..617 "}" [Newline("\n")] [],
             },
         },
-    ],
-    pattern: GritRewrite {
-        left: GritPatternAs {
-            pattern: GritCodeSnippet {
-                source: GritBacktickSnippetLiteral {
-                    value_token: GRIT_BACKTICK_SNIPPET@617..669 "`module.exports = $_`" [Newline("\n"), Newline("\n"), Comments("// Use the my_todo fu ..."), Newline("\n")] [Whitespace(" ")],
-                },
-            },
-            as_token: AS_KW@669..672 "as" [] [Whitespace(" ")],
-            variable: GritVariable {
-                value_token: GRIT_VARIABLE@672..675 "$x" [] [Whitespace(" ")],
-            },
-        },
-        annotation: missing (optional),
-        fat_arrow_token: FAT_ARROW@675..678 "=>" [] [Whitespace(" ")],
-        right: GritNodeLike {
-            name: GritName {
-                value_token: GRIT_NAME@678..685 "my_todo" [] [],
-            },
-            l_paren_token: L_PAREN@685..686 "(" [] [],
-            named_args: GritNamedArgList [
-                GritNamedArg {
-                    name: GritName {
-                        value_token: GRIT_NAME@686..692 "target" [] [],
-                    },
-                    eq_token: EQ@692..693 "=" [] [],
-                    pattern: GritVariable {
-                        value_token: GRIT_VARIABLE@693..695 "$x" [] [],
+        missing separator,
+        GritRewrite {
+            left: GritPatternAs {
+                pattern: GritCodeSnippet {
+                    source: GritBacktickSnippetLiteral {
+                        value_token: GRIT_BACKTICK_SNIPPET@617..669 "`module.exports = $_`" [Newline("\n"), Newline("\n"), Comments("// Use the my_todo fu ..."), Newline("\n")] [Whitespace(" ")],
                     },
                 },
-                COMMA@695..697 "," [] [Whitespace(" ")],
-                GritNamedArg {
-                    name: GritName {
-                        value_token: GRIT_NAME@697..704 "message" [] [],
-                    },
-                    eq_token: EQ@704..705 "=" [] [],
-                    pattern: GritCodeSnippet {
-                        source: GritBacktickSnippetLiteral {
-                            value_token: GRIT_BACKTICK_SNIPPET@705..725 "`Fix this\\nAnd that`" [] [],
+                as_token: AS_KW@669..672 "as" [] [Whitespace(" ")],
+                variable: GritVariable {
+                    value_token: GRIT_VARIABLE@672..675 "$x" [] [Whitespace(" ")],
+                },
+            },
+            annotation: missing (optional),
+            fat_arrow_token: FAT_ARROW@675..678 "=>" [] [Whitespace(" ")],
+            right: GritNodeLike {
+                name: GritName {
+                    value_token: GRIT_NAME@678..685 "my_todo" [] [],
+                },
+                l_paren_token: L_PAREN@685..686 "(" [] [],
+                named_args: GritNamedArgList [
+                    GritNamedArg {
+                        name: GritName {
+                            value_token: GRIT_NAME@686..692 "target" [] [],
+                        },
+                        eq_token: EQ@692..693 "=" [] [],
+                        pattern: GritVariable {
+                            value_token: GRIT_VARIABLE@693..695 "$x" [] [],
                         },
                     },
-                },
-            ],
-            r_paren_token: R_PAREN@725..726 ")" [] [],
+                    COMMA@695..697 "," [] [Whitespace(" ")],
+                    GritNamedArg {
+                        name: GritName {
+                            value_token: GRIT_NAME@697..704 "message" [] [],
+                        },
+                        eq_token: EQ@704..705 "=" [] [],
+                        pattern: GritCodeSnippet {
+                            source: GritBacktickSnippetLiteral {
+                                value_token: GRIT_BACKTICK_SNIPPET@705..725 "`Fix this\\nAnd that`" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_paren_token: R_PAREN@725..726 ")" [] [],
+            },
         },
-    },
-    definitions_continued: GritDefinitionList [],
+    ],
     eof_token: EOF@726..727 "" [Newline("\n")] [],
 }
 ```
@@ -391,7 +391,7 @@ GritRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: GRIT_DEFINITION_LIST@0..617
+  3: GRIT_DEFINITION_LIST@0..726
     0: GRIT_FUNCTION_DEFINITION@0..96
       0: FUNCTION_KW@0..36 "function" [Comments("// define a lines fun ..."), Newline("\n")] [Whitespace(" ")]
       1: GRIT_NAME@36..41
@@ -593,37 +593,37 @@ GritRoot {
               0: GRIT_VARIABLE@607..614 "$result" [] []
           11: COMMA@614..615 "," [] []
         2: R_CURLY@615..617 "}" [Newline("\n")] []
-  4: GRIT_REWRITE@617..726
-    0: GRIT_PATTERN_AS@617..675
-      0: GRIT_CODE_SNIPPET@617..669
-        0: GRIT_BACKTICK_SNIPPET_LITERAL@617..669
-          0: GRIT_BACKTICK_SNIPPET@617..669 "`module.exports = $_`" [Newline("\n"), Newline("\n"), Comments("// Use the my_todo fu ..."), Newline("\n")] [Whitespace(" ")]
-      1: AS_KW@669..672 "as" [] [Whitespace(" ")]
-      2: GRIT_VARIABLE@672..675
-        0: GRIT_VARIABLE@672..675 "$x" [] [Whitespace(" ")]
-    1: (empty)
-    2: FAT_ARROW@675..678 "=>" [] [Whitespace(" ")]
-    3: GRIT_NODE_LIKE@678..726
-      0: GRIT_NAME@678..685
-        0: GRIT_NAME@678..685 "my_todo" [] []
-      1: L_PAREN@685..686 "(" [] []
-      2: GRIT_NAMED_ARG_LIST@686..725
-        0: GRIT_NAMED_ARG@686..695
-          0: GRIT_NAME@686..692
-            0: GRIT_NAME@686..692 "target" [] []
-          1: EQ@692..693 "=" [] []
-          2: GRIT_VARIABLE@693..695
-            0: GRIT_VARIABLE@693..695 "$x" [] []
-        1: COMMA@695..697 "," [] [Whitespace(" ")]
-        2: GRIT_NAMED_ARG@697..725
-          0: GRIT_NAME@697..704
-            0: GRIT_NAME@697..704 "message" [] []
-          1: EQ@704..705 "=" [] []
-          2: GRIT_CODE_SNIPPET@705..725
-            0: GRIT_BACKTICK_SNIPPET_LITERAL@705..725
-              0: GRIT_BACKTICK_SNIPPET@705..725 "`Fix this\\nAnd that`" [] []
-      3: R_PAREN@725..726 ")" [] []
-  5: GRIT_DEFINITION_LIST@726..726
-  6: EOF@726..727 "" [Newline("\n")] []
+    3: (empty)
+    4: GRIT_REWRITE@617..726
+      0: GRIT_PATTERN_AS@617..675
+        0: GRIT_CODE_SNIPPET@617..669
+          0: GRIT_BACKTICK_SNIPPET_LITERAL@617..669
+            0: GRIT_BACKTICK_SNIPPET@617..669 "`module.exports = $_`" [Newline("\n"), Newline("\n"), Comments("// Use the my_todo fu ..."), Newline("\n")] [Whitespace(" ")]
+        1: AS_KW@669..672 "as" [] [Whitespace(" ")]
+        2: GRIT_VARIABLE@672..675
+          0: GRIT_VARIABLE@672..675 "$x" [] [Whitespace(" ")]
+      1: (empty)
+      2: FAT_ARROW@675..678 "=>" [] [Whitespace(" ")]
+      3: GRIT_NODE_LIKE@678..726
+        0: GRIT_NAME@678..685
+          0: GRIT_NAME@678..685 "my_todo" [] []
+        1: L_PAREN@685..686 "(" [] []
+        2: GRIT_NAMED_ARG_LIST@686..725
+          0: GRIT_NAMED_ARG@686..695
+            0: GRIT_NAME@686..692
+              0: GRIT_NAME@686..692 "target" [] []
+            1: EQ@692..693 "=" [] []
+            2: GRIT_VARIABLE@693..695
+              0: GRIT_VARIABLE@693..695 "$x" [] []
+          1: COMMA@695..697 "," [] [Whitespace(" ")]
+          2: GRIT_NAMED_ARG@697..725
+            0: GRIT_NAME@697..704
+              0: GRIT_NAME@697..704 "message" [] []
+            1: EQ@704..705 "=" [] []
+            2: GRIT_CODE_SNIPPET@705..725
+              0: GRIT_BACKTICK_SNIPPET_LITERAL@705..725
+                0: GRIT_BACKTICK_SNIPPET@705..725 "`Fix this\\nAnd that`" [] []
+        3: R_PAREN@725..726 ")" [] []
+  4: EOF@726..727 "" [Newline("\n")] []
 
 ```

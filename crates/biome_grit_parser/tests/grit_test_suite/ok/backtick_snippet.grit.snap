@@ -15,13 +15,13 @@ GritRoot {
     bom_token: missing (optional),
     version: missing (optional),
     language: missing (optional),
-    definitions: GritDefinitionList [],
-    pattern: GritCodeSnippet {
-        source: GritBacktickSnippetLiteral {
-            value_token: GRIT_BACKTICK_SNIPPET@0..23 "`console.log($message)`" [] [],
+    definitions: GritDefinitionList [
+        GritCodeSnippet {
+            source: GritBacktickSnippetLiteral {
+                value_token: GRIT_BACKTICK_SNIPPET@0..23 "`console.log($message)`" [] [],
+            },
         },
-    },
-    definitions_continued: GritDefinitionList [],
+    ],
     eof_token: EOF@23..24 "" [Newline("\n")] [],
 }
 ```
@@ -33,11 +33,10 @@ GritRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: GRIT_DEFINITION_LIST@0..0
-  4: GRIT_CODE_SNIPPET@0..23
-    0: GRIT_BACKTICK_SNIPPET_LITERAL@0..23
-      0: GRIT_BACKTICK_SNIPPET@0..23 "`console.log($message)`" [] []
-  5: GRIT_DEFINITION_LIST@23..23
-  6: EOF@23..24 "" [Newline("\n")] []
+  3: GRIT_DEFINITION_LIST@0..23
+    0: GRIT_CODE_SNIPPET@0..23
+      0: GRIT_BACKTICK_SNIPPET_LITERAL@0..23
+        0: GRIT_BACKTICK_SNIPPET@0..23 "`console.log($message)`" [] []
+  4: EOF@23..24 "" [Newline("\n")] []
 
 ```

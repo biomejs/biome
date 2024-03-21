@@ -24,8 +24,6 @@ GritRoot {
     },
     language: missing (optional),
     definitions: GritDefinitionList [],
-    pattern: missing (optional),
-    definitions_continued: GritDefinitionList [],
     eof_token: EOF@18..19 "" [Newline("\n")] [],
 }
 ```
@@ -44,8 +42,6 @@ GritRoot {
     4: R_PAREN@17..18 ")" [] []
   2: (empty)
   3: GRIT_DEFINITION_LIST@18..18
-  4: (empty)
-  5: GRIT_DEFINITION_LIST@18..18
-  6: EOF@18..19 "" [Newline("\n")] []
+  4: EOF@18..19 "" [Newline("\n")] []
 
 ```

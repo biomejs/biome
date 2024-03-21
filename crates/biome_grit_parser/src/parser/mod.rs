@@ -214,6 +214,10 @@ impl ParseSeparatedList for LanguageFlavorList {
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![,]
     }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
+    }
 }
 
 fn parse_language_name(p: &mut GritParser) -> ParsedSyntax {
@@ -328,5 +332,9 @@ impl ParseSeparatedList for VariableList {
 
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![,]
+    }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
     }
 }

@@ -35,49 +35,49 @@ GritRoot {
         flavor: missing (optional),
         semicolon_token: missing (optional),
     },
-    definitions: GritDefinitionList [],
-    pattern: GritPatternWhere {
-        pattern: GritCodeSnippet {
-            source: GritBacktickSnippetLiteral {
-                value_token: GRIT_BACKTICK_SNIPPET@29..43 "`$test($_)`" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+    definitions: GritDefinitionList [
+        GritPatternWhere {
+            pattern: GritCodeSnippet {
+                source: GritBacktickSnippetLiteral {
+                    value_token: GRIT_BACKTICK_SNIPPET@29..43 "`$test($_)`" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                },
+            },
+            where_token: WHERE_KW@43..49 "where" [] [Whitespace(" ")],
+            side_condition: GritPredicateAnd {
+                and_token: missing (optional),
+                l_curly_token: L_CURLY@49..50 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateMatch {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@50..61 "$test" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        match_token: MATCH@61..64 "<:" [] [Whitespace(" ")],
+                        right: GritRewrite {
+                            left: GritCodeSnippet {
+                                source: GritLanguageSpecificSnippet {
+                                    language: GritLanguageName {
+                                        language_kind: JS_KW@64..66 "js" [] [],
+                                    },
+                                    snippet_token: GRIT_STRING@66..78 "\"test.only\"" [] [Whitespace(" ")],
+                                },
+                            },
+                            annotation: missing (optional),
+                            fat_arrow_token: FAT_ARROW@78..81 "=>" [] [Whitespace(" ")],
+                            right: GritCodeSnippet {
+                                source: GritLanguageSpecificSnippet {
+                                    language: GritLanguageName {
+                                        language_kind: JS_KW@81..83 "js" [] [],
+                                    },
+                                    snippet_token: GRIT_STRING@83..89 "\"test\"" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@89..91 "}" [Newline("\n")] [],
             },
         },
-        where_token: WHERE_KW@43..49 "where" [] [Whitespace(" ")],
-        side_condition: GritPredicateAnd {
-            and_token: missing (optional),
-            l_curly_token: L_CURLY@49..50 "{" [] [],
-            predicates: GritPredicateList [
-                GritPredicateMatch {
-                    left: GritVariable {
-                        value_token: GRIT_VARIABLE@50..61 "$test" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
-                    },
-                    match_token: MATCH@61..64 "<:" [] [Whitespace(" ")],
-                    right: GritRewrite {
-                        left: GritCodeSnippet {
-                            source: GritLanguageSpecificSnippet {
-                                language: GritLanguageName {
-                                    language_kind: JS_KW@64..66 "js" [] [],
-                                },
-                                snippet_token: GRIT_STRING@66..78 "\"test.only\"" [] [Whitespace(" ")],
-                            },
-                        },
-                        annotation: missing (optional),
-                        fat_arrow_token: FAT_ARROW@78..81 "=>" [] [Whitespace(" ")],
-                        right: GritCodeSnippet {
-                            source: GritLanguageSpecificSnippet {
-                                language: GritLanguageName {
-                                    language_kind: JS_KW@81..83 "js" [] [],
-                                },
-                                snippet_token: GRIT_STRING@83..89 "\"test\"" [] [],
-                            },
-                        },
-                    },
-                },
-            ],
-            r_curly_token: R_CURLY@89..91 "}" [Newline("\n")] [],
-        },
-    },
-    definitions_continued: GritDefinitionList [],
+    ],
     eof_token: EOF@91..92 "" [Newline("\n")] [],
 }
 ```
@@ -100,35 +100,34 @@ GritRoot {
       0: JS_KW@27..29 "js" [] []
     2: (empty)
     3: (empty)
-  3: GRIT_DEFINITION_LIST@29..29
-  4: GRIT_PATTERN_WHERE@29..91
-    0: GRIT_CODE_SNIPPET@29..43
-      0: GRIT_BACKTICK_SNIPPET_LITERAL@29..43
-        0: GRIT_BACKTICK_SNIPPET@29..43 "`$test($_)`" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-    1: WHERE_KW@43..49 "where" [] [Whitespace(" ")]
-    2: GRIT_PREDICATE_AND@49..91
-      0: (empty)
-      1: L_CURLY@49..50 "{" [] []
-      2: GRIT_PREDICATE_LIST@50..89
-        0: GRIT_PREDICATE_MATCH@50..89
-          0: GRIT_VARIABLE@50..61
-            0: GRIT_VARIABLE@50..61 "$test" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
-          1: MATCH@61..64 "<:" [] [Whitespace(" ")]
-          2: GRIT_REWRITE@64..89
-            0: GRIT_CODE_SNIPPET@64..78
-              0: GRIT_LANGUAGE_SPECIFIC_SNIPPET@64..78
-                0: GRIT_LANGUAGE_NAME@64..66
-                  0: JS_KW@64..66 "js" [] []
-                1: GRIT_STRING@66..78 "\"test.only\"" [] [Whitespace(" ")]
-            1: (empty)
-            2: FAT_ARROW@78..81 "=>" [] [Whitespace(" ")]
-            3: GRIT_CODE_SNIPPET@81..89
-              0: GRIT_LANGUAGE_SPECIFIC_SNIPPET@81..89
-                0: GRIT_LANGUAGE_NAME@81..83
-                  0: JS_KW@81..83 "js" [] []
-                1: GRIT_STRING@83..89 "\"test\"" [] []
-      3: R_CURLY@89..91 "}" [Newline("\n")] []
-  5: GRIT_DEFINITION_LIST@91..91
-  6: EOF@91..92 "" [Newline("\n")] []
+  3: GRIT_DEFINITION_LIST@29..91
+    0: GRIT_PATTERN_WHERE@29..91
+      0: GRIT_CODE_SNIPPET@29..43
+        0: GRIT_BACKTICK_SNIPPET_LITERAL@29..43
+          0: GRIT_BACKTICK_SNIPPET@29..43 "`$test($_)`" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: WHERE_KW@43..49 "where" [] [Whitespace(" ")]
+      2: GRIT_PREDICATE_AND@49..91
+        0: (empty)
+        1: L_CURLY@49..50 "{" [] []
+        2: GRIT_PREDICATE_LIST@50..89
+          0: GRIT_PREDICATE_MATCH@50..89
+            0: GRIT_VARIABLE@50..61
+              0: GRIT_VARIABLE@50..61 "$test" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: MATCH@61..64 "<:" [] [Whitespace(" ")]
+            2: GRIT_REWRITE@64..89
+              0: GRIT_CODE_SNIPPET@64..78
+                0: GRIT_LANGUAGE_SPECIFIC_SNIPPET@64..78
+                  0: GRIT_LANGUAGE_NAME@64..66
+                    0: JS_KW@64..66 "js" [] []
+                  1: GRIT_STRING@66..78 "\"test.only\"" [] [Whitespace(" ")]
+              1: (empty)
+              2: FAT_ARROW@78..81 "=>" [] [Whitespace(" ")]
+              3: GRIT_CODE_SNIPPET@81..89
+                0: GRIT_LANGUAGE_SPECIFIC_SNIPPET@81..89
+                  0: GRIT_LANGUAGE_NAME@81..83
+                    0: JS_KW@81..83 "js" [] []
+                  1: GRIT_STRING@83..89 "\"test\"" [] []
+        3: R_CURLY@89..91 "}" [Newline("\n")] []
+  4: EOF@91..92 "" [Newline("\n")] []
 
 ```

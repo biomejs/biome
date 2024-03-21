@@ -513,7 +513,7 @@ impl ParseSeparatedList for NodeArgList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(token_set!(T![')']))
+        p.at(T![')'])
     }
 
     fn recover(
@@ -530,6 +530,10 @@ impl ParseSeparatedList for NodeArgList {
 
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![,]
+    }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
     }
 }
 
@@ -789,6 +793,10 @@ impl ParseSeparatedList for PatternList {
 
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![,]
+    }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
     }
 }
 

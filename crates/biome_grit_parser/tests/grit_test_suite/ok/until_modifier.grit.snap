@@ -17,45 +17,45 @@ GritRoot {
     bom_token: missing (optional),
     version: missing (optional),
     language: missing (optional),
-    definitions: GritDefinitionList [],
-    pattern: GritPatternWhere {
-        pattern: GritCodeSnippet {
-            source: GritBacktickSnippetLiteral {
-                value_token: GRIT_BACKTICK_SNIPPET@0..23 "`console.$_($content)`" [] [Whitespace(" ")],
+    definitions: GritDefinitionList [
+        GritPatternWhere {
+            pattern: GritCodeSnippet {
+                source: GritBacktickSnippetLiteral {
+                    value_token: GRIT_BACKTICK_SNIPPET@0..23 "`console.$_($content)`" [] [Whitespace(" ")],
+                },
             },
-        },
-        where_token: WHERE_KW@23..29 "where" [] [Whitespace(" ")],
-        side_condition: GritPredicateAnd {
-            and_token: missing (optional),
-            l_curly_token: L_CURLY@29..30 "{" [] [],
-            predicates: GritPredicateList [
-                GritPredicateMatch {
-                    left: GritVariable {
-                        value_token: GRIT_VARIABLE@30..42 "$content" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
-                    },
-                    match_token: MATCH@42..45 "<:" [] [Whitespace(" ")],
-                    right: GritPatternContains {
-                        contains_token: CONTAINS_KW@45..54 "contains" [] [Whitespace(" ")],
-                        contains: GritCodeSnippet {
-                            source: GritBacktickSnippetLiteral {
-                                value_token: GRIT_BACKTICK_SNIPPET@54..63 "`secret`" [] [Whitespace(" ")],
-                            },
+            where_token: WHERE_KW@23..29 "where" [] [Whitespace(" ")],
+            side_condition: GritPredicateAnd {
+                and_token: missing (optional),
+                l_curly_token: L_CURLY@29..30 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateMatch {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@30..42 "$content" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
                         },
-                        until_clause: GritPatternContainsUntilClause {
-                            until_token: UNTIL_KW@63..69 "until" [] [Whitespace(" ")],
-                            until: GritCodeSnippet {
+                        match_token: MATCH@42..45 "<:" [] [Whitespace(" ")],
+                        right: GritPatternContains {
+                            contains_token: CONTAINS_KW@45..54 "contains" [] [Whitespace(" ")],
+                            contains: GritCodeSnippet {
                                 source: GritBacktickSnippetLiteral {
-                                    value_token: GRIT_BACKTICK_SNIPPET@69..84 "`sanitized($_)`" [] [],
+                                    value_token: GRIT_BACKTICK_SNIPPET@54..63 "`secret`" [] [Whitespace(" ")],
+                                },
+                            },
+                            until_clause: GritPatternContainsUntilClause {
+                                until_token: UNTIL_KW@63..69 "until" [] [Whitespace(" ")],
+                                until: GritCodeSnippet {
+                                    source: GritBacktickSnippetLiteral {
+                                        value_token: GRIT_BACKTICK_SNIPPET@69..84 "`sanitized($_)`" [] [],
+                                    },
                                 },
                             },
                         },
                     },
-                },
-            ],
-            r_curly_token: R_CURLY@84..86 "}" [Newline("\n")] [],
+                ],
+                r_curly_token: R_CURLY@84..86 "}" [Newline("\n")] [],
+            },
         },
-    },
-    definitions_continued: GritDefinitionList [],
+    ],
     eof_token: EOF@86..87 "" [Newline("\n")] [],
 }
 ```
@@ -67,32 +67,31 @@ GritRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: GRIT_DEFINITION_LIST@0..0
-  4: GRIT_PATTERN_WHERE@0..86
-    0: GRIT_CODE_SNIPPET@0..23
-      0: GRIT_BACKTICK_SNIPPET_LITERAL@0..23
-        0: GRIT_BACKTICK_SNIPPET@0..23 "`console.$_($content)`" [] [Whitespace(" ")]
-    1: WHERE_KW@23..29 "where" [] [Whitespace(" ")]
-    2: GRIT_PREDICATE_AND@29..86
-      0: (empty)
-      1: L_CURLY@29..30 "{" [] []
-      2: GRIT_PREDICATE_LIST@30..84
-        0: GRIT_PREDICATE_MATCH@30..84
-          0: GRIT_VARIABLE@30..42
-            0: GRIT_VARIABLE@30..42 "$content" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
-          1: MATCH@42..45 "<:" [] [Whitespace(" ")]
-          2: GRIT_PATTERN_CONTAINS@45..84
-            0: CONTAINS_KW@45..54 "contains" [] [Whitespace(" ")]
-            1: GRIT_CODE_SNIPPET@54..63
-              0: GRIT_BACKTICK_SNIPPET_LITERAL@54..63
-                0: GRIT_BACKTICK_SNIPPET@54..63 "`secret`" [] [Whitespace(" ")]
-            2: GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE@63..84
-              0: UNTIL_KW@63..69 "until" [] [Whitespace(" ")]
-              1: GRIT_CODE_SNIPPET@69..84
-                0: GRIT_BACKTICK_SNIPPET_LITERAL@69..84
-                  0: GRIT_BACKTICK_SNIPPET@69..84 "`sanitized($_)`" [] []
-      3: R_CURLY@84..86 "}" [Newline("\n")] []
-  5: GRIT_DEFINITION_LIST@86..86
-  6: EOF@86..87 "" [Newline("\n")] []
+  3: GRIT_DEFINITION_LIST@0..86
+    0: GRIT_PATTERN_WHERE@0..86
+      0: GRIT_CODE_SNIPPET@0..23
+        0: GRIT_BACKTICK_SNIPPET_LITERAL@0..23
+          0: GRIT_BACKTICK_SNIPPET@0..23 "`console.$_($content)`" [] [Whitespace(" ")]
+      1: WHERE_KW@23..29 "where" [] [Whitespace(" ")]
+      2: GRIT_PREDICATE_AND@29..86
+        0: (empty)
+        1: L_CURLY@29..30 "{" [] []
+        2: GRIT_PREDICATE_LIST@30..84
+          0: GRIT_PREDICATE_MATCH@30..84
+            0: GRIT_VARIABLE@30..42
+              0: GRIT_VARIABLE@30..42 "$content" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: MATCH@42..45 "<:" [] [Whitespace(" ")]
+            2: GRIT_PATTERN_CONTAINS@45..84
+              0: CONTAINS_KW@45..54 "contains" [] [Whitespace(" ")]
+              1: GRIT_CODE_SNIPPET@54..63
+                0: GRIT_BACKTICK_SNIPPET_LITERAL@54..63
+                  0: GRIT_BACKTICK_SNIPPET@54..63 "`secret`" [] [Whitespace(" ")]
+              2: GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE@63..84
+                0: UNTIL_KW@63..69 "until" [] [Whitespace(" ")]
+                1: GRIT_CODE_SNIPPET@69..84
+                  0: GRIT_BACKTICK_SNIPPET_LITERAL@69..84
+                    0: GRIT_BACKTICK_SNIPPET@69..84 "`sanitized($_)`" [] []
+        3: R_CURLY@84..86 "}" [Newline("\n")] []
+  4: EOF@86..87 "" [Newline("\n")] []
 
 ```
