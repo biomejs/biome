@@ -1604,7 +1604,7 @@ export interface ConsistentArrayTypeOptions {
  */
 export interface FilenamingConventionOptions {
 	/**
-	 * Allowed cases for _TypeScript_ `enum` member names.
+	 * Allowed cases for file names.
 	 */
 	filenameCases: FilenameCases;
 	/**
@@ -1667,7 +1667,7 @@ export type FilenameCases = FilenameCase[];
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
 export type StableHookResult = "None" | "Identity" | { Indices: number[] };
 /**
- * Supported cases for TypeScript `enum` member names.
+ * Supported cases for file names.
  */
 export type FilenameCase =
 	| "camelCase"
