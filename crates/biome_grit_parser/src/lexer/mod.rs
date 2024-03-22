@@ -143,32 +143,6 @@ impl<'src> GritLexer<'src> {
         }
     }
 
-    /// Get the UTF8 char which starts at the current byte
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    #[inline]
-    fn current_char_unchecked(&self) -> char {
-        // Precautionary measure for making sure the unsafe code below does not
-        // read over memory boundary.
-        debug_assert!(!self.is_eof());
-        self.assert_current_char_boundary();
-
-        // Safety: We know this is safe because we require the input to the
-        // lexer to be valid utf8 and we always call this when we are at a char.
-        unsafe {
-            let Some(chr) = self
-                .source
-                .get_unchecked(self.position..self.source.len())
-                .chars()
-                .next()
-            else {
-                core::hint::unreachable_unchecked();
-            };
-            chr
-        }
-    }
-
     /// Bumps the current byte and creates a lexed token of the passed in kind.
     #[inline]
     fn consume_byte(&mut self, tok: GritSyntaxKind) -> GritSyntaxKind {
