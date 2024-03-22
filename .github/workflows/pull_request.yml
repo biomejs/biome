@@ -36,6 +36,7 @@ jobs:
         with:
           components: rustfmt
           bins: taplo-cli
+          cache-base: main
       - name: Run format
         run: |
           cargo fmt --all --check
@@ -53,6 +54,7 @@ jobs:
         uses: moonrepo/setup-rust@v1
         with:
           components: clippy
+          cache-base: main
       - name: Run clippy
         run: cargo lint
 
@@ -88,6 +90,7 @@ jobs:
         uses: moonrepo/setup-rust@v1
         with:
           bins: cargo-nextest
+          cache-base: main
       - name: Run tests
         run: cargo nextest run --workspace --verbose
       - name: Run doctests
@@ -116,6 +119,9 @@ jobs:
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
+        with:
+          cache-target: release
+          cache-base: main
       - name: Build main binary
         run: cargo build -p biome_cli --release
       - name: Install Node.js
@@ -157,6 +163,8 @@ jobs:
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
+        with:
+          cache-base: main
       - name: Run doc command
         run: cargo documentation
 
@@ -170,6 +178,8 @@ jobs:
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
+        with:
+          cache-base: main
       - name: Run the grammar codegen
         run: cargo codegen grammar
       - name: Run the analyzer codegen
