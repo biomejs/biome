@@ -468,6 +468,7 @@ impl Session {
 
             Err(err) => {
                 error!("Couldn't load the configuration file, reason:\n {}", err);
+                self.client.log_message(MessageType::ERROR, &err).await;
                 ConfigurationStatus::Error
             }
         };
