@@ -197,7 +197,7 @@ thread_local! {
     /// will be the address of the `main` function, while on worker threads
     /// this will be the start function for the thread (see the documentation
     /// of [set_bottom_frame] for examples of where to set the bottom frame).
-    static BOTTOM_FRAME: Cell<Option<usize>> = Cell::new(None);
+    static BOTTOM_FRAME: Cell<Option<usize>> = const { Cell::new(None) };
 }
 
 /// Registers a function pointer as the "bottom frame" for this thread: all

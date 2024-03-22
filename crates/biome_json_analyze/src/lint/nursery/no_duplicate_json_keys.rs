@@ -70,9 +70,7 @@ impl Rule for NoDuplicateJsonKeys {
             .collect();
 
         if !duplicated_keys.is_empty() {
-            let Some(original_key) = original_key else {
-                return None;
-            };
+            let original_key = original_key?;
 
             return Some(DuplicatedKeys {
                 original_key,

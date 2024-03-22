@@ -29,15 +29,12 @@ smallvec                     = { workspace = true }
 unicode-width                = "0.1.9"
 
 [dev-dependencies]
-biome_diagnostics    = { path = "../biome_diagnostics" }
 biome_formatter_test = { path = "../biome_formatter_test" }
-biome_fs             = { path = "../biome_fs" }
 biome_js_factory     = { path = "../biome_js_factory" }
 biome_js_parser      = { path = "../biome_js_parser" }
 biome_parser         = { path = "../biome_parser" }
 countme              = { workspace = true, features = ["enable"] }
 iai                  = "0.1.1"
-insta                = { workspace = true, features = ["glob"] }
 quickcheck           = { workspace = true }
 quickcheck_macros    = { workspace = true }
 serde                = { version = "1", features = ["derive"] }

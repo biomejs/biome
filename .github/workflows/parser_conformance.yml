@@ -35,6 +35,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
+
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
 

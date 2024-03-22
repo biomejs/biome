@@ -1,47 +1,20 @@
 use biome_rowan::FileSourceError;
 use std::path::Path;
 
-// TODO: Jsonc is not well-defined, so some files may only support comments
-// but no trailing commas. We should reconsider whether to use Jsonc as a variant,
-// or just use something like: JsonWithComments, JsonWithCommentsAndTrailingCommas
-//
-// Currently, the "variant" key and other properties are making things duplicated
-// and error-prone.
-
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
 pub struct JsonFileSource {
-    variant: JsonVariant,
     allow_trailing_commas: bool,
     allow_comments: bool,
-}
-
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[derive(
-    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
-)]
-enum JsonVariant {
-    #[default]
-    Standard,
-    Jsonc,
 }
 
 impl JsonFileSource {
     pub fn json() -> Self {
         Self {
-            variant: JsonVariant::Standard,
             allow_trailing_commas: false,
             allow_comments: false,
-        }
-    }
-
-    pub fn jsonc() -> Self {
-        Self {
-            variant: JsonVariant::Jsonc,
-            allow_trailing_commas: true,
-            allow_comments: true,
         }
     }
 
@@ -69,10 +42,6 @@ impl JsonFileSource {
 
     pub fn get_allow_comments(&self) -> bool {
         self.allow_comments
-    }
-
-    pub const fn is_jsonc(&self) -> bool {
-        matches!(self.variant, JsonVariant::Jsonc)
     }
 }
 
@@ -106,7 +75,7 @@ fn compute_source_type_from_path_or_extension(
     } else {
         match extension {
             "json" => JsonFileSource::json(),
-            "jsonc" => JsonFileSource::jsonc(),
+            "jsonc" => JsonFileSource::json().with_comments(true),
             _ => {
                 return Err(FileSourceError::UnknownExtension(
                     file_name.into(),

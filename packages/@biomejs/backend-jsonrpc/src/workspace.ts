@@ -1,7 +1,7 @@
 // Generated file, do not edit by hand, see `xtask/codegen`
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
-	feature: FeatureName[];
+	features: FeatureName[];
 	path: BiomePath;
 }
 export type FeatureName = "Format" | "Lint" | "OrganizeImports";
@@ -1711,7 +1711,6 @@ export interface JsFileSource {
 export interface JsonFileSource {
 	allow_comments: boolean;
 	allow_trailing_commas: boolean;
-	variant: JsonVariant;
 }
 export interface CssFileSource {
 	variant: CssVariant;
@@ -1731,7 +1730,6 @@ export type LanguageVariant = "Standard" | "StandardRestricted" | "Jsx";
 Defaults to the latest stable ECMAScript standard. 
 	 */
 export type LanguageVersion = "ES2022" | "ESNext";
-export type JsonVariant = "Standard" | "Jsonc";
 /**
 	* The style of CSS contained in the file.
 

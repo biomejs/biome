@@ -180,12 +180,8 @@ impl Rule for NoUselessConstructor {
             // There are more than one statement.
             return None;
         }
-        let Some(js_expr) = first.as_js_expression_statement()?.expression().ok() else {
-            return None;
-        };
-        let Some(js_call) = js_expr.as_js_call_expression() else {
-            return None;
-        };
+        let js_expr = first.as_js_expression_statement()?.expression().ok()?;
+        let js_call = js_expr.as_js_call_expression()?;
         let is_super_call = js_call.callee().ok()?.as_js_super_expression().is_some();
         if !is_super_call {
             return None;
