@@ -1,0 +1,111 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+js"multiply($x)" where {
+  $y = $x * 2,
+  $x => $y
+}
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritPatternWhere {
+            pattern: GritCodeSnippet {
+                source: GritLanguageSpecificSnippet {
+                    language: GritLanguageName {
+                        language_kind: JS_KW@0..2 "js" [] [],
+                    },
+                    snippet_token: GRIT_STRING@2..17 "\"multiply($x)\"" [] [Whitespace(" ")],
+                },
+            },
+            where_token: WHERE_KW@17..23 "where" [] [Whitespace(" ")],
+            side_condition: GritPredicateAnd {
+                and_token: missing (optional),
+                l_curly_token: L_CURLY@23..24 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateAssignment {
+                        container: GritVariable {
+                            value_token: GRIT_VARIABLE@24..30 "$y" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                        eq_token: EQ@30..32 "=" [] [Whitespace(" ")],
+                        pattern: GritMulOperation {
+                            left: GritVariable {
+                                value_token: GRIT_VARIABLE@32..35 "$x" [] [Whitespace(" ")],
+                            },
+                            star_token: STAR@35..37 "*" [] [Whitespace(" ")],
+                            right: GritIntLiteral {
+                                value_token: GRIT_INT@37..38 "2" [] [],
+                            },
+                        },
+                    },
+                    COMMA@38..39 "," [] [],
+                    GritPredicateRewrite {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@39..45 "$x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                        annotation: missing (optional),
+                        fat_arrow_token: FAT_ARROW@45..48 "=>" [] [Whitespace(" ")],
+                        right: GritVariable {
+                            value_token: GRIT_VARIABLE@48..50 "$y" [] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@50..52 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@52..53 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..53
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..52
+    0: GRIT_PATTERN_WHERE@0..52
+      0: GRIT_CODE_SNIPPET@0..17
+        0: GRIT_LANGUAGE_SPECIFIC_SNIPPET@0..17
+          0: GRIT_LANGUAGE_NAME@0..2
+            0: JS_KW@0..2 "js" [] []
+          1: GRIT_STRING@2..17 "\"multiply($x)\"" [] [Whitespace(" ")]
+      1: WHERE_KW@17..23 "where" [] [Whitespace(" ")]
+      2: GRIT_PREDICATE_AND@23..52
+        0: (empty)
+        1: L_CURLY@23..24 "{" [] []
+        2: GRIT_PREDICATE_LIST@24..50
+          0: GRIT_PREDICATE_ASSIGNMENT@24..38
+            0: GRIT_VARIABLE@24..30
+              0: GRIT_VARIABLE@24..30 "$y" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: EQ@30..32 "=" [] [Whitespace(" ")]
+            2: GRIT_MUL_OPERATION@32..38
+              0: GRIT_VARIABLE@32..35
+                0: GRIT_VARIABLE@32..35 "$x" [] [Whitespace(" ")]
+              1: STAR@35..37 "*" [] [Whitespace(" ")]
+              2: GRIT_INT_LITERAL@37..38
+                0: GRIT_INT@37..38 "2" [] []
+          1: COMMA@38..39 "," [] []
+          2: GRIT_PREDICATE_REWRITE@39..50
+            0: GRIT_VARIABLE@39..45
+              0: GRIT_VARIABLE@39..45 "$x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: (empty)
+            2: FAT_ARROW@45..48 "=>" [] [Whitespace(" ")]
+            3: GRIT_VARIABLE@48..50
+              0: GRIT_VARIABLE@48..50 "$y" [] []
+        3: R_CURLY@50..52 "}" [Newline("\n")] []
+  4: EOF@52..53 "" [Newline("\n")] []
+
+```

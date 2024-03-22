@@ -1,0 +1,192 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+`function $functionName($_) {$_}` as $f where {
+  $functionName <: r"test.*",
+  $f => .,
+  $new_file_name = `$functionName.test.js`,
+  $new_files += file(name = $new_file_name, body = $f)
+}
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritPatternWhere {
+            pattern: GritPatternAs {
+                pattern: GritCodeSnippet {
+                    source: GritBacktickSnippetLiteral {
+                        value_token: GRIT_BACKTICK_SNIPPET@0..34 "`function $functionName($_) {$_}`" [] [Whitespace(" ")],
+                    },
+                },
+                as_token: AS_KW@34..37 "as" [] [Whitespace(" ")],
+                variable: GritVariable {
+                    value_token: GRIT_VARIABLE@37..40 "$f" [] [Whitespace(" ")],
+                },
+            },
+            where_token: WHERE_KW@40..46 "where" [] [Whitespace(" ")],
+            side_condition: GritPredicateAnd {
+                and_token: missing (optional),
+                l_curly_token: L_CURLY@46..47 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateMatch {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@47..64 "$functionName" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                        match_token: MATCH@64..67 "<:" [] [Whitespace(" ")],
+                        right: GritRegexPattern {
+                            regex: GritRegexLiteral {
+                                value_token: GRIT_REGEX@67..76 "r\"test.*\"" [] [],
+                            },
+                            variables: missing (optional),
+                        },
+                    },
+                    COMMA@76..77 "," [] [],
+                    GritPredicateRewrite {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@77..83 "$f" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                        annotation: missing (optional),
+                        fat_arrow_token: FAT_ARROW@83..86 "=>" [] [Whitespace(" ")],
+                        right: GritDot {
+                            dot_token: DOT@86..87 "." [] [],
+                        },
+                    },
+                    COMMA@87..88 "," [] [],
+                    GritPredicateAssignment {
+                        container: GritVariable {
+                            value_token: GRIT_VARIABLE@88..106 "$new_file_name" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                        eq_token: EQ@106..108 "=" [] [Whitespace(" ")],
+                        pattern: GritCodeSnippet {
+                            source: GritBacktickSnippetLiteral {
+                                value_token: GRIT_BACKTICK_SNIPPET@108..131 "`$functionName.test.js`" [] [],
+                            },
+                        },
+                    },
+                    COMMA@131..132 "," [] [],
+                    GritPredicateAccumulate {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@132..146 "$new_files" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                        add_assign_token: PLUSEQ@146..149 "+=" [] [Whitespace(" ")],
+                        right: GritNodeLike {
+                            name: GritName {
+                                value_token: GRIT_NAME@149..153 "file" [] [],
+                            },
+                            l_paren_token: L_PAREN@153..154 "(" [] [],
+                            named_args: GritNamedArgList [
+                                GritNamedArg {
+                                    name: GritName {
+                                        value_token: GRIT_NAME@154..159 "name" [] [Whitespace(" ")],
+                                    },
+                                    eq_token: EQ@159..161 "=" [] [Whitespace(" ")],
+                                    pattern: GritVariable {
+                                        value_token: GRIT_VARIABLE@161..175 "$new_file_name" [] [],
+                                    },
+                                },
+                                COMMA@175..177 "," [] [Whitespace(" ")],
+                                GritNamedArg {
+                                    name: GritName {
+                                        value_token: GRIT_NAME@177..182 "body" [] [Whitespace(" ")],
+                                    },
+                                    eq_token: EQ@182..184 "=" [] [Whitespace(" ")],
+                                    pattern: GritVariable {
+                                        value_token: GRIT_VARIABLE@184..186 "$f" [] [],
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@186..187 ")" [] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@187..189 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@189..190 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..190
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..189
+    0: GRIT_PATTERN_WHERE@0..189
+      0: GRIT_PATTERN_AS@0..40
+        0: GRIT_CODE_SNIPPET@0..34
+          0: GRIT_BACKTICK_SNIPPET_LITERAL@0..34
+            0: GRIT_BACKTICK_SNIPPET@0..34 "`function $functionName($_) {$_}`" [] [Whitespace(" ")]
+        1: AS_KW@34..37 "as" [] [Whitespace(" ")]
+        2: GRIT_VARIABLE@37..40
+          0: GRIT_VARIABLE@37..40 "$f" [] [Whitespace(" ")]
+      1: WHERE_KW@40..46 "where" [] [Whitespace(" ")]
+      2: GRIT_PREDICATE_AND@46..189
+        0: (empty)
+        1: L_CURLY@46..47 "{" [] []
+        2: GRIT_PREDICATE_LIST@47..187
+          0: GRIT_PREDICATE_MATCH@47..76
+            0: GRIT_VARIABLE@47..64
+              0: GRIT_VARIABLE@47..64 "$functionName" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: MATCH@64..67 "<:" [] [Whitespace(" ")]
+            2: GRIT_REGEX_PATTERN@67..76
+              0: GRIT_REGEX_LITERAL@67..76
+                0: GRIT_REGEX@67..76 "r\"test.*\"" [] []
+              1: (empty)
+          1: COMMA@76..77 "," [] []
+          2: GRIT_PREDICATE_REWRITE@77..87
+            0: GRIT_VARIABLE@77..83
+              0: GRIT_VARIABLE@77..83 "$f" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: (empty)
+            2: FAT_ARROW@83..86 "=>" [] [Whitespace(" ")]
+            3: GRIT_DOT@86..87
+              0: DOT@86..87 "." [] []
+          3: COMMA@87..88 "," [] []
+          4: GRIT_PREDICATE_ASSIGNMENT@88..131
+            0: GRIT_VARIABLE@88..106
+              0: GRIT_VARIABLE@88..106 "$new_file_name" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: EQ@106..108 "=" [] [Whitespace(" ")]
+            2: GRIT_CODE_SNIPPET@108..131
+              0: GRIT_BACKTICK_SNIPPET_LITERAL@108..131
+                0: GRIT_BACKTICK_SNIPPET@108..131 "`$functionName.test.js`" [] []
+          5: COMMA@131..132 "," [] []
+          6: GRIT_PREDICATE_ACCUMULATE@132..187
+            0: GRIT_VARIABLE@132..146
+              0: GRIT_VARIABLE@132..146 "$new_files" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: PLUSEQ@146..149 "+=" [] [Whitespace(" ")]
+            2: GRIT_NODE_LIKE@149..187
+              0: GRIT_NAME@149..153
+                0: GRIT_NAME@149..153 "file" [] []
+              1: L_PAREN@153..154 "(" [] []
+              2: GRIT_NAMED_ARG_LIST@154..186
+                0: GRIT_NAMED_ARG@154..175
+                  0: GRIT_NAME@154..159
+                    0: GRIT_NAME@154..159 "name" [] [Whitespace(" ")]
+                  1: EQ@159..161 "=" [] [Whitespace(" ")]
+                  2: GRIT_VARIABLE@161..175
+                    0: GRIT_VARIABLE@161..175 "$new_file_name" [] []
+                1: COMMA@175..177 "," [] [Whitespace(" ")]
+                2: GRIT_NAMED_ARG@177..186
+                  0: GRIT_NAME@177..182
+                    0: GRIT_NAME@177..182 "body" [] [Whitespace(" ")]
+                  1: EQ@182..184 "=" [] [Whitespace(" ")]
+                  2: GRIT_VARIABLE@184..186
+                    0: GRIT_VARIABLE@184..186 "$f" [] []
+              3: R_PAREN@186..187 ")" [] []
+        3: R_CURLY@187..189 "}" [Newline("\n")] []
+  4: EOF@189..190 "" [Newline("\n")] []
+
+```

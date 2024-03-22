@@ -54,6 +54,9 @@ changelog = "crates/biome_fs/CHANGELOG.md"
 [packages.biome_grit_factory]
 versioned_files = ["crates/biome_grit_factory/Cargo.toml"]
 changelog = "crates/biome_grit_factory/CHANGELOG.md"
+[packages.biome_grit_parser]
+versioned_files = ["crates/biome_grit_parser/Cargo.toml"]
+changelog = "crates/biome_grit_parser/CHANGELOG.md"
 [packages.biome_grit_syntax]
 versioned_files = ["crates/biome_grit_syntax/Cargo.toml"]
 changelog = "crates/biome_grit_syntax/CHANGELOG.md"

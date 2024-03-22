@@ -1,0 +1,159 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+predicate program_contains_logger() {
+  invalid,
+  $variable,
+  $another
+}
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritPredicateDefinition {
+            predicate_token: PREDICATE_KW@0..10 "predicate" [] [Whitespace(" ")],
+            name: GritName {
+                value_token: GRIT_NAME@10..33 "program_contains_logger" [] [],
+            },
+            l_paren_token: L_PAREN@33..34 "(" [] [],
+            args: GritPatternArgList {
+                grit_variable_list: GritVariableList [],
+            },
+            r_paren_token: R_PAREN@34..36 ")" [] [Whitespace(" ")],
+            body: GritCurlyPredicateList {
+                l_curly_token: L_CURLY@36..37 "{" [] [],
+                predicates: GritPredicateList [
+                    GritBogusPredicate {
+                        items: [
+                            GRIT_NAME@37..47 "invalid" [Newline("\n"), Whitespace("  ")] [],
+                        ],
+                    },
+                    COMMA@47..48 "," [] [],
+                    GritBogusPredicate {
+                        items: [
+                            GritVariable {
+                                value_token: GRIT_VARIABLE@48..60 "$variable" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        ],
+                    },
+                    COMMA@60..61 "," [] [],
+                    GritBogusPredicate {
+                        items: [
+                            GritVariable {
+                                value_token: GRIT_VARIABLE@61..72 "$another" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        ],
+                    },
+                ],
+                r_curly_token: R_CURLY@72..74 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@74..75 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..75
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..74
+    0: GRIT_PREDICATE_DEFINITION@0..74
+      0: PREDICATE_KW@0..10 "predicate" [] [Whitespace(" ")]
+      1: GRIT_NAME@10..33
+        0: GRIT_NAME@10..33 "program_contains_logger" [] []
+      2: L_PAREN@33..34 "(" [] []
+      3: GRIT_PATTERN_ARG_LIST@34..34
+        0: GRIT_VARIABLE_LIST@34..34
+      4: R_PAREN@34..36 ")" [] [Whitespace(" ")]
+      5: GRIT_CURLY_PREDICATE_LIST@36..74
+        0: L_CURLY@36..37 "{" [] []
+        1: GRIT_PREDICATE_LIST@37..72
+          0: GRIT_BOGUS_PREDICATE@37..47
+            0: GRIT_NAME@37..47 "invalid" [Newline("\n"), Whitespace("  ")] []
+          1: COMMA@47..48 "," [] []
+          2: GRIT_BOGUS_PREDICATE@48..60
+            0: GRIT_VARIABLE@48..60
+              0: GRIT_VARIABLE@48..60 "$variable" [Newline("\n"), Whitespace("  ")] []
+          3: COMMA@60..61 "," [] []
+          4: GRIT_BOGUS_PREDICATE@61..72
+            0: GRIT_VARIABLE@61..72
+              0: GRIT_VARIABLE@61..72 "$another" [Newline("\n"), Whitespace("  ")] []
+        2: R_CURLY@72..74 "}" [Newline("\n")] []
+  4: EOF@74..75 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid_predicate.grit:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a predicate here.
+  
+    1 │ predicate program_contains_logger() {
+  > 2 │   invalid,
+      │   ^^^^^^^
+    3 │   $variable,
+    4 │   $another
+  
+  i Should this be a variable?
+  
+    1 │ predicate program_contains_logger() {
+  > 2 │   invalid,
+      │   ^^^^^^^
+    3 │   $variable,
+    4 │   $another
+  
+invalid_predicate.grit:3:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an operator but instead found ','.
+  
+    1 │ predicate program_contains_logger() {
+    2 │   invalid,
+  > 3 │   $variable,
+      │            ^
+    4 │   $another
+    5 │ }
+  
+  i Expected an operator here.
+  
+    1 │ predicate program_contains_logger() {
+    2 │   invalid,
+  > 3 │   $variable,
+      │            ^
+    4 │   $another
+    5 │ }
+  
+invalid_predicate.grit:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an operator but instead found '}'.
+  
+    3 │   $variable,
+    4 │   $another
+  > 5 │ }
+      │ ^
+    6 │ 
+  
+  i Expected an operator here.
+  
+    3 │   $variable,
+    4 │   $another
+  > 5 │ }
+      │ ^
+    6 │ 
+  
+```

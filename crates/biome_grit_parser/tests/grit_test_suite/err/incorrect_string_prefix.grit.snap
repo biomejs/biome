@@ -1,0 +1,66 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+unknown"console.log()"
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritBogusDefinition {
+            items: [
+                ERROR_TOKEN@0..7 "unknown" [] [],
+                GRIT_STRING@7..22 "\"console.log()\"" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@22..23 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..23
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..22
+    0: GRIT_BOGUS_DEFINITION@0..22
+      0: ERROR_TOKEN@0..7 "unknown" [] []
+      1: GRIT_STRING@7..22 "\"console.log()\"" [] []
+  4: EOF@22..23 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+incorrect_string_prefix.grit:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unxpected string prefix
+  
+  > 1 │ unknown"console.log()"
+      │ ^^^^^^^
+    2 │ 
+  
+  i Use a language annotation to create a language-specific snippet or use the `r` prefix to create a regex literal.
+  
+  i Supported language annotations are:
+  
+  - js
+  - json
+  - css
+  - grit
+  - html
+  
+```

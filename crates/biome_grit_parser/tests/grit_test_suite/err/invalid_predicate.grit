@@ -1,0 +1,5 @@
+predicate program_contains_logger() {
+  invalid,
+  $variable,
+  $another
+}

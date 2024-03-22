@@ -1,0 +1,126 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+`var $x = [$numbers]` => `var firstPrimes = [$numbers]` where {
+  $numbers <: [ `2`, `3`, `5` ]
+}
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritPatternWhere {
+            pattern: GritRewrite {
+                left: GritCodeSnippet {
+                    source: GritBacktickSnippetLiteral {
+                        value_token: GRIT_BACKTICK_SNIPPET@0..22 "`var $x = [$numbers]`" [] [Whitespace(" ")],
+                    },
+                },
+                annotation: missing (optional),
+                fat_arrow_token: FAT_ARROW@22..25 "=>" [] [Whitespace(" ")],
+                right: GritCodeSnippet {
+                    source: GritBacktickSnippetLiteral {
+                        value_token: GRIT_BACKTICK_SNIPPET@25..56 "`var firstPrimes = [$numbers]`" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            where_token: WHERE_KW@56..62 "where" [] [Whitespace(" ")],
+            side_condition: GritPredicateAnd {
+                and_token: missing (optional),
+                l_curly_token: L_CURLY@62..63 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateMatch {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@63..75 "$numbers" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                        match_token: MATCH@75..78 "<:" [] [Whitespace(" ")],
+                        right: GritList {
+                            name: missing (optional),
+                            l_brack_token: L_BRACK@78..80 "[" [] [Whitespace(" ")],
+                            patterns: GritListPatternList [
+                                GritCodeSnippet {
+                                    source: GritBacktickSnippetLiteral {
+                                        value_token: GRIT_BACKTICK_SNIPPET@80..83 "`2`" [] [],
+                                    },
+                                },
+                                COMMA@83..85 "," [] [Whitespace(" ")],
+                                GritCodeSnippet {
+                                    source: GritBacktickSnippetLiteral {
+                                        value_token: GRIT_BACKTICK_SNIPPET@85..88 "`3`" [] [],
+                                    },
+                                },
+                                COMMA@88..90 "," [] [Whitespace(" ")],
+                                GritCodeSnippet {
+                                    source: GritBacktickSnippetLiteral {
+                                        value_token: GRIT_BACKTICK_SNIPPET@90..94 "`5`" [] [Whitespace(" ")],
+                                    },
+                                },
+                            ],
+                            r_brack_token: R_BRACK@94..95 "]" [] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@95..97 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@97..98 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..98
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..97
+    0: GRIT_PATTERN_WHERE@0..97
+      0: GRIT_REWRITE@0..56
+        0: GRIT_CODE_SNIPPET@0..22
+          0: GRIT_BACKTICK_SNIPPET_LITERAL@0..22
+            0: GRIT_BACKTICK_SNIPPET@0..22 "`var $x = [$numbers]`" [] [Whitespace(" ")]
+        1: (empty)
+        2: FAT_ARROW@22..25 "=>" [] [Whitespace(" ")]
+        3: GRIT_CODE_SNIPPET@25..56
+          0: GRIT_BACKTICK_SNIPPET_LITERAL@25..56
+            0: GRIT_BACKTICK_SNIPPET@25..56 "`var firstPrimes = [$numbers]`" [] [Whitespace(" ")]
+      1: WHERE_KW@56..62 "where" [] [Whitespace(" ")]
+      2: GRIT_PREDICATE_AND@62..97
+        0: (empty)
+        1: L_CURLY@62..63 "{" [] []
+        2: GRIT_PREDICATE_LIST@63..95
+          0: GRIT_PREDICATE_MATCH@63..95
+            0: GRIT_VARIABLE@63..75
+              0: GRIT_VARIABLE@63..75 "$numbers" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: MATCH@75..78 "<:" [] [Whitespace(" ")]
+            2: GRIT_LIST@78..95
+              0: (empty)
+              1: L_BRACK@78..80 "[" [] [Whitespace(" ")]
+              2: GRIT_LIST_PATTERN_LIST@80..94
+                0: GRIT_CODE_SNIPPET@80..83
+                  0: GRIT_BACKTICK_SNIPPET_LITERAL@80..83
+                    0: GRIT_BACKTICK_SNIPPET@80..83 "`2`" [] []
+                1: COMMA@83..85 "," [] [Whitespace(" ")]
+                2: GRIT_CODE_SNIPPET@85..88
+                  0: GRIT_BACKTICK_SNIPPET_LITERAL@85..88
+                    0: GRIT_BACKTICK_SNIPPET@85..88 "`3`" [] []
+                3: COMMA@88..90 "," [] [Whitespace(" ")]
+                4: GRIT_CODE_SNIPPET@90..94
+                  0: GRIT_BACKTICK_SNIPPET_LITERAL@90..94
+                    0: GRIT_BACKTICK_SNIPPET@90..94 "`5`" [] [Whitespace(" ")]
+              3: R_BRACK@94..95 "]" [] []
+        3: R_CURLY@95..97 "}" [Newline("\n")] []
+  4: EOF@97..98 "" [Newline("\n")] []
+
+```

@@ -1,0 +1,77 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+private pattern this_pattern_is_hidden() {
+  `console`
+}
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritPatternDefinition {
+            visibility_token: PRIVATE_KW@0..8 "private" [] [Whitespace(" ")],
+            pattern_token: PATTERN_KW@8..16 "pattern" [] [Whitespace(" ")],
+            name: GritName {
+                value_token: GRIT_NAME@16..38 "this_pattern_is_hidden" [] [],
+            },
+            l_paren_token: L_PAREN@38..39 "(" [] [],
+            args: GritPatternArgList {
+                grit_variable_list: GritVariableList [],
+            },
+            r_paren_token: R_PAREN@39..41 ")" [] [Whitespace(" ")],
+            language: missing (optional),
+            body: GritPatternDefinitionBody {
+                l_curly_token: L_CURLY@41..42 "{" [] [],
+                patterns: GritPatternList [
+                    GritCodeSnippet {
+                        source: GritBacktickSnippetLiteral {
+                            value_token: GRIT_BACKTICK_SNIPPET@42..54 "`console`" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@54..56 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@56..57 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..57
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..56
+    0: GRIT_PATTERN_DEFINITION@0..56
+      0: PRIVATE_KW@0..8 "private" [] [Whitespace(" ")]
+      1: PATTERN_KW@8..16 "pattern" [] [Whitespace(" ")]
+      2: GRIT_NAME@16..38
+        0: GRIT_NAME@16..38 "this_pattern_is_hidden" [] []
+      3: L_PAREN@38..39 "(" [] []
+      4: GRIT_PATTERN_ARG_LIST@39..39
+        0: GRIT_VARIABLE_LIST@39..39
+      5: R_PAREN@39..41 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: GRIT_PATTERN_DEFINITION_BODY@41..56
+        0: L_CURLY@41..42 "{" [] []
+        1: GRIT_PATTERN_LIST@42..54
+          0: GRIT_CODE_SNIPPET@42..54
+            0: GRIT_BACKTICK_SNIPPET_LITERAL@42..54
+              0: GRIT_BACKTICK_SNIPPET@42..54 "`console`" [Newline("\n"), Whitespace("  ")] []
+        2: R_CURLY@54..56 "}" [Newline("\n")] []
+  4: EOF@56..57 "" [Newline("\n")] []
+
+```
