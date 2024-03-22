@@ -201,7 +201,11 @@ impl FileSystem for MemoryFileSystem {
         Ok(cb())
     }
 
-    fn resolve_configuration(&self, _path: &str) -> Result<Resolution, ResolveError> {
+    fn resolve_configuration(
+        &self,
+        _specifier: &str,
+        _path: Option<&Path>,
+    ) -> Result<Resolution, ResolveError> {
         todo!()
     }
 }
