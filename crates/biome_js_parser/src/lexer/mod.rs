@@ -485,50 +485,6 @@ impl<'src> JsLexer<'src> {
         }
     }
 
-    /// Get the UTF8 char which starts at the current byte
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    fn current_char_unchecked(&self) -> char {
-        // Precautionary measure for making sure the unsafe code below does not read over memory boundary
-        debug_assert!(!self.is_eof());
-        self.assert_current_char_boundary();
-
-        // Safety: We know this is safe because we require the input to the lexer to be valid utf8 and we always call this when we are at a char
-        let string = unsafe {
-            std::str::from_utf8_unchecked(self.source.as_bytes().get_unchecked(self.position..))
-        };
-        let chr = if let Some(chr) = string.chars().next() {
-            chr
-        } else {
-            // Safety: we always call this when we are at a valid char, so this branch is completely unreachable
-            unsafe {
-                core::hint::unreachable_unchecked();
-            }
-        };
-
-        chr
-    }
-
-    /// Gets the current byte.
-    ///
-    /// ## Returns
-    /// The current byte if the lexer isn't at the end of the file.
-    #[inline]
-    fn current_byte(&self) -> Option<u8> {
-        if self.is_eof() {
-            None
-        } else {
-            Some(self.source.as_bytes()[self.position])
-        }
-    }
-
-    /// Asserts that the lexer is currently positioned at `byte`
-    #[inline]
-    fn assert_byte(&self, byte: u8) {
-        debug_assert_eq!(self.source.as_bytes()[self.position], byte);
-    }
-
     /// Returns the current byte without checking if the lexer is at the end of the file.
     ///
     /// ## Safety
@@ -562,18 +518,6 @@ impl<'src> JsLexer<'src> {
         }
     }
 
-    /// Peeks at the next byte
-    #[inline]
-    fn peek_byte(&self) -> Option<u8> {
-        self.byte_at(1)
-    }
-
-    /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
-    #[inline]
-    fn byte_at(&self, offset: usize) -> Option<u8> {
-        self.source.as_bytes().get(self.position + offset).copied()
-    }
-
     /// Advances the current position by `n` bytes.
     #[inline]
     fn advance(&mut self, n: usize) {
@@ -587,12 +531,6 @@ impl<'src> JsLexer<'src> {
         } else {
             self.advance_char_unchecked();
         }
-    }
-
-    /// Returns `true` if the parser is at or passed the end of the file.
-    #[inline]
-    fn is_eof(&self) -> bool {
-        self.position >= self.source.len()
     }
 
     // Read a `\u{000...}` escape sequence, this expects the cur char to be the `{`
