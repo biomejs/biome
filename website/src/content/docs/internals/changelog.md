@@ -69,6 +69,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Correctly parse `.jsonc` files. Contributed by @Sec-ant
 
+- Correctly resolve external `extends` configs. Contributed by @Sec-ant
+
 ## 1.6.1 (2024-03-12)
 
 ### CLI
