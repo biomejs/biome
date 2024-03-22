@@ -72,6 +72,7 @@ enum EndOfLine {
     Lf,
     Crlf,
     Cr,
+    Auto,
 }
 
 #[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
@@ -134,6 +135,7 @@ impl From<EndOfLine> for LineEnding {
             EndOfLine::Lf => LineEnding::Lf,
             EndOfLine::Crlf => LineEnding::Crlf,
             EndOfLine::Cr => LineEnding::Cr,
+            EndOfLine::Auto => LineEnding::default(),
         }
     }
 }
@@ -342,8 +344,12 @@ pub(crate) fn read_prettier_files(
         }));
     } else {
         let prettier_configuration = deserialized.into_deserialized();
-
         if let Some(prettier_configuration) = prettier_configuration {
+            if prettier_configuration.end_of_line == EndOfLine::Auto {
+                console.log(markup! {
+                    <Warn>"Prettier's `\"endOfLine\": \"auto\"` option is not supported in Biome. The default `\"lf\"` option is used instead."</Warn>
+                });
+            }
             let formatter_configuration = prettier_configuration
                 .clone()
                 .try_into()

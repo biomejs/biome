@@ -165,6 +165,37 @@ fn prettier_migrate() {
 }
 
 #[test]
+fn prettier_migrate_end_of_line() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{}"#;
+    let prettier = r#"{ "endOfLine": "auto" }"#;
+
+    let configuration_path = Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("migrate"), "prettier"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_end_of_line",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn prettier_migrate_with_ignore() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
