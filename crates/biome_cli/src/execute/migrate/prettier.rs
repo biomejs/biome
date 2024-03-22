@@ -347,7 +347,7 @@ pub(crate) fn read_prettier_files(
         if let Some(prettier_configuration) = prettier_configuration {
             if prettier_configuration.end_of_line == EndOfLine::Auto {
                 console.log(markup! {
-                    <Warn>"Warning: Prettier's `\"endOfLine\": \"auto\"` option is not supported in Biome. Using the default 'lf' option."</Warn>
+                    <Warn>"Prettier's `\"endOfLine\": \"auto\"` option is not supported in Biome. The default `\"lf\"` option is used instead."</Warn>
                 });
             }
             let formatter_configuration = prettier_configuration
