@@ -33,7 +33,7 @@ impl OsFileSystem {
             working_directory: Some(working_directory),
             configuration_resolver: AssertUnwindSafe(Resolver::new(ResolveOptions {
                 condition_names: vec!["node".to_string(), "import".to_string()],
-                extensions: vec!["*.json".to_string()],
+                extensions: vec!["*.json".to_string(), "*.jsonc".to_string()],
                 ..ResolveOptions::default()
             })),
         }
@@ -83,9 +83,17 @@ impl FileSystem for OsFileSystem {
         path.is_file()
     }
 
-    fn resolve_configuration(&self, specifier: &str) -> Result<Resolution, ResolveError> {
-        self.configuration_resolver
-            .resolve(self.working_directory().unwrap(), specifier)
+    fn resolve_configuration(
+        &self,
+        specifier: &str,
+        path: Option<&Path>,
+    ) -> Result<Resolution, ResolveError> {
+        if let Some(path) = path {
+            self.configuration_resolver.resolve(path, specifier)
+        } else {
+            self.configuration_resolver
+                .resolve(self.working_directory().unwrap_or_default(), specifier)
+        }
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
