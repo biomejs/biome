@@ -40,7 +40,7 @@ pub fn setup_cli_subscriber(level: LoggingLevel, kind: LoggingKind) {
     };
 }
 
-#[derive(Debug, Default, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Copy, Debug, Default, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum LoggingLevel {
     /// No logs should be shown
     #[default]
@@ -138,7 +138,7 @@ impl<S> Filter<S> for LoggingFilter {
 }
 
 /// The kind of logging
-#[derive(Debug, Default, Clone, Eq, PartialEq)]
+#[derive(Copy, Debug, Default, Clone, Eq, PartialEq)]
 pub enum LoggingKind {
     /// A pretty log on multiple lines with nice colours
     #[default]

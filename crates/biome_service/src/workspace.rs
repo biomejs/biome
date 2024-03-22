@@ -116,16 +116,17 @@ impl FileFeaturesResult {
             .is_some_and(|file_name| FileFeaturesResult::PROTECTED_FILES.contains(&file_name))
     }
 
-    /// By default, all features are not supported by a file.
-    const WORKSPACE_FEATURES: [(FeatureName, SupportKind); 3] = [
+    /// By default, only search is supported.
+    const WORKSPACE_FEATURES: [(FeatureName, SupportKind); 4] = [
         (FeatureName::Lint, SupportKind::FileNotSupported),
         (FeatureName::Format, SupportKind::FileNotSupported),
         (FeatureName::OrganizeImports, SupportKind::FileNotSupported),
+        (FeatureName::Search, SupportKind::Supported),
     ];
 
     pub fn new() -> Self {
         Self {
-            features_supported: HashMap::from(FileFeaturesResult::WORKSPACE_FEATURES),
+            features_supported: HashMap::from(Self::WORKSPACE_FEATURES),
         }
     }
 
@@ -360,6 +361,7 @@ pub enum FeatureName {
     Format,
     Lint,
     OrganizeImports,
+    Search,
 }
 
 #[derive(Debug, Default)]
@@ -374,12 +376,19 @@ impl FeaturesBuilder {
         self.0.push(FeatureName::Format);
         self
     }
+
     pub fn with_linter(mut self) -> Self {
         self.0.push(FeatureName::Lint);
         self
     }
+
     pub fn with_organize_imports(mut self) -> Self {
         self.0.push(FeatureName::OrganizeImports);
+        self
+    }
+
+    pub fn with_search(mut self) -> Self {
+        self.0.push(FeatureName::Search);
         self
     }
 
@@ -871,6 +880,13 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn organize_imports(&self) -> Result<OrganizeImportsResult, WorkspaceError> {
         self.workspace.organize_imports(OrganizeImportsParams {
             path: self.path.clone(),
+        })
+    }
+
+    pub fn search_file(&self) -> Result<SearchResults, WorkspaceError> {
+        self.workspace.search_file(SearchFileParams {
+            path: self.path.clone(),
+            pattern: self.pattern.clone(),
         })
     }
 }

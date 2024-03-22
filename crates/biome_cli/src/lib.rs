@@ -9,6 +9,7 @@
 use biome_console::{ColorMode, Console};
 use biome_fs::OsFileSystem;
 use biome_service::{App, DynRef, Workspace, WorkspaceRef};
+use commands::search::SearchCommandPayload;
 use std::env;
 
 mod changed;
@@ -200,6 +201,24 @@ impl<'app> CliSession<'app> {
                 sub_command
                     .map(|sub_command| sub_command.is_prettier())
                     .unwrap_or_default(),
+            ),
+            BiomeCommand::Search {
+                cli_options,
+                files_configuration,
+                paths,
+                pattern,
+                stdin_file_path,
+                vcs_configuration,
+            } => commands::search::search(
+                self,
+                SearchCommandPayload {
+                    cli_options,
+                    files_configuration,
+                    paths,
+                    pattern,
+                    stdin_file_path,
+                    vcs_configuration,
+                },
             ),
             BiomeCommand::RunServer {
                 stop_on_disconnect,

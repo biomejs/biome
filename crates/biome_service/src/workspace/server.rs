@@ -309,6 +309,7 @@ impl WorkspaceServer {
                     &organize_imports.ignored_files,
                 )
             }
+            FeatureName::Search => return false, // There is no search-specific config.
         };
         let is_feature_included = feature_included_files.is_empty()
             || is_dir(path)
