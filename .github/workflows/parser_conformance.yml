@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Support longpaths
-        run: git config core.longpaths true
+        run: git config --system core.longpaths true
 
       - name: Checkout PR Branch
         uses: actions/checkout@v4
