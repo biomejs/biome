@@ -198,8 +198,7 @@ GraphqlListValue =
  elements: GraphqlListValueElementList
  ']'
 
-// TODO: commas is optional in GraphQL
-GraphqlListValueElementList = (AnyGraphqlValue (',' AnyGraphqlValue)* ','?)
+GraphqlListValueElementList = AnyGraphqlValue*
 
 // https://spec.graphql.org/October2021/#sec-Input-Object-Values
 GraphqlObjectValue =
@@ -207,8 +206,7 @@ GraphqlObjectValue =
  members: GraphqlObjectValueMemberList
  '}'
 
-// TODO: commas is optional in GraphQL
-GraphqlObjectValueMemberList = (GraphqlObjectField (',' GraphqlObjectField)* ','?)
+GraphqlObjectValueMemberList = GraphqlObjectField*
 
 GraphqlObjectField =
 	name: GraphqlName
@@ -221,8 +219,7 @@ GraphqlVariableDefinitions =
 	elements: GraphqlVariableDefinitionList
 	')'
 
-// TODO: commas is optional in GraphQL
-GraphqlVariableDefinitionList = (GraphqlVariableDefinition (',' GraphqlVariableDefinition)* ','?)
+GraphqlVariableDefinitionList = GraphqlVariableDefinition*
 
 // $episode: Episode = JEDI
 GraphqlVariableDefinition =

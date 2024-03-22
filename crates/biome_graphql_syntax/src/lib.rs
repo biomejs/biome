@@ -34,6 +34,7 @@ impl GraphqlSyntaxKind {
                 | GraphqlSyntaxKind::WHITESPACE
                 | GraphqlSyntaxKind::COMMENT
                 | GraphqlSyntaxKind::MULTILINE_COMMENT
+                | GraphqlSyntaxKind::COMMA
         )
     }
 

@@ -1604,49 +1604,28 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
-pub fn graphql_list_value_element_list<I, S>(items: I, separators: S) -> GraphqlListValueElementList
+pub fn graphql_list_value_element_list<I>(items: I) -> GraphqlListValueElementList
 where
     I: IntoIterator<Item = AnyGraphqlValue>,
     I::IntoIter: ExactSizeIterator,
-    S: IntoIterator<Item = GraphqlSyntaxToken>,
-    S::IntoIter: ExactSizeIterator,
 {
-    let mut items = items.into_iter();
-    let mut separators = separators.into_iter();
-    let length = items.len() + separators.len();
     GraphqlListValueElementList::unwrap_cast(SyntaxNode::new_detached(
         GraphqlSyntaxKind::GRAPHQL_LIST_VALUE_ELEMENT_LIST,
-        (0..length).map(|index| {
-            if index % 2 == 0 {
-                Some(items.next()?.into_syntax().into())
-            } else {
-                Some(separators.next()?.into())
-            }
-        }),
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
-pub fn graphql_object_value_member_list<I, S>(
-    items: I,
-    separators: S,
-) -> GraphqlObjectValueMemberList
+pub fn graphql_object_value_member_list<I>(items: I) -> GraphqlObjectValueMemberList
 where
     I: IntoIterator<Item = GraphqlObjectField>,
     I::IntoIter: ExactSizeIterator,
-    S: IntoIterator<Item = GraphqlSyntaxToken>,
-    S::IntoIter: ExactSizeIterator,
 {
-    let mut items = items.into_iter();
-    let mut separators = separators.into_iter();
-    let length = items.len() + separators.len();
     GraphqlObjectValueMemberList::unwrap_cast(SyntaxNode::new_detached(
         GraphqlSyntaxKind::GRAPHQL_OBJECT_VALUE_MEMBER_LIST,
-        (0..length).map(|index| {
-            if index % 2 == 0 {
-                Some(items.next()?.into_syntax().into())
-            } else {
-                Some(separators.next()?.into())
-            }
-        }),
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn graphql_root_operation_type_definition_list<I>(
@@ -1696,28 +1675,16 @@ where
         }),
     ))
 }
-pub fn graphql_variable_definition_list<I, S>(
-    items: I,
-    separators: S,
-) -> GraphqlVariableDefinitionList
+pub fn graphql_variable_definition_list<I>(items: I) -> GraphqlVariableDefinitionList
 where
     I: IntoIterator<Item = GraphqlVariableDefinition>,
     I::IntoIter: ExactSizeIterator,
-    S: IntoIterator<Item = GraphqlSyntaxToken>,
-    S::IntoIter: ExactSizeIterator,
 {
-    let mut items = items.into_iter();
-    let mut separators = separators.into_iter();
-    let length = items.len() + separators.len();
     GraphqlVariableDefinitionList::unwrap_cast(SyntaxNode::new_detached(
         GraphqlSyntaxKind::GRAPHQL_VARIABLE_DEFINITION_LIST,
-        (0..length).map(|index| {
-            if index % 2 == 0 {
-                Some(items.next()?.into_syntax().into())
-            } else {
-                Some(separators.next()?.into())
-            }
-        }),
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn graphql_bogus<I>(slots: I) -> GraphqlBogus

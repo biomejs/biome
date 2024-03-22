@@ -3,8 +3,6 @@ use crate::kind_src::KindsSrc;
 pub const GRAPHQL_KINDS_SRC: KindsSrc = KindsSrc {
     punct: &[
         ("!", "BANG"),
-        // commas are optional
-        (",", "COMMA"),
         ("$", "DOLLAR"),
         ("&", "AMP"),
         ("(", "L_PAREN"),
@@ -71,6 +69,7 @@ pub const GRAPHQL_KINDS_SRC: KindsSrc = KindsSrc {
         "IDENT",
         "COMMENT",
         "MULTILINE_COMMENT",
+        "COMMA",
     ],
     nodes: &[
         "GRAPHQL_NAME",

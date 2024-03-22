@@ -2466,20 +2466,12 @@ impl SyntaxFactory for GraphqlSyntaxFactory {
             GRAPHQL_INPUT_FIELD_LIST => {
                 Self::make_node_list_syntax(kind, children, GraphqlInputValueDefinition::can_cast)
             }
-            GRAPHQL_LIST_VALUE_ELEMENT_LIST => Self::make_separated_list_syntax(
-                kind,
-                children,
-                AnyGraphqlValue::can_cast,
-                T ! [,],
-                true,
-            ),
-            GRAPHQL_OBJECT_VALUE_MEMBER_LIST => Self::make_separated_list_syntax(
-                kind,
-                children,
-                GraphqlObjectField::can_cast,
-                T ! [,],
-                true,
-            ),
+            GRAPHQL_LIST_VALUE_ELEMENT_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyGraphqlValue::can_cast)
+            }
+            GRAPHQL_OBJECT_VALUE_MEMBER_LIST => {
+                Self::make_node_list_syntax(kind, children, GraphqlObjectField::can_cast)
+            }
             GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION_LIST => Self::make_node_list_syntax(
                 kind,
                 children,
@@ -2495,13 +2487,9 @@ impl SyntaxFactory for GraphqlSyntaxFactory {
                 T ! [|],
                 false,
             ),
-            GRAPHQL_VARIABLE_DEFINITION_LIST => Self::make_separated_list_syntax(
-                kind,
-                children,
-                GraphqlVariableDefinition::can_cast,
-                T ! [,],
-                true,
-            ),
+            GRAPHQL_VARIABLE_DEFINITION_LIST => {
+                Self::make_node_list_syntax(kind, children, GraphqlVariableDefinition::can_cast)
+            }
             _ => unreachable!("Is {:?} a token?", kind),
         }
     }

@@ -9170,7 +9170,7 @@ impl Serialize for GraphqlListValueElementList {
         seq.end()
     }
 }
-impl AstSeparatedList for GraphqlListValueElementList {
+impl AstNodeList for GraphqlListValueElementList {
     type Language = Language;
     type Node = AnyGraphqlValue;
     fn syntax_list(&self) -> &SyntaxList {
@@ -9183,19 +9183,19 @@ impl AstSeparatedList for GraphqlListValueElementList {
 impl Debug for GraphqlListValueElementList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("GraphqlListValueElementList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        f.debug_list().entries(self.iter()).finish()
     }
 }
-impl IntoIterator for GraphqlListValueElementList {
-    type Item = SyntaxResult<AnyGraphqlValue>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, AnyGraphqlValue>;
+impl IntoIterator for &GraphqlListValueElementList {
+    type Item = AnyGraphqlValue;
+    type IntoIter = AstNodeListIterator<Language, AnyGraphqlValue>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for &GraphqlListValueElementList {
-    type Item = SyntaxResult<AnyGraphqlValue>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, AnyGraphqlValue>;
+impl IntoIterator for GraphqlListValueElementList {
+    type Item = AnyGraphqlValue;
+    type IntoIter = AstNodeListIterator<Language, AnyGraphqlValue>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
@@ -9253,7 +9253,7 @@ impl Serialize for GraphqlObjectValueMemberList {
         seq.end()
     }
 }
-impl AstSeparatedList for GraphqlObjectValueMemberList {
+impl AstNodeList for GraphqlObjectValueMemberList {
     type Language = Language;
     type Node = GraphqlObjectField;
     fn syntax_list(&self) -> &SyntaxList {
@@ -9266,19 +9266,19 @@ impl AstSeparatedList for GraphqlObjectValueMemberList {
 impl Debug for GraphqlObjectValueMemberList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("GraphqlObjectValueMemberList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        f.debug_list().entries(self.iter()).finish()
     }
 }
-impl IntoIterator for GraphqlObjectValueMemberList {
-    type Item = SyntaxResult<GraphqlObjectField>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, GraphqlObjectField>;
+impl IntoIterator for &GraphqlObjectValueMemberList {
+    type Item = GraphqlObjectField;
+    type IntoIter = AstNodeListIterator<Language, GraphqlObjectField>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for &GraphqlObjectValueMemberList {
-    type Item = SyntaxResult<GraphqlObjectField>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, GraphqlObjectField>;
+impl IntoIterator for GraphqlObjectValueMemberList {
+    type Item = GraphqlObjectField;
+    type IntoIter = AstNodeListIterator<Language, GraphqlObjectField>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
@@ -9586,7 +9586,7 @@ impl Serialize for GraphqlVariableDefinitionList {
         seq.end()
     }
 }
-impl AstSeparatedList for GraphqlVariableDefinitionList {
+impl AstNodeList for GraphqlVariableDefinitionList {
     type Language = Language;
     type Node = GraphqlVariableDefinition;
     fn syntax_list(&self) -> &SyntaxList {
@@ -9599,19 +9599,19 @@ impl AstSeparatedList for GraphqlVariableDefinitionList {
 impl Debug for GraphqlVariableDefinitionList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("GraphqlVariableDefinitionList ")?;
-        f.debug_list().entries(self.elements()).finish()
+        f.debug_list().entries(self.iter()).finish()
     }
 }
-impl IntoIterator for GraphqlVariableDefinitionList {
-    type Item = SyntaxResult<GraphqlVariableDefinition>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, GraphqlVariableDefinition>;
+impl IntoIterator for &GraphqlVariableDefinitionList {
+    type Item = GraphqlVariableDefinition;
+    type IntoIter = AstNodeListIterator<Language, GraphqlVariableDefinition>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for &GraphqlVariableDefinitionList {
-    type Item = SyntaxResult<GraphqlVariableDefinition>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, GraphqlVariableDefinition>;
+impl IntoIterator for GraphqlVariableDefinitionList {
+    type Item = GraphqlVariableDefinition;
+    type IntoIter = AstNodeListIterator<Language, GraphqlVariableDefinition>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
