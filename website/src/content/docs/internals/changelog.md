@@ -15,7 +15,7 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## 1.6.2 (2024-03-22)
+## Unreleased
 
 ### Analyzer
 
@@ -38,6 +38,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix enabled rules calculation. The precendence of individual rules, `all` and `recommend` presets in top-level and group-level configs is now correctly respected. More details can be seen in ([#2072](https://github.com/biomejs/biome/pull/2072)) ([#2028](https://github.com/biomejs/biome/issues/2028)). Contributed by @Sec-ant
+
+### Editors
 
 ### Formatter
 
@@ -70,6 +72,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Correctly parse `.jsonc` files. Contributed by @Sec-ant
 
 - Correctly resolve external `extends` configs. Contributed by @Sec-ant
+
+### Parser
 
 ## 1.6.1 (2024-03-12)
 
