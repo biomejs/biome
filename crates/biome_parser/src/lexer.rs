@@ -1,8 +1,10 @@
 use super::diagnostic::ParseDiagnostic;
 use biome_rowan::{SyntaxKind, TextRange, TextSize};
+use biome_unicode_table::{lookup_byte, Dispatch::WHS};
 use bitflags::bitflags;
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
+use unicode_bom::Bom;
 
 /// `Lexer` trait defines the necessary methods a lexer must implement.
 /// Lexer is responsible for dividing the source code into meaningful parsing units (kinds).
@@ -21,7 +23,14 @@ pub trait Lexer<'src> {
     fn current(&self) -> Self::Kind;
 
     /// Provides the text range of the current kind.
-    fn current_range(&self) -> TextRange;
+    fn current_range(&self) -> TextRange {
+        TextRange::new(self.current_start(), TextSize::from(self.position() as u32))
+    }
+
+    /// Byte offset of the current token from the start of the source
+    /// The range of the current token can be computed by `self.position - self.current_start`
+
+    fn current_start(&self) -> TextSize;
 
     /// Creating a checkpoint of the lexer's current state.
     /// `rewind` can be used later to restore the lexer to the checkpoint's state.
@@ -47,7 +56,209 @@ pub trait Lexer<'src> {
     fn finish(self) -> Vec<ParseDiagnostic>;
 
     /// Provides flags related to the current kind, containing the meta-information about the kind.
-    fn current_flags(&self) -> TokenFlags;
+    fn current_flags(&self) -> TokenFlags {
+        TokenFlags::empty()
+    }
+
+    /// Returns the current position
+    fn position(&self) -> usize;
+
+    fn push_diagnostic(&mut self, diagnostic: ParseDiagnostic);
+
+    /// Consume one newline or all whitespace until a non-whitespace or a newline is found.
+    ///
+    /// ## Safety
+    /// Must be called at a valid UT8 char boundary
+    fn consume_newline_or_whitespaces(&mut self) -> Self::Kind;
+
+    /// Consumes all whitespace until a non-whitespace or a newline is found.
+    ///
+    /// ## Safety
+    /// Must be called at a valid UT8 char boundary
+    fn consume_whitespaces(&mut self) {
+        self.assert_current_char_boundary();
+
+        while let Some(byte) = self.current_byte() {
+            let dispatch = lookup_byte(byte);
+
+            match dispatch {
+                WHS => match byte {
+                    b'\t' | b' ' => self.advance(1),
+                    b'\r' | b'\n' => {
+                        break;
+                    }
+                    _ => {
+                        let start = self.text_position();
+                        self.advance(1);
+
+                        self.push_diagnostic(
+                            ParseDiagnostic::new(
+                                "The CSS standard only allows tabs, whitespace, carriage return and line feed whitespace.",
+                                start..self.text_position(),
+                            )
+                                .with_hint("Use a regular whitespace character instead."),
+                        )
+                    }
+                },
+
+                _ => break,
+            }
+        }
+    }
+
+    /// Asserts that the lexer is currently positioned at `byte`
+    fn assert_byte(&self, byte: u8) {
+        debug_assert_eq!(self.source().as_bytes()[self.position()], byte);
+    }
+
+    /// Advances the position by one and returns the next byte value
+    fn next_byte(&mut self) -> Option<u8> {
+        self.advance(1);
+        self.current_byte()
+    }
+
+    /// Returns `true` if the parser is at or passed the end of the file.
+    fn is_eof(&self) -> bool {
+        self.position() >= self.source().len()
+    }
+
+    fn advance_byte_or_char(&mut self, chr: u8) {
+        if chr.is_ascii() {
+            self.advance(1);
+        } else {
+            self.advance_char_unchecked();
+        }
+    }
+
+    /// Asserts that the lexer is at a UTF8 char boundary
+    #[inline]
+    fn assert_at_char_boundary(&self, offset: usize) {
+        debug_assert!(self.source().is_char_boundary(self.position() + offset));
+    }
+
+    /// Advances the current position by the current char UTF8 length
+    ///
+    /// ## Safety
+    /// Must be called at a valid UT8 char boundary
+    fn advance_char_unchecked(&mut self);
+
+    /// Consume just one newline/line break.
+    ///
+    /// ## Safety
+    /// Must be called at a valid UT8 char boundary
+    fn consume_newline(&mut self) -> bool {
+        self.assert_current_char_boundary();
+
+        match self.current_byte() {
+            Some(b'\n') => {
+                self.advance(1);
+                true
+            }
+            Some(b'\r') => {
+                if self.peek_byte() == Some(b'\n') {
+                    self.advance(2)
+                } else {
+                    self.advance(1)
+                }
+                true
+            }
+
+            _ => false,
+        }
+    }
+
+    /// Advances the current position by `n` bytes.
+    fn advance(&mut self, n: usize);
+
+    /// Asserts that the lexer is at current a UTF8 char boundary
+    #[inline]
+    fn assert_current_char_boundary(&self) {
+        debug_assert!(self.source().is_char_boundary(self.position()));
+    }
+
+    /// Gets the current byte.
+    ///
+    /// ## Returns
+    /// The current byte if the lexer isn't at the end of the file.
+    #[inline]
+    fn current_byte(&self) -> Option<u8> {
+        if self.is_eof() {
+            None
+        } else {
+            Some(self.source().as_bytes()[self.position()])
+        }
+    }
+
+    /// Peeks at the next byte
+    #[inline]
+    fn peek_byte(&self) -> Option<u8> {
+        self.byte_at(1)
+    }
+
+    /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
+    #[inline]
+    fn byte_at(&self, offset: usize) -> Option<u8> {
+        self.source()
+            .as_bytes()
+            .get(self.position() + offset)
+            .copied()
+    }
+
+    #[inline]
+    fn text_position(&self) -> TextSize {
+        TextSize::try_from(self.position()).expect("Input to be smaller than 4 GB")
+    }
+
+    /// Check if the source starts with a Unicode BOM character. If it does,
+    /// consume it and return the UNICODE_BOM token kind.
+    ///
+    /// ## Safety
+    /// Must be called at a valid UT8 char boundary (and realistically only at
+    /// the start position of the source).
+    #[inline]
+    fn consume_potential_bom<K>(&mut self, kind: K) -> Option<(K, usize)> {
+        // Bom needs at least the first three bytes of the source to know if it
+        // matches the UTF-8 BOM and not an alternative. This can be expanded
+        // to more bytes to support other BOM characters if Biome decides to
+        // support other encodings like UTF-16.
+        if let Some(first) = self.source().get(0..3) {
+            let bom = Bom::from(first.as_bytes());
+            self.advance(bom.len());
+
+            match bom {
+                Bom::Null => None,
+                _ => Some((kind, bom.len())),
+            }
+        } else {
+            None
+        }
+    }
+
+    /// Get the UTF8 char which starts at the current byte
+    ///
+    /// ## Safety
+    /// Must be called at a valid UT8 char boundary
+    #[inline]
+    fn current_char_unchecked(&self) -> char {
+        // Precautionary measure for making sure the unsafe code below does not
+        // read over memory boundary.
+        debug_assert!(!self.is_eof());
+        self.assert_current_char_boundary();
+
+        // Safety: We know this is safe because we require the input to the
+        // lexer to be valid utf8 and we always call this when we are at a char.
+        unsafe {
+            let Some(chr) = self
+                .source()
+                .get_unchecked(self.position()..self.source().len())
+                .chars()
+                .next()
+            else {
+                core::hint::unreachable_unchecked();
+            };
+            chr
+        }
+    }
 }
 
 /// `LexContext` is a trait that represents the context in
@@ -60,6 +271,12 @@ pub trait LexContext {
     /// Alternatively, `false` signals that the parser is within a special context,
     /// suggesting that a different set of parsing rules or procedures may need to be used.
     fn is_regular(&self) -> bool;
+}
+
+impl LexContext for () {
+    fn is_regular(&self) -> bool {
+        true
+    }
 }
 
 /// Wrapper around a [Lexer] that supports lookahead.

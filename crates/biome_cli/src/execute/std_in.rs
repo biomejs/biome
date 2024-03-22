@@ -28,7 +28,7 @@ pub(crate) fn run<'a>(
     if mode.is_format() {
         let file_features = workspace.file_features(SupportsFeatureParams {
             path: biome_path.clone(),
-            feature: FeaturesBuilder::new().with_formatter().build(),
+            features: FeaturesBuilder::new().with_formatter().build(),
         })?;
         if file_features.is_protected() {
             let protected_diagnostic =
@@ -76,7 +76,7 @@ pub(crate) fn run<'a>(
         // apply fix file of the linter
         let file_features = workspace.file_features(SupportsFeatureParams {
             path: biome_path.clone(),
-            feature: FeaturesBuilder::new()
+            features: FeaturesBuilder::new()
                 .with_linter()
                 .with_organize_imports()
                 .with_formatter()

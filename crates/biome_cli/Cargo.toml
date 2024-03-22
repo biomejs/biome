@@ -17,12 +17,10 @@ version              = "0.0.0"
 name = "biome"
 path = "src/main.rs"
 
-
 [dependencies]
 anyhow                   = "1.0.52"
 biome_analyze            = { workspace = true }
 biome_console            = { workspace = true }
-biome_css_formatter      = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
@@ -61,7 +59,7 @@ tokio = { workspace = true, features = ["process"] }
 mimalloc = "0.1.29"
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
-tikv-jemallocator = "0.5.0"
+tikv-jemallocator = "0.5.1"
 
 [dev-dependencies]
 biome_css_formatter  = { workspace = true }

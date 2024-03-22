@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/yaml/ignore.css
 ---
-
 # Input
 
 ```css
@@ -21,7 +20,7 @@ hello: world
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,8 @@
+@@ -1,6 +1,7 @@
  ---
  hello: world
 ----
@@ -29,9 +28,7 @@ hello: world
 +-
  
  /* prettier-ignore */
--.foo {}
-+.foo {
-+}
+ .foo {}
 ```
 
 # Output
@@ -43,8 +40,7 @@ hello: world
 -
 
 /* prettier-ignore */
-.foo {
-}
+.foo {}
 ```
 
 # Errors
@@ -93,5 +89,3 @@ ignore.css:3:3 parse ━━━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

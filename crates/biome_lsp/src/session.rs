@@ -286,7 +286,7 @@ impl Session {
         let biome_path = self.file_path(&url)?;
         let doc = self.document(&url)?;
         let file_features = self.workspace.file_features(SupportsFeatureParams {
-            feature: FeaturesBuilder::new()
+            features: FeaturesBuilder::new()
                 .with_linter()
                 .with_organize_imports()
                 .build(),
@@ -468,6 +468,7 @@ impl Session {
 
             Err(err) => {
                 error!("Couldn't load the configuration file, reason:\n {}", err);
+                self.client.log_message(MessageType::ERROR, &err).await;
                 ConfigurationStatus::Error
             }
         };

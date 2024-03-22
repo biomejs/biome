@@ -80,7 +80,7 @@ mod server;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SupportsFeatureParams {
     pub path: BiomePath,
-    pub feature: Vec<FeatureName>,
+    pub features: Vec<FeatureName>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
@@ -659,7 +659,7 @@ impl RageEntry {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IsPathIgnoredParams {
     pub biome_path: BiomePath,
-    pub feature: FeatureName,
+    pub features: Vec<FeatureName>,
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {

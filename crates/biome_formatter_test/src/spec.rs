@@ -41,7 +41,7 @@ impl<'a> SpecTestFile<'a> {
             .workspace
             .file_features(SupportsFeatureParams {
                 path: input_file.clone(),
-                feature: FeaturesBuilder::new().with_formatter().build(),
+                features: FeaturesBuilder::new().with_formatter().build(),
             })
             .unwrap();
 

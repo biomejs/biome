@@ -602,7 +602,7 @@ impl PartialConfiguration {
             {
                 directory_path.join(path)
             } else {
-                fs.resolve_configuration(path.as_str())
+                fs.resolve_configuration(path.as_str(), Some(directory_path))
                     .map_err(|error| {
                         ConfigurationDiagnostic::cant_resolve(
                             fs.working_directory()

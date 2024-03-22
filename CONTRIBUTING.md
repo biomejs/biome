@@ -198,7 +198,7 @@ cargo t test_some_function --show-output
 
 ## Checks
 
-When you finished your work, and you are ready to **commit and open a PR**, there are few other 
+When you finished your work, and you are ready to **commit and open a PR**, there are few other
 things you would need to run and check:
 - `just f` (alias for `just format`), formats Rust and TOML files.
 - `just l` (alias for `just lint`), run the linter for the whole project.
@@ -225,15 +225,15 @@ to the `knope.toml` file, which we use for changelog generation.
 
 ### Analyzers and lint rules
 
-To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal page](https://docs.rs/biome_analyze/latest/biome_analyze/)
+To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal page](https://github.com/biomejs/biome/blob/main/crates/biome_analyze/CONTRIBUTING.md)
 
 ### Parser
 
-To know the technical details of how our parser works and how to write test, please check our [internal page](https://docs.rs/biome_parser/latest/biome_parser/)
+To know the technical details of how our parser works and how to write test, please check our [internal page](https://github.com/biomejs/biome/blob/main/crates/biome_parser/CONTRIBUTING.md)
 
 ### Formatter
 
-To know the technical details of how our formatter works and how to write test, please check our [internal page](https://docs.rs/biome_js_formatter/latest/biome_js_formatter/)
+To know the technical details of how our formatter works and how to write test, please check our [internal page](https://docs.rs/biome_formatter/latest/biome_formatter/)
 
 
 ## Crate dependencies
@@ -440,3 +440,4 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Victor Teles @victor-teles](https://github.com/victor-teles)
 - [Yagiz Nizipli @anonrig](https://github.com/anonrig)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
+- [Ze-Zheng Wu @Sec-ant](https://github.com/Sec-ant)

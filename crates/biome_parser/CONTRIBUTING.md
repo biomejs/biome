@@ -94,14 +94,20 @@ The lexer is the lower primitive of a Biome parser. It usually consumes characte
 
 Create a `lexer/mod.rs` inside the parser crate.
 
-```rust ,ignore
+```rust , ignore
+use biome_beta_syntax::BetaSyntaxKind;
+use biome_parser::ParseDiagnostic;
+
 pub(crate) struct BetaLexer<'source> {
     /// Source text
     source: &'source str,
 
     /// The start byte position in the source text of the next token.
     position: usize,
-
+    
+    /// the current token
+    current_kind: BetaSyntaxKind, 
+    
     /// diagnostics emitted during the parsing phase
     diagnostics: Vec<ParseDiagnostic>,
 }
@@ -161,7 +167,7 @@ You're free to add additional parameters to your function if needed. There are r
 
 Let's assume you want to parse the JS `if` statement:
 
-```js
+```js , ignore
 JsIfStatement =
  if
  (
@@ -214,8 +220,8 @@ The parse rules will guide you in how to write your implementation and the parse
 * Optional token `'ident'?`: Use `p.eat(token)`. It eats the next token if it matches the passed-in token.
 * Required token `'ident'`: Use`p.expect(token)`. It eats the next token if it matches the passed-in token.
 It adds an `Expected 'x' but found 'y' instead` error and a missing marker if the token isn't present in the source code.
-* Optional node `body: JsBlockStatement?`: Use`parse_block_statement(p).or_missing(p)`. It parses the block if it is present in the source code and adds a missing marker if it isn't.
-* Required node `body: JsBlockStatement`: Use `parse_block_statement(p).or_missing_with_error(p, error_builder)`:
+* Optional node `body: JsBlockStatement?`: Use`parse_block_statement(p).ok(p)`. It parses the block if it is present in the source code and adds a missing marker if it isn't.
+* Required node `body: JsBlockStatement`: Use `parse_block_statement(p).or_add_diagnostic(p, error_builder)`:
 it parses the block statement if it is present in the source code and adds a missing marker and an error if not.
 
 Using the above-described rules result in the following implementation for the `if` statement rule.
@@ -246,6 +252,11 @@ if the opening parentheses `(` isn't present in the source text. That's where mi
 
 ### Parsing Lists & Error Recovery
 
+> 1. Performance-Neutral Error Recovery: implement an error recovery mechanism that does not degrade the parsing performance of valid code. This ensures that the parser remains efficient while being more forgiving of errors. We can try to check if the next token is a valid item for a list (e.g. we can use `is_at_item` to check if we have a missing end list token), however versus merely checking for a end list token does introduce a performance consideration, especially in well-formed documents where syntax errors are rare.
+> 
+> 2. Preservation of Valid Tree Structure: modify the parser to retain as much information from the valid parts of the AST tree as possible. Even when encountering invalid parts, the parser should mark them as 'bogus' rather than invalidating the parent node. This approach minimizes the loss of useful information due to isolated syntax errors.
+
+
 Parsing lists is different from parsing single elements with a fixed set of children because it requires looping until
 the parser reaches a terminal token (or the end of the file).
 
@@ -258,13 +269,13 @@ The general structure for parsing a list is (yes, that's something the parser in
 
 Let's try to parse an array:
 
-```js
+```js , ignore
 [ 1, 3, 6 ]
 ```
 
 We will use  `ParseSeparatedList` in order to achieve that
 
-```rust, ignore
+```rust ,ignore
 struct ArrayElementsList;
 
 impl ParseSeparatedList for ArrayElementsList {
@@ -286,15 +297,15 @@ impl ParseSeparatedList for ArrayElementsList {
         parsed_element.or_recover(
             p,
             &ParseRecoveryTokenSet::new(JS_BOGUS_STATEMENT, STMT_RECOVERY_SET),
-            js_parse_error::expected_case,
+            js_parse_error::expected_statement,
         )
     }
-};
+}
 ```
 
 Let's run through this step by step:
 
-```rust, ignore
+```rust ,ignore
 parsed_element.or_recover(
     p,
     &ParseRecoveryTokenSet::new(JS_BOGUS_STATEMENT, STMT_RECOVERY_SET),
@@ -336,7 +347,7 @@ However, conditional syntax must be handled because we want to add a diagnostic 
 
 Let's have a look at the `with` statement that is only allowed in loose mode/sloppy mode:
 
-```rust, ignore
+```rust , ignore
 fn parse_with_statement(p: &mut Parser) -> ParsedSyntax {
  if !p.at(T![with]) {
   return Absent;
@@ -358,10 +369,12 @@ fn parse_with_statement(p: &mut Parser) -> ParsedSyntax {
 
 The start of the rule is the same as for any other rule. The exciting bits start with
 
-```rust, ignore
-let conditional = StrictMode.excluding_syntax(p, with_stmt, |p, marker| {
- p.err_builder("`with` statements are not allowed in strict mode", marker.range(p))
-});
+```rust , ignore
+fn parse_something() {
+    let conditional = StrictMode.excluding_syntax(p, with_stmt, |p, marker| {
+        p.err_builder("`with` statements are not allowed in strict mode", marker.range(p))
+    });
+}
 ```
 
 The `StrictMode.excluding_syntax` converts the parsed syntax to a bogus node and uses the diagnostic builder to create a diagnostic if the feature is not supported.

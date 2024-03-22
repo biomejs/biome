@@ -9,7 +9,6 @@ use biome_formatter::{
     },
     write,
 };
-use biome_js_syntax::suppression::parse_suppression_comment;
 use biome_js_syntax::JsSyntaxKind::JS_EXPORT;
 use biome_js_syntax::{
     AnyJsClass, AnyJsName, AnyJsRoot, AnyJsStatement, JsArrayHole, JsArrowFunctionExpression,
@@ -19,6 +18,7 @@ use biome_js_syntax::{
     TsInterfaceDeclaration, TsMappedType,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
+use biome_suppression::parse_suppression_comment;
 
 pub type JsComments = Comments<JsLanguage>;
 

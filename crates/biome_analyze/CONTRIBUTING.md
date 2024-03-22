@@ -4,41 +4,13 @@ The analyzer is a generic crate aimed to implement a visitor-like infrastructure
 it's possible to inspect a piece of AST and emit diagnostics or actions based on a
 static check.
 
-## Folder structure
+The analyzer allows implementors to create **four different** types of rules:
+- **Syntax**: This rule checks the syntax according to the language specification and emits error diagnostics accordingly.
+- **Lint**: This rule performs static analysis of the source code to detect invalid or error-prone patterns, and emits diagnostics along with proposed fixes.
+- **Assist**: This rule detects refactoring opportunities and emits code action signals.
+- **Transformation**: This rule detects transformations that should be applied to the code.
 
-First, you need to identify the crate where you want to implement the rule.
-If the rule is going to be implemented for the JavaScript language (and its super languages),
-then the rule will be implemented inside the `biome_js_analyze` crate.
-
-Rules are divided by capabilities:
-
-- `analyzers/` folder contains rules that don't require any particular capabilities, via the `Ast<>` query type;
-
-- `semantic_analyzer/` folder contains rules that require the use of the semantic model, via `Semantic<>` query type;
-
-- `aria_analyzers/` folder contains rules that require the use of ARIA metadata, via `Aria<>` query type;
-
-- `assists/` folder contains rules that contribute to refactor code, with not associated diagnostics.
-  These are rules that are usually meant for editors and IDEs.
-
-Most of the rules will go under `analyzers/` or `semantic_analyzer/`.
-
-Inside these four folders, we have a folder for each group that _Biome_ supports.
-
-When implementing **new rules**, they have to be implemented under the group `nursery`.
-New rules should always be considered unstable/not exhaustive.
-
-In addition to selecting a group, rules may be flagged as `recommended`.
-The **recommended rules** are enabled in the default configuration of the _Biome_ linter.
-As a general principle, a recommended rule should catch actual programming errors.
-For instance, detecting a coding pattern that will throw an exception at runtime.
-Pedantic rules that check for specific unwanted patterns but may have high false positive rates,
-should be left off from the recommended set.
-Rules intended to be recommended should be flagged as such even if they are still part of the `nursery` group,
-as unstable rules are only enabled by default on unstable builds.
-This gives the project time to test the rule, find edge cases, etc.
-
-## Lint rules
+## Creating a rules
 
 When creating or updating a lint rule, you need to be aware that there's a lot of generated code inside our toolchain.
 Our CI ensures that this code is not out of sync and fails otherwise.
@@ -70,14 +42,14 @@ _Biome_ follows a naming convention according to what the rule do:
    When a rule's sole intention is to **mandate a single concept** - such as forcing the use of camel-casing - the rule should be named using the `use` prefix.
    For example, the rule to mandating the use of camel-cased variable names is named `useCamelCase`.
 
-### What a rule should say to the user
+### Explain a rule to the user
 
 A rule should be informative to the user, and give as much explanation as possible.
 
 When writing a rule, you must adhere to the following **pillars**:
 1. Explain to the user the error. Generally, this is the message of the diagnostic.
-2. Explain to the user **why** the error is triggered. Generally, this is implemented with an additional node.
-3. Tell the user what they should do. Generally, this is implemented using a code action. If a code action is not applicable a note should tell the user what they should do to fix the error.
+1. Explain to the user **why** the error is triggered. Generally, this is implemented with an additional node.
+1. Tell the user what they should do. Generally, this is implemented using a code action. If a code action is not applicable a note should tell the user what they should do to fix the error.
 
 ### Create and implement the rule
 
@@ -86,33 +58,17 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
 1. Run the command
 
    ```shell
-   just new-lintrule crates/biome_js_analyze/src/semantic_analyzers/nursery myRuleName
+   just new-js-lintrule myRuleName
    ```
+   The script will create a new **lint** rule for the _JavaScript_ language, inside the `biome_js_analyze`
 
-   Rules go in different folders, and the folder depend on the type of query system your rule
-   will use:
+1. The `Ast` query type allows you to query the AST of a program.
+1. The `State` type doesn't have to be used, so it can be considered optional. However, it has to be defined as `type State = ()`.
+1. Implement the `run` function:
 
-   - `type Query = Ast<>` -> `analyzers/` folder
-   - `type Query = Semantic<>` -> `semantic_analyzers/` folder
-   - `type Query = SemanticServices` -> `semantic_analyzers/` folder
-   - `type Query = Aria<>` -> `aria_analyzers` folder
-   - `type Query = ControlFlowGraph` -> `analyzers/` folder
+   This function is called every time the analyzer finds a match for the query specified by the rule, and may return zero or more "signals".
 
-   The core team will help you out if you don't get the folder right.
-   Using the incorrect folder won't break any code.
-
-2. The `Query` needs to have the `Semantic` type, because we want to have access to the semantic model.
-   `Query` tells the engine on which AST node we want to trigger the rule.
-
-3. The `State` type doesn't have to be used, so it can be considered optional.
-   However, it has to be defined as `type State = ()`.
-
-4. Implement the `run` function:
-
-   This function is called every time the analyzer finds a match for the query specified by the rule,
-   and may return zero or more "signals".
-
-5. Implement the `diagnostic` function, to tell the user where's the error and why:
+1. Implement the `diagnostic` function. Follow the [pillars](#explain-a-rule-to-the-user):
 
    ```rust,ignore
    impl Rule for UseAwesomeTricks {
@@ -122,10 +78,8 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
    ```
 
    While implementing the diagnostic, please keep [Biome's technical principals](https://biomejs.dev/internals/philosophy/#technical) in mind.
-   This function is called for every signal emitted by the `run` function, and it may return
-   zero or one diagnostic.
-
-6. Implement the optional `action` function, if we are able to provide automatic code fix to the rule:
+   
+1. Implement the optional `action` function, if we are able to provide a code action:
 
    ```rust,ignore
    impl Rule for UseAwesomeTricks {
@@ -134,7 +88,6 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
    }
    ```
 
-   This function is called for every signal emitted by the `run` function.
    It may return zero or one code action.
    Rules can return a code action that can be **safe** or **unsafe**. If a rule returns a code action, you must add `fix_kind` to the macro `declare_rule`.
    ```rust,ignore
@@ -147,21 +100,47 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
    `category` must be `ActionCategory::QuickFix`.
    `applicability` is either `Applicability:MaybeIncorrect` or `Applicability:Always`.
    `Applicability:Always` must only be used when the code transformation is safe.
-   In other words, the code transformation should always result in code that does no change the behavior of the code.
+   In other words, the code transformation should always result in code that doesn't change the behavior of the logic.
    In the case of `noVar`, it is not always safe to turn `var` to `const` or `let`.
 
-Don't forget to format your code with `cargo format` and lint with `cargo lint`.
+Don't forget to format your code with `just f` and lint with `just l`.
 
 That's it! Now, let's test the rule.
 
 ### Test the rule
+
+#### Quick test
+
+A swift way to test your rule is to go inside the `biome_js_analyze/src/lib.rs` file (this will change based on where you're implementing the rule) and modify the `quick_test` function.
+
+Usually this test is ignored, so remove _comment_ the macro `#[ignore]` macro, change the `let SOURCE` variable to whatever source code you need to test.  Then update the rule filter, and add your rule:
+
+```rust,ignore
+let rule_filter = RuleFilter::Rule("nursery", "useAwesomeTrick");
+```
+
+Now from your terminal, go inside the `biome_js_analyze` folder and run the test using `cargo`:
+
+```shell
+cargo t quick_test
+```
+
+Remember that, in case you add `dbg!` macros inside your source code, you'll have to use `--show-output`:
+
+```shell
+cargo t quick_test -- --show-output
+```
+
+The test is designed to **show** diagnostics and code actions if the rule correctly emits the signal. If nothing is shown, your logic didn't emit any signal.
+
+#### Snapshots
 
 Inside the `tests/specs/` folder, rules are divided by group and rule name.
 The test infrastructure is rigid around the association of the pair "group/rule name", which means that
 _**your test cases are placed inside the wrong group, you won't see any diagnostics**_.
 
 Since each new rule will start from `nursery`, that's where we start.
-If you used `just new-lintrule`, a folder that use the name of the rule should exist.
+If you used `just new-js-lintrule`, a folder that use the name of the rule should exist.
 Otherwise, create a folder called `myRuleName/`, and then create one or more files where you want to create different cases.
 
 A common pattern is to create files prefixed by `invalid` or `valid`.
@@ -179,33 +158,15 @@ For instance, for the rule `noVar`, the file `invalidScript.jsonc` contains:
 Note that code in a file ending with the extension `.jsonc` are in a _script environment_.
 This means that you cannot use syntax that belongs to _ECMAScript modules_ such as `import` and `export`.
 
-Run the command
+Run the command:
 
 ```shell
 just test-lintrule myRuleName
 ```
 
-and if you've done everything correctly,
-you should see some snapshots emitted with diagnostics and code actions.
+and if you've done everything correctly, you should see some snapshots emitted with diagnostics and code actions.
 
-Check our main [contribution document](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#testing)
-to know how to deal with the snapshot tests.
-
-### Promote a rule
-
-Promoting a rule when is stable can be a tedious work. Internally, we have a script
-that does that for you:
-
-```shell
-just promote-rule noConsoleLog style
-```
-
-The first argument is the name of the rule, in camel case. The second argument
-is the name of the group where you're promoting the rule to.
-
-The script will run some checks and some other script for you.
-
-You're now ready to commit the changes [using `git`](#commit-your-work)!
+Check our main [contribution document](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#testing) to know how to deal with the snapshot tests.
 
 ### Document the rule
 
@@ -269,17 +230,6 @@ For simplicity, use `just` to run all the commands with:
 just gen-lint
 ```
 
-This command runs several sub-commands:
-
-- `cargo codegen-configuration`, **this command must be run first** and, it will update the configuration;
-
-- `cargo lintdoc`, it will update the website with the documentation of the rules, check [`declare_rule`](#declare_rule)
-  for more information about it;
-
-- `cargo codegen-bindings`, it will update the TypeScript types released inside the JS APIs;
-
-- `cargo codegen-schema`, it will update the JSON Schema file of the configuration, used by the npm packages.
-
 ### Commit your work
 
 Once the rule implemented, tested, and documented, you are ready to open a pull request!
@@ -289,12 +239,6 @@ Stage and commit your changes:
 ```shell
 > git add -A
 > git commit -m 'feat(biome_js_analyze): myRuleName'
-```
-
-To test if everything is ready, run the following command:
-
-```shell
-just ready
 ```
 
 ### Rule configuration

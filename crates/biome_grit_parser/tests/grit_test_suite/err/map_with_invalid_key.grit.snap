@@ -1,0 +1,161 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+`const capital = $val` where {
+  $capitals = { england: `london`, $val: `paris` },
+  $val => $capitals.england,
+}
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritPatternWhere {
+            pattern: GritCodeSnippet {
+                source: GritBacktickSnippetLiteral {
+                    value_token: GRIT_BACKTICK_SNIPPET@0..23 "`const capital = $val`" [] [Whitespace(" ")],
+                },
+            },
+            where_token: WHERE_KW@23..29 "where" [] [Whitespace(" ")],
+            side_condition: GritPredicateAnd {
+                and_token: missing (optional),
+                l_curly_token: L_CURLY@29..30 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateAssignment {
+                        container: GritVariable {
+                            value_token: GRIT_VARIABLE@30..43 "$capitals" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                        eq_token: EQ@43..45 "=" [] [Whitespace(" ")],
+                        pattern: GritMap {
+                            l_curly_token: L_CURLY@45..47 "{" [] [Whitespace(" ")],
+                            elements: GritMapElementList [
+                                GritMapElement {
+                                    key: GritName {
+                                        value_token: GRIT_NAME@47..54 "england" [] [],
+                                    },
+                                    colon_token: COLON@54..56 ":" [] [Whitespace(" ")],
+                                    value: GritCodeSnippet {
+                                        source: GritBacktickSnippetLiteral {
+                                            value_token: GRIT_BACKTICK_SNIPPET@56..64 "`london`" [] [],
+                                        },
+                                    },
+                                },
+                                COMMA@64..66 "," [] [Whitespace(" ")],
+                                GritBogusMapElement {
+                                    items: [
+                                        GRIT_VARIABLE@66..70 "$val" [] [],
+                                        COLON@70..72 ":" [] [Whitespace(" ")],
+                                        GRIT_BACKTICK_SNIPPET@72..80 "`paris`" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@80..81 "}" [] [],
+                        },
+                    },
+                    COMMA@81..82 "," [] [],
+                    GritPredicateRewrite {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@82..90 "$val" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                        annotation: missing (optional),
+                        fat_arrow_token: FAT_ARROW@90..93 "=>" [] [Whitespace(" ")],
+                        right: GritMapAccessor {
+                            map: GritVariable {
+                                value_token: GRIT_VARIABLE@93..102 "$capitals" [] [],
+                            },
+                            dot_token: DOT@102..103 "." [] [],
+                            key: GritName {
+                                value_token: GRIT_NAME@103..110 "england" [] [],
+                            },
+                        },
+                    },
+                    COMMA@110..111 "," [] [],
+                ],
+                r_curly_token: R_CURLY@111..113 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@113..114 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..114
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..113
+    0: GRIT_PATTERN_WHERE@0..113
+      0: GRIT_CODE_SNIPPET@0..23
+        0: GRIT_BACKTICK_SNIPPET_LITERAL@0..23
+          0: GRIT_BACKTICK_SNIPPET@0..23 "`const capital = $val`" [] [Whitespace(" ")]
+      1: WHERE_KW@23..29 "where" [] [Whitespace(" ")]
+      2: GRIT_PREDICATE_AND@29..113
+        0: (empty)
+        1: L_CURLY@29..30 "{" [] []
+        2: GRIT_PREDICATE_LIST@30..111
+          0: GRIT_PREDICATE_ASSIGNMENT@30..81
+            0: GRIT_VARIABLE@30..43
+              0: GRIT_VARIABLE@30..43 "$capitals" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: EQ@43..45 "=" [] [Whitespace(" ")]
+            2: GRIT_MAP@45..81
+              0: L_CURLY@45..47 "{" [] [Whitespace(" ")]
+              1: GRIT_MAP_ELEMENT_LIST@47..80
+                0: GRIT_MAP_ELEMENT@47..64
+                  0: GRIT_NAME@47..54
+                    0: GRIT_NAME@47..54 "england" [] []
+                  1: COLON@54..56 ":" [] [Whitespace(" ")]
+                  2: GRIT_CODE_SNIPPET@56..64
+                    0: GRIT_BACKTICK_SNIPPET_LITERAL@56..64
+                      0: GRIT_BACKTICK_SNIPPET@56..64 "`london`" [] []
+                1: COMMA@64..66 "," [] [Whitespace(" ")]
+                2: GRIT_BOGUS_MAP_ELEMENT@66..80
+                  0: GRIT_VARIABLE@66..70 "$val" [] []
+                  1: COLON@70..72 ":" [] [Whitespace(" ")]
+                  2: GRIT_BACKTICK_SNIPPET@72..80 "`paris`" [] [Whitespace(" ")]
+              2: R_CURLY@80..81 "}" [] []
+          1: COMMA@81..82 "," [] []
+          2: GRIT_PREDICATE_REWRITE@82..110
+            0: GRIT_VARIABLE@82..90
+              0: GRIT_VARIABLE@82..90 "$val" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: (empty)
+            2: FAT_ARROW@90..93 "=>" [] [Whitespace(" ")]
+            3: GRIT_MAP_ACCESSOR@93..110
+              0: GRIT_VARIABLE@93..102
+                0: GRIT_VARIABLE@93..102 "$capitals" [] []
+              1: DOT@102..103 "." [] []
+              2: GRIT_NAME@103..110
+                0: GRIT_NAME@103..110 "england" [] []
+          3: COMMA@110..111 "," [] []
+        3: R_CURLY@111..113 "}" [Newline("\n")] []
+  4: EOF@113..114 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+map_with_invalid_key.grit:2:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a map element.
+  
+    1 │ `const capital = $val` where {
+  > 2 │   $capitals = { england: `london`, $val: `paris` },
+      │                                    ^^^^^^^^^^^^^
+    3 │   $val => $capitals.england,
+    4 │ }
+  
+  i Map elements consist of a name, followed by a colon and a pattern.
+  
+```

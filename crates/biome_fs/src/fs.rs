@@ -162,7 +162,11 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>>;
 
-    fn resolve_configuration(&self, path: &str) -> Result<Resolution, ResolveError>;
+    fn resolve_configuration(
+        &self,
+        specifier: &str,
+        path: Option<&Path>,
+    ) -> Result<Resolution, ResolveError>;
 }
 
 /// Result of the auto search
@@ -331,8 +335,12 @@ where
         T::get_changed_files(self, base)
     }
 
-    fn resolve_configuration(&self, path: &str) -> Result<Resolution, ResolveError> {
-        T::resolve_configuration(self, path)
+    fn resolve_configuration(
+        &self,
+        specifier: &str,
+        path: Option<&Path>,
+    ) -> Result<Resolution, ResolveError> {
+        T::resolve_configuration(self, specifier, path)
     }
 }
 

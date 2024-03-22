@@ -43,7 +43,7 @@ pub(crate) fn code_actions(
 
     let file_features = &session.workspace.file_features(SupportsFeatureParams {
         path: biome_path,
-        feature: FeaturesBuilder::new()
+        features: FeaturesBuilder::new()
             .with_linter()
             .with_organize_imports()
             .build(),
@@ -208,7 +208,7 @@ fn fix_all(
         .workspace
         .file_features(SupportsFeatureParams {
             path: biome_path.clone(),
-            feature: vec![FeatureName::Format],
+            features: vec![FeatureName::Format],
         })?
         .supports_format();
     let fixed = session.workspace.fix_file(FixFileParams {

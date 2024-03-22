@@ -40,23 +40,33 @@ SyntaxElement = SyntaxElement
 GritBogus = SyntaxElement*
 GritBogusContainer = SyntaxElement*
 GritBogusDefinition = SyntaxElement*
-GritBogusPattern = SyntaxElement*
+GritBogusMapElement = SyntaxElement*
+GritBogusLanguageDeclaration = SyntaxElement*
+GritBogusLanguageFlavorKind = SyntaxElement*
 GritBogusLiteral = SyntaxElement*
 GritBogusNamedArg = SyntaxElement*
+GritBogusPattern = SyntaxElement*
 GritBogusPredicate = SyntaxElement*
+GritBogusVersion = SyntaxElement*
 
 GritRoot =
     bom: 'UNICODE_BOM'?
-    version: GritVersion?
-    language: GritLanguageDeclaration?
+    version: AnyGritVersion?
+    language: AnyGritLanguageDeclaration?
     definitions: GritDefinitionList
-    pattern: AnyGritPattern?
-    definitions_continued: GritDefinitionList
     eof: 'EOF'
+
+AnyGritVersion =
+    GritVersion
+    | GritBogusVersion
 
 // engine biome(1.0)
 // ^^^^^^ ^^^^^^^^^^
 GritVersion = 'engine' 'biome' '(' version: GritDoubleLiteral ')'
+
+AnyGritLanguageDeclaration =
+    GritLanguageDeclaration
+    | GritBogusLanguageDeclaration
 
 // language js(typescript, jsx);
 // ^^^^^^^^ ^^^^^^^^^^^^^^ ^^^^^
@@ -69,7 +79,12 @@ GritLanguageDeclaration =
 // language js(typescript, jsx);
 //            ^^^^^^^^^^^^ ^^^^
 GritLanguageFlavor = '(' flavors: GritLanguageFlavorList ')'
-GritLanguageFlavorList = GritLanguageFlavorKind (',' GritLanguageFlavorKind)* ','?
+GritLanguageFlavorList = AnyGritLanguageFlavorKind (',' AnyGritLanguageFlavorKind)* ','?
+
+AnyGritLanguageFlavorKind =
+    GritLanguageFlavorKind
+    | GritBogusLanguageFlavorKind
+
 GritLanguageFlavorKind =
     flavor_kind: (
         // JavaScript flavors:
@@ -280,7 +295,11 @@ GritMap =
     elements: GritMapElementList
     '}'
 
-GritMapElementList = GritMapElement (',' GritMapElement)* ','?
+GritMapElementList = AnyGritMapElement (',' AnyGritMapElement)* ','?
+
+AnyGritMapElement =
+    GritMapElement
+    | GritBogusMapElement
 
 // { key: `pattern` }
 //   ^^^^ ^^^^^^^^^
@@ -496,6 +515,9 @@ AnyGritDefinition =
     GritPatternDefinition
     | GritPredicateDefinition
     | GritFunctionDefinition
+    | AnyGritPattern // This is not allowed by the GritQL reference grammar, but
+                     // we let the parser verify there is only a single pattern
+                     // between the definitions.
     | GritBogusDefinition
 
 GritDefinitionList = AnyGritDefinition ('newline' AnyGritDefinition)* 'newline'?

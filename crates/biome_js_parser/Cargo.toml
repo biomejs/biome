@@ -27,7 +27,6 @@ serde               = { workspace = true, features = ["derive"] }
 serde_json          = { workspace = true }
 smallvec            = { workspace = true }
 tracing             = { workspace = true }
-unicode-bom         = { workspace = true }
 
 [dev-dependencies]
 expect-test       = "1.2.2"

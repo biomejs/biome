@@ -29,7 +29,7 @@ use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -136,39 +136,25 @@ impl ExtensionHandler for JsonFileHandler {
     }
 }
 
-fn is_file_allowed(path: &Path) -> bool {
-    path.file_name()
-        .and_then(|f| f.to_str())
-        .map(|f| {
-            super::DocumentFileSource::KNOWN_FILES_AS_JSONC
-                .binary_search(&f)
-                .is_ok()
-        })
-        // default is false
-        .unwrap_or_default()
-}
-
 fn parse(
     biome_path: &BiomePath,
-    mut file_source: DocumentFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let parser = &settings.as_ref().languages.json.parser;
     let overrides = &settings.as_ref().override_settings;
+    let optional_json_file_source = file_source.to_json_file_source();
     let options: JsonParserOptions = overrides.override_json_parser_options(
         biome_path,
         JsonParserOptions {
             allow_comments: parser.allow_comments
-                || file_source.to_json_file_source().map(|fs| fs.is_jsonc()) == Some(true)
-                || is_file_allowed(biome_path),
-            allow_trailing_commas: parser.allow_trailing_commas || is_file_allowed(biome_path),
+                || optional_json_file_source.map_or(false, |x| x.get_allow_comments()),
+            allow_trailing_commas: parser.allow_trailing_commas
+                || optional_json_file_source.map_or(false, |x| x.get_allow_trailing_commas()),
         },
     );
-    if let DocumentFileSource::Json(file_source) = &mut file_source {
-        file_source.set_allow_trailing_comma(options.allow_trailing_commas);
-    }
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();

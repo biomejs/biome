@@ -1,0 +1,44 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+r"test\\.*[^'\"]"
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritRegexPattern {
+            regex: GritRegexLiteral {
+                value_token: GRIT_REGEX@0..17 "r\"test\\\\.*[^'\\\"]\"" [] [],
+            },
+            variables: missing (optional),
+        },
+    ],
+    eof_token: EOF@17..18 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..18
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..17
+    0: GRIT_REGEX_PATTERN@0..17
+      0: GRIT_REGEX_LITERAL@0..17
+        0: GRIT_REGEX@0..17 "r\"test\\\\.*[^'\\\"]\"" [] []
+      1: (empty)
+  4: EOF@17..18 "" [Newline("\n")] []
+
+```

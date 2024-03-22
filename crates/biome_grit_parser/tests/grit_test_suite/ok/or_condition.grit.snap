@@ -1,0 +1,126 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+`console.$method('$message');` => `console.warn('$message');` where {
+  or {
+    $message <: "Hello, world!",
+    $method <: `error`
+  }
+}
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritPatternWhere {
+            pattern: GritRewrite {
+                left: GritCodeSnippet {
+                    source: GritBacktickSnippetLiteral {
+                        value_token: GRIT_BACKTICK_SNIPPET@0..31 "`console.$method('$message');`" [] [Whitespace(" ")],
+                    },
+                },
+                annotation: missing (optional),
+                fat_arrow_token: FAT_ARROW@31..34 "=>" [] [Whitespace(" ")],
+                right: GritCodeSnippet {
+                    source: GritBacktickSnippetLiteral {
+                        value_token: GRIT_BACKTICK_SNIPPET@34..62 "`console.warn('$message');`" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            where_token: WHERE_KW@62..68 "where" [] [Whitespace(" ")],
+            side_condition: GritPredicateAnd {
+                and_token: missing (optional),
+                l_curly_token: L_CURLY@68..69 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateOr {
+                        or_token: OR_KW@69..75 "or" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        l_curly_token: L_CURLY@75..76 "{" [] [],
+                        predicates: GritPredicateList [
+                            GritPredicateMatch {
+                                left: GritVariable {
+                                    value_token: GRIT_VARIABLE@76..90 "$message" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                },
+                                match_token: MATCH@90..93 "<:" [] [Whitespace(" ")],
+                                right: GritStringLiteral {
+                                    value_token: GRIT_STRING@93..108 "\"Hello, world!\"" [] [],
+                                },
+                            },
+                            COMMA@108..109 "," [] [],
+                            GritPredicateMatch {
+                                left: GritVariable {
+                                    value_token: GRIT_VARIABLE@109..122 "$method" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                },
+                                match_token: MATCH@122..125 "<:" [] [Whitespace(" ")],
+                                right: GritCodeSnippet {
+                                    source: GritBacktickSnippetLiteral {
+                                        value_token: GRIT_BACKTICK_SNIPPET@125..132 "`error`" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_curly_token: R_CURLY@132..136 "}" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@136..138 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@138..139 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..139
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..138
+    0: GRIT_PATTERN_WHERE@0..138
+      0: GRIT_REWRITE@0..62
+        0: GRIT_CODE_SNIPPET@0..31
+          0: GRIT_BACKTICK_SNIPPET_LITERAL@0..31
+            0: GRIT_BACKTICK_SNIPPET@0..31 "`console.$method('$message');`" [] [Whitespace(" ")]
+        1: (empty)
+        2: FAT_ARROW@31..34 "=>" [] [Whitespace(" ")]
+        3: GRIT_CODE_SNIPPET@34..62
+          0: GRIT_BACKTICK_SNIPPET_LITERAL@34..62
+            0: GRIT_BACKTICK_SNIPPET@34..62 "`console.warn('$message');`" [] [Whitespace(" ")]
+      1: WHERE_KW@62..68 "where" [] [Whitespace(" ")]
+      2: GRIT_PREDICATE_AND@68..138
+        0: (empty)
+        1: L_CURLY@68..69 "{" [] []
+        2: GRIT_PREDICATE_LIST@69..136
+          0: GRIT_PREDICATE_OR@69..136
+            0: OR_KW@69..75 "or" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: L_CURLY@75..76 "{" [] []
+            2: GRIT_PREDICATE_LIST@76..132
+              0: GRIT_PREDICATE_MATCH@76..108
+                0: GRIT_VARIABLE@76..90
+                  0: GRIT_VARIABLE@76..90 "$message" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+                1: MATCH@90..93 "<:" [] [Whitespace(" ")]
+                2: GRIT_STRING_LITERAL@93..108
+                  0: GRIT_STRING@93..108 "\"Hello, world!\"" [] []
+              1: COMMA@108..109 "," [] []
+              2: GRIT_PREDICATE_MATCH@109..132
+                0: GRIT_VARIABLE@109..122
+                  0: GRIT_VARIABLE@109..122 "$method" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+                1: MATCH@122..125 "<:" [] [Whitespace(" ")]
+                2: GRIT_CODE_SNIPPET@125..132
+                  0: GRIT_BACKTICK_SNIPPET_LITERAL@125..132
+                    0: GRIT_BACKTICK_SNIPPET@125..132 "`error`" [] []
+            3: R_CURLY@132..136 "}" [Newline("\n"), Whitespace("  ")] []
+        3: R_CURLY@136..138 "}" [Newline("\n")] []
+  4: EOF@138..139 "" [Newline("\n")] []
+
+```

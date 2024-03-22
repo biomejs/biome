@@ -1,0 +1,134 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+pattern console_method_to_info($method) {
+  `console.$method($message)` => `console.info($message)`
+}
+console_method_to_info(method = `log`)
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritPatternDefinition {
+            visibility_token: missing (optional),
+            pattern_token: PATTERN_KW@0..8 "pattern" [] [Whitespace(" ")],
+            name: GritName {
+                value_token: GRIT_NAME@8..30 "console_method_to_info" [] [],
+            },
+            l_paren_token: L_PAREN@30..31 "(" [] [],
+            args: GritPatternArgList {
+                grit_variable_list: GritVariableList [
+                    GritVariable {
+                        value_token: GRIT_VARIABLE@31..38 "$method" [] [],
+                    },
+                ],
+            },
+            r_paren_token: R_PAREN@38..40 ")" [] [Whitespace(" ")],
+            language: missing (optional),
+            body: GritPatternDefinitionBody {
+                l_curly_token: L_CURLY@40..41 "{" [] [],
+                patterns: GritPatternList [
+                    GritRewrite {
+                        left: GritCodeSnippet {
+                            source: GritBacktickSnippetLiteral {
+                                value_token: GRIT_BACKTICK_SNIPPET@41..72 "`console.$method($message)`" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                            },
+                        },
+                        annotation: missing (optional),
+                        fat_arrow_token: FAT_ARROW@72..75 "=>" [] [Whitespace(" ")],
+                        right: GritCodeSnippet {
+                            source: GritBacktickSnippetLiteral {
+                                value_token: GRIT_BACKTICK_SNIPPET@75..99 "`console.info($message)`" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@99..101 "}" [Newline("\n")] [],
+            },
+        },
+        missing separator,
+        GritNodeLike {
+            name: GritName {
+                value_token: GRIT_NAME@101..124 "console_method_to_info" [Newline("\n")] [],
+            },
+            l_paren_token: L_PAREN@124..125 "(" [] [],
+            named_args: GritNamedArgList [
+                GritNamedArg {
+                    name: GritName {
+                        value_token: GRIT_NAME@125..132 "method" [] [Whitespace(" ")],
+                    },
+                    eq_token: EQ@132..134 "=" [] [Whitespace(" ")],
+                    pattern: GritCodeSnippet {
+                        source: GritBacktickSnippetLiteral {
+                            value_token: GRIT_BACKTICK_SNIPPET@134..139 "`log`" [] [],
+                        },
+                    },
+                },
+            ],
+            r_paren_token: R_PAREN@139..140 ")" [] [],
+        },
+    ],
+    eof_token: EOF@140..141 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..141
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..140
+    0: GRIT_PATTERN_DEFINITION@0..101
+      0: (empty)
+      1: PATTERN_KW@0..8 "pattern" [] [Whitespace(" ")]
+      2: GRIT_NAME@8..30
+        0: GRIT_NAME@8..30 "console_method_to_info" [] []
+      3: L_PAREN@30..31 "(" [] []
+      4: GRIT_PATTERN_ARG_LIST@31..38
+        0: GRIT_VARIABLE_LIST@31..38
+          0: GRIT_VARIABLE@31..38
+            0: GRIT_VARIABLE@31..38 "$method" [] []
+      5: R_PAREN@38..40 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: GRIT_PATTERN_DEFINITION_BODY@40..101
+        0: L_CURLY@40..41 "{" [] []
+        1: GRIT_PATTERN_LIST@41..99
+          0: GRIT_REWRITE@41..99
+            0: GRIT_CODE_SNIPPET@41..72
+              0: GRIT_BACKTICK_SNIPPET_LITERAL@41..72
+                0: GRIT_BACKTICK_SNIPPET@41..72 "`console.$method($message)`" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: (empty)
+            2: FAT_ARROW@72..75 "=>" [] [Whitespace(" ")]
+            3: GRIT_CODE_SNIPPET@75..99
+              0: GRIT_BACKTICK_SNIPPET_LITERAL@75..99
+                0: GRIT_BACKTICK_SNIPPET@75..99 "`console.info($message)`" [] []
+        2: R_CURLY@99..101 "}" [Newline("\n")] []
+    1: (empty)
+    2: GRIT_NODE_LIKE@101..140
+      0: GRIT_NAME@101..124
+        0: GRIT_NAME@101..124 "console_method_to_info" [Newline("\n")] []
+      1: L_PAREN@124..125 "(" [] []
+      2: GRIT_NAMED_ARG_LIST@125..139
+        0: GRIT_NAMED_ARG@125..139
+          0: GRIT_NAME@125..132
+            0: GRIT_NAME@125..132 "method" [] [Whitespace(" ")]
+          1: EQ@132..134 "=" [] [Whitespace(" ")]
+          2: GRIT_CODE_SNIPPET@134..139
+            0: GRIT_BACKTICK_SNIPPET_LITERAL@134..139
+              0: GRIT_BACKTICK_SNIPPET@134..139 "`log`" [] []
+      3: R_PAREN@139..140 ")" [] []
+  4: EOF@140..141 "" [Newline("\n")] []
+
+```

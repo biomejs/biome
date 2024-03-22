@@ -57,7 +57,7 @@ impl FromStr for LanguageKind {
             "grit" => Ok(LanguageKind::Grit),
             "html" => Ok(LanguageKind::Html),
             _ => Err(format!(
-                "Language {} not supported, please use: `js`, `css`, `json`, `gritql`, `graphql` or `html`",
+                "Language {} not supported, please use: `js`, `css`, `json`, `grit`, `graphql` or `html`",
                 kind
             )),
         }
