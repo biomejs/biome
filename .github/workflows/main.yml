@@ -19,12 +19,12 @@ jobs:
     name: Format Rust Files
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
       - name: Support longpaths
         run: git config core.longpaths true
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
         with:

@@ -24,9 +24,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout PR Branch
-        uses: actions/checkout@v4
-
       - name: Support longpaths
         run: git config core.longpaths true
 
@@ -34,6 +31,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
 
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
