@@ -39,20 +39,16 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
     // e.g. we have `color-profile` in css but it's an invalid ident in rust code
     // color-profile => "color_profile"
     // also mark uppercase differently from lowercase
-    // e.g. "query" => "QUERY", "QUERY" => "Q_U_E_R_Y_"
+    // e.g. "query" => "QUERY", "QUERY" => "QUERY_UPPERCASE"
     let all_keywords_values = all_keywords
         .iter()
         .map(|kw| {
-            kw.replace('-', "_")
-                .chars()
-                .map(|c| {
-                    if c.is_uppercase() {
-                        c.to_string() + "_"
-                    } else {
-                        c.to_string()
-                    }
-                })
-                .collect::<String>()
+            let kw = kw.replace('-', "_");
+            if kw.chars().all(|c| c.is_uppercase()) {
+                kw + "_UPPERCASE"
+            } else {
+                kw
+            }
         })
         .collect::<Vec<_>>();
     // "color_profile" => COLOR_PROFILE_KW

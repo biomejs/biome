@@ -41,7 +41,7 @@ impl GraphqlSyntaxKind {
     /// Returns `true` for any contextual (await) or non-contextual keyword
     #[inline]
     pub const fn is_keyword(self) -> bool {
-        (self as u16) <= (GraphqlSyntaxKind::I_N_P_U_T_F_I_E_L_D_D_E_F_I_N_I_T_I_O_N_KW as u16)
+        (self as u16) <= (GraphqlSyntaxKind::INPUT_FIELD_DEFINITION_KW as u16)
             && (self as u16) >= (GraphqlSyntaxKind::TRUE_KW as u16)
     }
 }

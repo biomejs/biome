@@ -978,21 +978,15 @@ pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> Tok
     } else if kind_source.keywords.contains(&name) {
         // we need to replace "-" with "_" for the keywords
         // e.g. we have `color-profile` in css but it's an invalid ident in rust code
+        let token = name.replace('-', "_");
         // also mark uppercase differently from lowercase
-        // e.g. "query" => "QUERY", "QUERY" => "Q_U_E_R_Y_"
-        let token: TokenStream = name
-            .replace('-', "_")
-            .chars()
-            .map(|c| {
-                if c.is_uppercase() {
-                    c.to_string() + "_"
-                } else {
-                    c.to_string()
-                }
-            })
-            .collect::<String>()
-            .parse()
-            .unwrap();
+        // e.g. "query" => "QUERY", "QUERY" => "QUERY_UPPERCASE"
+        let token = if token.chars().all(|c| c.is_uppercase()) {
+            token + "_UPPERCASE"
+        } else {
+            token
+        };
+        let token: TokenStream = token.parse().unwrap();
         quote! { T![#token] }
     } else {
         // $ is valid syntax in rust and it's part of macros,
