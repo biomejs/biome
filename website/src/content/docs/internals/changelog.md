@@ -31,6 +31,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fixes [#2131](https://github.com/biomejs/biome/issues/2131), where folders were incorrectly ignored when running the command `check`. Now folders are correctly ignored based on their command. Contributed by @ematipico
 
+- Smoother handling of `"endOfLine": "auto"` in prettier migration: falling back to `"lf"` ([#2145](https://github.com/biomejs/biome/pull/2145)). Contributed by @eMerzh
+
 ### Configuration
 
 #### Bug fixes
