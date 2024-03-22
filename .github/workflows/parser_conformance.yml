@@ -40,6 +40,9 @@ jobs:
 
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
+        with:
+          cache-target: release
+          cache-base: main
 
       - name: Compile
         run: cargo build --release --locked -p xtask_coverage

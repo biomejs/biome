@@ -43,6 +43,7 @@ jobs:
           channel: stable
           cache-target: release
           bins: cargo-codspeed
+          cache-base: main
 
       - name: Compile
         run: cargo codspeed build --features codspeed -p xtask_bench

@@ -40,6 +40,9 @@ jobs:
       - uses: pnpm/action-setup@v3
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
+        with:
+          cache-target: release
+          cache-base: main
       - name: Install libraries
         run: pnpm --filter @biomejs/js-api i
       - name: Compile backends

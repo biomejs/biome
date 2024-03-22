@@ -35,6 +35,10 @@ jobs:
 
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
+        with:
+          channel: stable
+          cache-target: release
+          cache-base: main
 
       - name: Install hyperfine
         run: cargo install hyperfine
