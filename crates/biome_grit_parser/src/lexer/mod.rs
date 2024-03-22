@@ -268,7 +268,7 @@ impl<'src> GritLexer<'src> {
                         let end = self.position;
                         self.diagnostics.push(
                             ParseDiagnostic::new(
-                                format!("'{}' is not a valid token", ".".repeat(end - start)),
+                                format!("'{}' isn't valid here.", ".".repeat(end - start)),
                                 start..end,
                             )
                             .with_hint("Did you mean '...'?"),
@@ -281,7 +281,7 @@ impl<'src> GritLexer<'src> {
                 } else {
                     self.advance(1);
                     self.diagnostics.push(
-                        ParseDiagnostic::new("'..' is not a valid token", start..self.position)
+                        ParseDiagnostic::new("'..' isn't valid here.", start..self.position)
                             .with_hint("Did you mean '...'?"),
                     );
 

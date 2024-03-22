@@ -139,7 +139,7 @@ GritRoot {
 ```
 dotdot_clause.grit:2:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × '..' is not a valid token
+  × '..' isn't valid here.
   
     1 │ `var $x = [$numbers]` => `var firstPrimes = [$numbers]` where {
   > 2 │   $numbers <: [ `2`, `3`, .., `11` ]
