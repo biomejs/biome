@@ -1,12 +1,17 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, LanguageKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleBlock;
 use biome_rowan::AstNode;
 
 declare_rule! {
-    /// **[WIP] This rule hasn't been implemented yet.**
+    /// Succinct description of the rule.
     ///
-    /// This is sample rule
+    /// Put context and details about the rule.
+    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    ///
+    /// Try to stay consistent with the descriptions of implemented rules.
+    ///
+    /// Add a link to the corresponding stylelint rule (if any):
     ///
     /// ## Examples
     ///
@@ -28,6 +33,7 @@ declare_rule! {
         version: "next",
         name: "noColorInvalidHex",
         recommended: false,
+        language_kind: LanguageKind::Css,
     }
 }
 

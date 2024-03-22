@@ -1389,7 +1389,7 @@
 					]
 				},
 				"noColorInvalidHex": {
-					"description": "[WIP] This rule hasn't been implemented yet.",
+					"description": "Succinct description of the rule.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

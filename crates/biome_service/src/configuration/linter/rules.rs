@@ -2559,7 +2559,7 @@ pub struct Nursery {
     #[doc = "Disallow the use of barrel file."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_barrel_file: Option<RuleConfiguration<NoBarrelFile>>,
-    #[doc = "[WIP] This rule hasn't been implemented yet."]
+    #[doc = "Succinct description of the rule."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_color_invalid_hex: Option<RuleConfiguration<NoColorInvalidHex>>,
     #[doc = "Disallow the use of console."]
