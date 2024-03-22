@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Support longpaths
-        run: git config core.longpaths true
+        run: git config --system core.longpaths true
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Free Disk Space
