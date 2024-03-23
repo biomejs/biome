@@ -76,87 +76,99 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     ///
     fn auto_search(
         &self,
-        mut file_path: PathBuf,
-        file_names: &[&str],
+        mut search_dir: PathBuf,
+        filenames: &[&str],
         should_error_if_file_not_found: bool,
     ) -> AutoSearchResultAlias {
-        let mut from_parent = false;
-        // outer loop is for searching parent directories
-        'search: loop {
-            // inner loop is for searching config file alternatives: biome.json, biome.jsonc
-            'alternatives_loop: for file_name in file_names {
-                let file_directory_path = file_path.join(file_name);
-                let options = OpenOptions::default().read(true);
-                let file = self.open_with_options(&file_directory_path, options);
-                match file {
+        let mut is_searching_in_parent_dir = false;
+        loop {
+            let mut errors: Vec<(FileSystemDiagnostic, String)> = vec![];
+
+            for filename in filenames {
+                let file_path = search_dir.join(filename);
+                let open_options = OpenOptions::default().read(true);
+                match self.open_with_options(&file_path, open_options) {
                     Ok(mut file) => {
                         let mut buffer = String::new();
-                        if let Err(err) = file.read_to_string(&mut buffer) {
-                            // base paths from users are not eligible for auto discovery
-                            if !should_error_if_file_not_found {
-                                continue 'alternatives_loop;
+                        match file.read_to_string(&mut buffer) {
+                            Ok(_) => {
+                                if is_searching_in_parent_dir {
+                                    info!(
+                                        "Biome auto discovered the file at following path that wasn't in the working directory: {}",
+                                        search_dir.display()
+                                    );
+                                }
+                                return Ok(Some(AutoSearchResult {
+                                    content: buffer,
+                                    file_path,
+                                    directory_path: search_dir,
+                                }));
                             }
-                            error!(
-                                "Could not read the file from {:?}, reason:\n {}",
-                                file_directory_path.display(),
-                                err
-                            );
-                            return Err(FileSystemDiagnostic {
-                                path: file_directory_path.display().to_string(),
-                                severity: Severity::Error,
-                                error_kind: ErrorKind::CantReadFile(
-                                    file_directory_path.display().to_string(),
-                                ),
-                            });
+                            Err(err) => {
+                                if !is_searching_in_parent_dir && should_error_if_file_not_found {
+                                    let error_message = format!(
+                                        "Biome couldn't read the config file {:?}, reason:\n {}",
+                                        file_path, err
+                                    );
+                                    errors.push((
+                                        FileSystemDiagnostic {
+                                            path: file_path.display().to_string(),
+                                            severity: Severity::Error,
+                                            error_kind: ErrorKind::CantReadFile(
+                                                file_path.display().to_string(),
+                                            ),
+                                        },
+                                        error_message,
+                                    ));
+                                }
+                                continue;
+                            }
                         }
-                        if from_parent {
-                            info!(
-                                "Biome auto discovered the file at following path that wasn't in the working directory: {}",
-                                file_path.display()
-                            );
-                        }
-                        return Ok(Some(AutoSearchResult {
-                            content: buffer,
-                            file_path: file_directory_path,
-                            directory_path: file_path,
-                        }));
                     }
                     Err(err) => {
-                        // base paths from users are not eligible for auto discovery
-                        if !should_error_if_file_not_found {
-                            continue 'alternatives_loop;
+                        if !is_searching_in_parent_dir && should_error_if_file_not_found {
+                            let error_message = format!(
+                                "Biome couldn't find the config file {:?}, reason:\n {}",
+                                file_path, err
+                            );
+                            errors.push((
+                                FileSystemDiagnostic {
+                                    path: file_path.display().to_string(),
+                                    severity: Severity::Error,
+                                    error_kind: ErrorKind::CantReadFile(
+                                        file_path.display().to_string(),
+                                    ),
+                                },
+                                error_message,
+                            ));
                         }
-                        error!(
-                            "Could not read the file from {:?}, reason:\n {}",
-                            file_directory_path.display(),
-                            err
-                        );
-                        return Err(FileSystemDiagnostic {
-                            path: file_directory_path.display().to_string(),
-                            severity: Severity::Error,
-                            error_kind: ErrorKind::CantReadFile(
-                                file_directory_path.display().to_string(),
-                            ),
-                        });
+                        continue;
                     }
                 }
             }
-            let parent_directory = if let Some(path) = file_path.parent() {
-                if path.is_dir() {
-                    Some(PathBuf::from(path))
-                } else {
-                    None
+
+            if !is_searching_in_parent_dir && should_error_if_file_not_found {
+                if let Some(diagnostic) = errors
+                    .into_iter()
+                    .map(|(diagnostic, message)| {
+                        error!(message);
+                        diagnostic
+                    })
+                    .last()
+                {
+                    // we can only return one Err, so we return the last diagnostic.
+                    return Err(diagnostic);
                 }
-            } else {
-                None
-            };
-            if let Some(parent_directory) = parent_directory {
-                file_path = parent_directory;
-                from_parent = true;
-                continue 'search;
             }
-            break 'search;
+
+            if let Some(parent_search_dir) = search_dir.parent() {
+                search_dir = PathBuf::from(parent_search_dir);
+                is_searching_in_parent_dir = true;
+            } else {
+                break;
+            }
         }
+
         Ok(None)
     }
 

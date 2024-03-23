@@ -15,6 +15,30 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+- Fix configuration resolution. Biome is now able to correctly find the `biome.jsonc` configuration file when `--config-path` is explicitly set. Contributed by @Sec-ant
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+- Add rule [noEvolvingAny](https://biomejs.dev/linter/rules/no-evolving-any) to disallow variables from evolving into `any` type through reassignments. Contributed by @fujiyamaorange
+
+### Parser
+
 ## 1.6.2 (2024-03-22)
 
 ### Analyzer
@@ -52,12 +76,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Support applying lint fixes when calling the `lintContent` method of the `Biome` class ([#1956](https://github.com/biomejs/biome/pull/1956)). Contributed by @mnahkies
 
 ### Linter
-
-#### New features
-
-- Add rule [noEvolvingAny](https://biomejs.dev/linter/rules/no-evolving-any) to disallow variables from evolving into `any` type through reassignments.
-
-Contributed by @fujiyamaorange
 
 #### Bug fixes
 
