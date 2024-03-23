@@ -45,7 +45,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
         .map(|kw| {
             let kw = kw.replace('-', "_");
             if kw.chars().all(|c| c.is_uppercase()) {
-                kw + "_UPPERCASE"
+                "UPPER_".to_string() + kw.as_str()
             } else {
                 kw
             }

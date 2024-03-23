@@ -982,7 +982,7 @@ pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> Tok
         // also mark uppercase differently from lowercase
         // e.g. "query" => "QUERY", "QUERY" => "QUERY_UPPERCASE"
         let token = if token.chars().all(|c| c.is_uppercase()) {
-            token + "_UPPERCASE"
+            "UPPER_".to_string() + token.as_str()
         } else {
             token
         };
