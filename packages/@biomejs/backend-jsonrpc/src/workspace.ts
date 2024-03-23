@@ -917,6 +917,10 @@ export interface Nursery {
 	 */
 	noDuplicateTestHooks?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow variables from evolving into any type through reassignments.
+	 */
+	noEvolvingAny?: RuleConfiguration_for_Null;
+	/**
 	 * This rule enforces a maximum depth to nested describe() in test files.
 	 */
 	noExcessiveNestedTestSuites?: RuleConfiguration_for_Null;
@@ -1899,6 +1903,7 @@ export type Category =
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateTestHooks"
+	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noExportsInTest"
 	| "lint/nursery/noFocusedTests"

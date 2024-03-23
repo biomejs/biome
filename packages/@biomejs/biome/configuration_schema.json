@@ -1430,6 +1430,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEvolvingAny": {
+					"description": "Disallow variables from evolving into any type through reassignments.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveNestedTestSuites": {
 					"description": "This rule enforces a maximum depth to nested describe() in test files.",
 					"anyOf": [
