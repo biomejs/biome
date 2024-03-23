@@ -155,5 +155,10 @@ pub const GRAPHQL_KINDS_SRC: KindsSrc = KindsSrc {
         "GRAPHQL_DIRECTIVE_LOCATION",
         // Bogus nodes
         "GRAPHQL_BOGUS",
+        "GRAPHQL_BOGUS_DEFINITION",
+        "GRAPHQL_BOGUS_SELECTION",
+        "GRAPHQL_BOGUS_VALUE",
+        "GRAPHQL_BOGUS_TYPE",
+        "GRAPHQL_BOGUS_EXTENSION",
     ],
 };

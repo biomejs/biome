@@ -51,7 +51,15 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
     const EOF: Self = EOF;
 
     fn is_bogus(&self) -> bool {
-        matches!(self, GRAPHQL_BOGUS)
+        matches!(
+            self,
+            GRAPHQL_BOGUS
+                | GRAPHQL_BOGUS_DEFINITION
+                | GRAPHQL_BOGUS_SELECTION
+                | GRAPHQL_BOGUS_VALUE
+                | GRAPHQL_BOGUS_TYPE
+                | GRAPHQL_BOGUS_EXTENSION
+        )
     }
 
     fn to_bogus(&self) -> GraphqlSyntaxKind {

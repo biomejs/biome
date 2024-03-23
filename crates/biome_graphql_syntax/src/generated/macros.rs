@@ -322,6 +322,26 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GraphqlBogus::new_unchecked(node) };
                     $body
                 }
+                $crate::GraphqlSyntaxKind::GRAPHQL_BOGUS_DEFINITION => {
+                    let $pattern = unsafe { $crate::GraphqlBogusDefinition::new_unchecked(node) };
+                    $body
+                }
+                $crate::GraphqlSyntaxKind::GRAPHQL_BOGUS_EXTENSION => {
+                    let $pattern = unsafe { $crate::GraphqlBogusExtension::new_unchecked(node) };
+                    $body
+                }
+                $crate::GraphqlSyntaxKind::GRAPHQL_BOGUS_SELECTION => {
+                    let $pattern = unsafe { $crate::GraphqlBogusSelection::new_unchecked(node) };
+                    $body
+                }
+                $crate::GraphqlSyntaxKind::GRAPHQL_BOGUS_TYPE => {
+                    let $pattern = unsafe { $crate::GraphqlBogusType::new_unchecked(node) };
+                    $body
+                }
+                $crate::GraphqlSyntaxKind::GRAPHQL_BOGUS_VALUE => {
+                    let $pattern = unsafe { $crate::GraphqlBogusValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::GraphqlSyntaxKind::GRAPHQL_ARGUMENT_DEFINITION_LIST => {
                     let $pattern =
                         unsafe { $crate::GraphqlArgumentDefinitionList::new_unchecked(node) };

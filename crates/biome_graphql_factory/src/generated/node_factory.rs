@@ -1697,3 +1697,53 @@ where
         slots,
     ))
 }
+pub fn graphql_bogus_definition<I>(slots: I) -> GraphqlBogusDefinition
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GraphqlBogusDefinition::unwrap_cast(SyntaxNode::new_detached(
+        GraphqlSyntaxKind::GRAPHQL_BOGUS_DEFINITION,
+        slots,
+    ))
+}
+pub fn graphql_bogus_extension<I>(slots: I) -> GraphqlBogusExtension
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GraphqlBogusExtension::unwrap_cast(SyntaxNode::new_detached(
+        GraphqlSyntaxKind::GRAPHQL_BOGUS_EXTENSION,
+        slots,
+    ))
+}
+pub fn graphql_bogus_selection<I>(slots: I) -> GraphqlBogusSelection
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GraphqlBogusSelection::unwrap_cast(SyntaxNode::new_detached(
+        GraphqlSyntaxKind::GRAPHQL_BOGUS_SELECTION,
+        slots,
+    ))
+}
+pub fn graphql_bogus_type<I>(slots: I) -> GraphqlBogusType
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GraphqlBogusType::unwrap_cast(SyntaxNode::new_detached(
+        GraphqlSyntaxKind::GRAPHQL_BOGUS_TYPE,
+        slots,
+    ))
+}
+pub fn graphql_bogus_value<I>(slots: I) -> GraphqlBogusValue
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GraphqlBogusValue::unwrap_cast(SyntaxNode::new_detached(
+        GraphqlSyntaxKind::GRAPHQL_BOGUS_VALUE,
+        slots,
+    ))
+}

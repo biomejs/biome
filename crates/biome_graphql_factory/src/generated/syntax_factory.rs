@@ -14,7 +14,12 @@ impl SyntaxFactory for GraphqlSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            GRAPHQL_BOGUS => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
+            GRAPHQL_BOGUS
+            | GRAPHQL_BOGUS_DEFINITION
+            | GRAPHQL_BOGUS_EXTENSION
+            | GRAPHQL_BOGUS_SELECTION
+            | GRAPHQL_BOGUS_TYPE
+            | GRAPHQL_BOGUS_VALUE => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
             GRAPHQL_ALIAS => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
