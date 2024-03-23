@@ -3,6 +3,7 @@
 
 mod biome_json_support;
 mod config_extends;
+mod config_path;
 mod cts_files;
 mod diagnostics;
 mod handle_astro_files;
