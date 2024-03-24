@@ -82,3 +82,7 @@ pub(crate) fn expected_any_font_feature_value_item(
     )
     .into_diagnostic(p)
 }
+
+pub(crate) fn expected_any_font_family_name(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expect_one_of(&["<family-name>", "<string>"], range).into_diagnostic(p)
+}

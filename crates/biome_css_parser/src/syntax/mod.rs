@@ -457,7 +457,8 @@ pub(crate) fn parse_string(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_STRING))
 }
 
-fn is_at_string(p: &mut CssParser) -> bool {
+#[inline]
+pub(crate) fn is_at_string(p: &mut CssParser) -> bool {
     p.at(CSS_STRING_LITERAL)
 }
 
