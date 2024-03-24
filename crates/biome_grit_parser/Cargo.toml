@@ -1,0 +1,44 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Biome's GritQL parser"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_grit_parser"
+repository.workspace = true
+version              = "0.1.0"
+
+[dependencies]
+biome_console      = { workspace = true }
+biome_diagnostics  = { workspace = true }
+biome_grit_factory = { workspace = true }
+biome_grit_syntax  = { workspace = true }
+biome_parser       = { workspace = true }
+biome_rowan        = { workspace = true }
+bitflags           = { workspace = true }
+schemars           = { workspace = true, optional = true }
+serde              = { workspace = true, features = ["derive"] }
+serde_json         = { workspace = true }
+smallvec           = { workspace = true }
+tracing            = { workspace = true }
+unicode-bom        = { workspace = true }
+
+[dev-dependencies]
+insta             = { workspace = true }
+quickcheck        = { workspace = true }
+quickcheck_macros = { workspace = true }
+tests_macros      = { workspace = true }
+
+[features]
+schemars = ["dep:schemars"]
+serde    = ["biome_grit_syntax/serde"]
+tests    = []
+
+# cargo-workspaces metadata
+[package.metadata.workspaces]
+independent = true
+
+[lints]
+workspace = true

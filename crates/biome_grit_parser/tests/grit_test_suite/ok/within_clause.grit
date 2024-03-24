@@ -1,0 +1,3 @@
+`console.log($arg)` where {
+  $arg <: within `if (DEBUG) { $_ }`
+}

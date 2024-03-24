@@ -14,11 +14,11 @@ resolver = "2"
 
 [workspace.lints.rust]
 absolute_paths_not_starting_with_crate = "warn"
+dead_code                              = "warn"
 trivial_numeric_casts                  = "warn"
 unused_import_braces                   = "warn"
 unused_lifetimes                       = "warn"
 unused_macro_rules                     = "warn"
-unused_tuple_struct_fields             = "warn"
 
 [workspace.lints.clippy]
 cargo_common_metadata   = "allow"
@@ -112,8 +112,8 @@ biome_diagnostics_macros     = { version = "0.5.7", path = "./crates/biome_diagn
 biome_formatter              = { version = "0.5.7", path = "./crates/biome_formatter" }
 biome_fs                     = { version = "0.5.7", path = "./crates/biome_fs" }
 biome_grit_factory           = { version = "0.5.7", path = "./crates/biome_grit_factory" }
+biome_grit_parser            = { version = "0.1.0", path = "./crates/biome_grit_parser" }
 biome_grit_syntax            = { version = "0.5.7", path = "./crates/biome_grit_syntax" }
-biome_html_factory           = { version = "0.5.7", path = "./crates/biome_html_factory" }
 biome_html_syntax            = { version = "0.5.7", path = "./crates/biome_html_syntax" }
 biome_js_analyze             = { version = "0.5.7", path = "./crates/biome_js_analyze" }
 biome_js_factory             = { version = "0.5.7", path = "./crates/biome_js_factory" }
@@ -121,7 +121,6 @@ biome_js_formatter           = { version = "0.5.7", path = "./crates/biome_js_fo
 biome_js_parser              = { version = "0.5.7", path = "./crates/biome_js_parser" }
 biome_js_semantic            = { version = "0.5.7", path = "./crates/biome_js_semantic" }
 biome_js_syntax              = { version = "0.5.7", path = "./crates/biome_js_syntax" }
-biome_js_transform           = { version = "0.5.7", path = "./crates/biome_js_transform" }
 biome_json_analyze           = { version = "0.5.7", path = "./crates/biome_json_analyze" }
 biome_json_factory           = { version = "0.5.7", path = "./crates/biome_json_factory" }
 biome_json_formatter         = { version = "0.5.7", path = "./crates/biome_json_formatter" }

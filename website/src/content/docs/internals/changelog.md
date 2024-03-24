@@ -19,6 +19,30 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+### CLI
+
+- Fix configuration resolution. Biome is now able to correctly find the `biome.jsonc` configuration file when `--config-path` is explicitly set. Contributed by @Sec-ant
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+- Add rule [noEvolvingAny](https://biomejs.dev/linter/rules/no-evolving-any) to disallow variables from evolving into `any` type through reassignments. Contributed by @fujiyamaorange
+
+### Parser
+
+## 1.6.2 (2024-03-22)
+
+### Analyzer
+
 #### Bug fixes
 
 - The `noSuperWithoutExtends` rule now allows for calling `super()` in derived class constructors of class expressions ([#2108](https://github.com/biomejs/biome/issues/2108)). Contributed by @Sec-ant
@@ -28,13 +52,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix dedent logic inconsistent with prettier where the indent-style is space and the indent-width is not 2. Contributed by @mdm317
 ### CLI
 
+#### Bug fixes
+
+- Fixes [#2131](https://github.com/biomejs/biome/issues/2131), where folders were incorrectly ignored when running the command `check`. Now folders are correctly ignored based on their command. Contributed by @ematipico
+
+- Smoother handling of `"endOfLine": "auto"` in prettier migration: falling back to `"lf"` ([#2145](https://github.com/biomejs/biome/pull/2145)). Contributed by @eMerzh
+
 ### Configuration
 
 #### Bug fixes
 
 - Fix enabled rules calculation. The precendence of individual rules, `all` and `recommend` presets in top-level and group-level configs is now correctly respected. More details can be seen in ([#2072](https://github.com/biomejs/biome/pull/2072)) ([#2028](https://github.com/biomejs/biome/issues/2028)). Contributed by @Sec-ant
-
-### Editors
 
 ### Formatter
 
@@ -53,10 +81,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Rule `noUndeclaredDependencies` now also validates `peerDependencies` and `optionalDependencies` ([#2122](https://github.com/biomejs/biome/issues/2122)). Contributed by @Sec-ant
+
 - Rule `noUndeclaredDependencies` won't check `declare module` statements anymore ([#2123](https://github.com/biomejs/biome/issues/2123)). Contributed by @Sec-ant
+
 - Fix [#1925](https://github.com/biomejs/biome/issues/1925). The fix for `useOptionalChain` would sometimes suggest an incorrect fix that discarded optional chaining operators on the left-hand side of logical expressions. These are now preserved. Contributed by @arendjr
 
-### Parser
+- Rule `noUndeclaredVariables` now also checks for worker globals ([#2121](https://github.com/biomejs/biome/issues/2121)). Contributed by @Sec-ant
+
+### LSP
+
+#### Bug fixes
+
+- Correctly parse `.jsonc` files. Contributed by @Sec-ant
+
+- Correctly resolve external `extends` configs. Contributed by @Sec-ant
 
 ## 1.6.1 (2024-03-12)
 

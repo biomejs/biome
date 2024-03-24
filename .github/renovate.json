@@ -1,7 +1,8 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
 	"timezone": "Europe/Gibraltar",
-	"schedule": ["0 9 * * 1"],
+	"schedule": ["before 9am on monday"],
+	"extends": ["config:recommended", ":dependencyDashboard"],
 	"assignees": ["@biomejs/maintainers", "@biomejs/core-contributors"],
 	"packageRules": [
 		{

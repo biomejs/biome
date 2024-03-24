@@ -4,11 +4,13 @@
 
 #[macro_use]
 mod generated;
+mod syntax_ext;
 mod syntax_node;
 
 use biome_rowan::{AstNode, RawSyntaxKind};
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use generated::*;
+pub use syntax_ext::*;
 pub use syntax_node::*;
 
 use GritSyntaxKind::*;
@@ -50,21 +52,31 @@ impl biome_rowan::SyntaxKind for GritSyntaxKind {
         matches!(
             self,
             GRIT_BOGUS
+                | GRIT_BOGUS_CONTAINER
                 | GRIT_BOGUS_DEFINITION
-                | GRIT_BOGUS_PATTERN
+                | GRIT_BOGUS_MAP_ELEMENT
+                | GRIT_BOGUS_LANGUAGE_DECLARATION
+                | GRIT_BOGUS_LANGUAGE_FLAVOR_KIND
                 | GRIT_BOGUS_LITERAL
                 | GRIT_BOGUS_NAMED_ARG
+                | GRIT_BOGUS_PATTERN
                 | GRIT_BOGUS_PREDICATE
+                | GRIT_BOGUS_VERSION
         )
     }
 
     fn to_bogus(&self) -> GritSyntaxKind {
         match self {
-            kind if AnyGritDefinition::can_cast(*kind) => GRIT_BOGUS_DEFINITION,
-            kind if AnyGritPattern::can_cast(*kind) => GRIT_BOGUS_PATTERN,
             kind if AnyGritLiteral::can_cast(*kind) => GRIT_BOGUS_LITERAL,
+            kind if AnyGritPattern::can_cast(*kind) => GRIT_BOGUS_PATTERN,
             kind if AnyGritPredicate::can_cast(*kind) => GRIT_BOGUS_PREDICATE,
+            kind if AnyGritContainer::can_cast(*kind) => GRIT_BOGUS_CONTAINER,
+            kind if AnyGritLanguageDeclaration::can_cast(*kind) => GRIT_BOGUS_LANGUAGE_DECLARATION,
+            kind if AnyGritLanguageFlavorKind::can_cast(*kind) => GRIT_BOGUS_LANGUAGE_FLAVOR_KIND,
+            kind if AnyGritMapElement::can_cast(*kind) => GRIT_BOGUS_MAP_ELEMENT,
             kind if AnyGritMaybeNamedArg::can_cast(*kind) => GRIT_BOGUS_NAMED_ARG,
+            kind if AnyGritDefinition::can_cast(*kind) => GRIT_BOGUS_DEFINITION,
+            kind if AnyGritVersion::can_cast(*kind) => GRIT_BOGUS_VERSION,
 
             _ => GRIT_BOGUS,
         }

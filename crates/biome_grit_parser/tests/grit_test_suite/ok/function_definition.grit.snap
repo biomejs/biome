@@ -1,0 +1,629 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+// define a lines function
+function lines($string) {
+    return split($string, separator=`\n`)
+}
+
+// Define a my_todo function
+function my_todo($target, $message) {
+   if($message <: undefined) {
+       $message = "This requires manual intervention."
+   },
+   $lines = lines(string = $message),
+   $lines <: some bubble($result) $x where {
+       if ($result <: undefined) {
+            $result = `// TODO: $x`
+        } else {
+            $result += `\n// $x`
+        }
+   },
+   $target_lines = lines(string = $target),
+   $target_lines <: some bubble($result) $x where { $result += `\n// $x` },
+   return $result,
+}
+
+// Use the my_todo function
+`module.exports = $_` as $x => my_todo(target=$x, message=`Fix this\nAnd that`)
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritFunctionDefinition {
+            function_token: FUNCTION_KW@0..36 "function" [Comments("// define a lines fun ..."), Newline("\n")] [Whitespace(" ")],
+            name: GritName {
+                value_token: GRIT_NAME@36..41 "lines" [] [],
+            },
+            l_paren_token: L_PAREN@41..42 "(" [] [],
+            args: GritVariableList [
+                GritVariable {
+                    value_token: GRIT_VARIABLE@42..49 "$string" [] [],
+                },
+            ],
+            r_paren_token: R_PAREN@49..51 ")" [] [Whitespace(" ")],
+            body: GritCurlyPredicateList {
+                l_curly_token: L_CURLY@51..52 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateReturn {
+                        return_token: RETURN_KW@52..64 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        pattern: GritNodeLike {
+                            name: GritName {
+                                value_token: GRIT_NAME@64..69 "split" [] [],
+                            },
+                            l_paren_token: L_PAREN@69..70 "(" [] [],
+                            named_args: GritNamedArgList [
+                                GritVariable {
+                                    value_token: GRIT_VARIABLE@70..77 "$string" [] [],
+                                },
+                                COMMA@77..79 "," [] [Whitespace(" ")],
+                                GritNamedArg {
+                                    name: GritName {
+                                        value_token: GRIT_NAME@79..88 "separator" [] [],
+                                    },
+                                    eq_token: EQ@88..89 "=" [] [],
+                                    pattern: GritCodeSnippet {
+                                        source: GritBacktickSnippetLiteral {
+                                            value_token: GRIT_BACKTICK_SNIPPET@89..93 "`\\n`" [] [],
+                                        },
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@93..94 ")" [] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@94..96 "}" [Newline("\n")] [],
+            },
+        },
+        missing separator,
+        GritFunctionDefinition {
+            function_token: FUNCTION_KW@96..136 "function" [Newline("\n"), Newline("\n"), Comments("// Define a my_todo f ..."), Newline("\n")] [Whitespace(" ")],
+            name: GritName {
+                value_token: GRIT_NAME@136..143 "my_todo" [] [],
+            },
+            l_paren_token: L_PAREN@143..144 "(" [] [],
+            args: GritVariableList [
+                GritVariable {
+                    value_token: GRIT_VARIABLE@144..151 "$target" [] [],
+                },
+                COMMA@151..153 "," [] [Whitespace(" ")],
+                GritVariable {
+                    value_token: GRIT_VARIABLE@153..161 "$message" [] [],
+                },
+            ],
+            r_paren_token: R_PAREN@161..163 ")" [] [Whitespace(" ")],
+            body: GritCurlyPredicateList {
+                l_curly_token: L_CURLY@163..164 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateIfElse {
+                        if_token: IF_KW@164..170 "if" [Newline("\n"), Whitespace("   ")] [],
+                        l_paren_token: L_PAREN@170..171 "(" [] [],
+                        if_predicate: GritPredicateMatch {
+                            left: GritVariable {
+                                value_token: GRIT_VARIABLE@171..180 "$message" [] [Whitespace(" ")],
+                            },
+                            match_token: MATCH@180..183 "<:" [] [Whitespace(" ")],
+                            right: GritUndefinedLiteral {
+                                token_token: UNDEFINED_KW@183..192 "undefined" [] [],
+                            },
+                        },
+                        r_paren_token: R_PAREN@192..194 ")" [] [Whitespace(" ")],
+                        then_predicate: GritPredicateAnd {
+                            and_token: missing (optional),
+                            l_curly_token: L_CURLY@194..195 "{" [] [],
+                            predicates: GritPredicateList [
+                                GritPredicateAssignment {
+                                    container: GritVariable {
+                                        value_token: GRIT_VARIABLE@195..212 "$message" [Newline("\n"), Whitespace("       ")] [Whitespace(" ")],
+                                    },
+                                    eq_token: EQ@212..214 "=" [] [Whitespace(" ")],
+                                    pattern: GritStringLiteral {
+                                        value_token: GRIT_STRING@214..250 "\"This requires manual intervention.\"" [] [],
+                                    },
+                                },
+                            ],
+                            r_curly_token: R_CURLY@250..255 "}" [Newline("\n"), Whitespace("   ")] [],
+                        },
+                        else_clause: missing (optional),
+                    },
+                    COMMA@255..256 "," [] [],
+                    GritPredicateAssignment {
+                        container: GritVariable {
+                            value_token: GRIT_VARIABLE@256..267 "$lines" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")],
+                        },
+                        eq_token: EQ@267..269 "=" [] [Whitespace(" ")],
+                        pattern: GritNodeLike {
+                            name: GritName {
+                                value_token: GRIT_NAME@269..274 "lines" [] [],
+                            },
+                            l_paren_token: L_PAREN@274..275 "(" [] [],
+                            named_args: GritNamedArgList [
+                                GritNamedArg {
+                                    name: GritName {
+                                        value_token: GRIT_NAME@275..282 "string" [] [Whitespace(" ")],
+                                    },
+                                    eq_token: EQ@282..284 "=" [] [Whitespace(" ")],
+                                    pattern: GritVariable {
+                                        value_token: GRIT_VARIABLE@284..292 "$message" [] [],
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@292..293 ")" [] [],
+                        },
+                    },
+                    COMMA@293..294 "," [] [],
+                    GritPredicateMatch {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@294..305 "$lines" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")],
+                        },
+                        match_token: MATCH@305..308 "<:" [] [Whitespace(" ")],
+                        right: GritSome {
+                            some_token: SOME_KW@308..313 "some" [] [Whitespace(" ")],
+                            pattern: GritBubble {
+                                bubble_token: BUBBLE_KW@313..319 "bubble" [] [],
+                                variables: GritBubbleScope {
+                                    l_paren_token: L_PAREN@319..320 "(" [] [],
+                                    variables: GritVariableList [
+                                        GritVariable {
+                                            value_token: GRIT_VARIABLE@320..327 "$result" [] [],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@327..329 ")" [] [Whitespace(" ")],
+                                },
+                                pattern: GritPatternWhere {
+                                    pattern: GritVariable {
+                                        value_token: GRIT_VARIABLE@329..332 "$x" [] [Whitespace(" ")],
+                                    },
+                                    where_token: WHERE_KW@332..338 "where" [] [Whitespace(" ")],
+                                    side_condition: GritPredicateAnd {
+                                        and_token: missing (optional),
+                                        l_curly_token: L_CURLY@338..339 "{" [] [],
+                                        predicates: GritPredicateList [
+                                            GritPredicateIfElse {
+                                                if_token: IF_KW@339..350 "if" [Newline("\n"), Whitespace("       ")] [Whitespace(" ")],
+                                                l_paren_token: L_PAREN@350..351 "(" [] [],
+                                                if_predicate: GritPredicateMatch {
+                                                    left: GritVariable {
+                                                        value_token: GRIT_VARIABLE@351..359 "$result" [] [Whitespace(" ")],
+                                                    },
+                                                    match_token: MATCH@359..362 "<:" [] [Whitespace(" ")],
+                                                    right: GritUndefinedLiteral {
+                                                        token_token: UNDEFINED_KW@362..371 "undefined" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@371..373 ")" [] [Whitespace(" ")],
+                                                then_predicate: GritPredicateAnd {
+                                                    and_token: missing (optional),
+                                                    l_curly_token: L_CURLY@373..374 "{" [] [],
+                                                    predicates: GritPredicateList [
+                                                        GritPredicateAssignment {
+                                                            container: GritVariable {
+                                                                value_token: GRIT_VARIABLE@374..395 "$result" [Newline("\n"), Whitespace("            ")] [Whitespace(" ")],
+                                                            },
+                                                            eq_token: EQ@395..397 "=" [] [Whitespace(" ")],
+                                                            pattern: GritCodeSnippet {
+                                                                source: GritBacktickSnippetLiteral {
+                                                                    value_token: GRIT_BACKTICK_SNIPPET@397..410 "`// TODO: $x`" [] [],
+                                                                },
+                                                            },
+                                                        },
+                                                    ],
+                                                    r_curly_token: R_CURLY@410..421 "}" [Newline("\n"), Whitespace("        ")] [Whitespace(" ")],
+                                                },
+                                                else_clause: GritPredicateElseClause {
+                                                    else_token: ELSE_KW@421..426 "else" [] [Whitespace(" ")],
+                                                    else_predicate: GritPredicateAnd {
+                                                        and_token: missing (optional),
+                                                        l_curly_token: L_CURLY@426..427 "{" [] [],
+                                                        predicates: GritPredicateList [
+                                                            GritPredicateAccumulate {
+                                                                left: GritVariable {
+                                                                    value_token: GRIT_VARIABLE@427..448 "$result" [Newline("\n"), Whitespace("            ")] [Whitespace(" ")],
+                                                                },
+                                                                add_assign_token: PLUSEQ@448..451 "+=" [] [Whitespace(" ")],
+                                                                right: GritCodeSnippet {
+                                                                    source: GritBacktickSnippetLiteral {
+                                                                        value_token: GRIT_BACKTICK_SNIPPET@451..460 "`\\n// $x`" [] [],
+                                                                    },
+                                                                },
+                                                            },
+                                                        ],
+                                                        r_curly_token: R_CURLY@460..470 "}" [Newline("\n"), Whitespace("        ")] [],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_curly_token: R_CURLY@470..475 "}" [Newline("\n"), Whitespace("   ")] [],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    COMMA@475..476 "," [] [],
+                    GritPredicateAssignment {
+                        container: GritVariable {
+                            value_token: GRIT_VARIABLE@476..494 "$target_lines" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")],
+                        },
+                        eq_token: EQ@494..496 "=" [] [Whitespace(" ")],
+                        pattern: GritNodeLike {
+                            name: GritName {
+                                value_token: GRIT_NAME@496..501 "lines" [] [],
+                            },
+                            l_paren_token: L_PAREN@501..502 "(" [] [],
+                            named_args: GritNamedArgList [
+                                GritNamedArg {
+                                    name: GritName {
+                                        value_token: GRIT_NAME@502..509 "string" [] [Whitespace(" ")],
+                                    },
+                                    eq_token: EQ@509..511 "=" [] [Whitespace(" ")],
+                                    pattern: GritVariable {
+                                        value_token: GRIT_VARIABLE@511..518 "$target" [] [],
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@518..519 ")" [] [],
+                        },
+                    },
+                    COMMA@519..520 "," [] [],
+                    GritPredicateMatch {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@520..538 "$target_lines" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")],
+                        },
+                        match_token: MATCH@538..541 "<:" [] [Whitespace(" ")],
+                        right: GritSome {
+                            some_token: SOME_KW@541..546 "some" [] [Whitespace(" ")],
+                            pattern: GritBubble {
+                                bubble_token: BUBBLE_KW@546..552 "bubble" [] [],
+                                variables: GritBubbleScope {
+                                    l_paren_token: L_PAREN@552..553 "(" [] [],
+                                    variables: GritVariableList [
+                                        GritVariable {
+                                            value_token: GRIT_VARIABLE@553..560 "$result" [] [],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@560..562 ")" [] [Whitespace(" ")],
+                                },
+                                pattern: GritPatternWhere {
+                                    pattern: GritVariable {
+                                        value_token: GRIT_VARIABLE@562..565 "$x" [] [Whitespace(" ")],
+                                    },
+                                    where_token: WHERE_KW@565..571 "where" [] [Whitespace(" ")],
+                                    side_condition: GritPredicateAnd {
+                                        and_token: missing (optional),
+                                        l_curly_token: L_CURLY@571..573 "{" [] [Whitespace(" ")],
+                                        predicates: GritPredicateList [
+                                            GritPredicateAccumulate {
+                                                left: GritVariable {
+                                                    value_token: GRIT_VARIABLE@573..581 "$result" [] [Whitespace(" ")],
+                                                },
+                                                add_assign_token: PLUSEQ@581..584 "+=" [] [Whitespace(" ")],
+                                                right: GritCodeSnippet {
+                                                    source: GritBacktickSnippetLiteral {
+                                                        value_token: GRIT_BACKTICK_SNIPPET@584..594 "`\\n// $x`" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_curly_token: R_CURLY@594..595 "}" [] [],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    COMMA@595..596 "," [] [],
+                    GritPredicateReturn {
+                        return_token: RETURN_KW@596..607 "return" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")],
+                        pattern: GritVariable {
+                            value_token: GRIT_VARIABLE@607..614 "$result" [] [],
+                        },
+                    },
+                    COMMA@614..615 "," [] [],
+                ],
+                r_curly_token: R_CURLY@615..617 "}" [Newline("\n")] [],
+            },
+        },
+        missing separator,
+        GritRewrite {
+            left: GritPatternAs {
+                pattern: GritCodeSnippet {
+                    source: GritBacktickSnippetLiteral {
+                        value_token: GRIT_BACKTICK_SNIPPET@617..669 "`module.exports = $_`" [Newline("\n"), Newline("\n"), Comments("// Use the my_todo fu ..."), Newline("\n")] [Whitespace(" ")],
+                    },
+                },
+                as_token: AS_KW@669..672 "as" [] [Whitespace(" ")],
+                variable: GritVariable {
+                    value_token: GRIT_VARIABLE@672..675 "$x" [] [Whitespace(" ")],
+                },
+            },
+            annotation: missing (optional),
+            fat_arrow_token: FAT_ARROW@675..678 "=>" [] [Whitespace(" ")],
+            right: GritNodeLike {
+                name: GritName {
+                    value_token: GRIT_NAME@678..685 "my_todo" [] [],
+                },
+                l_paren_token: L_PAREN@685..686 "(" [] [],
+                named_args: GritNamedArgList [
+                    GritNamedArg {
+                        name: GritName {
+                            value_token: GRIT_NAME@686..692 "target" [] [],
+                        },
+                        eq_token: EQ@692..693 "=" [] [],
+                        pattern: GritVariable {
+                            value_token: GRIT_VARIABLE@693..695 "$x" [] [],
+                        },
+                    },
+                    COMMA@695..697 "," [] [Whitespace(" ")],
+                    GritNamedArg {
+                        name: GritName {
+                            value_token: GRIT_NAME@697..704 "message" [] [],
+                        },
+                        eq_token: EQ@704..705 "=" [] [],
+                        pattern: GritCodeSnippet {
+                            source: GritBacktickSnippetLiteral {
+                                value_token: GRIT_BACKTICK_SNIPPET@705..725 "`Fix this\\nAnd that`" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_paren_token: R_PAREN@725..726 ")" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@726..727 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..727
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..726
+    0: GRIT_FUNCTION_DEFINITION@0..96
+      0: FUNCTION_KW@0..36 "function" [Comments("// define a lines fun ..."), Newline("\n")] [Whitespace(" ")]
+      1: GRIT_NAME@36..41
+        0: GRIT_NAME@36..41 "lines" [] []
+      2: L_PAREN@41..42 "(" [] []
+      3: GRIT_VARIABLE_LIST@42..49
+        0: GRIT_VARIABLE@42..49
+          0: GRIT_VARIABLE@42..49 "$string" [] []
+      4: R_PAREN@49..51 ")" [] [Whitespace(" ")]
+      5: GRIT_CURLY_PREDICATE_LIST@51..96
+        0: L_CURLY@51..52 "{" [] []
+        1: GRIT_PREDICATE_LIST@52..94
+          0: GRIT_PREDICATE_RETURN@52..94
+            0: RETURN_KW@52..64 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: GRIT_NODE_LIKE@64..94
+              0: GRIT_NAME@64..69
+                0: GRIT_NAME@64..69 "split" [] []
+              1: L_PAREN@69..70 "(" [] []
+              2: GRIT_NAMED_ARG_LIST@70..93
+                0: GRIT_VARIABLE@70..77
+                  0: GRIT_VARIABLE@70..77 "$string" [] []
+                1: COMMA@77..79 "," [] [Whitespace(" ")]
+                2: GRIT_NAMED_ARG@79..93
+                  0: GRIT_NAME@79..88
+                    0: GRIT_NAME@79..88 "separator" [] []
+                  1: EQ@88..89 "=" [] []
+                  2: GRIT_CODE_SNIPPET@89..93
+                    0: GRIT_BACKTICK_SNIPPET_LITERAL@89..93
+                      0: GRIT_BACKTICK_SNIPPET@89..93 "`\\n`" [] []
+              3: R_PAREN@93..94 ")" [] []
+        2: R_CURLY@94..96 "}" [Newline("\n")] []
+    1: (empty)
+    2: GRIT_FUNCTION_DEFINITION@96..617
+      0: FUNCTION_KW@96..136 "function" [Newline("\n"), Newline("\n"), Comments("// Define a my_todo f ..."), Newline("\n")] [Whitespace(" ")]
+      1: GRIT_NAME@136..143
+        0: GRIT_NAME@136..143 "my_todo" [] []
+      2: L_PAREN@143..144 "(" [] []
+      3: GRIT_VARIABLE_LIST@144..161
+        0: GRIT_VARIABLE@144..151
+          0: GRIT_VARIABLE@144..151 "$target" [] []
+        1: COMMA@151..153 "," [] [Whitespace(" ")]
+        2: GRIT_VARIABLE@153..161
+          0: GRIT_VARIABLE@153..161 "$message" [] []
+      4: R_PAREN@161..163 ")" [] [Whitespace(" ")]
+      5: GRIT_CURLY_PREDICATE_LIST@163..617
+        0: L_CURLY@163..164 "{" [] []
+        1: GRIT_PREDICATE_LIST@164..615
+          0: GRIT_PREDICATE_IF_ELSE@164..255
+            0: IF_KW@164..170 "if" [Newline("\n"), Whitespace("   ")] []
+            1: L_PAREN@170..171 "(" [] []
+            2: GRIT_PREDICATE_MATCH@171..192
+              0: GRIT_VARIABLE@171..180
+                0: GRIT_VARIABLE@171..180 "$message" [] [Whitespace(" ")]
+              1: MATCH@180..183 "<:" [] [Whitespace(" ")]
+              2: GRIT_UNDEFINED_LITERAL@183..192
+                0: UNDEFINED_KW@183..192 "undefined" [] []
+            3: R_PAREN@192..194 ")" [] [Whitespace(" ")]
+            4: GRIT_PREDICATE_AND@194..255
+              0: (empty)
+              1: L_CURLY@194..195 "{" [] []
+              2: GRIT_PREDICATE_LIST@195..250
+                0: GRIT_PREDICATE_ASSIGNMENT@195..250
+                  0: GRIT_VARIABLE@195..212
+                    0: GRIT_VARIABLE@195..212 "$message" [Newline("\n"), Whitespace("       ")] [Whitespace(" ")]
+                  1: EQ@212..214 "=" [] [Whitespace(" ")]
+                  2: GRIT_STRING_LITERAL@214..250
+                    0: GRIT_STRING@214..250 "\"This requires manual intervention.\"" [] []
+              3: R_CURLY@250..255 "}" [Newline("\n"), Whitespace("   ")] []
+            5: (empty)
+          1: COMMA@255..256 "," [] []
+          2: GRIT_PREDICATE_ASSIGNMENT@256..293
+            0: GRIT_VARIABLE@256..267
+              0: GRIT_VARIABLE@256..267 "$lines" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")]
+            1: EQ@267..269 "=" [] [Whitespace(" ")]
+            2: GRIT_NODE_LIKE@269..293
+              0: GRIT_NAME@269..274
+                0: GRIT_NAME@269..274 "lines" [] []
+              1: L_PAREN@274..275 "(" [] []
+              2: GRIT_NAMED_ARG_LIST@275..292
+                0: GRIT_NAMED_ARG@275..292
+                  0: GRIT_NAME@275..282
+                    0: GRIT_NAME@275..282 "string" [] [Whitespace(" ")]
+                  1: EQ@282..284 "=" [] [Whitespace(" ")]
+                  2: GRIT_VARIABLE@284..292
+                    0: GRIT_VARIABLE@284..292 "$message" [] []
+              3: R_PAREN@292..293 ")" [] []
+          3: COMMA@293..294 "," [] []
+          4: GRIT_PREDICATE_MATCH@294..475
+            0: GRIT_VARIABLE@294..305
+              0: GRIT_VARIABLE@294..305 "$lines" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")]
+            1: MATCH@305..308 "<:" [] [Whitespace(" ")]
+            2: GRIT_SOME@308..475
+              0: SOME_KW@308..313 "some" [] [Whitespace(" ")]
+              1: GRIT_BUBBLE@313..475
+                0: BUBBLE_KW@313..319 "bubble" [] []
+                1: GRIT_BUBBLE_SCOPE@319..329
+                  0: L_PAREN@319..320 "(" [] []
+                  1: GRIT_VARIABLE_LIST@320..327
+                    0: GRIT_VARIABLE@320..327
+                      0: GRIT_VARIABLE@320..327 "$result" [] []
+                  2: R_PAREN@327..329 ")" [] [Whitespace(" ")]
+                2: GRIT_PATTERN_WHERE@329..475
+                  0: GRIT_VARIABLE@329..332
+                    0: GRIT_VARIABLE@329..332 "$x" [] [Whitespace(" ")]
+                  1: WHERE_KW@332..338 "where" [] [Whitespace(" ")]
+                  2: GRIT_PREDICATE_AND@338..475
+                    0: (empty)
+                    1: L_CURLY@338..339 "{" [] []
+                    2: GRIT_PREDICATE_LIST@339..470
+                      0: GRIT_PREDICATE_IF_ELSE@339..470
+                        0: IF_KW@339..350 "if" [Newline("\n"), Whitespace("       ")] [Whitespace(" ")]
+                        1: L_PAREN@350..351 "(" [] []
+                        2: GRIT_PREDICATE_MATCH@351..371
+                          0: GRIT_VARIABLE@351..359
+                            0: GRIT_VARIABLE@351..359 "$result" [] [Whitespace(" ")]
+                          1: MATCH@359..362 "<:" [] [Whitespace(" ")]
+                          2: GRIT_UNDEFINED_LITERAL@362..371
+                            0: UNDEFINED_KW@362..371 "undefined" [] []
+                        3: R_PAREN@371..373 ")" [] [Whitespace(" ")]
+                        4: GRIT_PREDICATE_AND@373..421
+                          0: (empty)
+                          1: L_CURLY@373..374 "{" [] []
+                          2: GRIT_PREDICATE_LIST@374..410
+                            0: GRIT_PREDICATE_ASSIGNMENT@374..410
+                              0: GRIT_VARIABLE@374..395
+                                0: GRIT_VARIABLE@374..395 "$result" [Newline("\n"), Whitespace("            ")] [Whitespace(" ")]
+                              1: EQ@395..397 "=" [] [Whitespace(" ")]
+                              2: GRIT_CODE_SNIPPET@397..410
+                                0: GRIT_BACKTICK_SNIPPET_LITERAL@397..410
+                                  0: GRIT_BACKTICK_SNIPPET@397..410 "`// TODO: $x`" [] []
+                          3: R_CURLY@410..421 "}" [Newline("\n"), Whitespace("        ")] [Whitespace(" ")]
+                        5: GRIT_PREDICATE_ELSE_CLAUSE@421..470
+                          0: ELSE_KW@421..426 "else" [] [Whitespace(" ")]
+                          1: GRIT_PREDICATE_AND@426..470
+                            0: (empty)
+                            1: L_CURLY@426..427 "{" [] []
+                            2: GRIT_PREDICATE_LIST@427..460
+                              0: GRIT_PREDICATE_ACCUMULATE@427..460
+                                0: GRIT_VARIABLE@427..448
+                                  0: GRIT_VARIABLE@427..448 "$result" [Newline("\n"), Whitespace("            ")] [Whitespace(" ")]
+                                1: PLUSEQ@448..451 "+=" [] [Whitespace(" ")]
+                                2: GRIT_CODE_SNIPPET@451..460
+                                  0: GRIT_BACKTICK_SNIPPET_LITERAL@451..460
+                                    0: GRIT_BACKTICK_SNIPPET@451..460 "`\\n// $x`" [] []
+                            3: R_CURLY@460..470 "}" [Newline("\n"), Whitespace("        ")] []
+                    3: R_CURLY@470..475 "}" [Newline("\n"), Whitespace("   ")] []
+          5: COMMA@475..476 "," [] []
+          6: GRIT_PREDICATE_ASSIGNMENT@476..519
+            0: GRIT_VARIABLE@476..494
+              0: GRIT_VARIABLE@476..494 "$target_lines" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")]
+            1: EQ@494..496 "=" [] [Whitespace(" ")]
+            2: GRIT_NODE_LIKE@496..519
+              0: GRIT_NAME@496..501
+                0: GRIT_NAME@496..501 "lines" [] []
+              1: L_PAREN@501..502 "(" [] []
+              2: GRIT_NAMED_ARG_LIST@502..518
+                0: GRIT_NAMED_ARG@502..518
+                  0: GRIT_NAME@502..509
+                    0: GRIT_NAME@502..509 "string" [] [Whitespace(" ")]
+                  1: EQ@509..511 "=" [] [Whitespace(" ")]
+                  2: GRIT_VARIABLE@511..518
+                    0: GRIT_VARIABLE@511..518 "$target" [] []
+              3: R_PAREN@518..519 ")" [] []
+          7: COMMA@519..520 "," [] []
+          8: GRIT_PREDICATE_MATCH@520..595
+            0: GRIT_VARIABLE@520..538
+              0: GRIT_VARIABLE@520..538 "$target_lines" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")]
+            1: MATCH@538..541 "<:" [] [Whitespace(" ")]
+            2: GRIT_SOME@541..595
+              0: SOME_KW@541..546 "some" [] [Whitespace(" ")]
+              1: GRIT_BUBBLE@546..595
+                0: BUBBLE_KW@546..552 "bubble" [] []
+                1: GRIT_BUBBLE_SCOPE@552..562
+                  0: L_PAREN@552..553 "(" [] []
+                  1: GRIT_VARIABLE_LIST@553..560
+                    0: GRIT_VARIABLE@553..560
+                      0: GRIT_VARIABLE@553..560 "$result" [] []
+                  2: R_PAREN@560..562 ")" [] [Whitespace(" ")]
+                2: GRIT_PATTERN_WHERE@562..595
+                  0: GRIT_VARIABLE@562..565
+                    0: GRIT_VARIABLE@562..565 "$x" [] [Whitespace(" ")]
+                  1: WHERE_KW@565..571 "where" [] [Whitespace(" ")]
+                  2: GRIT_PREDICATE_AND@571..595
+                    0: (empty)
+                    1: L_CURLY@571..573 "{" [] [Whitespace(" ")]
+                    2: GRIT_PREDICATE_LIST@573..594
+                      0: GRIT_PREDICATE_ACCUMULATE@573..594
+                        0: GRIT_VARIABLE@573..581
+                          0: GRIT_VARIABLE@573..581 "$result" [] [Whitespace(" ")]
+                        1: PLUSEQ@581..584 "+=" [] [Whitespace(" ")]
+                        2: GRIT_CODE_SNIPPET@584..594
+                          0: GRIT_BACKTICK_SNIPPET_LITERAL@584..594
+                            0: GRIT_BACKTICK_SNIPPET@584..594 "`\\n// $x`" [] [Whitespace(" ")]
+                    3: R_CURLY@594..595 "}" [] []
+          9: COMMA@595..596 "," [] []
+          10: GRIT_PREDICATE_RETURN@596..614
+            0: RETURN_KW@596..607 "return" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")]
+            1: GRIT_VARIABLE@607..614
+              0: GRIT_VARIABLE@607..614 "$result" [] []
+          11: COMMA@614..615 "," [] []
+        2: R_CURLY@615..617 "}" [Newline("\n")] []
+    3: (empty)
+    4: GRIT_REWRITE@617..726
+      0: GRIT_PATTERN_AS@617..675
+        0: GRIT_CODE_SNIPPET@617..669
+          0: GRIT_BACKTICK_SNIPPET_LITERAL@617..669
+            0: GRIT_BACKTICK_SNIPPET@617..669 "`module.exports = $_`" [Newline("\n"), Newline("\n"), Comments("// Use the my_todo fu ..."), Newline("\n")] [Whitespace(" ")]
+        1: AS_KW@669..672 "as" [] [Whitespace(" ")]
+        2: GRIT_VARIABLE@672..675
+          0: GRIT_VARIABLE@672..675 "$x" [] [Whitespace(" ")]
+      1: (empty)
+      2: FAT_ARROW@675..678 "=>" [] [Whitespace(" ")]
+      3: GRIT_NODE_LIKE@678..726
+        0: GRIT_NAME@678..685
+          0: GRIT_NAME@678..685 "my_todo" [] []
+        1: L_PAREN@685..686 "(" [] []
+        2: GRIT_NAMED_ARG_LIST@686..725
+          0: GRIT_NAMED_ARG@686..695
+            0: GRIT_NAME@686..692
+              0: GRIT_NAME@686..692 "target" [] []
+            1: EQ@692..693 "=" [] []
+            2: GRIT_VARIABLE@693..695
+              0: GRIT_VARIABLE@693..695 "$x" [] []
+          1: COMMA@695..697 "," [] [Whitespace(" ")]
+          2: GRIT_NAMED_ARG@697..725
+            0: GRIT_NAME@697..704
+              0: GRIT_NAME@697..704 "message" [] []
+            1: EQ@704..705 "=" [] []
+            2: GRIT_CODE_SNIPPET@705..725
+              0: GRIT_BACKTICK_SNIPPET_LITERAL@705..725
+                0: GRIT_BACKTICK_SNIPPET@705..725 "`Fix this\\nAnd that`" [] []
+        3: R_PAREN@725..726 ")" [] []
+  4: EOF@726..727 "" [Newline("\n")] []
+
+```

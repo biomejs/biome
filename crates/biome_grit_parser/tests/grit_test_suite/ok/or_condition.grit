@@ -1,0 +1,6 @@
+`console.$method('$message');` => `console.warn('$message');` where {
+  or {
+    $message <: "Hello, world!",
+    $method <: `error`
+  }
+}

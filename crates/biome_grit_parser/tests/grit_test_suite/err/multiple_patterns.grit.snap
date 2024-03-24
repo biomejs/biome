@@ -1,0 +1,165 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+file(body = contains `console.$method` => `println`)
+
+file(body = contains `console.$method` => `print`)
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritNodeLike {
+            name: GritName {
+                value_token: GRIT_NAME@0..4 "file" [] [],
+            },
+            l_paren_token: L_PAREN@4..5 "(" [] [],
+            named_args: GritNamedArgList [
+                GritNamedArg {
+                    name: GritName {
+                        value_token: GRIT_NAME@5..10 "body" [] [Whitespace(" ")],
+                    },
+                    eq_token: EQ@10..12 "=" [] [Whitespace(" ")],
+                    pattern: GritPatternContains {
+                        contains_token: CONTAINS_KW@12..21 "contains" [] [Whitespace(" ")],
+                        contains: GritRewrite {
+                            left: GritCodeSnippet {
+                                source: GritBacktickSnippetLiteral {
+                                    value_token: GRIT_BACKTICK_SNIPPET@21..39 "`console.$method`" [] [Whitespace(" ")],
+                                },
+                            },
+                            annotation: missing (optional),
+                            fat_arrow_token: FAT_ARROW@39..42 "=>" [] [Whitespace(" ")],
+                            right: GritCodeSnippet {
+                                source: GritBacktickSnippetLiteral {
+                                    value_token: GRIT_BACKTICK_SNIPPET@42..51 "`println`" [] [],
+                                },
+                            },
+                        },
+                        until_clause: missing (optional),
+                    },
+                },
+            ],
+            r_paren_token: R_PAREN@51..52 ")" [] [],
+        },
+        missing separator,
+        GritNodeLike {
+            name: GritName {
+                value_token: GRIT_NAME@52..58 "file" [Newline("\n"), Newline("\n")] [],
+            },
+            l_paren_token: L_PAREN@58..59 "(" [] [],
+            named_args: GritNamedArgList [
+                GritNamedArg {
+                    name: GritName {
+                        value_token: GRIT_NAME@59..64 "body" [] [Whitespace(" ")],
+                    },
+                    eq_token: EQ@64..66 "=" [] [Whitespace(" ")],
+                    pattern: GritPatternContains {
+                        contains_token: CONTAINS_KW@66..75 "contains" [] [Whitespace(" ")],
+                        contains: GritRewrite {
+                            left: GritCodeSnippet {
+                                source: GritBacktickSnippetLiteral {
+                                    value_token: GRIT_BACKTICK_SNIPPET@75..93 "`console.$method`" [] [Whitespace(" ")],
+                                },
+                            },
+                            annotation: missing (optional),
+                            fat_arrow_token: FAT_ARROW@93..96 "=>" [] [Whitespace(" ")],
+                            right: GritCodeSnippet {
+                                source: GritBacktickSnippetLiteral {
+                                    value_token: GRIT_BACKTICK_SNIPPET@96..103 "`print`" [] [],
+                                },
+                            },
+                        },
+                        until_clause: missing (optional),
+                    },
+                },
+            ],
+            r_paren_token: R_PAREN@103..104 ")" [] [],
+        },
+    ],
+    eof_token: EOF@104..105 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..105
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..104
+    0: GRIT_NODE_LIKE@0..52
+      0: GRIT_NAME@0..4
+        0: GRIT_NAME@0..4 "file" [] []
+      1: L_PAREN@4..5 "(" [] []
+      2: GRIT_NAMED_ARG_LIST@5..51
+        0: GRIT_NAMED_ARG@5..51
+          0: GRIT_NAME@5..10
+            0: GRIT_NAME@5..10 "body" [] [Whitespace(" ")]
+          1: EQ@10..12 "=" [] [Whitespace(" ")]
+          2: GRIT_PATTERN_CONTAINS@12..51
+            0: CONTAINS_KW@12..21 "contains" [] [Whitespace(" ")]
+            1: GRIT_REWRITE@21..51
+              0: GRIT_CODE_SNIPPET@21..39
+                0: GRIT_BACKTICK_SNIPPET_LITERAL@21..39
+                  0: GRIT_BACKTICK_SNIPPET@21..39 "`console.$method`" [] [Whitespace(" ")]
+              1: (empty)
+              2: FAT_ARROW@39..42 "=>" [] [Whitespace(" ")]
+              3: GRIT_CODE_SNIPPET@42..51
+                0: GRIT_BACKTICK_SNIPPET_LITERAL@42..51
+                  0: GRIT_BACKTICK_SNIPPET@42..51 "`println`" [] []
+            2: (empty)
+      3: R_PAREN@51..52 ")" [] []
+    1: (empty)
+    2: GRIT_NODE_LIKE@52..104
+      0: GRIT_NAME@52..58
+        0: GRIT_NAME@52..58 "file" [Newline("\n"), Newline("\n")] []
+      1: L_PAREN@58..59 "(" [] []
+      2: GRIT_NAMED_ARG_LIST@59..103
+        0: GRIT_NAMED_ARG@59..103
+          0: GRIT_NAME@59..64
+            0: GRIT_NAME@59..64 "body" [] [Whitespace(" ")]
+          1: EQ@64..66 "=" [] [Whitespace(" ")]
+          2: GRIT_PATTERN_CONTAINS@66..103
+            0: CONTAINS_KW@66..75 "contains" [] [Whitespace(" ")]
+            1: GRIT_REWRITE@75..103
+              0: GRIT_CODE_SNIPPET@75..93
+                0: GRIT_BACKTICK_SNIPPET_LITERAL@75..93
+                  0: GRIT_BACKTICK_SNIPPET@75..93 "`console.$method`" [] [Whitespace(" ")]
+              1: (empty)
+              2: FAT_ARROW@93..96 "=>" [] [Whitespace(" ")]
+              3: GRIT_CODE_SNIPPET@96..103
+                0: GRIT_BACKTICK_SNIPPET_LITERAL@96..103
+                  0: GRIT_BACKTICK_SNIPPET@96..103 "`print`" [] []
+            2: (empty)
+      3: R_PAREN@103..104 ")" [] []
+  4: EOF@104..105 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+multiple_patterns.grit:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Too many patterns.
+  
+    1 │ file(body = contains `console.$method` => `println`)
+    2 │ 
+  > 3 │ file(body = contains `console.$method` => `print`)
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Grit files may only contain a single pattern. Use `sequential` if you would like to match multiple patterns.
+  
+```

@@ -141,6 +141,13 @@ impl LSPServer {
                             )),
                             kind: Some(WatchKind::all()),
                         },
+                        FileSystemWatcher {
+                            glob_pattern: GlobPattern::String(format!(
+                                "{}/biome.jsonc",
+                                base_path.display()
+                            )),
+                            kind: Some(WatchKind::all()),
+                        },
                         // TODO: Biome 2.0 remove it
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(

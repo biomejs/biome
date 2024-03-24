@@ -1,6 +1,6 @@
 {
 	"name": "@biomejs/js-api",
-	"version": "0.4.0",
+	"version": "0.5.0",
 	"description": "JavaScript APIs for the Biome package",
 	"scripts": {
 		"tsc": "tsc --noEmit",

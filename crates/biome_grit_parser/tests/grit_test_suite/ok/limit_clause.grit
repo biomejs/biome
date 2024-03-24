@@ -1,0 +1,3 @@
+`console.$method($message)` => `console.warn($message)` where {
+  $method <: not `error`
+} limit 2 // Only find 2 files

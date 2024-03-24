@@ -221,12 +221,10 @@ version = "0.5.7"
 dependencies = [
  "biome_analyze",
  "biome_console",
- "biome_css_factory",
  "biome_css_parser",
  "biome_css_syntax",
  "biome_diagnostics",
  "biome_rowan",
- "biome_service",
  "biome_test_utils",
  "insta",
  "lazy_static",
@@ -245,18 +243,15 @@ dependencies = [
 name = "biome_css_formatter"
 version = "0.5.7"
 dependencies = [
- "biome_css_factory",
  "biome_css_parser",
  "biome_css_syntax",
  "biome_diagnostics",
  "biome_formatter",
  "biome_formatter_test",
- "biome_fs",
  "biome_parser",
  "biome_rowan",
  "biome_suppression",
  "countme",
- "insta",
  "serde",
  "serde_json",
  "tests_macros",
@@ -279,7 +274,6 @@ dependencies = [
  "quickcheck_macros",
  "tests_macros",
  "tracing",
- "unicode-bom",
 ]
 
 [[package]]
@@ -430,6 +424,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_grit_parser"
+version = "0.1.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_grit_factory",
+ "biome_grit_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "bitflags 2.3.1",
+ "insta",
+ "quickcheck",
+ "quickcheck_macros",
+ "schemars",
+ "serde",
+ "serde_json",
+ "smallvec",
+ "tests_macros",
+ "tracing",
+ "unicode-bom",
+]
+
+[[package]]
 name = "biome_grit_syntax"
 version = "0.5.7"
 dependencies = [
@@ -473,9 +490,7 @@ dependencies = [
  "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
- "biome_text_edit",
  "biome_unicode_table",
- "countme",
  "insta",
  "lazy_static",
  "natord",
@@ -501,11 +516,9 @@ version = "0.5.7"
 dependencies = [
  "biome_deserialize",
  "biome_deserialize_macros",
- "biome_diagnostics",
  "biome_diagnostics_categories",
  "biome_formatter",
  "biome_formatter_test",
- "biome_fs",
  "biome_js_factory",
  "biome_js_parser",
  "biome_js_syntax",
@@ -516,7 +529,6 @@ dependencies = [
  "biome_unicode_table",
  "countme",
  "iai",
- "insta",
  "quickcheck",
  "quickcheck_macros",
  "schemars",
@@ -551,7 +563,6 @@ dependencies = [
  "smallvec",
  "tests_macros",
  "tracing",
- "unicode-bom",
 ]
 
 [[package]]
@@ -562,7 +573,6 @@ dependencies = [
  "biome_diagnostics",
  "biome_js_parser",
  "biome_js_syntax",
- "biome_markup",
  "biome_rowan",
  "rust-lapper",
  "rustc-hash",
@@ -572,8 +582,6 @@ dependencies = [
 name = "biome_js_syntax"
 version = "0.5.7"
 dependencies = [
- "biome_console",
- "biome_diagnostics",
  "biome_js_factory",
  "biome_js_parser",
  "biome_rowan",
@@ -605,11 +613,9 @@ dependencies = [
  "biome_analyze",
  "biome_console",
  "biome_diagnostics",
- "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
  "biome_rowan",
- "biome_service",
  "biome_test_utils",
  "insta",
  "lazy_static",
@@ -634,15 +640,12 @@ dependencies = [
  "biome_diagnostics",
  "biome_formatter",
  "biome_formatter_test",
- "biome_fs",
- "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
  "biome_parser",
  "biome_rowan",
  "biome_suppression",
  "countme",
- "insta",
  "schemars",
  "serde",
  "serde_json",
@@ -719,7 +722,6 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_rowan",
- "biome_service",
  "biome_test_utils",
  "insta",
  "lazy_static",
@@ -772,7 +774,6 @@ dependencies = [
  "quickcheck",
  "quickcheck_macros",
  "rustc-hash",
- "schemars",
  "serde",
  "serde_json",
  "tracing",
@@ -896,10 +897,8 @@ dependencies = [
  "console_error_panic_hook",
  "js-sys",
  "quote",
- "schemars",
  "serde",
  "serde-wasm-bindgen",
- "serde_json",
  "wasm-bindgen",
 ]
 

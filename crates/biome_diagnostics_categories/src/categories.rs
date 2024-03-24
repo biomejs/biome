@@ -115,6 +115,7 @@ define_categories! {
     "lint/nursery/noDuplicateElseIf": "https://biomejs.dev/linter/rules/no-duplicate-else-if",
     "lint/nursery/noDuplicateJsonKeys": "https://biomejs.dev/linter/rules/no-duplicate-json-keys",
     "lint/nursery/noDuplicateTestHooks": "https://biomejs.dev/linter/rules/no-duplicate-test-hooks",
+    "lint/nursery/noEvolvingAny": "https://biomejs.dev/linter/rules/no-evolving-any",
     "lint/nursery/noExcessiveNestedTestSuites": "https://biomejs.dev/linter/rules/no-excessive-nested-test-suites",
     "lint/nursery/noExportsInTest": "https://biomejs.dev/linter/rules/no-exports-in-test",
     "lint/nursery/noFocusedTests": "https://biomejs.dev/linter/rules/no-focused-tests",

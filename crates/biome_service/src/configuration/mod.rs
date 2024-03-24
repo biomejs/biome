@@ -245,9 +245,9 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 pub struct ConfigurationPayload {
     /// The result of the deserialization
     pub deserialized: Deserialized<PartialConfiguration>,
-    /// The path of where the `biome.json` file was found. This contains the `biome.json` name.
+    /// The path of where the `biome.json` or `biome.jsonc` file was found. This contains the file name.
     pub configuration_file_path: PathBuf,
-    /// The base path of where the `biome.json` file was found.
+    /// The base path of where the `biome.json` or `biome.jsonc` file was found.
     /// This has to be used to resolve other configuration files.
     pub configuration_directory_path: PathBuf,
 }
@@ -602,7 +602,7 @@ impl PartialConfiguration {
             {
                 directory_path.join(path)
             } else {
-                fs.resolve_configuration(path.as_str())
+                fs.resolve_configuration(path.as_str(), Some(directory_path))
                     .map_err(|error| {
                         ConfigurationDiagnostic::cant_resolve(
                             fs.working_directory()

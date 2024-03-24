@@ -78,14 +78,14 @@ The `extends` option allows to break down a configuration in multiple file and "
 
 ```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.2/schema.json",
   "extends": ["./formatter.json", "./linter.json"]
 }
 ```
 
 ```json title="formatter.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.2/schema.json",
   "formatter": {
     "indentSize": 2
   },
@@ -99,7 +99,7 @@ The `extends` option allows to break down a configuration in multiple file and "
 
 ```json title="linter.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.2/schema.json",
   "linter": {
     "rules": {
       "complexity": {
@@ -166,13 +166,17 @@ The following files are currently ignored by Biome. This means that no diagnosti
 - `package-lock.json`
 - `yarn.lock`
 
-The following files are parsed as **`JSON` files** with  the options `json.parser.allowComments` and `json.parser.allowTrailingCommas` set to `true`. This is because editor tools like VSCode treat them like this.
+## Well-known Files
 
-- `.babelrc.json`
+Here are some well-known files that we specifically treat based on their file names, rather than their extensions. Currently, the well-known files are JSON-like files only, but we may broaden the list to include other types when we support new parsers.
+
+The following files are parsed as **`JSON` files** with the options `json.parser.allowComments` and `json.parser.allowTrailingCommas` set to `true`. This is because the tools consuming these files are designed to accommodate such settings.
+
 - `.babelrc`
+- `.babelrc.json`
 - `.ember-cli`
-- `.eslintrc.json`
 - `.eslintrc`
+- `.eslintrc.json`
 - `.hintrc`
 - `.jsfmtrc`
 - `.jshintrc`

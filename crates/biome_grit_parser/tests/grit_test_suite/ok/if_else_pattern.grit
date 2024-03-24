@@ -1,0 +1,7 @@
+`$method('$message')` where {
+  if ($message <: r"Hello, .*!") {
+    $method => `console.info`
+  } else {
+    $method => `console.warn`
+  }
+}

@@ -60,6 +60,8 @@ jobs:
       - uses: pnpm/action-setup@v3
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
+        with:
+          cache-base: main
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Build WASM module for the web

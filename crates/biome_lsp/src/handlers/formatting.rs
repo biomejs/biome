@@ -24,7 +24,7 @@ pub(crate) fn format(
 
     let file_features = session.workspace.file_features(SupportsFeatureParams {
         path: biome_path.clone(),
-        feature: FeaturesBuilder::new().with_formatter().build(),
+        features: FeaturesBuilder::new().with_formatter().build(),
     })?;
 
     if file_features.supports_format() {
@@ -85,7 +85,7 @@ pub(crate) fn format_range(
 
     let file_features = session.workspace.file_features(SupportsFeatureParams {
         path: biome_path.clone(),
-        feature: FeaturesBuilder::new().with_formatter().build(),
+        features: FeaturesBuilder::new().with_formatter().build(),
     })?;
 
     if file_features.supports_format() {
@@ -141,7 +141,7 @@ pub(crate) fn format_on_type(
 
     let file_features = session.workspace.file_features(SupportsFeatureParams {
         path: biome_path.clone(),
-        feature: FeaturesBuilder::new().with_formatter().build(),
+        features: FeaturesBuilder::new().with_formatter().build(),
     })?;
 
     if file_features.supports_format() {

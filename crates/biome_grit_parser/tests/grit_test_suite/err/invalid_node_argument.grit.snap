@@ -1,0 +1,75 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+stmt(function="unknown")
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritNodeLike {
+            name: GritName {
+                value_token: GRIT_NAME@0..4 "stmt" [] [],
+            },
+            l_paren_token: L_PAREN@4..5 "(" [] [],
+            named_args: GritNamedArgList [
+                GritBogusNamedArg {
+                    items: [
+                        FUNCTION_KW@5..13 "function" [] [],
+                        EQ@13..14 "=" [] [],
+                        GRIT_STRING@14..23 "\"unknown\"" [] [],
+                    ],
+                },
+            ],
+            r_paren_token: R_PAREN@23..24 ")" [] [],
+        },
+    ],
+    eof_token: EOF@24..25 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..25
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..24
+    0: GRIT_NODE_LIKE@0..24
+      0: GRIT_NAME@0..4
+        0: GRIT_NAME@0..4 "stmt" [] []
+      1: L_PAREN@4..5 "(" [] []
+      2: GRIT_NAMED_ARG_LIST@5..23
+        0: GRIT_BOGUS_NAMED_ARG@5..23
+          0: FUNCTION_KW@5..13 "function" [] []
+          1: EQ@13..14 "=" [] []
+          2: GRIT_STRING@14..23 "\"unknown\"" [] []
+      3: R_PAREN@23..24 ")" [] []
+  4: EOF@24..25 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid_node_argument.grit:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected node argument.
+  
+  > 1 │ stmt(function="unknown")
+      │      ^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Node arguments must be patterns, optionally preceeded by a name and an equal sign.
+  
+```

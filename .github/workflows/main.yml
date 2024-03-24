@@ -25,11 +25,14 @@ jobs:
         run: git config core.longpaths true
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
         with:
           components: rustfmt
           bins: taplo-cli
+          cache-base: main
       - name: Run rustfmt
         run: |
           cargo fmt --all --verbose -- --check
@@ -47,6 +50,7 @@ jobs:
         uses: moonrepo/setup-rust@v1
         with:
           components: clippy
+          cache-base: main
       - name: Run cargo check
         run: cargo check --workspace --all-targets --release
       - name: Run clippy
@@ -64,6 +68,7 @@ jobs:
         uses: moonrepo/setup-rust@v1
         with:
           channel: nightly
+          cache: false
       - name: Install udeps
         run: cargo install cargo-udeps --locked
       - name: Run udeps
@@ -87,6 +92,7 @@ jobs:
         uses: moonrepo/setup-rust@v1
         with:
           bins: cargo-nextest
+          cache-base: main
       - name: Run tests on ${{ matrix.os }}
         run: cargo nextest run --workspace --verbose
       - name: Clean cache
@@ -112,6 +118,9 @@ jobs:
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@v1
+        with:
+          cache-target: release
+          cache-base: main
       - name: Compile
         run: cargo build --release --locked -p xtask_coverage
       - name: Run Test262 suite
