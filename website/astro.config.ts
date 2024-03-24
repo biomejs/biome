@@ -105,6 +105,7 @@ export default defineConfig({
 							label: "Integrate Biome with your VCS",
 							link: "/guides/integrate-in-vcs",
 							translations: {
+								ja: "Biome をあなたの VCS に統合する",
 								"zh-CN": "与版本控制系统集成",
 								"pt-BR": "Integrando o Biome com o seu VCS",
 							},
