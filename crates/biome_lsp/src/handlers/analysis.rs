@@ -149,8 +149,22 @@ pub(crate) fn code_actions(
             if has_quick_fix && action.suggestion.applicability == Applicability::MaybeIncorrect {
                 return None;
             }
+            // Filter out source.organizeImports.biome action when organize imports is not supported.
             if action.category.matches("source.organizeImports.biome")
                 && !file_features.supports_organize_imports()
+            {
+                return None;
+            }
+            // Filter out quickfix.biome action when lint is not supported.
+            // But keep JavaScript parse rules because they're not configurable
+            // and should be considered as a parse action
+            if action.category.matches("quickfix.biome")
+                && action.rule_name.as_ref().map_or(true, |(_, name)| {
+                    name != "noDuplicatePrivateClassMembers"
+                        && name != "noInitializerWithDefinite"
+                        && name != "noSuperWithoutExtends"
+                })
+                && !file_features.supports_lint()
             {
                 return None;
             }
