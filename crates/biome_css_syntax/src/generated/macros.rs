@@ -165,6 +165,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssFontFaceAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_FONT_FAMILY_NAME => {
+                    let $pattern = unsafe { $crate::CssFontFamilyName::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_FONT_FEATURE_VALUES_AT_RULE => {
                     let $pattern =
                         unsafe { $crate::CssFontFeatureValuesAtRule::new_unchecked(node) };
@@ -601,12 +605,20 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_CUSTOM_IDENTIFIER => {
+                    let $pattern = unsafe { $crate::CssBogusCustomIdentifier::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_DECLARATION_ITEM => {
                     let $pattern = unsafe { $crate::CssBogusDeclarationItem::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_DOCUMENT_MATCHER => {
                     let $pattern = unsafe { $crate::CssBogusDocumentMatcher::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_FONT_FAMILY_NAME => {
+                    let $pattern = unsafe { $crate::CssBogusFontFamilyName::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_FONT_FEATURE_VALUES_ITEM => {
@@ -679,6 +691,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssCompoundSelectorList::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_CUSTOM_IDENTIFIER_LIST => {
+                    let $pattern = unsafe { $crate::CssCustomIdentifierList::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_DECLARATION_LIST => {
                     let $pattern = unsafe { $crate::CssDeclarationList::new_unchecked(node) };
                     $body
@@ -694,6 +710,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_DOCUMENT_MATCHER_LIST => {
                     let $pattern = unsafe { $crate::CssDocumentMatcherList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FONT_FAMILY_NAME_LIST => {
+                    let $pattern = unsafe { $crate::CssFontFamilyNameList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_FONT_FEATURE_VALUES_ITEM_LIST => {

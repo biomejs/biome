@@ -56,6 +56,8 @@ CssBogusProperty =  SyntaxElement*
 CssBogusUrlModifier =  SyntaxElement*
 CssBogusPropertyValue = SyntaxElement*
 CssBogusDocumentMatcher = SyntaxElement*
+CssBogusFontFamilyName = SyntaxElement*
+CssBogusCustomIdentifier = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -596,18 +598,32 @@ CssFontFaceAtRule =
 // @ornaments = @ornaments { <declaration-list> }
 // @annotation = @annotation { <declaration-list> }
 
-// @font-feature-values Font One { @styleset { nice-style: 12; } }
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// @font-feature-values Font, Second { @styleset { nice-style: 12; } }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssFontFeatureValuesAtRule =
 	'font-feature-values'
-	name: AnyCssFontFamilyName
+	names: CssFontFamilyNameList
 	block: AnyCssFontFeatureValuesBlock
 
-// @font-feature-values Font One { @styleset { nice-style: 12; } }
-//                      ^^^^^^^^
+// @font-feature-values Font Second, Gothic, "Otaru Kisa" { }
+//                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssFontFamilyNameList = (AnyCssFontFamilyName (',' AnyCssFontFamilyName)*)
+
 AnyCssFontFamilyName =
+    CssFontFamilyName
+    | CssString
+    | CssBogusFontFamilyName
+
+CssFontFamilyName =
+	names: CssCustomIdentifierList
+
+// @font-feature-values Font Second Gothic { }
+//                      ^^^^^^^^^^^^^^^^^^
+CssCustomIdentifierList = CssCustomIdentifier*
+
+AnyCssCustomIdentifier =
 	CssCustomIdentifier
-	| CssString
+	| CssBogusCustomIdentifier
 
 AnyCssFontFeatureValuesBlock =
 	CssFontFeatureValuesBlock

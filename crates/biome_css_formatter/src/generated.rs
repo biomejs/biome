@@ -1299,6 +1299,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFontFaceAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssFontFamilyName>
+    for crate::css::auxiliary::font_family_name::FormatCssFontFamilyName
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssFontFamilyName,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssFontFamilyName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssFontFamilyName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssFontFamilyName,
+        crate::css::auxiliary::font_family_name::FormatCssFontFamilyName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::font_family_name::FormatCssFontFamilyName::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFontFamilyName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssFontFamilyName,
+        crate::css::auxiliary::font_family_name::FormatCssFontFamilyName,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::font_family_name::FormatCssFontFamilyName::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssFontFeatureValuesAtRule>
     for crate::css::statements::font_feature_values_at_rule::FormatCssFontFeatureValuesAtRule
 {
@@ -4882,6 +4922,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCompoundSelectorList 
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifierList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssCustomIdentifierList,
+        crate::css::lists::custom_identifier_list::FormatCssCustomIdentifierList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::lists::custom_identifier_list::FormatCssCustomIdentifierList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifierList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssCustomIdentifierList,
+        crate::css::lists::custom_identifier_list::FormatCssCustomIdentifierList,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::lists::custom_identifier_list::FormatCssCustomIdentifierList::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssDeclarationList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -4981,6 +5048,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssDocumentMatcherList {
         FormatOwnedWithRule::new(
             self,
             crate::css::lists::document_matcher_list::FormatCssDocumentMatcherList::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssFontFamilyNameList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssFontFamilyNameList,
+        crate::css::lists::font_family_name_list::FormatCssFontFamilyNameList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::lists::font_family_name_list::FormatCssFontFamilyNameList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFontFamilyNameList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssFontFamilyNameList,
+        crate::css::lists::font_family_name_list::FormatCssFontFamilyNameList,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::lists::font_family_name_list::FormatCssFontFamilyNameList::default(),
         )
     }
 }
@@ -5536,6 +5630,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusBlock {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssBogusCustomIdentifier>
+    for crate::css::bogus::bogus_custom_identifier::FormatCssBogusCustomIdentifier
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusCustomIdentifier,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusCustomIdentifier>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusCustomIdentifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusCustomIdentifier,
+        crate::css::bogus::bogus_custom_identifier::FormatCssBogusCustomIdentifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::bogus::bogus_custom_identifier::FormatCssBogusCustomIdentifier::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusCustomIdentifier {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusCustomIdentifier,
+        crate::css::bogus::bogus_custom_identifier::FormatCssBogusCustomIdentifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::bogus::bogus_custom_identifier::FormatCssBogusCustomIdentifier::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssBogusDeclarationItem>
     for crate::css::bogus::bogus_declaration_item::FormatCssBogusDeclarationItem
 {
@@ -5613,6 +5747,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusDocumentMatcher 
         FormatOwnedWithRule::new(
             self,
             crate::css::bogus::bogus_document_matcher::FormatCssBogusDocumentMatcher::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssBogusFontFamilyName>
+    for crate::css::bogus::bogus_font_family_name::FormatCssBogusFontFamilyName
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusFontFamilyName,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusFontFamilyName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusFontFamilyName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusFontFamilyName,
+        crate::css::bogus::bogus_font_family_name::FormatCssBogusFontFamilyName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::bogus::bogus_font_family_name::FormatCssBogusFontFamilyName::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusFontFamilyName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusFontFamilyName,
+        crate::css::bogus::bogus_font_family_name::FormatCssBogusFontFamilyName,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::bogus::bogus_font_family_name::FormatCssBogusFontFamilyName::default(),
         )
     }
 }
@@ -6460,6 +6634,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssContainerStyleQuer
         FormatOwnedWithRule::new(
             self,
             crate::css::any::container_style_query::FormatAnyCssContainerStyleQuery::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssCustomIdentifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssCustomIdentifier,
+        crate::css::any::custom_identifier::FormatAnyCssCustomIdentifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::custom_identifier::FormatAnyCssCustomIdentifier::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssCustomIdentifier {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssCustomIdentifier,
+        crate::css::any::custom_identifier::FormatAnyCssCustomIdentifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::custom_identifier::FormatAnyCssCustomIdentifier::default(),
         )
     }
 }

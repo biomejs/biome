@@ -17,8 +17,10 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_BOGUS
             | CSS_BOGUS_AT_RULE
             | CSS_BOGUS_BLOCK
+            | CSS_BOGUS_CUSTOM_IDENTIFIER
             | CSS_BOGUS_DECLARATION_ITEM
             | CSS_BOGUS_DOCUMENT_MATCHER
+            | CSS_BOGUS_FONT_FAMILY_NAME
             | CSS_BOGUS_FONT_FEATURE_VALUES_ITEM
             | CSS_BOGUS_KEYFRAMES_ITEM
             | CSS_BOGUS_LAYER
@@ -1114,6 +1116,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_FONT_FACE_AT_RULE, children)
             }
+            CSS_FONT_FAMILY_NAME => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssCustomIdentifierList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_FONT_FAMILY_NAME.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_FONT_FAMILY_NAME, children)
+            }
             CSS_FONT_FEATURE_VALUES_AT_RULE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -1126,7 +1147,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyCssFontFamilyName::can_cast(element.kind()) {
+                    if CssFontFamilyNameList::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -4088,6 +4109,9 @@ impl SyntaxFactory for CssSyntaxFactory {
                 T ! [,],
                 false,
             ),
+            CSS_CUSTOM_IDENTIFIER_LIST => {
+                Self::make_node_list_syntax(kind, children, CssCustomIdentifier::can_cast)
+            }
             CSS_DECLARATION_LIST => {
                 Self::make_node_list_syntax(kind, children, CssDeclarationWithSemicolon::can_cast)
             }
@@ -4103,6 +4127,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                 AnyCssDocumentMatcher::can_cast,
                 T ! [,],
                 true,
+            ),
+            CSS_FONT_FAMILY_NAME_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                AnyCssFontFamilyName::can_cast,
+                T ! [,],
+                false,
             ),
             CSS_FONT_FEATURE_VALUES_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssFontFeatureValuesItem::can_cast)

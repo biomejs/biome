@@ -83,7 +83,7 @@ info: css/comments/at-rules.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,38 +1,33 @@
+@@ -1,38 +1,31 @@
  @charset "utf-8"; /* comment 1 */
  
 -@import /* comment 2 */ url("fineprint.css") /* comment 3 */ print
@@ -130,17 +130,15 @@ info: css/comments/at-rules.css
  
 -/* comment 45 */
 -@font-feature-values /* comment 46 */ Font Two /* comment 47 */ {
-+/* comment 45 */ @font-feature-values /* comment 46 */ Font 
-+two /* comment 47 */ {
++/* comment 45 */ @font-feature-values /* comment 46 */ Font Two /* comment 47 */ {
    /* comment 48 */
 -  /* comment 49 */
 -  @styleset /* comment 50 */ {
-+  /* comment 49 */ @
-+  styleset /* comment 50 */ {
++  /* comment 49 */ @styleset /* comment 50 */ {
      /* comment 51 */
      nice-style: 4;
      /* comment 52 */
-@@ -40,12 +35,11 @@
+@@ -40,12 +33,11 @@
    /* comment 54 */
  } /* comment 55 */
  
@@ -156,7 +154,7 @@ info: css/comments/at-rules.css
  }
  
  @page /* comment 61 */ {
-@@ -55,80 +49,79 @@
+@@ -55,80 +47,79 @@
  @page /* comment 64 */ vertical /* comment 65 */ {
  }
  
@@ -327,11 +325,9 @@ info: css/comments/at-rules.css
 @keyframes /* comment 43 */ slidein /* comment 44 */ {
 }
 
-/* comment 45 */ @font-feature-values /* comment 46 */ Font 
-two /* comment 47 */ {
+/* comment 45 */ @font-feature-values /* comment 46 */ Font Two /* comment 47 */ {
   /* comment 48 */
-  /* comment 49 */ @
-  styleset /* comment 50 */ {
+  /* comment 49 */ @styleset /* comment 50 */ {
     /* comment 51 */
     nice-style: 4;
     /* comment 52 */
@@ -434,50 +430,6 @@ viewport /* comment 60 */ {
 
 # Errors
 ```
-at-rules.css:19:61 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `{` but instead found `Two`
-  
-    17 │ @keyframes /* comment 43 */ slidein /* comment 44 */ {}
-    18 │ 
-  > 19 │ /* comment 45 */ @font-feature-values /* comment 46 */ Font Two /* comment 47 */ { /* comment 48 */
-       │                                                             ^^^
-    20 │     /* comment 49 */ @styleset /* comment 50 */ { /* comment 51 */
-    21 │         nice-style: 4;
-  
-  i Remove Two
-  
-at-rules.css:20:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    19 │ /* comment 45 */ @font-feature-values /* comment 46 */ Font Two /* comment 47 */ { /* comment 48 */
-  > 20 │     /* comment 49 */ @styleset /* comment 50 */ { /* comment 51 */
-       │                       ^^^^^^^^
-    21 │         nice-style: 4;
-    22 │     /* comment 52 */ } /* comment 53 */
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
 at-rules.css:27:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
@@ -517,24 +469,25 @@ at-rules.css:27:19 parse ━━━━━━━━━━━━━━━━━━�
 ```
    17:     /* comment 33 */ /* comment 34 */ /* comment 35 */ orientation: landscape /* comment 36 */
    21: @namespace /* comment 40 */ /* comment 41 */ svg url(http://www.w3.org/2000/svg) /* comment 42 */;
-   57: @media /* comment 74 */ only /* comment 75 */ screen /* comment 76 */ and /* comment 77 */ (
-   58:     /* comment 78 */ /* comment 79 */ /* comment 80 */ min-width: 320px /* comment 81 */
-   60:     /* comment 84 */ /* comment 85 */ /* comment 86 */ max-width: 480px /* comment 87 */
-   62:     /* comment 90 */ /* comment 91 */ /* comment 92 */ resolution: 150dpi /* comment 93 */
-   65: @media /* comment 95 */ only /* comment 96 */ screen /* comment 97 */ and /* comment 98 */ (
-   66:     /* comment 99 */ /* comment 100 */ /* comment 101 */ min-width: 320px /* comment 102 */
-   68:     /* comment 105 */ /* comment 106 */ /* comment 107 */ max-width: 480px /* comment 108 */
-   70:     /* comment 111 */ /* comment 112 */ /* comment 113 */ resolution: 150dpi /* comment 114 */
-   75:   /* comment 120 */ screen /* comment 121 */ /* comment 123 */ and /* comment 122 */ /* comment 124 */ (
-   81:   ) /* comment 133 */ /* comment 135 */ and /* comment 134 */ /* comment 136 */ (
-   87:   ) /* comment 145 */ /* comment 147 */ and /* comment 146 */ /* comment 148 */ (
-   97:     /* comment 161 */ /* comment 162 */ /* comment 163 */ display: flex /* comment 164 */
-  101:     /* comment 168 */ /* comment 169 */ /* comment 170 */ display: flex /* comment 171 */
-  105:     /* comment 174 */ /* comment 175 */ /* comment 176 */ display: table-cell /* comment 177 */
-  108:     /* comment 180 */ /* comment 181 */ /* comment 182 */ display: list-item /* comment 183 */
-  111:     /* comment 186 */ /* comment 187 */ /* comment 188 */ display: run-in /* comment 189 */
-  115:     /* comment 192 */ /* comment 193 */ /* comment 194 */ --foo: green /* comment 195 */
-  120:     /* comment 199 */ /* comment 200 */ /* comment 201 */ display: flex /* comment 202 */
-  122:   /* comment 204 */ @media /* comment 205 */ screen /* comment 206 */ and /* comment 207 */ (
-  123:       /* comment 208 */ /* comment 209 */ /* comment 210 */ min-width: 900px /* comment 211 */
+   26: /* comment 45 */ @font-feature-values /* comment 46 */ Font Two /* comment 47 */ {
+   55: @media /* comment 74 */ only /* comment 75 */ screen /* comment 76 */ and /* comment 77 */ (
+   56:     /* comment 78 */ /* comment 79 */ /* comment 80 */ min-width: 320px /* comment 81 */
+   58:     /* comment 84 */ /* comment 85 */ /* comment 86 */ max-width: 480px /* comment 87 */
+   60:     /* comment 90 */ /* comment 91 */ /* comment 92 */ resolution: 150dpi /* comment 93 */
+   63: @media /* comment 95 */ only /* comment 96 */ screen /* comment 97 */ and /* comment 98 */ (
+   64:     /* comment 99 */ /* comment 100 */ /* comment 101 */ min-width: 320px /* comment 102 */
+   66:     /* comment 105 */ /* comment 106 */ /* comment 107 */ max-width: 480px /* comment 108 */
+   68:     /* comment 111 */ /* comment 112 */ /* comment 113 */ resolution: 150dpi /* comment 114 */
+   73:   /* comment 120 */ screen /* comment 121 */ /* comment 123 */ and /* comment 122 */ /* comment 124 */ (
+   79:   ) /* comment 133 */ /* comment 135 */ and /* comment 134 */ /* comment 136 */ (
+   85:   ) /* comment 145 */ /* comment 147 */ and /* comment 146 */ /* comment 148 */ (
+   95:     /* comment 161 */ /* comment 162 */ /* comment 163 */ display: flex /* comment 164 */
+   99:     /* comment 168 */ /* comment 169 */ /* comment 170 */ display: flex /* comment 171 */
+  103:     /* comment 174 */ /* comment 175 */ /* comment 176 */ display: table-cell /* comment 177 */
+  106:     /* comment 180 */ /* comment 181 */ /* comment 182 */ display: list-item /* comment 183 */
+  109:     /* comment 186 */ /* comment 187 */ /* comment 188 */ display: run-in /* comment 189 */
+  113:     /* comment 192 */ /* comment 193 */ /* comment 194 */ --foo: green /* comment 195 */
+  118:     /* comment 199 */ /* comment 200 */ /* comment 201 */ display: flex /* comment 202 */
+  120:   /* comment 204 */ @media /* comment 205 */ screen /* comment 206 */ and /* comment 207 */ (
+  121:       /* comment 208 */ /* comment 209 */ /* comment 210 */ min-width: 900px /* comment 211 */
 ```

@@ -13,7 +13,7 @@ impl FormatNodeRule<CssFontFeatureValuesAtRule> for FormatCssFontFeatureValuesAt
     ) -> FormatResult<()> {
         let CssFontFeatureValuesAtRuleFields {
             font_feature_values_token,
-            name,
+            names,
             block,
         } = node.as_fields();
 
@@ -22,7 +22,7 @@ impl FormatNodeRule<CssFontFeatureValuesAtRule> for FormatCssFontFeatureValuesAt
             [
                 font_feature_values_token.format(),
                 space(),
-                name.format(),
+                names.format(),
                 space(),
                 block.format()
             ]
