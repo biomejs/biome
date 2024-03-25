@@ -16,5 +16,14 @@
 	},
 	"organizeImports": {
 		"enabled": true
+	},
+	"files": {
+		"include": [
+			"website",
+			"packages/@biomejs/biome",
+			"packages/@biomejs/biome-jsonrpc",
+			"packages/@biomejs/js-api",
+			"packages/tailwindcss-config-analyzer"
+		]
 	}
 }

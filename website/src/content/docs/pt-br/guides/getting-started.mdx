@@ -19,10 +19,10 @@ A forma mais rápida de baixar o Biome é usando `npm` ou o seu package manager 
 Para instalar o Biome, execute o seguinte comando em um diretório que possua o arquivo `package.json`.
 
 <PackageManagerCommand
-  npm="install --save-dev --save-exact @biomejs/biome"
-  pnpm="add --save-dev --save-exact @biomejs/biome"
-  yarn="add --dev --exact @biomejs/biome"
-  bun="add --dev --exact @biomejs/biome"
+    npm="install --save-dev --save-exact @biomejs/biome"
+    pnpm="add --save-dev --save-exact @biomejs/biome"
+    yarn="add --dev --exact @biomejs/biome"
+    bun="add --dev --exact @biomejs/biome"
 />
 
 :::note
@@ -40,13 +40,13 @@ Isso elimina a necessidade de repetir as opções do CLI toda vez que você exec
 
 Para criar o arquivo de configuração, use o comando de `init` dentro da pasta raíz do seu projeto:
 
-<PackageManagerBiomeCommand command="init" />
+<PackageManagerBiomeCommand command="init"/>
 
 Após utilizar o comando, você terá um novo arquivo `biome.json` no seu diretório:
 
 ```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.3/schema.json",
   "organizeImports": {
     "enabled": false
   },
@@ -69,15 +69,15 @@ O CLI do Biome vem com vários comandos e opções, então você utiliza só o q
 
 Você pode formatar arquivos e diretórios usando o comando [`format`](/reference/cli#biome-format) com o parâmetro `--write`:
 
-<PackageManagerBiomeCommand command="format <files> --write" />
+<PackageManagerBiomeCommand command="format <files> --write"/>
 
 Você pode analisar e aplicar [correções seguras](/pt-br/linter#correções-seguras) em arquivos e diretórios utilizando o comando [`lint`](/reference/cli#biome-lint) com o parâmetro `--apply`:
 
-<PackageManagerBiomeCommand command="lint <files>" />
+<PackageManagerBiomeCommand command="lint <files>"/>
 
 Você pode aplicar **ambos** com o comando [`check`](/reference/cli#biome-check)
 
-<PackageManagerBiomeCommand command="check --apply <files>" />
+<PackageManagerBiomeCommand command="check --apply <files>"/>
 
 O comando `check` executa múltiplas ferramentas de uma vez. Até o momento, ele:
 
