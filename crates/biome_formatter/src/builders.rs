@@ -814,6 +814,62 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 /// # Ok(())
 /// # }
 /// ```
+///
+/// ```
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args, IndentStyle, IndentWidth, SimpleFormatOptions};
+///
+/// # fn main() -> FormatResult<()> {
+///     let context = SimpleFormatContext::new(SimpleFormatOptions {
+///         indent_width: IndentWidth::try_from(8).unwrap(),
+///         indent_style: IndentStyle::Space,
+///         ..SimpleFormatOptions::default()
+///     });
+///     let elements = format!(
+///         context,
+///         [
+///             text("root"),
+///             indent(&format_args![
+///                 hard_line_break(),
+///                 text("Indented"),
+///                 align(
+///                     2,
+///                     &format_args![
+///                         hard_line_break(),
+///                         text("Indented and aligned"),
+///                         dedent(&format_args![
+///                             hard_line_break(),
+///                             text("Indented, not aligned"),
+///                         ]),
+///                     ]
+///                 ),
+///             ]),
+///             align(
+///                 2,
+///                 &format_args![
+///                     hard_line_break(),
+///                     text("Aligned"),
+///                     indent(&format_args![
+///                         hard_line_break(),
+///                         text("Aligned, and indented"),
+///                         dedent(&format_args![
+///                             hard_line_break(),
+///                             text("aligned, not Intended"),
+///                         ]),
+///                     ])
+///                 ]
+///             ),
+///             dedent(&format_args![hard_line_break(), text("root level")])
+///         ]
+///     )?;
+///     assert_eq!(
+///      "root\n        Indented\n          Indented and aligned\n        Indented, not aligned\n  Aligned\n          Aligned, and indented\n  aligned, not Intended\nroot level",
+///      elements.print()?.as_code()
+///  );
+/// #    Ok(())
+/// # }
+/// ```
+
 #[inline]
 pub fn dedent<Content, Context>(content: &Content) -> Dedent<Context>
 where
