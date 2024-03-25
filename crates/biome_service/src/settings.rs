@@ -781,7 +781,6 @@ impl OverrideSettingPattern {
                 *options = cached_options.clone();
                 return;
             }
-            drop(readonly_cache);
         }
 
         let js_formatter = &self.languages.javascript.formatter;
@@ -838,7 +837,6 @@ impl OverrideSettingPattern {
                 *options = cached_options.clone();
                 return;
             }
-            drop(readonly_cache);
         }
 
         let json_formatter = &self.languages.json.formatter;
@@ -872,7 +870,6 @@ impl OverrideSettingPattern {
                 *options = cached_options.clone();
                 return;
             }
-            drop(readonly_cache);
         }
 
         let css_formatter = &self.languages.css.formatter;
@@ -906,7 +903,6 @@ impl OverrideSettingPattern {
                 *options = cached_options.clone();
                 return;
             }
-            drop(readonly_cache);
         }
 
         let js_parser = &self.languages.javascript.parser;
@@ -925,7 +921,6 @@ impl OverrideSettingPattern {
                 *options = *cached_options;
                 return;
             }
-            drop(readonly_cache);
         }
 
         let json_parser = &self.languages.json.parser;
