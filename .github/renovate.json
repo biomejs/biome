@@ -1,16 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "timezone": "Europe/Gibraltar",
-  "schedule": [
-    "before 9am on monday"
-  ],
   "extends": [
-    "config:recommended",
-    ":dependencyDashboard"
+    "config:base",
+    "schedule:weekly"
   ],
-  "lockFileMaintenance": {
-    "enabled": false
-  },
   "assignees": [
     "@biomejs/maintainers",
     "@biomejs/core-contributors"
@@ -20,6 +14,10 @@
       "groupName": "github-actions",
       "matchManagers": [
         "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ]
     },
     {
@@ -34,6 +32,10 @@
       "ignoreDeps": [
         "syn",
         "quote"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ]
     },
     {
@@ -43,6 +45,10 @@
       ],
       "matchManagers": [
         "npm"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ]
     },
     {
@@ -52,6 +58,10 @@
       ],
       "matchManagers": [
         "npm"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ]
     }
   ]
