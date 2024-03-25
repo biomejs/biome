@@ -14,10 +14,6 @@
       "groupName": "github-actions",
       "matchManagers": [
         "github-actions"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
       ]
     },
     {
@@ -32,10 +28,6 @@
       "ignoreDeps": [
         "syn",
         "quote"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
       ]
     },
     {
@@ -45,10 +37,6 @@
       ],
       "matchManagers": [
         "npm"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
       ]
     },
     {
@@ -58,10 +46,6 @@
       ],
       "matchManagers": [
         "npm"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
       ]
     }
   ]
