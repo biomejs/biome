@@ -35,7 +35,7 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
         since,
         changed,
     } = payload;
-    setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
+    setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
     let loaded_configuration =
         load_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
