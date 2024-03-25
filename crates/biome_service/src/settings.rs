@@ -21,12 +21,13 @@ use biome_fs::BiomePath;
 use biome_js_analyze::metadata;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::JsLanguage;
+use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use indexmap::IndexSet;
+use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
 use std::{
@@ -561,7 +562,7 @@ impl OverrideSettings {
             }
 
             if included {
-                pattern.js_format_options(&mut options);
+                pattern.apply_overrides_to_js_format_options(&mut options);
             }
 
             options
@@ -602,7 +603,7 @@ impl OverrideSettings {
                 return options;
             }
             if included {
-                pattern.json_format_options(&mut options);
+                pattern.apply_overrides_to_json_format_options(&mut options);
             }
 
             options
@@ -622,7 +623,7 @@ impl OverrideSettings {
                 return options;
             }
             if included {
-                pattern.css_format_options(&mut options);
+                pattern.apply_overrides_to_css_format_options(&mut options);
             }
 
             options
@@ -641,7 +642,7 @@ impl OverrideSettings {
                 return options;
             }
             if included {
-                pattern.js_parser_options(&mut options)
+                pattern.apply_overrides_to_js_parser_options(&mut options)
             }
             options
         })
@@ -659,7 +660,7 @@ impl OverrideSettings {
                 return options;
             }
             if included {
-                pattern.json_parser_options(&mut options);
+                pattern.apply_overrides_to_json_parser_options(&mut options);
             }
             options
         })
@@ -764,21 +765,24 @@ pub struct OverrideSettingPattern {
     pub languages: LanguageListSettings,
 
     // Cache
-    pub(crate) cached_js_format_options: RwLock<Option<JsFormatOptions>>,
+    // For js format options, we use the file source as the cache key because
+    // the file source params will affect how tokens are treated during formatting.
+    // So we cannot reuse the same file source for all js-family files.
+    pub(crate) cached_js_format_options: RwLock<FxHashMap<JsFileSource, JsFormatOptions>>,
     pub(crate) cached_json_format_options: RwLock<Option<JsonFormatOptions>>,
     pub(crate) cached_css_format_options: RwLock<Option<CssFormatOptions>>,
     pub(crate) cached_js_parser_options: RwLock<Option<JsParserOptions>>,
     pub(crate) cached_json_parser_options: RwLock<Option<JsonParserOptions>>,
 }
-
 impl OverrideSettingPattern {
-    fn js_format_options(&self, options: &mut JsFormatOptions) {
-        let cache = self.cached_js_format_options.read().unwrap();
-        if let Some(cached_options) = cache.as_ref() {
-            *options = cached_options.clone();
-            return;
+    fn apply_overrides_to_js_format_options(&self, options: &mut JsFormatOptions) {
+        if let Ok(readonly_cache) = self.cached_js_format_options.read() {
+            if let Some(cached_options) = readonly_cache.get(&options.source_type()) {
+                *options = cached_options.clone();
+                return;
+            }
+            drop(readonly_cache);
         }
-        drop(cache);
 
         let js_formatter = &self.languages.javascript.formatter;
         let formatter = &self.formatter;
@@ -821,11 +825,22 @@ impl OverrideSettingPattern {
         if let Some(attribute_position) = js_formatter.attribute_position {
             options.set_attribute_position(attribute_position);
         }
-        let mut cache = self.cached_js_format_options.write().unwrap();
-        let _ = cache.insert(options.clone());
+
+        if let Ok(mut writeonly_cache) = self.cached_js_format_options.write() {
+            let options = options.clone();
+            writeonly_cache.insert(options.source_type(), options);
+        }
     }
 
-    fn json_format_options(&self, options: &mut JsonFormatOptions) {
+    fn apply_overrides_to_json_format_options(&self, options: &mut JsonFormatOptions) {
+        if let Ok(readonly_cache) = self.cached_json_format_options.read() {
+            if let Some(cached_options) = readonly_cache.as_ref() {
+                *options = cached_options.clone();
+                return;
+            }
+            drop(readonly_cache);
+        }
+
         let cache = self.cached_json_format_options.read().unwrap();
         if let Some(cached_options) = cache.as_ref() {
             *options = cached_options.clone();
@@ -851,17 +866,21 @@ impl OverrideSettingPattern {
         if let Some(trailing_commas) = json_formatter.trailing_commas {
             options.set_trailing_commas(trailing_commas);
         }
-        let mut cache = self.cached_json_format_options.write().unwrap();
-        let _ = cache.insert(options.clone());
+
+        if let Ok(mut writeonly_cache) = self.cached_json_format_options.write() {
+            let options = options.clone();
+            let _ = writeonly_cache.insert(options);
+        }
     }
 
-    fn css_format_options(&self, options: &mut CssFormatOptions) {
-        let cache = self.cached_css_format_options.read().unwrap();
-        if let Some(cached_options) = cache.as_ref() {
-            *options = cached_options.clone();
-            return;
+    fn apply_overrides_to_css_format_options(&self, options: &mut CssFormatOptions) {
+        if let Ok(readonly_cache) = self.cached_css_format_options.read() {
+            if let Some(cached_options) = readonly_cache.as_ref() {
+                *options = cached_options.clone();
+                return;
+            }
+            drop(readonly_cache);
         }
-        drop(cache);
 
         let css_formatter = &self.languages.css.formatter;
         let formatter = &self.formatter;
@@ -881,40 +900,50 @@ impl OverrideSettingPattern {
         if let Some(quote_style) = css_formatter.quote_style {
             options.set_quote_style(quote_style);
         }
-        let mut cache = self.cached_css_format_options.write().unwrap();
-        let _ = cache.insert(options.clone());
+
+        if let Ok(mut writeonly_cache) = self.cached_css_format_options.write() {
+            let options = options.clone();
+            let _ = writeonly_cache.insert(options);
+        }
     }
 
-    fn js_parser_options(&self, options: &mut JsParserOptions) {
-        let cache = self.cached_js_parser_options.read().unwrap();
-        if let Some(cached_options) = cache.as_ref() {
-            *options = cached_options.clone();
-            return;
+    fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
+        if let Ok(readonly_cache) = self.cached_js_parser_options.read() {
+            if let Some(cached_options) = readonly_cache.as_ref() {
+                *options = cached_options.clone();
+                return;
+            }
+            drop(readonly_cache);
         }
-        drop(cache);
 
         let js_parser = &self.languages.javascript.parser;
 
         options.parse_class_parameter_decorators = js_parser.parse_class_parameter_decorators;
 
-        let mut cache = self.cached_js_parser_options.write().unwrap();
-        let _ = cache.insert(options.clone());
+        if let Ok(mut writeonly_cache) = self.cached_js_parser_options.write() {
+            let options = options.clone();
+            let _ = writeonly_cache.insert(options);
+        }
     }
 
-    fn json_parser_options(&self, options: &mut JsonParserOptions) {
-        let cache = self.cached_json_parser_options.read().unwrap();
-        if let Some(cached_options) = cache.as_ref() {
-            *options = *cached_options;
-            return;
+    fn apply_overrides_to_json_parser_options(&self, options: &mut JsonParserOptions) {
+        if let Ok(readonly_cache) = self.cached_json_parser_options.read() {
+            if let Some(cached_options) = readonly_cache.as_ref() {
+                *options = cached_options.clone();
+                return;
+            }
+            drop(readonly_cache);
         }
-        drop(cache);
+
         let json_parser = &self.languages.json.parser;
 
         options.allow_trailing_commas = json_parser.allow_trailing_commas;
         options.allow_comments = json_parser.allow_comments;
 
-        let mut cache = self.cached_json_parser_options.write().unwrap();
-        let _ = cache.insert(*options);
+        if let Ok(mut writeonly_cache) = self.cached_json_parser_options.write() {
+            let options = options.clone();
+            let _ = writeonly_cache.insert(options);
+        }
     }
 
     #[allow(dead_code)]
