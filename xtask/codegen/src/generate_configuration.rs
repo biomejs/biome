@@ -488,7 +488,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             }
 
             pub(crate) const fn is_recommended_unset(&self) -> bool {
-                matches!(self.recommended, None)
+                self.recommended.is_none()
             }
 
             pub(crate) fn is_all(&self) -> bool {
@@ -496,7 +496,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             }
 
             pub(crate) const fn is_all_unset(&self) -> bool {
-                matches!(self.all, None)
+                self.all.is_none()
             }
 
             pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
