@@ -117,15 +117,16 @@ impl FileFeaturesResult {
     }
 
     /// By default, all features are not supported by a file.
-    const WORKSPACE_FEATURES: [(FeatureName, SupportKind); 3] = [
+    const WORKSPACE_FEATURES: [(FeatureName, SupportKind); 4] = [
         (FeatureName::Lint, SupportKind::FileNotSupported),
         (FeatureName::Format, SupportKind::FileNotSupported),
         (FeatureName::OrganizeImports, SupportKind::FileNotSupported),
+        (FeatureName::Search, SupportKind::FileNotSupported),
     ];
 
     pub fn new() -> Self {
         Self {
-            features_supported: HashMap::from(FileFeaturesResult::WORKSPACE_FEATURES),
+            features_supported: HashMap::from(Self::WORKSPACE_FEATURES),
         }
     }
 
@@ -360,6 +361,7 @@ pub enum FeatureName {
     Format,
     Lint,
     OrganizeImports,
+    Search,
 }
 
 #[derive(Debug, Default)]
@@ -374,12 +376,19 @@ impl FeaturesBuilder {
         self.0.push(FeatureName::Format);
         self
     }
+
     pub fn with_linter(mut self) -> Self {
         self.0.push(FeatureName::Lint);
         self
     }
+
     pub fn with_organize_imports(mut self) -> Self {
         self.0.push(FeatureName::OrganizeImports);
+        self
+    }
+
+    pub fn with_search(mut self) -> Self {
+        self.0.push(FeatureName::Search);
         self
     }
 
@@ -657,6 +666,20 @@ impl RageEntry {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct SearchPatternParams {
+    pub path: BiomePath,
+    pub pattern: String,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct SearchResults {
+    pub file: BiomePath,
+    pub matches: Vec<TextRange>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IsPathIgnoredParams {
     pub biome_path: BiomePath,
     pub features: Vec<FeatureName>,
@@ -745,6 +768,9 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Returns debug information about this workspace.
     fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError>;
+
+    /// Searches a file for matches of the given pattern.
+    fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError>;
 
     /// Returns information about the server this workspace is connected to or `None` if the workspace isn't connected to a server.
     fn server_info(&self) -> Option<&ServerInfo>;
@@ -871,6 +897,13 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn organize_imports(&self) -> Result<OrganizeImportsResult, WorkspaceError> {
         self.workspace.organize_imports(OrganizeImportsParams {
             path: self.path.clone(),
+        })
+    }
+
+    pub fn search_pattern(&self, pattern: &str) -> Result<SearchResults, WorkspaceError> {
+        self.workspace.search_pattern(SearchPatternParams {
+            path: self.path.clone(),
+            pattern: pattern.to_owned(),
         })
     }
 }

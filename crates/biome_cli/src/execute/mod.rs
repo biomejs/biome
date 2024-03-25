@@ -38,6 +38,7 @@ impl Execution {
                 .with_linter()
                 .build(),
             TraversalMode::Migrate { .. } => vec![],
+            TraversalMode::Search { .. } => FeaturesBuilder::new().with_search().build(),
         }
     }
 }
@@ -118,12 +119,24 @@ pub(crate) enum TraversalMode {
     Migrate {
         /// Write result to disk
         write: bool,
-        /// The path directory where `biome.json` is placed
-        configuration_file_path: PathBuf,
         /// The path to `biome.json`
+        configuration_file_path: PathBuf,
+        /// The path directory where `biome.json` is placed
         configuration_directory_path: PathBuf,
         /// Migrate from prettier
         prettier: bool,
+    },
+    /// This mode is enabled when running the command `biome search`
+    Search {
+        /// The GritQL pattern to search for.
+        ///
+        /// Note that the search command (currently) does not support rewrites.
+        pattern: String,
+
+        /// An optional tuple.
+        /// 1. The virtual path to the file
+        /// 2. The content of the file
+        stdin: Option<Stdin>,
     },
 }
 
@@ -135,6 +148,7 @@ impl Display for TraversalMode {
             TraversalMode::Format { .. } => write!(f, "format"),
             TraversalMode::Migrate { .. } => write!(f, "migrate"),
             TraversalMode::Lint { .. } => write!(f, "lint"),
+            TraversalMode::Search { .. } => write!(f, "search"),
         }
     }
 }
@@ -206,7 +220,8 @@ impl Execution {
             | TraversalMode::Lint { fix_file_mode, .. } => fix_file_mode.as_ref(),
             TraversalMode::Format { .. }
             | TraversalMode::CI { .. }
-            | TraversalMode::Migrate { .. } => None,
+            | TraversalMode::Migrate { .. }
+            | TraversalMode::Search { .. } => None,
         }
     }
 
@@ -217,6 +232,7 @@ impl Execution {
             TraversalMode::CI { .. } => category!("ci"),
             TraversalMode::Format { .. } => category!("format"),
             TraversalMode::Migrate { .. } => category!("migrate"),
+            TraversalMode::Search { .. } => category!("search"),
         }
     }
 
@@ -269,9 +285,8 @@ impl Execution {
         match self.traversal_mode {
             TraversalMode::Check { fix_file_mode, .. }
             | TraversalMode::Lint { fix_file_mode, .. } => fix_file_mode.is_some(),
-            TraversalMode::CI { .. } => false,
-            TraversalMode::Format { write, .. } => write,
-            TraversalMode::Migrate { write: dry_run, .. } => dry_run,
+            TraversalMode::CI { .. } | TraversalMode::Search { .. } => false,
+            TraversalMode::Format { write, .. } | TraversalMode::Migrate { write, .. } => write,
         }
     }
 
@@ -279,7 +294,8 @@ impl Execution {
         match &self.traversal_mode {
             TraversalMode::Format { stdin, .. }
             | TraversalMode::Lint { stdin, .. }
-            | TraversalMode::Check { stdin, .. } => stdin.as_ref(),
+            | TraversalMode::Check { stdin, .. }
+            | TraversalMode::Search { stdin, .. } => stdin.as_ref(),
             TraversalMode::CI { .. } | TraversalMode::Migrate { .. } => None,
         }
     }
