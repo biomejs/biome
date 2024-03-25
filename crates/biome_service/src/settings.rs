@@ -841,13 +841,6 @@ impl OverrideSettingPattern {
             drop(readonly_cache);
         }
 
-        let cache = self.cached_json_format_options.read().unwrap();
-        if let Some(cached_options) = cache.as_ref() {
-            *options = cached_options.clone();
-            return;
-        }
-        drop(cache);
-
         let json_formatter = &self.languages.json.formatter;
         let formatter = &self.formatter;
 
