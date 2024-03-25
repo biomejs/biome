@@ -80,15 +80,16 @@ impl Rule for {rule_name_upper_camel} {{
         None
     }}
 
-    fn diagnostic(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {{
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {{
         //
         // Read our guidelines to write great diagnostics:
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
+        let node = ctx.query();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                reference.range(),
+                node.range(),
                 markup! {{
                     "Variable is read here."
                 }},
