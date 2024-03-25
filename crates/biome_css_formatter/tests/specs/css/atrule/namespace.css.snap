@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/namespace.css
+---
+# Input
+
+```css
+@namespace empty "";
+@namespace "";
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace url("http://www.w3.org/1999/xhtml");
+@namespace svg url(http://www.w3.org/2000/svg);
+@namespace svg url("http://www.w3.org/2000/svg");
+@namespace "http://www.w3.org/1999/xhtml";
+@namespace svg "http://www.w3.org/2000/svg";
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+@namespace empty "";
+@namespace "";
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace url("http://www.w3.org/1999/xhtml");
+@namespace svg url(http://www.w3.org/2000/svg);
+@namespace svg url("http://www.w3.org/2000/svg");
+@namespace "http://www.w3.org/1999/xhtml";
+@namespace svg "http://www.w3.org/2000/svg";
+```
