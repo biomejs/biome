@@ -149,9 +149,14 @@ pub(crate) fn code_actions(
             if has_quick_fix && action.suggestion.applicability == Applicability::MaybeIncorrect {
                 return None;
             }
+            // Filter out source.organizeImports.biome action when organize imports is not supported.
             if action.category.matches("source.organizeImports.biome")
                 && !file_features.supports_organize_imports()
             {
+                return None;
+            }
+            // Filter out quickfix.biome action when lint is not supported.
+            if action.category.matches("quickfix.biome") && !file_features.supports_lint() {
                 return None;
             }
             // Remove actions that do not match the categories requested by the

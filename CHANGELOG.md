@@ -17,7 +17,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- Fix configuration resolution. Biome is now able to correctly find the `biome.jsonc` configuration file when `--config-path` is explicitly set. Contributed by @Sec-ant
+- Fix configuration resolution. Biome is now able to correctly find the `biome.jsonc` configuration file when `--config-path` is explicitly set ([#2164](https://github.com/biomejs/biome/issues/2164)). Contributed by @Sec-ant
 
 - JavaScript/TypeScript files of different variants (`.ts`, `.js`, `.tsx`, `.jsx`) in a single workspace now have stable formatting behaviors when running the CLI command in paths of different nested levels or in different operating systems ([#2080](https://github.com/biomejs/biome/issues/2080), [#2109](https://github.com/biomejs/biome/issues/2109)). Contributed by @Sec-ant
 
@@ -42,6 +42,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add rule [noEvolvingAny](https://biomejs.dev/linter/rules/no-evolving-any) to disallow variables from evolving into `any` type through reassignments. Contributed by @fujiyamaorange
+
+### LSP
+
+#### Bug fixes
+
+- Quickfix action no longer autofixes lint rule errors on save when `linter` is disabled ([#2161](https://github.com/biomejs/biome/issues/2161)). Contributed by @Sec-ant
 
 ### Parser
 
