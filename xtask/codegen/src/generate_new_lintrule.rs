@@ -60,7 +60,7 @@ declare_rule! {{
     /// ### Valid
     ///
     /// ```js
-    /// var a = 1;
+    /// // var a = 1;
     /// ```
     ///
     pub {rule_name_upper_camel} {{
@@ -77,8 +77,8 @@ impl Rule for {rule_name_upper_camel} {{
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
-        let binding = ctx.query();
-        None
+        let _binding = ctx.query();
+        Some(())
     }}
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {{
@@ -239,7 +239,7 @@ pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
     if std::fs::File::open(&test_file).is_err() {
         let _ = std::fs::write(
             test_file,
-            "/* should not generate diagnostics */\n\n var a = 1;",
+            "/* should not generate diagnostics */\n// var a = 1;",
         );
     }
 
@@ -248,6 +248,6 @@ pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
         test_folder.display()
     );
     if std::fs::File::open(&test_file).is_err() {
-        let _ = std::fs::write(test_file, "\n\n var a = 1;\na = 2;\na = 3;");
+        let _ = std::fs::write(test_file, "var a = 1;\na = 2;\na = 3;");
     }
 }
