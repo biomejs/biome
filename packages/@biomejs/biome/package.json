@@ -33,7 +33,7 @@
 		"JSON"
 	],
 	"engines": {
-		"node": ">=14.*"
+		"node": ">=14.21.3"
 	},
 	"funding": {
 		"type": "opencollective",
