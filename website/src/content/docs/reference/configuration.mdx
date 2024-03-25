@@ -45,7 +45,7 @@ A list of paths to other JSON files. Biome resolves and applies the options of t
 The maximum allowed size for source code files in bytes. Files above
 this limit will be ignored for performance reasons.
 
-> Default: 1024*1024 (1MB)
+> Default: `1048576` (1024*1024, 1MB)
 
 ### `files.ignore`
 
@@ -110,7 +110,7 @@ Biome won't emit diagnostics if it encounters files that can't handle.
 }
 ```
 
-> Default: false
+> Default: `false`
 
 ## `vcs`
 
@@ -120,7 +120,7 @@ Set of properties to integrate Biome with a VCS software.
 
 Whether Biome should integrate itself with the VCS client
 
-> Default: false
+> Default: `false`
 
 ### `vcs.clientKind`
 
@@ -383,7 +383,7 @@ Allows to format a document that has syntax errors.
 
 The style of the indentation. It can be `"tab"` or `"space"`.
 
-> Default: `tab`
+> Default: `"tab"`
 
 ### `formatter.indentSize`
 
@@ -400,17 +400,25 @@ How big the indentation should be.
 ### `formatter.lineEnding`
 
 The type of line ending.
-- `lf`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos
-- `crlf` Carriage Return + Line Feed characters (`\r\n`), common on Windows
-- `cr` Carriage Return character only (`\r`), used very rarely
+- `"lf"`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos;
+- `"crlf"`, Carriage Return + Line Feed characters (`\r\n`), common on Windows;
+- `"cr"`, Carriage Return character only (`\r`), used very rarely.
 
-> Default: `lf`
+> Default: `"lf"`
 
 ### `formatter.lineWidth`
 
 How many characters can be written on a single line.
 
 > Default: `80`
+
+### `formatter.attributePosition`
+
+The attribute position style in HTMLish languages. 
+- `"auto"`, the attributes are automatically formatted, and they will collapse in multiple lines only when they hit certain criteria;
+- `"multiline"`, the attributes are always formatted on multiple lines, regardless.
+
+> Default: `"auto"`
 
 ## `organizeImports`
 
@@ -496,38 +504,38 @@ Allows to support the unsafe/experimental parameter decorators.
 
 ### `javascript.formatter.quoteStyle`
 
-The type of quote used when representing string literals. It can be `single` or `double`.
+The type of quote used when representing string literals. It can be `"single"` or `"double"`.
 
-> Default: `double`
+> Default: `"double"`
 
 ### `javascript.formatter.jsxQuoteStyle`
 
-The type of quote used when representing jsx string literals. It can be `single` or `double`.
+The type of quote used when representing jsx string literals. It can be `"single"` or `"double"`.
 
-> Default: `double`
+> Default: `"double"`
 
 ### `javascript.formatter.quoteProperties`
 
-When properties inside objects should be quoted. It can be `asNeeded` or `preserve`.
+When properties inside objects should be quoted. It can be `"asNeeded"` or `"preserve"`.
 
-> Default: `asNeeded`
+> Default: `"asNeeded"`
 
 ### `javascript.formatter.trailingComma`
 
 Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Possible values:
-- `all`, the trailing comma is always added
-- `es5`, the trailing comma is added only in places where it's supported by older version of JavaScript
-- `none`, trailing commas are never added
+- `"all"`, the trailing comma is always added;
+- `"es5"`, the trailing comma is added only in places where it's supported by older version of JavaScript;
+- `"none"`, trailing commas are never added.
 
-> Default: `all`
+> Default: `"all"`
 
 ### `javascript.formatter.semicolons`
 
 It configures where the formatter prints semicolons:
-- `always`, the semicolons is always added at the end of each statement;
-- `asNeeded`, the semicolons are added only in places where it's needed, to protect from [ASI](https://en.wikibooks.org/wiki/JavaScript/Automatic_semicolon_insertion)
+- `"always"`, the semicolons is always added at the end of each statement;
+- `"asNeeded"`, the semicolons are added only in places where it's needed, to protect from [ASI](https://en.wikibooks.org/wiki/JavaScript/Automatic_semicolon_insertion).
 
-> Default: `always`
+> Default: `"always"`
 
 Example:
 
@@ -546,10 +554,10 @@ Example:
 ### `javascript.formatter.arrowParentheses`
 
 Whether to add non-necessary parentheses to arrow functions:
-- `always`, the parentheses are always added;
-- `asNeeded`, the parentheses are added only when they are needed;
+- `"always"`, the parentheses are always added;
+- `"asNeeded"`, the parentheses are added only when they are needed.
 
-> Default: `always`
+> Default: `"always"`
 
 ### `javascript.formatter.enabled`
 
@@ -561,7 +569,7 @@ Enables Biome's formatter for JavaScript (and its super languages) files.
 
 The style of the indentation for JavaScript (and its super languages) files. It can be `"tab"` or `"space"`.
 
-> Default: `tab`
+> Default: `"tab"`
 
 ### `javascript.formatter.indentSize`
 
@@ -578,11 +586,11 @@ How big the indentation should be for JavaScript (and its super languages) files
 ### `javascript.formatter.lineEnding`
 
 The type of line ending for JavaScript (and its super languages) files.
-- `lf`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos
-- `crlf` Carriage Return + Line Feed characters (`\r\n`), common on Windows
-- `cr` Carriage Return character only (`\r`), used very rarely
+- `"lf"`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos;
+- `"crlf"`, Carriage Return + Line Feed characters (`\r\n`), common on Windows;
+- `"cr"`, Carriage Return character only (`\r`), used very rarely.
 
-> Default: `lf`
+> Default: `"lf"`
 
 ### `javascript.formatter.lineWidth`
 
@@ -594,14 +602,21 @@ How many characters can be written on a single line in JavaScript (and its super
 
 Choose whether the ending `>` of a multi-line JSX element should be on the last attribute line or not
 
-> Default: false
+> Default: `false`
 
 ### `javascript.formatter.bracketSpacing`
 
 Choose whether spaces should be added between brackets and inner values
 
-> Default: true
+> Default: `true`
 
+### `javascript.formatter.attributePosition`
+
+The attribute position style in jsx elements. 
+- `"auto"`, the attributes are automatically formatted, and they will collapse in multiple lines only when they hit certain criteria;
+- `"multiline"`, the attributes are always formatted on multiple lines, regardless.
+
+> Default: `"auto"`
 
 ### `javascript.globals`
 
@@ -664,7 +679,7 @@ Enables Biome's formatter for JSON (and its super languages) files.
 
 The style of the indentation for JSON (and its super languages) files. It can be `"tab"` or `"space"`.
 
-> Default: `tab`
+> Default: `"tab"`
 
 
 ### `json.formatter.indentSize`
@@ -682,11 +697,11 @@ How big the indentation should be for JSON (and its super languages) files.
 ### `json.formatter.lineEnding`
 
 The type of line ending for JSON (and its super languages) files.
-- `lf`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos
-- `crlf` Carriage Return + Line Feed characters (`\r\n`), common on Windows
-- `cr` Carriage Return character only (`\r`), used very rarely
+- `"lf"`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos;
+- , Carriage Return + Line Feed characters (`\r\n`), common on Windows;
+- `"cr"`, Carriage Return character only (`\r`), used very rarely.
 
-> Default: `lf`
+> Default: `"lf"`
 
 ### `json.formatter.lineWidth`
 
@@ -699,10 +714,10 @@ How many characters can be written on a single line in JSON (and its super langu
 Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
 
 Allowed values:
-- `none`: the trailing comma is removed;
-- `all`: the trailing comma is kept **and** preferred.
+- `"none"`: the trailing comma is removed;
+- `"all"`: the trailing comma is kept **and** preferred.
 
-> Default: `none`
+> Default: `"none"`
 
 ## `overrides`
 
