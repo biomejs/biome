@@ -767,7 +767,7 @@ pub struct OverrideSettingPattern {
     // Cache
     // For js format options, we use the file source as the cache key because
     // the file source params will affect how tokens are treated during formatting.
-    // So we cannot reuse the same file source for all js-family files.
+    // So we cannot reuse the same format options for all js-family files.
     pub(crate) cached_js_format_options: RwLock<FxHashMap<JsFileSource, JsFormatOptions>>,
     pub(crate) cached_json_format_options: RwLock<Option<JsonFormatOptions>>,
     pub(crate) cached_css_format_options: RwLock<Option<CssFormatOptions>>,
