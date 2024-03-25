@@ -4,7 +4,7 @@ use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, Language, LanguageListSettings, LanguageSettings, OverrideSettings,
+    FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     SettingsHandle,
 };
 use crate::workspace::{DocumentFileSource, GetSyntaxTreeResult, OrganizeImportsResult};
@@ -38,7 +38,7 @@ pub struct CssParserSettings {
     pub allow_wrong_line_comments: bool,
 }
 
-impl Language for CssLanguage {
+impl ServiceLanguage for CssLanguage {
     type FormatterSettings = CssFormatterSettings;
     type LinterSettings = ();
     type OrganizeImportsSettings = ();

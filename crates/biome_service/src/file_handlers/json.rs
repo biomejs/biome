@@ -6,7 +6,7 @@ use crate::file_handlers::{
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, Language, LanguageListSettings, LanguageSettings, OverrideSettings,
+    FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     SettingsHandle,
 };
 use crate::workspace::{
@@ -49,7 +49,7 @@ pub struct JsonParserSettings {
     pub allow_trailing_commas: bool,
 }
 
-impl Language for JsonLanguage {
+impl ServiceLanguage for JsonLanguage {
     type FormatterSettings = JsonFormatterSettings;
     type LinterSettings = ();
     type OrganizeImportsSettings = ();

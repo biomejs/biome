@@ -26,8 +26,9 @@ biome_suppression = { workspace = true }
 biome_css_parser     = { path = "../biome_css_parser" }
 biome_formatter_test = { path = "../biome_formatter_test" }
 biome_parser         = { path = "../biome_parser" }
+biome_service        = { path = "../biome_service" }
 countme              = { workspace = true, features = ["enable"] }
-serde                = { version = "1", features = ["derive"] }
+serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
 

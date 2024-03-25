@@ -366,7 +366,7 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
     }
 }
 
-pub trait Language: biome_rowan::Language {
+pub trait ServiceLanguage: biome_rowan::Language {
     /// Formatter settings type for this language
     type FormatterSettings: Default;
 
@@ -376,7 +376,7 @@ pub trait Language: biome_rowan::Language {
     type OrganizeImportsSettings: Default;
 
     /// Fully resolved formatter options type for this language
-    type FormatOptions: biome_formatter::FormatOptions;
+    type FormatOptions: biome_formatter::FormatOptions + Clone + std::fmt::Display;
 
     /// Settings that belong to the parser
     type ParserSettings: Default;
@@ -396,7 +396,7 @@ pub trait Language: biome_rowan::Language {
 }
 
 #[derive(Debug, Default)]
-pub struct LanguageSettings<L: Language> {
+pub struct LanguageSettings<L: ServiceLanguage> {
     /// Formatter settings for this language
     pub formatter: L::FormatterSettings,
 
@@ -509,7 +509,7 @@ impl<'a> SettingsHandle<'a> {
         file_source: &DocumentFileSource,
     ) -> L::FormatOptions
     where
-        L: Language,
+        L: ServiceLanguage,
     {
         L::resolve_format_options(
             &self.inner.formatter,

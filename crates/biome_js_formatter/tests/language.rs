@@ -27,7 +27,7 @@ impl JsTestFormatLanguage {
 }
 
 impl TestFormatLanguage for JsTestFormatLanguage {
-    type SyntaxLanguage = JsLanguage;
+    type ServiceLanguage = JsLanguage;
     type Options = JsFormatOptions;
     type Context = JsFormatContext;
     type FormatLanguage = JsFormatLanguage;
@@ -58,7 +58,7 @@ impl TestFormatLanguage for JsTestFormatLanguage {
     fn format_node(
         &self,
         options: Self::Options,
-        node: &SyntaxNode<Self::SyntaxLanguage>,
+        node: &SyntaxNode<Self::ServiceLanguage>,
     ) -> FormatResult<Formatted<Self::Context>> {
         format_node(options, node)
     }
@@ -66,7 +66,7 @@ impl TestFormatLanguage for JsTestFormatLanguage {
     fn format_range(
         &self,
         options: Self::Options,
-        node: &SyntaxNode<Self::SyntaxLanguage>,
+        node: &SyntaxNode<Self::ServiceLanguage>,
         range: TextRange,
     ) -> FormatResult<Printed> {
         format_range(options, node, range)

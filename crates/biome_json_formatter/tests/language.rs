@@ -16,7 +16,7 @@ pub struct JsonTestFormatLanguage {
 }
 
 impl TestFormatLanguage for JsonTestFormatLanguage {
-    type SyntaxLanguage = JsonLanguage;
+    type ServiceLanguage = JsonLanguage;
     type Options = JsonFormatOptions;
     type Context = JsonFormatContext;
     type FormatLanguage = JsonFormatLanguage;
@@ -43,7 +43,7 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
     fn format_node(
         &self,
         options: Self::Options,
-        node: &SyntaxNode<Self::SyntaxLanguage>,
+        node: &SyntaxNode<Self::ServiceLanguage>,
     ) -> FormatResult<Formatted<Self::Context>> {
         format_node(options, node)
     }
@@ -51,7 +51,7 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
     fn format_range(
         &self,
         options: Self::Options,
-        node: &SyntaxNode<Self::SyntaxLanguage>,
+        node: &SyntaxNode<Self::ServiceLanguage>,
         range: TextRange,
     ) -> FormatResult<Printed> {
         format_range(options, node, range)
