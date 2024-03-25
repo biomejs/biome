@@ -112,7 +112,7 @@ export interface PartialFilesConfiguration {
  */
 export interface PartialFormatterConfiguration {
 	/**
-	 * The attribute position style. By default auto.
+	 * The attribute position style in HTMLish languages. By default auto.
 	 */
 	attributePosition?: AttributePosition;
 	enabled?: boolean;
@@ -296,7 +296,7 @@ export interface PartialJavascriptFormatter {
 	 */
 	arrowParentheses?: ArrowParentheses;
 	/**
-	 * The attribute position style in JavaScript code. Defaults to auto.
+	 * The attribute position style in JSX/TSX languages. Defaults to auto.
 	 */
 	attributePosition?: AttributePosition;
 	/**

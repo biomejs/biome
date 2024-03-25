@@ -49,7 +49,7 @@ pub struct FormatterConfiguration {
     ))]
     pub line_width: LineWidth,
 
-    /// The attribute position style. By default auto.
+    /// The attribute position style in HTMLish languages. By default auto.
     #[partial(bpaf(long("attribute-position"), argument("auto|multiline"), optional))]
     pub attribute_position: AttributePosition,
 

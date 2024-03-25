@@ -1000,7 +1000,7 @@
 			"type": "object",
 			"properties": {
 				"attributePosition": {
-					"description": "The attribute position style. By default auto.",
+					"description": "The attribute position style in HTMLish languages. By default auto.",
 					"anyOf": [
 						{ "$ref": "#/definitions/AttributePosition" },
 						{ "type": "null" }
@@ -1135,7 +1135,7 @@
 					]
 				},
 				"attributePosition": {
-					"description": "The attribute position style in JavaScript code. Defaults to auto.",
+					"description": "The attribute position style in JSX/TSX languages. Defaults to auto.",
 					"anyOf": [
 						{ "$ref": "#/definitions/AttributePosition" },
 						{ "type": "null" }

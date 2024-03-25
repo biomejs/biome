@@ -25,6 +25,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Configuration
 
+#### Bug fixes
+
+- Complete the documentation and overrides support for options `lineEnd` and `attributePosition`. Contributed by @Sec-ant
+
 ### Editors
 
 ### Formatter

@@ -785,9 +785,11 @@ impl OverrideSettingPattern {
         if let Some(indent_style) = js_formatter.indent_style.or(formatter.indent_style) {
             options.set_indent_style(indent_style);
         }
-
         if let Some(indent_width) = js_formatter.indent_width.or(formatter.indent_width) {
-            options.set_indent_width(indent_width)
+            options.set_indent_width(indent_width);
+        }
+        if let Some(line_ending) = js_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
         }
         if let Some(line_width) = js_formatter.line_width.or(formatter.line_width) {
             options.set_line_width(line_width);
@@ -795,14 +797,14 @@ impl OverrideSettingPattern {
         if let Some(quote_style) = js_formatter.quote_style {
             options.set_quote_style(quote_style);
         }
-        if let Some(trailing_comma) = js_formatter.trailing_comma {
-            options.set_trailing_comma(trailing_comma);
+        if let Some(jsx_quote_style) = js_formatter.jsx_quote_style {
+            options.set_jsx_quote_style(jsx_quote_style);
         }
         if let Some(quote_properties) = js_formatter.quote_properties {
             options.set_quote_properties(quote_properties);
         }
-        if let Some(jsx_quote_style) = js_formatter.jsx_quote_style {
-            options.set_jsx_quote_style(jsx_quote_style);
+        if let Some(trailing_comma) = js_formatter.trailing_comma {
+            options.set_trailing_comma(trailing_comma);
         }
         if let Some(semicolons) = js_formatter.semicolons {
             options.set_semicolons(semicolons);
@@ -815,6 +817,9 @@ impl OverrideSettingPattern {
         }
         if let Some(bracket_same_line) = js_formatter.bracket_same_line {
             options.set_bracket_same_line(bracket_same_line);
+        }
+        if let Some(attribute_position) = js_formatter.attribute_position {
+            options.set_attribute_position(attribute_position);
         }
         let mut cache = self.cached_js_format_options.write().unwrap();
         let _ = cache.insert(options.clone());
@@ -829,14 +834,18 @@ impl OverrideSettingPattern {
         drop(cache);
 
         let json_formatter = &self.languages.json.formatter;
+        let formatter = &self.formatter;
 
-        if let Some(indent_style) = json_formatter.indent_style.or(self.formatter.indent_style) {
+        if let Some(indent_style) = json_formatter.indent_style.or(formatter.indent_style) {
             options.set_indent_style(indent_style);
         }
-        if let Some(indent_width) = json_formatter.indent_width.or(self.formatter.indent_width) {
+        if let Some(indent_width) = json_formatter.indent_width.or(formatter.indent_width) {
             options.set_indent_width(indent_width)
         }
-        if let Some(line_width) = json_formatter.line_width.or(self.formatter.line_width) {
+        if let Some(line_ending) = json_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = json_formatter.line_width.or(formatter.line_width) {
             options.set_line_width(line_width);
         }
         if let Some(trailing_commas) = json_formatter.trailing_commas {
@@ -845,6 +854,7 @@ impl OverrideSettingPattern {
         let mut cache = self.cached_json_format_options.write().unwrap();
         let _ = cache.insert(options.clone());
     }
+
     fn css_format_options(&self, options: &mut CssFormatOptions) {
         let cache = self.cached_css_format_options.read().unwrap();
         if let Some(cached_options) = cache.as_ref() {
@@ -861,6 +871,9 @@ impl OverrideSettingPattern {
         }
         if let Some(indent_width) = css_formatter.indent_width.or(formatter.indent_width) {
             options.set_indent_width(indent_width)
+        }
+        if let Some(line_ending) = css_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
         }
         if let Some(line_width) = css_formatter.line_width.or(formatter.line_width) {
             options.set_line_width(line_width);
