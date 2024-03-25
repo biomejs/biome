@@ -390,7 +390,7 @@ quickcheck_macros    = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
 ```
 
-Update the `spect_tests.rs` file look like this:
+Update the `spec_tests.rs` file to look like this:
 
 ```rust
 mod spec_test;
