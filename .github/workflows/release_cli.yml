@@ -144,7 +144,7 @@ jobs:
 
       # Upload the CLI binary as a build artifact
       - name: Upload CLI artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cli
           path: ./dist/biome-*
@@ -169,7 +169,7 @@ jobs:
         run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomedev crates/biome_wasm
 
       - name: Upload WASM artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wasm
           path: |
@@ -192,11 +192,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download CLI artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: cli
       - name: Download WASM artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wasm
           path: packages/@biomejs
@@ -228,7 +228,7 @@ jobs:
         run: |
           bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
       - name: Create GitHub release and tag
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

@@ -102,7 +102,7 @@ jobs:
           pnpm --filter @biomejs/js-api run build
 
       - name: Upload JS API artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: js-api
           path: |
@@ -121,7 +121,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download package artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: js-api
           path: packages/@biomejs/js-api/dist
@@ -151,7 +151,7 @@ jobs:
         run: |
           bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
       - name: Create GitHub release and tag
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
