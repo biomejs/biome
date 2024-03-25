@@ -240,38 +240,38 @@ impl<'a> CallStack for FitsCallStack<'a> {
 /// When the element kind is [end_dedent], pop the last item from the temp_indentations stack and push it onto the indentations stack.
 pub(super) trait IndentStack {
     type Stack: Stack<Indention> + Debug;
-    type TempStack: Stack<Indention> + Debug;
+    type HistoryStack: Stack<Indention> + Debug;
 
-    fn stack(&self) -> &Self::Stack;
-    fn temp_stack(&self) -> &Self::TempStack;
+    fn current_stack(&self) -> &Self::Stack;
+    fn history_stack(&self) -> &Self::HistoryStack;
 
-    fn stack_mut(&mut self) -> &mut Self::Stack;
-    fn temp_stack_mut(&mut self) -> &mut Self::TempStack;
+    fn current_stack_mut(&mut self) -> &mut Self::Stack;
+    fn history_stack_mut(&mut self) -> &mut Self::HistoryStack;
 
     fn push(&mut self, indention: Indention) -> Indention {
-        self.stack_mut().push(indention);
+        self.current_stack_mut().push(indention);
         indention
     }
     fn start_dedent(&mut self) -> Indention {
-        if self.stack().is_empty() {
-            return Indention::default();
+        if let Some(indent) = self.current_stack_mut().pop() {
+            self.history_stack_mut().push(indent);
+            self.current_stack()
+                .top()
+                .copied()
+                .unwrap_or_else(Indention::default)
+        } else {
+            Indention::default()
         }
-        let indent = self.stack_mut().pop().unwrap();
-        self.temp_stack_mut().push(indent);
-        if self.stack().is_empty() {
-            return Indention::default();
-        }
-        *self.stack_mut().top().unwrap()
     }
     fn end_dedent(&mut self) {
-        if self.temp_stack_mut().is_empty() {
-            return;
+        if let Some(indent) = self.history_stack_mut().pop() {
+            self.current_stack_mut().push(indent);
         }
-        let indent = self.temp_stack_mut().pop().unwrap();
-        self.stack_mut().push(indent);
     }
     fn pop(&mut self) -> Indention {
-        self.stack_mut().pop().unwrap()
+        self.current_stack_mut()
+            .pop()
+            .unwrap_or_else(Indention::default)
     }
 }
 
@@ -279,33 +279,33 @@ pub(super) trait IndentStack {
 #[derive(Debug, Clone)]
 pub(super) struct PrintIndentStack {
     indentions: Vec<Indention>,
-    temp_indentions: Vec<Indention>,
+    history_indentions: Vec<Indention>,
 }
 
 impl PrintIndentStack {
     pub(super) fn new() -> Self {
         Self {
             indentions: Vec::new(),
-            temp_indentions: Vec::new(),
+            history_indentions: Vec::new(),
         }
     }
 }
 impl IndentStack for PrintIndentStack {
     type Stack = Vec<Indention>;
-    type TempStack = Vec<Indention>;
+    type HistoryStack = Vec<Indention>;
 
-    fn stack(&self) -> &Self::Stack {
+    fn current_stack(&self) -> &Self::Stack {
         &self.indentions
     }
-    fn temp_stack(&self) -> &Self::TempStack {
-        &self.temp_indentions
+    fn history_stack(&self) -> &Self::HistoryStack {
+        &self.history_indentions
     }
 
-    fn stack_mut(&mut self) -> &mut Self::Stack {
+    fn current_stack_mut(&mut self) -> &mut Self::Stack {
         &mut self.indentions
     }
-    fn temp_stack_mut(&mut self) -> &mut Self::TempStack {
-        &mut self.temp_indentions
+    fn history_stack_mut(&mut self) -> &mut Self::HistoryStack {
+        &mut self.history_indentions
     }
 }
 
@@ -314,41 +314,41 @@ impl IndentStack for PrintIndentStack {
 /// The stack is a view on top of the [PrintIndentStack] because the stack frames are still necessary when printing.
 pub(super) struct FitsIndentStack<'print> {
     indentions: StackedStack<'print, Indention>,
-    temp_indentions: StackedStack<'print, Indention>,
+    history_indentions: StackedStack<'print, Indention>,
 }
 
 impl<'print> FitsIndentStack<'print> {
     pub(super) fn new(
         print: &'print PrintIndentStack,
         saved_indent_stack: Vec<Indention>,
-        saved_stack_tem_indent: Vec<Indention>,
+        saved_history_indent_stack: Vec<Indention>,
     ) -> Self {
         let indentions = StackedStack::with_vec(&print.indentions, saved_indent_stack);
-        let temp_indentions =
-            StackedStack::with_vec(&print.temp_indentions, saved_stack_tem_indent);
+        let history_indentions =
+            StackedStack::with_vec(&print.history_indentions, saved_history_indent_stack);
 
         Self {
             indentions,
-            temp_indentions,
+            history_indentions,
         }
     }
 }
 
 impl<'a> IndentStack for FitsIndentStack<'a> {
     type Stack = StackedStack<'a, Indention>;
-    type TempStack = StackedStack<'a, Indention>;
+    type HistoryStack = StackedStack<'a, Indention>;
 
-    fn stack(&self) -> &Self::Stack {
+    fn current_stack(&self) -> &Self::Stack {
         &self.indentions
     }
-    fn temp_stack(&self) -> &Self::TempStack {
-        &self.temp_indentions
+    fn history_stack(&self) -> &Self::HistoryStack {
+        &self.history_indentions
     }
 
-    fn stack_mut(&mut self) -> &mut Self::Stack {
+    fn current_stack_mut(&mut self) -> &mut Self::Stack {
         &mut self.indentions
     }
-    fn temp_stack_mut(&mut self) -> &mut Self::TempStack {
-        &mut self.temp_indentions
+    fn history_stack_mut(&mut self) -> &mut Self::HistoryStack {
+        &mut self.history_indentions
     }
 }
