@@ -255,7 +255,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
             TraversalMode::Migrate { .. } => {
                 unreachable!("The migration should not be called for this file")
             }
-            TraversalMode::Search { pattern, .. } => {
+            TraversalMode::Search { ref pattern, .. } => {
                 // the unsupported case should be handled already at this point
                 search(shared_context, path, pattern)
             }

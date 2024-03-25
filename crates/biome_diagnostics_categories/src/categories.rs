@@ -239,6 +239,7 @@ define_categories! {
     "migrate",
     "deserialize",
     "project",
+    "search",
     "internalError/io",
     "internalError/fs",
     "internalError/panic",

@@ -281,16 +281,6 @@ pub enum BiomeCommand {
     /// Searches for Grit patterns across a project.
     #[bpaf(command, hide)] // !! Command is hidden until ready for release.
     Search {
-        /// The GritQL pattern to search for.
-        ///
-        /// Note that the search command (currently) does not support rewrites.
-        #[bpaf(positional("PATH"))]
-        pattern: String,
-
-        /// Single file, single path or list of paths.
-        #[bpaf(positional("PATH"), many)]
-        paths: Vec<OsString>,
-
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
@@ -310,6 +300,16 @@ pub enum BiomeCommand {
         /// Example: `echo 'let a;' | biome search '`let $var`' --stdin-file-path=file.js`
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
+
+        /// The GritQL pattern to search for.
+        ///
+        /// Note that the search command (currently) does not support rewrites.
+        #[bpaf(positional("PATH"))]
+        pattern: String,
+
+        /// Single file, single path or list of paths.
+        #[bpaf(positional("PATH"), many)]
+        paths: Vec<OsString>,
     },
 
     /// A command to retrieve the documentation of various aspects of the CLI.
@@ -377,13 +377,17 @@ impl BiomeCommand {
     }
 
     pub const fn get_color(&self) -> Option<&ColorsArg> {
-        self.cli_options()
-            .and_then(|cli_options| cli_options.colors.as_ref())
+        match self.cli_options() {
+            Some(cli_options) => cli_options.colors.as_ref(),
+            None => None,
+        }
     }
 
     pub const fn should_use_server(&self) -> bool {
-        self.cli_options()
-            .map_or(false, |cli_options| cli_options.use_server)
+        match self.cli_options() {
+            Some(cli_options) => cli_options.use_server,
+            None => false,
+        }
     }
 
     pub const fn has_metrics(&self) -> bool {
@@ -495,4 +499,10 @@ pub(crate) fn get_stdin(
     };
 
     Ok(stdin)
+}
+
+/// Tests that all CLI options adhere to the invariants expected by `bpaf`.
+#[test]
+fn check_options() {
+    biome_command().check_invariants(false);
 }

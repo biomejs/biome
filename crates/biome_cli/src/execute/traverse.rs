@@ -750,9 +750,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
             TraversalMode::Lint { .. } => file_features.supports_lint(),
             // Imagine if Biome can't handle its own configuration file...
             TraversalMode::Migrate { .. } => true,
-            // We do need to have a suitable parser, but in principle, every
-            // file is searchable.
-            TraversalMode::Search { .. } => true,
+            TraversalMode::Search { .. } => false,
         }
     }
 

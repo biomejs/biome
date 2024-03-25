@@ -116,12 +116,12 @@ impl FileFeaturesResult {
             .is_some_and(|file_name| FileFeaturesResult::PROTECTED_FILES.contains(&file_name))
     }
 
-    /// By default, only search is supported.
+    /// By default, all features are not supported by a file.
     const WORKSPACE_FEATURES: [(FeatureName, SupportKind); 4] = [
         (FeatureName::Lint, SupportKind::FileNotSupported),
         (FeatureName::Format, SupportKind::FileNotSupported),
         (FeatureName::OrganizeImports, SupportKind::FileNotSupported),
-        (FeatureName::Search, SupportKind::Supported),
+        (FeatureName::Search, SupportKind::FileNotSupported),
     ];
 
     pub fn new() -> Self {
@@ -900,10 +900,10 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
-    pub fn search_pattern(&self, pattern: String) -> Result<SearchResults, WorkspaceError> {
+    pub fn search_pattern(&self, pattern: &str) -> Result<SearchResults, WorkspaceError> {
         self.workspace.search_pattern(SearchPatternParams {
             path: self.path.clone(),
-            pattern,
+            pattern: pattern.to_owned(),
         })
     }
 }

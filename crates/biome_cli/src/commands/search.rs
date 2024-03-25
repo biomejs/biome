@@ -29,7 +29,7 @@ pub(crate) fn search(
     let SearchCommandPayload {
         cli_options,
         files_configuration,
-        mut paths,
+        paths,
         pattern,
         stdin_file_path,
         vcs_configuration,
