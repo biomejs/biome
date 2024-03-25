@@ -929,7 +929,7 @@ impl OverrideSettingPattern {
     fn apply_overrides_to_json_parser_options(&self, options: &mut JsonParserOptions) {
         if let Ok(readonly_cache) = self.cached_json_parser_options.read() {
             if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = cached_options.clone();
+                *options = *cached_options;
                 return;
             }
             drop(readonly_cache);
@@ -941,7 +941,7 @@ impl OverrideSettingPattern {
         options.allow_comments = json_parser.allow_comments;
 
         if let Ok(mut writeonly_cache) = self.cached_json_parser_options.write() {
-            let options = options.clone();
+            let options = *options;
             let _ = writeonly_cache.insert(options);
         }
     }
