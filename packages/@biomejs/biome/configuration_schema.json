@@ -1135,7 +1135,7 @@
 					]
 				},
 				"attributePosition": {
-					"description": "The attribute position style in JSX/TSX languages. Defaults to auto.",
+					"description": "The attribute position style in jsx elements. Defaults to auto.",
 					"anyOf": [
 						{ "$ref": "#/definitions/AttributePosition" },
 						{ "type": "null" }

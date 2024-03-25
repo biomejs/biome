@@ -50,7 +50,7 @@ pub struct FormatterConfiguration {
     pub line_width: LineWidth,
 
     /// The attribute position style in HTMLish languages. By default auto.
-    #[partial(bpaf(long("attribute-position"), argument("auto|multiline"), optional))]
+    #[partial(bpaf(long("attribute-position"), argument("multiline|auto"), optional))]
     pub attribute_position: AttributePosition,
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
