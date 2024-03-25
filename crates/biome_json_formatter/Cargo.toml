@@ -28,6 +28,7 @@ serde                    = { workspace = true, features = ["derive"], optional =
 biome_formatter_test = { path = "../biome_formatter_test" }
 biome_json_parser    = { path = "../biome_json_parser" }
 biome_parser         = { path = "../biome_parser" }
+biome_service        = { path = "../biome_service" }
 countme              = { workspace = true, features = ["enable"] }
 serde_json           = { workspace = true }
 tests_macros         = { path = "../tests_macros" }

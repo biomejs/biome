@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/arrow/arrow_parentheses.ts
 ---
-
 # Input
 
 ```ts
@@ -61,7 +60,7 @@ Attribute Position: Auto
 (action = 1) => {};
 ```
 
-## Output 2
+## Output 1
 
 -----
 Indent style: Tab
@@ -94,5 +93,3 @@ action => {};
 (...action) => {};
 (action = 1) => {};
 ```
-
-

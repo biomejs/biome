@@ -8,7 +8,9 @@ use crate::file_handlers::{is_diagnostic_error, FixAllParams};
 use crate::settings::OverrideSettings;
 use crate::workspace::{DocumentFileSource, OrganizeImportsResult};
 use crate::{
-    settings::{FormatSettings, Language, LanguageListSettings, LanguageSettings, SettingsHandle},
+    settings::{
+        FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage, SettingsHandle,
+    },
     workspace::{
         CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
         RenameResult,
@@ -82,7 +84,7 @@ pub struct JsLinterSettings {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsOrganizeImportsSettings {}
 
-impl Language for JsLanguage {
+impl ServiceLanguage for JsLanguage {
     type FormatterSettings = JsFormatterSettings;
     type LinterSettings = JsLinterSettings;
     type FormatOptions = JsFormatOptions;

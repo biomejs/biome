@@ -1,7 +1,8 @@
 {
-    "cases": [
-        {
-            "quote_style": "Single"
+    "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+    "css": {
+        "formatter": {
+            "quoteStyle": "single"
         }
-    ]
+    }
 }

@@ -61,6 +61,10 @@ pub fn deserialize_from_json_str<Output: Deserializable>(
     }
 }
 
+pub fn deserialize_from_str<Output: Deserializable>(source: &str) -> Deserialized<Output> {
+    deserialize_from_json_str(source, JsonParserOptions::default(), "")
+}
+
 /// Attempts to deserialize a JSON AST, given the `Output`.
 ///
 /// `name` corresponds to the name used in a diagnostic to designate the deserialized value.

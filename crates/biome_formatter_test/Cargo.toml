@@ -15,6 +15,7 @@ version              = "0.0.0"
 
 [dependencies]
 biome_console     = { workspace = true }
+biome_deserialize = { workspace = true }
 biome_diagnostics = { workspace = true }
 biome_formatter   = { workspace = true }
 biome_fs          = { workspace = true }

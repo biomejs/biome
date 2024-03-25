@@ -4,6 +4,7 @@ use biome_diagnostics::console::markup;
 use biome_diagnostics::termcolor;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_rowan::SyntaxNode;
+use biome_service::settings::ServiceLanguage;
 
 /// Perform a second pass of formatting on a file, printing a diff if the
 /// output doesn't match the input
@@ -12,12 +13,12 @@ pub struct CheckReformat<'a, L>
 where
     L: TestFormatLanguage,
 {
-    root: &'a SyntaxNode<L::SyntaxLanguage>,
+    root: &'a SyntaxNode<L::ServiceLanguage>,
     text: &'a str,
     file_name: &'a str,
 
     language: &'a L,
-    options: L::Options,
+    options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
 }
 
 impl<'a, L> CheckReformat<'a, L>
@@ -25,12 +26,12 @@ where
     L: TestFormatLanguage,
 {
     pub fn new(
-        root: &'a SyntaxNode<L::SyntaxLanguage>,
+        root: &'a SyntaxNode<L::ServiceLanguage>,
         text: &'a str,
         file_name: &'a str,
 
         language: &'a L,
-        options: L::Options,
+        options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
     ) -> Self {
         CheckReformat {
             root,

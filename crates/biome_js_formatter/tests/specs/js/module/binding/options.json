@@ -1,7 +1,8 @@
 {
-	"cases": [
-		{
-			"bracket_spacing": false
-		}
-	]
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "bracketSpacing": false
+    }
+  }
 }

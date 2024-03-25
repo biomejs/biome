@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/no-semi/statements.ts
 ---
-
 # Input
 
 ```ts
@@ -62,7 +61,7 @@ export declare function abcd(): string;
 declare let a;
 ```
 
-## Output 2
+## Output 1
 
 -----
 Indent style: Tab
@@ -95,5 +94,3 @@ export declare function abcd(): string
 
 declare let a
 ```
-
-

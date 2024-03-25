@@ -1,7 +1,8 @@
 {
-	"cases": [
-		{
-			"arrow_parentheses": "AsNeeded"
-		}
-	]
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "asNeeded"
+    }
+  }
 }

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/expression/bracket-spacing/expression_bracket_spacing.ts
 ---
-
 # Input
 
 ```ts
@@ -198,7 +197,7 @@ type GenericTypeExpression<A extends { a: string }> =
 	}>;
 ```
 
-## Output 2
+## Output 1
 
 -----
 Indent style: Tab
@@ -314,5 +313,3 @@ type GenericTypeExpression<A extends {a: string}> =
 		zzz: boolean;
 	}>;
 ```
-
-

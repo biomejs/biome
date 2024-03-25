@@ -250,6 +250,7 @@ dependencies = [
  "biome_formatter_test",
  "biome_parser",
  "biome_rowan",
+ "biome_service",
  "biome_suppression",
  "countme",
  "serde",
@@ -385,6 +386,7 @@ name = "biome_formatter_test"
 version = "0.0.0"
 dependencies = [
  "biome_console",
+ "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
  "biome_fs",
@@ -524,6 +526,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_service",
  "biome_suppression",
  "biome_text_size",
  "biome_unicode_table",
@@ -644,6 +647,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_service",
  "biome_suppression",
  "countme",
  "schemars",
