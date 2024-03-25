@@ -4,7 +4,7 @@ export interface SupportsFeatureParams {
 	features: FeatureName[];
 	path: BiomePath;
 }
-export type FeatureName = "Format" | "Lint" | "OrganizeImports";
+export type FeatureName = "Format" | "Lint" | "OrganizeImports" | "Search";
 export interface BiomePath {
 	path: string;
 }
@@ -2021,6 +2021,7 @@ export type Category =
 	| "migrate"
 	| "deserialize"
 	| "project"
+	| "search"
 	| "internalError/io"
 	| "internalError/fs"
 	| "internalError/panic"
