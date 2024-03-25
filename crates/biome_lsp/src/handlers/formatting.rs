@@ -3,12 +3,14 @@ use crate::diagnostics::LspError;
 use crate::session::Session;
 use anyhow::Context;
 use biome_fs::BiomePath;
+use biome_rowan::{TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     FeaturesBuilder, FileFeaturesResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
     GetFileContentParams, SupportsFeatureParams,
 };
 use biome_service::{extension_error, WorkspaceError};
+use std::ops::{Add, Sub};
 use tower_lsp::lsp_types::*;
 use tracing::debug;
 
@@ -99,6 +101,27 @@ pub(crate) fn format_range(
                     params.range.end
                 )
             })?;
+        let content = session.workspace.get_file_content(GetFileContentParams {
+            path: biome_path.clone(),
+        })?;
+        let offset = match biome_path.extension().and_then(|s| s.to_str()) {
+            Some("vue") => VueFileHandler::start(content.as_str()),
+            Some("astro") => AstroFileHandler::start(content.as_str()),
+            Some("svelte") => SvelteFileHandler::start(content.as_str()),
+            _ => None,
+        };
+        let format_range = if let Some(offset) = offset {
+            if format_range.start() - TextSize::from(offset) >= TextSize::from(0) {
+                TextRange::new(
+                    format_range.start().sub(TextSize::from(offset)),
+                    format_range.end().sub(TextSize::from(offset)),
+                )
+            } else {
+                format_range
+            }
+        } else {
+            format_range
+        };
 
         let formatted = session.workspace.format_range(FormatRangeParams {
             path: biome_path,
@@ -109,6 +132,14 @@ pub(crate) fn format_range(
         let formatted_range = match formatted.range() {
             Some(range) => {
                 let position_encoding = session.position_encoding();
+                let range = if let Some(offset) = offset {
+                    TextRange::new(
+                        range.start().add(TextSize::from(offset)),
+                        range.end().add(TextSize::from(offset)),
+                    )
+                } else {
+                    range
+                };
                 to_proto::range(&doc.line_index, range, position_encoding)?
             }
             None => Range {
