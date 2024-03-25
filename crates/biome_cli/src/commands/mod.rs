@@ -304,7 +304,11 @@ pub enum BiomeCommand {
         config_path: Option<PathBuf>,
     },
     #[bpaf(command("__print_socket"), hide)]
-    PrintSocket,
+    PrintSocket {
+        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
+        config_path: Option<PathBuf>,
+    },
 }
 
 #[derive(Debug, Bpaf, Clone)]
@@ -336,7 +340,7 @@ impl BiomeCommand {
             | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => None,
+            | BiomeCommand::PrintSocket { .. } => None,
         }
     }
 
@@ -355,7 +359,7 @@ impl BiomeCommand {
             | BiomeCommand::Explain { .. }
             | BiomeCommand::LspProxy(_, _)
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => false,
+            | BiomeCommand::PrintSocket { .. } => false,
         }
     }
 
@@ -378,7 +382,7 @@ impl BiomeCommand {
             | BiomeCommand::Explain { .. }
             | BiomeCommand::LspProxy(_, _)
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => false,
+            | BiomeCommand::PrintSocket { .. } => false,
         }
     }
 
@@ -397,7 +401,7 @@ impl BiomeCommand {
             | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => LoggingLevel::default(),
+            | BiomeCommand::PrintSocket { .. } => LoggingLevel::default(),
         }
     }
     pub fn log_kind(&self) -> LoggingKind {
@@ -415,7 +419,7 @@ impl BiomeCommand {
             | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => LoggingKind::default(),
+            | BiomeCommand::PrintSocket { .. } => LoggingKind::default(),
         }
     }
 }

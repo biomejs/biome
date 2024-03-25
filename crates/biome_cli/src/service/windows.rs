@@ -196,8 +196,8 @@ pub(crate) async fn ensure_daemon(
 
 /// Ensure the server daemon is running and ready to receive connections and
 /// print the global pipe name in the standard output
-pub(crate) async fn print_socket() -> io::Result<()> {
-    ensure_daemon(true, None).await?;
+pub(crate) async fn print_socket(config_path: Option<PathBuf>) -> io::Result<()> {
+    ensure_daemon(true, config_path).await?;
     println!("{}", get_pipe_name());
     Ok(())
 }
