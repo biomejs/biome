@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/binding/array-binding-holes.js
 ---
-
 # Input
 
 ```js
@@ -37,7 +36,7 @@ Attribute Position: Auto
 function foo([foo, /* not used */ /* not used */ ,]) {}
 ```
 
-## Output 2
+## Output 1
 
 -----
 Indent style: Tab
@@ -58,5 +57,3 @@ Attribute Position: Auto
 ```js
 function foo([foo, /* not used */ /* not used */ ,]) {}
 ```
-
-

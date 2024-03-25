@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/arrow/curried_indents.js
 ---
-
 # Input
 
 ```js
@@ -125,7 +124,7 @@ import("./someComponent").then(({ default: TheComponent }) => (props) => (
 ));
 ```
 
-## Output 2
+## Output 1
 
 -----
 Indent style: Tab
@@ -192,5 +191,3 @@ import("./someComponent").then(({ default: TheComponent }) => props => (
 	<TheComponent {...someInjectedProps} />
 ));
 ```
-
-

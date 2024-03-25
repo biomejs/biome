@@ -1,7 +1,8 @@
 {
-	"cases": [
-		{
-			"semicolons": "AsNeeded"
-		}
-	]
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "semicolons": "asNeeded"
+    }
+  }
 }

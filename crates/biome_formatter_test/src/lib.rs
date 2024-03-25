@@ -41,7 +41,7 @@ pub trait TestFormatLanguage {
         range: TextRange,
     ) -> FormatResult<Printed>;
 
-    fn default_options() -> <Self::ServiceLanguage as ServiceLanguage>::FormatOptions;
+    fn default_options(&self) -> <Self::ServiceLanguage as ServiceLanguage>::FormatOptions;
 
     fn to_options(
         &self,

@@ -1,36 +1,37 @@
 [package]
-authors.workspace = true
+authors.workspace    = true
 categories.workspace = true
-description = "Biome's JSON formatter"
-edition.workspace = true
-homepage.workspace = true
-keywords.workspace = true
-license.workspace = true
-name = "biome_json_formatter"
+description          = "Biome's JSON formatter"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_json_formatter"
 repository.workspace = true
-version = "0.5.7"
+version              = "0.5.7"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-biome_deserialize = { workspace = true }
+biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
-biome_diagnostics = { workspace = true }
-biome_formatter = { workspace = true }
-biome_json_syntax = { workspace = true }
-biome_rowan = { workspace = true }
-biome_suppression = { workspace = true }
-schemars = { workspace = true, optional = true }
-serde = { workspace = true, features = ["derive"], optional = true }
+biome_diagnostics        = { workspace = true }
+biome_formatter          = { workspace = true }
+biome_json_syntax        = { workspace = true }
+biome_rowan              = { workspace = true }
+biome_suppression        = { workspace = true }
+schemars                 = { workspace = true, optional = true }
+serde                    = { workspace = true, features = ["derive"], optional = true }
 
 
 [dev-dependencies]
 biome_formatter_test = { path = "../biome_formatter_test" }
-biome_json_parser = { path = "../biome_json_parser" }
-biome_parser = { path = "../biome_parser" }
-countme = { workspace = true, features = ["enable"] }
-serde_json = { workspace = true }
-tests_macros = { path = "../tests_macros" }
+biome_json_parser    = { path = "../biome_json_parser" }
+biome_parser         = { path = "../biome_parser" }
+biome_service        = { path = "../biome_service" }
+countme              = { workspace = true, features = ["enable"] }
+serde_json           = { workspace = true }
+tests_macros         = { path = "../tests_macros" }
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]

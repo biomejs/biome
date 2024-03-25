@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/binding/identifier_binding.js
 ---
-
 # Input
 
 ```js
@@ -42,7 +41,7 @@ let abcde = "very long value that will cause a line break",
 	fghij = "this should end up on the next line";
 ```
 
-## Output 2
+## Output 1
 
 -----
 Indent style: Tab
@@ -66,5 +65,3 @@ let x = y;
 let abcde = "very long value that will cause a line break",
 	fghij = "this should end up on the next line";
 ```
-
-
