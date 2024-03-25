@@ -83,7 +83,7 @@ info: css/comments/at-rules.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,38 +1,27 @@
+@@ -1,38 +1,33 @@
  @charset "utf-8"; /* comment 1 */
  
 -@import /* comment 2 */ url("fineprint.css") /* comment 3 */ print
@@ -93,18 +93,22 @@ info: css/comments/at-rules.css
 -  /* comment 9 */ tv /* comment 10 */;
 -/* comment 11 */
 -@import /* comment 12 */ /* comment 13 */ url("bluish.css") /* comment 14 */
-+@import /* comment 2 */ url("fineprint.css") /* comment 3 */ print /* comment 4 */; /* comment 5 */
-+@import /* comment 6 */ url("bluish.css") /* comment 7 */ projection /* comment 8 */, /* comment 9 */ tv /* comment 10 */;
+-    /* comment 15 */ projection /* comment 16 */,
++@import /* comment 2 */ url("fineprint.css") /* comment 3 */
++  print /* comment 4 */; /* comment 5 */
++@import /* comment 6 */ url("bluish.css") /* comment 7 */
++  projection /* comment 8 */, /* comment 9 */ tv /* comment 10 */;
 +/* comment 11 */ @import /* comment 12 */
-+    /* comment 13 */ url("bluish.css") /* comment 14 */
-     /* comment 15 */ projection /* comment 16 */,
--  /* comment 17 */ tv /* comment 18 */; /* comment 19 */
-+    /* comment 17 */ tv /* comment 18 */; /* comment 19 */
++  /* comment 13 */ url("bluish.css") /* comment 14 */
++  /* comment 15 */ projection /* comment 16 */,
+   /* comment 17 */ tv /* comment 18 */; /* comment 19 */
  /* comment 20 */
 -@import /* comment 21 */ url("bluish.css") /* comment 22 */ projection
 -    /* comment 23 */,
 -  /* comment 24 */ tv /* comment 25 */;
--@import /* comment 26 */ "custom.css" /* comment 27 */; /* comment 28 */
++@import /* comment 21 */ url("bluish.css") /* comment 22 */
++  projection /* comment 23 */, /* comment 24 */ tv /* comment 25 */;
+ @import /* comment 26 */ "custom.css" /* comment 27 */; /* comment 28 */
 -@import /* comment 29 */ url("landscape.css") /* comment 30 */ screen
 -  /* comment 31 */ and /* comment 32 */
 -  (
@@ -112,9 +116,10 @@ info: css/comments/at-rules.css
 -      /* comment 36 */
 -  )
 -  /* comment 37 */;
-+@import/* comment 21 */url("bluish.css")/* comment 22 */projection/* comment 23 */,/* comment 24 */tv/* comment 25 */;
-+@import /* comment 26 */'custom.css'/* comment 27 */; /* comment 28 */
-+@import /* comment 29 */ url('landscape.css') /* comment 30 */ screen /* comment 31 */ and /* comment 32 */ (/* comment 33 */orientation/* comment 34 */:/* comment 35 */landscape/* comment 36 */)/* comment 37 */;
++@import /* comment 29 */ url("landscape.css") /* comment 30 */
++  screen /* comment 31 */ and /* comment 32 */ (
++    /* comment 33 */ /* comment 34 */ /* comment 35 */ orientation: landscape /* comment 36 */
++  ) /* comment 37 */;
  
  @namespace /* comment 38 */ url(http://www.w3.org/1999/xhtml) /* comment 39 */;
 -@namespace /* comment 40 */ svg /* comment 41 */ url(http://www.w3.org/2000/svg) /* comment 42 */;
@@ -135,7 +140,7 @@ info: css/comments/at-rules.css
      /* comment 51 */
      nice-style: 4;
      /* comment 52 */
-@@ -40,12 +29,11 @@
+@@ -40,12 +35,11 @@
    /* comment 54 */
  } /* comment 55 */
  
@@ -151,7 +156,7 @@ info: css/comments/at-rules.css
  }
  
  @page /* comment 61 */ {
-@@ -55,80 +43,79 @@
+@@ -55,80 +49,79 @@
  @page /* comment 64 */ vertical /* comment 65 */ {
  }
  
@@ -299,16 +304,22 @@ info: css/comments/at-rules.css
 ```css
 @charset "utf-8"; /* comment 1 */
 
-@import /* comment 2 */ url("fineprint.css") /* comment 3 */ print /* comment 4 */; /* comment 5 */
-@import /* comment 6 */ url("bluish.css") /* comment 7 */ projection /* comment 8 */, /* comment 9 */ tv /* comment 10 */;
+@import /* comment 2 */ url("fineprint.css") /* comment 3 */
+  print /* comment 4 */; /* comment 5 */
+@import /* comment 6 */ url("bluish.css") /* comment 7 */
+  projection /* comment 8 */, /* comment 9 */ tv /* comment 10 */;
 /* comment 11 */ @import /* comment 12 */
-    /* comment 13 */ url("bluish.css") /* comment 14 */
-    /* comment 15 */ projection /* comment 16 */,
-    /* comment 17 */ tv /* comment 18 */; /* comment 19 */
+  /* comment 13 */ url("bluish.css") /* comment 14 */
+  /* comment 15 */ projection /* comment 16 */,
+  /* comment 17 */ tv /* comment 18 */; /* comment 19 */
 /* comment 20 */
-@import/* comment 21 */url("bluish.css")/* comment 22 */projection/* comment 23 */,/* comment 24 */tv/* comment 25 */;
-@import /* comment 26 */'custom.css'/* comment 27 */; /* comment 28 */
-@import /* comment 29 */ url('landscape.css') /* comment 30 */ screen /* comment 31 */ and /* comment 32 */ (/* comment 33 */orientation/* comment 34 */:/* comment 35 */landscape/* comment 36 */)/* comment 37 */;
+@import /* comment 21 */ url("bluish.css") /* comment 22 */
+  projection /* comment 23 */, /* comment 24 */ tv /* comment 25 */;
+@import /* comment 26 */ "custom.css" /* comment 27 */; /* comment 28 */
+@import /* comment 29 */ url("landscape.css") /* comment 30 */
+  screen /* comment 31 */ and /* comment 32 */ (
+    /* comment 33 */ /* comment 34 */ /* comment 35 */ orientation: landscape /* comment 36 */
+  ) /* comment 37 */;
 
 @namespace /* comment 38 */ url(http://www.w3.org/1999/xhtml) /* comment 39 */;
 @namespace /* comment 40 */ /* comment 41 */ svg url(http://www.w3.org/2000/svg) /* comment 42 */;
@@ -504,29 +515,26 @@ at-rules.css:27:19 parse ━━━━━━━━━━━━━━━━━━�
 
 # Lines exceeding max width of 80 characters
 ```
-    3: @import /* comment 2 */ url("fineprint.css") /* comment 3 */ print /* comment 4 */; /* comment 5 */
-    4: @import /* comment 6 */ url("bluish.css") /* comment 7 */ projection /* comment 8 */, /* comment 9 */ tv /* comment 10 */;
-   10: @import/* comment 21 */url("bluish.css")/* comment 22 */projection/* comment 23 */,/* comment 24 */tv/* comment 25 */;
-   12: @import /* comment 29 */ url('landscape.css') /* comment 30 */ screen /* comment 31 */ and /* comment 32 */ (/* comment 33 */orientation/* comment 34 */:/* comment 35 */landscape/* comment 36 */)/* comment 37 */;
-   15: @namespace /* comment 40 */ /* comment 41 */ svg url(http://www.w3.org/2000/svg) /* comment 42 */;
-   51: @media /* comment 74 */ only /* comment 75 */ screen /* comment 76 */ and /* comment 77 */ (
-   52:     /* comment 78 */ /* comment 79 */ /* comment 80 */ min-width: 320px /* comment 81 */
-   54:     /* comment 84 */ /* comment 85 */ /* comment 86 */ max-width: 480px /* comment 87 */
-   56:     /* comment 90 */ /* comment 91 */ /* comment 92 */ resolution: 150dpi /* comment 93 */
-   59: @media /* comment 95 */ only /* comment 96 */ screen /* comment 97 */ and /* comment 98 */ (
-   60:     /* comment 99 */ /* comment 100 */ /* comment 101 */ min-width: 320px /* comment 102 */
-   62:     /* comment 105 */ /* comment 106 */ /* comment 107 */ max-width: 480px /* comment 108 */
-   64:     /* comment 111 */ /* comment 112 */ /* comment 113 */ resolution: 150dpi /* comment 114 */
-   69:   /* comment 120 */ screen /* comment 121 */ /* comment 123 */ and /* comment 122 */ /* comment 124 */ (
-   75:   ) /* comment 133 */ /* comment 135 */ and /* comment 134 */ /* comment 136 */ (
-   81:   ) /* comment 145 */ /* comment 147 */ and /* comment 146 */ /* comment 148 */ (
-   91:     /* comment 161 */ /* comment 162 */ /* comment 163 */ display: flex /* comment 164 */
-   95:     /* comment 168 */ /* comment 169 */ /* comment 170 */ display: flex /* comment 171 */
-   99:     /* comment 174 */ /* comment 175 */ /* comment 176 */ display: table-cell /* comment 177 */
-  102:     /* comment 180 */ /* comment 181 */ /* comment 182 */ display: list-item /* comment 183 */
-  105:     /* comment 186 */ /* comment 187 */ /* comment 188 */ display: run-in /* comment 189 */
-  109:     /* comment 192 */ /* comment 193 */ /* comment 194 */ --foo: green /* comment 195 */
-  114:     /* comment 199 */ /* comment 200 */ /* comment 201 */ display: flex /* comment 202 */
-  116:   /* comment 204 */ @media /* comment 205 */ screen /* comment 206 */ and /* comment 207 */ (
-  117:       /* comment 208 */ /* comment 209 */ /* comment 210 */ min-width: 900px /* comment 211 */
+   17:     /* comment 33 */ /* comment 34 */ /* comment 35 */ orientation: landscape /* comment 36 */
+   21: @namespace /* comment 40 */ /* comment 41 */ svg url(http://www.w3.org/2000/svg) /* comment 42 */;
+   57: @media /* comment 74 */ only /* comment 75 */ screen /* comment 76 */ and /* comment 77 */ (
+   58:     /* comment 78 */ /* comment 79 */ /* comment 80 */ min-width: 320px /* comment 81 */
+   60:     /* comment 84 */ /* comment 85 */ /* comment 86 */ max-width: 480px /* comment 87 */
+   62:     /* comment 90 */ /* comment 91 */ /* comment 92 */ resolution: 150dpi /* comment 93 */
+   65: @media /* comment 95 */ only /* comment 96 */ screen /* comment 97 */ and /* comment 98 */ (
+   66:     /* comment 99 */ /* comment 100 */ /* comment 101 */ min-width: 320px /* comment 102 */
+   68:     /* comment 105 */ /* comment 106 */ /* comment 107 */ max-width: 480px /* comment 108 */
+   70:     /* comment 111 */ /* comment 112 */ /* comment 113 */ resolution: 150dpi /* comment 114 */
+   75:   /* comment 120 */ screen /* comment 121 */ /* comment 123 */ and /* comment 122 */ /* comment 124 */ (
+   81:   ) /* comment 133 */ /* comment 135 */ and /* comment 134 */ /* comment 136 */ (
+   87:   ) /* comment 145 */ /* comment 147 */ and /* comment 146 */ /* comment 148 */ (
+   97:     /* comment 161 */ /* comment 162 */ /* comment 163 */ display: flex /* comment 164 */
+  101:     /* comment 168 */ /* comment 169 */ /* comment 170 */ display: flex /* comment 171 */
+  105:     /* comment 174 */ /* comment 175 */ /* comment 176 */ display: table-cell /* comment 177 */
+  108:     /* comment 180 */ /* comment 181 */ /* comment 182 */ display: list-item /* comment 183 */
+  111:     /* comment 186 */ /* comment 187 */ /* comment 188 */ display: run-in /* comment 189 */
+  115:     /* comment 192 */ /* comment 193 */ /* comment 194 */ --foo: green /* comment 195 */
+  120:     /* comment 199 */ /* comment 200 */ /* comment 201 */ display: flex /* comment 202 */
+  122:   /* comment 204 */ @media /* comment 205 */ screen /* comment 206 */ and /* comment 207 */ (
+  123:       /* comment 208 */ /* comment 209 */ /* comment 210 */ min-width: 900px /* comment 211 */
 ```
