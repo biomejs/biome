@@ -25,7 +25,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- Complete the documentation and overrides support for options `lineEnd` and `attributePosition`. Contributed by @Sec-ant
+- Complete the documentation and overrides support for options `formatter.lineEnding`, `[language].formatter.lineEnding`, `formatter.attributePosition` and `javascript.formatter.attributePosition`. Contributed by @Sec-ant
 
 ### Editors
 
