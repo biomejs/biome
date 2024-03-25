@@ -190,8 +190,8 @@ impl Rule for {rule_name_upper_camel} {{
 pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
     let crate_folder = match kind {
         RuleKind::Js => project_root().join("crates/biome_js_analyze"),
-        RuleKind::Json => project_root().join("crates/biome_js_analyze"),
-        RuleKind::Css => project_root().join("crates/biome_js_analyze"),
+        RuleKind::Json => project_root().join("crates/biome_json_analyze"),
+        RuleKind::Css => project_root().join("crates/biome_css_analyze"),
     };
     let rule_folder = crate_folder.join("src/lint/nursery");
     let test_folder = crate_folder.join("tests/specs/nursery");
@@ -248,6 +248,6 @@ pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
         test_folder.display()
     );
     if std::fs::File::open(&test_file).is_err() {
-        let _ = std::fs::write(test_file, "\n\n var a = 1;\na = 2;\n a = 3;");
+        let _ = std::fs::write(test_file, "\n\n var a = 1;\na = 2;\na = 3;");
     }
 }
