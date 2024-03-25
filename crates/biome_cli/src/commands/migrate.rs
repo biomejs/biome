@@ -23,7 +23,7 @@ pub(crate) fn migrate(
         directory_path,
         file_path,
     } = load_configuration(&session.app.fs, base_path)?;
-    setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
+    setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
     if let (Some(path), Some(directory_path)) = (file_path, directory_path) {
         execute_mode(

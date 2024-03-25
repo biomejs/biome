@@ -401,16 +401,12 @@ impl BiomeCommand {
 
     pub fn log_level(&self) -> LoggingLevel {
         self.cli_options()
-            .map_or(LoggingLevel::default(), |cli_options| {
-                cli_options.log_level.clone()
-            })
+            .map_or(LoggingLevel::default(), |cli_options| cli_options.log_level)
     }
 
     pub fn log_kind(&self) -> LoggingKind {
         self.cli_options()
-            .map_or(LoggingKind::default(), |cli_options| {
-                cli_options.log_kind.clone()
-            })
+            .map_or(LoggingKind::default(), |cli_options| cli_options.log_kind)
     }
 }
 

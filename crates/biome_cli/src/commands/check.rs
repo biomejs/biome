@@ -46,7 +46,7 @@ pub(crate) fn check(
         since,
         changed,
     } = payload;
-    setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
+    setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
     let fix_file_mode = if apply && apply_unsafe {
         return Err(CliDiagnostic::incompatible_arguments(
