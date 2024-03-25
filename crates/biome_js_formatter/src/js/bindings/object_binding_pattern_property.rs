@@ -20,7 +20,7 @@ impl FormatNodeRule<JsObjectBindingPatternProperty> for FormatJsObjectBindingPat
             init,
         } = node.as_fields();
 
-        let group_id = f.group_id("object_binding_pattern_property");
+        let group_id = f.group_id("assignment");
 
         write![
             f,
