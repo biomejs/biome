@@ -666,6 +666,20 @@ impl RageEntry {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct SearchPatternParams {
+    pub path: BiomePath,
+    pub pattern: String,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct SearchResults {
+    pub file: BiomePath,
+    pub matches: Vec<TextRange>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IsPathIgnoredParams {
     pub biome_path: BiomePath,
     pub features: Vec<FeatureName>,
@@ -754,6 +768,9 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Returns debug information about this workspace.
     fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError>;
+
+    /// Searches a file for matches of the given pattern.
+    fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError>;
 
     /// Returns information about the server this workspace is connected to or `None` if the workspace isn't connected to a server.
     fn server_info(&self) -> Option<&ServerInfo>;
@@ -883,10 +900,10 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
-    pub fn search_file(&self) -> Result<SearchResults, WorkspaceError> {
-        self.workspace.search_file(SearchFileParams {
+    pub fn search_pattern(&self, pattern: String) -> Result<SearchResults, WorkspaceError> {
+        self.workspace.search_pattern(SearchPatternParams {
             path: self.path.clone(),
-            pattern: self.pattern.clone(),
+            pattern,
         })
     }
 }
