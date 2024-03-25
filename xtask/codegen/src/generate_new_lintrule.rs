@@ -36,6 +36,7 @@ fn generate_rule_template(
 }};
 use biome_console::markup;
 use biome_js_syntax::JsIdentifierBinding;
+use biome_rowan::AstNode;
 
 declare_rule! {{
     /// Succinct description of the rule.
