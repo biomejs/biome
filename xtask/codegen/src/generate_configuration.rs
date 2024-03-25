@@ -128,7 +128,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                     #global_all,
                     #global_recommended,
                     &mut enabled_rules,
-                    &mut disabled_rules,
                 );
                 enabled_rules.extend(&group.get_enabled_rules());
                 disabled_rules.extend(&group.get_disabled_rules());
@@ -488,16 +487,16 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 matches!(self.recommended, Some(true))
             }
 
-            pub(crate) const fn is_not_recommended(&self) -> bool {
-                matches!(self.recommended, Some(false))
+            pub(crate) const fn is_recommended_unset(&self) -> bool {
+                matches!(self.recommended, None)
             }
 
             pub(crate) fn is_all(&self) -> bool {
                 matches!(self.all, Some(true))
             }
 
-            pub(crate) fn is_not_all(&self) -> bool {
-                matches!(self.all, Some(false))
+            pub(crate) const fn is_all_unset(&self) -> bool {
+                matches!(self.all, None)
             }
 
             pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -531,24 +530,17 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             }
 
             /// Select preset rules
+            // Preset rules shouldn't populate disabled rules
+            // because that will make specific rules cannot be enabled later.
             pub(crate) fn collect_preset_rules(
                 &self,
                 parent_is_all: bool,
                 parent_is_recommended: bool,
                 enabled_rules: &mut IndexSet<RuleFilter>,
-                disabled_rules: &mut IndexSet<RuleFilter>,
             ) {
-                if self.is_all() {
+                if self.is_all() || self.is_all_unset() && parent_is_all {
                     enabled_rules.extend(Self::all_rules_as_filters());
-                } else if self.is_recommended() {
-                    enabled_rules.extend(Self::recommended_rules_as_filters());
-                } else if self.is_not_all() {
-                    disabled_rules.extend(Self::all_rules_as_filters());
-                } else if self.is_not_recommended() {
-                    disabled_rules.extend(Self::recommended_rules_as_filters());
-                } else if parent_is_all {
-                    enabled_rules.extend(Self::all_rules_as_filters());
-                } else if parent_is_recommended {
+                } else if self.is_recommended() || self.is_recommended_unset() && parent_is_recommended && !parent_is_all {
                     enabled_rules.extend(Self::recommended_rules_as_filters());
                 }
             }

@@ -1919,6 +1919,52 @@ fn top_level_all_down_level_empty() {
 }
 
 #[test]
+fn group_level_disable_recommended_enable_specific() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // useButtonType should be enabled.
+    let biome_json = r#"{
+        "linter": {
+            "rules": {
+                "a11y": {
+                    "recommended": false,
+                    "useButtonType": "error"
+                }
+            }
+        }
+    }"#;
+
+    let code = r#"
+    function SubmitButton() {
+        return <button>Submit</button>;
+    }    
+    "#;
+
+    let file_path = Path::new("fix.jsx");
+    fs.insert(file_path.into(), code.as_bytes());
+
+    let config_path = Path::new("biome.json");
+    fs.insert(config_path.into(), biome_json.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "group_level_disable_recommended_enable_specific",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn ignore_configured_globals() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
