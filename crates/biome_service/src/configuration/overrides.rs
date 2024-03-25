@@ -140,7 +140,7 @@ pub struct OverrideFormatterConfiguration {
     pub line_width: Option<LineWidth>,
 
     /// The attribute position style.
-    #[bpaf(long("attribute-position"), argument("auto|multiline"), optional)]
+    #[bpaf(long("attribute-position"), argument("multiline|auto"), optional)]
     pub attribute_position: Option<AttributePosition>,
 }
 
