@@ -233,7 +233,7 @@ To know the technical details of how our parser works and how to write test, ple
 
 ### Formatter
 
-To know the technical details of how our formatter works and how to write test, please check our [internal page](https://docs.rs/biome_formatter/latest/biome_formatter/)
+To know the technical details of how our formatter works and how to write test, please check our [internal page](https://github.com/biomejs/biome/blob/main/crates/biome_formatter/CONTRIBUTING.md)
 
 
 ## Crate dependencies

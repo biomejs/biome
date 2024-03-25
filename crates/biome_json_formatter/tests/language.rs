@@ -49,7 +49,7 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
         format_range(options, node, range)
     }
 
-    fn default_options() -> <Self::ServiceLanguage as ServiceLanguage>::FormatOptions {
+    fn default_options(&self) -> <Self::ServiceLanguage as ServiceLanguage>::FormatOptions {
         JsonFormatOptions::default()
     }
 }

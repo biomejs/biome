@@ -48,7 +48,7 @@ impl TestFormatLanguage for CssTestFormatLanguage {
         format_range(options, node, range)
     }
 
-    fn default_options() -> <Self::ServiceLanguage as ServiceLanguage>::FormatOptions {
+    fn default_options(&self) -> <Self::ServiceLanguage as ServiceLanguage>::FormatOptions {
         CssFormatOptions::default()
     }
 }
