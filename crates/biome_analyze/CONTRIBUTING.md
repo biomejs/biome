@@ -24,7 +24,7 @@ _Just_ is not part of the rust toolchain, you have to install it with [a package
 
 _Biome_ follows a naming convention according to what the rule do:
 
-1. Forbid a concept
+- Forbid a concept
 
    ```block
    no<Concept>
@@ -33,7 +33,7 @@ _Biome_ follows a naming convention according to what the rule do:
    When a rule's sole intention is to **forbid a single concept** - such as disallowing the use of `debugger` statements - the rule should be named using the `no` prefix.
    For example, the rule to disallow the use of `debugger` statements is named `noDebugger`.
 
-1. Mandate a concept
+- Mandate a concept
 
    ```block
    use<Concept>
@@ -62,13 +62,13 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
    ```
    The script will create a new **lint** rule for the _JavaScript_ language, inside the `biome_js_analyze`
 
-1. The `Ast` query type allows you to query the AST of a program.
-1. The `State` type doesn't have to be used, so it can be considered optional. However, it has to be defined as `type State = ()`.
-1. Implement the `run` function:
+2. The `Ast` query type allows you to query the AST of a program.
+3. The `State` type doesn't have to be used, so it can be considered optional. However, it has to be defined as `type State = ()`.
+4. Implement the `run` function:
 
    This function is called every time the analyzer finds a match for the query specified by the rule, and may return zero or more "signals".
 
-1. Implement the `diagnostic` function. Follow the [pillars](#explain-a-rule-to-the-user):
+5. Implement the `diagnostic` function. Follow the [pillars](#explain-a-rule-to-the-user):
 
    ```rust,ignore
    impl Rule for UseAwesomeTricks {
@@ -78,8 +78,8 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
    ```
 
    While implementing the diagnostic, please keep [Biome's technical principals](https://biomejs.dev/internals/philosophy/#technical) in mind.
-   
-1. Implement the optional `action` function, if we are able to provide a code action:
+
+6. Implement the optional `action` function, if we are able to provide a code action:
 
    ```rust,ignore
    impl Rule for UseAwesomeTricks {
