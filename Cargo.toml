@@ -151,7 +151,7 @@ bitflags          = "2.3.1"
 bpaf              = { version = "0.9.9", features = ["derive"] }
 countme           = "3.0.1"
 crossbeam         = "0.8.4"
-dashmap           = "5.4.0"
+dashmap           = "5.5.3"
 ignore            = "0.4.21"
 indexmap          = "1.9.3"
 insta             = "1.36.1"
