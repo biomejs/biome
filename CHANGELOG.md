@@ -48,6 +48,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Quickfix action no longer autofixes lint rule errors on save when `linter` is disabled ([#2161](https://github.com/biomejs/biome/issues/2161)). Contributed by @Sec-ant
+- Range formatting for Astro/Svelte/Vue doesn't place code out of place, especially when formatting on paste is enabled. Contributed by @ematipico
 
 ### Parser
 
