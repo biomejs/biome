@@ -192,7 +192,7 @@ pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
         RuleKind::Json => project_root().join("crates/biome_js_analyze"),
         RuleKind::Css => project_root().join("crates/biome_js_analyze"),
     };
-    let rule_folder = crate_folder.join("src/lint");
+    let rule_folder = crate_folder.join("src/lint/nursery");
     let test_folder = crate_folder.join("tests/specs/nursery");
     let rule_name_upper_camel = rule_name.to_camel();
     let rule_name_snake = rule_name.to_snake();
