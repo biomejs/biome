@@ -745,6 +745,35 @@ impl<Context> Format<Context> for HardSpace {
 /// # Ok(())
 /// # }
 /// ```
+///
+/// When the indent_style is tab, [indent] convert the preceding alignments to indents
+/// ```
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+///
+/// # fn main() -> FormatResult<()> {
+/// let block = format!(
+///     SimpleFormatContext::default(),
+///     [
+///         text("root"),
+///         indent(&format_args![align(
+///             2,
+///             &format_args![indent(&format_args![
+///                 hard_line_break(),
+///                 text("shoud be 3 tabs"),
+///             ])]
+///         )])
+///     ]
+/// )?;
+///
+/// assert_eq!(
+///     "root\n\t\t\tshoud be 3 tabs",
+///     block.print()?.as_code()
+/// );
+/// #    Ok(())
+/// # }
+/// ```
+
 #[inline]
 pub fn indent<Content, Context>(content: &Content) -> Indent<Context>
 where
@@ -867,6 +896,39 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 ///      elements.print()?.as_code()
 ///  );
 /// #    Ok(())
+/// # }
+/// ```
+///
+/// ```
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+///
+/// # fn main() -> FormatResult<()> {
+/// let block = format!(
+///     SimpleFormatContext::default(),
+///     [
+///         text("root"),
+///         indent(&format_args![align(
+///             2,
+///             &format_args![align(
+///                 2,
+///                 &format_args![indent(&format_args![
+///                     hard_line_break(),
+///                     text("should be 4 tabs"),
+///                     dedent(&format_args![
+///                         hard_line_break(),
+///                         text("should be 1 tab and 4 spaces"),
+///                     ]),
+///                 ])]
+///             ),]
+///         )])
+///     ]
+/// )?;
+/// assert_eq!(
+///     "root\n\t\t\t\tshould be 4 tabs\n\t    should be 1 tab and 4 spaces",
+///     block.print()?.as_code()
+/// );
+/// # Ok(())
 /// # }
 /// ```
 
