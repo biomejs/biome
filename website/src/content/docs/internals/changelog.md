@@ -15,6 +15,28 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+#### Bug fixes
+
+- Correctly calculate enabled rules in lint rule groups. Now a specific rule belonging to a group can be enabled even if its group-level preset option `recommended` or `all` is `false` ([#2191](https://github.com/biomejs/biome/issues/2191)). Contributed by @Sec-ant
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+### Parser
+
 ## 1.6.3 (2024-03-25)
 
 ### Analyzer

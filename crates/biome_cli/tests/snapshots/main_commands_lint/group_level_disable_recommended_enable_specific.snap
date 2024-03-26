@@ -1,0 +1,64 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "a11y": {
+        "recommended": false,
+        "useButtonType": "error"
+      }
+    }
+  }
+}
+```
+
+## `fix.jsx`
+
+```jsx
+
+    function SubmitButton() {
+        return <button>Submit</button>;
+    }    
+    
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+fix.jsx:3:16 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    2 │     function SubmitButton() {
+  > 3 │         return <button>Submit</button>;
+      │                ^^^^^^^^
+    4 │     }····
+    5 │     
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes needed.
+Found 2 errors.
+```
