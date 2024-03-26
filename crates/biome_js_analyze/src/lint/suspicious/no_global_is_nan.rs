@@ -11,7 +11,7 @@ use biome_rowan::{AstNode, BatchMutationExt};
 declare_rule! {
     /// Use `Number.isNaN` instead of global `isNaN`.
     ///
-    /// `Number.isNaN()` and `isNaN()` [have not the same behavior](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/isNaN#description).
+    /// `Number.isNaN()` and `isNaN()` [do not have the same behavior](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/isNaN#description).
     /// When the argument to `isNaN()` is not a number, the value is first coerced to a number.
     /// `Number.isNaN()` does not perform this coercion.
     /// Therefore, it is a more reliable way to test whether a value is `NaN`.
