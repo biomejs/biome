@@ -52,7 +52,7 @@ impl Rule for NoChildrenProp {
             NoChildrenPropQuery::JsxAttribute(attribute) => {
                 let name = attribute.name().ok()?;
                 let name = name.as_jsx_name()?;
-                if name.value_token().ok()?.text() == "children" {
+                if name.value_token().ok()?.text_trimmed() == "children" {
                     return Some(NoChildrenPropState::JsxProp(name.range()));
                 }
 
