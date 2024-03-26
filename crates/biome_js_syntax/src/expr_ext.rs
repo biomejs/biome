@@ -1073,6 +1073,7 @@ impl AnyJsExpression {
         })
     }
 
+    /// Checks whether the current called is named `"describe"`
     pub fn is_test_describe_call(&self) -> bool {
         if self.contains_a_test_pattern() == Ok(true) {
             if let Some(function_name) = self.get_callee_object_name() {
@@ -1084,6 +1085,7 @@ impl AnyJsExpression {
         false
     }
 
+    /// Checks whether the current called is named `"it"`
     pub fn is_test_it_call(&self) -> bool {
         if self.contains_a_test_pattern() == Ok(true) {
             if let Some(function_name) = self.get_callee_object_name() {
@@ -1095,6 +1097,7 @@ impl AnyJsExpression {
         false
     }
 
+    /// Checks whether the current called is named `"expect"` or `"assert"`
     pub fn to_assertion_call(&self) -> Option<JsSyntaxToken> {
         let name = self.get_callee_object_name();
         if let Some(name) = name {
