@@ -564,13 +564,13 @@ impl A11y {
     pub(crate) fn is_recommended(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) const fn is_recommended_unset(&self) -> bool {
+    pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
     pub(crate) fn is_all(&self) -> bool {
         matches!(self.all, Some(true))
     }
-    pub(crate) const fn is_all_unset(&self) -> bool {
+    pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -1265,13 +1265,13 @@ impl Complexity {
     pub(crate) fn is_recommended(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) const fn is_recommended_unset(&self) -> bool {
+    pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
     pub(crate) fn is_all(&self) -> bool {
         matches!(self.all, Some(true))
     }
-    pub(crate) const fn is_all_unset(&self) -> bool {
+    pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -1985,13 +1985,13 @@ impl Correctness {
     pub(crate) fn is_recommended(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) const fn is_recommended_unset(&self) -> bool {
+    pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
     pub(crate) fn is_all(&self) -> bool {
         matches!(self.all, Some(true))
     }
-    pub(crate) const fn is_all_unset(&self) -> bool {
+    pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -2720,13 +2720,13 @@ impl Nursery {
     pub(crate) fn is_recommended(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) const fn is_recommended_unset(&self) -> bool {
+    pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
     pub(crate) fn is_all(&self) -> bool {
         matches!(self.all, Some(true))
     }
-    pub(crate) const fn is_all_unset(&self) -> bool {
+    pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -3146,13 +3146,13 @@ impl Performance {
     pub(crate) fn is_recommended(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) const fn is_recommended_unset(&self) -> bool {
+    pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
     pub(crate) fn is_all(&self) -> bool {
         matches!(self.all, Some(true))
     }
-    pub(crate) const fn is_all_unset(&self) -> bool {
+    pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -3292,13 +3292,13 @@ impl Security {
     pub(crate) fn is_recommended(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) const fn is_recommended_unset(&self) -> bool {
+    pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
     pub(crate) fn is_all(&self) -> bool {
         matches!(self.all, Some(true))
     }
-    pub(crate) const fn is_all_unset(&self) -> bool {
+    pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -3683,13 +3683,13 @@ impl Style {
     pub(crate) fn is_recommended(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) const fn is_recommended_unset(&self) -> bool {
+    pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
     pub(crate) fn is_all(&self) -> bool {
         matches!(self.all, Some(true))
     }
-    pub(crate) const fn is_all_unset(&self) -> bool {
+    pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -4699,13 +4699,13 @@ impl Suspicious {
     pub(crate) fn is_recommended(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) const fn is_recommended_unset(&self) -> bool {
+    pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
     pub(crate) fn is_all(&self) -> bool {
         matches!(self.all, Some(true))
     }
-    pub(crate) const fn is_all_unset(&self) -> bool {
+    pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {

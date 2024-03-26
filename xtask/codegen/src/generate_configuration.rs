@@ -487,7 +487,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 matches!(self.recommended, Some(true))
             }
 
-            pub(crate) const fn is_recommended_unset(&self) -> bool {
+            pub(crate) fn is_recommended_unset(&self) -> bool {
                 self.recommended.is_none()
             }
 
@@ -495,7 +495,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 matches!(self.all, Some(true))
             }
 
-            pub(crate) const fn is_all_unset(&self) -> bool {
+            pub(crate) fn is_all_unset(&self) -> bool {
                 self.all.is_none()
             }
 
