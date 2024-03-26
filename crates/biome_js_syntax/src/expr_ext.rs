@@ -962,8 +962,6 @@ impl AnyJsExpression {
     pub fn get_callee_object_name(&self) -> Option<JsSyntaxToken> {
         let identifier = self.get_callee_object_identifier()?;
         identifier.value_token().ok()
-
-
     }
 
     pub fn get_callee_object_identifier(&self) -> Option<JsReferenceIdentifier> {
@@ -977,7 +975,6 @@ impl AnyJsExpression {
                 let tag = tag.as_js_static_member_expression()?;
                 let member = tag.object().ok()?;
                 member.as_js_identifier_expression()?.name().ok()
-
             }
             AnyJsExpression::JsIdentifierExpression(node) => node.name().ok(),
             _ => None,

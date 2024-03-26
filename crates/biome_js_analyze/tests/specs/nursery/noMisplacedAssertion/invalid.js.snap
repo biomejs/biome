@@ -8,3 +8,21 @@ describe(() => {
 	expect("something").toBeTrue()
 })
 ```
+
+# Diagnostics
+```
+invalid.js:2:2 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The assertion isn't inside a it() function call.
+  
+    1 │ describe(() => {
+  > 2 │ 	expect("something").toBeTrue()
+      │ 	^^^^^^
+    3 │ })
+  
+  i This will result in unexpected behaviours from your test suite.
+  
+  i Move the assertion inside a it() function call.
+  
+
+```

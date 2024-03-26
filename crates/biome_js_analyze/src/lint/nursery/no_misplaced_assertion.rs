@@ -1,35 +1,79 @@
-use crate::semantic_services::Semantic;
+use crate::services::semantic::Semantic;
 use biome_analyze::{
     context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_deserialize_macros::Deserializable;
-use biome_js_syntax::{
-     JsCallExpression, JsIdentifierBinding, JsImport, JsModule,
-};
+use biome_js_syntax::{JsCallExpression, JsIdentifierBinding, JsImport, JsModule};
 use biome_rowan::{AstNode, WalkEvent};
 use serde::{Deserialize, Serialize};
 
 declare_rule! {
     /// Checks that the assertion function, for example `expect`, is placed inside an `it()` function call.
     ///
-    /// Placing (and using) the `expect` assertion function can result in unexpected behavoiurs when executing your testing suite.
+    /// Placing (and using) the `expect` assertion function can result in unexpected behaviors when executing your testing suite.
+    ///
+    /// By default, the rule will the following assertion functions: `expect` and `assert`.
+    ///
+    /// If `expect` or `assert` are imported, the rule will check if they are imported from `"chai"`, `"node:assert"` and `"node:assert/strict"`. Check the [options](#options) if you need to change the defaults.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// describe(() => {
+    /// describe("describe", () => {
     ///     expect()
+    /// })
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// import assert from "node:assert";
+    /// describe("describe", () => {
+    ///     assert.equal()
     /// })
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
+    /// import assert from "node:assert";
+    /// describe("describe", () => {
+    ///     it("it", () => {
+    ///         assert.equal()
+    ///     })
+    /// })
+    /// ```
     ///
+    /// ```js
+    /// describe("describe", () => {
+    ///     it("it", () => {
+    ///         expect()
+    ///     })
+    /// })
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// The rule allows to change the name of the assertion function to check, and the modules to inspect in case the function is imported.
+    ///
+    /// ```json,ignore
+    /// {
+    ///     "options": {
+    ///         "assertionFunctionNames": ["expect"],
+    ///         "specifiers": ["somePackage"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// With the previous configuration, the rule will be triggered if the function `expect` is used _and_ it is imported from the package `"somePackage"`.
+    ///
+    /// ```js,ignore
+    /// import {expect} from "somePackage";
+    /// describe("describe", () => {
+    ///     assert.equal()
+    /// })
     /// ```
     ///
     pub NoMisplacedAssertion {
@@ -97,7 +141,6 @@ impl Rule for NoMisplacedAssertion {
                     }
                 }
                 WalkEvent::Leave(node) => {
-
                     if let Some(node) = JsCallExpression::cast(node) {
                         if let Ok(callee) = node.callee() {
                             if callee.is_test_describe_call() {
@@ -108,8 +151,7 @@ impl Rule for NoMisplacedAssertion {
                             }
                             if let Some(identifier) = callee.get_callee_object_identifier() {
                                 if inside_describe_call && !inside_it_call {
-                                    assertion_call =
-                                        Some(identifier);
+                                    assertion_call = Some(identifier);
                                     break;
                                 }
                             }
@@ -121,31 +163,31 @@ impl Rule for NoMisplacedAssertion {
         if let Some(assertion_call) = assertion_call {
             let call_text = assertion_call.value_token().ok()?;
             let binding = model.binding(&assertion_call);
-            dbg!(&binding);
-            if !options.specifiers.is_empty() {
-                if let Some(binding) = binding {
+            if let Some(binding) = binding {
+                if !options.specifiers.is_empty() {
                     let ident = JsIdentifierBinding::cast_ref(binding.syntax())?;
                     let import = ident.syntax().ancestors().find_map(JsImport::cast)?;
                     let source_text = import.source_text().ok()?;
-                    if options.assertion_function_names.iter()
+                    if options
+                        .assertion_function_names
+                        .iter()
                         .find(|function_name| function_name.as_str() == call_text.text_trimmed())
                         .is_some()
-
                         && options
-                        .specifiers
-                        .iter()
-                        .find(|specifier| specifier.as_str() == source_text.text())
-                        .is_some()
-
+                            .specifiers
+                            .iter()
+                            .find(|specifier| specifier.as_str() == source_text.text())
+                            .is_some()
                     {
                         return Some(assertion_call.range());
                     }
                 }
             } else {
-                if options.assertion_function_names.iter()
+                if options
+                    .assertion_function_names
+                    .iter()
                     .find(|function_name| function_name.as_str() == call_text.text_trimmed())
                     .is_some()
-
                 {
                     return Some(assertion_call.range());
                 }

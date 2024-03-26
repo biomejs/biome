@@ -252,11 +252,8 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"import assert from "node:assert";
-import { describe } from "node:test";
-
-describe(() => {
-	assert.equal("something", "something")
+        const SOURCE: &str = r#"describe(() => {
+	expect("something").toBeTrue()
 })
         "#;
 
