@@ -449,6 +449,30 @@ unsorted.jsx:38:15 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
+unsorted.jsx:42:3 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    40 │ 	class={{
+    41 │ 		// TODO: property should be sorted
+  > 42 │ 		"px-2 foo p-4 bar": [
+       │ 		^^^^^^^^^^^^^^^^^^
+    43 │ 			"px-2 foo p-4 bar",
+    44 │ 			// TODO: property should be sorted
+  
+  i Unsafe fix: Sort the classes.
+  
+    40 40 │   	class={{
+    41 41 │   		// TODO: property should be sorted
+    42    │ - → → "px-2·foo·p-4·bar":·[
+       42 │ + → → "foo·bar·p-4·px-2":·[
+    43 43 │   			"px-2 foo p-4 bar",
+    44 44 │   			// TODO: property should be sorted
+  
+
+```
+
+```
 unsorted.jsx:43:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! These CSS classes should be sorted.
@@ -468,6 +492,30 @@ unsorted.jsx:43:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
        43 │ + → → → "foo·bar·p-4·px-2",
     44 44 │   			// TODO: property should be sorted
     45 45 │   			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+  
+
+```
+
+```
+unsorted.jsx:45:6 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    43 │ 			"px-2 foo p-4 bar",
+    44 │ 			// TODO: property should be sorted
+  > 45 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
+       │ 			  ^^^^^^^^^^^^^^^^^^
+    46 │ 		],
+    47 │ 	}}
+  
+  i Unsafe fix: Sort the classes.
+  
+    43 43 │   			"px-2 foo p-4 bar",
+    44 44 │   			// TODO: property should be sorted
+    45    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
+       45 │ + → → → {·"foo·bar·p-4·px-2":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
+    46 46 │   		],
+    47 47 │   	}}
   
 
 ```
@@ -519,5 +567,3 @@ unsorted.jsx:45:55 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
   
 
 ```
-
-

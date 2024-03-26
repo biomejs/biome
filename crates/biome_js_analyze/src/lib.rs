@@ -252,13 +252,11 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"import assert from "node:assert";
-import { describe } from "node:test";
-
-describe(() => {
-	assert.equal("something", "something")
-})
-        "#;
+        const SOURCE: &str = r#"<div
+    class={{
+        "px-2·foo·p-4·bar": ["foo bar p-4"],
+    }}
+/>"#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
@@ -270,7 +268,7 @@ describe(() => {
             dependencies_index: Some(1),
             stable_result: StableHookResult::None,
         };
-        let rule_filter = RuleFilter::Rule("nursery", "noMisplacedAssertion");
+        let rule_filter = RuleFilter::Rule("nursery", "useSortedClasses");
 
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
