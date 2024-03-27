@@ -1101,10 +1101,7 @@ impl AnyJsExpression {
 
         match first {
             Some("test" | "it") => true,
-            Some("Deno") => match second {
-                Some("test") => true,
-                _ => false,
-            },
+            Some("Deno") => matches!(second, Some("test")),
             _ => false,
         }
     }
@@ -1127,12 +1124,12 @@ impl AnyJsExpression {
             Some(first) => {
                 if first.text() == "assert" {
                     if second.is_some() {
-                        return Some(first.clone());
+                        Some(first.clone())
                     } else {
                         None
                     }
                 } else if matches!(first.text(), "expect" | "assertEquals") {
-                    return Some(first.clone());
+                    Some(first.clone())
                 } else {
                     None
                 }

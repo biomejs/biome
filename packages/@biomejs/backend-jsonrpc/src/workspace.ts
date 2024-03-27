@@ -935,7 +935,7 @@ export interface Nursery {
 	/**
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
-	noMisplacedAssertion?: RuleConfiguration_for_NoMisplacedOptions;
+	noMisplacedAssertion?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of namespace imports.
 	 */
@@ -1487,9 +1487,6 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
-export type RuleConfiguration_for_NoMisplacedOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoMisplacedOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -1528,10 +1525,6 @@ export interface RuleWithOptions_for_HooksOptions {
 export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	level: RulePlainConfiguration;
 	options: DeprecatedHooksOptions;
-}
-export interface RuleWithOptions_for_NoMisplacedOptions {
-	level: RulePlainConfiguration;
-	options: NoMisplacedOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	level: RulePlainConfiguration;
@@ -1583,20 +1576,6 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
-export interface NoMisplacedOptions {
-	/**
-	 * The name of the function that will run the assertion. By default, its name is `expect`.
-	 */
-	assertionFunctionNames: string[];
-	/**
-	* A list of specifiers that export the `assertionFunctionName` function.
-
-If your assertion function name is a global, provide an empty array.
-
-Defaults to: `"chai"`, `"node:assert"` and `node:assert/strict`. 
-	 */
-	specifiers: string[];
-}
 /**
  * Options for the rule `noRestrictedImports`.
  */

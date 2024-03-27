@@ -1373,29 +1373,6 @@
 			},
 			"additionalProperties": false
 		},
-		"NoMisplacedConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoMisplacedOptions" }
-			]
-		},
-		"NoMisplacedOptions": {
-			"type": "object",
-			"required": ["assertionFunctionNames", "specifiers"],
-			"properties": {
-				"assertionFunctionNames": {
-					"description": "The name of the function that will run the assertion. By default, its name is `expect`.",
-					"type": "array",
-					"items": { "type": "string" }
-				},
-				"specifiers": {
-					"description": "A list of specifiers that export the `assertionFunctionName` function.\n\nIf your assertion function name is a global, provide an empty array.\n\nDefaults to: `\"chai\"`, `\"node:assert\"` and `node:assert/strict`.",
-					"type": "array",
-					"items": { "type": "string" }
-				}
-			},
-			"additionalProperties": false
-		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1484,7 +1461,7 @@
 				"noMisplacedAssertion": {
 					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
 					"anyOf": [
-						{ "$ref": "#/definitions/NoMisplacedConfiguration" },
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1865,15 +1842,6 @@
 			"properties": {
 				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
 				"options": { "$ref": "#/definitions/NamingConventionOptions" }
-			},
-			"additionalProperties": false
-		},
-		"RuleWithNoMisplacedOptions": {
-			"type": "object",
-			"required": ["level", "options"],
-			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/NoMisplacedOptions" }
 			},
 			"additionalProperties": false
 		},

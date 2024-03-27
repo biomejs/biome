@@ -86,8 +86,8 @@ declare_rule! {
     }
 }
 
-const ASSERTION_FUNCTION_NAMES: [&'static str; 3] = ["assert", "assertEquals", "expect"];
-const SPECIFIERS: [&'static str; 6] = [
+const ASSERTION_FUNCTION_NAMES: [&str; 3] = ["assert", "assertEquals", "expect"];
+const SPECIFIERS: [&str; 6] = [
     "chai",
     "node:assert",
     "node:assert/strict",
@@ -143,25 +143,20 @@ impl Rule for NoMisplacedAssertion {
                 let import = ident.syntax().ancestors().find_map(JsImport::cast)?;
                 let source_text = import.source_text().ok()?;
                 if (ASSERTION_FUNCTION_NAMES.contains(&call_text.text()))
-                    && (SPECIFIERS
-                        .iter()
-                        .find(|specifier| {
-                            // Deno is a particular case
-                            if **specifier == "/assert/mod.ts" {
-                                source_text.text().ends_with("/assert/mod.ts")
-                                    && source_text.text().starts_with("https://deno.land/std")
-                            } else {
-                                **specifier == source_text.text()
-                            }
-                        })
-                        .is_some())
+                    && (SPECIFIERS.iter().any(|specifier| {
+                        // Deno is a particular case
+                        if *specifier == "/assert/mod.ts" {
+                            source_text.text().ends_with("/assert/mod.ts")
+                                && source_text.text().starts_with("https://deno.land/std")
+                        } else {
+                            *specifier == source_text.text()
+                        }
+                    }))
                 {
                     return Some(assertion_call.range());
                 }
-            } else {
-                if ASSERTION_FUNCTION_NAMES.contains(&call_text.text()) {
-                    return Some(assertion_call.range());
-                }
+            } else if ASSERTION_FUNCTION_NAMES.contains(&call_text.text()) {
+                return Some(assertion_call.range());
             }
         }
 
