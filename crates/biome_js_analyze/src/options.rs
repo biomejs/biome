@@ -166,8 +166,6 @@ pub type NoSelfAssign =
     <lint::correctness::no_self_assign::NoSelfAssign as biome_analyze::Rule>::Options;
 pub type NoSelfCompare =
     <lint::suspicious::no_self_compare::NoSelfCompare as biome_analyze::Rule>::Options;
-pub type NoSemicolonInJsx =
-    <lint::nursery::no_semicolon_in_jsx::NoSemicolonInJsx as biome_analyze::Rule>::Options;
 pub type NoSetterReturn =
     <lint::correctness::no_setter_return::NoSetterReturn as biome_analyze::Rule>::Options;
 pub type NoShadowRestrictedNames = < lint :: suspicious :: no_shadow_restricted_names :: NoShadowRestrictedNames as biome_analyze :: Rule > :: Options ;
@@ -180,6 +178,7 @@ pub type NoSparseArray =
 pub type NoStaticOnlyClass =
     <lint::complexity::no_static_only_class::NoStaticOnlyClass as biome_analyze::Rule>::Options;
 pub type NoStringCaseMismatch = < lint :: correctness :: no_string_case_mismatch :: NoStringCaseMismatch as biome_analyze :: Rule > :: Options ;
+pub type NoSuspiciousSemicolonInJsx = < lint :: nursery :: no_suspicious_semicolon_in_jsx :: NoSuspiciousSemicolonInJsx as biome_analyze :: Rule > :: Options ;
 pub type NoSvgWithoutTitle =
     <lint::a11y::no_svg_without_title::NoSvgWithoutTitle as biome_analyze::Rule>::Options;
 pub type NoSwitchDeclarations = < lint :: correctness :: no_switch_declarations :: NoSwitchDeclarations as biome_analyze :: Rule > :: Options ;

@@ -75,6 +75,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add rule [noEvolvingAny](https://biomejs.dev/linter/rules/no-evolving-any) to disallow variables from evolving into `any` type through reassignments. Contributed by @fujiyamaorange
 
+#### Enhancements
+
+- Rename `noSemicolonInJsx` to `noSuspiciousSemicolonInJsx`. Contributed by @fujiyamaorange
+
 ### LSP
 
 #### Bug fixes

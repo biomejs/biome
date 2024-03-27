@@ -1,8 +1,8 @@
 ---
-title: noSemicolonInJsx (since v1.6.0)
+title: noSuspiciousSemicolonInJsx (since v1.6.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noSemicolonInJsx`**
+**Diagnostic Category: `lint/nursery/noSuspiciousSemicolonInJsx`**
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.
@@ -26,7 +26,7 @@ const Component = () => {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noSemicolonInJsx.js:4:14 <a href="https://biomejs.dev/linter/rules/no-semicolons-in-jsx">lint/nursery/noSemicolonInJsx</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noSuspiciousSemicolonInJsx.js:4:14 <a href="https://biomejs.dev/linter/rules/no-suspicious-semicolons-in-jsx">lint/nursery/noSuspiciousSemicolonInJsx</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">There is a suspicious </span><span style="color: Tomato;"><strong>semicolon</strong></span><span style="color: Tomato;"> in the JSX element.</span>
   
