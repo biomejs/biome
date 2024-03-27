@@ -119,6 +119,7 @@ define_categories! {
     "lint/nursery/noExcessiveNestedTestSuites": "https://biomejs.dev/linter/rules/no-excessive-nested-test-suites",
     "lint/nursery/noExportsInTest": "https://biomejs.dev/linter/rules/no-exports-in-test",
     "lint/nursery/noFocusedTests": "https://biomejs.dev/linter/rules/no-focused-tests",
+    "lint/nursery/noMisplacedAssertion": "https://biomejs.dev/linter/rules/no-misplaced-assertion",
     "lint/nursery/noNamespaceImport": "https://biomejs.dev/linter/rules/no-namespace-import",
     "lint/nursery/noNodejsModules": "https://biomejs.dev/linter/rules/no-nodejs-modules",
     "lint/nursery/noReExportAll": "https://biomejs.dev/linter/rules/no-re-export-all",

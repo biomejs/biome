@@ -39,6 +39,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#2211](https://github.com/biomejs/biome/issues/2211). noChildrenProp should work fine when children pass as a prop in a new line. Contributed by @fireairforce
 
+#### Enhancements
+
+- Add support for object property members in the rule `useSortedClasses`. Contributed by @ematipico
+
 ### Parser
 
 ## 1.6.3 (2024-03-25)

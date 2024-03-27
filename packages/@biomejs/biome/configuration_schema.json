@@ -1458,6 +1458,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMisplacedAssertion": {
+					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNamespaceImport": {
 					"description": "Disallow the use of namespace imports.",
 					"anyOf": [
