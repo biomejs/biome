@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, LanguageKind, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleBlock;
 use biome_rowan::AstNode;
@@ -28,7 +28,6 @@ declare_rule! {
         version: "next",
         name: "noColorInvalidHex",
         recommended: false,
-        language_kind: LanguageKind::Css,
     }
 }
 

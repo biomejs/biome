@@ -2,7 +2,7 @@ mod rules_sources;
 
 use crate::rules_sources::generate_rule_sources;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, ControlFlow, FixKind, GroupCategory, LanguageKind, Queryable,
+    AnalysisFilter, AnalyzerOptions, ControlFlow, FixKind, GroupCategory, Queryable,
     RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata, RuleSource,
     RuleSourceKind,
 };
@@ -241,32 +241,12 @@ fn generate_group(
     writeln!(main_page_buffer)?;
     write_markup_to_string(main_page_buffer, description)?;
     writeln!(main_page_buffer)?;
-    if is_nursery {
-        writeln!(
-            main_page_buffer,
-            "| Rule name | Description | Properties | Language |"
-        )?;
-        writeln!(main_page_buffer, "| --- | --- | --- | --- |")?;
-    } else {
-        writeln!(main_page_buffer, "| Rule name | Description | Properties |")?;
-        writeln!(main_page_buffer, "| --- | --- | --- |")?;
-    }
+    writeln!(main_page_buffer, "| Rule name | Description | Properties |")?;
+    writeln!(main_page_buffer, "| --- | --- | --- |")?;
 
     for (rule, meta) in rules {
         let is_recommended = !is_nursery && meta.recommended;
         let dashed_rule = Case::Kebab.convert(rule);
-        let lang_kind = meta.language_kind.unwrap_or_default();
-        let lang_icon = match lang_kind {
-            LanguageKind::Js => {
-                "<img alt=\"JavaScript logo\" src=\"/src/assets/svg/js-icon.svg\" />"
-            }
-            LanguageKind::Json => {
-                "<img alt=\"JavaScript logo\" src=\"/src/assets/svg/json-icon.svg\" />"
-            }
-            LanguageKind::Css => {
-                "<img alt=\"JavaScript logo\" src=\"/src/assets/svg/css-icon.svg\" />"
-            }
-        };
         if is_recommended {
             recommended_rules.push_str(&format!(
                 "\t<li><a href='/linter/rules/{dashed_rule}'>{rule}</a></li>\n"
@@ -301,17 +281,10 @@ fn generate_group(
                 let mut summary_html = Vec::new();
                 write_html(&mut summary_html, summary.into_iter())?;
                 let summary_html = String::from_utf8_lossy(&summary_html);
-                if is_nursery {
-                    write!(
+                write!(
                     main_page_buffer,
-                    "| [{rule}](/linter/rules/{dashed_rule}) | {summary_html} | {properties} | {lang_icon} |"
+                    "| [{rule}](/linter/rules/{dashed_rule}) | {summary_html} | {properties} |"
                 )?;
-                } else {
-                    write!(
-                        main_page_buffer,
-                        "| [{rule}](/linter/rules/{dashed_rule}) | {summary_html} | {properties} |"
-                    )?;
-                }
 
                 writeln!(main_page_buffer)?;
             }

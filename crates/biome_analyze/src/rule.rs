@@ -32,8 +32,6 @@ pub struct RuleMetadata {
     pub recommended: bool,
     /// The kind of fix
     pub fix_kind: Option<FixKind>,
-    /// The target language
-    pub language_kind: Option<LanguageKind>,
     /// The source URL of the rule
     pub source: Option<RuleSource>,
     /// The source kind of the rule
@@ -229,28 +227,6 @@ impl RuleSourceKind {
     }
 }
 
-#[derive(Debug, Default, Clone)]
-pub enum LanguageKind {
-    #[default]
-    Js,
-    Json,
-    Css,
-}
-
-impl LanguageKind {
-    pub const fn is_js(&self) -> bool {
-        matches!(self, Self::Js)
-    }
-
-    pub const fn is_json(&self) -> bool {
-        matches!(self, Self::Json)
-    }
-
-    pub const fn is_css(&self) -> bool {
-        matches!(self, Self::Css)
-    }
-}
-
 impl RuleMetadata {
     pub const fn new(version: &'static str, name: &'static str, docs: &'static str) -> Self {
         Self {
@@ -262,7 +238,6 @@ impl RuleMetadata {
             fix_kind: None,
             source: None,
             source_kind: None,
-            language_kind: None,
         }
     }
 
@@ -291,11 +266,6 @@ impl RuleMetadata {
 
     pub const fn source_kind(mut self, source_kind: RuleSourceKind) -> Self {
         self.source_kind = Some(source_kind);
-        self
-    }
-
-    pub const fn language_kind(mut self, language_kind: LanguageKind) -> Self {
-        self.language_kind = Some(language_kind);
         self
     }
 }
