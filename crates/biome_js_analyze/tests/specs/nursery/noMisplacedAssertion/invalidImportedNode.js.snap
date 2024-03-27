@@ -16,7 +16,7 @@ describe(() => {
 ```
 invalidImportedNode.js:5:2 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assertion isn't inside a it() function call.
+  ! The assertion isn't inside a it(), test() or Deno.test() function call.
   
     4 │ describe(() => {
   > 5 │ 	assert.equal("something", "something")
@@ -25,7 +25,7 @@ invalidImportedNode.js:5:2 lint/nursery/noMisplacedAssertion ━━━━━━�
   
   i This will result in unexpected behaviours from your test suite.
   
-  i Move the assertion inside a it() function call.
+  i Move the assertion inside a it(), test() or Deno.test() function call.
   
 
 ```

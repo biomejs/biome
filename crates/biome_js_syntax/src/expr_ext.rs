@@ -1024,6 +1024,7 @@ impl AnyJsExpression {
     /// - `fit`
     /// - `fdescribe`
     /// - `ftest`
+    /// - `Deno.test`
     ///
     /// Based on this [article]
     ///
@@ -1048,9 +1049,9 @@ impl AnyJsExpression {
         let fifth = rev.next().map(|t| t.text());
 
         Ok(match first {
-            Some("it" | "describe") => match second {
+            Some("it" | "describe" | "Deno") => match second {
                 None => true,
-                Some("only" | "skip") => third.is_none(),
+                Some("only" | "skip" | "test") => third.is_none(),
                 _ => false,
             },
             Some("test") => match second {
@@ -1073,40 +1074,71 @@ impl AnyJsExpression {
         })
     }
 
-    /// Checks whether the current called is named `"describe"`
-    pub fn is_test_describe_call(&self) -> bool {
-        if self.contains_a_test_pattern() == Ok(true) {
-            if let Some(function_name) = self.get_callee_object_name() {
-                if matches!(function_name.text_trimmed(), "describe") {
-                    return true;
-                }
-            }
+    /// Checks whether the current function call is:
+    /// - `describe`
+    pub fn contains_describe_call(&self) -> bool {
+        let mut members = CalleeNamesIterator::new(self.clone());
+
+        if let Some(member) = members.next() {
+            return member.text() == "describe";
         }
         false
     }
 
-    /// Checks whether the current called is named `"it"`
-    pub fn is_test_it_call(&self) -> bool {
-        if self.contains_a_test_pattern() == Ok(true) {
-            if let Some(function_name) = self.get_callee_object_name() {
-                if matches!(function_name.text_trimmed(), "it") {
-                    return true;
-                }
-            }
+    /// Checks whether the current function call is:
+    /// - `it`
+    /// - `test`
+    /// - `Deno.test`
+    pub fn contains_it_call(&self) -> bool {
+        let mut members = CalleeNamesIterator::new(self.clone());
+
+        let texts: [Option<TokenText>; 2] = [members.next(), members.next()];
+
+        let mut rev = texts.iter().rev().flatten();
+
+        let first = rev.next().map(|t| t.text());
+        let second = rev.next().map(|t| t.text());
+
+        match first {
+            Some("test" | "it") => true,
+            Some("Deno") => match second {
+                Some("test") => true,
+                _ => false,
+            },
+            _ => false,
         }
-        false
     }
 
-    /// Checks whether the current called is named `"expect"` or `"assert"`
-    pub fn to_assertion_call(&self) -> Option<JsSyntaxToken> {
-        let name = self.get_callee_object_name();
-        if let Some(name) = name {
-            if matches!(name.text_trimmed(), "expect" | "assert") {
-                return Some(name);
-            }
-        }
+    /// Checks whether the current called is named:
+    /// - `expect`
+    /// - `assert`
+    /// - `assertEquals`
+    pub fn to_assertion_call(&self) -> Option<TokenText> {
+        let mut members = CalleeNamesIterator::new(self.clone());
 
-        None
+        let texts: [Option<TokenText>; 2] = [members.next(), members.next()];
+
+        let mut rev = texts.iter().rev().flatten();
+
+        let first = rev.next();
+        let second = rev.next();
+
+        match first {
+            Some(first) => {
+                if first.text() == "assert" {
+                    if second.is_some() {
+                        return Some(first.clone());
+                    } else {
+                        None
+                    }
+                } else if matches!(first.text(), "expect" | "assertEquals") {
+                    return Some(first.clone());
+                } else {
+                    None
+                }
+            }
+            None => None,
+        }
     }
 }
 

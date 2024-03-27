@@ -116,7 +116,7 @@ impl Visitor for NestedTestVisitor {
             WalkEvent::Enter(node) => {
                 if let Some(node) = JsCallExpression::cast_ref(node) {
                     if let Ok(callee) = node.callee() {
-                        if callee.is_test_describe_call() {
+                        if callee.contains_describe_call() {
                             self.curr_count += 1;
                             if self.curr_count == self.max_count + 1 {
                                 ctx.match_query(NestedTest(node.clone()));
@@ -128,7 +128,7 @@ impl Visitor for NestedTestVisitor {
             WalkEvent::Leave(node) => {
                 if let Some(node) = JsCallExpression::cast_ref(node) {
                     if let Ok(callee) = node.callee() {
-                        if callee.is_test_describe_call() {
+                        if callee.contains_describe_call() {
                             self.curr_count -= 1;
                         }
                     }
