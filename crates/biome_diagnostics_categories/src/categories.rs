@@ -124,7 +124,7 @@ define_categories! {
     "lint/nursery/noReExportAll": "https://biomejs.dev/linter/rules/no-re-export-all",
     "lint/nursery/noRestrictedImports": "https://biomejs.dev/linter/rules/no-restricted-imports",
     "lint/nursery/noSkippedTests": "https://biomejs.dev/linter/rules/no-skipped-tests",
-    "lint/nursery/noSuspiciousSemicolonInJsx": "https://biomejs.dev/linter/rules/no-suspicious-semicolons-in-jsx",
+    "lint/nursery/noSuspiciousSemicolonInJsx": "https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx",
     "lint/nursery/noTypeOnlyImportAttributes": "https://biomejs.dev/linter/rules/no-type-only-import-attributes",
     "lint/nursery/noUndeclaredDependencies": "https://biomejs.dev/linter/rules/no-undeclared-dependencies",
     "lint/nursery/noUselessTernary": "https://biomejs.dev/linter/rules/no-useless-ternary",
