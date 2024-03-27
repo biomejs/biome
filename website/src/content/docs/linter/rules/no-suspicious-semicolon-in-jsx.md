@@ -1,8 +1,12 @@
 ---
-title: noSuspiciousSemicolonInJsx (since v1.6.0)
+title: noSuspiciousSemicolonInJsx (not released)
 ---
 
 **Diagnostic Category: `lint/nursery/noSuspiciousSemicolonInJsx`**
+
+:::danger
+This rule hasn't been released yet.
+:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

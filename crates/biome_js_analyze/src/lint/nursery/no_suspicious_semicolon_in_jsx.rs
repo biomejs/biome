@@ -43,7 +43,7 @@ declare_rule! {
     /// ```
     ///
     pub NoSuspiciousSemicolonInJsx {
-        version: "1.6.0",
+        version: "next",
         name: "noSuspiciousSemicolonInJsx",
         recommended: true,
     }
