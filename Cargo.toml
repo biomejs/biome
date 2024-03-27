@@ -111,6 +111,8 @@ biome_diagnostics_categories = { version = "0.5.7", path = "./crates/biome_diagn
 biome_diagnostics_macros     = { version = "0.5.7", path = "./crates/biome_diagnostics_macros" }
 biome_formatter              = { version = "0.5.7", path = "./crates/biome_formatter" }
 biome_fs                     = { version = "0.5.7", path = "./crates/biome_fs" }
+biome_graphql_factory        = { version = "0.1.0", path = "./crates/biome_graphql_factory" }
+biome_graphql_syntax         = { version = "0.1.0", path = "./crates/biome_graphql_syntax" }
 biome_grit_factory           = { version = "0.5.7", path = "./crates/biome_grit_factory" }
 biome_grit_parser            = { version = "0.1.0", path = "./crates/biome_grit_parser" }
 biome_grit_syntax            = { version = "0.5.7", path = "./crates/biome_grit_syntax" }

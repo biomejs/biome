@@ -418,6 +418,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_graphql_factory"
+version = "0.1.0"
+dependencies = [
+ "biome_graphql_syntax",
+ "biome_rowan",
+]
+
+[[package]]
+name = "biome_graphql_syntax"
+version = "0.1.0"
+dependencies = [
+ "biome_rowan",
+ "schemars",
+ "serde",
+]
+
+[[package]]
 name = "biome_grit_factory"
 version = "0.5.7"
 dependencies = [

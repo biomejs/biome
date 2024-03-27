@@ -1,4 +1,5 @@
 use crate::css_kinds_src::CSS_KINDS_SRC;
+use crate::graphql_kind_src::GRAPHQL_KINDS_SRC;
 use crate::grit_kinds_src::GRIT_KINDS_SRC;
 use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::js_kinds_src::{AstNodeSrc, AstSrc, Field, TokenKind, JS_KINDS_SRC};
@@ -967,6 +968,7 @@ pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> Tok
         LanguageKind::Json => JSON_KINDS_SRC,
         LanguageKind::Grit => GRIT_KINDS_SRC,
         LanguageKind::Html => HTML_KINDS_SRC,
+        LanguageKind::Graphql => GRAPHQL_KINDS_SRC,
     };
     if kind_source.literals.contains(&kind_variant_name.as_str())
         || kind_source.tokens.contains(&kind_variant_name.as_str())
@@ -976,7 +978,15 @@ pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> Tok
     } else if kind_source.keywords.contains(&name) {
         // we need to replace "-" with "_" for the keywords
         // e.g. we have `color-profile` in css but it's an invalid ident in rust code
-        let token: TokenStream = name.replace('-', "_").parse().unwrap();
+        let token = name.replace('-', "_");
+        // also mark uppercase differently from lowercase
+        // e.g. "query" => "QUERY", "QUERY" => "QUERY_UPPERCASE"
+        let token = if token.chars().all(|c| c.is_uppercase()) {
+            "UPPER_".to_string() + token.as_str()
+        } else {
+            token
+        };
+        let token: TokenStream = token.parse().unwrap();
         quote! { T![#token] }
     } else {
         // $ is valid syntax in rust and it's part of macros,

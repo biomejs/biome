@@ -779,6 +779,9 @@ fn get_node_concept(
                 _ => NodeConcept::Auxiliary,
             },
 
+            // TODO: implement formatter
+            LanguageKind::Graphql => NodeConcept::Auxiliary,
+
             // TODO: I will handle formatting in a follow-up PR.
             LanguageKind::Grit => NodeConcept::Auxiliary,
 
@@ -847,6 +850,7 @@ impl LanguageKind {
             LanguageKind::Js => "JsFormatter",
             LanguageKind::Css => "CssFormatter",
             LanguageKind::Json => "JsonFormatter",
+            LanguageKind::Graphql => "GraphqlFormatter",
             LanguageKind::Grit => "GritFormatter",
             LanguageKind::Html => "HtmlFormatter",
         };
@@ -859,6 +863,7 @@ impl LanguageKind {
             LanguageKind::Js => "JsFormatContext",
             LanguageKind::Css => "CssFormatContext",
             LanguageKind::Json => "JsonFormatContext",
+            LanguageKind::Graphql => "GraphqlFormatContext",
             LanguageKind::Grit => "GritFormatContext",
             LanguageKind::Html => "HtmlFormatContext",
         };

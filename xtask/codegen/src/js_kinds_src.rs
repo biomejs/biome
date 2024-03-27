@@ -679,6 +679,7 @@ impl Field {
                     ("||", _) => "logical_or",
                     ("&&", _) => "logical_and",
                     ("$=", _) => "suffix",
+                    ("$", LanguageKind::Graphql) => "dollar",
                     ("~=", _) => "whitespace_like",
                     (",", _) => "comma",
                     _ => name,
