@@ -24,7 +24,6 @@
 // functions
 /* SHOULD emit diagnostics (functions specified in options) */
 clsx("px-2 foo p-4 bar");
-// TODO: tagged template literals are not supported yet
 tw`px-2 foo p-4 bar`;
 tw.div`px-2 foo p-4 bar`;
 notClassFunction("px-2 foo p-4 bar");
@@ -37,10 +36,8 @@ notTemplateFunction.div`px-2 foo p-4 bar`;
 <div class={["px-2 foo p-4 bar"]} />;
 <div
 	class={{
-		// TODO: property should be sorted
 		"px-2 foo p-4 bar": [
 			"px-2 foo p-4 bar",
-			// TODO: property should be sorted
 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
 		],
 	}}
