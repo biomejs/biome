@@ -252,7 +252,12 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"<>{provider}</>
+        const SOURCE: &str = r#"import assert from "node:assert";
+import { describe } from "node:test";
+
+describe(() => {
+	assert.equal("something", "something")
+})
         "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
@@ -265,7 +270,7 @@ mod tests {
             dependencies_index: Some(1),
             stable_result: StableHookResult::None,
         };
-        let rule_filter = RuleFilter::Rule("complexity", "noUselessFragments");
+        let rule_filter = RuleFilter::Rule("nursery", "noMisplacedAssertion");
 
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),

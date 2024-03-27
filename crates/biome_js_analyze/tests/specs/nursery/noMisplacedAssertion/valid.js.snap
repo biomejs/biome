@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```jsx
+describe("msg", () => {
+    it("msg", () => {
+        expect("something").toBeTrue()
+    })
+})
+
+test("something", () => {
+    expect("something").toBeTrue()
+})
+
+Deno.test("something", () => {
+    expect("something").toBeTrue()
+})
+```

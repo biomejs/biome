@@ -933,6 +933,10 @@ export interface Nursery {
 	 */
 	noFocusedTests?: RuleConfiguration_for_Null;
 	/**
+	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
+	 */
+	noMisplacedAssertion?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of namespace imports.
 	 */
 	noNamespaceImport?: RuleConfiguration_for_Null;
@@ -1907,6 +1911,7 @@ export type Category =
 	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noExportsInTest"
 	| "lint/nursery/noFocusedTests"
+	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noNamespaceImport"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReExportAll"

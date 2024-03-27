@@ -42,7 +42,7 @@ declare_rule! {
     /// </>
     /// ```
     ///
-    /// ### Options
+    /// ## Options
     ///
     /// ```json
     /// {
