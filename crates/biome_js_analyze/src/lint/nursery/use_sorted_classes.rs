@@ -167,7 +167,6 @@ impl Rule for UseSortedClasses {
             if let Some(value) = node.value() {
                 let sorted_value = sort_class_name(&value, &SORT_CONFIG);
                 if value.text() != sorted_value {
-                    dbg!(&sorted_value);
                     return Some(sorted_value);
                 }
             }
