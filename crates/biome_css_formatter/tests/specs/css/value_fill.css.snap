@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/value_fill.css
 ---
-
 # Input
 
 ```css
@@ -33,5 +32,3 @@ div {
 		going forever onward intothenight;
 }
 ```
-
-
