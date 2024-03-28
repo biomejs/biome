@@ -25,10 +25,7 @@ use std::{any::TypeId, marker::PhantomData, ops::Deref};
 use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
 
-use super::{
-    eslint_barrel, eslint_import, eslint_jest, eslint_jsxa11y, eslint_react, eslint_react_hooks,
-    eslint_typescript, eslint_unicorn,
-};
+use super::{eslint_jsxa11y, eslint_typescript, eslint_unicorn};
 
 /// This modules includes implementations for deserializing an eslint configuration.
 ///
@@ -122,16 +119,10 @@ fn load_config(
             )
         },
         Some("js" | "cjs") => {
-            let path_str = path.to_string_lossy();
-            let output = Command::new("node")
-                .arg("--eval")
-                .arg(format!("import('{path_str}').then((c) => console.log(JSON.stringify(c.default)))"))
-                .output()?;
+            let content = load_config_with_node(&path.to_string_lossy())?;
             deserialize_from_json_str::<ConfigData>(
-                &String::from_utf8_lossy(&output.stdout),
-                JsonParserOptions::default()
-                    .with_allow_trailing_commas()
-                    .with_allow_comments(),
+                &content,
+                JsonParserOptions::default(),
                 "",
             )
         },
@@ -159,6 +150,65 @@ fn load_config(
     }
 }
 
+fn load_config_with_node(path_str: &str) -> Result<String, CliDiagnostic> {
+    match Command::new("node")
+        .arg("--eval")
+        .arg(format!(
+            "import('{path_str}').then((c) => console.log(JSON.stringify(c.default)))"
+        ))
+        .output() {
+        Err(_) => {
+            Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+                reason: "The `node` program doesn't exist or cannot be invoked by Biome.\n`node` is invoked to resolve ESlint configurations written in JavaScript.\nThis includes shared configurations and plugin configurations imported with ESlint's `extends`.".to_string()
+            }))
+        },
+        Ok(output) => {
+            if !output.stderr.is_empty() {
+                let stderr = String::from_utf8_lossy(&output.stderr);
+                return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+                    reason: format!("`node` was invoked to resolve an ESlint configuration. This invocation failed with the following error:\n{stderr}")
+                }));
+            }
+            Ok(String::from_utf8_lossy(&output.stdout).to_string())
+        }
+    }
+}
+
+/// ESlint to specific rules to resolve a package name.
+/// See https://eslint.org/docs/latest/extend/shareable-configs#using-a-shareable-config
+/// See also https://eslint.org/docs/latest/extend/plugins
+#[derive(Debug)]
+enum EslintPackage {
+    Config,
+    Plugin,
+}
+impl EslintPackage {
+    fn resolve_name<'a>(&self, name: &'a str) -> Cow<'a, str> {
+        let artifact = match self {
+            EslintPackage::Config => "eslint-config-",
+            EslintPackage::Plugin => "eslint-plugin-",
+        };
+        debug_assert!(matches!(artifact, "eslint-plugin-" | "eslint-config-"));
+        if name.starts_with('@') {
+            // handle scoped package
+            if let Some((scope, scoped)) = name.split_once('/') {
+                if scoped.starts_with(artifact) {
+                    Cow::Borrowed(name)
+                } else {
+                    Cow::Owned(format!("{scope}/{artifact}{scoped}"))
+                }
+            } else {
+                let artifact = artifact.trim_end_matches('-');
+                Cow::Owned(format!("{name}/{artifact}"))
+            }
+        } else if name.starts_with(artifact) {
+            Cow::Borrowed(name)
+        } else {
+            Cow::Owned(format!("{artifact}{name}"))
+        }
+    }
+}
+
 #[derive(Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
 pub(crate) struct ConfigData {
@@ -175,150 +225,100 @@ impl ConfigData {
     ///
     /// This handles native ESlint presets such as `eslint:recommended`,
     /// and plugin presets such as `plugin:@typescript-eslint/recommended`.
-    pub(crate) fn from_preset(name: &str) -> Option<ConfigData> {
-        let rules = match name {
-            "eslint:recommended" => Rules::from_iter(ESLINT_RECOMMENDED.into_iter()),
-            "eslint:all" => Rules::from_iter(ESLINT_ALL.into_iter()),
-            "plugin:barrel/recommended" => Rules::from_iter(eslint_barrel::RECOMMENDED.into_iter()),
-            "plugin:import/errors" => Rules::from_iter(eslint_import::ERRORS.into_iter()),
-            "plugin:import/recommended" => Rules::from_iter(
-                eslint_import::ERRORS
-                    .into_iter()
-                    .chain(eslint_import::WARNINGS),
-            ),
-            "plugin:import/warnings" => Rules::from_iter(eslint_import::WARNINGS.into_iter()),
-            "plugin:jest/recommended" => Rules::from_iter(eslint_jest::RECOMMENDED.into_iter()),
-            "plugin:jest/style" => Rules::from_iter(eslint_jest::STYLE.into_iter()),
-            "plugin:jest/all" => Rules::from_iter(
-                eslint_jest::RECOMMENDED
-                    .into_iter()
-                    .chain(eslint_jest::NON_RECOMMENDED_ERROR),
-            ),
-            "plugin:jsx-a11y/recommended" => Rules::from_iter(
-                eslint_jsxa11y::STRICT
-                    .into_iter()
-                    .chain(eslint_jsxa11y::DISABLED_IN_RECOMMENDED),
-            ),
-            "plugin:jsx-a11y/strict" => Rules::from_iter(eslint_jsxa11y::STRICT.into_iter()),
-            "plugin:react/all" => Rules::from_iter(
-                eslint_react::RECOMMENDED
-                    .into_iter()
-                    .chain(eslint_react::NON_RECOMMENDED),
-            ),
-            "plugin:react/jsx-runtime" => Rules::from_iter(eslint_react::JSX_RUNTIME.into_iter()),
-            "plugin:react-hooks/recommended" => {
-                Rules::from_iter(eslint_react_hooks::RECOMMENDED.into_iter())
-            }
-            "plugin:react/recommended" => Rules::from_iter(eslint_react::RECOMMENDED.into_iter()),
-            "plugin:@typescript-eslint/base" => Rules::default(),
-            "plugin:@typescript-eslint/recommended" => {
-                Rules::from_iter(eslint_typescript::RECOMMENDED.into_iter())
-            }
-            "plugin:@typescript-eslint/recommended-type-checked-only" => {
-                Rules::from_iter(eslint_typescript::RECOMMENDED_TYPE_CHECKED_ONLY.into_iter())
-            }
-            "plugin:@typescript-eslint/recommended-type-checked" => Rules::from_iter(
-                eslint_typescript::RECOMMENDED
-                    .into_iter()
-                    .chain(eslint_typescript::RECOMMENDED_TYPE_CHECKED_ONLY),
-            ),
-            "plugin:@typescript-eslint/strict" => {
-                Rules::from_iter(eslint_typescript::STRICT.into_iter())
-            }
-            "plugin:@typescript-eslint/strict-type-checked-only" => {
-                Rules::from_iter(eslint_typescript::STRICT_YYPE_CHECKED_ONLY.into_iter())
-            }
-            "plugin:@typescript-eslint/strict-type-checked" => Rules::from_iter(
-                eslint_typescript::STRICT
-                    .into_iter()
-                    .chain(eslint_typescript::STRICT_YYPE_CHECKED_ONLY),
-            ),
-            "plugin:@typescript-eslint/stylistic" => {
-                Rules::from_iter(eslint_typescript::STYLISTIC.into_iter())
-            }
-            "plugin:@typescript-eslint/stylistic-type-checked-only" => {
-                Rules::from_iter(eslint_typescript::STYLISTIC_TYPE_CHECKED_ONLY.into_iter())
-            }
-            "plugin:@typescript-eslint/stylistic-type-checked" => Rules::from_iter(
-                eslint_typescript::STYLISTIC
-                    .into_iter()
-                    .chain(eslint_typescript::STYLISTIC_TYPE_CHECKED_ONLY),
-            ),
-            "plugin:@typescript-eslint/disable-type-checked" => {
-                Rules::from_iter(eslint_typescript::DISABLE_TYPE_CHECKED.into_iter())
-            }
-            "plugin:@typescript-eslint/all" => Rules::from_iter(eslint_typescript::ALL.into_iter()),
-            "plugin:unicorn/recommeded" => {
-                Rules::from_iter(eslint_unicorn::RECOMMENDED.into_iter())
-            }
-            "plugin:unicorn/all" => Rules::from_iter(
-                eslint_unicorn::RECOMMENDED
-                    .into_iter()
-                    .chain(eslint_unicorn::NON_RECOMMENDED),
-            ),
+    pub(crate) fn from_preset(name: &str) -> Result<ConfigData, CliDiagnostic> {
+        match name {
+            "eslint:recommended" => Ok(ConfigData {
+                rules: Rules::from_iter(ESLINT_RECOMMENDED.into_iter()),
+                ..Default::default()
+            }),
+            "eslint:all" => Ok(ConfigData {
+                rules: Rules::from_iter(ESLINT_ALL.into_iter()),
+                ..Default::default()
+            }),
             name => {
-                if let Some((protocol, _imported)) = name.split_once(':') {
+                if let Some((protocol, name)) = name.split_once(':') {
                     match protocol {
                         "plugin" => {
-                            // TODO: we could handle plugins here
+                            // load ESlint plugin preset
+                            if let Some(config_name) = name.split('/').last() {
+                                let name = name.trim_end_matches(config_name);
+                                let name = name.trim_end_matches('/');
+                                let name = EslintPackage::Plugin.resolve_name(name);
+                                let Ok(content) = load_config_with_node(&name) else {
+                                    return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+                                        reason: format!(
+                                            "The package '{name}' cannot be loaded. Make sure it is installed."
+                                        ),
+                                    }));
+                                };
+                                let deserialized = deserialize_from_json_str::<PluginExport>(
+                                    &content,
+                                    JsonParserOptions::default(),
+                                    "",
+                                )
+                                .into_deserialized();
+                                deserialized.and_then(|mut deserialized| {
+                                    // We use `HashMap::remove` to take ownership of the configuration.
+                                    deserialized.configs.remove(config_name)
+                                }).ok_or_else(|| {
+                                    CliDiagnostic::MigrateError(MigrationDiagnostic {
+                                        reason: format!("The ESlint configuration '{config_name}' of the package '{name}' cannot be extracted. This is likely an internal error.")
+                                    })
+                                })
+                            } else {
+                                Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+                                    reason: format!(
+                                        "The configuration {name} cannot be resolved. Make sure that your ESlint configuration file is valid."
+                                    ),
+                                }))
+                            }
                         }
-                        _ => {}
+                        _ => Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+                            reason: format!("The package {name} cannot be resolved. This is likely an internal error."),
+                        })),
                     }
                 } else {
-                    let name = if name.starts_with('@') {
-                        if let Some((scope, scoped)) = name.split_once('/') {
-                            if scoped.starts_with("eslint-config-") {
-                                Cow::Borrowed(name)
-                            } else {
-                                Cow::Owned(format!("{scope}/eslint-config-{scoped}"))
-                            }
-                        } else {
-                            Cow::Owned(format!("{name}/eslint-config"))
-                        }
-                    } else if name.starts_with("eslint-config-") {
-                        Cow::Borrowed(name)
-                    } else {
-                        Cow::Owned(format!("eslint-config-{name}"))
-                    };
-                    let Ok(output) = Command::new("node")
-                        .arg("--eval")
-                        .arg(format!(
-                            "import('{name}').then((c) => console.log(JSON.stringify(c.default)))"
-                        ))
-                        .output()
-                    else {
-                        return None;
+                    // load ESlint shared config
+                    let name = EslintPackage::Config.resolve_name(name);
+                    let Ok(content) = load_config_with_node(&name) else {
+                        return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+                            reason: format!(
+                                "The package '{name}' cannot be loaded. Make sure it is installed."
+                            ),
+                        }));
                     };
                     let deserialized = deserialize_from_json_str::<ConfigData>(
-                        &String::from_utf8_lossy(&output.stdout),
-                        JsonParserOptions::default()
-                            .with_allow_trailing_commas()
-                            .with_allow_comments(),
+                        &content,
+                        JsonParserOptions::default(),
                         "",
-                    );
-                    if let Some(deserialized) = deserialized.into_deserialized() {
-                        return Some(deserialized);
-                    }
+                    )
+                    .into_deserialized();
+                    deserialized.ok_or_else(|| {
+                        CliDiagnostic::MigrateError(MigrationDiagnostic {
+                            reason: format!("The ESlint configuration of the package '{name}' cannot be extracted. This is likely an internal error.")
+                        })
+                    })
                 }
-                return None;
             }
-        };
-        Some(ConfigData {
-            rules,
-            ..Default::default()
-        })
+        }
     }
 
     /// Load and merge included configuration via `self.extends`.
     ///
     /// Unknown presets are ignored.
     /// `self.extends` is replaced by an empty array.
-    pub(crate) fn resolve_extends(&mut self) {
+    pub(crate) fn resolve_extends(&mut self, console: &mut dyn Console) {
         let extensions: Vec<_> = self
             .extends
             .0
             .iter()
-            .filter_map(|preset| Self::from_preset(preset))
+            .filter_map(|preset| match Self::from_preset(preset) {
+                Ok(config) => Some(config),
+                Err(diag) => {
+                    console.error(markup! {{PrintDiagnostic::simple(&diag)}});
+                    None
+                }
+            })
             .collect();
         self.extends = Shorthand::default();
         for ext in extensions {
@@ -334,6 +334,14 @@ impl Merge for ConfigData {
         self.rules.merge_with(other.rules);
         self.overrides.append(&mut other.overrides);
     }
+}
+
+//? ESlint plugins export metadata in their main export.
+/// This includes presets in the `configs` field.
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct PluginExport {
+    pub(crate) configs: FxHashMap<String, ConfigData>,
 }
 
 #[derive(Debug)]

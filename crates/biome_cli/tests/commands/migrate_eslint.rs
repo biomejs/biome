@@ -276,7 +276,7 @@ fn migrate_eslintrcjson_rule_options() {
 fn migrate_eslintrcjson_presets() {
     let biomejson = r#"{ "linter": { "enabled": true } }"#;
     let eslintrc = r#"{
-        "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+        "extends": ["eslint:recommended"],
         "rules": {
             // Overrides recommended
             "eqeqeq": "off"

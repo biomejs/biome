@@ -12,7 +12,7 @@ expression: content
 
 ```json
 {
-        "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+        "extends": ["eslint:recommended"],
         "rules": {
             // Overrides recommended
             "eqeqeq": "off"
@@ -33,70 +33,64 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        3 │ + → → "enabled":·true,
        4 │ + → → "rules":·{
        5 │ + → → → "complexity":·{
-       6 │ + → → → → "noBannedTypes":·"error",
-       7 │ + → → → → "noExtraBooleanCast":·"error",
-       8 │ + → → → → "noMultipleSpacesInRegularExpressionLiterals":·"error",
-       9 │ + → → → → "noUselessCatch":·"error",
-      10 │ + → → → → "noWith":·"error"
-      11 │ + → → → },
-      12 │ + → → → "correctness":·{
-      13 │ + → → → → "noConstAssign":·"error",
-      14 │ + → → → → "noConstantCondition":·"error",
-      15 │ + → → → → "noEmptyCharacterClassInRegex":·"error",
-      16 │ + → → → → "noEmptyPattern":·"error",
-      17 │ + → → → → "noGlobalObjectCalls":·"error",
-      18 │ + → → → → "noInvalidConstructorSuper":·"error",
-      19 │ + → → → → "noInvalidNewBuiltin":·"error",
-      20 │ + → → → → "noNonoctalDecimalEscape":·"error",
-      21 │ + → → → → "noPrecisionLoss":·"error",
-      22 │ + → → → → "noSelfAssign":·"error",
-      23 │ + → → → → "noSetterReturn":·"error",
-      24 │ + → → → → "noSwitchDeclarations":·"error",
-      25 │ + → → → → "noUndeclaredVariables":·"error",
-      26 │ + → → → → "noUnreachable":·"error",
-      27 │ + → → → → "noUnreachableSuper":·"error",
-      28 │ + → → → → "noUnsafeFinally":·"error",
-      29 │ + → → → → "noUnsafeOptionalChaining":·"error",
-      30 │ + → → → → "noUnusedLabels":·"error",
-      31 │ + → → → → "noUnusedPrivateClassMembers":·"error",
-      32 │ + → → → → "noUnusedVariables":·"error",
-      33 │ + → → → → "useIsNan":·"error",
-      34 │ + → → → → "useValidForDirection":·"error",
-      35 │ + → → → → "useYield":·"error"
-      36 │ + → → → },
-      37 │ + → → → "style":·{·"noNamespace":·"error"·},
-      38 │ + → → → "suspicious":·{
-      39 │ + → → → → "noAsyncPromiseExecutor":·"error",
-      40 │ + → → → → "noCatchAssign":·"error",
-      41 │ + → → → → "noClassAssign":·"error",
-      42 │ + → → → → "noCompareNegZero":·"error",
-      43 │ + → → → → "noControlCharactersInRegex":·"error",
-      44 │ + → → → → "noDebugger":·"error",
-      45 │ + → → → → "noDoubleEquals":·"off",
-      46 │ + → → → → "noDuplicateCase":·"error",
-      47 │ + → → → → "noDuplicateClassMembers":·"error",
-      48 │ + → → → → "noDuplicateObjectKeys":·"error",
-      49 │ + → → → → "noDuplicateParameters":·"error",
-      50 │ + → → → → "noEmptyBlockStatements":·"error",
-      51 │ + → → → → "noExplicitAny":·"error",
-      52 │ + → → → → "noExtraNonNullAssertion":·"error",
-      53 │ + → → → → "noFallthroughSwitchClause":·"error",
-      54 │ + → → → → "noFunctionAssign":·"error",
-      55 │ + → → → → "noGlobalAssign":·"error",
-      56 │ + → → → → "noImportAssign":·"error",
-      57 │ + → → → → "noMisleadingCharacterClass":·"error",
-      58 │ + → → → → "noMisleadingInstantiator":·"error",
-      59 │ + → → → → "noPrototypeBuiltins":·"error",
-      60 │ + → → → → "noShadowRestrictedNames":·"error",
-      61 │ + → → → → "noUnsafeDeclarationMerging":·"error",
-      62 │ + → → → → "noUnsafeNegation":·"error",
-      63 │ + → → → → "useGetterReturn":·"error",
-      64 │ + → → → → "useValidTypeof":·"error"
-      65 │ + → → → }
-      66 │ + → → }
-      67 │ + → }
-      68 │ + }
-      69 │ + 
+       6 │ + → → → → "noExtraBooleanCast":·"error",
+       7 │ + → → → → "noMultipleSpacesInRegularExpressionLiterals":·"error",
+       8 │ + → → → → "noUselessCatch":·"error",
+       9 │ + → → → → "noWith":·"error"
+      10 │ + → → → },
+      11 │ + → → → "correctness":·{
+      12 │ + → → → → "noConstAssign":·"error",
+      13 │ + → → → → "noConstantCondition":·"error",
+      14 │ + → → → → "noEmptyCharacterClassInRegex":·"error",
+      15 │ + → → → → "noEmptyPattern":·"error",
+      16 │ + → → → → "noGlobalObjectCalls":·"error",
+      17 │ + → → → → "noInvalidConstructorSuper":·"error",
+      18 │ + → → → → "noInvalidNewBuiltin":·"error",
+      19 │ + → → → → "noNonoctalDecimalEscape":·"error",
+      20 │ + → → → → "noPrecisionLoss":·"error",
+      21 │ + → → → → "noSelfAssign":·"error",
+      22 │ + → → → → "noSetterReturn":·"error",
+      23 │ + → → → → "noSwitchDeclarations":·"error",
+      24 │ + → → → → "noUndeclaredVariables":·"error",
+      25 │ + → → → → "noUnreachable":·"error",
+      26 │ + → → → → "noUnreachableSuper":·"error",
+      27 │ + → → → → "noUnsafeFinally":·"error",
+      28 │ + → → → → "noUnsafeOptionalChaining":·"error",
+      29 │ + → → → → "noUnusedLabels":·"error",
+      30 │ + → → → → "noUnusedPrivateClassMembers":·"error",
+      31 │ + → → → → "noUnusedVariables":·"error",
+      32 │ + → → → → "useIsNan":·"error",
+      33 │ + → → → → "useValidForDirection":·"error",
+      34 │ + → → → → "useYield":·"error"
+      35 │ + → → → },
+      36 │ + → → → "suspicious":·{
+      37 │ + → → → → "noAsyncPromiseExecutor":·"error",
+      38 │ + → → → → "noCatchAssign":·"error",
+      39 │ + → → → → "noClassAssign":·"error",
+      40 │ + → → → → "noCompareNegZero":·"error",
+      41 │ + → → → → "noControlCharactersInRegex":·"error",
+      42 │ + → → → → "noDebugger":·"error",
+      43 │ + → → → → "noDoubleEquals":·"off",
+      44 │ + → → → → "noDuplicateCase":·"error",
+      45 │ + → → → → "noDuplicateClassMembers":·"error",
+      46 │ + → → → → "noDuplicateObjectKeys":·"error",
+      47 │ + → → → → "noDuplicateParameters":·"error",
+      48 │ + → → → → "noEmptyBlockStatements":·"error",
+      49 │ + → → → → "noFallthroughSwitchClause":·"error",
+      50 │ + → → → → "noFunctionAssign":·"error",
+      51 │ + → → → → "noGlobalAssign":·"error",
+      52 │ + → → → → "noImportAssign":·"error",
+      53 │ + → → → → "noMisleadingCharacterClass":·"error",
+      54 │ + → → → → "noPrototypeBuiltins":·"error",
+      55 │ + → → → → "noShadowRestrictedNames":·"error",
+      56 │ + → → → → "noUnsafeNegation":·"error",
+      57 │ + → → → → "useGetterReturn":·"error",
+      58 │ + → → → → "useValidTypeof":·"error"
+      59 │ + → → → }
+      60 │ + → → }
+      61 │ + → }
+      62 │ + }
+      63 │ + 
   
 
 ```

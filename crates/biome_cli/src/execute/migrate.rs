@@ -21,12 +21,7 @@ use std::path::PathBuf;
 
 mod eslint;
 mod eslint_any_rule_to_biome;
-mod eslint_barrel;
-mod eslint_import;
-mod eslint_jest;
 mod eslint_jsxa11y;
-mod eslint_react;
-mod eslint_react_hooks;
 mod eslint_to_biome;
 mod eslint_typescript;
 mod eslint_unicorn;
@@ -190,7 +185,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         }) => {
             let mut eslint_config = eslint::read_eslint_config(fs, console)?;
             // resolve the `extends` field.
-            eslint_config.resolve_extends();
+            eslint_config.resolve_extends(console);
             let biome_config = deserialize_from_json_str::<PartialConfiguration>(
                 biome_config_content.as_str(),
                 JsonParserOptions::default(),
