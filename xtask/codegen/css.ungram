@@ -1408,7 +1408,7 @@ CssDocumentAtRule =
 	matchers: CssDocumentMatcherList
 	block: AnyCssRuleBlock
 
-CssDocumentMatcherList = AnyCssDocumentMatcher (',' AnyCssDocumentMatcher)* ','?
+CssDocumentMatcherList = (AnyCssDocumentMatcher (',' AnyCssDocumentMatcher)*)
 
 AnyCssDocumentMatcher =
 	CssUrlFunction

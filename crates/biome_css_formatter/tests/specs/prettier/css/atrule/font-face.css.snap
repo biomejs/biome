@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/font-face.css
 ---
-
 # Input
 
 ```css
@@ -185,5 +184,3 @@ format(
     url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 ```
-
-

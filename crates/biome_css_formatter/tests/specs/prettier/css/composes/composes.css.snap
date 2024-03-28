@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/composes/composes.css
 ---
-
 # Input
 
 ```css
@@ -39,5 +38,3 @@ info: css/composes/composes.css
 ```
     3:     "a/long/file/path/exceeding/the/maximum/length/forcing/a/line-wrap/file.css";
 ```
-
-

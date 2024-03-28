@@ -13,8 +13,16 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-.foo {
-    transform: translate(/* comment 9 */ 10px);
+:root {
+		--bs-gradient: linear-gradient(
+			180deg,
+          180deg,
+          180deg,
+          180deg,
+          180deg,
+          180deg,
+          180deg
+		);
 }
 
 "#;

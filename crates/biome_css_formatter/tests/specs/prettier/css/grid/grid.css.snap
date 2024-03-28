@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/grid/grid.css
 ---
-
 # Input
 
 ```css
@@ -565,5 +564,3 @@ grid.css:113:35 parse ━━━━━━━━━━━━━━━━━━━�
 ```
    71:   /* The. Worst. This one is shorthand for like everything here smashed into one. But rarely will you actually specify EVERYTHING. */
 ```
-
-

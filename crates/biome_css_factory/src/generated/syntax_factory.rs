@@ -4126,7 +4126,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 children,
                 AnyCssDocumentMatcher::can_cast,
                 T ! [,],
-                true,
+                false,
             ),
             CSS_FONT_FAMILY_NAME_LIST => Self::make_separated_list_syntax(
                 kind,
