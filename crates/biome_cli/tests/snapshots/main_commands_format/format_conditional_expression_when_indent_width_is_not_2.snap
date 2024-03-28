@@ -1,0 +1,42 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "formatter": {
+      "lineWidth": 80,
+      "indentWidth": 8,
+      "indentStyle": "space"
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+a // test
+        ? // nested test in consequence
+          b
+                ? // nested consequence in consequence
+                  c
+                : // nested alternate in consequence
+                  d
+        : // nested test in alternate
+          e
+          ? // nested consequence in alternate
+            f
+          : // nested alternate in alternate
+            g;
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

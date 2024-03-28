@@ -51,13 +51,12 @@ impl PrintElementArgs {
         self
     }
 
-    pub fn decrement_indent(mut self) -> Self {
-        self.indent = self.indent.decrement();
-        self
-    }
-
     pub fn reset_indent(mut self) -> Self {
         self.indent = Indention::default();
+        self
+    }
+    pub fn set_indent(mut self, indent: Indention) -> Self {
+        self.indent = indent;
         self
     }
 
@@ -231,5 +230,125 @@ impl<'a> CallStack for FitsCallStack<'a> {
 
     fn stack_mut(&mut self) -> &mut Self::Stack {
         &mut self.stack
+    }
+}
+
+/// Indent stack that stores the history of indention.
+///
+/// When the element kind is [indent] or [align], push the current indentation onto the stack of indentations.
+/// When the element kind is [dedent], pop the last item from the indentations stack and push it onto the temp_indentations stack.
+/// When the element kind is [end_dedent], pop the last item from the temp_indentations stack and push it onto the indentations stack.
+pub(super) trait IndentStack {
+    type Stack: Stack<Indention> + Debug;
+    type HistoryStack: Stack<Indention> + Debug;
+
+    fn current_stack(&self) -> &Self::Stack;
+    fn history_stack(&self) -> &Self::HistoryStack;
+
+    fn current_stack_mut(&mut self) -> &mut Self::Stack;
+    fn history_stack_mut(&mut self) -> &mut Self::HistoryStack;
+
+    fn push(&mut self, indention: Indention) -> Indention {
+        self.current_stack_mut().push(indention);
+        indention
+    }
+    fn start_dedent(&mut self) -> Indention {
+        if let Some(indent) = self.current_stack_mut().pop() {
+            self.history_stack_mut().push(indent);
+            self.current_stack()
+                .top()
+                .copied()
+                .unwrap_or_else(Indention::default)
+        } else {
+            Indention::default()
+        }
+    }
+    fn end_dedent(&mut self) {
+        if let Some(indent) = self.history_stack_mut().pop() {
+            self.current_stack_mut().push(indent);
+        }
+    }
+    fn pop(&mut self) -> Indention {
+        self.current_stack_mut()
+            .pop()
+            .unwrap_or_else(Indention::default)
+    }
+}
+
+/// Indent stack used for storing indetion history when printing the [FormatElement]s
+#[derive(Debug, Clone)]
+pub(super) struct PrintIndentStack {
+    indentions: Vec<Indention>,
+    history_indentions: Vec<Indention>,
+}
+
+impl PrintIndentStack {
+    pub(super) fn new() -> Self {
+        Self {
+            indentions: Vec::new(),
+            history_indentions: Vec::new(),
+        }
+    }
+}
+impl IndentStack for PrintIndentStack {
+    type Stack = Vec<Indention>;
+    type HistoryStack = Vec<Indention>;
+
+    fn current_stack(&self) -> &Self::Stack {
+        &self.indentions
+    }
+    fn history_stack(&self) -> &Self::HistoryStack {
+        &self.history_indentions
+    }
+
+    fn current_stack_mut(&mut self) -> &mut Self::Stack {
+        &mut self.indentions
+    }
+    fn history_stack_mut(&mut self) -> &mut Self::HistoryStack {
+        &mut self.history_indentions
+    }
+}
+
+/// Indent stack used for storing the history of indention when measuring fits on the line.
+///
+/// The stack is a view on top of the [PrintIndentStack] because the stack frames are still necessary when printing.
+pub(super) struct FitsIndentStack<'print> {
+    indentions: StackedStack<'print, Indention>,
+    history_indentions: StackedStack<'print, Indention>,
+}
+
+impl<'print> FitsIndentStack<'print> {
+    pub(super) fn new(
+        print: &'print PrintIndentStack,
+        saved_indent_stack: Vec<Indention>,
+        saved_history_indent_stack: Vec<Indention>,
+    ) -> Self {
+        let indentions = StackedStack::with_vec(&print.indentions, saved_indent_stack);
+        let history_indentions =
+            StackedStack::with_vec(&print.history_indentions, saved_history_indent_stack);
+
+        Self {
+            indentions,
+            history_indentions,
+        }
+    }
+}
+
+impl<'a> IndentStack for FitsIndentStack<'a> {
+    type Stack = StackedStack<'a, Indention>;
+    type HistoryStack = StackedStack<'a, Indention>;
+
+    fn current_stack(&self) -> &Self::Stack {
+        &self.indentions
+    }
+    fn history_stack(&self) -> &Self::HistoryStack {
+        &self.history_indentions
+    }
+
+    fn current_stack_mut(&mut self) -> &mut Self::Stack {
+        &mut self.indentions
+    }
+    fn history_stack_mut(&mut self) -> &mut Self::HistoryStack {
+        &mut self.history_indentions
     }
 }

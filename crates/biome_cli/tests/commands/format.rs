@@ -3517,3 +3517,67 @@ fn should_format_files_in_folders_ignored_by_linter() {
         result,
     ));
 }
+
+#[test]
+fn format_conditional_expression_when_indent_width_is_not_2() {
+    let mut fs: MemoryFileSystem = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let biome_json = Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+        "javascript": {
+            "formatter": {
+                "lineWidth": 80,
+                "indentWidth": 8,
+                "indentStyle": "space"
+            }
+        }
+    }"#,
+    );
+
+    let js_file_content = r#"
+        a // test
+            ? // nested test in consequence
+                b
+                ? // nested consequence in consequence
+                    c
+                : // nested alternate in consequence
+                    d
+            : // nested test in alternate
+                e
+                ? // nested consequence in alternate
+                    f
+                : // nested alternate in alternate
+                    g;
+	"#;
+    let js_file = Path::new("file.js");
+    fs.insert(js_file.into(), js_file_content.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), "--write", js_file.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut file = fs
+        .open(js_file)
+        .expect("formatting target file was removed by the CLI");
+
+    let mut content = String::new();
+    file.read_to_string(&mut content)
+        .expect("failed to read file from memory FS");
+
+    drop(file);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_conditional_expression_when_indent_width_is_not_2",
+        fs,
+        console,
+        result,
+    ));
+}
