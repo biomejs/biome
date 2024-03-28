@@ -473,7 +473,7 @@ where
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ConsistentArrayTypeOptions {
-    syntax: ConsistentArrayType,
+    pub syntax: ConsistentArrayType,
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]

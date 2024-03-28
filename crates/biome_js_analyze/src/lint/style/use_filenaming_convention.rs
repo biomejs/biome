@@ -297,6 +297,12 @@ impl FilenameCases {
     }
 }
 
+impl FromIterator<FilenameCase> for FilenameCases {
+    fn from_iter<T: IntoIterator<Item = FilenameCase>>(iter: T) -> Self {
+        Self(FxHashSet::from_iter(iter))
+    }
+}
+
 impl Default for FilenameCases {
     fn default() -> Self {
         Self(FxHashSet::from_iter([

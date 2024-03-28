@@ -49,6 +49,7 @@ configuration = [
   "biome_json_syntax",
   "biome_css_analyze",
   "biome_css_syntax",
+  "biome_rowan",
   "pulldown-cmark",
 ]
 license = ["ureq/default", "ureq/json", "ureq/serde_json", "serde", "serde_json"]

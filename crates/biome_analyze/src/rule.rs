@@ -158,6 +158,24 @@ impl RuleSource {
         }
     }
 
+    pub fn to_namespaced_rule_name(&self) -> String {
+        match self {
+            Self::Clippy(rule_name) | Self::Eslint(rule_name) => (*rule_name).to_string(),
+            Self::EslintImport(rule_name) => format!("import/{rule_name}"),
+            Self::EslintImportAccess(rule_name) => format!("import-access/{rule_name}"),
+            Self::EslintJest(rule_name) => format!("jest/{rule_name}"),
+            Self::EslintJsxA11y(rule_name) => format!("jsx-a11y/{rule_name}"),
+            Self::EslintReact(rule_name) => format!("react/{rule_name}"),
+            Self::EslintReactHooks(rule_name) => format!("react-hooks/{rule_name}"),
+            Self::EslintTypeScript(rule_name) => format!("@typescript-eslint/{rule_name}"),
+            Self::EslintSonarJs(rule_name) => format!("sonarjs/{rule_name}"),
+            Self::EslintStylistic(rule_name) => format!("@stylistic/{rule_name}"),
+            Self::EslintUnicorn(rule_name) => format!("unicorn/{rule_name}"),
+            Self::EslintMysticatea(rule_name) => format!("@mysticatea/{rule_name}"),
+            Self::EslintBarrelFiles(rule_name) => format!("barrel-files/{rule_name}"),
+        }
+    }
+
     pub fn to_rule_url(&self) -> String {
         match self {
             Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
@@ -186,29 +204,9 @@ impl RuleSource {
         matches!(self, Self::Eslint(_))
     }
 
-    /// TypeScript plugin
-    pub const fn is_eslint_typescript(&self) -> bool {
-        matches!(self, Self::EslintTypeScript(_))
-    }
-
     /// All ESLint plugins, exception for the TypeScript one
     pub const fn is_eslint_plugin(&self) -> bool {
-        matches!(
-            self,
-            Self::EslintImport(_)
-                | Self::EslintImportAccess(_)
-                | Self::EslintJest(_)
-                | Self::EslintStylistic(_)
-                | Self::EslintJsxA11y(_)
-                | Self::EslintReact(_)
-                | Self::EslintReactHooks(_)
-                | Self::EslintSonarJs(_)
-                | Self::EslintUnicorn(_)
-        )
-    }
-
-    pub const fn is_clippy(&self) -> bool {
-        matches!(self, Self::Clippy(_))
+        !matches!(self, Self::Clippy(_) | Self::Eslint(_))
     }
 }
 

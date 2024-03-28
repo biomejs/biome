@@ -1,0 +1,175 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.eslintrc.json`
+
+```json
+{
+        "rules": {
+            "no-restricted-globals": ["error", "event", "fdescribe"],
+            "jsx-a11y/aria-role": ["error", {
+                "allowedInvalidRoles": ["text"],
+                "ignoreNonDOM": true
+            }],
+            "@typescript-eslint/array-type": ["error", { "default": "generic" }],
+            "@typescript-eslint/naming-convention": ["error",
+                {
+                    "selector": "enumMember",
+                    "format": ["UPPER_CASE"]
+                }
+            ],
+            "unicorn/filename-case": ["error", {
+                "cases": {
+                    "camelCase": true,
+                    "pascalCase": true
+                }
+            }]
+        },
+        "overrides": [{
+            "files": ["default.js"],
+            "rules": {
+                "no-restricted-globals": "error",
+                "jsx-a11y/aria-role": "error",
+                "@typescript-eslint/array-type": "error",
+                "@typescript-eslint/naming-convention": "error",
+                "unicorn/filename-case": "error"
+            }
+        }, {
+            "files": ["alternative.js"],
+            "rules": {
+                "no-restricted-globals": ["error",
+                    {
+                        "name": "event",
+                        "message": "Use local parameter instead."
+                    },
+                    {
+                        "name": "fdescribe",
+                        "message": "Do not commit fdescribe. Use describe instead."
+                    }
+                ],
+                "@typescript-eslint/array-type": ["error", { "default": "array" }],
+                "@typescript-eslint/naming-convention": ["error",
+                    {
+                        "selector": "default",
+                        "format": ["UPPER_CASE"]
+                    }
+                ],
+                "unicorn/filename-case": ["error", {
+                    "case": "kebabCase",
+                    "multipleFileExtensions": true
+                }]
+            }
+        }],
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{
+       5 │ + → → → "a11y":·{
+       6 │ + → → → → "useValidAriaRole":·{
+       7 │ + → → → → → "level":·"error",
+       8 │ + → → → → → "options":·{·"allowInvalidRoles":·["text"],·"ignoreNonDom":·true·}
+       9 │ + → → → → }
+      10 │ + → → → },
+      11 │ + → → → "style":·{
+      12 │ + → → → → "noRestrictedGlobals":·{
+      13 │ + → → → → → "level":·"error",
+      14 │ + → → → → → "options":·{·"deniedGlobals":·["event",·"fdescribe"]·}
+      15 │ + → → → → },
+      16 │ + → → → → "useConsistentArrayType":·{
+      17 │ + → → → → → "level":·"error",
+      18 │ + → → → → → "options":·{·"syntax":·"generic"·}
+      19 │ + → → → → },
+      20 │ + → → → → "useFilenamingConvention":·{
+      21 │ + → → → → → "level":·"error",
+      22 │ + → → → → → "options":·{
+      23 │ + → → → → → → "requireAscii":·true,
+      24 │ + → → → → → → "filenameCases":·["camelCase",·"PascalCase"]
+      25 │ + → → → → → }
+      26 │ + → → → → },
+      27 │ + → → → → "useNamingConvention":·{
+      28 │ + → → → → → "level":·"error",
+      29 │ + → → → → → "options":·{·"strictCase":·false,·"enumMemberCase":·"CONSTANT_CASE"·}
+      30 │ + → → → → }
+      31 │ + → → → }
+      32 │ + → → }
+      33 │ + → },
+      34 │ + → "overrides":·[
+      35 │ + → → {
+      36 │ + → → → "ignore":·["default.js"],
+      37 │ + → → → "linter":·{
+      38 │ + → → → → "rules":·{
+      39 │ + → → → → → "a11y":·{·"useValidAriaRole":·"error"·},
+      40 │ + → → → → → "style":·{
+      41 │ + → → → → → → "noRestrictedGlobals":·{·"level":·"error",·"options":·{}·},
+      42 │ + → → → → → → "useConsistentArrayType":·"error",
+      43 │ + → → → → → → "useFilenamingConvention":·{
+      44 │ + → → → → → → → "level":·"error",
+      45 │ + → → → → → → → "options":·{
+      46 │ + → → → → → → → → "requireAscii":·true,
+      47 │ + → → → → → → → → "filenameCases":·["kebab-case"]
+      48 │ + → → → → → → → }
+      49 │ + → → → → → → },
+      50 │ + → → → → → → "useNamingConvention":·{
+      51 │ + → → → → → → → "level":·"error",
+      52 │ + → → → → → → → "options":·{·"strictCase":·false·}
+      53 │ + → → → → → → }
+      54 │ + → → → → → }
+      55 │ + → → → → }
+      56 │ + → → → }
+      57 │ + → → },
+      58 │ + → → {
+      59 │ + → → → "ignore":·["alternative.js"],
+      60 │ + → → → "linter":·{
+      61 │ + → → → → "rules":·{
+      62 │ + → → → → → "style":·{
+      63 │ + → → → → → → "noRestrictedGlobals":·{
+      64 │ + → → → → → → → "level":·"error",
+      65 │ + → → → → → → → "options":·{·"deniedGlobals":·["event",·"fdescribe"]·}
+      66 │ + → → → → → → },
+      67 │ + → → → → → → "useConsistentArrayType":·{
+      68 │ + → → → → → → → "level":·"error",
+      69 │ + → → → → → → → "options":·{·"syntax":·"shorthand"·}
+      70 │ + → → → → → → },
+      71 │ + → → → → → → "useFilenamingConvention":·{
+      72 │ + → → → → → → → "level":·"error",
+      73 │ + → → → → → → → "options":·{
+      74 │ + → → → → → → → → "requireAscii":·true,
+      75 │ + → → → → → → → → "filenameCases":·["kebab-case"]
+      76 │ + → → → → → → → }
+      77 │ + → → → → → → },
+      78 │ + → → → → → → "useNamingConvention":·{
+      79 │ + → → → → → → → "level":·"error",
+      80 │ + → → → → → → → "options":·{·"strictCase":·false·}
+      81 │ + → → → → → → }
+      82 │ + → → → → → }
+      83 │ + → → → → }
+      84 │ + → → → }
+      85 │ + → → }
+      86 │ + → ]
+      87 │ + }
+      88 │ + 
+  
+
+```
+
+```block
+Run the command with the option --write to apply the changes.
+```

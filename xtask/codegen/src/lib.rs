@@ -82,6 +82,8 @@ pub enum TaskCommand {
     /// Generate the part of the configuration that depends on some metadata
     #[bpaf(command)]
     Configuration,
+    #[bpaf(command)]
+    EslintMigrate,
     /// Generate the JSON schema for the Biome configuration file format
     #[bpaf(command)]
     Schema,

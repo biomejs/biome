@@ -6,12 +6,14 @@ use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::ConfigurationBasePath;
 use std::path::PathBuf;
 
+use super::MigrateSubCommand;
+
 /// Handler for the "check" command of the Biome CLI
 pub(crate) fn migrate(
     session: CliSession,
     cli_options: CliOptions,
     write: bool,
-    prettier: bool,
+    sub_command: Option<MigrateSubCommand>,
 ) -> Result<(), CliDiagnostic> {
     let base_path = match cli_options.config_path.as_ref() {
         None => ConfigurationBasePath::default(),
@@ -31,7 +33,7 @@ pub(crate) fn migrate(
                 write,
                 configuration_file_path: path,
                 configuration_directory_path: directory_path,
-                prettier,
+                sub_command,
             }),
             session,
             &cli_options,
@@ -39,7 +41,7 @@ pub(crate) fn migrate(
         )
     } else {
         Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
-            reason: "Biome couldn't find the configuration file".to_string(),
+            reason: "Biome couldn't find the Biome configuration file.".to_string(),
         }))
     }
 }

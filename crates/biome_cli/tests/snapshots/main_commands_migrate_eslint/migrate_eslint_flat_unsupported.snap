@@ -2,12 +2,24 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
 ---
+## `biome.json`
+
+```json
+{}
+```
+
+## `./eslint.config.js`
+
+```js
+
+```
+
 # Termination Message
 
 ```block
 migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Migration has encountered an error: Biome couldn't find the Biome configuration file.
+  × Migration has encountered an error: ESlint flat configuration format is not supported yet.
   
 
 

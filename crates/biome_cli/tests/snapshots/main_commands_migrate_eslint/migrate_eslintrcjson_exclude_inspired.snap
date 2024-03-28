@@ -1,0 +1,25 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{}
+```
+
+## `.eslintrc.json`
+
+```json
+{ "rules": { "no-else-return": "error" } }
+```
+
+# Emitted Messages
+
+```block
+No changes to apply to the Biome configuration file.
+```
+
+```block
+Run the command with the option --include-inspired to also migrate inspired rules.
+```

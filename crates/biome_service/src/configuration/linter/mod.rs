@@ -153,6 +153,13 @@ impl<T: Default> RuleConfiguration<T> {
             RuleConfiguration::WithOptions(options) => options.level,
         }
     }
+
+    pub fn set_level(&mut self, level: RulePlainConfiguration) {
+        match self {
+            RuleConfiguration::Plain(plain) => *plain = level,
+            RuleConfiguration::WithOptions(options) => options.level = level,
+        }
+    }
 }
 
 // Rule configuration has a custom [Merge] implementation so that overriding the

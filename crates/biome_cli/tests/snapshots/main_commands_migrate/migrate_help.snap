@@ -41,5 +41,7 @@ Available options:
 Available commands:
     prettier                  It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`,
                               and map the Prettier's configuration into Biome's configuration file.
+    eslint                    It attempts to find the ESlint configuration file in the working directory,
+                              and update the Biome's configuration file as a result.
 
 ```

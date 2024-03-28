@@ -1,0 +1,65 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "complexity": { "noUselessLabel": "error", "useLiteralKeys": "off" },
+      "security": { "noGlobalEval": "warn" },
+      "style": { "useDefaultParameterLast": "off" },
+      "suspicious": { "noDoubleEquals": "warn", "useGetterReturn": "error" }
+    }
+  },
+  "javascript": { "globals": ["var2", "var1"] },
+  "overrides": [
+    {
+      "ignore": ["bin/*.js", "lib/*.js"],
+      "linter": { "rules": { "suspicious": { "noDoubleEquals": "off" } } }
+    }
+  ]
+}
+```
+
+## `.eslintrc.json`
+
+```json
+{
+        "ignore_patterns": [
+            "**/*.test.js", // trailing comma amd comment
+        ],
+        "globals": {
+            "var1": "writable",
+            "var2": "readonly"
+        },
+        "rules": {
+            "dot-notation": 0,
+            "default-param-last": "off",
+            "eqeqeq": "warn",
+            "getter-return": [2,
+                // support unknown options
+                { "allowImplicit": true }
+            ],
+            "no-eval": 1,
+            "no-extra-label": ["error"]
+        },
+        "overrides": [{
+            "files": ["bin/*.js", "lib/*.js"],
+            "excludedFiles": "*.test.js",
+            "rules": {
+                "eqeqeq": ["off"]
+            }
+        }],
+        "unknownField": "ignored"
+    }
+```
+
+# Emitted Messages
+
+```block
+The configuration biome.json has been successfully migrated.
+```

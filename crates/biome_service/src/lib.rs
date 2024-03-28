@@ -17,7 +17,7 @@ pub mod workspace_types;
 
 pub use crate::configuration::{
     create_config, Configuration, ConfigurationBasePath, ConfigurationDiagnostic,
-    JavascriptFormatter, PartialConfiguration, RuleConfiguration, Rules,
+    JavascriptFormatter, PartialConfiguration, RuleConfiguration, RuleWithOptions, Rules,
 };
 pub use crate::matcher::Matcher;
 

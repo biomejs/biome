@@ -1,0 +1,104 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.eslintrc.json`
+
+```json
+{
+        "extends": ["eslint:recommended"],
+        "rules": {
+            // Overrides recommended
+            "eqeqeq": "off"
+        },
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{
+       5 │ + → → → "complexity":·{
+       6 │ + → → → → "noExtraBooleanCast":·"error",
+       7 │ + → → → → "noMultipleSpacesInRegularExpressionLiterals":·"error",
+       8 │ + → → → → "noUselessCatch":·"error",
+       9 │ + → → → → "noWith":·"error"
+      10 │ + → → → },
+      11 │ + → → → "correctness":·{
+      12 │ + → → → → "noConstAssign":·"error",
+      13 │ + → → → → "noConstantCondition":·"error",
+      14 │ + → → → → "noEmptyCharacterClassInRegex":·"error",
+      15 │ + → → → → "noEmptyPattern":·"error",
+      16 │ + → → → → "noGlobalObjectCalls":·"error",
+      17 │ + → → → → "noInvalidConstructorSuper":·"error",
+      18 │ + → → → → "noInvalidNewBuiltin":·"error",
+      19 │ + → → → → "noNonoctalDecimalEscape":·"error",
+      20 │ + → → → → "noPrecisionLoss":·"error",
+      21 │ + → → → → "noSelfAssign":·"error",
+      22 │ + → → → → "noSetterReturn":·"error",
+      23 │ + → → → → "noSwitchDeclarations":·"error",
+      24 │ + → → → → "noUndeclaredVariables":·"error",
+      25 │ + → → → → "noUnreachable":·"error",
+      26 │ + → → → → "noUnreachableSuper":·"error",
+      27 │ + → → → → "noUnsafeFinally":·"error",
+      28 │ + → → → → "noUnsafeOptionalChaining":·"error",
+      29 │ + → → → → "noUnusedLabels":·"error",
+      30 │ + → → → → "noUnusedPrivateClassMembers":·"error",
+      31 │ + → → → → "noUnusedVariables":·"error",
+      32 │ + → → → → "useIsNan":·"error",
+      33 │ + → → → → "useValidForDirection":·"error",
+      34 │ + → → → → "useYield":·"error"
+      35 │ + → → → },
+      36 │ + → → → "suspicious":·{
+      37 │ + → → → → "noAsyncPromiseExecutor":·"error",
+      38 │ + → → → → "noCatchAssign":·"error",
+      39 │ + → → → → "noClassAssign":·"error",
+      40 │ + → → → → "noCompareNegZero":·"error",
+      41 │ + → → → → "noControlCharactersInRegex":·"error",
+      42 │ + → → → → "noDebugger":·"error",
+      43 │ + → → → → "noDoubleEquals":·"off",
+      44 │ + → → → → "noDuplicateCase":·"error",
+      45 │ + → → → → "noDuplicateClassMembers":·"error",
+      46 │ + → → → → "noDuplicateObjectKeys":·"error",
+      47 │ + → → → → "noDuplicateParameters":·"error",
+      48 │ + → → → → "noEmptyBlockStatements":·"error",
+      49 │ + → → → → "noFallthroughSwitchClause":·"error",
+      50 │ + → → → → "noFunctionAssign":·"error",
+      51 │ + → → → → "noGlobalAssign":·"error",
+      52 │ + → → → → "noImportAssign":·"error",
+      53 │ + → → → → "noMisleadingCharacterClass":·"error",
+      54 │ + → → → → "noPrototypeBuiltins":·"error",
+      55 │ + → → → → "noShadowRestrictedNames":·"error",
+      56 │ + → → → → "noUnsafeNegation":·"error",
+      57 │ + → → → → "useGetterReturn":·"error",
+      58 │ + → → → → "useValidTypeof":·"error"
+      59 │ + → → → }
+      60 │ + → → }
+      61 │ + → }
+      62 │ + }
+      63 │ + 
+  
+
+```
+
+```block
+Run the command with the option --write to apply the changes.
+```
+
+```block
+Run the command with the option --include-inspired to also migrate inspired rules.
+```

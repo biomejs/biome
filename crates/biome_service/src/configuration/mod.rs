@@ -10,7 +10,7 @@ pub mod javascript;
 pub mod json;
 pub mod linter;
 pub mod organize_imports;
-mod overrides;
+pub mod overrides;
 pub mod vcs;
 
 use crate::configuration::diagnostics::CantLoadExtendFile;
@@ -19,7 +19,7 @@ pub(crate) use crate::configuration::generated::push_to_analyzer_rules;
 use crate::configuration::organize_imports::{
     partial_organize_imports, OrganizeImports, PartialOrganizeImports,
 };
-use crate::configuration::overrides::Overrides;
+pub use crate::configuration::overrides::{OverridePattern, Overrides};
 use crate::configuration::vcs::{
     partial_vcs_configuration, PartialVcsConfiguration, VcsConfiguration,
 };
@@ -54,7 +54,7 @@ pub use json::{
 };
 pub use linter::{
     partial_linter_configuration, LinterConfiguration, PartialLinterConfiguration,
-    RuleConfiguration, Rules,
+    RuleConfiguration, RuleWithOptions, Rules,
 };
 pub use overrides::to_override_settings;
 use serde::{Deserialize, Serialize};

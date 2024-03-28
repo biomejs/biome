@@ -5,6 +5,7 @@ codegen               = "run -p xtask_codegen --"
 codegen-bindings      = "run -p xtask_codegen --features schema -- bindings"
 codegen-configuration = "run -p xtask_codegen --features configuration -- configuration"
 # updates a newly created crate
+codegen-eslint-migrate = "run -p xtask_codegen --features configuration -- eslint-migrate"
 codegen-license = "run -p xtask_codegen --features license -- license"
 codegen-schema = "run -p xtask_codegen --features schema -- schema"
 codegen-website = "run -p xtask_codegen --features website -- website"

@@ -19,9 +19,10 @@ upgrade-tools:
 	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools knope --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
-gen-all:
-  cargo run -p xtask_codegen -- all
-  cargo run -p xtask_codegen -- configuration
+gen:
+  cargo codegen all
+  cargo codegen-configuration
+  cargo codegen-eslint-migrate
   cargo lintdoc
   just gen-bindings
   just gen-web

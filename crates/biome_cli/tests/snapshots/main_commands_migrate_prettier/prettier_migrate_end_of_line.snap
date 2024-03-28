@@ -1,0 +1,60 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{}
+```
+
+## `.prettierrc`
+
+```prettierrc
+{ "endOfLine": "auto" }
+```
+
+# Emitted Messages
+
+```block
+Prettier's `"endOfLine": "auto"` option is not supported in Biome. The default `"lf"` option is used instead.
+```
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {}
+       1 │ + {
+       2 │ + → "formatter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "formatWithErrors":·false,
+       5 │ + → → "indentStyle":·"space",
+       6 │ + → → "indentWidth":·2,
+       7 │ + → → "lineEnding":·"lf",
+       8 │ + → → "lineWidth":·80,
+       9 │ + → → "attributePosition":·"auto"
+      10 │ + → },
+      11 │ + → "javascript":·{
+      12 │ + → → "formatter":·{
+      13 │ + → → → "jsxQuoteStyle":·"double",
+      14 │ + → → → "quoteProperties":·"asNeeded",
+      15 │ + → → → "trailingComma":·"all",
+      16 │ + → → → "semicolons":·"asNeeded",
+      17 │ + → → → "arrowParentheses":·"always",
+      18 │ + → → → "bracketSpacing":·true,
+      19 │ + → → → "bracketSameLine":·false,
+      20 │ + → → → "quoteStyle":·"single",
+      21 │ + → → → "attributePosition":·"auto"
+      22 │ + → → }
+      23 │ + → }
+      24 │ + }
+      25 │ + 
+  
+
+```
+
+```block
+Run the command with the option --write to apply the changes.
+```
