@@ -483,6 +483,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_html_parser"
+version = "0.0.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_html_factory",
+ "biome_html_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_test_utils",
+ "biome_unicode_table",
+ "insta",
+ "quickcheck",
+ "quickcheck_macros",
+ "tests_macros",
+ "tracing",
+]
+
+[[package]]
 name = "biome_html_syntax"
 version = "0.5.7"
 dependencies = [

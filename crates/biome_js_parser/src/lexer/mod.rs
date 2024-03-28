@@ -22,7 +22,9 @@ mod tests;
 use biome_js_syntax::JsSyntaxKind::*;
 pub use biome_js_syntax::*;
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
+use biome_parser::lexer::{
+    LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
+};
 use biome_unicode_table::{
     is_js_id_continue, is_js_id_start, lookup_byte,
     Dispatch::{self, *},
@@ -131,6 +133,9 @@ pub(crate) struct JsLexer<'src> {
 }
 
 impl<'src> Lexer<'src> for JsLexer<'src> {
+    const NEWLINE: Self::Kind = NEWLINE;
+    const WHITESPACE: Self::Kind = WHITESPACE;
+
     type Kind = JsSyntaxKind;
     type LexContext = JsLexContext;
     type ReLexContext = JsReLexContext;
@@ -158,18 +163,6 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
         self.current_start
     }
 
-    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
-        LexerCheckpoint {
-            position: TextSize::from(self.position as u32),
-            current_start: self.current_start,
-            current_flags: self.current_flags,
-            current_kind: self.current_kind,
-            after_line_break: self.after_newline,
-            unicode_bom_length: self.unicode_bom_length,
-            diagnostics_pos: self.diagnostics.len() as u32,
-        }
-    }
-
     fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
         self.current_start = TextSize::from(self.position as u32);
         self.current_flags = TokenFlags::empty();
@@ -194,29 +187,6 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
         }
 
         kind
-    }
-
-    fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind {
-        let old_position = self.position;
-        self.position = u32::from(self.current_start) as usize;
-
-        let re_lexed_kind = match context {
-            JsReLexContext::Regex if matches!(self.current(), T![/] | T![/=]) => self.read_regex(),
-            JsReLexContext::BinaryOperator => self.re_lex_binary_operator(),
-            JsReLexContext::TypeArgumentLessThan => self.re_lex_type_argument_less_than(),
-            JsReLexContext::JsxIdentifier => self.re_lex_jsx_identifier(old_position),
-            JsReLexContext::JsxChild if !self.is_eof() => self.lex_jsx_child_token(),
-            _ => self.current(),
-        };
-
-        if self.current() == re_lexed_kind {
-            // Didn't re-lex anything. Return existing token again
-            self.position = old_position;
-        } else {
-            self.current_kind = re_lexed_kind;
-        }
-
-        re_lexed_kind
     }
 
     fn has_preceding_line_break(&self) -> bool {
@@ -283,6 +253,45 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
         } else {
             self.consume_whitespaces();
             WHITESPACE
+        }
+    }
+}
+
+impl<'src> ReLexer<'src> for JsLexer<'src> {
+    fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind {
+        let old_position = self.position;
+        self.position = u32::from(self.current_start) as usize;
+
+        let re_lexed_kind = match context {
+            JsReLexContext::Regex if matches!(self.current(), T![/] | T![/=]) => self.read_regex(),
+            JsReLexContext::BinaryOperator => self.re_lex_binary_operator(),
+            JsReLexContext::TypeArgumentLessThan => self.re_lex_type_argument_less_than(),
+            JsReLexContext::JsxIdentifier => self.re_lex_jsx_identifier(old_position),
+            JsReLexContext::JsxChild if !self.is_eof() => self.lex_jsx_child_token(),
+            _ => self.current(),
+        };
+
+        if self.current() == re_lexed_kind {
+            // Didn't re-lex anything. Return existing token again
+            self.position = old_position;
+        } else {
+            self.current_kind = re_lexed_kind;
+        }
+
+        re_lexed_kind
+    }
+}
+
+impl<'src> LexerWithCheckpoint<'src> for JsLexer<'src> {
+    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
+        LexerCheckpoint {
+            position: TextSize::from(self.position as u32),
+            current_start: self.current_start,
+            current_flags: self.current_flags,
+            current_kind: self.current_kind,
+            after_line_break: self.after_newline,
+            unicode_bom_length: self.unicode_bom_length,
+            diagnostics_pos: self.diagnostics.len() as u32,
         }
     }
 }
@@ -1771,7 +1780,13 @@ impl<'src> JsLexer<'src> {
         let dispatched = lookup_byte(byte);
 
         match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => {
+                let kind = self.consume_newline_or_whitespaces();
+                if kind == Self::NEWLINE {
+                    self.after_newline = true;
+                }
+                kind
+            }
             EXL => self.resolve_bang(),
             HAS => self.read_shebang(),
             PRC => self.bin_or_assign(T![%], T![%=]),
@@ -1876,7 +1891,11 @@ impl<'src> JsLexer<'src> {
                 if is_linebreak(chr)
                     || (UNICODE_WHITESPACE_STARTS.contains(&byte) && UNICODE_SPACES.contains(&chr))
                 {
-                    self.consume_newline_or_whitespaces()
+                    let kind = self.consume_newline_or_whitespaces();
+                    if kind == Self::NEWLINE {
+                        self.after_newline = true;
+                    }
+                    kind
                 } else {
                     self.advance(chr.len_utf8() - 1);
                     if is_js_id_start(chr) {

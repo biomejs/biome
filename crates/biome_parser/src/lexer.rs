@@ -9,6 +9,12 @@ use unicode_bom::Bom;
 /// `Lexer` trait defines the necessary methods a lexer must implement.
 /// Lexer is responsible for dividing the source code into meaningful parsing units (kinds).
 pub trait Lexer<'src> {
+    /// The kind of the newline
+    const NEWLINE: Self::Kind;
+
+    /// The kind of the space
+    const WHITESPACE: Self::Kind;
+
     /// A kind of syntax, as identified by the lexer.
     type Kind: SyntaxKind;
     /// The specific context in which the lexer operates.
@@ -32,16 +38,8 @@ pub trait Lexer<'src> {
 
     fn current_start(&self) -> TextSize;
 
-    /// Creating a checkpoint of the lexer's current state.
-    /// `rewind` can be used later to restore the lexer to the checkpoint's state.
-    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind>;
-
     /// Tokenizes the next kind into a single coherent token within the given lexing context.
     fn next_token(&mut self, context: Self::LexContext) -> Self::Kind;
-
-    /// Re-lexes the current kind under a different lexing context.
-    /// Useful when a token can have different interpretations based on context.
-    fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind;
 
     /// Returns `true` if the current kind is preceded by a line break.
     fn has_preceding_line_break(&self) -> bool;
@@ -69,7 +67,14 @@ pub trait Lexer<'src> {
     ///
     /// ## Safety
     /// Must be called at a valid UT8 char boundary
-    fn consume_newline_or_whitespaces(&mut self) -> Self::Kind;
+    fn consume_newline_or_whitespaces(&mut self) -> Self::Kind {
+        if self.consume_newline() {
+            Self::NEWLINE
+        } else {
+            self.consume_whitespaces();
+            Self::WHITESPACE
+        }
+    }
 
     /// Consumes all whitespace until a non-whitespace or a newline is found.
     ///
@@ -261,6 +266,18 @@ pub trait Lexer<'src> {
     }
 }
 
+pub trait ReLexer<'src>: Lexer<'src> + LexerWithCheckpoint<'src> {
+    /// Re-lexes the current kind under a different lexing context.
+    /// Useful when a token can have different interpretations based on context.
+    fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind;
+}
+
+pub trait LexerWithCheckpoint<'src>: Lexer<'src> {
+    /// Creating a checkpoint of the lexer's current state.
+    /// `rewind` can be used later to restore the lexer to the checkpoint's state.
+    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind>;
+}
+
 /// `LexContext` is a trait that represents the context in
 /// which a parser is currently operating. It is used to specify
 /// and handle the variations in parsing requirements depending
@@ -407,16 +424,6 @@ impl<'l, Lex: Lexer<'l>> BufferedLexer<'l, Lex> {
         self.inner.source()
     }
 
-    /// Creates a checkpoint representing the current lexer state. Allows rewinding
-    /// the lexer to this position later on.
-    pub fn checkpoint(&self) -> LexerCheckpoint<Lex::Kind> {
-        if let Some(current) = &self.current {
-            current.clone()
-        } else {
-            self.inner.checkpoint()
-        }
-    }
-
     /// Rewinds the lexer to the state stored in the checkpoint.
     pub fn rewind(&mut self, checkpoint: LexerCheckpoint<Lex::Kind>) {
         self.inner.rewind(checkpoint);
@@ -431,6 +438,22 @@ impl<'l, Lex: Lexer<'l>> BufferedLexer<'l, Lex> {
         }
     }
 
+    /// Returns an iterator over the tokens following the current token to perform lookahead.
+    /// For example, what's the 3rd token after the current token?
+    #[inline(always)]
+    pub fn lookahead<'s>(&'s mut self) -> LookaheadIterator<'s, 'l, Lex> {
+        LookaheadIterator::new(self)
+    }
+
+    /// Consumes the buffered lexer and returns the lexing diagnostics
+    pub fn finish(self) -> Vec<ParseDiagnostic> {
+        self.inner.finish()
+    }
+}
+impl<'l, Lex> BufferedLexer<'l, Lex>
+where
+    Lex: ReLexer<'l>,
+{
     /// Re-lex the current token in the given context
     /// See [Lexer::re_lex]
     pub fn re_lex(&mut self, context: Lex::ReLexContext) -> Lex::Kind {
@@ -455,17 +478,18 @@ impl<'l, Lex: Lexer<'l>> BufferedLexer<'l, Lex> {
 
         new_kind
     }
+}
 
-    /// Returns an iterator over the tokens following the current token to perform lookahead.
-    /// For example, what's the 3rd token after the current token?
-    #[inline(always)]
-    pub fn lookahead<'s>(&'s mut self) -> LookaheadIterator<'s, 'l, Lex> {
-        LookaheadIterator::new(self)
-    }
-
-    /// Consumes the buffered lexer and returns the lexing diagnostics
-    pub fn finish(self) -> Vec<ParseDiagnostic> {
-        self.inner.finish()
+impl<'l, Lex> BufferedLexer<'l, Lex>
+where
+    Lex: LexerWithCheckpoint<'l>,
+{
+    pub fn checkpoint(&self) -> LexerCheckpoint<Lex::Kind> {
+        if let Some(current) = &self.current {
+            current.clone()
+        } else {
+            self.inner.checkpoint()
+        }
     }
 }
 
@@ -484,7 +508,7 @@ impl<'l, 't, Lex: Lexer<'t>> LookaheadIterator<'l, 't, Lex> {
     }
 }
 
-impl<'l, 't, Lex: Lexer<'t>> Iterator for LookaheadIterator<'l, 't, Lex> {
+impl<'l, 't, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'l, 't, Lex> {
     type Item = LookaheadToken<Lex::Kind>;
 
     #[inline]
@@ -524,7 +548,7 @@ impl<'l, 't, Lex: Lexer<'t>> Iterator for LookaheadIterator<'l, 't, Lex> {
     }
 }
 
-impl<'l, 't, Lex: Lexer<'t>> FusedIterator for LookaheadIterator<'l, 't, Lex> {}
+impl<'l, 't, Lex: LexerWithCheckpoint<'t>> FusedIterator for LookaheadIterator<'l, 't, Lex> {}
 
 #[derive(Debug)]
 pub struct LookaheadToken<Kind: SyntaxKind> {
@@ -553,7 +577,7 @@ impl<Kind: SyntaxKind> From<&LexerCheckpoint<Kind>> for LookaheadToken<Kind> {
 
 /// Stores the state of the lexer so that it may later be restored to that position.
 #[derive(Debug, Clone)]
-pub struct LexerCheckpoint<Kind: SyntaxKind> {
+pub struct LexerCheckpoint<Kind> {
     pub position: TextSize,
     pub current_start: TextSize,
     pub current_kind: Kind,

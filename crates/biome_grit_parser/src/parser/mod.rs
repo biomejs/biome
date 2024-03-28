@@ -78,7 +78,7 @@ impl<'source> Parser for GritParser<'source> {
     }
 }
 
-pub(crate) fn parse_root(p: &mut GritParser) -> CompletedMarker {
+pub(crate) fn parse_root(p: &mut GritParser) {
     let m = p.start();
 
     p.eat(UNICODE_BOM);
@@ -90,7 +90,7 @@ pub(crate) fn parse_root(p: &mut GritParser) -> CompletedMarker {
 
     p.expect(EOF);
 
-    m.complete(p, GRIT_ROOT)
+    m.complete(p, GRIT_ROOT);
 }
 
 fn parse_version(p: &mut GritParser) -> ParsedSyntax {

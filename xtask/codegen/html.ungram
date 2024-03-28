@@ -40,8 +40,8 @@ HtmlBogus = SyntaxElement*
 
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
-	directive: HtmlDirective
-	tags: HtmlElementList
+	directive: HtmlDirective?
+	html: HtmlElement?
 	eof: 'EOF'
 
 // <!DOCTYPE html>
@@ -50,7 +50,11 @@ HtmlRoot =
 HtmlDirective =
 	'<'
 	'!'
-	content: HtmlString
+	doctype: 'doctype'
+	html: 'html'?
+	quirk: 'html_literal'?
+	public_id: 'html_string_literal'?
+	system_id: 'html_string_literal'?
 	'>'
 
 // ==================================

@@ -8,8 +8,8 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("=", "EQ"),
         ("!", "BANG"),
     ],
-    keywords: &["null", "true", "false"],
-    literals: &["HTML_STRING_LITERAL"],
+    keywords: &["null", "true", "false", "doctype", "html"],
+    literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
     tokens: &[
         "ERROR_TOKEN",
         "NEWLINE",
