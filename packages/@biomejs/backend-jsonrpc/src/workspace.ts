@@ -893,7 +893,7 @@ export interface Nursery {
 	 */
 	noBarrelFile?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * [WIP] This rule hasn't been implemented yet.
 	 */
 	noColorInvalidHex?: RuleConfiguration_for_Null;
 	/**
