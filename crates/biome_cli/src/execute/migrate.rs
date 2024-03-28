@@ -184,8 +184,10 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             include_nursery,
         }) => {
             let mut eslint_config = eslint::read_eslint_config(fs, console)?;
-            // resolve the `extends` field.
-            eslint_config.resolve_extends(console);
+            // recursively resolve the `extends` field.
+            while !eslint_config.extends.is_empty() {
+                eslint_config.resolve_extends(console);
+            }
             let biome_config = deserialize_from_json_str::<PartialConfiguration>(
                 biome_config_content.as_str(),
                 JsonParserOptions::default(),

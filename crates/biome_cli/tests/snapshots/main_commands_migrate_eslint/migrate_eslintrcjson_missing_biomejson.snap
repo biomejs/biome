@@ -13,7 +13,7 @@ expression: content
 ```block
 migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Migration has encountered an error: Biome couldn't find the configuration file
+  × Migration has encountered an error: Biome couldn't find the Biome configuration file.
   
 
 

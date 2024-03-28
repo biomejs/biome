@@ -151,12 +151,13 @@ fn load_config(
 }
 
 fn load_config_with_node(path_str: &str) -> Result<String, CliDiagnostic> {
-    match Command::new("node")
+    let output = Command::new("node")
         .arg("--eval")
         .arg(format!(
             "import('{path_str}').then((c) => console.log(JSON.stringify(c.default)))"
         ))
-        .output() {
+        .output();
+    match output {
         Err(_) => {
             Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
                 reason: "The `node` program doesn't exist or cannot be invoked by Biome.\n`node` is invoked to resolve ESlint configurations written in JavaScript.\nThis includes shared configurations and plugin configurations imported with ESlint's `extends`.".to_string()
@@ -164,6 +165,18 @@ fn load_config_with_node(path_str: &str) -> Result<String, CliDiagnostic> {
         },
         Ok(output) => {
             if !output.stderr.is_empty() {
+                // Try with `require` before giving up.
+                let output2 = Command::new("node")
+                    .arg("--print")
+                    .arg(format!(
+                        "JSON.stringify(require('{path_str}'))"
+                    ))
+                    .output();
+                if let Ok(output2) = output2 {
+                    if output2.stderr.is_empty() {
+                        return Ok(String::from_utf8_lossy(&output2.stdout).to_string());
+                    }
+                }
                 let stderr = String::from_utf8_lossy(&output.stderr);
                 return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
                     reason: format!("`node` was invoked to resolve an ESlint configuration. This invocation failed with the following error:\n{stderr}")

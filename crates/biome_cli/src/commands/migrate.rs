@@ -41,7 +41,7 @@ pub(crate) fn migrate(
         )
     } else {
         Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
-            reason: "Biome couldn't find the configuration file".to_string(),
+            reason: "Biome couldn't find the Biome configuration file.".to_string(),
         }))
     }
 }
