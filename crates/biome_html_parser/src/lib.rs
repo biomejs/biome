@@ -9,7 +9,7 @@ use biome_html_syntax::{HtmlRoot, HtmlSyntaxNode};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::{AstNode, NodeCache};
 
-/// Parses the provided string as CSS program using the provided node cache.
+/// Parses the provided string as HTML program using the provided node cache.
 pub fn parse_html_with_cache(source: &str, cache: &mut NodeCache) -> HtmlParse {
     tracing::debug_span!("Parsing phase").in_scope(move || {
         let mut parser = HtmlParser::new(source);
@@ -85,7 +85,8 @@ impl HtmlParse {
     /// Convert this parse result into a typed AST node.
     ///
     /// # Panics
-    /// Panics if the node represented by this parse result mismatches.
+    ///    
+    /// It panics if the node represented by this parse result mismatches.
     pub fn tree(&self) -> HtmlRoot {
         HtmlRoot::unwrap_cast(self.syntax())
     }

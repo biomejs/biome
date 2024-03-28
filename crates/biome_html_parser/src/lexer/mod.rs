@@ -25,7 +25,6 @@ pub(crate) struct HtmlLexer<'src> {
 }
 
 impl<'src> HtmlLexer<'src> {
-    /// Make a new lexer from a str, this is safe because strs are valid utf8
     pub fn from_str(string: &'src str) -> Self {
         Self {
             source: string,
@@ -38,37 +37,10 @@ impl<'src> HtmlLexer<'src> {
             current_flags: TokenFlags::empty(),
         }
     }
-    /// Get the UTF8 char which starts at the current byte
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    fn current_char_unchecked(&self) -> char {
-        // Precautionary measure for making sure the unsafe code below does not read over memory boundary
-        debug_assert!(!self.is_eof());
-        self.assert_at_char_boundary();
-
-        // Safety: We know this is safe because we require the input to the lexer to be valid utf8 and we always call this when we are at a char
-        let string = unsafe {
-            std::str::from_utf8_unchecked(self.source.as_bytes().get_unchecked(self.position..))
-        };
-        let chr = if let Some(chr) = string.chars().next() {
-            chr
-        } else {
-            // Safety: we always call this when we are at a valid char, so this branch is completely unreachable
-            unsafe {
-                core::hint::unreachable_unchecked();
-            }
-        };
-
-        chr
-    }
 }
 
 impl<'src> HtmlLexer<'src> {
     fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
-        // The speed difference comes from the difference in table size, a 2kb table is easily fit into cpu cache
-        // While a 16kb table will be ejected from cache very often leading to slowdowns, this also allows LLVM
-        // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(current);
 
         match dispatched {
