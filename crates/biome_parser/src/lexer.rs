@@ -455,7 +455,6 @@ where
     Lex: ReLexer<'l>,
 {
     /// Re-lex the current token in the given context
-    /// See [Lexer::re_lex]
     pub fn re_lex(&mut self, context: Lex::ReLexContext) -> Lex::Kind {
         let current_kind = self.current();
         let current_checkpoint = self.inner.checkpoint();
