@@ -19,7 +19,6 @@ pub enum HtmlLexContext {
     /// Default context: no particular rules are applied to the lexer logic.
     #[default]
     Regular,
-
 }
 
 impl HtmlLexContext {
@@ -50,14 +49,14 @@ impl<'source> HtmlTokenSource<'source> {
         source
     }
 
-    fn next_non_trivia_token(&mut self,  first_token: bool) {
+    fn next_non_trivia_token(&mut self, first_token: bool) {
         let mut trailing = !first_token;
         self.preceding_line_break = false;
 
         loop {
-            let token = self.lexer.next_token(()) ;
+            let token = self.lexer.next_token(());
             if token == EOF {
-                break
+                break;
             } else {
                 let trivia_kind = TriviaPieceKind::try_from(token);
 
@@ -75,16 +74,16 @@ impl<'source> HtmlTokenSource<'source> {
                             self.preceding_line_break = true;
                         }
 
-                        self.trivia
-                            .push(Trivia::new(trivia_kind, self.lexer.current_range(), trailing));
+                        self.trivia.push(Trivia::new(
+                            trivia_kind,
+                            self.lexer.current_range(),
+                            trailing,
+                        ));
                     }
                 }
             }
-
-
         }
     }
-
 }
 
 impl<'src> TokenSource for HtmlTokenSource<'src> {

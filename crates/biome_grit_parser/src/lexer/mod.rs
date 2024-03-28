@@ -34,6 +34,8 @@ pub(crate) struct GritLexer<'src> {
 }
 
 impl<'src> Lexer<'src> for GritLexer<'src> {
+    const NEWLINE: Self::Kind = NEWLINE;
+    const WHITESPACE: Self::Kind = WHITESPACE;
     type Kind = GritSyntaxKind;
 
     type LexContext = ();
@@ -49,10 +51,6 @@ impl<'src> Lexer<'src> for GritLexer<'src> {
 
     fn current_start(&self) -> TextSize {
         self.current_start
-    }
-
-    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
-        unimplemented!("Grit lexer doesn't support checkpoints");
     }
 
     fn next_token(&mut self, _context: Self::LexContext) -> Self::Kind {
@@ -79,11 +77,6 @@ impl<'src> Lexer<'src> for GritLexer<'src> {
 
         kind
     }
-
-    fn re_lex(&mut self, _context: Self::ReLexContext) -> Self::Kind {
-        unimplemented!("Grit lexer doesn't support re-lexing");
-    }
-
     fn has_preceding_line_break(&self) -> bool {
         self.after_newline
     }
@@ -106,16 +99,6 @@ impl<'src> Lexer<'src> for GritLexer<'src> {
 
     fn push_diagnostic(&mut self, diagnostic: ParseDiagnostic) {
         self.diagnostics.push(diagnostic);
-    }
-
-    fn consume_newline_or_whitespaces(&mut self) -> Self::Kind {
-        if self.consume_newline() {
-            self.after_newline = true;
-            NEWLINE
-        } else {
-            self.consume_whitespaces();
-            WHITESPACE
-        }
     }
 
     #[inline]

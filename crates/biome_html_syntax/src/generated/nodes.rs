@@ -175,7 +175,11 @@ impl HtmlDirective {
         HtmlDirectiveFields {
             l_angle_token: self.l_angle_token(),
             excl_token: self.excl_token(),
-            content: self.content(),
+            doctype_token: self.doctype_token(),
+            html_token: self.html_token(),
+            quirk_token: self.quirk_token(),
+            public_id_token: self.public_id_token(),
+            system_id_token: self.system_id_token(),
             r_angle_token: self.r_angle_token(),
         }
     }
@@ -185,11 +189,23 @@ impl HtmlDirective {
     pub fn excl_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn content(&self) -> SyntaxResult<HtmlString> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn doctype_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn html_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
+    }
+    pub fn quirk_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
+    }
+    pub fn public_id_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 5usize)
+    }
+    pub fn system_id_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 6usize)
     }
     pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+        support::required_token(&self.syntax, 7usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -205,7 +221,11 @@ impl Serialize for HtmlDirective {
 pub struct HtmlDirectiveFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub excl_token: SyntaxResult<SyntaxToken>,
-    pub content: SyntaxResult<HtmlString>,
+    pub doctype_token: SyntaxResult<SyntaxToken>,
+    pub html_token: Option<SyntaxToken>,
+    pub quirk_token: Option<SyntaxToken>,
+    pub public_id_token: Option<SyntaxToken>,
+    pub system_id_token: Option<SyntaxToken>,
     pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -359,18 +379,18 @@ impl HtmlRoot {
         HtmlRootFields {
             bom_token: self.bom_token(),
             directive: self.directive(),
-            tags: self.tags(),
+            html: self.html(),
             eof_token: self.eof_token(),
         }
     }
     pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn directive(&self) -> SyntaxResult<HtmlDirective> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn directive(&self) -> Option<HtmlDirective> {
+        support::node(&self.syntax, 1usize)
     }
-    pub fn tags(&self) -> HtmlElementList {
-        support::list(&self.syntax, 2usize)
+    pub fn html(&self) -> Option<HtmlElement> {
+        support::node(&self.syntax, 2usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
@@ -388,8 +408,8 @@ impl Serialize for HtmlRoot {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct HtmlRootFields {
     pub bom_token: Option<SyntaxToken>,
-    pub directive: SyntaxResult<HtmlDirective>,
-    pub tags: HtmlElementList,
+    pub directive: Option<HtmlDirective>,
+    pub html: Option<HtmlElement>,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -664,7 +684,26 @@ impl std::fmt::Debug for HtmlDirective {
                 &support::DebugSyntaxResult(self.l_angle_token()),
             )
             .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
-            .field("content", &support::DebugSyntaxResult(self.content()))
+            .field(
+                "doctype_token",
+                &support::DebugSyntaxResult(self.doctype_token()),
+            )
+            .field(
+                "html_token",
+                &support::DebugOptionalElement(self.html_token()),
+            )
+            .field(
+                "quirk_token",
+                &support::DebugOptionalElement(self.quirk_token()),
+            )
+            .field(
+                "public_id_token",
+                &support::DebugOptionalElement(self.public_id_token()),
+            )
+            .field(
+                "system_id_token",
+                &support::DebugOptionalElement(self.system_id_token()),
+            )
             .field(
                 "r_angle_token",
                 &support::DebugSyntaxResult(self.r_angle_token()),
@@ -844,8 +883,11 @@ impl std::fmt::Debug for HtmlRoot {
                 "bom_token",
                 &support::DebugOptionalElement(self.bom_token()),
             )
-            .field("directive", &support::DebugSyntaxResult(self.directive()))
-            .field("tags", &self.tags())
+            .field(
+                "directive",
+                &support::DebugOptionalElement(self.directive()),
+            )
+            .field("html", &support::DebugOptionalElement(self.html()))
             .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
             .finish()
     }

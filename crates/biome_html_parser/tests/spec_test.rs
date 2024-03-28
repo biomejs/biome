@@ -1,6 +1,9 @@
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
-use biome_diagnostics::termcolor;
+use biome_diagnostics::{termcolor, DiagnosticExt, PrintDiagnostic};
+use biome_html_parser::parse_html;
+use biome_rowan::SyntaxKind;
+use biome_test_utils::has_bogus_nodes_or_empty_slots;
 use std::fmt::Write;
 use std::fs;
 use std::path::Path;
@@ -31,7 +34,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
-    let parsed = parse_html(&content, parse_config);
+    let parsed = parse_html(&content);
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();

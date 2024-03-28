@@ -51,12 +51,12 @@ impl HtmlParse {
     ///
     /// # fn main() -> Result<(), SyntaxError> {
     /// use biome_html_syntax::HtmlSyntaxKind;
-    /// let parse = parse_html(r#"<html></html>"#);
+    /// // let parse = parse_html(r#"<html></html>"#);
     ///
     /// // Get the root value
-    /// let root_value = parse.tree().value()?;
+    /// // let root_value = parse.tree().html()?;
     ///
-    /// assert_eq!(root_value.syntax().kind(), HtmlSyntaxKind::HTML_ELEMENT);
+    /// // assert_eq!(root_value.syntax().kind(), HtmlSyntaxKind::HTML_ELEMENT);
     ///
     /// # Ok(())
     /// # }

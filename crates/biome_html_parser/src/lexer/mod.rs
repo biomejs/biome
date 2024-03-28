@@ -1,9 +1,11 @@
-use biome_html_syntax::HtmlSyntaxKind::{EOF, ERROR_TOKEN, NEWLINE, TOMBSTONE, WHITESPACE};
-use biome_html_syntax::{HtmlSyntaxKind, TextLen, TextSize};
+mod tests;
+
+use biome_html_syntax::HtmlSyntaxKind::{
+    EOF, ERROR_TOKEN, NEWLINE, TOMBSTONE, UNICODE_BOM, WHITESPACE,
+};
+use biome_html_syntax::{HtmlSyntaxKind, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, TokenFlags};
-use biome_unicode_table::lookup_byte;
-use biome_unicode_table::Dispatch::*;
 
 pub(crate) struct HtmlLexer<'src> {
     /// Source text
@@ -41,13 +43,24 @@ impl<'src> HtmlLexer<'src> {
 
 impl<'src> HtmlLexer<'src> {
     fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
-        let dispatched = lookup_byte(current);
-
-        match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
-
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'<' => self.consume_byte(T![<]),
+            b'>' => self.consume_byte(T![>]),
+            b'/' => self.consume_byte(T![/]),
+            b'!' => self.consume_byte(T![!]),
+            _ if self.position == 0 && self.consume_potential_bom(UNICODE_BOM).is_some() => {
+                UNICODE_BOM
+            }
             _ => self.consume_unexpected_character(),
         }
+    }
+
+    /// Bumps the current byte and creates a lexed token of the passed in kind.
+    #[inline]
+    fn consume_byte(&mut self, tok: HtmlSyntaxKind) -> HtmlSyntaxKind {
+        self.advance(1);
+        tok
     }
 
     fn consume_unexpected_character(&mut self) -> HtmlSyntaxKind {
@@ -79,7 +92,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
     type ReLexContext = ();
 
     fn source(&self) -> &'src str {
-        &self.source
+        self.source
     }
 
     fn current(&self) -> Self::Kind {
