@@ -953,13 +953,13 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
-	 * It detects possible "wrong" semicolons inside JSX elements.
-	 */
-	noSemicolonInJsx?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow disabled tests.
 	 */
 	noSkippedTests?: RuleConfiguration_for_Null;
+	/**
+	 * It detects possible "wrong" semicolons inside JSX elements.
+	 */
+	noSuspiciousSemicolonInJsx?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
@@ -1916,8 +1916,8 @@ export type Category =
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReExportAll"
 	| "lint/nursery/noRestrictedImports"
-	| "lint/nursery/noSemicolonInJsx"
 	| "lint/nursery/noSkippedTests"
+	| "lint/nursery/noSuspiciousSemicolonInJsx"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUselessTernary"

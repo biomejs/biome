@@ -32,7 +32,7 @@ const Component3 = () => (
 
 # Diagnostics
 ```
-invalid.jsx:4:18 lint/nursery/noSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:18 lint/nursery/noSuspiciousSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! There is a suspicious semicolon in the JSX element.
   
@@ -53,7 +53,7 @@ invalid.jsx:4:18 lint/nursery/noSemicolonInJsx ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:14:23 lint/nursery/noSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:14:23 lint/nursery/noSuspiciousSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! There is a suspicious semicolon in the JSX element.
   
@@ -74,7 +74,7 @@ invalid.jsx:14:23 lint/nursery/noSemicolonInJsx ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:21:22 lint/nursery/noSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:21:22 lint/nursery/noSuspiciousSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! There is a suspicious semicolon in the JSX element.
   

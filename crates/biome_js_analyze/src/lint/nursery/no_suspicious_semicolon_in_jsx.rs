@@ -42,14 +42,14 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub NoSemicolonInJsx {
-        version: "1.6.0",
-        name: "noSemicolonInJsx",
+    pub NoSuspiciousSemicolonInJsx {
+        version: "next",
+        name: "noSuspiciousSemicolonInJsx",
         recommended: true,
     }
 }
 
-impl Rule for NoSemicolonInJsx {
+impl Rule for NoSuspiciousSemicolonInJsx {
     type Query = Ast<AnyJsxElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;

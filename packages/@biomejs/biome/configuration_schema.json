@@ -1493,15 +1493,15 @@
 						{ "type": "null" }
 					]
 				},
-				"noSemicolonInJsx": {
-					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
+				"noSkippedTests": {
+					"description": "Disallow disabled tests.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"noSkippedTests": {
-					"description": "Disallow disabled tests.",
+				"noSuspiciousSemicolonInJsx": {
+					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

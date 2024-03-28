@@ -2604,12 +2604,12 @@ pub struct Nursery {
     #[doc = "Disallow specified modules when loaded by import or require."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_imports: Option<RuleConfiguration<NoRestrictedImports>>,
-    #[doc = "It detects possible \"wrong\" semicolons inside JSX elements."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_semicolon_in_jsx: Option<RuleConfiguration<NoSemicolonInJsx>>,
     #[doc = "Disallow disabled tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_skipped_tests: Option<RuleConfiguration<NoSkippedTests>>,
+    #[doc = "It detects possible \"wrong\" semicolons inside JSX elements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_suspicious_semicolon_in_jsx: Option<RuleConfiguration<NoSuspiciousSemicolonInJsx>>,
     #[doc = "Disallow the use of dependencies that aren't specified in the package.json."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_undeclared_dependencies: Option<RuleConfiguration<NoUndeclaredDependencies>>,
@@ -2662,8 +2662,8 @@ impl Nursery {
         "noNodejsModules",
         "noReExportAll",
         "noRestrictedImports",
-        "noSemicolonInJsx",
         "noSkippedTests",
+        "noSuspiciousSemicolonInJsx",
         "noUndeclaredDependencies",
         "noUselessTernary",
         "useImportRestrictions",
@@ -2680,7 +2680,7 @@ impl Nursery {
         "noExcessiveNestedTestSuites",
         "noExportsInTest",
         "noFocusedTests",
-        "noSemicolonInJsx",
+        "noSuspiciousSemicolonInJsx",
         "noUselessTernary",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 10] = [
@@ -2692,7 +2692,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
     ];
     const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 24] = [
@@ -2816,12 +2816,12 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_semicolon_in_jsx.as_ref() {
+        if let Some(rule) = self.no_skipped_tests.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_skipped_tests.as_ref() {
+        if let Some(rule) = self.no_suspicious_semicolon_in_jsx.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
@@ -2940,12 +2940,12 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_semicolon_in_jsx.as_ref() {
+        if let Some(rule) = self.no_skipped_tests.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_skipped_tests.as_ref() {
+        if let Some(rule) = self.no_suspicious_semicolon_in_jsx.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
@@ -3080,12 +3080,12 @@ impl Nursery {
                 .no_restricted_imports
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noSemicolonInJsx" => self
-                .no_semicolon_in_jsx
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
             "noSkippedTests" => self
                 .no_skipped_tests
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noSuspiciousSemicolonInJsx" => self
+                .no_suspicious_semicolon_in_jsx
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUndeclaredDependencies" => self
