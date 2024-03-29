@@ -5,7 +5,7 @@ description: In-depth explanation of the differences with Prettier.
 
 In some cases, Biome has intentionally decided to format code in a way that doesn't match Prettier's output. These divergences are explained below.
 
-### Prettier doesn't unquote some object properties that are valid JavaScript identifiers.
+## Prettier doesn't unquote some object properties that are valid JavaScript identifiers.
 
 Prettier and Biome unquote object and class properties that are valid JavaScript identifiers.
 Prettier [unquotes only valid ES5 identifiers](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646).
@@ -37,7 +37,7 @@ const obj = {
 ```
 
 
-### Prettier has an inconsistent behavior for assignment in computed keys.
+## Prettier has an inconsistent behavior for assignment in computed keys.
 
 Prettier and Biome enclose some assignment expressions between parentheses, particularly in conditionals.
 This allows Biome to identify an expression that should be a comparison.
@@ -75,7 +75,7 @@ To be consistent, we decided to diverge and omit the parentheses.
 Alternatively, we could enclose any assignment in a computed key of an object or of a class.
 
 
-### Prettier adds a trailing comma to type parameters of arrow functions even when it is not required.
+## Prettier adds a trailing comma to type parameters of arrow functions even when it is not required.
 
 In some specific cases, a type parameter list of an arrow function requires a trailing comma to distinguish it from a JSX element.
 When a default type is provided, this trailing comma is not required.
@@ -95,7 +95,7 @@ Diff
 ```
 
 
-### Prettier has an inconsistent behavior for parenthesized non-null-asserted optional chains
+## Prettier has an inconsistent behavior for parenthesized non-null-asserted optional chains
 
 In _TypeScript_, the non-null assertion operator `!` allows asserting that a value is non-null.
 When applied on an optional chain, the assertion applies to the entire chain regardless of the presence of parentheses,
@@ -127,7 +127,7 @@ a.?.b!
 ```
 
 
-### Prettier formats invalid syntaxes
+## Prettier formats invalid syntaxes
 
 Prettier's Babel-based parsing for JavaScript and TypeScript is very loose and [allows multiple errors](https://github.com/prettier/prettier/blob/e4a74c05f4502dd4ec70495c3130ff08ab088e05/src/language-js/parse/babel.js#L177-L218) to be ignored.
 Biome's parser is intentionally stricter than the Prettier parser.
@@ -163,7 +163,7 @@ It would continue to build the nodes like normal (effectively matching the behav
 When formatting, these particular bogus nodes would just attempt to format the inner node and then fallback if there's an error (the existing `format_or_verbatim` utility would do this already).
 This keeps the parsing and formatting logic separate from each other but introduces more complexity to the parser, allowing invalid states to be considered semi-valid.
 
-#### Duplicate modifiers on class properties
+### Duplicate modifiers on class properties
 
 Input
 
@@ -213,7 +213,7 @@ class Read {
 }
 ```
 
-#### Assignment to an optional chain
+### Assignment to an optional chain
 
 Input
 
@@ -228,7 +228,7 @@ a?.b = c;
 (a?.b) = c;
 ```
 
-#### Incorrect modifier for the type parameters of an interface
+### Incorrect modifier for the type parameters of an interface
 
 Input
 
@@ -243,7 +243,7 @@ interface L<const in T> {}
 interface L<in const T> {}
 ```
 
-#### Top-level return
+### Top-level return
 
 ```js title="example.js"
 return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
@@ -259,7 +259,7 @@ return (
 return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
 ```
 
-#### Erroneous self-increment and self-decrement
+### Erroneous self-increment and self-decrement
 
 Input
 
@@ -272,7 +272,7 @@ Input
 (1)++;
 ```
 
-#### Use of `abstract` modifier in non-abstract classes
+### Use of `abstract` modifier in non-abstract classes
 
 Input
 
@@ -292,7 +292,7 @@ class C {
 }
 ```
 
-### Prettier has inconsistencies between TypeScript and Babel parsing
+## Prettier has inconsistencies between TypeScript and Babel parsing
 
 Prettier supports a number of different parsers for JavaScript and TypeScript code, all of which are meant to be compatible with the [`estree` spec](https://github.com/estree/estree). Most of the time, Prettier uses Babel as the default parser for JavaScript code, but when parsing TypeScript, it will try to use TypeScript's own parser first and only fall back to Babel with TypeScript enabled afterward. While the TypeScript parser is generally compatible with `estree`, it's not exact, and [this can lead to some inconsistencies](https://github.com/prettier/prettier/issues/15785) that affect the output that Prettier creates. In general, these are considered bugs in Prettier itself, since the output should be the same regardless of which parser is used.
 
