@@ -171,7 +171,7 @@ pub struct HtmlRootBuilder {
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
     directive: Option<HtmlDirective>,
-    html: Option<HtmlElement>,
+    html: Option<AnyHtmlElement>,
 }
 impl HtmlRootBuilder {
     pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
@@ -182,7 +182,7 @@ impl HtmlRootBuilder {
         self.directive = Some(directive);
         self
     }
-    pub fn with_html(mut self, html: HtmlElement) -> Self {
+    pub fn with_html(mut self, html: AnyHtmlElement) -> Self {
         self.html = Some(html);
         self
     }

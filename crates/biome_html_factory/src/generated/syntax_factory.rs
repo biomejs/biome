@@ -213,7 +213,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == HTML_IDENT {
+                    if element.kind() == HTML_LITERAL {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -286,7 +286,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if HtmlElement::can_cast(element.kind()) {
+                    if AnyHtmlElement::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }

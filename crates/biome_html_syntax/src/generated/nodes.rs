@@ -389,7 +389,7 @@ impl HtmlRoot {
     pub fn directive(&self) -> Option<HtmlDirective> {
         support::node(&self.syntax, 1usize)
     }
-    pub fn html(&self) -> Option<HtmlElement> {
+    pub fn html(&self) -> Option<AnyHtmlElement> {
         support::node(&self.syntax, 2usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -409,7 +409,7 @@ impl Serialize for HtmlRoot {
 pub struct HtmlRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub directive: Option<HtmlDirective>,
-    pub html: Option<HtmlElement>,
+    pub html: Option<AnyHtmlElement>,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]

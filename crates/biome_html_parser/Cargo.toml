@@ -25,6 +25,8 @@ tracing             = { workspace = true }
 
 
 [dev-dependencies]
-biome_test_utils = { path = "../biome_test_utils" }
-insta            = { workspace = true }
-tests_macros     = { path = "../tests_macros" }
+biome_test_utils  = { path = "../biome_test_utils" }
+insta             = { workspace = true }
+quickcheck        = { workspace = true }
+quickcheck_macros = { workspace = true }
+tests_macros      = { path = "../tests_macros" }
