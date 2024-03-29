@@ -11,6 +11,16 @@ pub enum RuleKind {
     Css,
 }
 
+impl RuleKind {
+    fn as_str(&self) -> &str {
+        match self {
+            Self::Js => "js",
+            Self::Json => "json",
+            Self::Css => "css",
+        }
+    }
+}
+
 impl FromStr for RuleKind {
     type Err = &'static str;
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
@@ -188,11 +198,8 @@ impl Rule for {rule_name_upper_camel} {{
 }
 
 pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
-    let crate_folder = match kind {
-        RuleKind::Js => project_root().join("crates/biome_js_analyze"),
-        RuleKind::Json => project_root().join("crates/biome_json_analyze"),
-        RuleKind::Css => project_root().join("crates/biome_css_analyze"),
-    };
+    let rule_kind = kind.as_str();
+    let crate_folder = project_root().join(format!("crates/biome_{rule_kind}_analyze"));
     let rule_folder = crate_folder.join("src/lint/nursery");
     let test_folder = crate_folder.join("tests/specs/nursery");
     let rule_name_upper_camel = rule_name.to_camel();
@@ -235,7 +242,10 @@ pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
     let tests_path = format!("{}/{rule_name_lower_camel}", test_folder.display());
     let _ = std::fs::create_dir_all(tests_path);
 
-    let test_file = format!("{}/{rule_name_lower_camel}/valid.js", test_folder.display());
+    let test_file = format!(
+        "{}/{rule_name_lower_camel}/valid.{rule_kind}",
+        test_folder.display()
+    );
     if std::fs::File::open(&test_file).is_err() {
         let _ = std::fs::write(
             test_file,
@@ -244,7 +254,7 @@ pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
     }
 
     let test_file = format!(
-        "{}/{rule_name_lower_camel}/invalid.js",
+        "{}/{rule_name_lower_camel}/invalid.{rule_kind}",
         test_folder.display()
     );
     if std::fs::File::open(&test_file).is_err() {
