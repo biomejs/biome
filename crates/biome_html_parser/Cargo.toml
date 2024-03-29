@@ -1,30 +1,30 @@
 [package]
-authors.workspace = true
+authors.workspace    = true
 categories.workspace = true
-description = "<DESCRIPTION>"
-edition.workspace = true
-homepage.workspace = true
-keywords.workspace = true
-license.workspace = true
-name = "biome_html_parser"
+description          = "<DESCRIPTION>"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_html_parser"
 repository.workspace = true
-version = "0.0.0"
+version              = "0.0.0"
 
 [lints]
 workspace = true
 
 [dependencies]
-biome_console = { workspace = true }
-biome_diagnostics = { workspace = true }
-biome_html_factory = { workspace = true }
-biome_html_syntax = { workspace = true }
-biome_parser = { workspace = true }
-biome_rowan = { workspace = true }
+biome_console       = { workspace = true }
+biome_diagnostics   = { workspace = true }
+biome_html_factory  = { workspace = true }
+biome_html_syntax   = { workspace = true }
+biome_parser        = { workspace = true }
+biome_rowan         = { workspace = true }
 biome_unicode_table = { workspace = true }
-tracing = { workspace = true }
+tracing             = { workspace = true }
 
 
 [dev-dependencies]
 biome_test_utils = { path = "../biome_test_utils" }
-insta = { workspace = true }
-tests_macros = { path = "../tests_macros" }
+insta            = { workspace = true }
+tests_macros     = { path = "../tests_macros" }

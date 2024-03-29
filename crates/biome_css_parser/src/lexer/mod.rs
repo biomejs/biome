@@ -276,7 +276,9 @@ impl<'src> CssLexer<'src> {
         match dispatched {
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
-                self.after_newline = kind == Self::NEWLINE;
+                if kind == Self::NEWLINE {
+                    self.after_newline = true;
+                }
                 kind
             }
             QOT => self.consume_string_literal(current),
