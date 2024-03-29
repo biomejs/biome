@@ -122,7 +122,26 @@ export default defineConfig({
 					items: [
 						{
 							label: "Analyzer",
-							link: "/analyzer",
+							items: [
+								{
+									label: "Introduction",
+									link: "/analyzer",
+									translations: {
+										ja: "イントロダクション",
+										"zh-CN": "介绍",
+										"pt-BR": "Introdução",
+									},
+								},
+								{
+									label: "Import Sorting",
+									link: "/analyzer/import-sorting",
+									translations: {
+										ja: "Import文のソート",
+										"zh-CN": "导入排序",
+										"pt-BR": "Ordenação de importações",
+									},
+								},
+							],
 							translations: {
 								ja: "Analyzer",
 								"zh-CN": "分析器",

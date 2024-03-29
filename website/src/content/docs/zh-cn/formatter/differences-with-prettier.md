@@ -5,7 +5,7 @@ description: 深入解释与 Prettier 的不同之处。
 
 在某些情况下，Biome 主观决定以与 Prettier 输出不一致的方式来格式化代码。下文将解释这些差异。
 
-### Prettier 不会取消引用某些作为有效 JavaScript 标识符的对象属性
+## Prettier 不会取消引用某些作为有效 JavaScript 标识符的对象属性
 
 Prettier 和 Biome 取消引用作为有效 JavaScript 标识符的对象和类属性。
 Prettier [仅取消引号有效的 ES5 标识符](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646).
@@ -37,7 +37,7 @@ const obj = {
 ```
 
 
-### Prettier 在计算键中的赋值行为不一致
+## Prettier 在计算键中的赋值行为不一致
 
 Prettier 和 Biome 将一些赋值表达式括在括号之间，特别是在条件语句中。
 这使得 Biome 能够识别应该进行比较的表达。
@@ -74,7 +74,7 @@ class C {
 为了保持一致，我们决定舍弃括号。
 或者，我们也可以把任何赋值括在对象或类的计算键中。
 
-### Prettier 为箭头函数的类型参数添加了逗号尾部，即使在不需要逗号尾部的情况下也是如此
+## Prettier 为箭头函数的类型参数添加了逗号尾部，即使在不需要逗号尾部的情况下也是如此
 
 在某些特定情况下，箭头函数的类型参数列表需要使用逗号来与 JSX 元素区分开来。
 如果提供了默认类型，则不需要使用逗号。
@@ -94,7 +94,7 @@ class C {
 ```
 
 
-### Prettier 对括号中的非空断言可选链的行为不一致
+## Prettier 对括号中的非空断言可选链的行为不一致
 
 在 _TypeScript_ 中，非空断言操作符 `!` 允许断言一个值是非空的。
 当应用于可选链时，断言适用于整个链，无论是否存在括号，
@@ -126,7 +126,7 @@ a.?.b!
 ```
 
 
-### Prettier 格式化无效语法
+## Prettier 格式化无效语法
 
 Prettier 对 JavaScript 和 TypeScript 的基于 Babel 的解析非常宽松，允许忽略[多个错误](https://github.com/prettier/prettier/blob/e4a74c05f4502dd4ec70495c3130ff08ab088e05/src/language-js/parse/babel.js#L177-L218)。
 Biome 的解析器有意比 Prettier 解析器更严格。
@@ -162,7 +162,7 @@ Biome 有多种方法可以解决这个问题。
 在格式化时，这些特定的假节点会尝试格式化内部节点，如果出现错误，就会回退（现有的 `format_or_verbatim` 工具已经可以做到这一点）。
 这将使解析和格式化逻辑相互分离，但会给解析器带来更多复杂性，使无效状态被视为半有效状态。
 
-#### 类属性上的重复修饰符
+### 类属性上的重复修饰符
 
 输入
 
@@ -212,7 +212,7 @@ class Read {
 }
 ```
 
-#### 分配给一个可选链
+### 分配给一个可选链
 
 输入
 
@@ -227,7 +227,7 @@ a?.b = c;
 (a?.b) = c;
 ```
 
-#### 接口类型参数的修饰符不正确
+### 接口类型参数的修饰符不正确
 
 输入
 
@@ -242,7 +242,7 @@ interface L<const in T> {}
 interface L<in const T> {}
 ```
 
-#### 顶层返回
+### 顶层返回
 
 ```js title="example.js"
 return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
@@ -258,7 +258,7 @@ return (
 return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
 ```
 
-#### 错误的自增和自减
+### 错误的自增和自减
 
 输入
 
@@ -271,7 +271,7 @@ return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && some
 (1)++;
 ```
 
-#### 在非抽象类中使用 `abstract` 修饰符
+### 在非抽象类中使用 `abstract` 修饰符
 
 输入
 
@@ -291,7 +291,7 @@ class C {
 }
 ```
 
-### Prettier 在 TypeScript 和 Babel 解析之间存在不一致问题
+## Prettier 在 TypeScript 和 Babel 解析之间存在不一致问题
 
 Prettier 支持多种不同的 JavaScript 和 TypeScript 代码解析器，所有这些解析器都旨在与 [`estree` 规范](https://github.com/estree/estree)兼容。 大多数情况下，Prettier 使用 Babel 作为 JavaScript 代码的默认解析器，但在解析 TypeScript 时，它会首先尝试使用 TypeScript 自带的解析器，然后在启用 TypeScript 后才返回 Babel。虽然 TypeScript 解析器通常与 estree 兼容，但它并不精确，这[可能会导致一些不一致](https://github.com/prettier/prettier/issues/15785)，从而影响 Prettier 创建的输出。一般来说，这些被认为是 Prettier 本身的错误，因为无论使用哪个解析器，输出都应该是相同的。
 

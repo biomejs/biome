@@ -5,7 +5,7 @@ description: Explicação detalhada das diferenças com o Prettier.
 
 Em alguns casos, o Biome decidiu intencionalmente formatar o código de uma maneira que não corresponde à saída do Prettier. Essas divergências são explicadas abaixo.
 
-### O Prettier não retira as aspas de algumas propriedades de objetos que são identificadores JavaScript válidos
+## O Prettier não retira as aspas de algumas propriedades de objetos que são identificadores JavaScript válidos
 
 Prettier e Biome retiram as aspas de propriedades de objetos e classes que são identificadores JavaScript válidos.
 O Prettier [retira as aspas apenas de identificadores ES5 válidos](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646).
@@ -36,7 +36,7 @@ const obj = {
 };
 ```
 
-### O Prettier tem um comportamento inconsistente para atribuição em chaves computadas
+## O Prettier tem um comportamento inconsistente para atribuição em chaves computadas
 
 Prettier e Biome colocam algumas expressões de atribuição entre parênteses, particularmente em condicionais.
 Isso permite que o Biome identifique uma expressão que deveria ser uma comparação.
@@ -73,7 +73,7 @@ class C {
 Para ser consistente, decidimos divergir e omitir os parênteses.
 Alternativamente, poderíamos colocar parênteses em qualquer atribuição em uma chave computada de um objeto ou de uma classe.
 
-### O Prettier adiciona uma vírgula final aos parâmetros de tipo de funções arrow mesmo quando não é necessário
+## O Prettier adiciona uma vírgula final aos parâmetros de tipo de funções arrow mesmo quando não é necessário
 
 Em alguns casos específicos, uma lista de parâmetros de tipo de uma função arrow requer uma vírgula final para distingui-la de um elemento JSX.
 Quando um tipo padrão é fornecido, essa vírgula final não é necessária.
@@ -92,7 +92,7 @@ Diff
 <T = unknown>() => {};
 ```
 
-### O Prettier tem um comportamento inconsistente para cadeias opcionais com asserção de não nulo entre parênteses
+## O Prettier tem um comportamento inconsistente para cadeias opcionais com asserção de não nulo entre parênteses
 
 Em _TypeScript_, o operador de asserção de não nulo `!` permite afirmar que um valor não é nulo.
 Quando aplicado em uma cadeia opcional, a asserção se aplica a toda a cadeia, independentemente da presença de parênteses,
@@ -123,7 +123,7 @@ a.?.b!
 a.?.b!
 ```
 
-### O Prettier formata sintaxes inválidas
+## O Prettier formata sintaxes inválidas
 
 A análise do Prettier baseada em Babel para JavaScript e TypeScript é muito permissiva e [ignora vários erros](https://github.com/prettier/prettier/blob/e4a74c05f4502dd4ec70495c3130ff08ab088e05/src/language-js/parse/babel.js#L177-L218).
 O analisador do Biome é intencionalmente mais rigoroso que o do Prettier.
@@ -159,7 +159,7 @@ Ele continuaria a construir os nós normalmente (efetivamente correspondendo ao 
 Ao formatar, esses nós falsos específicos tentariam apenas formatar o nó interno e, em seguida, voltariam atrás se houvesse um erro (o método utilitário `format_or_verbatim` já faria isso).
 Isso mantém a lógica de análise e formatação separadas uma da outra, mas introduz mais complexidade ao analisador, permitindo que estados inválidos sejam considerados semi-válidos.
 
-#### Modificadores duplicados em propriedades de classe
+### Modificadores duplicados em propriedades de classe
 
 Entrada
 
@@ -209,7 +209,7 @@ class Read {
 }
 
 
-#### Atribuição a uma cadeia opcional
+### Atribuição a uma cadeia opcional
 
 Entrada
 
@@ -224,7 +224,7 @@ a?.b = c;
 (a?.b) = c;
 ```
 
-#### Modificador incorreto para os parâmetros de tipo de uma interface
+### Modificador incorreto para os parâmetros de tipo de uma interface
 
 Entrada
 
@@ -241,7 +241,7 @@ interface L<in const
  T> {}
 ```
 
-#### Retorno no nível superior
+### Retorno no nível superior
 
 ```js title="example.js"
 return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
@@ -257,7 +257,7 @@ return (
 return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
 ```
 
-#### Autoincremento e autodecremento errôneos
+### Autoincremento e autodecremento errôneos
 
 Entrada
 
@@ -270,7 +270,7 @@ Entrada
 (1)++;
 ```
 
-#### Uso do modificador `abstract` em classes não abstratas
+### Uso do modificador `abstract` em classes não abstratas
 
 Entrada
 
@@ -289,7 +289,7 @@ class C {
 }
 ```
 
-### Prettier tem inconsistências entre análise de TypeScript e Babel
+## Prettier tem inconsistências entre análise de TypeScript e Babel
 
 O Prettier suporta vários analisadores diferentes para código JavaScript e TypeScript, todos destinados a serem compatíveis com a especificação [`estree`](https://github.com/estree/estree). Na maioria das vezes, o Prettier usa o Babel como o analisador padrão para código JavaScript, mas ao analisar TypeScript, tentará usar o próprio analisador do TypeScript primeiro e só recorrerá ao Babel com TypeScript habilitado depois. Embora o analisador TypeScript seja geralmente compatível com `estree`, não é exato, e [isso pode levar a algumas inconsistências](https://github.com/prettier/prettier/issues/15785) que afetam a saída que o Prettier cria. Em geral, esses são considerados bugs no próprio Prettier, já que a saída deve ser a mesma, independentemente de qual analisador é usado.
 
