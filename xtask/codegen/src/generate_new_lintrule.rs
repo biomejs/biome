@@ -116,7 +116,7 @@ impl Rule for {rule_name_upper_camel} {{
         }
         RuleKind::Css => {
             format!(
-                r#"use biome_analyze::{{context::RuleContext, declare_rule, Ast, LanguageKind, Rule, RuleDiagnostic}};
+                r#"use biome_analyze::{{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic}};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleBlock;
 use biome_rowan::AstNode;
@@ -151,7 +151,6 @@ declare_rule! {{
         version: "next",
         name: "{rule_name_lower_camel}",
         recommended: false,
-        language_kind: LanguageKind::Css,
     }}
 }}
 
