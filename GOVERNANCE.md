@@ -56,7 +56,7 @@ Only [maintainers](#maintainer) can be nominated to be core contributors.
 
 Core contributors may either be nominated by another, [Core contributor](#core-contributor), or [lead](#lead).
 
-When nominating a core contributor, a new thread in the `#core-contributors` channel has to be created, with a case and [their contributions](#contributions) of why the person should join as [core contributor](#core-contributor).
+When nominating a core contributor, a new **private** thread in the `#core-contributors` channel has to be created, with a case and [their contributions](#contributions) of why the person should join as [core contributor](#core-contributor).
 
 `#core-contributors` is a private channel available only to people who have the `Core contributor` role.
 
@@ -89,13 +89,13 @@ Maintainers are those with a history of consistent contributions, including but 
 
 Maintainers may either be nominated by another [maintainer](#maintainer), [Core contributor](#core-contributor), [lead](#lead).
 
-When nominating a new maintainer, a new thread in the `#maintainers` channel has to be created, provide a link to the history of the [person's contributions](#contributions) to the project and a brief explanation of why the person should join as [maintainer](#maintainer).
+When nominating a new maintainer, a new **private** thread in the `#maintainers` channel has to be created, provide a link to the history of the [person's contributions](#contributions) to the project and a brief explanation of why the person should join as [maintainer](#maintainer).
 
 `#maintainers` is a private channel available only to people who have the `maintainer` role.
 
 The voting period will follow the [voting rules](#voting-rules). An individual becomes a [maintainer](#maintainer) if:
 - reaches more than 50% of positive votes among the people who have voting rights;
-- if the voting session ends with 50%, the Lead maintainers will take the decision;
+- if the voting session ends with 50%, the Leads will take the decision;
 
 A maintainer can be self-nominated. They will have to message a [lead maintainer](#lead) privately with links to their contributions to the project. Then, the lead can:
 - reject the nomination in place, provide reasons why and possibly some suggestions for the future;
@@ -109,10 +109,11 @@ In the event of a rejection, the nominated person will be privately given the re
 
 ### Voting Rules
 
+- The voting sessions are run in Discord, so Maintainers and Core Contributors are expected to have an account.
 - Members are required to vote.
 - Members may abstain from a vote.
-- Members who do not vote within seven days will automatically abstain.
-- Leads may reduce the seven days automatic abstain for urgent decisions.
+- Members who do not vote within three days will automatically abstain.
+- Leads may reduce the three days automatic abstain for urgent decisions.
 - Leads reserve the right to veto approval with a publicly disclosed reason.
 - It's highly suggested to pair the vote with a reason of the vote, e.g. "I vote in favour because that person writes good code". These reasons will be collected and brought up to the nominee at the end of the voting phase.
 
@@ -211,11 +212,19 @@ The reviewers will determine responses based on the information gathered and the
 
 ## OpenCollective fund allocation
 
-- Funds will be allocated for project-specific services such as domain registration and website hosting.
-- Core contributors are allowed to claim expenses related to conferences where they talk about Biome, or Biome workshops that they run. Expenses that can be claimed are but not limited to: trip (plane, train, etc.), meals, transport, parking.
+**Funds will be allocated for project-specific services**:
+  - Domain registrations
+  - Website hosting
+  - Password manager to manage secrets and passwords among Lead members
+
+Core contributors are allowed to claim expenses related to conferences where they talk about Biome, or Biome workshops that they run. Expenses that can be claimed are but not limited to: trip (plane, train, etc.), meals, transport, parking.
   - The person will have to provide proof of attendance (badge, video, etc.);
   - Expenses will have to be uploaded via the open collective website.
-- Expenses will be approved by the [leads](#lead).
+  - Only the expenses that afforded in the days of the workspace/conference are accepted:
+    - If a conference lasts multiple days and the member decides to attend *both* days, and the member speaks only the first day, only the expenses of the first day should be taken in consideration. In this example, if the member booked three nights in a hotel to attend these two days, the expense should be divided by 3  - three nights - and only expense 2 days: night before the conference, plus the night of the day the member speaks.
+    - If a conference lasts one day and the member decides to make their performance longer, all the expenses afforded in the other days won't be accepted. Only 2 nights of accommodation are accepted.
+
+Expenses must be approved by at least one [leads](#lead). In the presence of one single lead, the lead will ask one core contributor to fact-check the honesty of expenses, and leave a comment in the Open Collective expense page. In case of multiple leads, the lead submitting the expense must seek the approval of at least one other lead.
 
 > [!NOTE]
 > Other usage of funds has yet to be decided.
