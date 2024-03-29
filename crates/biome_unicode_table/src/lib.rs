@@ -8,6 +8,12 @@ pub use crate::bytes::Dispatch;
 
 /// Tests if `c` is a valid start of a CSS identifier
 #[inline]
+pub fn is_html_id_start(c: char) -> bool {
+    ID_Start(c)
+}
+
+/// Tests if `c` is a valid start of a CSS identifier
+#[inline]
 pub fn is_css_id_start(c: char) -> bool {
     c == '_' || c == '$' || ID_Start(c)
 }

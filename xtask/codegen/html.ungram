@@ -41,12 +41,11 @@ HtmlBogus = SyntaxElement*
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
 	directive: HtmlDirective?
-	html: HtmlElement?
+	html: AnyHtmlElement?
 	eof: 'EOF'
 
 // <!DOCTYPE html>
 // ^^^^^^^^^^^^^^^
-// TODO: add better representation
 HtmlDirective =
 	'<'
 	'!'
@@ -116,4 +115,4 @@ HtmlAttributeInitializerClause =
 
 
 HtmlString = value: 'html_string_literal'
-HtmlName = value: 'html_ident'
+HtmlName = value: 'html_literal'

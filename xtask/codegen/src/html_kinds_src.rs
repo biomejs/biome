@@ -7,6 +7,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("/", "SLASH"),
         ("=", "EQ"),
         ("!", "BANG"),
+        ("-", "MINUS"),
     ],
     keywords: &["null", "true", "false", "doctype", "html"],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
