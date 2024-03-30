@@ -87,6 +87,8 @@ pub enum RuleSource {
     EslintMysticatea(&'static str),
     /// Rules from [Eslint Plugin Barrel Files](https://github.com/thepassle/eslint-plugin-barrel-files)
     EslintBarrelFiles(&'static str),
+    /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
+    Stylelint(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -112,6 +114,7 @@ impl std::fmt::Display for RuleSource {
             RuleSource::EslintUnicorn(_) => write!(f, "eslint-plugin-unicorn"),
             RuleSource::EslintMysticatea(_) => write!(f, "eslint-plugin-mysticates"),
             RuleSource::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
+            RuleSource::Stylelint(_) => write!(f, "Stylelint"),
         }
     }
 }
@@ -154,7 +157,8 @@ impl RuleSource {
             | Self::EslintStylistic(rule_name)
             | Self::EslintUnicorn(rule_name)
             | Self::EslintMysticatea(rule_name)
-            | Self::EslintBarrelFiles(rule_name) => rule_name,
+            | Self::EslintBarrelFiles(rule_name)
+            | Self::Stylelint(rule_name) => rule_name,
         }
     }
 
@@ -191,7 +195,8 @@ impl RuleSource {
             Self::EslintStylistic(rule_name) => format!("https://eslint.style/rules/default/{rule_name}"),
             Self::EslintUnicorn(rule_name) => format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintMysticatea(rule_name) => format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}.md"),
-            Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md")
+            Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
+            Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
         }
     }
 
@@ -207,6 +212,10 @@ impl RuleSource {
     /// All ESLint plugins, exception for the TypeScript one
     pub const fn is_eslint_plugin(&self) -> bool {
         !matches!(self, Self::Clippy(_) | Self::Eslint(_))
+    }
+
+    pub const fn is_stylelint(&self) -> bool {
+        matches!(self, Self::Stylelint(_))
     }
 }
 
