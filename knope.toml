@@ -139,3 +139,7 @@ changelog = "crates/biome_graphql_factory/CHANGELOG.md"
 [package."biome_html_parser"]
 versioned_files = ["creates/biome_html_parser/Cargo.toml"]
 changelog = "crates/biome_html_parser/CHANGELOG.md"
+
+[package."biome_configuration"]
+versioned_files = ["creates/biome_configuration/Cargo.toml"]
+changelog = "crates/biome_configuration/CHANGELOG.md"    

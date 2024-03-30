@@ -194,6 +194,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_configuration"
+version = "0.0.0"
+
+[[package]]
 name = "biome_console"
 version = "0.5.7"
 dependencies = [

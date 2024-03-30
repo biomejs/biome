@@ -29,6 +29,7 @@ documentation = """
     -p biome_markup \
     -p biome_rowan
     -p biome_string_case \
+    -p biome_configuration \
     --no-deps
 """
 format = "fmt --all --verbose"
