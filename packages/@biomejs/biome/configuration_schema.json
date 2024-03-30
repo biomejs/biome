@@ -1451,6 +1451,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExtraneousDependencies": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFocusedTests": {
 					"description": "Disallow focused tests.",
 					"anyOf": [
