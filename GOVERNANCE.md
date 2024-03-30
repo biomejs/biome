@@ -224,7 +224,7 @@ Core contributors are allowed to claim expenses related to conferences where the
     - If a conference lasts multiple days and the member decides to attend *both* days, and the member speaks only the first day, only the expenses of the first day should be taken in consideration. In this example, if the member booked three nights in a hotel to attend these two days, the expense should be divided by 3  - three nights - and only expense 2 days: night before the conference, plus the night of the day the member speaks.
     - If a conference lasts one day and the member decides to make their performance longer, all the expenses afforded in the other days won't be accepted. Only 2 nights of accommodation are accepted.
 
-Expenses must be approved by at least one [leads](#lead). In the presence of one single lead, the lead will ask one core contributor to fact-check the honesty of expenses, and leave a comment in the Open Collective expense page. In case of multiple leads, the lead submitting the expense must seek the approval of at least one other lead.
+Expenses must be approved by at least one [lead](#lead). In the presence of one single lead, the lead will ask one core contributor to fact-check the honesty of expenses, and leave a comment in the Open Collective expense page. In case of multiple leads, the lead submitting the expense must seek the approval of at least one other lead.
 
 > [!NOTE]
 > Other usage of funds has yet to be decided.
