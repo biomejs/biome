@@ -71,10 +71,18 @@ impl Rule for UseButtonType {
                 }
                 let type_attribute = element.find_attribute_by_name("type").ok()?;
                 let Some(attribute) = type_attribute else {
-                    return Some(UseButtonTypeState {
-                        range: element.range(),
-                        missing_prop: true,
-                    });
+                    let has_spread_prop = element
+                        .attributes()
+                        .into_iter()
+                        .any(|attr| attr.as_jsx_spread_attribute().is_some());
+                    if has_spread_prop {
+                        return None;
+                    } else {
+                        return Some(UseButtonTypeState {
+                            range: element.range(),
+                            missing_prop: true,
+                        });
+                    }
                 };
                 inspect_jsx_type_attribute(&attribute)
             }
@@ -85,10 +93,18 @@ impl Rule for UseButtonType {
                 }
                 let type_attribute = element.find_attribute_by_name("type").ok()?;
                 let Some(attribute) = type_attribute else {
-                    return Some(UseButtonTypeState {
-                        range: element.range(),
-                        missing_prop: true,
-                    });
+                    let has_spread_prop = element
+                        .attributes()
+                        .into_iter()
+                        .any(|attr| attr.as_jsx_spread_attribute().is_some());
+                    if has_spread_prop {
+                        return None;
+                    } else {
+                        return Some(UseButtonTypeState {
+                            range: element.range(),
+                            missing_prop: true,
+                        });
+                    }
                 };
                 inspect_jsx_type_attribute(&attribute)
             }
