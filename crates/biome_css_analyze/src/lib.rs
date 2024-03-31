@@ -1,3 +1,4 @@
+mod keywords;
 mod lint;
 pub mod options;
 mod registry;
