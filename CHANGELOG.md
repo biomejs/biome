@@ -33,6 +33,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#2211](https://github.com/biomejs/biome/issues/2211). noChildrenProp should work fine when children pass as a prop in a new line. Contributed by @fireairforce
 
+- Fix [#2248](https://github.com/biomejs/biome/issues/2248). `lint/a11y/useButtonType` should not trigger when button element with spread attribute. Contributed by @fireairforce
+
 #### Enhancements
 
 - Add support for object property members in the rule `useSortedClasses`. Contributed by @ematipico
