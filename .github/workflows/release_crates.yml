@@ -17,7 +17,7 @@ jobs:
     environment: crate-publish
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
       - name: Login to crate.io
         run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
       - name: Publish crates to crates.io

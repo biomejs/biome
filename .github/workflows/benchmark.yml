@@ -33,12 +33,12 @@ jobs:
     steps:
 
       - name: Checkout PR Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           ref: ${{ steps.sha.outputs.result }}
 
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v1
+        uses: moonrepo/setup-rust@b8edcc56aab474d90c7cf0bb8beeaf8334c15e9f # v1
         with:
           channel: stable
           cache-target: release
@@ -49,7 +49,7 @@ jobs:
         run: cargo codspeed build --features codspeed -p xtask_bench
 
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@v2
+        uses: CodSpeedHQ/action@1dbf41f0ae41cebfe61e084e535aebe533409b4d # v2
         timeout-minutes: 30
         with:
           run: cargo codspeed run

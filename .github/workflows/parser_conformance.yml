@@ -25,13 +25,13 @@ jobs:
 
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Support longpaths
         run: git config core.longpaths true
 
       - name: Checkout PR Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           submodules: recursive
 
@@ -39,7 +39,7 @@ jobs:
         uses: ./.github/actions/free-disk-space
 
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v1
+        uses: moonrepo/setup-rust@b8edcc56aab474d90c7cf0bb8beeaf8334c15e9f # v1
         with:
           cache-target: release
           cache-base: main
@@ -52,7 +52,7 @@ jobs:
         run: cargo coverage --json > new_results.json
 
       - name: Checkout main Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           clean: false
           ref: main
@@ -77,11 +77,11 @@ jobs:
       - name: Get the PR number
         if: github.event_name == 'pull_request'
         id: pr-number
-        uses: kkak10/pr-number-action@v1.3
+        uses: kkak10/pr-number-action@8f5358941366822cd0825e04dfe68437f2f5f15b # v1.3
 
       - name: Find Previous Comment
         if: github.event_name == 'pull_request'
-        uses: peter-evans/find-comment@v3.0.0
+        uses: peter-evans/find-comment@d5fe37641ad8451bdd80312415672ba26c86575e # v3.0.0
         id: previous-comment
         with:
           issue-number: ${{ steps.pr-number.outputs.pr }}
@@ -89,7 +89,7 @@ jobs:
 
       - name: Update existing comment
         if: github.event_name == 'pull_request' && steps.previous-comment.outputs.comment-id
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4
         continue-on-error: true
         with:
           comment-id: ${{ steps.previous-comment.outputs.comment-id }}
@@ -99,7 +99,7 @@ jobs:
 
       - name: Write a new comment
         if: github.event_name == 'pull_request' && !steps.previous-comment.outputs.comment-id
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4
         continue-on-error: true
         with:
           issue-number: ${{ steps.pr-number.outputs.pr }}
