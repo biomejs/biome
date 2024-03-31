@@ -96,8 +96,10 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
 
         match action {
             Some(action) => {
-                if let Some((range, _)) = action.mutation.as_text_edits() {
-                    tree = match JsonRoot::cast(action.mutation.commit()) {
+                if let (root, Some((range, _))) =
+                    action.mutation.commit_with_text_range_and_edit(true)
+                {
+                    tree = match JsonRoot::cast(root) {
                         Some(tree) => tree,
                         None => return Err(CliDiagnostic::check_error(category!("migrate"))),
                     };

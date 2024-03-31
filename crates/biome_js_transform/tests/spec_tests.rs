@@ -142,11 +142,15 @@ fn check_transformation(
     transformation: &AnalyzerTransformation<JsLanguage>,
     options: JsParserOptions,
 ) {
-    let (_, text_edit) = transformation.mutation.as_text_edits().unwrap_or_default();
+    let (new_tree, Some((_, text_edit))) = transformation
+        .mutation
+        .clone()
+        .commit_with_text_range_and_edit(true)
+    else {
+        panic!("text edit doesn't exist");
+    };
 
     let output = text_edit.new_string(source);
-
-    let new_tree = transformation.mutation.clone().commit();
 
     // Checks that applying the text edits returned by the BatchMutation
     // returns the same code as printing the modified syntax tree

@@ -20,7 +20,7 @@ pub fn has_bogus_nodes_or_empty_slots(node: &JsSyntaxNode) -> bool {
         if kind.is_list() {
             return descendant
                 .slots()
-                .any(|slot| matches!(slot, SyntaxSlot::Empty));
+                .any(|slot| matches!(slot, SyntaxSlot::Empty { .. }));
         }
 
         false

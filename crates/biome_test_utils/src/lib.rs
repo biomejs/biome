@@ -164,7 +164,7 @@ pub fn register_leak_checker() {
 }
 
 pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerAction<L>) -> String {
-    let (_, text_edit) = action.mutation.as_text_edits().unwrap_or_default();
+    let (_, text_edit) = action.mutation.as_text_range_and_edit().unwrap_or_default();
 
     let output = text_edit.new_string(source);
 
@@ -204,7 +204,7 @@ pub fn has_bogus_nodes_or_empty_slots<L: biome_rowan::Language>(node: &SyntaxNod
         if kind.is_list() {
             return descendant
                 .slots()
-                .any(|slot| matches!(slot, SyntaxSlot::Empty));
+                .any(|slot| matches!(slot, SyntaxSlot::Empty { .. }));
         }
 
         false
