@@ -100,9 +100,9 @@ pub(crate) fn find_variable_position(
         .map(|child| child.omit_parentheses())
         .filter(|child| child.syntax().text_trimmed() == variable)
         .map(|child| {
-            if child.syntax().text_trimmed_range().end() < operator_range.start() {
+            if child.syntax().text_trimmed_range().end() <= operator_range.start() {
                 return VariablePosition::Left;
-            } else if operator_range.end() < child.syntax().text_trimmed_range().start() {
+            } else if operator_range.end() <= child.syntax().text_trimmed_range().start() {
                 return VariablePosition::Right;
             }
 
@@ -185,5 +185,28 @@ mod test {
         );
 
         assert_eq!(position, None);
+    }
+
+    #[test]
+    fn find_variable_position_when_the_operator_has_no_spaces_around() {
+        let source = "l-c";
+        let parsed = parse(
+            source,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let binary_expression = parsed
+            .syntax()
+            .descendants()
+            .find_map(JsBinaryExpression::cast);
+
+        let variable = "l";
+        let position = find_variable_position(
+            &binary_expression.expect("valid binary expression"),
+            variable,
+        );
+
+        assert_eq!(position, Some(VariablePosition::Left));
     }
 }
