@@ -52,8 +52,9 @@ invalid.js:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-     1  1 │   // Header comment
+     1    │ - //·Header·comment
      2    │ - import·A·from·"mod";
+        1 │ + 
      3  2 │   
      4  3 │   // Header comment
   
@@ -75,11 +76,13 @@ invalid.js:5:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused import.
   
-     3  3 │   
-     4  4 │   // Header comment
+     1  1 │   // Header comment
+     2  2 │   import A from "mod";
+     3    │ - 
+     4    │ - //·Header·comment
      5    │ - import·*·as·B·from·"mod";·//·Import·comment
-     6  5 │   
-     7  6 │   // Header comment
+     6  3 │   
+     7  4 │   // Header comment
   
 
 ```
@@ -99,11 +102,13 @@ invalid.js:8:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused import.
   
-     6  6 │   
-     7  7 │   // Header comment
+     4  4 │   // Header comment
+     5  5 │   import * as B from "mod"; // Import comment
+     6    │ - 
+     7    │ - //·Header·comment
      8    │ - import·{·C·}·from·"mod";·//·Import·comment
-     9  8 │   
-    10  9 │   // Header comment
+     9  6 │   
+    10  7 │   // Header comment
   
 
 ```
@@ -210,10 +215,8 @@ invalid.js:17:5 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
     15 15 │   import {
     16    │ - ····//·Comment
     17    │ - ····H,
-    18    │ - ····I,
-       16 │ + ····I,
+    18 16 │       I,
     19 17 │   } from "mod";
-    20 18 │   
   
 
 ```
@@ -300,11 +303,13 @@ invalid.js:24:15 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-    22 22 │   
-    23 23 │   // Header comment
+    20 20 │   
+    21 21 │   import {/*a*/J/*b*/, /*c*/K/*d*/} from "mod";
+    22    │ - 
+    23    │ - //·Header·comment
     24    │ - import·{·L·as·M,·}·from·"mod";·//·Import·comment
-    25 24 │   
-    26 25 │   // See https://github.com/biomejs/biome/issues/653
+    25 22 │   
+    26 23 │   // See https://github.com/biomejs/biome/issues/653
   
 
 ```
@@ -328,11 +333,8 @@ invalid.js:28:9 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
     26 26 │   // See https://github.com/biomejs/biome/issues/653
     27 27 │   import {a} from 'a'
     28    │ - import·{d}·from·'d'
-    29    │ - import·{b}·from·'b'
-       28 │ + import·{b}·from·'b'
+    29 28 │   import {b} from 'b'
     30 29 │   export const bb = a + b
   
 
 ```
-
-

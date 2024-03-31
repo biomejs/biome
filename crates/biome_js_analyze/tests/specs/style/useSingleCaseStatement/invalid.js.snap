@@ -75,7 +75,8 @@ invalid.js:4:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━━
      3    │ - ····case·false:
         3 │ + ····case·false:·{
      4  4 │           let foo = '';
-     5  5 │           foo;
+     5    │ - ········foo;
+        5 │ + ········foo;
         6 │ + ····}
      6  7 │   }
      7  8 │   
@@ -104,7 +105,8 @@ invalid.js:10:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
      9    │ - ····case·false:·//·comment
         9 │ + ····case·false:·{·//·comment
     10 10 │           let foo = '';
-    11 11 │           foo;
+    11    │ - ········foo;
+       11 │ + ········foo;
        12 │ + ····}
     12 13 │   }
     13 14 │   
@@ -133,7 +135,8 @@ invalid.js:17:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
     16    │ - ····/*·comment·*/·:
        16 │ + ····/*·comment·*/·:·{
     17 17 │           let foo = '';
-    18 18 │           foo;
+    18    │ - ········foo;
+       18 │ + ········foo;
        19 │ + ····}
     19 20 │   }
     20 21 │   
@@ -162,7 +165,8 @@ invalid.js:24:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
     23    │ - ····default:
        23 │ + ····default:·{
     24 24 │           let foo = '';
-    25 25 │           foo;
+    25    │ - ········foo;
+       25 │ + ········foo;
        26 │ + ····}
     26 27 │   }
     27 28 │   
@@ -191,7 +195,8 @@ invalid.js:31:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
     30    │ - ····default:
        30 │ + ····default:·{
     31 31 │           let foo = '';
-    32 32 │           foo;
+    32    │ - ········foo;
+       32 │ + ········foo;
        33 │ + ····}
     33 34 │   }
     34 35 │   
@@ -220,7 +225,8 @@ invalid.js:37:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
     36    │ - ····default:·//·comment
        36 │ + ····default:·{·//·comment
     37 37 │           let foo = '';
-    38 38 │           foo;
+    38    │ - ········foo;
+       38 │ + ········foo;
        39 │ + ····}
     39 40 │   }
     40 41 │   
@@ -249,12 +255,11 @@ invalid.js:44:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
     43    │ - ····/*·comment·*/·:
        43 │ + ····/*·comment·*/·:·{
     44 44 │           let foo = '';
-    45 45 │           foo;
+    45    │ - ········foo;
+       45 │ + ········foo;
        46 │ + ····}
     46 47 │   }
     47 48 │   
   
 
 ```
-
-

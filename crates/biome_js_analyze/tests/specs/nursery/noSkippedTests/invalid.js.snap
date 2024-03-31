@@ -30,11 +30,8 @@ invalid.js:1:10 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━�
   
   i Unsafe fix: Enable the test.
   
-    1   │ - describe.skip("test",·()·=>·{});
-      1 │ + describe("test",·()·=>·{});
-    2 2 │   it.skip("test", () => {});
-    3 3 │   test.skip("test", () => {});
-  
+    1 │ describe.skip("test",·()·=>·{});
+      │         -----                   
 
 ```
 
@@ -55,12 +52,8 @@ invalid.js:2:4 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━
   
   i Unsafe fix: Enable the test.
   
-    1 1 │   describe.skip("test", () => {});
-    2   │ - it.skip("test",·()·=>·{});
-      2 │ + it("test",·()·=>·{});
-    3 3 │   test.skip("test", () => {});
-    4 4 │   xdescribe('foo', () => {});
-  
+    2 │ it.skip("test",·()·=>·{});
+      │   -----                   
 
 ```
 
@@ -82,13 +75,8 @@ invalid.js:3:6 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━
   
   i Unsafe fix: Enable the test.
   
-    1 1 │   describe.skip("test", () => {});
-    2 2 │   it.skip("test", () => {});
-    3   │ - test.skip("test",·()·=>·{});
-      3 │ + test("test",·()·=>·{});
-    4 4 │   xdescribe('foo', () => {});
-    5 5 │   xit('foo', () => {});
-  
+    3 │ test.skip("test",·()·=>·{});
+      │     -----                   
 
 ```
 
@@ -173,5 +161,3 @@ invalid.js:6:1 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━
   
 
 ```
-
-

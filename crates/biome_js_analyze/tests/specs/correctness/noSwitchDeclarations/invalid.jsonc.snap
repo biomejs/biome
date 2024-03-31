@@ -24,8 +24,9 @@ invalid.jsonc:1:22 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
   
   i Unsafe fix: Wrap the declaration in a block.
   
-    1 │ switch·(a)·{·case·1:·{·let·x·=·1;·break;·}}
-      │                      ++                   +
+  - switch·(a)·{·case·1:·let·x·=·1;·break;·}
+  + switch·(a)·{·case·1:·{·let·x·=·1;·break;·}}
+  
 
 ```
 
@@ -51,8 +52,9 @@ invalid.jsonc:1:23 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
   
   i Unsafe fix: Wrap the declaration in a block.
   
-    1 │ switch·(a)·{·default:·{·let·x·=·2;·break;·}}
-      │                       ++                   +
+  - switch·(a)·{·default:·let·x·=·2;·break;·}
+  + switch·(a)·{·default:·{·let·x·=·2;·break;·}}
+  
 
 ```
 
@@ -78,8 +80,9 @@ invalid.jsonc:1:22 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
   
   i Unsafe fix: Wrap the declaration in a block.
   
-    1 │ switch·(a)·{·case·1:·{·const·x·=·1;·break;·}}
-      │                      ++                     +
+  - switch·(a)·{·case·1:·const·x·=·1;·break;·}
+  + switch·(a)·{·case·1:·{·const·x·=·1;·break;·}}
+  
 
 ```
 
@@ -105,8 +108,9 @@ invalid.jsonc:1:23 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
   
   i Unsafe fix: Wrap the declaration in a block.
   
-    1 │ switch·(a)·{·default:·{·const·x·=·2;·break;·}}
-      │                       ++                     +
+  - switch·(a)·{·default:·const·x·=·2;·break;·}
+  + switch·(a)·{·default:·{·const·x·=·2;·break;·}}
+  
 
 ```
 
@@ -132,8 +136,9 @@ invalid.jsonc:1:22 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
   
   i Unsafe fix: Wrap the declaration in a block.
   
-    1 │ switch·(a)·{·case·1:·{·function·f()·{}·break;·}}
-      │                      ++                        +
+  - switch·(a)·{·case·1:·function·f()·{}·break;·}
+  + switch·(a)·{·case·1:·{·function·f()·{}·break;·}}
+  
 
 ```
 
@@ -159,8 +164,9 @@ invalid.jsonc:1:23 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
   
   i Unsafe fix: Wrap the declaration in a block.
   
-    1 │ switch·(a)·{·default:·{·function·f()·{}·break;·}}
-      │                       ++                        +
+  - switch·(a)·{·default:·function·f()·{}·break;·}
+  + switch·(a)·{·default:·{·function·f()·{}·break;·}}
+  
 
 ```
 
@@ -186,8 +192,9 @@ invalid.jsonc:1:22 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
   
   i Unsafe fix: Wrap the declaration in a block.
   
-    1 │ switch·(a)·{·case·1:·{·class·C·{}·break;·}}
-      │                      ++                   +
+  - switch·(a)·{·case·1:·class·C·{}·break;·}
+  + switch·(a)·{·case·1:·{·class·C·{}·break;·}}
+  
 
 ```
 
@@ -213,9 +220,8 @@ invalid.jsonc:1:23 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
   
   i Unsafe fix: Wrap the declaration in a block.
   
-    1 │ switch·(a)·{·default:·{·class·C·{}·break;·}}
-      │                       ++                   +
+  - switch·(a)·{·default:·class·C·{}·break;·}
+  + switch·(a)·{·default:·{·class·C·{}·break;·}}
+  
 
 ```
-
-

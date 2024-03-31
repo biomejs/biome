@@ -38,11 +38,8 @@ invalid.js:1:10 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━�
   
   i Unsafe fix: Remove focus from test.
   
-     1    │ - describe.only("bar",·function·()·{});
-        1 │ + describe("bar",·function·()·{});
-     2  2 │   it.only("bar", function () {});
-     3  3 │   test.only("bar", function () {});
-  
+    1 │ describe.only("bar",·function·()·{});
+      │         -----                        
 
 ```
 
@@ -63,12 +60,8 @@ invalid.js:2:4 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━
   
   i Unsafe fix: Remove focus from test.
   
-     1  1 │   describe.only("bar", function () {});
-     2    │ - it.only("bar",·function·()·{});
-        2 │ + it("bar",·function·()·{});
-     3  3 │   test.only("bar", function () {});
-     4  4 │   
-  
+    2 │ it.only("bar",·function·()·{});
+      │   -----                        
 
 ```
 
@@ -90,13 +83,8 @@ invalid.js:3:6 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━
   
   i Unsafe fix: Remove focus from test.
   
-     1  1 │   describe.only("bar", function () {});
-     2  2 │   it.only("bar", function () {});
-     3    │ - test.only("bar",·function·()·{});
-        3 │ + test("bar",·function·()·{});
-     4  4 │   
-     5  5 │   describe.only("bar", () => {});
-  
+    3 │ test.only("bar",·function·()·{});
+      │     -----                        
 
 ```
 
@@ -118,13 +106,8 @@ invalid.js:5:10 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━�
   
   i Unsafe fix: Remove focus from test.
   
-     3  3 │   test.only("bar", function () {});
-     4  4 │   
-     5    │ - describe.only("bar",·()·=>·{});
-        5 │ + describe("bar",·()·=>·{});
-     6  6 │   it.only("bar", () => {});
-     7  7 │   test.only("bar", () => {});
-  
+    5 │ describe.only("bar",·()·=>·{});
+      │         -----                  
 
 ```
 
@@ -145,13 +128,8 @@ invalid.js:6:4 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━
   
   i Unsafe fix: Remove focus from test.
   
-     4  4 │   
-     5  5 │   describe.only("bar", () => {});
-     6    │ - it.only("bar",·()·=>·{});
-        6 │ + it("bar",·()·=>·{});
-     7  7 │   test.only("bar", () => {});
-     8  8 │   
-  
+    6 │ it.only("bar",·()·=>·{});
+      │   -----                  
 
 ```
 
@@ -173,13 +151,8 @@ invalid.js:7:6 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━
   
   i Unsafe fix: Remove focus from test.
   
-     5  5 │   describe.only("bar", () => {});
-     6  6 │   it.only("bar", () => {});
-     7    │ - test.only("bar",·()·=>·{});
-        7 │ + test("bar",·()·=>·{});
-     8  8 │   
-     9  9 │   describe["only"]("bar", function () {});
-  
+    7 │ test.only("bar",·()·=>·{});
+      │     -----                  
 
 ```
 
@@ -303,5 +276,3 @@ invalid.js:14:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━�
   
 
 ```
-
-

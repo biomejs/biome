@@ -121,10 +121,8 @@ invalid.js:16:3 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━
     14 14 │   	if (i > 5) {
     15 15 │   		console.log("foo");
     16    │ - → → continue;
-    17    │ - → }·else·if·(i·>=·5·&&·i·<·8)·{
-       16 │ + → }·else·if·(i·>=·5·&&·i·<·8)·{
+    17 16 │   	} else if (i >= 5 && i < 8) {
     18 17 │   		console.log("test");
-    19 18 │   	} else {
   
 
 ```
@@ -189,5 +187,3 @@ invalid.js:31:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━
   
 
 ```
-
-

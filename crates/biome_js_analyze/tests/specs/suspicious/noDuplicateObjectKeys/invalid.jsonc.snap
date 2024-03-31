@@ -26,7 +26,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   i Unsafe fix: Remove this property value named a
   
     1 │ ({·a:·1,·a:·2·});
-      │       ------     
+      │    ------        
 
 ```
 
@@ -54,7 +54,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   i Unsafe fix: Remove this property value named a
   
     1 │ ({·a:·1,·a:·2,·a:·3·});
-      │       ------           
+      │    ------              
 
 ```
 
@@ -76,7 +76,7 @@ invalid.jsonc:1:10 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   i Unsafe fix: Remove this property value named a
   
     1 │ ({·a:·1,·a:·2,·a:·3·});
-      │             ------     
+      │          ------        
 
 ```
 
@@ -104,7 +104,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   i Unsafe fix: Remove this property value named 
   
     1 │ ({·'':·1,·'':·2·});
-      │        -------     
+      │    -------         
 
 ```
 
@@ -132,7 +132,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   i Unsafe fix: Remove this property value named z
   
     1 │ ({·z:·1,·z:·2·});
-      │       ------     
+      │    ------        
 
 ```
 
@@ -160,7 +160,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   i Unsafe fix: Remove this getter named a
   
     1 │ ({·get·a()·{},·get·a()·{}·});
-      │              ------------    
+      │    ------------              
 
 ```
 
@@ -188,7 +188,7 @@ invalid.jsonc:1:4 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
   i Unsafe fix: Remove this setter named a
   
     1 │ ({·set·a(v)·{},·set·a(v)·{}·});
-      │               -------------    
+      │    -------------               
 
 ```
 
@@ -409,5 +409,3 @@ invalid.jsonc:1:16 lint/suspicious/noDuplicateObjectKeys  FIXABLE  ━━━━�
       │                -------------        
 
 ```
-
-
