@@ -113,12 +113,13 @@ pub(crate) fn analyze_and_snap(
 }
 
 fn check_code_action(path: &Path, source: &str, action: &AnalyzerAction<JsonLanguage>) {
-    let (new_tree, Some((_, text_edit))) = action
+    let (new_tree, text_edit) = match action
         .mutation
         .clone()
         .commit_with_text_range_and_edit(true)
-    else {
-        panic!("text edit doesn't exist");
+    {
+        (new_tree, Some((_, text_edit))) => (new_tree, text_edit),
+        (new_tree, None) => (new_tree, Default::default()),
     };
 
     let output = text_edit.new_string(source);

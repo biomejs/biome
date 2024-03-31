@@ -186,12 +186,13 @@ fn check_code_action(
     action: &AnalyzerAction<CssLanguage>,
     options: CssParserOptions,
 ) {
-    let (new_tree, Some((_, text_edit))) = action
+    let (new_tree, text_edit) = match action
         .mutation
         .clone()
         .commit_with_text_range_and_edit(true)
-    else {
-        todo!();
+    {
+        (new_tree, Some((_, text_edit))) => (new_tree, text_edit),
+        (new_tree, None) => (new_tree, Default::default()),
     };
 
     let output = text_edit.new_string(source);
