@@ -1,0 +1,32 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_graphql_parser"
+repository.workspace = true
+version              = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_console         = { workspace = true }
+biome_diagnostics     = { workspace = true }
+biome_graphql_factory = { workspace = true }
+biome_graphql_syntax  = { workspace = true }
+biome_parser          = { workspace = true }
+biome_rowan           = { workspace = true }
+biome_unicode_table   = { workspace = true }
+tracing               = { workspace = true }
+unicode-bom           = { workspace = true }
+
+[dev-dependencies]
+insta             = { workspace = true }
+quickcheck        = { workspace = true }
+quickcheck_macros = { workspace = true }
+tests_macros      = { workspace = true }
+
+[lints]
+workspace = true

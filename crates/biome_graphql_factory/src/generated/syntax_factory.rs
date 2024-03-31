@@ -359,10 +359,24 @@ impl SyntaxFactory for GraphqlSyntaxFactory {
             }
             GRAPHQL_DOCUMENT => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
+                    if element.kind() == T![UNICODE_BOM] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
                     if GraphqlDefinitionList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![EOF] {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1426,7 +1440,7 @@ impl SyntaxFactory for GraphqlSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == IDENT {
+                    if element.kind() == GRAPHQL_NAME {
                         slots.mark_present();
                         current_element = elements.next();
                     }

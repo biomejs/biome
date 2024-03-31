@@ -491,11 +491,19 @@ impl GraphqlDocument {
     }
     pub fn as_fields(&self) -> GraphqlDocumentFields {
         GraphqlDocumentFields {
-            graphql_definition_list: self.graphql_definition_list(),
+            bom_token: self.bom_token(),
+            definitions: self.definitions(),
+            eof_token: self.eof_token(),
         }
     }
-    pub fn graphql_definition_list(&self) -> GraphqlDefinitionList {
-        support::list(&self.syntax, 0usize)
+    pub fn bom_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn definitions(&self) -> GraphqlDefinitionList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -509,7 +517,9 @@ impl Serialize for GraphqlDocument {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GraphqlDocumentFields {
-    pub graphql_definition_list: GraphqlDefinitionList,
+    pub bom_token: Option<SyntaxToken>,
+    pub definitions: GraphqlDefinitionList,
+    pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GraphqlEnumTypeDefinition {
@@ -4198,7 +4208,12 @@ impl AstNode for GraphqlDocument {
 impl std::fmt::Debug for GraphqlDocument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("GraphqlDocument")
-            .field("graphql_definition_list", &self.graphql_definition_list())
+            .field(
+                "bom_token",
+                &support::DebugOptionalElement(self.bom_token()),
+            )
+            .field("definitions", &self.definitions())
+            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
             .finish()
     }
 }

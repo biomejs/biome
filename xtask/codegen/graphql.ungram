@@ -45,9 +45,12 @@ GraphqlBogusType = SyntaxElement*
 // Extension that don't add anything
 GraphqlBogusExtension = SyntaxElement*
 
-GraphqlName = value: 'ident'
+GraphqlName = value: 'graphql_name'
 
-GraphqlDocument = GraphqlDefinitionList
+GraphqlDocument =
+	bom: 'UNICODE_BOM'?
+	definitions: GraphqlDefinitionList
+	eof: 'EOF'
 
 GraphqlDefinitionList = AnyGraphqlDefinition*
 

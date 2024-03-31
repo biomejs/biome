@@ -192,10 +192,22 @@ impl GraphqlDirectiveLocation {
     }
 }
 impl GraphqlDocument {
-    pub fn with_graphql_definition_list(self, element: GraphqlDefinitionList) -> Self {
+    pub fn with_bom_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
+        )
+    }
+    pub fn with_definitions(self, element: GraphqlDefinitionList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_eof_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
     }
 }

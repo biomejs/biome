@@ -184,13 +184,36 @@ pub fn graphql_directive_location(value_token_token: SyntaxToken) -> GraphqlDire
         [Some(SyntaxElement::Token(value_token_token))],
     ))
 }
-pub fn graphql_document(graphql_definition_list: GraphqlDefinitionList) -> GraphqlDocument {
-    GraphqlDocument::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_DOCUMENT,
-        [Some(SyntaxElement::Node(
-            graphql_definition_list.into_syntax(),
-        ))],
-    ))
+pub fn graphql_document(
+    definitions: GraphqlDefinitionList,
+    eof_token: SyntaxToken,
+) -> GraphqlDocumentBuilder {
+    GraphqlDocumentBuilder {
+        definitions,
+        eof_token,
+        bom_token: None,
+    }
+}
+pub struct GraphqlDocumentBuilder {
+    definitions: GraphqlDefinitionList,
+    eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
+}
+impl GraphqlDocumentBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn build(self) -> GraphqlDocument {
+        GraphqlDocument::unwrap_cast(SyntaxNode::new_detached(
+            GraphqlSyntaxKind::GRAPHQL_DOCUMENT,
+            [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.definitions.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
 }
 pub fn graphql_enum_type_definition(
     enum_token: SyntaxToken,

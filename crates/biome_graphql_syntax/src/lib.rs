@@ -33,7 +33,6 @@ impl GraphqlSyntaxKind {
             GraphqlSyntaxKind::NEWLINE
                 | GraphqlSyntaxKind::WHITESPACE
                 | GraphqlSyntaxKind::COMMENT
-                | GraphqlSyntaxKind::MULTILINE_COMMENT
                 | GraphqlSyntaxKind::COMMA
         )
     }
@@ -97,8 +96,9 @@ impl TryFrom<GraphqlSyntaxKind> for TriviaPieceKind {
             match value {
                 GraphqlSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
                 GraphqlSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
+                // https://spec.graphql.org/October2021/#sec-Insignificant-Commas
+                GraphqlSyntaxKind::COMMA => Ok(TriviaPieceKind::Whitespace),
                 GraphqlSyntaxKind::COMMENT => Ok(TriviaPieceKind::SingleLineComment),
-                GraphqlSyntaxKind::MULTILINE_COMMENT => Ok(TriviaPieceKind::MultiLineComment),
                 _ => unreachable!("Not Trivia"),
             }
         } else {
