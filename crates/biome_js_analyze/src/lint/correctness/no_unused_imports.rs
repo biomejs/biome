@@ -1,4 +1,4 @@
-use crate::{services::semantic::Semantic, utils::batch::JsBatchMutation, JsRuleAction};
+use crate::{services::semantic::Semantic, JsRuleAction};
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
 };
@@ -18,6 +18,10 @@ declare_rule! {
     /// Unused imports might be the result of an incomplete refactoring.
     /// The code fix can remove comments associated with an `import`.
     /// See the last invalid example.
+    ///
+    /// Note that the leading trivia, e.g., comments or newlines preceding
+    /// the unused imports will also be removed. So that comment directives
+    /// like `@ts-expect-error` won't be transferred to a wrong place.
     ///
     /// ## Examples
     ///
@@ -205,7 +209,8 @@ fn remove_import_specifier(
         | AnyJsImportClause::JsImportNamespaceClause(_) => {
             // Remove the entire statement
             let import = clause.parent::<JsImport>()?;
-            mutation.transfer_leading_trivia_to_sibling(import.syntax());
+            // This will also remove the trivia of the node
+            // which is intended
             mutation.remove_node(import);
         }
     }
