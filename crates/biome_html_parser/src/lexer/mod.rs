@@ -2,7 +2,7 @@ mod tests;
 
 use crate::token_source::HtmlLexContext;
 use biome_html_syntax::HtmlSyntaxKind::{
-    DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE, TOMBSTONE,
+    COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE, TOMBSTONE,
     UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, TextLen, TextSize, T};
@@ -48,13 +48,10 @@ impl<'src> HtmlLexer<'src> {
             unicode_bom_length: 0,
         }
     }
-}
-
-impl<'src> HtmlLexer<'src> {
     fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            b'<' => self.consume_byte(T![<]),
+            b'<' => self.consume_l_angle(),
             b'>' => self.consume_byte(T![>]),
             b'/' => self.consume_byte(T![/]),
             b'!' => self.consume_byte(T![!]),
@@ -69,6 +66,29 @@ impl<'src> HtmlLexer<'src> {
                     }
                 }
                 self.consume_unexpected_character()
+            }
+        }
+    }
+
+    fn consume_element_list_token(&mut self, current: u8) -> HtmlSyntaxKind {
+        debug_assert!(!self.is_eof());
+        match current {
+            b'<' => self.consume_byte(T![<]),
+            _ => {
+                while let Some(chr) = self.current_byte() {
+                    match chr {
+                        b'<' => break,
+                        chr => {
+                            if chr.is_ascii() {
+                                self.advance(1);
+                            } else {
+                                self.advance_char_unchecked();
+                            }
+                        }
+                    }
+                }
+
+                HTML_LITERAL
             }
         }
     }
@@ -217,6 +237,45 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    fn consume_l_angle(&mut self) -> HtmlSyntaxKind {
+        self.assert_byte(b'<');
+
+        if !self.at_start_comment() {
+            self.consume_byte(T![<])
+        } else {
+            self.consume_comment()
+        }
+    }
+
+    fn consume_comment(&mut self) -> HtmlSyntaxKind {
+        // eat <!--
+        self.advance(4);
+
+        while let Some(char) = self.current_byte() {
+            if self.at_end_comment() {
+                // eat -->
+                self.advance(3);
+                return COMMENT;
+            }
+            self.advance_byte_or_char(char);
+        }
+
+        COMMENT
+    }
+
+    fn at_start_comment(&mut self) -> bool {
+        self.current_byte() == Some(b'<')
+            && self.byte_at(1) == Some(b'!')
+            && self.byte_at(2) == Some(b'-')
+            && self.byte_at(3) == Some(b'-')
+    }
+
+    fn at_end_comment(&mut self) -> bool {
+        self.current_byte() == Some(b'-')
+            && self.byte_at(1) == Some(b'-')
+            && self.byte_at(2) == Some(b'>')
+    }
+
     /// Lexes a `\u0000` escape sequence. Assumes that the lexer is positioned at the `u` token.
     ///
     /// A unicode escape sequence must consist of 4 hex characters.
@@ -295,8 +354,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
             match self.current_byte() {
                 Some(current) => match context {
                     HtmlLexContext::Regular => self.consume_token(current),
-                    // TODO: apply correct context
-                    HtmlLexContext::InsideElement => self.consume_token(current),
+                    HtmlLexContext::ElementList => self.consume_element_list_token(current),
                 },
                 None => EOF,
             }
@@ -320,8 +378,26 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         self.current_flags.has_unicode_escape()
     }
 
-    fn rewind(&mut self, _checkpoint: LexerCheckpoint<Self::Kind>) {
-        unreachable!("no need")
+    fn rewind(&mut self, checkpoint: LexerCheckpoint<Self::Kind>) {
+        let LexerCheckpoint {
+            position,
+            current_start,
+            current_flags,
+            current_kind,
+            after_line_break,
+            unicode_bom_length,
+            diagnostics_pos,
+        } = checkpoint;
+
+        let new_pos = u32::from(position) as usize;
+
+        self.position = new_pos;
+        self.current_kind = current_kind;
+        self.current_start = current_start;
+        self.current_flags = current_flags;
+        self.after_newline = after_line_break;
+        self.unicode_bom_length = unicode_bom_length;
+        self.diagnostics.truncate(diagnostics_pos as usize);
     }
 
     fn finish(self) -> Vec<ParseDiagnostic> {

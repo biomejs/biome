@@ -14,7 +14,9 @@ impl SyntaxFactory for HtmlSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            HTML_BOGUS => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
+            HTML_BOGUS | HTML_BOGUS_ATTRIBUTE | HTML_BOGUS_ELEMENT => {
+                RawSyntaxNode::new(kind, children.into_iter().map(Some))
+            }
             HTML_ATTRIBUTE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -106,6 +108,25 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                     );
                 }
                 slots.into_node(HTML_CLOSING_ELEMENT, children)
+            }
+            HTML_CONTENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == HTML_LITERAL {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        HTML_CONTENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(HTML_CONTENT, children)
             }
             HTML_DIRECTIVE => {
                 let mut elements = (&children).into_iter();
@@ -374,7 +395,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 slots.into_node(HTML_STRING, children)
             }
             HTML_ATTRIBUTE_LIST => {
-                Self::make_node_list_syntax(kind, children, HtmlAttribute::can_cast)
+                Self::make_node_list_syntax(kind, children, AnyHtmlAttribute::can_cast)
             }
             HTML_ELEMENT_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyHtmlElement::can_cast)

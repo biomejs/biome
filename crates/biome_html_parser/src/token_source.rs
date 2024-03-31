@@ -33,8 +33,8 @@ pub(crate) enum HtmlLexContext {
     #[default]
     Regular,
     #[allow(unused)]
-    /// When the lexer is inside elements, newlines, spaces and quotes are part of the text
-    InsideElement,
+    /// When the lexer is inside a element list, newlines, spaces and quotes are part of the text
+    ElementList,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -101,7 +101,12 @@ impl<'source> HtmlTokenSource<'source> {
         }
 
         if self.lookahead_offset != 0 {
-            debug_assert!(self.lookahead_offset >= processed_tokens);
+            debug_assert!(
+                self.lookahead_offset >= processed_tokens,
+                "lookadead offeset: {}, processed tokens: {}",
+                self.lookahead_offset,
+                processed_tokens
+            );
             self.lookahead_offset -= processed_tokens;
         }
     }
@@ -216,7 +221,6 @@ impl<'source> NthToken for HtmlTokenSource<'source> {
         }
     }
     #[inline(always)]
-
     fn has_nth_preceding_line_break(&mut self, n: usize) -> bool {
         if n == 0 {
             self.has_preceding_line_break()

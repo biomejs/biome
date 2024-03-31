@@ -61,6 +61,12 @@ pub fn html_closing_element(
         ],
     ))
 }
+pub fn html_content(value_token: SyntaxToken) -> HtmlContent {
+    HtmlContent::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_CONTENT,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn html_directive(
     l_angle_token: SyntaxToken,
     excl_token: SyntaxToken,
@@ -226,7 +232,7 @@ pub fn html_string(value_token: SyntaxToken) -> HtmlString {
 }
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
 where
-    I: IntoIterator<Item = HtmlAttribute>,
+    I: IntoIterator<Item = AnyHtmlAttribute>,
     I::IntoIter: ExactSizeIterator,
 {
     HtmlAttributeList::unwrap_cast(SyntaxNode::new_detached(
@@ -254,4 +260,24 @@ where
     I::IntoIter: ExactSizeIterator,
 {
     HtmlBogus::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_BOGUS, slots))
+}
+pub fn html_bogus_attribute<I>(slots: I) -> HtmlBogusAttribute
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    HtmlBogusAttribute::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_BOGUS_ATTRIBUTE,
+        slots,
+    ))
+}
+pub fn html_bogus_element<I>(slots: I) -> HtmlBogusElement
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    HtmlBogusElement::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_BOGUS_ELEMENT,
+        slots,
+    ))
 }

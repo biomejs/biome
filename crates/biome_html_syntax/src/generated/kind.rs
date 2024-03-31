@@ -45,7 +45,10 @@ pub enum HtmlSyntaxKind {
     HTML_NAME,
     HTML_ELEMENT_LIST,
     HTML_ATTRIBUTE_LIST,
+    HTML_CONTENT,
     HTML_BOGUS,
+    HTML_BOGUS_ELEMENT,
+    HTML_BOGUS_ATTRIBUTE,
     #[doc(hidden)]
     __LAST,
 }
