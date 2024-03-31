@@ -33,6 +33,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Editors
 
+#### Bug fixes
+
+- Fix the unexpected code deletion and repetition when `quickfix.biome` is enabled and some `import`-related rules are applied ([#2222](https://github.com/biomejs/biome/issues/2222), [#688](https://github.com/biomejs/biome/issues/688), [#1570](https://github.com/biomejs/biome/issues/1570), [#1550](https://github.com/biomejs/biome/issues/1550), [#1015](https://github.com/biomejs/biome/issues/1015)). Contributed by @Sec-ant
+
 ### Formatter
 
 ### JavaScript APIs
