@@ -21,6 +21,7 @@ xtask          = { path = '../', version = "0.0" }
 
 biome_analyze        = { workspace = true, optional = true }
 biome_cli            = { workspace = true, optional = true }
+biome_configuration  = { workspace = true }
 biome_css_analyze    = { workspace = true, optional = true }
 biome_css_syntax     = { workspace = true, optional = true }
 biome_diagnostics    = { workspace = true, optional = true }
