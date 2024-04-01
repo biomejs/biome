@@ -4,10 +4,10 @@ use crate::execute::ReportMode;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
+use biome_configuration::{vcs::PartialVcsConfiguration, PartialFilesConfiguration};
 use biome_deserialize::Merge;
-use biome_service::configuration::vcs::PartialVcsConfiguration;
 use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialFilesConfiguration,
+    load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::workspace::UpdateSettingsParams;
 use std::ffi::OsString;

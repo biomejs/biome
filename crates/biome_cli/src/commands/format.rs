@@ -6,13 +6,16 @@ use crate::execute::ReportMode;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
+use biome_configuration::vcs::PartialVcsConfiguration;
+use biome_configuration::{
+    PartialCssFormatter, PartialFilesConfiguration, PartialFormatterConfiguration,
+    PartialJavascriptFormatter, PartialJsonFormatter,
+};
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
-use biome_service::configuration::vcs::PartialVcsConfiguration;
 use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialCssFormatter, PartialFilesConfiguration,
-    PartialFormatterConfiguration, PartialJavascriptFormatter, PartialJsonFormatter,
+    load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::workspace::UpdateSettingsParams;
 use std::ffi::OsString;
