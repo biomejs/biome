@@ -15,7 +15,10 @@ use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Applicability;
 use biome_js_semantic::CanBeImportedExported;
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, inner_string_text, AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember, JsIdentifierBinding, JsLiteralExportName, JsLiteralMemberName, JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator, JsVariableKind,  TsEnumMember, TsIdentifierBinding, TsTypeParameterName
+    binding_ext::AnyJsBindingDeclaration, inner_string_text, AnyJsClassMember, AnyJsObjectMember,
+    AnyJsVariableDeclaration, AnyTsTypeMember, JsIdentifierBinding, JsLiteralExportName,
+    JsLiteralMemberName, JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxToken,
+    JsVariableDeclarator, JsVariableKind, TsEnumMember, TsIdentifierBinding, TsTypeParameterName,
 };
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxResult, TokenText,
@@ -421,9 +424,6 @@ impl Rule for UseNamingConvention {
                 if binding.is_exported(model) {
                     return None;
                 }
-                // if binding.syntax().ancestors().any(|x| matches!(x.kind(), JsSyntaxKind::JSX_REFERENCE_IDENTIFIER)) {
-                //     return None;
-                // }
                 if let Some(AnyJsBindingDeclaration::TsPropertyParameter(_)) = binding.declaration()
                 {
                     // Property parameters are also class properties.

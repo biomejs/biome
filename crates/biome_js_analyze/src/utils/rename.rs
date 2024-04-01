@@ -3,7 +3,9 @@ use biome_console::markup;
 use biome_diagnostics::{Diagnostic, Location, Severity};
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsIdentifierBinding, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsxReferenceIdentifier, TextRange, TsIdentifierBinding
+    binding_ext::AnyJsIdentifierBinding, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
+    JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsxReferenceIdentifier,
+    TextRange, TsIdentifierBinding,
 };
 use biome_rowan::{AstNode, BatchMutation, SyntaxNodeCast, TriviaPiece};
 use serde::{Deserialize, Serialize};
@@ -293,10 +295,10 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
                     .cast::<JsIdentifierAssignment>()
                     .and_then(|node| node.name_token().ok()),
                 JsSyntaxKind::JSX_REFERENCE_IDENTIFIER => reference
-                .syntax()
-                .clone()
-                .cast::<JsxReferenceIdentifier>()
-                .and_then(|node| node.value_token().ok()),
+                    .syntax()
+                    .clone()
+                    .cast::<JsxReferenceIdentifier>()
+                    .and_then(|node| node.value_token().ok()),
                 _ => None,
             };
 
