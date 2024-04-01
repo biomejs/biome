@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validComponentName.js
+---
+# Input
+```jsx
+function loadWidgetComponent(widgetId) {
+  const Component = getWidgetComponent(widgetId);
+  if (!Component) return null;
+  return <Component />;
+}
+```
+
+# Diagnostics
+```
+validComponentName.js:2:9 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This local const name should be in camelCase.
+  
+    1 │ function loadWidgetComponent(widgetId) {
+  > 2 │   const Component = getWidgetComponent(widgetId);
+      │         ^^^^^^^^^
+    3 │   if (!Component) return null;
+    4 │   return <Component />;
+  
+  i The name could be renamed to `component`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    1 1 │   function loadWidgetComponent(widgetId) {
+    2   │ - ··const·Component·=·getWidgetComponent(widgetId);
+    3   │ - ··if·(!Component)·return·null;
+    4   │ - ··return·<Component·/>;
+      2 │ + ··const·component·=·getWidgetComponent(widgetId);
+      3 │ + ··if·(!component)·return·null;
+      4 │ + ··return·<component·/>;
+    5 5 │   }
+  
+
+```
