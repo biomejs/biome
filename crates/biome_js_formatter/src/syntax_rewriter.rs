@@ -110,7 +110,7 @@ impl JsFormatSyntaxRewriter {
     ///
     /// because the `Long` has two leading new lines after removing parentheses, the one after `a` and the one after the opening `(`.
     ///
-    /// However, it is important to leave at least one leading new line in front of the token's leading trivia if there's a comment in the leading trivia because
+    /// However, it is important to leave at least one leading new line in front of the token's leading trivia if there's a comment in the leading trivia
     /// because we want that leading comments that are preceded by a line break to be formatted on their own line.
     ///
     /// ```javascript
