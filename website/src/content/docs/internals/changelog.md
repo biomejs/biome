@@ -31,6 +31,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Correctly calculate enabled rules in lint rule groups. Now a specific rule belonging to a group can be enabled even if its group-level preset option `recommended` or `all` is `false` ([#2191](https://github.com/biomejs/biome/issues/2191)). Contributed by @Sec-ant
 
+- Fix the resolution strategy of `extends` so it can work as most users would expect in both LSP and CLI ([#2231](https://github.com/biomejs/biome/issues/2231)):
+
+  - Absolute paths:
+    - As is.
+  - Relative paths:
+    - Resolve the extend configuration file relative to the directory where the current configuration file is.
+  - External modules:
+    1. First resolve the extend configuration file from the directory where the current configuration file is;
+    2. Fallback to resolve the extend configuration file from the working directory.
+
+  Contributed by @Sec-ant
+
 ### Editors
 
 ### Formatter

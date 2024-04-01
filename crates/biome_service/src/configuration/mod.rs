@@ -59,6 +59,7 @@ pub use linter::{
 pub use overrides::to_override_settings;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
+use std::fs::canonicalize;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
 use std::num::NonZeroU64;
@@ -110,7 +111,7 @@ pub struct Configuration {
     #[partial(type, bpaf(external(partial_css_configuration), optional, hide))]
     pub css: CssConfiguration,
 
-    /// A list of paths to other JSON files, used to extends the current configuration.
+    /// A list of paths or modules to other JSON files, used to extends the current configuration.
     #[partial(bpaf(hide))]
     pub extends: StringSet,
 
@@ -547,11 +548,11 @@ impl PartialConfiguration {
     fn apply_extends(
         &mut self,
         fs: &DynRef<'_, dyn FileSystem>,
-        file_path: &Path,
-        directory_path: &Path,
+        configuration_file_path: &Path,
+        configuration_directory_path: &Path,
         diagnostics: &mut Vec<Error>,
     ) -> Result<(), WorkspaceError> {
-        let deserialized = self.deserialize_extends(fs, directory_path)?;
+        let deserialized = self.deserialize_extends(fs, configuration_directory_path)?;
         let (configurations, errors): (Vec<_>, Vec<_>) = deserialized
             .into_iter()
             .map(|d| d.consume())
@@ -574,7 +575,9 @@ impl PartialConfiguration {
             errors
                 .into_iter()
                 .flatten()
-                .map(|diagnostic| diagnostic.with_file_path(file_path.display().to_string()))
+                .map(|diagnostic| {
+                    diagnostic.with_file_path(configuration_file_path.display().to_string())
+                })
                 .collect::<Vec<_>>(),
         );
 
@@ -585,48 +588,76 @@ impl PartialConfiguration {
     fn deserialize_extends(
         &mut self,
         fs: &DynRef<'_, dyn FileSystem>,
-        directory_path: &Path,
+        configuration_directory_path: &Path,
     ) -> Result<Vec<Deserialized<PartialConfiguration>>, WorkspaceError> {
         let Some(extends) = &self.extends else {
             return Ok(Vec::new());
         };
 
+        let working_directory_path = fs.working_directory().unwrap_or_default();
+        let is_configuration_directory_not_working_directory =
+            canonicalize(&working_directory_path)
+                .is_ok_and(|w| canonicalize(&configuration_directory_path).is_ok_and(|c| w != c));
+
         let mut deserialized_configurations = vec![];
-        for path in extends.iter() {
-            let as_path = Path::new(path);
-            let extension = as_path.extension().and_then(|ext| ext.to_str());
+        for extend_entry in extends.iter() {
+            let extend_entry_as_path = Path::new(extend_entry);
+            let extension = extend_entry_as_path
+                .extension()
+                .and_then(|ext| ext.to_str());
             // TODO: Remove extension in Biome 2.0
-            let config_path = if as_path.starts_with(".")
+            let extend_file_path = if extend_entry_as_path.starts_with(".")
                 || extension == Some("json")
                 || extension == Some("jsonc")
             {
-                directory_path.join(path)
+                configuration_directory_path.join(extend_entry)
             } else {
-                fs.resolve_configuration(path.as_str(), Some(directory_path))
-                    .map_err(|error| {
-                        ConfigurationDiagnostic::cant_resolve(
-                            fs.working_directory()
-                                .unwrap_or_default()
-                                .display()
-                                .to_string(),
-                            error,
-                        )
+                // 1. Try to resolve an extend entry from the configuration dir
+                fs.resolve_configuration(extend_entry.as_str(), Some(configuration_directory_path))
+                    .or_else(|err| {
+                        // 2. Try to resolve an extend entry from the working directory
+                        // for cases where using CLI with the flag `--config-path`
+                        if is_configuration_directory_not_working_directory {
+                            fs.resolve_configuration(
+                                extend_entry.as_str(),
+                                Some(&working_directory_path),
+                            )
+                            .map_err(|err| {
+                                ConfigurationDiagnostic::cant_resolve(
+                                    format!(
+                                        "{:?} or {:?}",
+                                        configuration_directory_path, working_directory_path
+                                    ),
+                                    err,
+                                )
+                            })
+                        } else {
+                            Err(ConfigurationDiagnostic::cant_resolve(
+                                format!("{:?}", configuration_directory_path),
+                                err,
+                            ))
+                        }
                     })?
                     .into_path_buf()
             };
 
             let mut file = fs
-                .open_with_options(config_path.as_path(), OpenOptions::default().read(true))
+                .open_with_options(
+                    extend_file_path.as_path(),
+                    OpenOptions::default().read(true),
+                )
                 .map_err(|err| {
-                    CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
-                        markup!{
-                            "Biome tried to load the configuration file "<Emphasis>{directory_path.display().to_string()}</Emphasis>" using "<Emphasis>{config_path.display().to_string()}</Emphasis>" as base path."
-                        }
-                    )
+                    CantLoadExtendFile::new(extend_file_path.display().to_string(), err.to_string())
+                        .with_verbose_advice(markup! {
+                            "Biome tried to load the extend configuration file from \""<Emphasis>{
+                                // This is already the full path now.
+                                extend_file_path.display().to_string()
+                            }</Emphasis>"\"."
+                        })
                 })?;
             let mut content = String::new();
             file.read_to_string(&mut content).map_err(|err| {
-                CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
+                CantLoadExtendFile::new(extend_file_path.display().to_string(), err.to_string()).with_verbose_advice(
                     markup!{
                         "It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
                     }

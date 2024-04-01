@@ -36,7 +36,7 @@ export interface PartialConfiguration {
 	 */
 	css?: PartialCssConfiguration;
 	/**
-	 * A list of paths to other JSON files, used to extends the current configuration.
+	 * A list of paths or modules to other JSON files, used to extends the current configuration.
 	 */
 	extends?: StringSet;
 	/**
