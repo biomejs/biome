@@ -597,7 +597,7 @@ impl PartialConfiguration {
         let working_directory_path = fs.working_directory().unwrap_or_default();
         let is_configuration_directory_not_working_directory =
             canonicalize(&working_directory_path)
-                .is_ok_and(|w| canonicalize(&configuration_directory_path).is_ok_and(|c| w != c));
+                .is_ok_and(|w| canonicalize(configuration_directory_path).is_ok_and(|c| w != c));
 
         let mut deserialized_configurations = vec![];
         for extend_entry in extends.iter() {
