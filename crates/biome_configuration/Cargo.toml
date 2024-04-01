@@ -22,7 +22,7 @@ biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
 biome_js_analyze         = { workspace = true }
 biome_js_formatter       = { workspace = true, features = ["serde"] }
-biome_js_syntax          = { workspace = true, features = ["serde"] }
+biome_js_syntax          = { workspace = true, features = ["serde", "schema"] }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_json_analyze       = { workspace = true }
@@ -39,7 +39,13 @@ serde_json               = { workspace = true, features = ["raw_value"] }
 oxc_resolver             = { workspace = true }
 
 [features]
-schema = ["dep:schemars", "biome_js_analyze/schema", "biome_formatter/serde"]
+schema = [
+  "dep:schemars",
+  "biome_js_analyze/schema",
+  "biome_formatter/serde",
+  "biome_json_syntax/schema",
+  "biome_css_syntax/schema",
+]
 
 [dev-dependencies]
 insta = { workspace = true }

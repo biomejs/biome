@@ -15,6 +15,7 @@ pub mod vcs;
 
 pub use crate::diagnostics::CantLoadExtendFile;
 pub use crate::diagnostics::ConfigurationDiagnostic;
+pub use crate::generated::push_to_analyzer_rules;
 use crate::organize_imports::{partial_organize_imports, OrganizeImports, PartialOrganizeImports};
 use crate::vcs::{partial_vcs_configuration, PartialVcsConfiguration, VcsConfiguration};
 use biome_deserialize::{Deserialized, StringSet};
