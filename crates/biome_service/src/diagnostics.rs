@@ -1,5 +1,5 @@
 use crate::workspace::DocumentFileSource;
-use crate::ConfigurationDiagnostic;
+use biome_configuration::{CantLoadExtendFile, ConfigurationDiagnostic};
 use biome_console::fmt::Bytes;
 use biome_console::markup;
 use biome_diagnostics::{
@@ -156,6 +156,12 @@ impl From<FileSystemDiagnostic> for WorkspaceError {
 impl From<ConfigurationDiagnostic> for WorkspaceError {
     fn from(value: ConfigurationDiagnostic) -> Self {
         Self::Configuration(value)
+    }
+}
+
+impl From<CantLoadExtendFile> for WorkspaceError {
+    fn from(value: CantLoadExtendFile) -> Self {
+        WorkspaceError::Configuration(ConfigurationDiagnostic::CantLoadExtendFile(value))
     }
 }
 
