@@ -33,7 +33,10 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_NAME",
         "HTML_ELEMENT_LIST",
         "HTML_ATTRIBUTE_LIST",
+        "HTML_CONTENT",
         // Bogus nodes
         "HTML_BOGUS",
+        "HTML_BOGUS_ELEMENT",
+        "HTML_BOGUS_ATTRIBUTE",
     ],
 };

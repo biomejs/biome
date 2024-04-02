@@ -37,6 +37,8 @@
 SyntaxElement = SyntaxElement
 
 HtmlBogus = SyntaxElement*
+HtmlBogusElement = SyntaxElement*
+HtmlBogusAttribute = SyntaxElement*
 
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
@@ -65,6 +67,8 @@ HtmlElementList = AnyHtmlElement*
 AnyHtmlElement =
 	HtmlSelfClosingElement
 	| HtmlElement
+	| HtmlContent
+	| HtmlBogusElement
 
 
 // <a />
@@ -100,7 +104,11 @@ HtmlClosingElement =
 // Attributes
 // ==================================
 
-HtmlAttributeList = HtmlAttribute*
+HtmlAttributeList = AnyHtmlAttribute*
+
+AnyHtmlAttribute =
+	HtmlAttribute
+	| HtmlBogusAttribute
 
 HtmlAttribute =
 	name: HtmlName
@@ -116,3 +124,4 @@ HtmlAttributeInitializerClause =
 
 HtmlString = value: 'html_string_literal'
 HtmlName = value: 'html_literal'
+HtmlContent = value: 'html_literal'
