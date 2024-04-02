@@ -36,6 +36,15 @@ import { Code } from "astro:components";
 ---
 <div></div>"#;
 
+const ASTRO_RETURN: &str = r#"---
+const foo = true;
+if (foo) {
+    return "Something";
+}
+
+---
+<div></div>"#;
+
 const ASTRO_FILE_IMPORTS_AFTER: &str = r#"---
 import { Code } from "astro:components";
 import { getLocale } from "astro:i18n";
@@ -267,6 +276,31 @@ fn sorts_imports_write() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "sorts_imports_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_not_throw_parse_error_for_return() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let astro_file_path = Path::new("file.astro");
+    fs.insert(astro_file_path.into(), ASTRO_RETURN.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), astro_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_throw_parse_error_for_return",
         fs,
         console,
         result,
