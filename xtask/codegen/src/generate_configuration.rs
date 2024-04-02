@@ -281,7 +281,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     };
 
     let push_rules = quote! {
-        use biome_configuration::linter::*;
+        use crate::linter::*;
         use crate::Rules;
         use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
