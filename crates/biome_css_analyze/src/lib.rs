@@ -2,6 +2,7 @@ mod keywords;
 mod lint;
 pub mod options;
 mod registry;
+mod utils;
 
 pub use crate::registry::visit_registry;
 use biome_analyze::{
