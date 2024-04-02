@@ -57,9 +57,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
-## 1.6.3 (2024-03-25)
+- The parser doesn't throw any error when the frontmatter of `.astro` files contains an illegal return:
 
-### Analyzer
+  ```astro
+  ---
+  const condition = true;
+  if (condition) {
+    return "Something";
+  }
+  ---
+  <div></div>
+  ```
+  Contributed by @ematipico
+
+## 1.6.3 (2024-03-25)
 
 ### CLI
 
@@ -75,15 +86,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Complete the documentation and overrides support for options `formatter.lineEnding`, `[language].formatter.lineEnding`, `formatter.attributePosition` and `javascript.formatter.attributePosition`. Contributed by @Sec-ant
 
-### Editors
-
 ### Formatter
 
 #### Bug fixes
 
 - Fix [#2172](https://github.com/biomejs/biome/issues/2172) by breaking long object destructuring patterns. Contributed by @ah-yu
-
-### JavaScript APIs
 
 ### Linter
 
@@ -101,8 +108,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Quickfix action no longer autofixes lint rule errors on save when `linter` is disabled ([#2161](https://github.com/biomejs/biome/issues/2161)). Contributed by @Sec-ant
 - Range formatting for Astro/Svelte/Vue doesn't place code out of place, especially when formatting on paste is enabled. Contributed by @ematipico
-
-### Parser
 
 ## 1.6.2 (2024-03-22)
 
