@@ -21,9 +21,9 @@ xtask          = { path = '../', version = "0.0" }
 
 biome_analyze        = { workspace = true, optional = true }
 biome_cli            = { workspace = true, optional = true }
-biome_configuration  = { workspace = true }
 biome_css_analyze    = { workspace = true, optional = true }
 biome_css_syntax     = { workspace = true, optional = true }
+biome_configuration  = { workspace = true, optional = true }
 biome_diagnostics    = { workspace = true, optional = true }
 biome_js_analyze     = { workspace = true, optional = true }
 biome_js_factory     = { workspace = true, optional = true }
@@ -64,6 +64,7 @@ schema = [
   "biome_json_formatter",
   "biome_json_parser",
   "biome_diagnostics",
+  "biome_configuration"
 ]
 website = ["schema", "biome_service", "biome_cli/docgen", "biome_js_parser", "biome_js_formatter", "biome_js_syntax"]
 
