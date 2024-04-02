@@ -15,6 +15,7 @@ version              = "0.0.0"
 
 [dependencies]
 biome_analyze       = { workspace = true }
+biome_configuration = { workspace = true }
 biome_console       = { workspace = true }
 biome_deserialize   = { workspace = true }
 biome_diagnostics   = { workspace = true }
@@ -22,7 +23,6 @@ biome_json_parser   = { workspace = true }
 biome_project       = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_service       = { workspace = true }
-biome_configuration = { workspace = true }
 countme             = { workspace = true, features = ["enable"] }
 json_comments       = "0.2.1"
 serde_json          = { workspace = true }
