@@ -7,7 +7,10 @@ use biome_css_syntax::{
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
 
-use crate::utils::{is_font_family_keyword, is_font_shorthand_keyword};
+use crate::{
+    keywords,
+    utils::{is_font_family_keyword, is_font_shorthand_keyword},
+};
 
 declare_rule! {
     /// Succinct description of the rule.
@@ -172,21 +175,24 @@ fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue> {
             continue;
         }
 
-        let prev_node = v.syntax().prev_sibling().unwrap();
-        let prev_prev_node = prev_node.prev_sibling().unwrap();
-
         // Ignore anything come after a <font-size>/, because it's a line-height
-        if let Some(slash) = prev_node.cast::<AnyCssGenericComponentValue>() {
-            if let Some(size) = prev_prev_node.cast::<AnyCssGenericComponentValue>() {
-                if matches!(
-                    size,
-                    AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::AnyCssDimension(_))
-                ) && matches!(slash, AnyCssGenericComponentValue::CssGenericDelimiter(_))
-                {
-                    continue;
-                }
+        if let Some(prev_node) = v.syntax().prev_sibling() {
+            if let Some(prev_prev_node) = prev_node.prev_sibling() {
+                if let Some(slash) = prev_node.cast::<AnyCssGenericComponentValue>() {
+                    if let Some(size) = prev_prev_node.cast::<AnyCssGenericComponentValue>() {
+                        if matches!(
+                            size,
+                            AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::AnyCssDimension(
+                                _
+                            ))
+                        ) && matches!(slash, AnyCssGenericComponentValue::CssGenericDelimiter(_))
+                        {
+                            continue;
+                        }
+                    }
+                };
             }
-        };
+        }
 
         // Ignore number values
         if matches!(
