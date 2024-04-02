@@ -7,10 +7,7 @@ use biome_css_syntax::{
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
 
-use crate::{
-    keywords,
-    utils::{is_font_family_keyword, is_font_shorthand_keyword},
-};
+use crate::utils::{is_font_family_keyword, is_font_shorthand_keyword};
 
 declare_rule! {
     /// Succinct description of the rule.
@@ -59,87 +56,62 @@ impl Rule for NoFontFamilyDuplicateNames {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let property_name = node.name().ok()?.text();
-        if property_name.to_lowercase() == "font-family" {
-            let mut seen: HashSet<String> = HashSet::new();
-            let value_list = node.value();
-            for v in value_list {
-                match v {
-                    AnyCssGenericComponentValue::CssGenericDelimiter(_) => continue,
-                    AnyCssGenericComponentValue::AnyCssValue(css_value) => match css_value {
-                        // A generic family name like `serif` or `sans-serif``.
-                        AnyCssValue::CssIdentifier(val) => {
-                            let font_name = val.text();
-                            if seen.contains(&font_name) {
-                                return Some(RuleState {
-                                    value: font_name,
-                                    span: val.range(),
-                                });
-                            };
-                            seen.insert(font_name);
-                        }
-                        // A font family name. e.g "Lucida Grande", "Arial".
-                        AnyCssValue::CssString(val) => {
-                            let normalized_val: String = val
-                                .text()
-                                .chars()
-                                .filter(|&c| c != '\'' && c != '\"' && !c.is_whitespace())
-                                .collect();
-                            if seen.contains(&normalized_val) {
-                                return Some(RuleState {
-                                    value: normalized_val.to_string(),
-                                    span: val.range(),
-                                });
-                            }
-                            seen.insert(normalized_val);
-                        }
-                        _ => continue,
-                    },
-                }
-            }
-            None
-        } else if property_name.to_lowercase() == "font" {
-            let mut seen: HashSet<String> = HashSet::new();
-            let value_list = node.value();
-            let font_families = find_font_family(value_list);
+        let property_name = node.name().ok()?.text().to_lowercase();
 
-            if font_families.is_empty() {
-                return None;
-            }
+        let is_font_family = property_name == "font-family";
+        let is_font = property_name == "font";
 
-            for v in font_families {
-                match v {
-                    AnyCssValue::CssIdentifier(val) => {
-                        let font_name = val.text();
-                        if seen.contains(&font_name) {
-                            return Some(RuleState {
-                                value: font_name,
-                                span: val.range(),
-                            });
-                        };
-                        seen.insert(font_name);
-                    }
-                    AnyCssValue::CssString(val) => {
-                        let normalized_val: String = val
-                            .text()
-                            .chars()
-                            .filter(|&c| c != '\'' && c != '\"' && !c.is_whitespace())
-                            .collect();
-                        if seen.contains(&normalized_val) {
-                            return Some(RuleState {
-                                value: normalized_val.to_string(),
-                                span: val.range(),
-                            });
-                        }
-                        seen.insert(normalized_val);
-                    }
-                    _ => continue,
-                }
-            }
-            None
-        } else {
-            None
+        if !is_font_family && !is_font {
+            return None;
         }
+
+        let mut seen: HashSet<String> = HashSet::new();
+        let value_list = node.value();
+        let font_families = if is_font {
+            find_font_family(value_list)
+        } else {
+            value_list
+                .into_iter()
+                .filter_map(|v| match v {
+                    AnyCssGenericComponentValue::AnyCssValue(value) => Some(value),
+                    _ => None,
+                })
+                .collect()
+        };
+
+        for css_value in font_families {
+            match css_value {
+                // A generic family name like `serif` or `sans-serif`
+                AnyCssValue::CssIdentifier(val) => {
+                    let font_name = val.text();
+                    if seen.contains(&font_name) {
+                        return Some(RuleState {
+                            value: font_name.clone(),
+                            span: val.range(),
+                        });
+                    }
+                    seen.insert(font_name);
+                }
+                // A font family name. e.g "Lucida Grande", "Arial".
+                AnyCssValue::CssString(val) => {
+                    let normalized_font_name: String = val
+                        .text()
+                        .chars()
+                        .filter(|&c| c != '\'' && c != '\"' && !c.is_whitespace())
+                        .collect();
+
+                    if seen.contains(&normalized_font_name) {
+                        return Some(RuleState {
+                            value: normalized_font_name,
+                            span: val.range(),
+                        });
+                    }
+                    seen.insert(normalized_font_name);
+                }
+                _ => continue,
+            }
+        }
+        None
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
