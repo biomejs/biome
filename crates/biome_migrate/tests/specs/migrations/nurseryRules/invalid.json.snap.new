@@ -1,0 +1,34 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+assertion_line: 43
+expression: invalid.json
+---
+# Input
+```json
+{
+	"linter": {
+		"rules": {
+			"nursery": {
+				"test": "error"
+			}
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:5:5 migrate  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule is has been promoted to security/test.
+  
+    3 │ 		"rules": {
+    4 │ 			"nursery": {
+  > 5 │ 				"test": "error"
+      │ 				^^^^^^^^^^^^^^^
+    6 │ 			}
+    7 │ 		}
+  
+
+```

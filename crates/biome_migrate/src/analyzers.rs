@@ -1,9 +1,11 @@
 use crate::analyzers::indent_size::IndentSize;
+use crate::analyzers::nursery_rules::NurseryRules;
 use crate::analyzers::schema::Schema;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_json_syntax::JsonLanguage;
 
 mod indent_size;
+mod nursery_rules;
 mod schema;
 
 pub(crate) struct MigrationGroup;
@@ -19,7 +21,9 @@ impl RuleGroup for MigrationGroup {
         // v1.3.0
         registry.record_rule::<IndentSize>();
         // v1.5.0
-        registry.record_rule::<Schema>()
+        registry.record_rule::<Schema>();
+        // v1.7.0
+        registry.record_rule::<NurseryRules>();
     }
 }
 
