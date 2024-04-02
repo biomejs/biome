@@ -142,4 +142,4 @@ changelog = "crates/biome_html_parser/CHANGELOG.md"
 
 [package."biome_configuration"]
 versioned_files = ["creates/biome_configuration/Cargo.toml"]
-changelog = "crates/biome_configuration/CHANGELOG.md"    
+changelog = "crates/biome_configuration/CHANGELOG.md"
