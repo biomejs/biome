@@ -5,7 +5,7 @@
 pub mod css;
 pub mod diagnostics;
 pub mod formatter;
-mod generated;
+pub mod generated;
 pub mod javascript;
 pub mod json;
 pub mod linter;
