@@ -88,8 +88,12 @@ file.vue:4:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Remove the type annotation.
   
-    4 │ var·foo:·string·=·"";
-      │        --------      
+    2 2 │   delete a.c;
+    3 3 │   
+    4   │ - var·foo:·string·=·"";
+      4 │ + var·foo·=·"";
+    5 5 │   
+  
 
 ```
 

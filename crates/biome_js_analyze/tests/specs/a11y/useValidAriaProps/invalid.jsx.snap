@@ -146,7 +146,7 @@ invalid.jsx:5:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
                     Check the list of all valid aria-* attributes.
   
     5 │ var·a·=·<div·aria-skldjfaria-foo1="foobar"·aria-skldjfaria-foo222="foobar"·/>;
-      │                              ------------------------------                   
+      │              ------------------------------                                   
 
 ```
 
@@ -176,5 +176,3 @@ invalid.jsx:5:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
       │                                            --------------------------------   
 
 ```
-
-

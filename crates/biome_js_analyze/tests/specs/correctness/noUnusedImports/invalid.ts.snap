@@ -47,8 +47,9 @@ invalid.ts:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused import.
   
-     1  1 │   // Header comment
+     1    │ - //·Header·comment
      2    │ - import·type·A·from·"mod";
+        1 │ + 
      3  2 │   
      4  3 │   // Header comment
   
@@ -70,11 +71,13 @@ invalid.ts:5:18 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused import.
   
-     3  3 │   
-     4  4 │   // Header comment
+     1  1 │   // Header comment
+     2  2 │   import type A from "mod";
+     3    │ - 
+     4    │ - //·Header·comment
      5    │ - import·type·*·as·B·from·"mod";·//·Import·comment
-     6  5 │   
-     7  6 │   // Header comment
+     6  3 │   
+     7  4 │   // Header comment
   
 
 ```
@@ -94,11 +97,13 @@ invalid.ts:8:15 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused import.
   
-     6  6 │   
-     7  7 │   // Header comment
+     4  4 │   // Header comment
+     5  5 │   import type * as B from "mod"; // Import comment
+     6    │ - 
+     7    │ - //·Header·comment
      8    │ - import·type·{·C·}·from·"mod";·//·Import·comment
-     9  8 │   
-    10  9 │   // Header comment
+     9  6 │   
+    10  7 │   // Header comment
   
 
 ```
@@ -205,10 +210,8 @@ invalid.ts:17:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
     15 15 │   import {
     16    │ - ····//·Comment
     17    │ - ····type·H,
-    18    │ - ····type·I,
-       16 │ + ····type·I,
+    18 16 │       type I,
     19 17 │   } from "mod";
-    20 18 │   
   
 
 ```
@@ -255,7 +258,7 @@ invalid.ts:21:19 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   i Safe fix: Remove the unused import.
   
     21 │ import·{/*a*/type·J/*b*/,·/*c*/type·K/*d*/}·from·"mod";
-       │                   ------------------                   
+       │              ------------------                        
 
 ```
 
@@ -294,12 +297,12 @@ invalid.ts:24:20 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-    22 22 │   
-    23 23 │   // Header comment
+    20 20 │   
+    21 21 │   import {/*a*/type J/*b*/, /*c*/type K/*d*/} from "mod";
+    22    │ - 
+    23    │ - //·Header·comment
     24    │ - import·type·{·L·as·M,·}·from·"mod";·//·Import·comment
-    25 24 │   
+    25 22 │   
   
 
 ```
-
-

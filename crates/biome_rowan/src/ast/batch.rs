@@ -1,8 +1,8 @@
+use crate::syntax::SyntaxKind;
 use crate::{
-    chain_trivia_pieces, AstNode, Language, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxSlot,
-    SyntaxToken,
+    chain_trivia_pieces, AstNode, Language, SyntaxElement, SyntaxNode, SyntaxSlot, SyntaxToken,
 };
-use biome_text_edit::TextEdit;
+use biome_text_edit::{TextEdit, TextEditBuilder};
 use biome_text_size::TextRange;
 use std::{
     cmp,
@@ -43,18 +43,32 @@ struct CommitChange<L: Language> {
     parent_range: Option<(u32, u32)>,
     new_node_slot: usize,
     new_node: Option<SyntaxElement<L>>,
+    is_from_action: bool,
 }
 
 impl<L: Language> CommitChange<L> {
     /// Returns the "ordering key" for a change, controlling in what order this
     /// change will be applied relatively to other changes. The key consists of
     /// a tuple of numeric values representing the depth, parent start and slot
-    /// of the corresponding change
-    fn key(&self) -> (usize, cmp::Reverse<u32>, cmp::Reverse<usize>) {
+    /// index of the corresponding change.
+    ///
+    /// So, we order first by depth. Then by the range of the node. Then by the
+    /// slot index of the node.
+    ///
+    /// The first is important to guarantee that all nodes that will be changed
+    /// in the future are still valid with using SyntaxNode that we have.
+    ///
+    /// The second and third are essential to guarantee that the ".peek()" we do
+    /// below is sufficient to see the same node in case of two or more nodes
+    /// having the same parent.
+    ///
+    /// All of them will be prioritized in the descending order in a binary heap
+    /// to ensure one change won't invalidate its following changes.
+    fn key(&self) -> (usize, u32, usize) {
         (
             self.parent_depth,
-            cmp::Reverse(self.parent_range.map(|(start, _)| start).unwrap_or(0)),
-            cmp::Reverse(self.new_node_slot),
+            self.parent_range.map(|(start, _)| start).unwrap_or(0),
+            self.new_node_slot,
         )
     }
 }
@@ -66,13 +80,6 @@ impl<L: Language> PartialEq for CommitChange<L> {
 }
 impl<L: Language> Eq for CommitChange<L> {}
 
-/// We order first by depth. Then by the range of the node.
-///
-/// The first is important to guarantee that all nodes that will be changed
-/// in the future are still valid with using SyntaxNode that we have.
-///
-/// The second is important to guarante that the ".peek()" we do below is sufficient
-/// to see the same node in case of two or more nodes having the same depth.
 impl<L: Language> PartialOrd for CommitChange<L> {
     fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
         Some(self.cmp(other))
@@ -298,49 +305,38 @@ where
             parent_range,
             new_node_slot,
             new_node: next_element,
+            is_from_action: true,
         });
     }
 
     /// Returns the range of the document modified by this mutation along with
     /// a list of individual text edits to be performed on the source code, or
     /// [None] if the mutation is empty
-    pub fn as_text_edits(&self) -> Option<(TextRange, TextEdit)> {
-        let mut range = None;
+    ///
+    /// If the new tree is also required,
+    /// please use `commit_with_text_range_and_edit`
+    pub fn as_text_range_and_edit(self) -> Option<(TextRange, TextEdit)> {
+        self.commit_with_text_range_and_edit(true).1
+    }
 
-        debug!(" changes {:?}", &self.changes);
-
-        for change in &self.changes {
-            let parent = change.parent.as_ref().unwrap_or(&self.root);
-            let delete = match parent.slots().nth(change.new_node_slot) {
-                Some(SyntaxSlot::Node(node)) => node.text_range(),
-                Some(SyntaxSlot::Token(token)) => token.text_range(),
-                _ => continue,
-            };
-
-            range = match range {
-                None => Some(delete),
-                Some(range) => Some(range.cover(delete)),
-            };
-        }
-
-        let text_range = range?;
-
-        let old = self.root.to_string();
-        let new = self.clone().commit().to_string();
-        let text_edit = TextEdit::from_unicode_words(&old, &new);
-
-        Some((text_range, text_edit))
+    /// Returns the new tree with all commit changes applied.
+    ///
+    /// If the text range and text edit are also required,
+    /// please use `commit_with_text_range_and_edit`
+    pub fn commit(self) -> SyntaxNode<L> {
+        self.commit_with_text_range_and_edit(false).0
     }
 
     /// The core of the batch mutation algorithm can be summarized as:
-    /// 1 - Iterate all requested changes;
-    /// 2 - Insert them into a heap (priority queue) by depth. Deeper changes are done first;
-    /// 3 - Loop popping requested changes from the heap, taking the deepest change we have for the moment;
-    /// 4 - Each requested change has a "parent", an "index" and the "new node" (or None);
-    /// 5 - Clone the current parent's "parent", the "grandparent";
-    /// 6 - Detach the current "parent" from the tree;
-    /// 7 - Replace the old node at "index" at the current "parent" with the current "new node";
-    /// 8 - Insert into the heap the grandparent as the parent and the current "parent" as the "new node";
+    ///
+    /// 1. Iterate all requested changes;
+    /// 2. Insert them into a heap (priority queue) by depth. Deeper changes are done first;
+    /// 3. Loop popping requested changes from the heap, taking the deepest change we have for the moment;
+    /// 4. Each requested change has a "parent", an "index" and the "new node" (or None);
+    /// 5. Clone the current parent's "parent", the "grandparent";
+    /// 6. Detach the current "parent" from the tree;
+    /// 7. Replace the old node at "index" at the current "parent" with the current "new node";
+    /// 8. Insert into the heap the grandparent as the parent and the current "parent" as the "new node";
     ///
     /// This is the simple case. The algorithm also has a more complex case when to changes have a common ancestor,
     /// which can actually be one of the changed nodes.
@@ -348,89 +344,209 @@ where
     /// To address this case at step 3, when we pop a new change to apply it, we actually aggregate all changes to the current
     /// parent together. This is done by the heap because we also sort by node and it's range.
     ///
-    pub fn commit(self) -> SyntaxNode<L> {
+    /// Text range and text edit can be collected simultanously while committing if "with_text_range_and_edit" is true.
+    /// They're directly calculated from the commit changes. So you can commit and get text range and text edit in one pass.
+    ///
+    /// The calcultion of text range and text edit can be summarized as:
+    ///
+    /// While we popping requested changes from the heap, collect the "deleted_text_range" and "optional_inserted_text"
+    /// into an ordered vector "text_mutation_list" sorted by the "deleted_text_range". The reason behind it is that
+    /// changes on the heap are first ordered by parent depth, but we need to construct the TextEdit from start to end.
+    /// So we use binary search and insertion to populate the "text_mutation_list". Reaching the root node means all
+    /// changes have been visted. So we start to construct the TextEdit with the help of "text_edit_builder" by iterating
+    /// the collected "text_mutation_list".
+    pub fn commit_with_text_range_and_edit(
+        self,
+        with_text_range_and_edit: bool,
+    ) -> (SyntaxNode<L>, Option<(TextRange, TextEdit)>) {
         let BatchMutation { root, mut changes } = self;
-        // Fill the heap with the requested changes
 
-        while let Some(item) = changes.pop() {
-            // If parent is None, we reached the root
-            if let Some(current_parent) = item.parent {
+        // Ordered text mutation list sorted by text range
+        let mut text_mutation_list: Vec<(TextRange, Option<String>)> =
+            // SAFETY: this is safe bacause changes from actions can only
+            // overwrite each other, so the total number of the finalized
+            // text mutations will only be less.
+            Vec::with_capacity(changes.len());
+
+        // Collect all commit changes
+        while let Some(CommitChange {
+            new_node: curr_new_node,
+            new_node_slot: curr_new_node_slot,
+            parent: curr_parent,
+            parent_depth: curr_parent_depth,
+            is_from_action: curr_is_from_action,
+            ..
+        }) = changes.pop()
+        {
+            if let Some(curr_parent) = curr_parent {
                 // This must be done before the detachment below
                 // because we need nodes that are still valid in the old tree
-
-                let grandparent = current_parent.parent();
-                let grandparent_range = grandparent.as_ref().map(|g| {
+                let curr_grand_parent = curr_parent.parent();
+                let curr_grand_parent_range = curr_grand_parent.as_ref().map(|g| {
                     let range = g.text_range();
                     (range.start().into(), range.end().into())
                 });
-                let current_parent_slot = current_parent.index();
+                let curr_parent_slot = curr_parent.index();
 
                 // Aggregate all modifications to the current parent
                 // This works because of the Ord we defined in the [CommitChange] struct
+                let mut modifications =
+                    vec![(curr_new_node_slot, curr_new_node, curr_is_from_action)];
 
-                let mut modifications = vec![(item.new_node_slot, item.new_node)];
-                loop {
-                    if let Some(next_change_parent) = changes.peek().and_then(|i| i.parent.as_ref())
-                    {
-                        if *next_change_parent == current_parent {
-                            // SAFETY: We can .pop().unwrap() because we .peek() above
-                            let next_change = changes.pop().expect("changes.pop");
+                while changes
+                    .peek()
+                    .and_then(|c| c.parent.as_ref())
+                    .map_or(false, |p| *p == curr_parent)
+                {
+                    // SAFETY: We can .pop().unwrap() because we .peek() above
+                    let CommitChange {
+                        new_node: next_new_node,
+                        new_node_slot: next_new_node_slot,
+                        is_from_action: next_is_from_action,
+                        ..
+                    } = changes.pop().expect("changes.pop");
 
-                            // If we have two modification to the same slot,
-                            // last write wins
-                            if let Some(last) = modifications.last() {
-                                if last.0 == next_change.new_node_slot {
-                                    modifications.pop();
-                                }
-                            }
-                            modifications.push((next_change.new_node_slot, next_change.new_node));
-                            continue;
+                    // If we have two modifications to the same slot,
+                    // last write wins
+                    if let Some(&(prev_new_node_slot, ..)) = modifications.last() {
+                        if prev_new_node_slot == next_new_node_slot {
+                            modifications.pop();
                         }
                     }
-                    break;
+
+                    // Add to the modifications
+                    modifications.push((next_new_node_slot, next_new_node, next_is_from_action));
                 }
 
-                // Now we detach the current parent, make all the modifications
-                // and push a pending change to its parent.
+                // Collect text mutations, this has to be done before the detach below,
+                // or we'll lose the "deleted_text_range" info
+                if with_text_range_and_edit {
+                    for (new_node_slot, new_node, is_from_action) in &modifications {
+                        if !is_from_action {
+                            continue;
+                        }
+                        let deleted_text_range = match curr_parent.slots().nth(*new_node_slot) {
+                            Some(SyntaxSlot::Node(node)) => node.text_range(),
+                            Some(SyntaxSlot::Token(token)) => token.text_range(),
+                            Some(SyntaxSlot::Empty { index }) => {
+                                TextRange::new(index.into(), index.into())
+                            }
+                            None => continue,
+                        };
+                        let optional_inserted_text = new_node.as_ref().map(|n| n.to_string());
 
-                let mut current_parent = current_parent.detach();
+                        // We use binary search to keep the text mutations in order
+                        match text_mutation_list
+                            .binary_search_by(|(range, _)| range.ordering(deleted_text_range))
+                        {
+                            // Overwrite the text mutation with an overlapping text range
+                            Ok(pos) => {
+                                text_mutation_list[pos] =
+                                    (deleted_text_range, optional_inserted_text)
+                            }
+                            // Insert the text mutation at the correct position
+                            Err(pos) => text_mutation_list
+                                .insert(pos, (deleted_text_range, optional_inserted_text)),
+                        }
+                    }
+                }
+
+                // Now we detach the current parent, commit all the modifications
+                // and push a pending change to its parent
+                let mut current_parent = curr_parent.detach();
                 let is_list = current_parent.kind().is_list();
-                let mut removed_slots = 0;
-
-                for (index, replace_with) in modifications {
-                    debug_assert!(index >= removed_slots);
-                    let index = index.checked_sub(removed_slots)
-                        .unwrap_or_else(|| panic!("cannot replace element in slot {index} with {removed_slots} removed slots"));
-
-                    current_parent = if is_list && replace_with.is_none() {
-                        removed_slots += 1;
-                        current_parent.clone().splice_slots(index..=index, empty())
+                for (new_node_slot, new_node, ..) in modifications {
+                    current_parent = if is_list && new_node.is_none() {
+                        current_parent.splice_slots(new_node_slot..=new_node_slot, empty())
                     } else {
-                        current_parent
-                            .clone()
-                            .splice_slots(index..=index, once(replace_with))
-                    };
+                        current_parent.splice_slots(new_node_slot..=new_node_slot, once(new_node))
+                    }
                 }
 
                 changes.push(CommitChange {
-                    parent_depth: item.parent_depth - 1,
-                    parent: grandparent,
-                    parent_range: grandparent_range,
-                    new_node_slot: current_parent_slot,
+                    parent_depth: curr_parent_depth - 1,
+                    parent: curr_grand_parent,
+                    parent_range: curr_grand_parent_range,
+                    new_node_slot: curr_parent_slot,
                     new_node: Some(SyntaxElement::Node(current_parent)),
+                    is_from_action: false,
                 });
-            } else {
-                let root = item
-                    .new_node
-                    .expect("new_node")
-                    .into_node()
-                    .expect("expected root to be a node and not a token");
+            }
+            // If parent is None, we reached the document root
+            else {
+                let optional_text_range_and_edit = if with_text_range_and_edit {
+                    // The root of batch mutation is not necessarily
+                    // the document root in some rule actions,
+                    // so we need to find the actual document root
+                    let mut document_root = root;
+                    while let Some(parent) = document_root.parent() {
+                        document_root = parent;
+                    }
 
-                return root;
+                    if curr_is_from_action {
+                        text_mutation_list = vec![(
+                            document_root.text_range(),
+                            Some(
+                                curr_new_node
+                                    .as_ref()
+                                    .map_or(String::new(), |n| n.to_string()),
+                            ),
+                        )];
+                    }
+
+                    // Build text range and text edit from the text mutation list
+                    let root_string = document_root.to_string();
+                    let mut text_range = TextRange::default();
+                    let mut text_edit_builder = TextEditBuilder::default();
+
+                    let mut pointer: usize = 0;
+                    for (deleted_text_range, optional_inserted_text) in text_mutation_list {
+                        if let (Ok(range_start), Ok(range_end)) = (
+                            usize::try_from(u32::from(deleted_text_range.start())),
+                            usize::try_from(u32::from(deleted_text_range.end())),
+                        ) {
+                            text_range = text_range.cover(deleted_text_range);
+                            if range_start > pointer {
+                                text_edit_builder.equal(&root_string[pointer..range_start]);
+                            }
+
+                            let old = &root_string[range_start..range_end];
+                            let new = &optional_inserted_text.map_or(String::new(), |t| t);
+
+                            text_edit_builder.with_unicode_words_diff(old, new);
+
+                            pointer = range_end;
+                        }
+                    }
+                    let end_pos = root_string.len();
+                    if end_pos > pointer {
+                        text_edit_builder.equal(&root_string[pointer..end_pos]);
+                    }
+
+                    let text_edit = text_edit_builder.finish();
+
+                    Some((text_range, text_edit))
+                } else {
+                    None
+                };
+
+                return (
+                    // SAFETY: If the change is propagated from the child,
+                    // this will allways be a syntax node element because
+                    // that's how we construct it above.
+                    //
+                    // Otherwise root should still exist as a node even if
+                    // the code is to be transformed to an empty string.
+                    curr_new_node
+                        .expect("expected root to exist")
+                        .into_node()
+                        .expect("expected root to be a node and not a token"),
+                    optional_text_range_and_edit,
+                );
             }
         }
 
-        root
+        (root, None)
     }
 
     pub fn root(&self) -> &SyntaxNode<L> {

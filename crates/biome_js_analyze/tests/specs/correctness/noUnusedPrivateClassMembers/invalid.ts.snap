@@ -169,10 +169,8 @@ invalid.ts:33:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     31 31 │   
     32 32 │   class TsAccessor {
     33    │ - → private·get·unusedAccessor()·{·}
-    34    │ - → private·set·unusedAccessor(value)·{·}
-       33 │ + → private·set·unusedAccessor(value)·{·}
+    34 33 │   	private set unusedAccessor(value) { }
     35 34 │   }
-    36 35 │   
   
 
 ```
@@ -199,5 +197,3 @@ invalid.ts:34:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
   
 
 ```
-
-

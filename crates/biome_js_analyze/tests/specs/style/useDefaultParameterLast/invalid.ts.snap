@@ -219,8 +219,13 @@ invalid.ts:7:19 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━�
   
   i Unsafe fix: Turn the parameter into a required parameter.
   
-    7 │ export·function·h(a/*·before·*/?/*·after·*/:·number,·b:·number)·{}
-      │                                -                                  
+     5  5 │   export function f(a = 0, b = 0, c?: string, c: string) {}
+     6  6 │   
+     7    │ - export·function·h(a/*·before·*/?/*·after·*/:·number,·b:·number)·{}
+        7 │ + export·function·h(a/*·before·*//*·after·*/:·number,·b:·number)·{}
+     8  8 │   
+     9  9 │   export class Foo {
+  
 
 ```
 
@@ -249,5 +254,3 @@ invalid.ts:10:17 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━
        │                           -----                        
 
 ```
-
-

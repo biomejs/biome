@@ -184,7 +184,7 @@ where
                     parent = parent.splice_slots(index..=index, [Some(updated.into())]);
                 }
             }
-            SyntaxSlot::Empty => {
+            SyntaxSlot::Empty { .. } => {
                 // Nothing to visit
             }
         }

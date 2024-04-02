@@ -48,10 +48,8 @@ invalidClass.cjs:3:3 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━
      1  1 │   class C1 {
      2  2 │   	test() {
      3    │ - → → "use·strict";
-     4    │ - → }
-        3 │ + → → → }
+     4  3 │   	}
      5  4 │   }
-     6  5 │   
   
 
 ```
@@ -86,12 +84,8 @@ invalidClass.cjs:9:3 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━
      7  7 │   const C2 = class {
      8  8 │   	test() {
      9    │ - → → "use·strict";
-    10    │ - → }
-        9 │ + → → → }
+    10  9 │   	}
     11 10 │   };
-    12 11 │   
   
 
 ```
-
-

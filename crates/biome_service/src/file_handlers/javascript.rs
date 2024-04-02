@@ -592,8 +592,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
         match action {
             Some(action) => {
-                if let Some((range, _)) = action.mutation.as_text_edits() {
-                    tree = match AnyJsRoot::cast(action.mutation.commit()) {
+                if let (root, Some((range, _))) =
+                    action.mutation.commit_with_text_range_and_edit(true)
+                {
+                    tree = match AnyJsRoot::cast(root) {
                         Some(tree) => tree,
                         None => {
                             return Err(WorkspaceError::RuleError(
@@ -739,7 +741,7 @@ fn rename(
                         new_name,
                     }))
                 } else {
-                    let (range, indels) = batch.as_text_edits().unwrap_or_default();
+                    let (range, indels) = batch.as_text_range_and_edit().unwrap_or_default();
                     Ok(RenameResult { range, indels })
                 }
             }

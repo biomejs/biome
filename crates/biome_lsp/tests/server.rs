@@ -935,7 +935,7 @@ async fn pull_quick_fixes() -> Result<()> {
         data: None,
     });
 
-    assert_eq!(res, vec![expected_code_action, expected_suppression_action]);
+    assert_eq!(res, vec![expected_suppression_action, expected_code_action]);
 
     server.close_document().await?;
 
@@ -1265,7 +1265,10 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
         data: None,
     });
 
-    assert_eq!(res, vec![expected_code_action, expected_suppression_action]);
+    assert_eq!(
+        res,
+        vec![expected_suppression_action, expected_code_action,]
+    );
 
     server.close_document().await?;
 
