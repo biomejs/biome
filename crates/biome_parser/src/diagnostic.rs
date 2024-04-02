@@ -5,6 +5,7 @@ use biome_diagnostics::console::{markup, MarkupBuf};
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{Advices, Diagnostic, Location, LogCategory, MessageAndDescription, Visit};
 use biome_rowan::{SyntaxKind, TextLen, TextRange};
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
 /// A specialized diagnostic for the parser
@@ -18,8 +19,9 @@ use std::cmp::Ordering;
 ///
 /// These information **are printed in this exact order**.
 ///
-#[derive(Debug, Diagnostic, Clone)]
+#[derive(Clone, Debug, Deserialize, Diagnostic, Serialize)]
 #[diagnostic(category = "parse", severity = Error)]
+#[serde(rename_all = "camelCase")]
 pub struct ParseDiagnostic {
     /// The location where the error is occurred
     #[location(span)]
@@ -32,14 +34,15 @@ pub struct ParseDiagnostic {
 }
 
 /// Possible details related to the diagnostic
-#[derive(Debug, Default, Clone)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct ParserAdvice {
     advice_list: Vec<ParserAdviceKind>,
 }
 
 /// The structure of the advice. A message that gives details, a possible range so
 /// the diagnostic is able to highlight the part of the code we want to explain.
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 struct ParserAdviceDetail {
     /// A message that should explain this detail
     message: MarkupBuf,
@@ -47,7 +50,7 @@ struct ParserAdviceDetail {
     span: Option<TextRange>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 enum ParserAdviceKind {
     /// A list a possible details that can be attached to the diagnostic.
     /// Useful to explain the nature errors.

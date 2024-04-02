@@ -1,10 +1,10 @@
 use super::{
     ChangeFileParams, CloseFileParams, FeatureName, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams, PullActionsParams,
-    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
-    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateProjectParams,
-    UpdateSettingsParams,
+    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams,
+    ParsePatternParams, ParsePatternResult, PatternId, PullActionsParams, PullActionsResult,
+    PullDiagnosticsParams, PullDiagnosticsResult, RenameResult, SearchPatternParams, SearchResults,
+    SupportsFeatureParams, UpdateProjectParams, UpdateSettingsParams,
 };
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
@@ -24,6 +24,7 @@ use biome_diagnostics::{
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName};
+use biome_grit_patterns::GritPattern;
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
@@ -55,6 +56,8 @@ pub(super) struct WorkspaceServer {
     current_project_path: RwLock<Option<BiomePath>>,
     /// Stores the document sources used across the workspace
     file_sources: RwLock<IndexSet<DocumentFileSource>>,
+    /// Stores patterns to search for.
+    patterns: DashMap<PatternId, GritPattern>,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross
@@ -91,6 +94,7 @@ impl WorkspaceServer {
             manifests: DashMap::default(),
             current_project_path: RwLock::default(),
             file_sources: RwLock::default(),
+            patterns: Default::default(),
         }
     }
 
@@ -715,12 +719,27 @@ impl Workspace for WorkspaceServer {
         Ok(RageResult { entries })
     }
 
+    fn parse_pattern(
+        &self,
+        params: ParsePatternParams,
+    ) -> Result<ParsePatternResult, WorkspaceError> {
+        let pattern = biome_grit_patterns::parse_pattern(params.pattern)?;
+        let pattern_id = PatternId::from("1234"); // TODO: Generate a real ID.
+        self.patterns.insert(pattern_id.clone(), pattern);
+        Ok(ParsePatternResult { pattern_id })
+    }
+
     fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
         // FIXME: Let's implement some real matching here...
         Ok(SearchResults {
             file: params.path,
             matches: Vec::new(),
         })
+    }
+
+    fn drop_pattern(&self, params: super::DropPatternParams) -> Result<(), WorkspaceError> {
+        self.patterns.remove(&params.pattern);
+        Ok(())
     }
 
     fn server_info(&self) -> Option<&ServerInfo> {

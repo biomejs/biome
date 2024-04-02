@@ -7,6 +7,7 @@ use biome_diagnostics::{
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
+use biome_grit_patterns::ParseError;
 use biome_js_analyze::utils::rename::RenameError;
 use biome_js_analyze::RuleError;
 use serde::{Deserialize, Serialize};
@@ -56,6 +57,10 @@ pub enum WorkspaceError {
     Vcs(VcsDiagnostic),
     /// Diagnostic raised when a file is protected
     ProtectedFile(ProtectedFile),
+    /// An invalid patterns was given
+    ParsePatternError(ParseError),
+    /// No pattern with the given ID
+    InvalidPattern(InvalidPattern),
 }
 
 impl WorkspaceError {
@@ -150,6 +155,8 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileSystem(error) => error.category(),
             WorkspaceError::Vcs(error) => error.category(),
             WorkspaceError::ProtectedFile(error) => error.category(),
+            WorkspaceError::ParsePatternError(error) => error.category(),
+            WorkspaceError::InvalidPattern(error) => error.category(),
         }
     }
 
@@ -173,6 +180,8 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileSystem(error) => error.description(fmt),
             WorkspaceError::Vcs(error) => error.description(fmt),
             WorkspaceError::ProtectedFile(error) => error.description(fmt),
+            WorkspaceError::ParsePatternError(error) => error.description(fmt),
+            WorkspaceError::InvalidPattern(error) => error.description(fmt),
         }
     }
 
@@ -196,6 +205,8 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileSystem(error) => error.message(fmt),
             WorkspaceError::Vcs(error) => error.message(fmt),
             WorkspaceError::ProtectedFile(error) => error.message(fmt),
+            WorkspaceError::ParsePatternError(error) => error.message(fmt),
+            WorkspaceError::InvalidPattern(error) => error.message(fmt),
         }
     }
 
@@ -219,6 +230,8 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileSystem(error) => error.severity(),
             WorkspaceError::Vcs(error) => error.severity(),
             WorkspaceError::ProtectedFile(error) => error.severity(),
+            WorkspaceError::ParsePatternError(error) => error.severity(),
+            WorkspaceError::InvalidPattern(error) => error.severity(),
         }
     }
 
@@ -242,6 +255,8 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileSystem(error) => error.tags(),
             WorkspaceError::Vcs(error) => error.tags(),
             WorkspaceError::ProtectedFile(error) => error.tags(),
+            WorkspaceError::ParsePatternError(error) => error.tags(),
+            WorkspaceError::InvalidPattern(error) => error.tags(),
         }
     }
 
@@ -265,6 +280,8 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileSystem(error) => error.location(),
             WorkspaceError::Vcs(error) => error.location(),
             WorkspaceError::ProtectedFile(error) => error.location(),
+            WorkspaceError::ParsePatternError(error) => error.location(),
+            WorkspaceError::InvalidPattern(error) => error.location(),
         }
     }
 
@@ -288,6 +305,8 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileSystem(error) => Diagnostic::source(error),
             WorkspaceError::Vcs(error) => Diagnostic::source(error),
             WorkspaceError::ProtectedFile(error) => Diagnostic::source(error),
+            WorkspaceError::ParsePatternError(error) => Diagnostic::source(error),
+            WorkspaceError::InvalidPattern(error) => Diagnostic::source(error),
         }
     }
 
@@ -311,6 +330,8 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileSystem(error) => error.advices(visitor),
             WorkspaceError::Vcs(error) => error.advices(visitor),
             WorkspaceError::ProtectedFile(error) => error.advices(visitor),
+            WorkspaceError::ParsePatternError(error) => error.advices(visitor),
+            WorkspaceError::InvalidPattern(error) => error.advices(visitor),
         }
     }
     fn verbose_advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
@@ -333,6 +354,8 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileSystem(error) => error.verbose_advices(visitor),
             WorkspaceError::Vcs(error) => error.verbose_advices(visitor),
             WorkspaceError::ProtectedFile(error) => error.verbose_advices(visitor),
+            WorkspaceError::ParsePatternError(error) => error.verbose_advices(visitor),
+            WorkspaceError::InvalidPattern(error) => error.verbose_advices(visitor),
         }
     }
 }
@@ -518,6 +541,16 @@ impl Diagnostic for SourceFileNotSupported {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "search",
+    message(
+        message("Invalid pattern -- this is a bug in Biome."),
+        description = "If this problem persists, please report here: https://github.com/biomejs/biome/issues/"
+    )
+)]
+pub struct InvalidPattern;
+
 pub fn extension_error(path: &BiomePath) -> WorkspaceError {
     let file_source = DocumentFileSource::from_path(path);
     WorkspaceError::source_file_not_supported(
@@ -662,6 +695,12 @@ impl Diagnostic for VcsDiagnostic {
 impl From<VcsDiagnostic> for WorkspaceError {
     fn from(value: VcsDiagnostic) -> Self {
         Self::Vcs(value)
+    }
+}
+
+impl From<ParseError> for WorkspaceError {
+    fn from(value: ParseError) -> Self {
+        Self::ParsePatternError(value)
     }
 }
 

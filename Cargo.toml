@@ -115,6 +115,7 @@ biome_graphql_factory        = { version = "0.1.0", path = "./crates/biome_graph
 biome_graphql_syntax         = { version = "0.1.0", path = "./crates/biome_graphql_syntax" }
 biome_grit_factory           = { version = "0.5.7", path = "./crates/biome_grit_factory" }
 biome_grit_parser            = { version = "0.1.0", path = "./crates/biome_grit_parser" }
+biome_grit_patterns          = { version = "0.0.1", path = "./crates/biome_grit_patterns" }
 biome_grit_syntax            = { version = "0.5.7", path = "./crates/biome_grit_syntax" }
 biome_html_factory           = { version = "0.5.7", path = "./crates/biome_html_factory" }
 biome_html_syntax            = { version = "0.5.7", path = "./crates/biome_html_syntax" }

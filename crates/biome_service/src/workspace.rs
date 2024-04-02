@@ -666,9 +666,21 @@ impl RageEntry {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct ParsePatternParams {
+    pub pattern: String,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct ParsePatternResult {
+    pub pattern_id: PatternId,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SearchPatternParams {
     pub path: BiomePath,
-    pub pattern: String,
+    pub pattern: PatternId,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -676,6 +688,40 @@ pub struct SearchPatternParams {
 pub struct SearchResults {
     pub file: BiomePath,
     pub matches: Vec<TextRange>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct DropPatternParams {
+    pub pattern: PatternId,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct PatternId(String);
+
+impl std::fmt::Display for PatternId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl From<PatternId> for String {
+    fn from(value: PatternId) -> Self {
+        value.0
+    }
+}
+
+impl From<String> for PatternId {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+impl From<&str> for PatternId {
+    fn from(value: &str) -> Self {
+        Self(value.to_owned())
+    }
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -769,8 +815,19 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Returns debug information about this workspace.
     fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError>;
 
+    /// Parses a pattern to be used in follow-up [`search_pattern`] requests.
+    ///
+    /// Clients should call [`drop_pattern()`] when they no need longer need it.
+    fn parse_pattern(
+        &self,
+        params: ParsePatternParams,
+    ) -> Result<ParsePatternResult, WorkspaceError>;
+
     /// Searches a file for matches of the given pattern.
     fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError>;
+
+    /// Used to indicate a client no longer needs a specific pattern.
+    fn drop_pattern(&self, params: DropPatternParams) -> Result<(), WorkspaceError>;
 
     /// Returns information about the server this workspace is connected to or `None` if the workspace isn't connected to a server.
     fn server_info(&self) -> Option<&ServerInfo>;
@@ -900,10 +957,10 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
-    pub fn search_pattern(&self, pattern: &str) -> Result<SearchResults, WorkspaceError> {
+    pub fn search_pattern(&self, pattern: &PatternId) -> Result<SearchResults, WorkspaceError> {
         self.workspace.search_pattern(SearchPatternParams {
             path: self.path.clone(),
-            pattern: pattern.to_owned(),
+            pattern: pattern.clone(),
         })
     }
 }
