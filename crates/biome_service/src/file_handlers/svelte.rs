@@ -11,7 +11,7 @@ use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
-use biome_js_syntax::{JsFileSource, TextRange, TextSize};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use lazy_static::lazy_static;
@@ -77,7 +77,9 @@ impl SvelteFileHandler {
         matches
             .and_then(|captures| captures.name("lang"))
             .filter(|lang| lang.as_str() == "ts")
-            .map_or(JsFileSource::js_module(), |_| JsFileSource::ts())
+            .map_or(JsFileSource::js_module(), |_| {
+                JsFileSource::ts().with_embedding_kind(EmbeddingKind::Svelte)
+            })
     }
 }
 
