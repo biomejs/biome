@@ -246,6 +246,9 @@ impl TextEditBuilder {
         self.edit
     }
 
+    /// A higher level utility function for the text edit builder to generate
+    /// mutiple text edit steps (equal, delete and insert) to represent the
+    /// diff from the old string to the new string.
     pub fn with_unicode_words_diff(&mut self, old: &str, new: &str) {
         let diff = TextDiff::configure()
             .newline_terminated(true)

@@ -58,12 +58,12 @@ impl<L: Language> CommitChange<L> {
     /// The first is important to guarantee that all nodes that will be changed
     /// in the future are still valid with using SyntaxNode that we have.
     ///
-    /// The second and third is important to guarante that the ".peek()" we do
+    /// The second and third are essential to guarantee that the ".peek()" we do
     /// below is sufficient to see the same node in case of two or more nodes
     /// having the same parent.
     ///
-    /// All of them will be be prioritized in the descending order in a binary
-    /// heap, to ensure one change won't invalidate its following changes.
+    /// All of them will be prioritized in the descending order in a binary heap
+    /// to ensure one change won't invalidate its following changes.
     fn key(&self) -> (usize, u32, usize) {
         (
             self.parent_depth,
@@ -328,14 +328,15 @@ where
     }
 
     /// The core of the batch mutation algorithm can be summarized as:
-    /// 1 - Iterate all requested changes;
-    /// 2 - Insert them into a heap (priority queue) by depth. Deeper changes are done first;
-    /// 3 - Loop popping requested changes from the heap, taking the deepest change we have for the moment;
-    /// 4 - Each requested change has a "parent", an "index" and the "new node" (or None);
-    /// 5 - Clone the current parent's "parent", the "grandparent";
-    /// 6 - Detach the current "parent" from the tree;
-    /// 7 - Replace the old node at "index" at the current "parent" with the current "new node";
-    /// 8 - Insert into the heap the grandparent as the parent and the current "parent" as the "new node";
+    ///
+    /// 1. Iterate all requested changes;
+    /// 2. Insert them into a heap (priority queue) by depth. Deeper changes are done first;
+    /// 3. Loop popping requested changes from the heap, taking the deepest change we have for the moment;
+    /// 4. Each requested change has a "parent", an "index" and the "new node" (or None);
+    /// 5. Clone the current parent's "parent", the "grandparent";
+    /// 6. Detach the current "parent" from the tree;
+    /// 7. Replace the old node at "index" at the current "parent" with the current "new node";
+    /// 8. Insert into the heap the grandparent as the parent and the current "parent" as the "new node";
     ///
     /// This is the simple case. The algorithm also has a more complex case when to changes have a common ancestor,
     /// which can actually be one of the changed nodes.
@@ -343,7 +344,17 @@ where
     /// To address this case at step 3, when we pop a new change to apply it, we actually aggregate all changes to the current
     /// parent together. This is done by the heap because we also sort by node and it's range.
     ///
-    /// Text range and text edit can be collected simultanously. They're directly calculated from the commit changes.
+    /// Text range and text edit can be collected simultanously while committing if "with_text_range_and_edit" is true.
+    /// They're directly calculated from the commit changes. So you can commit and get text range and text edit in one pass.
+    ///
+    /// The calcultion of text range and text edit can be summarized as:
+    ///
+    /// While we popping requested changes from the heap, collect the "deleted_text_range" and "optional_inserted_text"
+    /// into an ordered vector "text_mutation_list" sorted by the "deleted_text_range". The reason behind it is that
+    /// changes on the heap are first ordered by parent depth, but we need to construct the TextEdit from start to end.
+    /// So we use binary search and insertion to populate the "text_mutation_list". Reaching the root node means all
+    /// changes have been visted. So we start to construct the TextEdit with the help of "text_edit_builder" by iterating
+    /// the collected "text_mutation_list".
     pub fn commit_with_text_range_and_edit(
         self,
         with_text_range_and_edit: bool,
@@ -351,7 +362,11 @@ where
         let BatchMutation { root, mut changes } = self;
 
         // Ordered text mutation list sorted by text range
-        let mut text_mutation_list: Vec<(TextRange, Option<String>)> = vec![];
+        let mut text_mutation_list: Vec<(TextRange, Option<String>)> =
+            // SAFETY: this is safe bacause changes from actions can only
+            // overwrite each other, so the total number of the finalized
+            // text mutations will only be less.
+            Vec::with_capacity(changes.len());
 
         // Collect all commit changes
         while let Some(CommitChange {
@@ -429,7 +444,7 @@ where
                                 text_mutation_list[pos] =
                                     (deleted_text_range, optional_inserted_text)
                             }
-                            // Insert the text mutation in the correct position
+                            // Insert the text mutation at the correct position
                             Err(pos) => text_mutation_list
                                 .insert(pos, (deleted_text_range, optional_inserted_text)),
                         }
@@ -516,8 +531,14 @@ where
                 };
 
                 return (
+                    // SAFETY: If the change is propagated from the child,
+                    // this will allways be a syntax node element because
+                    // that's how we construct it above.
+                    //
+                    // Otherwise root should still exist as a node even if
+                    // the code is to be transformed to an empty string.
                     curr_new_node
-                        .expect("new_node")
+                        .expect("expected root to exist")
                         .into_node()
                         .expect("expected root to be a node and not a token"),
                     optional_text_range_and_edit,
