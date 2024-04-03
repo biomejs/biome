@@ -25,6 +25,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Bug fixes
+
+- Fix the printed error count ([#2048](https://github.com/biomejs/biome/issues/2048)). Contributed by @Sec-ant
+
 ### Configuration
 
 #### Bug fixes

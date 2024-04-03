@@ -65,7 +65,5 @@ file1.js:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━
 
 ```block
 Checked 1 file in <TIME>. No fixes needed.
-Found 2 errors.
+Found 1 error.
 ```
-
-
