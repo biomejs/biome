@@ -298,6 +298,7 @@ impl<'src> GraphqlLexer<'src> {
         ERROR_TOKEN
     }
 
+    /// consume an entire number, be it a float, int, or scientific notion
     fn consume_number(&mut self, first: u8) -> GraphqlSyntaxKind {
         self.assert_current_char_boundary();
 
@@ -338,6 +339,7 @@ impl<'src> GraphqlLexer<'src> {
         }
     }
 
+    /// consume a single digit in a number
     fn consume_digit(&mut self, chr: u8, state: LexNumberState) -> LexNumberState {
         debug_assert!(chr.is_ascii_digit());
         match chr {
@@ -697,6 +699,7 @@ enum LexStringState {
     Terminated,
 }
 
+/// Current state of a number being parsed
 #[derive(Debug, Clone)]
 enum LexNumberState {
     /// After a minus sign
