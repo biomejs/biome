@@ -59,7 +59,7 @@
 		"textlint-rule-preset-jtf-style": "2.3.14",
 		"textlint-rule-prh": "6.0.0",
 		"typescript": "5.4.2",
-		"vite": "5.1.6",
+		"vite": "5.1.7",
 		"vite-plugin-svgr": "4.2.0"
 	},
 	"dependencies": {
