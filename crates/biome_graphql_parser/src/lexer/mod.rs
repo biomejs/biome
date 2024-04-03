@@ -170,7 +170,7 @@ impl<'src> GraphqlLexer<'src> {
 
     /// Lexes an ellipsis.
     fn consume_ellipsis(&mut self) -> GraphqlSyntaxKind {
-        assert_eq!(self.current_byte(), Some(b'.'));
+        self.assert_byte(b'.');
         let start = self.position;
         self.advance(1);
         if self.current_byte() == Some(b'.') {
@@ -313,7 +313,7 @@ impl<'src> GraphqlLexer<'src> {
         while let Some(chr) = self.current_byte() {
             let new_state = match chr {
                 b'0'..=b'9' => self.consume_digit(chr, state),
-                b'.' => self.consume_fraction(chr, state),
+                b'.' => self.consume_fraction(state),
                 b'e' | b'E' => self.consume_exponent(chr, start, state),
                 _ => break,
             };
@@ -339,7 +339,7 @@ impl<'src> GraphqlLexer<'src> {
     }
 
     fn consume_digit(&mut self, chr: u8, state: LexNumberState) -> LexNumberState {
-        assert!(chr.is_ascii_digit());
+        debug_assert!(chr.is_ascii_digit());
         match chr {
             b'0' => {
                 let position = self.text_position();
@@ -376,8 +376,8 @@ impl<'src> GraphqlLexer<'src> {
             _ => panic!("Invalid character"),
         }
     }
-    fn consume_fraction(&mut self, chr: u8, state: LexNumberState) -> LexNumberState {
-        assert_eq!(chr, b'.');
+    fn consume_fraction(&mut self, state: LexNumberState) -> LexNumberState {
+        self.assert_byte(b'.');
         let position = self.text_position();
         self.advance(1);
 
@@ -406,7 +406,7 @@ impl<'src> GraphqlLexer<'src> {
         start: TextSize,
         state: LexNumberState,
     ) -> LexNumberState {
-        assert!(matches!(chr, b'e' | b'E'));
+        debug_assert!(matches!(chr, b'e' | b'E'));
         let position = self.text_position();
         self.advance(1);
 
@@ -436,7 +436,7 @@ impl<'src> GraphqlLexer<'src> {
     }
 
     fn consume_string(&mut self) -> GraphqlSyntaxKind {
-        assert_eq!(self.current_byte(), Some(b'"'));
+        self.assert_byte(b'"');
         let start = self.text_position();
 
         self.advance(1); // Skip over the quote
@@ -490,12 +490,12 @@ impl<'src> GraphqlLexer<'src> {
         self.assert_current_char_boundary();
         match state {
             LexStringState::Uninitialized => match chr {
-                b'"' => (self.consume_quote_in_string(chr, state), None),
+                b'"' => (self.consume_quote_in_string(state), None),
                 _ => (LexStringState::InString, None),
             },
             LexStringState::InString => match chr {
-                b'"' => (self.consume_quote_in_string(chr, state), None),
-                b'\\' => self.consume_escape_sequence_in_string(chr, state),
+                b'"' => (self.consume_quote_in_string(state), None),
+                b'\\' => self.consume_escape_sequence_in_string(state),
                 b'\n' | b'\r' => (
                     LexStringState::Terminated,
                     Some(
@@ -509,8 +509,8 @@ impl<'src> GraphqlLexer<'src> {
                 }
             },
             LexStringState::InBlockString => match chr {
-                b'"' => (self.consume_quote_in_string(chr, state), None),
-                b'\\' => self.consume_escape_sequence_in_string(chr, state),
+                b'"' => (self.consume_quote_in_string(state), None),
+                b'\\' => self.consume_escape_sequence_in_string(state),
                 _ => {
                     self.advance_char_unchecked();
                     (state, None)
@@ -520,8 +520,8 @@ impl<'src> GraphqlLexer<'src> {
         }
     }
 
-    fn consume_quote_in_string(&mut self, chr: u8, state: LexStringState) -> LexStringState {
-        assert_eq!(chr, b'"');
+    fn consume_quote_in_string(&mut self, state: LexStringState) -> LexStringState {
+        self.assert_byte(b'"');
         self.advance(1);
         match state {
             LexStringState::Uninitialized => {
@@ -548,10 +548,9 @@ impl<'src> GraphqlLexer<'src> {
 
     fn consume_escape_sequence_in_string(
         &mut self,
-        chr: u8,
         state: LexStringState,
     ) -> (LexStringState, Option<ParseDiagnostic>) {
-        assert_eq!(chr, b'\\');
+        self.assert_byte(b'\\');
         let escape_start = self.text_position();
         self.advance(1);
         match state {
@@ -658,7 +657,7 @@ impl<'src> GraphqlLexer<'src> {
     }
 
     fn consume_comment(&mut self) -> GraphqlSyntaxKind {
-        assert_eq!(self.current_byte(), Some(b'#'));
+        self.assert_byte(b'#');
 
         self.advance(1);
 
