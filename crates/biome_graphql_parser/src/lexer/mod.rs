@@ -596,7 +596,21 @@ impl<'src> GraphqlLexer<'src> {
                     let diagnostic = ParseDiagnostic::new(
                         "Invalid escape sequence",
                         escape_start..self.text_position() + c.text_len(),
-                    ).with_hint(r#"Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. "#);
+                    )
+                    .with_alternatives(
+                        "Expected one of the following values",
+                        &[
+                            r"\\",
+                            r"\/",
+                            r#"\""#,
+                            r"\b",
+                            r"\f",
+                            r"\n",
+                            r"\r",
+                            r"\t",
+                            r"\uXXXX where X is hexedecimal number",
+                        ],
+                    );
                     (state, Some(diagnostic))
                 }
 
