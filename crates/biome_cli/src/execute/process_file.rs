@@ -63,11 +63,8 @@ pub(crate) enum Message {
 }
 
 impl Message {
-    pub(crate) const fn is_error(&self) -> bool {
-        matches!(
-            self,
-            Message::Diff { .. } | Message::Diagnostics { .. } | Message::Failure
-        )
+    pub(crate) const fn is_failure(&self) -> bool {
+        matches!(self, Message::Failure)
     }
 }
 

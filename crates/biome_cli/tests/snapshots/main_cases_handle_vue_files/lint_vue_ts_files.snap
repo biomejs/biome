@@ -125,5 +125,5 @@ file.vue:4:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes needed.
-Found 5 errors.
+Found 4 errors.
 ```

@@ -23,6 +23,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - An operator with no spaces around in a binary expression no longer breaks the js analyzer ([#2243](https://github.com/biomejs/biome/issues/2243)). Contributed by @Sec-ant
 
+### CLI
+
+#### Bug fixes
+
+- Fix the printed error count ([#2048](https://github.com/biomejs/biome/issues/2048)). Contributed by @Sec-ant
+
 ### Configuration
 
 #### Bug fixes
