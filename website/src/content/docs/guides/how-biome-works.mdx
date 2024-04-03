@@ -52,17 +52,18 @@ working directory, and then it starts looking in the parent directories until:
 Here's an example:
 
 <FileTree>
-    - app
-    - backend
+- app
+  - backend
     - package.json
     - biome.json
-    - frontend
+  - frontend
     - legacy
-    - package.json
+      - package.json
     - new
-    - package.json
+      - package.json
     - biome.json
 </FileTree>
+
 
 - biome commands that run in `app/backend/package.json` will use the configuration file `app/backend/biome.json`;
 - biome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
@@ -78,14 +79,14 @@ The `extends` option allows to break down a configuration in multiple file and "
 
 ```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "extends": ["./formatter.json", "./linter.json"]
 }
 ```
 
 ```json title="formatter.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "formatter": {
     "indentSize": 2
   },
@@ -99,7 +100,7 @@ The `extends` option allows to break down a configuration in multiple file and "
 
 ```json title="linter.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "linter": {
     "rules": {
       "complexity": {
@@ -201,14 +202,14 @@ and decide to place your `biome.json` at the root folder of the project.
 Inside the `frontend/` project, you have your `package.json` with some scripts that run Biome:
 
 <FileTree>
-    - backend
+- backend
+  - ...
+- biome.json
+- frontend
+  - package.json
+  - src
     - ...
-    - biome.json
-    - frontend
-    - package.json
-    - src
-    - ...
-    - test
+  - test
     - ...
 </FileTree>
 
