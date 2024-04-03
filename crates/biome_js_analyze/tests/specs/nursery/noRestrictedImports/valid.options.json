@@ -6,7 +6,9 @@
 				"noRestrictedImports": {
 					"level": "error",
 					"options": {
-						"paths": {}
+						"paths": {
+							"node:fs": "Importing from node:fs is forbidden"
+						}
 					}
 				}
 			}

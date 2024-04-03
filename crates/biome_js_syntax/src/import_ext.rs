@@ -1,9 +1,9 @@
 use crate::{
     inner_string_text, AnyJsBinding, AnyJsImportClause, AnyJsNamedImportSpecifier,
     JsCallExpression, JsImport, JsImportAssertion, JsImportCallExpression, JsModuleSource,
-    JsSyntaxToken,
+    JsSyntaxToken, TsExternalModuleDeclaration,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult, TokenText};
+use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult, TokenText};
 
 impl JsImport {
     /// It checks if the source of an import against the string `source_to_check`
@@ -302,5 +302,40 @@ impl AnyJsImportSpecifierLike {
                     .ok()
             }
         }
+    }
+
+    /// Check whether the js import specifier like is in a ts module declaration:
+    /// ```ts
+    /// declare "abc" {}
+    /// ```
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_factory::make;
+    /// use biome_js_syntax::{AnyJsImportSpecifierLike, JsSyntaxKind, JsSyntaxToken};
+    /// use biome_rowan::TriviaPieceKind;
+    ///
+    /// let module_token = JsSyntaxToken::new_detached(JsSyntaxKind::MODULE_KW, "module", [], []);
+    /// let module_source = make::js_module_source(make::js_string_literal("foo"));
+    /// let module_declaration = make::ts_external_module_declaration(module_token, module_source).build();
+    /// let any_import_specifier = AnyJsImportSpecifierLike::JsModuleSource(module_declaration.source().expect("module source"));
+    /// assert!(any_import_specifier.is_in_module_declaration());
+    ///
+    /// let module_source = make::js_module_source(make::js_string_literal("bar"));
+    /// let any_import_specifier = AnyJsImportSpecifierLike::JsModuleSource(module_source);
+    /// assert!(!any_import_specifier.is_in_module_declaration());
+    /// ```
+    pub fn is_in_ts_module_declaration(&self) -> bool {
+        // It will first has to be a JsModuleSource
+        if !matches!(self, AnyJsImportSpecifierLike::JsModuleSource(_)) {
+            return false;
+        }
+        // Then test whether its parent is a TsExternalModuleDeclaration
+        if let Some(parent_syntax_kind) = self.syntax().parent().kind() {
+            if TsExternalModuleDeclaration::can_cast(parent_syntax_kind) {
+                return true;
+            }
+        }
+        false
     }
 }
