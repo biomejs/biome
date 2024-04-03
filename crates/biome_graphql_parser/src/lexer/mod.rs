@@ -5,7 +5,6 @@ mod tests;
 use biome_graphql_syntax::{GraphqlSyntaxKind, GraphqlSyntaxKind::*, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, TokenFlags};
-use core::panic;
 use std::ops::Add;
 
 #[derive(Debug)]
@@ -375,7 +374,14 @@ impl<'src> GraphqlLexer<'src> {
                     _ => state,
                 }
             }
-            _ => panic!("Invalid character"),
+            // should never happen
+            _ => {
+                let position = self.text_position();
+                LexNumberState::Invalid(ParseDiagnostic::new(
+                    "Invalid character",
+                    position..position + TextSize::from(1),
+                ))
+            }
         }
     }
     fn consume_fraction(&mut self, state: LexNumberState) -> LexNumberState {
@@ -492,11 +498,11 @@ impl<'src> GraphqlLexer<'src> {
         self.assert_current_char_boundary();
         match state {
             LexStringState::Uninitialized => match chr {
-                b'"' => (self.consume_quote_in_string(state), None),
+                b'"' => self.consume_quote_in_string(state),
                 _ => (LexStringState::InString, None),
             },
             LexStringState::InString => match chr {
-                b'"' => (self.consume_quote_in_string(state), None),
+                b'"' => self.consume_quote_in_string(state),
                 b'\\' => self.consume_escape_sequence_in_string(state),
                 b'\n' | b'\r' => (
                     LexStringState::Terminated,
@@ -511,40 +517,57 @@ impl<'src> GraphqlLexer<'src> {
                 }
             },
             LexStringState::InBlockString => match chr {
-                b'"' => (self.consume_quote_in_string(state), None),
+                b'"' => self.consume_quote_in_string(state),
                 b'\\' => self.consume_escape_sequence_in_string(state),
                 _ => {
                     self.advance_char_unchecked();
                     (state, None)
                 }
             },
-            _ => panic!("String terminated"),
+            // should never happen
+            _ => (
+                state,
+                Some(ParseDiagnostic::new(
+                    "String terminated",
+                    self.position..self.position + 1,
+                )),
+            ),
         }
     }
 
-    fn consume_quote_in_string(&mut self, state: LexStringState) -> LexStringState {
+    fn consume_quote_in_string(
+        &mut self,
+        state: LexStringState,
+    ) -> (LexStringState, Option<ParseDiagnostic>) {
         self.assert_byte(b'"');
         self.advance(1);
         match state {
             LexStringState::Uninitialized => {
                 if self.current_byte() == Some(b'"') {
                     self.advance(1);
-                    LexStringState::InBlockString
+                    (LexStringState::InBlockString, None)
                 } else {
                     // an empty string
-                    LexStringState::Terminated
+                    (LexStringState::Terminated, None)
                 }
             }
-            LexStringState::InString => LexStringState::Terminated,
+            LexStringState::InString => (LexStringState::Terminated, None),
             LexStringState::InBlockString => {
                 if self.current_byte() == Some(b'"') && self.byte_at(1) == Some(b'"') {
                     self.advance(2);
-                    LexStringState::Terminated
+                    (LexStringState::Terminated, None)
                 } else {
-                    state
+                    (state, None)
                 }
             }
-            _ => panic!("String terminated"),
+            // should never happen
+            _ => (
+                state,
+                Some(ParseDiagnostic::new(
+                    "String terminated",
+                    self.position..self.position + 1,
+                )),
+            ),
         }
     }
 
@@ -606,7 +629,14 @@ impl<'src> GraphqlLexer<'src> {
                     (state, Some(diagnostic))
                 }
             }
-            _ => panic!("String uninitialized/terminated"),
+            // should never happen
+            _ => (
+                state,
+                Some(ParseDiagnostic::new(
+                    "String terminated",
+                    self.position..self.position + 1,
+                )),
+            ),
         }
     }
 
