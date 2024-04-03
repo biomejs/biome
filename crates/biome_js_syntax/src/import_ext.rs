@@ -319,11 +319,11 @@ impl AnyJsImportSpecifierLike {
     /// let module_source = make::js_module_source(make::js_string_literal("foo"));
     /// let module_declaration = make::ts_external_module_declaration(module_token, module_source).build();
     /// let any_import_specifier = AnyJsImportSpecifierLike::JsModuleSource(module_declaration.source().expect("module source"));
-    /// assert!(any_import_specifier.is_in_module_declaration());
+    /// assert!(any_import_specifier.is_in_ts_module_declaration());
     ///
     /// let module_source = make::js_module_source(make::js_string_literal("bar"));
     /// let any_import_specifier = AnyJsImportSpecifierLike::JsModuleSource(module_source);
-    /// assert!(!any_import_specifier.is_in_module_declaration());
+    /// assert!(!any_import_specifier.is_in_ts_module_declaration());
     /// ```
     pub fn is_in_ts_module_declaration(&self) -> bool {
         // It will first has to be a JsModuleSource
