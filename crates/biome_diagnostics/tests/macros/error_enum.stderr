@@ -1,5 +1,0 @@
-error: enums are not supported by the Diagnostic derive macro
- --> tests/macros/error_enum.rs:4:1
-  |
-4 | enum ErrorEnum {
-  | ^^^^

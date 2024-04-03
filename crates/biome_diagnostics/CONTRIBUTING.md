@@ -135,3 +135,6 @@ allocates).
 The category may also require some special care if you're declaring a new one,
 since all diagnostic categories have to be statically registered you'll need to
 add it to `crates/biome_diagnostics_categories/src/categories.rs`
+
+`#[derive(Diagnostic)]` also works in enums. This assumes every variant of
+the enum contains a type that is themselves a diagnostic.
