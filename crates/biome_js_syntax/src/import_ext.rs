@@ -326,7 +326,7 @@ impl AnyJsImportSpecifierLike {
     /// assert!(!any_import_specifier.is_in_ts_module_declaration());
     /// ```
     pub fn is_in_ts_module_declaration(&self) -> bool {
-        // It will first has to be a JsModuleSource
+        // It first has to be a JsModuleSource
         if !matches!(self, AnyJsImportSpecifierLike::JsModuleSource(_)) {
             return false;
         }
