@@ -113,7 +113,7 @@ impl<'src> Lexer<'src> for GraphqlLexer<'src> {
     }
 
     fn rewind(&mut self, _checkpoint: LexerCheckpoint<Self::Kind>) {
-        todo!();
+        unimplemented!("GraphQL lexer doesn't support rewinding");
     }
 }
 
