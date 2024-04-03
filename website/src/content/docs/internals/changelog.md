@@ -27,6 +27,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Configuration
 
+#### Enhancements
+
+- Biome nows display location of a parsing error for its configuration file ([#1627](https://github.com/biomejs/biome/issues/1627)).
+
+  Previously, when Biome encountered a parsing error in its configuration file,
+  it didn't indicate the location of the error.
+  It now displays the name of the configuration file and the range where the error occurred.
+
+  Contributed by @Conaclos
+
 ### Editors
 
 ### Formatter
