@@ -2617,7 +2617,7 @@ pub struct Nursery {
     #[doc = "Disallow focused tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_focused_tests: Option<RuleConfiguration<NoFocusedTests>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow duplicate names within font families."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_font_family_duplicate_names: Option<RuleConfiguration<NoFontFamilyDuplicateNames>>,
     #[doc = "Checks that the assertion function, for example expect, is placed inside an it() function call."]
@@ -2703,7 +2703,7 @@ impl Nursery {
         "useNodeAssertStrict",
         "useSortedClasses",
     ];
-    const RECOMMENDED_RULES: [&'static str; 10] = [
+    const RECOMMENDED_RULES: [&'static str; 11] = [
         "noDoneCallback",
         "noDuplicateElseIf",
         "noDuplicateJsonKeys",
@@ -2712,10 +2712,11 @@ impl Nursery {
         "noExcessiveNestedTestSuites",
         "noExportsInTest",
         "noFocusedTests",
+        "noFontFamilyDuplicateNames",
         "noSuspiciousSemicolonInJsx",
         "noUselessTernary",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 10] = [
+    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 11] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
@@ -2724,6 +2725,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
     ];
@@ -3033,7 +3035,7 @@ impl Nursery {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 10] {
+    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 11] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
     pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 25] {

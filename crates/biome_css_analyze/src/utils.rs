@@ -20,3 +20,7 @@ pub fn is_font_shorthand_keyword(value: &str) -> bool {
         || LINE_HEIGHT_KEYWORDS.contains(&value)
         || FONT_FAMILY_KEYWORDS.contains(&value)
 }
+
+pub fn is_css_variable(value: &str) -> bool {
+    value.to_lowercase().starts_with("var(")
+}

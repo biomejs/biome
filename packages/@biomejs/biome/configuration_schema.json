@@ -1459,7 +1459,7 @@
 					]
 				},
 				"noFontFamilyDuplicateNames": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow duplicate names within font families.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

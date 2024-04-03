@@ -1,6 +1,6 @@
 pub const BASIC_KEYWORDS: [&str; 5] = ["initial", "inherit", "revert", "revert-layer", "unset"];
 
-pub const SYSTEM_FONT_KEYWORDS: [&str; 6] = [
+pub const _SYSTEM_FONT_KEYWORDS: [&str; 6] = [
     "caption",
     "icon",
     "menu",

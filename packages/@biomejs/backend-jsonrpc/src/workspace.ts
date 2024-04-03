@@ -933,7 +933,7 @@ export interface Nursery {
 	 */
 	noFocusedTests?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow duplicate names within font families.
 	 */
 	noFontFamilyDuplicateNames?: RuleConfiguration_for_Null;
 	/**

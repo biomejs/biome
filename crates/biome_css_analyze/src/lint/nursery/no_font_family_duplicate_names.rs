@@ -7,34 +7,41 @@ use biome_css_syntax::{
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
 
-use crate::utils::{is_font_family_keyword, is_font_shorthand_keyword};
+use crate::utils::{is_css_variable, is_font_family_keyword, is_font_shorthand_keyword};
 
 declare_rule! {
-    /// Succinct description of the rule.
+    /// Disallow duplicate names within font families.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    /// This rule checks the `font` and `font-family` properties for duplicate font names.
     ///
-    /// Try to stay consistent with the descriptions of implemented rules.
+    /// This rule ignores var(--custom-property) variable syntaxes.
     ///
-    /// Add a link to the corresponding stylelint rule (if any):
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```css,expect_diagnostic
-    /// p {}
+    /// a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
     /// ```
     ///
     /// ### Valid
     ///
     /// ```css
-    /// p {
-    ///   color: red;
-    /// }
+    /// a { font-family: "Lucida Grande", "Arial", sans-serif; }
     /// ```
     ///
+    /// ```css
+    /// b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif; }
+    /// ```
     pub NoFontFamilyDuplicateNames {
         version: "next",
         name: "noFontFamilyDuplicateNames",
@@ -131,6 +138,11 @@ fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue> {
     let mut font_families: Vec<AnyCssValue> = Vec::new();
     for v in value {
         let lower_case_value = v.text().to_lowercase();
+
+        // Ignore CSS variables
+        if is_css_variable(&lower_case_value) {
+            continue;
+        }
 
         // Ignore keywords for other font parts
         if is_font_shorthand_keyword(&lower_case_value)
