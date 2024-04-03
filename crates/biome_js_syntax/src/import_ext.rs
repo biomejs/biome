@@ -332,9 +332,7 @@ impl AnyJsImportSpecifierLike {
         }
         // Then test whether its parent is a TsExternalModuleDeclaration
         if let Some(parent_syntax_kind) = self.syntax().parent().kind() {
-            if TsExternalModuleDeclaration::can_cast(parent_syntax_kind) {
-                return true;
-            }
+            return TsExternalModuleDeclaration::can_cast(parent_syntax_kind);
         }
         false
     }
