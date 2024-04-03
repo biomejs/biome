@@ -12,7 +12,7 @@ This rule hasn't been released yet.
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-Source: <a href="https://github.com/uhyo/eslint-plugin-import-access" target="_blank"><code>font-family-no-duplicate-names</code></a>
+Source: <a href="https://github.com/stylelint/stylelint/blob/main/lib/rules/font-family-no-duplicate-names/README.md" target="_blank"><code>font-family-no-duplicate-names</code></a>
 
 Disallow duplicate names within font families.
 

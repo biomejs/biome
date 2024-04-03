@@ -46,7 +46,7 @@ declare_rule! {
         version: "next",
         name: "noFontFamilyDuplicateNames",
         recommended: true,
-        source: RuleSource::EslintImportAccess("font-family-no-duplicate-names"),
+        source: RuleSource::Stylelint("font-family-no-duplicate-names"),
     }
 }
 
