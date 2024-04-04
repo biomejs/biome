@@ -125,15 +125,15 @@ impl DeserializableValue for AnyJsonValue {
         }
     }
 
-    fn is_type(&self, ty: VisitableType) -> bool {
+    fn visitable_type(&self) -> Option<VisitableType> {
         match self {
-            AnyJsonValue::JsonArrayValue(_) => ty == VisitableType::ARRAY,
-            AnyJsonValue::JsonBogusValue(_) => false,
-            AnyJsonValue::JsonBooleanValue(_) => ty == VisitableType::BOOL,
-            AnyJsonValue::JsonNullValue(_) => ty == VisitableType::NULL,
-            AnyJsonValue::JsonNumberValue(_) => ty == VisitableType::NUMBER,
-            AnyJsonValue::JsonObjectValue(_) => ty == VisitableType::MAP,
-            AnyJsonValue::JsonStringValue(_) => ty == VisitableType::STR,
+            AnyJsonValue::JsonArrayValue(_) => Some(VisitableType::ARRAY),
+            AnyJsonValue::JsonBogusValue(_) => None,
+            AnyJsonValue::JsonBooleanValue(_) => Some(VisitableType::BOOL),
+            AnyJsonValue::JsonNullValue(_) => Some(VisitableType::NULL),
+            AnyJsonValue::JsonNumberValue(_) => Some(VisitableType::NUMBER),
+            AnyJsonValue::JsonObjectValue(_) => Some(VisitableType::MAP),
+            AnyJsonValue::JsonStringValue(_) => Some(VisitableType::STR),
         }
     }
 }
@@ -153,8 +153,8 @@ impl DeserializableValue for JsonMemberName {
         visitor.visit_str(Text(value), AstNode::range(self), name, diagnostics)
     }
 
-    fn is_type(&self, _ty: VisitableType) -> bool {
-        false
+    fn visitable_type(&self) -> Option<VisitableType> {
+        Some(VisitableType::STR)
     }
 }
 
