@@ -144,7 +144,7 @@ fix.js:4:12 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
 ```block
 fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - 
     2   │ - ····function·f()·{arguments;}

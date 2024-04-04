@@ -57,7 +57,7 @@ check.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━
 ```block
 check.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1 │ for·(;·true;·);
       │    +  +     +  

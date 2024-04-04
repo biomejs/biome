@@ -31,7 +31,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 test.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - console.log('bar');
       1 │ + console.log("bar");

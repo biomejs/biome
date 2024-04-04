@@ -39,7 +39,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.ts format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - type·A·=·{·a:·string·};·type·B·=·Partial<A>
       1 │ + type·A·=·{·a:·string·};

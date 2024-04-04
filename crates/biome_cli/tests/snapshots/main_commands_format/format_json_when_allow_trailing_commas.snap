@@ -38,7 +38,7 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1 1 │   {
     2   │ - ····"array":·[
@@ -56,5 +56,3 @@ file.json format ━━━━━━━━━━━━━━━━━━━━━
 Checked 1 file in <TIME>. No fixes needed.
 Found 1 error.
 ```
-
-

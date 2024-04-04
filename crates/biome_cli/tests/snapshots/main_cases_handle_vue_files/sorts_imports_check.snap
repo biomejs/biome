@@ -28,7 +28,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.vue organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Import statements could be sorted:
+  × Import statements could be sorted:
   
     1 1 │   <script setup lang="ts">
     2   │ - import·Button·from·"./components/Button.vue";

@@ -26,7 +26,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 check.js organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Import statements could be sorted:
+  × Import statements could be sorted:
   
     1   │ - import·{·lorem,·foom,·bar·}·from·"foo";
       1 │ + import·{·bar,·foom,·lorem·}·from·"foo";

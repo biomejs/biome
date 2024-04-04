@@ -52,7 +52,7 @@ fix.js:2:2 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━�
 ```block
 fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - 
     2   │ - (1·>=·-0)
