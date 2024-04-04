@@ -167,11 +167,10 @@ pub(crate) fn format(
         }
     }
 
-    if changed && staged {
-        return Err(CliDiagnostic::incompatible_arguments("changed", "staged"));
-    }
-
     if changed {
+        if staged {
+            return Err(CliDiagnostic::incompatible_arguments("changed", "staged"));
+        }
         paths = get_changed_files(&session.app.fs, &configuration, since)?;
     } else if staged {
         paths = get_staged_files(&session.app.fs)?;
