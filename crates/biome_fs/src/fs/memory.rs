@@ -28,8 +28,8 @@ pub struct MemoryFileSystem {
     files: AssertUnwindSafe<RwLock<FxHashMap<PathBuf, FileEntry>>>,
     errors: FxHashMap<PathBuf, ErrorEntry>,
     allow_write: bool,
-    on_get_changed_files: OnGetChangedFiles,
     on_get_staged_files: OnGetChangedFiles,
+    on_get_changed_files: OnGetChangedFiles,
 }
 
 impl Default for MemoryFileSystem {
@@ -38,10 +38,10 @@ impl Default for MemoryFileSystem {
             files: Default::default(),
             errors: Default::default(),
             allow_write: true,
-            on_get_changed_files: Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(Box::new(
+            on_get_staged_files: Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(Box::new(
                 Vec::new,
             )))))),
-            on_get_staged_files: Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(Box::new(
+            on_get_changed_files: Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(Box::new(
                 Vec::new,
             )))))),
         }

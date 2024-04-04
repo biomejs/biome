@@ -3007,6 +3007,175 @@ fn should_not_error_for_no_changed_files_with_no_errors_on_unmatched() {
 }
 
 #[test]
+fn should_error_if_changed_flag_and_staged_flag_are_active_at_the_same_time() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--staged",
+                "--changed"
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_error_if_changed_flag_and_staged_flag_are_active_at_the_same_time",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_only_processes_staged_files_when_staged_flag_is_set() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.set_on_get_staged_files(Box::new(|| vec![String::from("staged.js")]));
+    fs.set_on_get_changed_files(Box::new(|| vec![String::from("changed.js")]));
+
+    // Staged (prepared to be committed)
+    fs.insert(Path::new("staged.js").into(), r#"console.log('staged');"#.as_bytes());
+
+    // Changed (already recorded in git history)
+    fs.insert( Path::new("changed.js").into(), r#"console.log('changed');"#.as_bytes());
+
+    // Unstaged (not yet recorded in git history, and not prepared to be committed)
+    fs.insert(Path::new("file2.js").into(), r#"console.log('file2');"#.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--staged",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_only_processes_staged_files_when_staged_flag_is_set",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_only_process_staged_file_if_its_included() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.set_on_get_staged_files(Box::new(|| {
+        vec![String::from("file.js"), String::from("file2.js")]
+    }));
+
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"
+{
+    "files": {
+        "include": ["file.js"]
+    },
+    "vcs": {
+        "defaultBranch": "main"
+    }
+}
+        "#
+        .as_bytes(),
+    );
+
+    fs.insert(Path::new("file.js").into(), r#"console.log('file');"#.as_bytes());
+    fs.insert(Path::new("file2.js").into(), r#"console.log('file2');"#.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--staged",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_only_process_staged_file_if_its_included",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_not_process_ignored_file_even_if_its_staged() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.set_on_get_staged_files(Box::new(|| vec![String::from("file.js")]));
+
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"
+{
+    "files": {
+        "ignore": ["file.js"]
+    },
+    "vcs": {
+        "defaultBranch": "main"
+    }
+}
+        "#
+        .as_bytes(),
+    );
+
+    fs.insert(Path::new("file.js").into(), r#"console.log('file');"#.as_bytes());
+    fs.insert(Path::new("file2.js").into(), r#"console.log('file2');"#.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--staged",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_process_ignored_file_even_if_its_staged",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn lint_syntax_rules() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
