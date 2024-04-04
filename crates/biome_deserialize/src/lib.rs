@@ -103,8 +103,8 @@ pub trait DeserializableValue: Sized {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<V::Output>;
 
-    /// Returns whether the value is of the given type.
-    fn is_type(&self, ty: VisitableType) -> bool;
+    /// Returns the type of this value.
+    fn visitable_type(&self) -> Option<VisitableType>;
 }
 
 /// This trait represents a visitor that walks through a [DeserializableValue].
