@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
-use crate::configuration::linter::{RulePlainConfiguration, RuleWithOptions};
-use crate::configuration::LinterConfiguration;
+use crate::linter::{RulePlainConfiguration, RuleWithOptions};
+use crate::LinterConfiguration;
 use crate::RuleConfiguration;
 use biome_deserialize::{
     Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,

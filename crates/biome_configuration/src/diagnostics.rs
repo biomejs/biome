@@ -1,4 +1,3 @@
-use crate::WorkspaceError;
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_deserialize::DeserializationDiagnostic;
@@ -51,11 +50,11 @@ impl From<DeserializationDiagnostic> for ConfigurationDiagnostic {
 }
 
 impl ConfigurationDiagnostic {
-    pub(crate) fn new_serialization_error() -> Self {
+    pub fn new_serialization_error() -> Self {
         Self::SerializationError(SerializationError)
     }
 
-    pub(crate) fn new_invalid_ignore_pattern(
+    pub fn new_invalid_ignore_pattern(
         pattern: impl Into<String>,
         reason: impl Into<String>,
     ) -> Self {
@@ -142,7 +141,7 @@ pub struct ConfigAlreadyExists {}
 pub struct InvalidIgnorePattern {
     #[message]
     #[description]
-    pub(crate) message: String,
+    pub message: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -178,12 +177,6 @@ impl CantLoadExtendFile {
     }
 }
 
-impl From<CantLoadExtendFile> for WorkspaceError {
-    fn from(value: CantLoadExtendFile) -> Self {
-        WorkspaceError::Configuration(ConfigurationDiagnostic::CantLoadExtendFile(value))
-    }
-}
-
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
 	category = "configuration",
@@ -212,8 +205,7 @@ pub struct CantResolve {
 
 #[cfg(test)]
 mod test {
-    use crate::configuration::diagnostics::ConfigurationDiagnostic;
-    use crate::configuration::PartialConfiguration;
+    use crate::{ConfigurationDiagnostic, PartialConfiguration};
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use biome_json_parser::JsonParserOptions;
@@ -225,7 +217,6 @@ mod test {
             prepend_module_to_snapshot => false,
         }, {
             insta::assert_snapshot!(test_name, content);
-
         });
     }
 

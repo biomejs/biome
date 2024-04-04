@@ -5,17 +5,20 @@ use crate::extension_settings::CONFIGURATION_SECTION;
 use crate::utils;
 use anyhow::Result;
 use biome_analyze::RuleCategories;
+use biome_configuration::ConfigurationBasePath;
 use biome_console::markup;
 use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, FileSystem};
-use biome_service::configuration::{load_configuration, LoadedConfiguration};
+use biome_service::configuration::{
+    load_configuration, LoadedConfiguration, PartialConfigurationExt,
+};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
     SupportsFeatureParams, UpdateProjectParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
-use biome_service::{ConfigurationBasePath, Workspace};
+use biome_service::Workspace;
 use biome_service::{DynRef, WorkspaceError};
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;

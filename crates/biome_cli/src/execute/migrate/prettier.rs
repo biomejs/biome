@@ -1,5 +1,9 @@
 use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
+use biome_configuration::{
+    PartialConfiguration, PartialFormatterConfiguration, PartialJavascriptConfiguration,
+    PartialJavascriptFormatter, PlainIndentStyle,
+};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::StringSet;
@@ -9,11 +13,7 @@ use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
 use biome_json_parser::JsonParserOptions;
-use biome_service::configuration::{
-    PartialFormatterConfiguration, PartialJavascriptConfiguration, PartialJavascriptFormatter,
-    PlainIndentStyle,
-};
-use biome_service::{DynRef, PartialConfiguration};
+use biome_service::DynRef;
 use indexmap::IndexSet;
 use std::path::{Path, PathBuf};
 

@@ -1,74 +1,54 @@
 [package]
 authors.workspace    = true
 categories.workspace = true
-description          = "Biome's core functionality"
+description          = "Biome Configuration"
 edition.workspace    = true
 homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
-name                 = "biome_service"
-publish              = false
+name                 = "biome_configuration"
 repository.workspace = true
-version              = "0.0.0"
+version              = "0.0.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 biome_analyze            = { workspace = true, features = ["serde"] }
-biome_configuration      = { workspace = true, features = ["schema"] }
 biome_console            = { workspace = true }
 biome_css_analyze        = { workspace = true }
-biome_css_formatter      = { workspace = true }
-biome_css_parser         = { workspace = true }
 biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
-biome_fs                 = { workspace = true, features = ["serde"] }
 biome_js_analyze         = { workspace = true }
-biome_js_factory         = { workspace = true, optional = true }
 biome_js_formatter       = { workspace = true, features = ["serde"] }
-biome_js_parser          = { workspace = true }
-biome_js_semantic        = { workspace = true }
-biome_js_syntax          = { workspace = true, features = ["schema"] }
+biome_js_syntax          = { workspace = true, features = ["serde", "schema"] }
 biome_json_analyze       = { workspace = true }
 biome_json_formatter     = { workspace = true, features = ["serde"] }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
-biome_parser             = { workspace = true }
-biome_project            = { workspace = true }
 biome_rowan              = { workspace = true, features = ["serde"] }
-biome_text_edit          = { workspace = true }
 bpaf                     = { workspace = true }
-dashmap                  = { workspace = true }
-ignore                   = { workspace = true }
 indexmap                 = { workspace = true, features = ["serde"] }
-lazy_static              = { workspace = true }
 oxc_resolver             = { workspace = true }
-regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, features = ["indexmap1"], optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true, features = ["raw_value"] }
-tracing                  = { workspace = true, features = ["attributes", "log"] }
 
 [features]
-format_css = ["biome_css_formatter/format_css"]
 schema = [
   "dep:schemars",
   "biome_js_analyze/schema",
   "biome_formatter/serde",
-  "biome_js_factory",
-  "biome_text_edit/schemars",
   "biome_json_syntax/schema",
   "biome_css_syntax/schema",
 ]
 
 [dev-dependencies]
-insta        = { workspace = true }
-tests_macros = { workspace = true }
+insta = { workspace = true }
 
 [lints]
 workspace = true

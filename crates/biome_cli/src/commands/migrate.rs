@@ -2,8 +2,8 @@ use crate::cli_options::CliOptions;
 use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::{execute_mode, Execution, TraversalMode};
 use crate::{setup_cli_subscriber, CliDiagnostic, CliSession};
+use biome_configuration::ConfigurationBasePath;
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
-use biome_service::ConfigurationBasePath;
 use std::path::PathBuf;
 
 /// Handler for the "check" command of the Biome CLI

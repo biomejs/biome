@@ -1,3 +1,4 @@
+use biome_configuration::ConfigurationBasePath;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{fmt, markup, ConsoleExt, HorizontalLine, Markup};
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
@@ -5,7 +6,7 @@ use biome_diagnostics::{termcolor, PrintDescription};
 use biome_fs::FileSystem;
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{client, RageEntry, RageParams};
-use biome_service::{ConfigurationBasePath, DynRef, Workspace};
+use biome_service::{DynRef, Workspace};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::{env, io, ops::Deref};

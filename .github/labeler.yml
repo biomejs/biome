@@ -2,14 +2,14 @@
 
 A-Cli:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - crates/biome_cli/**
     - crates/biome_fs/**
     - crates/biome_console/**
 
 A-Core:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - crates/biome_deserializer/**
     - crates/biome_fs/**
     - crates/biome_rowan/**
@@ -20,19 +20,20 @@ A-Core:
 
 A-Project:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - crates/biome_service/**
+    - crates/biome_configuration/**
 
 A-Linter:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - crates/biome_analyze/**
     - crates/biome_js_analyze/**
     - crates/biome_json_analyze/**
 
 A-Parser:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - crates/biome_parser/**
     - crates/biome_js_parser/**
     - crates/biome_js_syntax/**
@@ -43,7 +44,7 @@ A-Parser:
 
 A-Formatter:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - crates/biome_formatter/**
     - crates/biome_formatter_test/**
     - crates/biome_js_formatter/**
@@ -52,48 +53,48 @@ A-Formatter:
 
 A-Editors:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - crates/editors/**
 
 A-Diagnostic:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - crates/biome_diagnostics/**
     - crates/biome_diagnostics_categories/**
     - crates/biome_diagnostics_macros/**
 
 A-Tooling:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - xtask/**
     - crates/biome_ungrammar/**
 
 A-Website:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - website/**
 
 A-LSP:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - crates/biome_lsp/**
 
 A-Changelog:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - CHANGELOG.md
 
 L-Javascript:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - crates/biome_js_*/**
 
 L-Json:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - crates/biome_json_*/**
 
 L-CSS:
 - changed-files:
-  - any-glob-to-any-file: 
+  - any-glob-to-any-file:
     - crates/biome_css_*/**

@@ -1,9 +1,9 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use crate::configuration::linter::*;
+use crate::linter::*;
 use crate::Rules;
 use biome_analyze::{AnalyzerRules, MetadataRegistry};
-pub(crate) fn push_to_analyzer_rules(
+pub fn push_to_analyzer_rules(
     rules: &Rules,
     metadata: &MetadataRegistry,
     analyzer_rules: &mut AnalyzerRules,
