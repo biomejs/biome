@@ -3014,14 +3014,7 @@ fn should_error_if_changed_flag_and_staged_flag_are_active_at_the_same_time() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                "--staged",
-                "--changed"
-            ]
-            .as_slice(),
-        ),
+        Args::from([("lint"), "--staged", "--changed"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3044,24 +3037,27 @@ fn should_only_processes_staged_files_when_staged_flag_is_set() {
     fs.set_on_get_changed_files(Box::new(|| vec![String::from("changed.js")]));
 
     // Staged (prepared to be committed)
-    fs.insert(Path::new("staged.js").into(), r#"console.log('staged');"#.as_bytes());
+    fs.insert(
+        Path::new("staged.js").into(),
+        r#"console.log('staged');"#.as_bytes(),
+    );
 
     // Changed (already recorded in git history)
-    fs.insert( Path::new("changed.js").into(), r#"console.log('changed');"#.as_bytes());
+    fs.insert(
+        Path::new("changed.js").into(),
+        r#"console.log('changed');"#.as_bytes(),
+    );
 
     // Unstaged (not yet recorded in git history, and not prepared to be committed)
-    fs.insert(Path::new("file2.js").into(), r#"console.log('file2');"#.as_bytes());
+    fs.insert(
+        Path::new("file2.js").into(),
+        r#"console.log('file2');"#.as_bytes(),
+    );
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                "--staged",
-            ]
-            .as_slice(),
-        ),
+        Args::from([("lint"), "--staged"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3100,19 +3096,19 @@ fn should_only_process_staged_file_if_its_included() {
         .as_bytes(),
     );
 
-    fs.insert(Path::new("file.js").into(), r#"console.log('file');"#.as_bytes());
-    fs.insert(Path::new("file2.js").into(), r#"console.log('file2');"#.as_bytes());
+    fs.insert(
+        Path::new("file.js").into(),
+        r#"console.log('file');"#.as_bytes(),
+    );
+    fs.insert(
+        Path::new("file2.js").into(),
+        r#"console.log('file2');"#.as_bytes(),
+    );
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                "--staged",
-            ]
-            .as_slice(),
-        ),
+        Args::from([("lint"), "--staged"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3149,19 +3145,19 @@ fn should_not_process_ignored_file_even_if_its_staged() {
         .as_bytes(),
     );
 
-    fs.insert(Path::new("file.js").into(), r#"console.log('file');"#.as_bytes());
-    fs.insert(Path::new("file2.js").into(), r#"console.log('file2');"#.as_bytes());
+    fs.insert(
+        Path::new("file.js").into(),
+        r#"console.log('file');"#.as_bytes(),
+    );
+    fs.insert(
+        Path::new("file2.js").into(),
+        r#"console.log('file2');"#.as_bytes(),
+    );
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                "--staged",
-            ]
-            .as_slice(),
-        ),
+        Args::from([("lint"), "--staged"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
