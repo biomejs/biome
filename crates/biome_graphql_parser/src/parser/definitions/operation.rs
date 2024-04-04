@@ -50,11 +50,8 @@ pub(crate) fn is_at_operation(p: &mut GraphqlParser<'_>) -> bool {
 
 #[inline]
 fn parse_selection_set(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !p.at(T!['{']) {
-        return Absent;
-    }
     let m = p.start();
-    p.bump(T!['{']);
+    p.expect(T!['{']);
     SelectionList::new().parse_list(p);
     p.bump(T!['}']);
     Present(m.complete(p, GRAPHQL_SELECTION_SET))
