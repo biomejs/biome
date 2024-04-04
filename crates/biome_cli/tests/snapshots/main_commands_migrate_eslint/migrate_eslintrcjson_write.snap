@@ -64,5 +64,5 @@ expression: content
 # Emitted Messages
 
 ```block
-The configuration .eslintrc.json has been successfully migrated.
+.eslintrc.json has been successfully migrated.
 ```

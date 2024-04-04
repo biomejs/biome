@@ -26,8 +26,8 @@ a/**
 # Emitted Messages
 
 ```block
-The file .eslintignore contains negated glob patterns that start with !.
-These ignore patterns cannot be migrated because Biome doesn't support negated glob patterns.
+.eslintignore contains negated glob patterns that start with !.
+These patterns cannot be migrated because Biome doesn't support them.
 ```
 
 ```block

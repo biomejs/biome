@@ -55,5 +55,9 @@ generated/*.spec.js
 # Emitted Messages
 
 ```block
-The configuration .prettierrc has been successfully migrated.
+.prettierignore has been successfully migrated.
+```
+
+```block
+.prettierrc has been successfully migrated.
 ```

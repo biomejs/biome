@@ -28,6 +28,7 @@ mod eslint_to_biome;
 mod eslint_typescript;
 mod eslint_unicorn;
 mod ignorefile;
+mod node;
 mod prettier;
 
 pub(crate) struct MigratePayload<'a> {
@@ -90,11 +91,6 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 biome_config.merge_with(prettier_configuration.as_biome_configuration());
                 if let Ok(ignore_patterns) = ignorefile::read_ignore_file(fs, prettier::IGNORE_FILE)
                 {
-                    if ignore_patterns.has_negated_patterns {
-                        console.log(markup! {
-                            <Warn>"The file "<Emphasis>{prettier::IGNORE_FILE}</Emphasis>" contains negated glob patterns that start with "<Emphasis>"!"</Emphasis>".\nThese ignore patterns cannot be migrated because Biome doesn't support negated glob patterns."</Warn>
-                        })
-                    }
                     if !ignore_patterns.patterns.is_empty() {
                         biome_config
                             .formatter
@@ -102,6 +98,15 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                             .ignore
                             .get_or_insert(Default::default())
                             .extend(ignore_patterns.patterns);
+                    }
+                    if ignore_patterns.has_negated_patterns {
+                        console.log(markup! {
+                            <Warn><Emphasis>{prettier::IGNORE_FILE}</Emphasis>" contains negated glob patterns that start with "<Emphasis>"!"</Emphasis>".\nThese patterns cannot be migrated because Biome doesn't support them."</Warn>
+                        })
+                    } else if write && biome_config != old_biome_config {
+                        console.log(markup!{
+                            <Info><Emphasis>{prettier::IGNORE_FILE}</Emphasis>" has been successfully migrated."</Info>
+                        });
                     }
                 }
                 if biome_config == old_biome_config {
@@ -123,7 +128,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     if write {
                         biome_config_file.set_content(printed.as_code().as_bytes())?;
                         console.log(markup!{
-                            <Info>"The configuration "<Emphasis>".prettierrc"</Emphasis>" has been successfully migrated."</Info>
+                            <Info><Emphasis>".prettierrc"</Emphasis>" has been successfully migrated."</Info>
                         });
                     } else {
                         let file_name = configuration_file_path.display().to_string();
@@ -164,11 +169,6 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             let old_biome_config = biome_config.clone();
             biome_config.merge_with(biome_eslint_config);
             if let Ok(ignore_patterns) = ignorefile::read_ignore_file(fs, eslint::IGNORE_FILE) {
-                if ignore_patterns.has_negated_patterns {
-                    console.log(markup! {
-                        <Warn>"The file "<Emphasis>{eslint::IGNORE_FILE}</Emphasis>" contains negated glob patterns that start with "<Emphasis>"!"</Emphasis>".\nThese ignore patterns cannot be migrated because Biome doesn't support negated glob patterns."</Warn>
-                    })
-                }
                 if !ignore_patterns.patterns.is_empty() {
                     biome_config
                         .linter
@@ -176,6 +176,15 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                         .ignore
                         .get_or_insert(Default::default())
                         .extend(ignore_patterns.patterns);
+                }
+                if ignore_patterns.has_negated_patterns {
+                    console.log(markup! {
+                        <Warn><Emphasis>{eslint::IGNORE_FILE}</Emphasis>" contains negated glob patterns that start with "<Emphasis>"!"</Emphasis>".\nThese patterns cannot be migrated because Biome doesn't support them."</Warn>
+                    })
+                } else if write && biome_config != old_biome_config {
+                    console.log(markup!{
+                        <Info><Emphasis>{eslint::IGNORE_FILE}</Emphasis>" has been successfully migrated."</Info>
+                    });
                 }
             }
             if biome_config == old_biome_config {
@@ -197,7 +206,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 if write {
                     biome_config_file.set_content(printed.as_code().as_bytes())?;
                     console.log(markup!{
-                        <Info>"The configuration "<Emphasis>{eslint_path}</Emphasis>" has been successfully migrated."</Info>
+                        <Info><Emphasis>{eslint_path}</Emphasis>" has been successfully migrated."</Info>
                     });
                 } else {
                     let file_name = configuration_file_path.display().to_string();

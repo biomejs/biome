@@ -41,5 +41,5 @@ expression: content
 # Emitted Messages
 
 ```block
-The configuration .prettierrc has been successfully migrated.
+.prettierrc has been successfully migrated.
 ```
