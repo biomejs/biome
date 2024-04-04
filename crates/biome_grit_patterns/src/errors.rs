@@ -1,5 +1,5 @@
+use biome_diagnostics::serde::Diagnostic as SerializableDiagnostic;
 use biome_diagnostics::Diagnostic;
-use biome_parser::diagnostic::ParseDiagnostic;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Diagnostic, Serialize)]
@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
     message = "Error(s) parsing pattern",
 )]
 pub struct ParsePatternError {
-    diagnostics: Vec<ParseDiagnostic>,
+    diagnostics: Vec<SerializableDiagnostic>,
 }
 
 #[derive(Debug, Deserialize, Diagnostic, Serialize)]
@@ -19,7 +19,7 @@ pub struct ParsePatternError {
     message = "Error(s) parsing pattern snippet",
 )]
 pub struct ParseSnippetError {
-    diagnostics: Vec<ParseDiagnostic>,
+    diagnostics: Vec<SerializableDiagnostic>,
 }
 
 #[derive(Debug, Deserialize, Diagnostic, Serialize)]

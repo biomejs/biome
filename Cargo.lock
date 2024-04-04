@@ -471,8 +471,6 @@ version = "0.0.1"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
- "biome_grit_parser",
- "biome_parser",
  "serde",
 ]
 
@@ -789,7 +787,6 @@ dependencies = [
  "biome_unicode_table",
  "bitflags 2.3.1",
  "drop_bomb",
- "serde",
  "unicode-bom",
 ]
 

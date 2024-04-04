@@ -17,7 +17,6 @@ biome_rowan         = { workspace = true }
 biome_unicode_table = { workspace = true }
 bitflags            = { workspace = true }
 drop_bomb           = "0.1.5"
-serde               = { workspace = true }
 unicode-bom         = { workspace = true }
 
 [lints]

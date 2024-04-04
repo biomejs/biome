@@ -57,10 +57,8 @@ pub enum WorkspaceError {
     Vcs(VcsDiagnostic),
     /// Diagnostic raised when a file is protected
     ProtectedFile(ProtectedFile),
-    /// An invalid patterns was given
-    ParsePatternError(ParseError),
-    /// No pattern with the given ID
-    InvalidPattern(InvalidPattern),
+    /// Error when searching for a pattern
+    SearchError(SearchError),
 }
 
 impl WorkspaceError {
@@ -316,6 +314,14 @@ impl Diagnostic for SourceFileNotSupported {
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
+pub enum SearchError {
+    /// An invalid patterns was given
+    ParsePatternError(ParseError),
+    /// No pattern with the given ID
+    InvalidPattern(InvalidPattern),
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "search",
     message(
@@ -411,7 +417,7 @@ impl From<VcsDiagnostic> for WorkspaceError {
 
 impl From<ParseError> for WorkspaceError {
     fn from(value: ParseError) -> Self {
-        Self::ParsePatternError(value)
+        Self::SearchError(SearchError::ParsePatternError(value))
     }
 }
 

@@ -14,8 +14,7 @@ version              = "0.0.1"
 [dependencies]
 biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
-biome_grit_parser = { workspace = true }
-biome_parser      = { workspace = true }
+#biome_grit_parser = { workspace = true } TODO: will be used in a future PR
 #marzano-core      = { git = "https://github.com/getgrit/gritql.git", optional = true }
 serde = { workspace = true, features = ["derive"] }
 
