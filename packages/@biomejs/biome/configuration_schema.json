@@ -737,7 +737,7 @@
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/UnusedImportsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1872,6 +1872,15 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUnusedImportsOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
+				"options": { "$ref": "#/definitions/UnusedImportsOptions" }
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUtilityClassSortingOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -2696,6 +2705,23 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UnusedImportsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUnusedImportsOptions" }
+			]
+		},
+		"UnusedImportsOptions": {
+			"type": "object",
+			"required": ["ignoreReact"],
+			"properties": {
+				"ignoreReact": {
+					"description": "Ignore `React` imports from the `react` package when set to `true`.",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
 		},
 		"UtilityClassSortingConfiguration": {
 			"anyOf": [

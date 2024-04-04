@@ -834,7 +834,7 @@ export interface Correctness {
 	/**
 	 * Disallow unused imports.
 	 */
-	noUnusedImports?: RuleConfiguration_for_Null;
+	noUnusedImports?: RuleConfiguration_for_UnusedImportsOptions;
 	/**
 	 * Disallow unused labels.
 	 */
@@ -1481,6 +1481,9 @@ export type RuleConfiguration_for_ValidAriaRoleOptions =
 export type RuleConfiguration_for_ComplexityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ComplexityOptions;
+export type RuleConfiguration_for_UnusedImportsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UnusedImportsOptions;
 export type RuleConfiguration_for_HooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_HooksOptions;
@@ -1517,6 +1520,10 @@ export interface RuleWithOptions_for_ValidAriaRoleOptions {
 export interface RuleWithOptions_for_ComplexityOptions {
 	level: RulePlainConfiguration;
 	options: ComplexityOptions;
+}
+export interface RuleWithOptions_for_UnusedImportsOptions {
+	level: RulePlainConfiguration;
+	options: UnusedImportsOptions;
 }
 export interface RuleWithOptions_for_HooksOptions {
 	level: RulePlainConfiguration;
@@ -1562,6 +1569,12 @@ export interface ComplexityOptions {
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
 	maxAllowedComplexity: number;
+}
+export interface UnusedImportsOptions {
+	/**
+	 * Ignore `React` imports from the `react` package when set to `true`.
+	 */
+	ignoreReact: boolean;
 }
 /**
  * Options for the rule `useExhaustiveDependencies`
