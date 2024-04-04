@@ -158,8 +158,13 @@ pub(crate) fn format(
     let (vcs_base_path, gitignore_matches) =
         configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
-    if since.is_some() && !changed {
-        return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+    if since.is_some() {
+        if !changed {
+            return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+        }
+        if staged {
+            return Err(CliDiagnostic::incompatible_arguments("since", "staged"));
+        }
     }
 
     if changed && staged {

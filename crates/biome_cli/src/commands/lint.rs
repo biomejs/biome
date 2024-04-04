@@ -97,8 +97,13 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     let (vcs_base_path, gitignore_matches) =
         fs_configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
-    if since.is_some() && !changed {
-        return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+    if since.is_some() {
+        if !changed {
+            return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+        }
+        if staged {
+            return Err(CliDiagnostic::incompatible_arguments("since", "staged"));
+        }
     }
 
     if changed && staged {
