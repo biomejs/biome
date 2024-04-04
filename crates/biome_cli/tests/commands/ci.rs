@@ -71,7 +71,7 @@ fn ok() {
 
     assert_file_contents(&fs, file_path, FORMATTED);
 
-    if console.out_buffer.len() != 1 {
+    if console.out_buffer.len() != 2 {
         panic!("unexpected console content: {:#?}", console.out_buffer);
     }
 
