@@ -1582,7 +1582,7 @@
  
  x = (
    <fbt desc="example 3">
-     Count Chocula knows the the number
+     Count Chocula knows the number
      <fbt:enum enum-range={["one", "two", "three"]} value={getValue()} />
      is awesome
    </fbt>
