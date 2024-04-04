@@ -2,13 +2,14 @@ mod diagnostics;
 mod migrate;
 mod process_file;
 mod std_in;
-mod traverse;
+pub(crate) mod traverse;
 
 use crate::cli_options::CliOptions;
 use crate::commands::MigrateSubCommand;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::traverse;
-use crate::reporter::ConsoleReporter;
+use crate::reporter::report;
+use crate::reporter::terminal::{ConsoleReporterBuilder, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
@@ -16,10 +17,9 @@ use biome_service::workspace::{FeatureName, FeaturesBuilder, FixFileMode};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
-use std::sync::RwLock;
 
 /// Useful information during the traversal of files and virtual content
-pub(crate) struct Execution {
+pub struct Execution {
     /// How the information should be collected and reported
     report_mode: ReportMode,
 
@@ -242,6 +242,13 @@ impl Execution {
         matches!(self.traversal_mode, TraversalMode::CI { .. })
     }
 
+    pub(crate) const fn is_ci_github(&self) -> bool {
+        if let TraversalMode::CI { environment } = &self.traversal_mode {
+            return matches!(environment, Some(ExecutionEnvironment::GitHub));
+        }
+        false
+    }
+
     pub(crate) const fn is_check(&self) -> bool {
         matches!(self.traversal_mode, TraversalMode::Check { .. })
     }
@@ -307,7 +314,7 @@ impl Execution {
 /// or handles the stdin file.
 pub(crate) fn execute_mode(
     mut mode: Execution,
-    session: CliSession,
+    mut session: CliSession,
     cli_options: &CliOptions,
     paths: Vec<OsString>,
 ) -> Result<(), CliDiagnostic> {
@@ -340,7 +347,22 @@ pub(crate) fn execute_mode(
         };
         migrate::run(payload)
     } else {
-        let reporter = ConsoleReporter::new(true, cli_options.verbose);
-        traverse(mode, session, cli_options, paths, reporter)
+        let (summary_result, diagnostics) = traverse(&mode, &mut session, cli_options, paths)?;
+        let console = session.app.console;
+        let mut reporter = ConsoleReporterBuilder::default()
+            .with_execution(&mode)
+            .with_cli_options(&cli_options)
+            .with_diagnostics(diagnostics)
+            .with_summary(&summary_result)
+            .finish();
+
+        let mut visitor = ConsoleReporterVisitor(console);
+        report(
+            &mut reporter,
+            &mut visitor,
+            &mode,
+            cli_options,
+            &summary_result,
+        )
     }
 }

@@ -1,243 +1,135 @@
+pub(crate) mod terminal;
+
 use crate::cli_options::CliOptions;
-use crate::execute::{Execution, TraversalMode};
+use crate::execute::Execution;
 use crate::CliDiagnostic;
-use biome_console::{markup, Console, ConsoleExt, Markup};
-use biome_diagnostics::{Error, PrintDiagnostic, Severity};
+use biome_diagnostics::{Error, Severity};
+use std::io;
 use std::time::Duration;
 
-/// Information computed from a diff result
-#[derive(Debug)]
-pub struct ReportDiff {
-    /// The severity fo the diff
-    pub severity: Severity,
-    /// How was the code before the command
-    pub before: String,
-    /// How is the code after the command
-    pub after: String,
+pub struct DiagnosticsPayload<'a> {
+    diagnostics: Vec<Error>,
+    verbose: bool,
+    diagnostic_level: Severity,
+    execution: &'a Execution,
 }
 
-pub trait Reporter: Send + Sync {
-    fn report_not_printed_diagnostics(&mut self, number: u64);
-    fn report_skipped_fixes(&mut self, number: u32);
-    fn report_diagnostic(&mut self, diagnostic: Error);
-
-    fn finish(self, execution: Execution) -> Dumper;
+pub struct SummaryResult {
+    pub(crate) changed: usize,
+    pub(crate) unchanged: usize,
+    pub(crate) duration: Duration,
+    pub(crate) errors: u32,
+    pub(crate) warnings: u32,
+    pub(crate) skipped: usize,
+    pub(crate) suggested_fixes_skipped: u32,
+    pub(crate) diagnostics_not_printed: u32,
 }
 
-pub trait ReportWriter {
-    type Formatter;
-
-    fn error(&mut self, markup: Markup) -> Result<(), CliDiagnostic>;
-
-    fn out(&mut self) -> Result<(), CliDiagnostic>;
+pub trait Reporter {
+    /// Writes the summary using the underling visitor
+    fn write(&mut self, visitor: &mut dyn ReporterVisitor) -> io::Result<()>;
 }
 
-pub struct ConsoleReporter {
-    pub(crate) diagnostics: Vec<Error>,
-    pub(crate) not_reported: u64,
-    pub(crate) skipped_fixes: u32,
-}
+// pub trait TerminalReporter: Reporter {
+//     fn dump_to_terminal(&self, console: &mut dyn Console, visitor: &mut dyn ReporterVisitor);
+// }
 
-impl ConsoleReporter {
-    pub fn new() -> Self {
-        Self {
-            diagnostics: Vec::default(),
-            not_reported: 0,
-            skipped_fixes: 0,
-        }
+pub trait ReporterVisitor {
+    /// Writes the summary in the underling writer
+    fn report_summary(
+        &mut self,
+        traversal_mode: &Execution,
+        summary: &SummaryResult,
+    ) -> io::Result<()> {
+        let _ = (summary, traversal_mode);
+        Ok(())
+    }
+
+    /// Writes a diagnostic
+    fn report_diagnostics(&mut self, payload: &DiagnosticsPayload) -> io::Result<()> {
+        let _ = payload;
+        Ok(())
     }
 }
 
-pub struct Dumper {
-    pub skipped: usize,
-    pub errors: usize,
-    pub warnings: usize,
-    pub count: usize,
-    pub diagnostics: Vec<Error>,
-    pub execution: Execution,
-    pub duration: Duration,
-    pub not_printed_diagnostics: u64,
-    pub skipped_suggested_fixes: u32,
-    pub diagnostic_level: Severity,
-    pub verbose: bool,
+trait SummaryReporter {
+    fn report(&mut self, visitor: &mut dyn SummaryVisitor) -> io::Result<()>;
 }
 
-impl Dumper {
-    pub fn new(
-        execution: Execution,
-        diagnostics: Vec<Error>,
-        not_printed_diagnostics: u64,
-        skipped_suggested_fixes: u32,
-    ) -> Self {
-        Self {
-            execution,
-            skipped: 0,
-            errors: 0,
-            warnings: 0,
-            count: 0,
-            diagnostics,
-            duration: Duration::default(),
-            not_printed_diagnostics,
-            skipped_suggested_fixes,
-            diagnostic_level: Severity::Information,
-            verbose: false,
-        }
-    }
+trait SummaryVisitor {
+    /// Reports the total files that were checked
+    fn report_skipped_fixes(&mut self, skipped: usize) -> io::Result<()>;
 
-    pub fn with_duration(mut self, duration: Duration) -> Self {
-        self.duration = duration;
-        self
-    }
-    pub fn with_skipped(mut self, skipped: usize) -> Self {
-        self.skipped = skipped;
-        self
-    }
+    /// Reports the total files that were checked
+    fn report_not_printed_diagnostics(&mut self, not_printed: usize) -> io::Result<()>;
+    /// Reports the total files that were checked
+    fn report_total(&mut self, total: usize) -> io::Result<()>;
 
-    pub fn with_count(mut self, count: usize) -> Self {
-        self.count = count;
-        self
-    }
-    pub fn with_warnings(mut self, warnings: usize) -> Self {
-        self.warnings = warnings;
-        self
-    }
-    pub fn with_diagnostic_level(mut self, diagnostic_level: Severity) -> Self {
-        self.diagnostic_level = diagnostic_level;
-        self
-    }
-    pub fn with_errors(mut self, errors: usize) -> Self {
-        self.errors = errors;
-        self
-    }
+    /// Reports the number of files that were changed/modified
+    fn report_changed(&mut self, changed: usize) -> io::Result<()>;
 
-    pub fn with_verbose(mut self, verbose: bool) -> Self {
-        self.verbose = verbose;
-        self
-    }
+    /// Reports the number of files that were skipped
+    fn report_skipped(&mut self, skipped: usize) -> io::Result<()>;
 
-    pub fn dump(
-        self,
-        cli_options: &CliOptions,
-        console: &mut dyn Console,
-    ) -> Result<(), CliDiagnostic> {
-        for diagnostic in &self.diagnostics {
-            if diagnostic.severity() >= self.diagnostic_level {
-                console.error(markup! {
-                    {if self.verbose { PrintDiagnostic::verbose(diagnostic) } else { PrintDiagnostic::simple(diagnostic) }}
-                });
-            }
-        }
+    /// Reports the number of errors emitted during the traversal
+    fn report_errors(&mut self, errors: usize) -> io::Result<()>;
 
-        if self.execution.is_check() && self.skipped_suggested_fixes > 0 {
-            console.log(markup! {
-                <Warn>"Skipped "{self.skipped_suggested_fixes}" suggested fixes.\n"</Warn>
-                <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --apply-unsafe\n"</Emphasis></Info>
-            })
-        }
+    /// Reports the number of warnings emitted during the traversal
+    fn report_warnings(&mut self, warnings: usize) -> io::Result<()>;
+}
 
-        if !self.execution.is_ci() && self.not_printed_diagnostics > 0 {
-            console.log(markup! {
-                <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
-                <Info>"Diagnostics not shown: "</Info><Emphasis>{self.not_printed_diagnostics}</Emphasis><Info>"."</Info>
-            })
-        }
+trait DiagnosticReporter {
+    fn report(&mut self, visitor: &mut dyn DiagnosticVisitor) -> io::Result<()>;
+}
 
-        match self.execution.traversal_mode() {
-            TraversalMode::Check { .. } | TraversalMode::Lint { .. } => {
-                if self.execution.as_fix_file_mode().is_some() {
-                    console.log(markup! {
-                        <Info>"Fixed "{self.count}" file(s) in "{self.duration}</Info>
-                    });
-                } else {
-                    console.log(
-                        markup!(<Info>"Checked "{self.count}" file(s) in "{self.duration}</Info>),
-                    );
+trait DiagnosticVisitor {
+    /// Reports a single diagnostic. It receives the following information:
+    /// - `verbose`: if the diagnostic should be printed in verbose mode
+    /// - `diagnostic_level`: the minimum level of severity requested
+    /// - `ci_kind`: the kind of CI environment, if any
+    fn report_diagnostic(
+        &mut self,
+        diagnostic: &Error,
+        verbose: bool,
+        diagnostic_level: Severity,
+        execution: &Execution,
+    ) -> io::Result<()>;
+}
 
-                    if self.errors > 0 {
-                        console.log(markup!("\n"<Error>"Found "{self.errors}" error(s)"</Error>))
-                    }
-                }
-            }
-            TraversalMode::CI { .. } => {
-                console
-                    .log(markup!(<Info>"Checked "{self.count}" file(s) in "{self.duration}</Info>));
+pub(crate) fn report<R, V>(
+    reporter: &mut R,
+    reporter_visitor: &mut V,
+    execution: &Execution,
+    cli_options: &CliOptions,
+    traverse_result: &SummaryResult,
+) -> Result<(), CliDiagnostic>
+where
+    R: Reporter,
+    V: ReporterVisitor,
+{
+    let count = traverse_result.changed + traverse_result.unchanged;
 
-                if self.errors > 0 {
-                    console.log(markup!("\n"<Error>"Found "{self.errors}" error(s)"</Error>))
-                }
-            }
-            TraversalMode::Format { write: false, .. } => {
-                console.log(markup! {
-                    <Info>"Compared "{self.count}" file(s) in "{self.duration}</Info>
-                });
-            }
-            TraversalMode::Format { write: true, .. } => {
-                console.log(markup! {
-                    <Info>"Formatted "{self.count}" file(s) in "{self.duration}</Info>
-                });
-            }
+    // TODO: handle error properly
+    reporter.write(reporter_visitor).unwrap();
 
-            TraversalMode::Migrate { write: false, .. } => {
-                console.log(markup! {
-                    <Info>"Checked your configuration file in "{self.duration}</Info>
-                });
-            }
-
-            TraversalMode::Migrate { write: true, .. } => {
-                console.log(markup! {
-                    <Info>"Migrated your configuration file in "{self.duration}</Info>
-                });
-            }
-        }
-
-        if self.skipped > 0 {
-            console.log(markup! {
-                <Warn>"Skipped "{self.skipped}" file(s)"</Warn>
-            });
-        }
-
-        let should_exit_on_warnings = self.warnings > 0 && cli_options.error_on_warnings;
-        // Processing emitted error diagnostics, exit with a non-zero code
-        if self.count.saturating_sub(self.skipped) == 0 && !cli_options.no_errors_on_unmatched {
-            Err(CliDiagnostic::no_files_processed())
-        } else if self.errors > 0 || should_exit_on_warnings {
-            let category = self.execution.as_diagnostic_category();
-            if should_exit_on_warnings {
-                if self.execution.is_check_apply() {
-                    Err(CliDiagnostic::apply_warnings(category))
-                } else {
-                    Err(CliDiagnostic::check_warnings(category))
-                }
-            } else if self.execution.is_check_apply() {
-                Err(CliDiagnostic::apply_error(category))
+    let should_exit_on_warnings = traverse_result.warnings > 0 && cli_options.error_on_warnings;
+    // Processing emitted error diagnostics, exit with a non-zero code
+    if count.saturating_sub(traverse_result.skipped) == 0 && !cli_options.no_errors_on_unmatched {
+        Err(CliDiagnostic::no_files_processed())
+    } else if traverse_result.errors > 0 || should_exit_on_warnings {
+        let category = execution.as_diagnostic_category();
+        if should_exit_on_warnings {
+            if execution.is_check_apply() {
+                Err(CliDiagnostic::apply_warnings(category))
             } else {
-                Err(CliDiagnostic::check_error(category))
+                Err(CliDiagnostic::check_warnings(category))
             }
+        } else if execution.is_check_apply() {
+            Err(CliDiagnostic::apply_error(category))
         } else {
-            Ok(())
+            Err(CliDiagnostic::check_error(category))
         }
-    }
-}
-
-impl Reporter for ConsoleReporter {
-    fn report_not_printed_diagnostics(&mut self, number: u64) {
-        self.not_reported = number;
-    }
-
-    fn report_skipped_fixes(&mut self, number: u32) {
-        self.skipped_fixes = number;
-    }
-
-    fn report_diagnostic(&mut self, diagnostic: Error) {
-        self.diagnostics.push(diagnostic)
-    }
-
-    fn finish(self, execution: Execution) -> Dumper {
-        Dumper::new(
-            execution,
-            self.diagnostics,
-            self.not_reported,
-            self.skipped_fixes,
-        )
+    } else {
+        Ok(())
     }
 }
