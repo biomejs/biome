@@ -30,7 +30,9 @@ const a = ["loreum", "ipsum"];
 # Emitted Messages
 
 ```block
-Formatted 2 files in <TIME>. Fixed 2 files.
+Formatted 2 files in <TIME>.
 ```
 
-
+```block
+Fixed 2 files.
+```

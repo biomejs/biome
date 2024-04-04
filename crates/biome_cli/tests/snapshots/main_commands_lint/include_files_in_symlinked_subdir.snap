@@ -64,6 +64,13 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-Checked 2 files in <TIME>. No fixes needed.
+Checked 2 files in <TIME>.
+```
+
+```block
+No fixes needed.
+```
+
+```block
 Found 2 errors.
 ```

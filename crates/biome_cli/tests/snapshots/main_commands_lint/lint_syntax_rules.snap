@@ -33,6 +33,13 @@ check.js:1:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━�
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
+Checked 1 file in <TIME>.
+```
+
+```block
+No fixes needed.
+```
+
+```block
 Found 1 error.
 ```

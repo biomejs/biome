@@ -43,12 +43,17 @@ format.js format ━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
-Found 1 error.
+Checked 1 file in <TIME>.
+```
+
+```block
+No fixes needed.
 ```
 
 ```block
 Skipped 1 file.
 ```
 
-
+```block
+Found 1 error.
+```

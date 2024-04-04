@@ -41,7 +41,9 @@ debugger
 # Emitted Messages
 
 ```block
-Checked 3 files in <TIME>. No fixes needed.
+Checked 3 files in <TIME>.
 ```
 
-
+```block
+No fixes needed.
+```

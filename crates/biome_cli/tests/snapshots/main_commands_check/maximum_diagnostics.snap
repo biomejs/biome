@@ -532,6 +532,13 @@ Diagnostics not shown: 77.
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
+Checked 1 file in <TIME>.
+```
+
+```block
+No fixes needed.
+```
+
+```block
 Found 21 errors.
 ```

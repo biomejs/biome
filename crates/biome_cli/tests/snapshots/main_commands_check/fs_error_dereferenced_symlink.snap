@@ -26,8 +26,13 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-Checked 0 files in <TIME>. No fixes needed.
-Found 1 warning.
+Checked 0 files in <TIME>.
 ```
 
+```block
+No fixes needed.
+```
 
+```block
+Found 1 warning.
+```

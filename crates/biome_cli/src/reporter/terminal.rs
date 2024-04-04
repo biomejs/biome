@@ -65,8 +65,8 @@ impl<'a> ConsoleReporterBuilder<'a> {
 }
 impl<'a> Reporter for ConsoleReporter<'a> {
     fn write(&mut self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_summary(self.execution, &self.summary)?;
         visitor.report_diagnostics(&mut self.diagnostics_payload)?;
+        visitor.report_summary(self.execution, &self.summary)?;
         Ok(())
     }
 }
@@ -178,10 +178,10 @@ impl<'a> SummaryVisitor for ConsoleSummaryVisitor<'a> {
         if errors > 0 {
             if errors == 1 {
                 self.console
-                    .log(markup!("\n"<Error>"Found "{errors}" error."</Error>));
+                    .log(markup!(<Error>"Found "{errors}" error."</Error>));
             } else {
                 self.console
-                    .log(markup!("\n"<Error>"Found "{errors}" errors."</Error>));
+                    .log(markup!(<Error>"Found "{errors}" errors."</Error>));
             }
         }
 
@@ -192,10 +192,10 @@ impl<'a> SummaryVisitor for ConsoleSummaryVisitor<'a> {
         if warnings > 0 {
             if warnings == 1 {
                 self.console
-                    .log(markup!("\n"<Warn>"Found "{warnings}" warning."</Warn>));
+                    .log(markup!(<Warn>"Found "{warnings}" warning."</Warn>));
             } else {
                 self.console
-                    .log(markup!("\n"<Warn>"Found "{warnings}" warnings."</Warn>));
+                    .log(markup!(<Warn>"Found "{warnings}" warnings."</Warn>));
             }
         }
 

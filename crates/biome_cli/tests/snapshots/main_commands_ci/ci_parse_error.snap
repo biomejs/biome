@@ -67,6 +67,13 @@ ci.js format ━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
+Checked 1 file in <TIME>.
+```
+
+```block
+No fixes needed.
+```
+
+```block
 Found 3 errors.
 ```

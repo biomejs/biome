@@ -39,7 +39,9 @@ debugger
 # Emitted Messages
 
 ```block
-Checked 3 files in <TIME>. Fixed 1 file.
+Checked 3 files in <TIME>.
 ```
 
-
+```block
+Fixed 1 file.
+```

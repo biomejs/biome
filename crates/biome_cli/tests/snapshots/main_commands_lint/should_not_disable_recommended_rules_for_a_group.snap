@@ -66,6 +66,13 @@ fix.js:3:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
+Checked 1 file in <TIME>.
+```
+
+```block
+No fixes needed.
+```
+
+```block
 Found 1 error.
 ```

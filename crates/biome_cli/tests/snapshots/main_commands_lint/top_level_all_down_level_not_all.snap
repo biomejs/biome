@@ -131,8 +131,13 @@ fix.js:4:12 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
-Found 5 warnings.
+Checked 1 file in <TIME>.
 ```
 
+```block
+No fixes needed.
+```
 
+```block
+Found 5 warnings.
+```

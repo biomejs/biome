@@ -21,8 +21,13 @@ Diagnostics not shown: 40.
 ```
 
 ```block
-Checked 60 files in <TIME>. No fixes needed.
-Found 60 errors.
+Checked 60 files in <TIME>.
 ```
 
+```block
+No fixes needed.
+```
 
+```block
+Found 60 errors.
+```

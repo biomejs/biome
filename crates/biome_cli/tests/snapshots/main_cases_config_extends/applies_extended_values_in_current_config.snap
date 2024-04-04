@@ -28,7 +28,9 @@ const a = [
 # Emitted Messages
 
 ```block
-Formatted 1 file in <TIME>. Fixed 1 file.
+Formatted 1 file in <TIME>.
 ```
 
-
+```block
+Fixed 1 file.
+```
