@@ -37,7 +37,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();
-    writeln!(snapshot, "## Input\n```grit\n{content}\n```\n").unwrap();
+    writeln!(snapshot, "## Input\n```graphql\n{content}\n```\n").unwrap();
 
     writeln!(
         snapshot,

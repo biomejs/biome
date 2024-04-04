@@ -3,7 +3,7 @@ source: crates/biome_graphql_parser/tests/spec_test.rs
 expression: snapshot
 ---
 ## Input
-```grit
+```graphql
 query {
   likeStory
 }
