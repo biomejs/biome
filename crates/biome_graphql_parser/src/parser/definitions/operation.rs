@@ -34,7 +34,7 @@ pub(crate) fn parse_operation_definition(p: &mut GraphqlParser) -> ParsedSyntax 
         // we don't need diagnostic here, because name is optional
         parse_name(p).ok();
 
-        DirectiveList::new().parse_list(p);
+        DirectiveList.parse_list(p);
         parse_selection_set(p).or_add_diagnostic(p, expected_selection_set);
 
         Present(m.complete(p, GRAPHQL_OPERATION_DEFINITION))
@@ -115,7 +115,7 @@ fn parse_field(p: &mut GraphqlParser) -> ParsedSyntax {
     // TODO: parse alias, arguments, nested selection set
     let m = p.start();
     parse_name(p).or_add_diagnostic(p, expected_name);
-    DirectiveList::new().parse_list(p);
+    DirectiveList.parse_list(p);
     Present(m.complete(p, GRAPHQL_FIELD))
 }
 

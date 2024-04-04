@@ -71,7 +71,7 @@ pub(crate) fn parse_root(p: &mut GraphqlParser) -> CompletedMarker {
 
     p.eat(UNICODE_BOM);
 
-    DefinitionList::new().parse_list(p);
+    DefinitionList.parse_list(p);
 
     p.expect(EOF);
 

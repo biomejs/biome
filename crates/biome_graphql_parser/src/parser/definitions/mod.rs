@@ -22,13 +22,8 @@ impl ParseRecovery for DefinitionListParseRecovery {
     }
 }
 
+#[derive(Default)]
 pub(crate) struct DefinitionList;
-
-impl DefinitionList {
-    pub(crate) fn new() -> Self {
-        Self
-    }
-}
 
 impl ParseNodeList for DefinitionList {
     type Kind = GraphqlSyntaxKind;

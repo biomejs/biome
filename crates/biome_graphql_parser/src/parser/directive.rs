@@ -21,13 +21,8 @@ impl ParseRecovery for DirectiveListParseRecovery {
     }
 }
 
+#[derive(Default)]
 pub(crate) struct DirectiveList;
-
-impl DirectiveList {
-    pub(crate) fn new() -> Self {
-        Self
-    }
-}
 
 impl ParseNodeList for DirectiveList {
     type Kind = GraphqlSyntaxKind;
