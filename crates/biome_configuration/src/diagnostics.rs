@@ -205,8 +205,7 @@ pub struct CantResolve {
 
 #[cfg(test)]
 mod test {
-    use crate::configuration::diagnostics::ConfigurationDiagnostic;
-    use crate::configuration::PartialConfiguration;
+    use crate::{ConfigurationDiagnostic, PartialConfiguration};
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use biome_json_parser::JsonParserOptions;
@@ -218,7 +217,6 @@ mod test {
             prepend_module_to_snapshot => false,
         }, {
             insta::assert_snapshot!(test_name, content);
-
         });
     }
 
