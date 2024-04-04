@@ -351,7 +351,7 @@ pub(crate) fn execute_mode(
         let console = session.app.console;
         let mut reporter = ConsoleReporterBuilder::default()
             .with_execution(&mode)
-            .with_cli_options(&cli_options)
+            .with_cli_options(cli_options)
             .with_diagnostics(diagnostics)
             .with_summary(&summary_result)
             .finish();

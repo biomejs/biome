@@ -7,8 +7,6 @@ use crate::execute::diagnostics::{
 };
 use crate::reporter::SummaryResult;
 use crate::{CliDiagnostic, CliSession};
-use biome_console::fmt::Formatter;
-use biome_console::{fmt, markup};
 use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::{category, DiagnosticExt, Error, Resource, Severity};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
@@ -20,7 +18,6 @@ use rustc_hash::FxHashSet;
 use std::sync::atomic::AtomicU32;
 use std::{
     ffi::OsString,
-    io,
     panic::catch_unwind,
     path::{Path, PathBuf},
     sync::{
@@ -62,7 +59,7 @@ pub(crate) fn traverse(
     let max_diagnostics = execution.get_max_diagnostics();
     let remaining_diagnostics = AtomicU16::new(max_diagnostics);
 
-    let printer = DiagnosticsPrinter::new(&execution)
+    let printer = DiagnosticsPrinter::new(execution)
         .with_verbose(cli_options.verbose)
         .with_diagnostic_level(cli_options.diagnostic_level)
         .with_max_diagnostics(max_diagnostics);
@@ -81,7 +78,7 @@ pub(crate) fn traverse(
             &TraversalOptions {
                 fs,
                 workspace,
-                execution: &execution,
+                execution,
                 interner,
                 changed: &changed,
                 unchanged: &unchanged,

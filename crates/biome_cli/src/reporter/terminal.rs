@@ -50,7 +50,7 @@ impl<'a> ConsoleReporterBuilder<'a> {
         let summary = self.summary.expect("to call with_summary()");
         let execution = self.execution.expect("to call with_traversal()");
         let diagnostics_payload = DiagnosticsPayload {
-            execution: &execution,
+            execution,
             verbose: cli_options.verbose,
             diagnostic_level: cli_options.diagnostic_level,
             diagnostics: self.diagnostics,
@@ -59,14 +59,14 @@ impl<'a> ConsoleReporterBuilder<'a> {
         ConsoleReporter {
             summary,
             diagnostics_payload,
-            execution: &execution,
+            execution,
         }
     }
 }
 impl<'a> Reporter for ConsoleReporter<'a> {
     fn write(&mut self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_diagnostics(&mut self.diagnostics_payload)?;
-        visitor.report_summary(self.execution, &self.summary)?;
+        visitor.report_diagnostics(&self.diagnostics_payload)?;
+        visitor.report_summary(self.execution, self.summary)?;
         Ok(())
     }
 }
