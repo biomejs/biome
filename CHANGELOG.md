@@ -43,15 +43,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
-#### Bug fixes
-
-- Lint rules `useNodejsImportProtocol`, `useNodeAssertStrict`, `noRestrictedImports`, `noNodejsModules` will no longer check `declare module` statements anymore. Contributed by @Sec-ant
-
 #### New features
+
+- Add a new option `ignoreReact` to [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports).
+
+  When `ignoreReact` is enabled, Biome ignores imports of `React` from the `react` package.
+  The option is disabled by default.
+
+  Contributed by @Conaclos
 
 #### Enhancements
 
 #### Bug fixes
+
+- Lint rules `useNodejsImportProtocol`, `useNodeAssertStrict`, `noRestrictedImports`, `noNodejsModules` will no longer check `declare module` statements anymore. Contributed by @Sec-ant
 
 ### Parser
 

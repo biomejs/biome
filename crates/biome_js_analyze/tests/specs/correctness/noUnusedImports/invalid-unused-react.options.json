@@ -1,0 +1,14 @@
+{
+    "linter": {
+        "rules": {
+            "correctness": {
+                "noUnusedImports": {
+                    "level": "error",
+                    "options": {
+                        "ignoreReact": true
+                    }
+                }
+            }
+        }
+    }
+}

@@ -14,6 +14,25 @@ Note that the leading trivia, e.g., comments or newlines preceding
 the unused imports will also be removed. So that comment directives
 like `@ts-expect-error` won't be transferred to a wrong place.
 
+## Options
+
+The rule provides a single option `ignoreReact`.
+When this option is set to `true`, imports named `React` from the package `react` are ignored.
+`ignoreReact` is disabled by default.
+
+```json
+{
+    "//": "...",
+    "options": {
+        "ignoreReact": true
+    }
+}
+```
+
+This option should only be necessary if you cannot upgrade to a React version that supports the new JSX runtime.
+In the new JSX runtime, you no longer need to import `React`.
+You can find more details in [this comment](https://github.com/biomejs/biome/issues/571#issuecomment-1774026734).
+
 ## Examples
 
 ### Invalid

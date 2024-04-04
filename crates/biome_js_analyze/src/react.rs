@@ -4,9 +4,10 @@ pub mod hooks;
 
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, AnyJsNamedImportSpecifier,
-    AnyJsObjectMember, JsCallExpression, JsIdentifierBinding, JsImport, JsObjectExpression,
-    JsPropertyObjectMember, JsxMemberName, JsxReferenceIdentifier,
+    binding_ext::AnyJsBindingDeclaration, AnyJsCallArgument, AnyJsExpression,
+    AnyJsMemberExpression, AnyJsNamedImportSpecifier, AnyJsObjectMember, JsCallExpression,
+    JsIdentifierBinding, JsImport, JsObjectExpression, JsPropertyObjectMember, JsxMemberName,
+    JsxReferenceIdentifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList};
 
@@ -290,4 +291,38 @@ fn is_named_react_export(binding: &Binding, lib: ReactLibrary, name: &str) -> Op
 
     let import = import_specifier.import_clause()?.parent::<JsImport>()?;
     Some(import.source_text().ok()?.text() == lib.import_name())
+}
+
+/// Checks if `binding` is an import of the global name of `lib`.
+pub(crate) fn is_global_react_import(binding: &JsIdentifierBinding, lib: ReactLibrary) -> bool {
+    if !binding
+        .name_token()
+        .is_ok_and(|name| name.text_trimmed() == lib.global_name())
+    {
+        return false;
+    };
+    let Some(decl) = binding.declaration() else {
+        return false;
+    };
+    // This must be a default import or a namespace import
+    let syntax = match decl {
+        AnyJsBindingDeclaration::JsNamedImportSpecifier(specifier) => {
+            if !specifier.name().is_ok_and(|name| name.is_default()) {
+                return false;
+            }
+            specifier.into_syntax()
+        }
+        AnyJsBindingDeclaration::JsDefaultImportSpecifier(specifier) => specifier.into_syntax(),
+        AnyJsBindingDeclaration::JsNamespaceImportSpecifier(specifier) => specifier.into_syntax(),
+        _ => {
+            return false;
+        }
+    };
+    // Check import source
+    syntax
+        .ancestors()
+        .skip(1)
+        .find_map(JsImport::cast)
+        .and_then(|import| import.source_text().ok())
+        .is_some_and(|source| source.text() == lib.import_name())
 }
