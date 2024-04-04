@@ -76,7 +76,7 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
     }
 
     fn is_root(&self) -> bool {
-        GraphqlDocument::can_cast(*self)
+        GraphqlRoot::can_cast(*self)
     }
 
     fn is_list(&self) -> bool {

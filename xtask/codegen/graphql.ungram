@@ -47,7 +47,7 @@ GraphqlBogusExtension = SyntaxElement*
 
 GraphqlName = value: 'graphql_name'
 
-GraphqlDocument =
+GraphqlRoot =
 	bom: 'UNICODE_BOM'?
 	definitions: GraphqlDefinitionList
 	eof: 'EOF'

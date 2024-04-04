@@ -75,7 +75,7 @@ pub(crate) fn parse_root(p: &mut GraphqlParser) -> CompletedMarker {
 
     p.expect(EOF);
 
-    m.complete(p, GRAPHQL_DOCUMENT)
+    m.complete(p, GRAPHQL_ROOT)
 }
 
 #[inline]

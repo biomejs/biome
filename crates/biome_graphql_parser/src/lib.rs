@@ -1,7 +1,7 @@
 //! Extremely fast, lossless, and error tolerant GraphQL Parser.
 
 use biome_graphql_factory::GraphqlSyntaxFactory;
-use biome_graphql_syntax::{GraphqlDocument, GraphqlLanguage, GraphqlSyntaxNode};
+use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode};
 pub use biome_parser::prelude::*;
 use biome_parser::tree_sink::LosslessTreeSink;
 use biome_rowan::{AstNode, NodeCache};
@@ -91,8 +91,8 @@ impl GraphqlParse {
     ///
     /// # Panics
     /// Panics if the node represented by this parse result mismatches.
-    pub fn tree(&self) -> GraphqlDocument {
-        GraphqlDocument::unwrap_cast(self.syntax())
+    pub fn tree(&self) -> GraphqlRoot {
+        GraphqlRoot::unwrap_cast(self.syntax())
     }
 }
 

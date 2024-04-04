@@ -58,10 +58,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GraphqlDirectiveLocation::new_unchecked(node) };
                     $body
                 }
-                $crate::GraphqlSyntaxKind::GRAPHQL_DOCUMENT => {
-                    let $pattern = unsafe { $crate::GraphqlDocument::new_unchecked(node) };
-                    $body
-                }
                 $crate::GraphqlSyntaxKind::GRAPHQL_ENUM_TYPE_DEFINITION => {
                     let $pattern =
                         unsafe { $crate::GraphqlEnumTypeDefinition::new_unchecked(node) };
@@ -241,6 +237,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_OPERATION_TYPE => {
                     let $pattern = unsafe { $crate::GraphqlOperationType::new_unchecked(node) };
+                    $body
+                }
+                $crate::GraphqlSyntaxKind::GRAPHQL_ROOT => {
+                    let $pattern = unsafe { $crate::GraphqlRoot::new_unchecked(node) };
                     $body
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION => {

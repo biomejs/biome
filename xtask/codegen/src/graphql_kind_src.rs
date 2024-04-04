@@ -71,7 +71,7 @@ pub const GRAPHQL_KINDS_SRC: KindsSrc = KindsSrc {
         "COMMA",
     ],
     nodes: &[
-        "GRAPHQL_DOCUMENT",
+        "GRAPHQL_ROOT",
         "GRAPHQL_DEFINITION_LIST",
         "GRAPHQL_FRAGMENT_DEFINITION",
         "GRAPHQL_DIRECTIVE_DEFINITION",

@@ -5,7 +5,7 @@
 //!
 //! This is a simple wrapper around the `rowan` crate which does most of the heavy lifting and is language agnostic.
 
-use crate::{GraphqlDocument, GraphqlSyntaxKind};
+use crate::{GraphqlRoot, GraphqlSyntaxKind};
 use biome_rowan::Language;
 #[cfg(feature = "serde")]
 use serde::Serialize;
@@ -16,7 +16,7 @@ pub struct GraphqlLanguage;
 
 impl Language for GraphqlLanguage {
     type Kind = GraphqlSyntaxKind;
-    type Root = GraphqlDocument;
+    type Root = GraphqlRoot;
 }
 
 pub type GraphqlSyntaxNode = biome_rowan::SyntaxNode<GraphqlLanguage>;
