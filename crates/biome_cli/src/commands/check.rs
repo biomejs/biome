@@ -1,4 +1,4 @@
-use crate::changed::get_changed_files;
+use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::CliOptions;
 use crate::commands::{get_stdin, resolve_manifest, validate_configuration_diagnostics};
 use crate::{
@@ -26,6 +26,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
     pub(crate) linter_enabled: Option<bool>,
     pub(crate) organize_imports_enabled: Option<bool>,
+    pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
 }
@@ -46,6 +47,7 @@ pub(crate) fn check(
         organize_imports_enabled,
         formatter_enabled,
         since,
+        staged,
         changed,
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
@@ -124,8 +126,14 @@ pub(crate) fn check(
         return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
     }
 
+    if changed && staged {
+        return Err(CliDiagnostic::incompatible_arguments("changed", "staged"));
+    }
+
     if changed {
         paths = get_changed_files(&session.app.fs, &fs_configuration, since)?;
+    } else if staged {
+        paths = get_staged_files(&session.app.fs)?;
     }
     session
         .app

@@ -109,6 +109,11 @@ pub enum BiomeCommand {
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 
+        /// When set to true, only the files that have been staged (the ones prepared to be committed)
+        /// will be linted.
+        #[bpaf(long("staged"), switch)]
+        staged: bool,
+
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.
         #[bpaf(long("changed"), switch)]
@@ -150,6 +155,10 @@ pub enum BiomeCommand {
         /// Example: `echo 'let a;' | biome lint --stdin-file-path=file.js`
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
+        /// When set to true, only the files that have been staged (the ones prepared to be committed)
+        /// will be linted.
+        #[bpaf(long("staged"), switch)]
+        staged: bool,
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.
         #[bpaf(long("changed"), switch)]
@@ -196,6 +205,11 @@ pub enum BiomeCommand {
         /// Writes formatted files to file system.
         #[bpaf(switch)]
         write: bool,
+
+        /// When set to true, only the files that have been staged (the ones prepared to be committed)
+        /// will be linted.
+        #[bpaf(long("staged"), switch)]
+        staged: bool,
 
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.

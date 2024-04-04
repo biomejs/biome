@@ -1,4 +1,4 @@
-use crate::changed::get_changed_files;
+use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::CliOptions;
 use crate::commands::{get_stdin, resolve_manifest, validate_configuration_diagnostics};
 use crate::{
@@ -24,6 +24,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) files_configuration: Option<PartialFilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) stdin_file_path: Option<String>,
+    pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
 }
@@ -39,6 +40,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         stdin_file_path,
         vcs_configuration,
         files_configuration,
+        staged,
         changed,
         since,
     } = payload;
@@ -99,8 +101,14 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
     }
 
+    if changed && staged {
+        return Err(CliDiagnostic::incompatible_arguments("changed", "staged"));
+    }
+
     if changed {
         paths = get_changed_files(&session.app.fs, &fs_configuration, since)?;
+    } else if staged {
+        paths = get_staged_files(&session.app.fs)?;
     }
 
     let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "lint")?;
