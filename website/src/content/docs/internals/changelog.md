@@ -21,11 +21,25 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Bug fixes
+
+- Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnositic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
+
 #### New features
 
 #### Enhancements
 
 ### Configuration
+
+#### Enhancements
+
+- Biome now displays the location of a parsing error for its configuration file ([#1627](https://github.com/biomejs/biome/issues/1627)).
+
+  Previously, when Biome encountered a parsing error in its configuration file,
+  it didn't indicate the location of the error.
+  It now displays the name of the configuration file and the range where the error occurred.
+
+  Contributed by @Conaclos
 
 ### Editors
 
@@ -34,6 +48,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### JavaScript APIs
 
 ### Linter
+
+#### Bug fixes
+
+- Lint rules `useNodejsImportProtocol`, `useNodeAssertStrict`, `noRestrictedImports`, `noNodejsModules` will no longer check `declare module` statements anymore. Contributed by @Sec-ant
 
 #### New features
 

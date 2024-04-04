@@ -48,7 +48,7 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 files/.eslintrc.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - 
     2   │ - /*test*/·[
@@ -64,7 +64,7 @@ files/.eslintrc.json format ━━━━━━━━━━━━━━━━━�
 ```block
 files/.jshintrc format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - 
     2   │ - /*test*/·[
@@ -80,7 +80,7 @@ files/.jshintrc format ━━━━━━━━━━━━━━━━━━━
 ```block
 files/.babelrc format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - 
     2   │ - /*test*/·[
@@ -97,5 +97,3 @@ files/.babelrc format ━━━━━━━━━━━━━━━━━━━�
 Checked 3 files in <TIME>. No fixes needed.
 Found 3 errors.
 ```
-
-

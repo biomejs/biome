@@ -44,17 +44,13 @@ pub fn deserialize_from_json_str<Output: Deserializable>(
         diagnostics,
         deserialized,
     } = deserialize_from_json_ast::<Output>(&parse.tree(), name);
-    let mut errors = parse
+    let errors = parse
         .into_diagnostics()
         .into_iter()
         .map(Error::from)
+        .chain(diagnostics)
+        .map(|diagnostic| diagnostic.with_file_source_code(source))
         .collect::<Vec<_>>();
-    errors.extend(
-        diagnostics
-            .into_iter()
-            .map(|diagnostic| diagnostic.with_file_source_code(source))
-            .collect::<Vec<_>>(),
-    );
     Deserialized {
         diagnostics: errors,
         deserialized,

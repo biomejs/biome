@@ -46,7 +46,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 src/index.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - a['b']··=··42;
       1 │ + a['b']·=·42;

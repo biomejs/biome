@@ -56,7 +56,7 @@ check.js:1:1 lint/correctness/noInvalidNewBuiltin  FIXABLE  ━━━━━━�
 ```block
 check.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - new·Symbol("");
       1 │ + new·Symbol("");

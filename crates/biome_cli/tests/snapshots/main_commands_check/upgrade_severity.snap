@@ -55,7 +55,7 @@ file.js:1:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━�
 ```block
 file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - if(!cond)·{·exprA();·}·else·{·exprB()·}
       1 │ + if·(!cond)·{

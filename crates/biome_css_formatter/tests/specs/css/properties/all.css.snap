@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/properties/all.css
 ---
-
 # Input
 
 ```css
@@ -10,7 +9,7 @@ div {
     all: InItial;
     all  : inherIT;
     all
-    : 
+    :
     revert-layer
     ;
 
@@ -18,6 +17,19 @@ div {
     all  : a,
     value list ;
 }
+
+:root {
+	--bs-gradient: linear-gradient(
+		180deg,
+		180deg,
+		180deg,
+		180deg,
+		180deg,
+		180deg,
+		180deg
+	);
+}
+
 ```
 
 
@@ -44,6 +56,16 @@ div {
 	all: unknown-value;
 	all: a , value list;
 }
+
+:root {
+	--bs-gradient: linear-gradient(
+		180deg,
+		180deg,
+		180deg,
+		180deg,
+		180deg,
+		180deg,
+		180deg
+	);
+}
 ```
-
-

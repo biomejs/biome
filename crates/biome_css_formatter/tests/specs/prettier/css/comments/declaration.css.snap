@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/comments/declaration.css
 ---
-
 # Input
 
 ```css
@@ -116,23 +115,25 @@ body
 -  /* comment 23 */
 -  color/* comment 24 */:/* comment 25 */ blue /* comment 26 */; /* comment 27 */
 -  transform/* comment 28 */:/* comment 29 */ translate(
-+  /* comment 23 */ /* comment 24 */ /* comment 25 */ color: blue /* comment 26 */; /* comment 27 */
-+  /* comment 28 */ /* comment 29 */ transform: translate(
-       /* comment 30 */ 10px /* comment 31 */
+-      /* comment 30 */ 10px /* comment 31 */
 -    )
 -    /* comment 32 */; /* comment 33 */
-+    ) /* comment 32 */; /* comment 33 */
++  /* comment 23 */ /* comment 24 */ /* comment 25 */ color: blue /* comment 26 */; /* comment 27 */
++  /* comment 28 */ /* comment 29 */ transform: translate(
++    /* comment 30 */ 10px /* comment 31 */
++  ) /* comment 32 */; /* comment 33 */
  }
  .foo {
 -  /* comment 34 */
 -  color/* comment 35 */ : /* comment 36 */ blue /* comment 37 */; /* comment 38 */
 -  transform/* comment 39 */ : /* comment 40 */ translate(
-+  /* comment 34 */ /* comment 35 */ /* comment 36 */ color: blue /* comment 37 */; /* comment 38 */
-+  /* comment 39 */ /* comment 40 */ transform: translate(
-       /* comment 41 */ 10px /* comment 42 */
+-      /* comment 41 */ 10px /* comment 42 */
 -    )
 -    /* comment 43 */; /* comment 44 */
-+    ) /* comment 43 */; /* comment 44 */
++  /* comment 34 */ /* comment 35 */ /* comment 36 */ color: blue /* comment 37 */; /* comment 38 */
++  /* comment 39 */ /* comment 40 */ transform: translate(
++    /* comment 41 */ 10px /* comment 42 */
++  ) /* comment 43 */; /* comment 44 */
  }
  .foo {
    /* comment 45 */
@@ -166,12 +167,12 @@ body
 +  /* comment 61 */ /* comment 62 */
 +  /* comment 63 */
 +  /* comment 64 */ transform: translate(
-+      /* comment 65 */
-+      /* comment 66 */
-+      /* comment 67 */ 10px /* comment 68 */
-+      /* comment 69 */
-+      /* comment 70 */
-+    ) /* comment 71 */; /* comment 74 */
++    /* comment 65 */
++    /* comment 66 */
++    /* comment 67 */ 10px /* comment 68 */
++    /* comment 69 */
++    /* comment 70 */
++  ) /* comment 71 */; /* comment 74 */
 +  /* comment 72 */
 +  /* comment 73 */
    /* comment 75 */
@@ -201,14 +202,14 @@ a {
 .foo {
   /* comment 23 */ /* comment 24 */ /* comment 25 */ color: blue /* comment 26 */; /* comment 27 */
   /* comment 28 */ /* comment 29 */ transform: translate(
-      /* comment 30 */ 10px /* comment 31 */
-    ) /* comment 32 */; /* comment 33 */
+    /* comment 30 */ 10px /* comment 31 */
+  ) /* comment 32 */; /* comment 33 */
 }
 .foo {
   /* comment 34 */ /* comment 35 */ /* comment 36 */ color: blue /* comment 37 */; /* comment 38 */
   /* comment 39 */ /* comment 40 */ transform: translate(
-      /* comment 41 */ 10px /* comment 42 */
-    ) /* comment 43 */; /* comment 44 */
+    /* comment 41 */ 10px /* comment 42 */
+  ) /* comment 43 */; /* comment 44 */
 }
 .foo {
   /* comment 45 */
@@ -225,12 +226,12 @@ a {
   /* comment 61 */ /* comment 62 */
   /* comment 63 */
   /* comment 64 */ transform: translate(
-      /* comment 65 */
-      /* comment 66 */
-      /* comment 67 */ 10px /* comment 68 */
-      /* comment 69 */
-      /* comment 70 */
-    ) /* comment 71 */; /* comment 74 */
+    /* comment 65 */
+    /* comment 66 */
+    /* comment 67 */ 10px /* comment 68 */
+    /* comment 69 */
+    /* comment 70 */
+  ) /* comment 71 */; /* comment 74 */
   /* comment 72 */
   /* comment 73 */
   /* comment 75 */
@@ -276,5 +277,3 @@ body {
    18:   /* comment 23 */ /* comment 24 */ /* comment 25 */ color: blue /* comment 26 */; /* comment 27 */
    24:   /* comment 34 */ /* comment 35 */ /* comment 36 */ color: blue /* comment 37 */; /* comment 38 */
 ```
-
-
