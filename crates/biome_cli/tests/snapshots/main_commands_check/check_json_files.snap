@@ -56,7 +56,7 @@ test.json:1:3 lint/nursery/noDuplicateJsonKeys ━━━━━━━━━━━
 ```block
 test.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - {·"foo":·true,·"foo":·true·}
       1 │ + {·"foo":·true,·"foo":·true·}

@@ -522,9 +522,9 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     new,
                     diff_kind,
                 } => {
-                    let is_error = self.execution.is_ci() || !self.execution.is_format_write();
                     // A diff is an error in CI mode and in format check mode
-                    if self.execution.is_ci() || !self.execution.is_format_write() {
+                    let is_error = self.execution.is_ci() || !self.execution.is_format_write();
+                    if is_error {
                         self.errors.fetch_add(1, Ordering::Relaxed);
                     }
 
@@ -552,7 +552,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(Error::from(diag))
+                                    diagnostics_to_print.push(diag.with_severity(severity));
                                 }
                                 DiffKind::OrganizeImports => {
                                     let diag = CIOrganizeImportsDiffDiagnostic {
@@ -562,7 +562,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(Error::from(diag))
+                                    diagnostics_to_print.push(diag.with_severity(severity))
                                 }
                             };
                         } else {
@@ -575,7 +575,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(Error::from(diag))
+                                    diagnostics_to_print.push(diag.with_severity(severity))
                                 }
                                 DiffKind::OrganizeImports => {
                                     let diag = OrganizeImportsDiffDiagnostic {
@@ -585,7 +585,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(Error::from(diag))
+                                    diagnostics_to_print.push(diag.with_severity(severity))
                                 }
                             };
                         }

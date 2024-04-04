@@ -137,3 +137,60 @@ fn max_diagnostics_verbose() {
         result,
     ));
 }
+
+#[test]
+fn diagnostic_level() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+    "formatter": {
+        "enabled": true
+    },
+    "organizeImports": {
+        "enabled": true
+    },
+    "linter": {
+        "enabled": false
+    }
+}
+"#,
+    );
+
+    let file_path = PathBuf::from("src/index.js".to_string());
+    fs.insert(
+        file_path,
+        r#"import { graphql, useFragment, useMutation } from "react-relay";
+import { FC, memo, useCallback } from "react";
+"#,
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("check"), ("--diagnostic-level=error"), ("src")].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    let messages = &console.out_buffer;
+
+    assert!(messages
+        .iter()
+        .filter(|m| m.level == LogLevel::Error)
+        .any(|m| {
+            let content = format!("{:?}", m.content);
+            content.contains("organizeImports")
+        }));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "diagnostic_level",
+        fs,
+        console,
+        result,
+    ));
+}

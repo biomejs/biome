@@ -24,7 +24,7 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 format.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - ··statement(··)··
       1 │ + statement();
@@ -37,5 +37,3 @@ format.js format ━━━━━━━━━━━━━━━━━━━━━
 Checked 1 file in <TIME>. No fixes needed.
 Found 1 error.
 ```
-
-
