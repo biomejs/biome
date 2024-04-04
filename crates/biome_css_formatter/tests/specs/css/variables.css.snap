@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/variables.css
 ---
-
 # Input
 
 ```css
@@ -83,9 +82,9 @@ Quote style: Double Quotes
 	prop4: var(--prop, pink);
 
 	prop5: var(
-			--one-var-thats-super-long-on-its-own,
-			--super-long-just-enough-to-make-it-break-over-lines
-		);
+		--one-var-thats-super-long-on-its-own,
+		--super-long-just-enough-to-make-it-break-over-lines
+	);
 }
 
 .multiple {
@@ -95,5 +94,3 @@ Quote style: Double Quotes
 	prop: hsl(var(--hue, 0) var(--sat, 100) var(--light, 1));
 }
 ```
-
-

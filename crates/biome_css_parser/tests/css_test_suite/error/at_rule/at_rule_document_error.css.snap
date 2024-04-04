@@ -81,6 +81,7 @@ CssRoot {
                         ],
                     },
                     COMMA@164..199 "," [] [Whitespace(" "), Comments("/* Error in URL, reco ..."), Whitespace(" ")],
+                    missing element,
                 ],
                 block: CssRuleBlock {
                     l_curly_token: L_CURLY@199..200 "{" [] [],
@@ -143,6 +144,7 @@ CssRoot {
           2: CSS_BOGUS_DOCUMENT_MATCHER@151..164
             0: IDENT@151..164 "invalid-url" [Newline("\n"), Whitespace(" ")] []
           3: COMMA@164..199 "," [] [Whitespace(" "), Comments("/* Error in URL, reco ..."), Whitespace(" ")]
+          4: (empty)
         2: CSS_RULE_BLOCK@199..203
           0: L_CURLY@199..200 "{" [] []
           1: CSS_RULE_LIST@200..200
