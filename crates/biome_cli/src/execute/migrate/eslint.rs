@@ -5,7 +5,6 @@ use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_json_parser::JsonParserOptions;
 use biome_service::DynRef;
-use indexmap::IndexSet;
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -57,7 +56,7 @@ const LEGACY_CONFIG_FILES: [&str; 5] = [
 const PACKAGE_JSON: &str = "package.json";
 
 /// ESLint Ignore file. Use the same syntax as gitignore.
-const IGNORE_FILE: &str = ".eslintignore";
+pub(crate) const IGNORE_FILE: &str = ".eslintignore";
 
 /// Returns the ESLint configuration file in the working directory with the highest priority.
 ///
@@ -116,31 +115,6 @@ pub(crate) struct Config {
     /// Resolved ESlint config
     pub(crate) data: eslint_eslint::AnyConfigData,
 }
-
-pub(crate) fn read_ignore_file(fs: &DynRef<'_, dyn FileSystem>) -> Option<IgnorePatterns> {
-    let path = Path::new(IGNORE_FILE);
-    if fs.path_exists(path) {
-        let Ok(mut file) = fs.open_with_options(path, OpenOptions::default().read(true)) else {
-            return None;
-        };
-        let mut content = String::new();
-        let _ = file.read_to_string(&mut content);
-        let patterns = content
-            .lines()
-            .filter(|line| !line.is_empty() && !line.starts_with('#'))
-            .map(|line| line.trim())
-            // Biome doesn't support negated globs
-            .filter(|line| !line.starts_with('!'))
-            .map(String::from)
-            .collect::<IndexSet<_>>();
-        Some(IgnorePatterns(patterns))
-    } else {
-        None
-    }
-}
-
-#[derive(Debug)]
-pub(crate) struct IgnorePatterns(pub(crate) IndexSet<String>);
 
 /// Load an ESlint Flat config
 /// See https://eslint.org/docs/latest/use/configure/configuration-files-new

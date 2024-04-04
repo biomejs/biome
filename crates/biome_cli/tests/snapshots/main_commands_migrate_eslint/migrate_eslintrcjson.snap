@@ -12,7 +12,7 @@ expression: content
 
 ```json
 {
-        "ignore_patterns": [
+        "ignorePatterns": [
             "**/*.test.js", // trailing comma amd comment
         ],
         "globals": {
@@ -58,18 +58,19 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        7 │ + → → → "security":·{·"noGlobalEval":·"warn"·},
        8 │ + → → → "style":·{·"useDefaultParameterLast":·"off"·},
        9 │ + → → → "suspicious":·{·"noDoubleEquals":·"warn",·"useGetterReturn":·"error"·}
-      10 │ + → → }
-      11 │ + → },
-      12 │ + → "javascript":·{·"globals":·["var2",·"var1"]·},
-      13 │ + → "overrides":·[
-      14 │ + → → {
-      15 │ + → → → "ignore":·["*.test.js"],
-      16 │ + → → → "include":·["bin/*.js",·"lib/*.js"],
-      17 │ + → → → "linter":·{·"rules":·{·"suspicious":·{·"noDoubleEquals":·"off"·}·}·}
-      18 │ + → → }
-      19 │ + → ]
-      20 │ + }
-      21 │ + 
+      10 │ + → → },
+      11 │ + → → "ignore":·["**/*.test.js"]
+      12 │ + → },
+      13 │ + → "javascript":·{·"globals":·["var2",·"var1"]·},
+      14 │ + → "overrides":·[
+      15 │ + → → {
+      16 │ + → → → "ignore":·["*.test.js"],
+      17 │ + → → → "include":·["bin/*.js",·"lib/*.js"],
+      18 │ + → → → "linter":·{·"rules":·{·"suspicious":·{·"noDoubleEquals":·"off"·}·}·}
+      19 │ + → → }
+      20 │ + → ]
+      21 │ + }
+      22 │ + 
   
 
 ```

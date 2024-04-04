@@ -27,6 +27,7 @@ mod eslint_jsxa11y;
 mod eslint_to_biome;
 mod eslint_typescript;
 mod eslint_unicorn;
+mod ignorefile;
 mod prettier;
 
 pub(crate) struct MigratePayload<'a> {
@@ -87,6 +88,22 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 };
                 let old_biome_config = biome_config.clone();
                 biome_config.merge_with(prettier_configuration.as_biome_configuration());
+                if let Ok(ignore_patterns) = ignorefile::read_ignore_file(fs, prettier::IGNORE_FILE)
+                {
+                    if ignore_patterns.has_negated_patterns {
+                        console.log(markup! {
+                            <Warn>"The file "<Emphasis>{prettier::IGNORE_FILE}</Emphasis>" contains negated glob patterns that start with "<Emphasis>"!"</Emphasis>".\nThese ignore patterns cannot be migrated because Biome doesn't support negated glob patterns."</Warn>
+                        })
+                    }
+                    if !ignore_patterns.patterns.is_empty() {
+                        biome_config
+                            .formatter
+                            .get_or_insert(Default::default())
+                            .ignore
+                            .get_or_insert(Default::default())
+                            .extend(ignore_patterns.patterns);
+                    }
+                }
                 if biome_config == old_biome_config {
                     console.log(markup! {
                         <Info>"No changes to apply to the Biome configuration file."</Info>
@@ -108,11 +125,6 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                         console.log(markup!{
                             <Info>"The configuration "<Emphasis>".prettierrc"</Emphasis>" has been successfully migrated."</Info>
                         });
-                        if prettier_configuration.has_ignore_file() {
-                            console.log(markup!{
-                                <Warn>"Please make sure that the globs of the "<Emphasis>".prettierignore"</Emphasis>" file still work in Biome. Prettier's globs use git globs, while Biome's globs use uni-style globs. They both seem similar, but their semantics differ."</Warn>
-                            })
-                        }
                     } else {
                         let file_name = configuration_file_path.display().to_string();
                         let diagnostic = MigrateDiffDiagnostic {
@@ -138,7 +150,6 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 path: eslint_path,
                 data: eslint_config,
             } = eslint::read_eslint_config(fs, console)?;
-            let ignore_patterns = eslint::read_ignore_file(fs);
             let biome_config =
                 deserialize_from_json_ast::<PartialConfiguration>(&parsed.tree(), "")
                     .into_deserialized();
@@ -151,10 +162,22 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     include_nursery,
                 });
             let old_biome_config = biome_config.clone();
-            if let Some(ignore_patterns) = ignore_patterns {
-                biome_config.merge_with(ignore_patterns.into_biome_config());
-            }
             biome_config.merge_with(biome_eslint_config);
+            if let Ok(ignore_patterns) = ignorefile::read_ignore_file(fs, eslint::IGNORE_FILE) {
+                if ignore_patterns.has_negated_patterns {
+                    console.log(markup! {
+                        <Warn>"The file "<Emphasis>{eslint::IGNORE_FILE}</Emphasis>" contains negated glob patterns that start with "<Emphasis>"!"</Emphasis>".\nThese ignore patterns cannot be migrated because Biome doesn't support negated glob patterns."</Warn>
+                    })
+                }
+                if !ignore_patterns.patterns.is_empty() {
+                    biome_config
+                        .linter
+                        .get_or_insert(Default::default())
+                        .ignore
+                        .get_or_insert(Default::default())
+                        .extend(ignore_patterns.patterns);
+                }
+            }
             if biome_config == old_biome_config {
                 console.log(markup! {
                     <Info>"No changes to apply to the Biome configuration file."</Info>

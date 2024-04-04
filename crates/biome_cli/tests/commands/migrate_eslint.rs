@@ -10,7 +10,7 @@ use std::path::Path;
 fn migrate_eslintrcjson() {
     let biomejson = r#"{ "linter": { "enabled": true } }"#;
     let eslintrc = r#"{
-        "ignore_patterns": [
+        "ignorePatterns": [
             "**/*.test.js", // trailing comma amd comment
         ],
         "globals": {
@@ -63,7 +63,7 @@ fn migrate_eslintrcjson() {
 fn migrate_eslintrcjson_write() {
     let biomejson = r#"{ "linter": { "enabled": true } }"#;
     let eslintrc = r#"{
-        "ignore_patterns": [
+        "ignorePatterns": [
             "**/*.test.js", // trailing comma amd comment
         ],
         "globals": {
@@ -406,6 +406,102 @@ fn migrate_no_eslint_config_packagejson() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "migrate_no_eslint_config_packagejson",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn migrate_eslintignore() {
+    let biomejson = r#"{ "linter": { "enabled": true } }"#;
+    let eslintrc = r#"{ "rules": { "eqeqeq": "off" } }"#;
+    let eslintignore = r#"
+# Comment
+/src
+*.test.js
+**/*.spec.js
+test/main.js
+"#;
+
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+    fs.insert(Path::new(".eslintignore").into(), eslintignore.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(["migrate", "eslint"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_eslintignore",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn migrate_eslintignore_and_ignore_patterns() {
+    let biomejson = r#"{ "linter": { "enabled": true } }"#;
+    let eslintrc = r#"{
+        "ignorePatterns": ["**/*.spec.js"],
+        "rules": { "eqeqeq": "off" }
+    }"#;
+    let eslintignore = r#"*.test.js"#;
+
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+    fs.insert(Path::new(".eslintignore").into(), eslintignore.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(["migrate", "eslint"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_eslintignore_and_ignore_patterns",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn migrate_eslintignore_negated_patterns() {
+    let biomejson = r#"{ "linter": { "enabled": true } }"#;
+    let eslintrc = r#"{ "rules": { "eqeqeq": "off" } }"#;
+    let eslintignore = r#"
+a/**
+!a/b
+"#;
+
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+    fs.insert(Path::new(".eslintignore").into(), eslintignore.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(["migrate", "eslint"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_eslintignore_negated_patterns",
         fs,
         console,
         result,

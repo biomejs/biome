@@ -43,7 +43,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   You can use the CLI flags `--include-inspired` and `--include-nursery` to migrate them as well.
 
   Note that this is a best-effort approach.
-   You are not guaranteed to get the same behavior as ESLint.
+  You are not guaranteed to get the same behavior as ESLint.
 
   Given the following ESLint configuration:
 
@@ -89,11 +89,21 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
 
+  Also, if the working diretcory contains `.eslintignore`, then Biome migrates the glob patterns.
+  Nested `.eslintignore` in subdirectories and negated glob patterns are not supported.
+
   If you find any issue, please don't hesitate to report them.
 
   Contributed by @Conaclos
 
 #### Enhancements
+
+- Improve support of `.prettierignore` when migrating from Prettier
+
+  Now, Biome translates most of the glob patterns in `.prettierignore` to the equivalent Biome ignore pattern.
+  Only negated glob patterns are not supported.
+
+  Contributed by @Conaclos
 
 ### Configuration
 

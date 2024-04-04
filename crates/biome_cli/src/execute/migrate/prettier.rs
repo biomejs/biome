@@ -6,7 +6,6 @@ use biome_configuration::{
 };
 use biome_console::{markup, Console, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_deserialize::StringSet;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
@@ -14,7 +13,6 @@ use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
 use biome_json_parser::JsonParserOptions;
 use biome_service::DynRef;
-use indexmap::IndexSet;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug, Deserializable, Eq, PartialEq)]
@@ -218,9 +216,6 @@ impl From<PrettierConfiguration> for PartialJavascriptFormatter {
 pub(crate) struct FromPrettierConfiguration {
     /// Path of the Prettier configuration file
     configuration_path: Option<PathBuf>,
-    /// Path of the `.prettierignore` file
-    #[allow(unused)]
-    ignore_path: Option<PathBuf>,
 
     /// The translated Biome configuration, from the Prettier configuration
     formatter_configuration: Option<PartialFormatterConfiguration>,
@@ -241,20 +236,8 @@ impl FromPrettierConfiguration {
         self.javascript_formatter_configuration = Some(javascript_formatter);
     }
 
-    pub(crate) fn store_ignored_globs(&mut self, value: StringSet) {
-        let formatter_configuration = self
-            .formatter_configuration
-            .get_or_insert(PartialFormatterConfiguration::default());
-
-        formatter_configuration.ignore = Some(value);
-    }
-
     pub(crate) fn store_configuration_path(&mut self, path: impl Into<PathBuf>) {
         self.configuration_path = Some(path.into());
-    }
-
-    pub(crate) fn store_ignore_path(&mut self, path: impl Into<PathBuf>) {
-        self.ignore_path = Some(path.into())
     }
 
     pub(crate) fn as_biome_configuration(&self) -> PartialConfiguration {
@@ -276,17 +259,13 @@ impl FromPrettierConfiguration {
         self.formatter_configuration.is_some() || self.javascript_formatter_configuration.is_some()
     }
 
-    pub(crate) fn has_ignore_file(&self) -> bool {
-        self.ignore_path.is_some()
-    }
-
     pub(crate) fn get_configuration_path(&self) -> Option<&Path> {
         self.configuration_path.as_deref()
     }
 }
 
-const PRETTIER_CONFIG_FILES: [&str; 2] = [".prettierrc", ".prettierrc.json"];
-const PRETTIER_IGNORE_FILE: &str = ".prettierignore";
+const CONFIG_FILES: [&str; 2] = [".prettierrc", ".prettierrc.json"];
+pub(crate) const IGNORE_FILE: &str = ".prettierignore";
 /// This function is in charge of reading prettier files, deserialize its contents and convert them in a Biome configuration type
 pub(crate) fn read_prettier_files(
     fs: &DynRef<'_, dyn FileSystem>,
@@ -294,7 +273,7 @@ pub(crate) fn read_prettier_files(
 ) -> Result<FromPrettierConfiguration, CliDiagnostic> {
     let mut from_prettier_configuration = FromPrettierConfiguration::default();
     let mut prettier_config_content = String::new();
-    for config_name in PRETTIER_CONFIG_FILES {
+    for config_name in CONFIG_FILES {
         let open_options = OpenOptions::default().read(true);
         let path = Path::new(config_name);
         let file = fs.open_with_options(path, open_options);
@@ -359,36 +338,11 @@ pub(crate) fn read_prettier_files(
                 .store_configuration((formatter_configuration, javascript_configuration));
         }
     }
-
-    let mut ignore_file_content = String::new();
-    let open_options = OpenOptions::default().read(true);
-    let path = Path::new(PRETTIER_IGNORE_FILE);
-    let file = fs.open_with_options(path, open_options);
-    if let Ok(mut file) = file {
-        let result = file.read_to_string(&mut ignore_file_content);
-        if let Err(err) = result {
-            return Err(CliDiagnostic::io_error(err));
-        }
-        from_prettier_configuration.store_ignore_path(path)
-    }
-
-    if !ignore_file_content.is_empty() {
-        let lines = StringSet::new(
-            ignore_file_content
-                .lines()
-                .filter(|line| !line.is_empty())
-                .filter(|line| !line.starts_with('#'))
-                .map(String::from)
-                .collect::<IndexSet<_>>(),
-        );
-        from_prettier_configuration.store_ignored_globs(lines);
-    }
-
     Ok(from_prettier_configuration)
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use crate::execute::migrate::prettier::{PrettierConfiguration, PrettierTrailingComma};
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_json_parser::JsonParserOptions;

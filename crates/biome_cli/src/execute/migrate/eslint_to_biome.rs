@@ -2,9 +2,7 @@ use biome_configuration::{self as biome_config};
 use biome_deserialize::{Merge, StringSet};
 use biome_js_analyze::lint::style::no_restricted_globals;
 
-use super::{
-    eslint, eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_typescript,
-};
+use super::{eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_typescript};
 
 /// This modules includes implementations for converting an ESLint config to a Biome config.
 ///
@@ -37,19 +35,6 @@ impl eslint_eslint::AnyConfigData {
             Self::Flat(config) => config.into_biome_config(options),
             Self::Legacy(config) => config.into_biome_config(options),
         }
-    }
-}
-
-impl eslint::IgnorePatterns {
-    pub(crate) fn into_biome_config(self) -> biome_config::PartialConfiguration {
-        let mut biome_config = biome_config::PartialConfiguration::default();
-        if !self.0.is_empty() {
-            biome_config.linter = Some(biome_config::PartialLinterConfiguration {
-                ignore: Some(StringSet::new(self.0)),
-                ..Default::default()
-            });
-        }
-        biome_config
     }
 }
 

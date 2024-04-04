@@ -14,7 +14,8 @@ expression: content
       "security": { "noGlobalEval": "warn" },
       "style": { "useDefaultParameterLast": "off" },
       "suspicious": { "noDoubleEquals": "warn", "useGetterReturn": "error" }
-    }
+    },
+    "ignore": ["**/*.test.js"]
   },
   "javascript": { "globals": ["var2", "var1"] },
   "overrides": [
@@ -31,7 +32,7 @@ expression: content
 
 ```json
 {
-        "ignore_patterns": [
+        "ignorePatterns": [
             "**/*.test.js", // trailing comma amd comment
         ],
         "globals": {
