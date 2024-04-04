@@ -5,7 +5,7 @@ use crate::execute::diagnostics::{
     CIFormatDiffDiagnostic, CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice,
     FormatDiffDiagnostic, OrganizeImportsDiffDiagnostic, PanicDiagnostic,
 };
-use crate::reporter::SummaryResult;
+use crate::reporter::TraversalSummary;
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::{category, DiagnosticExt, Error, Resource, Severity};
@@ -34,7 +34,7 @@ pub(crate) fn traverse(
     session: &mut CliSession,
     cli_options: &CliOptions,
     inputs: Vec<OsString>,
-) -> Result<(SummaryResult, Vec<Error>), CliDiagnostic> {
+) -> Result<(TraversalSummary, Vec<Error>), CliDiagnostic> {
     init_thread_pool();
     if inputs.is_empty()
         && execution.as_stdin_file().is_none()
@@ -136,16 +136,15 @@ pub(crate) fn traverse(
     // }
 
     Ok((
-        SummaryResult {
-            changed,
-            unchanged,
-            duration,
-            errors,
-            warnings,
-            skipped,
-            suggested_fixes_skipped,
-            diagnostics_not_printed,
-        },
+        TraversalSummary::default()
+            .with_changed(changed)
+            .with_unchanged(unchanged)
+            .with_duration(duration)
+            .with_errors(errors)
+            .with_warnings(warnings)
+            .with_skipped(skipped)
+            .with_suggested_fixes_skipped(suggested_fixes_skipped)
+            .with_diagnostics_not_printed(diagnostics_not_printed),
         diagnostics,
     ))
 }

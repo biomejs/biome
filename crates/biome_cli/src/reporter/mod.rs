@@ -14,15 +14,81 @@ pub struct DiagnosticsPayload<'a> {
     execution: &'a Execution,
 }
 
-pub struct SummaryResult {
-    pub(crate) changed: usize,
-    pub(crate) unchanged: usize,
-    pub(crate) duration: Duration,
-    pub(crate) errors: u32,
-    pub(crate) warnings: u32,
-    pub(crate) skipped: usize,
-    pub(crate) suggested_fixes_skipped: u32,
-    pub(crate) diagnostics_not_printed: u32,
+/// A type that holds the result of the traversal
+#[derive(Debug, Default)]
+pub struct TraversalSummary {
+    changed: usize,
+    unchanged: usize,
+    duration: Duration,
+    errors: u32,
+    warnings: u32,
+    skipped: usize,
+    suggested_fixes_skipped: u32,
+    diagnostics_not_printed: u32,
+}
+
+impl TraversalSummary {
+    pub fn with_changed(mut self, value: usize) -> Self {
+        self.changed = value;
+        self
+    }
+    pub fn with_unchanged(mut self, value: usize) -> Self {
+        self.unchanged = value;
+        self
+    }
+    pub fn with_duration(mut self, value: Duration) -> Self {
+        self.duration = value;
+        self
+    }
+    pub fn with_errors(mut self, value: u32) -> Self {
+        self.errors = value;
+        self
+    }
+
+    pub fn with_warnings(mut self, value: u32) -> Self {
+        self.warnings = value;
+        self
+    }
+
+    pub fn with_skipped(mut self, value: usize) -> Self {
+        self.skipped = value;
+        self
+    }
+
+    pub fn with_suggested_fixes_skipped(mut self, value: u32) -> Self {
+        self.suggested_fixes_skipped = value;
+        self
+    }
+
+    pub fn with_diagnostics_not_printed(mut self, value: u32) -> Self {
+        self.diagnostics_not_printed = value;
+        self
+    }
+
+    pub fn changed(&self) -> usize {
+        self.changed
+    }
+    pub fn unchanged(&self) -> usize {
+        self.unchanged
+    }
+    pub fn duration(&self) -> Duration {
+        self.duration
+    }
+    pub fn errors(&self) -> u32 {
+        self.errors
+    }
+    pub fn warnings(&self) -> u32 {
+        self.warnings
+    }
+    pub fn skipped(&self) -> usize {
+        self.skipped
+    }
+    pub fn suggested_fixes_skipped(&self) -> u32 {
+        self.suggested_fixes_skipped
+    }
+    pub fn diagnostics_not_printed(&self) -> u32 {
+        self.diagnostics_not_printed
+    }
 }
 
 pub trait Reporter {
@@ -39,7 +105,7 @@ pub trait ReporterVisitor {
     fn report_summary(
         &mut self,
         traversal_mode: &Execution,
-        summary: &SummaryResult,
+        summary: &TraversalSummary,
     ) -> io::Result<()> {
         let _ = (summary, traversal_mode);
         Ok(())
@@ -50,50 +116,57 @@ pub trait ReporterVisitor {
         let _ = payload;
         Ok(())
     }
-}
-
-trait SummaryReporter {
-    fn report(&mut self, visitor: &mut dyn SummaryVisitor) -> io::Result<()>;
-}
-
-trait SummaryVisitor {
-    /// Reports the total files that were checked
-    fn report_skipped_fixes(&mut self, skipped: usize) -> io::Result<()>;
 
     /// Reports the total files that were checked
-    fn report_not_printed_diagnostics(&mut self, not_printed: usize) -> io::Result<()>;
+    fn report_skipped_fixes(&mut self, execution: &Execution, skipped: usize) -> io::Result<()> {
+        let _ = (execution, skipped);
+        Ok(())
+    }
+
     /// Reports the total files that were checked
-    fn report_total(&mut self, total: usize) -> io::Result<()>;
+    fn report_not_printed_diagnostics(
+        &mut self,
+        execution: &Execution,
+        not_printed: usize,
+    ) -> io::Result<()> {
+        let _ = (execution, not_printed);
+        Ok(())
+    }
+
+    /// Reports the total files that were checked
+    fn report_total(
+        &mut self,
+        execution: &Execution,
+        total: usize,
+        duration: Duration,
+    ) -> io::Result<()> {
+        let _ = (execution, total, duration);
+        Ok(())
+    }
 
     /// Reports the number of files that were changed/modified
-    fn report_changed(&mut self, changed: usize) -> io::Result<()>;
+    fn report_changed(&mut self, execution: &Execution, changed: usize) -> io::Result<()> {
+        let _ = (execution, changed);
+        Ok(())
+    }
 
     /// Reports the number of files that were skipped
-    fn report_skipped(&mut self, skipped: usize) -> io::Result<()>;
+    fn report_skipped(&mut self, execution: &Execution, skipped: usize) -> io::Result<()> {
+        let _ = (execution, skipped);
+        Ok(())
+    }
 
     /// Reports the number of errors emitted during the traversal
-    fn report_errors(&mut self, errors: usize) -> io::Result<()>;
+    fn report_errors(&mut self, execution: &Execution, errors: usize) -> io::Result<()> {
+        let _ = (execution, errors);
+        Ok(())
+    }
 
     /// Reports the number of warnings emitted during the traversal
-    fn report_warnings(&mut self, warnings: usize) -> io::Result<()>;
-}
-
-trait DiagnosticReporter {
-    fn report(&mut self, visitor: &mut dyn DiagnosticVisitor) -> io::Result<()>;
-}
-
-trait DiagnosticVisitor {
-    /// Reports a single diagnostic. It receives the following information:
-    /// - `verbose`: if the diagnostic should be printed in verbose mode
-    /// - `diagnostic_level`: the minimum level of severity requested
-    /// - `ci_kind`: the kind of CI environment, if any
-    fn report_diagnostic(
-        &mut self,
-        diagnostic: &Error,
-        verbose: bool,
-        diagnostic_level: Severity,
-        execution: &Execution,
-    ) -> io::Result<()>;
+    fn report_warnings(&mut self, execution: &Execution, warnings: usize) -> io::Result<()> {
+        let _ = (execution, warnings);
+        Ok(())
+    }
 }
 
 pub(crate) fn report<R, V>(
@@ -101,7 +174,7 @@ pub(crate) fn report<R, V>(
     reporter_visitor: &mut V,
     execution: &Execution,
     cli_options: &CliOptions,
-    traverse_result: &SummaryResult,
+    traverse_result: &TraversalSummary,
 ) -> Result<(), CliDiagnostic>
 where
     R: Reporter,
@@ -109,8 +182,7 @@ where
 {
     let count = traverse_result.changed + traverse_result.unchanged;
 
-    // TODO: handle error properly
-    reporter.write(reporter_visitor).unwrap();
+    reporter.write(reporter_visitor)?;
 
     let should_exit_on_warnings = traverse_result.warnings > 0 && cli_options.error_on_warnings;
     // Processing emitted error diagnostics, exit with a non-zero code

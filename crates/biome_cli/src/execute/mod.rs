@@ -19,6 +19,7 @@ use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
 
 /// Useful information during the traversal of files and virtual content
+#[derive(Debug)]
 pub struct Execution {
     /// How the information should be collected and reported
     report_mode: ReportMode,
@@ -28,6 +29,20 @@ pub struct Execution {
 
     /// The maximum number of diagnostics that can be printed in console
     max_diagnostics: u16,
+}
+
+impl Execution {
+    pub fn new_format() -> Self {
+        Self {
+            traversal_mode: TraversalMode::Format {
+                ignore_errors: false,
+                write: false,
+                stdin: None,
+            },
+            report_mode: ReportMode::default(),
+            max_diagnostics: 0,
+        }
+    }
 }
 
 impl Execution {
@@ -47,13 +62,13 @@ impl Execution {
 }
 
 #[derive(Debug)]
-pub(crate) enum ExecutionEnvironment {
+pub enum ExecutionEnvironment {
     GitHub,
 }
 
 /// A type that holds the information to execute the CLI via `stdin
 #[derive(Debug)]
-pub(crate) struct Stdin(
+pub struct Stdin(
     /// The virtual path to the file
     PathBuf,
     /// The content of the file
@@ -77,7 +92,7 @@ impl From<(PathBuf, String)> for Stdin {
 }
 
 #[derive(Debug)]
-pub(crate) enum TraversalMode {
+pub enum TraversalMode {
     /// This mode is enabled when running the command `biome check`
     Check {
         /// The type of fixes that should be applied when analyzing a file.
@@ -156,7 +171,7 @@ impl Display for TraversalMode {
 }
 
 /// Tells to the execution of the traversal how the information should be reported
-#[derive(Copy, Clone, Default)]
+#[derive(Copy, Clone, Default, Debug)]
 pub(crate) enum ReportMode {
     /// Reports information straight to the console, it's the default mode
     #[default]
@@ -312,7 +327,7 @@ impl Execution {
 
 /// Based on the [mode](ExecutionMode), the function might launch a traversal of the file system
 /// or handles the stdin file.
-pub(crate) fn execute_mode(
+pub fn execute_mode(
     mut mode: Execution,
     mut session: CliSession,
     cli_options: &CliOptions,

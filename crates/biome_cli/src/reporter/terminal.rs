@@ -1,18 +1,15 @@
 use crate::cli_options::CliOptions;
 use crate::execute::{Execution, TraversalMode};
-use crate::reporter::{
-    DiagnosticReporter, DiagnosticVisitor, DiagnosticsPayload, ReporterVisitor, SummaryReporter,
-    SummaryResult, SummaryVisitor,
-};
+use crate::reporter::{DiagnosticsPayload, ReporterVisitor, TraversalSummary};
 use crate::Reporter;
 use biome_console::fmt::Formatter;
 use biome_console::{fmt, markup, Console, ConsoleExt};
-use biome_diagnostics::{Error, PrintDiagnostic, PrintGitHubDiagnostic, Severity};
+use biome_diagnostics::{Error, PrintDiagnostic, PrintGitHubDiagnostic};
 use std::io;
 use std::time::Duration;
 
 pub(crate) struct ConsoleReporter<'a> {
-    summary: &'a SummaryResult,
+    summary: &'a TraversalSummary,
     diagnostics_payload: DiagnosticsPayload<'a>,
     execution: &'a Execution,
 }
@@ -21,7 +18,7 @@ pub(crate) struct ConsoleReporter<'a> {
 pub(crate) struct ConsoleReporterBuilder<'a> {
     cli_options: Option<&'a CliOptions>,
     execution: Option<&'a Execution>,
-    summary: Option<&'a SummaryResult>,
+    summary: Option<&'a TraversalSummary>,
     diagnostics: Vec<Error>,
 }
 
@@ -35,7 +32,7 @@ impl<'a> ConsoleReporterBuilder<'a> {
         self.execution = Some(execution);
         self
     }
-    pub(crate) fn with_summary(mut self, summary_result: &'a SummaryResult) -> Self {
+    pub(crate) fn with_summary(mut self, summary_result: &'a TraversalSummary) -> Self {
         self.summary = Some(summary_result);
         self
     }
@@ -76,52 +73,48 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
     fn report_summary(
         &mut self,
         traversal_mode: &Execution,
-        summary: &SummaryResult,
+        summary: &TraversalSummary,
     ) -> io::Result<()> {
-        let mut visitor = ConsoleSummaryVisitor {
-            console: self.0,
-            summary,
-            execution: traversal_mode,
-        };
-        let mut reporter = ConsoleSummaryReporter(summary);
-        reporter.report(&mut visitor)?;
+        self.report_skipped_fixes(traversal_mode, summary.suggested_fixes_skipped as usize)?;
+        self.report_not_printed_diagnostics(
+            traversal_mode,
+            summary.diagnostics_not_printed as usize,
+        )?;
+        self.report_total(
+            traversal_mode,
+            summary.changed() + summary.unchanged(),
+            summary.duration(),
+        )?;
+        self.report_changed(traversal_mode, summary.changed)?;
+        self.report_skipped(traversal_mode, summary.skipped)?;
+        self.report_errors(traversal_mode, summary.errors as usize)?;
+        self.report_warnings(traversal_mode, summary.warnings as usize)?;
         Ok(())
     }
 
     fn report_diagnostics(&mut self, diagnostics_payload: &DiagnosticsPayload) -> io::Result<()> {
-        let mut visitor = ConsoleDiagnosticVisitor { console: self.0 };
-        let mut reporter = ConsoleDiagnosticReporter(diagnostics_payload);
-        reporter.report(&mut visitor)?;
-        Ok(())
-    }
-}
-
-struct ConsoleSummaryVisitor<'a> {
-    console: &'a mut dyn Console,
-    summary: &'a SummaryResult,
-    execution: &'a Execution,
-}
-
-struct ConsoleSummaryReporter<'a>(&'a SummaryResult);
-
-impl<'a> SummaryReporter for ConsoleSummaryReporter<'a> {
-    fn report(&mut self, visitor: &mut dyn SummaryVisitor) -> io::Result<()> {
-        visitor.report_skipped_fixes(self.0.suggested_fixes_skipped as usize)?;
-        visitor.report_not_printed_diagnostics(self.0.diagnostics_not_printed as usize)?;
-        visitor.report_total(self.0.changed + self.0.unchanged)?;
-        visitor.report_changed(self.0.changed)?;
-        visitor.report_skipped(self.0.skipped)?;
-        visitor.report_errors(self.0.errors as usize)?;
-        visitor.report_warnings(self.0.warnings as usize)?;
+        for diagnostic in &diagnostics_payload.diagnostics {
+            if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
+                if diagnostic.tags().is_verbose() && diagnostics_payload.verbose {
+                    self.0
+                        .error(markup! {{PrintDiagnostic::verbose(diagnostic)}});
+                } else {
+                    self.0
+                        .error(markup! {{PrintDiagnostic::simple(diagnostic)}});
+                }
+            }
+            if diagnostics_payload.execution.is_ci_github() {
+                self.0
+                    .log(markup! {{PrintGitHubDiagnostic::simple(diagnostic)}});
+            }
+        }
 
         Ok(())
     }
-}
 
-impl<'a> SummaryVisitor for ConsoleSummaryVisitor<'a> {
-    fn report_skipped_fixes(&mut self, skipped: usize) -> io::Result<()> {
-        if self.execution.is_check() && skipped > 0 {
-            self.console.log(markup! {
+    fn report_skipped_fixes(&mut self, execution: &Execution, skipped: usize) -> io::Result<()> {
+        if execution.is_check() && skipped > 0 {
+            self.0.log(markup! {
                 <Warn>"Skipped "{skipped}" suggested fixes.\n"</Warn>
                 <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --apply-unsafe\n"</Emphasis></Info>
             })
@@ -129,44 +122,49 @@ impl<'a> SummaryVisitor for ConsoleSummaryVisitor<'a> {
         Ok(())
     }
 
-    fn report_not_printed_diagnostics(&mut self, not_printed: usize) -> io::Result<()> {
-        if !self.execution.is_ci() && not_printed > 0 {
-            self.console.log(markup! {
+    fn report_not_printed_diagnostics(
+        &mut self,
+        execution: &Execution,
+        not_printed: usize,
+    ) -> io::Result<()> {
+        if !execution.is_ci() && not_printed > 0 {
+            self.0.log(markup! {
                 <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
                 <Info>"Diagnostics not shown: "</Info><Emphasis>{not_printed}</Emphasis><Info>"."</Info>
             })
         }
         Ok(())
     }
-    fn report_total(&mut self, total: usize) -> io::Result<()> {
-        let total = SummaryTotal(
-            self.execution.traversal_mode(),
-            total,
-            &self.summary.duration,
-        );
-        self.console.log(markup! {
+    fn report_total(
+        &mut self,
+        execution: &Execution,
+        total: usize,
+        duration: Duration,
+    ) -> io::Result<()> {
+        let total = SummaryTotal(execution.traversal_mode(), total, &duration);
+        self.0.log(markup! {
             <Info>{total}</Info>
         });
 
         Ok(())
     }
 
-    fn report_changed(&mut self, changed: usize) -> io::Result<()> {
+    fn report_changed(&mut self, _execution: &Execution, changed: usize) -> io::Result<()> {
         let detail = SummaryDetail(changed);
-        self.console.log(markup! {
+        self.0.log(markup! {
             <Info>{detail}</Info>
         });
         Ok(())
     }
 
-    fn report_skipped(&mut self, skipped: usize) -> io::Result<()> {
+    fn report_skipped(&mut self, _execution: &Execution, skipped: usize) -> io::Result<()> {
         if skipped > 0 {
             if skipped == 1 {
-                self.console.log(markup! {
+                self.0.log(markup! {
                     <Warn>"Skipped "{skipped}" file."</Warn>
                 });
             } else {
-                self.console.log(markup! {
+                self.0.log(markup! {
                     <Warn>"Skipped "{skipped}" files."</Warn>
                 });
             }
@@ -174,13 +172,13 @@ impl<'a> SummaryVisitor for ConsoleSummaryVisitor<'a> {
         Ok(())
     }
 
-    fn report_errors(&mut self, errors: usize) -> io::Result<()> {
+    fn report_errors(&mut self, _execution: &Execution, errors: usize) -> io::Result<()> {
         if errors > 0 {
             if errors == 1 {
-                self.console
+                self.0
                     .log(markup!(<Error>"Found "{errors}" error."</Error>));
             } else {
-                self.console
+                self.0
                     .log(markup!(<Error>"Found "{errors}" errors."</Error>));
             }
         }
@@ -188,63 +186,17 @@ impl<'a> SummaryVisitor for ConsoleSummaryVisitor<'a> {
         Ok(())
     }
 
-    fn report_warnings(&mut self, warnings: usize) -> io::Result<()> {
+    fn report_warnings(&mut self, _execution: &Execution, warnings: usize) -> io::Result<()> {
         if warnings > 0 {
             if warnings == 1 {
-                self.console
+                self.0
                     .log(markup!(<Warn>"Found "{warnings}" warning."</Warn>));
             } else {
-                self.console
+                self.0
                     .log(markup!(<Warn>"Found "{warnings}" warnings."</Warn>));
             }
         }
 
-        Ok(())
-    }
-}
-
-struct ConsoleDiagnosticVisitor<'a> {
-    console: &'a mut dyn Console,
-}
-
-struct ConsoleDiagnosticReporter<'a>(&'a DiagnosticsPayload<'a>);
-
-impl<'a> DiagnosticReporter for ConsoleDiagnosticReporter<'a> {
-    fn report(&mut self, visitor: &mut dyn DiagnosticVisitor) -> io::Result<()> {
-        for diagnostic in &self.0.diagnostics {
-            visitor.report_diagnostic(
-                diagnostic,
-                self.0.verbose,
-                self.0.diagnostic_level,
-                self.0.execution,
-            )?;
-        }
-
-        Ok(())
-    }
-}
-
-impl<'a> DiagnosticVisitor for ConsoleDiagnosticVisitor<'a> {
-    fn report_diagnostic(
-        &mut self,
-        diagnostic: &Error,
-        verbose: bool,
-        diagnostic_level: Severity,
-        execution: &Execution,
-    ) -> io::Result<()> {
-        if diagnostic.severity() >= diagnostic_level {
-            if diagnostic.tags().is_verbose() && verbose {
-                self.console
-                    .error(markup! {{PrintDiagnostic::verbose(diagnostic)}});
-            } else {
-                self.console
-                    .error(markup! {{PrintDiagnostic::simple(diagnostic)}});
-            }
-        }
-        if execution.is_ci_github() {
-            self.console
-                .log(markup! {{PrintGitHubDiagnostic::simple(diagnostic)}});
-        }
         Ok(())
     }
 }
