@@ -125,10 +125,10 @@ pub enum ReactLibrary {
 }
 
 impl ReactLibrary {
-    pub const fn import_name(self) -> &'static str {
+    pub const fn import_names(self) -> &'static [&'static str] {
         match self {
-            ReactLibrary::React => "react",
-            ReactLibrary::ReactDOM => "react-dom",
+            ReactLibrary::React => &["react", "preact/compat", "preact/hooks"],
+            ReactLibrary::ReactDOM => &["react-dom"],
         }
     }
 
@@ -179,6 +179,9 @@ const VALID_REACT_API: [&str; 29] = [
 /// The function has accepts a `api_name` to check against
 ///
 /// [`React` API]: https://reactjs.org/docs/react-api.html
+///
+/// This also returns `true` for libraries that return React-compatible APIs,
+/// such as Preact.
 pub(crate) fn is_react_call_api(
     expr: &AnyJsExpression,
     model: &SemanticModel,
@@ -269,7 +272,7 @@ fn is_react_export(binding: &Binding, lib: ReactLibrary) -> bool {
         .syntax()
         .ancestors()
         .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
-        .is_some_and(|source| source.text() == lib.import_name())
+        .is_some_and(|source| lib.import_names().contains(&source.text()))
 }
 
 fn is_named_react_export(binding: &Binding, lib: ReactLibrary, name: &str) -> Option<bool> {
@@ -290,7 +293,10 @@ fn is_named_react_export(binding: &Binding, lib: ReactLibrary, name: &str) -> Op
     }
 
     let import = import_specifier.import_clause()?.parent::<JsImport>()?;
-    Some(import.source_text().ok()?.text() == lib.import_name())
+    import
+        .source_text()
+        .ok()
+        .map(|import_name| lib.import_names().contains(&import_name.text()))
 }
 
 /// Checks if `binding` is an import of the global name of `lib`.
@@ -324,5 +330,5 @@ pub(crate) fn is_global_react_import(binding: &JsIdentifierBinding, lib: ReactLi
         .skip(1)
         .find_map(JsImport::cast)
         .and_then(|import| import.source_text().ok())
-        .is_some_and(|source| source.text() == lib.import_name())
+        .is_some_and(|source| lib.import_names().contains(&source.text()))
 }

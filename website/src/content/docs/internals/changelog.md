@@ -139,6 +139,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Implement [#2043](https://github.com/biomejs/biome/issues/2043): The React rule [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) is now also compatible with Preact hooks imported from `preact/hooks` or `preact/compat`. Contributed by @arendjr
+
 #### Enhancements
 
 #### Bug fixes
@@ -278,7 +280,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Support applying lint fixes when calling the `lintContent` method of the `Biome` class ([#1956](https://github.com/biomejs/biome/pull/1956)). Contributed by @mnahkies
 
-### Linter
+### Parser
 
 #### Bug fixes
 
@@ -368,10 +370,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### Parser
 
 #### Bug fixes
-
-- JavaScript lexer is now able to lex regular expression literals with escaped non-ascii chars ([#1941](https://github.com/biomejs/biome/issues/1941)).
-
-  Contributed by @Sec-ant
 
 ## 1.6.0 (2024-03-08)
 
