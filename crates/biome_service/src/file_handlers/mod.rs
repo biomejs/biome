@@ -20,7 +20,8 @@ use biome_css_syntax::CssFileSource;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, TextRange, TextSize};
+use biome_js_parser::{parse, JsParserOptions};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, Language, TextRange, TextSize};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
@@ -558,6 +559,44 @@ pub(crate) fn is_diagnostic_error(
     severity >= Severity::Error
 }
 
+/// Parse the "lang" attribute from the opening tag of the "\<script\>" block in Svelte or Vue files.
+/// This function will return the language based on the existence or the value of the "lang" attribute.
+/// We use the JSX parser at the moment to parse the opening tag. So the opening tag should be first
+/// matched by regular expressions.
+///
+/// TODO: We should change the parser when HTMLish languages are supported.
+pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> Language {
+    parse(
+        script_opening_tag,
+        JsFileSource::jsx(),
+        JsParserOptions::default(),
+    )
+    .try_tree()
+    .and_then(|tree| {
+        tree.as_js_module()?.items().into_iter().find_map(|item| {
+            let expression = item
+                .as_any_js_statement()?
+                .as_js_expression_statement()?
+                .expression()
+                .ok()?;
+            let tag = expression.as_jsx_tag_expression()?.tag().ok()?;
+            let opening_element = tag.as_jsx_element()?.opening_element().ok()?;
+            let lang_attribute = opening_element.attributes().find_by_name("lang").ok()??;
+            let attribute_value = lang_attribute.initializer()?.value().ok()?;
+            let attribute_inner_string =
+                attribute_value.as_jsx_string()?.inner_string_text().ok()?;
+            if attribute_inner_string.text() == "ts" {
+                Some(Language::TypeScript {
+                    definition_file: false,
+                })
+            } else {
+                None
+            }
+        })
+    })
+    .map_or(Language::JavaScript, |lang| lang)
+}
+
 #[test]
 fn test_order() {
     for items in
@@ -568,4 +607,37 @@ fn test_order() {
     for items in DocumentFileSource::WELL_KNOWN_JSON_WITH_COMMENTS_FILES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
+}
+
+#[test]
+fn test_svelte_script_lang() {
+    const SVELTE_JS_SCRIPT_OPENING_TAG: &str = r#"<script>"#;
+    const SVELTE_TS_SCRIPT_OPENING_TAG: &str = r#"<script lang="ts">"#;
+    const SVELTE_CONTEXT_MODULE_JS_SCRIPT_OPENING_TAG: &str = r#"<script context="module">"#;
+    const SVELTE_CONTEXT_MODULE_TS_SCRIPT_OPENING_TAG: &str =
+        r#"<script context="module" lang="ts">"#;
+
+    assert!(parse_lang_from_script_opening_tag(SVELTE_JS_SCRIPT_OPENING_TAG).is_javascript());
+    assert!(parse_lang_from_script_opening_tag(SVELTE_TS_SCRIPT_OPENING_TAG).is_typescript());
+    assert!(
+        parse_lang_from_script_opening_tag(SVELTE_CONTEXT_MODULE_JS_SCRIPT_OPENING_TAG)
+            .is_javascript()
+    );
+    assert!(
+        parse_lang_from_script_opening_tag(SVELTE_CONTEXT_MODULE_TS_SCRIPT_OPENING_TAG)
+            .is_typescript()
+    );
+}
+
+#[test]
+fn test_vue_script_lang() {
+    const VUE_JS_SCRIPT_OPENING_TAG: &str = r#"<script>"#;
+    const VUE_TS_SCRIPT_OPENING_TAG: &str = r#"<script lang="ts">"#;
+    const VUE_SETUP_JS_SCRIPT_OPENING_TAG: &str = r#"<script setup>"#;
+    const VUE_SETUP_TS_SCRIPT_OPENING_TAG: &str = r#"<script setup lang="ts">"#;
+
+    assert!(parse_lang_from_script_opening_tag(VUE_JS_SCRIPT_OPENING_TAG).is_javascript());
+    assert!(parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG).is_typescript());
+    assert!(parse_lang_from_script_opening_tag(VUE_SETUP_JS_SCRIPT_OPENING_TAG).is_javascript());
+    assert!(parse_lang_from_script_opening_tag(VUE_SETUP_TS_SCRIPT_OPENING_TAG).is_typescript());
 }

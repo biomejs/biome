@@ -5,9 +5,9 @@ expression: content
 ## `file.svelte`
 
 ```svelte
-<script lang="ts">
-import * as svelteUse from "svelte-use";
+<script context="module" lang="ts">
 import Button from "./components/Button.svelte";
+const hello: string = "world";
 </script>
 <div></div>
 ```
@@ -15,5 +15,5 @@ import Button from "./components/Button.svelte";
 # Emitted Messages
 
 ```block
-Checked 1 file in <TIME>. Fixed 1 file.
+Formatted 1 file in <TIME>. Fixed 1 file.
 ```
