@@ -15,9 +15,5 @@ import { getLocale } from "astro:i18n";
 # Emitted Messages
 
 ```block
-Checked 1 file in <TIME>.
-```
-
-```block
-Fixed 1 file.
+Checked 1 file in <TIME>. Fixed 1 file.
 ```

@@ -36,13 +36,6 @@ check.js:1:4 lint/suspicious/noAssignInExpressions ━━━━━━━━━�
 ```
 
 ```block
-Checked 1 file in <TIME>.
-```
-
-```block
-No fixes needed.
-```
-
-```block
+Checked 1 file in <TIME>. No fixes needed.
 Found 1 error.
 ```

@@ -31,13 +31,5 @@ check.js lint ━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-Checked 1 file in <TIME>.
-```
-
-```block
-No fixes needed.
-```
-
-```block
-Skipped 1 file.
+Checked 1 file in <TIME>. No fixes needed.
 ```

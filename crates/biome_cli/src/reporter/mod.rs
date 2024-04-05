@@ -114,57 +114,6 @@ pub trait ReporterVisitor {
         let _ = payload;
         Ok(())
     }
-
-    /// Reports the fixes that were skipped
-    fn report_skipped_fixes(&mut self, execution: &Execution, skipped: usize) -> io::Result<()> {
-        let _ = (execution, skipped);
-        Ok(())
-    }
-
-    /// Reports diagnostics that were not printed
-    fn report_not_printed_diagnostics(
-        &mut self,
-        execution: &Execution,
-        not_printed: usize,
-    ) -> io::Result<()> {
-        let _ = (execution, not_printed);
-        Ok(())
-    }
-
-    /// Reports the total files that were checked
-    fn report_total(
-        &mut self,
-        execution: &Execution,
-        total: usize,
-        duration: Duration,
-    ) -> io::Result<()> {
-        let _ = (execution, total, duration);
-        Ok(())
-    }
-
-    /// Reports the number of files that were changed/modified
-    fn report_changed(&mut self, execution: &Execution, changed: usize) -> io::Result<()> {
-        let _ = (execution, changed);
-        Ok(())
-    }
-
-    /// Reports the number of files that were skipped
-    fn report_skipped(&mut self, execution: &Execution, skipped: usize) -> io::Result<()> {
-        let _ = (execution, skipped);
-        Ok(())
-    }
-
-    /// Reports the number of errors emitted during the traversal
-    fn report_errors(&mut self, execution: &Execution, errors: usize) -> io::Result<()> {
-        let _ = (execution, errors);
-        Ok(())
-    }
-
-    /// Reports the number of warnings emitted during the traversal
-    fn report_warnings(&mut self, execution: &Execution, warnings: usize) -> io::Result<()> {
-        let _ = (execution, warnings);
-        Ok(())
-    }
 }
 
 /// This function reports the result of a traversal

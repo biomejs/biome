@@ -79,9 +79,5 @@ statement();
 # Emitted Messages
 
 ```block
-Formatted 3 files in <TIME>.
-```
-
-```block
-Fixed 3 files.
+Formatted 3 files in <TIME>. Fixed 3 files.
 ```

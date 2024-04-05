@@ -54,13 +54,6 @@ src/index.js organizeImports ━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-Checked 1 file in <TIME>.
-```
-
-```block
-No fixes needed.
-```
-
-```block
+Checked 1 file in <TIME>. No fixes needed.
 Found 1 error.
 ```

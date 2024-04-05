@@ -72,23 +72,27 @@ pub(crate) struct ConsoleReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
 impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
     fn report_summary(
         &mut self,
-        traversal_mode: &Execution,
+        execution: &Execution,
         summary: &TraversalSummary,
     ) -> io::Result<()> {
-        self.report_skipped_fixes(traversal_mode, summary.suggested_fixes_skipped as usize)?;
-        self.report_not_printed_diagnostics(
-            traversal_mode,
-            summary.diagnostics_not_printed as usize,
-        )?;
-        self.report_total(
-            traversal_mode,
-            summary.changed() + summary.unchanged(),
-            summary.duration(),
-        )?;
-        self.report_changed(traversal_mode, summary.changed)?;
-        self.report_skipped(traversal_mode, summary.skipped)?;
-        self.report_errors(traversal_mode, summary.errors as usize)?;
-        self.report_warnings(traversal_mode, summary.warnings as usize)?;
+        if execution.is_check() && summary.suggested_fixes_skipped > 0 {
+            self.0.log(markup! {
+                <Warn>"Skipped "{summary.suggested_fixes_skipped}" suggested fixes.\n"</Warn>
+                <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --apply-unsafe\n"</Emphasis></Info>
+            })
+        }
+
+        if !execution.is_ci() && summary.diagnostics_not_printed > 0 {
+            self.0.log(markup! {
+                <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
+                <Info>"Diagnostics not shown: "</Info><Emphasis>{summary.diagnostics_not_printed}</Emphasis><Info>"."</Info>
+            })
+        }
+
+        self.0.log(markup! {
+            {ConsoleTraversalSummary(execution.traversal_mode(), summary)}
+        });
+
         Ok(())
     }
 
@@ -106,94 +110,6 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
             if diagnostics_payload.execution.is_ci_github() {
                 self.0
                     .log(markup! {{PrintGitHubDiagnostic::simple(diagnostic)}});
-            }
-        }
-
-        Ok(())
-    }
-
-    fn report_skipped_fixes(&mut self, execution: &Execution, skipped: usize) -> io::Result<()> {
-        if execution.is_check() && skipped > 0 {
-            self.0.log(markup! {
-                <Warn>"Skipped "{skipped}" suggested fixes.\n"</Warn>
-                <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --apply-unsafe\n"</Emphasis></Info>
-            })
-        }
-        Ok(())
-    }
-
-    fn report_not_printed_diagnostics(
-        &mut self,
-        execution: &Execution,
-        not_printed: usize,
-    ) -> io::Result<()> {
-        if !execution.is_ci() && not_printed > 0 {
-            self.0.log(markup! {
-                <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
-                <Info>"Diagnostics not shown: "</Info><Emphasis>{not_printed}</Emphasis><Info>"."</Info>
-            })
-        }
-        Ok(())
-    }
-    fn report_total(
-        &mut self,
-        execution: &Execution,
-        total: usize,
-        duration: Duration,
-    ) -> io::Result<()> {
-        let total = SummaryTotal(execution.traversal_mode(), total, &duration);
-        self.0.log(markup! {
-            <Info>{total}</Info>
-        });
-
-        Ok(())
-    }
-
-    fn report_changed(&mut self, _execution: &Execution, changed: usize) -> io::Result<()> {
-        let detail = SummaryDetail(changed);
-        self.0.log(markup! {
-            <Info>{detail}</Info>
-        });
-        Ok(())
-    }
-
-    fn report_skipped(&mut self, _execution: &Execution, skipped: usize) -> io::Result<()> {
-        if skipped > 0 {
-            if skipped == 1 {
-                self.0.log(markup! {
-                    <Warn>"Skipped "{skipped}" file."</Warn>
-                });
-            } else {
-                self.0.log(markup! {
-                    <Warn>"Skipped "{skipped}" files."</Warn>
-                });
-            }
-        }
-        Ok(())
-    }
-
-    fn report_errors(&mut self, _execution: &Execution, errors: usize) -> io::Result<()> {
-        if errors > 0 {
-            if errors == 1 {
-                self.0
-                    .log(markup!(<Error>"Found "{errors}" error."</Error>));
-            } else {
-                self.0
-                    .log(markup!(<Error>"Found "{errors}" errors."</Error>));
-            }
-        }
-
-        Ok(())
-    }
-
-    fn report_warnings(&mut self, _execution: &Execution, warnings: usize) -> io::Result<()> {
-        if warnings > 0 {
-            if warnings == 1 {
-                self.0
-                    .log(markup!(<Warn>"Found "{warnings}" warning."</Warn>));
-            } else {
-                self.0
-                    .log(markup!(<Warn>"Found "{warnings}" warnings."</Warn>));
             }
         }
 
@@ -220,11 +136,11 @@ impl fmt::Display for SummaryDetail {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if self.0 > 0 {
             fmt.write_markup(markup! {
-                "Fixed "{Files(self.0)}"."
+                " Fixed "{Files(self.0)}"."
             })
         } else {
             fmt.write_markup(markup! {
-                "No fixes needed."
+                " No fixes needed."
             })
         }
     }
@@ -268,5 +184,30 @@ impl<'a> fmt::Display for SummaryTotal<'a> {
                 "Searched "{files}" in "{self.2}"."
             }),
         }
+    }
+}
+
+struct ConsoleTraversalSummary<'a>(pub(crate) &'a TraversalMode, &'a TraversalSummary);
+impl<'a> fmt::Display for ConsoleTraversalSummary<'a> {
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        let summary = SummaryTotal(self.0, self.1.changed + self.1.unchanged, &self.1.duration);
+        let detail = SummaryDetail(self.1.changed);
+        fmt.write_markup(markup!(<Info>{summary}{detail}</Info>))?;
+
+        if self.1.errors > 0 {
+            if self.1.errors == 1 {
+                fmt.write_markup(markup!("\n"<Error>"Found "{self.1.errors}" error."</Error>))?;
+            } else {
+                fmt.write_markup(markup!("\n"<Error>"Found "{self.1.errors}" errors."</Error>))?;
+            }
+        }
+        if self.1.warnings > 0 {
+            if self.1.warnings == 1 {
+                fmt.write_markup(markup!("\n"<Warn>"Found "{self.1.warnings}" warning."</Warn>))?;
+            } else {
+                fmt.write_markup(markup!("\n"<Warn>"Found "{self.1.warnings}" warnings."</Warn>))?;
+            }
+        }
+        Ok(())
     }
 }

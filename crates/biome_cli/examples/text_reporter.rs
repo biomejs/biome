@@ -20,23 +20,13 @@ impl Reporter for TextReport {
 impl ReporterVisitor for BufferVisitor {
     fn report_summary(
         &mut self,
-        execution: &Execution,
+        _execution: &Execution,
         summary: &TraversalSummary,
     ) -> std::io::Result<()> {
-        self.report_total(
-            execution,
-            summary.changed() + summary.changed(),
-            summary.duration(),
-        )
-    }
-
-    fn report_total(
-        &mut self,
-        __execution: &Execution,
-        total: usize,
-        _duration: Duration,
-    ) -> std::io::Result<()> {
-        self.0.push_str(&format!("Total is {}", total));
+        self.0.push_str(&format!(
+            "Total is {}",
+            summary.changed() + summary.unchanged()
+        ));
         Ok(())
     }
 }
