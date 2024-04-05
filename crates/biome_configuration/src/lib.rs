@@ -39,11 +39,11 @@ pub use json::{
 };
 pub use linter::{
     partial_linter_configuration, LinterConfiguration, PartialLinterConfiguration,
-    RuleConfiguration, Rules,
+    RuleConfiguration, RulePlainConfiguration, RuleWithOptions, Rules,
 };
 pub use overrides::{
     OverrideFormatterConfiguration, OverrideLinterConfiguration,
-    OverrideOrganizeImportsConfiguration, Overrides,
+    OverrideOrganizeImportsConfiguration, OverridePattern, Overrides,
 };
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;

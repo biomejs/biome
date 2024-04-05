@@ -86,6 +86,12 @@ impl<'de> Deserialize<'de> for StringSet {
     }
 }
 
+impl FromIterator<String> for StringSet {
+    fn from_iter<T: IntoIterator<Item = String>>(iter: T) -> Self {
+        StringSet::new(IndexSet::from_iter(iter))
+    }
+}
+
 impl IntoIterator for StringSet {
     type Item = String;
     type IntoIter = IntoIter<String>;

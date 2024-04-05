@@ -14,6 +14,7 @@ use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_js_analyze::metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
+use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
 use std::path::{Path, PathBuf};
