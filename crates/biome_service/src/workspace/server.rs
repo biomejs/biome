@@ -3,7 +3,8 @@ use super::{
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams, PullActionsParams,
     PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
-    SupportsFeatureParams, UpdateProjectParams, UpdateSettingsParams,
+    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateProjectParams,
+    UpdateSettingsParams,
 };
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
@@ -123,7 +124,7 @@ impl WorkspaceServer {
         move || {
             let file_source = self.get_file_source(path);
 
-            let language = DocumentFileSource::from_path_and_known_filename(path).or(file_source);
+            let language = DocumentFileSource::from_path(path).or(file_source);
             WorkspaceError::source_file_not_supported(
                 language,
                 path.clone().display().to_string(),
@@ -243,14 +244,22 @@ impl WorkspaceServer {
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
     /// or in the feature `ignore`/`include`
-    fn is_ignored(&self, path: &Path, feature: FeatureName) -> bool {
+    fn is_ignored(&self, path: &Path, features: Vec<FeatureName>) -> bool {
         let file_name = path.file_name().and_then(|s| s.to_str());
+        let ignored_by_features = {
+            let mut ignored = false;
+            for feature in features {
+                // a path is ignored if it's ignored by all features
+                ignored &= self.is_ignored_by_feature_config(path, feature)
+            }
+            ignored
+        };
         // Never ignore Biome's config file regardless `include`/`ignore`
         (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
             // Apply top-level `include`/`ignore`
             (self.is_ignored_by_top_level_config(path) ||
                 // Apply feature-level `include`/`ignore`
-                self.is_ignored_by_feature_config(path, feature))
+                ignored_by_features)
     }
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
@@ -301,6 +310,7 @@ impl WorkspaceServer {
                     &organize_imports.ignored_files,
                 )
             }
+            FeatureName::Search => return false, // There is no search-specific config.
         };
         let is_feature_included = feature_included_files.is_empty()
             || is_dir(path)
@@ -322,7 +332,7 @@ impl Workspace for WorkspaceServer {
             }
             Entry::Vacant(entry) => {
                 let capabilities = self.get_file_capabilities(&params.path);
-                let language = DocumentFileSource::from_path_and_known_filename(&params.path);
+                let language = DocumentFileSource::from_path(&params.path);
                 let path = params.path.as_path();
                 let settings = self.settings.read().unwrap();
                 let mut file_features = FileFeaturesResult::new();
@@ -343,7 +353,7 @@ impl Workspace for WorkspaceServer {
                 } else if self.is_ignored_by_top_level_config(path) {
                     file_features.set_ignored_for_all_features();
                 } else {
-                    for feature in params.feature {
+                    for feature in params.features {
                         if self.is_ignored_by_feature_config(path, feature) {
                             file_features.ignored(feature);
                         }
@@ -363,7 +373,7 @@ impl Workspace for WorkspaceServer {
         }
     }
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        Ok(self.is_ignored(params.biome_path.as_path(), params.feature))
+        Ok(self.is_ignored(params.biome_path.as_path(), params.features))
     }
     /// Update the global settings for this workspace
     ///
@@ -703,6 +713,14 @@ impl Workspace for WorkspaceServer {
         ];
 
         Ok(RageResult { entries })
+    }
+
+    fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
+        // FIXME: Let's implement some real matching here...
+        Ok(SearchResults {
+            file: params.path,
+            matches: Vec::new(),
+        })
     }
 
     fn server_info(&self) -> Option<&ServerInfo> {

@@ -1,0 +1,187 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/string/quoteSingle/properties_quotes.js
+---
+# Input
+
+```js
+class Y {
+    "other" = 4;
+    "method"() {}
+    "another_method"() {}
+    "camelMethod"() {}
+    "stay-like-this"() {}
+    get "getter"() {}
+    set "setterr"(value) {}
+    "constructor"() {}
+}
+
+let value = { "a": "test", "quotes-required": "test" };
+
+({ "a": test } = value);
+
+let { "a": test } = value;
+
+// you guys stay like this
+
+({ "$$_": test } = value);
+
+({ "%{}": test } = value);
+
+({ "[]": test } = value);
+
+let { "fff--fff": test } = value;
+
+let { "with_underscore": test } = value;
+
+let a = { "": 10, "c_d": 30 }
+
+let b = { "'": 10, "c_d": 30 }
+
+let { "_$_ff$_morning_not_quotes": test, "_$_ff$_morning_yes_quotes_@": test } = value;
+
+let { "_$_$_%": test } = value;
+
+let { "0197": test, "3n": test, "3p": test, "p9": test } = value;
+
+const x = {
+    '¾¾¾¾': 'test1',
+    '①': 'test2',
+};
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```js
+class Y {
+	other = 4;
+	method() {}
+	another_method() {}
+	camelMethod() {}
+	"stay-like-this"() {}
+	get getter() {}
+	set setterr(value) {}
+	constructor() {}
+}
+
+let value = { a: "test", "quotes-required": "test" };
+
+({ a: test } = value);
+
+let { a: test } = value;
+
+// you guys stay like this
+
+({ $$_: test } = value);
+
+({ "%{}": test } = value);
+
+({ "[]": test } = value);
+
+let { "fff--fff": test } = value;
+
+let { with_underscore: test } = value;
+
+let a = { "": 10, c_d: 30 };
+
+let b = { "'": 10, c_d: 30 };
+
+let { _$_ff$_morning_not_quotes: test, "_$_ff$_morning_yes_quotes_@": test } =
+	value;
+
+let { "_$_$_%": test } = value;
+
+let { "0197": test, "3n": test, "3p": test, p9: test } = value;
+
+const x = {
+	"¾¾¾¾": "test1",
+	"①": "test2",
+};
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Single Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```js
+class Y {
+	other = 4;
+	method() {}
+	another_method() {}
+	camelMethod() {}
+	'stay-like-this'() {}
+	get getter() {}
+	set setterr(value) {}
+	constructor() {}
+}
+
+let value = { a: 'test', 'quotes-required': 'test' };
+
+({ a: test } = value);
+
+let { a: test } = value;
+
+// you guys stay like this
+
+({ $$_: test } = value);
+
+({ '%{}': test } = value);
+
+({ '[]': test } = value);
+
+let { 'fff--fff': test } = value;
+
+let { with_underscore: test } = value;
+
+let a = { '': 10, c_d: 30 };
+
+let b = { "'": 10, c_d: 30 };
+
+let { _$_ff$_morning_not_quotes: test, '_$_ff$_morning_yes_quotes_@': test } =
+	value;
+
+let { '_$_$_%': test } = value;
+
+let { '0197': test, '3n': test, '3p': test, p9: test } = value;
+
+const x = {
+	'¾¾¾¾': 'test1',
+	'①': 'test2',
+};
+```

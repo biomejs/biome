@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/quotes/quotes.css
 ---
-
 # Input
 
 ```css
@@ -115,21 +114,9 @@ one 'two' three {}
  
  @supports (content: one "two" three "four") {
    a[href="foo" y],
-@@ -71,23 +71,33 @@
-   }
- }
- 
--@import "file.css";
- @import "file.css";
-+@import 'file.css';
- 
- @import url("foo.css");
--@import url("foo.css");
-+@import url('foo.css');
- 
--@import "foo.css" screen and (orientation: landscape);
+@@ -80,14 +80,24 @@
  @import "foo.css" screen and (orientation: landscape);
-+@import 'foo.css' screen and (orientation: landscape);
+ @import "foo.css" screen and (orientation: landscape);
  
 -@foo "one";
 -@foo 'one';
@@ -241,13 +228,13 @@ one 'two' three {}
 }
 
 @import "file.css";
-@import 'file.css';
+@import "file.css";
 
 @import url("foo.css");
-@import url('foo.css');
+@import url("foo.css");
 
 @import "foo.css" screen and (orientation: landscape);
-@import 'foo.css' screen and (orientation: landscape);
+@import "foo.css" screen and (orientation: landscape);
 
 @
 foo "one"
@@ -813,5 +800,3 @@ quotes.css:91:11 parse ━━━━━━━━━━━━━━━━━━━
     3: /* Also, it has to be the very first thing in the file, but here are some more tests anyway: */
     4: @charset "UTF-8"; /* Single quotes are invalid here. Keep them since we don't know what the user is doing. */
 ```
-
-

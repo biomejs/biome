@@ -199,12 +199,11 @@ invalid.js:9:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Remove console
   
+     6 6 │   console.nonExistent('hello world')
      7 7 │   console.log('with semicolon');
-     8 8 │   
+     8   │ - 
      9   │ - globalThis.console.warn();
-    10   │ - 
+    10 8 │   
   
 
 ```
-
-

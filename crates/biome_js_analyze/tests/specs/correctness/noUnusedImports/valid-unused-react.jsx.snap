@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-unused-react.jsx
+---
+# Input
+```jsx
+import React from "react"
+import { default as React } from "react"
+import * as React from "react"
+
+```

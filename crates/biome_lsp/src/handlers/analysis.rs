@@ -43,7 +43,7 @@ pub(crate) fn code_actions(
 
     let file_features = &session.workspace.file_features(SupportsFeatureParams {
         path: biome_path,
-        feature: FeaturesBuilder::new()
+        features: FeaturesBuilder::new()
             .with_linter()
             .with_organize_imports()
             .build(),
@@ -149,9 +149,14 @@ pub(crate) fn code_actions(
             if has_quick_fix && action.suggestion.applicability == Applicability::MaybeIncorrect {
                 return None;
             }
+            // Filter out source.organizeImports.biome action when organize imports is not supported.
             if action.category.matches("source.organizeImports.biome")
                 && !file_features.supports_organize_imports()
             {
+                return None;
+            }
+            // Filter out quickfix.biome action when lint is not supported.
+            if action.category.matches("quickfix.biome") && !file_features.supports_lint() {
                 return None;
             }
             // Remove actions that do not match the categories requested by the
@@ -174,6 +179,7 @@ pub(crate) fn code_actions(
             has_fixes |= action.diagnostics.is_some();
             Some(CodeActionOrCommand::CodeAction(action))
         })
+        .rev()
         .chain(fix_all)
         .collect();
 
@@ -208,7 +214,7 @@ fn fix_all(
         .workspace
         .file_features(SupportsFeatureParams {
             path: biome_path.clone(),
-            feature: vec![FeatureName::Format],
+            features: vec![FeatureName::Format],
         })?
         .supports_format();
     let fixed = session.workspace.fix_file(FixFileParams {

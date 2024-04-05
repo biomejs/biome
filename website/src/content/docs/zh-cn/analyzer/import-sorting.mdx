@@ -1,0 +1,129 @@
+---
+title: 导入排序
+description: Biome导入排序提供的功能
+---
+
+Biome允许使用[自然排序](https://en.wikipedia.org/wiki/Natural_sort_order)对导入语句进行排序。
+
+此功能默认启用，但可以通过配置选择禁用：
+
+```json title="biome.json"
+{
+  "organizeImports": {
+    "enabled": false
+  }
+}
+```
+
+## 导入的排序方式
+
+导入语句按照“距离”排序。与用户“距离”较远的模块放在顶部，与用户“距离”较近的模块放在底部：
+
+1. 通过`bun:`协议导入的模块。这适用于编写Bun运行的代码；
+2. 显式使用`node:`协议导入的内置Node.js模块和常见的Node内置模块，如`assert`；
+3. 通过`npm:`协议导入的模块。这适用于编写Deno运行的代码；
+4. 通过URL导入的模块；
+5. 从库导入的模块；
+6. 通过绝对导入导入的模块；
+7. 通过以`#`为前缀的名称导入的模块。这适用于使用[Node的子路径导入](https://nodejs.org/api/packages.html#subpath-imports)时；
+8. 通过相对导入导入的模块；
+9. 无法通过前面的标准确定的模块；
+
+例如，给定以下代码：
+
+```ts title="example.ts"
+import uncle from "../uncle";
+import sibling from "./sibling";
+import express from "npm:express";
+import imageUrl from "url:./image.png";
+import assert from "node:assert";
+import aunt from "../aunt";
+import { VERSION } from "https://deno.land/std/version.ts";
+import { mock, test } from "node:test";
+import { expect } from "bun:test";
+import { internal } from "#internal";
+import { secret } from "/absolute/path";
+import React from "react";
+```
+
+它们将按照以下方式排序：
+
+```ts title="example.ts"
+import { expect } from "bun:test";
+import assert from "node:assert";
+import { mock, test } from "node:test";
+import express from "npm:express";
+import { VERSION } from "https://deno.land/std/version.ts";
+import React from "react";
+import { secret } from "/absolute/path";
+import { internal } from "#internal";
+import aunt from "../aunt";
+import uncle from "../uncle";
+import sibling from "./sibling";
+import imageUrl from "url:./image.png";
+```
+
+您可以通过两种方式应用排序：通过[CLI](#通过cli进行导入排序)或[VSCode扩展](#通过vscode扩展进行导入排序)。
+
+## 分组导入
+
+在特定顺序下导入语句是很常见的，特别是在前端项目中工作时，您导入CSS文件：
+
+```js title="example.js"
+import "../styles/reset.css";
+import "../styles/layout.css";
+import { Grid } from "../components/Grid.jsx";
+```
+
+另一个常见的情况是导入polyfill或shim文件，这需要在文件顶部保留：
+
+```js title="example.js"
+import "../polyfills/array/flatMap";
+import { functionThatUsesFlatMap } from "./utils.js";
+```
+
+在这些情况下，Biome将对所有这些导入语句进行排序，可能会导致顺序**破坏**应用程序。
+
+为了避免这种情况，创建一个导入语句的“组”。通过添加一个**新行**来分隔这些组。
+
+这样做，Biome将仅对属于同一组的导入语句进行排序：
+
+```js title="example.js"
+// 组1，仅对这两个文件进行排序
+import "../styles/reset.css";
+import "../styles/layout.css";
+
+// 组2，仅对这个文件进行排序
+import { Grid } from "../components/Grid.jsx";
+```
+
+```js title="example.js"
+// 组1，polyfill/shim
+import "../polyfills/array/flatMap";
+
+// 组2，需要polyfill/shim的文件
+import { functionThatUsesFlatMap } from "./utils.js";
+```
+
+## 通过CLI进行导入排序
+
+使用`check`命令，带有`--apply`选项。
+
+```shell
+biome check --apply-unsafe ./path/to/src
+```
+
+## 通过VSCode扩展进行导入排序
+
+Biome VS Code扩展通过“Organize Imports”代码操作支持导入排序。
+默认情况下，可以使用<kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>键盘快捷键运行此操作，也可以通过*命令面板*（<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>）选择*Organize Imports*来访问它。
+
+如果希望自动在保存时运行该操作而不是手动调用它，请将以下内容添加到编辑器配置中：
+
+```json title="settings.json"
+{
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.biome": "explicit"
+  }
+}
+```

@@ -7,6 +7,10 @@ template: splash
 description: Formate, verifique erros e muito mais em uma fração de segundo.
 editUrl: false
 next: false
+banner:
+  content: |
+    Considere fazer uma doação para a instituição de caridade <a href="https://www.enduringhearts.org/" target="_blank">Enduring Hearts</a>
+
 hero:
   title: Um conjunto de ferramentas para seu projeto web
   tagline: Formate, verifique erros e muito mais em uma fração de segundo.
@@ -40,10 +44,8 @@ import Netlify from "@/components/Netlify.astro";
 import Sponsors from "@/components/Sponsors.astro";
 import LinterExample from "@/components/linter/example.md";
 
-
 <div class="gradient"></div>
 <div class="grid"></div>
-
 
 <div class="hero-code">
     <h2 class="head">Formata código como o Prettier e economiza tempo</h2>
@@ -85,15 +87,14 @@ import LinterExample from "@/components/linter/example.md";
       </div>
     </div>
 
-
     Teste o formatador do Biome no [playground](/playground/) ou diretamente no seu projeto:
 
     ```shell
     npm i -D --save-exact @biomejs/biome
     npx @biomejs/biome format --write ./src
     ```
-</div>
 
+</div>
 
 <div class="hero-code">
     <h2 class="head">Corrija problemas e aprenda boas práticas</h2>
@@ -113,7 +114,6 @@ import LinterExample from "@/components/linter/example.md";
 
 </div>
 
-
 <div class="hero-code">
     <h2 class="head">Tudo de uma vez</h2>
 
@@ -130,8 +130,6 @@ import LinterExample from "@/components/linter/example.md";
 
 </div>
 
-
-
 <div class="card-cnt">
 
 <CardGrid>
@@ -139,8 +137,8 @@ import LinterExample from "@/components/linter/example.md";
       Construído com Rust e uma arquitetura inovadora inspirado pelo rust-analyzer.
     </Card>
     <Card title="Simples" icon="pencil">
-      Nenhuma configuração é necessária para começar a usar! Caso precise, temos
-      diversas opções disponíveis!
+      Nenhuma configuração necessária para começar. 
+      Opções extensivas disponíveis quando você precisar delas.
     </Card>
     <Card title="Escalável" icon="random">
       Projetado para suportar codebases de qualquer tamanho. Focado no crescimento
@@ -151,8 +149,8 @@ import LinterExample from "@/components/linter/example.md";
       anteriores, e qualquer melhoria em uma ferramenta beneficia todas elas.
     </Card>
     <Card title="Prático e informativo" icon="information">
-      Esqueça aquelas mensagens de erro obscuras! Quando alguma coisa está errada,
-      nós falamos exatamente o que está errado e como consertar!
+      Evite mensagens de erro obscuras; quando dizemos que algo está errado, 
+      informamos exatamente onde o problema está e como corrigi-lo.
     </Card>
     <Card title="Pacote completo" icon="add-document">
       Suporte pronto para todas as funcionalidades de linguagem que você utiliza
@@ -199,7 +197,7 @@ import LinterExample from "@/components/linter/example.md";
       </a>
       <a href="https://github.com/biomejs/biome" class="github">
         <Icon name="github" />
-        <p>Github</p>
+        <p>GitHub</p>
       </a>
       <a href="https://twitter.com/biomejs" class="x">
         <Icon name="x.com" />

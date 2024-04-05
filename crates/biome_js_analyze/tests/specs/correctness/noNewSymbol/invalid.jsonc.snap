@@ -123,10 +123,7 @@ invalid.jsonc:1:26 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━�
   
   i Unsafe fix: Remove new.
   
-  - var·s·=·/*·prefix_cmt·*/·new·/*·suffix_cmt·*/·Symbol()·//·comment
-  + var·s·=·/*·prefix_cmt·*/··/*·suffix_cmt·*/·Symbol()·//·comment
-  
+    1 │ var·s·=·/*·prefix_cmt·*/·new·/*·suffix_cmt·*/·Symbol()·//·comment
+      │                          ---                                     
 
 ```
-
-

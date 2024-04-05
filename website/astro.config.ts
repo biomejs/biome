@@ -105,6 +105,7 @@ export default defineConfig({
 							label: "Integrate Biome with your VCS",
 							link: "/guides/integrate-in-vcs",
 							translations: {
+								ja: "Biome をあなたの VCS と統合する",
 								"zh-CN": "与版本控制系统集成",
 								"pt-BR": "Integrando o Biome com o seu VCS",
 							},
@@ -121,7 +122,26 @@ export default defineConfig({
 					items: [
 						{
 							label: "Analyzer",
-							link: "/analyzer",
+							items: [
+								{
+									label: "Introduction",
+									link: "/analyzer",
+									translations: {
+										ja: "イントロダクション",
+										"zh-CN": "介绍",
+										"pt-BR": "Introdução",
+									},
+								},
+								{
+									label: "Import Sorting",
+									link: "/analyzer/import-sorting",
+									translations: {
+										ja: "Import文のソート",
+										"zh-CN": "导入排序",
+										"pt-BR": "Ordenação de importações",
+									},
+								},
+							],
 							translations: {
 								ja: "Analyzer",
 								"zh-CN": "分析器",

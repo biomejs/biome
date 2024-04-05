@@ -15,7 +15,9 @@ version              = "0.0.0"
 
 [dependencies]
 biome_analyze            = { workspace = true, features = ["serde"] }
+biome_configuration      = { workspace = true, features = ["schema"] }
 biome_console            = { workspace = true }
+biome_css_analyze        = { workspace = true }
 biome_css_formatter      = { workspace = true }
 biome_css_parser         = { workspace = true }
 biome_css_syntax         = { workspace = true }

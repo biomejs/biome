@@ -19,7 +19,6 @@ pub(crate) fn lint_with_guard<'ctx>(
 ) -> FileResult {
     tracing::info_span!("Processes linting", path =? workspace_file.path.display()).in_scope(
         move || {
-            let mut errors = 0;
             let mut input = workspace_file.input()?;
             let mut changed = false;
             if let Some(fix_mode) = ctx.execution.as_fix_file_mode() {
@@ -54,7 +53,6 @@ pub(crate) fn lint_with_guard<'ctx>(
                     workspace_file.update_file(output)?;
                     input = workspace_file.input()?;
                 }
-                errors = fix_result.errors;
             }
 
             let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
@@ -71,7 +69,6 @@ pub(crate) fn lint_with_guard<'ctx>(
 
             let no_diagnostics = pull_diagnostics_result.diagnostics.is_empty()
                 && pull_diagnostics_result.skipped_diagnostics == 0;
-            errors += pull_diagnostics_result.errors;
 
             if !no_diagnostics {
                 let input = match workspace_file.as_extension() {
@@ -93,9 +90,7 @@ pub(crate) fn lint_with_guard<'ctx>(
                 });
             }
 
-            if errors > 0 {
-                Ok(FileStatus::Message(Message::Failure))
-            } else if changed {
+            if changed {
                 Ok(FileStatus::Changed)
             } else {
                 Ok(FileStatus::Unchanged)

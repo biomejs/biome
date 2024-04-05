@@ -18,10 +18,14 @@ pub enum HtmlSyntaxKind {
     SLASH,
     EQ,
     BANG,
+    MINUS,
     NULL_KW,
     TRUE_KW,
     FALSE_KW,
+    DOCTYPE_KW,
+    HTML_KW,
     HTML_STRING_LITERAL,
+    HTML_LITERAL,
     ERROR_TOKEN,
     NEWLINE,
     WHITESPACE,
@@ -41,7 +45,10 @@ pub enum HtmlSyntaxKind {
     HTML_NAME,
     HTML_ELEMENT_LIST,
     HTML_ATTRIBUTE_LIST,
+    HTML_CONTENT,
     HTML_BOGUS,
+    HTML_BOGUS_ELEMENT,
+    HTML_BOGUS_ATTRIBUTE,
     #[doc(hidden)]
     __LAST,
 }
@@ -49,13 +56,13 @@ use self::HtmlSyntaxKind::*;
 impl HtmlSyntaxKind {
     pub const fn is_punct(self) -> bool {
         match self {
-            L_ANGLE | R_ANGLE | SLASH | EQ | BANG => true,
+            L_ANGLE | R_ANGLE | SLASH | EQ | BANG | MINUS => true,
             _ => false,
         }
     }
     pub const fn is_literal(self) -> bool {
         match self {
-            HTML_STRING_LITERAL => true,
+            HTML_STRING_LITERAL | HTML_LITERAL => true,
             _ => false,
         }
     }
@@ -70,6 +77,8 @@ impl HtmlSyntaxKind {
             "null" => NULL_KW,
             "true" => TRUE_KW,
             "false" => FALSE_KW,
+            "doctype" => DOCTYPE_KW,
+            "html" => HTML_KW,
             _ => return None,
         };
         Some(kw)
@@ -81,9 +90,12 @@ impl HtmlSyntaxKind {
             SLASH => "/",
             EQ => "=",
             BANG => "!",
+            MINUS => "-",
             NULL_KW => "null",
             TRUE_KW => "true",
             FALSE_KW => "false",
+            DOCTYPE_KW => "doctype",
+            HTML_KW => "html",
             HTML_STRING_LITERAL => "string literal",
             _ => return None,
         };
@@ -92,4 +104,4 @@ impl HtmlSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }
+macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }

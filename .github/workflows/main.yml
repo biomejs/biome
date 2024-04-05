@@ -20,16 +20,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
       - name: Support longpaths
         run: git config core.longpaths true
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v1
+        uses: moonrepo/setup-rust@b8edcc56aab474d90c7cf0bb8beeaf8334c15e9f # v1
         with:
           components: rustfmt
           bins: taplo-cli
+          cache-base: main
       - name: Run rustfmt
         run: |
           cargo fmt --all --verbose -- --check
@@ -40,13 +43,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v1
+        uses: moonrepo/setup-rust@b8edcc56aab474d90c7cf0bb8beeaf8334c15e9f # v1
         with:
           components: clippy
+          cache-base: main
       - name: Run cargo check
         run: cargo check --workspace --all-targets --release
       - name: Run clippy
@@ -57,13 +61,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v1
+        uses: moonrepo/setup-rust@b8edcc56aab474d90c7cf0bb8beeaf8334c15e9f # v1
         with:
           channel: nightly
+          cache: false
       - name: Install udeps
         run: cargo install cargo-udeps --locked
       - name: Run udeps
@@ -80,13 +85,14 @@ jobs:
           - os: macos-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v1
+        uses: moonrepo/setup-rust@b8edcc56aab474d90c7cf0bb8beeaf8334c15e9f # v1
         with:
           bins: cargo-nextest
+          cache-base: main
       - name: Run tests on ${{ matrix.os }}
         run: cargo nextest run --workspace --verbose
       - name: Clean cache
@@ -105,13 +111,16 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: git config --system core.longpaths true
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           submodules: recursive
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v1
+        uses: moonrepo/setup-rust@b8edcc56aab474d90c7cf0bb8beeaf8334c15e9f # v1
+        with:
+          cache-target: release
+          cache-base: main
       - name: Compile
         run: cargo build --release --locked -p xtask_coverage
       - name: Run Test262 suite

@@ -1,0 +1,45 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+language js;
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: GritLanguageDeclaration {
+        language_token: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")],
+        name: GritLanguageName {
+            language_kind: JS_KW@9..11 "js" [] [],
+        },
+        flavor: missing (optional),
+        semicolon_token: SEMICOLON@11..12 ";" [] [],
+    },
+    definitions: GritDefinitionList [],
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..13
+  0: (empty)
+  1: (empty)
+  2: GRIT_LANGUAGE_DECLARATION@0..12
+    0: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")]
+    1: GRIT_LANGUAGE_NAME@9..11
+      0: JS_KW@9..11 "js" [] []
+    2: (empty)
+    3: SEMICOLON@11..12 ";" [] []
+  3: GRIT_DEFINITION_LIST@12..12
+  4: EOF@12..13 "" [Newline("\n")] []
+
+```

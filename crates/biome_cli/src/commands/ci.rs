@@ -2,14 +2,13 @@ use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::commands::validate_configuration_diagnostics;
 use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution};
+use biome_configuration::{organize_imports::PartialOrganizeImports, PartialConfiguration};
+use biome_configuration::{PartialFormatterConfiguration, PartialLinterConfiguration};
 use biome_deserialize::Merge;
-use biome_service::configuration::organize_imports::PartialOrganizeImports;
 use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialFormatterConfiguration,
-    PartialLinterConfiguration,
+    load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::workspace::UpdateSettingsParams;
-use biome_service::PartialConfiguration;
 use std::ffi::OsString;
 
 pub(crate) struct CiCommandPayload {
@@ -35,7 +34,7 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
         since,
         changed,
     } = payload;
-    setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
+    setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
     let loaded_configuration =
         load_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;

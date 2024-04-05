@@ -3461,3 +3461,59 @@ fn format_empty_svelte_ts_files_write() {
         result,
     ));
 }
+
+#[test]
+fn should_format_files_in_folders_ignored_by_linter() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("build/file.js");
+    fs.insert(
+        file_path.into(),
+        r#"
+	value['optimizelyService'] = optimizelyService;
+		"#,
+    );
+
+    let biome_json = Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+    "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+    "organizeImports": {
+        "enabled": true
+    },
+    "linter": {
+        "ignore": ["**/build"],
+        "enabled": true,
+        "rules": {
+            "recommended": true
+        }
+    }
+}
+        "#,
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                "--write",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_format_files_in_folders_ignored_by_linter",
+        fs,
+        console,
+        result,
+    ));
+}

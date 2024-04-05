@@ -1,0 +1,154 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/font_feature_values.css
+---
+# Input
+
+```css
+@font-feature-values ident {  }
+
+@font-feature-values 'ident' {  }
+
+@font-feature-values ident {
+	@styleset {
+    nice-style: 12;
+  }
+}
+
+@font-feature-values ident {
+	@styleset {
+    nice-style: 12;
+  }
+  @swash {
+		pretty: 1;
+	}
+}
+
+@font-feature-values ident {
+	@historical-forms { }
+	@character-variant { }
+	@swash { }
+	@ornaments { }
+	@annotation { }
+}
+
+@font-feature-values "Otaru Kisa" {
+	@annotation { circled: 1; black-boxed: 3; }
+}
+
+@font-feature-values Otaru {
+	@annotation { circled: 1; black-boxed: 3; }
+}
+
+@font-feature-values Otaru Kisa {
+	@annotation { circled: 1; black-boxed: 3; }
+}
+
+@font-feature-values Taisho Gothic {
+	@annotation { boxed: 1; circled: 4; }
+}
+
+@font-feature-values Taisho Gothic, Bar {
+	@annotation { boxed: 1; circled: 4; }
+}
+
+@font-feature-values Taisho Gothic, "Otaru Kisa", Bar {
+	@annotation { boxed: 1; circled: 4; }
+}
+
+
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+@font-feature-values ident {
+}
+
+@font-feature-values "ident" {
+}
+
+@font-feature-values ident {
+	@styleset {
+		nice-style: 12;
+	}
+}
+
+@font-feature-values ident {
+	@styleset {
+		nice-style: 12;
+	}
+	@swash {
+		pretty: 1;
+	}
+}
+
+@font-feature-values ident {
+	@historical-forms {
+	}
+	@character-variant {
+	}
+	@swash {
+	}
+	@ornaments {
+	}
+	@annotation {
+	}
+}
+
+@font-feature-values "Otaru Kisa" {
+	@annotation {
+		circled: 1;
+		black-boxed: 3;
+	}
+}
+
+@font-feature-values Otaru {
+	@annotation {
+		circled: 1;
+		black-boxed: 3;
+	}
+}
+
+@font-feature-values Otaru Kisa {
+	@annotation {
+		circled: 1;
+		black-boxed: 3;
+	}
+}
+
+@font-feature-values Taisho Gothic {
+	@annotation {
+		boxed: 1;
+		circled: 4;
+	}
+}
+
+@font-feature-values Taisho Gothic, Bar {
+	@annotation {
+		boxed: 1;
+		circled: 4;
+	}
+}
+
+@font-feature-values Taisho Gothic, "Otaru Kisa", Bar {
+	@annotation {
+		boxed: 1;
+		circled: 4;
+	}
+}
+```

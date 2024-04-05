@@ -34,9 +34,8 @@ file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━
   i Unsafe fix: Use // biome-ignore instead
   
     1   │ - //·rome-ignore·lint(suspicious/noDoubleEquals):·test
-    2   │ - a·
       1 │ + //·biome-ignore·lint(suspicious/noDoubleEquals):·test
-      2 │ + a·==·b;
+    2 2 │   a == b;
   
 
 ```
@@ -44,7 +43,7 @@ file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━
 ```block
 file.js organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Import statements could be sorted:
+  × Import statements could be sorted:
   
     1   │ - //·rome-ignore·lint(suspicious/noDoubleEquals):·test
       1 │ + //·biome-ignore·lint(suspicious/noDoubleEquals):·test
@@ -65,9 +64,8 @@ file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━
   i Unsafe fix: Use // biome-ignore instead
   
     1   │ - //·rome-ignore·lint(suspicious/noDoubleEquals):·test
-    2   │ - a·
       1 │ + //·biome-ignore·lint(suspicious/noDoubleEquals):·test
-      2 │ + a·==·b;
+    2 2 │   a == b;
   
 
 ```
@@ -75,7 +73,7 @@ file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━
 ```block
 file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1 1 │   // rome-ignore lint(suspicious/noDoubleEquals): test
     2   │ - a·==·b;
@@ -87,7 +85,5 @@ file.js format ━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes needed.
-Found 3 errors.
+Found 2 errors.
 ```
-
-

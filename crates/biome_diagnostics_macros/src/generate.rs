@@ -2,9 +2,18 @@ use proc_macro2::{Ident, Span, TokenStream};
 use proc_macro_error::*;
 use quote::quote;
 
-use crate::parse::{DeriveInput, StaticOrDynamic, StringOrMarkup};
+use crate::parse::{
+    DeriveEnumInput, DeriveInput, DeriveStructInput, StaticOrDynamic, StringOrMarkup,
+};
 
 pub(crate) fn generate_diagnostic(input: DeriveInput) -> TokenStream {
+    match input {
+        DeriveInput::DeriveStructInput(input) => generate_struct_diagnostic(input),
+        DeriveInput::DeriveEnumInput(input) => generate_enum_diagnostic(input),
+    }
+}
+
+fn generate_struct_diagnostic(input: DeriveStructInput) -> TokenStream {
     let category = generate_category(&input);
     let severity = generate_severity(&input);
     let description = generate_description(&input);
@@ -42,7 +51,7 @@ pub(crate) fn generate_diagnostic(input: DeriveInput) -> TokenStream {
     }
 }
 
-fn generate_category(input: &DeriveInput) -> TokenStream {
+fn generate_category(input: &DeriveStructInput) -> TokenStream {
     let category = match &input.category {
         Some(StaticOrDynamic::Static(value)) => quote! {
             biome_diagnostics::category!(#value)
@@ -60,7 +69,7 @@ fn generate_category(input: &DeriveInput) -> TokenStream {
     }
 }
 
-fn generate_severity(input: &DeriveInput) -> TokenStream {
+fn generate_severity(input: &DeriveStructInput) -> TokenStream {
     let severity = match &input.severity {
         Some(StaticOrDynamic::Static(value)) => quote! {
             biome_diagnostics::Severity::#value
@@ -78,7 +87,7 @@ fn generate_severity(input: &DeriveInput) -> TokenStream {
     }
 }
 
-fn generate_description(input: &DeriveInput) -> TokenStream {
+fn generate_description(input: &DeriveStructInput) -> TokenStream {
     let description = match &input.description {
         Some(StaticOrDynamic::Static(StringOrMarkup::String(value))) => {
             let mut format_string = String::new();
@@ -151,7 +160,7 @@ fn generate_description(input: &DeriveInput) -> TokenStream {
     }
 }
 
-fn generate_message(input: &DeriveInput) -> TokenStream {
+fn generate_message(input: &DeriveStructInput) -> TokenStream {
     let message = match &input.message {
         Some(StaticOrDynamic::Static(StringOrMarkup::String(value))) => quote! {
             fmt.write_str(#value)
@@ -173,7 +182,7 @@ fn generate_message(input: &DeriveInput) -> TokenStream {
     }
 }
 
-fn generate_advices(input: &DeriveInput) -> TokenStream {
+fn generate_advices(input: &DeriveStructInput) -> TokenStream {
     if input.advices.is_empty() {
         return quote!();
     }
@@ -188,7 +197,7 @@ fn generate_advices(input: &DeriveInput) -> TokenStream {
     }
 }
 
-fn generate_verbose_advices(input: &DeriveInput) -> TokenStream {
+fn generate_verbose_advices(input: &DeriveStructInput) -> TokenStream {
     if input.verbose_advices.is_empty() {
         return quote!();
     }
@@ -203,7 +212,7 @@ fn generate_verbose_advices(input: &DeriveInput) -> TokenStream {
     }
 }
 
-fn generate_location(input: &DeriveInput) -> TokenStream {
+fn generate_location(input: &DeriveStructInput) -> TokenStream {
     if input.location.is_empty() {
         return quote!();
     }
@@ -220,7 +229,7 @@ fn generate_location(input: &DeriveInput) -> TokenStream {
     }
 }
 
-fn generate_tags(input: &DeriveInput) -> TokenStream {
+fn generate_tags(input: &DeriveStructInput) -> TokenStream {
     let tags = match &input.tags {
         Some(StaticOrDynamic::Static(value)) => {
             let values = value.iter();
@@ -241,7 +250,7 @@ fn generate_tags(input: &DeriveInput) -> TokenStream {
     }
 }
 
-fn generate_source(input: &DeriveInput) -> TokenStream {
+fn generate_source(input: &DeriveStructInput) -> TokenStream {
     match &input.source {
         Some(value) => quote! {
             fn source(&self) -> Option<&dyn biome_diagnostics::Diagnostic> {
@@ -249,5 +258,82 @@ fn generate_source(input: &DeriveInput) -> TokenStream {
             }
         },
         None => quote!(),
+    }
+}
+
+fn generate_enum_diagnostic(input: DeriveEnumInput) -> TokenStream {
+    let generic_params = if !input.generics.params.is_empty() {
+        let lt_token = &input.generics.lt_token;
+        let params = &input.generics.params;
+        let gt_token = &input.generics.gt_token;
+        quote! { #lt_token #params #gt_token }
+    } else {
+        quote!()
+    };
+
+    let ident = input.ident;
+    let generics = input.generics;
+    let variants: Vec<_> = input
+        .variants
+        .iter()
+        .map(|variant| &variant.ident)
+        .collect();
+
+    quote! {
+        impl #generic_params biome_diagnostics::Diagnostic for #ident #generics {
+            fn category(&self) -> Option<&'static biome_diagnostics::Category> {
+                match self {
+                    #(Self::#variants(error) => biome_diagnostics::Diagnostic::category(error),)*
+                }
+            }
+
+            fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                match self {
+                    #(Self::#variants(error) => biome_diagnostics::Diagnostic::description(error, fmt),)*
+                }
+            }
+
+            fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+                match self {
+                    #(Self::#variants(error) => biome_diagnostics::Diagnostic::message(error, fmt),)*
+                }
+            }
+
+            fn severity(&self) -> biome_diagnostics::Severity {
+                match self {
+                    #(Self::#variants(error) => biome_diagnostics::Diagnostic::severity(error),)*
+                }
+            }
+
+            fn tags(&self) -> biome_diagnostics::DiagnosticTags {
+                match self {
+                    #(Self::#variants(error) => biome_diagnostics::Diagnostic::tags(error),)*
+                }
+            }
+
+            fn location(&self) -> biome_diagnostics::Location<'_> {
+                match self {
+                    #(Self::#variants(error) => biome_diagnostics::Diagnostic::location(error),)*
+                }
+            }
+
+            fn source(&self) -> Option<&dyn biome_diagnostics::Diagnostic> {
+                match self {
+                    #(Self::#variants(error) => biome_diagnostics::Diagnostic::source(error),)*
+                }
+            }
+
+            fn advices(&self, visitor: &mut dyn biome_diagnostics::Visit) -> std::io::Result<()> {
+                match self {
+                    #(Self::#variants(error) => biome_diagnostics::Diagnostic::advices(error, visitor),)*
+                }
+            }
+
+            fn verbose_advices(&self, visitor: &mut dyn biome_diagnostics::Visit) -> std::io::Result<()> {
+                match self {
+                    #(Self::#variants(error) => biome_diagnostics::Diagnostic::verbose_advices(error, visitor),)*
+                }
+            }
+        }
     }
 }

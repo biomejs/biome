@@ -70,7 +70,7 @@ invalid.ts:2:13 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   i Safe fix: Remove extra non-null assertion.
   
     2 │ const·bar·=·case1!!.bar;
-      │                   -     
+      │                  -      
 
 ```
 
@@ -88,7 +88,7 @@ invalid.ts:5:24 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   i Safe fix: Remove extra non-null assertion.
   
     5 │ ··const·bar1:·number·=·bar!!!;
-      │                             - 
+      │                            -  
 
 ```
 
@@ -106,7 +106,7 @@ invalid.ts:5:24 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   i Safe fix: Remove extra non-null assertion.
   
     5 │ ··const·bar1:·number·=·bar!!!;
-      │                             - 
+      │                           -   
 
 ```
 
@@ -234,7 +234,7 @@ invalid.ts:32:5 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   i Safe fix: Remove extra non-null assertion.
   
     32 │ ····this.property!!;
-       │                   - 
+       │                  -  
 
 ```
 
@@ -253,7 +253,7 @@ invalid.ts:36:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   i Safe fix: Remove extra non-null assertion.
   
     36 │ case10!!.prop·=·null;
-       │        -             
+       │       -              
 
 ```
 
@@ -272,7 +272,7 @@ invalid.ts:40:11 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   i Safe fix: Remove extra non-null assertion.
   
     40 │ case12!?.[a.b!!];
-       │               -  
+       │              -   
 
 ```
 
@@ -291,7 +291,7 @@ invalid.ts:42:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   i Safe fix: Remove extra non-null assertion.
   
     42 │ case13!!!·=·null
-       │         -       
+       │        -        
 
 ```
 
@@ -310,7 +310,7 @@ invalid.ts:42:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   i Safe fix: Remove extra non-null assertion.
   
     42 │ case13!!!·=·null
-       │         -       
+       │       -         
 
 ```
 
@@ -329,7 +329,7 @@ invalid.ts:44:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   i Safe fix: Remove extra non-null assertion.
   
     44 │ case14!!·=·null
-       │        -       
+       │       -        
 
 ```
 
@@ -348,7 +348,7 @@ invalid.ts:46:5 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   i Safe fix: Remove extra non-null assertion.
   
     46 │ if·(case15!!)·{}
-       │            -    
+       │           -     
 
 ```
 
@@ -366,8 +366,6 @@ invalid.ts:48:6 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   i Safe fix: Remove extra non-null assertion.
   
     48 │ if·(!case16!!)·{}
-       │             -    
+       │            -     
 
 ```
-
-

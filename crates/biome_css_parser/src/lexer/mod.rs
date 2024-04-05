@@ -3,14 +3,15 @@
 mod tests;
 
 use crate::CssParserOptions;
-use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextRange, TextSize, T};
+use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
+use biome_parser::lexer::{
+    LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
+};
 use biome_unicode_table::{
     is_css_id_continue, is_css_id_start, lookup_byte, Dispatch, Dispatch::*,
 };
 use std::char::REPLACEMENT_CHARACTER;
-use unicode_bom::Bom;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum CssLexContext {
@@ -62,7 +63,8 @@ pub(crate) struct CssLexer<'src> {
     /// If the source starts with a Unicode BOM, this is the number of bytes for that token.
     unicode_bom_length: usize,
 
-    /// Byte offset of the current token from the start of the source
+    /// Byte offset of the current token from the start of the source.
+    ///
     /// The range of the current token can be computed by `self.position - self.current_start`
     current_start: TextSize,
 
@@ -78,6 +80,9 @@ pub(crate) struct CssLexer<'src> {
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
+    const NEWLINE: Self::Kind = NEWLINE;
+
+    const WHITESPACE: Self::Kind = WHITESPACE;
     type Kind = CssSyntaxKind;
     type LexContext = CssLexContext;
     type ReLexContext = CssReLexContext;
@@ -90,20 +95,16 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         self.current_kind
     }
 
-    fn current_range(&self) -> TextRange {
-        TextRange::new(self.current_start, TextSize::from(self.position as u32))
+    fn position(&self) -> usize {
+        self.position
     }
 
-    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
-        LexerCheckpoint {
-            position: TextSize::from(self.position as u32),
-            current_start: self.current_start,
-            current_flags: self.current_flags,
-            current_kind: self.current_kind,
-            after_line_break: self.after_newline,
-            unicode_bom_length: self.unicode_bom_length,
-            diagnostics_pos: self.diagnostics.len() as u32,
-        }
+    fn current_start(&self) -> TextSize {
+        self.current_start
+    }
+
+    fn push_diagnostic(&mut self, diagnostic: ParseDiagnostic) {
+        self.diagnostics.push(diagnostic);
     }
 
     fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
@@ -130,25 +131,6 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         }
 
         kind
-    }
-
-    fn re_lex(&mut self, _context: Self::ReLexContext) -> Self::Kind {
-        let old_position = self.position;
-        self.position = u32::from(self.current_start) as usize;
-
-        let re_lexed_kind = match self.current_byte() {
-            Some(current) => self.consume_selector_token(current),
-            None => EOF,
-        };
-
-        if self.current() == re_lexed_kind {
-            // Didn't re-lex anything. Return existing token again
-            self.position = old_position;
-        } else {
-            self.current_kind = re_lexed_kind;
-        }
-
-        re_lexed_kind
     }
 
     fn has_preceding_line_break(&self) -> bool {
@@ -188,6 +170,18 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
     fn current_flags(&self) -> TokenFlags {
         self.current_flags
     }
+
+    #[inline]
+    fn advance_char_unchecked(&mut self) {
+        let c = self.current_char_unchecked();
+        self.position += c.len_utf8();
+    }
+
+    /// Advances the current position by `n` bytes.
+    #[inline]
+    fn advance(&mut self, n: usize) {
+        self.position += n;
+    }
 }
 
 impl<'src> CssLexer<'src> {
@@ -210,113 +204,10 @@ impl<'src> CssLexer<'src> {
         Self { config, ..self }
     }
 
-    fn text_position(&self) -> TextSize {
-        TextSize::try_from(self.position).expect("Input to be smaller than 4 GB")
-    }
-
     /// Bumps the current byte and creates a lexed token of the passed in kind
     fn consume_byte(&mut self, tok: CssSyntaxKind) -> CssSyntaxKind {
         self.advance(1);
         tok
-    }
-
-    /// Consume just one newline/line break.
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    fn consume_newline(&mut self) -> bool {
-        self.assert_current_char_boundary();
-
-        match self.current_byte() {
-            Some(b'\n') => {
-                self.advance(1);
-                true
-            }
-            Some(b'\r') => {
-                if self.peek_byte() == Some(b'\n') {
-                    self.advance(2)
-                } else {
-                    self.advance(1)
-                }
-                true
-            }
-
-            _ => false,
-        }
-    }
-
-    /// Consumes all whitespace until a non-whitespace or a newline is found.
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    fn consume_whitespaces(&mut self) {
-        self.assert_current_char_boundary();
-
-        while let Some(byte) = self.current_byte() {
-            let dispatch = lookup_byte(byte);
-
-            match dispatch {
-                WHS => match byte {
-                    b'\t' | b' ' => self.advance(1),
-                    b'\r' | b'\n' => {
-                        break;
-                    }
-                    _ => {
-                        let start = self.text_position();
-                        self.advance(1);
-
-                        self.diagnostics.push(
-                            ParseDiagnostic::new(
-                                "The CSS standard only allows tabs, whitespace, carriage return and line feed whitespace.",
-                                start..self.text_position(),
-                            )
-                            .with_hint("Use a regular whitespace character instead."),
-                        )
-                    }
-                },
-
-                _ => break,
-            }
-        }
-    }
-
-    /// Consume one newline or all whitespace until a non-whitespace or a newline is found.
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    fn consume_newline_or_whitespaces(&mut self) -> CssSyntaxKind {
-        if self.consume_newline() {
-            self.after_newline = true;
-            NEWLINE
-        } else {
-            self.consume_whitespaces();
-            WHITESPACE
-        }
-    }
-
-    /// Check if the source starts with a Unicode BOM character. If it does,
-    /// consume it and return the UNICODE_BOM token kind.
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary (and realistically only at
-    /// the start position of the source).
-    fn consume_potential_bom(&mut self) -> Option<CssSyntaxKind> {
-        // Bom needs at least the first three bytes of the source to know if it
-        // matches the UTF-8 BOM and not an alternative. This can be expanded
-        // to more bytes to support other BOM characters if Biome decides to
-        // support other encodings like UTF-16.
-        if let Some(first) = self.source().get(0..3) {
-            let bom = Bom::from(first.as_bytes());
-            self.unicode_bom_length = bom.len();
-            self.advance(self.unicode_bom_length);
-
-            match bom {
-                Bom::Null => None,
-                _ => Some(UNICODE_BOM),
-            }
-        } else {
-            None
-        }
     }
 
     /// Get the UTF8 char which starts at the current byte
@@ -327,62 +218,12 @@ impl<'src> CssLexer<'src> {
         self.char_unchecked_at(0)
     }
 
-    /// Gets the current byte.
-    ///
-    /// ## Returns
-    /// The current byte if the lexer isn't at the end of the file.
-    #[inline]
-    fn current_byte(&self) -> Option<u8> {
-        if self.is_eof() {
-            None
-        } else {
-            Some(self.source.as_bytes()[self.position])
-        }
-    }
-
-    /// Asserts that the lexer is at current a UTF8 char boundary
-    #[inline]
-    fn assert_current_char_boundary(&self) {
-        debug_assert!(self.source.is_char_boundary(self.position));
-    }
-
-    /// Peeks at the next byte
-    #[inline]
-    fn peek_byte(&self) -> Option<u8> {
-        self.byte_at(1)
-    }
-
     /// Peek the UTF8 char which starts at the current byte
     ///
     /// ## Safety
     /// Must be called at a valid UT8 char boundary
     fn peek_char_unchecked(&self) -> char {
         self.char_unchecked_at(1)
-    }
-
-    /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
-    #[inline]
-    fn byte_at(&self, offset: usize) -> Option<u8> {
-        self.source.as_bytes().get(self.position + offset).copied()
-    }
-
-    /// Advances the position by one and returns the next byte value
-    #[inline]
-    fn next_byte(&mut self) -> Option<u8> {
-        self.advance(1);
-        self.current_byte()
-    }
-
-    /// Asserts that the lexer is at a UTF8 char boundary
-    #[inline]
-    fn assert_at_char_boundary(&self, offset: usize) {
-        debug_assert!(self.source.is_char_boundary(self.position + offset));
-    }
-
-    /// Asserts that the lexer is currently positioned at `byte`
-    #[inline]
-    fn assert_byte(&self, byte: u8) {
-        debug_assert_eq!(self.source.as_bytes()[self.position], byte);
     }
 
     /// Get the UTF8 char which starts at the current byte
@@ -422,37 +263,6 @@ impl<'src> CssLexer<'src> {
         }
     }
 
-    /// Advances the current position by `n` bytes.
-    #[inline]
-    fn advance(&mut self, n: usize) {
-        self.position += n;
-    }
-
-    #[inline]
-    fn advance_byte_or_char(&mut self, chr: u8) {
-        if chr.is_ascii() {
-            self.advance(1);
-        } else {
-            self.advance_char_unchecked();
-        }
-    }
-
-    /// Advances the current position by the current char UTF8 length
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    #[inline]
-    fn advance_char_unchecked(&mut self) {
-        let c = self.current_char_unchecked();
-        self.position += c.len_utf8();
-    }
-
-    /// Returns `true` if the parser is at or passed the end of the file.
-    #[inline]
-    fn is_eof(&self) -> bool {
-        self.position >= self.source.len()
-    }
-
     /// Lexes the next token
     ///
     /// Guaranteed to not be at the end of the file
@@ -464,7 +274,13 @@ impl<'src> CssLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => {
+                let kind = self.consume_newline_or_whitespaces();
+                if kind == Self::NEWLINE {
+                    self.after_newline = true;
+                }
+                kind
+            }
             QOT => self.consume_string_literal(current),
             SLH => self.consume_slash(),
 
@@ -520,11 +336,13 @@ impl<'src> CssLexer<'src> {
             UNI => {
                 // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
                 // perform the check. At any other position, the BOM is just considered plain whitespace.
-                if self.position == 0 && self.consume_potential_bom().is_some() {
-                    UNICODE_BOM
-                } else {
-                    self.consume_unexpected_character()
+                if self.position == 0 {
+                    if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
+                        self.unicode_bom_length = bom_size;
+                        return bom;
+                    }
                 }
+                self.consume_unexpected_character()
             }
 
             _ => self.consume_unexpected_character(),
@@ -1416,6 +1234,42 @@ impl<'src> CssLexer<'src> {
         }
     }
 }
+
+impl<'src> ReLexer<'src> for CssLexer<'src> {
+    fn re_lex(&mut self, _context: Self::ReLexContext) -> Self::Kind {
+        let old_position = self.position;
+        self.position = u32::from(self.current_start) as usize;
+
+        let re_lexed_kind = match self.current_byte() {
+            Some(current) => self.consume_selector_token(current),
+            None => EOF,
+        };
+
+        if self.current() == re_lexed_kind {
+            // Didn't re-lex anything. Return existing token again
+            self.position = old_position;
+        } else {
+            self.current_kind = re_lexed_kind;
+        }
+
+        re_lexed_kind
+    }
+}
+
+impl<'src> LexerWithCheckpoint<'src> for CssLexer<'src> {
+    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
+        LexerCheckpoint {
+            position: TextSize::from(self.position as u32),
+            current_start: self.current_start,
+            current_flags: self.current_flags,
+            current_kind: self.current_kind,
+            after_line_break: self.after_newline,
+            unicode_bom_length: self.unicode_bom_length,
+            diagnostics_pos: self.diagnostics.len() as u32,
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 enum LexStringState {
     /// String that contains an invalid escape sequence

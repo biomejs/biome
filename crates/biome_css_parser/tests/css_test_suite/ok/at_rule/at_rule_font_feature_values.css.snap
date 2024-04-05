@@ -32,6 +32,29 @@ expression: snapshot
 	@annotation { }
 }
 
+@font-feature-values "Otaru Kisa" {
+	@annotation { circled: 1; black-boxed: 3; }
+}
+
+@font-feature-values Otaru {
+	@annotation { circled: 1; black-boxed: 3; }
+}
+
+@font-feature-values Otaru Kisa {
+	@annotation { circled: 1; black-boxed: 3; }
+}
+
+@font-feature-values Taisho Gothic {
+	@annotation { boxed: 1; circled: 4; }
+}
+
+@font-feature-values Taisho Gothic, Bar {
+	@annotation { boxed: 1; circled: 4; }
+}
+
+@font-feature-values Taisho Gothic, "Otaru Kisa", Bar {
+	@annotation { boxed: 1; circled: 4; }
+}
 
 
 ```
@@ -47,9 +70,15 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: CssFontFeatureValuesAtRule {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@1..21 "font-feature-values" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@21..27 "ident" [] [Whitespace(" ")],
-                },
+                names: CssFontFamilyNameList [
+                    CssFontFamilyName {
+                        names: CssCustomIdentifierList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@21..27 "ident" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                ],
                 block: CssFontFeatureValuesBlock {
                     l_curly_token: L_CURLY@27..30 "{" [] [Whitespace("  ")],
                     items: CssFontFeatureValuesItemList [],
@@ -61,9 +90,11 @@ CssRoot {
             at_token: AT@31..34 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssFontFeatureValuesAtRule {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@34..54 "font-feature-values" [] [Whitespace(" ")],
-                name: CssString {
-                    value_token: CSS_STRING_LITERAL@54..62 "'ident'" [] [Whitespace(" ")],
-                },
+                names: CssFontFamilyNameList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@54..62 "'ident'" [] [Whitespace(" ")],
+                    },
+                ],
                 block: CssFontFeatureValuesBlock {
                     l_curly_token: L_CURLY@62..65 "{" [] [Whitespace("  ")],
                     items: CssFontFeatureValuesItemList [],
@@ -75,9 +106,15 @@ CssRoot {
             at_token: AT@66..69 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssFontFeatureValuesAtRule {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@69..89 "font-feature-values" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@89..95 "ident" [] [Whitespace(" ")],
-                },
+                names: CssFontFamilyNameList [
+                    CssFontFamilyName {
+                        names: CssCustomIdentifierList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@89..95 "ident" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                ],
                 block: CssFontFeatureValuesBlock {
                     l_curly_token: L_CURLY@95..96 "{" [] [],
                     items: CssFontFeatureValuesItemList [
@@ -117,9 +154,15 @@ CssRoot {
             at_token: AT@135..138 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssFontFeatureValuesAtRule {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@138..158 "font-feature-values" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@158..164 "ident" [] [Whitespace(" ")],
-                },
+                names: CssFontFamilyNameList [
+                    CssFontFamilyName {
+                        names: CssCustomIdentifierList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@158..164 "ident" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                ],
                 block: CssFontFeatureValuesBlock {
                     l_curly_token: L_CURLY@164..165 "{" [] [],
                     items: CssFontFeatureValuesItemList [
@@ -186,9 +229,15 @@ CssRoot {
             at_token: AT@231..234 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssFontFeatureValuesAtRule {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@234..254 "font-feature-values" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@254..260 "ident" [] [Whitespace(" ")],
-                },
+                names: CssFontFamilyNameList [
+                    CssFontFamilyName {
+                        names: CssCustomIdentifierList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@254..260 "ident" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                ],
                 block: CssFontFeatureValuesBlock {
                     l_curly_token: L_CURLY@260..261 "{" [] [],
                     items: CssFontFeatureValuesItemList [
@@ -242,23 +291,444 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@355..358 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@358..378 "font-feature-values" [] [Whitespace(" ")],
+                names: CssFontFamilyNameList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@378..391 "\"Otaru Kisa\"" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@391..392 "{" [] [],
+                    items: CssFontFeatureValuesItemList [
+                        CssFontFeatureValuesItem {
+                            at_token: AT@392..395 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: ANNOTATION_KW@395..406 "annotation" [] [Whitespace(" ")],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@406..408 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@408..415 "circled" [] [],
+                                                },
+                                                colon_token: COLON@415..417 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@417..418 "1" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@418..420 ";" [] [Whitespace(" ")],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@420..431 "black-boxed" [] [],
+                                                },
+                                                colon_token: COLON@431..433 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@433..434 "3" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@434..436 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@436..437 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@437..439 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@439..442 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@442..462 "font-feature-values" [] [Whitespace(" ")],
+                names: CssFontFamilyNameList [
+                    CssFontFamilyName {
+                        names: CssCustomIdentifierList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@462..468 "Otaru" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                ],
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@468..469 "{" [] [],
+                    items: CssFontFeatureValuesItemList [
+                        CssFontFeatureValuesItem {
+                            at_token: AT@469..472 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: ANNOTATION_KW@472..483 "annotation" [] [Whitespace(" ")],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@483..485 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@485..492 "circled" [] [],
+                                                },
+                                                colon_token: COLON@492..494 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@494..495 "1" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@495..497 ";" [] [Whitespace(" ")],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@497..508 "black-boxed" [] [],
+                                                },
+                                                colon_token: COLON@508..510 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@510..511 "3" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@511..513 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@513..514 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@514..516 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@516..519 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@519..539 "font-feature-values" [] [Whitespace(" ")],
+                names: CssFontFamilyNameList [
+                    CssFontFamilyName {
+                        names: CssCustomIdentifierList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@539..545 "Otaru" [] [Whitespace(" ")],
+                            },
+                            CssCustomIdentifier {
+                                value_token: IDENT@545..550 "Kisa" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                ],
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@550..551 "{" [] [],
+                    items: CssFontFeatureValuesItemList [
+                        CssFontFeatureValuesItem {
+                            at_token: AT@551..554 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: ANNOTATION_KW@554..565 "annotation" [] [Whitespace(" ")],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@565..567 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@567..574 "circled" [] [],
+                                                },
+                                                colon_token: COLON@574..576 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@576..577 "1" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@577..579 ";" [] [Whitespace(" ")],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@579..590 "black-boxed" [] [],
+                                                },
+                                                colon_token: COLON@590..592 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@592..593 "3" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@593..595 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@595..596 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@596..598 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@598..601 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@601..621 "font-feature-values" [] [Whitespace(" ")],
+                names: CssFontFamilyNameList [
+                    CssFontFamilyName {
+                        names: CssCustomIdentifierList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@621..628 "Taisho" [] [Whitespace(" ")],
+                            },
+                            CssCustomIdentifier {
+                                value_token: IDENT@628..635 "Gothic" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                ],
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@635..636 "{" [] [],
+                    items: CssFontFeatureValuesItemList [
+                        CssFontFeatureValuesItem {
+                            at_token: AT@636..639 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: ANNOTATION_KW@639..650 "annotation" [] [Whitespace(" ")],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@650..652 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@652..657 "boxed" [] [],
+                                                },
+                                                colon_token: COLON@657..659 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@659..660 "1" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@660..662 ";" [] [Whitespace(" ")],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@662..669 "circled" [] [],
+                                                },
+                                                colon_token: COLON@669..671 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@671..672 "4" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@672..674 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@674..675 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@675..677 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@677..680 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@680..700 "font-feature-values" [] [Whitespace(" ")],
+                names: CssFontFamilyNameList [
+                    CssFontFamilyName {
+                        names: CssCustomIdentifierList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@700..707 "Taisho" [] [Whitespace(" ")],
+                            },
+                            CssCustomIdentifier {
+                                value_token: IDENT@707..713 "Gothic" [] [],
+                            },
+                        ],
+                    },
+                    COMMA@713..715 "," [] [Whitespace(" ")],
+                    CssFontFamilyName {
+                        names: CssCustomIdentifierList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@715..719 "Bar" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                ],
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@719..720 "{" [] [],
+                    items: CssFontFeatureValuesItemList [
+                        CssFontFeatureValuesItem {
+                            at_token: AT@720..723 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: ANNOTATION_KW@723..734 "annotation" [] [Whitespace(" ")],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@734..736 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@736..741 "boxed" [] [],
+                                                },
+                                                colon_token: COLON@741..743 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@743..744 "1" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@744..746 ";" [] [Whitespace(" ")],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@746..753 "circled" [] [],
+                                                },
+                                                colon_token: COLON@753..755 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@755..756 "4" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@756..758 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@758..759 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@759..761 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@761..764 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@764..784 "font-feature-values" [] [Whitespace(" ")],
+                names: CssFontFamilyNameList [
+                    CssFontFamilyName {
+                        names: CssCustomIdentifierList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@784..791 "Taisho" [] [Whitespace(" ")],
+                            },
+                            CssCustomIdentifier {
+                                value_token: IDENT@791..797 "Gothic" [] [],
+                            },
+                        ],
+                    },
+                    COMMA@797..799 "," [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@799..811 "\"Otaru Kisa\"" [] [],
+                    },
+                    COMMA@811..813 "," [] [Whitespace(" ")],
+                    CssFontFamilyName {
+                        names: CssCustomIdentifierList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@813..817 "Bar" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                ],
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@817..818 "{" [] [],
+                    items: CssFontFeatureValuesItemList [
+                        CssFontFeatureValuesItem {
+                            at_token: AT@818..821 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: ANNOTATION_KW@821..832 "annotation" [] [Whitespace(" ")],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@832..834 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@834..839 "boxed" [] [],
+                                                },
+                                                colon_token: COLON@839..841 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@841..842 "1" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@842..844 ";" [] [Whitespace(" ")],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@844..851 "circled" [] [],
+                                                },
+                                                colon_token: COLON@851..853 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@853..854 "4" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@854..856 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@856..857 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@857..859 "}" [Newline("\n")] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@355..358 "" [Newline("\n"), Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@859..861 "" [Newline("\n"), Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..358
+0: CSS_ROOT@0..861
   0: (empty)
-  1: CSS_RULE_LIST@0..355
+  1: CSS_RULE_LIST@0..859
     0: CSS_AT_RULE@0..31
       0: AT@0..1 "@" [] []
       1: CSS_FONT_FEATURE_VALUES_AT_RULE@1..31
         0: FONT_FEATURE_VALUES_KW@1..21 "font-feature-values" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@21..27
-          0: IDENT@21..27 "ident" [] [Whitespace(" ")]
+        1: CSS_FONT_FAMILY_NAME_LIST@21..27
+          0: CSS_FONT_FAMILY_NAME@21..27
+            0: CSS_CUSTOM_IDENTIFIER_LIST@21..27
+              0: CSS_CUSTOM_IDENTIFIER@21..27
+                0: IDENT@21..27 "ident" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@27..31
           0: L_CURLY@27..30 "{" [] [Whitespace("  ")]
           1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@30..30
@@ -267,8 +737,9 @@ CssRoot {
       0: AT@31..34 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_FONT_FEATURE_VALUES_AT_RULE@34..66
         0: FONT_FEATURE_VALUES_KW@34..54 "font-feature-values" [] [Whitespace(" ")]
-        1: CSS_STRING@54..62
-          0: CSS_STRING_LITERAL@54..62 "'ident'" [] [Whitespace(" ")]
+        1: CSS_FONT_FAMILY_NAME_LIST@54..62
+          0: CSS_STRING@54..62
+            0: CSS_STRING_LITERAL@54..62 "'ident'" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@62..66
           0: L_CURLY@62..65 "{" [] [Whitespace("  ")]
           1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@65..65
@@ -277,8 +748,11 @@ CssRoot {
       0: AT@66..69 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_FONT_FEATURE_VALUES_AT_RULE@69..135
         0: FONT_FEATURE_VALUES_KW@69..89 "font-feature-values" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@89..95
-          0: IDENT@89..95 "ident" [] [Whitespace(" ")]
+        1: CSS_FONT_FAMILY_NAME_LIST@89..95
+          0: CSS_FONT_FAMILY_NAME@89..95
+            0: CSS_CUSTOM_IDENTIFIER_LIST@89..95
+              0: CSS_CUSTOM_IDENTIFIER@89..95
+                0: IDENT@89..95 "ident" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@95..135
           0: L_CURLY@95..96 "{" [] []
           1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@96..133
@@ -305,8 +779,11 @@ CssRoot {
       0: AT@135..138 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_FONT_FEATURE_VALUES_AT_RULE@138..231
         0: FONT_FEATURE_VALUES_KW@138..158 "font-feature-values" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@158..164
-          0: IDENT@158..164 "ident" [] [Whitespace(" ")]
+        1: CSS_FONT_FAMILY_NAME_LIST@158..164
+          0: CSS_FONT_FAMILY_NAME@158..164
+            0: CSS_CUSTOM_IDENTIFIER_LIST@158..164
+              0: CSS_CUSTOM_IDENTIFIER@158..164
+                0: IDENT@158..164 "ident" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@164..231
           0: L_CURLY@164..165 "{" [] []
           1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@165..229
@@ -351,8 +828,11 @@ CssRoot {
       0: AT@231..234 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_FONT_FEATURE_VALUES_AT_RULE@234..355
         0: FONT_FEATURE_VALUES_KW@234..254 "font-feature-values" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@254..260
-          0: IDENT@254..260 "ident" [] [Whitespace(" ")]
+        1: CSS_FONT_FAMILY_NAME_LIST@254..260
+          0: CSS_FONT_FAMILY_NAME@254..260
+            0: CSS_CUSTOM_IDENTIFIER_LIST@254..260
+              0: CSS_CUSTOM_IDENTIFIER@254..260
+                0: IDENT@254..260 "ident" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@260..355
           0: L_CURLY@260..261 "{" [] []
           1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@261..353
@@ -392,6 +872,277 @@ CssRoot {
                 1: CSS_DECLARATION_LIST@352..352
                 2: R_CURLY@352..353 "}" [] []
           2: R_CURLY@353..355 "}" [Newline("\n")] []
-  2: EOF@355..358 "" [Newline("\n"), Newline("\n"), Newline("\n")] []
+    5: CSS_AT_RULE@355..439
+      0: AT@355..358 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@358..439
+        0: FONT_FEATURE_VALUES_KW@358..378 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_FONT_FAMILY_NAME_LIST@378..391
+          0: CSS_STRING@378..391
+            0: CSS_STRING_LITERAL@378..391 "\"Otaru Kisa\"" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@391..439
+          0: L_CURLY@391..392 "{" [] []
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@392..437
+            0: CSS_FONT_FEATURE_VALUES_ITEM@392..437
+              0: AT@392..395 "@" [Newline("\n"), Whitespace("\t")] []
+              1: ANNOTATION_KW@395..406 "annotation" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_BLOCK@406..437
+                0: L_CURLY@406..408 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@408..436
+                  0: CSS_DECLARATION_WITH_SEMICOLON@408..420
+                    0: CSS_DECLARATION@408..418
+                      0: CSS_GENERIC_PROPERTY@408..418
+                        0: CSS_IDENTIFIER@408..415
+                          0: IDENT@408..415 "circled" [] []
+                        1: COLON@415..417 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@417..418
+                          0: CSS_NUMBER@417..418
+                            0: CSS_NUMBER_LITERAL@417..418 "1" [] []
+                      1: (empty)
+                    1: SEMICOLON@418..420 ";" [] [Whitespace(" ")]
+                  1: CSS_DECLARATION_WITH_SEMICOLON@420..436
+                    0: CSS_DECLARATION@420..434
+                      0: CSS_GENERIC_PROPERTY@420..434
+                        0: CSS_IDENTIFIER@420..431
+                          0: IDENT@420..431 "black-boxed" [] []
+                        1: COLON@431..433 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@433..434
+                          0: CSS_NUMBER@433..434
+                            0: CSS_NUMBER_LITERAL@433..434 "3" [] []
+                      1: (empty)
+                    1: SEMICOLON@434..436 ";" [] [Whitespace(" ")]
+                2: R_CURLY@436..437 "}" [] []
+          2: R_CURLY@437..439 "}" [Newline("\n")] []
+    6: CSS_AT_RULE@439..516
+      0: AT@439..442 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@442..516
+        0: FONT_FEATURE_VALUES_KW@442..462 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_FONT_FAMILY_NAME_LIST@462..468
+          0: CSS_FONT_FAMILY_NAME@462..468
+            0: CSS_CUSTOM_IDENTIFIER_LIST@462..468
+              0: CSS_CUSTOM_IDENTIFIER@462..468
+                0: IDENT@462..468 "Otaru" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@468..516
+          0: L_CURLY@468..469 "{" [] []
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@469..514
+            0: CSS_FONT_FEATURE_VALUES_ITEM@469..514
+              0: AT@469..472 "@" [Newline("\n"), Whitespace("\t")] []
+              1: ANNOTATION_KW@472..483 "annotation" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_BLOCK@483..514
+                0: L_CURLY@483..485 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@485..513
+                  0: CSS_DECLARATION_WITH_SEMICOLON@485..497
+                    0: CSS_DECLARATION@485..495
+                      0: CSS_GENERIC_PROPERTY@485..495
+                        0: CSS_IDENTIFIER@485..492
+                          0: IDENT@485..492 "circled" [] []
+                        1: COLON@492..494 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@494..495
+                          0: CSS_NUMBER@494..495
+                            0: CSS_NUMBER_LITERAL@494..495 "1" [] []
+                      1: (empty)
+                    1: SEMICOLON@495..497 ";" [] [Whitespace(" ")]
+                  1: CSS_DECLARATION_WITH_SEMICOLON@497..513
+                    0: CSS_DECLARATION@497..511
+                      0: CSS_GENERIC_PROPERTY@497..511
+                        0: CSS_IDENTIFIER@497..508
+                          0: IDENT@497..508 "black-boxed" [] []
+                        1: COLON@508..510 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@510..511
+                          0: CSS_NUMBER@510..511
+                            0: CSS_NUMBER_LITERAL@510..511 "3" [] []
+                      1: (empty)
+                    1: SEMICOLON@511..513 ";" [] [Whitespace(" ")]
+                2: R_CURLY@513..514 "}" [] []
+          2: R_CURLY@514..516 "}" [Newline("\n")] []
+    7: CSS_AT_RULE@516..598
+      0: AT@516..519 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@519..598
+        0: FONT_FEATURE_VALUES_KW@519..539 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_FONT_FAMILY_NAME_LIST@539..550
+          0: CSS_FONT_FAMILY_NAME@539..550
+            0: CSS_CUSTOM_IDENTIFIER_LIST@539..550
+              0: CSS_CUSTOM_IDENTIFIER@539..545
+                0: IDENT@539..545 "Otaru" [] [Whitespace(" ")]
+              1: CSS_CUSTOM_IDENTIFIER@545..550
+                0: IDENT@545..550 "Kisa" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@550..598
+          0: L_CURLY@550..551 "{" [] []
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@551..596
+            0: CSS_FONT_FEATURE_VALUES_ITEM@551..596
+              0: AT@551..554 "@" [Newline("\n"), Whitespace("\t")] []
+              1: ANNOTATION_KW@554..565 "annotation" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_BLOCK@565..596
+                0: L_CURLY@565..567 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@567..595
+                  0: CSS_DECLARATION_WITH_SEMICOLON@567..579
+                    0: CSS_DECLARATION@567..577
+                      0: CSS_GENERIC_PROPERTY@567..577
+                        0: CSS_IDENTIFIER@567..574
+                          0: IDENT@567..574 "circled" [] []
+                        1: COLON@574..576 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@576..577
+                          0: CSS_NUMBER@576..577
+                            0: CSS_NUMBER_LITERAL@576..577 "1" [] []
+                      1: (empty)
+                    1: SEMICOLON@577..579 ";" [] [Whitespace(" ")]
+                  1: CSS_DECLARATION_WITH_SEMICOLON@579..595
+                    0: CSS_DECLARATION@579..593
+                      0: CSS_GENERIC_PROPERTY@579..593
+                        0: CSS_IDENTIFIER@579..590
+                          0: IDENT@579..590 "black-boxed" [] []
+                        1: COLON@590..592 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@592..593
+                          0: CSS_NUMBER@592..593
+                            0: CSS_NUMBER_LITERAL@592..593 "3" [] []
+                      1: (empty)
+                    1: SEMICOLON@593..595 ";" [] [Whitespace(" ")]
+                2: R_CURLY@595..596 "}" [] []
+          2: R_CURLY@596..598 "}" [Newline("\n")] []
+    8: CSS_AT_RULE@598..677
+      0: AT@598..601 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@601..677
+        0: FONT_FEATURE_VALUES_KW@601..621 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_FONT_FAMILY_NAME_LIST@621..635
+          0: CSS_FONT_FAMILY_NAME@621..635
+            0: CSS_CUSTOM_IDENTIFIER_LIST@621..635
+              0: CSS_CUSTOM_IDENTIFIER@621..628
+                0: IDENT@621..628 "Taisho" [] [Whitespace(" ")]
+              1: CSS_CUSTOM_IDENTIFIER@628..635
+                0: IDENT@628..635 "Gothic" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@635..677
+          0: L_CURLY@635..636 "{" [] []
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@636..675
+            0: CSS_FONT_FEATURE_VALUES_ITEM@636..675
+              0: AT@636..639 "@" [Newline("\n"), Whitespace("\t")] []
+              1: ANNOTATION_KW@639..650 "annotation" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_BLOCK@650..675
+                0: L_CURLY@650..652 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@652..674
+                  0: CSS_DECLARATION_WITH_SEMICOLON@652..662
+                    0: CSS_DECLARATION@652..660
+                      0: CSS_GENERIC_PROPERTY@652..660
+                        0: CSS_IDENTIFIER@652..657
+                          0: IDENT@652..657 "boxed" [] []
+                        1: COLON@657..659 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@659..660
+                          0: CSS_NUMBER@659..660
+                            0: CSS_NUMBER_LITERAL@659..660 "1" [] []
+                      1: (empty)
+                    1: SEMICOLON@660..662 ";" [] [Whitespace(" ")]
+                  1: CSS_DECLARATION_WITH_SEMICOLON@662..674
+                    0: CSS_DECLARATION@662..672
+                      0: CSS_GENERIC_PROPERTY@662..672
+                        0: CSS_IDENTIFIER@662..669
+                          0: IDENT@662..669 "circled" [] []
+                        1: COLON@669..671 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@671..672
+                          0: CSS_NUMBER@671..672
+                            0: CSS_NUMBER_LITERAL@671..672 "4" [] []
+                      1: (empty)
+                    1: SEMICOLON@672..674 ";" [] [Whitespace(" ")]
+                2: R_CURLY@674..675 "}" [] []
+          2: R_CURLY@675..677 "}" [Newline("\n")] []
+    9: CSS_AT_RULE@677..761
+      0: AT@677..680 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@680..761
+        0: FONT_FEATURE_VALUES_KW@680..700 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_FONT_FAMILY_NAME_LIST@700..719
+          0: CSS_FONT_FAMILY_NAME@700..713
+            0: CSS_CUSTOM_IDENTIFIER_LIST@700..713
+              0: CSS_CUSTOM_IDENTIFIER@700..707
+                0: IDENT@700..707 "Taisho" [] [Whitespace(" ")]
+              1: CSS_CUSTOM_IDENTIFIER@707..713
+                0: IDENT@707..713 "Gothic" [] []
+          1: COMMA@713..715 "," [] [Whitespace(" ")]
+          2: CSS_FONT_FAMILY_NAME@715..719
+            0: CSS_CUSTOM_IDENTIFIER_LIST@715..719
+              0: CSS_CUSTOM_IDENTIFIER@715..719
+                0: IDENT@715..719 "Bar" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@719..761
+          0: L_CURLY@719..720 "{" [] []
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@720..759
+            0: CSS_FONT_FEATURE_VALUES_ITEM@720..759
+              0: AT@720..723 "@" [Newline("\n"), Whitespace("\t")] []
+              1: ANNOTATION_KW@723..734 "annotation" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_BLOCK@734..759
+                0: L_CURLY@734..736 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@736..758
+                  0: CSS_DECLARATION_WITH_SEMICOLON@736..746
+                    0: CSS_DECLARATION@736..744
+                      0: CSS_GENERIC_PROPERTY@736..744
+                        0: CSS_IDENTIFIER@736..741
+                          0: IDENT@736..741 "boxed" [] []
+                        1: COLON@741..743 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@743..744
+                          0: CSS_NUMBER@743..744
+                            0: CSS_NUMBER_LITERAL@743..744 "1" [] []
+                      1: (empty)
+                    1: SEMICOLON@744..746 ";" [] [Whitespace(" ")]
+                  1: CSS_DECLARATION_WITH_SEMICOLON@746..758
+                    0: CSS_DECLARATION@746..756
+                      0: CSS_GENERIC_PROPERTY@746..756
+                        0: CSS_IDENTIFIER@746..753
+                          0: IDENT@746..753 "circled" [] []
+                        1: COLON@753..755 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@755..756
+                          0: CSS_NUMBER@755..756
+                            0: CSS_NUMBER_LITERAL@755..756 "4" [] []
+                      1: (empty)
+                    1: SEMICOLON@756..758 ";" [] [Whitespace(" ")]
+                2: R_CURLY@758..759 "}" [] []
+          2: R_CURLY@759..761 "}" [Newline("\n")] []
+    10: CSS_AT_RULE@761..859
+      0: AT@761..764 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@764..859
+        0: FONT_FEATURE_VALUES_KW@764..784 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_FONT_FAMILY_NAME_LIST@784..817
+          0: CSS_FONT_FAMILY_NAME@784..797
+            0: CSS_CUSTOM_IDENTIFIER_LIST@784..797
+              0: CSS_CUSTOM_IDENTIFIER@784..791
+                0: IDENT@784..791 "Taisho" [] [Whitespace(" ")]
+              1: CSS_CUSTOM_IDENTIFIER@791..797
+                0: IDENT@791..797 "Gothic" [] []
+          1: COMMA@797..799 "," [] [Whitespace(" ")]
+          2: CSS_STRING@799..811
+            0: CSS_STRING_LITERAL@799..811 "\"Otaru Kisa\"" [] []
+          3: COMMA@811..813 "," [] [Whitespace(" ")]
+          4: CSS_FONT_FAMILY_NAME@813..817
+            0: CSS_CUSTOM_IDENTIFIER_LIST@813..817
+              0: CSS_CUSTOM_IDENTIFIER@813..817
+                0: IDENT@813..817 "Bar" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@817..859
+          0: L_CURLY@817..818 "{" [] []
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@818..857
+            0: CSS_FONT_FEATURE_VALUES_ITEM@818..857
+              0: AT@818..821 "@" [Newline("\n"), Whitespace("\t")] []
+              1: ANNOTATION_KW@821..832 "annotation" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_BLOCK@832..857
+                0: L_CURLY@832..834 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@834..856
+                  0: CSS_DECLARATION_WITH_SEMICOLON@834..844
+                    0: CSS_DECLARATION@834..842
+                      0: CSS_GENERIC_PROPERTY@834..842
+                        0: CSS_IDENTIFIER@834..839
+                          0: IDENT@834..839 "boxed" [] []
+                        1: COLON@839..841 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@841..842
+                          0: CSS_NUMBER@841..842
+                            0: CSS_NUMBER_LITERAL@841..842 "1" [] []
+                      1: (empty)
+                    1: SEMICOLON@842..844 ";" [] [Whitespace(" ")]
+                  1: CSS_DECLARATION_WITH_SEMICOLON@844..856
+                    0: CSS_DECLARATION@844..854
+                      0: CSS_GENERIC_PROPERTY@844..854
+                        0: CSS_IDENTIFIER@844..851
+                          0: IDENT@844..851 "circled" [] []
+                        1: COLON@851..853 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@853..854
+                          0: CSS_NUMBER@853..854
+                            0: CSS_NUMBER_LITERAL@853..854 "4" [] []
+                      1: (empty)
+                    1: SEMICOLON@854..856 ";" [] [Whitespace(" ")]
+                2: R_CURLY@856..857 "}" [] []
+          2: R_CURLY@857..859 "}" [Newline("\n")] []
+  2: EOF@859..861 "" [Newline("\n"), Newline("\n")] []
 
 ```

@@ -36,7 +36,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - 
     2   │ - (1·>=·-0)
@@ -48,7 +48,5 @@ fix.js format ━━━━━━━━━━━━━━━━━━━━━━
 
 ```block
 Checked 1 file in <TIME>. No fixes needed.
-Found 2 errors.
+Found 1 error.
 ```
-
-

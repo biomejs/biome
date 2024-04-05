@@ -96,7 +96,7 @@ impl ExtensionHandler for AstroFileHandler {
 
 fn parse(
     _rome_path: &BiomePath,
-    _file_source: DocumentFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     _settings: SettingsHandle,
     cache: &mut NodeCache,
@@ -104,7 +104,9 @@ fn parse(
     let frontmatter = AstroFileHandler::input(text);
     let parse = parse_js_with_cache(
         frontmatter,
-        JsFileSource::ts(),
+        file_source
+            .to_js_file_source()
+            .unwrap_or(JsFileSource::ts()),
         JsParserOptions::default(),
         cache,
     );
@@ -117,7 +119,7 @@ fn parse(
             root.as_send().unwrap(),
             diagnostics,
         ),
-        language: Some(JsFileSource::ts().into()),
+        language: Some(JsFileSource::astro().into()),
     }
 }
 

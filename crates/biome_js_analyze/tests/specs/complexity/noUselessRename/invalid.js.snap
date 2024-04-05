@@ -244,9 +244,12 @@ invalid.js:24:21 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the renaming.
   
-    24 │ export·{·/*before*/·foo·as·foo·/*after*/·}·from·"foo";
-       │                         -------                       
+    22 22 │   export { /*before*/ foo as foo /*after*/ };
+    23 23 │   
+    24    │ - export·{·/*before*/·foo·as·foo·/*after*/·}·from·"foo";
+       24 │ + export·{·/*before*/·foo·/*after*/·}·from·"foo";
+    25 25 │   
+    26 26 │   // following cases are supported by ESLint
+  
 
 ```
-
-

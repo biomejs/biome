@@ -960,20 +960,23 @@ impl AnyJsExpression {
     }
 
     pub fn get_callee_object_name(&self) -> Option<JsSyntaxToken> {
+        let identifier = self.get_callee_object_identifier()?;
+        identifier.value_token().ok()
+    }
+
+    pub fn get_callee_object_identifier(&self) -> Option<JsReferenceIdentifier> {
         match self {
             AnyJsExpression::JsStaticMemberExpression(node) => {
                 let member = node.object().ok()?;
-                let member = member.as_js_identifier_expression()?.name().ok()?;
-                member.value_token().ok()
+                member.as_js_identifier_expression()?.name().ok()
             }
             AnyJsExpression::JsTemplateExpression(node) => {
                 let tag = node.tag()?;
                 let tag = tag.as_js_static_member_expression()?;
                 let member = tag.object().ok()?;
-                let member = member.as_js_identifier_expression()?.name().ok()?;
-                member.value_token().ok()
+                member.as_js_identifier_expression()?.name().ok()
             }
-            AnyJsExpression::JsIdentifierExpression(node) => node.name().ok()?.value_token().ok(),
+            AnyJsExpression::JsIdentifierExpression(node) => node.name().ok(),
             _ => None,
         }
     }
@@ -1021,6 +1024,7 @@ impl AnyJsExpression {
     /// - `fit`
     /// - `fdescribe`
     /// - `ftest`
+    /// - `Deno.test`
     ///
     /// Based on this [article]
     ///
@@ -1045,9 +1049,9 @@ impl AnyJsExpression {
         let fifth = rev.next().map(|t| t.text());
 
         Ok(match first {
-            Some("it" | "describe") => match second {
+            Some("it" | "describe" | "Deno") => match second {
                 None => true,
-                Some("only" | "skip") => third.is_none(),
+                Some("only" | "skip" | "test") => third.is_none(),
                 _ => false,
             },
             Some("test") => match second {
@@ -1068,6 +1072,70 @@ impl AnyJsExpression {
             Some("skip" | "xit" | "xdescribe" | "xtest" | "fit" | "fdescribe" | "ftest") => true,
             _ => false,
         })
+    }
+
+    /// Checks whether the current function call is:
+    /// - `describe`
+    pub fn contains_describe_call(&self) -> bool {
+        let mut members = CalleeNamesIterator::new(self.clone());
+
+        if let Some(member) = members.next() {
+            return member.text() == "describe";
+        }
+        false
+    }
+
+    /// Checks whether the current function call is:
+    /// - `it`
+    /// - `test`
+    /// - `Deno.test`
+    pub fn contains_it_call(&self) -> bool {
+        let mut members = CalleeNamesIterator::new(self.clone());
+
+        let texts: [Option<TokenText>; 2] = [members.next(), members.next()];
+
+        let mut rev = texts.iter().rev().flatten();
+
+        let first = rev.next().map(|t| t.text());
+        let second = rev.next().map(|t| t.text());
+
+        match first {
+            Some("test" | "it") => true,
+            Some("Deno") => matches!(second, Some("test")),
+            _ => false,
+        }
+    }
+
+    /// Checks whether the current called is named:
+    /// - `expect`
+    /// - `assert`
+    /// - `assertEquals`
+    pub fn to_assertion_call(&self) -> Option<TokenText> {
+        let mut members = CalleeNamesIterator::new(self.clone());
+
+        let texts: [Option<TokenText>; 2] = [members.next(), members.next()];
+
+        let mut rev = texts.iter().rev().flatten();
+
+        let first = rev.next();
+        let second = rev.next();
+
+        match first {
+            Some(first) => {
+                if first.text() == "assert" {
+                    if second.is_some() {
+                        Some(first.clone())
+                    } else {
+                        None
+                    }
+                } else if matches!(first.text(), "expect" | "assertEquals") {
+                    Some(first.clone())
+                } else {
+                    None
+                }
+            }
+            None => None,
+        }
     }
 }
 

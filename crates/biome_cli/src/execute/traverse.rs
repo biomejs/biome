@@ -13,7 +13,7 @@ use biome_diagnostics::PrintGitHubDiagnostic;
 use biome_diagnostics::{category, DiagnosticExt, Error, PrintDiagnostic, Resource, Severity};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
-use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
+use biome_service::workspace::IsPathIgnoredParams;
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
@@ -103,6 +103,10 @@ impl<'a> fmt::Display for SummaryTotal<'a> {
                     })
                 }
             }
+
+            TraversalMode::Search { .. } => fmt.write_markup(markup! {
+                "Searched "{files}" in "{self.2}
+            }),
         }
     }
 }
@@ -518,9 +522,9 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     new,
                     diff_kind,
                 } => {
-                    let is_error = self.execution.is_ci() || !self.execution.is_format_write();
                     // A diff is an error in CI mode and in format check mode
-                    if self.execution.is_ci() || !self.execution.is_format_write() {
+                    let is_error = self.execution.is_ci() || !self.execution.is_format_write();
+                    if is_error {
                         self.errors.fetch_add(1, Ordering::Relaxed);
                     }
 
@@ -548,7 +552,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(Error::from(diag))
+                                    diagnostics_to_print.push(diag.with_severity(severity));
                                 }
                                 DiffKind::OrganizeImports => {
                                     let diag = CIOrganizeImportsDiffDiagnostic {
@@ -558,7 +562,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(Error::from(diag))
+                                    diagnostics_to_print.push(diag.with_severity(severity))
                                 }
                             };
                         } else {
@@ -571,7 +575,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(Error::from(diag))
+                                    diagnostics_to_print.push(diag.with_severity(severity))
                                 }
                                 DiffKind::OrganizeImports => {
                                     let diag = OrganizeImportsDiffDiagnostic {
@@ -581,7 +585,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(Error::from(diag))
+                                    diagnostics_to_print.push(diag.with_severity(severity))
                                 }
                             };
                         }
@@ -702,7 +706,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
                 .workspace
                 .is_path_ignored(IsPathIgnoredParams {
                     biome_path: biome_path.clone(),
-                    feature: self.execution.as_feature_name(),
+                    features: self.execution.to_features(),
                 })
                 .unwrap_or_else(|err| {
                     self.push_diagnostic(err.into());
@@ -713,11 +717,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
 
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             path: biome_path.clone(),
-            feature: FeaturesBuilder::new()
-                .with_linter()
-                .with_formatter()
-                .with_organize_imports()
-                .build(),
+            features: self.execution.to_features(),
         });
 
         let file_features = match file_features {
@@ -750,6 +750,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
             TraversalMode::Lint { .. } => file_features.supports_lint(),
             // Imagine if Biome can't handle its own configuration file...
             TraversalMode::Migrate { .. } => true,
+            TraversalMode::Search { .. } => false,
         }
     }
 

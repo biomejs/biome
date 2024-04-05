@@ -1,0 +1,161 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/string/quotePreserve/parameter_quotes.ts
+---
+# Input
+
+```ts
+import * as f from "f";
+
+type X = {
+    "member": string;
+    // you stay like this
+    "member-member": number,
+    "4": number,
+    "with_underscore": number
+    "0197": number,
+    "3n": number,
+    "3p": number,
+    "p9": number
+    "_$_ff$_morning_not_quotes": number,
+    "_$_ff$_morning_yes_quotes_@": number
+};
+
+
+interface Y {
+    "member": string;
+    // you stay like this
+    "member-member": number,
+    "4": number,
+    "with_underscore": number
+    "0197": number,
+    "3n": number,
+    "3p": number,
+    "p9": number
+    "_$_ff$_morning_not_quotes": number,
+    "_$_ff$_morning_yes_quotes_@": number
+}
+
+const Y = {
+    "123": false,
+    "3n": false,
+    12334: false
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```ts
+import * as f from "f";
+
+type X = {
+	member: string;
+	// you stay like this
+	"member-member": number;
+	"4": number;
+	with_underscore: number;
+	"0197": number;
+	"3n": number;
+	"3p": number;
+	p9: number;
+	_$_ff$_morning_not_quotes: number;
+	"_$_ff$_morning_yes_quotes_@": number;
+};
+
+interface Y {
+	member: string;
+	// you stay like this
+	"member-member": number;
+	"4": number;
+	with_underscore: number;
+	"0197": number;
+	"3n": number;
+	"3p": number;
+	p9: number;
+	_$_ff$_morning_not_quotes: number;
+	"_$_ff$_morning_yes_quotes_@": number;
+}
+
+const Y = {
+	"123": false,
+	"3n": false,
+	12334: false,
+};
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: Preserve
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```ts
+import * as f from "f";
+
+type X = {
+	"member": string;
+	// you stay like this
+	"member-member": number;
+	"4": number;
+	"with_underscore": number;
+	"0197": number;
+	"3n": number;
+	"3p": number;
+	"p9": number;
+	"_$_ff$_morning_not_quotes": number;
+	"_$_ff$_morning_yes_quotes_@": number;
+};
+
+interface Y {
+	"member": string;
+	// you stay like this
+	"member-member": number;
+	"4": number;
+	"with_underscore": number;
+	"0197": number;
+	"3n": number;
+	"3p": number;
+	"p9": number;
+	"_$_ff$_morning_not_quotes": number;
+	"_$_ff$_morning_yes_quotes_@": number;
+}
+
+const Y = {
+	"123": false,
+	"3n": false,
+	12334: false,
+};
+```

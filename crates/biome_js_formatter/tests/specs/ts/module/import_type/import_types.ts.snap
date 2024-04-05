@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/module/import_type/import_types.ts
 ---
-
 # Input
 
 ```ts
@@ -72,7 +71,7 @@ import { type Bar } from "bar";
 import { bar, type Bar as Baz } from "baz";
 ```
 
-## Output 2
+## Output 1
 
 -----
 Indent style: Tab
@@ -107,5 +106,3 @@ import {foo, type Foo} from "foo";
 import {type Bar} from "bar";
 import {bar, type Bar as Baz} from "baz";
 ```
-
-

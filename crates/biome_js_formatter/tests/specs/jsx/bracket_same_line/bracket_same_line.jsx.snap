@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: jsx/bracket_same_line/bracket_same_line.jsx
 ---
-
 # Input
 
 ```jsx
@@ -70,7 +69,7 @@ const a = <div></div>;
 <div className="hi"></div>;
 ```
 
-## Output 2
+## Output 1
 
 -----
 Indent style: Tab
@@ -107,5 +106,3 @@ const a = <div></div>;
 <div className="hi" />;
 <div className="hi"></div>;
 ```
-
-

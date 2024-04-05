@@ -11,7 +11,7 @@ pub(crate) fn check_file<'ctx>(
     path: &Path,
     file_features: &'ctx FileFeaturesResult,
 ) -> FileResult {
-    let mut has_errors = false;
+    let mut has_failures = false;
     let mut workspace_file = WorkspaceFile::new(ctx, path)?;
     let mut changed = false;
     tracing::info_span!("Process check", path =? workspace_file.path.display()).in_scope(
@@ -24,15 +24,15 @@ pub(crate) fn check_file<'ctx>(
                             changed = true
                         }
                         if let FileStatus::Message(msg) = status {
-                            if msg.is_error() {
-                                has_errors = true
+                            if msg.is_failure() {
+                                has_failures = true;
                             }
                             ctx.push_message(msg);
                         }
                     }
                     Err(err) => {
                         ctx.push_message(err);
-                        has_errors = true;
+                        has_failures = true;
                     }
                 }
             }
@@ -44,15 +44,15 @@ pub(crate) fn check_file<'ctx>(
                             changed = true
                         }
                         if let FileStatus::Message(msg) = status {
-                            if msg.is_error() {
-                                has_errors = true
+                            if msg.is_failure() {
+                                has_failures = true;
                             }
                             ctx.push_message(msg);
                         }
                     }
                     Err(err) => {
                         ctx.push_message(err);
-                        has_errors = true;
+                        has_failures = true;
                     }
                 }
             }
@@ -65,20 +65,20 @@ pub(crate) fn check_file<'ctx>(
                             changed = true
                         }
                         if let FileStatus::Message(msg) = status {
-                            if msg.is_error() {
-                                has_errors = true
+                            if msg.is_failure() {
+                                has_failures = true;
                             }
                             ctx.push_message(msg);
                         }
                     }
                     Err(err) => {
                         ctx.push_message(err);
-                        has_errors = true;
+                        has_failures = true;
                     }
                 }
             }
 
-            if has_errors {
+            if has_failures {
                 Ok(FileStatus::Message(Message::Failure))
             } else if changed {
                 Ok(FileStatus::Changed)

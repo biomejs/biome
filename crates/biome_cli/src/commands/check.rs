@@ -4,14 +4,16 @@ use crate::commands::{get_stdin, resolve_manifest, validate_configuration_diagno
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
-use biome_deserialize::Merge;
-use biome_service::configuration::organize_imports::PartialOrganizeImports;
-use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialFormatterConfiguration,
+use biome_configuration::{
+    organize_imports::PartialOrganizeImports, PartialConfiguration, PartialFormatterConfiguration,
     PartialLinterConfiguration,
 };
-use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::PartialConfiguration;
+use biome_deserialize::Merge;
+use biome_service::configuration::PartialConfigurationExt;
+use biome_service::{
+    configuration::{load_configuration, LoadedConfiguration},
+    workspace::{FixFileMode, UpdateSettingsParams},
+};
 use std::ffi::OsString;
 
 pub(crate) struct CheckCommandPayload {
@@ -46,7 +48,7 @@ pub(crate) fn check(
         since,
         changed,
     } = payload;
-    setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
+    setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
     let fix_file_mode = if apply && apply_unsafe {
         return Err(CliDiagnostic::incompatible_arguments(

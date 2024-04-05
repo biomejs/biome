@@ -1,0 +1,6 @@
+engine biome(0.1)
+language js
+
+`$test($_)` where {
+    $test <: js"test.only" => js"test"
+}

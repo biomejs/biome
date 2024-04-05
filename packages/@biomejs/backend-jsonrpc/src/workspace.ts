@@ -1,10 +1,10 @@
 // Generated file, do not edit by hand, see `xtask/codegen`
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
-	feature: FeatureName[];
+	features: FeatureName[];
 	path: BiomePath;
 }
-export type FeatureName = "Format" | "Lint" | "OrganizeImports";
+export type FeatureName = "Format" | "Lint" | "OrganizeImports" | "Search";
 export interface BiomePath {
 	path: string;
 }
@@ -112,7 +112,7 @@ export interface PartialFilesConfiguration {
  */
 export interface PartialFormatterConfiguration {
 	/**
-	 * The attribute position style. By default auto.
+	 * The attribute position style in HTMLish languages. By default auto.
 	 */
 	attributePosition?: AttributePosition;
 	enabled?: boolean;
@@ -296,7 +296,7 @@ export interface PartialJavascriptFormatter {
 	 */
 	arrowParentheses?: ArrowParentheses;
 	/**
-	 * The attribute position style in JavaScript code. Defaults to auto.
+	 * The attribute position style in jsx elements. Defaults to auto.
 	 */
 	attributePosition?: AttributePosition;
 	/**
@@ -834,7 +834,7 @@ export interface Correctness {
 	/**
 	 * Disallow unused imports.
 	 */
-	noUnusedImports?: RuleConfiguration_for_Null;
+	noUnusedImports?: RuleConfiguration_for_UnusedImportsOptions;
 	/**
 	 * Disallow unused labels.
 	 */
@@ -893,6 +893,10 @@ export interface Nursery {
 	 */
 	noBarrelFile?: RuleConfiguration_for_Null;
 	/**
+	 * [WIP] This rule hasn't been implemented yet.
+	 */
+	noColorInvalidHex?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of console.
 	 */
 	noConsole?: RuleConfiguration_for_Null;
@@ -913,6 +917,10 @@ export interface Nursery {
 	 */
 	noDuplicateTestHooks?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow variables from evolving into any type through reassignments.
+	 */
+	noEvolvingAny?: RuleConfiguration_for_Null;
+	/**
 	 * This rule enforces a maximum depth to nested describe() in test files.
 	 */
 	noExcessiveNestedTestSuites?: RuleConfiguration_for_Null;
@@ -924,6 +932,10 @@ export interface Nursery {
 	 * Disallow focused tests.
 	 */
 	noFocusedTests?: RuleConfiguration_for_Null;
+	/**
+	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
+	 */
+	noMisplacedAssertion?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of namespace imports.
 	 */
@@ -941,13 +953,13 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
-	 * It detects possible "wrong" semicolons inside JSX elements.
-	 */
-	noSemicolonInJsx?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow disabled tests.
 	 */
 	noSkippedTests?: RuleConfiguration_for_Null;
+	/**
+	 * It detects possible "wrong" semicolons inside JSX elements.
+	 */
+	noSuspiciousSemicolonInJsx?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
@@ -1469,6 +1481,9 @@ export type RuleConfiguration_for_ValidAriaRoleOptions =
 export type RuleConfiguration_for_ComplexityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ComplexityOptions;
+export type RuleConfiguration_for_UnusedImportsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UnusedImportsOptions;
 export type RuleConfiguration_for_HooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_HooksOptions;
@@ -1505,6 +1520,10 @@ export interface RuleWithOptions_for_ValidAriaRoleOptions {
 export interface RuleWithOptions_for_ComplexityOptions {
 	level: RulePlainConfiguration;
 	options: ComplexityOptions;
+}
+export interface RuleWithOptions_for_UnusedImportsOptions {
+	level: RulePlainConfiguration;
+	options: UnusedImportsOptions;
 }
 export interface RuleWithOptions_for_HooksOptions {
 	level: RulePlainConfiguration;
@@ -1550,6 +1569,12 @@ export interface ComplexityOptions {
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
 	maxAllowedComplexity: number;
+}
+export interface UnusedImportsOptions {
+	/**
+	 * Ignore `React` imports from the `react` package when set to `true`.
+	 */
+	ignoreReact: boolean;
 }
 /**
  * Options for the rule `useExhaustiveDependencies`
@@ -1600,7 +1625,7 @@ export interface ConsistentArrayTypeOptions {
  */
 export interface FilenamingConventionOptions {
 	/**
-	 * Allowed cases for _TypeScript_ `enum` member names.
+	 * Allowed cases for file names.
 	 */
 	filenameCases: FilenameCases;
 	/**
@@ -1663,7 +1688,7 @@ export type FilenameCases = FilenameCase[];
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
 export type StableHookResult = "None" | "Identity" | { Indices: number[] };
 /**
- * Supported cases for TypeScript `enum` member names.
+ * Supported cases for file names.
  */
 export type FilenameCase =
 	| "camelCase"
@@ -1701,8 +1726,8 @@ export interface JsFileSource {
 	version: LanguageVersion;
 }
 export interface JsonFileSource {
-	allow_trailing_comma: boolean;
-	variant: JsonVariant;
+	allow_comments: boolean;
+	allow_trailing_commas: boolean;
 }
 export interface CssFileSource {
 	variant: CssVariant;
@@ -1722,7 +1747,6 @@ export type LanguageVariant = "Standard" | "StandardRestricted" | "Jsx";
 Defaults to the latest stable ECMAScript standard. 
 	 */
 export type LanguageVersion = "ES2022" | "ESNext";
-export type JsonVariant = "Standard" | "Jsonc";
 /**
 	* The style of CSS contained in the file.
 
@@ -1887,22 +1911,26 @@ export type Category =
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
+	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noApproximativeNumericConstant"
 	| "lint/nursery/noBarrelFile"
+	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
-	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDoneCallback"
+	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateTestHooks"
+	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noExportsInTest"
 	| "lint/nursery/noFocusedTests"
+	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noNamespaceImport"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReExportAll"
 	| "lint/nursery/noRestrictedImports"
-	| "lint/nursery/noSemicolonInJsx"
 	| "lint/nursery/noSkippedTests"
+	| "lint/nursery/noSuspiciousSemicolonInJsx"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUselessTernary"
@@ -2016,6 +2044,7 @@ export type Category =
 	| "migrate"
 	| "deserialize"
 	| "project"
+	| "search"
 	| "internalError/io"
 	| "internalError/fs"
 	| "internalError/panic"

@@ -5,17 +5,20 @@ use crate::extension_settings::CONFIGURATION_SECTION;
 use crate::utils;
 use anyhow::Result;
 use biome_analyze::RuleCategories;
+use biome_configuration::ConfigurationBasePath;
 use biome_console::markup;
 use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, FileSystem};
-use biome_service::configuration::{load_configuration, LoadedConfiguration};
+use biome_service::configuration::{
+    load_configuration, LoadedConfiguration, PartialConfigurationExt,
+};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
     SupportsFeatureParams, UpdateProjectParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
-use biome_service::{ConfigurationBasePath, Workspace};
+use biome_service::Workspace;
 use biome_service::{DynRef, WorkspaceError};
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
@@ -286,7 +289,7 @@ impl Session {
         let biome_path = self.file_path(&url)?;
         let doc = self.document(&url)?;
         let file_features = self.workspace.file_features(SupportsFeatureParams {
-            feature: FeaturesBuilder::new()
+            features: FeaturesBuilder::new()
                 .with_linter()
                 .with_organize_imports()
                 .build(),
@@ -468,6 +471,7 @@ impl Session {
 
             Err(err) => {
                 error!("Couldn't load the configuration file, reason:\n {}", err);
+                self.client.log_message(MessageType::ERROR, &err).await;
                 ConfigurationStatus::Error
             }
         };

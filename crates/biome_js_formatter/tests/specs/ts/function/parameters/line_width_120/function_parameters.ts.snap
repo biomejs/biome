@@ -1,0 +1,150 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/function/parameters/line_width_120/function_parameters.ts
+---
+# Input
+
+```ts
+export function formatNumber1(
+	value: string,
+	{
+		a,
+		b,
+		c,
+		formatNumber,
+		...props
+	}: Omit<NumberFormatterProps, 'value' | 'defaultFractionDigits'> & {
+		useGrouping?: boolean;
+	}
+): string {}
+
+export function formatNumber2(
+	value: string,
+	{ a }: Omit<NumberFormatterProps, 'value' | 'defaultFractionDigits'> & {
+		useGrouping?: boolean;
+	}
+): string {}
+
+
+export const findByDatefindByDatefindByDatefindByDate =
+	(_, { date }, { req } ) => findByDatefindByDatefindByDatefindByDate;
+
+export const queryAuditLog = async ({
+		startDate,
+		endDate,
+		jobId,
+		src,
+		type,
+	}: Filter): Promise<DBAuditLog[]> => {
+
+};
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```ts
+export function formatNumber1(
+	value: string,
+	{
+		a,
+		b,
+		c,
+		formatNumber,
+		...props
+	}: Omit<NumberFormatterProps, "value" | "defaultFractionDigits"> & {
+		useGrouping?: boolean;
+	},
+): string {}
+
+export function formatNumber2(
+	value: string,
+	{
+		a,
+	}: Omit<NumberFormatterProps, "value" | "defaultFractionDigits"> & {
+		useGrouping?: boolean;
+	},
+): string {}
+
+export const findByDatefindByDatefindByDatefindByDate = (
+	_,
+	{ date },
+	{ req },
+) => findByDatefindByDatefindByDatefindByDate;
+
+export const queryAuditLog = async ({
+	startDate,
+	endDate,
+	jobId,
+	src,
+	type,
+}: Filter): Promise<DBAuditLog[]> => {};
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 120
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```ts
+export function formatNumber1(
+	value: string,
+	{
+		a,
+		b,
+		c,
+		formatNumber,
+		...props
+	}: Omit<NumberFormatterProps, "value" | "defaultFractionDigits"> & {
+		useGrouping?: boolean;
+	},
+): string {}
+
+export function formatNumber2(
+	value: string,
+	{
+		a,
+	}: Omit<NumberFormatterProps, "value" | "defaultFractionDigits"> & {
+		useGrouping?: boolean;
+	},
+): string {}
+
+export const findByDatefindByDatefindByDatefindByDate = (_, { date }, { req }) =>
+	findByDatefindByDatefindByDatefindByDate;
+
+export const queryAuditLog = async ({ startDate, endDate, jobId, src, type }: Filter): Promise<DBAuditLog[]> => {};
+```

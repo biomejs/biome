@@ -1,4 +1,5 @@
 use crate::css_kinds_src::CSS_KINDS_SRC;
+use crate::graphql_kind_src::GRAPHQL_KINDS_SRC;
 use crate::grit_kinds_src::GRIT_KINDS_SRC;
 use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::js_kinds_src::JS_KINDS_SRC;
@@ -17,6 +18,7 @@ pub enum LanguageKind {
     Js,
     Css,
     Json,
+    Graphql,
     Grit,
     Html,
 }
@@ -27,16 +29,18 @@ impl std::fmt::Display for LanguageKind {
             LanguageKind::Js => write!(f, "js"),
             LanguageKind::Css => write!(f, "css"),
             LanguageKind::Json => write!(f, "json"),
+            LanguageKind::Graphql => write!(f, "graphql"),
             LanguageKind::Grit => write!(f, "grit"),
             LanguageKind::Html => write!(f, "html"),
         }
     }
 }
 
-pub const ALL_LANGUAGE_KIND: [LanguageKind; 5] = [
+pub const ALL_LANGUAGE_KIND: [LanguageKind; 6] = [
     LanguageKind::Js,
     LanguageKind::Css,
     LanguageKind::Json,
+    LanguageKind::Graphql,
     LanguageKind::Grit,
     LanguageKind::Html,
 ];
@@ -49,10 +53,11 @@ impl FromStr for LanguageKind {
             "js" => Ok(LanguageKind::Js),
             "css" => Ok(LanguageKind::Css),
             "json" => Ok(LanguageKind::Json),
+            "graphql" => Ok(LanguageKind::Graphql),
             "grit" => Ok(LanguageKind::Grit),
             "html" => Ok(LanguageKind::Html),
             _ => Err(format!(
-                "Language {} not supported, please use: `js`, `css`, `json`, `gritql` or `html`",
+                "Language {} not supported, please use: `js`, `css`, `json`, `grit`, `graphql` or `html`",
                 kind
             )),
         }
@@ -69,6 +74,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxKind },
             LanguageKind::Css => quote! { CssSyntaxKind },
             LanguageKind::Json => quote! { JsonSyntaxKind },
+            LanguageKind::Graphql => quote! { GraphqlSyntaxKind },
             LanguageKind::Grit => quote! { GritSyntaxKind },
             LanguageKind::Html => quote! { HtmlSyntaxKind },
         }
@@ -78,6 +84,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxFactory },
             LanguageKind::Css => quote! { CssSyntaxFactory },
             LanguageKind::Json => quote! { JsonSyntaxFactory },
+            LanguageKind::Graphql => quote! { GraphqlSyntaxFactory },
             LanguageKind::Grit => quote! { GritSyntaxFactory },
             LanguageKind::Html => quote! { HtmlSyntaxFactory },
         }
@@ -88,6 +95,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxNode },
             LanguageKind::Css => quote! { CssSyntaxNode },
             LanguageKind::Json => quote! { JsonSyntaxNode },
+            LanguageKind::Graphql => quote! { GraphqlSyntaxNode },
             LanguageKind::Grit => quote! { GritSyntaxNode },
             LanguageKind::Html => quote! { HtmlSyntaxNode },
         }
@@ -98,6 +106,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxElement },
             LanguageKind::Css => quote! { CssSyntaxElement },
             LanguageKind::Json => quote! { JsonSyntaxElement },
+            LanguageKind::Graphql => quote! { GraphqlSyntaxElement },
             LanguageKind::Grit => quote! { GritSyntaxElement },
             LanguageKind::Html => quote! { HtmlSyntaxElement },
         }
@@ -108,6 +117,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxToken },
             LanguageKind::Css => quote! { CssSyntaxToken },
             LanguageKind::Json => quote! { JsonSyntaxToken },
+            LanguageKind::Graphql => quote! { GraphqlSyntaxToken },
             LanguageKind::Grit => quote! { GritSyntaxToken },
             LanguageKind::Html => quote! { HtmlSyntaxToken },
         }
@@ -118,6 +128,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxElementChildren },
             LanguageKind::Css => quote! { CssSyntaxElementChildren },
             LanguageKind::Json => quote! { JsonSyntaxElementChildren },
+            LanguageKind::Graphql => quote! { GraphqlSyntaxElementChildren },
             LanguageKind::Grit => quote! { GritSyntaxElementChildren },
             LanguageKind::Html => quote! { HtmlSyntaxElementChildren },
         }
@@ -128,6 +139,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxList },
             LanguageKind::Css => quote! { CssSyntaxList },
             LanguageKind::Json => quote! { JsonSyntaxList },
+            LanguageKind::Graphql => quote! { GraphqlSyntaxList },
             LanguageKind::Grit => quote! { GritSyntaxList },
             LanguageKind::Html => quote! { HtmlSyntaxList },
         }
@@ -138,6 +150,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsLanguage },
             LanguageKind::Css => quote! { CssLanguage },
             LanguageKind::Json => quote! { JsonLanguage },
+            LanguageKind::Graphql => quote! { GraphqlLanguage },
             LanguageKind::Grit => quote! { GritLanguage },
             LanguageKind::Html => quote! { HtmlLanguage },
         }
@@ -160,6 +173,7 @@ impl LanguageKind {
             LanguageKind::Js => JS_KINDS_SRC,
             LanguageKind::Css => CSS_KINDS_SRC,
             LanguageKind::Json => JSON_KINDS_SRC,
+            LanguageKind::Graphql => GRAPHQL_KINDS_SRC,
             LanguageKind::Grit => GRIT_KINDS_SRC,
             LanguageKind::Html => HTML_KINDS_SRC,
         }
@@ -170,6 +184,7 @@ impl LanguageKind {
             LanguageKind::Js => include_str!("../js.ungram"),
             LanguageKind::Css => include_str!("../css.ungram"),
             LanguageKind::Json => include_str!("../json.ungram"),
+            LanguageKind::Graphql => include_str!("../graphql.ungram"),
             LanguageKind::Grit => include_str!("../gritql.ungram"),
             LanguageKind::Html => include_str!("../html.ungram"),
         }

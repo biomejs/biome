@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/parens/parens.css
 ---
-
 # Input
 
 ```css
@@ -268,81 +267,7 @@ a {
 ```diff
 --- Prettier
 +++ Biome
-@@ -7,60 +7,60 @@
-   prop6: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
-   prop7: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
-   prop8: very-very-very-very-very-very-vey-very-very-long-func(
--    1px,
--    1px,
--    1px,
--    very-very-very-very-very-very-vey-very-very-long-func(
-       1px,
-       1px,
-       1px,
--      very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
--    )
--  );
-+      very-very-very-very-very-very-vey-very-very-long-func(
-+          1px,
-+          1px,
-+          1px,
-+          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
-+        )
-+    );
-   prop9: very-very-very-very-very-very-vey-very-very-long-func(
--    1px,
--    1px,
--    1px,
--    very-very-very-very-very-very-vey-very-very-long-func(
-       1px,
-       1px,
-       1px,
--      very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
--    )
--  );
-+      very-very-very-very-very-very-vey-very-very-long-func(
-+          1px,
-+          1px,
-+          1px,
-+          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
-+        )
-+    );
-   prop10: very-very-very-very-very-very-vey-very-very-long-func(
--    1px,
--    1px,
--    1px,
--    very-very-very-very-very-very-vey-very-very-long-func(
-       1px,
-       1px,
-       1px,
--      very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
--    )
--  );
-+      very-very-very-very-very-very-vey-very-very-long-func(
-+          1px,
-+          1px,
-+          1px,
-+          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
-+        )
-+    );
-   prop11: very-very-very-very-very-very-vey-very-very-long-func(
--    1px,
--    1px,
--    1px,
--    very-very-very-very-very-very-vey-very-very-long-func(
-       1px,
-       1px,
-       1px,
--      very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
--    )
--  );
-+      very-very-very-very-very-very-vey-very-very-long-func(
-+          1px,
-+          1px,
-+          1px,
-+          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
-+        )
-+    );
+@@ -53,14 +53,14 @@
  }
  
  .foo {
@@ -453,49 +378,49 @@ a {
   prop6: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
   prop7: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
   prop8: very-very-very-very-very-very-vey-very-very-long-func(
+    1px,
+    1px,
+    1px,
+    very-very-very-very-very-very-vey-very-very-long-func(
       1px,
       1px,
       1px,
-      very-very-very-very-very-very-vey-very-very-long-func(
-          1px,
-          1px,
-          1px,
-          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
-        )
-    );
+      very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
+    )
+  );
   prop9: very-very-very-very-very-very-vey-very-very-long-func(
+    1px,
+    1px,
+    1px,
+    very-very-very-very-very-very-vey-very-very-long-func(
       1px,
       1px,
       1px,
-      very-very-very-very-very-very-vey-very-very-long-func(
-          1px,
-          1px,
-          1px,
-          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
-        )
-    );
+      very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
+    )
+  );
   prop10: very-very-very-very-very-very-vey-very-very-long-func(
+    1px,
+    1px,
+    1px,
+    very-very-very-very-very-very-vey-very-very-long-func(
       1px,
       1px,
       1px,
-      very-very-very-very-very-very-vey-very-very-long-func(
-          1px,
-          1px,
-          1px,
-          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
-        )
-    );
+      very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
+    )
+  );
   prop11: very-very-very-very-very-very-vey-very-very-long-func(
+    1px,
+    1px,
+    1px,
+    very-very-very-very-very-very-vey-very-very-long-func(
       1px,
       1px,
       1px,
-      very-very-very-very-very-very-vey-very-very-long-func(
-          1px,
-          1px,
-          1px,
-          very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
-        )
-    );
+      very-very-very-very-very-very-vey-very-very-long-func(1px, 1px, 1px)
+    )
+  );
 }
 
 .foo {
@@ -1516,5 +1441,3 @@ parens.css:252:37 parse ━━━━━━━━━━━━━━━━━━�
   149:   filter: progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=45, Strength=6) progid:DXImageTransform.Microsoft.Shadow(color='#042b47', Direction=135, Strength=6);
   150:   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#fad59f, endColorstr=#fa9907)";
 ```
-
-

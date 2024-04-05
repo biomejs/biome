@@ -6,10 +6,15 @@ use syn::{
     punctuated::Punctuated,
     spanned::Spanned,
     token::Paren,
-    Generics, Token,
+    Attribute, DataEnum, DataStruct, Generics, Token, Variant,
 };
 
-pub(crate) struct DeriveInput {
+pub(crate) enum DeriveInput {
+    DeriveStructInput(DeriveStructInput),
+    DeriveEnumInput(DeriveEnumInput),
+}
+
+pub(crate) struct DeriveStructInput {
     pub(crate) ident: Ident,
     pub(crate) generics: Generics,
 
@@ -24,11 +29,46 @@ pub(crate) struct DeriveInput {
     pub(crate) source: Option<TokenStream>,
 }
 
+pub(crate) struct DeriveEnumInput {
+    pub(crate) ident: Ident,
+    pub(crate) generics: Generics,
+
+    pub(crate) variants: Vec<Variant>,
+}
+
 impl DeriveInput {
     pub(crate) fn parse(input: syn::DeriveInput) -> Self {
+        match input.data {
+            syn::Data::Struct(data) => Self::DeriveStructInput(DeriveStructInput::parse(
+                input.ident,
+                input.generics,
+                input.attrs,
+                data,
+            )),
+            syn::Data::Enum(data) => Self::DeriveEnumInput(DeriveEnumInput::parse(
+                input.ident,
+                input.generics,
+                input.attrs,
+                data,
+            )),
+            syn::Data::Union(data) => abort!(
+                data.union_token.span(),
+                "unions are not supported by the Diagnostic derive macro"
+            ),
+        }
+    }
+}
+
+impl DeriveStructInput {
+    pub(crate) fn parse(
+        ident: Ident,
+        generics: Generics,
+        attrs: Vec<Attribute>,
+        data: DataStruct,
+    ) -> Self {
         let mut result = Self {
-            ident: input.ident,
-            generics: input.generics,
+            ident,
+            generics,
 
             severity: None,
             category: None,
@@ -41,7 +81,7 @@ impl DeriveInput {
             source: None,
         };
 
-        for attr in input.attrs {
+        for attr in attrs {
             if attr.path.is_ident("diagnostic") {
                 let tokens = attr.tokens.into();
                 let attrs = match DiagnosticAttrs::parse.parse(tokens) {
@@ -94,18 +134,6 @@ impl DeriveInput {
                 continue;
             }
         }
-
-        let data = match input.data {
-            syn::Data::Struct(data) => data,
-            syn::Data::Enum(data) => abort!(
-                data.enum_token.span(),
-                "enums are not supported by the Diagnostic derive macro"
-            ),
-            syn::Data::Union(data) => abort!(
-                data.union_token.span(),
-                "unions are not supported by the Diagnostic derive macro"
-            ),
-        };
 
         for (index, field) in data.fields.into_iter().enumerate() {
             let ident = match field.ident {
@@ -172,6 +200,31 @@ impl DeriveInput {
         }
 
         result
+    }
+}
+
+impl DeriveEnumInput {
+    pub(crate) fn parse(
+        ident: Ident,
+        generics: Generics,
+        attrs: Vec<Attribute>,
+        data: DataEnum,
+    ) -> Self {
+        for attr in attrs {
+            if attr.path.is_ident("diagnostic") {
+                abort!(
+                    attr.span(),
+                    "\"diagnostic\" attributes are not supported on enums"
+                );
+            }
+        }
+
+        Self {
+            ident,
+            generics,
+
+            variants: data.variants.into_iter().collect(),
+        }
     }
 }
 

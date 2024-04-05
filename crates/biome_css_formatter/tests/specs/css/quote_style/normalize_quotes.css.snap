@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/quote_style/normalize_quotes.css
 ---
-
 # Input
 
 ```css
@@ -68,7 +67,7 @@ div {
 }
 ```
 
-## Output 2
+## Output 1
 
 -----
 Indent style: Tab
@@ -101,5 +100,3 @@ div {
 	color: var(--\eeunquoted);
 }
 ```
-
-

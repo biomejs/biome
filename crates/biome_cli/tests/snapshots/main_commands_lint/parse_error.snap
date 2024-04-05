@@ -42,7 +42,5 @@ check.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes needed.
-Found 2 errors.
+Found 1 error.
 ```
-
-

@@ -8,7 +8,8 @@ impl FormatRule<AnyCssFontFamilyName> for FormatAnyCssFontFamilyName {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssFontFamilyName, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssFontFamilyName::CssCustomIdentifier(node) => node.format().fmt(f),
+            AnyCssFontFamilyName::CssBogusFontFamilyName(node) => node.format().fmt(f),
+            AnyCssFontFamilyName::CssFontFamilyName(node) => node.format().fmt(f),
             AnyCssFontFamilyName::CssString(node) => node.format().fmt(f),
         }
     }

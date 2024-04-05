@@ -1,7 +1,7 @@
 use crate::logging::LoggingKind;
 use crate::LoggingLevel;
+use biome_configuration::ConfigurationBasePath;
 use biome_diagnostics::Severity;
-use biome_service::ConfigurationBasePath;
 use bpaf::Bpaf;
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -21,7 +21,7 @@ pub struct CliOptions {
     #[bpaf(long("verbose"), switch, fallback(false))]
     pub verbose: bool,
 
-    /// Set the directory of the biome.json configuration file and disable default configuration file resolution.
+    /// Set the directory of the biome.json or biome.jsonc configuration file and disable default configuration file resolution.
     #[bpaf(long("config-path"), argument("PATH"), optional)]
     pub config_path: Option<String>,
 

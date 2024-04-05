@@ -1,0 +1,47 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+engine biome (1.0)
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: GritVersion {
+        engine_token: ENGINE_KW@0..7 "engine" [] [Whitespace(" ")],
+        biome_token: BIOME_KW@7..13 "biome" [] [Whitespace(" ")],
+        l_paren_token: L_PAREN@13..14 "(" [] [],
+        version: GritDoubleLiteral {
+            value_token: GRIT_DOUBLE@14..17 "1.0" [] [],
+        },
+        r_paren_token: R_PAREN@17..18 ")" [] [],
+    },
+    language: missing (optional),
+    definitions: GritDefinitionList [],
+    eof_token: EOF@18..19 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..19
+  0: (empty)
+  1: GRIT_VERSION@0..18
+    0: ENGINE_KW@0..7 "engine" [] [Whitespace(" ")]
+    1: BIOME_KW@7..13 "biome" [] [Whitespace(" ")]
+    2: L_PAREN@13..14 "(" [] []
+    3: GRIT_DOUBLE_LITERAL@14..17
+      0: GRIT_DOUBLE@14..17 "1.0" [] []
+    4: R_PAREN@17..18 ")" [] []
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@18..18
+  4: EOF@18..19 "" [Newline("\n")] []
+
+```

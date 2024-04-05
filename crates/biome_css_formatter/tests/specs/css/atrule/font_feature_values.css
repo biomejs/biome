@@ -1,0 +1,52 @@
+@font-feature-values ident {  }
+
+@font-feature-values 'ident' {  }
+
+@font-feature-values ident {
+	@styleset {
+    nice-style: 12;
+  }
+}
+
+@font-feature-values ident {
+	@styleset {
+    nice-style: 12;
+  }
+  @swash {
+		pretty: 1;
+	}
+}
+
+@font-feature-values ident {
+	@historical-forms { }
+	@character-variant { }
+	@swash { }
+	@ornaments { }
+	@annotation { }
+}
+
+@font-feature-values "Otaru Kisa" {
+	@annotation { circled: 1; black-boxed: 3; }
+}
+
+@font-feature-values Otaru {
+	@annotation { circled: 1; black-boxed: 3; }
+}
+
+@font-feature-values Otaru Kisa {
+	@annotation { circled: 1; black-boxed: 3; }
+}
+
+@font-feature-values Taisho Gothic {
+	@annotation { boxed: 1; circled: 4; }
+}
+
+@font-feature-values Taisho Gothic, Bar {
+	@annotation { boxed: 1; circled: 4; }
+}
+
+@font-feature-values Taisho Gothic, "Otaru Kisa", Bar {
+	@annotation { boxed: 1; circled: 4; }
+}
+
+

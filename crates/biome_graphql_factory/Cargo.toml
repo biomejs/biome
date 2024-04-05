@@ -1,0 +1,20 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Utilities to create GraphQL AST for biome_graphql_parser"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_graphql_factory"
+repository.workspace = true
+version              = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_graphql_syntax = { workspace = true }
+biome_rowan          = { workspace = true }
+
+[lints]
+workspace = true

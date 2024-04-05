@@ -1,12 +1,12 @@
 use super::{CodeActionsParams, DocumentFileSource, ExtensionHandler, Mime, ParseResult};
-use crate::configuration::{to_analyzer_rules, PartialConfiguration};
+use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FixAllParams, FormatterCapabilities, LintParams,
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, Language, LanguageListSettings, LanguageSettings, OverrideSettings,
+    FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     SettingsHandle,
 };
 use crate::workspace::{
@@ -17,6 +17,7 @@ use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
 };
+use biome_configuration::PartialConfiguration;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
@@ -29,7 +30,7 @@ use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -49,7 +50,7 @@ pub struct JsonParserSettings {
     pub allow_trailing_commas: bool,
 }
 
-impl Language for JsonLanguage {
+impl ServiceLanguage for JsonLanguage {
     type FormatterSettings = JsonFormatterSettings;
     type LinterSettings = ();
     type OrganizeImportsSettings = ();
@@ -136,39 +137,25 @@ impl ExtensionHandler for JsonFileHandler {
     }
 }
 
-fn is_file_allowed(path: &Path) -> bool {
-    path.file_name()
-        .and_then(|f| f.to_str())
-        .map(|f| {
-            super::DocumentFileSource::KNOWN_FILES_AS_JSONC
-                .binary_search(&f)
-                .is_ok()
-        })
-        // default is false
-        .unwrap_or_default()
-}
-
 fn parse(
     biome_path: &BiomePath,
-    mut file_source: DocumentFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let parser = &settings.as_ref().languages.json.parser;
     let overrides = &settings.as_ref().override_settings;
+    let optional_json_file_source = file_source.to_json_file_source();
     let options: JsonParserOptions = overrides.override_json_parser_options(
         biome_path,
         JsonParserOptions {
             allow_comments: parser.allow_comments
-                || file_source.to_json_file_source().map(|fs| fs.is_jsonc()) == Some(true)
-                || is_file_allowed(biome_path),
-            allow_trailing_commas: parser.allow_trailing_commas || is_file_allowed(biome_path),
+                || optional_json_file_source.map_or(false, |x| x.get_allow_comments()),
+            allow_trailing_commas: parser.allow_trailing_commas
+                || optional_json_file_source.map_or(false, |x| x.get_allow_trailing_commas()),
         },
     );
-    if let DocumentFileSource::Json(file_source) = &mut file_source {
-        file_source.set_allow_trailing_comma(options.allow_trailing_commas);
-    }
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();

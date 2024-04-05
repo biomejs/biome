@@ -2,7 +2,7 @@ use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilt
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::{JsFileSource, JsLanguage, ModuleKind};
+use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
@@ -188,11 +188,16 @@ fn check_code_action(
     action: &AnalyzerAction<JsLanguage>,
     options: JsParserOptions,
 ) {
-    let (_, text_edit) = action.mutation.as_text_edits().unwrap_or_default();
+    let (new_tree, text_edit) = match action
+        .mutation
+        .clone()
+        .commit_with_text_range_and_edit(true)
+    {
+        (new_tree, Some((_, text_edit))) => (new_tree, text_edit),
+        (new_tree, None) => (new_tree, Default::default()),
+    };
 
     let output = text_edit.new_string(source);
-
-    let new_tree = action.mutation.clone().commit();
 
     // Checks that applying the text edits returned by the BatchMutation
     // returns the same code as printing the modified syntax tree
@@ -220,9 +225,9 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
 
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
-    let file_ext = match input_file.extension().and_then(OsStr::to_str).unwrap() {
-        "cjs" => JsFileSource::js_module().with_module_kind(ModuleKind::Script),
+    let source_type = match input_file.extension().and_then(OsStr::to_str).unwrap() {
         "js" | "mjs" | "jsx" => JsFileSource::jsx(),
+        "cjs" => JsFileSource::js_script(),
         "ts" => JsFileSource::ts(),
         "mts" | "cts" => JsFileSource::ts_restricted(),
         "tsx" => JsFileSource::tsx(),
@@ -245,7 +250,7 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
     analyze_and_snap(
         &mut snapshot,
         &input_code,
-        file_ext,
+        source_type,
         filter,
         file_name,
         input_file,

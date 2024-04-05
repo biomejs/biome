@@ -1,7 +1,6 @@
 {
-	"cases": [
-		{
-			"attribute_position": "Multiline"
-		}
-	]
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "attributePosition": "multiline"
+  }
 }

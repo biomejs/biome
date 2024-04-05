@@ -371,8 +371,9 @@ invalid.jsonc:1:27 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
-    1 │ A:·while(true)·{·continue·A/*after*/;·}
-      │                          --            
+  - A:·while(true)·{·continue·A/*after*/;·}
+  + A:·while(true)·{·continue/*after*/;·}
+  
 
 ```
 
@@ -395,8 +396,10 @@ invalid.jsonc:1:24 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
-    1 │ A:·while(true)·{·break·A·//after
-      │                        --       
+    1   │ - A:·while(true)·{·break·A·//after
+      1 │ + A:·while(true)·{·break·//after
+    2 2 │    }
+  
 
 ```
 
@@ -419,8 +422,10 @@ invalid.jsonc:1:24 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
   i Safe fix: Remove the unnecessary label.
     You can achieve the same result without the label.
   
-    1 │ A:·while(true)·{·break·A·/*after*/
-      │                        --         
+    1   │ - A:·while(true)·{·break·A·/*after*/
+      1 │ + A:·while(true)·{·break·/*after*/
+    2 2 │   foo() }
+  
 
 ```
 
@@ -467,5 +472,3 @@ invalid.jsonc:1:58 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
       │                                                         --   
 
 ```
-
-

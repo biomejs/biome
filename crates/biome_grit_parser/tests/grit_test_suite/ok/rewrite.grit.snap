@@ -1,0 +1,57 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+`println` => `console.log`
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritRewrite {
+            left: GritCodeSnippet {
+                source: GritBacktickSnippetLiteral {
+                    value_token: GRIT_BACKTICK_SNIPPET@0..10 "`println`" [] [Whitespace(" ")],
+                },
+            },
+            annotation: missing (optional),
+            fat_arrow_token: FAT_ARROW@10..13 "=>" [] [Whitespace(" ")],
+            right: GritCodeSnippet {
+                source: GritBacktickSnippetLiteral {
+                    value_token: GRIT_BACKTICK_SNIPPET@13..26 "`console.log`" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@26..27 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..27
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..26
+    0: GRIT_REWRITE@0..26
+      0: GRIT_CODE_SNIPPET@0..10
+        0: GRIT_BACKTICK_SNIPPET_LITERAL@0..10
+          0: GRIT_BACKTICK_SNIPPET@0..10 "`println`" [] [Whitespace(" ")]
+      1: (empty)
+      2: FAT_ARROW@10..13 "=>" [] [Whitespace(" ")]
+      3: GRIT_CODE_SNIPPET@13..26
+        0: GRIT_BACKTICK_SNIPPET_LITERAL@13..26
+          0: GRIT_BACKTICK_SNIPPET@13..26 "`console.log`" [] []
+  4: EOF@26..27 "" [Newline("\n")] []
+
+```

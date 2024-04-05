@@ -40,13 +40,13 @@ It eliminates the need to repeat the CLI options every time you run a command an
 
 To create the configuration, run the `init` command in the root folder of your project:
 
-<PackageManagerBiomeCommand command="init" />
+<PackageManagerBiomeCommand command="init"/>
 
 After running the `init` command, you'll now have a new `biome.json` file in your directory:
 
 ```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "organizeImports": {
     "enabled": false
   },
@@ -61,11 +61,11 @@ After running the `init` command, you'll now have a new `biome.json` file in you
 
 Alternatively, you can run `biome init --jsonc` to emit a `biome.jsonc` file instead.
 
-<PackageManagerBiomeCommand command="init --jsonc" />
+<PackageManagerBiomeCommand command="init --jsonc"/>
 
 ```json title="biome.jsonc"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "organizeImports": {
     "enabled": false
   },
@@ -88,15 +88,15 @@ Biome CLI comes with many commands and options, so you can use only what you nee
 
 You can format files and directories using the [`format`](/reference/cli#biome-format) command and the `--write` option:
 
-<PackageManagerBiomeCommand command="format <files> --write" />
+<PackageManagerBiomeCommand command="format <files> --write"/>
 
 You can lint and apply [safe fixes](/linter#safe-fixes) to files and directories using the [`lint`](/reference/cli#biome-lint) command with the `--apply`:
 
-<PackageManagerBiomeCommand command="lint <files>" />
+<PackageManagerBiomeCommand command="lint <files>"/>
 
 You can apply **both** of them by leveraging the [`check`](/reference/cli#biome-check) command:
 
-<PackageManagerBiomeCommand command="check --apply <files>" />
+<PackageManagerBiomeCommand command="check --apply <files>"/>
 
 The command `check` is command meant to run multiple tools at once. Currently, it does:
 

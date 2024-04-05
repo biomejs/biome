@@ -61,21 +61,73 @@ pub fn html_closing_element(
         ],
     ))
 }
+pub fn html_content(value_token: SyntaxToken) -> HtmlContent {
+    HtmlContent::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_CONTENT,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn html_directive(
     l_angle_token: SyntaxToken,
     excl_token: SyntaxToken,
-    content: HtmlString,
+    doctype_token: SyntaxToken,
     r_angle_token: SyntaxToken,
-) -> HtmlDirective {
-    HtmlDirective::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_DIRECTIVE,
-        [
-            Some(SyntaxElement::Token(l_angle_token)),
-            Some(SyntaxElement::Token(excl_token)),
-            Some(SyntaxElement::Node(content.into_syntax())),
-            Some(SyntaxElement::Token(r_angle_token)),
-        ],
-    ))
+) -> HtmlDirectiveBuilder {
+    HtmlDirectiveBuilder {
+        l_angle_token,
+        excl_token,
+        doctype_token,
+        r_angle_token,
+        html_token: None,
+        quirk_token: None,
+        public_id_token: None,
+        system_id_token: None,
+    }
+}
+pub struct HtmlDirectiveBuilder {
+    l_angle_token: SyntaxToken,
+    excl_token: SyntaxToken,
+    doctype_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+    html_token: Option<SyntaxToken>,
+    quirk_token: Option<SyntaxToken>,
+    public_id_token: Option<SyntaxToken>,
+    system_id_token: Option<SyntaxToken>,
+}
+impl HtmlDirectiveBuilder {
+    pub fn with_html_token(mut self, html_token: SyntaxToken) -> Self {
+        self.html_token = Some(html_token);
+        self
+    }
+    pub fn with_quirk_token(mut self, quirk_token: SyntaxToken) -> Self {
+        self.quirk_token = Some(quirk_token);
+        self
+    }
+    pub fn with_public_id_token(mut self, public_id_token: SyntaxToken) -> Self {
+        self.public_id_token = Some(public_id_token);
+        self
+    }
+    pub fn with_system_id_token(mut self, system_id_token: SyntaxToken) -> Self {
+        self.system_id_token = Some(system_id_token);
+        self
+    }
+    pub fn build(self) -> HtmlDirective {
+        HtmlDirective::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::HTML_DIRECTIVE,
+            [
+                Some(SyntaxElement::Token(self.l_angle_token)),
+                Some(SyntaxElement::Token(self.excl_token)),
+                Some(SyntaxElement::Token(self.doctype_token)),
+                self.html_token.map(|token| SyntaxElement::Token(token)),
+                self.quirk_token.map(|token| SyntaxElement::Token(token)),
+                self.public_id_token
+                    .map(|token| SyntaxElement::Token(token)),
+                self.system_id_token
+                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.r_angle_token)),
+            ],
+        ))
+    }
 }
 pub fn html_element(
     opening_element: HtmlOpeningElement,
@@ -113,27 +165,31 @@ pub fn html_opening_element(
         ],
     ))
 }
-pub fn html_root(
-    directive: HtmlDirective,
-    tags: HtmlElementList,
-    eof_token: SyntaxToken,
-) -> HtmlRootBuilder {
+pub fn html_root(eof_token: SyntaxToken) -> HtmlRootBuilder {
     HtmlRootBuilder {
-        directive,
-        tags,
         eof_token,
         bom_token: None,
+        directive: None,
+        html: None,
     }
 }
 pub struct HtmlRootBuilder {
-    directive: HtmlDirective,
-    tags: HtmlElementList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
+    directive: Option<HtmlDirective>,
+    html: Option<AnyHtmlElement>,
 }
 impl HtmlRootBuilder {
     pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
         self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn with_directive(mut self, directive: HtmlDirective) -> Self {
+        self.directive = Some(directive);
+        self
+    }
+    pub fn with_html(mut self, html: AnyHtmlElement) -> Self {
+        self.html = Some(html);
         self
     }
     pub fn build(self) -> HtmlRoot {
@@ -141,8 +197,10 @@ impl HtmlRootBuilder {
             HtmlSyntaxKind::HTML_ROOT,
             [
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.directive.into_syntax())),
-                Some(SyntaxElement::Node(self.tags.into_syntax())),
+                self.directive
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.html
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.eof_token)),
             ],
         ))
@@ -174,7 +232,7 @@ pub fn html_string(value_token: SyntaxToken) -> HtmlString {
 }
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
 where
-    I: IntoIterator<Item = HtmlAttribute>,
+    I: IntoIterator<Item = AnyHtmlAttribute>,
     I::IntoIter: ExactSizeIterator,
 {
     HtmlAttributeList::unwrap_cast(SyntaxNode::new_detached(
@@ -202,4 +260,24 @@ where
     I::IntoIter: ExactSizeIterator,
 {
     HtmlBogus::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_BOGUS, slots))
+}
+pub fn html_bogus_attribute<I>(slots: I) -> HtmlBogusAttribute
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    HtmlBogusAttribute::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_BOGUS_ATTRIBUTE,
+        slots,
+    ))
+}
+pub fn html_bogus_element<I>(slots: I) -> HtmlBogusElement
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    HtmlBogusElement::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_BOGUS_ELEMENT,
+        slots,
+    ))
 }

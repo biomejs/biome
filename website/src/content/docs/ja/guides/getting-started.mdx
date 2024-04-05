@@ -38,13 +38,13 @@ Biomeをインストールする際には、バージョン範囲演算子を使
 
 設定を作成するには、プロジェクトのルートディレクトリで `init` コマンドを実行します。
 
-<PackageManagerBiomeCommand command="init" />
+<PackageManagerBiomeCommand command="init"/>
 
 `init` コマンドを実行すると、そのディレクトリに `biome.json` ファイルが新規作成されます。
 
 ```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "organizeImports": {
     "enabled": false
   },
@@ -67,15 +67,15 @@ Biome CLIには多くのコマンドとオプションが用意されている�
 
 [`format`](/ja/reference/cli#biome-format) コマンドを `--write` オプションを指定し実行することで、ファイルやディレクトリをformatできます。
 
-<PackageManagerBiomeCommand command="format <files> --write" />
+<PackageManagerBiomeCommand command="format <files> --write"/>
 
 [`lint`](/ja/reference/cli#biome-lint) コマンドを `--apply` オプションを指定し実行することで、ファイルやディレクトリに対してLintを実行し、[安全な修正](/ja/linter#安全な修正safe-fixes)を適用できます。
 
-<PackageManagerBiomeCommand command="lint <files>" />
+<PackageManagerBiomeCommand command="lint <files>"/>
 
 [`check`](/ja/reference/cli#biome-check) コマンドを実行することで、それら**両方**のコマンドを実行できます。
 
-<PackageManagerBiomeCommand command="check --apply <files>" />
+<PackageManagerBiomeCommand command="check --apply <files>"/>
 
 `check` コマンドは複数のツールを一度に実行するためのコマンドです。現在は以下のことを行います。
 

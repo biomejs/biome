@@ -1,6 +1,4 @@
-use biome_formatter::{
-    FormatContext, FormatResult, Formatted, IndentStyle, LineEnding, LineWidth, Printed,
-};
+use biome_formatter::{FormatResult, Formatted, IndentStyle, LineEnding, LineWidth, Printed};
 use biome_formatter_test::TestFormatLanguage;
 use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
 use biome_json_formatter::{format_node, format_range, JsonFormatLanguage};
@@ -8,6 +6,7 @@ use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::{SyntaxNode, TextRange};
+use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default)]
@@ -16,8 +15,7 @@ pub struct JsonTestFormatLanguage {
 }
 
 impl TestFormatLanguage for JsonTestFormatLanguage {
-    type SyntaxLanguage = JsonLanguage;
-    type Options = JsonFormatOptions;
+    type ServiceLanguage = JsonLanguage;
     type Context = JsonFormatContext;
     type FormatLanguage = JsonFormatLanguage;
 
@@ -27,34 +25,32 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
         AnyParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics())
     }
 
-    fn deserialize_format_options(
+    fn to_language_settings<'a>(
         &self,
-        options: &str,
-    ) -> Vec<<Self::Context as FormatContext>::Options> {
-        let test_options: TestOptions = serde_json::from_str(options).unwrap();
-
-        test_options
-            .cases
-            .into_iter()
-            .map(|case| case.into())
-            .collect()
+        settings: &'a WorkspaceSettings,
+    ) -> &'a <Self::ServiceLanguage as ServiceLanguage>::FormatterSettings {
+        &settings.languages.json.formatter
     }
 
     fn format_node(
         &self,
-        options: Self::Options,
-        node: &SyntaxNode<Self::SyntaxLanguage>,
+        options: <Self::ServiceLanguage as ServiceLanguage>::FormatOptions,
+        node: &SyntaxNode<Self::ServiceLanguage>,
     ) -> FormatResult<Formatted<Self::Context>> {
         format_node(options, node)
     }
 
     fn format_range(
         &self,
-        options: Self::Options,
-        node: &SyntaxNode<Self::SyntaxLanguage>,
+        options: <Self::ServiceLanguage as ServiceLanguage>::FormatOptions,
+        node: &SyntaxNode<Self::ServiceLanguage>,
         range: TextRange,
     ) -> FormatResult<Printed> {
         format_range(options, node, range)
+    }
+
+    fn default_options(&self) -> <Self::ServiceLanguage as ServiceLanguage>::FormatOptions {
+        JsonFormatOptions::default()
     }
 }
 

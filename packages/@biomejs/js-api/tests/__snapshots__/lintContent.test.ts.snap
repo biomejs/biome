@@ -1,163 +1,22 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Biome WebAssembly lintContent > should lint content > lint diagnostics 1`] = `
-[
-  {
-    "advices": {
-      "advices": [
-        {
-          "Log": [
-            "Info",
-            [
-              {
-                "content": "==",
-                "elements": [
-                  "Emphasis",
-                ],
-              },
-              {
-                "content": " is only allowed when comparing against ",
-                "elements": [],
-              },
-              {
-                "content": "null",
-                "elements": [
-                  "Emphasis",
-                ],
-              },
-            ],
-          ],
-        },
-        {
-          "Frame": {
-            "path": null,
-            "source_code": null,
-            "span": [
-              6,
-              8,
-            ],
-          },
-        },
-        {
-          "Log": [
-            "Info",
-            [
-              {
-                "content": "Using ",
-                "elements": [],
-              },
-              {
-                "content": "==",
-                "elements": [
-                  "Emphasis",
-                ],
-              },
-              {
-                "content": " may be unsafe if you are relying on type coercion",
-                "elements": [],
-              },
-            ],
-          ],
-        },
-        {
-          "Log": [
-            "Info",
-            [
-              {
-                "content": "Unsafe fix: Use ",
-                "elements": [],
-              },
-              {
-                "content": "===",
-                "elements": [
-                  "Emphasis",
-                ],
-              },
-            ],
-          ],
-        },
-        {
-          "Diff": {
-            "dictionary": "if (a === b) {}",
-            "ops": [
-              {
-                "DiffOp": {
-                  "Equal": {
-                    "range": [
-                      0,
-                      8,
-                    ],
-                  },
-                },
-              },
-              {
-                "DiffOp": {
-                  "Insert": {
-                    "range": [
-                      8,
-                      9,
-                    ],
-                  },
-                },
-              },
-              {
-                "DiffOp": {
-                  "Equal": {
-                    "range": [
-                      9,
-                      15,
-                    ],
-                  },
-                },
-              },
-            ],
-          },
-        },
-      ],
-    },
-    "category": "lint/suspicious/noDoubleEquals",
-    "description": "Use === instead of ==.
-== is only allowed when comparing against \`null\`",
-    "location": {
-      "path": {
-        "file": "example.js",
-      },
-      "source_code": null,
-      "span": [
-        6,
-        8,
-      ],
-    },
-    "message": [
-      {
-        "content": "Use ",
-        "elements": [],
-      },
-      {
-        "content": "===",
-        "elements": [
-          "Emphasis",
-        ],
-      },
-      {
-        "content": " instead of ",
-        "elements": [],
-      },
-      {
-        "content": "==",
-        "elements": [
-          "Emphasis",
-        ],
-      },
-    ],
-    "severity": "error",
-    "source": null,
-    "tags": [
-      "fixable",
-    ],
-    "verbose_advices": {
-      "advices": [],
-    },
-  },
-]
+exports[`Biome WebAssembly lintContent > fixFileMode is SafeAndUnsafeFixes > should fix the code 1`] = `
+"
+	const a = \`foo \${Date.now()} bar\`;
+	const b = / {3}/;
+	"
+`;
+
+exports[`Biome WebAssembly lintContent > fixFileMode is SafeFixes > should fix the SafeFixes only 1`] = `
+"
+	const a = "foo " + Date.now() + " bar";
+	const b = / {3}/;
+	"
+`;
+
+exports[`Biome WebAssembly lintContent > fixFileMode is undefined/omitted > should not fix the code 1`] = `
+"
+	const a = "foo " + Date.now() + " bar";
+	const b = /   /;
+	"
 `;

@@ -1,0 +1,112 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+`console.$method($message)` => `console.warn($message)` where {
+  $method <: not `error`
+} limit 2 // Only find 2 files
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritPatternLimit {
+            pattern: GritPatternWhere {
+                pattern: GritRewrite {
+                    left: GritCodeSnippet {
+                        source: GritBacktickSnippetLiteral {
+                            value_token: GRIT_BACKTICK_SNIPPET@0..28 "`console.$method($message)`" [] [Whitespace(" ")],
+                        },
+                    },
+                    annotation: missing (optional),
+                    fat_arrow_token: FAT_ARROW@28..31 "=>" [] [Whitespace(" ")],
+                    right: GritCodeSnippet {
+                        source: GritBacktickSnippetLiteral {
+                            value_token: GRIT_BACKTICK_SNIPPET@31..56 "`console.warn($message)`" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                where_token: WHERE_KW@56..62 "where" [] [Whitespace(" ")],
+                side_condition: GritPredicateAnd {
+                    and_token: missing (optional),
+                    l_curly_token: L_CURLY@62..63 "{" [] [],
+                    predicates: GritPredicateList [
+                        GritPredicateMatch {
+                            left: GritVariable {
+                                value_token: GRIT_VARIABLE@63..74 "$method" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                            },
+                            match_token: MATCH@74..77 "<:" [] [Whitespace(" ")],
+                            right: GritPatternNot {
+                                not: GritNot {
+                                    token: NOT_KW@77..81 "not" [] [Whitespace(" ")],
+                                },
+                                pattern: GritCodeSnippet {
+                                    source: GritBacktickSnippetLiteral {
+                                        value_token: GRIT_BACKTICK_SNIPPET@81..88 "`error`" [] [],
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@88..91 "}" [Newline("\n")] [Whitespace(" ")],
+                },
+            },
+            limit_token: LIMIT_KW@91..97 "limit" [] [Whitespace(" ")],
+            limit: GritIntLiteral {
+                value_token: GRIT_INT@97..119 "2" [] [Whitespace(" "), Comments("// Only find 2 files")],
+            },
+        },
+    ],
+    eof_token: EOF@119..120 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..120
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..119
+    0: GRIT_PATTERN_LIMIT@0..119
+      0: GRIT_PATTERN_WHERE@0..91
+        0: GRIT_REWRITE@0..56
+          0: GRIT_CODE_SNIPPET@0..28
+            0: GRIT_BACKTICK_SNIPPET_LITERAL@0..28
+              0: GRIT_BACKTICK_SNIPPET@0..28 "`console.$method($message)`" [] [Whitespace(" ")]
+          1: (empty)
+          2: FAT_ARROW@28..31 "=>" [] [Whitespace(" ")]
+          3: GRIT_CODE_SNIPPET@31..56
+            0: GRIT_BACKTICK_SNIPPET_LITERAL@31..56
+              0: GRIT_BACKTICK_SNIPPET@31..56 "`console.warn($message)`" [] [Whitespace(" ")]
+        1: WHERE_KW@56..62 "where" [] [Whitespace(" ")]
+        2: GRIT_PREDICATE_AND@62..91
+          0: (empty)
+          1: L_CURLY@62..63 "{" [] []
+          2: GRIT_PREDICATE_LIST@63..88
+            0: GRIT_PREDICATE_MATCH@63..88
+              0: GRIT_VARIABLE@63..74
+                0: GRIT_VARIABLE@63..74 "$method" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+              1: MATCH@74..77 "<:" [] [Whitespace(" ")]
+              2: GRIT_PATTERN_NOT@77..88
+                0: GRIT_NOT@77..81
+                  0: NOT_KW@77..81 "not" [] [Whitespace(" ")]
+                1: GRIT_CODE_SNIPPET@81..88
+                  0: GRIT_BACKTICK_SNIPPET_LITERAL@81..88
+                    0: GRIT_BACKTICK_SNIPPET@81..88 "`error`" [] []
+          3: R_CURLY@88..91 "}" [Newline("\n")] [Whitespace(" ")]
+      1: LIMIT_KW@91..97 "limit" [] [Whitespace(" ")]
+      2: GRIT_INT_LITERAL@97..119
+        0: GRIT_INT@97..119 "2" [] [Whitespace(" "), Comments("// Only find 2 files")]
+  4: EOF@119..120 "" [Newline("\n")] []
+
+```

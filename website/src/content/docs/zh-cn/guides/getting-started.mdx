@@ -37,13 +37,13 @@ import PackageManagerCommand from "@/components/PackageManagerCommand.astro";
 
 要创建配置，请在项目的根文件夹中运行`init`命令：
 
-<PackageManagerBiomeCommand command="init" />
+<PackageManagerBiomeCommand command="init"/>
 
 运行`init`命令后，您的目录中将出现一个新的`biome.json`文件：
 
 ```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "organizeImports": {
     "enabled": false
   },
@@ -66,15 +66,15 @@ Biome CLI提供了许多命令和选项，因此您可以只使用您需要的�
 
 您可以使用[`format`](/reference/cli#biome-format)命令和`--write`选项格式化文件和目录：
 
-<PackageManagerBiomeCommand command="format <files> --write" />
+<PackageManagerBiomeCommand command="format <files> --write"/>
 
 您可以使用[`lint`](/reference/cli#biome-lint)命令和`--apply`选项来对文件和目录进行代码检查并应用[安全修复](/linter#safe-fixes)：
 
-<PackageManagerBiomeCommand command="lint <files>" />
+<PackageManagerBiomeCommand command="lint <files>"/>
 
 您可以通过使用[`check`](/reference/cli#biome-check)命令来同时应用**两者**：
 
-<PackageManagerBiomeCommand command="check --apply <files>" />
+<PackageManagerBiomeCommand command="check --apply <files>"/>
 
 `check`命令旨在一次运行多个工具。目前，它会：
 

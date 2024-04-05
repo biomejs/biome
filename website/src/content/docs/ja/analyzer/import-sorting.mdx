@@ -1,0 +1,130 @@
+---
+title: Import文のソート
+description: BiomeのImport文のソート
+---
+
+Biomeは、import文を[自然順](https://ja.wikipedia.org/wiki/自然順)に従ってソートします。
+
+この機能はデフォルトで有効ですが、以下のように設定を通じてオプトアウトすることができます。
+
+```json
+{
+  "organizeImports": {
+    "enabled": false
+  }
+}
+```
+
+## Import文がどのようにソートされるか
+
+import文は、"距離" によってソートされます。ユーザーから "遠い" モジュールが上に配置され、ユーザーに "近い" モジュールが下に配置されます。
+
+1. `bun:`プロトコルを介してインポートされたモジュール。これはBunによって実行されるコードを書く場合に適用されます。
+2. `node:`プロトコルを使用して明示的にインポートされるNode.jsの組み込みモジュールおよび`assert`などの一般的なNodeビルトイン。
+3. `npm:`プロトコルを介してインポートされたモジュール。これはDenoで実行されるコードを書く場合に適用されます。
+4. URLを介してインポートされたモジュール。
+5. ライブラリからインポートされたモジュール。
+6. 絶対インポート (absolute import) を使用してインポートされたモジュール。
+7. `#`の接頭辞が付いた名前からインポートされたモジュール。これは、[Nodeのサブパスインポート](https://nodejs.org/api/packages.html#subpath-imports)を使用する場合に適用されます。
+8. 相対インポート (relative import) を使用してインポートされたモジュール。
+9. 前述の基準で識別できなかったモジュール。
+
+例えば、次のコードが与えられた場合、
+
+```ts
+import uncle from "../uncle";
+import sibling from "./sibling";
+import express from "npm:express";
+import imageUrl from "url:./image.png";
+import assert from "node:assert";
+import aunt from "../aunt";
+import { VERSION } from "https://deno.land/std/version.ts";
+import { mock, test } from "node:test";
+import { expect } from "bun:test";
+import { internal } from "#internal";
+import { secret } from "/absolute/path";
+import React from "react";
+```
+
+次のようにソートされます。
+
+```ts
+import { expect } from "bun:test";
+import assert from "node:assert";
+import { mock, test } from "node:test";
+import express from "npm:express";
+import { VERSION } from "https://deno.land/std/version.ts";
+import React from "react";
+import { secret } from "/absolute/path";
+import { internal } from "#internal";
+import aunt from "../aunt";
+import uncle from "../uncle";
+import sibling from "./sibling";
+import imageUrl from "url:./image.png";
+```
+
+ソートを適用する方法は、[CLIを使用した場合](#cliを使用した場合)または[VS Code拡張機能を使用した場合](#vs-code拡張機能を使用した場合)の2つあります。
+
+## グループインポート
+
+主にフロントエンドのプロジェクトで作業する場合やCSSファイルをインポートする際には、特定の順序でimport文を宣言することは一般的です。
+
+```js
+import "../styles/reset.css";
+import "../styles/layout.css";
+import { Grid } from "../components/Grid.jsx";
+```
+
+他の一般的なケースは、polyfill や shim ファイルをインポートすることです。これらはファイルの先頭に配置する必要があります。
+
+```js
+import "../polyfills/array/flatMap";
+import { functionThatUsesFlatMap } from "./utils.js";
+```
+
+こういったケースでは、Biomeがimport文をすべてソートすることによりアプリケーションの従来の挙動を**壊す**可能性があります。
+
+これを回避するためにはimport文の"グループ"を作成します。**改行**を追加することでグループに区切ることができます。
+
+これによりBiomeは、ソートの対象をグループに属するimport文のみに制限します。
+
+```js
+// group 1, only these two files will be sorted
+import "../styles/reset.css";
+import "../styles/layout.css";
+
+// group 2, only this one is sorted
+import { Grid } from "../components/Grid.jsx";
+```
+
+```js
+// group 1, the polyfill/shim
+import "../polyfills/array/flatMap";
+
+// group 2, the files tha require the polyfill/shim
+import { functionThatUsesFlatMap } from "./utils.js";
+```
+
+## CLIを使用した場合
+
+オプション`--apply`を指定して、`check`コマンドを実行します。
+
+```shell
+biome check --apply ./path/to/src
+```
+
+## VS Code拡張機能を使用した場合
+
+BiomeのVS Code拡張機能は、_Organize Imports_ コードアクションによるimport文のソートをサポートしています。
+このアクションはデフォルトで <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> キーボードショートカットを使用して実行するか、
+コマンドパレット (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) から _Organize Imports_ を選択してアクセスできます。
+
+ファイル保存時に自動で実行したい場合は、エディタの設定に以下を追加することで実現できます。
+
+```json title="settings.json"
+{
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.biome": "explicit"
+  }
+}
+```

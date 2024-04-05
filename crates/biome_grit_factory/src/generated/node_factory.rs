@@ -1360,45 +1360,33 @@ impl GritRewriteBuilder {
         ))
     }
 }
-pub fn grit_root(
-    definitions: GritDefinitionList,
-    definitions_continued: GritDefinitionList,
-    eof_token: SyntaxToken,
-) -> GritRootBuilder {
+pub fn grit_root(definitions: GritDefinitionList, eof_token: SyntaxToken) -> GritRootBuilder {
     GritRootBuilder {
         definitions,
-        definitions_continued,
         eof_token,
         bom_token: None,
         version: None,
         language: None,
-        pattern: None,
     }
 }
 pub struct GritRootBuilder {
     definitions: GritDefinitionList,
-    definitions_continued: GritDefinitionList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
-    version: Option<GritVersion>,
-    language: Option<GritLanguageDeclaration>,
-    pattern: Option<AnyGritPattern>,
+    version: Option<AnyGritVersion>,
+    language: Option<AnyGritLanguageDeclaration>,
 }
 impl GritRootBuilder {
     pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
         self.bom_token = Some(bom_token);
         self
     }
-    pub fn with_version(mut self, version: GritVersion) -> Self {
+    pub fn with_version(mut self, version: AnyGritVersion) -> Self {
         self.version = Some(version);
         self
     }
-    pub fn with_language(mut self, language: GritLanguageDeclaration) -> Self {
+    pub fn with_language(mut self, language: AnyGritLanguageDeclaration) -> Self {
         self.language = Some(language);
-        self
-    }
-    pub fn with_pattern(mut self, pattern: AnyGritPattern) -> Self {
-        self.pattern = Some(pattern);
         self
     }
     pub fn build(self) -> GritRoot {
@@ -1411,11 +1399,6 @@ impl GritRootBuilder {
                 self.language
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.definitions.into_syntax())),
-                self.pattern
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(
-                    self.definitions_continued.into_syntax(),
-                )),
                 Some(SyntaxElement::Token(self.eof_token)),
             ],
         ))
@@ -1540,7 +1523,7 @@ where
 }
 pub fn grit_language_flavor_list<I, S>(items: I, separators: S) -> GritLanguageFlavorList
 where
-    I: IntoIterator<Item = GritLanguageFlavorKind>,
+    I: IntoIterator<Item = AnyGritLanguageFlavorKind>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = GritSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -1582,7 +1565,7 @@ where
 }
 pub fn grit_map_element_list<I, S>(items: I, separators: S) -> GritMapElementList
 where
-    I: IntoIterator<Item = GritMapElement>,
+    I: IntoIterator<Item = AnyGritMapElement>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = GritSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -1712,6 +1695,26 @@ where
         slots,
     ))
 }
+pub fn grit_bogus_language_declaration<I>(slots: I) -> GritBogusLanguageDeclaration
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GritBogusLanguageDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BOGUS_LANGUAGE_DECLARATION,
+        slots,
+    ))
+}
+pub fn grit_bogus_language_flavor_kind<I>(slots: I) -> GritBogusLanguageFlavorKind
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GritBogusLanguageFlavorKind::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BOGUS_LANGUAGE_FLAVOR_KIND,
+        slots,
+    ))
+}
 pub fn grit_bogus_literal<I>(slots: I) -> GritBogusLiteral
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
@@ -1719,6 +1722,16 @@ where
 {
     GritBogusLiteral::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_BOGUS_LITERAL,
+        slots,
+    ))
+}
+pub fn grit_bogus_map_element<I>(slots: I) -> GritBogusMapElement
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GritBogusMapElement::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BOGUS_MAP_ELEMENT,
         slots,
     ))
 }
@@ -1749,6 +1762,16 @@ where
 {
     GritBogusPredicate::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_BOGUS_PREDICATE,
+        slots,
+    ))
+}
+pub fn grit_bogus_version<I>(slots: I) -> GritBogusVersion
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    GritBogusVersion::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_BOGUS_VERSION,
         slots,
     ))
 }

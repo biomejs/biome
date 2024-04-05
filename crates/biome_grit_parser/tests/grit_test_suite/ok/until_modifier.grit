@@ -1,0 +1,3 @@
+`console.$_($content)` where {
+  $content <: contains `secret` until `sanitized($_)`
+}

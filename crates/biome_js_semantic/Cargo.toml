@@ -20,7 +20,6 @@ rustc-hash      = { workspace = true }
 biome_console     = { path = "../biome_console" }
 biome_diagnostics = { path = "../biome_diagnostics" }
 biome_js_parser   = { path = "../biome_js_parser" }
-biome_markup      = { path = "../biome_markup" }
 
 [lints]
 workspace = true

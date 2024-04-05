@@ -1,0 +1,132 @@
+---
+title: Imports Sorting
+description: What the Biome Imports Sorting provides
+---
+
+Biome allows sorting import statements using [natural ordering](https://en.wikipedia.org/wiki/Natural_sort_order).
+
+This feature is enabled by default but can be opted-out via configuration:
+
+```json title="biome.json"
+{
+  "organizeImports": {
+    "enabled": false
+  }
+}
+```
+
+## How imports are sorted
+
+Import statements are sorted by "distance". Modules that are "farther" from the user are put on the top, modules "closer" to the user are put on the bottom:
+
+1. modules imported via `bun:` protocol. This is applicable when writing code run by Bun;
+1. built-in Node.js modules that are explicitly imported using the `node:` protocol and common Node built-ins such as `assert`;
+1. modules imported via `npm:` protocol. This is applicable when writing code run by Deno;
+1. modules that contain the protocol `:`. These are usually considered "virtual modules", modules that are injected by your working environment, e.g. `vite`;
+1. modules imported via URL;
+1. modules imported from libraries;
+1. modules imported via absolute imports;
+1. modules imported from a name prefixed by `#`. This is applicable when using [Node's subpath imports](https://nodejs.org/api/packages.html#subpath-imports);
+1. modules imported via relative imports;
+1. modules that couldn't be identified by the previous criteria;
+
+For example, given the following code:
+
+```ts title="example.ts"
+import uncle from "../uncle";
+import sibling from "./sibling";
+import express from "npm:express";
+import imageUrl from "url:./image.png";
+import { sortBy } from "virtual:utils";
+import assert from "node:assert";
+import aunt from "../aunt";
+import { VERSION } from "https://deno.land/std/version.ts";
+import { mock, test } from "node:test";
+import { expect } from "bun:test";
+import { internal } from "#internal";
+import { secret } from "/absolute/path";
+import React from "react";
+```
+
+They will be sorted like this:
+
+```ts title="example.ts"
+ import { expect } from "bun:test";
+ import assert from "node:assert";
+ import { mock, test } from "node:test";
+ import express from "npm:express";
+ import { sortBy } from "virtual:utils";
+ import { VERSION } from "https://deno.land/std/version.ts";
+ import React from "react";
+ import { secret } from "/absolute/path";
+ import { internal } from "#internal";
+ import aunt from "../aunt";
+ import uncle from "../uncle";
+ import sibling from "./sibling";
+ import imageUrl from "url:./image.png";
+```
+
+You can apply the sorting in two ways: via [CLI](#import-sorting-via-cli) or [VSCode extension](#import-sorting-via-vscode-extension).
+
+## Grouped imports
+
+It's widespread to have import statements in a certain order, primarily when you work on a frontend project, and you import CSS files:
+
+```js title="example.js"
+import "../styles/reset.css";
+import "../styles/layout.css";
+import { Grid } from "../components/Grid.jsx";
+```
+
+Another common case is import polyfills or shim files, that needs to stay at the top file:
+
+```js title="example.js"
+import "../polyfills/array/flatMap";
+import { functionThatUsesFlatMap } from "./utils.js";
+```
+
+In these cases, Biome will sort all these three imports, and it might happen that the order will **break** your application.
+
+To avoid this, create a "group" of imports. You create a "group" by adding a **new line** to separate the groups.
+
+By doing so, Biome will limit the sorting only to the import statements that belong to the same group:
+
+```js title="example.js"
+// group 1, only these two files will be sorted
+import "../styles/reset.css";
+import "../styles/layout.css";
+
+// group 2, only this one is sorted
+import { Grid } from "../components/Grid.jsx";
+```
+
+```js title="example.js"
+// group 1, the polyfill/shim
+import "../polyfills/array/flatMap";
+
+// group 2, the files that require the polyfill/shim
+import { functionThatUsesFlatMap } from "./utils.js";
+```
+
+## Import sorting via CLI
+
+Using the command `check`, with the option `--apply`.
+
+```shell
+biome check --apply ./path/to/src
+```
+
+## Import sorting via VSCode extension
+
+The Biome VS Code extension supports imports sorting through the "Organize Imports" code action.
+By default, this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> keyboard shortcut, or is accessible through the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) by selecting _Organize Imports_.
+
+You can add the following to your editor configuration if you want the action to run automatically on save instead of calling it manually:
+
+```json title="settings.json"
+{
+	"editor.codeActionsOnSave":{
+		"source.organizeImports.biome": "explicit"
+	}
+}
+```

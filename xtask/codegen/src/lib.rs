@@ -11,6 +11,7 @@ mod generate_nodes;
 mod generate_nodes_mut;
 mod generate_syntax_factory;
 mod generate_syntax_kinds;
+mod graphql_kind_src;
 mod grit_kinds_src;
 mod js_kinds_src;
 mod json_kinds_src;
@@ -25,7 +26,7 @@ mod termcolorful;
 mod unicode;
 
 use bpaf::Bpaf;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use xtask::{glue::fs2, Mode, Result};
 
@@ -33,6 +34,7 @@ pub use self::ast::generate_ast;
 pub use self::formatter::generate_formatters;
 pub use self::generate_analyzer::generate_analyzer;
 pub use self::generate_crate::generate_crate;
+pub use self::generate_new_lintrule::{generate_new_lintrule, RuleKind};
 pub use self::parser_tests::generate_parser_tests;
 pub use self::unicode::generate_tables;
 
@@ -80,6 +82,8 @@ pub enum TaskCommand {
     /// Generate the part of the configuration that depends on some metadata
     #[bpaf(command)]
     Configuration,
+    #[bpaf(command)]
+    MigrateEslint,
     /// Generate the JSON schema for the Biome configuration file format
     #[bpaf(command)]
     Schema,
@@ -102,8 +106,8 @@ pub enum TaskCommand {
     #[bpaf(command, long("new-lintrule"))]
     NewLintRule(
         /// Path of the rule
-        #[bpaf(long("path"))]
-        PathBuf,
+        #[bpaf(long("kind"))]
+        RuleKind,
         /// Name of the rule
         #[bpaf(long("name"))]
         String,

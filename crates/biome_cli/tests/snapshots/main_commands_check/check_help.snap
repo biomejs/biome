@@ -29,7 +29,8 @@ The configuration that is contained inside the file `biome.json`
         --indent-width=NUMBER  The size of the indentation, 2 by default
         --line-ending=<lf|crlf|cr>  The type of line ending.
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
-        --attribute-position=<auto|multiline>  The attribute position style. By default auto.
+        --attribute-position=<multiline|auto>  The attribute position style in HTMLish languages. By
+                              default auto.
         --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.
         --quote-properties=<preserve|as-needed>  When properties in objects are quoted. Defaults to asNeeded.
         --trailing-comma=<all|es5|none>  Print trailing commas wherever possible in multi-line comma-separated
@@ -56,8 +57,8 @@ The configuration that is contained inside the file `biome.json`
         --javascript-formatter-line-width=NUMBER  What's the max width of a line applied to JavaScript
                               (and its super languages) files. Defaults to 80.
         --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
-        --javascript-attribute-position=<multiline|auto>  The attribute position style in JavaScript
-                              code. Defaults to auto.
+        --javascript-attribute-position=<multiline|auto>  The attribute position style in jsx elements.
+                              Defaults to auto.
         --json-formatter-enabled=<true|false>  Control the formatter for JSON (and its super languages)
                               files.
         --json-formatter-indent-style=<tab|space>  The indent style applied to JSON (and its super languages)
@@ -79,8 +80,8 @@ Global options applied to all commands
                               output is determined to be incompatible
         --use-server          Connect to a running instance of the Biome daemon server.
         --verbose             Print additional diagnostics, and some diagnostics show more information.
-        --config-path=PATH    Set the directory of the biome.json configuration file and disable default
-                              configuration file resolution.
+        --config-path=PATH    Set the directory of the biome.json or biome.jsonc configuration file and
+                              disable default configuration file resolution.
         --max-diagnostics=NUMBER  Cap the amount of diagnostics displayed.
                               [default: 20]
         --skip-errors         Skip over files containing syntax errors instead of emitting an error diagnostic.
@@ -119,5 +120,3 @@ Available options:
     -h, --help                Prints help information
 
 ```
-
-

@@ -2,17 +2,19 @@ mod check;
 mod format;
 mod lint;
 mod organize_imports;
+mod search;
 pub(crate) mod workspace_file;
 
 use crate::execute::diagnostics::{ResultExt, UnhandledDiagnostic};
-use crate::execute::process_file::check::check_file;
-use crate::execute::process_file::format::format;
-use crate::execute::process_file::lint::lint;
 use crate::execute::traverse::TraversalOptions;
 use crate::execute::TraversalMode;
 use biome_diagnostics::{category, DiagnosticExt, DiagnosticTags, Error};
 use biome_fs::BiomePath;
-use biome_service::workspace::{FeatureName, FeaturesBuilder, SupportKind, SupportsFeatureParams};
+use biome_service::workspace::{FeatureName, SupportKind, SupportsFeatureParams};
+use check::check_file;
+use format::format;
+use lint::lint;
+use search::search;
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::path::Path;
@@ -61,11 +63,8 @@ pub(crate) enum Message {
 }
 
 impl Message {
-    pub(crate) const fn is_error(&self) -> bool {
-        matches!(
-            self,
-            Message::Diff { .. } | Message::Diagnostics { .. } | Message::Failure
-        )
+    pub(crate) const fn is_failure(&self) -> bool {
+        matches!(self, Message::Failure)
     }
 }
 
@@ -132,11 +131,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
             .workspace
             .file_features(SupportsFeatureParams {
                 path: biome_path,
-                feature: FeaturesBuilder::new()
-                    .with_formatter()
-                    .with_linter()
-                    .with_organize_imports()
-                    .build(),
+                features: ctx.execution.to_features(),
             })
             .with_file_path_and_code_and_tags(
                 path.display().to_string(),
@@ -220,6 +215,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
             TraversalMode::Format { .. } => file_features.support_kind_for(&FeatureName::Format),
             TraversalMode::Lint { .. } => file_features.support_kind_for(&FeatureName::Lint),
             TraversalMode::Migrate { .. } => None,
+            TraversalMode::Search { .. } => file_features.support_kind_for(&FeatureName::Search),
         };
 
         if let Some(reason) = unsupported_reason {
@@ -255,6 +251,10 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
             }
             TraversalMode::Migrate { .. } => {
                 unreachable!("The migration should not be called for this file")
+            }
+            TraversalMode::Search { ref pattern, .. } => {
+                // the unsupported case should be handled already at this point
+                search(shared_context, path, pattern)
             }
         }
     })

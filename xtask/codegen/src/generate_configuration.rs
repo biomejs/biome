@@ -1,6 +1,7 @@
 use biome_analyze::{
     GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
 };
+use biome_css_syntax::CssLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use biome_string_case::Case;
@@ -12,8 +13,8 @@ use xtask::*;
 use xtask_codegen::{to_capitalized, update};
 
 pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
-    let config_root = project_root().join("crates/biome_service/src/configuration/linter");
-    let push_rules_directory = project_root().join("crates/biome_service/src/configuration");
+    let config_root = project_root().join("crates/biome_configuration/src/linter");
+    let push_rules_directory = project_root().join("crates/biome_configuration/src");
 
     #[derive(Default)]
     struct LintRulesVisitor {
@@ -60,9 +61,30 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         }
     }
 
+    impl RegistryVisitor<CssLanguage> for LintRulesVisitor {
+        fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
+            if matches!(C::CATEGORY, RuleCategory::Lint) {
+                C::record_groups(self);
+            }
+        }
+
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule + 'static,
+            R::Query: Queryable<Language = CssLanguage>,
+            <R::Query as Queryable>::Output: Clone,
+        {
+            self.groups
+                .entry(<R::Group as RuleGroup>::NAME)
+                .or_insert_with(BTreeMap::new)
+                .insert(R::METADATA.name, R::METADATA);
+        }
+    }
+
     let mut visitor = LintRulesVisitor::default();
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
+    biome_css_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor { groups } = visitor;
 
@@ -106,7 +128,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                     #global_all,
                     #global_recommended,
                     &mut enabled_rules,
-                    &mut disabled_rules,
                 );
                 enabled_rules.extend(&group.get_enabled_rules());
                 disabled_rules.extend(&group.get_disabled_rules());
@@ -144,6 +165,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use biome_diagnostics::{Category, Severity};
         use biome_js_analyze::options::*;
         use biome_json_analyze::options::*;
+        use biome_css_analyze::options::*;
         use biome_rowan::TextRange;
         use indexmap::IndexSet;
         use serde::{Deserialize, Serialize};
@@ -259,11 +281,11 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     };
 
     let push_rules = quote! {
-        use crate::configuration::linter::*;
+        use crate::linter::*;
         use crate::Rules;
         use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
-        pub(crate) fn push_to_analyzer_rules(
+        pub fn push_to_analyzer_rules(
             rules: &Rules,
             metadata: &MetadataRegistry,
             analyzer_rules: &mut AnalyzerRules,
@@ -465,16 +487,16 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 matches!(self.recommended, Some(true))
             }
 
-            pub(crate) const fn is_not_recommended(&self) -> bool {
-                matches!(self.recommended, Some(false))
+            pub(crate) fn is_recommended_unset(&self) -> bool {
+                self.recommended.is_none()
             }
 
             pub(crate) fn is_all(&self) -> bool {
                 matches!(self.all, Some(true))
             }
 
-            pub(crate) fn is_not_all(&self) -> bool {
-                matches!(self.all, Some(false))
+            pub(crate) fn is_all_unset(&self) -> bool {
+                self.all.is_none()
             }
 
             pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -508,24 +530,17 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             }
 
             /// Select preset rules
+            // Preset rules shouldn't populate disabled rules
+            // because that will make specific rules cannot be enabled later.
             pub(crate) fn collect_preset_rules(
                 &self,
                 parent_is_all: bool,
                 parent_is_recommended: bool,
                 enabled_rules: &mut IndexSet<RuleFilter>,
-                disabled_rules: &mut IndexSet<RuleFilter>,
             ) {
-                if self.is_all() {
+                if self.is_all() || self.is_all_unset() && parent_is_all {
                     enabled_rules.extend(Self::all_rules_as_filters());
-                } else if self.is_recommended() {
-                    enabled_rules.extend(Self::recommended_rules_as_filters());
-                } else if self.is_not_all() {
-                    disabled_rules.extend(Self::all_rules_as_filters());
-                } else if self.is_not_recommended() {
-                    disabled_rules.extend(Self::recommended_rules_as_filters());
-                } else if parent_is_all {
-                    enabled_rules.extend(Self::all_rules_as_filters());
-                } else if parent_is_recommended {
+                } else if self.is_recommended() || self.is_recommended_unset() && parent_is_recommended && !parent_is_all {
                     enabled_rules.extend(Self::recommended_rules_as_filters());
                 }
             }

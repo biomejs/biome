@@ -3,23 +3,22 @@ use crate::diagnostics::DeprecatedConfigurationFile;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
-use biome_console::{markup, Console, ConsoleExt};
-use biome_diagnostics::{Diagnostic, PrintDiagnostic};
-use biome_fs::BiomePath;
-use biome_service::configuration::vcs::PartialVcsConfiguration;
-use biome_service::configuration::{
+use biome_configuration::{
     css::partial_css_formatter, javascript::partial_javascript_formatter,
     json::partial_json_formatter, partial_configuration, partial_files_configuration,
     partial_formatter_configuration, partial_linter_configuration, vcs::partial_vcs_configuration,
-};
-use biome_service::configuration::{
-    LoadedConfiguration, PartialCssFormatter, PartialFilesConfiguration,
+    vcs::PartialVcsConfiguration, PartialCssFormatter, PartialFilesConfiguration,
     PartialFormatterConfiguration, PartialJavascriptFormatter, PartialJsonFormatter,
     PartialLinterConfiguration,
 };
+use biome_configuration::{ConfigurationDiagnostic, PartialConfiguration};
+use biome_console::{markup, Console, ConsoleExt};
+use biome_diagnostics::{Diagnostic, PrintDiagnostic};
+use biome_fs::BiomePath;
+use biome_service::configuration::LoadedConfiguration;
 use biome_service::documentation::Doc;
 use biome_service::workspace::{OpenProjectParams, UpdateProjectParams};
-use biome_service::{ConfigurationDiagnostic, PartialConfiguration, WorkspaceError};
+use biome_service::WorkspaceError;
 use bpaf::Bpaf;
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -33,6 +32,7 @@ pub(crate) mod init;
 pub(crate) mod lint;
 pub(crate) mod migrate;
 pub(crate) mod rage;
+pub(crate) mod search;
 pub(crate) mod version;
 
 #[derive(Debug, Clone, Bpaf)]
@@ -277,6 +277,40 @@ pub enum BiomeCommand {
         sub_command: Option<MigrateSubCommand>,
     },
 
+    /// Searches for Grit patterns across a project.
+    #[bpaf(command, hide)] // !! Command is hidden until ready for release.
+    Search {
+        #[bpaf(external, hide_usage)]
+        cli_options: CliOptions,
+
+        #[bpaf(external(partial_files_configuration), optional, hide_usage)]
+        files_configuration: Option<PartialFilesConfiguration>,
+
+        #[bpaf(external(partial_vcs_configuration), optional, hide_usage)]
+        vcs_configuration: Option<PartialVcsConfiguration>,
+
+        /// Use this option when you want to search through code piped from
+        /// `stdin`, and print the output to `stdout`.
+        ///
+        /// The file doesn't need to exist on disk, what matters is the
+        /// extension of the file. Based on the extension, Biome knows how to
+        /// parse the code.
+        ///
+        /// Example: `echo 'let a;' | biome search '`let $var`' --stdin-file-path=file.js`
+        #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
+        stdin_file_path: Option<String>,
+
+        /// The GritQL pattern to search for.
+        ///
+        /// Note that the search command (currently) does not support rewrites.
+        #[bpaf(positional("PATH"))]
+        pattern: String,
+
+        /// Single file, single path or list of paths.
+        #[bpaf(positional("PATH"), many)]
+        paths: Vec<OsString>,
+    },
+
     /// A command to retrieve the documentation of various aspects of the CLI.
     ///
     /// ## Examples
@@ -312,6 +346,16 @@ pub enum MigrateSubCommand {
     /// It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`, and map the Prettier's configuration into Biome's configuration file.
     #[bpaf(command)]
     Prettier,
+    /// It attempts to find the ESLint configuration file in the working directory, and update the Biome's configuration file as a result.
+    #[bpaf(command)]
+    Eslint {
+        /// Includes rules inspired from an eslint rule in the migration
+        #[bpaf(long("include-inspired"))]
+        include_inspired: bool,
+        /// Includes nursery rules in the migration
+        #[bpaf(long("include-nursery"))]
+        include_nursery: bool,
+    },
 }
 
 impl MigrateSubCommand {
@@ -321,7 +365,7 @@ impl MigrateSubCommand {
 }
 
 impl BiomeCommand {
-    pub const fn get_color(&self) -> Option<&ColorsArg> {
+    const fn cli_options(&self) -> Option<&CliOptions> {
         match self {
             BiomeCommand::Version(cli_options)
             | BiomeCommand::Rage(cli_options, ..)
@@ -329,7 +373,8 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
-            | BiomeCommand::Migrate { cli_options, .. } => cli_options.colors.as_ref(),
+            | BiomeCommand::Migrate { cli_options, .. }
+            | BiomeCommand::Search { cli_options, .. } => Some(cli_options),
             BiomeCommand::LspProxy(_, _)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
@@ -340,22 +385,17 @@ impl BiomeCommand {
         }
     }
 
+    pub const fn get_color(&self) -> Option<&ColorsArg> {
+        match self.cli_options() {
+            Some(cli_options) => cli_options.colors.as_ref(),
+            None => None,
+        }
+    }
+
     pub const fn should_use_server(&self) -> bool {
-        match self {
-            BiomeCommand::Version(cli_options)
-            | BiomeCommand::Rage(cli_options, ..)
-            | BiomeCommand::Check { cli_options, .. }
-            | BiomeCommand::Lint { cli_options, .. }
-            | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Format { cli_options, .. }
-            | BiomeCommand::Migrate { cli_options, .. } => cli_options.use_server,
-            BiomeCommand::Init(_)
-            | BiomeCommand::Start(_)
-            | BiomeCommand::Stop
-            | BiomeCommand::Explain { .. }
-            | BiomeCommand::LspProxy(_, _)
-            | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => false,
+        match self.cli_options() {
+            Some(cli_options) => cli_options.use_server,
+            None => false,
         }
     }
 
@@ -364,59 +404,18 @@ impl BiomeCommand {
     }
 
     pub fn is_verbose(&self) -> bool {
-        match self {
-            BiomeCommand::Check { cli_options, .. }
-            | BiomeCommand::Lint { cli_options, .. }
-            | BiomeCommand::Format { cli_options, .. }
-            | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Migrate { cli_options, .. } => cli_options.verbose,
-            BiomeCommand::Version(_)
-            | BiomeCommand::Rage(..)
-            | BiomeCommand::Start(_)
-            | BiomeCommand::Stop
-            | BiomeCommand::Init(_)
-            | BiomeCommand::Explain { .. }
-            | BiomeCommand::LspProxy(_, _)
-            | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => false,
-        }
+        self.cli_options()
+            .map_or(false, |cli_options| cli_options.verbose)
     }
 
     pub fn log_level(&self) -> LoggingLevel {
-        match self {
-            BiomeCommand::Check { cli_options, .. }
-            | BiomeCommand::Lint { cli_options, .. }
-            | BiomeCommand::Format { cli_options, .. }
-            | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Migrate { cli_options, .. } => cli_options.log_level.clone(),
-            BiomeCommand::Version(_)
-            | BiomeCommand::LspProxy(_, _)
-            | BiomeCommand::Rage(..)
-            | BiomeCommand::Start(_)
-            | BiomeCommand::Stop
-            | BiomeCommand::Init(_)
-            | BiomeCommand::Explain { .. }
-            | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => LoggingLevel::default(),
-        }
+        self.cli_options()
+            .map_or(LoggingLevel::default(), |cli_options| cli_options.log_level)
     }
+
     pub fn log_kind(&self) -> LoggingKind {
-        match self {
-            BiomeCommand::Check { cli_options, .. }
-            | BiomeCommand::Lint { cli_options, .. }
-            | BiomeCommand::Format { cli_options, .. }
-            | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Migrate { cli_options, .. } => cli_options.log_kind.clone(),
-            BiomeCommand::Version(_)
-            | BiomeCommand::Rage(..)
-            | BiomeCommand::LspProxy(_, _)
-            | BiomeCommand::Start(_)
-            | BiomeCommand::Stop
-            | BiomeCommand::Init(_)
-            | BiomeCommand::Explain { .. }
-            | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => LoggingKind::default(),
-        }
+        self.cli_options()
+            .map_or(LoggingKind::default(), |cli_options| cli_options.log_kind)
     }
 }
 
@@ -509,4 +508,10 @@ pub(crate) fn get_stdin(
     };
 
     Ok(stdin)
+}
+
+/// Tests that all CLI options adhere to the invariants expected by `bpaf`.
+#[test]
+fn check_options() {
+    biome_command().check_invariants(false);
 }

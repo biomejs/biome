@@ -1,0 +1,83 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/document.css
+---
+# Input
+
+```css
+@document url("https://www.example.com/") {
+	h1 {
+		color: green;
+	}
+}
+
+@document url("http://www.w3.org/"), url-prefix("http://www.w3.org/Style/"), domain("mozilla.org"), media-document("video"), regexp("https:.*") {
+	body {
+		color: purple;
+		background: yellow;
+	}
+}
+
+@document url(https://www.example.com/) {}
+@-moz-document url("https://www.example.com/") {}
+@-moz-document/* near */ /* filter */ url("example.com/{") /* a */ {}
+
+@document url("https://www.example.com/") {
+	@media screen and (min-width: 900px) {
+		article {
+			padding: 1rem 3rem;
+		}
+	}
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+@document url("https://www.example.com/") {
+	h1 {
+		color: green;
+	}
+}
+
+@document url("http://www.w3.org/"), url-prefix("http://www.w3.org/Style/"), domain("mozilla.org"), media-document("video"), regexp("https:.*") {
+	body {
+		color: purple;
+		background: yellow;
+	}
+}
+
+@document url(https://www.example.com/) {
+}
+@-moz-document url("https://www.example.com/") {
+}
+@-moz-document /* near */ /* filter */ url("example.com/{") /* a */ {
+}
+
+@document url("https://www.example.com/") {
+	@media screen and (min-width: 900px) {
+		article {
+			padding: 1rem 3rem;
+		}
+	}
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+    7: @document url("http://www.w3.org/"), url-prefix("http://www.w3.org/Style/"), domain("mozilla.org"), media-document("video"), regexp("https:.*") {
+```

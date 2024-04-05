@@ -1,0 +1,63 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+language non_existing;
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: GritBogusLanguageDeclaration {
+        items: [
+            LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")],
+            GRIT_NAME@9..21 "non_existing" [] [],
+            SEMICOLON@21..22 ";" [] [],
+        ],
+    },
+    definitions: GritDefinitionList [],
+    eof_token: EOF@22..23 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..23
+  0: (empty)
+  1: (empty)
+  2: GRIT_BOGUS_LANGUAGE_DECLARATION@0..22
+    0: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")]
+    1: GRIT_NAME@9..21 "non_existing" [] []
+    2: SEMICOLON@21..22 ";" [] []
+  3: GRIT_DEFINITION_LIST@22..22
+  4: EOF@22..23 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid_language.grit:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected language.
+  
+  > 1 │ language non_existing;
+      │          ^^^^^^^^^^^^
+    2 │ 
+  
+  i Expected one of:
+  
+  - js
+  - json
+  - css
+  - grit
+  - html
+  
+```

@@ -1,0 +1,47 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+<div/>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlSelfClosingElement {
+        l_angle_token: L_ANGLE@0..1 "<" [] [],
+        name: HtmlName {
+            value_token: HTML_LITERAL@1..4 "div" [] [],
+        },
+        attributes: HtmlAttributeList [],
+        slash_token: SLASH@4..5 "/" [] [],
+        r_angle_token: R_ANGLE@5..6 ">" [] [],
+    },
+    eof_token: EOF@6..7 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..7
+  0: (empty)
+  1: (empty)
+  2: HTML_SELF_CLOSING_ELEMENT@0..6
+    0: L_ANGLE@0..1 "<" [] []
+    1: HTML_NAME@1..4
+      0: HTML_LITERAL@1..4 "div" [] []
+    2: HTML_ATTRIBUTE_LIST@4..4
+    3: SLASH@4..5 "/" [] []
+    4: R_ANGLE@5..6 ">" [] []
+  3: EOF@6..7 "" [Newline("\n")] []
+
+```
