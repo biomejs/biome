@@ -3,7 +3,7 @@ title: Use Biome in big projects
 description: A small guide how to set Biome in big projects
 ---
 
-import { FileTree } from '@astrojs/starlight/components';
+import {FileTree} from '@astrojs/starlight/components';
 
 Biome can provide some tools that can help you to use it properly in big projects, such as monorepo or workspaces that contain multiple projects.
 
@@ -20,16 +20,16 @@ Let's suppose we have a project that contains a backend app and new frontend app
 
 
 <FileTree>
-- app
-  - backend
-    - biome.json
-    - package.json
-  - frontend
-    - biome.json
-    - legacy-app
+  - app
+    - backend
+      - biome.json
       - package.json
-    - new-app
-      - package.json
+    - frontend
+      - biome.json
+      - legacy-app
+        - package.json
+      - new-app
+        - package.json
 </FileTree>
 
 This means that when you run a script from the file `app/backend/package.json`, Biome will use the configuration file `app/backend/biome.json`.
@@ -92,5 +92,39 @@ Let's jump to `app/backend/biome.json`, where we need to enable the linting:
       "recommended": true
     }
   }
+}
+```
+
+## Monorepos
+
+Monorepos are particular repositories where multiple libraries are stored and maintained in one big repository. Each library represents a self-contained project, which can contain different configurations.
+
+Biome doesn't support monorepos very well due to some limitations in resolving nested configuration files, you [help and follow the relative issue](https://github.com/biomejs/biome/issues/2228).
+
+In order to have the best developer experience despite the current limitation, it's advised to have a `biome.json` at the root of the monorepo, and use the [`overrides`](/reference/configuration/#overrides) configuration to change the behaviour of Biome in certain packages.
+
+In the following example we disable the rule `suspicious/noConsoleLog` inside the package `packages/logger`.
+
+```json title="biome.jsonc"
+
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "overrides": [{
+      "include": ["packages/logger/**"],
+      "linter": {
+        "rules": {
+          "rules": {
+            "suspicious": {
+              "noConsoleLog": "off"
+            }
+          }
+        }
+      }
+  }]
 }
 ```
