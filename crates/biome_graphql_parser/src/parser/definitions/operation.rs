@@ -53,7 +53,7 @@ fn parse_selection_set(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
     p.expect(T!['{']);
     SelectionList::new().parse_list(p);
-    p.bump(T!['}']);
+    p.expect(T!['}']);
     Present(m.complete(p, GRAPHQL_SELECTION_SET))
 }
 
