@@ -97,7 +97,7 @@ impl TryFrom<GraphqlSyntaxKind> for TriviaPieceKind {
                 GraphqlSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
                 GraphqlSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
                 // https://spec.graphql.org/October2021/#sec-Insignificant-Commas
-                GraphqlSyntaxKind::COMMA => Ok(TriviaPieceKind::Whitespace),
+                GraphqlSyntaxKind::COMMA => Ok(TriviaPieceKind::Skipped),
                 GraphqlSyntaxKind::COMMENT => Ok(TriviaPieceKind::SingleLineComment),
                 _ => unreachable!("Not Trivia"),
             }

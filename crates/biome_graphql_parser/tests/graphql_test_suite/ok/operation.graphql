@@ -2,6 +2,29 @@ query {
   likeStory
 }
 
+# shorthand
 {
-  field
+  likeStory
+}
+
+mutation {
+	likeStory
+}
+
+subscription {
+	storyLiked
+}
+
+# with variables
+query ($storyId: ID!) {
+	likeStory(storyId: $storyId)
+}
+
+query ($storyId: ID = "1") {
+	likeStory(storyId: $storyId)
+}
+
+# with directives
+query ($storyId: ID!) @skip(if: true){
+	likeStory(storyId: $storyId)
 }

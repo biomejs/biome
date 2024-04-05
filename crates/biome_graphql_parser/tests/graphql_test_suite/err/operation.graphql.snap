@@ -1,0 +1,75 @@
+---
+source: crates/biome_graphql_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```graphql
+query likeStory
+
+
+
+```
+
+## AST
+
+```
+GraphqlRoot {
+    bom_token: missing (optional),
+    definitions: GraphqlDefinitionList [
+        GraphqlOperationDefinition {
+            ty: GraphqlOperationType {
+                value_token: QUERY_KW@0..6 "query" [] [Whitespace(" ")],
+            },
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@6..15 "likeStory" [] [],
+            },
+            variables: missing (optional),
+            directives: GraphqlDirectiveList [],
+            selection_set: GraphqlSelectionSet {
+                l_curly_token: missing (required),
+                selections: GraphqlSelectionList [],
+                r_curly_token: missing (required),
+            },
+        },
+    ],
+    eof_token: EOF@15..18 "" [Newline("\n"), Newline("\n"), Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRAPHQL_ROOT@0..18
+  0: (empty)
+  1: GRAPHQL_DEFINITION_LIST@0..15
+    0: GRAPHQL_OPERATION_DEFINITION@0..15
+      0: GRAPHQL_OPERATION_TYPE@0..6
+        0: QUERY_KW@0..6 "query" [] [Whitespace(" ")]
+      1: GRAPHQL_NAME@6..15
+        0: GRAPHQL_NAME@6..15 "likeStory" [] []
+      2: (empty)
+      3: GRAPHQL_DIRECTIVE_LIST@15..15
+      4: GRAPHQL_SELECTION_SET@15..15
+        0: (empty)
+        1: GRAPHQL_SELECTION_LIST@15..15
+        2: (empty)
+  2: EOF@15..18 "" [Newline("\n"), Newline("\n"), Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+operation.graphql:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead the file ends
+  
+  > 4 │ 
+      │ 
+  
+  i the file ends here
+  
+  > 4 │ 
+      │ 
+  
+```

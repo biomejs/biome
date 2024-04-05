@@ -8,7 +8,7 @@ use biome_parser::{
     prelude::ParsedSyntax::*, Parser,
 };
 
-use super::parse_error::expected_directive;
+use super::{argument::parse_arguments, parse_error::expected_directive};
 struct DirectiveListParseRecovery;
 
 impl ParseRecovery for DirectiveListParseRecovery {
@@ -48,11 +48,6 @@ impl ParseNodeList for DirectiveList {
 }
 
 #[inline]
-fn is_at_directive(p: &mut GraphqlParser<'_>) -> bool {
-    p.at(T![@])
-}
-
-#[inline]
 pub(crate) fn parse_directive(p: &mut GraphqlParser) -> ParsedSyntax {
     if !p.at(T![@]) {
         return Absent;
@@ -61,7 +56,14 @@ pub(crate) fn parse_directive(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T![@]);
     parse_name(p).or_add_diagnostic(p, expected_name);
-    // TODO: parse arguments
+
+    // arguments are optional
+    parse_arguments(p).ok();
 
     Present(m.complete(p, GRAPHQL_DIRECTIVE))
+}
+
+#[inline]
+fn is_at_directive(p: &mut GraphqlParser<'_>) -> bool {
+    p.at(T![@])
 }

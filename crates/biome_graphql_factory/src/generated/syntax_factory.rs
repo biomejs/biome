@@ -741,7 +741,7 @@ impl SyntaxFactory for GraphqlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GraphqlFragmentName::can_cast(element.kind()) {
+                    if GraphqlName::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -776,25 +776,6 @@ impl SyntaxFactory for GraphqlSyntaxFactory {
                 }
                 slots.into_node(GRAPHQL_FRAGMENT_DEFINITION, children)
             }
-            GRAPHQL_FRAGMENT_NAME => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if GraphqlName::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        GRAPHQL_FRAGMENT_NAME.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(GRAPHQL_FRAGMENT_NAME, children)
-            }
             GRAPHQL_FRAGMENT_SPREAD => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -807,7 +788,7 @@ impl SyntaxFactory for GraphqlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GraphqlFragmentName::can_cast(element.kind()) {
+                    if GraphqlName::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }

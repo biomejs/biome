@@ -1,0 +1,12 @@
+{
+	field_value(
+		int_value: 1,
+		float_value: 1.1,
+		string_value: "string",
+		boolean_value: true,
+		null_value: null,
+		enum_value: AN_ENUM_VALUE,
+		list_value: [1, 2, 3],
+		object_value: {key: "value"}
+	)
+}

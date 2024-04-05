@@ -109,7 +109,7 @@ AnyGraphqlSelection =
 	| GraphqlInlineFragment
 	| GraphqlBogusSelection
 
-// { "a": b(c: d) @ef {...} }
+// { a: b(c: d) @ef {...} }
 //   ^^^^^^^^^^^^^^^^^^^^^^
 // https://spec.graphql.org/October2021/#sec-Language.Fields
 GraphqlField =
@@ -119,7 +119,7 @@ GraphqlField =
 	directives: GraphqlDirectiveList
 	selection_set: GraphqlSelectionSet?
 
-// { "a": b }
+// { a: b }
 //   ^^^
 // https://spec.graphql.org/October2021/#Alias
 GraphqlAlias =
@@ -149,7 +149,7 @@ GraphqlArgument =
 // https://spec.graphql.org/October2021/#sec-Language.Fragments
 GraphqlFragmentSpread =
 	'...'
-	name: GraphqlFragmentName
+	name: GraphqlName
 	directives: GraphqlDirectiveList
 
 // { ... on A { b } }
@@ -165,13 +165,10 @@ GraphqlInlineFragment =
 // https://spec.graphql.org/October2021/#sec-Language.Fragments
 GraphqlFragmentDefinition =
 	'fragment'
-	name: GraphqlFragmentName
+	name: GraphqlName
 	type_condition: GraphqlTypeCondition
 	directives: GraphqlDirectiveList
 	selection_set: GraphqlSelectionSet
-
-GraphqlFragmentName =
-	name: GraphqlName
 
 GraphqlTypeCondition =
 	'on'

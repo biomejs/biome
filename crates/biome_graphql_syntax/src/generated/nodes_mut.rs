@@ -434,7 +434,7 @@ impl GraphqlFragmentDefinition {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: GraphqlFragmentName) -> Self {
+    pub fn with_name(self, element: GraphqlName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -459,14 +459,6 @@ impl GraphqlFragmentDefinition {
         )
     }
 }
-impl GraphqlFragmentName {
-    pub fn with_name(self, element: GraphqlName) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
 impl GraphqlFragmentSpread {
     pub fn with_dotdotdot_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -474,7 +466,7 @@ impl GraphqlFragmentSpread {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: GraphqlFragmentName) -> Self {
+    pub fn with_name(self, element: GraphqlName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),

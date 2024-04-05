@@ -1,6 +1,10 @@
+mod argument;
 mod definitions;
 mod directive;
 mod parse_error;
+mod r#type;
+mod value;
+mod variable;
 use crate::token_source::GraphqlTokenSource;
 use biome_graphql_syntax::GraphqlSyntaxKind::{self, *};
 use biome_parser::diagnostic::merge_diagnostics;
@@ -24,7 +28,6 @@ impl<'source> GraphqlParser<'source> {
         }
     }
 
-    #[allow(unused)]
     pub fn lookahead(&mut self) -> GraphqlSyntaxKind {
         self.source.lookahead()
     }
@@ -87,4 +90,9 @@ fn parse_name(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(GRAPHQL_NAME);
     Present(m.complete(p, GRAPHQL_NAME))
+}
+
+#[inline]
+fn is_at_name(p: &GraphqlParser) -> bool {
+    p.at(GRAPHQL_NAME)
 }
