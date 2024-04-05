@@ -15,5 +15,9 @@ import Button from "./components/Button.svelte";
 # Emitted Messages
 
 ```block
-Checked 1 file in <TIME>. Fixed 1 file.
+Checked 1 file in <TIME>.
+```
+
+```block
+Fixed 1 file.
 ```

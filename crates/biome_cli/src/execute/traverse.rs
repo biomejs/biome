@@ -100,41 +100,6 @@ pub(crate) fn traverse(
     let skipped = skipped.load(Ordering::Relaxed);
     let suggested_fixes_skipped = printer.skipped_fixes();
     let diagnostics_not_printed = printer.not_printed_diagnostics();
-
-    // if execution.should_report_to_terminal() {
-    //     console.log(markup! {
-    //         {}
-    //     });
-    // } else {
-    //     if let TraversalMode::Format { write, .. } = execution.traversal_mode() {
-    //         let mut summary = FormatterReportSummary::default();
-    //         if *write {
-    //             summary.set_files_written(count);
-    //         } else {
-    //             summary.set_files_compared(count);
-    //         }
-    //         report.set_formatter_summary(summary);
-    //     }
-    //
-    //     let to_print = report.as_serialized_reports()?;
-    //     console.log(markup! {
-    //         {to_print}
-    //     });
-    //     return Ok(());
-    // }
-    //
-    // if skipped > 0 {
-    //     if skipped == 1 {
-    //         console.log(markup! {
-    //             <Warn>"Skipped "{skipped}" file."</Warn>
-    //         });
-    //     } else {
-    //         console.log(markup! {
-    //             <Warn>"Skipped "{skipped}" files."</Warn>
-    //         });
-    //     }
-    // }
-
     Ok((
         TraversalSummary::default()
             .with_changed(changed)

@@ -91,15 +91,13 @@ impl TraversalSummary {
     }
 }
 
+/// When using this trait, the type that implements this trait is the one that holds the read-only information to pass around
 pub trait Reporter {
     /// Writes the summary using the underling visitor
     fn write(&mut self, visitor: &mut dyn ReporterVisitor) -> io::Result<()>;
 }
 
-// pub trait TerminalReporter: Reporter {
-//     fn dump_to_terminal(&self, console: &mut dyn Console, visitor: &mut dyn ReporterVisitor);
-// }
-
+/// When using this trait, the type that implements this trait is the one that will **write** the data, ideally inside a buffer
 pub trait ReporterVisitor {
     /// Writes the summary in the underling writer
     fn report_summary(
@@ -117,13 +115,13 @@ pub trait ReporterVisitor {
         Ok(())
     }
 
-    /// Reports the total files that were checked
+    /// Reports the fixes that were skipped
     fn report_skipped_fixes(&mut self, execution: &Execution, skipped: usize) -> io::Result<()> {
         let _ = (execution, skipped);
         Ok(())
     }
 
-    /// Reports the total files that were checked
+    /// Reports diagnostics that were not printed
     fn report_not_printed_diagnostics(
         &mut self,
         execution: &Execution,
@@ -169,6 +167,7 @@ pub trait ReporterVisitor {
     }
 }
 
+/// This function reports the result of a traversal
 pub(crate) fn report<R, V>(
     reporter: &mut R,
     reporter_visitor: &mut V,
