@@ -564,7 +564,7 @@ pub(crate) fn is_diagnostic_error(
 /// We use the JSX parser at the moment to parse the opening tag. So the opening tag should be first
 /// matched by regular expressions.
 ///
-/// TODO: We should change the parser when HTMLish languages are supported.
+// TODO: We should change the parser when HTMLish languages are supported.
 pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> Language {
     parse(
         script_opening_tag,
