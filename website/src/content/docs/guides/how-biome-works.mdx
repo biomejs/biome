@@ -179,19 +179,30 @@ The following files are parsed as **`JSON` files** with the options `json.parser
 
 - `.babelrc`
 - `.babelrc.json`
-- `.ember-cli`
-- `.eslintrc`
-- `.eslintrc.json`
+- `.devcontainer.json`
 - `.hintrc`
-- `.jsfmtrc`
-- `.jshintrc`
+- `.hintrc.json`
 - `.swcrc`
+- `api-documenter.json`
+- `api-extractor.json`
 - `babel.config.json`
+- `deno.json`
+- `devcontainer.json`
+- `dprint.json`
 - `jsconfig.json`
+- `jsr.json`
+- `language-configuration.json`
 - `tsconfig.json`
-- `tslint.json`
 - `typedoc.json`
 - `typescript.json`
+
+The following files are parsed as **`JSON` files** with the options `json.parser.allowComments` set to `true` but `json.parser.allowTrailingCommas` set to `false`. This is because the tools consuming these files can only strip comments.
+
+- `.ember-cli`
+- `.eslintrc.json`
+- `.jscsrc`
+- `.jshintrc`
+- `tslint.json`
 
 ## `include` and `ignore` explained
 

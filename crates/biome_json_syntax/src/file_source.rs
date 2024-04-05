@@ -18,29 +18,21 @@ impl JsonFileSource {
         }
     }
 
-    pub fn with_trailing_commas(mut self, option_value: bool) -> Self {
-        self.allow_trailing_commas = option_value;
+    pub fn with_allow_trailing_commas(mut self) -> Self {
+        self.allow_trailing_commas = true;
         self
     }
 
-    pub fn set_allow_trailing_commas(&mut self, option_value: bool) {
-        self.allow_trailing_commas = option_value;
-    }
-
-    pub fn get_allow_trailing_commas(&self) -> bool {
+    pub fn allow_trailing_commas(&self) -> bool {
         self.allow_trailing_commas
     }
 
-    pub fn with_comments(mut self, option_value: bool) -> Self {
-        self.allow_comments = option_value;
+    pub fn with_allow_comments(mut self) -> Self {
+        self.allow_comments = true;
         self
     }
 
-    pub fn set_allow_comments(&mut self, option_value: bool) {
-        self.allow_comments = option_value;
-    }
-
-    pub fn get_allow_comments(&self) -> bool {
+    pub fn allow_comments(&self) -> bool {
         self.allow_comments
     }
 }
@@ -75,7 +67,26 @@ fn compute_source_type_from_path_or_extension(
     } else {
         match extension {
             "json" => JsonFileSource::json(),
-            "jsonc" => JsonFileSource::json().with_comments(true),
+            // We support comments and trailing commas for `.jsonc` files
+            // https://github.com/github-linguist/linguist/blob/4ac734c15a96f9e16fd12330d0cb8de82274f700/lib/linguist/languages.yml#L3230-L3246
+            "jsonc"
+            | "code-snippets"
+            | "code-workspace"
+            | "sublime-build"
+            | "sublime-commands"
+            | "sublime-completions"
+            | "sublime-keymap"
+            | "sublime-macro"
+            | "sublime-menu"
+            | "sublime-mousemap"
+            | "sublime-project"
+            | "sublime-settings"
+            | "sublime-theme"
+            | "sublime-workspace"
+            | "sublime_metrics"
+            | "sublime_session" => JsonFileSource::json()
+                .with_allow_comments()
+                .with_allow_trailing_commas(),
             _ => {
                 return Err(FileSourceError::UnknownExtension(
                     file_name.into(),
