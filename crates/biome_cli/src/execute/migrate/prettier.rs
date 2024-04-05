@@ -223,7 +223,7 @@ const PACKAGE_JSON: &str = "package.json";
 const CONFIG_FILES: [&str; 8] = [
     ".prettierrc",
     ".prettierrc.json",
-    // Prefixed with `./` to ensure that it is loadable via NodeJS's `import()`
+    // Prefixed with `./` to ensure that it is loadable via Node.js's `import()`
     "./.prettierrc.js",
     "./prettier.config.js",
     "./.prettierrc.mjs",
@@ -268,7 +268,7 @@ fn load_config(
 ) -> Result<PrettierConfiguration, CliDiagnostic> {
     let (deserialized, diagnostics) = match path.extension().and_then(|file_ext| file_ext.to_str())
     {
-        Some("json") | None => {
+        None | Some("json") => {
             let mut file = fs.open_with_options(path, OpenOptions::default().read(true))?;
             let mut content = String::new();
             file.read_to_string(&mut content)?;
@@ -314,16 +314,23 @@ fn load_config(
         }
     };
     let path_str = path.to_string_lossy();
-    for diagnostic in diagnostics.into_iter().filter(|diag| {
-        matches!(
-            diag.severity(),
-            biome_diagnostics::Severity::Fatal
-                | biome_diagnostics::Severity::Error
-                | biome_diagnostics::Severity::Warning
-        )
-    }) {
-        let diagnostic = diagnostic.with_file_path(path_str.to_string());
-        console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+    // Heuristic: the Prettier config file is considered a YAML file if:
+    // - desrialization failed
+    // - there are at least 3 diagnostics
+    // - the configuration file has no extension.
+    // In this case we skip emitting the diagnostics
+    if !(deserialized.is_none() && diagnostics.len() > 2 || path.extension().is_none()) {
+        for diagnostic in diagnostics.into_iter().filter(|diag| {
+            matches!(
+                diag.severity(),
+                biome_diagnostics::Severity::Fatal
+                    | biome_diagnostics::Severity::Error
+                    | biome_diagnostics::Severity::Warning
+            )
+        }) {
+            let diagnostic = diagnostic.with_file_path(path_str.to_string());
+            console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+        }
     }
     if let Some(result) = deserialized {
         if result.end_of_line == EndOfLine::Auto {
@@ -332,6 +339,11 @@ fn load_config(
             });
         }
         Ok(result)
+    } else if path.extension().is_none() {
+        // The Prettier config file may be a YAML file.
+        Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+            reason: "Could not deserialize the Prettier configuration file.\nOnly JSON configurations are supported.".to_string(),
+        }))
     } else {
         Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
             reason: "Could not deserialize the Prettier configuration file".to_string(),

@@ -29,7 +29,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   When loading a legacy ESLint configuration, Biome resolves the `extends` field.
   It resolves both shared configurations and plugin presets!
-  To do this, it invokes NodeJS.
+  To do this, it invokes _Node.js_.
 
   Biome relies on the metadata of its rules to determine the [equivalent rule of an ESLint rule](https://biomejs.dev/linter/rules-sources/).
   A Biome rule is either inspired or roughly identical to an ESLint rules.
@@ -103,7 +103,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   `@biomejs/biome migrate prettier` is now able to migrate Prettier configuration files
   ending with `js`, `mjs`, or `cjs` extensions.
-  To do this, Biome invokes NodeJs.
+  To do this, Biome invokes Node.js.
 
   Also, embedded Prettier configurations in `package.json` are now supported.
 
