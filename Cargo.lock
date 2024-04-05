@@ -459,6 +459,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_graphql_parser"
+version = "0.1.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_graphql_factory",
+ "biome_graphql_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_unicode_table",
+ "insta",
+ "quickcheck",
+ "quickcheck_macros",
+ "tests_macros",
+ "tracing",
+ "unicode-bom",
+]
+
+[[package]]
 name = "biome_graphql_syntax"
 version = "0.1.0"
 dependencies = [
