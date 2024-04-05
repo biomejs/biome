@@ -128,6 +128,7 @@ impl FileSystem for OsFileSystem {
         let output = Command::new("git")
             .arg("diff")
             .arg("--name-only")
+            .arg("--relative")
             .arg("--staged")
             // A: added
             // C: copied
