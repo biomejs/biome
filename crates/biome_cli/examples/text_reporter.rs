@@ -33,9 +33,11 @@ impl ReporterVisitor for BufferVisitor {
 }
 
 pub fn main() {
-    let mut summary = TraversalSummary::default();
-    summary.changed = 32;
-    summary.unchanged = 28;
+    let summary = TraversalSummary {
+        changed: 32,
+        unchanged: 28,
+        ..TraversalSummary::default()
+    };
     let mut visitor = BufferVisitor(String::new());
     let mut reporter = TextReport { summary };
     reporter.write(&mut visitor).unwrap();
