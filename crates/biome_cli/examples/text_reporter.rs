@@ -1,5 +1,4 @@
-use biome_cli::{Execution, Reporter, ReporterVisitor, TraversalSummary};
-use std::time::Duration;
+use biome_cli::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 
 /// This will be the visitor, which where we **write** the data
 struct BufferVisitor(String);
@@ -23,18 +22,20 @@ impl ReporterVisitor for BufferVisitor {
         _execution: &Execution,
         summary: &TraversalSummary,
     ) -> std::io::Result<()> {
-        self.0.push_str(&format!(
-            "Total is {}",
-            summary.changed() + summary.unchanged()
-        ));
+        self.0
+            .push_str(&format!("Total is {}", summary.changed + summary.unchanged));
         Ok(())
+    }
+
+    fn report_diagnostics(&mut self, _payload: &DiagnosticsPayload) -> std::io::Result<()> {
+        todo!()
     }
 }
 
 pub fn main() {
-    let summary = TraversalSummary::default()
-        .with_changed(32)
-        .with_unchanged(28);
+    let mut summary = TraversalSummary::default();
+    summary.changed = 32;
+    summary.unchanged = 28;
     let mut visitor = BufferVisitor(String::new());
     let mut reporter = TextReport { summary };
     reporter.write(&mut visitor).unwrap();

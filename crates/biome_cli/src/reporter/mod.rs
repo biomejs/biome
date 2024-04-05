@@ -17,78 +17,14 @@ pub struct DiagnosticsPayload<'a> {
 /// A type that holds the result of the traversal
 #[derive(Debug, Default)]
 pub struct TraversalSummary {
-    changed: usize,
-    unchanged: usize,
-    duration: Duration,
-    errors: u32,
-    warnings: u32,
-    skipped: usize,
-    suggested_fixes_skipped: u32,
-    diagnostics_not_printed: u32,
-}
-
-impl TraversalSummary {
-    pub fn with_changed(mut self, value: usize) -> Self {
-        self.changed = value;
-        self
-    }
-    pub fn with_unchanged(mut self, value: usize) -> Self {
-        self.unchanged = value;
-        self
-    }
-    pub fn with_duration(mut self, value: Duration) -> Self {
-        self.duration = value;
-        self
-    }
-    pub fn with_errors(mut self, value: u32) -> Self {
-        self.errors = value;
-        self
-    }
-
-    pub fn with_warnings(mut self, value: u32) -> Self {
-        self.warnings = value;
-        self
-    }
-
-    pub fn with_skipped(mut self, value: usize) -> Self {
-        self.skipped = value;
-        self
-    }
-
-    pub fn with_suggested_fixes_skipped(mut self, value: u32) -> Self {
-        self.suggested_fixes_skipped = value;
-        self
-    }
-
-    pub fn with_diagnostics_not_printed(mut self, value: u32) -> Self {
-        self.diagnostics_not_printed = value;
-        self
-    }
-
-    pub fn changed(&self) -> usize {
-        self.changed
-    }
-    pub fn unchanged(&self) -> usize {
-        self.unchanged
-    }
-    pub fn duration(&self) -> Duration {
-        self.duration
-    }
-    pub fn errors(&self) -> u32 {
-        self.errors
-    }
-    pub fn warnings(&self) -> u32 {
-        self.warnings
-    }
-    pub fn skipped(&self) -> usize {
-        self.skipped
-    }
-    pub fn suggested_fixes_skipped(&self) -> u32 {
-        self.suggested_fixes_skipped
-    }
-    pub fn diagnostics_not_printed(&self) -> u32 {
-        self.diagnostics_not_printed
-    }
+    pub changed: usize,
+    pub unchanged: usize,
+    pub duration: Duration,
+    pub errors: u32,
+    pub warnings: u32,
+    pub skipped: usize,
+    pub suggested_fixes_skipped: u32,
+    pub diagnostics_not_printed: u32,
 }
 
 /// When using this trait, the type that implements this trait is the one that holds the read-only information to pass around
@@ -104,16 +40,10 @@ pub trait ReporterVisitor {
         &mut self,
         traversal_mode: &Execution,
         summary: &TraversalSummary,
-    ) -> io::Result<()> {
-        let _ = (summary, traversal_mode);
-        Ok(())
-    }
+    ) -> io::Result<()>;
 
-    /// Writes a diagnostic
-    fn report_diagnostics(&mut self, payload: &DiagnosticsPayload) -> io::Result<()> {
-        let _ = payload;
-        Ok(())
-    }
+    /// Writes a diagnostics
+    fn report_diagnostics(&mut self, payload: &DiagnosticsPayload) -> io::Result<()>;
 }
 
 /// This function reports the result of a traversal

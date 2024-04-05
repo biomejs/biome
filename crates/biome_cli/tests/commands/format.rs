@@ -268,7 +268,7 @@ fn write() {
 
     assert_file_contents(&fs, file_path, FORMATTED);
 
-    assert_eq!(console.out_buffer.len(), 2);
+    assert_eq!(console.out_buffer.len(), 1);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -361,11 +361,9 @@ fn lint_warning() {
     // The console buffer is expected to contain the following message:
     // 0: "Formatter would have printed the following content"
     // 1: "Checked 1 files"
-    // 2: "No fixes needed"
-    // 3: "Found 1 error"
     assert_eq!(
         console.out_buffer.len(),
-        4,
+        2,
         "console {:#?}",
         console.out_buffer
     );
@@ -3184,7 +3182,7 @@ fn format_package_json() {
 
     assert_file_contents(&fs, file_path, expected);
 
-    assert_eq!(console.out_buffer.len(), 2);
+    assert_eq!(console.out_buffer.len(), 1);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

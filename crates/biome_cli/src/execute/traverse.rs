@@ -101,15 +101,16 @@ pub(crate) fn traverse(
     let suggested_fixes_skipped = printer.skipped_fixes();
     let diagnostics_not_printed = printer.not_printed_diagnostics();
     Ok((
-        TraversalSummary::default()
-            .with_changed(changed)
-            .with_unchanged(unchanged)
-            .with_duration(duration)
-            .with_errors(errors)
-            .with_warnings(warnings)
-            .with_skipped(skipped)
-            .with_suggested_fixes_skipped(suggested_fixes_skipped)
-            .with_diagnostics_not_printed(diagnostics_not_printed),
+        TraversalSummary {
+            changed,
+            unchanged,
+            duration,
+            errors,
+            warnings,
+            skipped,
+            suggested_fixes_skipped,
+            diagnostics_not_printed,
+        },
         diagnostics,
     ))
 }
