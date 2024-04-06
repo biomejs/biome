@@ -929,7 +929,7 @@ export interface Nursery {
 	 */
 	noExportsInTest?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow to use unnecessary callback on flatMap
 	 */
 	noFlatMapIdentity?: RuleConfiguration_for_Null;
 	/**

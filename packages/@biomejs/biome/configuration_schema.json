@@ -1452,7 +1452,7 @@
 					]
 				},
 				"noFlatMapIdentity": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow to use unnecessary callback on flatMap",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
