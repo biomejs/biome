@@ -20,7 +20,7 @@ mod execute;
 mod logging;
 mod metrics;
 mod panic;
-mod reports;
+mod reporter;
 mod service;
 
 use crate::cli_options::ColorsArg;
@@ -31,12 +31,9 @@ use crate::commands::lint::LintCommandPayload;
 pub use crate::commands::{biome_command, BiomeCommand};
 pub use crate::logging::{setup_cli_subscriber, LoggingLevel};
 pub use diagnostics::CliDiagnostic;
-pub(crate) use execute::{execute_mode, Execution, TraversalMode};
+pub use execute::{execute_mode, Execution, TraversalMode};
 pub use panic::setup_panic_handler;
-pub use reports::{
-    formatter::{FormatterReport, FormatterReportFileDetail, FormatterReportSummary},
-    Report, ReportDiagnostic, ReportDiff, ReportErrorKind, ReportKind,
-};
+pub use reporter::{DiagnosticsPayload, Reporter, ReporterVisitor, TraversalSummary};
 pub use service::{open_transport, SocketTransport};
 
 #[cfg(debug_assertions)]

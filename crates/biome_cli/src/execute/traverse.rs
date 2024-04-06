@@ -1,16 +1,14 @@
 use super::process_file::{process_file, DiffKind, FileStatus, Message};
-use super::ExecutionEnvironment;
+use super::{Execution, TraversalMode};
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
     CIFormatDiffDiagnostic, CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice,
     FormatDiffDiagnostic, OrganizeImportsDiffDiagnostic, PanicDiagnostic,
 };
-use crate::{CliDiagnostic, CliSession, Execution, FormatterReportSummary, Report, TraversalMode};
-use biome_console::fmt::Formatter;
-use biome_console::{fmt, markup, Console, ConsoleExt};
+use crate::reporter::TraversalSummary;
+use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::DiagnosticTags;
-use biome_diagnostics::PrintGitHubDiagnostic;
-use biome_diagnostics::{category, DiagnosticExt, Error, PrintDiagnostic, Resource, Severity};
+use biome_diagnostics::{category, DiagnosticExt, Error, Resource, Severity};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::workspace::IsPathIgnoredParams;
@@ -20,7 +18,6 @@ use rustc_hash::FxHashSet;
 use std::sync::atomic::AtomicU32;
 use std::{
     ffi::OsString,
-    io,
     panic::catch_unwind,
     path::{Path, PathBuf},
     sync::{
@@ -31,121 +28,13 @@ use std::{
     time::{Duration, Instant},
 };
 
-struct SummaryResult<'a> {
-    changed: usize,
-    unchanged: usize,
-    duration: Duration,
-    errors: u32,
-    warnings: u32,
-    traversal: &'a TraversalMode,
-}
-
-struct Files(usize);
-
-impl fmt::Display for Files {
-    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        fmt.write_markup(markup!({self.0} " "))?;
-        if self.0 == 1 {
-            fmt.write_str("file")
-        } else {
-            fmt.write_str("files")
-        }
-    }
-}
-
-struct SummaryDetail(usize);
-
-impl fmt::Display for SummaryDetail {
-    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        if self.0 > 0 {
-            fmt.write_markup(markup! {
-                ". Fixed "{Files(self.0)}"."
-            })
-        } else {
-            fmt.write_markup(markup! {
-                ". No fixes needed."
-            })
-        }
-    }
-}
-
-struct SummaryTotal<'a>(&'a TraversalMode, usize, &'a Duration);
-
-impl<'a> fmt::Display for SummaryTotal<'a> {
-    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        let files = Files(self.1);
-        match self.0 {
-            TraversalMode::Check { .. } | TraversalMode::Lint { .. } | TraversalMode::CI { .. } => {
-                fmt.write_markup(markup! {
-                    "Checked "{files}" in "{self.2}
-                })
-            }
-            TraversalMode::Format { write, .. } => {
-                if *write {
-                    fmt.write_markup(markup! {
-                        "Formatted "{files}" in "{self.2}
-                    })
-                } else {
-                    fmt.write_markup(markup! {
-                        "Checked "{files}" in "{self.2}
-                    })
-                }
-            }
-
-            TraversalMode::Migrate { write, .. } => {
-                if *write {
-                    fmt.write_markup(markup! {
-                      "Migrated your configuration file in "{self.2}
-                    })
-                } else {
-                    fmt.write_markup(markup! {
-                        "Checked your configuration file in "{self.2}
-                    })
-                }
-            }
-
-            TraversalMode::Search { .. } => fmt.write_markup(markup! {
-                "Searched "{files}" in "{self.2}
-            }),
-        }
-    }
-}
-
-impl<'a> fmt::Display for SummaryResult<'a> {
-    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        let summary = SummaryTotal(
-            self.traversal,
-            self.changed + self.unchanged,
-            &self.duration,
-        );
-        let detail = SummaryDetail(self.changed);
-        fmt.write_markup(markup!(<Info>{summary}{detail}</Info>))?;
-
-        if self.errors > 0 {
-            if self.errors == 1 {
-                fmt.write_markup(markup!("\n"<Error>"Found "{self.errors}" error."</Error>))?;
-            } else {
-                fmt.write_markup(markup!("\n"<Error>"Found "{self.errors}" errors."</Error>))?;
-            }
-        }
-        if self.warnings > 0 {
-            if self.warnings == 1 {
-                fmt.write_markup(markup!("\n"<Warn>"Found "{self.warnings}" warning."</Warn>))?;
-            } else {
-                fmt.write_markup(markup!("\n"<Warn>"Found "{self.warnings}" warnings."</Warn>))?;
-            }
-        }
-        Ok(())
-    }
-}
-
 ///
 pub(crate) fn traverse(
-    execution: Execution,
-    session: CliSession,
+    execution: &Execution,
+    session: &mut CliSession,
     cli_options: &CliOptions,
     inputs: Vec<OsString>,
-) -> Result<(), CliDiagnostic> {
+) -> Result<(TraversalSummary, Vec<Error>), CliDiagnostic> {
     init_thread_pool();
     if inputs.is_empty()
         && execution.as_stdin_file().is_none()
@@ -166,24 +55,19 @@ pub(crate) fn traverse(
 
     let fs = &*session.app.fs;
     let workspace = &*session.app.workspace;
-    let console = &mut *session.app.console;
 
     let max_diagnostics = execution.get_max_diagnostics();
     let remaining_diagnostics = AtomicU16::new(max_diagnostics);
 
-    let mut report = Report::default();
-
-    let printer = DiagnosticsPrinter::new(&execution)
+    let printer = DiagnosticsPrinter::new(execution)
         .with_verbose(cli_options.verbose)
         .with_diagnostic_level(cli_options.diagnostic_level)
         .with_max_diagnostics(max_diagnostics);
 
-    let duration = thread::scope(|s| {
+    let (duration, diagnostics) = thread::scope(|s| {
         let handler = thread::Builder::new()
             .name(String::from("biome::console"))
-            .spawn_scoped(s, || {
-                printer.run(receiver, recv_files, console);
-            })
+            .spawn_scoped(s, || printer.run(receiver, recv_files))
             .expect("failed to spawn console thread");
 
         // The traversal context is scoped to ensure all the channels it
@@ -194,7 +78,7 @@ pub(crate) fn traverse(
             &TraversalOptions {
                 fs,
                 workspace,
-                execution: &execution,
+                execution,
                 interner,
                 changed: &changed,
                 unchanged: &unchanged,
@@ -204,79 +88,31 @@ pub(crate) fn traverse(
             },
         );
         // wait for the main thread to finish
-        handler.join().unwrap();
+        let diagnostics = handler.join().unwrap();
 
-        elapsed
+        (elapsed, diagnostics)
     });
 
     let errors = printer.errors();
     let warnings = printer.warnings();
     let changed = changed.load(Ordering::Relaxed);
     let unchanged = unchanged.load(Ordering::Relaxed);
-    let count = changed + unchanged;
     let skipped = skipped.load(Ordering::Relaxed);
-
-    if execution.should_report_to_terminal() {
-        console.log(markup! {
-            {SummaryResult {
-                changed,
-                unchanged,
-                duration,
-                errors,
-                warnings,
-                traversal: execution.traversal_mode()
-            }}
-        });
-    } else {
-        if let TraversalMode::Format { write, .. } = execution.traversal_mode() {
-            let mut summary = FormatterReportSummary::default();
-            if *write {
-                summary.set_files_written(count);
-            } else {
-                summary.set_files_compared(count);
-            }
-            report.set_formatter_summary(summary);
-        }
-
-        let to_print = report.as_serialized_reports()?;
-        console.log(markup! {
-            {to_print}
-        });
-        return Ok(());
-    }
-
-    if skipped > 0 {
-        if skipped == 1 {
-            console.log(markup! {
-                <Warn>"Skipped "{skipped}" file."</Warn>
-            });
-        } else {
-            console.log(markup! {
-                <Warn>"Skipped "{skipped}" files."</Warn>
-            });
-        }
-    }
-
-    let should_exit_on_warnings = warnings > 0 && cli_options.error_on_warnings;
-    // Processing emitted error diagnostics, exit with a non-zero code
-    if count.saturating_sub(skipped) == 0 && !cli_options.no_errors_on_unmatched {
-        Err(CliDiagnostic::no_files_processed())
-    } else if errors > 0 || should_exit_on_warnings {
-        let category = execution.as_diagnostic_category();
-        if should_exit_on_warnings {
-            if execution.is_check_apply() {
-                Err(CliDiagnostic::apply_warnings(category))
-            } else {
-                Err(CliDiagnostic::check_warnings(category))
-            }
-        } else if execution.is_check_apply() {
-            Err(CliDiagnostic::apply_error(category))
-        } else {
-            Err(CliDiagnostic::check_error(category))
-        }
-    } else {
-        Ok(())
-    }
+    let suggested_fixes_skipped = printer.skipped_fixes();
+    let diagnostics_not_printed = printer.not_printed_diagnostics();
+    Ok((
+        TraversalSummary {
+            changed,
+            unchanged,
+            duration,
+            errors,
+            warnings,
+            skipped,
+            suggested_fixes_skipped,
+            diagnostics_not_printed,
+        },
+        diagnostics,
+    ))
 }
 
 /// This function will setup the global Rayon thread pool the first time it's called
@@ -328,6 +164,7 @@ struct DiagnosticsPrinter<'ctx> {
 
     not_printed_diagnostics: AtomicU32,
     printed_diagnostics: AtomicU32,
+    total_skipped_suggested_fixes: AtomicU32,
 }
 
 impl<'ctx> DiagnosticsPrinter<'ctx> {
@@ -342,6 +179,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
             max_diagnostics: 20,
             not_printed_diagnostics: AtomicU32::new(0),
             printed_diagnostics: AtomicU32::new(0),
+            total_skipped_suggested_fixes: AtomicU32::new(0),
         }
     }
 
@@ -366,6 +204,14 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
 
     fn warnings(&self) -> u32 {
         self.warnings.load(Ordering::Relaxed)
+    }
+
+    fn not_printed_diagnostics(&self) -> u32 {
+        self.not_printed_diagnostics.load(Ordering::Relaxed)
+    }
+
+    fn skipped_fixes(&self) -> u32 {
+        self.total_skipped_suggested_fixes.load(Ordering::Relaxed)
     }
 
     /// Checks if the diagnostic we received from the thread should be considered or not. Logic:
@@ -400,14 +246,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
         should_print
     }
 
-    fn run(
-        &self,
-        receiver: Receiver<Message>,
-        interner: Receiver<PathBuf>,
-        console: &'ctx mut dyn Console,
-    ) {
+    fn run(&self, receiver: Receiver<Message>, interner: Receiver<PathBuf>) -> Vec<Error> {
         let mut paths: FxHashSet<String> = FxHashSet::default();
-        let mut total_skipped_suggested_fixes = 0;
 
         let mut diagnostics_to_print = vec![];
 
@@ -416,7 +256,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                 Message::SkippedFixes {
                     skipped_suggested_fixes,
                 } => {
-                    total_skipped_suggested_fixes += skipped_suggested_fixes;
+                    self.total_skipped_suggested_fixes
+                        .fetch_add(skipped_suggested_fixes, Ordering::Relaxed);
                 }
 
                 Message::Failure => {
@@ -593,44 +434,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                 }
             }
         }
-
-        let running_on_github = matches!(
-            self.execution.traversal_mode(),
-            TraversalMode::CI {
-                environment: Some(ExecutionEnvironment::GitHub),
-            }
-        );
-
-        for diagnostic in diagnostics_to_print {
-            if diagnostic.severity() >= self.diagnostic_level {
-                if diagnostic.tags().is_verbose() {
-                    if self.verbose {
-                        console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
-                    }
-                } else {
-                    console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
-                }
-            }
-
-            if running_on_github {
-                console.log(markup! {{PrintGitHubDiagnostic::simple(&diagnostic)}});
-            }
-        }
-
-        if self.execution.is_check() && total_skipped_suggested_fixes > 0 {
-            console.log(markup! {
-                <Warn>"Skipped "{total_skipped_suggested_fixes}" suggested fixes.\n"</Warn>
-                <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --apply-unsafe\n"</Emphasis></Info>
-            })
-        }
-
-        let not_printed_diagnostics = self.not_printed_diagnostics.load(Ordering::Relaxed);
-        if !self.execution.is_ci() && not_printed_diagnostics > 0 {
-            console.log(markup! {
-                <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
-                <Info>"Diagnostics not shown: "</Info><Emphasis>{not_printed_diagnostics}</Emphasis><Info>"."</Info>
-            })
-        }
+        diagnostics_to_print
     }
 }
 
