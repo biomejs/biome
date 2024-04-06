@@ -2,7 +2,7 @@
 title: noUnusedImports (since v1.3.0)
 ---
 
-**Diagnostic Category: `lint/correctness/noUnusedImports`**
+**Diagnostic Category: `lint/nursery/noUnusedImports`**
 
 Disallow unused imports.
 
