@@ -391,7 +391,15 @@ pub fn is_binding_react_stable(
     else {
         return false;
     };
+    let Some(function_name) = callee.get_callee_member_name() else {
+        return false;
+    };
+    let function_name = function_name.text_trimmed();
     stable_config.iter().any(|config| {
+        if !config.builtin && config.hook_name.as_str() != function_name {
+            return false;
+        }
+
         if config.builtin
             && !is_react_call_api(&callee, model, ReactLibrary::React, &config.hook_name)
         {
