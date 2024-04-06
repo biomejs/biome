@@ -1847,10 +1847,9 @@
 		},
 		"RuleWithNoOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "type": "null" }
+				"level": { "$ref": "#/definitions/RulePlainConfiguration" }
 			},
 			"additionalProperties": false
 		},

@@ -133,6 +133,30 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- `options` is no longer required for rules without any options ([#2313](https://github.com/biomejs/biome/issues/2313)).
+
+  Previously, the JSON schema required to set `options` to `null` when an object is used to set the diagnostic level of a rule without any option.
+  However, if `options` is set to `null`, Biome emits an error.
+
+  The schema is now fixed and it no longer requires specifying `options`.
+  This makes the following configuration valid:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "style": {
+          "noDefaultExport": {
+            "level": "off"
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  Contributed by @Conaclos
+
 ### Editors
 
 ### Formatter
