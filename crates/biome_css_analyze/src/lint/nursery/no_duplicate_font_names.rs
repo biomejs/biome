@@ -42,9 +42,9 @@ declare_rule! {
     /// ```css
     /// b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif; }
     /// ```
-    pub NoFontFamilyDuplicateNames {
+    pub NoDuplicateFontNames {
         version: "next",
-        name: "noFontFamilyDuplicateNames",
+        name: "noDuplicateFontNames",
         recommended: true,
         source: RuleSource::Stylelint("font-family-no-duplicate-names"),
     }
@@ -55,7 +55,7 @@ pub struct RuleState {
     span: TextRange,
 }
 
-impl Rule for NoFontFamilyDuplicateNames {
+impl Rule for NoDuplicateFontNames {
     type Query = Ast<CssGenericProperty>;
     type State = RuleState;
     type Signals = Option<Self::State>;

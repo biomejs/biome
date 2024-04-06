@@ -2619,7 +2619,7 @@ pub struct Nursery {
     pub no_focused_tests: Option<RuleConfiguration<NoFocusedTests>>,
     #[doc = "Disallow duplicate names within font families."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_font_family_duplicate_names: Option<RuleConfiguration<NoFontFamilyDuplicateNames>>,
+    pub no_font_family_duplicate_names: Option<RuleConfiguration<NoDuplicateFontNames>>,
     #[doc = "Checks that the assertion function, for example expect, is placed inside an it() function call."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misplaced_assertion: Option<RuleConfiguration<NoMisplacedAssertion>>,
@@ -2688,7 +2688,7 @@ impl Nursery {
         "noExcessiveNestedTestSuites",
         "noExportsInTest",
         "noFocusedTests",
-        "noFontFamilyDuplicateNames",
+        "noDuplicateFontNames",
         "noMisplacedAssertion",
         "noNamespaceImport",
         "noNodejsModules",
@@ -2712,7 +2712,7 @@ impl Nursery {
         "noExcessiveNestedTestSuites",
         "noExportsInTest",
         "noFocusedTests",
-        "noFontFamilyDuplicateNames",
+        "noDuplicateFontNames",
         "noSuspiciousSemicolonInJsx",
         "noUselessTernary",
     ];
@@ -3105,7 +3105,7 @@ impl Nursery {
                 .no_focused_tests
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noFontFamilyDuplicateNames" => self
+            "noDuplicateFontNames" => self
                 .no_font_family_duplicate_names
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
