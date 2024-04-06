@@ -14,7 +14,7 @@ declare_rule! {
     ///
     /// This rule checks the `font` and `font-family` properties for duplicate font names.
     ///
-    /// This rule ignores var(--custom-property) variable syntaxes.
+    /// This rule ignores var(--custom-property) variable syntaxes now.
     ///
     ///
     /// ## Examples
