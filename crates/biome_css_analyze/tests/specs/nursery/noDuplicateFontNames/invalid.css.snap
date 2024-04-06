@@ -14,7 +14,7 @@ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-s
 
 # Diagnostics
 ```
-invalid.css:1:56 lint/nursery/noFontFamilyDuplicateNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:56 lint/nursery/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected duplicate font name: sans-serif
   
@@ -27,7 +27,7 @@ invalid.css:1:56 lint/nursery/noFontFamilyDuplicateNames ━━━━━━━�
 ```
 
 ```
-invalid.css:2:44 lint/nursery/noFontFamilyDuplicateNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:44 lint/nursery/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected duplicate font name: Arial
   
@@ -41,7 +41,7 @@ invalid.css:2:44 lint/nursery/noFontFamilyDuplicateNames ━━━━━━━�
 ```
 
 ```
-invalid.css:3:35 lint/nursery/noFontFamilyDuplicateNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:35 lint/nursery/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected duplicate font name: LucidaGrande
   
@@ -56,7 +56,7 @@ invalid.css:3:35 lint/nursery/noFontFamilyDuplicateNames ━━━━━━━�
 ```
 
 ```
-invalid.css:4:27 lint/nursery/noFontFamilyDuplicateNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:27 lint/nursery/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected duplicate font name: Times
   
@@ -71,7 +71,7 @@ invalid.css:4:27 lint/nursery/noFontFamilyDuplicateNames ━━━━━━━�
 ```
 
 ```
-invalid.css:5:39 lint/nursery/noFontFamilyDuplicateNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:39 lint/nursery/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected duplicate font name: Arial
   
@@ -85,7 +85,7 @@ invalid.css:5:39 lint/nursery/noFontFamilyDuplicateNames ━━━━━━━�
 ```
 
 ```
-invalid.css:6:75 lint/nursery/noFontFamilyDuplicateNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:75 lint/nursery/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected duplicate font name: sans-serif
   

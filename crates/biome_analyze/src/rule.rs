@@ -177,6 +177,7 @@ impl RuleSource {
             Self::EslintUnicorn(rule_name) => format!("unicorn/{rule_name}"),
             Self::EslintMysticatea(rule_name) => format!("@mysticatea/{rule_name}"),
             Self::EslintBarrelFiles(rule_name) => format!("barrel-files/{rule_name}"),
+            Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
         }
     }
 
