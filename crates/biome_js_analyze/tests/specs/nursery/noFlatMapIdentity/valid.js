@@ -1,0 +1,1 @@
+array.flatMap((arr) => arr * 2);

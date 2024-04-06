@@ -89,6 +89,8 @@ pub type NoExtraBooleanCast =
     <lint::complexity::no_extra_boolean_cast::NoExtraBooleanCast as biome_analyze::Rule>::Options;
 pub type NoExtraNonNullAssertion = < lint :: suspicious :: no_extra_non_null_assertion :: NoExtraNonNullAssertion as biome_analyze :: Rule > :: Options ;
 pub type NoFallthroughSwitchClause = < lint :: suspicious :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause as biome_analyze :: Rule > :: Options ;
+pub type NoFlatMapIdentity =
+    <lint::nursery::no_flat_map_identity::NoFlatMapIdentity as biome_analyze::Rule>::Options;
 pub type NoFocusedTests =
     <lint::nursery::no_focused_tests::NoFocusedTests as biome_analyze::Rule>::Options;
 pub type NoForEach = <lint::complexity::no_for_each::NoForEach as biome_analyze::Rule>::Options;

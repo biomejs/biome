@@ -929,6 +929,10 @@ export interface Nursery {
 	 */
 	noExportsInTest?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noFlatMapIdentity?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow focused tests.
 	 */
 	noFocusedTests?: RuleConfiguration_for_Null;
@@ -1923,6 +1927,7 @@ export type Category =
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noExportsInTest"
+	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noFocusedTests"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noNamespaceImport"

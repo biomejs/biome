@@ -252,11 +252,7 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"<div
-    class={{
-        "px-2·foo·p-4·bar": ["foo bar p-4"],
-    }}
-/>"#;
+        const SOURCE: &str = r#"array.flatMap(arr => arr)"#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
@@ -268,7 +264,7 @@ mod tests {
             dependencies_index: Some(1),
             stable_result: StableHookResult::None,
         };
-        let rule_filter = RuleFilter::Rule("nursery", "useSortedClasses");
+        let rule_filter = RuleFilter::Rule("nursery", "noFlatMapIdentity");
 
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
