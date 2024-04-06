@@ -337,6 +337,8 @@ impl TryFrom<&Path> for JsFileSource {
             return Ok(file_source);
         }
 
+        // We assume the file extensions are case-insensitive
+        // and we use the lowercase form of them for pattern matching
         // TODO: This should be extracted to a dedicated function, maybe in biome_fs
         // because the same logic is also used in DocumentFileSource::from_path_optional
         // and we may support more and more extensions with more than one dots.

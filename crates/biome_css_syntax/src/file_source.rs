@@ -67,6 +67,8 @@ impl TryFrom<&Path> for CssFileSource {
             return Ok(file_source);
         }
 
+        // We assume the file extensions are case-insensitive
+        // and we use the lowercase form of them for pattern matching
         let extension = &path
             .extension()
             .and_then(OsStr::to_str)
