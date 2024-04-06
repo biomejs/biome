@@ -1416,6 +1416,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateFontNames": {
+					"description": "Disallow duplicate names within font families.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateJsonKeys": {
 					"description": "Disallow two keys with the same name inside a JSON object.",
 					"anyOf": [
@@ -1453,13 +1460,6 @@
 				},
 				"noFocusedTests": {
 					"description": "Disallow focused tests.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateFontNames": {
-					"description": "Disallow duplicate names within font families.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -2599,6 +2599,9 @@ pub struct Nursery {
     #[doc = "Disallow duplicate conditions in if-else-if chains"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_else_if: Option<RuleConfiguration<NoDuplicateElseIf>>,
+    #[doc = "Disallow duplicate names within font families."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_duplicate_font_names: Option<RuleConfiguration<NoDuplicateFontNames>>,
     #[doc = "Disallow two keys with the same name inside a JSON object."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_json_keys: Option<RuleConfiguration<NoDuplicateJsonKeys>>,
@@ -2617,9 +2620,6 @@ pub struct Nursery {
     #[doc = "Disallow focused tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_focused_tests: Option<RuleConfiguration<NoFocusedTests>>,
-    #[doc = "Disallow duplicate names within font families."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_font_family_duplicate_names: Option<RuleConfiguration<NoDuplicateFontNames>>,
     #[doc = "Checks that the assertion function, for example expect, is placed inside an it() function call."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misplaced_assertion: Option<RuleConfiguration<NoMisplacedAssertion>>,
@@ -2682,13 +2682,13 @@ impl Nursery {
         "noConsole",
         "noDoneCallback",
         "noDuplicateElseIf",
+        "noDuplicateFontNames",
         "noDuplicateJsonKeys",
         "noDuplicateTestHooks",
         "noEvolvingAny",
         "noExcessiveNestedTestSuites",
         "noExportsInTest",
         "noFocusedTests",
-        "noDuplicateFontNames",
         "noMisplacedAssertion",
         "noNamespaceImport",
         "noNodejsModules",
@@ -2706,13 +2706,13 @@ impl Nursery {
     const RECOMMENDED_RULES: [&'static str; 11] = [
         "noDoneCallback",
         "noDuplicateElseIf",
+        "noDuplicateFontNames",
         "noDuplicateJsonKeys",
         "noDuplicateTestHooks",
         "noEvolvingAny",
         "noExcessiveNestedTestSuites",
         "noExportsInTest",
         "noFocusedTests",
-        "noDuplicateFontNames",
         "noSuspiciousSemicolonInJsx",
         "noUselessTernary",
     ];
@@ -2796,37 +2796,37 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_test_hooks.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_evolving_any.as_ref() {
+        if let Some(rule) = self.no_duplicate_test_hooks.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_excessive_nested_test_suites.as_ref() {
+        if let Some(rule) = self.no_evolving_any.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_exports_in_test.as_ref() {
+        if let Some(rule) = self.no_excessive_nested_test_suites.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_focused_tests.as_ref() {
+        if let Some(rule) = self.no_exports_in_test.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_font_family_duplicate_names.as_ref() {
+        if let Some(rule) = self.no_focused_tests.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
@@ -2925,37 +2925,37 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_test_hooks.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_evolving_any.as_ref() {
+        if let Some(rule) = self.no_duplicate_test_hooks.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_excessive_nested_test_suites.as_ref() {
+        if let Some(rule) = self.no_evolving_any.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_exports_in_test.as_ref() {
+        if let Some(rule) = self.no_excessive_nested_test_suites.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_focused_tests.as_ref() {
+        if let Some(rule) = self.no_exports_in_test.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_font_family_duplicate_names.as_ref() {
+        if let Some(rule) = self.no_focused_tests.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
@@ -3081,6 +3081,10 @@ impl Nursery {
                 .no_duplicate_else_if
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "noDuplicateFontNames" => self
+                .no_duplicate_font_names
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "noDuplicateJsonKeys" => self
                 .no_duplicate_json_keys
                 .as_ref()
@@ -3103,10 +3107,6 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noFocusedTests" => self
                 .no_focused_tests
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noDuplicateFontNames" => self
-                .no_font_family_duplicate_names
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noMisplacedAssertion" => self
