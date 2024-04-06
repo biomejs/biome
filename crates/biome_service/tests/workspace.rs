@@ -104,7 +104,7 @@ fn correctly_handle_json_files() {
     .unwrap();
     assert!(jsonc_file.format_file().is_ok());
 
-    // ".jsonc" file doesn't allow trailing commas
+    // ".jsonc" file allow trailing commas
     let jsonc_file = FileGuard::open(
         workspace.as_ref(),
         OpenFileParams {
@@ -115,7 +115,35 @@ fn correctly_handle_json_files() {
         },
     )
     .unwrap();
-    assert!(jsonc_file.format_file().is_err());
+    assert!(jsonc_file.format_file().is_ok());
+
+    // well-known json-with-comments file allows comments
+    let well_known_json_with_comments_file = FileGuard::open(
+        workspace.as_ref(),
+        OpenFileParams {
+            path: BiomePath::new(".eslintrc.json"),
+            content: r#"{"a": 42}//comment"#.into(),
+            version: 0,
+            document_file_source: None,
+        },
+    )
+    .unwrap();
+    assert!(well_known_json_with_comments_file.format_file().is_ok());
+
+    // well-known json-with-comments file doesn't allow trailing commas
+    let well_known_json_with_comments_file_with_trailing_commas = FileGuard::open(
+        workspace.as_ref(),
+        OpenFileParams {
+            path: BiomePath::new("dir/.eslintrc.json"),
+            content: r#"{"a": 42,}"#.into(),
+            version: 0,
+            document_file_source: None,
+        },
+    )
+    .unwrap();
+    assert!(well_known_json_with_comments_file_with_trailing_commas
+        .format_file()
+        .is_err());
 
     // well-known json-with-comments-and-trailing-commas file allows comments and trailing commas
     let well_known_json_with_comments_and_trailing_commas_file = FileGuard::open(

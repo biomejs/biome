@@ -10,6 +10,10 @@ pub enum FileSourceError {
     MissingFileExtension(PathBuf),
     /// The source type is unknown
     UnknownExtension(String, String),
+    /// The file name is unknown (not a well-known file name)
+    UnknownFileName(String),
+    /// The language id is unknown
+    UnknownLanguageId(String),
 }
 
 impl std::error::Error for FileSourceError {}
@@ -25,6 +29,15 @@ impl Display for FileSourceError {
             }
             FileSourceError::UnknownExtension(_, extension) => {
                 write!(f, "The parser can't parse the extension '{extension}' yet")
+            }
+            FileSourceError::UnknownFileName(file_name) => {
+                write!(
+                    f,
+                    "The parser doesn't recognize the file name '{file_name}' yet"
+                )
+            }
+            FileSourceError::UnknownLanguageId(language_id) => {
+                write!(f, "The parser can't parse the language '{language_id}' yet")
             }
         }
     }

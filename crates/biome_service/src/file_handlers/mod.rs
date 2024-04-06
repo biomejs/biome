@@ -25,7 +25,7 @@ use biome_js_syntax::{EmbeddingKind, JsFileSource, Language, TextRange, TextSize
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
-use biome_rowan::NodeCache;
+use biome_rowan::{FileSourceError, NodeCache};
 pub use javascript::JsFormatterSettings;
 use std::ffi::OsStr;
 use std::path::Path;
@@ -69,56 +69,64 @@ impl From<CssFileSource> for DocumentFileSource {
 }
 
 impl From<&Path> for DocumentFileSource {
-    fn from(value: &Path) -> Self {
-        JsFileSource::try_from(value)
-            .map(Into::into)
-            .or(JsonFileSource::try_from(value).map(Into::into))
-            .unwrap_or(DocumentFileSource::Unknown)
+    fn from(path: &Path) -> Self {
+        Self::from_path(path)
     }
 }
 
 impl DocumentFileSource {
-    // Well known json-like files that support comments and trailing commas
-    // This list should be SORTED!
-    const WELL_KNOWN_JSON_WITH_COMMENTS_AND_TRAILING_COMMAS_FILES: &'static [&'static str] = &[
-        ".babelrc",
-        ".babelrc.json",
-        ".ember-cli",
-        ".eslintrc",
-        ".eslintrc.json",
-        ".hintrc",
-        ".jsfmtrc",
-        ".jshintrc",
-        ".swcrc",
-        "babel.config.json",
-        "jsconfig.json",
-        "tsconfig.json",
-        "tslint.json",
-        "typedoc.json",
-        "typescript.json",
-    ];
+    fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
+        if let Ok(file_source) = JsonFileSource::try_from_well_known(file_name) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = JsFileSource::try_from_well_known(file_name) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = CssFileSource::try_from_well_known(file_name) {
+            return Ok(file_source.into());
+        }
+        Err(FileSourceError::UnknownFileName(file_name.into()))
+    }
 
-    // Well known json-like files that support comments but no trailing commas
-    // This list should be SORTED!
-    const WELL_KNOWN_JSON_WITH_COMMENTS_FILES: &'static [&'static str] = &[];
+    // Returns the language corresponding to this file name
+    pub fn from_well_known(file_name: &str) -> Self {
+        Self::try_from_well_known(file_name)
+            .map_or(DocumentFileSource::Unknown, |file_source| file_source)
+    }
+
+    fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
+        if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = CssFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
+        Err(FileSourceError::UnknownExtension(
+            Default::default(),
+            extension.into(),
+        ))
+    }
 
     /// Returns the language corresponding to this file extension
-    pub fn from_extension(s: &str) -> Self {
-        match s.to_lowercase().as_str() {
-            "js" | "mjs" | "jsx" => JsFileSource::jsx().into(),
-            "cjs" => JsFileSource::js_script().into(),
-            "ts" => JsFileSource::ts().into(),
-            "mts" | "cts" => JsFileSource::ts_restricted().into(),
-            "tsx" => JsFileSource::tsx().into(),
-            "d.ts" | "d.mts" | "d.cts" => JsFileSource::d_ts().into(),
-            "json" => JsonFileSource::json().into(),
-            "jsonc" => JsonFileSource::json().with_comments(true).into(),
-            "astro" => JsFileSource::astro().into(),
-            "vue" => JsFileSource::vue().into(),
-            "svelte" => JsFileSource::svelte().into(),
-            "css" => CssFileSource::css().into(),
-            _ => DocumentFileSource::Unknown,
+    pub fn from_extension(extension: &str) -> Self {
+        Self::try_from_extension(extension)
+            .map_or(DocumentFileSource::Unknown, |file_source| file_source)
+    }
+
+    fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
+        if let Ok(file_source) = JsonFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
         }
+        if let Ok(file_source) = JsFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = CssFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
+        }
+        Err(FileSourceError::UnknownLanguageId(language_id.into()))
     }
 
     /// Returns the language corresponding to this language ID
@@ -127,68 +135,56 @@ impl DocumentFileSource {
     /// for a list of language identifiers
     ///
     /// [microsoft spec]: https://code.visualstudio.com/docs/languages/identifiers
-    pub fn from_language_id(s: &str) -> Self {
-        match s.to_lowercase().as_str() {
-            "javascript" => JsFileSource::js_module().into(),
-            "typescript" => JsFileSource::ts().into(),
-            "javascriptreact" => JsFileSource::jsx().into(),
-            "typescriptreact" => JsFileSource::tsx().into(),
-            "json" => JsonFileSource::json().into(),
-            "jsonc" => JsonFileSource::json().with_comments(true).into(),
-            "astro" => JsFileSource::astro().into(),
-            "vue" => JsFileSource::vue().into(),
-            "svelte" => JsFileSource::svelte().into(),
-            // TODO: remove this when we are ready to handle CSS files
-            "css" => DocumentFileSource::Unknown,
-            _ => DocumentFileSource::Unknown,
+    pub fn from_language_id(language_id: &str) -> Self {
+        Self::try_from_language_id(language_id)
+            .map_or(DocumentFileSource::Unknown, |file_source| file_source)
+    }
+
+    fn try_from_path(path: &Path) -> Result<Self, FileSourceError> {
+        let file_name = path
+            .file_name()
+            .and_then(OsStr::to_str)
+            .ok_or_else(|| FileSourceError::MissingFileName(path.into()))?;
+
+        if let Ok(file_source) = Self::try_from_well_known(file_name) {
+            return Ok(file_source);
         }
+
+        // TODO: This should be extracted to a dedicated function, maybe in biome_fs
+        // because the same logic is also used in JsFileSource::try_from
+        // and we may support more and more extensions with more than one dots.
+        let extension = &match path {
+            _ if path
+                .to_str()
+                .is_some_and(|p| p.to_lowercase().ends_with(".d.ts")) =>
+            {
+                Some("d.ts".to_owned())
+            }
+            _ if path
+                .to_str()
+                .is_some_and(|p| p.to_lowercase().ends_with(".d.mts")) =>
+            {
+                Some("d.mts".to_owned())
+            }
+            _ if path
+                .to_str()
+                .is_some_and(|p| p.to_lowercase().ends_with(".d.cts")) =>
+            {
+                Some("d.cts".to_owned())
+            }
+            path => path
+                .extension()
+                .and_then(OsStr::to_str)
+                .map(|s| s.to_lowercase()),
+        }
+        .ok_or_else(|| FileSourceError::MissingFileExtension(path.into()))?;
+
+        Self::try_from_extension(extension)
     }
 
     /// Returns the language corresponding to the file path
     pub fn from_path(path: &Path) -> Self {
-        // check well known files
-        if let Some(file_source) = path
-            .file_name()
-            .and_then(OsStr::to_str)
-            .and_then(DocumentFileSource::try_from_well_known_filename)
-        {
-            return file_source;
-        }
-
-        // extract extensions
-        let extension = match path {
-            _ if path.to_str().is_some_and(|p| p.ends_with(".d.ts")) => Some("d.ts"),
-            _ if path.to_str().is_some_and(|p| p.ends_with(".d.mts")) => Some("d.mts"),
-            _ if path.to_str().is_some_and(|p| p.ends_with(".d.cts")) => Some("d.cts"),
-            path => path.extension().and_then(|e| e.to_str()),
-        };
-
-        // from extensions
-        extension.map_or(
-            DocumentFileSource::Unknown,
-            DocumentFileSource::from_extension,
-        )
-    }
-
-    fn try_from_well_known_filename(filename: &str) -> Option<DocumentFileSource> {
-        if Self::WELL_KNOWN_JSON_WITH_COMMENTS_AND_TRAILING_COMMAS_FILES
-            .binary_search(&filename)
-            .is_ok()
-        {
-            return Some(
-                JsonFileSource::json()
-                    .with_comments(true)
-                    .with_trailing_commas(true)
-                    .into(),
-            );
-        }
-        if Self::WELL_KNOWN_JSON_WITH_COMMENTS_FILES
-            .binary_search(&filename)
-            .is_ok()
-        {
-            return Some(JsonFileSource::json().with_comments(true).into());
-        }
-        None
+        Self::try_from_path(path).map_or(DocumentFileSource::Unknown, |file_source| file_source)
     }
 
     /// Returns the language if it's not unknown, otherwise returns `other`.
@@ -238,32 +234,26 @@ impl DocumentFileSource {
     pub fn to_js_file_source(&self) -> Option<JsFileSource> {
         match self {
             DocumentFileSource::Js(file_source) => Some(*file_source),
-            DocumentFileSource::Json(_)
-            | DocumentFileSource::Css(_)
-            | DocumentFileSource::Unknown => None,
+            _ => None,
         }
     }
 
     pub fn to_json_file_source(&self) -> Option<JsonFileSource> {
         match self {
             DocumentFileSource::Json(json) => Some(*json),
-            DocumentFileSource::Js(_)
-            | DocumentFileSource::Css(_)
-            | DocumentFileSource::Unknown => None,
+            _ => None,
         }
     }
 
     pub fn to_css_file_source(&self) -> Option<CssFileSource> {
         match self {
             DocumentFileSource::Css(css) => Some(*css),
-            DocumentFileSource::Js(_)
-            | DocumentFileSource::Json(_)
-            | DocumentFileSource::Unknown => None,
+            _ => None,
         }
     }
 
     pub fn can_parse(path: &Path, content: &str) -> bool {
-        let file_source = DocumentFileSource::from_path(path);
+        let file_source = DocumentFileSource::from(path);
         match file_source {
             DocumentFileSource::Js(js) => match js.as_embedding_kind() {
                 EmbeddingKind::Astro => ASTRO_FENCE.is_match(content),
@@ -295,7 +285,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
                 }
             }
             DocumentFileSource::Json(json) => {
-                if json.get_allow_comments() {
+                if json.allow_comments() {
                     fmt.write_markup(markup! { "JSONC" })
                 } else {
                     fmt.write_markup(markup! { "JSON" })
@@ -307,8 +297,6 @@ impl biome_console::fmt::Display for DocumentFileSource {
     }
 }
 
-// TODO: The Css variant is unused at the moment
-#[allow(dead_code)]
 pub(crate) enum Mime {
     Javascript,
     Json,
@@ -595,18 +583,6 @@ pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> La
         })
     })
     .map_or(Language::JavaScript, |lang| lang)
-}
-
-#[test]
-fn test_order() {
-    for items in
-        DocumentFileSource::WELL_KNOWN_JSON_WITH_COMMENTS_AND_TRAILING_COMMAS_FILES.windows(2)
-    {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
-    }
-    for items in DocumentFileSource::WELL_KNOWN_JSON_WITH_COMMENTS_FILES.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
-    }
 }
 
 #[test]

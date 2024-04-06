@@ -151,9 +151,9 @@ fn parse(
         biome_path,
         JsonParserOptions {
             allow_comments: parser.allow_comments
-                || optional_json_file_source.map_or(false, |x| x.get_allow_comments()),
+                || optional_json_file_source.map_or(false, |x| x.allow_comments()),
             allow_trailing_commas: parser.allow_trailing_commas
-                || optional_json_file_source.map_or(false, |x| x.get_allow_trailing_commas()),
+                || optional_json_file_source.map_or(false, |x| x.allow_trailing_commas()),
         },
     );
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
