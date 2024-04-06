@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+array.flatMap((arr) => arr)
+array.flatMap((arr) => {return arr})
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid unnecessary callback in flatMap call
+  
+  > 1 │ array.flatMap((arr) => arr)
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ array.flatMap((arr) => {return arr})
+  
+  i You can just use flat() to flatten the array
+  
+  i Safe fix: Replace unnecessary flatMap call to flat instead.
+  
+    1   │ - array.flatMap((arr)·=>·arr)␍
+      1 │ + array.flat()␍
+    2 2 │   array.flatMap((arr) => {return arr})
+  
+
+```
+
+```
+invalid.js:2:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid unnecessary callback in flatMap call
+  
+    1 │ array.flatMap((arr) => arr)
+  > 2 │ array.flatMap((arr) => {return arr})
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i You can just use flat() to flatten the array
+  
+  i Safe fix: Replace unnecessary flatMap call to flat instead.
+  
+    1 1 │   array.flatMap((arr) => arr)␍
+    2   │ - array.flatMap((arr)·=>·{return·arr})
+      2 │ + array.flat()
+  
+
+```

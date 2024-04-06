@@ -2614,7 +2614,7 @@ pub struct Nursery {
     #[doc = "Disallow using export or module.exports in files containing tests"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_exports_in_test: Option<RuleConfiguration<NoExportsInTest>>,
-    #[doc = "Disallow to use unnecessary callback on flatMap"]
+    #[doc = "Disallow to use unnecessary callback on flatMap,"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_flat_map_identity: Option<RuleConfiguration<NoFlatMapIdentity>>,
     #[doc = "Disallow focused tests."]

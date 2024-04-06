@@ -1,20 +1,22 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{ident, js_call_argument_list, js_call_arguments, js_name, token};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsCallExpression, JsSyntaxKind,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsName, AnyJsStatement,
+    JsCallExpression, JsSyntaxKind,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Disallow to use unnecessary callback on `flatMap`
+    /// Disallow to use unnecessary callback on `flatMap`,
     ///
-    /// To achieve the same result (flattening an array) more concisely and efficiently, you should use flat() instead
+    /// to achieve the same result (flattening an array) more concisely and efficiently, you should use `flat` instead
     ///
     /// ## Examples
     ///
@@ -22,6 +24,10 @@ declare_rule! {
     ///
     /// ```js,expect_diagnostic
     /// array.flatMap((arr) => arr);
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// array.flatMap((arr) => {return arr});
     /// ```
     ///
     /// ### Valid
@@ -34,6 +40,7 @@ declare_rule! {
         version: "next",
         name: "noFlatMapIdentity",
         recommended: false,
+        source: RuleSource::Clippy("flat_map_identity"),
         fix_kind: FixKind::Safe,
     }
 }
@@ -52,8 +59,27 @@ impl Rule for NoFlatMapIdentity {
             let arg = arg
                 .as_any_js_expression()?
                 .as_js_arrow_function_expression()?;
+
             let function_parameter = arg.parameters().ok()?.text();
-            let function_body = arg.body().ok()?.text();
+
+            let function_body: String = match arg.body().ok()? {
+                AnyJsFunctionBody::AnyJsExpression(body) => body.omit_parentheses().text(),
+                AnyJsFunctionBody::JsFunctionBody(body) => {
+                    let mut statement = body.statements().into_iter();
+                    match statement.next() {
+                        Some(AnyJsStatement::JsReturnStatement(body)) => {
+                            let Some(AnyJsExpression::JsIdentifierExpression(return_statement)) =
+                                body.argument()
+                            else {
+                                return None;
+                            };
+                            return_statement.name().ok()?.text()
+                        }
+                        _ => return None,
+                    }
+                }
+            };
+
             let function_parameter = function_parameter.trim_matches(&['(', ')']);
             if function_parameter != function_body {
                 return None;
@@ -69,35 +95,33 @@ impl Rule for NoFlatMapIdentity {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
         let node = ctx.query();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                "flat method can be used to simplify"
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "Avoid unnecessary callback in "<Emphasis>"flatMap"</Emphasis>" call"
+                },
+            )
+            .note(markup! {"You can just use "<Emphasis>"flat"</Emphasis>" to flatten the array"}),
+        )
     }
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        let flat_member = js_name(ident("flat"));
+        let empty_argument = js_call_arguments(
+            token(JsSyntaxKind::L_PAREN),
+            js_call_argument_list(vec![], vec![]),
+            token(JsSyntaxKind::R_PAREN),
+        );
 
         let Ok(AnyJsExpression::JsStaticMemberExpression(flat_expression)) = node.callee() else {
             return None;
         };
 
-        let empty_argument = js_call_arguments(
-            token(JsSyntaxKind::L_PAREN),
-            js_call_argument_list(vec![], vec![token(JsSyntaxKind::COMMA)]),
-            token(JsSyntaxKind::R_PAREN),
-        );
-
+        let flat_member = js_name(ident("flat"));
         let flat_call = flat_expression.with_member(AnyJsName::JsName(flat_member));
 
         mutation.replace_node(
@@ -109,7 +133,7 @@ impl Rule for NoFlatMapIdentity {
 
         Some(JsRuleAction {
             mutation,
-            message: markup! {"Replace unnecessary flatMap call to flat instead"}.to_owned(),
+            message: markup! {"Replace unnecessary "<Emphasis>"flatMap"</Emphasis>" call to "<Emphasis>"flat"</Emphasis>" instead."}.to_owned(),
             category: ActionCategory::QuickFix,
             applicability: Applicability::Always,
         })
