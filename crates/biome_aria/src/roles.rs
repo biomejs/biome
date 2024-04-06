@@ -728,6 +728,23 @@ define_role! {
 }
 
 define_role! {
+    /// https://w3c.github.io/graphics-aria/#graphics-object
+    GraphicsObjectRole {
+        PROPS: [],
+        ROLES: ["group"],
+        CONCEPTS: &[("graphics-document", &[]), ("group", &[]), ("img", &[]), ("graphics-symbol", &[])],
+    }
+}
+
+define_role! {
+    /// https://w3c.github.io/graphics-aria/#graphics-symbol
+    GraphicsSymbolRole {
+        PROPS: [],
+        ROLES: ["img"],
+    }
+}
+
+define_role! {
     /// https://www.w3.org/TR/wai-aria-1.2/#time
     TimeRole {
         PROPS: [],
@@ -871,6 +888,9 @@ impl<'a> AriaRoles {
         "status",
         "contentinfo",
         "region",
+        "graphics-document",
+        "graphics-object",
+        "graphics-symbol",
     ];
 
     /// It returns the metadata of a role, if it exits.
@@ -916,6 +936,9 @@ impl<'a> AriaRoles {
             "figure" => &FigureRole as &dyn AriaRoleDefinition,
             "form" => &FormRole as &dyn AriaRoleDefinition,
             "generic" => &GenericRole as &dyn AriaRoleDefinition,
+            "graphics-document" => &GraphicsDocumentRole as &dyn AriaRoleDefinition,
+            "graphics-object" => &GraphicsObjectRole as &dyn AriaRoleDefinition,
+            "graphics-symbol" => &GraphicsSymbolRole as &dyn AriaRoleDefinition,
             "grid" => &GridRole as &dyn AriaRoleDefinition,
             "gridcell" => &GridCellRole as &dyn AriaRoleDefinition,
             "group" => &GroupRole as &dyn AriaRoleDefinition,
@@ -1176,6 +1199,8 @@ impl<'a> AriaRoles {
                 "definition" => &DefinitionRole as &dyn AriaRoleDefinitionWithConcepts,
                 "figure" => &FigureRole as &dyn AriaRoleDefinitionWithConcepts,
                 "form" => &FormRole as &dyn AriaRoleDefinitionWithConcepts,
+                "graphics-document" => &GraphicsDocumentRole as &dyn AriaRoleDefinitionWithConcepts,
+                "graphics-object" => &GraphicsObjectRole as &dyn AriaRoleDefinitionWithConcepts,
                 "grid" => &GridRole as &dyn AriaRoleDefinitionWithConcepts,
                 "gridcell" => &GridCellRole as &dyn AriaRoleDefinitionWithConcepts,
                 "group" => &GroupRole as &dyn AriaRoleDefinitionWithConcepts,

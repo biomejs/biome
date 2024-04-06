@@ -78,6 +78,10 @@ To make svg accessible, the following methods are available:
 </svg>
 ```
 
+```jsx
+<svg role="presentation">foo</svg>
+```
+
 ### Valid
 
 ```jsx
@@ -115,12 +119,35 @@ To make svg accessible, the following methods are available:
 </svg>
 ```
 
+```jsx
+<svg role="graphics-symbol"><rect /></svg>
+```
+
+```jsx
+<svg role="graphics-symbol img"><rect /></svg>
+```
+
+```jsx
+<svg aria-hidden><rect /></svg>
+```
+
+a11y/noSvgWithoutTitle.js:1:1 <a href="https://biomejs.dev/linter/rules/no-svg-without-title">lint/a11y/noSvgWithoutTitle</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Alternative text </span><span style="color: Tomato;"><strong>title</strong></span><span style="color: Tomato;"> element cannot be empty</span>
+  
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;svg aria-hidden&gt;&lt;rect /&gt;&lt;/svg&gt;
+   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">For accessibility purposes, </span><span style="color: lightgreen;"><strong>SVGs</strong></span><span style="color: lightgreen;"> should have an alternative text, provided via </span><span style="color: lightgreen;"><strong>title</strong></span><span style="color: lightgreen;"> element. If the svg element has role=&quot;img&quot;, you should add the </span><span style="color: lightgreen;"><strong>aria-label</strong></span><span style="color: lightgreen;"> or </span><span style="color: lightgreen;"><strong>aria-labelledby</strong></span><span style="color: lightgreen;"> attribute.</span>
+  
 ## Accessibility guidelines
 
 [Document Structure – SVG 1.1 (Second Edition)](https://www.w3.org/TR/SVG11/struct.html#DescriptionAndTitleElements)
 [ARIA: img role - Accessibility | MDN](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/img_role)
 [Accessible SVGs | CSS-Tricks - CSS-Tricks](https://css-tricks.com/accessible-svgs/)
 [Contextually Marking up accessible images and SVGs | scottohara.me](https://www.scottohara.me/blog/2019/05/22/contextual-images-svgs-and-a11y.html)
+[Accessible SVGs](https://www.unimelb.edu.au/accessibility/techniques/accessible-svgs)
 
 ## Related links
 
