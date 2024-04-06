@@ -1579,16 +1579,14 @@
 			"properties": {
 				"attributePosition": {
 					"description": "The attribute position style.",
-					"default": null,
 					"anyOf": [
 						{ "$ref": "#/definitions/AttributePosition" },
 						{ "type": "null" }
 					]
 				},
-				"enabled": { "default": null, "type": ["boolean", "null"] },
+				"enabled": { "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
-					"default": null,
 					"type": ["boolean", "null"]
 				},
 				"indentSize": {
@@ -1616,7 +1614,6 @@
 				},
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
-					"default": 80,
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				}
 			},

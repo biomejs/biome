@@ -368,3 +368,45 @@ fn prettier_migrate_write_biome_jsonc() {
         result,
     ));
 }
+
+#[test]
+fn prettier_migrate_overrides() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "formatter": { "enabled": true } }"#;
+    let prettier = r#"{
+        "overrides": [{
+            "files": ["**/*.test.js"],
+            "options": { "useTabs": false }
+        }, {
+            "files": ["**/*.spec.js"],
+            "options": { "semi": true, "singleQuote": true }
+        }, {
+            "files": ["**/*.ts"],
+            "options": { "useTabs": false, "semi": true, "singleQuote": true }
+        }]
+    }"#;
+
+    let configuration_path = Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("migrate"), "prettier"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_overrides",
+        fs,
+        console,
+        result,
+    ));
+}
