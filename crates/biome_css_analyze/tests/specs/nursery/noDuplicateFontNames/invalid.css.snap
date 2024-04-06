@@ -23,6 +23,8 @@ invalid.css:1:56 lint/nursery/noDuplicateFontNames ━━━━━━━━━�
     2 │ a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
     3 │ a { fOnT-fAmIlY: "Lucida Grande", '  Lucida Grande ', sans-serif; }
   
+  i Remove duplicate font names within the property
+  
 
 ```
 
@@ -36,6 +38,8 @@ invalid.css:2:44 lint/nursery/noDuplicateFontNames ━━━━━━━━━�
       │                                            ^^^^^
     3 │ a { fOnT-fAmIlY: "Lucida Grande", '  Lucida Grande ', sans-serif; }
     4 │ a { font-family: 'Times', Times, "serif", serif; }
+  
+  i Remove duplicate font names within the property
   
 
 ```
@@ -52,6 +56,8 @@ invalid.css:3:35 lint/nursery/noDuplicateFontNames ━━━━━━━━━�
     4 │ a { font-family: 'Times', Times, "serif", serif; }
     5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
   
+  i Remove duplicate font names within the property
+  
 
 ```
 
@@ -67,6 +73,8 @@ invalid.css:4:27 lint/nursery/noDuplicateFontNames ━━━━━━━━━�
     5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
     6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
   
+  i Remove duplicate font names within the property
+  
 
 ```
 
@@ -81,6 +89,8 @@ invalid.css:5:39 lint/nursery/noDuplicateFontNames ━━━━━━━━━�
       │                                       ^^^^^^^^
     6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
   
+  i Remove duplicate font names within the property
+  
 
 ```
 
@@ -93,6 +103,8 @@ invalid.css:6:75 lint/nursery/noDuplicateFontNames ━━━━━━━━━�
     5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
   > 6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
       │                                                                           ^^^^^^^^^^
+  
+  i Remove duplicate font names within the property
   
 
 ```

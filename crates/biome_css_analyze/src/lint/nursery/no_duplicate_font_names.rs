@@ -107,7 +107,9 @@ impl Rule for NoDuplicateFontNames {
                         .filter(|&c| c != '\'' && c != '\"' && !c.is_whitespace())
                         .collect();
 
-                    if seen.contains(&normalized_font_name) {
+                    if seen.contains(&normalized_font_name)
+                        && !is_font_family_keyword(&normalized_font_name)
+                    {
                         return Some(RuleState {
                             value: normalized_font_name,
                             span: val.range(),
@@ -123,13 +125,18 @@ impl Rule for NoDuplicateFontNames {
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let span = state.span;
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            span,
-            markup! {
-                "Unexpected duplicate font name: "<Emphasis>{ state.value }</Emphasis>
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                span,
+                markup! {
+                    "Unexpected duplicate font name: "<Emphasis>{ state.value }</Emphasis>
+                },
+            )
+            .note(markup! {
+                "Remove duplicate font names within the property"
+            }),
+        )
     }
 }
 
