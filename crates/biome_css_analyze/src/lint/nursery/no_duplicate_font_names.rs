@@ -72,7 +72,8 @@ impl Rule for NoDuplicateFontNames {
             return None;
         }
 
-        let mut seen: HashSet<String> = HashSet::new();
+        let mut unquoted_family_names: HashSet<String> = HashSet::new();
+        let mut family_names: HashSet<String> = HashSet::new();
         let value_list = node.value();
         let font_families = if is_font {
             find_font_family(value_list)
@@ -88,16 +89,28 @@ impl Rule for NoDuplicateFontNames {
 
         for css_value in font_families {
             match css_value {
-                // A generic family name like `serif` or `sans-serif`
+                // A generic family name like `sans-serif` or unquoted font name.
                 AnyCssValue::CssIdentifier(val) => {
                     let font_name = val.text();
-                    if seen.contains(&font_name) {
+
+                    // check the case: "Arial", Arial
+                    // we ignore the case of the font name is a keyword(context: https://github.com/stylelint/stylelint/issues/1284)
+                    // e.g "sans-serif", sans-serif
+                    if family_names.contains(&font_name) && !is_font_family_keyword(&font_name) {
                         return Some(RuleState {
-                            value: font_name.clone(),
+                            value: font_name,
                             span: val.range(),
                         });
                     }
-                    seen.insert(font_name);
+
+                    // check the case: sans-self, sans-self
+                    if unquoted_family_names.contains(&font_name) {
+                        return Some(RuleState {
+                            value: font_name,
+                            span: val.range(),
+                        });
+                    }
+                    unquoted_family_names.insert(font_name);
                 }
                 // A font family name. e.g "Lucida Grande", "Arial".
                 AnyCssValue::CssString(val) => {
@@ -107,15 +120,15 @@ impl Rule for NoDuplicateFontNames {
                         .filter(|&c| c != '\'' && c != '\"' && !c.is_whitespace())
                         .collect();
 
-                    if seen.contains(&normalized_font_name)
-                        && !is_font_family_keyword(&normalized_font_name)
+                    if family_names.contains(&normalized_font_name)
+                        || unquoted_family_names.contains(&normalized_font_name)
                     {
                         return Some(RuleState {
                             value: normalized_font_name,
                             span: val.range(),
                         });
                     }
-                    seen.insert(normalized_font_name);
+                    family_names.insert(normalized_font_name);
                 }
                 _ => continue,
             }
