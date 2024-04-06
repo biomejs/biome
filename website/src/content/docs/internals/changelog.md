@@ -25,11 +25,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
-#### Bug fixes
-
-- Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnositic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
-- Biome now correctly filters out files that are not present in the current directory when using the `--changed` flag [#1996](https://github.com/biomejs/biome/issues/1996).
-
 #### New features
 
 - Add a command to migrate from ESLint
@@ -40,7 +35,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   When loading a legacy ESLint configuration, Biome resolves the `extends` field.
   It resolves both shared configurations and plugin presets!
-  To do this, it invokes NodeJS.
+  To do this, it invokes _Node.js_.
 
   Biome relies on the metadata of its rules to determine the [equivalent rule of an ESLint rule](https://biomejs.dev/linter/rules-sources/).
   A Biome rule is either inspired or roughly identical to an ESLint rules.
@@ -109,6 +104,22 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Only negated glob patterns are not supported.
 
   Contributed by @Conaclos
+
+- Support JavaScript configuration files when migrating from Prettier
+
+  `@biomejs/biome migrate prettier` is now able to migrate Prettier configuration files
+  ending with `js`, `mjs`, or `cjs` extensions.
+  To do this, Biome invokes Node.js.
+
+  Also, embedded Prettier configurations in `package.json` are now supported.
+
+  Contributed by @Conaclos
+
+#### Bug fixes
+
+- Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnositic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
+
+- Biome now correctly filters out files that are not present in the current directory when using the `--changed` flag [#1996](https://github.com/biomejs/biome/issues/1996). Contributed by @castarco
 
 ### Configuration
 

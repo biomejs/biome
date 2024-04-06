@@ -29,7 +29,7 @@ use super::node;
 ///
 /// See https://eslint.org/docs/latest/use/configure/configuration-files-new
 const FLAT_CONFIG_FILES: [&str; 3] = [
-    // Prefixed with `./` to ensure that it is loadable via NodeJS's `import()`
+    // Prefixed with `./` to ensure that it is loadable via Node.js's `import()`
     "./eslint.config.js",
     "./eslint.config.mjs",
     "./eslint.config.cjs",
@@ -43,9 +43,9 @@ const FLAT_CONFIG_FILES: [&str; 3] = [
 /// It translates the priority of the files.
 /// For example, ESLint looks for `./.eslintrc.js` before looking for `./.eslintrc.json`.
 const LEGACY_CONFIG_FILES: [&str; 5] = [
-    // Prefixed with `./` to ensure that it is loadable via NodeJS's `import()`
+    // Prefixed with `./` to ensure that it is loadable via Node.js's `import()`
     "./.eslintrc.js",
-    // Prefixed with `./` to ensure that it is loadable via NodeJS's `import()`
+    // Prefixed with `./` to ensure that it is loadable via Node.js's `import()`
     "./.eslintrc.cjs",
     ".eslintrc.yaml",
     ".eslintrc.yml",
@@ -95,15 +95,12 @@ pub(crate) fn read_eslint_config(
             });
         }
     }
-    let path = Path::new(PACKAGE_JSON);
-    if fs.path_exists(path) {
-        // We don't report errors in `PACKAGE_JSON`.
-        if let Ok(data) = load_legacy_config_data(fs, path, console) {
-            return Ok(Config {
-                path: PACKAGE_JSON,
-                data: data.into(),
-            });
-        }
+    // We don't report an error if ESLint config is not embedded in `PACKAGE_JSON`.
+    if let Ok(data) = load_legacy_config_data(fs, Path::new(PACKAGE_JSON), console) {
+        return Ok(Config {
+            path: PACKAGE_JSON,
+            data: data.into(),
+        });
     }
     Err(CliDiagnostic::MigrateError(MigrationDiagnostic { reason: "The default ESLint configuration file `.eslintrc.*` was not found in the working directory.".to_string()}))
 }

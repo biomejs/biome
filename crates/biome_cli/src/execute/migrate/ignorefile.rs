@@ -4,6 +4,8 @@ use biome_fs::{FileSystem, OpenOptions};
 use biome_service::DynRef;
 use indexmap::IndexSet;
 
+/// Read an ignore file that follows gitignore pattern syntax,
+/// and turn them into a list of UNIX glob patterns.
 pub(crate) fn read_ignore_file(
     fs: &DynRef<'_, dyn FileSystem>,
     ignore_filename: &str,

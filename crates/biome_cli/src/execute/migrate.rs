@@ -1,7 +1,6 @@
 use crate::commands::MigrateSubCommand;
 use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
-use crate::execute::migrate::prettier::read_prettier_files;
 use crate::{CliDiagnostic, CliSession};
 use biome_configuration::PartialConfiguration;
 use biome_console::{markup, ConsoleExt};
@@ -79,71 +78,74 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
 
     match sub_command {
         Some(MigrateSubCommand::Prettier) => {
-            let prettier_configuration = read_prettier_files(fs, console)?;
-            if prettier_configuration.has_configuration() {
-                let biome_config =
-                    deserialize_from_json_ast::<PartialConfiguration>(&parsed.tree(), "")
-                        .into_deserialized();
-                let Some(mut biome_config) = biome_config else {
-                    return Ok(());
-                };
-                let old_biome_config = biome_config.clone();
-                biome_config.merge_with(prettier_configuration.as_biome_configuration());
-                if let Ok(ignore_patterns) = ignorefile::read_ignore_file(fs, prettier::IGNORE_FILE)
-                {
-                    if !ignore_patterns.patterns.is_empty() {
-                        biome_config
-                            .formatter
-                            .get_or_insert(Default::default())
-                            .ignore
-                            .get_or_insert(Default::default())
-                            .extend(ignore_patterns.patterns);
-                    }
-                    if ignore_patterns.has_negated_patterns {
-                        console.log(markup! {
-                            <Warn><Emphasis>{prettier::IGNORE_FILE}</Emphasis>" contains negated glob patterns that start with "<Emphasis>"!"</Emphasis>".\nThese patterns cannot be migrated because Biome doesn't support them."</Warn>
-                        })
-                    } else if write && biome_config != old_biome_config {
-                        console.log(markup!{
-                            <Info><Emphasis>{prettier::IGNORE_FILE}</Emphasis>" has been successfully migrated."</Info>
-                        });
-                    }
+            let prettier::Config {
+                path: prettier_path,
+                data: prettier_config,
+            } = prettier::read_config_file(fs, console)?;
+            let biome_config =
+                deserialize_from_json_ast::<PartialConfiguration>(&parsed.tree(), "")
+                    .into_deserialized();
+            let Some(mut biome_config) = biome_config else {
+                return Ok(());
+            };
+            let old_biome_config = biome_config.clone();
+            let prettier_biome_config = prettier_config
+                .try_into()
+                .map_err(|err| CliDiagnostic::MigrateError(MigrationDiagnostic { reason: err }))?;
+            biome_config.merge_with(prettier_biome_config);
+            if let Ok(ignore_patterns) = ignorefile::read_ignore_file(fs, prettier::IGNORE_FILE) {
+                if !ignore_patterns.patterns.is_empty() {
+                    biome_config
+                        .formatter
+                        .get_or_insert(Default::default())
+                        .ignore
+                        .get_or_insert(Default::default())
+                        .extend(ignore_patterns.patterns);
                 }
-                if biome_config == old_biome_config {
+                if ignore_patterns.has_negated_patterns {
                     console.log(markup! {
-                        <Info>"No changes to apply to the Biome configuration file."</Info>
+                        <Warn><Emphasis>{prettier::IGNORE_FILE}</Emphasis>" contains negated glob patterns that start with "<Emphasis>"!"</Emphasis>".\nThese patterns cannot be migrated because Biome doesn't support them."</Warn>
+                    })
+                } else if write && biome_config != old_biome_config {
+                    console.log(markup!{
+                        <Info><Emphasis>{prettier::IGNORE_FILE}</Emphasis>" has been successfully migrated."</Info>
+                    });
+                }
+            }
+            if biome_config == old_biome_config {
+                console.log(markup! {
+                    <Info>"No changes to apply to the Biome configuration file."</Info>
+                });
+            } else {
+                let new_content = serde_json::to_string(&biome_config).map_err(|err| {
+                    CliDiagnostic::MigrateError(MigrationDiagnostic {
+                        reason: err.to_string(),
+                    })
+                })?;
+                workspace.change_file(ChangeFileParams {
+                    path: biome_path.clone(),
+                    content: new_content,
+                    version: 1,
+                })?;
+                let printed = workspace.format_file(FormatFileParams { path: biome_path })?;
+                if write {
+                    biome_config_file.set_content(printed.as_code().as_bytes())?;
+                    console.log(markup!{
+                        <Info><Emphasis>{prettier_path}</Emphasis>" has been successfully migrated."</Info>
                     });
                 } else {
-                    let new_content = serde_json::to_string(&biome_config).map_err(|err| {
-                        CliDiagnostic::MigrateError(MigrationDiagnostic {
-                            reason: err.to_string(),
-                        })
-                    })?;
-                    workspace.change_file(ChangeFileParams {
-                        path: biome_path.clone(),
-                        content: new_content,
-                        version: 1,
-                    })?;
-                    let printed = workspace.format_file(FormatFileParams { path: biome_path })?;
-                    if write {
-                        biome_config_file.set_content(printed.as_code().as_bytes())?;
-                        console.log(markup!{
-                            <Info><Emphasis>".prettierrc"</Emphasis>" has been successfully migrated."</Info>
-                        });
-                    } else {
-                        let file_name = configuration_file_path.display().to_string();
-                        let diagnostic = MigrateDiffDiagnostic {
-                            file_name,
-                            diff: ContentDiffAdvice {
-                                old: biome_config_content,
-                                new: printed.as_code().to_string(),
-                            },
-                        };
-                        console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
-                        console.log(markup! {
-                            <Info>"Run the command with the option "<Emphasis>"--write"</Emphasis>" to apply the changes."</Info>
-                        })
-                    }
+                    let file_name = configuration_file_path.display().to_string();
+                    let diagnostic = MigrateDiffDiagnostic {
+                        file_name,
+                        diff: ContentDiffAdvice {
+                            old: biome_config_content,
+                            new: printed.as_code().to_string(),
+                        },
+                    };
+                    console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+                    console.log(markup! {
+                        <Info>"Run the command with the option "<Emphasis>"--write"</Emphasis>" to apply the changes."</Info>
+                    })
                 }
             }
         }

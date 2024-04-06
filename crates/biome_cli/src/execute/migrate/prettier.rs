@@ -1,9 +1,5 @@
 use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
-use biome_configuration::{
-    PartialConfiguration, PartialFormatterConfiguration, PartialJavascriptConfiguration,
-    PartialJavascriptFormatter, PlainIndentStyle,
-};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize_macros::Deserializable;
@@ -13,7 +9,23 @@ use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
 use biome_json_parser::JsonParserOptions;
 use biome_service::DynRef;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+
+use super::node;
+
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct PrettierPackageJson {
+    pub(crate) prettier: Option<PrettierConfiguration>,
+}
+
+#[derive(Debug)]
+pub(crate) struct Config {
+    /// Path of the ESlint config file
+    pub(crate) path: &'static str,
+    /// Resolved ESlint config
+    pub(crate) data: PrettierConfiguration,
+}
 
 #[derive(Clone, Debug, Deserializable, Eq, PartialEq)]
 #[deserializable(unknown_fields = "allow")]
@@ -48,7 +60,6 @@ impl Default for PrettierConfiguration {
     fn default() -> Self {
         Self {
             print_width: 80,
-
             use_tabs: false,
             trailing_comma: PrettierTrailingComma::default(),
             tab_width: 2,
@@ -96,18 +107,6 @@ enum QuoteProps {
     Preserve,
 }
 
-impl TryFrom<&str> for PrettierTrailingComma {
-    type Error = String;
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value {
-            "all" => Ok(Self::All),
-            "none" => Ok(Self::None),
-            "es5" => Ok(Self::Es5),
-            _ => Err("Option not supported".to_string()),
-        }
-    }
-}
-
 impl From<PrettierTrailingComma> for TrailingComma {
     fn from(value: PrettierTrailingComma) -> Self {
         match value {
@@ -147,16 +146,18 @@ impl From<QuoteProps> for QuoteProperties {
     }
 }
 
-impl TryFrom<PrettierConfiguration> for PartialFormatterConfiguration {
+impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguration {
     type Error = String;
     fn try_from(value: PrettierConfiguration) -> Result<Self, Self::Error> {
+        let mut result = biome_configuration::PartialConfiguration::default();
+
         let line_width = LineWidth::try_from(value.print_width).map_err(|err| err.to_string())?;
         let indent_style = if value.use_tabs {
-            PlainIndentStyle::Tab
+            biome_configuration::PlainIndentStyle::Tab
         } else {
-            PlainIndentStyle::Space
+            biome_configuration::PlainIndentStyle::Space
         };
-        Ok(Self {
+        let formatter = biome_configuration::PartialFormatterConfiguration {
             indent_width: Some(value.tab_width),
             line_width: Some(line_width),
             indent_style: Some(indent_style),
@@ -168,12 +169,9 @@ impl TryFrom<PrettierConfiguration> for PartialFormatterConfiguration {
             enabled: Some(true),
             // deprecated
             indent_size: None,
-        })
-    }
-}
+        };
+        result.formatter = Some(formatter);
 
-impl From<PrettierConfiguration> for PartialJavascriptFormatter {
-    fn from(value: PrettierConfiguration) -> Self {
         let semicolons = if value.semi {
             Semicolons::Always
         } else {
@@ -189,7 +187,7 @@ impl From<PrettierConfiguration> for PartialJavascriptFormatter {
         } else {
             QuoteStyle::Double
         };
-        Self {
+        let js_formatter = biome_configuration::PartialJavascriptFormatter {
             indent_width: None,
             line_width: None,
             indent_style: None,
@@ -208,137 +206,149 @@ impl From<PrettierConfiguration> for PartialJavascriptFormatter {
             bracket_spacing: Some(value.bracket_spacing),
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
-        }
-    }
-}
-
-#[derive(Debug, Default)]
-pub(crate) struct FromPrettierConfiguration {
-    /// Path of the Prettier configuration file
-    configuration_path: Option<PathBuf>,
-
-    /// The translated Biome configuration, from the Prettier configuration
-    formatter_configuration: Option<PartialFormatterConfiguration>,
-
-    /// The translated Biome configuration, from the Prettier configuration
-    javascript_formatter_configuration: Option<PartialJavascriptFormatter>,
-}
-
-impl FromPrettierConfiguration {
-    pub(crate) fn store_configuration(
-        &mut self,
-        (formatter, javascript_formatter): (
-            PartialFormatterConfiguration,
-            PartialJavascriptFormatter,
-        ),
-    ) {
-        self.formatter_configuration = Some(formatter);
-        self.javascript_formatter_configuration = Some(javascript_formatter);
-    }
-
-    pub(crate) fn store_configuration_path(&mut self, path: impl Into<PathBuf>) {
-        self.configuration_path = Some(path.into());
-    }
-
-    pub(crate) fn as_biome_configuration(&self) -> PartialConfiguration {
-        let mut configuration = PartialConfiguration {
-            formatter: self.formatter_configuration.clone(),
+        };
+        let js_config = biome_configuration::PartialJavascriptConfiguration {
+            formatter: Some(js_formatter),
             ..Default::default()
         };
-        if self.javascript_formatter_configuration.is_some() {
-            configuration.javascript = Some(PartialJavascriptConfiguration {
-                formatter: self.javascript_formatter_configuration.clone(),
-                ..Default::default()
-            });
-        }
-
-        configuration
-    }
-
-    pub(crate) fn has_configuration(&self) -> bool {
-        self.formatter_configuration.is_some() || self.javascript_formatter_configuration.is_some()
-    }
-
-    pub(crate) fn get_configuration_path(&self) -> Option<&Path> {
-        self.configuration_path.as_deref()
+        result.javascript = Some(js_config);
+        Ok(result)
     }
 }
 
-const CONFIG_FILES: [&str; 2] = [".prettierrc", ".prettierrc.json"];
+/// A Prettier config can be embedded in `package.json`
+const PACKAGE_JSON: &str = "package.json";
+
+/// Prettie config files ordered by precedence
+const CONFIG_FILES: [&str; 8] = [
+    ".prettierrc",
+    ".prettierrc.json",
+    // Prefixed with `./` to ensure that it is loadable via Node.js's `import()`
+    "./.prettierrc.js",
+    "./prettier.config.js",
+    "./.prettierrc.mjs",
+    "./prettier.config.mjs",
+    "./.prettierrc.cjs",
+    "./prettier.config.cjs",
+];
+
+/// Prettier Ignore file. Use the same syntax as gitignore.
 pub(crate) const IGNORE_FILE: &str = ".prettierignore";
-/// This function is in charge of reading prettier files, deserialize its contents and convert them in a Biome configuration type
-pub(crate) fn read_prettier_files(
+
+/// This function is in charge of reading prettier files, deserialize its contents
+pub(crate) fn read_config_file(
     fs: &DynRef<'_, dyn FileSystem>,
     console: &mut dyn Console,
-) -> Result<FromPrettierConfiguration, CliDiagnostic> {
-    let mut from_prettier_configuration = FromPrettierConfiguration::default();
-    let mut prettier_config_content = String::new();
+) -> Result<Config, CliDiagnostic> {
+    // We don't report an error if Prettier config is not embedded in `PACKAGE_JSON`.
+    if let Ok(data) = load_config(fs, Path::new(PACKAGE_JSON), console) {
+        return Ok(Config {
+            path: PACKAGE_JSON,
+            data,
+        });
+    }
     for config_name in CONFIG_FILES {
-        let open_options = OpenOptions::default().read(true);
         let path = Path::new(config_name);
-        let file = fs.open_with_options(path, open_options);
-        match file {
-            Ok(mut file) => {
-                let result = file.read_to_string(&mut prettier_config_content);
-                if let Err(err) = result {
-                    return Err(CliDiagnostic::io_error(err));
-                }
-                from_prettier_configuration.store_configuration_path(path);
-
-                break;
-            }
-            Err(_) => {
-                continue;
-            }
+        if fs.path_exists(path) {
+            return Ok(Config {
+                path: config_name,
+                data: load_config(fs, path, console)?,
+            });
         }
     }
+    Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+        reason: "Biome couldn't find a Prettier configuration file.".to_string(),
+    }))
+}
 
-    if prettier_config_content.is_empty() {
-        return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
-            reason: "Biome couldn't find a Prettier configuration file.".to_string(),
-        }));
-    }
-
-    let deserialized = deserialize_from_json_str::<PrettierConfiguration>(
-        prettier_config_content.as_str(),
-        JsonParserOptions::default()
-            .with_allow_trailing_commas()
-            .with_allow_comments(),
-        "",
-    );
-
-    if deserialized.has_errors() {
-        let diagnostics = deserialized.into_diagnostics();
-        for diagnostic in diagnostics {
-            let diagnostic =
-                if let Some(path) = from_prettier_configuration.get_configuration_path() {
-                    diagnostic.with_file_path(path.display().to_string())
-                } else {
-                    diagnostic
-                };
+fn load_config(
+    fs: &DynRef<'_, dyn FileSystem>,
+    path: &Path,
+    console: &mut dyn Console,
+) -> Result<PrettierConfiguration, CliDiagnostic> {
+    let (deserialized, diagnostics) = match path.extension().and_then(|file_ext| file_ext.to_str())
+    {
+        None | Some("json") => {
+            let mut file = fs.open_with_options(path, OpenOptions::default().read(true))?;
+            let mut content = String::new();
+            file.read_to_string(&mut content)?;
+            if path.file_name().is_some_and(|name| name == PACKAGE_JSON) {
+                let (deserialized, _) = deserialize_from_json_str::<PrettierPackageJson>(
+                    &content,
+                    JsonParserOptions::default()
+                        .with_allow_trailing_commas()
+                        .with_allow_comments(),
+                    "",
+                )
+                .consume();
+                (
+                    deserialized.and_then(|packagejson| packagejson.prettier),
+                    vec![],
+                )
+            } else {
+                deserialize_from_json_str::<PrettierConfiguration>(
+                    &content,
+                    JsonParserOptions::default()
+                        .with_allow_trailing_commas()
+                        .with_allow_comments(),
+                    "",
+                )
+                .consume()
+            }
+        }
+        Some("js" | "mjs" | "cjs") => {
+            let node::Resolution { content, .. } = node::load_config(&path.to_string_lossy())?;
+            deserialize_from_json_str::<PrettierConfiguration>(
+                &content,
+                JsonParserOptions::default(),
+                "",
+            )
+            .consume()
+        }
+        Some(ext) => {
+            return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+                reason: format!(
+                    "Prettier configuration ending with the extension `{ext}` are not supported."
+                ),
+            }))
+        }
+    };
+    let path_str = path.to_string_lossy();
+    // Heuristic: the Prettier config file is considered a YAML file if:
+    // - desrialization failed
+    // - there are at least 3 diagnostics
+    // - the configuration file has no extension.
+    // In this case we skip emitting the diagnostics
+    if !(deserialized.is_none() && diagnostics.len() > 2 || path.extension().is_none()) {
+        for diagnostic in diagnostics.into_iter().filter(|diag| {
+            matches!(
+                diag.severity(),
+                biome_diagnostics::Severity::Fatal
+                    | biome_diagnostics::Severity::Error
+                    | biome_diagnostics::Severity::Warning
+            )
+        }) {
+            let diagnostic = diagnostic.with_file_path(path_str.to_string());
             console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
         }
-        return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
-            reason: "Could not deserialize the Prettier configuration file".to_string(),
-        }));
-    } else {
-        let prettier_configuration = deserialized.into_deserialized();
-        if let Some(prettier_configuration) = prettier_configuration {
-            if prettier_configuration.end_of_line == EndOfLine::Auto {
-                console.log(markup! {
-                    <Warn>"Prettier's `\"endOfLine\": \"auto\"` option is not supported in Biome. The default `\"lf\"` option is used instead."</Warn>
-                });
-            }
-            let formatter_configuration = prettier_configuration
-                .clone()
-                .try_into()
-                .map_err(|err| CliDiagnostic::MigrateError(MigrationDiagnostic { reason: err }))?;
-            let javascript_configuration = prettier_configuration.into();
-            from_prettier_configuration
-                .store_configuration((formatter_configuration, javascript_configuration));
-        }
     }
-    Ok(from_prettier_configuration)
+    if let Some(result) = deserialized {
+        if result.end_of_line == EndOfLine::Auto {
+            console.log(markup! {
+                <Warn>"Prettier's `\"endOfLine\": \"auto\"` option is not supported in Biome. The default `\"lf\"` option is used instead."</Warn>
+            });
+        }
+        Ok(result)
+    } else if path.extension().is_none() {
+        // The Prettier config file may be a YAML file.
+        Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+            reason: "Could not deserialize the Prettier configuration file.\nOnly JSON configurations are supported.".to_string(),
+        }))
+    } else {
+        Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+            reason: "Could not deserialize the Prettier configuration file".to_string(),
+        }))
+    }
 }
 
 #[cfg(test)]
