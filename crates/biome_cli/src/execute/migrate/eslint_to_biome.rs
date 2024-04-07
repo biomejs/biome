@@ -12,7 +12,7 @@ use super::{eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, es
 ///   the equivalent Biome's rule of an Eslint rule
 /// - hand-written handling of Biome rules that have options in the current module.
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub(crate) struct MigrationOptions {
     /// Migrate inspired rules from eslint and its plugins?
     pub(crate) include_inspired: bool,
@@ -47,46 +47,51 @@ impl eslint_eslint::FlatConfigData {
         let mut biome_config = biome_config::PartialConfiguration::default();
         let mut linter = biome_config::PartialLinterConfiguration::default();
         let mut overrides = biome_config::Overrides::default();
-        let mut global_ignores = StringSet::default();
-        let mut global_config_object = eslint_eslint::FlatConfigObject::default();
-        // First determine the base configuration
-        for flat_config_object in self.0 {
-            if flat_config_object.is_global_ignores() {
-                global_ignores.extend(flat_config_object.ignores);
-            } else if flat_config_object.is_global_config() {
-                global_config_object.merge_with(flat_config_object);
-            } else {
-                let mut override_pattern = biome_config::OverridePattern::default();
-                if let Some(language_options) = flat_config_object.language_options {
-                    let globals = language_options.globals.enabled().collect::<StringSet>();
-                    let js_config = biome_config::PartialJavascriptConfiguration {
-                        globals: Some(globals),
-                        ..Default::default()
-                    };
-                    override_pattern.javascript = Some(js_config)
-                }
-                if !flat_config_object.ignores.is_empty() {
-                    override_pattern.ignore =
-                        Some(flat_config_object.ignores.into_iter().collect());
-                }
-                if !flat_config_object.files.is_empty() {
-                    override_pattern.include = Some(flat_config_object.files.into_iter().collect());
-                }
-                if let Some(rules) = flat_config_object.rules {
-                    if !rules.is_empty() {
-                        override_pattern.linter = Some(biome_config::OverrideLinterConfiguration {
-                            rules: Some(rules.into_biome_rules(options, &mut results)),
+        let global_config_object = if self.0.len() == 1 {
+            // If there is a single config object, then we use it as the global config
+            self.0.into_iter().next().unwrap()
+        } else {
+            let mut global_config_object = eslint_eslint::FlatConfigObject::default();
+            for flat_config_object in self.0 {
+                if flat_config_object.is_global_ignores() {
+                    global_config_object
+                        .ignores
+                        .extend(flat_config_object.ignores);
+                } else if flat_config_object.is_global_config() {
+                    global_config_object.merge_with(flat_config_object);
+                } else {
+                    let mut override_pat = biome_config::OverridePattern::default();
+                    if let Some(language_options) = flat_config_object.language_options {
+                        let globals = language_options.globals.enabled().collect::<StringSet>();
+                        let js_config = biome_config::PartialJavascriptConfiguration {
+                            globals: Some(globals),
                             ..Default::default()
-                        });
+                        };
+                        override_pat.javascript = Some(js_config)
                     }
+                    if !flat_config_object.ignores.is_empty() {
+                        override_pat.ignore =
+                            Some(flat_config_object.ignores.into_iter().collect());
+                    }
+                    if !flat_config_object.files.is_empty() {
+                        override_pat.include = Some(flat_config_object.files.into_iter().collect());
+                    }
+                    if let Some(rules) = flat_config_object.rules {
+                        if !rules.is_empty() {
+                            override_pat.linter = Some(biome_config::OverrideLinterConfiguration {
+                                rules: Some(rules.into_biome_rules(options, &mut results)),
+                                ..Default::default()
+                            });
+                        }
+                    }
+                    overrides.0.push(override_pat);
                 }
-                overrides.0.push(override_pattern);
             }
-        }
-        if !overrides.0.is_empty() {
-            biome_config.overrides = Some(overrides);
-        }
-        debug_assert!(global_config_object.is_global_config());
+            if !overrides.0.is_empty() {
+                biome_config.overrides = Some(overrides);
+            }
+            global_config_object
+        };
         let mut rules = if let Some(rules) = global_config_object.rules {
             rules.into_biome_rules(options, &mut results)
         } else {
@@ -102,8 +107,11 @@ impl eslint_eslint::FlatConfigData {
         }
         rules.recommended = Some(false);
         linter.rules = Some(rules);
-        if !global_ignores.is_empty() {
-            linter.ignore = Some(global_ignores);
+        if !global_config_object.ignores.is_empty() {
+            linter.ignore = Some(global_config_object.ignores.into_iter().collect());
+        }
+        if !global_config_object.files.is_empty() {
+            linter.include = Some(global_config_object.files.into_iter().collect());
         }
         biome_config.linter = Some(linter);
         (biome_config, results)
@@ -263,5 +271,122 @@ fn migrate_eslint_rule(
                 );
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use eslint_eslint::*;
+    use std::borrow::Cow;
+
+    #[test]
+    fn flat_config_single_config_object() {
+        let flat_config = FlatConfigData(vec![FlatConfigObject {
+            files: vec!["*.js".to_string()],
+            ignores: vec!["*.test.js".to_string()],
+            language_options: None,
+            rules: Some(Rules(
+                [Rule::Any(Cow::Borrowed("eqeqeq"), Severity::Error)]
+                    .into_iter()
+                    .collect(),
+            )),
+        }]);
+        let (biome_config, _) = flat_config.into_biome_config(&MigrationOptions::default());
+
+        assert!(biome_config.files.is_none());
+        assert!(biome_config.overrides.is_none());
+        assert!(biome_config.formatter.is_none());
+        assert!(biome_config.organize_imports.is_none());
+        let linter = biome_config.linter.unwrap();
+        assert_eq!(
+            linter.include,
+            Some(["*.js".to_string()].into_iter().collect())
+        );
+        assert_eq!(
+            linter.ignore,
+            Some(["*.test.js".to_string()].into_iter().collect())
+        );
+        assert!(linter.rules.is_some());
+    }
+
+    #[test]
+    fn flat_config_multiple_config_object() {
+        let flat_config = FlatConfigData(vec![
+            FlatConfigObject {
+                files: vec![],
+                ignores: vec!["*.test.js".to_string()],
+                language_options: None,
+                rules: None,
+            },
+            FlatConfigObject {
+                files: vec![],
+                ignores: vec![],
+                language_options: None,
+                rules: Some(Rules(
+                    [Rule::Any(Cow::Borrowed("eqeqeq"), Severity::Error)]
+                        .into_iter()
+                        .collect(),
+                )),
+            },
+            FlatConfigObject {
+                files: vec![],
+                ignores: vec!["*.spec.js".to_string()],
+                language_options: None,
+                rules: None,
+            },
+            FlatConfigObject {
+                files: vec!["*.ts".to_string()],
+                ignores: vec![],
+                language_options: None,
+                rules: Some(Rules(
+                    [Rule::Any(Cow::Borrowed("eqeqeq"), Severity::Off)]
+                        .into_iter()
+                        .collect(),
+                )),
+            },
+        ]);
+        let (biome_config, _) = flat_config.into_biome_config(&MigrationOptions::default());
+
+        assert!(biome_config.files.is_none());
+        assert!(biome_config.formatter.is_none());
+        assert!(biome_config.organize_imports.is_none());
+        let linter = biome_config.linter.unwrap();
+        assert!(linter.include.is_none());
+        assert_eq!(
+            linter.ignore,
+            Some(
+                ["*.test.js".to_string(), "*.spec.js".to_string()]
+                    .into_iter()
+                    .collect()
+            )
+        );
+        assert_eq!(
+            linter.rules.unwrap().suspicious.unwrap().no_double_equals,
+            Some(biome_config::RuleConfiguration::Plain(
+                biome_config::RulePlainConfiguration::Error
+            ))
+        );
+        let overrides = biome_config.overrides.unwrap();
+        assert_eq!(overrides.0.len(), 1);
+        let override0 = overrides.0.into_iter().next().unwrap();
+        assert_eq!(
+            override0.include,
+            Some(["*.ts".to_string()].into_iter().collect())
+        );
+        assert!(override0.ignore.is_none());
+        assert_eq!(
+            override0
+                .linter
+                .unwrap()
+                .rules
+                .unwrap()
+                .suspicious
+                .unwrap()
+                .no_double_equals,
+            Some(biome_config::RuleConfiguration::Plain(
+                biome_config::RulePlainConfiguration::Off
+            ))
+        );
     }
 }
