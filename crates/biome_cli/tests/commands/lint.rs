@@ -1852,7 +1852,7 @@ fn top_level_all_false_group_level_all_true() {
 }
 
 #[test]
-fn top_level_all_true_group_level_all_unset() {
+fn top_level_all_true_group_level_empty() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -1896,7 +1896,7 @@ fn top_level_all_true_group_level_all_unset() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "top_level_all_true_group_level_all_unset",
+        "top_level_all_true_group_level_empty",
         fs,
         console,
         result,
