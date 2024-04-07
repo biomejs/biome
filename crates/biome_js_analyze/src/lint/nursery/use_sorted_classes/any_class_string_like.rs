@@ -1,7 +1,8 @@
 use super::UtilityClassSortingOptions;
 use biome_js_syntax::{
-    AnyJsExpression, JsCallArguments, JsCallExpression, JsStringLiteralExpression,
-    JsTemplateChunkElement, JsTemplateExpression, JsxAttribute, JsxString,
+    AnyJsExpression, JsCallArguments, JsCallExpression, JsLiteralMemberName,
+    JsStringLiteralExpression, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression,
+    JsxAttribute, JsxString,
 };
 use biome_rowan::{declare_node_union, AstNode, TokenText};
 
@@ -37,38 +38,47 @@ fn get_attribute_name(attribute: &JsxAttribute) -> Option<TokenText> {
 
 declare_node_union! {
     /// A string literal, JSX string, or template chunk representing a CSS class string.
-    pub AnyClassStringLike = JsStringLiteralExpression | JsxString | JsTemplateChunkElement
+    pub AnyClassStringLike = JsStringLiteralExpression | JsxString | JsTemplateChunkElement | JsLiteralMemberName
+}
+
+fn inspect_string_literal(
+    node: &JsSyntaxNode,
+    options: &UtilityClassSortingOptions,
+) -> Option<bool> {
+    let mut in_arguments = false;
+    let mut in_function = false;
+    for ancestor in node.ancestors().skip(1) {
+        if let Some(jsx_attribute) = JsxAttribute::cast_ref(&ancestor) {
+            let attribute_name = get_attribute_name(&jsx_attribute)?;
+            if options.has_attribute(attribute_name.text()) {
+                return Some(true);
+            }
+        }
+
+        if let Some(call_expression) = JsCallExpression::cast_ref(&ancestor) {
+            in_function = is_call_expression_of_target_function(&call_expression, options);
+        }
+
+        if JsCallArguments::can_cast(ancestor.kind()) {
+            in_arguments = true;
+        }
+
+        if in_function && in_arguments {
+            return Some(true);
+        }
+    }
+
+    None
 }
 
 impl AnyClassStringLike {
     pub(crate) fn should_visit(&self, options: &UtilityClassSortingOptions) -> Option<bool> {
         match self {
             AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
-                let mut in_arguments = false;
-                let mut in_function = false;
-                for ancestor in string_literal.syntax().ancestors().skip(1) {
-                    if let Some(jsx_attribute) = JsxAttribute::cast_ref(&ancestor) {
-                        let attribute_name = get_attribute_name(&jsx_attribute)?;
-                        if options.has_attribute(attribute_name.text()) {
-                            return Some(true);
-                        }
-                    }
-
-                    if let Some(call_expression) = JsCallExpression::cast_ref(&ancestor) {
-                        in_function =
-                            is_call_expression_of_target_function(&call_expression, options);
-                    }
-
-                    if JsCallArguments::can_cast(ancestor.kind()) {
-                        in_arguments = true;
-                    }
-
-                    if in_function && in_arguments {
-                        return Some(true);
-                    }
-                }
-
-                None
+                inspect_string_literal(string_literal.syntax(), options)
+            }
+            AnyClassStringLike::JsLiteralMemberName(literal_name) => {
+                inspect_string_literal(literal_name.syntax(), options)
             }
             AnyClassStringLike::JsxString(jsx_string) => {
                 let jsx_attribute = jsx_string
@@ -114,6 +124,7 @@ impl AnyClassStringLike {
             AnyClassStringLike::JsTemplateChunkElement(template_chunk) => {
                 Some(template_chunk.template_chunk_token().ok()?.token_text())
             }
+            AnyClassStringLike::JsLiteralMemberName(node) => node.name().ok(),
         }
     }
 }

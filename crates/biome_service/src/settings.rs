@@ -1,16 +1,15 @@
-use crate::configuration::diagnostics::InvalidIgnorePattern;
-use crate::configuration::formatter::to_format_settings;
-use crate::configuration::linter::to_linter_settings;
-use crate::configuration::organize_imports::{to_organize_imports_settings, OrganizeImports};
-use crate::configuration::{
-    push_to_analyzer_rules, to_override_settings, CssConfiguration, FormatterConfiguration,
-    JavascriptConfiguration, JsonConfiguration, LinterConfiguration, PartialConfiguration,
-};
 use crate::workspace::DocumentFileSource;
-use crate::{
-    configuration::FilesConfiguration, ConfigurationDiagnostic, Matcher, Rules, WorkspaceError,
-};
+use crate::{Matcher, WorkspaceError};
 use biome_analyze::AnalyzerRules;
+use biome_configuration::diagnostics::InvalidIgnorePattern;
+use biome_configuration::organize_imports::OrganizeImports;
+use biome_configuration::{
+    push_to_analyzer_rules, ConfigurationDiagnostic, CssConfiguration, FilesConfiguration,
+    FormatterConfiguration, JavascriptConfiguration, JsonConfiguration, LinterConfiguration,
+    OverrideFormatterConfiguration, OverrideLinterConfiguration,
+    OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
+    PartialJavascriptConfiguration, PartialJsonConfiguration, PlainIndentStyle, Rules,
+};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
@@ -367,7 +366,7 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
     }
 }
 
-pub trait Language: biome_rowan::Language {
+pub trait ServiceLanguage: biome_rowan::Language {
     /// Formatter settings type for this language
     type FormatterSettings: Default;
 
@@ -377,7 +376,7 @@ pub trait Language: biome_rowan::Language {
     type OrganizeImportsSettings: Default;
 
     /// Fully resolved formatter options type for this language
-    type FormatOptions: biome_formatter::FormatOptions;
+    type FormatOptions: biome_formatter::FormatOptions + Clone + std::fmt::Display;
 
     /// Settings that belong to the parser
     type ParserSettings: Default;
@@ -397,7 +396,7 @@ pub trait Language: biome_rowan::Language {
 }
 
 #[derive(Debug, Default)]
-pub struct LanguageSettings<L: Language> {
+pub struct LanguageSettings<L: ServiceLanguage> {
     /// Formatter settings for this language
     pub formatter: L::FormatterSettings,
 
@@ -510,7 +509,7 @@ impl<'a> SettingsHandle<'a> {
         file_source: &DocumentFileSource,
     ) -> L::FormatOptions
     where
-        L: Language,
+        L: ServiceLanguage,
     {
         L::resolve_format_options(
             &self.inner.formatter,
@@ -751,6 +750,7 @@ impl OverrideSettings {
         None
     }
 }
+
 #[derive(Debug, Default)]
 pub struct OverrideSettingPattern {
     pub exclude: Matcher,
@@ -988,4 +988,326 @@ fn to_git_ignore(path: PathBuf, matches: &[String]) -> Result<Gitignore, Workspa
         ))
     })?;
     Ok(gitignore)
+}
+
+pub fn to_organize_imports_settings(
+    working_directory: Option<PathBuf>,
+    organize_imports: OrganizeImports,
+) -> Result<OrganizeImportsSettings, WorkspaceError> {
+    Ok(OrganizeImportsSettings {
+        enabled: organize_imports.enabled,
+        ignored_files: to_matcher(working_directory.clone(), Some(&organize_imports.ignore))?,
+        included_files: to_matcher(working_directory, Some(&organize_imports.include))?,
+    })
+}
+
+impl TryFrom<OverrideOrganizeImportsConfiguration> for OrganizeImportsSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(
+        organize_imports: OverrideOrganizeImportsConfiguration,
+    ) -> Result<Self, Self::Error> {
+        Ok(Self {
+            enabled: organize_imports.enabled.unwrap_or_default(),
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
+        })
+    }
+}
+
+pub fn to_override_settings(
+    working_directory: Option<PathBuf>,
+    overrides: Overrides,
+    current_settings: &WorkspaceSettings,
+) -> Result<OverrideSettings, WorkspaceError> {
+    let mut override_settings = OverrideSettings::default();
+    for mut pattern in overrides.0 {
+        let formatter = pattern.formatter.take().unwrap_or_default();
+        let formatter = to_override_format_settings(formatter, &current_settings.formatter);
+
+        let linter = pattern.linter.take().unwrap_or_default();
+        let linter = to_override_linter_settings(linter, &current_settings.linter);
+
+        let organize_imports = pattern.organize_imports.take().unwrap_or_default();
+        let organize_imports = to_override_organize_imports_settings(
+            organize_imports,
+            &current_settings.organize_imports,
+        );
+
+        let mut languages = LanguageListSettings::default();
+        let javascript = pattern.javascript.take().unwrap_or_default();
+        let json = pattern.json.take().unwrap_or_default();
+        let css = pattern.css.take().unwrap_or_default();
+        languages.javascript =
+            to_javascript_language_settings(javascript, &current_settings.languages.javascript);
+
+        languages.json = to_json_language_settings(json, &current_settings.languages.json);
+        languages.css = to_css_language_settings(css, &current_settings.languages.css);
+
+        let pattern_setting = OverrideSettingPattern {
+            include: to_matcher(working_directory.clone(), pattern.include.as_ref())?,
+            exclude: to_matcher(working_directory.clone(), pattern.ignore.as_ref())?,
+            formatter,
+            linter,
+            organize_imports,
+            languages,
+            ..OverrideSettingPattern::default()
+        };
+
+        override_settings.patterns.push(pattern_setting);
+    }
+
+    Ok(override_settings)
+}
+
+pub(crate) fn to_override_format_settings(
+    conf: OverrideFormatterConfiguration,
+    format_settings: &FormatSettings,
+) -> OverrideFormatSettings {
+    let indent_style = conf
+        .indent_style
+        .map(Into::into)
+        .or(format_settings.indent_style);
+    let indent_width = conf
+        .indent_width
+        .map(Into::into)
+        .or(conf.indent_size.map(Into::into))
+        .or(format_settings.indent_width);
+
+    let line_ending = conf.line_ending.or(format_settings.line_ending);
+    let line_width = conf.line_width.or(format_settings.line_width);
+    let format_with_errors = conf
+        .format_with_errors
+        .unwrap_or(format_settings.format_with_errors);
+
+    OverrideFormatSettings {
+        enabled: conf.enabled.or(Some(format_settings.enabled)),
+        indent_style,
+        indent_width,
+        line_ending,
+        line_width,
+        format_with_errors,
+    }
+}
+
+fn to_override_linter_settings(
+    conf: OverrideLinterConfiguration,
+    lint_settings: &LinterSettings,
+) -> OverrideLinterSettings {
+    OverrideLinterSettings {
+        enabled: conf.enabled.or(Some(lint_settings.enabled)),
+        rules: conf.rules.or(lint_settings.rules.clone()),
+    }
+}
+
+fn to_javascript_language_settings(
+    mut conf: PartialJavascriptConfiguration,
+    parent_settings: &LanguageSettings<JsLanguage>,
+) -> LanguageSettings<JsLanguage> {
+    let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+    let parent_formatter = &parent_settings.formatter;
+    language_setting.formatter.quote_style = formatter.quote_style.or(parent_formatter.quote_style);
+    language_setting.formatter.jsx_quote_style = formatter
+        .jsx_quote_style
+        .or(parent_formatter.jsx_quote_style);
+    language_setting.formatter.quote_properties = formatter
+        .quote_properties
+        .or(parent_formatter.quote_properties);
+    language_setting.formatter.trailing_comma =
+        formatter.trailing_comma.or(parent_formatter.trailing_comma);
+    language_setting.formatter.semicolons = formatter.semicolons.or(parent_formatter.semicolons);
+    language_setting.formatter.arrow_parentheses = formatter
+        .arrow_parentheses
+        .or(parent_formatter.arrow_parentheses);
+    language_setting.formatter.bracket_spacing = formatter
+        .bracket_spacing
+        .map(Into::into)
+        .or(parent_formatter.bracket_spacing);
+    language_setting.formatter.bracket_same_line = formatter
+        .bracket_same_line
+        .map(Into::into)
+        .or(parent_formatter.bracket_same_line);
+    language_setting.formatter.enabled = formatter.enabled.or(parent_formatter.enabled);
+    language_setting.formatter.line_width = formatter.line_width.or(parent_formatter.line_width);
+    language_setting.formatter.line_ending = formatter.line_ending.or(parent_formatter.line_ending);
+    language_setting.formatter.indent_width = formatter
+        .indent_width
+        .map(Into::into)
+        .or(formatter.indent_size.map(Into::into))
+        .or(parent_formatter.indent_width);
+    language_setting.formatter.indent_style = formatter
+        .indent_style
+        .map(Into::into)
+        .or(parent_formatter.indent_style);
+
+    let parser = conf.parser.take().unwrap_or_default();
+    let parent_parser = &parent_settings.parser;
+    language_setting.parser.parse_class_parameter_decorators = parser
+        .unsafe_parameter_decorators_enabled
+        .unwrap_or(parent_parser.parse_class_parameter_decorators);
+
+    let organize_imports = conf.organize_imports;
+    if let Some(_organize_imports) = organize_imports {}
+
+    language_setting.globals = conf
+        .globals
+        .map(StringSet::into_index_set)
+        .or_else(|| parent_settings.globals.clone());
+
+    language_setting
+}
+
+fn to_json_language_settings(
+    mut conf: PartialJsonConfiguration,
+    parent_settings: &LanguageSettings<JsonLanguage>,
+) -> LanguageSettings<JsonLanguage> {
+    let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+    let parent_formatter = &parent_settings.formatter;
+
+    language_setting.formatter.enabled = formatter.enabled.or(parent_formatter.enabled);
+    language_setting.formatter.line_width = formatter.line_width.or(parent_formatter.line_width);
+    language_setting.formatter.line_ending = formatter.line_ending.or(parent_formatter.line_ending);
+    language_setting.formatter.indent_width = formatter
+        .indent_width
+        .map(Into::into)
+        .or(formatter.indent_size.map(Into::into))
+        .or(parent_formatter.indent_width);
+    language_setting.formatter.indent_style = formatter
+        .indent_style
+        .map(Into::into)
+        .or(parent_formatter.indent_style);
+    language_setting.formatter.trailing_commas = formatter
+        .trailing_commas
+        .or(parent_formatter.trailing_commas);
+
+    let parser = conf.parser.take().unwrap_or_default();
+    let parent_parser = &parent_settings.parser;
+    language_setting.parser.allow_comments = parser
+        .allow_comments
+        .unwrap_or(parent_parser.allow_comments);
+
+    language_setting.parser.allow_trailing_commas = parser
+        .allow_trailing_commas
+        .unwrap_or(parent_parser.allow_trailing_commas);
+
+    language_setting
+}
+
+fn to_css_language_settings(
+    mut conf: PartialCssConfiguration,
+    parent_settings: &LanguageSettings<CssLanguage>,
+) -> LanguageSettings<CssLanguage> {
+    let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+    let parent_formatter = &parent_settings.formatter;
+
+    language_setting.formatter.enabled = formatter.enabled.or(parent_formatter.enabled);
+    language_setting.formatter.line_width = formatter.line_width.or(parent_formatter.line_width);
+    language_setting.formatter.line_ending = formatter.line_ending.or(parent_formatter.line_ending);
+    language_setting.formatter.indent_width = formatter
+        .indent_width
+        .map(Into::into)
+        .or(formatter.indent_size.map(Into::into))
+        .or(parent_formatter.indent_width);
+    language_setting.formatter.indent_style = formatter
+        .indent_style
+        .map(Into::into)
+        .or(parent_formatter.indent_style);
+    language_setting.formatter.quote_style = formatter.quote_style.or(parent_formatter.quote_style);
+
+    let parser = conf.parser.take().unwrap_or_default();
+    let parent_parser = &parent_settings.parser;
+    language_setting.parser.allow_wrong_line_comments = parser
+        .allow_wrong_line_comments
+        .unwrap_or(parent_parser.allow_wrong_line_comments);
+
+    language_setting
+}
+
+fn to_override_organize_imports_settings(
+    conf: OverrideOrganizeImportsConfiguration,
+    settings: &OrganizeImportsSettings,
+) -> OverrideOrganizeImportsSettings {
+    OverrideOrganizeImportsSettings {
+        enabled: conf.enabled.or(Some(settings.enabled)),
+    }
+}
+
+pub fn to_format_settings(
+    working_directory: Option<PathBuf>,
+    conf: FormatterConfiguration,
+) -> Result<FormatSettings, WorkspaceError> {
+    let indent_style = match conf.indent_style {
+        PlainIndentStyle::Tab => IndentStyle::Tab,
+        PlainIndentStyle::Space => IndentStyle::Space,
+    };
+    let indent_width = conf.indent_width.into();
+
+    Ok(FormatSettings {
+        enabled: conf.enabled,
+        indent_style: Some(indent_style),
+        indent_width: Some(indent_width),
+        line_ending: Some(conf.line_ending),
+        line_width: Some(conf.line_width),
+        format_with_errors: conf.format_with_errors,
+        attribute_position: Some(conf.attribute_position),
+        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
+        included_files: to_matcher(working_directory, Some(&conf.include))?,
+    })
+}
+
+impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(conf: OverrideFormatterConfiguration) -> Result<Self, Self::Error> {
+        let indent_style = match conf.indent_style {
+            Some(PlainIndentStyle::Tab) => IndentStyle::Tab,
+            Some(PlainIndentStyle::Space) => IndentStyle::Space,
+            None => IndentStyle::default(),
+        };
+        let indent_width = conf
+            .indent_width
+            .map(Into::into)
+            .or(conf.indent_size.map(Into::into))
+            .unwrap_or_default();
+
+        Ok(Self {
+            enabled: conf.enabled.unwrap_or_default(),
+            indent_style: Some(indent_style),
+            indent_width: Some(indent_width),
+            line_ending: conf.line_ending,
+            line_width: conf.line_width,
+            attribute_position: Some(AttributePosition::default()),
+            format_with_errors: conf.format_with_errors.unwrap_or_default(),
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
+        })
+    }
+}
+
+pub fn to_linter_settings(
+    working_directory: Option<PathBuf>,
+    conf: LinterConfiguration,
+) -> Result<LinterSettings, WorkspaceError> {
+    Ok(LinterSettings {
+        enabled: conf.enabled,
+        rules: Some(conf.rules),
+        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
+        included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
+    })
+}
+
+impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(conf: OverrideLinterConfiguration) -> Result<Self, Self::Error> {
+        Ok(Self {
+            enabled: conf.enabled.unwrap_or_default(),
+            rules: conf.rules,
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
+        })
+    }
 }

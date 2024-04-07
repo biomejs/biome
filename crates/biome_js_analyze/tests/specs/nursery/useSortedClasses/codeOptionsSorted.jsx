@@ -19,7 +19,6 @@
 
 // functions
 clsx("foo bar p-4 px-2");
-// TODO: tagged template literals are not supported yet
 tw`foo bar p-4 px-2`;
 tw.div`foo bar p-4 px-2`;
 notClassFunction("px-2 foo p-4 bar");

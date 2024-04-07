@@ -16,8 +16,8 @@ use super::{
     ChangeFileParams, CloseFileParams, FixFileParams, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
-    SupportsFeatureParams, UpdateSettingsParams,
+    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult, SearchPatternParams,
+    SearchResults, SupportsFeatureParams, UpdateSettingsParams,
 };
 
 pub struct WorkspaceClient<T> {
@@ -190,6 +190,10 @@ where
 
     fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError> {
         self.request("biome/rage", params)
+    }
+
+    fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
+        self.request("biome/search_pattern", params)
     }
 
     fn server_info(&self) -> Option<&ServerInfo> {

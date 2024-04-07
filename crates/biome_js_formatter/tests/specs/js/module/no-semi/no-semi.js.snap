@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/no-semi/no-semi.js
 ---
-
 # Input
 
 ```js
@@ -206,7 +205,7 @@ aReallyLongLine012345678901234567890123456789012345678901234567890123456789 *
 	(b + c);
 ```
 
-## Output 2
+## Output 1
 
 -----
 Indent style: Tab
@@ -317,5 +316,3 @@ while (false) (function () {})()
 aReallyLongLine012345678901234567890123456789012345678901234567890123456789 *
 	(b + c)
 ```
-
-

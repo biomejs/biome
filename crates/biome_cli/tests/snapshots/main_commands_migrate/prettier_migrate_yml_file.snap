@@ -28,17 +28,23 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-.prettierrc parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.prettierrc:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × String values must be double quoted.
+  
+  > 1 │ useTabs: true
+      │ ^^^^^^^
   
 
 ```
 
 ```block
-.prettierrc parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.prettierrc:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × End of file expected
+  
+  > 1 │ useTabs: true
+      │        ^
   
   i Use an array for a sequence of values: `[1, 2]`
   
@@ -46,9 +52,12 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-.prettierrc parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.prettierrc:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × End of file expected
+  
+  > 1 │ useTabs: true
+      │          ^^^^
   
   i Use an array for a sequence of values: `[1, 2]`
   
@@ -65,5 +74,3 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   
 
 ```
-
-

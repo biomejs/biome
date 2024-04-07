@@ -11,6 +11,16 @@ pub enum RuleKind {
     Css,
 }
 
+impl RuleKind {
+    fn as_str(&self) -> &str {
+        match self {
+            Self::Js => "js",
+            Self::Json => "json",
+            Self::Css => "css",
+        }
+    }
+}
+
 impl FromStr for RuleKind {
     type Err = &'static str;
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
@@ -36,6 +46,7 @@ fn generate_rule_template(
 }};
 use biome_console::markup;
 use biome_js_syntax::JsIdentifierBinding;
+use biome_rowan::AstNode;
 
 declare_rule! {{
     /// Succinct description of the rule.
@@ -59,7 +70,7 @@ declare_rule! {{
     /// ### Valid
     ///
     /// ```js
-    /// var a = 1;
+    /// // var a = 1;
     /// ```
     ///
     pub {rule_name_upper_camel} {{
@@ -76,19 +87,20 @@ impl Rule for {rule_name_upper_camel} {{
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
-        let binding = ctx.query();
-        None
+        let _binding = ctx.query();
+        Some(())
     }}
 
-    fn diagnostic(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {{
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {{
         //
         // Read our guidelines to write great diagnostics:
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
+        let node = ctx.query();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                reference.range(),
+                node.range(),
                 markup! {{
                     "Variable is read here."
                 }},
@@ -186,12 +198,9 @@ impl Rule for {rule_name_upper_camel} {{
 }
 
 pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
-    let crate_folder = match kind {
-        RuleKind::Js => project_root().join("crates/biome_js_analyze"),
-        RuleKind::Json => project_root().join("crates/biome_js_analyze"),
-        RuleKind::Css => project_root().join("crates/biome_js_analyze"),
-    };
-    let rule_folder = crate_folder.join("src/lint");
+    let rule_kind = kind.as_str();
+    let crate_folder = project_root().join(format!("crates/biome_{rule_kind}_analyze"));
+    let rule_folder = crate_folder.join("src/lint/nursery");
     let test_folder = crate_folder.join("tests/specs/nursery");
     let rule_name_upper_camel = rule_name.to_camel();
     let rule_name_snake = rule_name.to_snake();
@@ -233,19 +242,22 @@ pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
     let tests_path = format!("{}/{rule_name_lower_camel}", test_folder.display());
     let _ = std::fs::create_dir_all(tests_path);
 
-    let test_file = format!("{}/{rule_name_lower_camel}/valid.js", test_folder.display());
+    let test_file = format!(
+        "{}/{rule_name_lower_camel}/valid.{rule_kind}",
+        test_folder.display()
+    );
     if std::fs::File::open(&test_file).is_err() {
         let _ = std::fs::write(
             test_file,
-            "/* should not generate diagnostics */\n\n var a = 1;",
+            "/* should not generate diagnostics */\n// var a = 1;",
         );
     }
 
     let test_file = format!(
-        "{}/{rule_name_lower_camel}/invalid.js",
+        "{}/{rule_name_lower_camel}/invalid.{rule_kind}",
         test_folder.display()
     );
     if std::fs::File::open(&test_file).is_err() {
-        let _ = std::fs::write(test_file, "\n\n var a = 1;\na = 2;\n a = 3;");
+        let _ = std::fs::write(test_file, "var a = 1;\na = 2;\na = 3;");
     }
 }

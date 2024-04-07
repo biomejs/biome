@@ -38,7 +38,7 @@ check.js:1:4 lint/suspicious/noAssignInExpressions ━━━━━━━━━�
 ```block
 check.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - if(a·=·b)·{}
       1 │ + if·((a·=·b))·{
@@ -50,7 +50,5 @@ check.js format ━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes needed.
-Found 4 errors.
+Found 2 errors.
 ```
-
-

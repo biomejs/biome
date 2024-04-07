@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/fill-value/fill.css
 ---
-
 # Input
 
 ```css
@@ -45,5 +44,3 @@ div {
     sans-serif;
 }
 ```
-
-

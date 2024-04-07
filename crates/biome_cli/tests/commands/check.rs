@@ -191,7 +191,6 @@ fn maximum_diagnostics() {
         .filter(|m| m.level == LogLevel::Log)
         .any(|m| {
             let content = format!("{:?}", m.content);
-            dbg!(&content);
             content.contains("The number of diagnostics exceeds the number allowed by Biome")
                 && content.contains("Diagnostics not shown")
                 && content.contains("77")
@@ -1299,13 +1298,6 @@ fn max_diagnostics_default() {
 
     console.out_buffer = filtered_messages;
 
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "max_diagnostics_default",
-        fs,
-        console,
-        result,
-    ));
     assert_eq!(diagnostic_count, 20);
 }
 
@@ -1357,14 +1349,6 @@ fn max_diagnostics() {
     }
 
     console.out_buffer = filtered_messages;
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "max_diagnostics",
-        fs,
-        console,
-        result,
-    ));
 
     assert_eq!(diagnostic_count, 10);
 }

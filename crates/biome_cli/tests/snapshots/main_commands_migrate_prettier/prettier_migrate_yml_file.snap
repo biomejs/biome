@@ -1,0 +1,27 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.prettierrc`
+
+```prettierrc
+useTabs: true
+```
+
+# Termination Message
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Migration has encountered an error: Could not deserialize the Prettier configuration file.
+    Only JSON configurations are supported.
+  
+
+
+```

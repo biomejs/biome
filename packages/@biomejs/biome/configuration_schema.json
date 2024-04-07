@@ -737,7 +737,7 @@
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/UnusedImportsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1389,7 +1389,7 @@
 					]
 				},
 				"noColorInvalidHex": {
-					"description": "Succinct description of the rule.",
+					"description": "[WIP] This rule hasn't been implemented yet.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1458,6 +1458,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMisplacedAssertion": {
+					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNamespaceImport": {
 					"description": "Disallow the use of namespace imports.",
 					"anyOf": [
@@ -1486,15 +1493,15 @@
 						{ "type": "null" }
 					]
 				},
-				"noSemicolonInJsx": {
-					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
+				"noSkippedTests": {
+					"description": "Disallow disabled tests.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"noSkippedTests": {
-					"description": "Disallow disabled tests.",
+				"noSuspiciousSemicolonInJsx": {
+					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1840,10 +1847,9 @@
 		},
 		"RuleWithNoOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "type": "null" }
+				"level": { "$ref": "#/definitions/RulePlainConfiguration" }
 			},
 			"additionalProperties": false
 		},
@@ -1862,6 +1868,15 @@
 			"properties": {
 				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
 				"options": { "$ref": "#/definitions/RestrictedImportsOptions" }
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUnusedImportsOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
+				"options": { "$ref": "#/definitions/UnusedImportsOptions" }
 			},
 			"additionalProperties": false
 		},
@@ -2689,6 +2704,23 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UnusedImportsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUnusedImportsOptions" }
+			]
+		},
+		"UnusedImportsOptions": {
+			"type": "object",
+			"required": ["ignoreReact"],
+			"properties": {
+				"ignoreReact": {
+					"description": "Ignore `React` imports from the `react` package when set to `true`.",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
 		},
 		"UtilityClassSortingConfiguration": {
 			"anyOf": [

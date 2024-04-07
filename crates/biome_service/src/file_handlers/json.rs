@@ -1,12 +1,12 @@
 use super::{CodeActionsParams, DocumentFileSource, ExtensionHandler, Mime, ParseResult};
-use crate::configuration::{to_analyzer_rules, PartialConfiguration};
+use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FixAllParams, FormatterCapabilities, LintParams,
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, Language, LanguageListSettings, LanguageSettings, OverrideSettings,
+    FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     SettingsHandle,
 };
 use crate::workspace::{
@@ -17,6 +17,7 @@ use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
 };
+use biome_configuration::PartialConfiguration;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
@@ -49,7 +50,7 @@ pub struct JsonParserSettings {
     pub allow_trailing_commas: bool,
 }
 
-impl Language for JsonLanguage {
+impl ServiceLanguage for JsonLanguage {
     type FormatterSettings = JsonFormatterSettings;
     type LinterSettings = ();
     type OrganizeImportsSettings = ();

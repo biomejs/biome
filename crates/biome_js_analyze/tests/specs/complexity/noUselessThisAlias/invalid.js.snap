@@ -119,9 +119,8 @@ invalid.js:5:11 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━�
      3  3 │   function f() {
      4    │ - ····//·assignment·comment
      5    │ - ····const·self·=·this;
-     6    │ - ····return·()·=>·{
+     6  4 │       return () => {
      7    │ - ········/*a*/self/*b*/.g();
-        4 │ + ····return·()·=>·{
         5 │ + ········/*a*/this/*b*/.g();
      8  6 │       }
      9  7 │   }
@@ -147,9 +146,8 @@ invalid.js:12:9 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━�
     10 10 │   
     11 11 │   function f() {
     12    │ - ····let·self·=·this;
-    13    │ - ····return·()·=>·{
+    13 12 │       return () => {
     14    │ - ········self.g();
-       12 │ + ····return·()·=>·{
        13 │ + ········this.g();
     15 14 │       }
     16 15 │   }
@@ -177,9 +175,8 @@ invalid.js:19:9 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━�
     19    │ - ····var·self;
     20    │ - ····self·=·this;
     21    │ - ····self·=·this;
-    22    │ - ····return·()·=>·{
+    22 19 │       return () => {
     23    │ - ········self.g();
-       19 │ + ····return·()·=>·{
        20 │ + ········this.g();
     24 21 │       }
     25 22 │   }
@@ -227,5 +224,3 @@ invalid.js:32:13 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━
   
 
 ```
-
-

@@ -22,6 +22,7 @@ upgrade-tools:
 gen-all:
   cargo run -p xtask_codegen -- all
   cargo run -p xtask_codegen -- configuration
+  cargo run -p xtask_codegen --features configuration -- migrate-eslint
   cargo lintdoc
   just gen-bindings
   just gen-web
@@ -34,8 +35,9 @@ gen-bindings:
 
 # Generates code generated files for the linter
 gen-lint:
-  cargo codegen analyzer
+  cargo run -p xtask_codegen -- analyzer
   cargo codegen-configuration
+  cargo run -p xtask_codegen --features configuration -- migrate-eslint
   just gen-bindings
   just format
   cargo lintdoc
@@ -44,6 +46,10 @@ gen-lint:
 # Generates code generated files for the website
 gen-web:
   cargo codegen-website
+
+# Generates the initial files for all formatter crates
+gen-formatter:
+  cargo run -p xtask_codegen -- formatter
 
 # Generates the Tailwind CSS preset for utility class sorting (requires Bun)
 gen-tw:
@@ -64,14 +70,10 @@ new-js-lintrule rulename:
   just gen-lint
   just documentation
 
-# WIP: Creates a new css lint rule in the given path, with the given name. Name has to be camel case.
+# Creates a new css lint rule in the given path, with the given name. Name has to be camel case.
 new-css-lintrule rulename:
-  cargo run -p xtask_codegen -- new-css-lintrule --kind=css --name={{rulename}}
-  cargo codegen analyzer
-  cargo codegen-configuration
-  just gen-bindings
-  just format
-# TODO: lintdoc, website, cargo doc
+  cargo run -p xtask_codegen -- new-lintrule --kind=css --name={{rulename}}
+  just gen-lint
 
 # Promotes a rule from the nursery group to a new group
 promote-rule rulename group:

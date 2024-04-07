@@ -11,12 +11,14 @@ use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
-use biome_js_syntax::{JsFileSource, TextRange, TextSize};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, Language, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use lazy_static::lazy_static;
 use regex::{Match, Regex};
 use tracing::debug;
+
+use super::parse_lang_from_script_opening_tag;
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct SvelteFileHandler;
@@ -24,13 +26,7 @@ pub struct SvelteFileHandler;
 lazy_static! {
     // https://regex101.com/r/E4n4hh/3
     pub static ref SVELTE_FENCE: Regex = Regex::new(
-        r#"(?ixms)(?:<script[^>]?)
-            (?:
-            (?:(lang)\s*=\s*['"](?P<lang>[^'"]*)['"])
-            |
-            (?:(\w+)\s*(?:=\s*['"]([^'"]*)['"])?)
-            )*
-        [^>]*>\n(?P<script>(?U:.*))</script>"#
+        r#"(?ixms)(?<opening><script[^>]*>)\n(?P<script>(?U:.*))</script>"#
     )
     .unwrap();
 }
@@ -73,11 +69,17 @@ impl SvelteFileHandler {
     }
 
     pub fn file_source(text: &str) -> JsFileSource {
-        let matches = SVELTE_FENCE.captures(text);
-        matches
-            .and_then(|captures| captures.name("lang"))
-            .filter(|lang| lang.as_str() == "ts")
-            .map_or(JsFileSource::js_module(), |_| JsFileSource::ts())
+        SVELTE_FENCE
+            .captures(text)
+            .and_then(|captures| {
+                match parse_lang_from_script_opening_tag(captures.name("opening")?.as_str()) {
+                    Language::JavaScript => None,
+                    Language::TypeScript { .. } => {
+                        Some(JsFileSource::ts().with_embedding_kind(EmbeddingKind::Svelte))
+                    }
+                }
+            })
+            .map_or(JsFileSource::js_module(), |fs| fs)
     }
 }
 
@@ -117,20 +119,12 @@ fn parse(
     _settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let matches = SVELTE_FENCE.captures(text);
-    let script = match matches {
-        Some(ref captures) => &text[captures.name("script").unwrap().range()],
-        _ => "",
-    };
+    let script = SvelteFileHandler::input(text);
+    let file_source = SvelteFileHandler::file_source(text);
 
-    let language = matches
-        .and_then(|captures| captures.name("lang"))
-        .filter(|lang| lang.as_str() == "ts")
-        .map_or(JsFileSource::js_module(), |_| JsFileSource::ts());
+    debug!("Parsing file with language {:?}", file_source);
 
-    debug!("Parsing file with language {:?}", language);
-
-    let parse = parse_js_with_cache(script, language, JsParserOptions::default(), cache);
+    let parse = parse_js_with_cache(script, file_source, JsParserOptions::default(), cache);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
 
@@ -140,11 +134,7 @@ fn parse(
             root.as_send().unwrap(),
             diagnostics,
         ),
-        language: Some(if language.is_typescript() {
-            JsFileSource::ts().into()
-        } else {
-            JsFileSource::js_module().into()
-        }),
+        language: Some(file_source.into()),
     }
 }
 

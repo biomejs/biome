@@ -44,21 +44,21 @@ pub fn deserialize_from_json_str<Output: Deserializable>(
         diagnostics,
         deserialized,
     } = deserialize_from_json_ast::<Output>(&parse.tree(), name);
-    let mut errors = parse
+    let errors = parse
         .into_diagnostics()
         .into_iter()
         .map(Error::from)
+        .chain(diagnostics)
+        .map(|diagnostic| diagnostic.with_file_source_code(source))
         .collect::<Vec<_>>();
-    errors.extend(
-        diagnostics
-            .into_iter()
-            .map(|diagnostic| diagnostic.with_file_source_code(source))
-            .collect::<Vec<_>>(),
-    );
     Deserialized {
         diagnostics: errors,
         deserialized,
     }
+}
+
+pub fn deserialize_from_str<Output: Deserializable>(source: &str) -> Deserialized<Output> {
+    deserialize_from_json_str(source, JsonParserOptions::default(), "")
 }
 
 /// Attempts to deserialize a JSON AST, given the `Output`.
@@ -125,15 +125,15 @@ impl DeserializableValue for AnyJsonValue {
         }
     }
 
-    fn is_type(&self, ty: VisitableType) -> bool {
+    fn visitable_type(&self) -> Option<VisitableType> {
         match self {
-            AnyJsonValue::JsonArrayValue(_) => ty == VisitableType::ARRAY,
-            AnyJsonValue::JsonBogusValue(_) => false,
-            AnyJsonValue::JsonBooleanValue(_) => ty == VisitableType::BOOL,
-            AnyJsonValue::JsonNullValue(_) => ty == VisitableType::NULL,
-            AnyJsonValue::JsonNumberValue(_) => ty == VisitableType::NUMBER,
-            AnyJsonValue::JsonObjectValue(_) => ty == VisitableType::MAP,
-            AnyJsonValue::JsonStringValue(_) => ty == VisitableType::STR,
+            AnyJsonValue::JsonArrayValue(_) => Some(VisitableType::ARRAY),
+            AnyJsonValue::JsonBogusValue(_) => None,
+            AnyJsonValue::JsonBooleanValue(_) => Some(VisitableType::BOOL),
+            AnyJsonValue::JsonNullValue(_) => Some(VisitableType::NULL),
+            AnyJsonValue::JsonNumberValue(_) => Some(VisitableType::NUMBER),
+            AnyJsonValue::JsonObjectValue(_) => Some(VisitableType::MAP),
+            AnyJsonValue::JsonStringValue(_) => Some(VisitableType::STR),
         }
     }
 }
@@ -153,8 +153,8 @@ impl DeserializableValue for JsonMemberName {
         visitor.visit_str(Text(value), AstNode::range(self), name, diagnostics)
     }
 
-    fn is_type(&self, _ty: VisitableType) -> bool {
-        false
+    fn visitable_type(&self) -> Option<VisitableType> {
+        Some(VisitableType::STR)
     }
 }
 

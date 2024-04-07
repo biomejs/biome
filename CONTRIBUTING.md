@@ -233,7 +233,7 @@ To know the technical details of how our parser works and how to write test, ple
 
 ### Formatter
 
-To know the technical details of how our formatter works and how to write test, please check our [internal page](https://docs.rs/biome_formatter/latest/biome_formatter/)
+To know the technical details of how our formatter works and how to write test, please check our [internal page](https://github.com/biomejs/biome/blob/main/crates/biome_formatter/CONTRIBUTING.md)
 
 
 ## Crate dependencies
@@ -441,3 +441,4 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Yagiz Nizipli @anonrig](https://github.com/anonrig)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
 - [Ze-Zheng Wu @Sec-ant](https://github.com/Sec-ant)
+- [Zheyu Zhang @ah-yu](https://github.com/ah-yu)

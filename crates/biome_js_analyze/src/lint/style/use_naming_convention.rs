@@ -429,6 +429,7 @@ impl Rule for UseNamingConvention {
                     // Property parameters are also class properties.
                     return None;
                 }
+
                 Some(AnyJsRenamableDeclaration::JsIdentifierBinding(
                     binding.clone(),
                 ))

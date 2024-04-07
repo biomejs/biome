@@ -1,4 +1,4 @@
-use crate::{utils::batch::JsBatchMutation, JsRuleAction};
+use crate::JsRuleAction;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
@@ -12,6 +12,10 @@ use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
 declare_rule! {
  /// Prevents from having redundant `"use strict"`.
+ ///
+ /// Note that the leading trivia, e.g., comments or newlines preceding
+ /// the redundant `"use strict"` will also be removed. So that comment
+ /// directives won't be transferred to a wrong place.
  ///
  /// ## Examples
  ///
@@ -157,7 +161,8 @@ impl Rule for NoRedundantUseStrict {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        mutation.transfer_leading_trivia_to_sibling(node.syntax());
+        // This will also remove the trivia of the node
+        // which is intended
         mutation.remove_node(node.clone());
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,

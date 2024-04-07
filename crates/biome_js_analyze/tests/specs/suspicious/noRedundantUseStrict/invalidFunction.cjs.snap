@@ -37,11 +37,8 @@ invalidFunction.cjs:3:2 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━
     1 1 │   function test() {
     2 2 │   	"use strict";
     3   │ - → "use·strict";
-    4   │ - }
-      3 │ + → }
+    4 3 │   }
     5 4 │   
   
 
 ```
-
-

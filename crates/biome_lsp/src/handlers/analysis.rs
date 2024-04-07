@@ -179,6 +179,7 @@ pub(crate) fn code_actions(
             has_fixes |= action.diagnostics.is_some();
             Some(CodeActionOrCommand::CodeAction(action))
         })
+        .rev()
         .chain(fix_all)
         .collect();
 

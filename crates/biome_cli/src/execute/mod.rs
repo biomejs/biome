@@ -2,11 +2,14 @@ mod diagnostics;
 mod migrate;
 mod process_file;
 mod std_in;
-mod traverse;
+pub(crate) mod traverse;
 
 use crate::cli_options::CliOptions;
+use crate::commands::MigrateSubCommand;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::traverse;
+use crate::reporter::report;
+use crate::reporter::terminal::{ConsoleReporterBuilder, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
@@ -16,7 +19,8 @@ use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
 
 /// Useful information during the traversal of files and virtual content
-pub(crate) struct Execution {
+#[derive(Debug)]
+pub struct Execution {
     /// How the information should be collected and reported
     report_mode: ReportMode,
 
@@ -25,6 +29,20 @@ pub(crate) struct Execution {
 
     /// The maximum number of diagnostics that can be printed in console
     max_diagnostics: u16,
+}
+
+impl Execution {
+    pub fn new_format() -> Self {
+        Self {
+            traversal_mode: TraversalMode::Format {
+                ignore_errors: false,
+                write: false,
+                stdin: None,
+            },
+            report_mode: ReportMode::default(),
+            max_diagnostics: 0,
+        }
+    }
 }
 
 impl Execution {
@@ -38,18 +56,19 @@ impl Execution {
                 .with_linter()
                 .build(),
             TraversalMode::Migrate { .. } => vec![],
+            TraversalMode::Search { .. } => FeaturesBuilder::new().with_search().build(),
         }
     }
 }
 
 #[derive(Debug)]
-pub(crate) enum ExecutionEnvironment {
+pub enum ExecutionEnvironment {
     GitHub,
 }
 
 /// A type that holds the information to execute the CLI via `stdin
 #[derive(Debug)]
-pub(crate) struct Stdin(
+pub struct Stdin(
     /// The virtual path to the file
     PathBuf,
     /// The content of the file
@@ -73,7 +92,7 @@ impl From<(PathBuf, String)> for Stdin {
 }
 
 #[derive(Debug)]
-pub(crate) enum TraversalMode {
+pub enum TraversalMode {
     /// This mode is enabled when running the command `biome check`
     Check {
         /// The type of fixes that should be applied when analyzing a file.
@@ -118,12 +137,23 @@ pub(crate) enum TraversalMode {
     Migrate {
         /// Write result to disk
         write: bool,
-        /// The path directory where `biome.json` is placed
-        configuration_file_path: PathBuf,
         /// The path to `biome.json`
+        configuration_file_path: PathBuf,
+        /// The path directory where `biome.json` is placed
         configuration_directory_path: PathBuf,
-        /// Migrate from prettier
-        prettier: bool,
+        sub_command: Option<MigrateSubCommand>,
+    },
+    /// This mode is enabled when running the command `biome search`
+    Search {
+        /// The GritQL pattern to search for.
+        ///
+        /// Note that the search command (currently) does not support rewrites.
+        pattern: String,
+
+        /// An optional tuple.
+        /// 1. The virtual path to the file
+        /// 2. The content of the file
+        stdin: Option<Stdin>,
     },
 }
 
@@ -135,12 +165,13 @@ impl Display for TraversalMode {
             TraversalMode::Format { .. } => write!(f, "format"),
             TraversalMode::Migrate { .. } => write!(f, "migrate"),
             TraversalMode::Lint { .. } => write!(f, "lint"),
+            TraversalMode::Search { .. } => write!(f, "search"),
         }
     }
 }
 
 /// Tells to the execution of the traversal how the information should be reported
-#[derive(Copy, Clone, Default)]
+#[derive(Copy, Clone, Default, Debug)]
 pub(crate) enum ReportMode {
     /// Reports information straight to the console, it's the default mode
     #[default]
@@ -206,7 +237,8 @@ impl Execution {
             | TraversalMode::Lint { fix_file_mode, .. } => fix_file_mode.as_ref(),
             TraversalMode::Format { .. }
             | TraversalMode::CI { .. }
-            | TraversalMode::Migrate { .. } => None,
+            | TraversalMode::Migrate { .. }
+            | TraversalMode::Search { .. } => None,
         }
     }
 
@@ -217,11 +249,19 @@ impl Execution {
             TraversalMode::CI { .. } => category!("ci"),
             TraversalMode::Format { .. } => category!("format"),
             TraversalMode::Migrate { .. } => category!("migrate"),
+            TraversalMode::Search { .. } => category!("search"),
         }
     }
 
     pub(crate) const fn is_ci(&self) -> bool {
         matches!(self.traversal_mode, TraversalMode::CI { .. })
+    }
+
+    pub(crate) const fn is_ci_github(&self) -> bool {
+        if let TraversalMode::CI { environment } = &self.traversal_mode {
+            return matches!(environment, Some(ExecutionEnvironment::GitHub));
+        }
+        false
     }
 
     pub(crate) const fn is_check(&self) -> bool {
@@ -269,9 +309,8 @@ impl Execution {
         match self.traversal_mode {
             TraversalMode::Check { fix_file_mode, .. }
             | TraversalMode::Lint { fix_file_mode, .. } => fix_file_mode.is_some(),
-            TraversalMode::CI { .. } => false,
-            TraversalMode::Format { write, .. } => write,
-            TraversalMode::Migrate { write: dry_run, .. } => dry_run,
+            TraversalMode::CI { .. } | TraversalMode::Search { .. } => false,
+            TraversalMode::Format { write, .. } | TraversalMode::Migrate { write, .. } => write,
         }
     }
 
@@ -279,7 +318,8 @@ impl Execution {
         match &self.traversal_mode {
             TraversalMode::Format { stdin, .. }
             | TraversalMode::Lint { stdin, .. }
-            | TraversalMode::Check { stdin, .. } => stdin.as_ref(),
+            | TraversalMode::Check { stdin, .. }
+            | TraversalMode::Search { stdin, .. } => stdin.as_ref(),
             TraversalMode::CI { .. } | TraversalMode::Migrate { .. } => None,
         }
     }
@@ -287,9 +327,9 @@ impl Execution {
 
 /// Based on the [mode](ExecutionMode), the function might launch a traversal of the file system
 /// or handles the stdin file.
-pub(crate) fn execute_mode(
+pub fn execute_mode(
     mut mode: Execution,
-    session: CliSession,
+    mut session: CliSession,
     cli_options: &CliOptions,
     paths: Vec<OsString>,
 ) -> Result<(), CliDiagnostic> {
@@ -309,7 +349,7 @@ pub(crate) fn execute_mode(
         write,
         configuration_file_path,
         configuration_directory_path,
-        prettier,
+        sub_command,
     } = mode.traversal_mode
     {
         let payload = MigratePayload {
@@ -318,10 +358,26 @@ pub(crate) fn execute_mode(
             configuration_file_path,
             configuration_directory_path,
             verbose: cli_options.verbose,
-            prettier,
+            sub_command,
         };
         migrate::run(payload)
     } else {
-        traverse(mode, session, cli_options, paths)
+        let (summary_result, diagnostics) = traverse(&mode, &mut session, cli_options, paths)?;
+        let console = session.app.console;
+        let mut reporter = ConsoleReporterBuilder::default()
+            .with_execution(&mode)
+            .with_cli_options(cli_options)
+            .with_diagnostics(diagnostics)
+            .with_summary(&summary_result)
+            .finish();
+
+        let mut visitor = ConsoleReporterVisitor(console);
+        report(
+            &mut reporter,
+            &mut visitor,
+            &mode,
+            cli_options,
+            &summary_result,
+        )
     }
 }

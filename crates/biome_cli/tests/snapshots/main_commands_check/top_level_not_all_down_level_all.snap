@@ -107,7 +107,7 @@ fix.js:4:5 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━
 ```block
 fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - 
     2   │ - ····function·f()·{arguments;}
@@ -126,7 +126,5 @@ fix.js format ━━━━━━━━━━━━━━━━━━━━━━
 
 ```block
 Checked 1 file in <TIME>. No fixes needed.
-Found 6 errors.
+Found 4 errors.
 ```
-
-

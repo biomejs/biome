@@ -1,0 +1,67 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/string/quoteSingle/directives.js
+---
+# Input
+
+```js
+'use preferred quote';
+"use preferred quote";
+"keep quotes and escpaes \" ";
+'keep quotes and escpaes \' ';
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```js
+"use preferred quote";
+"use preferred quote";
+"keep quotes and escpaes \" ";
+'keep quotes and escpaes \' ';
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Single Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```js
+'use preferred quote';
+'use preferred quote';
+"keep quotes and escpaes \" ";
+'keep quotes and escpaes \' ';
+```

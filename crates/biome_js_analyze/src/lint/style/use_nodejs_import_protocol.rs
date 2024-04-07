@@ -57,7 +57,11 @@ impl Rule for UseNodejsImportProtocol {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module_name = ctx.query().module_name_token()?;
+        let node = ctx.query();
+        if node.is_in_ts_module_declaration() {
+            return None;
+        }
+        let module_name = node.module_name_token()?;
         is_node_module_without_protocol(&inner_string_text(&module_name)).then_some(module_name)
     }
 

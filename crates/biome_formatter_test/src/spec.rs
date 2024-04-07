@@ -2,12 +2,16 @@ use crate::check_reformat::CheckReformat;
 use crate::snapshot_builder::{SnapshotBuilder, SnapshotOutput};
 use crate::utils::strip_rome_placeholders;
 use crate::TestFormatLanguage;
+use biome_configuration::PartialConfiguration;
 use biome_console::EnvConsole;
+use biome_deserialize::json::deserialize_from_str;
+use biome_diagnostics::print_diagnostic_to_string;
 use biome_formatter::{FormatOptions, Printed};
 use biome_fs::BiomePath;
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};
-use biome_service::workspace::{FeaturesBuilder, SupportsFeatureParams};
+use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
+use biome_service::workspace::{DocumentFileSource, FeaturesBuilder, SupportsFeatureParams};
 use biome_service::App;
 use std::ops::Range;
 use std::path::{Path, PathBuf};
@@ -101,7 +105,7 @@ where
     test_file: SpecTestFile<'a>,
     test_directory: PathBuf,
     language: L,
-    options: L::Options,
+    options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
 }
 
 impl<'a, L> SpecSnapshot<'a, L>
@@ -112,7 +116,7 @@ where
         test_file: SpecTestFile<'a>,
         test_directory: &str,
         language: L,
-        options: L::Options,
+        options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
     ) -> Self {
         let test_directory = PathBuf::from(test_directory);
 
@@ -124,7 +128,11 @@ where
         }
     }
 
-    fn formatted(&self, parsed: &AnyParse, options: L::Options) -> (String, Printed) {
+    fn formatted(
+        &self,
+        parsed: &AnyParse,
+        options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
+    ) -> (String, Printed) {
         let has_errors = parsed.has_errors();
         let syntax = parsed.syntax();
 
@@ -214,34 +222,46 @@ where
         if options_path.exists() {
             let mut options_path = BiomePath::new(&options_path);
 
+            let mut settings = WorkspaceSettings::default();
             // SAFETY: we checked its existence already, we assume we have rights to read it
-            let test_options = self
-                .language
-                .deserialize_format_options(options_path.get_buffer_from_file().as_str());
+            let (test_options, diagnostics) = deserialize_from_str::<PartialConfiguration>(
+                options_path.get_buffer_from_file().as_str(),
+            )
+            .consume();
+            settings
+                .merge_with_configuration(test_options.unwrap_or_default(), None, None, &[])
+                .unwrap();
 
-            for (index, options) in test_options.into_iter().enumerate() {
-                let (mut output_code, printed) = self.formatted(&parsed, options.clone());
+            if !diagnostics.is_empty() {
+                for diagnostic in diagnostics {
+                    println!("{:?}", print_diagnostic_to_string(&diagnostic));
+                }
 
-                let max_width = options.line_width().get() as usize;
-
-                // There are some logs that print different line endings, and we can't snapshot those
-                // otherwise we risk automatically having them replaced with LF by git.
-                //
-                // This is a workaround, and it might not work for all cases.
-                const CRLF_PATTERN: &str = "\r\n";
-                const CR_PATTERN: &str = "\r";
-                output_code = output_code
-                    .replace(CRLF_PATTERN, "<CRLF>\n")
-                    .replace(CR_PATTERN, "<CR>\n");
-
-                snapshot_builder = snapshot_builder
-                    .with_output_and_options(
-                        SnapshotOutput::new(&output_code).with_index(index + 2),
-                        options,
-                    )
-                    .with_unimplemented(&printed)
-                    .with_lines_exceeding_max_width(&output_code, max_width);
+                panic!("Configuration is invalid");
             }
+
+            let options = self
+                .language
+                .to_options(&settings, &DocumentFileSource::from_path(input_file));
+
+            let (mut output_code, printed) = self.formatted(&parsed, options.clone());
+
+            let max_width = options.line_width().get() as usize;
+
+            // There are some logs that print different line endings, and we can't snapshot those
+            // otherwise we risk automatically having them replaced with LF by git.
+            //
+            // This is a workaround, and it might not work for all cases.
+            const CRLF_PATTERN: &str = "\r\n";
+            const CR_PATTERN: &str = "\r";
+            output_code = output_code
+                .replace(CRLF_PATTERN, "<CRLF>\n")
+                .replace(CR_PATTERN, "<CR>\n");
+
+            snapshot_builder = snapshot_builder
+                .with_output_and_options(SnapshotOutput::new(&output_code).with_index(1), options)
+                .with_unimplemented(&printed)
+                .with_lines_exceeding_max_width(&output_code, max_width);
         }
 
         snapshot_builder.finish(self.test_file.relative_file_name());

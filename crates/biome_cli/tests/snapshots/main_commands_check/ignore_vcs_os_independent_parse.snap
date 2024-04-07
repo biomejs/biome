@@ -56,7 +56,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file1.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - blah.call();
       1 │ + blah.call();
@@ -67,7 +67,5 @@ file1.js format ━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes needed.
-Found 2 errors.
+Found 1 error.
 ```
-
-

@@ -1,0 +1,26 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `.eslintrc.json`
+
+```json
+{}
+```
+
+# Termination Message
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Migration has encountered an error: Biome couldn't find the Biome configuration file.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+If this project has not yet been set up with Biome yet, please follow the Getting Started guide first.
+```

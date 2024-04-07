@@ -11,6 +11,8 @@ use biome_console::{
     fmt::{Formatter, HTML},
     markup, Console, Markup, MarkupBuf,
 };
+use biome_css_parser::CssParserOptions;
+use biome_css_syntax::CssLanguage;
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
 use biome_js_parser::JsParserOptions;
@@ -130,9 +132,31 @@ fn main() -> Result<()> {
         }
     }
 
+    impl RegistryVisitor<CssLanguage> for LintRulesVisitor {
+        fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
+            if matches!(C::CATEGORY, RuleCategory::Lint) {
+                C::record_groups(self);
+            }
+        }
+
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule + 'static,
+            R::Query: Queryable<Language = CssLanguage>,
+            <R::Query as Queryable>::Output: Clone,
+        {
+            self.number_or_rules += 1;
+            self.groups
+                .entry(<R::Group as RuleGroup>::NAME)
+                .or_default()
+                .insert(R::METADATA.name, R::METADATA);
+        }
+    }
+
     let mut visitor = LintRulesVisitor::default();
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
+    biome_css_analyze::visit_registry(&mut visitor);
 
     let mut recommended_rules = String::new();
 
@@ -261,6 +285,7 @@ fn generate_group(
                     main_page_buffer,
                     "| [{rule}](/linter/rules/{dashed_rule}) | {summary_html} | {properties} |"
                 )?;
+
                 writeln!(main_page_buffer)?;
             }
             Err(err) => {
@@ -407,6 +432,7 @@ fn parse_documentation(
                             }
                         }
                         BlockType::Json => write!(content, "json")?,
+                        BlockType::Css => write!(content, "css")?,
                     }
                 }
                 writeln!(content)?;
@@ -561,6 +587,7 @@ fn parse_documentation(
 enum BlockType {
     Js(JsFileSource),
     Json,
+    Css,
 }
 
 struct CodeBlockTest {
@@ -615,6 +642,10 @@ impl FromStr for CodeBlockTest {
 
                 "json" => {
                     test.block_type = BlockType::Json;
+                }
+
+                "css" => {
+                    test.block_type = BlockType::Css;
                 }
 
                 _ => {
@@ -799,6 +830,72 @@ fn assert_lint(
 
                 let options = AnalyzerOptions::default();
                 let (_, diagnostics) = biome_json_analyze::analyze(
+                    &root,
+                    filter,
+                    &options,
+                    |signal| {
+                        if let Some(mut diag) = signal.diagnostic() {
+                            let category = diag.category().expect("linter diagnostic has no code");
+                            let severity = settings.get_severity_from_rule_code(category).expect(
+                                "If you see this error, it means you need to run cargo codegen-configuration",
+                            );
+
+                            for action in signal.actions() {
+                                if !action.is_suppression() {
+                                    rule_has_code_action = true;
+                                    diag = diag.add_code_suggestion(action.into());
+                                }
+                            }
+
+                            let error = diag
+                                .with_severity(severity)
+                                .with_file_path(file.clone())
+                                .with_file_source_code(code);
+                            let res = write_diagnostic(code, error);
+
+                            // Abort the analysis on error
+                            if let Err(err) = res {
+                                return ControlFlow::Break(err);
+                            }
+                        }
+
+                        ControlFlow::Continue(())
+                    },
+                );
+
+                // Result is Some(_) if analysis aborted with an error
+                for diagnostic in diagnostics {
+                    write_diagnostic(code, diagnostic)?;
+                }
+
+                if test.expect_diagnostic && rule_has_code_action && !has_fix_kind {
+                    bail!("The rule '{}' emitted code actions via `action` function, but you didn't mark rule with `fix_kind`.", rule)
+                }
+            }
+        }
+        BlockType::Css => {
+            let parse = biome_css_parser::parse_css(code, CssParserOptions::default());
+
+            if parse.has_errors() {
+                for diag in parse.into_diagnostics() {
+                    let error = diag
+                        .with_file_path(file.clone())
+                        .with_file_source_code(code);
+                    write_diagnostic(code, error)?;
+                }
+            } else {
+                let root = parse.tree();
+
+                let settings = WorkspaceSettings::default();
+
+                let rule_filter = RuleFilter::Rule(group, rule);
+                let filter = AnalysisFilter {
+                    enabled_rules: Some(slice::from_ref(&rule_filter)),
+                    ..AnalysisFilter::default()
+                };
+
+                let options = AnalyzerOptions::default();
+                let (_, diagnostics) = biome_css_analyze::analyze(
                     &root,
                     filter,
                     &options,

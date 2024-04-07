@@ -1,5 +1,6 @@
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
+use biome_configuration::PartialConfiguration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
@@ -8,8 +9,7 @@ use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_project::PackageJson;
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
-use biome_service::settings::{Language, WorkspaceSettings};
-use biome_service::PartialConfiguration;
+use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
 use json_comments::StripComments;
 use similar::TextDiff;
 use std::ffi::{c_int, OsStr};
@@ -163,8 +163,8 @@ pub fn register_leak_checker() {
     });
 }
 
-pub fn code_fix_to_string<L: Language>(source: &str, action: AnalyzerAction<L>) -> String {
-    let (_, text_edit) = action.mutation.as_text_edits().unwrap_or_default();
+pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerAction<L>) -> String {
+    let (_, text_edit) = action.mutation.as_text_range_and_edit().unwrap_or_default();
 
     let output = text_edit.new_string(source);
 
@@ -204,7 +204,7 @@ pub fn has_bogus_nodes_or_empty_slots<L: biome_rowan::Language>(node: &SyntaxNod
         if kind.is_list() {
             return descendant
                 .slots()
-                .any(|slot| matches!(slot, SyntaxSlot::Empty));
+                .any(|slot| matches!(slot, SyntaxSlot::Empty { .. }));
         }
 
         false
@@ -214,7 +214,7 @@ pub fn has_bogus_nodes_or_empty_slots<L: biome_rowan::Language>(node: &SyntaxNod
 /// This function analyzes the parsing result of a file and panic with a
 /// detailed message if it contains any error-level diagnostic, bogus nodes,
 /// empty list slots or missing required children
-pub fn assert_errors_are_absent<L: Language>(
+pub fn assert_errors_are_absent<L: ServiceLanguage>(
     program: &SyntaxNode<L>,
     diagnostics: &[ParseDiagnostic],
     path: &Path,

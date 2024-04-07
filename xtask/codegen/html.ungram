@@ -37,20 +37,25 @@
 SyntaxElement = SyntaxElement
 
 HtmlBogus = SyntaxElement*
+HtmlBogusElement = SyntaxElement*
+HtmlBogusAttribute = SyntaxElement*
 
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
-	directive: HtmlDirective
-	tags: HtmlElementList
+	directive: HtmlDirective?
+	html: AnyHtmlElement?
 	eof: 'EOF'
 
 // <!DOCTYPE html>
 // ^^^^^^^^^^^^^^^
-// TODO: add better representation
 HtmlDirective =
 	'<'
 	'!'
-	content: HtmlString
+	doctype: 'doctype'
+	html: 'html'?
+	quirk: 'html_literal'?
+	public_id: 'html_string_literal'?
+	system_id: 'html_string_literal'?
 	'>'
 
 // ==================================
@@ -62,6 +67,8 @@ HtmlElementList = AnyHtmlElement*
 AnyHtmlElement =
 	HtmlSelfClosingElement
 	| HtmlElement
+	| HtmlContent
+	| HtmlBogusElement
 
 
 // <a />
@@ -97,7 +104,11 @@ HtmlClosingElement =
 // Attributes
 // ==================================
 
-HtmlAttributeList = HtmlAttribute*
+HtmlAttributeList = AnyHtmlAttribute*
+
+AnyHtmlAttribute =
+	HtmlAttribute
+	| HtmlBogusAttribute
 
 HtmlAttribute =
 	name: HtmlName
@@ -112,4 +123,5 @@ HtmlAttributeInitializerClause =
 
 
 HtmlString = value: 'html_string_literal'
-HtmlName = value: 'html_ident'
+HtmlName = value: 'html_literal'
+HtmlContent = value: 'html_literal'

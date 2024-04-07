@@ -155,6 +155,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "biome_analyze",
+ "biome_configuration",
  "biome_console",
  "biome_css_formatter",
  "biome_deserialize",
@@ -162,6 +163,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_formatter",
  "biome_fs",
+ "biome_js_analyze",
  "biome_js_formatter",
  "biome_json_formatter",
  "biome_json_parser",
@@ -185,12 +187,44 @@ dependencies = [
  "rustc-hash",
  "serde",
  "serde_json",
+ "smallvec",
  "tikv-jemallocator",
  "tokio",
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
  "tracing-tree",
+]
+
+[[package]]
+name = "biome_configuration"
+version = "0.0.1"
+dependencies = [
+ "biome_analyze",
+ "biome_console",
+ "biome_css_analyze",
+ "biome_css_syntax",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_flags",
+ "biome_formatter",
+ "biome_js_analyze",
+ "biome_js_formatter",
+ "biome_js_syntax",
+ "biome_json_analyze",
+ "biome_json_formatter",
+ "biome_json_parser",
+ "biome_json_syntax",
+ "biome_rowan",
+ "bpaf",
+ "indexmap 1.9.3",
+ "insta",
+ "oxc_resolver",
+ "rustc-hash",
+ "schemars",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -250,6 +284,7 @@ dependencies = [
  "biome_formatter_test",
  "biome_parser",
  "biome_rowan",
+ "biome_service",
  "biome_suppression",
  "countme",
  "serde",
@@ -384,7 +419,9 @@ dependencies = [
 name = "biome_formatter_test"
 version = "0.0.0"
 dependencies = [
+ "biome_configuration",
  "biome_console",
+ "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
  "biome_fs",
@@ -413,6 +450,42 @@ dependencies = [
  "schemars",
  "serde",
  "tracing",
+]
+
+[[package]]
+name = "biome_graphql_factory"
+version = "0.1.0"
+dependencies = [
+ "biome_graphql_syntax",
+ "biome_rowan",
+]
+
+[[package]]
+name = "biome_graphql_parser"
+version = "0.1.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_graphql_factory",
+ "biome_graphql_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_unicode_table",
+ "insta",
+ "quickcheck",
+ "quickcheck_macros",
+ "tests_macros",
+ "tracing",
+ "unicode-bom",
+]
+
+[[package]]
+name = "biome_graphql_syntax"
+version = "0.1.0"
+dependencies = [
+ "biome_rowan",
+ "schemars",
+ "serde",
 ]
 
 [[package]]
@@ -461,6 +534,25 @@ version = "0.5.7"
 dependencies = [
  "biome_html_syntax",
  "biome_rowan",
+]
+
+[[package]]
+name = "biome_html_parser"
+version = "0.0.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_html_factory",
+ "biome_html_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_test_utils",
+ "biome_unicode_table",
+ "insta",
+ "quickcheck",
+ "quickcheck_macros",
+ "tests_macros",
+ "tracing",
 ]
 
 [[package]]
@@ -524,6 +616,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_service",
  "biome_suppression",
  "biome_text_size",
  "biome_unicode_table",
@@ -644,6 +737,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_service",
  "biome_suppression",
  "countme",
  "schemars",
@@ -686,6 +780,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "biome_analyze",
+ "biome_configuration",
  "biome_console",
  "biome_diagnostics",
  "biome_fs",
@@ -784,6 +879,7 @@ name = "biome_service"
 version = "0.0.0"
 dependencies = [
  "biome_analyze",
+ "biome_configuration",
  "biome_console",
  "biome_css_analyze",
  "biome_css_formatter",
@@ -843,6 +939,7 @@ name = "biome_test_utils"
 version = "0.0.0"
 dependencies = [
  "biome_analyze",
+ "biome_configuration",
  "biome_console",
  "biome_deserialize",
  "biome_diagnostics",
@@ -3720,6 +3817,7 @@ dependencies = [
  "anyhow",
  "biome_analyze",
  "biome_cli",
+ "biome_configuration",
  "biome_css_analyze",
  "biome_css_syntax",
  "biome_diagnostics",
@@ -3810,6 +3908,9 @@ version = "0.0.0"
 dependencies = [
  "biome_analyze",
  "biome_console",
+ "biome_css_analyze",
+ "biome_css_parser",
+ "biome_css_syntax",
  "biome_diagnostics",
  "biome_js_analyze",
  "biome_js_parser",

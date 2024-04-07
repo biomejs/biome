@@ -573,16 +573,22 @@ pub fn css_font_face_at_rule(
         ],
     ))
 }
+pub fn css_font_family_name(names: CssCustomIdentifierList) -> CssFontFamilyName {
+    CssFontFamilyName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FAMILY_NAME,
+        [Some(SyntaxElement::Node(names.into_syntax()))],
+    ))
+}
 pub fn css_font_feature_values_at_rule(
     font_feature_values_token: SyntaxToken,
-    name: AnyCssFontFamilyName,
+    names: CssFontFamilyNameList,
     block: AnyCssFontFeatureValuesBlock,
 ) -> CssFontFeatureValuesAtRule {
     CssFontFeatureValuesAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_FONT_FEATURE_VALUES_AT_RULE,
         [
             Some(SyntaxElement::Token(font_feature_values_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(names.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
@@ -2057,6 +2063,18 @@ where
         }),
     ))
 }
+pub fn css_custom_identifier_list<I>(items: I) -> CssCustomIdentifierList
+where
+    I: IntoIterator<Item = CssCustomIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssCustomIdentifierList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_IDENTIFIER_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_declaration_list<I>(items: I) -> CssDeclarationList
 where
     I: IntoIterator<Item = CssDeclarationWithSemicolon>,
@@ -2105,6 +2123,27 @@ where
     let length = items.len() + separators.len();
     CssDocumentMatcherList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_DOCUMENT_MATCHER_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn css_font_family_name_list<I, S>(items: I, separators: S) -> CssFontFamilyNameList
+where
+    I: IntoIterator<Item = AnyCssFontFamilyName>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssFontFamilyNameList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FAMILY_NAME_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())
@@ -2426,6 +2465,16 @@ where
         slots,
     ))
 }
+pub fn css_bogus_custom_identifier<I>(slots: I) -> CssBogusCustomIdentifier
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_CUSTOM_IDENTIFIER,
+        slots,
+    ))
+}
 pub fn css_bogus_declaration_item<I>(slots: I) -> CssBogusDeclarationItem
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
@@ -2443,6 +2492,16 @@ where
 {
     CssBogusDocumentMatcher::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_DOCUMENT_MATCHER,
+        slots,
+    ))
+}
+pub fn css_bogus_font_family_name<I>(slots: I) -> CssBogusFontFamilyName
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusFontFamilyName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_FONT_FAMILY_NAME,
         slots,
     ))
 }

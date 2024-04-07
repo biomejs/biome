@@ -57,7 +57,7 @@ test.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━�
 ```block
 test.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1   │ - debugger;·console.log("string");·
       1 │ + debugger;
@@ -69,7 +69,5 @@ test.js format ━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes needed.
-Found 4 errors.
+Found 2 errors.
 ```
-
-

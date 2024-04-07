@@ -4,13 +4,15 @@ use crate::commands::{get_stdin, resolve_manifest, validate_configuration_diagno
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
+use biome_configuration::vcs::PartialVcsConfiguration;
+use biome_configuration::{
+    PartialConfiguration, PartialFilesConfiguration, PartialLinterConfiguration,
+};
 use biome_deserialize::Merge;
-use biome_service::configuration::vcs::PartialVcsConfiguration;
 use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialFilesConfiguration, PartialLinterConfiguration,
+    load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::PartialConfiguration;
 use std::ffi::OsString;
 
 pub(crate) struct LintCommandPayload {
@@ -40,7 +42,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         changed,
         since,
     } = payload;
-    setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
+    setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
     let fix_file_mode = if apply && apply_unsafe {
         return Err(CliDiagnostic::incompatible_arguments(

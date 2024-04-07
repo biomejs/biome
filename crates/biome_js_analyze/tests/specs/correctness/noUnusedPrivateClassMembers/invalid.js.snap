@@ -170,10 +170,8 @@ invalid.js:26:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     24 24 │   
     25 25 │   class Accessor {
     26    │ - → get·#unusedAccessor()·{}
-    27    │ - → set·#unusedAccessor(value)·{}
-       26 │ + → set·#unusedAccessor(value)·{}
+    27 26 │   	set #unusedAccessor(value) {}
     28 27 │   }
-    29 28 │   
   
 
 ```
@@ -239,10 +237,8 @@ invalid.js:35:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     33 33 │   
     34 34 │   class Foo {
     35    │ - → #usedOnlyInWrite·=·5;
-    36    │ - → method()·{
-       35 │ + → method()·{
+    36 35 │   	method() {
     37 36 │   			this.#usedOnlyInWrite = 42;
-    38 37 │   	}
   
 
 ```
@@ -263,10 +259,8 @@ invalid.js:42:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     40 40 │   
     41 41 │   class Foo {
     42    │ - → #usedOnlyInWriteStatement·=·5;
-    43    │ - → method()·{
-       42 │ + → method()·{
+    43 42 │   	method() {
     44 43 │   			this.#usedOnlyInWriteStatement += 42;
-    45 44 │   	}
   
 
 ```
@@ -292,5 +286,3 @@ invalid.js:49:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
   
 
 ```
-
-

@@ -5,7 +5,7 @@ description: Prettier との違いを深く解説
 
 Prettier との間にいくつかの相違点が存在します。
 
-### Prettierは有効なJavaScript識別子である一部のオブジェクトプロパティの引用符を外しません
+## Prettierは有効なJavaScript識別子である一部のオブジェクトプロパティの引用符を外しません
 
 PrettierとBiomeは、有効なJavaScript識別子であるオブジェクトおよびクラスプロパティの引用符を外します。
 Prettierは、特に[ES5において有効な識別子のみ引用符を外します](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646)。
@@ -39,7 +39,7 @@ const obj = {
 ```
 
 
-### Prettierは計算プロパティでの代入で一貫性のない挙動を示します
+## Prettierは計算プロパティでの代入で一貫性のない挙動を示します
 
 PrettierとBiomeは、特に条件文などで代入式を括弧で囲みます。
 これにより、Biomeは比較式であるべきコードを識別できます。
@@ -76,7 +76,7 @@ class C {
 一貫性を保つために、私たちは Prettier のformatに合わせることなく括弧を省略することにしました。
 代替案としては、オブジェクトまたはクラスの計算プロパティでの代入を常に括弧で囲むことができます。
 
-### Prettierは必要ない場合でもアロー関数の型パラメータに末尾のカンマを追加します
+## Prettierは必要ない場合でもアロー関数の型パラメータに末尾のカンマを追加します
 
 特定のケースでは、JSX要素と区別するために、アロー関数の型パラメータリストに末尾のカンマが必要となります。
 型パラメータにデフォルト値が提供されている場合、末尾のカンマは必要ありません。
@@ -95,7 +95,7 @@ class C {
 <T = unknown>() => {};
 ```
 
-### Prettier は、括弧で囲まれた non-null アサーションを含むオプショナルチェーンに対して一貫性のない動作をします
+## Prettier は、括弧で囲まれた non-null アサーションを含むオプショナルチェーンに対して一貫性のない動作をします
 
 _TypeScript_ では、non-null アサーション演算子 `!` を使用して、値が null でないことをアサートできます。
 オプショナルチェーンに適用される場合、アサーションは括弧の存在に関係なくチェーン全体に適用されます。つまり、`(a.?.b)!` と `a.?.b!` は同じ結果になるはずです。
@@ -123,7 +123,7 @@ a.?.b!
 ```
 
 
-### Prettierは無効な構文をformatします
+## Prettierは無効な構文をformatします
 
 JavaScriptおよびTypeScriptのためにPrettierで利用されているBabel parserの解析は厳密なものではなく、[いくつかの構文エラーを無視](https://github.com/prettier/prettier/blob/e4a74c05f4502dd4ec70495c3130ff08ab088e05/src/language-js/parse/babel.js#L177-L218) することがあります。
 Biomeのparserは、Prettierのparserよりも厳密に構文を解析します。
@@ -158,7 +158,7 @@ Biomeでは、この問題に対処するいくつかの方法があります。
 format時には、特定のbogusノードでは内部ノードをformatしようと試み、エラーが発生した場合はフォールバックします（既存の `format_or_verbatim` ユーティリティがこれを行っています）。
 これにより、parserとformatterのロジックを分離しつつ、無効な状態を半有効とみなすような複雑なロジックをparserに実装することが可能になります。
 
-#### クラスプロパティの重複する修飾子
+### クラスプロパティの重複する修飾子
 
 入力
 
@@ -208,7 +208,7 @@ class Read {
 }
 
 
-#### オプショナルチェーンへの代入
+### オプショナルチェーンへの代入
 
 入力
 
@@ -223,7 +223,7 @@ a?.b = c;
 (a?.b) = c;
 ```
 
-#### インターフェイスの型パラメータに対する誤った修飾子
+### インターフェイスの型パラメータに対する誤った修飾子
 
 入力
 
@@ -238,7 +238,7 @@ interface L<const in T> {}
 interface L<in const T> {}
 ```
 
-#### トップレベルのreturn
+### トップレベルのreturn
 
 ```js title="example.js"
 return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
@@ -254,7 +254,7 @@ return (
 return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
 ```
 
-#### 誤った self-increment と self-decrement
+### 誤った self-increment と self-decrement
 
 入力
 
@@ -267,7 +267,7 @@ return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && some
 (1)++;
 ```
 
-#### 抽象クラスでないクラスでの `abstract` 修飾子の使用
+### 抽象クラスでないクラスでの `abstract` 修飾子の使用
 
 入力
 

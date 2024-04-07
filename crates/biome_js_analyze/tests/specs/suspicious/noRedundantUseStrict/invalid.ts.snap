@@ -28,11 +28,8 @@ invalid.ts:2:2 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━━
   
     1 1 │   function test(): void {
     2   │ - → "use·strict";
-    3   │ - }
-      2 │ + → }
+    3 2 │   }
     4 3 │   
   
 
 ```
-
-

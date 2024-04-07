@@ -11,7 +11,7 @@ use biome_rowan::{AstNode, BatchMutationExt};
 declare_rule! {
     /// Use `Number.isFinite` instead of global `isFinite`.
     ///
-    /// `Number.isFinite()` and `isFinite()` [have not the same behavior](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isFinite#difference_between_number.isfinite_and_global_isfinite).
+    /// `Number.isFinite()` and `isFinite()` [do not have the same behavior](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isFinite#difference_between_number.isfinite_and_global_isfinite).
     /// When the argument to `isFinite()` is not a number, the value is first coerced to a number.
     /// `Number.isFinite()` does not perform this coercion.
     /// Therefore, it is a more reliable way to test whether a number is finite.

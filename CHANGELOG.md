@@ -13,6 +13,229 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### Bug fixes
+
+- Now Biome can detect the script language in Svelte and Vue script blocks more reliably ([#2245](https://github.com/biomejs/biome/issues/2245)). Contributed by @Sec-ant
+
+### CLI
+
+#### New features
+
+- Add a command to migrate from ESLint
+
+  `@biomejs/biome migrate eslint` allows you to migrate an ESLint configuration to Biome.
+  The command supports [legacy ESLint configurations](https://eslint.org/docs/latest/use/configure/configuration-files) and [new flat ESLint configurations](https://eslint.org/docs/latest/use/configure/configuration-files-new).
+  Legacy ESLint configurations using the YAML format are not supported.
+
+  When loading a legacy ESLint configuration, Biome resolves the `extends` field.
+  It resolves both shared configurations and plugin presets!
+  To do this, it invokes _Node.js_.
+
+  Biome relies on the metadata of its rules to determine the [equivalent rule of an ESLint rule](https://biomejs.dev/linter/rules-sources/).
+  A Biome rule is either inspired or roughly identical to an ESLint rules.
+  By default, inspired and nursery rules are excluded from the migration.
+  You can use the CLI flags `--include-inspired` and `--include-nursery` to migrate them as well.
+
+  Note that this is a best-effort approach.
+  You are not guaranteed to get the same behavior as ESLint.
+
+  Given the following ESLint configuration:
+
+  ```json
+  {
+        "ignore_patterns": ["**/*.test.js"],
+        "globals": { "var2": "readonly" },
+        "rules": {
+            "eqeqeq": "error"
+        },
+        "overrides": [{
+            "files": ["lib/*.js"],
+            "rules": {
+              "default-param-last": "off"
+            }
+        }]
+  }
+  ```
+
+  `@biomejs/biome migrate eslint --write` changes the Biome configuration as follows:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "recommended": false,
+        "suspicious": {
+          "noDoubleEquals": "error"
+        }
+      }
+    },
+    "javascript": { "globals": ["var2"] },
+    "overrides": [{
+      "include": ["lib/*.js"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useDefaultParameterLast": "off"
+          }
+        }
+      }
+    }]
+  }
+  ```
+
+  Also, if the working diretcory contains `.eslintignore`, then Biome migrates the glob patterns.
+  Nested `.eslintignore` in subdirectories and negated glob patterns are not supported.
+
+  If you find any issue, please don't hesitate to report them.
+
+  Contributed by @Conaclos
+
+#### Enhancements
+
+- Improve support of `.prettierignore` when migrating from Prettier
+
+  Now, Biome translates most of the glob patterns in `.prettierignore` to the equivalent Biome ignore pattern.
+  Only negated glob patterns are not supported.
+
+  Contributed by @Conaclos
+
+- Support JavaScript configuration files when migrating from Prettier
+
+  `@biomejs/biome migrate prettier` is now able to migrate Prettier configuration files
+  ending with `js`, `mjs`, or `cjs` extensions.
+  To do this, Biome invokes Node.js.
+
+  Also, embedded Prettier configurations in `package.json` are now supported.
+
+  Contributed by @Conaclos
+
+#### Bug fixes
+
+- Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnositic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
+
+- Biome now correctly filters out files that are not present in the current directory when using the `--changed` flag [#1996](https://github.com/biomejs/biome/issues/1996). Contributed by @castarco
+
+### Configuration
+
+#### Enhancements
+
+- Biome now displays the location of a parsing error for its configuration file ([#1627](https://github.com/biomejs/biome/issues/1627)).
+
+  Previously, when Biome encountered a parsing error in its configuration file,
+  it didn't indicate the location of the error.
+  It now displays the name of the configuration file and the range where the error occurred.
+
+  Contributed by @Conaclos
+
+- `options` is no longer required for rules without any options ([#2313](https://github.com/biomejs/biome/issues/2313)).
+
+  Previously, the JSON schema required to set `options` to `null` when an object is used to set the diagnostic level of a rule without any option.
+  However, if `options` is set to `null`, Biome emits an error.
+
+  The schema is now fixed and it no longer requires specifying `options`.
+  This makes the following configuration valid:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "style": {
+          "noDefaultExport": {
+            "level": "off"
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  Contributed by @Conaclos
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+- Add a new option `ignoreReact` to [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports).
+
+  When `ignoreReact` is enabled, Biome ignores imports of `React` from the `react` package.
+  The option is disabled by default.
+
+  Contributed by @Conaclos
+
+- Implement [#2043](https://github.com/biomejs/biome/issues/2043): The React rule [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) is now also compatible with Preact hooks imported from `preact/hooks` or `preact/compat`. Contributed by @arendjr
+
+#### Enhancements
+
+#### Bug fixes
+
+- Lint rules `useNodejsImportProtocol`, `useNodeAssertStrict`, `noRestrictedImports`, `noNodejsModules` will no longer check `declare module` statements anymore. Contributed by @Sec-ant
+
+### Parser
+
+
+## 1.6.4 (2022-04-03)
+
+### Analyzer
+
+#### Bug fixes
+
+- An operator with no spaces around in a binary expression no longer breaks the js analyzer ([#2243](https://github.com/biomejs/biome/issues/2243)). Contributed by @Sec-ant
+
+### CLI
+
+#### Bug fixes
+
+- Fix the printed error count ([#2048](https://github.com/biomejs/biome/issues/2048)). Contributed by @Sec-ant
+
+### Configuration
+
+#### Bug fixes
+
+- Correctly calculate enabled rules in lint rule groups. Now a specific rule belonging to a group can be enabled even if its group-level preset option `recommended` or `all` is `false` ([#2191](https://github.com/biomejs/biome/issues/2191)). Contributed by @Sec-ant
+
+### Editors
+
+#### Bug fixes
+
+- Fix the unexpected code deletion and repetition when `quickfix.biome` is enabled and some `import`-related rules are applied ([#2222](https://github.com/biomejs/biome/issues/2222), [#688](https://github.com/biomejs/biome/issues/688), [#1015](https://github.com/biomejs/biome/issues/1015)). Contributed by @Sec-ant
+
+### Linter
+
+#### Bug fixes
+
+- Fix [#2211](https://github.com/biomejs/biome/issues/2211). noChildrenProp should work fine when children pass as a prop in a new line. Contributed by @fireairforce
+
+- Fix [#2248](https://github.com/biomejs/biome/issues/2248). `lint/a11y/useButtonType` should not trigger when button element with spread attribute. Contributed by @fireairforce
+
+- Fix [#2216](https://github.com/biomejs/biome/issues/2216). `lint/style/useNamingConvention` should not ignore JSX Component name binding. Contributed by @fireairforce
+
+#### Enhancements
+
+- Add support for object property members in the rule `useSortedClasses`. Contributed by @ematipico
+
+### Parser
+
+- The parser doesn't throw any error when the frontmatter of `.astro` files contains an illegal return:
+
+  ```astro
+  ---
+  const condition = true;
+  if (condition) {
+    return "Something";
+  }
+  ---
+  <div></div>
+  ```
+  Contributed by @ematipico
+
+## 1.6.3 (2024-03-25)
+
 ### CLI
 
 #### Bug fixes
@@ -27,15 +250,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Complete the documentation and overrides support for options `formatter.lineEnding`, `[language].formatter.lineEnding`, `formatter.attributePosition` and `javascript.formatter.attributePosition`. Contributed by @Sec-ant
 
-### Editors
-
 ### Formatter
 
 #### Bug fixes
 
 - Fix [#2172](https://github.com/biomejs/biome/issues/2172) by breaking long object destructuring patterns. Contributed by @ah-yu
-
-### JavaScript APIs
 
 ### Linter
 
@@ -43,13 +262,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add rule [noEvolvingAny](https://biomejs.dev/linter/rules/no-evolving-any) to disallow variables from evolving into `any` type through reassignments. Contributed by @fujiyamaorange
 
+#### Enhancements
+
+- Rename `noSemicolonInJsx` to `noSuspiciousSemicolonInJsx`. Contributed by @fujiyamaorange
+
 ### LSP
 
 #### Bug fixes
 
 - Quickfix action no longer autofixes lint rule errors on save when `linter` is disabled ([#2161](https://github.com/biomejs/biome/issues/2161)). Contributed by @Sec-ant
-
-### Parser
+- Range formatting for Astro/Svelte/Vue doesn't place code out of place, especially when formatting on paste is enabled. Contributed by @ematipico
 
 ## 1.6.2 (2024-03-22)
 
@@ -611,7 +833,7 @@ Additionally, the following rules are now recommended:
 
   ```diff
   - <div class="px-2 foo p-4 bar" />
-  + <div class="foo·bar·p-4·px-2" />
+  + <div class="foo bar p-4 px-2" />
   ```
   Contributed by @DaniGuardiola
 
@@ -833,7 +1055,7 @@ Additionally, the following rules are now recommended:
 - Fix [#1656](https://github.com/biomejs/biome/issues/1656). [useOptionalChain](https://biomejs.dev/linter/rules/use-optional-chain/) code action now correctly handles logical and chains where methods with the same name are invoked with different arguments:
 
   ```diff
-  - tags·&&·tags.includes('a')·&&·tags.includes('b')
+  - tags && tags.includes('a') && tags.includes('b')
   + tags?.includes('a') && tags.includes('b')
   ```
 

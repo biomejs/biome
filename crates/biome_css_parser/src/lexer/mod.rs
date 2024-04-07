@@ -5,7 +5,9 @@ mod tests;
 use crate::CssParserOptions;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
+use biome_parser::lexer::{
+    LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
+};
 use biome_unicode_table::{
     is_css_id_continue, is_css_id_start, lookup_byte, Dispatch, Dispatch::*,
 };
@@ -78,6 +80,9 @@ pub(crate) struct CssLexer<'src> {
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
+    const NEWLINE: Self::Kind = NEWLINE;
+
+    const WHITESPACE: Self::Kind = WHITESPACE;
     type Kind = CssSyntaxKind;
     type LexContext = CssLexContext;
     type ReLexContext = CssReLexContext;
@@ -100,18 +105,6 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
 
     fn push_diagnostic(&mut self, diagnostic: ParseDiagnostic) {
         self.diagnostics.push(diagnostic);
-    }
-
-    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
-        LexerCheckpoint {
-            position: TextSize::from(self.position as u32),
-            current_start: self.current_start,
-            current_flags: self.current_flags,
-            current_kind: self.current_kind,
-            after_line_break: self.after_newline,
-            unicode_bom_length: self.unicode_bom_length,
-            diagnostics_pos: self.diagnostics.len() as u32,
-        }
     }
 
     fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
@@ -138,25 +131,6 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         }
 
         kind
-    }
-
-    fn re_lex(&mut self, _context: Self::ReLexContext) -> Self::Kind {
-        let old_position = self.position;
-        self.position = u32::from(self.current_start) as usize;
-
-        let re_lexed_kind = match self.current_byte() {
-            Some(current) => self.consume_selector_token(current),
-            None => EOF,
-        };
-
-        if self.current() == re_lexed_kind {
-            // Didn't re-lex anything. Return existing token again
-            self.position = old_position;
-        } else {
-            self.current_kind = re_lexed_kind;
-        }
-
-        re_lexed_kind
     }
 
     fn has_preceding_line_break(&self) -> bool {
@@ -195,20 +169,6 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
 
     fn current_flags(&self) -> TokenFlags {
         self.current_flags
-    }
-
-    /// Consume one newline or all whitespace until a non-whitespace or a newline is found.
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    fn consume_newline_or_whitespaces(&mut self) -> Self::Kind {
-        if self.consume_newline() {
-            self.after_newline = true;
-            NEWLINE
-        } else {
-            self.consume_whitespaces();
-            WHITESPACE
-        }
     }
 
     #[inline]
@@ -314,7 +274,13 @@ impl<'src> CssLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
+            WHS => {
+                let kind = self.consume_newline_or_whitespaces();
+                if kind == Self::NEWLINE {
+                    self.after_newline = true;
+                }
+                kind
+            }
             QOT => self.consume_string_literal(current),
             SLH => self.consume_slash(),
 
@@ -1268,6 +1234,42 @@ impl<'src> CssLexer<'src> {
         }
     }
 }
+
+impl<'src> ReLexer<'src> for CssLexer<'src> {
+    fn re_lex(&mut self, _context: Self::ReLexContext) -> Self::Kind {
+        let old_position = self.position;
+        self.position = u32::from(self.current_start) as usize;
+
+        let re_lexed_kind = match self.current_byte() {
+            Some(current) => self.consume_selector_token(current),
+            None => EOF,
+        };
+
+        if self.current() == re_lexed_kind {
+            // Didn't re-lex anything. Return existing token again
+            self.position = old_position;
+        } else {
+            self.current_kind = re_lexed_kind;
+        }
+
+        re_lexed_kind
+    }
+}
+
+impl<'src> LexerWithCheckpoint<'src> for CssLexer<'src> {
+    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
+        LexerCheckpoint {
+            position: TextSize::from(self.position as u32),
+            current_start: self.current_start,
+            current_flags: self.current_flags,
+            current_kind: self.current_kind,
+            after_line_break: self.after_newline,
+            unicode_bom_length: self.unicode_bom_length,
+            diagnostics_pos: self.diagnostics.len() as u32,
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 enum LexStringState {
     /// String that contains an invalid escape sequence

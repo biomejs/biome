@@ -33,8 +33,8 @@ const bar = foo!!.bar;
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove extra non-null assertion.</span>
   
-<strong>  </strong><strong>  1 │ </strong>const<span style="opacity: 0.8;">·</span>bar<span style="opacity: 0.8;">·</span>=<span style="opacity: 0.8;">·</span>foo!<span style="color: Tomato;">!</span>.bar;
-<strong>  </strong><strong>    │ </strong>                <span style="color: Tomato;">-</span>     
+<strong>  </strong><strong>  1 │ </strong>const<span style="opacity: 0.8;">·</span>bar<span style="opacity: 0.8;">·</span>=<span style="opacity: 0.8;">·</span>foo<span style="color: Tomato;">!</span>!.bar;
+<strong>  </strong><strong>    │ </strong>               <span style="color: Tomato;">-</span>      
 </code></pre>
 
 ```ts

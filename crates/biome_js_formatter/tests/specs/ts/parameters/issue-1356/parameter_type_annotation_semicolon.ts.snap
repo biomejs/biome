@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/parameters/issue-1356/parameter_type_annotation_semicolon.ts
 ---
-
 # Input
 
 ```ts
@@ -54,7 +53,7 @@ foo((args: { a: string; b: string }) => {
 });
 ```
 
-## Output 2
+## Output 1
 
 -----
 Indent style: Tab
@@ -65,7 +64,7 @@ Quote style: Double Quotes
 JSX quote style: Double Quotes
 Quote properties: As needed
 Trailing comma: All
-Semicolons: Always
+Semicolons: As needed
 Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
@@ -82,9 +81,9 @@ Attribute Position: Auto
 
 foo(
 	(args: { a: string; b: string }) => {
-		return a;
+		return a
 	},
-);
+)
 ```
 
 # Lines exceeding max width of 40 characters
@@ -94,5 +93,3 @@ foo(
     3: // `semicolon: AsNeeded` was set, since the semicolon became conditional on
     6: // https://github.com/biomejs/biome/issues/1356.
 ```
-
-

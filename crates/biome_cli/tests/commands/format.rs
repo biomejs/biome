@@ -360,7 +360,7 @@ fn lint_warning() {
 
     // The console buffer is expected to contain the following message:
     // 0: "Formatter would have printed the following content"
-    // 1: "Compared 1 files"
+    // 1: "Checked 1 files"
     assert_eq!(
         console.out_buffer.len(),
         2,

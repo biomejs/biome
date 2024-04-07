@@ -11,6 +11,7 @@ pub(crate) mod container_style_and_combinable_query;
 pub(crate) mod container_style_in_parens;
 pub(crate) mod container_style_or_combinable_query;
 pub(crate) mod container_style_query;
+pub(crate) mod custom_identifier;
 pub(crate) mod declaration_block;
 pub(crate) mod declaration_name;
 pub(crate) mod declaration_or_at_rule;

@@ -3,7 +3,7 @@ title: How Biome works
 description: Learn how Biome works, like assumptions, configuration and more.
 ---
 import DefaultConfiguration from "@/components/generated/DefaultConfiguration.mdx";
-import { FileTree } from '@astrojs/starlight/components';
+import {FileTree} from '@astrojs/starlight/components';
 
 This is a guide that explains how the tool works, assumptions, and internal information useful when setting up the project and the configuration file.
 
@@ -40,7 +40,7 @@ This configuration file enables the formatter and sets the preferred indent styl
 
 When you run `biome init`, the default configuration emitted is the following:
 
-<DefaultConfiguration />
+<DefaultConfiguration/>
 
 ### Configuration file resolution
 
@@ -64,6 +64,7 @@ Here's an example:
     - biome.json
 </FileTree>
 
+
 - biome commands that run in `app/backend/package.json` will use the configuration file `app/backend/biome.json`;
 - biome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
 will use the configuration file `app/frontend/biome.json`;
@@ -72,20 +73,24 @@ will use the configuration file `app/frontend/biome.json`;
 Most biome commands also support the `--config-path` command line option to point to a custom directory for the `biome.json` file. In this case, the above configuration file resolution is **disabled**.
 :::
 
+:::caution
+Biome doesn't support nested `biome.json` files, neither in CLI nor in LSP. [Follow and help the support in the relative issue](https://github.com/biomejs/biome/issues/2228)
+:::
+
 ### The `extends` option
 
 The `extends` option allows to break down a configuration in multiple file and "share" common patterns among multiple projects/folders.
 
 ```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "extends": ["./formatter.json", "./linter.json"]
 }
 ```
 
 ```json title="formatter.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "formatter": {
     "indentSize": 2
   },
@@ -99,7 +104,7 @@ The `extends` option allows to break down a configuration in multiple file and "
 
 ```json title="linter.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "linter": {
     "rules": {
       "complexity": {
@@ -212,6 +217,7 @@ Inside the `frontend/` project, you have your `package.json` with some scripts t
     - ...
 </FileTree>
 
+
 ```json title="biome.json"
 {
   "files": {
@@ -260,18 +266,15 @@ This is a current limitation that we will fix in a future release.
 The syntax and meaning of these two options loosely follow the [globset rules](https://docs.rs/globset/latest/globset/#syntax) but without the ability to set options.
 
 
-> - `*` matches zero or more characters.
-> - `**` recursively matches directories but are only legal in three situations.
+> - `*` matches zero or more characters.- `**` recursively matches directories but are only legal in three situations.
 > First, if the glob starts with <code>\*\*&#x2F;</code>, then it matches
 > all directories. For example, <code>\*\*&#x2F;foo</code> matches `foo`
 > and `bar/foo` but not `foo/bar`. Secondly, if the glob ends with
-> <code>&#x2F;\*\*</code>, then it matches all sub-entries. For example,
+<code>&#x2F;\*\*</code>, then it matches all sub-entries. For example,
   > <code>foo&#x2F;\*\*</code> matches `foo/a` and `foo/a/b`, but not `foo`.
   > Thirdly, if the glob contains <code>&#x2F;\*\*&#x2F;</code> anywhere within
   > the pattern, then it matches zero or more directories. Using `**` anywhere
-  > else is illegal (N.B. the glob `**` is allowed and means "match everything").
->
-> - Metacharacters such as `*` and `?` can be escaped with character class
+  > else is illegal (N.B. the glob `**` is allowed and means "match everything").- Metacharacters such as `*` and `?` can be escaped with character class
 > notation. e.g., `[*]` matches `*`.
 
 Check the [wikipedia page](https://en.wikipedia.org/wiki/Glob_(programming)) for more information.

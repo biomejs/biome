@@ -27,9 +27,5 @@ quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
 
-# cargo-workspaces metadata
-[package.metadata.workspaces]
-independent = true
-
 [lints]
 workspace = true

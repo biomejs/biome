@@ -49,7 +49,11 @@ impl Rule for NoRestrictedImports {
     type Options = Box<RestrictedImportsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module_name = ctx.query().module_name_token()?;
+        let node = ctx.query();
+        if node.is_in_ts_module_declaration() {
+            return None;
+        }
+        let module_name = node.module_name_token()?;
         let inner_text = inner_string_text(&module_name);
 
         ctx.options()

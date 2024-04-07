@@ -1,9 +1,8 @@
 {
-  "cases": [
-    {
-      "line_width": 120,
-      "indent_style": "Space",
-      "indent_width": 4
-    }
-  ]
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "lineWidth": 120,
+    "indentWidth": 4,
+    "indentStyle": "space"
+  }
 }

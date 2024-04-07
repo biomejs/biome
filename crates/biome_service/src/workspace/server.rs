@@ -3,7 +3,8 @@ use super::{
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams, PullActionsParams,
     PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
-    SupportsFeatureParams, UpdateProjectParams, UpdateSettingsParams,
+    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateProjectParams,
+    UpdateSettingsParams,
 };
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
@@ -309,6 +310,7 @@ impl WorkspaceServer {
                     &organize_imports.ignored_files,
                 )
             }
+            FeatureName::Search => return false, // There is no search-specific config.
         };
         let is_feature_included = feature_included_files.is_empty()
             || is_dir(path)
@@ -711,6 +713,14 @@ impl Workspace for WorkspaceServer {
         ];
 
         Ok(RageResult { entries })
+    }
+
+    fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
+        // FIXME: Let's implement some real matching here...
+        Ok(SearchResults {
+            file: params.path,
+            matches: Vec::new(),
+        })
     }
 
     fn server_info(&self) -> Option<&ServerInfo> {

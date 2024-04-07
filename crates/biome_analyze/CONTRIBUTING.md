@@ -78,7 +78,7 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
    ```
 
    While implementing the diagnostic, please keep [Biome's technical principals](https://biomejs.dev/internals/philosophy/#technical) in mind.
-   
+
 1. Implement the optional `action` function, if we are able to provide a code action:
 
    ```rust,ignore

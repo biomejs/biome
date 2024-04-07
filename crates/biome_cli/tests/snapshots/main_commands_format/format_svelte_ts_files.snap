@@ -28,7 +28,7 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.svelte format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Formatter would have printed the following content:
+  × Formatter would have printed the following content:
   
     1 1 │   <script setup lang="ts">
     2   │ - import·····{·type·····something·}·from·"file.svelte";
@@ -45,5 +45,3 @@ file.svelte format ━━━━━━━━━━━━━━━━━━━━�
 Checked 1 file in <TIME>. No fixes needed.
 Found 1 error.
 ```
-
-

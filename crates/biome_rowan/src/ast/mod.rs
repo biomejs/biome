@@ -463,7 +463,7 @@ where
 impl<L: Language, N: AstNode<Language = L>> AstNodeListIterator<L, N> {
     fn slot_to_node(slot: &SyntaxSlot<L>) -> N {
         match slot {
-            SyntaxSlot::Empty => panic!("Node isn't permitted to contain empty slots"),
+            SyntaxSlot::Empty { .. } => panic!("Node isn't permitted to contain empty slots"),
             SyntaxSlot::Node(node) => N::unwrap_cast(node.clone()),
             SyntaxSlot::Token(token) => panic!(
                 "Expected node of type `{:?}` but found token `{:?}` instead.",
@@ -685,12 +685,12 @@ impl<L: Language, N: AstNode<Language = L>> Iterator for AstSeparatedListElement
             // The node for this element is missing if the next child is a token instead of a node.
             SyntaxSlot::Token(token) => panic!("Malformed list, node expected but found token {:?} instead. You must add missing markers for missing elements.", token),
             // Missing element
-            SyntaxSlot::Empty => Err(SyntaxError::MissingRequiredChild),
+            SyntaxSlot::Empty { .. } => Err(SyntaxError::MissingRequiredChild),
             SyntaxSlot::Node(node) => Ok(N::unwrap_cast(node))
         };
 
         let separator = match self.slots.next() {
-            Some(SyntaxSlot::Empty) => Err(
+            Some(SyntaxSlot::Empty { .. }) => Err(
                 SyntaxError::MissingRequiredChild,
             ),
             Some(SyntaxSlot::Token(token)) => Ok(Some(token)),
@@ -728,12 +728,12 @@ impl<L: Language, N: AstNode<Language = L>> DoubleEndedIterator
                 });
             }
             SyntaxSlot::Token(token) => Ok(Some(token)),
-            SyntaxSlot::Empty => Ok(None),
+            SyntaxSlot::Empty { .. } => Ok(None),
         };
 
         let node = match self.slots.next_back() {
             None => panic!("Malformed separated list, expected a node but found none"),
-            Some(SyntaxSlot::Empty) => Err(SyntaxError::MissingRequiredChild),
+            Some(SyntaxSlot::Empty{ .. }) => Err(SyntaxError::MissingRequiredChild),
             Some(SyntaxSlot::Token(token)) => panic!("Malformed list, node expected but found token {:?} instead. You must add missing markers for missing elements.", token),
             Some(SyntaxSlot::Node(node)) => {
                 Ok(N::unwrap_cast(node))
@@ -802,7 +802,7 @@ pub mod support {
         slot_index: usize,
     ) -> Option<N> {
         match parent.slots().nth(slot_index)? {
-            SyntaxSlot::Empty => None,
+            SyntaxSlot::Empty { .. } => None,
             SyntaxSlot::Node(node) => Some(N::unwrap_cast(node)),
             SyntaxSlot::Token(token) => panic!(
                 "expected a node in the slot {} but found token {:?}",
@@ -832,7 +832,7 @@ pub mod support {
 
     pub fn token<L: Language>(parent: &SyntaxNode<L>, slot_index: usize) -> Option<SyntaxToken<L>> {
         match parent.slots().nth(slot_index)? {
-            SyntaxSlot::Empty => None,
+            SyntaxSlot::Empty { .. } => None,
             SyntaxSlot::Token(token) => Some(token),
             SyntaxSlot::Node(node) => panic!(
                 "expected a token in the slot {} but found node {:?}",

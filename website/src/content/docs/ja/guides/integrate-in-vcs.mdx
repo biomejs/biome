@@ -1,0 +1,66 @@
+---
+title: Biome をあなたの VCS と統合する
+description: Biome を VCS と統合する方法を学びます
+---
+
+VCS (バージョン管理システム）の統合は、追加の機能を活用することを目的としており、VCSでしか提供できない機能を利用して開発体験をさらにカスタマイズできるようになります。
+
+この統合は *opt-in* であり、2つの必須フィールドが必要です。`vcs.enabled` フィールドと `vcs.clientKind` フィールドです。
+
+```json title="biome.json"
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git"
+  }
+}
+```
+
+この設定自体は、**何も行いません**。新機能を opt-in する必要があります。
+
+### 無視するファイルを設定する
+
+この機能では、Biome が VCS において、指定されたすべてのファイルとフォルダを無視することができます。これは opt-in 機能であり、`vcs.useIgnoreFile` フィールドを有効にする必要があります。
+
+```json title="biome.json" ins={5}
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  }
+}
+```
+
+### 変更されたファイルのみを処理する
+
+この機能は CLI でのみ利用可能で、特定のリビジョン間で**変更されたファイルのみ**を処理できます。
+
+設定ファイルを更新し、`vcs.defaultBranch` フィールドでデフォルトのブランチを Biome に伝える必要があります。
+
+```json title="biome.json" ins={6}
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  }
+}
+```
+
+次に、コマンドに `--changed` オプションを追加すると、VCS が"変更された"と認識したファイルのみを処理します。Biome は、VCS の助けを借りて、main ブランチと現在のリビジョンからの変更ファイルを判断します。
+
+```shell
+biome format --changed
+```
+
+:::caution
+Biomeは何が変更されたかをチェックしません。つまり、スペースや改行を追加しただけでもファイルが"変更された"とマークされます。
+:::
+
+あるいは、`--since` オプションを使って任意のブランチを指定することもできます。このオプションは `vcs.defaultBranch` オプションよりも**優先**されます。例えば、変更を next ブランチと比較したい場合は次のようにします。
+
+```shell
+biome format --changed --since=next
+```

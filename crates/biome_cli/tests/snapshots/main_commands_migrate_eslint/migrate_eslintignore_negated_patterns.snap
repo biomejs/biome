@@ -1,0 +1,56 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.eslintignore`
+
+```eslintignore
+
+a/**
+!a/b
+
+```
+
+## `.eslintrc.json`
+
+```json
+{ "rules": { "eqeqeq": "off" } }
+```
+
+# Emitted Messages
+
+```block
+.eslintignore contains negated glob patterns that start with !.
+These patterns cannot be migrated because Biome doesn't support them.
+```
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{
+       5 │ + → → → "recommended":·false,
+       6 │ + → → → "suspicious":·{·"noDoubleEquals":·"off"·}
+       7 │ + → → },
+       8 │ + → → "ignore":·["a/**"]
+       9 │ + → }
+      10 │ + }
+      11 │ + 
+  
+
+```
+
+```block
+Run the command with the option --write to apply the changes.
+```

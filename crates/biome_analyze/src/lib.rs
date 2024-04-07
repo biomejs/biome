@@ -272,8 +272,6 @@ where
                     continue;
                 }
             };
-            trace!("Event {:?}", &node_event);
-
             // If this is a node event pass it to the visitors for this phase
             for visitor in self.visitors.iter_mut() {
                 let ctx = VisitorContext {

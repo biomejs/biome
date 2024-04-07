@@ -42,12 +42,13 @@ impl Rule for UseNodeAssertStrict {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-
-        let text = node.module_name_token()?;
-        if inner_string_text(&text) == "node:assert" {
-            return Some(text);
+        if node.is_in_ts_module_declaration() {
+            return None;
         }
-
+        let module_name = node.module_name_token()?;
+        if inner_string_text(&module_name) == "node:assert" {
+            return Some(module_name);
+        }
         None
     }
 

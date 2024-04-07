@@ -7,6 +7,7 @@ use crate::utils::{get_prettier_diff, strip_prettier_placeholders, PrettierDiff}
 use crate::TestFormatLanguage;
 use biome_formatter::FormatOptions;
 use biome_parser::AnyParse;
+use biome_service::settings::ServiceLanguage;
 
 const PRETTIER_IGNORE: &str = "prettier-ignore";
 const BIOME_IGNORE: &str = "biome-ignore format: prettier ignore";
@@ -95,14 +96,18 @@ where
 {
     test_file: PrettierTestFile<'a>,
     language: L,
-    options: L::Options,
+    options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
 }
 
 impl<'a, L> PrettierSnapshot<'a, L>
 where
     L: TestFormatLanguage,
 {
-    pub fn new(test_file: PrettierTestFile<'a>, language: L, options: L::Options) -> Self {
+    pub fn new(
+        test_file: PrettierTestFile<'a>,
+        language: L,
+        options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
+    ) -> Self {
         PrettierSnapshot {
             test_file,
             language,

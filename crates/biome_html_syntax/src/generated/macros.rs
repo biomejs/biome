@@ -29,6 +29,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlClosingElement::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_CONTENT => {
+                    let $pattern = unsafe { $crate::HtmlContent::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_DIRECTIVE => {
                     let $pattern = unsafe { $crate::HtmlDirective::new_unchecked(node) };
                     $body
@@ -59,6 +63,14 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::HTML_BOGUS => {
                     let $pattern = unsafe { $crate::HtmlBogus::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_BOGUS_ATTRIBUTE => {
+                    let $pattern = unsafe { $crate::HtmlBogusAttribute::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_BOGUS_ELEMENT => {
+                    let $pattern = unsafe { $crate::HtmlBogusElement::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_LIST => {

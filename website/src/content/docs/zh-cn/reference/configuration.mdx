@@ -27,7 +27,7 @@ import LintGroups from "@/components/generated/Groups.astro";
 
 ```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.2/schema.json"
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json"
 }
 ```
 
@@ -37,14 +37,14 @@ import LintGroups from "@/components/generated/Groups.astro";
 
 ```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "extends": ["./formatter.json", "./linter.json"]
 }
 ```
 
 ```json title="formatter.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "formatter": {
     "indentSize": 2
   },
@@ -58,7 +58,7 @@ import LintGroups from "@/components/generated/Groups.astro";
 
 ```json title="linter.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
   "linter": {
     "rules": {
       "complexity": {
@@ -266,7 +266,7 @@ Biome应检查VCS文件的文件夹。默认情况下，Biome将使用找到 `bi
 
 影响单个组规则的选项。Biome支持以下组：
 
-<LintGroups />
+<LintGroups/>
 
 ### `linter.rules.[group].recommended`
 
