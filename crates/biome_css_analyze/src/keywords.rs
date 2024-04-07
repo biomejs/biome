@@ -23,11 +23,11 @@ pub const FONT_FAMILY_KEYWORDS: [&str; 10] = [
 ];
 
 pub const FONT_WEIGHT_ABSOLUTE_KEYWORDS: [&str; 2] = ["normal", "bold"];
-pub const FONT_WIGHT_NUMERIC_KEYWORDS: [&str; 9] = [
+pub const FONT_WEIGHT_NUMERIC_KEYWORDS: [&str; 9] = [
     "100", "200", "300", "400", "500", "600", "700", "800", "900",
 ];
 pub const FONT_STYLE_KEYWORDS: [&str; 3] = ["normal", "italic", "oblique"];
-pub const FONT_VARIANTS_KEYWORDS: [&str; 36] = [
+pub const FONT_VARIANTS_KEYWORDS: [&str; 35] = [
     "normal",
     "none",
     "historical-forms",
@@ -40,7 +40,6 @@ pub const FONT_VARIANTS_KEYWORDS: [&str; 36] = [
     "no-historical-ligatures",
     "contextual",
     "no-contextual",
-    "small-caps",
     "small-caps",
     "all-small-caps",
     "petite-caps",
