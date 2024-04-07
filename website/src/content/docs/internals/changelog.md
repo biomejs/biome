@@ -181,6 +181,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Enhancements
 
+- [style/useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention/) now allows prefixing a filename with `+` ([#2341](https://github.com/biomejs/biome/issues/2341)).
+
+  This is a convention used by [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Lint rules `useNodejsImportProtocol`, `useNodeAssertStrict`, `noRestrictedImports`, `noNodejsModules` will no longer check `declare module` statements anymore. Contributed by @Sec-ant
