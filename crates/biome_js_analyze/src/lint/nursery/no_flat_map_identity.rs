@@ -16,7 +16,7 @@ use crate::JsRuleAction;
 declare_rule! {
     /// Disallow to use unnecessary callback on `flatMap`,
     ///
-    /// to achieve the same result (flattening an array) more concisely and efficiently, you should use `flat` instead
+    /// To achieve the same result (flattening an array) more concisely and efficiently, you should use `flat` instead.
     ///
     /// ## Examples
     ///
