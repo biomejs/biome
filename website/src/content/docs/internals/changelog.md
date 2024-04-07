@@ -29,7 +29,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add a command to migrate from ESLint
 
-  `@biomejs/biome migrate eslint` allows you to migrate an ESLint configuration to Biome.
+  `biome migrate eslint` allows you to migrate an ESLint configuration to Biome.
   The command supports [legacy ESLint configurations](https://eslint.org/docs/latest/use/configure/configuration-files) and [new flat ESLint configurations](https://eslint.org/docs/latest/use/configure/configuration-files-new).
   Legacy ESLint configurations using the YAML format are not supported.
 
@@ -63,7 +63,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
 
-  `@biomejs/biome migrate eslint --write` changes the Biome configuration as follows:
+  `biome migrate eslint --write` changes the Biome configuration as follows:
 
   ```json
   {
@@ -89,7 +89,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
 
-  Also, if the working diretcory contains `.eslintignore`, then Biome migrates the glob patterns.
+  Also, if the working directory contains `.eslintignore`, then Biome migrates the glob patterns.
   Nested `.eslintignore` in subdirectories and negated glob patterns are not supported.
 
   If you find any issue, please don't hesitate to report them.
@@ -107,12 +107,15 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Support JavaScript configuration files when migrating from Prettier
 
-  `@biomejs/biome migrate prettier` is now able to migrate Prettier configuration files
+  `biome migrate prettier` is now able to migrate Prettier configuration files
   ending with `js`, `mjs`, or `cjs` extensions.
   To do this, Biome invokes Node.js.
 
   Also, embedded Prettier configurations in `package.json` are now supported.
 
+  Contributed by @Conaclos
+
+- Support `overrides` field in Prettier configuration files when migrating from Prettier. 
   Contributed by @Conaclos
 
 #### Bug fixes

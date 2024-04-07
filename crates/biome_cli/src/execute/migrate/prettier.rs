@@ -1,14 +1,17 @@
 use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
 use biome_console::{markup, Console, ConsoleExt};
-use biome_deserialize::json::deserialize_from_json_str;
+use biome_deserialize::{json::deserialize_from_json_str, StringSet};
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
-use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{
+    AttributePosition, LineEnding, LineWidth, LineWidthFromIntError, QuoteStyle,
+};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
 use biome_json_parser::JsonParserOptions;
 use biome_service::DynRef;
+use indexmap::IndexSet;
 use std::path::Path;
 
 use super::node;
@@ -54,6 +57,8 @@ pub(crate) struct PrettierConfiguration {
     arrow_parens: ArrowParens,
     /// https://prettier.io/docs/en/options#end-of-line
     end_of_line: EndOfLine,
+    /// https://prettier.io/docs/en/configuration.html#configuration-overrides
+    overrides: Vec<Override>,
 }
 
 impl Default for PrettierConfiguration {
@@ -71,8 +76,44 @@ impl Default for PrettierConfiguration {
             jsx_single_quote: false,
             arrow_parens: ArrowParens::default(),
             end_of_line: EndOfLine::default(),
+            overrides: vec![],
         }
     }
+}
+
+#[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
+pub(crate) struct Override {
+    files: IndexSet<String>,
+    options: OverrideOptions,
+}
+
+#[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct OverrideOptions {
+    /// https://prettier.io/docs/en/options#print-width
+    print_width: Option<u16>,
+    /// https://prettier.io/docs/en/options#use-tabs
+    use_tabs: Option<bool>,
+    /// https://prettier.io/docs/en/options#trailing-comma
+    trailing_comma: Option<PrettierTrailingComma>,
+    /// https://prettier.io/docs/en/options#tab-width
+    tab_width: Option<u8>,
+    /// https://prettier.io/docs/en/options#semicolons
+    semi: Option<bool>,
+    /// https://prettier.io/docs/en/options#quotes
+    single_quote: Option<bool>,
+    /// https://prettier.io/docs/en/options#bracket-spcing
+    bracket_spacing: Option<bool>,
+    /// https://prettier.io/docs/en/options#bracket-line
+    bracket_line: Option<bool>,
+    /// https://prettier.io/docs/en/options#quote-props
+    quote_props: Option<QuoteProps>,
+    /// https://prettier.io/docs/en/options#jsx-quotes
+    jsx_single_quote: Option<bool>,
+    /// https://prettier.io/docs/en/options#arrow-function-parentheses
+    arrow_parens: Option<ArrowParens>,
+    /// https://prettier.io/docs/en/options#end-of-line
+    end_of_line: Option<EndOfLine>,
 }
 
 #[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
@@ -147,11 +188,11 @@ impl From<QuoteProps> for QuoteProperties {
 }
 
 impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguration {
-    type Error = String;
+    type Error = LineWidthFromIntError;
     fn try_from(value: PrettierConfiguration) -> Result<Self, Self::Error> {
         let mut result = biome_configuration::PartialConfiguration::default();
 
-        let line_width = LineWidth::try_from(value.print_width).map_err(|err| err.to_string())?;
+        let line_width = LineWidth::try_from(value.print_width)?;
         let indent_style = if value.use_tabs {
             biome_configuration::PlainIndentStyle::Tab
         } else {
@@ -206,6 +247,103 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             bracket_spacing: Some(value.bracket_spacing),
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
+        };
+        let js_config = biome_configuration::PartialJavascriptConfiguration {
+            formatter: Some(js_formatter),
+            ..Default::default()
+        };
+        result.javascript = Some(js_config);
+        if !value.overrides.is_empty() {
+            let mut overrides = biome_configuration::Overrides::default();
+            for override_elt in value.overrides {
+                overrides.0.push(override_elt.try_into()?);
+            }
+            result.overrides = Some(overrides);
+        }
+        Ok(result)
+    }
+}
+
+impl TryFrom<Override> for biome_configuration::OverridePattern {
+    type Error = LineWidthFromIntError;
+    fn try_from(Override { files, options }: Override) -> Result<Self, Self::Error> {
+        let mut result = biome_configuration::OverridePattern {
+            include: Some(StringSet::new(files)),
+            ..Default::default()
+        };
+        if options.print_width.is_some()
+            || options.use_tabs.is_some()
+            || options.tab_width.is_some()
+            || options.end_of_line.is_some()
+        {
+            // are global options are set
+            let line_width = if let Some(print_width) = options.print_width {
+                Some(LineWidth::try_from(print_width)?)
+            } else {
+                None
+            };
+            let indent_style = options.use_tabs.map(|use_tabs| {
+                if use_tabs {
+                    biome_configuration::PlainIndentStyle::Tab
+                } else {
+                    biome_configuration::PlainIndentStyle::Space
+                }
+            });
+            let formatter = biome_configuration::OverrideFormatterConfiguration {
+                indent_width: options.tab_width,
+                line_width,
+                indent_style,
+                line_ending: options.end_of_line.map(|end_of_line| end_of_line.into()),
+                ..Default::default()
+            };
+            result.formatter = Some(formatter);
+        }
+        if options.semi.is_none()
+            && options.single_quote.is_none()
+            && options.jsx_single_quote.is_none()
+            && options.bracket_line.is_none()
+            && options.arrow_parens.is_none()
+            && options.trailing_comma.is_none()
+            && options.quote_props.is_none()
+            && options.bracket_spacing.is_none()
+        {
+            // no js option are set
+            return Ok(result);
+        }
+        // js config
+        let semicolons = options.semi.map(|semi| {
+            if semi {
+                Semicolons::Always
+            } else {
+                Semicolons::AsNeeded
+            }
+        });
+        let quote_style = options.single_quote.map(|single_quote| {
+            if single_quote {
+                QuoteStyle::Single
+            } else {
+                QuoteStyle::Double
+            }
+        });
+        let jsx_quote_style = options.jsx_single_quote.map(|jsx_single_quote| {
+            if jsx_single_quote {
+                QuoteStyle::Single
+            } else {
+                QuoteStyle::Double
+            }
+        });
+        let js_formatter = biome_configuration::PartialJavascriptFormatter {
+            bracket_same_line: options.bracket_line,
+            arrow_parentheses: options.arrow_parens.map(|arrow_parens| arrow_parens.into()),
+            semicolons,
+            trailing_comma: options
+                .trailing_comma
+                .map(|trailing_comma| trailing_comma.into()),
+            quote_style,
+            quote_properties: options.quote_props.map(|quote_props| quote_props.into()),
+            bracket_spacing: options.bracket_spacing,
+            jsx_quote_style,
+            ..Default::default()
         };
         let js_config = biome_configuration::PartialJavascriptConfiguration {
             formatter: Some(js_formatter),

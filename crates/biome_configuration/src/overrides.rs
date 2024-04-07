@@ -1,7 +1,6 @@
 use super::javascript::PartialJavascriptConfiguration;
 use super::json::PartialJsonConfiguration;
 use super::PartialCssConfiguration;
-use crate::formatter::{deserialize_line_width, serialize_line_width};
 use crate::{
     partial_css_configuration, partial_javascript_configuration, partial_json_configuration,
     PlainIndentStyle, Rules,
@@ -92,11 +91,13 @@ impl FromStr for OverridePattern {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideFormatterConfiguration {
     // if `false`, it disables the feature. `true` by default
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub enabled: Option<bool>,
 
     /// Stores whether formatting should be allowed to proceed if a given file
     /// has syntax errors
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub format_with_errors: Option<bool>,
 
@@ -122,14 +123,12 @@ pub struct OverrideFormatterConfiguration {
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line. Defaults to 80.
-    #[serde(
-        deserialize_with = "deserialize_line_width",
-        serialize_with = "serialize_line_width"
-    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("line-width"), argument("NUMBER"), optional)]
     pub line_width: Option<LineWidth>,
 
     /// The attribute position style.
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("attribute-position"), argument("multiline|auto"), optional)]
     pub attribute_position: Option<AttributePosition>,
 }

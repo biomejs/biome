@@ -26,8 +26,8 @@ pub use css::{
     PartialCssFormatter,
 };
 pub use formatter::{
-    deserialize_line_width, partial_formatter_configuration, serialize_line_width,
-    FormatterConfiguration, PartialFormatterConfiguration, PlainIndentStyle,
+    partial_formatter_configuration, FormatterConfiguration, PartialFormatterConfiguration,
+    PlainIndentStyle,
 };
 pub use javascript::{
     partial_javascript_configuration, JavascriptConfiguration, JavascriptFormatter,

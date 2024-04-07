@@ -229,7 +229,7 @@ impl From<u8> for IndentWidth {
 #[derive(Clone, Copy, Debug, Eq, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, schemars::JsonSchema),
     serde(rename_all = "camelCase")
 )]
 pub struct LineWidth(u16);
@@ -268,6 +268,18 @@ impl Deserializable for LineWidth {
             value.range(),
         ));
         None
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for LineWidth {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value: u16 = serde::Deserialize::deserialize(deserializer)?;
+        let line_width = LineWidth::try_from(value).map_err(serde::de::Error::custom)?;
+        Ok(line_width)
     }
 }
 

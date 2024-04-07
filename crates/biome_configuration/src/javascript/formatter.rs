@@ -1,5 +1,4 @@
 use crate::PlainIndentStyle;
-use crate::{deserialize_line_width, serialize_line_width};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
 use biome_js_formatter::context::trailing_comma::TrailingComma;
@@ -75,10 +74,6 @@ pub struct JavascriptFormatter {
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
-    #[partial(serde(
-        deserialize_with = "deserialize_line_width",
-        serialize_with = "serialize_line_width"
-    ))]
     #[partial(bpaf(long("javascript-formatter-line-width"), argument("NUMBER"), optional))]
     pub line_width: Option<LineWidth>,
 
