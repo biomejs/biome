@@ -18,7 +18,7 @@ use crate::prelude::tag::{DedentMode, Tag, TagKind, VerbatimKind};
 use crate::prelude::Tag::EndFill;
 use crate::printer::call_stack::{
     CallStack, FitsCallStack, FitsIndentStack, IndentStack, PrintCallStack, PrintElementArgs,
-    StackFrame,
+    StackFrame, SuffixStack,
 };
 use crate::printer::line_suffixes::{LineSuffixEntry, LineSuffixes};
 use crate::printer::queue::{
@@ -67,7 +67,7 @@ impl<'a> Printer<'a> {
                 self.print_element(&mut stack, &mut indent_stack, &mut queue, element)?;
 
                 if queue.is_empty() {
-                    self.flush_line_suffixes(&mut queue, &mut stack, None);
+                    self.flush_line_suffixes(&mut queue, &mut stack, &mut indent_stack, None);
                 }
             }
 
@@ -91,7 +91,6 @@ impl<'a> Printer<'a> {
         use Tag::*;
 
         let args = stack.top();
-
         match element {
             FormatElement::Space | FormatElement::HardSpace => {
                 if self.state.line_width > 0 {
@@ -125,7 +124,7 @@ impl<'a> Printer<'a> {
                 }
 
                 if self.state.line_suffixes.has_pending() {
-                    self.flush_line_suffixes(queue, stack, Some(element));
+                    self.flush_line_suffixes(queue, stack, indent_stack, Some(element));
                     return Ok(());
                 }
 
@@ -150,7 +149,7 @@ impl<'a> Printer<'a> {
 
             FormatElement::LineSuffixBoundary => {
                 const HARD_BREAK: &FormatElement = &FormatElement::Line(LineMode::Hard);
-                self.flush_line_suffixes(queue, stack, Some(HARD_BREAK));
+                self.flush_line_suffixes(queue, stack, indent_stack, Some(HARD_BREAK));
             }
 
             FormatElement::BestFitting(best_fitting) => {
@@ -253,6 +252,7 @@ impl<'a> Printer<'a> {
             }
 
             FormatElement::Tag(StartLineSuffix) => {
+                indent_stack.push_suffix(args.indention());
                 self.state
                     .line_suffixes
                     .extend(args, queue.iter_content(TagKind::LineSuffix));
@@ -278,7 +278,6 @@ impl<'a> Printer<'a> {
                 | EndGroup
                 | EndConditionalContent
                 | EndVerbatim
-                | EndLineSuffix
                 | EndFill),
             ) => {
                 stack.pop(tag.kind())?;
@@ -291,7 +290,7 @@ impl<'a> Printer<'a> {
                 }
                 stack.pop(tag.kind())?;
             }
-            FormatElement::Tag(tag @ (EndIndent | EndAlign)) => {
+            FormatElement::Tag(tag @ (EndIndent | EndAlign | EndLineSuffix)) => {
                 stack.pop(tag.kind())?;
                 indent_stack.pop();
             }
@@ -392,6 +391,7 @@ impl<'a> Printer<'a> {
         &mut self,
         queue: &mut PrintQueue<'a>,
         stack: &mut PrintCallStack,
+        indent_stack: &mut PrintIndentStack,
         line_break: Option<&'a FormatElement>,
     ) {
         let suffixes = self.state.line_suffixes.take_pending();
@@ -401,7 +401,7 @@ impl<'a> Printer<'a> {
             if let Some(line_break) = line_break {
                 queue.push(line_break);
             }
-
+            indent_stack.flush_suffixes();
             for entry in suffixes.rev() {
                 match entry {
                     LineSuffixEntry::Suffix(suffix) => {

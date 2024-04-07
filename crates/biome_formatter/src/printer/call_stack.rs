@@ -233,6 +233,18 @@ impl<'a> CallStack for FitsCallStack<'a> {
     }
 }
 
+/// Suffix stack that stores the indention.
+///
+/// When ElementKind is [suffix], push the current indention onto the SuffixStack.
+pub(super) trait SuffixStack {
+    type SuffixStack: Stack<Indention> + Debug;
+    fn suffix_stack(&self) -> &Self::SuffixStack;
+    fn suffix_stack_mut(&mut self) -> &mut Self::SuffixStack;
+    fn push_suffix(&mut self, indention: Indention) {
+        self.suffix_stack_mut().push(indention);
+    }
+}
+
 /// Indent stack that stores the history of indention.
 ///
 /// When the element kind is [indent] or [align], push the current indentation onto the stack of indentations.
@@ -280,6 +292,7 @@ pub(super) trait IndentStack {
 pub(super) struct PrintIndentStack {
     indentions: Vec<Indention>,
     history_indentions: Vec<Indention>,
+    suffix_indentions: Vec<Indention>,
 }
 
 impl PrintIndentStack {
@@ -287,7 +300,12 @@ impl PrintIndentStack {
         Self {
             indentions: Vec::new(),
             history_indentions: Vec::new(),
+            suffix_indentions: Vec::new(),
         }
+    }
+    pub fn flush_suffixes(&mut self) {
+        self.indentions
+            .extend(self.suffix_indentions.drain(..).rev());
     }
 }
 impl IndentStack for PrintIndentStack {
@@ -308,7 +326,15 @@ impl IndentStack for PrintIndentStack {
         &mut self.history_indentions
     }
 }
-
+impl SuffixStack for PrintIndentStack {
+    type SuffixStack = Vec<Indention>;
+    fn suffix_stack(&self) -> &Self::SuffixStack {
+        &self.suffix_indentions
+    }
+    fn suffix_stack_mut(&mut self) -> &mut Self::SuffixStack {
+        &mut self.suffix_indentions
+    }
+}
 /// Indent stack used for storing the history of indention when measuring fits on the line.
 ///
 /// The stack is a view on top of the [PrintIndentStack] because the stack frames are still necessary when printing.
