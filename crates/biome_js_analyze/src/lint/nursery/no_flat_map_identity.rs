@@ -14,7 +14,7 @@ use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Disallow to use unnecessary callback on `flatMap`,
+    /// Disallow to use unnecessary callback on `flatMap`.
     ///
     /// To achieve the same result (flattening an array) more concisely and efficiently, you should use `flat` instead.
     ///
@@ -101,10 +101,10 @@ impl Rule for NoFlatMapIdentity {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Avoid unnecessary callback in "<Emphasis>"flatMap"</Emphasis>" call"
+                    "Avoid unnecessary callback in "<Emphasis>"flatMap"</Emphasis>" call."
                 },
             )
-            .note(markup! {"You can just use "<Emphasis>"flat"</Emphasis>" to flatten the array"}),
+            .note(markup! {"You can just use "<Emphasis>"flat"</Emphasis>" to flatten the array."}),
         )
     }
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
