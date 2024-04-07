@@ -84,7 +84,10 @@ declare_rule! {
     pub UseCollapsedElseIf {
         version: "1.1.0",
         name: "useCollapsedElseIf",
-        source: RuleSource::Eslint("no-lonely-if"),
+        sources: &[
+            RuleSource::Eslint("no-lonely-if"),
+            RuleSource::Clippy("collapsible_else_if")
+        ],
         recommended: false,
         fix_kind: FixKind::Safe,
     }

@@ -48,7 +48,11 @@ declare_rule! {
     pub NoPrecisionLoss {
         version: "1.0.0",
         name: "noPrecisionLoss",
-        source: RuleSource::Eslint("no-loss-of-precision"),
+        sources: &[
+            RuleSource::Eslint("no-loss-of-precision"),
+            RuleSource::EslintTypeScript("no-loss-of-precision"),
+            RuleSource::Clippy("lossy_float_literal")
+        ],
         recommended: true,
     }
 }

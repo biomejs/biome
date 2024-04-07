@@ -33,7 +33,7 @@ pub struct RuleMetadata {
     /// The kind of fix
     pub fix_kind: Option<FixKind>,
     /// The source URL of the rule
-    pub source: Option<RuleSource>,
+    pub sources: &'static [RuleSource],
     /// The source kind of the rule
     pub source_kind: Option<RuleSourceKind>,
 }
@@ -210,7 +210,7 @@ impl RuleSource {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub enum RuleSourceKind {
     /// The rule implements the same logic of the source
     #[default]
@@ -234,7 +234,7 @@ impl RuleMetadata {
             docs,
             recommended: false,
             fix_kind: None,
-            source: None,
+            sources: &[],
             source_kind: None,
         }
     }
@@ -254,8 +254,8 @@ impl RuleMetadata {
         self
     }
 
-    pub const fn source(mut self, source: RuleSource) -> Self {
-        self.source = Some(source);
+    pub const fn sources(mut self, sources: &'static [RuleSource]) -> Self {
+        self.sources = sources;
         //if self.source_kind.is_none() {
         //    self.source_kind = Some(RuleSourceKind::SameLogic);
         //}

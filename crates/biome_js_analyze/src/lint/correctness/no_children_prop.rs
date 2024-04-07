@@ -25,7 +25,7 @@ declare_rule! {
     pub NoChildrenProp {
         version: "1.0.0",
         name: "noChildrenProp",
-        source: RuleSource::EslintReact("no-children-prop"),
+        sources: &[RuleSource::EslintReact("no-children-prop")],
         recommended: true,
     }
 }

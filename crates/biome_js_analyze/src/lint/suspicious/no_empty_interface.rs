@@ -43,7 +43,7 @@ declare_rule! {
     pub NoEmptyInterface {
         version: "1.0.0",
         name: "noEmptyInterface",
-        source: RuleSource::EslintTypeScript("no-empty-interface"),
+        sources: &[RuleSource::EslintTypeScript("no-empty-interface")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
         fix_kind: FixKind::Safe,

@@ -34,7 +34,7 @@ declare_rule! {
         version: "1.6.0",
         name: "noReExportAll",
         recommended: false,
-        source: RuleSource::EslintBarrelFiles("avoid-re-export-all"),
+        sources: &[RuleSource::EslintBarrelFiles("avoid-re-export-all")],
         source_kind: RuleSourceKind::SameLogic,
     }
 }

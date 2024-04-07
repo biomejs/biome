@@ -56,7 +56,7 @@ declare_rule! {
     pub NoUselessTernary {
         version: "1.5.0",
         name: "noUselessTernary",
-        source: RuleSource::Eslint("no-unneeded-ternary"),
+        sources: &[RuleSource::Eslint("no-unneeded-ternary")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

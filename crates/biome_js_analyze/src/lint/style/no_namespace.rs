@@ -48,7 +48,7 @@ declare_rule! {
     pub NoNamespace {
         version: "1.0.0",
         name: "noNamespace",
-        source: RuleSource::EslintTypeScript("no-namespace"),
+        sources: &[RuleSource::EslintTypeScript("no-namespace")],
         recommended: false,
     }
 }

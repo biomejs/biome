@@ -59,7 +59,7 @@ declare_rule! {
     pub UseKeyWithClickEvents {
         version: "1.0.0",
         name: "useKeyWithClickEvents",
-        source: RuleSource::EslintJsxA11y("click-events-have-key-events"),
+        sources: &[RuleSource::EslintJsxA11y("click-events-have-key-events")],
         recommended: true,
     }
 }

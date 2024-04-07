@@ -74,7 +74,7 @@ declare_rule! {
     pub UseValidAnchor {
         version: "1.0.0",
         name: "useValidAnchor",
-        source: RuleSource::EslintJsxA11y("anchor-is-valid"),
+        sources: &[RuleSource::EslintJsxA11y("anchor-is-valid")],
         recommended: true,
     }
 }

@@ -221,7 +221,7 @@ declare_rule! {
     pub UseExhaustiveDependencies {
         version: "1.0.0",
         name: "useExhaustiveDependencies",
-        source: RuleSource::EslintReactHooks("exhaustive-deps"),
+        sources: &[RuleSource::EslintReactHooks("exhaustive-deps")],
         recommended: true,
     }
 }

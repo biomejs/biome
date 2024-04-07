@@ -66,7 +66,10 @@ declare_rule! {
     pub NoSelfAssign {
         version: "1.0.0",
         name: "noSelfAssign",
-        source: RuleSource::Eslint("no-self-assign"),
+        sources: &[
+            RuleSource::Eslint("no-self-assign"),
+            RuleSource::Clippy("self_assignment"),
+        ],
         recommended: true,
     }
 }

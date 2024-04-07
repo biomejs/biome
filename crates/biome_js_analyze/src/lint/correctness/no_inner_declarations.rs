@@ -88,7 +88,7 @@ declare_rule! {
     pub NoInnerDeclarations {
         version: "1.0.0",
         name: "noInnerDeclarations",
-        source: RuleSource::Eslint("no-inner-declarations"),
+        sources: &[RuleSource::Eslint("no-inner-declarations")],
         recommended: true,
     }
 }

@@ -10,6 +10,8 @@ This rule is recommended by Biome. A diagnostic error will appear when linting y
 
 Source: <a href="https://eslint.org/docs/latest/rules/dot-notation" target="_blank"><code>dot-notation</code></a>
 
+Source: <a href="https://typescript-eslint.io/rules/dot-notation" target="_blank"><code>dot-notation</code></a>
+
 Enforce the usage of a literal access to properties over computed property access.
 
 ## Examples

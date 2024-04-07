@@ -72,7 +72,7 @@ declare_rule! {
     pub UseValidTypeof {
         version: "1.0.0",
         name: "useValidTypeof",
-        source: RuleSource::Eslint("valid-typeof"),
+        sources: &[RuleSource::Eslint("valid-typeof")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

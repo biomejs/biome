@@ -6,6 +6,8 @@ title: useForOf (since v1.5.0)
 
 Source: <a href="https://typescript-eslint.io/rules/prefer-for-of" target="_blank"><code>prefer-for-of</code></a>
 
+Source: <a href="https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-for-loop.md" target="_blank"><code>no-for-loop</code></a>
+
 This rule recommends a `for-of` loop when in a `for` loop, the index used to extract an item from the iterated array.
 
 ## Examples

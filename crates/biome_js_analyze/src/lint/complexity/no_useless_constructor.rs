@@ -118,7 +118,10 @@ declare_rule! {
     pub NoUselessConstructor {
         version: "1.0.0",
         name: "noUselessConstructor",
-        source: RuleSource::EslintTypeScript("no-useless-constructor"),
+        sources: &[
+            RuleSource::Eslint("no-useless-constructor"),
+            RuleSource::EslintTypeScript("no-useless-constructor"),
+        ],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

@@ -65,7 +65,7 @@ declare_rule! {
     pub UseHookAtTopLevel {
         version: "1.0.0",
         name: "useHookAtTopLevel",
-        source: RuleSource::EslintReactHooks("rules-of-hooks"),
+        sources: &[RuleSource::EslintReactHooks("rules-of-hooks")],
         recommended: false,
     }
 }

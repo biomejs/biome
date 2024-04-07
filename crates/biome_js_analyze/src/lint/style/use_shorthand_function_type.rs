@@ -81,7 +81,7 @@ declare_rule! {
     pub UseShorthandFunctionType {
         version: "1.5.0",
         name: "useShorthandFunctionType",
-        source: RuleSource::EslintTypeScript("prefer-function-type"),
+        sources: &[RuleSource::EslintTypeScript("prefer-function-type")],
         recommended: true,
         fix_kind: FixKind::Safe,
     }

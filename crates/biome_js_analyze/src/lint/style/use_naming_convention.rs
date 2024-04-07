@@ -286,7 +286,7 @@ declare_rule! {
     pub UseNamingConvention {
         version: "1.0.0",
         name: "useNamingConvention",
-        source: RuleSource::EslintTypeScript("naming-convention"),
+        sources: &[RuleSource::EslintTypeScript("naming-convention")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
         fix_kind: FixKind::Safe,

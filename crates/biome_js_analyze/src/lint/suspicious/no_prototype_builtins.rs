@@ -42,7 +42,7 @@ declare_rule! {
     pub NoPrototypeBuiltins {
         version: "1.0.0",
         name: "noPrototypeBuiltins",
-        source: RuleSource::Eslint("no-prototype-builtins"),
+        sources: &[RuleSource::Eslint("no-prototype-builtins")],
         recommended: true,
     }
 }

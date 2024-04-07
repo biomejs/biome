@@ -56,7 +56,7 @@ declare_rule! {
     pub NoParameterAssign {
         version: "1.0.0",
         name: "noParameterAssign",
-        source: RuleSource::Eslint("no-param-reassign"),
+        sources: &[RuleSource::Eslint("no-param-reassign")],
         recommended: true,
     }
 }

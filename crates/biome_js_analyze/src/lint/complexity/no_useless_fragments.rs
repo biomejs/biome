@@ -62,7 +62,7 @@ declare_rule! {
     pub NoUselessFragments {
         version: "1.0.0",
         name: "noUselessFragments",
-        source: RuleSource::EslintReact("jsx-no-useless-fragment"),
+        sources: &[RuleSource::EslintReact("jsx-no-useless-fragment")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

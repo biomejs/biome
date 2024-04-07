@@ -45,7 +45,7 @@ declare_rule! {
         version: "1.6.0",
         name: "noBarrelFile",
         recommended: false,
-        source: RuleSource::EslintBarrelFiles("avoid-namespace-import"),
+        sources: &[RuleSource::EslintBarrelFiles("avoid-namespace-import")],
         source_kind: RuleSourceKind::Inspired,
     }
 }

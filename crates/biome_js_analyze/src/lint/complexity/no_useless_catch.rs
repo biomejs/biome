@@ -53,7 +53,7 @@ declare_rule! {
     pub NoUselessCatch {
         version: "1.0.0",
         name: "noUselessCatch",
-        source: RuleSource::Eslint("no-useless-catch"),
+        sources: &[RuleSource::Eslint("no-useless-catch")],
         recommended: true,
     }
 }

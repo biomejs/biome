@@ -34,7 +34,7 @@ declare_rule! {
     pub NoStringCaseMismatch {
         version: "1.0.0",
         name: "noStringCaseMismatch",
-        source: RuleSource::Clippy("match_str_case_mismatch"),
+        sources: &[RuleSource::Clippy("match_str_case_mismatch")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

@@ -59,7 +59,7 @@ declare_rule! {
     pub NoDefaultExport {
         version: "1.4.0",
         name: "noDefaultExport",
-        source: RuleSource::EslintImport("no-default-export"),
+        sources: &[RuleSource::EslintImport("no-default-export")],
         recommended: false,
     }
 }

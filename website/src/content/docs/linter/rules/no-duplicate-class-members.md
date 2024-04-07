@@ -10,6 +10,8 @@ This rule is recommended by Biome. A diagnostic error will appear when linting y
 
 Source: <a href="https://eslint.org/docs/latest/rules/no-dupe-class-members" target="_blank"><code>no-dupe-class-members</code></a>
 
+Source: <a href="https://typescript-eslint.io/rules/no-dupe-class-members" target="_blank"><code>no-dupe-class-members</code></a>
+
 Disallow duplicate class members.
 
 If there are declarations of the same name among class members,

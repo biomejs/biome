@@ -45,7 +45,7 @@ declare_rule! {
     pub NoUselessEmptyExport {
         version: "1.0.0",
         name: "noUselessEmptyExport",
-        source: RuleSource::EslintTypeScript("no-useless-empty-export"),
+        sources: &[RuleSource::EslintTypeScript("no-useless-empty-export")],
         recommended: true,
         fix_kind: FixKind::Safe,
     }

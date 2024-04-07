@@ -51,7 +51,7 @@ declare_rule! {
     pub NoPositiveTabindex {
         version: "1.0.0",
         name: "noPositiveTabindex",
-        source: RuleSource::EslintJsxA11y("tabindex-no-positive"),
+        sources: &[RuleSource::EslintJsxA11y("tabindex-no-positive")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

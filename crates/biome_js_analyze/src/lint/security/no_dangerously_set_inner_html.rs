@@ -28,7 +28,7 @@ declare_rule! {
     pub NoDangerouslySetInnerHtml {
         version: "1.0.0",
         name: "noDangerouslySetInnerHtml",
-        source: RuleSource::EslintReact("no-danger-with-children"),
+        sources: &[RuleSource::EslintReact("no-danger-with-children")],
         recommended: true,
     }
 }

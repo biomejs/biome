@@ -44,7 +44,7 @@ declare_rule! {
     pub UseNamespaceKeyword {
         version: "1.0.0",
         name: "useNamespaceKeyword",
-        source: RuleSource::EslintTypeScript("prefer-namespace-keyword"),
+        sources: &[RuleSource::EslintTypeScript("prefer-namespace-keyword")],
         recommended: true,
         fix_kind: FixKind::Safe,
     }

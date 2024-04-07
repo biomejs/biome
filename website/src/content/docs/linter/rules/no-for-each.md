@@ -10,6 +10,8 @@ This rule is recommended by Biome. A diagnostic error will appear when linting y
 
 Source: <a href="https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-array-for-each.md" target="_blank"><code>no-array-for-each</code></a>
 
+Source: <a href="https://rust-lang.github.io/rust-clippy/master/#/needless_for_each" target="_blank"><code>needless_for_each</code></a>
+
 Prefer `for...of` statement instead of `Array.forEach`.
 
 Here's a summary of why `forEach` may be disallowed, and why `for...of` is preferred for almost any use-case of `forEach`:

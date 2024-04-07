@@ -38,7 +38,7 @@ declare_rule! {
         version: "1.6.0",
         name: "noSkippedTests",
         recommended: false,
-        source: RuleSource::EslintJest("no-disabled-tests"),
+        sources: &[RuleSource::EslintJest("no-disabled-tests")],
         source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Unsafe,
     }

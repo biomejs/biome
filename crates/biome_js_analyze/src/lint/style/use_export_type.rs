@@ -60,7 +60,7 @@ declare_rule! {
     pub UseExportType {
         version: "1.5.0",
         name: "useExportType",
-        source: RuleSource::EslintTypeScript("consistent-type-exports"),
+        sources: &[RuleSource::EslintTypeScript("consistent-type-exports")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
         fix_kind: FixKind::Safe,

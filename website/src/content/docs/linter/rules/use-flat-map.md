@@ -10,6 +10,8 @@ This rule is recommended by Biome. A diagnostic error will appear when linting y
 
 Source: <a href="https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-array-flat-map.md" target="_blank"><code>prefer-array-flat-map</code></a>
 
+Source: <a href="https://rust-lang.github.io/rust-clippy/master/#/map_flatten" target="_blank"><code>map_flatten</code></a>
+
 Promotes the use of `.flatMap()` when `map().flat()` are used together.
 
 ## Examples

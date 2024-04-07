@@ -88,7 +88,10 @@ declare_rule! {
     pub NoUselessElse {
         version: "1.3.0",
         name: "noUselessElse",
-        source: RuleSource::Eslint("no-else-return"),
+        sources: &[
+            RuleSource::Eslint("no-else-return"),
+            RuleSource::Clippy("redundant_else 	"),
+        ],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
         fix_kind: FixKind::Unsafe,

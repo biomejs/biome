@@ -52,7 +52,7 @@ declare_rule! {
     pub NoGlobalEval {
         version: "1.5.0",
         name: "noGlobalEval",
-        source: RuleSource::Eslint("no-eval"),
+        sources: &[RuleSource::Eslint("no-eval")],
         recommended: true,
     }
 }

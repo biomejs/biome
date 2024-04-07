@@ -36,7 +36,7 @@ declare_rule! {
     pub NoUnsafeNegation {
         version: "1.0.0",
         name: "noUnsafeNegation",
-        source: RuleSource::Eslint("no-unsafe-negation"),
+        sources: &[RuleSource::Eslint("no-unsafe-negation")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

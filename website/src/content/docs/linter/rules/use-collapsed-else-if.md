@@ -6,6 +6,8 @@ title: useCollapsedElseIf (since v1.1.0)
 
 Source: <a href="https://eslint.org/docs/latest/rules/no-lonely-if" target="_blank"><code>no-lonely-if</code></a>
 
+Source: <a href="https://rust-lang.github.io/rust-clippy/master/#/collapsible_else_if" target="_blank"><code>collapsible_else_if</code></a>
+
 Enforce using `else if` instead of nested `if` in `else` clauses.
 
 If an `if` statement is the only statement in the `else` block, it is often clearer to use an `else if` form.

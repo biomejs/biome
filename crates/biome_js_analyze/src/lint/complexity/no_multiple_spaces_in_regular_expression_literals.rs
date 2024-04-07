@@ -49,7 +49,7 @@ declare_rule! {
     pub NoMultipleSpacesInRegularExpressionLiterals {
         version: "1.0.0",
         name: "noMultipleSpacesInRegularExpressionLiterals",
-        source: RuleSource::Eslint("no-regex-spaces"),
+        sources: &[RuleSource::Eslint("no-regex-spaces")],
         recommended: true,
         fix_kind: FixKind::Safe,
     }

@@ -507,3 +507,36 @@ a/**
         result,
     ));
 }
+
+#[test]
+fn migrate_eslintrcjson_extended_rules() {
+    let biomejson = r#"{ "linter": { "enabled": true } }"#;
+    let eslintrc = r#"{
+        "rules": {
+            "dot-notation": 0,
+            "@typescript-eslint/dot-notation": 2,
+            "@typescript-eslint/no-dupe-class-members": 2,
+            "no-dupe-class-members": 0
+        }
+    }"#;
+
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(["migrate", "eslint"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_eslintrcjson_extended_rules",
+        fs,
+        console,
+        result,
+    ));
+}

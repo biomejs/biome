@@ -54,7 +54,7 @@ declare_rule! {
     pub NoExplicitAny {
         version: "1.0.0",
         name: "noExplicitAny",
-        source: RuleSource::EslintTypeScript("no-explicit-any"),
+        sources: &[RuleSource::EslintTypeScript("no-explicit-any")],
         recommended: true,
     }
 }

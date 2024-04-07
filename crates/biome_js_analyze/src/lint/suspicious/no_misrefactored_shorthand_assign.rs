@@ -52,7 +52,7 @@ declare_rule! {
     pub NoMisrefactoredShorthandAssign {
         version: "1.3.0",
         name: "noMisrefactoredShorthandAssign",
-        source: RuleSource::Clippy("misrefactored_assign_op"),
+        sources: &[RuleSource::Clippy("misrefactored_assign_op")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

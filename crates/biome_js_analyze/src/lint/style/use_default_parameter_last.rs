@@ -51,7 +51,10 @@ declare_rule! {
     pub UseDefaultParameterLast {
         version: "1.0.0",
         name: "useDefaultParameterLast",
-        source: RuleSource::Eslint("default-param-last"),
+        sources: &[
+            RuleSource::Eslint("default-param-last"),
+            RuleSource::EslintTypeScript("default-param-last")
+        ],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

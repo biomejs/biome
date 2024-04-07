@@ -61,7 +61,7 @@ declare_rule! {
     pub UseIframeTitle {
         version: "1.0.0",
         name: "useIframeTitle",
-        source: RuleSource::EslintJsxA11y("iframe-has-title"),
+        sources: &[RuleSource::EslintJsxA11y("iframe-has-title")],
         recommended: true,
     }
 }

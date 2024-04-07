@@ -10,6 +10,8 @@ This rule is recommended by Biome. A diagnostic error will appear when linting y
 
 Source: <a href="https://eslint.org/docs/latest/rules/no-self-assign" target="_blank"><code>no-self-assign</code></a>
 
+Source: <a href="https://rust-lang.github.io/rust-clippy/master/#/self_assignment" target="_blank"><code>self_assignment</code></a>
+
 Disallow assignments where both sides are exactly the same.
 
 Self assignments have no effect, so probably those are an error due to incomplete refactoring.

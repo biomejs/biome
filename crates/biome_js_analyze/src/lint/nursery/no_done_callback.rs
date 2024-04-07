@@ -47,7 +47,7 @@ declare_rule! {
         version: "next",
         name: "noDoneCallback",
         recommended: true,
-        source: RuleSource::EslintJest("no-done-callback"),
+        sources: &[RuleSource::EslintJest("no-done-callback")],
         source_kind: RuleSourceKind::SameLogic,
     }
 }

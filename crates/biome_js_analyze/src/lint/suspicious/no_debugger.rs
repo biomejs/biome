@@ -29,7 +29,7 @@ declare_rule! {
     pub NoDebugger {
         version: "1.0.0",
         name: "noDebugger",
-        source: RuleSource::Eslint("no-debugger"),
+        sources: &[RuleSource::Eslint("no-debugger")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

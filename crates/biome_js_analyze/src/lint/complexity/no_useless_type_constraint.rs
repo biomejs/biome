@@ -79,7 +79,7 @@ declare_rule! {
     pub NoUselessTypeConstraint {
         version: "1.0.0",
         name: "noUselessTypeConstraint",
-        source: RuleSource::EslintTypeScript("no-unnecessary-type-constraint"),
+        sources: &[RuleSource::EslintTypeScript("no-unnecessary-type-constraint")],
         recommended: true,
         fix_kind: FixKind::Safe,
     }

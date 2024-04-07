@@ -57,7 +57,7 @@ declare_rule! {
     pub UseSelfClosingElements {
         version: "1.0.0",
         name: "useSelfClosingElements",
-        source: RuleSource::EslintStylistic("jsx-self-closing-comp"),
+        sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

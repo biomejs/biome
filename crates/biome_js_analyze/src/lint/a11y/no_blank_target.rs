@@ -51,7 +51,7 @@ declare_rule! {
     pub NoBlankTarget {
         version: "1.0.0",
         name: "noBlankTarget",
-        source: RuleSource::EslintReact("jsx-no-target-blank"),
+        sources: &[RuleSource::EslintReact("jsx-no-target-blank")],
         recommended: true,
         fix_kind: FixKind::Safe,
     }

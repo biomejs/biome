@@ -82,7 +82,7 @@ declare_rule! {
     pub UseFilenamingConvention {
         version: "1.5.0",
         name: "useFilenamingConvention",
-        source: RuleSource::EslintUnicorn("filename-case"),
+        sources: &[RuleSource::EslintUnicorn("filename-case")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
     }

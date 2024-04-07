@@ -51,6 +51,18 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_import_type.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@typescript-eslint/default-param-last" => {
+            let group = rules.style.get_or_insert_with(Default::default);
+            let rule = group
+                .use_default_parameter_last
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "@typescript-eslint/dot-notation" => {
+            let group = rules.complexity.get_or_insert_with(Default::default);
+            let rule = group.use_literal_keys.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@typescript-eslint/naming-convention" => {
             if !options.include_inspired {
                 results.has_inspired_rules = true;
@@ -59,6 +71,20 @@ pub(crate) fn migrate_eslint_any_rule(
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
                 .use_naming_convention
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "@typescript-eslint/no-dupe-class-members" => {
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .no_duplicate_class_members
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "@typescript-eslint/no-empty-function" => {
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .no_empty_block_statements
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -100,6 +126,11 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@typescript-eslint/no-loss-of-precision" => {
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group.no_precision_loss.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@typescript-eslint/no-misused-new" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
@@ -122,6 +153,16 @@ pub(crate) fn migrate_eslint_any_rule(
         "@typescript-eslint/no-redeclare" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group.no_redeclare.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "@typescript-eslint/no-restricted-imports" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_restricted_imports
+                .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "@typescript-eslint/no-this-alias" => {
@@ -147,6 +188,11 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .no_unsafe_declaration_merging
                 .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "@typescript-eslint/no-unused-vars" => {
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group.no_unused_variables.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "@typescript-eslint/no-use-before-define" => {
@@ -231,6 +277,11 @@ pub(crate) fn migrate_eslint_any_rule(
         "@typescript-eslint/prefer-optional-chain" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.use_optional_chain.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "@typescript-eslint/require-await" => {
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group.use_await.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "barrel-files/avoid-namespace-import" => {
@@ -690,9 +741,23 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-empty-function" => {
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .no_empty_block_statements
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-empty-pattern" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group.no_empty_pattern.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "no-empty-static-block" => {
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .no_empty_block_statements
+                .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "no-eval" => {
@@ -829,6 +894,11 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-redeclare" => {
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group.no_redeclare.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-regex-spaces" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
@@ -944,9 +1014,23 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_unused_variables.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-use-before-define" => {
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group
+                .no_invalid_use_before_declaration
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-useless-catch" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.no_useless_catch.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "no-useless-constructor" => {
+            let group = rules.complexity.get_or_insert_with(Default::default);
+            let rule = group
+                .no_useless_constructor
+                .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "no-useless-rename" => {
@@ -1147,9 +1231,19 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_for_each.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "unicorn/no-for-loop" => {
+            let group = rules.style.get_or_insert_with(Default::default);
+            let rule = group.use_for_of.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "unicorn/no-instanceof-array" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group.use_is_array.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "unicorn/no-static-only-class" => {
+            let group = rules.complexity.get_or_insert_with(Default::default);
+            let rule = group.no_static_only_class.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "unicorn/no-thenable" => {

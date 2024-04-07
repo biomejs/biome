@@ -31,8 +31,16 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | Clippy rule name | Biome rule name |
 | ---- | ---- |
 | [approx_constant](https://rust-lang.github.io/rust-clippy/master/#/approx_constant) |[noApproximativeNumericConstant](/linter/rules/no-approximative-numeric-constant) (inspired) |
+| [collapsible_else_if](https://rust-lang.github.io/rust-clippy/master/#/collapsible_else_if) |[useCollapsedElseIf](/linter/rules/use-collapsed-else-if) |
+| [eq_op](https://rust-lang.github.io/rust-clippy/master/#/eq_op) |[noSelfCompare](/linter/rules/no-self-compare) |
+| [if_not_else](https://rust-lang.github.io/rust-clippy/master/#/if_not_else) |[noNegationElse](/linter/rules/no-negation-else) |
+| [lossy_float_literal](https://rust-lang.github.io/rust-clippy/master/#/lossy_float_literal) |[noPrecisionLoss](/linter/rules/no-precision-loss) |
+| [map_flatten](https://rust-lang.github.io/rust-clippy/master/#/map_flatten) |[useFlatMap](/linter/rules/use-flat-map) |
 | [match_str_case_mismatch](https://rust-lang.github.io/rust-clippy/master/#/match_str_case_mismatch) |[noStringCaseMismatch](/linter/rules/no-string-case-mismatch) |
 | [misrefactored_assign_op](https://rust-lang.github.io/rust-clippy/master/#/misrefactored_assign_op) |[noMisrefactoredShorthandAssign](/linter/rules/no-misrefactored-shorthand-assign) |
+| [needless_for_each](https://rust-lang.github.io/rust-clippy/master/#/needless_for_each) |[noForEach](/linter/rules/no-for-each) |
+| [redundant_else 	](https://rust-lang.github.io/rust-clippy/master/#/redundant_else 	) |[noUselessElse](/linter/rules/no-useless-else) (inspired) |
+| [self_assignment](https://rust-lang.github.io/rust-clippy/master/#/self_assignment) |[noSelfAssign](/linter/rules/no-self-assign) |
 ### ESLint
 | ESLint rule name | Biome rule name |
 | ---- | ---- |
@@ -62,7 +70,9 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [no-else-return](https://eslint.org/docs/latest/rules/no-else-return) |[noUselessElse](/linter/rules/no-useless-else) (inspired) |
 | [no-empty](https://eslint.org/docs/latest/rules/no-empty) |[noEmptyBlockStatements](/linter/rules/no-empty-block-statements) |
 | [no-empty-character-class](https://eslint.org/docs/latest/rules/no-empty-character-class) |[noEmptyCharacterClassInRegex](/linter/rules/no-empty-character-class-in-regex) |
+| [no-empty-function](https://eslint.org/docs/latest/rules/no-empty-function) |[noEmptyBlockStatements](/linter/rules/no-empty-block-statements) |
 | [no-empty-pattern](https://eslint.org/docs/latest/rules/no-empty-pattern) |[noEmptyPattern](/linter/rules/no-empty-pattern) |
+| [no-empty-static-block](https://eslint.org/docs/latest/rules/no-empty-static-block) |[noEmptyBlockStatements](/linter/rules/no-empty-block-statements) |
 | [no-eval](https://eslint.org/docs/latest/rules/no-eval) |[noGlobalEval](/linter/rules/no-global-eval) |
 | [no-ex-assign](https://eslint.org/docs/latest/rules/no-ex-assign) |[noCatchAssign](/linter/rules/no-catch-assign) |
 | [no-extra-boolean-cast](https://eslint.org/docs/latest/rules/no-extra-boolean-cast) |[noExtraBooleanCast](/linter/rules/no-extra-boolean-cast) |
@@ -85,6 +95,7 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [no-obj-calls](https://eslint.org/docs/latest/rules/no-obj-calls) |[noGlobalObjectCalls](/linter/rules/no-global-object-calls) |
 | [no-param-reassign](https://eslint.org/docs/latest/rules/no-param-reassign) |[noParameterAssign](/linter/rules/no-parameter-assign) |
 | [no-prototype-builtins](https://eslint.org/docs/latest/rules/no-prototype-builtins) |[noPrototypeBuiltins](/linter/rules/no-prototype-builtins) |
+| [no-redeclare](https://eslint.org/docs/latest/rules/no-redeclare) |[noRedeclare](/linter/rules/no-redeclare) |
 | [no-regex-spaces](https://eslint.org/docs/latest/rules/no-regex-spaces) |[noMultipleSpacesInRegularExpressionLiterals](/linter/rules/no-multiple-spaces-in-regular-expression-literals) |
 | [no-restricted-globals](https://eslint.org/docs/latest/rules/no-restricted-globals) |[noRestrictedGlobals](/linter/rules/no-restricted-globals) |
 | [no-self-assign](https://eslint.org/docs/latest/rules/no-self-assign) |[noSelfAssign](/linter/rules/no-self-assign) |
@@ -102,7 +113,9 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [no-unused-labels](https://eslint.org/docs/latest/rules/no-unused-labels) |[noUnusedLabels](/linter/rules/no-unused-labels) |
 | [no-unused-private-class-members](https://eslint.org/docs/latest/rules/no-unused-private-class-members) |[noUnusedPrivateClassMembers](/linter/rules/no-unused-private-class-members) |
 | [no-unused-vars](https://eslint.org/docs/latest/rules/no-unused-vars) |[noUnusedVariables](/linter/rules/no-unused-variables) |
+| [no-use-before-define](https://eslint.org/docs/latest/rules/no-use-before-define) |[noInvalidUseBeforeDeclaration](/linter/rules/no-invalid-use-before-declaration) |
 | [no-useless-catch](https://eslint.org/docs/latest/rules/no-useless-catch) |[noUselessCatch](/linter/rules/no-useless-catch) |
+| [no-useless-constructor](https://eslint.org/docs/latest/rules/no-useless-constructor) |[noUselessConstructor](/linter/rules/no-useless-constructor) |
 | [no-useless-rename](https://eslint.org/docs/latest/rules/no-useless-rename) |[noUselessRename](/linter/rules/no-useless-rename) |
 | [no-var](https://eslint.org/docs/latest/rules/no-var) |[noVar](/linter/rules/no-var) |
 | [no-void](https://eslint.org/docs/latest/rules/no-void) |[noVoid](/linter/rules/no-void) |
@@ -192,13 +205,18 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [ban-types](https://typescript-eslint.io/rules/ban-types) |[noBannedTypes](/linter/rules/no-banned-types) (inspired) |
 | [consistent-type-exports](https://typescript-eslint.io/rules/consistent-type-exports) |[useExportType](/linter/rules/use-export-type) (inspired) |
 | [consistent-type-imports](https://typescript-eslint.io/rules/consistent-type-imports) |[useImportType](/linter/rules/use-import-type) (inspired) |
+| [default-param-last](https://typescript-eslint.io/rules/default-param-last) |[useDefaultParameterLast](/linter/rules/use-default-parameter-last) |
+| [dot-notation](https://typescript-eslint.io/rules/dot-notation) |[useLiteralKeys](/linter/rules/use-literal-keys) |
 | [naming-convention](https://typescript-eslint.io/rules/naming-convention) |[useNamingConvention](/linter/rules/use-naming-convention) (inspired) |
+| [no-dupe-class-members](https://typescript-eslint.io/rules/no-dupe-class-members) |[noDuplicateClassMembers](/linter/rules/no-duplicate-class-members) |
+| [no-empty-function](https://typescript-eslint.io/rules/no-empty-function) |[noEmptyBlockStatements](/linter/rules/no-empty-block-statements) |
 | [no-empty-interface](https://typescript-eslint.io/rules/no-empty-interface) |[noEmptyInterface](/linter/rules/no-empty-interface) (inspired) |
 | [no-explicit-any](https://typescript-eslint.io/rules/no-explicit-any) |[noExplicitAny](/linter/rules/no-explicit-any) |
 | [no-extra-non-null-assertion](https://typescript-eslint.io/rules/no-extra-non-null-assertion) |[noExtraNonNullAssertion](/linter/rules/no-extra-non-null-assertion) |
 | [no-extraneous-class](https://typescript-eslint.io/rules/no-extraneous-class) |[noStaticOnlyClass](/linter/rules/no-static-only-class) |
 | [no-inferrable-types](https://typescript-eslint.io/rules/no-inferrable-types) |[noInferrableTypes](/linter/rules/no-inferrable-types) |
 | [no-invalid-void-type](https://typescript-eslint.io/rules/no-invalid-void-type) |[noConfusingVoidType](/linter/rules/no-confusing-void-type) |
+| [no-loss-of-precision](https://typescript-eslint.io/rules/no-loss-of-precision) |[noPrecisionLoss](/linter/rules/no-precision-loss) |
 | [no-misused-new](https://typescript-eslint.io/rules/no-misused-new) |[noMisleadingInstantiator](/linter/rules/no-misleading-instantiator) |
 | [no-namespace](https://typescript-eslint.io/rules/no-namespace) |[noNamespace](/linter/rules/no-namespace) |
 | [no-non-null-assertion](https://typescript-eslint.io/rules/no-non-null-assertion) |[noNonNullAssertion](/linter/rules/no-non-null-assertion) |
@@ -206,6 +224,7 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [no-this-alias](https://typescript-eslint.io/rules/no-this-alias) |[noUselessThisAlias](/linter/rules/no-useless-this-alias) (inspired) |
 | [no-unnecessary-type-constraint](https://typescript-eslint.io/rules/no-unnecessary-type-constraint) |[noUselessTypeConstraint](/linter/rules/no-useless-type-constraint) |
 | [no-unsafe-declaration-merging](https://typescript-eslint.io/rules/no-unsafe-declaration-merging) |[noUnsafeDeclarationMerging](/linter/rules/no-unsafe-declaration-merging) |
+| [no-unused-vars](https://typescript-eslint.io/rules/no-unused-vars) |[noUnusedVariables](/linter/rules/no-unused-variables) |
 | [no-use-before-define](https://typescript-eslint.io/rules/no-use-before-define) |[noInvalidUseBeforeDeclaration](/linter/rules/no-invalid-use-before-declaration) |
 | [no-useless-constructor](https://typescript-eslint.io/rules/no-useless-constructor) |[noUselessConstructor](/linter/rules/no-useless-constructor) |
 | [no-useless-empty-export](https://typescript-eslint.io/rules/no-useless-empty-export) |[noUselessEmptyExport](/linter/rules/no-useless-empty-export) |
@@ -218,12 +237,15 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [prefer-literal-enum-member](https://typescript-eslint.io/rules/prefer-literal-enum-member) |[useLiteralEnumMembers](/linter/rules/use-literal-enum-members) |
 | [prefer-namespace-keyword](https://typescript-eslint.io/rules/prefer-namespace-keyword) |[useNamespaceKeyword](/linter/rules/use-namespace-keyword) |
 | [prefer-optional-chain](https://typescript-eslint.io/rules/prefer-optional-chain) |[useOptionalChain](/linter/rules/use-optional-chain) |
+| [require-await](https://typescript-eslint.io/rules/require-await) |[useAwait](/linter/rules/use-await) |
 ### eslint-plugin-unicorn
 | eslint-plugin-unicorn rule name | Biome rule name |
 | ---- | ---- |
 | [filename-case](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/filename-case.md) |[useFilenamingConvention](/linter/rules/use-filenaming-convention) (inspired) |
 | [no-array-for-each](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-array-for-each.md) |[noForEach](/linter/rules/no-for-each) (inspired) |
+| [no-for-loop](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-for-loop.md) |[useForOf](/linter/rules/use-for-of) |
 | [no-instanceof-array](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-instanceof-array.md) |[useIsArray](/linter/rules/use-is-array) |
+| [no-static-only-class](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-static-only-class.md) |[noStaticOnlyClass](/linter/rules/no-static-only-class) |
 | [no-thenable](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-thenable.md) |[noThenProperty](/linter/rules/no-then-property) |
 | [no-useless-switch-case](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-useless-switch-case.md) |[noUselessSwitchCase](/linter/rules/no-useless-switch-case) |
 | [prefer-array-flat-map](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-array-flat-map.md) |[useFlatMap](/linter/rules/use-flat-map) |

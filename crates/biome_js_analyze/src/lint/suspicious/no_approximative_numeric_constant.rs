@@ -46,7 +46,7 @@ declare_rule! {
     pub NoApproximativeNumericConstant {
         version: "1.3.0",
         name: "noApproximativeNumericConstant",
-        source: RuleSource::Clippy("approx_constant"),
+        sources: &[RuleSource::Clippy("approx_constant")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

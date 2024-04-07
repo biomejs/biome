@@ -23,7 +23,7 @@ declare_rule! {
     pub NoSparseArray {
         version: "1.0.0",
         name: "noSparseArray",
-        source: RuleSource::Eslint("no-sparse-array"),
+        sources: &[RuleSource::Eslint("no-sparse-array")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

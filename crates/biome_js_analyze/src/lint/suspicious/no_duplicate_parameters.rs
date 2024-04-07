@@ -40,7 +40,7 @@ declare_rule! {
     pub NoDuplicateParameters {
         version: "1.0.0",
         name: "noDuplicateParameters",
-        source: RuleSource::Eslint("no-dupe-args"),
+        sources: &[RuleSource::Eslint("no-dupe-args")],
         recommended: true,
     }
 }

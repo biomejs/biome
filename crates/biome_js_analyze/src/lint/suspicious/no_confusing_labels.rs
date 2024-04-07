@@ -50,7 +50,7 @@ declare_rule! {
     pub NoConfusingLabels {
         version: "1.0.0",
         name: "noConfusingLabels",
-        source: RuleSource::Eslint("no-labels"),
+        sources: &[RuleSource::Eslint("no-labels")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
     }

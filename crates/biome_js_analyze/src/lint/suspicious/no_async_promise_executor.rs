@@ -39,7 +39,7 @@ declare_rule! {
     pub NoAsyncPromiseExecutor {
         version: "1.0.0",
         name: "noAsyncPromiseExecutor",
-        source: RuleSource::Eslint("no-async-promise-executor"),
+        sources: &[RuleSource::Eslint("no-async-promise-executor")],
         recommended: true,
     }
 }

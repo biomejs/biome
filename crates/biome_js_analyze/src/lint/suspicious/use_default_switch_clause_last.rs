@@ -72,7 +72,7 @@ declare_rule! {
     pub UseDefaultSwitchClauseLast {
         version: "1.0.0",
         name: "useDefaultSwitchClauseLast",
-        source: RuleSource::Eslint("default-case-last"),
+        sources: &[RuleSource::Eslint("default-case-last")],
         recommended: true,
     }
 }

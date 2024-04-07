@@ -59,7 +59,7 @@ declare_rule! {
     pub NoExtraBooleanCast {
         version: "1.0.0",
         name: "noExtraBooleanCast",
-        source: RuleSource::Eslint("no-extra-boolean-cast"),
+        sources: &[RuleSource::Eslint("no-extra-boolean-cast")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

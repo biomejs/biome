@@ -52,7 +52,7 @@ declare_rule! {
     pub NoInvalidNewBuiltin {
         version: "1.3.0",
         name: "noInvalidNewBuiltin",
-        source: RuleSource::Eslint("no-new-native-nonconstructor"),
+        sources: &[RuleSource::Eslint("no-new-native-nonconstructor")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }
