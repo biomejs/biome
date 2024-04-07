@@ -1,0 +1,35 @@
+name: Update Contributors
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-contributors-and-create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@b8edcc56aab474d90c7cf0bb8beeaf8334c15e9f # v1
+        with:
+          bins: cargo-nextest
+          cache-base: main
+      - name: Update Contributors
+        run: cargo run --bin xtask_contributors -- --token ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Pull Request
+        id: create-pull-request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/update-contributors
+          title: "chore(website): update contributors"
+          body: ""
+          labels: A-Website
