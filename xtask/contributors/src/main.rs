@@ -19,12 +19,12 @@ fn main() -> Result<()> {
 
     Ok(())
 }
-const IMPORT_IMAGE: &str = "import { Image } from \"astro:assets\"";
+const IMPORT_IMAGE: &str = "import { Image } from \"astro:assets\";";
 
 fn write_contributors_in_community(root: PathBuf, contributors: &[Contributor]) -> Result<()> {
     let mut content = String::new();
 
-    content.push_str(format!("---\n // {} \n {}  \n---\n", PREAMBLE, IMPORT_IMAGE).as_str());
+    content.push_str(format!("---\n// {}\n{}\n---\n", PREAMBLE, IMPORT_IMAGE).as_str());
 
     let contributors_per_row = [5, 4, 6, 5, 3, 5, 4];
 
@@ -59,7 +59,7 @@ fn write_contributors_in_community(root: PathBuf, contributors: &[Contributor]) 
 fn write_contributors_in_credits(root: PathBuf, contributors: &[Contributor]) -> Result<()> {
     let mut content = String::new();
 
-    content.push_str(format!("---\n // {} \n {}  \n---\n", PREAMBLE, IMPORT_IMAGE).as_str());
+    content.push_str(format!("---\n// {}\n{}\n---\n", PREAMBLE, IMPORT_IMAGE).as_str());
 
     content.push('\n');
     content.push_str("<h2>Code contributors</h2>");
