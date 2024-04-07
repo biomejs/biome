@@ -4,6 +4,8 @@ mod generate_bindings;
 mod generate_configuration;
 #[cfg(feature = "license")]
 mod generate_license;
+#[cfg(feature = "configuration")]
+mod generate_migrate_eslint;
 #[cfg(feature = "schema")]
 mod generate_schema;
 #[cfg(feature = "website")]
@@ -17,6 +19,8 @@ use crate::generate_bindings::generate_workspace_bindings;
 use crate::generate_configuration::generate_rules_configuration;
 #[cfg(feature = "license")]
 use crate::generate_license::generate_license;
+#[cfg(feature = "configuration")]
+use crate::generate_migrate_eslint::generate_migrate_eslint;
 #[cfg(feature = "schema")]
 use crate::generate_schema::generate_configuration_schema;
 #[cfg(feature = "website")]
@@ -40,10 +44,13 @@ fn main() -> Result<()> {
         TaskCommand::Analyzer => {
             generate_analyzer()?;
         }
-
         TaskCommand::Configuration => {
             #[cfg(feature = "configuration")]
             generate_rules_configuration(Overwrite)?;
+        }
+        TaskCommand::MigrateEslint => {
+            #[cfg(feature = "configuration")]
+            generate_migrate_eslint(Overwrite)?;
         }
         TaskCommand::Schema => {
             #[cfg(feature = "schema")]

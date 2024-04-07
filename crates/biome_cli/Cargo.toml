@@ -20,12 +20,14 @@ path = "src/main.rs"
 [dependencies]
 anyhow                   = "1.0.52"
 biome_analyze            = { workspace = true }
+biome_configuration      = { workspace = true }
 biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_formatter          = { workspace = true }
 biome_fs                 = { workspace = true }
+biome_js_analyze         = { workspace = true }
 biome_js_formatter       = { workspace = true }
 biome_json_formatter     = { workspace = true }
 biome_json_parser        = { workspace = true }
@@ -45,6 +47,7 @@ rayon                    = { workspace = true }
 rustc-hash               = { workspace = true }
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true }
+smallvec                 = { workspace = true }
 tokio                    = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }
 tracing                  = { workspace = true }
 tracing-appender         = "0.2"

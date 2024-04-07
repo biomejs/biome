@@ -27,7 +27,7 @@ quickcheck_macros = { workspace = true }
 serde_json        = { workspace = true }
 
 [features]
-serde = ["dep:serde", "biome_text_size/serde"]
+serde = ["dep:serde", "biome_text_size/serde", "biome_text_size/schemars"]
 
 [[bench]]
 harness = false

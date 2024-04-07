@@ -1,6 +1,6 @@
+use biome_configuration::PartialConfiguration;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
-use biome_service::PartialConfiguration;
 use schemars::schema::{RootSchema, Schema, SchemaObject};
 use schemars::schema_for;
 use serde_json::to_string;
@@ -59,6 +59,12 @@ fn rename_partial_references_in_schema(mut schema: RootSchema) -> RootSchema {
                 key = stripped.to_string();
             } else if key == "RuleWithOptions_for_Null" {
                 key = "RuleWithNoOptions".to_string();
+                if let Schema::Object(schema_object) = &mut schema {
+                    if let Some(object) = &mut schema_object.object {
+                        object.required.remove("options");
+                        object.properties.remove("options");
+                    }
+                }
             } else if key == "RuleConfiguration_for_Null" {
                 key = "RuleConfiguration".to_string();
             } else if let Some(stripped) = key.strip_prefix("RuleWithOptions_for_") {

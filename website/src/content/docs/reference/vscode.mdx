@@ -118,7 +118,7 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 
 ## Troubleshooting
 
-> I installed `@biomejs/biome`, but the extension shows a warning saying that it could not resolve library.
+### I installed `@biomejs/biome`, but the extension shows a warning saying that it could not resolve library
 
 The library `@biomejs/biome` specifies some optional dependencies that are installed based on your OS and architecture.
 
@@ -134,3 +134,7 @@ It's possible though, that the extension can't resolve the binary when loading t
 - `@biomejs/cli-linux-x64`
 - `@biomejs/cli-win32-arm64`
 - `@biomejs/cli-win32-x64`
+
+### My `biome.json` file is ignored in a multi-root workspace
+
+Currently, support for multi-root workspaces is limited, making `biome.json` files placed in individual root folders sometimes invisible to the extension. For now, you may need to set up an individual workspace for each folder that depends on Biome. You can track our progress on [this issue](https://github.com/biomejs/biome/issues/1573).

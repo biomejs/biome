@@ -737,7 +737,7 @@
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/UnusedImportsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1579,16 +1579,14 @@
 			"properties": {
 				"attributePosition": {
 					"description": "The attribute position style.",
-					"default": null,
 					"anyOf": [
 						{ "$ref": "#/definitions/AttributePosition" },
 						{ "type": "null" }
 					]
 				},
-				"enabled": { "default": null, "type": ["boolean", "null"] },
+				"enabled": { "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
-					"default": null,
 					"type": ["boolean", "null"]
 				},
 				"indentSize": {
@@ -1616,7 +1614,6 @@
 				},
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
-					"default": 80,
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				}
 			},
@@ -1847,10 +1844,9 @@
 		},
 		"RuleWithNoOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "type": "null" }
+				"level": { "$ref": "#/definitions/RulePlainConfiguration" }
 			},
 			"additionalProperties": false
 		},
@@ -1869,6 +1865,15 @@
 			"properties": {
 				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
 				"options": { "$ref": "#/definitions/RestrictedImportsOptions" }
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUnusedImportsOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
+				"options": { "$ref": "#/definitions/UnusedImportsOptions" }
 			},
 			"additionalProperties": false
 		},
@@ -2696,6 +2701,23 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UnusedImportsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUnusedImportsOptions" }
+			]
+		},
+		"UnusedImportsOptions": {
+			"type": "object",
+			"required": ["ignoreReact"],
+			"properties": {
+				"ignoreReact": {
+					"description": "Ignore `React` imports from the `react` package when set to `true`.",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
 		},
 		"UtilityClassSortingConfiguration": {
 			"anyOf": [

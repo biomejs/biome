@@ -1,7 +1,8 @@
 use crate::{CliDiagnostic, CliSession};
+use biome_configuration::PartialConfiguration;
 use biome_console::{markup, ConsoleExt, HorizontalLine};
 use biome_fs::ConfigName;
-use biome_service::{create_config, PartialConfiguration};
+use biome_service::configuration::create_config;
 
 pub(crate) fn init(mut session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagnostic> {
     let fs = &mut session.app.fs;

@@ -1,0 +1,102 @@
+---
+source: crates/biome_graphql_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```graphql
+query {
+  likeStory
+}
+
+{
+  field
+}
+
+```
+
+## AST
+
+```
+GraphqlRoot {
+    bom_token: missing (optional),
+    definitions: GraphqlDefinitionList [
+        GraphqlOperationDefinition {
+            ty: GraphqlOperationType {
+                value_token: QUERY_KW@0..6 "query" [] [Whitespace(" ")],
+            },
+            name: missing (optional),
+            variables: missing (optional),
+            directives: GraphqlDirectiveList [],
+            selection_set: GraphqlSelectionSet {
+                l_curly_token: L_CURLY@6..7 "{" [] [],
+                selections: GraphqlSelectionList [
+                    GraphqlField {
+                        alias: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@7..19 "likeStory" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: missing (optional),
+                        directives: GraphqlDirectiveList [],
+                        selection_set: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@19..21 "}" [Newline("\n")] [],
+            },
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@21..24 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@24..32 "field" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    arguments: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@32..34 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@34..35 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRAPHQL_ROOT@0..35
+  0: (empty)
+  1: GRAPHQL_DEFINITION_LIST@0..34
+    0: GRAPHQL_OPERATION_DEFINITION@0..21
+      0: GRAPHQL_OPERATION_TYPE@0..6
+        0: QUERY_KW@0..6 "query" [] [Whitespace(" ")]
+      1: (empty)
+      2: (empty)
+      3: GRAPHQL_DIRECTIVE_LIST@6..6
+      4: GRAPHQL_SELECTION_SET@6..21
+        0: L_CURLY@6..7 "{" [] []
+        1: GRAPHQL_SELECTION_LIST@7..19
+          0: GRAPHQL_FIELD@7..19
+            0: (empty)
+            1: GRAPHQL_NAME@7..19
+              0: GRAPHQL_NAME@7..19 "likeStory" [Newline("\n"), Whitespace("  ")] []
+            2: (empty)
+            3: GRAPHQL_DIRECTIVE_LIST@19..19
+            4: (empty)
+        2: R_CURLY@19..21 "}" [Newline("\n")] []
+    1: GRAPHQL_SELECTION_SET@21..34
+      0: L_CURLY@21..24 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@24..32
+        0: GRAPHQL_FIELD@24..32
+          0: (empty)
+          1: GRAPHQL_NAME@24..32
+            0: GRAPHQL_NAME@24..32 "field" [Newline("\n"), Whitespace("  ")] []
+          2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@32..32
+          4: (empty)
+      2: R_CURLY@32..34 "}" [Newline("\n")] []
+  2: EOF@34..35 "" [Newline("\n")] []
+
+```

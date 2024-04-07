@@ -2,21 +2,19 @@ use crate::cli_options::CliOptions;
 use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::{execute_mode, Execution, TraversalMode};
 use crate::{setup_cli_subscriber, CliDiagnostic, CliSession};
+use biome_console::{markup, ConsoleExt};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
-use biome_service::ConfigurationBasePath;
-use std::path::PathBuf;
+
+use super::MigrateSubCommand;
 
 /// Handler for the "check" command of the Biome CLI
 pub(crate) fn migrate(
     session: CliSession,
     cli_options: CliOptions,
     write: bool,
-    prettier: bool,
+    sub_command: Option<MigrateSubCommand>,
 ) -> Result<(), CliDiagnostic> {
-    let base_path = match cli_options.config_path.as_ref() {
-        None => ConfigurationBasePath::default(),
-        Some(path) => ConfigurationBasePath::FromUser(PathBuf::from(path)),
-    };
+    let base_path = cli_options.as_configuration_base_path();
     let LoadedConfiguration {
         configuration: _,
         diagnostics: _,
@@ -31,15 +29,19 @@ pub(crate) fn migrate(
                 write,
                 configuration_file_path: path,
                 configuration_directory_path: directory_path,
-                prettier,
+                sub_command,
             }),
             session,
             &cli_options,
             vec![],
         )
     } else {
+        let console = session.app.console;
+        console.log(markup! {
+            <Info>"If this project has not yet been set up with Biome yet, please follow the "<Hyperlink href="https://biomejs.dev/guides/getting-started/">"Getting Started guide"</Hyperlink>" first."</Info>
+        });
         Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
-            reason: "Biome couldn't find the configuration file".to_string(),
+            reason: "Biome couldn't find the Biome configuration file.".to_string(),
         }))
     }
 }

@@ -13,8 +13,8 @@ use xtask::*;
 use xtask_codegen::{to_capitalized, update};
 
 pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
-    let config_root = project_root().join("crates/biome_service/src/configuration/linter");
-    let push_rules_directory = project_root().join("crates/biome_service/src/configuration");
+    let config_root = project_root().join("crates/biome_configuration/src/linter");
+    let push_rules_directory = project_root().join("crates/biome_configuration/src");
 
     #[derive(Default)]
     struct LintRulesVisitor {
@@ -281,11 +281,11 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     };
 
     let push_rules = quote! {
-        use crate::configuration::linter::*;
+        use crate::linter::*;
         use crate::Rules;
         use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
-        pub(crate) fn push_to_analyzer_rules(
+        pub fn push_to_analyzer_rules(
             rules: &Rules,
             metadata: &MetadataRegistry,
             analyzer_rules: &mut AnalyzerRules,

@@ -1,0 +1,26 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{}
+```
+
+## `.eslintrc.yaml`
+
+```yaml
+
+```
+
+# Termination Message
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Migration has encountered an error: ESLint configuration ending with the extension `yaml` are not supported.
+  
+
+
+```

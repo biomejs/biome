@@ -55,6 +55,7 @@ use crate::file_handlers::Capabilities;
 use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
+use biome_configuration::PartialConfiguration;
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_css_formatter::can_format_css_yet;
 use biome_diagnostics::CodeSuggestion;
@@ -69,7 +70,6 @@ use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 use tracing::debug;
 
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-use crate::configuration::PartialConfiguration;
 pub use crate::file_handlers::DocumentFileSource;
 use crate::settings::WorkspaceSettings;
 
