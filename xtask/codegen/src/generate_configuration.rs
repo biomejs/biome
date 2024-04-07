@@ -115,11 +115,14 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
 
         let (global_all, global_recommended) = if group == "nursery" {
             (
-                quote! { self.is_all() && biome_flags::is_unstable() },
-                quote! { self.is_recommended() && biome_flags::is_unstable() },
+                quote! { self.is_all_true() && biome_flags::is_unstable() },
+                quote! { !self.is_recommended_false() && biome_flags::is_unstable() },
             )
         } else {
-            (quote! { self.is_all() }, quote! { self.is_recommended() })
+            (
+                quote! { self.is_all_true() },
+                quote! { !self.is_recommended_false() },
+            )
         };
 
         group_as_default_rules.push(quote! {
@@ -254,14 +257,13 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 }
             }
 
-            pub(crate) const fn is_recommended(&self) -> bool {
-                // It is only considered _not_ recommended when
-                // the configuration is `"recommended": false`.
-                // Hence, omission of the setting or set to `true` are considered recommended.
-                !matches!(self.recommended, Some(false))
+            // Note: In top level, it is only considered _not_ recommended
+            // when the recommended option is false
+            pub(crate) const fn is_recommended_false(&self) -> bool {
+                matches!(self.recommended, Some(false))
             }
 
-            pub(crate) const fn is_all(&self) -> bool {
+            pub(crate) const fn is_all_true(&self) -> bool {
                 matches!(self.all, Some(true))
             }
 
@@ -482,7 +484,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             ];
 
             /// Retrieves the recommended rules
-            pub(crate) fn is_recommended(&self) -> bool {
+            pub(crate) fn is_recommended_true(&self) -> bool {
                 // we should inject recommended rules only when they are set to "true"
                 matches!(self.recommended, Some(true))
             }
@@ -491,7 +493,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 self.recommended.is_none()
             }
 
-            pub(crate) fn is_all(&self) -> bool {
+            pub(crate) fn is_all_true(&self) -> bool {
                 matches!(self.all, Some(true))
             }
 
@@ -538,9 +540,9 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 parent_is_recommended: bool,
                 enabled_rules: &mut IndexSet<RuleFilter>,
             ) {
-                if self.is_all() || self.is_all_unset() && parent_is_all {
+                if self.is_all_true() || self.is_all_unset() && parent_is_all {
                     enabled_rules.extend(Self::all_rules_as_filters());
-                } else if self.is_recommended() || self.is_recommended_unset() && parent_is_recommended && !parent_is_all {
+                } else if self.is_recommended_true() || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended && !parent_is_all {
                     enabled_rules.extend(Self::recommended_rules_as_filters());
                 }
             }

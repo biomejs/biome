@@ -219,10 +219,10 @@ impl Rules {
             None
         }
     }
-    pub(crate) const fn is_recommended(&self) -> bool {
-        !matches!(self.recommended, Some(false))
+    pub(crate) const fn is_recommended_false(&self) -> bool {
+        matches!(self.recommended, Some(false))
     }
-    pub(crate) const fn is_all(&self) -> bool {
+    pub(crate) const fn is_all_true(&self) -> bool {
         matches!(self.all, Some(true))
     }
     #[doc = r" It returns the enabled rules by default."]
@@ -232,79 +232,107 @@ impl Rules {
         let mut enabled_rules = IndexSet::new();
         let mut disabled_rules = IndexSet::new();
         if let Some(group) = self.a11y.as_ref() {
-            group.collect_preset_rules(self.is_all(), self.is_recommended(), &mut enabled_rules);
-            enabled_rules.extend(&group.get_enabled_rules());
-            disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all() {
-            enabled_rules.extend(A11y::all_rules_as_filters());
-        } else if self.is_recommended() {
-            enabled_rules.extend(A11y::recommended_rules_as_filters());
-        }
-        if let Some(group) = self.complexity.as_ref() {
-            group.collect_preset_rules(self.is_all(), self.is_recommended(), &mut enabled_rules);
-            enabled_rules.extend(&group.get_enabled_rules());
-            disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all() {
-            enabled_rules.extend(Complexity::all_rules_as_filters());
-        } else if self.is_recommended() {
-            enabled_rules.extend(Complexity::recommended_rules_as_filters());
-        }
-        if let Some(group) = self.correctness.as_ref() {
-            group.collect_preset_rules(self.is_all(), self.is_recommended(), &mut enabled_rules);
-            enabled_rules.extend(&group.get_enabled_rules());
-            disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all() {
-            enabled_rules.extend(Correctness::all_rules_as_filters());
-        } else if self.is_recommended() {
-            enabled_rules.extend(Correctness::recommended_rules_as_filters());
-        }
-        if let Some(group) = self.nursery.as_ref() {
             group.collect_preset_rules(
-                self.is_all() && biome_flags::is_unstable(),
-                self.is_recommended() && biome_flags::is_unstable(),
+                self.is_all_true(),
+                !self.is_recommended_false(),
                 &mut enabled_rules,
             );
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all() && biome_flags::is_unstable() {
+        } else if self.is_all_true() {
+            enabled_rules.extend(A11y::all_rules_as_filters());
+        } else if !self.is_recommended_false() {
+            enabled_rules.extend(A11y::recommended_rules_as_filters());
+        }
+        if let Some(group) = self.complexity.as_ref() {
+            group.collect_preset_rules(
+                self.is_all_true(),
+                !self.is_recommended_false(),
+                &mut enabled_rules,
+            );
+            enabled_rules.extend(&group.get_enabled_rules());
+            disabled_rules.extend(&group.get_disabled_rules());
+        } else if self.is_all_true() {
+            enabled_rules.extend(Complexity::all_rules_as_filters());
+        } else if !self.is_recommended_false() {
+            enabled_rules.extend(Complexity::recommended_rules_as_filters());
+        }
+        if let Some(group) = self.correctness.as_ref() {
+            group.collect_preset_rules(
+                self.is_all_true(),
+                !self.is_recommended_false(),
+                &mut enabled_rules,
+            );
+            enabled_rules.extend(&group.get_enabled_rules());
+            disabled_rules.extend(&group.get_disabled_rules());
+        } else if self.is_all_true() {
+            enabled_rules.extend(Correctness::all_rules_as_filters());
+        } else if !self.is_recommended_false() {
+            enabled_rules.extend(Correctness::recommended_rules_as_filters());
+        }
+        if let Some(group) = self.nursery.as_ref() {
+            group.collect_preset_rules(
+                self.is_all_true() && biome_flags::is_unstable(),
+                !self.is_recommended_false() && biome_flags::is_unstable(),
+                &mut enabled_rules,
+            );
+            enabled_rules.extend(&group.get_enabled_rules());
+            disabled_rules.extend(&group.get_disabled_rules());
+        } else if self.is_all_true() && biome_flags::is_unstable() {
             enabled_rules.extend(Nursery::all_rules_as_filters());
-        } else if self.is_recommended() && biome_flags::is_unstable() {
+        } else if !self.is_recommended_false() && biome_flags::is_unstable() {
             enabled_rules.extend(Nursery::recommended_rules_as_filters());
         }
         if let Some(group) = self.performance.as_ref() {
-            group.collect_preset_rules(self.is_all(), self.is_recommended(), &mut enabled_rules);
+            group.collect_preset_rules(
+                self.is_all_true(),
+                !self.is_recommended_false(),
+                &mut enabled_rules,
+            );
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all() {
+        } else if self.is_all_true() {
             enabled_rules.extend(Performance::all_rules_as_filters());
-        } else if self.is_recommended() {
+        } else if !self.is_recommended_false() {
             enabled_rules.extend(Performance::recommended_rules_as_filters());
         }
         if let Some(group) = self.security.as_ref() {
-            group.collect_preset_rules(self.is_all(), self.is_recommended(), &mut enabled_rules);
+            group.collect_preset_rules(
+                self.is_all_true(),
+                !self.is_recommended_false(),
+                &mut enabled_rules,
+            );
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all() {
+        } else if self.is_all_true() {
             enabled_rules.extend(Security::all_rules_as_filters());
-        } else if self.is_recommended() {
+        } else if !self.is_recommended_false() {
             enabled_rules.extend(Security::recommended_rules_as_filters());
         }
         if let Some(group) = self.style.as_ref() {
-            group.collect_preset_rules(self.is_all(), self.is_recommended(), &mut enabled_rules);
+            group.collect_preset_rules(
+                self.is_all_true(),
+                !self.is_recommended_false(),
+                &mut enabled_rules,
+            );
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all() {
+        } else if self.is_all_true() {
             enabled_rules.extend(Style::all_rules_as_filters());
-        } else if self.is_recommended() {
+        } else if !self.is_recommended_false() {
             enabled_rules.extend(Style::recommended_rules_as_filters());
         }
         if let Some(group) = self.suspicious.as_ref() {
-            group.collect_preset_rules(self.is_all(), self.is_recommended(), &mut enabled_rules);
+            group.collect_preset_rules(
+                self.is_all_true(),
+                !self.is_recommended_false(),
+                &mut enabled_rules,
+            );
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all() {
+        } else if self.is_all_true() {
             enabled_rules.extend(Suspicious::all_rules_as_filters());
-        } else if self.is_recommended() {
+        } else if !self.is_recommended_false() {
             enabled_rules.extend(Suspicious::recommended_rules_as_filters());
         }
         enabled_rules.difference(&disabled_rules).copied().collect()
@@ -561,13 +589,13 @@ impl A11y {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool {
+    pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn is_all(&self) -> bool {
+    pub(crate) fn is_all_true(&self) -> bool {
         matches!(self.all, Some(true))
     }
     pub(crate) fn is_all_unset(&self) -> bool {
@@ -902,10 +930,13 @@ impl A11y {
         parent_is_recommended: bool,
         enabled_rules: &mut IndexSet<RuleFilter>,
     ) {
-        if self.is_all() || self.is_all_unset() && parent_is_all {
+        if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended()
-            || self.is_recommended_unset() && parent_is_recommended && !parent_is_all
+        } else if self.is_recommended_true()
+            || self.is_recommended_unset()
+                && self.is_all_unset()
+                && parent_is_recommended
+                && !parent_is_all
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -1262,13 +1293,13 @@ impl Complexity {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool {
+    pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn is_all(&self) -> bool {
+    pub(crate) fn is_all_true(&self) -> bool {
         matches!(self.all, Some(true))
     }
     pub(crate) fn is_all_unset(&self) -> bool {
@@ -1579,10 +1610,13 @@ impl Complexity {
         parent_is_recommended: bool,
         enabled_rules: &mut IndexSet<RuleFilter>,
     ) {
-        if self.is_all() || self.is_all_unset() && parent_is_all {
+        if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended()
-            || self.is_recommended_unset() && parent_is_recommended && !parent_is_all
+        } else if self.is_recommended_true()
+            || self.is_recommended_unset()
+                && self.is_all_unset()
+                && parent_is_recommended
+                && !parent_is_all
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -1982,13 +2016,13 @@ impl Correctness {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool {
+    pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn is_all(&self) -> bool {
+    pub(crate) fn is_all_true(&self) -> bool {
         matches!(self.all, Some(true))
     }
     pub(crate) fn is_all_unset(&self) -> bool {
@@ -2383,10 +2417,13 @@ impl Correctness {
         parent_is_recommended: bool,
         enabled_rules: &mut IndexSet<RuleFilter>,
     ) {
-        if self.is_all() || self.is_all_unset() && parent_is_all {
+        if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended()
-            || self.is_recommended_unset() && parent_is_recommended && !parent_is_all
+        } else if self.is_recommended_true()
+            || self.is_recommended_unset()
+                && self.is_all_unset()
+                && parent_is_recommended
+                && !parent_is_all
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -2722,13 +2759,13 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool {
+    pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn is_all(&self) -> bool {
+    pub(crate) fn is_all_true(&self) -> bool {
         matches!(self.all, Some(true))
     }
     pub(crate) fn is_all_unset(&self) -> bool {
@@ -3003,10 +3040,13 @@ impl Nursery {
         parent_is_recommended: bool,
         enabled_rules: &mut IndexSet<RuleFilter>,
     ) {
-        if self.is_all() || self.is_all_unset() && parent_is_all {
+        if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended()
-            || self.is_recommended_unset() && parent_is_recommended && !parent_is_all
+        } else if self.is_recommended_true()
+            || self.is_recommended_unset()
+                && self.is_all_unset()
+                && parent_is_recommended
+                && !parent_is_all
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -3162,13 +3202,13 @@ impl Performance {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool {
+    pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn is_all(&self) -> bool {
+    pub(crate) fn is_all_true(&self) -> bool {
         matches!(self.all, Some(true))
     }
     pub(crate) fn is_all_unset(&self) -> bool {
@@ -3223,10 +3263,13 @@ impl Performance {
         parent_is_recommended: bool,
         enabled_rules: &mut IndexSet<RuleFilter>,
     ) {
-        if self.is_all() || self.is_all_unset() && parent_is_all {
+        if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended()
-            || self.is_recommended_unset() && parent_is_recommended && !parent_is_all
+        } else if self.is_recommended_true()
+            || self.is_recommended_unset()
+                && self.is_all_unset()
+                && parent_is_recommended
+                && !parent_is_all
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -3308,13 +3351,13 @@ impl Security {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool {
+    pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn is_all(&self) -> bool {
+    pub(crate) fn is_all_true(&self) -> bool {
         matches!(self.all, Some(true))
     }
     pub(crate) fn is_all_unset(&self) -> bool {
@@ -3379,10 +3422,13 @@ impl Security {
         parent_is_recommended: bool,
         enabled_rules: &mut IndexSet<RuleFilter>,
     ) {
-        if self.is_all() || self.is_all_unset() && parent_is_all {
+        if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended()
-            || self.is_recommended_unset() && parent_is_recommended && !parent_is_all
+        } else if self.is_recommended_true()
+            || self.is_recommended_unset()
+                && self.is_all_unset()
+                && parent_is_recommended
+                && !parent_is_all
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -3699,13 +3745,13 @@ impl Style {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool {
+    pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn is_all(&self) -> bool {
+    pub(crate) fn is_all_true(&self) -> bool {
         matches!(self.all, Some(true))
     }
     pub(crate) fn is_all_unset(&self) -> bool {
@@ -4150,10 +4196,13 @@ impl Style {
         parent_is_recommended: bool,
         enabled_rules: &mut IndexSet<RuleFilter>,
     ) {
-        if self.is_all() || self.is_all_unset() && parent_is_all {
+        if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended()
-            || self.is_recommended_unset() && parent_is_recommended && !parent_is_all
+        } else if self.is_recommended_true()
+            || self.is_recommended_unset()
+                && self.is_all_unset()
+                && parent_is_recommended
+                && !parent_is_all
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -4715,13 +4764,13 @@ impl Suspicious {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool {
+    pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn is_all(&self) -> bool {
+    pub(crate) fn is_all_true(&self) -> bool {
         matches!(self.all, Some(true))
     }
     pub(crate) fn is_all_unset(&self) -> bool {
@@ -5256,10 +5305,13 @@ impl Suspicious {
         parent_is_recommended: bool,
         enabled_rules: &mut IndexSet<RuleFilter>,
     ) {
-        if self.is_all() || self.is_all_unset() && parent_is_all {
+        if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended()
-            || self.is_recommended_unset() && parent_is_recommended && !parent_is_all
+        } else if self.is_recommended_true()
+            || self.is_recommended_unset()
+                && self.is_all_unset()
+                && parent_is_recommended
+                && !parent_is_all
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
