@@ -281,6 +281,13 @@ impl JsFileSource {
         }
     }
 
+    /// Try to return the JS file source corresponding to this file name from well-known files
+    pub fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
+        // TODO: to be implemented
+        Err(FileSourceError::UnknownFileName(file_name.into()))
+    }
+
+    /// Try to return the JS file source corresponding to this file extension
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         match extension {
             "js" | "mjs" | "jsx" => Ok(Self::jsx()),
@@ -288,6 +295,8 @@ impl JsFileSource {
             "ts" => Ok(Self::ts()),
             "mts" | "cts" => Ok(Self::ts_restricted()),
             "tsx" => Ok(Self::tsx()),
+            // Note: the extension passed to this function can contain dots,
+            // this should be handled properly by the extension provider
             "d.ts" | "d.mts" | "d.cts" => Ok(Self::d_ts()),
             // TODO: Remove once we have full support of astro files
             "astro" => Ok(Self::astro()),
@@ -302,11 +311,12 @@ impl JsFileSource {
         }
     }
 
-    pub fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
-        // TODO: to be implemented
-        Err(FileSourceError::UnknownFileName(file_name.into()))
-    }
-
+    /// Try to return the JS file source corresponding to this language ID
+    ///
+    /// See the [LSP spec] and [VS Code spec] for a list of language identifiers
+    ///
+    /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
+    /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "javascript" => Ok(Self::js_module()),

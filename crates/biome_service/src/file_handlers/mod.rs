@@ -88,7 +88,7 @@ impl DocumentFileSource {
         Err(FileSourceError::UnknownFileName(file_name.into()))
     }
 
-    // Returns the language corresponding to this file name
+    /// Returns the document file source corresponding to this file name from well-known files
     pub fn from_well_known(file_name: &str) -> Self {
         Self::try_from_well_known(file_name)
             .map_or(DocumentFileSource::Unknown, |file_source| file_source)
@@ -110,7 +110,7 @@ impl DocumentFileSource {
         ))
     }
 
-    /// Returns the language corresponding to this file extension
+    /// Returns the document file source corresponding to this file extension
     pub fn from_extension(extension: &str) -> Self {
         Self::try_from_extension(extension)
             .map_or(DocumentFileSource::Unknown, |file_source| file_source)
@@ -129,12 +129,12 @@ impl DocumentFileSource {
         Err(FileSourceError::UnknownLanguageId(language_id.into()))
     }
 
-    /// Returns the language corresponding to this language ID
+    /// Returns the document file source corresponding to this language ID
     ///
-    /// See the [microsoft spec]
-    /// for a list of language identifiers
+    /// See the [LSP spec] and [VS Code spec] for a list of language identifiers
     ///
-    /// [microsoft spec]: https://code.visualstudio.com/docs/languages/identifiers
+    /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
+    /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn from_language_id(language_id: &str) -> Self {
         Self::try_from_language_id(language_id)
             .map_or(DocumentFileSource::Unknown, |file_source| file_source)
@@ -184,12 +184,12 @@ impl DocumentFileSource {
         Self::try_from_extension(extension)
     }
 
-    /// Returns the language corresponding to the file path
+    /// Returns the document file source corresponding to the file path
     pub fn from_path(path: &Path) -> Self {
         Self::try_from_path(path).map_or(DocumentFileSource::Unknown, |file_source| file_source)
     }
 
-    /// Returns the language if it's not unknown, otherwise returns `other`.
+    /// Returns the document file source if it's not unknown, otherwise returns `other`.
     ///
     /// # Examples
     ///

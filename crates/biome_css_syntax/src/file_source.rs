@@ -31,6 +31,13 @@ impl CssFileSource {
         }
     }
 
+    /// Try to return the CSS file source corresponding to this file name from well-known files
+    pub fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
+        // TODO: to be implemented
+        Err(FileSourceError::UnknownFileName(file_name.into()))
+    }
+
+    /// Try to return the CSS file source corresponding to this file extension
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         match extension {
             "css" => Ok(Self::css()),
@@ -41,11 +48,12 @@ impl CssFileSource {
         }
     }
 
-    pub fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
-        // TODO: to be implemented
-        Err(FileSourceError::UnknownFileName(file_name.into()))
-    }
-
+    /// Try to return the CSS file source corresponding to this language ID
+    ///
+    /// See the [LSP spec] and [VS Code spec] for a list of language identifiers
+    ///
+    /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
+    /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "css" => Ok(Self::css()),

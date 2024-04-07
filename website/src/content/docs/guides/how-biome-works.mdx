@@ -177,6 +177,31 @@ Here are some well-known files that we specifically treat based on their file na
 
 ### JSON-like Files
 
+The following files are parsed as `JSON` files with both the options `json.parser.allowComments` and `json.parser.allowTrailingCommas` set to `false`.
+
+- `.all-contributorsrc`
+- `.arcconfig`
+- `.auto-changelog`
+- `.bowerrc`
+- `.c8rc`
+- `.htmlhintrc`
+- `.imgbotconfig`
+- `.jslintrc`
+- `.nycrc`
+- `.tern-config`
+- `.tern-project`
+- `.vuerc`
+- `.watchmanconfig`
+- `mcmod.info`
+
+The following files are parsed as `JSON` files with the options `json.parser.allowComments` set to `true` but `json.parser.allowTrailingCommas` set to `false`. This is because the tools consuming these files can only strip comments.
+
+- `.ember-cli`
+- `.eslintrc.json`
+- `.jscsrc`
+- `.jshintrc`
+- `tslint.json`
+
 The following files are parsed as `JSON` files with the options `json.parser.allowComments` and `json.parser.allowTrailingCommas` set to `true`. This is because the tools consuming these files are designed to accommodate such settings.
 
 - `.babelrc`
@@ -197,28 +222,6 @@ The following files are parsed as `JSON` files with the options `json.parser.all
 - `tsconfig.json`
 - `typedoc.json`
 - `typescript.json`
-
-The following files are parsed as `JSON` files with the options `json.parser.allowComments` set to `true` but `json.parser.allowTrailingCommas` set to `false`. This is because the tools consuming these files can only strip comments.
-
-- `.ember-cli`
-- `.eslintrc.json`
-- `.jscsrc`
-- `.jshintrc`
-- `tslint.json`
-
-The following files are parsed as `JSON` files with both the options `json.parser.allowComments` and `json.parser.allowTrailingCommas` set to `false`.
-
-- `.all-contributorsrc`
-- `.arcconfig`
-- `.auto-changelog`
-- `.c8rc`
-- `.htmlhintrc`
-- `.imgbotconfig`
-- `.nycrc`
-- `.tern-config`
-- `.tern-project`
-- `.watchmanconfig`
-- `mcmod.info`
 
 ## `include` and `ignore` explained
 
