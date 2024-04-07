@@ -85,7 +85,7 @@ declare_rule! {
     /// ```
     ///
     /// ```js
-    /// <svg aria-hidden><rect /></svg>
+    /// <svg aria-hidden="true"><rect /></svg>
     /// ```
     ///
     ///
