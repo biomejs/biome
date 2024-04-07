@@ -59,9 +59,9 @@ impl<'a> Printer<'a> {
         indent: u16,
     ) -> PrintResult<Printed> {
         tracing::debug_span!("Printer::print").in_scope(move || {
-            let mut stack = PrintCallStack::new(PrintElementArgs::new(Indention::Level(indent)));
+            let mut stack = PrintCallStack::new(PrintElementArgs::new());
             let mut queue: PrintQueue<'a> = PrintQueue::new(document.as_ref());
-            let mut indent_stack = PrintIndentStack::new();
+            let mut indent_stack = PrintIndentStack::new(Indention::Level(indent));
 
             while let Some(element) = queue.pop() {
                 self.print_element(&mut stack, &mut indent_stack, &mut queue, element)?;
@@ -140,7 +140,7 @@ impl<'a> Printer<'a> {
                 }
 
                 self.state.pending_space = false;
-                self.state.pending_indent = args.indention();
+                self.state.pending_indent = indent_stack.indention();
             }
 
             FormatElement::ExpandParent => {
@@ -208,22 +208,20 @@ impl<'a> Printer<'a> {
             }
 
             FormatElement::Tag(StartIndent) => {
-                let args = args.increment_indent_level(self.options.indent_style());
-                indent_stack.push(args.indention());
+                indent_stack.indent(self.options.indent_style());
                 stack.push(TagKind::Indent, args);
             }
 
             FormatElement::Tag(StartDedent(mode)) => {
-                let args = match mode {
-                    DedentMode::Level => args.set_indent(indent_stack.start_dedent()),
-                    DedentMode::Root => args.reset_indent(),
+                match mode {
+                    DedentMode::Level => indent_stack.start_dedent(),
+                    DedentMode::Root => indent_stack.reset_indent(),
                 };
                 stack.push(TagKind::Dedent, args);
             }
 
             FormatElement::Tag(StartAlign(align)) => {
-                let args = args.set_indent_align(align.count());
-                indent_stack.push(args.indention());
+                indent_stack.align(align.count());
                 stack.push(TagKind::Align, args);
             }
 
@@ -243,16 +241,15 @@ impl<'a> Printer<'a> {
             FormatElement::Tag(StartIndentIfGroupBreaks(group_id)) => {
                 let group_mode = self.state.group_modes.unwrap_print_mode(*group_id, element);
 
-                let args = match group_mode {
-                    PrintMode::Flat => args,
-                    PrintMode::Expanded => args.increment_indent_level(self.options.indent_style),
-                };
+                if let PrintMode::Expanded = group_mode {
+                    indent_stack.indent(self.options.indent_style);
+                }
 
                 stack.push(TagKind::IndentIfGroupBreaks, args);
             }
 
             FormatElement::Tag(StartLineSuffix) => {
-                indent_stack.push_suffix(args.indention());
+                indent_stack.push_suffix(indent_stack.indention());
                 self.state
                     .line_suffixes
                     .extend(args, queue.iter_content(TagKind::LineSuffix));
@@ -297,7 +294,7 @@ impl<'a> Printer<'a> {
             FormatElement::Tag(tag @ EndDedent(mode)) => {
                 match mode {
                     DedentMode::Level => indent_stack.end_dedent(),
-                    DedentMode::Root => {}
+                    DedentMode::Root => indent_stack.pop(),
                 };
                 stack.pop(tag.kind())?;
             }
@@ -1155,23 +1152,21 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             FormatElement::Interned(content) => self.queue.extend_back(content),
 
             FormatElement::Tag(StartIndent) => {
-                let args = args.increment_indent_level(self.options().indent_style());
+                self.indent_stack.indent(self.options().indent_style());
                 self.stack.push(TagKind::Indent, args);
-                self.indent_stack.push(args.indention());
             }
 
             FormatElement::Tag(StartDedent(mode)) => {
-                let args = match mode {
-                    DedentMode::Level => args.set_indent(self.indent_stack.start_dedent()),
-                    DedentMode::Root => args.reset_indent(),
+                match mode {
+                    DedentMode::Level => self.indent_stack.start_dedent(),
+                    DedentMode::Root => self.indent_stack.reset_indent(),
                 };
                 self.stack.push(TagKind::Dedent, args);
             }
 
             FormatElement::Tag(StartAlign(align)) => {
-                let args = args.set_indent_align(align.count());
+                self.indent_stack.align(align.count());
                 self.stack.push(TagKind::Align, args);
-                self.indent_stack.push(args.indention());
             }
 
             FormatElement::Tag(StartGroup(group)) => {
@@ -1220,10 +1215,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                         self.stack.push(TagKind::IndentIfGroupBreaks, args);
                     }
                     PrintMode::Expanded => {
-                        self.stack.push(
-                            TagKind::IndentIfGroupBreaks,
-                            args.increment_indent_level(self.options().indent_style()),
-                        );
+                        self.indent_stack.indent(self.options().indent_style());
+                        self.stack.push(TagKind::IndentIfGroupBreaks, args);
                     }
                 }
             }
@@ -1257,12 +1250,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                     .group_modes()
                     .get_print_mode(*group_id)
                     .unwrap_or_else(|| args.mode());
-
-                match group_mode {
-                    PrintMode::Flat => {}
-                    PrintMode::Expanded => {
-                        self.indent_stack.pop();
-                    }
+                if let PrintMode::Expanded = group_mode {
+                    self.indent_stack.pop();
                 }
                 self.stack.pop(tag.kind())?;
             }
@@ -1271,10 +1260,9 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                 self.indent_stack.pop();
             }
             FormatElement::Tag(tag @ EndDedent(mode)) => {
-                match mode {
-                    DedentMode::Level => self.indent_stack.end_dedent(),
-                    DedentMode::Root => {}
-                };
+                if let DedentMode::Level = mode {
+                    self.indent_stack.end_dedent();
+                }
                 self.stack.pop(tag.kind())?;
             }
         }

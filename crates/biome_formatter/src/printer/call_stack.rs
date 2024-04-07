@@ -26,43 +26,16 @@ pub(super) struct StackFrame {
 /// data structures. Such structures should be stored on the [PrinterState] instead.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub(super) struct PrintElementArgs {
-    indent: Indention,
     mode: PrintMode,
 }
 
 impl PrintElementArgs {
-    pub fn new(indent: Indention) -> Self {
-        Self {
-            indent,
-            ..Self::default()
-        }
+    pub fn new() -> Self {
+        Self { ..Self::default() }
     }
 
     pub(super) fn mode(&self) -> PrintMode {
         self.mode
-    }
-
-    pub(super) fn indention(&self) -> Indention {
-        self.indent
-    }
-
-    pub fn increment_indent_level(mut self, indent_style: IndentStyle) -> Self {
-        self.indent = self.indent.increment_level(indent_style);
-        self
-    }
-
-    pub fn reset_indent(mut self) -> Self {
-        self.indent = Indention::default();
-        self
-    }
-    pub fn set_indent(mut self, indent: Indention) -> Self {
-        self.indent = indent;
-        self
-    }
-
-    pub fn set_indent_align(mut self, count: NonZeroU8) -> Self {
-        self.indent = self.indent.set_align(count);
-        self
     }
 
     pub fn with_print_mode(mut self, mode: PrintMode) -> Self {
@@ -74,7 +47,6 @@ impl PrintElementArgs {
 impl Default for PrintElementArgs {
     fn default() -> Self {
         Self {
-            indent: Indention::Level(0),
             mode: PrintMode::Expanded,
         }
     }
@@ -260,19 +232,12 @@ pub(super) trait IndentStack {
     fn current_stack_mut(&mut self) -> &mut Self::Stack;
     fn history_stack_mut(&mut self) -> &mut Self::HistoryStack;
 
-    fn push(&mut self, indention: Indention) -> Indention {
+    fn push(&mut self, indention: Indention) {
         self.current_stack_mut().push(indention);
-        indention
     }
-    fn start_dedent(&mut self) -> Indention {
+    fn start_dedent(&mut self) {
         if let Some(indent) = self.current_stack_mut().pop() {
             self.history_stack_mut().push(indent);
-            self.current_stack()
-                .top()
-                .copied()
-                .unwrap_or_else(Indention::default)
-        } else {
-            Indention::default()
         }
     }
     fn end_dedent(&mut self) {
@@ -280,10 +245,22 @@ pub(super) trait IndentStack {
             self.current_stack_mut().push(indent);
         }
     }
-    fn pop(&mut self) -> Indention {
-        self.current_stack_mut()
-            .pop()
-            .unwrap_or_else(Indention::default)
+    fn pop(&mut self) {
+        self.current_stack_mut().pop();
+    }
+    fn indention(&self) -> Indention {
+        self.current_stack().top().copied().unwrap_or_default()
+    }
+    fn reset_indent(&mut self) {
+        self.current_stack_mut().push(Indention::default());
+    }
+    fn indent(&mut self, indent_style: IndentStyle) {
+        let next_indent = self.indention().increment_level(indent_style);
+        self.current_stack_mut().push(next_indent);
+    }
+    fn align(&mut self, count: NonZeroU8) {
+        let next_indent = self.indention().set_align(count);
+        self.current_stack_mut().push(next_indent);
     }
 }
 
@@ -296,9 +273,9 @@ pub(super) struct PrintIndentStack {
 }
 
 impl PrintIndentStack {
-    pub(super) fn new() -> Self {
+    pub(super) fn new(indention: Indention) -> Self {
         Self {
-            indentions: Vec::new(),
+            indentions: vec![indention],
             history_indentions: Vec::new(),
             suffix_indentions: Vec::new(),
         }
