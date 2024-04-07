@@ -277,19 +277,29 @@ impl<'a> Printer<'a> {
                 | EndEntry
                 | EndGroup
                 | EndConditionalContent
-                | EndIndentIfGroupBreaks
                 | EndVerbatim
                 | EndLineSuffix
                 | EndFill),
             ) => {
                 stack.pop(tag.kind())?;
             }
+            FormatElement::Tag(tag @ EndIndentIfGroupBreaks(group_id)) => {
+                if let PrintMode::Expanded =
+                    self.state.group_modes.unwrap_print_mode(*group_id, element)
+                {
+                    indent_stack.pop();
+                }
+                stack.pop(tag.kind())?;
+            }
             FormatElement::Tag(tag @ (EndIndent | EndAlign)) => {
                 stack.pop(tag.kind())?;
                 indent_stack.pop();
             }
-            FormatElement::Tag(tag @ EndDedent) => {
-                indent_stack.end_dedent();
+            FormatElement::Tag(tag @ EndDedent(mode)) => {
+                match mode {
+                    DedentMode::Level => indent_stack.end_dedent(),
+                    DedentMode::Root => {}
+                };
                 stack.pop(tag.kind())?;
             }
         };
@@ -1237,19 +1247,35 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                 | EndEntry
                 | EndGroup
                 | EndConditionalContent
-                | EndIndentIfGroupBreaks
                 | EndVerbatim
                 | EndFill),
             ) => {
+                self.stack.pop(tag.kind())?;
+            }
+            FormatElement::Tag(tag @ EndIndentIfGroupBreaks(group_id)) => {
+                let group_mode = self
+                    .group_modes()
+                    .get_print_mode(*group_id)
+                    .unwrap_or_else(|| args.mode());
+
+                match group_mode {
+                    PrintMode::Flat => {}
+                    PrintMode::Expanded => {
+                        self.indent_stack.pop();
+                    }
+                }
                 self.stack.pop(tag.kind())?;
             }
             FormatElement::Tag(tag @ (EndIndent | EndAlign)) => {
                 self.stack.pop(tag.kind())?;
                 self.indent_stack.pop();
             }
-            FormatElement::Tag(tag @ EndDedent) => {
+            FormatElement::Tag(tag @ EndDedent(mode)) => {
+                match mode {
+                    DedentMode::Level => self.indent_stack.end_dedent(),
+                    DedentMode::Root => {}
+                };
                 self.stack.pop(tag.kind())?;
-                self.indent_stack.end_dedent();
             }
         }
 

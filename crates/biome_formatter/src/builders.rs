@@ -953,7 +953,7 @@ impl<Context> Format<Context> for Dedent<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartDedent(self.mode)))?;
         Arguments::from(&self.content).fmt(f)?;
-        f.write_element(FormatElement::Tag(EndDedent))
+        f.write_element(FormatElement::Tag(EndDedent(self.mode)))
     }
 }
 
@@ -2225,7 +2225,7 @@ impl<Context> Format<Context> for IndentIfGroupBreaks<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartIndentIfGroupBreaks(self.group_id)))?;
         Arguments::from(&self.content).fmt(f)?;
-        f.write_element(FormatElement::Tag(EndIndentIfGroupBreaks))
+        f.write_element(FormatElement::Tag(EndIndentIfGroupBreaks(self.group_id)))
     }
 }
 

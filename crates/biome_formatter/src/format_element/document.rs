@@ -514,12 +514,12 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         EndFill
                         | EndLabelled
                         | EndConditionalContent
-                        | EndIndentIfGroupBreaks
+                        | EndIndentIfGroupBreaks(_)
                         | EndAlign
                         | EndIndent
                         | EndGroup
                         | EndLineSuffix
-                        | EndDedent
+                        | EndDedent(_)
                         | EndVerbatim => {
                             write!(f, [ContentArrayEnd, text(")")])?;
                         }
