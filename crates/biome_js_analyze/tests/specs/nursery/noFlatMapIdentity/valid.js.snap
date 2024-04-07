@@ -4,5 +4,5 @@ expression: valid.js
 ---
 # Input
 ```jsx
-array.flatMap((arr) => arr * 5);
+array.flatMap((arr) => arr * 2);
 ```

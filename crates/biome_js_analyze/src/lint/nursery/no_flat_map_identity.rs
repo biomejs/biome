@@ -39,7 +39,7 @@ declare_rule! {
     pub NoFlatMapIdentity {
         version: "next",
         name: "noFlatMapIdentity",
-        recommended: false,
+        recommended: true,
         source: RuleSource::Clippy("flat_map_identity"),
         fix_kind: FixKind::Safe,
     }

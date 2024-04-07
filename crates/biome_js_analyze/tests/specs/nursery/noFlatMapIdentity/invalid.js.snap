@@ -18,7 +18,7 @@ invalid.js:1:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ array.flatMap((arr) => {return arr})
   
-  i You can just use flat() to flatten the array
+  i You can just use flat to flatten the array
   
   i Safe fix: Replace unnecessary flatMap call to flat instead.
   
@@ -38,7 +38,7 @@ invalid.js:2:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━
   > 2 │ array.flatMap((arr) => {return arr})
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i You can just use flat() to flatten the array
+  i You can just use flat to flatten the array
   
   i Safe fix: Replace unnecessary flatMap call to flat instead.
   
