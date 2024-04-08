@@ -163,7 +163,7 @@ lazy_static       = "1.4.0"
 oxc_resolver      = "1.4.0"
 quickcheck        = "1.0.3"
 quickcheck_macros = "1.0.0"
-quote             = { version = "1.0.28" }
+quote             = { version = "1.0.35" }
 rayon             = "1.8.1"
 regex             = "1.10.3"
 rustc-hash        = "1.1.0"
