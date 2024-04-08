@@ -15,6 +15,7 @@ use crate::{
 
 /// Serializable representation for a [Diagnostic](super::Diagnostic).
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(test, derive(Eq, PartialEq))]
 pub struct Diagnostic {
@@ -129,6 +130,7 @@ impl<D: super::Diagnostic + ?Sized> std::fmt::Display for PrintDescription<'_, D
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(test, derive(Eq, PartialEq))]
 struct Location {
@@ -151,6 +153,7 @@ impl From<super::Location<'_>> for Location {
 
 /// Implementation of [Visitor] collecting serializable [Advice] into a vector.
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(test, derive(Eq, PartialEq))]
 struct Advices {
@@ -237,6 +240,7 @@ impl super::Advices for Advices {
 /// See the [Visitor] trait for additional documentation on all the supported
 /// advice types.
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(test, derive(Eq, PartialEq))]
 enum Advice {

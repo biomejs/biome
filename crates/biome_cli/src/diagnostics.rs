@@ -54,6 +54,8 @@ pub enum CliDiagnostic {
     NoFilesWereProcessed(NoFilesWereProcessed),
     /// Errors thrown when running the `biome migrate` command
     MigrateError(MigrationDiagnostic),
+
+    Report(ReportDiagnostic),
 }
 
 #[derive(Debug, Diagnostic)]
@@ -261,6 +263,13 @@ impl DeprecatedArgument {
         }
     }
 }
+
+#[derive(Debug, Default, Diagnostic)]
+#[diagnostic(
+    category = "internalError/fs",
+    severity = Error,
+)]
+pub struct ReportDiagnostic {}
 
 /// Advices for the [CliDiagnostic]
 #[derive(Debug, Default)]

@@ -302,7 +302,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
 
                     let should_print = self.should_print();
 
-                    if self.execution.should_report_to_terminal() && should_print {
+                    if should_print {
                         diagnostics_to_print.push(err);
                     }
                 }
@@ -349,7 +349,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
 
                             let should_print = self.should_print();
 
-                            if self.execution.should_report_to_terminal() && should_print {
+                            if should_print {
                                 let diag =
                                     diag.with_file_path(&name).with_file_source_code(&content);
                                 diagnostics_to_print.push(diag)
@@ -382,7 +382,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
 
                     let should_print = self.should_print();
 
-                    if self.execution.should_report_to_terminal() && should_print {
+                    if should_print {
                         if self.execution.is_ci() {
                             match diff_kind {
                                 DiffKind::Format => {
