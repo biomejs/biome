@@ -51,7 +51,6 @@ impl FormatNodeRule<JsxSpreadChild> for FormatJsxSpreadChild {
         write!(f, [l_curly_token.format()])?;
 
         if f.comments().has_comments(expression.syntax())
-            && !f.comments().is_suppressed(expression.syntax())
         {
             write!(f, [soft_block_indent(&format_inner)])?;
         } else {
