@@ -92,7 +92,7 @@ impl FormatRule<AnyJsExpression> for FormatAnyJsExpressionWithoutComments {
                 FormatJsFunctionExpression::default().fmt_node(node, f)
             }
             AnyJsExpression::JsIdentifierExpression(node) => {
-                FormatJsIdentifierExpression::default().fmt_node(node, f)
+                FormatJsIdentifierExpression.fmt_node(node, f)
             }
             AnyJsExpression::JsImportCallExpression(node) => {
                 FormatJsImportCallExpression.fmt_node(node, f)
