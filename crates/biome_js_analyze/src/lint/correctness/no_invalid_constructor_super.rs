@@ -48,7 +48,7 @@ declare_rule! {
     pub NoInvalidConstructorSuper {
         version: "1.0.0",
         name: "noInvalidConstructorSuper",
-        source: RuleSource::Eslint("constructor-super"),
+        sources: &[RuleSource::Eslint("constructor-super")],
         recommended: true,
     }
 }

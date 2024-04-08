@@ -41,7 +41,7 @@ declare_rule! {
     pub NoGlobalAssign {
         version: "1.5.0",
         name: "noGlobalAssign",
-        source: RuleSource::Eslint("no-global-assign"),
+        sources: &[RuleSource::Eslint("no-global-assign")],
         recommended: true,
     }
 }

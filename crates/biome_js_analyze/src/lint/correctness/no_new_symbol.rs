@@ -34,7 +34,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noNewSymbol",
         recommended: false,
-        source: RuleSource::Eslint("no-new-symbol"),
+        sources: &[RuleSource::Eslint("no-new-symbol")],
         deprecated: "Use `noInvalidNewBuiltin` instead.",
         fix_kind: FixKind::Unsafe,
     }

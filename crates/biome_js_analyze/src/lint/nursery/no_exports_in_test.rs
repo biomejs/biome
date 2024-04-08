@@ -40,7 +40,7 @@ declare_rule! {
         version: "1.6.0",
         name: "noExportsInTest",
         recommended: true,
-        source: RuleSource::EslintJest("no-export"),
+        sources: &[RuleSource::EslintJest("no-export")],
         source_kind: RuleSourceKind::Inspired,
     }
 }

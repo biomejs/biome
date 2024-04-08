@@ -88,7 +88,7 @@ impl<L: Language> RegistryVisitor<L> for EslintLintRulesVisitor {
         R::Query: Queryable<Language = L>,
         <R::Query as Queryable>::Output: Clone,
     {
-        if let Some(source) = R::METADATA.source {
+        for source in R::METADATA.sources {
             if source.is_eslint() || source.is_eslint_plugin() {
                 self.0.insert(
                     source.to_namespaced_rule_name(),

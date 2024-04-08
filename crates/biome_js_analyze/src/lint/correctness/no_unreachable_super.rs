@@ -64,7 +64,7 @@ declare_rule! {
     pub NoUnreachableSuper {
         version: "1.0.0",
         name: "noUnreachableSuper",
-        source: RuleSource::Eslint("no-this-before-super"),
+        sources: &[RuleSource::Eslint("no-this-before-super")],
         recommended: true,
     }
 }

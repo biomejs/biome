@@ -55,7 +55,7 @@ declare_rule! {
     pub NoFallthroughSwitchClause {
         version: "1.0.0",
         name: "noFallthroughSwitchClause",
-        source: RuleSource::Eslint("no-fallthrough"),
+        sources: &[RuleSource::Eslint("no-fallthrough")],
         recommended: true,
     }
 }

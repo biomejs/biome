@@ -52,7 +52,10 @@ declare_rule! {
     pub UseLiteralKeys {
         version: "1.0.0",
         name: "useLiteralKeys",
-        source: RuleSource::Eslint("dot-notation"),
+        sources: &[
+            RuleSource::Eslint("dot-notation"),
+            RuleSource::EslintTypeScript("dot-notation")
+        ],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

@@ -48,7 +48,7 @@ declare_rule! {
     pub NoMisleadingInstantiator {
         version: "1.3.0",
         name: "noMisleadingInstantiator",
-        source: RuleSource::EslintTypeScript("no-misused-new"),
+        sources: &[RuleSource::EslintTypeScript("no-misused-new")],
         recommended: true,
     }
 }

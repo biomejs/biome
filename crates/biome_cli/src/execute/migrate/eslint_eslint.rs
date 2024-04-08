@@ -5,10 +5,9 @@ use biome_deserialize::{
 };
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
+use indexmap::IndexSet;
 use rustc_hash::FxHashMap;
-use rustc_hash::FxHashSet;
 use std::borrow::Cow;
-use std::collections::hash_set;
 use std::hash::{Hash, Hasher};
 use std::ops::DerefMut;
 use std::vec;
@@ -406,21 +405,20 @@ impl Deserializable for NumberOrString {
 }
 
 #[derive(Debug, Default)]
-pub(crate) struct Rules(pub(crate) FxHashSet<Rule>);
+pub(crate) struct Rules(
+    // We use `IndexSet` instead of `HashSet` to preserve the order.
+    // Keeping the order is important because several ESLint rules can have
+    // the same equivalent Biome rule.
+    // The severity level of the last one is thus used.
+    pub(crate) IndexSet<Rule>,
+);
 impl Merge for Rules {
     fn merge_with(&mut self, other: Self) {
         self.0.extend(other.0);
     }
 }
-impl IntoIterator for Rules {
-    type Item = Rule;
-    type IntoIter = hash_set::IntoIter<Rule>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.into_iter()
-    }
-}
 impl Deref for Rules {
-    type Target = FxHashSet<Rule>;
+    type Target = IndexSet<Rule>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -448,7 +446,7 @@ impl Deserializable for Rules {
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 use biome_deserialize::Text;
-                let mut result = FxHashSet::default();
+                let mut result = IndexSet::default();
                 for (key, value) in members.flatten() {
                     let Some(rule_name) = Text::deserialize(&key, "", diagnostics) else {
                         continue;

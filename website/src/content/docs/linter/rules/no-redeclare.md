@@ -8,6 +8,8 @@ title: noRedeclare (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-redeclare" target="_blank"><code>no-redeclare</code></a>
+
 Source: <a href="https://typescript-eslint.io/rules/no-redeclare" target="_blank"><code>no-redeclare</code></a>
 
 Disallow variable, function, class, and type redeclarations in the same scope.

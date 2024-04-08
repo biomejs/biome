@@ -46,7 +46,7 @@ declare_rule! {
     pub NoUselessLoneBlockStatements {
         version: "1.3.3",
         name: "noUselessLoneBlockStatements",
-        source: RuleSource::Eslint("no-lone-blocks"),
+        sources: &[RuleSource::Eslint("no-lone-blocks")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

@@ -51,7 +51,7 @@ declare_rule! {
     pub UseAriaActivedescendantWithTabindex {
         version: "1.3.0",
         name: "useAriaActivedescendantWithTabindex",
-        source: RuleSource::EslintJsxA11y("aria-activedescendant-has-tabindex"),
+        sources: &[RuleSource::EslintJsxA11y("aria-activedescendant-has-tabindex")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

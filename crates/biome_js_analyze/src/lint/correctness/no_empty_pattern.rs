@@ -35,7 +35,7 @@ declare_rule! {
     pub NoEmptyPattern {
         version: "1.0.0",
         name: "noEmptyPattern",
-        source: RuleSource::Eslint("no-empty-pattern"),
+        sources: &[RuleSource::Eslint("no-empty-pattern")],
         recommended: true,
     }
 }

@@ -50,7 +50,7 @@ declare_rule! {
     pub UseTemplate {
         version: "1.0.0",
         name: "useTemplate",
-        source: RuleSource::Eslint("prefer-template"),
+        sources: &[RuleSource::Eslint("prefer-template")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

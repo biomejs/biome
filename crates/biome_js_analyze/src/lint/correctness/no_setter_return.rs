@@ -67,7 +67,7 @@ declare_rule! {
     pub NoSetterReturn {
         version: "1.0.0",
         name: "noSetterReturn",
-        source: RuleSource::Eslint("no-setter-return"),
+        sources: &[RuleSource::Eslint("no-setter-return")],
         recommended: true,
     }
 }

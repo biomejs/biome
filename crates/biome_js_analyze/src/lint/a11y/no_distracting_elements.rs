@@ -40,7 +40,7 @@ declare_rule! {
     pub NoDistractingElements {
         version: "1.0.0",
         name: "noDistractingElements",
-        source: RuleSource::EslintJsxA11y("no-distracting-elements"),
+        sources: &[RuleSource::EslintJsxA11y("no-distracting-elements")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

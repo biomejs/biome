@@ -182,7 +182,7 @@ impl eslint_eslint::Rules {
         results: &mut MigrationResults,
     ) -> biome_config::Rules {
         let mut rules = biome_config::Rules::default();
-        for eslint_rule in self {
+        for eslint_rule in self.0 {
             migrate_eslint_rule(&mut rules, eslint_rule, options, results);
         }
         rules

@@ -86,7 +86,7 @@ declare_rule! {
     pub NoGlobalObjectCalls {
         version: "1.0.0",
         name: "noGlobalObjectCalls",
-        source: RuleSource::Eslint("no-obj-calls"),
+        sources: &[RuleSource::Eslint("no-obj-calls")],
         recommended: true,
     }
 }

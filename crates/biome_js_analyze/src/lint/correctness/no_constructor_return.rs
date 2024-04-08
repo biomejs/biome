@@ -46,7 +46,7 @@ declare_rule! {
     pub NoConstructorReturn {
         version: "1.0.0",
         name: "noConstructorReturn",
-        source: RuleSource::Eslint("no-constructor-return"),
+        sources: &[RuleSource::Eslint("no-constructor-return")],
         recommended: true,
     }
 }

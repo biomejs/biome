@@ -76,7 +76,7 @@ declare_rule! {
     pub UseOptionalChain {
         version: "1.0.0",
         name: "useOptionalChain",
-        source: RuleSource::EslintTypeScript("prefer-optional-chain"),
+        sources: &[RuleSource::EslintTypeScript("prefer-optional-chain")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

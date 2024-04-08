@@ -8,6 +8,8 @@ title: noUselessConstructor (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-useless-constructor" target="_blank"><code>no-useless-constructor</code></a>
+
 Source: <a href="https://typescript-eslint.io/rules/no-useless-constructor" target="_blank"><code>no-useless-constructor</code></a>
 
 Disallow unnecessary constructors.
