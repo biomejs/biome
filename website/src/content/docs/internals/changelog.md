@@ -195,6 +195,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [style/useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accept `PAscalCase` for local and top-level variables.
+
+  This allows supporting local variables that hold a component or a regular class.
+  The following code is now accepted:
+
+  ```tsx
+  function loadComponent() {
+    const Component = getComponent();
+    return <Component />;
+  }
+  ```
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Lint rules `useNodejsImportProtocol`, `useNodeAssertStrict`, `noRestrictedImports`, `noNodejsModules` will no longer check `declare module` statements anymore. Contributed by @Sec-ant
