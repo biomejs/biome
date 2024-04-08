@@ -30,10 +30,6 @@ declare_rule! {
     /// array.flatMap((arr) => {return arr});
     /// ```
     ///
-    /// ```js,expect_diagnostic
-    /// array.flatMap();
-    /// ```
-    ///
     /// ### Valid
     ///
     /// ```js
@@ -96,10 +92,8 @@ impl Rule for NoFlatMapIdentity {
             if function_parameter == function_body {
                 return Some(());
             }
-            return None;
         }
-
-        Some(())
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
