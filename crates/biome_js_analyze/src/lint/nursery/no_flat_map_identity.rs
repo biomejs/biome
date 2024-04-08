@@ -57,7 +57,15 @@ impl Rule for NoFlatMapIdentity {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let flat_map_call = ctx.query();
+
+        let flat_map_expression =
+            AnyJsMemberExpression::cast_ref(flat_map_call.callee().ok()?.syntax())?;
+        if flat_map_expression.member_name()?.text() != "flatMap" {
+            return None;
+        }
+
         let arguments = flat_map_call.arguments().ok()?.args();
+
         if let Some(arg) = arguments.first() {
             let arg = arg.ok()?;
             let arg = arg
@@ -65,6 +73,7 @@ impl Rule for NoFlatMapIdentity {
                 .as_js_arrow_function_expression()?;
 
             let function_parameter = arg.parameters().ok()?.text();
+            let function_parameter = function_parameter.trim_matches(&['(', ')']);
 
             let function_body: String = match arg.body().ok()? {
                 AnyJsFunctionBody::AnyJsExpression(body) => body.omit_parentheses().text(),
@@ -84,18 +93,11 @@ impl Rule for NoFlatMapIdentity {
                 }
             };
 
-            let function_parameter = function_parameter.trim_matches(&['(', ')']);
-            if function_parameter != function_body {
-                return None;
+            if function_parameter == function_body {
+                return Some(());
             }
-            let flat_map_expression =
-                AnyJsMemberExpression::cast_ref(flat_map_call.callee().ok()?.syntax())?;
-            if flat_map_expression.member_name()?.text() != "flatMap" {
-                return None;
-            }
-        } else {
-            return Some(());
-        };
+            return None;
+        }
 
         Some(())
     }
