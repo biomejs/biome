@@ -540,9 +540,10 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 parent_is_recommended: bool,
                 enabled_rules: &mut IndexSet<RuleFilter>,
             ) {
+                // The order of the if-else branches MATTERS!
                 if self.is_all_true() || self.is_all_unset() && parent_is_all {
                     enabled_rules.extend(Self::all_rules_as_filters());
-                } else if self.is_recommended_true() || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended && !parent_is_all {
+                } else if self.is_recommended_true() || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended {
                     enabled_rules.extend(Self::recommended_rules_as_filters());
                 }
             }

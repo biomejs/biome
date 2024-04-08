@@ -933,10 +933,7 @@ impl A11y {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
         } else if self.is_recommended_true()
-            || self.is_recommended_unset()
-                && self.is_all_unset()
-                && parent_is_recommended
-                && !parent_is_all
+            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -1613,10 +1610,7 @@ impl Complexity {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
         } else if self.is_recommended_true()
-            || self.is_recommended_unset()
-                && self.is_all_unset()
-                && parent_is_recommended
-                && !parent_is_all
+            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -2420,10 +2414,7 @@ impl Correctness {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
         } else if self.is_recommended_true()
-            || self.is_recommended_unset()
-                && self.is_all_unset()
-                && parent_is_recommended
-                && !parent_is_all
+            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -3043,10 +3034,7 @@ impl Nursery {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
         } else if self.is_recommended_true()
-            || self.is_recommended_unset()
-                && self.is_all_unset()
-                && parent_is_recommended
-                && !parent_is_all
+            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -3266,10 +3254,7 @@ impl Performance {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
         } else if self.is_recommended_true()
-            || self.is_recommended_unset()
-                && self.is_all_unset()
-                && parent_is_recommended
-                && !parent_is_all
+            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -3425,10 +3410,7 @@ impl Security {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
         } else if self.is_recommended_true()
-            || self.is_recommended_unset()
-                && self.is_all_unset()
-                && parent_is_recommended
-                && !parent_is_all
+            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -4199,10 +4181,7 @@ impl Style {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
         } else if self.is_recommended_true()
-            || self.is_recommended_unset()
-                && self.is_all_unset()
-                && parent_is_recommended
-                && !parent_is_all
+            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
@@ -5308,10 +5287,7 @@ impl Suspicious {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
         } else if self.is_recommended_true()
-            || self.is_recommended_unset()
-                && self.is_all_unset()
-                && parent_is_recommended
-                && !parent_is_all
+            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
         {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
