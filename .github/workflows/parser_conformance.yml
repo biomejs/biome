@@ -81,7 +81,7 @@ jobs:
 
       - name: Find Previous Comment
         if: github.event_name == 'pull_request'
-        uses: peter-evans/find-comment@d5fe37641ad8451bdd80312415672ba26c86575e # v3.0.0
+        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
         id: previous-comment
         with:
           issue-number: ${{ steps.pr-number.outputs.pr }}
