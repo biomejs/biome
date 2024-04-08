@@ -56,7 +56,7 @@ declare_rule! {
     pub NoNonoctalDecimalEscape {
         version: "1.0.0",
         name: "noNonoctalDecimalEscape",
-        source: RuleSource::Eslint("no-nonoctal-decimal-escape"),
+        sources: &[RuleSource::Eslint("no-nonoctal-decimal-escape")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

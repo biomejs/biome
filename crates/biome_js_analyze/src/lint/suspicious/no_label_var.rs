@@ -25,7 +25,7 @@ declare_rule! {
     pub NoLabelVar {
         version: "1.0.0",
         name: "noLabelVar",
-        source: RuleSource::Eslint("no-label-var"),
+        sources: &[RuleSource::Eslint("no-label-var")],
         recommended: true,
     }
 }

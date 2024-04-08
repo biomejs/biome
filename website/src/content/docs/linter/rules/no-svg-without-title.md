@@ -78,6 +78,10 @@ To make svg accessible, the following methods are available:
 </svg>
 ```
 
+```jsx
+<svg role="presentation">foo</svg>
+```
+
 ### Valid
 
 ```jsx
@@ -115,12 +119,25 @@ To make svg accessible, the following methods are available:
 </svg>
 ```
 
+```jsx
+<svg role="graphics-symbol"><rect /></svg>
+```
+
+```jsx
+<svg role="graphics-symbol img"><rect /></svg>
+```
+
+```jsx
+<svg aria-hidden="true"><rect /></svg>
+```
+
 ## Accessibility guidelines
 
 [Document Structure – SVG 1.1 (Second Edition)](https://www.w3.org/TR/SVG11/struct.html#DescriptionAndTitleElements)
 [ARIA: img role - Accessibility | MDN](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/img_role)
 [Accessible SVGs | CSS-Tricks - CSS-Tricks](https://css-tricks.com/accessible-svgs/)
 [Contextually Marking up accessible images and SVGs | scottohara.me](https://www.scottohara.me/blog/2019/05/22/contextual-images-svgs-and-a11y.html)
+[Accessible SVGs](https://www.unimelb.edu.au/accessibility/techniques/accessible-svgs)
 
 ## Related links
 

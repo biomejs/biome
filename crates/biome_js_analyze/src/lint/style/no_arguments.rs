@@ -27,7 +27,7 @@ declare_rule! {
     pub NoArguments {
         version: "1.0.0",
         name: "noArguments",
-        source: RuleSource::Eslint("prefer-rest-params"),
+        sources: &[RuleSource::Eslint("prefer-rest-params")],
         recommended: true,
     }
 }

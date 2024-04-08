@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: stableResultInvalid.js
+---
+# Input
+```jsx
+import { useCallback } from "react";
+import { useDispatch } from "react-redux";
+
+function MyComponent25() {
+    const dispatch = useDispatch();
+    const doAction = useCallback(() => dispatch(someAction()), []);
+}
+
+```
+
+# Diagnostics
+```
+stableResultInvalid.js:6:22 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook does not specify all of its dependencies: dispatch
+  
+    4 │ function MyComponent25() {
+    5 │     const dispatch = useDispatch();
+  > 6 │     const doAction = useCallback(() => dispatch(someAction()), []);
+      │                      ^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    4 │ function MyComponent25() {
+    5 │     const dispatch = useDispatch();
+  > 6 │     const doAction = useCallback(() => dispatch(someAction()), []);
+      │                                        ^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i Either include it or remove the dependency array
+  
+
+```

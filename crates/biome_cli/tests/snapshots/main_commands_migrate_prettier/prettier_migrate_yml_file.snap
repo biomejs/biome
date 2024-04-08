@@ -19,58 +19,9 @@ useTabs: true
 ```block
 migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Migration has encountered an error: Could not deserialize the Prettier configuration file
+  × Migration has encountered an error: Could not deserialize the Prettier configuration file.
+    Only JSON configurations are supported.
   
 
-
-```
-
-# Emitted Messages
-
-```block
-.prettierrc:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × String values must be double quoted.
-  
-  > 1 │ useTabs: true
-      │ ^^^^^^^
-  
-
-```
-
-```block
-.prettierrc:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × End of file expected
-  
-  > 1 │ useTabs: true
-      │        ^
-  
-  i Use an array for a sequence of values: `[1, 2]`
-  
-
-```
-
-```block
-.prettierrc:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × End of file expected
-  
-  > 1 │ useTabs: true
-      │          ^^^^
-  
-  i Use an array for a sequence of values: `[1, 2]`
-  
-
-```
-
-```block
-.prettierrc:1:1 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Incorrect type, expected an object, but received an array.
-  
-  > 1 │ useTabs: true
-      │ ^^^^^^^^^^^^^
-  
 
 ```

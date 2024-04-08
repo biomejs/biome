@@ -38,7 +38,7 @@ declare_rule! {
     pub NoCommentText {
         version: "1.0.0",
         name: "noCommentText",
-        source: RuleSource::EslintReact("jsx-no-comment-textnodes"),
+        sources: &[RuleSource::EslintReact("jsx-no-comment-textnodes")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

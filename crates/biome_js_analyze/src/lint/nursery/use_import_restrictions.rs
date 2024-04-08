@@ -75,7 +75,7 @@ declare_rule! {
     pub UseImportRestrictions {
         version: "1.0.0",
         name: "useImportRestrictions",
-        source: RuleSource::EslintImportAccess("eslint-plugin-import-access"),
+        sources: &[RuleSource::EslintImportAccess("eslint-plugin-import-access")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
     }

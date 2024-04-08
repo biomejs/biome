@@ -67,7 +67,7 @@ declare_rule! {
     pub UseImportType {
         version: "1.5.0",
         name: "useImportType",
-        source: RuleSource::EslintTypeScript("consistent-type-imports"),
+        sources: &[RuleSource::EslintTypeScript("consistent-type-imports")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
         fix_kind: FixKind::Safe,

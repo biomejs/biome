@@ -48,7 +48,7 @@ declare_rule! {
         version: "next",
         name: "noDuplicateElseIf",
         recommended: true,
-        source: RuleSource::Eslint("no-dupe-else-if"),
+        sources: &[RuleSource::Eslint("no-dupe-else-if")],
     }
 }
 

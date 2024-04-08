@@ -53,7 +53,7 @@ declare_rule! {
     pub UseShorthandAssign {
         version: "1.3.0",
         name: "useShorthandAssign",
-        source: RuleSource::Eslint("operator-assignment"),
+        sources: &[RuleSource::Eslint("operator-assignment")],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

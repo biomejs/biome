@@ -17,24 +17,23 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Now Biome can detect the script language in Svelte and Vue script blocks more reliably ([#2245](https://github.com/biomejs/biome/issues/2245)). Contributed by @Sec-ant
 
+#### Enhancements
+
+- Complete the well-known file lists for JSON-like files. Trailing commas are allowed in `.jsonc` files by default. Some well-known files like `tsconfig.json` and `.babelrc` don't use the `.jsonc` extension but still allow comments and trailing commas. While others, such as `.eslintrc.json`, only allow comments. Biome is able to identify these files and adjusts the `json.parser.allowTrailingCommas` option accordingly to ensure they are correctly parsed. Contributed by @Sec-ant
+
 ### CLI
-
-#### Bug fixes
-
-- Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnositic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
-- Biome now correctly filters out files that are not present in the current directory when using the `--changed` flag [#1996](https://github.com/biomejs/biome/issues/1996).
 
 #### New features
 
 - Add a command to migrate from ESLint
 
-  `@biomejs/biome migrate eslint` allows you to migrate an ESLint configuration to Biome.
+  `biome migrate eslint` allows you to migrate an ESLint configuration to Biome.
   The command supports [legacy ESLint configurations](https://eslint.org/docs/latest/use/configure/configuration-files) and [new flat ESLint configurations](https://eslint.org/docs/latest/use/configure/configuration-files-new).
   Legacy ESLint configurations using the YAML format are not supported.
 
   When loading a legacy ESLint configuration, Biome resolves the `extends` field.
   It resolves both shared configurations and plugin presets!
-  To do this, it invokes NodeJS.
+  To do this, it invokes _Node.js_.
 
   Biome relies on the metadata of its rules to determine the [equivalent rule of an ESLint rule](https://biomejs.dev/linter/rules-sources/).
   A Biome rule is either inspired or roughly identical to an ESLint rules.
@@ -62,7 +61,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
 
-  `@biomejs/biome migrate eslint --write` changes the Biome configuration as follows:
+  `biome migrate eslint --write` changes the Biome configuration as follows:
 
   ```json
   {
@@ -88,7 +87,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
 
-  Also, if the working diretcory contains `.eslintignore`, then Biome migrates the glob patterns.
+  Also, if the working directory contains `.eslintignore`, then Biome migrates the glob patterns.
   Nested `.eslintignore` in subdirectories and negated glob patterns are not supported.
 
   If you find any issue, please don't hesitate to report them.
@@ -104,7 +103,30 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Support JavaScript configuration files when migrating from Prettier
+
+  `biome migrate prettier` is now able to migrate Prettier configuration files
+  ending with `js`, `mjs`, or `cjs` extensions.
+  To do this, Biome invokes Node.js.
+
+  Also, embedded Prettier configurations in `package.json` are now supported.
+
+  Contributed by @Conaclos
+
+- Support `overrides` field in Prettier configuration files when migrating from Prettier. 
+  Contributed by @Conaclos
+
+#### Bug fixes
+
+- Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnositic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
+
+- Biome now correctly filters out files that are not present in the current directory when using the `--changed` flag [#1996](https://github.com/biomejs/biome/issues/1996). Contributed by @castarco
+
 ### Configuration
+
+#### Bug fixes
+
+- Now setting group level `all` to `false` can disable recommended rules from that group when top level `recommended` is `true` or unset. Contributed by @Sec-ant
 
 #### Enhancements
 
@@ -113,6 +135,30 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Previously, when Biome encountered a parsing error in its configuration file,
   it didn't indicate the location of the error.
   It now displays the name of the configuration file and the range where the error occurred.
+
+  Contributed by @Conaclos
+
+- `options` is no longer required for rules without any options ([#2313](https://github.com/biomejs/biome/issues/2313)).
+
+  Previously, the JSON schema required to set `options` to `null` when an object is used to set the diagnostic level of a rule without any option.
+  However, if `options` is set to `null`, Biome emits an error.
+
+  The schema is now fixed and it no longer requires specifying `options`.
+  This makes the following configuration valid:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "style": {
+          "noDefaultExport": {
+            "level": "off"
+          }
+        }
+      }
+    }
+  }
+  ```
 
   Contributed by @Conaclos
 
@@ -136,6 +182,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Implement [#2043](https://github.com/biomejs/biome/issues/2043): The React rule [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) is now also compatible with Preact hooks imported from `preact/hooks` or `preact/compat`. Contributed by @arendjr
 
 #### Enhancements
+
+- [style/useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention/) now allows prefixing a filename with `+` ([#2341](https://github.com/biomejs/biome/issues/2341)).
+
+  This is a convention used by [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
+
+  Contributed by @Conaclos
 
 #### Bug fixes
 
@@ -274,7 +326,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Support applying lint fixes when calling the `lintContent` method of the `Biome` class ([#1956](https://github.com/biomejs/biome/pull/1956)). Contributed by @mnahkies
 
-### Parser
+### Linter
 
 #### Bug fixes
 
@@ -364,6 +416,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### Parser
 
 #### Bug fixes
+
+- JavaScript lexer is now able to lex regular expression literals with escaped non-ascii chars ([#1941](https://github.com/biomejs/biome/issues/1941)).
+
+  Contributed by @Sec-ant
 
 ## 1.6.0 (2024-03-08)
 

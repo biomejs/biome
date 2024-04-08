@@ -20,7 +20,7 @@ declare_rule! {
     pub NoVoid {
         version: "1.0.0",
         name: "noVoid",
-        source: RuleSource::Eslint("no-void"),
+        sources: &[RuleSource::Eslint("no-void")],
         recommended: false,
     }
 }

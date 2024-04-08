@@ -41,7 +41,7 @@ declare_rule! {
     pub UseValidForDirection {
         version: "1.0.0",
         name: "useValidForDirection",
-        source: RuleSource::Eslint("for-direction"),
+        sources: &[RuleSource::Eslint("for-direction")],
         recommended: true,
     }
 }

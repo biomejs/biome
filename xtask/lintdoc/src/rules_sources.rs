@@ -50,34 +50,36 @@ description: A page that maps lint rules from other sources to Biome
 
     for (rule_name, metadata) in rules {
         let kebab_rule_name = Case::Kebab.convert(rule_name);
-        if let Some(source) = &metadata.source {
-            let set = rules_by_source.get_mut(&format!("{source}"));
-            if let Some(set) = set {
-                set.insert(SourceSet {
-                    biome_rule_name: rule_name.to_string(),
-                    biome_link: format!("/linter/rules/{}", kebab_rule_name),
-                    source_link: source.to_rule_url(),
-                    source_rule_name: source.as_rule_name().to_string(),
-                    inspired: metadata
-                        .source_kind
-                        .map_or(false, |kind| kind.is_inspired()),
-                });
-            } else {
-                let mut set = BTreeSet::new();
-                set.insert(SourceSet {
-                    biome_rule_name: rule_name.to_string(),
-                    biome_link: format!("/linter/rules/{}", kebab_rule_name),
-                    source_link: source.to_rule_url(),
-                    source_rule_name: source.as_rule_name().to_string(),
-                    inspired: metadata.source_kind.map_or(true, |kind| kind.is_inspired()),
-                });
-                rules_by_source.insert(format!("{source}"), set);
-            }
-        } else {
+        if metadata.sources.is_empty() {
             exclusive_biome_rules.insert((
                 rule_name.to_string(),
                 format!("/linter/rules/{}", kebab_rule_name),
             ));
+        } else {
+            for source in metadata.sources {
+                let set = rules_by_source.get_mut(&format!("{source}"));
+                if let Some(set) = set {
+                    set.insert(SourceSet {
+                        biome_rule_name: rule_name.to_string(),
+                        biome_link: format!("/linter/rules/{}", kebab_rule_name),
+                        source_link: source.to_rule_url(),
+                        source_rule_name: source.as_rule_name().to_string(),
+                        inspired: metadata
+                            .source_kind
+                            .map_or(false, |kind| kind.is_inspired()),
+                    });
+                } else {
+                    let mut set = BTreeSet::new();
+                    set.insert(SourceSet {
+                        biome_rule_name: rule_name.to_string(),
+                        biome_link: format!("/linter/rules/{}", kebab_rule_name),
+                        source_link: source.to_rule_url(),
+                        source_rule_name: source.as_rule_name().to_string(),
+                        inspired: metadata.source_kind.map_or(true, |kind| kind.is_inspired()),
+                    });
+                    rules_by_source.insert(format!("{source}"), set);
+                }
+            }
         }
     }
 

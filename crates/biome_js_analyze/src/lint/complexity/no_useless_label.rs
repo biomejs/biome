@@ -35,7 +35,7 @@ declare_rule! {
     pub NoUselessLabel {
         version: "1.0.0",
         name: "noUselessLabel",
-        source: RuleSource::Eslint("no-extra-label"),
+        sources: &[RuleSource::Eslint("no-extra-label")],
         recommended: true,
         fix_kind: FixKind::Safe,
     }

@@ -43,7 +43,10 @@ declare_rule! {
     pub UseForOf {
         version: "1.5.0",
         name: "useForOf",
-        source: RuleSource::EslintTypeScript("prefer-for-of"),
+        sources: &[
+            RuleSource::EslintTypeScript("prefer-for-of"),
+            RuleSource::EslintUnicorn("no-for-loop"),
+        ],
         recommended: false,
     }
 }

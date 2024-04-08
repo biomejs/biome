@@ -10,6 +10,8 @@ This rule is recommended by Biome. A diagnostic error will appear when linting y
 
 Source: <a href="https://eslint.org/docs/latest/rules/no-self-compare" target="_blank"><code>no-self-compare</code></a>
 
+Source: <a href="https://rust-lang.github.io/rust-clippy/master/#/eq_op" target="_blank"><code>eq_op</code></a>
+
 Disallow comparisons where both sides are exactly the same.
 
 >Comparing a variable against itself is usually an error, either a typo or refactoring error. It is confusing to the reader and may potentially introduce a runtime error.

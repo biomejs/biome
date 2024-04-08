@@ -81,7 +81,7 @@ declare_rule! {
         version: "next",
         name: "noMisplacedAssertion",
         recommended: false,
-        source: RuleSource::EslintJest("no-standalone-expect"),
+        sources: &[RuleSource::EslintJest("no-standalone-expect")],
         source_kind: RuleSourceKind::Inspired,
     }
 }

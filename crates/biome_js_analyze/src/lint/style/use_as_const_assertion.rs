@@ -48,7 +48,7 @@ declare_rule! {
     pub UseAsConstAssertion {
         version: "1.3.0",
         name: "useAsConstAssertion",
-        source: RuleSource::EslintTypeScript("prefer-as-const"),
+        sources: &[RuleSource::EslintTypeScript("prefer-as-const")],
         recommended: true,
         fix_kind: FixKind::Safe,
     }

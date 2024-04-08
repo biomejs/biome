@@ -6,6 +6,8 @@ title: noNegationElse (since v1.0.0)
 
 Source: <a href="https://eslint.org/docs/latest/rules/no-negated-condition" target="_blank"><code>no-negated-condition</code></a>
 
+Source: <a href="https://rust-lang.github.io/rust-clippy/master/#/if_not_else" target="_blank"><code>if_not_else</code></a>
+
 Disallow negation in the condition of an `if` statement if it has an `else` clause.
 
 ## Examples

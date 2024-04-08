@@ -33,7 +33,7 @@ declare_rule! {
     pub NoParameterProperties {
         version: "1.0.0",
         name: "noParameterProperties",
-        source: RuleSource::EslintTypeScript("parameter-properties"),
+        sources: &[RuleSource::EslintTypeScript("parameter-properties")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
     }

@@ -6,6 +6,8 @@ title: useAwait (since v1.4.0)
 
 Source: <a href="https://eslint.org/docs/latest/rules/require-await" target="_blank"><code>require-await</code></a>
 
+Source: <a href="https://typescript-eslint.io/rules/require-await" target="_blank"><code>require-await</code></a>
+
 Ensure `async` functions utilize `await`.
 
 This rule reports `async` functions that lack an `await` expression. As `async`

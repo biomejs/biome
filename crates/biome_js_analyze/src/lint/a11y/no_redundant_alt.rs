@@ -42,7 +42,7 @@ declare_rule! {
     pub NoRedundantAlt {
         version: "1.0.0",
         name: "noRedundantAlt",
-        source: RuleSource::EslintJsxA11y("no-redundant-roles"),
+        sources: &[RuleSource::EslintJsxA11y("no-redundant-roles")],
         recommended: true,
     }
 }

@@ -262,7 +262,7 @@ fn generate_group(
             meta.version,
             is_recommended,
             has_code_action,
-            meta.source.as_ref(),
+            meta.sources,
             meta.source_kind.as_ref(),
         ) {
             Ok(summary) => {
@@ -307,7 +307,7 @@ fn generate_rule(
     version: &'static str,
     is_recommended: bool,
     has_fix_kind: bool,
-    source: Option<&RuleSource>,
+    sources: &[RuleSource],
     source_kind: Option<&RuleSourceKind>,
 ) -> Result<Vec<Event<'static>>> {
     let mut content = Vec::new();
@@ -352,9 +352,9 @@ fn generate_rule(
         writeln!(content)?;
     }
 
-    if let Some(source) = source {
+    for source in sources {
         let (source_rule_url, source_rule_name) = source.as_url_and_rule_name();
-        match source_kind.cloned().unwrap_or_default() {
+        match source_kind.copied().unwrap_or_default() {
             RuleSourceKind::Inspired => {
                 write!(content, "Inspired from: ")?;
             }

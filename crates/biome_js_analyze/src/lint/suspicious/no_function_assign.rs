@@ -96,7 +96,7 @@ declare_rule! {
     pub NoFunctionAssign {
         version: "1.0.0",
         name: "noFunctionAssign",
-        source: RuleSource::Eslint("no-func-assign"),
+        sources: &[RuleSource::Eslint("no-func-assign")],
         recommended: true,
     }
 }

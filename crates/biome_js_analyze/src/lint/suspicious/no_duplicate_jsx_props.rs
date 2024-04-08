@@ -33,7 +33,7 @@ declare_rule! {
  pub NoDuplicateJsxProps {
         version: "1.0.0",
         name: "noDuplicateJsxProps",
-        source: RuleSource::EslintReact("jsx-no-duplicate-props"),
+        sources: &[RuleSource::EslintReact("jsx-no-duplicate-props")],
         recommended: true,
     }
 }

@@ -31,7 +31,7 @@ declare_rule! {
     pub NoUndeclaredVariables {
         version: "1.0.0",
         name: "noUndeclaredVariables",
-        source: RuleSource::Eslint("no-undef"),
+        sources: &[RuleSource::Eslint("no-undef")],
         recommended: false,
     }
 }

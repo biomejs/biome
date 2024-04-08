@@ -33,7 +33,7 @@ declare_rule! {
     pub NoVoidElementsWithChildren {
         version: "1.0.0",
         name: "noVoidElementsWithChildren",
-        source: RuleSource::EslintReact("void-dom-elements-no-children"),
+        sources: &[RuleSource::EslintReact("void-dom-elements-no-children")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

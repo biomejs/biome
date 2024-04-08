@@ -27,7 +27,10 @@ declare_rule! {
     pub NoSelfCompare {
         version: "1.0.0",
         name: "noSelfCompare",
-        source: RuleSource::Eslint("no-self-compare"),
+        sources: &[
+            RuleSource::Eslint("no-self-compare"),
+            RuleSource::Clippy("eq_op"),
+        ],
         recommended: true,
     }
 }

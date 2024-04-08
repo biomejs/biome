@@ -37,7 +37,7 @@ declare_rule! {
     pub NoCatchAssign {
         version: "1.0.0",
         name: "noCatchAssign",
-        source: RuleSource::Eslint("no-ex-assign"),
+        sources: &[RuleSource::Eslint("no-ex-assign")],
         recommended: true,
     }
 }

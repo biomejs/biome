@@ -91,7 +91,10 @@ declare_rule! {
     pub NoStaticOnlyClass {
         version: "1.0.0",
         name: "noStaticOnlyClass",
-        source: RuleSource::EslintTypeScript("no-extraneous-class"),
+        sources: &[
+            RuleSource::EslintTypeScript("no-extraneous-class"),
+            RuleSource::EslintUnicorn("no-static-only-class"),
+        ],
         recommended: true,
     }
 }

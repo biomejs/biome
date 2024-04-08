@@ -10,6 +10,8 @@ This rule is part of the [nursery](/linter/rules/#nursery) group.
 
 Source: <a href="https://eslint.org/docs/latest/rules/no-restricted-imports" target="_blank"><code>no-restricted-imports</code></a>
 
+Source: <a href="https://typescript-eslint.io/rules/no-restricted-imports" target="_blank"><code>no-restricted-imports</code></a>
+
 Disallow specified modules when loaded by import or require.
 
 ## Options

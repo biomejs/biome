@@ -87,7 +87,10 @@ declare_rule! {
     pub NoDuplicateClassMembers {
         version: "1.0.0",
         name: "noDuplicateClassMembers",
-        source: RuleSource::Eslint("no-dupe-class-members"),
+        sources: &[
+            RuleSource::Eslint("no-dupe-class-members"),
+            RuleSource::EslintTypeScript("no-dupe-class-members")
+        ],
         recommended: true,
     }
 }

@@ -98,7 +98,7 @@ declare_rule! {
     pub NoInferrableTypes {
         version: "1.0.0",
         name: "noInferrableTypes",
-        source: RuleSource::EslintTypeScript("no-inferrable-types"),
+        sources: &[RuleSource::EslintTypeScript("no-inferrable-types")],
         recommended: true,
         fix_kind: FixKind::Safe,
     }

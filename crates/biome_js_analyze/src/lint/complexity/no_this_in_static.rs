@@ -81,7 +81,7 @@ declare_rule! {
     pub NoThisInStatic {
         version: "1.3.1",
         name: "noThisInStatic",
-        source: RuleSource::EslintMysticatea("no-this-in-static"),
+        sources: &[RuleSource::EslintMysticatea("no-this-in-static")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

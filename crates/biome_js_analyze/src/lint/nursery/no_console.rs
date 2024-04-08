@@ -23,7 +23,7 @@ declare_rule! {
     pub NoConsole {
         version: "1.6.0",
         name: "noConsole",
-        source: RuleSource::Eslint("no-console"),
+        sources: &[RuleSource::Eslint("no-console")],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
