@@ -89,7 +89,7 @@ fn write_contributors_in_credits(root: PathBuf, contributors: &[Contributor]) ->
         content.push('\n');
     }
 
-    content.push_str("</ul>");
+    content.push_str("</ul>\n");
     fs2::write(root.join("Contributors.astro"), content)?;
     Ok(())
 }
@@ -110,6 +110,7 @@ fn get_contributors(token: &str) -> Vec<Contributor> {
         &mut contributors,
     );
     contributors.sort_by(|a, b| b.contributions.cmp(&a.contributions));
+    contributors.retain(|c| !c.login.ends_with("[bot]"));
     contributors
 }
 
