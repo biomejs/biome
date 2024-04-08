@@ -12,6 +12,6 @@
 	"devDependencies": {
 		"@types/bun": "1.0.12",
 		"read-package-up": "11.0.0",
-		"typescript": "5.4.3"
+		"typescript": "5.4.4"
 	}
 }
