@@ -27,7 +27,7 @@ jobs:
         run: cargo run --bin xtask_contributors -- --token ${{ secrets.GITHUB_TOKEN }}
       - name: Create Pull Request
         id: create-pull-request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e # v6
         with:
           branch: chore/update-contributors
           title: "chore(website): update contributors"
