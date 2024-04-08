@@ -30,6 +30,10 @@ declare_rule! {
     /// array.flatMap((arr) => {return arr});
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// array.flatMap();
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
@@ -89,6 +93,8 @@ impl Rule for NoFlatMapIdentity {
             if flat_map_expression.member_name()?.text() != "flatMap" {
                 return None;
             }
+        } else {
+            return Some(());
         };
 
         Some(())

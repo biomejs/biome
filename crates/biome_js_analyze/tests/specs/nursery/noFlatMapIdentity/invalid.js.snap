@@ -12,13 +12,13 @@ array.flatMap((arr) => {return arr})
 ```
 invalid.js:1:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid unnecessary callback in flatMap call
+  ! Avoid unnecessary callback in flatMap call.
   
   > 1 │ array.flatMap((arr) => arr)
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ array.flatMap((arr) => {return arr})
   
-  i You can just use flat to flatten the array
+  i You can just use flat to flatten the array.
   
   i Safe fix: Replace unnecessary flatMap call to flat instead.
   
@@ -32,13 +32,13 @@ invalid.js:1:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━
 ```
 invalid.js:2:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid unnecessary callback in flatMap call
+  ! Avoid unnecessary callback in flatMap call.
   
     1 │ array.flatMap((arr) => arr)
   > 2 │ array.flatMap((arr) => {return arr})
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i You can just use flat to flatten the array
+  i You can just use flat to flatten the array.
   
   i Safe fix: Replace unnecessary flatMap call to flat instead.
   

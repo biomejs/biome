@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidEmptyArgument.js
+---
+# Input
+```jsx
+array.flatMap()
+```
+
+# Diagnostics
+```
+invalidEmptyArgument.js:1:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid unnecessary callback in flatMap call.
+  
+  > 1 │ array.flatMap()
+      │ ^^^^^^^^^^^^^^^
+  
+  i You can just use flat to flatten the array.
+  
+  i Safe fix: Replace unnecessary flatMap call to flat instead.
+  
+  - array.flatMap()
+  + array.flat()
+  
+
+```
