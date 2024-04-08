@@ -3,8 +3,8 @@ use crate::parser::{
     directive::DirectiveList,
     is_at_name,
     parse_error::{
-        expected_any_selection, expected_named_type, expected_selection_set, expected_type,
-        expected_value, expected_variable_definition,
+        expected_any_selection, expected_named_type, expected_type, expected_value,
+        expected_variable_definition,
     },
     parse_name,
     r#type::{parse_named_type, parse_type},
@@ -128,7 +128,7 @@ pub(crate) fn parse_operation_definition(p: &mut GraphqlParser) -> ParsedSyntax 
     parse_variable_definitions(p).ok();
 
     DirectiveList.parse_list(p);
-    parse_selection_set(p).or_add_diagnostic(p, expected_selection_set);
+    parse_selection_set(p).ok();
 
     Present(m.complete(p, GRAPHQL_OPERATION_DEFINITION))
 }
@@ -197,7 +197,7 @@ fn parse_fragment(p: &mut GraphqlParser) -> ParsedSyntax {
             m.complete(p, GRAPHQL_TYPE_CONDITION);
         }
         DirectiveList.parse_list(p);
-        parse_selection_set(p).or_add_diagnostic(p, expected_selection_set);
+        parse_selection_set(p).ok();
         Present(m.complete(p, GRAPHQL_INLINE_FRAGMENT))
     }
 }

@@ -6,10 +6,6 @@ pub(crate) fn expected_any_definition(p: &GraphqlParser, range: TextRange) -> Pa
     expected_node("definition", range, p)
 }
 
-pub(crate) fn expected_selection_set(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("selection set", range, p)
-}
-
 pub(crate) fn expected_any_selection(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["field", "fragment spread", "inline fragment"], range, p)
 }
