@@ -23,15 +23,18 @@ declare_rule! {
     /// A filename consists of two parts: a name and a set of consecutive extension.
     /// For instance, `my-filename.test.js` has `my-filename` as name, and two consecutive extensions: `.test` and `.js`.
     ///
-    /// The name of a filename can start with a dot, be prefixed and suffixed by underscores `_`.
-    /// For example, `.filename.js`, `__filename__.js`, or even `.__filename__.js`.
+    /// The filename can start with a dot or a plus sign, be prefixed and suffixed by underscores `_`.
+    /// For example, `.filename.js`, `+filename.js`, `__filename__.js`, or even `.__filename__.js`.
+    ///
+    /// The convention of prefixing a filename with a plus sign is used by
+    /// [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
     ///
     /// By default, the rule ensures that the filename is either in [`camelCase`], [`kebab-case`], [`snake_case`],
     /// or equal to the name of one export in the file.
     ///
     /// ## Options
     ///
-    /// The rule provides two options that are detailed in the following subsections.
+    /// The rule provides several options that are detailed in the following subsections.
     ///
     /// ```json
     /// {
@@ -46,7 +49,7 @@ declare_rule! {
     ///
     /// ### strictCase
     ///
-    /// When this option is set to `true`, it forbids consecutive uppercase characters in [`camelCase`].
+    /// When this option is set to `true`, it forbids consecutive uppercase characters in [`camelCase`] and [`PascalCase`].
     /// For instance,  when the option is set to `true`, `agentID` will throw an error.
     /// This name should be renamed to `agentId`.
     ///
@@ -60,7 +63,7 @@ declare_rule! {
     /// When this option is set to `true`, it forbids names that include non-ASCII characters.
     /// For instance,  when the option is set to `true`, `café` or `안녕하세요` will throw an error.
     ///
-    /// When the option is set to `false`, anames may include non-ASCII characters.
+    /// When the option is set to `false`, a name may include non-ASCII characters.
     /// `café` and `안녕하세요` are so valid.
     ///
     /// Default: `false`
@@ -106,6 +109,11 @@ impl Rule for UseFilenamingConvention {
         let name = if name.is_empty() {
             // The filename starts with a dot
             splitted.next()?
+        } else if let Some(stripped_name) = name.strip_prefix('+') {
+            // Support [Sveltekit](https://kit.svelte.dev/docs/routing#page) and
+            // [Vike](https://vike.dev/route) routing conventions
+            // where page name starts with `+`.
+            stripped_name
         } else {
             name
         };
@@ -174,6 +182,8 @@ impl Rule for UseFilenamingConvention {
                 let name = if name.is_empty() {
                     // The filename starts with a dot
                     splitted.next()?
+                } else if let Some(stripped_name) = name.strip_prefix('+') {
+                    stripped_name
                 } else {
                     name
                 };
