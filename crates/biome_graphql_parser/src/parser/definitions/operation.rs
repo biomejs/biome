@@ -111,7 +111,7 @@ pub(crate) fn parse_operation_definition(p: &mut GraphqlParser) -> ParsedSyntax 
         return Absent;
     }
 
-    if !p.at_ts(OPERATION_TYPE) {
+    if is_at_selection_set(p) {
         return parse_selection_set(p);
     }
 
@@ -180,7 +180,7 @@ fn parse_field(p: &mut GraphqlParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_fragment(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !p.at(DOT3) {
+    if !is_at_fragment(p) {
         return Absent;
     }
     let m = p.start();
