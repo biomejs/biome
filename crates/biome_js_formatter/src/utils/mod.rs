@@ -4,6 +4,7 @@ mod binary_like_expression;
 mod conditional;
 pub mod string_utils;
 
+pub(crate) mod expression;
 pub(crate) mod format_class;
 pub(crate) mod format_modifiers;
 pub(crate) mod function_body;
@@ -36,7 +37,6 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, AstNodeList};
 use biome_text_size::TextSize;
 pub(crate) use conditional::{AnyJsConditional, ConditionalJsxChain};
-pub(crate) mod expression;
 pub(crate) use object_like::JsObjectLike;
 pub(crate) use object_pattern_like::JsObjectPatternLike;
 pub(crate) use string_utils::*;
