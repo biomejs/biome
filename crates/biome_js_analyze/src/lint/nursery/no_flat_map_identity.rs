@@ -40,7 +40,7 @@ declare_rule! {
         version: "next",
         name: "noFlatMapIdentity",
         recommended: true,
-        sources: &[RuleSource::Clippy("flat_map_identity")],
+        source: RuleSource::Clippy("flat_map_identity"),
         fix_kind: FixKind::Safe,
     }
 }
