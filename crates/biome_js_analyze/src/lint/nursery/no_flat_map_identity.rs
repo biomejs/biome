@@ -56,6 +56,11 @@ impl Rule for NoFlatMapIdentity {
 
         let flat_map_expression =
             AnyJsMemberExpression::cast_ref(flat_map_call.callee().ok()?.syntax())?;
+
+        if flat_map_expression.object().is_err() {
+            return None;
+        }
+
         if flat_map_expression.member_name()?.text() != "flatMap" {
             return None;
         }
@@ -64,32 +69,66 @@ impl Rule for NoFlatMapIdentity {
 
         if let Some(arg) = arguments.first() {
             let arg = arg.ok()?;
-            let arg = arg
-                .as_any_js_expression()?
-                .as_js_arrow_function_expression()?;
-
-            let function_parameter = arg.parameters().ok()?.text();
-            let function_parameter = function_parameter.trim_matches(&['(', ')']);
-
-            let function_body: String = match arg.body().ok()? {
-                AnyJsFunctionBody::AnyJsExpression(body) => body.omit_parentheses().text(),
-                AnyJsFunctionBody::JsFunctionBody(body) => {
-                    let mut statement = body.statements().into_iter();
-                    match statement.next() {
-                        Some(AnyJsStatement::JsReturnStatement(body)) => {
-                            let Some(AnyJsExpression::JsIdentifierExpression(return_statement)) =
-                                body.argument()
-                            else {
-                                return None;
-                            };
-                            return_statement.name().ok()?.text()
+            let (function_param, function_body) = match arg.as_any_js_expression()? {
+                AnyJsExpression::JsArrowFunctionExpression(arg) => {
+                    let parameter: String = match arg.parameters().ok()? {
+                        biome_js_syntax::AnyJsArrowFunctionParameters::AnyJsBinding(p) => {
+                            p.text().trim_matches(&['(', ')']).to_owned()
                         }
-                        _ => return None,
+                        biome_js_syntax::AnyJsArrowFunctionParameters::JsParameters(p) => {
+                            if p.items().len() == 1 {
+                                if let Some(param) = p.items().into_iter().next() {
+                                    param.ok()?.text()
+                                } else {
+                                    return None;
+                                }
+                            } else {
+                                return None;
+                            }
+                        }
+                    };
+
+                    let function_body: String = match arg.body().ok()? {
+                        AnyJsFunctionBody::AnyJsExpression(body) => body.omit_parentheses().text(),
+                        AnyJsFunctionBody::JsFunctionBody(body) => {
+                            let mut statement = body.statements().into_iter();
+                            match statement.next() {
+                                Some(AnyJsStatement::JsReturnStatement(body)) => {
+                                    let Some(AnyJsExpression::JsIdentifierExpression(
+                                        return_statement,
+                                    )) = body.argument()
+                                    else {
+                                        return None;
+                                    };
+                                    return_statement.name().ok()?.text()
+                                }
+                                _ => return None,
+                            }
+                        }
+                    };
+                    (parameter, function_body)
+                }
+                AnyJsExpression::JsFunctionExpression(arg) => {
+                    let function_parameter = arg.parameters().ok()?.text();
+                    let function_parameter =
+                        function_parameter.trim_matches(&['(', ')']).to_owned();
+
+                    let mut statement = arg.body().ok()?.statements().into_iter();
+                    if let Some(AnyJsStatement::JsReturnStatement(body)) = statement.next() {
+                        let Some(AnyJsExpression::JsIdentifierExpression(return_statement)) =
+                            body.argument()
+                        else {
+                            return None;
+                        };
+                        (function_parameter, return_statement.name().ok()?.text())
+                    } else {
+                        return None;
                     }
                 }
+                _ => return None,
             };
 
-            if function_parameter == function_body {
+            if function_param == function_body {
                 return Some(());
             }
         }
