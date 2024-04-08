@@ -1,5 +1,5 @@
 use biome_rowan::FileSourceError;
-use std::path::Path;
+use std::{ffi::OsStr, path::Path};
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
@@ -30,6 +30,36 @@ impl CssFileSource {
             variant: CssVariant::Standard,
         }
     }
+
+    /// Try to return the CSS file source corresponding to this file name from well-known files
+    pub fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
+        // TODO: to be implemented
+        Err(FileSourceError::UnknownFileName(file_name.into()))
+    }
+
+    /// Try to return the CSS file source corresponding to this file extension
+    pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
+        match extension {
+            "css" => Ok(Self::css()),
+            _ => Err(FileSourceError::UnknownExtension(
+                Default::default(),
+                extension.into(),
+            )),
+        }
+    }
+
+    /// Try to return the CSS file source corresponding to this language ID
+    ///
+    /// See the [LSP spec] and [VS Code spec] for a list of language identifiers
+    ///
+    /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
+    /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
+    pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
+        match language_id {
+            "css" => Ok(Self::css()),
+            _ => Err(FileSourceError::UnknownLanguageId(language_id.into())),
+        }
+    }
 }
 
 impl TryFrom<&Path> for CssFileSource {
@@ -38,37 +68,21 @@ impl TryFrom<&Path> for CssFileSource {
     fn try_from(path: &Path) -> Result<Self, Self::Error> {
         let file_name = path
             .file_name()
-            .ok_or_else(|| FileSourceError::MissingFileName(path.into()))?
-            .to_str()
+            .and_then(OsStr::to_str)
             .ok_or_else(|| FileSourceError::MissingFileName(path.into()))?;
 
-        let extension = path
+        if let Ok(file_source) = Self::try_from_well_known(file_name) {
+            return Ok(file_source);
+        }
+
+        // We assume the file extensions are case-insensitive
+        // and we use the lowercase form of them for pattern matching
+        let extension = &path
             .extension()
-            .ok_or_else(|| FileSourceError::MissingFileExtension(path.into()))?
-            .to_str()
+            .and_then(OsStr::to_str)
+            .map(str::to_lowercase)
             .ok_or_else(|| FileSourceError::MissingFileExtension(path.into()))?;
 
-        compute_source_type_from_path_or_extension(file_name, extension)
+        Self::try_from_extension(extension)
     }
-}
-
-/// It deduce the [CssFileSource] from the file name and its extension
-fn compute_source_type_from_path_or_extension(
-    file_name: &str,
-    extension: &str,
-) -> Result<CssFileSource, FileSourceError> {
-    let source_type = if file_name.ends_with(".css") {
-        CssFileSource::css()
-    } else {
-        match extension {
-            "css" => CssFileSource::css(),
-            _ => {
-                return Err(FileSourceError::UnknownExtension(
-                    file_name.into(),
-                    extension.into(),
-                ));
-            }
-        }
-    };
-    Ok(source_type)
 }
