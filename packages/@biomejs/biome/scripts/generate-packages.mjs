@@ -33,9 +33,16 @@ function generateNativePackage(platform, arch) {
 	// Generate the package.json manifest
 	const { version, license, repository, engines, homepage } = rootManifest;
 
+	// Generate constants
+	const ext = os === "win32" ? ".exe" : "";
+	const binaryName = `${getName(platform, arch, "biome")}${ext}`;
+
 	const manifest = JSON.stringify({
 		name: packageName,
 		version,
+		bin: {
+			biome: binaryName,
+		},
 		license,
 		repository,
 		engines,
@@ -55,11 +62,7 @@ function generateNativePackage(platform, arch) {
 	fs.writeFileSync(manifestPath, manifest);
 
 	// Copy the CLI binary
-	const ext = os === "win32" ? ".exe" : "";
-	const binarySource = resolve(
-		REPO_ROOT,
-		`${getName(platform, arch, "biome")}${ext}`,
-	);
+	const binarySource = resolve(REPO_ROOT, binaryName);
 	const binaryTarget = resolve(packageRoot, `biome${ext}`);
 
 	console.log(`Copy binary ${binaryTarget}`);
