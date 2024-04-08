@@ -111,6 +111,7 @@ define_categories! {
     "lint/nursery/noBarrelFile": "https://biomejs.dev/linter/rules/no-barrel-file",
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
     "lint/nursery/noConsole": "https://biomejs.dev/linter/rules/no-console",
+    "lint/nursery/noConstantMathMinMax": "https://biomejs.dev/linter/rules/no-constant-math-min-max",
     "lint/nursery/noDoneCallback": "https://biomejs.dev/linter/rules/no-done-callback",
     "lint/nursery/noDuplicateElseIf": "https://biomejs.dev/linter/rules/no-duplicate-else-if",
     "lint/nursery/noDuplicateJsonKeys": "https://biomejs.dev/linter/rules/no-duplicate-json-keys",
