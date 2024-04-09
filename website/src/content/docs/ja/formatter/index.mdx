@@ -40,19 +40,38 @@ Biomeがサポートする、言語に依存しないオプションは以下の
 
 `biome.json`を使用して、[フォーマッターを設定](/reference/configuration/#formatter)することができます。以下はデフォルトの設定です。
 
-```json
+```json title="biome.json"
 {
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
+    "ignore": [],
+    "attributePosition": "auto",
     "indentStyle": "tab",
     "indentWidth": 2,
-    "lineWidth": 80,
     "lineEnding": "lf",
-    "ignore": []
+    "lineWidth": 80
+  },
+  "javascript": {
+    "formatter": {
+      "arrowParentheses":"always",
+      "bracketSameLine": false,
+      "bracketSpacing": true,
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "semicolons": "always",
+      "trailingComma": "all"
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
   }
 }
 ```
+
+他のツールと違って、Biomeは言語ごとに関するオプションを設定することができます。
 
 ## コードのformatを無効にする
 
@@ -88,28 +107,3 @@ const expr =
     0,
   ];
 ```
-
-## 言語ごとの設定
-
-他のツールと違って、Biomeは言語ごとに関するオプションを設定することができます。
-
-### JavaScript
-
-以下は、JavaScript のファイルに適用されるデフォルトの設定です：
-
-```json title="biome.json"
-{
-  "javascript": {
-    "formatter": {
-      "arrowParentheses":"always",
-      "jsxQuoteStyle": "double",
-      "semicolons": "always",
-      "trailingComma": "all",
-      "quoteProperties": "asNeeded",
-      "bracketSpacing": true,
-      "bracketSameLine": false
-    }
-  }
-}
-```
-

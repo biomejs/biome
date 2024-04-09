@@ -5,20 +5,10 @@ description: How to use the Biome formatter.
 
 import PackageManagerBiomeCommand from "@/components/PackageManagerBiomeCommand.astro";
 
-Biome is an opinionated formatter that has the goal to stop all ongoing debates over styles.
+Biome is an opinionated formatter.
 It follows a similar [philosophy to Prettier](https://prettier.io/docs/en/option-philosophy.html),
 only supporting a few options to avoid debates over styles, turning into debates over Biome options.
 It deliberately [resists the urge to add new options](https://github.com/prettier/prettier/issues/40) to prevent [bike-shed discussions](https://en.wikipedia.org/wiki/Law_of_triviality) in teams so they can focus on what really matters instead.
-
-## Options
-
-The language agnostic options supported by Biome are:
-
-- indent style (default: `tab`): Use spaces or tabs for indention
-- tab width (default: `2`): The number of spaces per indention level
-- line width (default: `80`): The column width at which Biome wraps code
-
-Other formatting options are available for specific languages as well.  See the [configuration](/reference/configuration) options for details.
 
 ## Use the formatter with the CLI
 
@@ -36,9 +26,15 @@ Use the  `--help` flag to know what are the available options:
 
 Or check the [CLI reference section](/reference/cli#biomeformat).
 
-## Configuration
+## Options
 
-You may want to [configure Biome](/reference/configuration/#formatter) using `biome.json`.
+Biome provides some options to tune the behavior of its formatter.
+Differently from other tools, Biome separates language-agnostic options from language-specific options.
+
+The formatter options can be set on the [CLI](reference/cli/#biome-format) or in the `biome.json` configuration file.
+Biome doesn't support `.editorconfig` [yet](https://github.com/biomejs/biome/issues/1724).
+
+It's recommended to use the configuration file to ensure that both the Biome CLI and the Biome LSP apply the same options.
 The following defaults are applied:
 
 ```json title="biome.json"
@@ -46,14 +42,40 @@ The following defaults are applied:
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
+    "ignore": [],
+    "attributePosition": "auto",
     "indentStyle": "tab",
     "indentWidth": 2,
-    "lineWidth": 80,
     "lineEnding": "lf",
-    "ignore": []
+    "lineWidth": 80
+  },
+  "javascript": {
+    "formatter": {
+      "arrowParentheses":"always",
+      "bracketSameLine": false,
+      "bracketSpacing": true,
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "semicolons": "always",
+      "trailingComma": "all"
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
   }
 }
 ```
+
+The main language-agnostic options supported by the Biome formatter are:
+
+- indent style (default: `tab`): Use spaces or tabs for indention;
+- line width (default: `80`): The column width at which Biome wraps code;
+- tab width (default: `2`): The number of spaces per indention level.
+
+See the [configuration reference](/reference/configuration/#formatter) for more details.
+
 
 ## Ignoring Code
 
@@ -88,27 +110,4 @@ const expr =
     -1,
     0,
   ];
-```
-## Per language configuration
-
-Differently from other tools, Biome places options belong to a language in a different place of its configuration.
-
-### JavaScript
-
-Following, the default applied to JavaScript files:
-
-```json title="biome.json"
-{
-  "javascript": {
-    "formatter": {
-      "arrowParentheses":"always",
-      "jsxQuoteStyle": "double",
-      "semicolons": "always",
-      "trailingComma": "all",
-      "quoteProperties": "asNeeded",
-      "bracketSpacing": true,
-      "bracketSameLine": false
-    }
-  }
-}
 ```
