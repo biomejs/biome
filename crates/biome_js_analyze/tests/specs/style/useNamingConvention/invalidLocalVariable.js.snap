@@ -10,6 +10,8 @@ export default function () {
     let CONSTANT_CASE_LET
 
     var CONSTANT_CASE_VAR
+
+    const { prop: Unknown_Style } = obj
 }
 
 export function f() {
@@ -80,8 +82,8 @@ invalidLocalVariable.js:6:9 lint/style/useNamingConvention  FIXABLE  ━━━�
     5 │ 
   > 6 │     var CONSTANT_CASE_VAR
       │         ^^^^^^^^^^^^^^^^^
-    7 │ }
-    8 │ 
+    7 │ 
+    8 │     const { prop: Unknown_Style } = obj
   
   i The name could be renamed to `constantCaseVar`.
   
@@ -91,37 +93,63 @@ invalidLocalVariable.js:6:9 lint/style/useNamingConvention  FIXABLE  ━━━�
      5  5 │   
      6    │ - ····var·CONSTANT_CASE_VAR
         6 │ + ····var·constantCaseVar
-     7  7 │   }
-     8  8 │   
+     7  7 │   
+     8  8 │       const { prop: Unknown_Style } = obj
   
 
 ```
 
 ```
-invalidLocalVariable.js:10:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidLocalVariable.js:8:19 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This local const name should be in camelCase or PascalCase.
   
-     9 │ export function f() {
-  > 10 │     const a_var = 0;
+     6 │     var CONSTANT_CASE_VAR
+     7 │ 
+   > 8 │     const { prop: Unknown_Style } = obj
+       │                   ^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i The name could be renamed to `unknownStyle`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     6  6 │       var CONSTANT_CASE_VAR
+     7  7 │   
+     8    │ - ····const·{·prop:·Unknown_Style·}·=·obj
+        8 │ + ····const·{·prop:·unknownStyle·}·=·obj
+     9  9 │   }
+    10 10 │   
+  
+
+```
+
+```
+invalidLocalVariable.js:12:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This local const name should be in camelCase or PascalCase.
+  
+    11 │ export function f() {
+  > 12 │     const a_var = 0;
        │           ^^^^^
-    11 │     console.log(a_var);
-    12 │     return a_var;
+    13 │     console.log(a_var);
+    14 │     return a_var;
   
   i The name could be renamed to `aVar`.
   
   i Safe fix: Rename this symbol in camelCase.
   
-     8  8 │   
-     9  9 │   export function f() {
-    10    │ - ····const·a_var·=·0;
-    11    │ - ····console.log(a_var);
-    12    │ - ····return·a_var;
-       10 │ + ····const·aVar·=·0;
-       11 │ + ····console.log(aVar);
-       12 │ + ····return·aVar;
-    13 13 │   }
-    14 14 │   
+    10 10 │   
+    11 11 │   export function f() {
+    12    │ - ····const·a_var·=·0;
+    13    │ - ····console.log(a_var);
+    14    │ - ····return·a_var;
+       12 │ + ····const·aVar·=·0;
+       13 │ + ····console.log(aVar);
+       14 │ + ····return·aVar;
+    15 15 │   }
+    16 16 │   
   
 
 ```
