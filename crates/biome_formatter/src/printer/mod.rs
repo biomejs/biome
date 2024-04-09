@@ -821,7 +821,7 @@ enum Indention {
     Align {
         level: u16,
         align: NonZeroU8,
-        previous_align_count: u16,
+        align_count: u16,
     },
 }
 
@@ -862,18 +862,16 @@ impl Indention {
             Indention::Level(count) => Indention::Level(count + 1),
             // Increase the indent AND convert the align to an indent
             Indention::Align {
-                level,
-                previous_align_count,
-                ..
-            } if indent_style.is_tab() => Indention::Level(level + previous_align_count + 2),
+                level, align_count, ..
+            } if indent_style.is_tab() => Indention::Level(level + align_count + 1),
             Indention::Align {
                 level: indent,
                 align,
-                previous_align_count,
+                align_count,
             } => Indention::Align {
                 level: indent + 1,
                 align,
-                previous_align_count: previous_align_count + 1,
+                align_count,
             },
         }
     }
@@ -886,18 +884,18 @@ impl Indention {
             Indention::Level(indent_count) => Indention::Align {
                 level: indent_count,
                 align: count,
-                previous_align_count: 0,
+                align_count: 1,
             },
 
             // Convert the existing align to an indent
             Indention::Align {
                 level: indent,
                 align,
-                previous_align_count,
+                align_count,
             } => Indention::Align {
                 level: indent,
                 align: align.saturating_add(count.get()),
-                previous_align_count: previous_align_count + 1,
+                align_count: align_count + 1,
             },
         }
     }
