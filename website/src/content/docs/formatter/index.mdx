@@ -29,9 +29,9 @@ Or check the [CLI reference section](/reference/cli#biomeformat).
 ## Options
 
 Biome provides some options to tune the behavior of its formatter.
-Differently from other tools, Biome separates language agnostic options from language-specific options.
+Differently from other tools, Biome separates language-agnostic options from language-specific options.
 
-The formatter options can be set on the [CLI](reference/cli/#biome-format) or in the configuration file `biome.json`.
+The formatter options can be set on the [CLI](reference/cli/#biome-format) or in the `biome.json` configuration file.
 Biome doesn't support `.editorconfig` [yet](https://github.com/biomejs/biome/issues/1724).
 
 It's recommended to use the configuration file to ensure that both the Biome CLI and the Biome LSP apply the same options.
@@ -68,7 +68,7 @@ The following defaults are applied:
 }
 ```
 
-The main language agnostic options supported by the Biome formatter are:
+The main language-agnostic options supported by the Biome formatter are:
 
 - indent style (default: `tab`): Use spaces or tabs for indention
 - tab width (default: `2`): The number of spaces per indention level
