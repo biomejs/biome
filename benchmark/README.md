@@ -1,4 +1,5 @@
 # Benchmarks
+
 ## Running in Docker
 
 Run in the root directory, not `./benchmark`
@@ -34,6 +35,7 @@ Setup: MacBook Pro (13-inch, M1, 2020)
 The speed-ups for the multithreaded benchmarks can vary significantly depending on the setup. For example, Biome is 100 times faster than Prettier on an M1 Max with 10 cores.
 
 ## Analysis
+
 ### Formatter
 
 * Biome's formatter is fast :).
