@@ -24,9 +24,9 @@ use super::parse_lang_from_script_opening_tag;
 pub struct VueFileHandler;
 
 lazy_static! {
-    // https://regex101.com/r/E4n4hh/3
+    // https://regex101.com/r/E4n4hh/4
     pub static ref VUE_FENCE: Regex = Regex::new(
-        r#"(?ixms)(?<opening><script[^>]*>)\n(?P<script>(?U:.*))</script>"#
+        r#"(?ixs)(?<opening><script[^>]*>)\r?\n(?<script>(?U:.*))</script>"#
     )
     .unwrap();
 }
