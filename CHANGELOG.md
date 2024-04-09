@@ -22,6 +22,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - `useExhaustiveDependencies` correctly reports missing dependencies declared
   using function declarations ([#2362](https://github.com/biomejs/biome/issues/2362)).
   Contributed by @arendjr
+- Biome now can handle `.svelte` and `.vue` files with `CRLF` as the end-of-line sequence. Contributed by @Sec-ant
 
 #### Enhancements
 

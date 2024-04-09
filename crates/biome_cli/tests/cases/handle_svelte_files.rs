@@ -30,6 +30,9 @@ const hello: string = "world";
 </script>
 <div></div>"#;
 
+const SVELTE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED: &str =
+    "<script>\r\n  const a    = \"b\";\r\n</script>\r\n<div></div>";
+
 #[test]
 fn sorts_imports_check() {
     let mut fs = MemoryFileSystem::default();
@@ -176,6 +179,40 @@ fn format_svelte_ts_context_module_files_write() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_ts_context_module_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_svelte_carriage_return_line_feed_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file_path = Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        SVELTE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(
+        &fs,
+        svelte_file_path,
+        SVELTE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED,
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_svelte_carriage_return_line_feed_files",
         fs,
         console,
         result,
