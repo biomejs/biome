@@ -319,7 +319,17 @@ impl JsFileSource {
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
-            "javascript" => Ok(Self::js_module()),
+            // We use Self::jsx() for the javascript language id
+            // because `.js` files will be associated with the javascript language id
+            // and we already use Self::jsx() for `.js` files in try_from_extension().
+            // This will make LSP and CLI work consistently.
+            //
+            // This also fixes the issue where some plugins like babel plugin will
+            // associate `.jsx` files with the javascript language id.
+            //
+            // TODO: This should be considered as an ad hoc fix.
+            // We might want to reconsider the design and variants of the file source.
+            "javascript" => Ok(Self::jsx()),
             "typescript" => Ok(Self::ts()),
             "javascriptreact" => Ok(Self::jsx()),
             "typescriptreact" => Ok(Self::tsx()),
