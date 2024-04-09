@@ -73,6 +73,8 @@ fn parse_argument(p: &mut GraphqlParser) -> ParsedSyntax {
     }
 
     let m = p.start();
+
+    // name is checked for in `is_at_name`
     parse_name(p).ok();
     p.expect(T![:]);
     parse_value(p).or_add_diagnostic(p, expected_value);

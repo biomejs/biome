@@ -3,7 +3,7 @@ use crate::parser::{
     directive::DirectiveList,
     is_at_name,
     parse_error::{
-        expected_any_selection, expected_named_type, expected_type, expected_value,
+        expected_any_selection, expected_name, expected_named_type, expected_type, expected_value,
         expected_variable_definition,
     },
     parse_name,
@@ -162,13 +162,22 @@ fn parse_field(p: &mut GraphqlParser) -> ParsedSyntax {
     // This is currently the only time we need to lookahead
     // so there is no need to implement NthToken to use nth_at
     let next_token = p.lookahead();
+
+    // alias is optional, so if there is a colon, we parse it as an alias
+    // otherwise we parse it as a normal field name
     if next_token == T![:] {
         let m = p.start();
+
+        // name is checked for in `is_at_field`
         parse_name(p).ok();
         p.bump(T![:]);
         m.complete(p, GRAPHQL_ALIAS);
+
+        parse_name(p).or_add_diagnostic(p, expected_name);
+    } else {
+        // name is checked for in `is_at_field`
+        parse_name(p).ok();
     }
-    parse_name(p).ok();
 
     // arguments are optional
     parse_arguments(p).ok();
@@ -188,6 +197,7 @@ fn parse_fragment(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(DOT3);
     if is_at_name(p) {
+        // name is checked for in `is_at_name`
         parse_name(p).ok();
         DirectiveList.parse_list(p);
         Present(m.complete(p, GRAPHQL_FRAGMENT_SPREAD))
@@ -227,6 +237,7 @@ fn parse_variable_definition(p: &mut GraphqlParser) -> ParsedSyntax {
 
     let m = p.start();
 
+    // variable is checked for in `is_at_variable`
     parse_variable(p).ok();
     p.expect(T![:]);
     parse_type(p).or_add_diagnostic(p, expected_type);
