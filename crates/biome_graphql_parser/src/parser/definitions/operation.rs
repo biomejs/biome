@@ -159,6 +159,8 @@ fn parse_field(p: &mut GraphqlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
+    // This is currently the only time we need to lookahead
+    // so there is no need to implement NthToken to use nth_at
     let next_token = p.lookahead();
     if next_token == T![:] {
         let m = p.start();
