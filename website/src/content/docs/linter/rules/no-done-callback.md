@@ -1,12 +1,8 @@
 ---
-title: noDoneCallback (not released)
+title: noDoneCallback (since v1.6.1)
 ---
 
 **Diagnostic Category: `lint/nursery/noDoneCallback`**
-
-:::danger
-This rule hasn't been released yet.
-:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

@@ -196,7 +196,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- [style/useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accept `PAscalCase` for local and top-level variables.
+- [style/useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accept `PascalCase` for local and top-level variables.
 
   This allows supporting local variables that hold a component or a regular class.
   The following code is now accepted:
@@ -244,6 +244,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix the unexpected code deletion and repetition when `quickfix.biome` is enabled and some `import`-related rules are applied ([#2222](https://github.com/biomejs/biome/issues/2222), [#688](https://github.com/biomejs/biome/issues/688), [#1015](https://github.com/biomejs/biome/issues/1015)). Contributed by @Sec-ant
 
 ### Linter
+
+#### New features
+
+- Add [nursery/noMisplacedAssertion](https://biomejs.dev/linter/rules/no-misplaced-assertion/). COntributed by @ematipico
 
 #### Bug fixes
 
@@ -348,6 +352,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Support applying lint fixes when calling the `lintContent` method of the `Biome` class ([#1956](https://github.com/biomejs/biome/pull/1956)). Contributed by @mnahkies
 
 ### Linter
+
+#### New features
+
+- Add [nursery/noDuplicateElseIf](https://biomejs.dev/linter/rules/no-duplicate-else-if/). COntributed by @mdm317
 
 #### Bug fixes
 
@@ -918,7 +926,7 @@ Additionally, the following rules are now recommended:
 - Add rule [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test) which disallows `export` or `modules.exports` in files
   containing test. Contributed by @ah-yu
 
-- Add rule [noSemicolonInJsx](https://biomejs.dev/linter/rules/no-semicolon-in-jsx/) to detect possible wrong semicolons inside JSX elements.
+- Add rule [noSemicolonInJsx](https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx/) to detect possible wrong semicolons inside JSX elements.
 
   ```jsx
   const Component = () => {

@@ -42,7 +42,7 @@ declare_rule! {
     /// ```
     ///
     pub NoEvolvingAny {
-        version: "next",
+        version: "1.6.3",
         name: "noEvolvingAny",
         recommended: true,
     }
