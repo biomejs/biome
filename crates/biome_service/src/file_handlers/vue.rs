@@ -73,7 +73,9 @@ impl VueFileHandler {
             .captures(text)
             .and_then(|captures| {
                 match parse_lang_from_script_opening_tag(captures.name("opening")?.as_str()) {
-                    Language::JavaScript => None,
+                    Language::JavaScript => {
+                        Some(JsFileSource::js_module().with_embedding_kind(EmbeddingKind::Vue))
+                    }
                     Language::TypeScript { .. } => {
                         Some(JsFileSource::ts().with_embedding_kind(EmbeddingKind::Vue))
                     }
