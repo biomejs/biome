@@ -1,12 +1,8 @@
 ---
-title: noEvolvingAny (not released)
+title: noEvolvingAny (since v1.6.3)
 ---
 
 **Diagnostic Category: `lint/nursery/noEvolvingAny`**
-
-:::danger
-This rule hasn't been released yet.
-:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.
