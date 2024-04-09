@@ -43,9 +43,10 @@ declare_rule! {
     ///
     /// ### Variable names
     ///
-    /// All variables, including function parameters and catch parameters, are in [`camelCase`].
+    /// All variables, including function parameters, are in [`camelCase`] or [`PascalCase`].
+    /// Catch parameters are always in [`camelCase`].
     ///
-    /// Additionally, top-level variables declared as `const` or `var` may be in [`CONSTANT_CASE`] or [`PascalCase`].
+    /// Additionally, top-level variables declared as `const` or `var` may be in [`CONSTANT_CASE`].
     /// Top-level variables are declared at module or script level.
     /// Variables declared in a TypeScript `module` or `namespace` are also considered top-level.
     ///
@@ -60,8 +61,6 @@ declare_rule! {
     /// }
     ///
     /// export const A_CONSTANT = 5;
-    ///
-    /// export const Person = class {}
     ///
     /// let aVariable = 0;
     ///
@@ -81,7 +80,7 @@ declare_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// function f(FirstParam) {}
+    /// function f(FIRST_PARAM) {}
     /// ```
     ///
     /// ### Function names
@@ -924,19 +923,12 @@ impl Named {
             | Named::ClassSetter
             | Named::ClassStaticMethod
             | Named::ClassStaticSetter
-            | Named::FunctionParameter
             | Named::IndexParameter
-            | Named::LocalConst
-            | Named::LocalLet
-            | Named::LocalVar
-            | Named::LocalVariable
-            | Named::LocalUsing
             | Named::ObjectGetter
             | Named::ObjectMethod
             | Named::ObjectProperty
             | Named::ObjectSetter
             | Named::ParameterProperty
-            | Named::TopLevelLet
             | Named::TypeMethod
             | Named::TypeProperty
             | Named::TypeSetter => SmallVec::from_slice(&[Case::Camel]),
@@ -956,8 +948,15 @@ impl Named {
             Named::ExportSource | Named::ImportSource => SmallVec::new(),
             Named::ExportNamespace
             | Named::Function
+            | Named::FunctionParameter
             | Named::ImportNamespace
-            | Named::Namespace => SmallVec::from_slice(&[Case::Camel, Case::Pascal]),
+            | Named::LocalConst
+            | Named::LocalLet
+            | Named::LocalVar
+            | Named::LocalVariable
+            | Named::LocalUsing
+            | Named::Namespace
+            | Named::TopLevelLet => SmallVec::from_slice(&[Case::Camel, Case::Pascal]),
         }
     }
 }

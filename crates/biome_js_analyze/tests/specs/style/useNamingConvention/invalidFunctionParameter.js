@@ -1,1 +1,1 @@
-function f(A, SpecialParameter, _snake_case, CONSTANT_CASE) {}
+function f(_snake_case, CONSTANT_CASE) {}
