@@ -461,6 +461,15 @@ fn capture_needs_to_be_in_the_dependency_list(
                 }
             }
 
+            // ... they are recursively used by the binding being created
+            if capture
+                .node()
+                .ancestors()
+                .any(|ancestor| &ancestor == declaration.syntax())
+            {
+                return None;
+            }
+
             // ... they are assign to stable returns of another React function
             let not_stable =
                 !is_binding_react_stable(&binding.tree(), model, &options.stable_config);
