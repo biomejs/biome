@@ -1,5 +1,5 @@
 use biome_rowan::FileSourceError;
-use std::path::Path;
+use std::{ffi::OsStr, path::Path};
 
 #[derive(Debug, Default, Clone)]
 pub struct HtmlFileSource {
@@ -25,6 +25,41 @@ impl HtmlFileSource {
             variant: HtmlVariant::Astro,
         }
     }
+
+    /// Try to return the HTML file source corresponding to this file name from well-known files
+    pub fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
+        // TODO: to be implemented
+        Err(FileSourceError::UnknownFileName(file_name.into()))
+    }
+
+    /// Try to return the HTML file source corresponding to this file extension
+    pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
+        match extension {
+            "html" => Ok(Self::html()),
+            "astro" => Ok(Self::astro()),
+            _ => Err(FileSourceError::UnknownExtension(
+                Default::default(),
+                extension.into(),
+            )),
+        }
+    }
+
+    /// Try to return the HTML file source corresponding to this language ID
+    ///
+    /// See the [LSP spec] and [VS Code spec] for a list of language identifiers
+    ///
+    /// The language ID for Astro is registered by its [VS Code extension]
+    ///
+    /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
+    /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
+    /// [VS Code extension]: https://github.com/withastro/language-tools/blob/0503392b80765c8a1292ddc9c063a1187425c187/packages/vscode/package.json#L140
+    pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
+        match language_id {
+            "html" => Ok(Self::html()),
+            "astro" => Ok(Self::astro()),
+            _ => Err(FileSourceError::UnknownLanguageId(language_id.into())),
+        }
+    }
 }
 
 impl TryFrom<&Path> for HtmlFileSource {
@@ -33,33 +68,21 @@ impl TryFrom<&Path> for HtmlFileSource {
     fn try_from(path: &Path) -> Result<Self, Self::Error> {
         let file_name = path
             .file_name()
-            .ok_or_else(|| FileSourceError::MissingFileName(path.into()))?
-            .to_str()
+            .and_then(OsStr::to_str)
             .ok_or_else(|| FileSourceError::MissingFileName(path.into()))?;
 
-        let extension = path
+        if let Ok(file_source) = Self::try_from_well_known(file_name) {
+            return Ok(file_source);
+        }
+
+        // We assume the file extensions are case-insensitive
+        // and we use the lowercase form of them for pattern matching
+        let extension = &path
             .extension()
-            .ok_or_else(|| FileSourceError::MissingFileExtension(path.into()))?
-            .to_str()
+            .and_then(OsStr::to_str)
+            .map(str::to_lowercase)
             .ok_or_else(|| FileSourceError::MissingFileExtension(path.into()))?;
 
-        compute_source_type_from_path_or_extension(file_name, extension)
+        Self::try_from_extension(extension)
     }
-}
-
-/// It deduce the [HtmlFileSource] from the file name and its extension
-fn compute_source_type_from_path_or_extension(
-    file_name: &str,
-    extension: &str,
-) -> Result<HtmlFileSource, FileSourceError> {
-    Ok(match extension {
-        "html" => HtmlFileSource::html(),
-        "astro" => HtmlFileSource::astro(),
-        _ => {
-            return Err(FileSourceError::UnknownExtension(
-                file_name.into(),
-                extension.into(),
-            ));
-        }
-    })
 }

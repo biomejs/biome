@@ -14,4 +14,12 @@ export default function () {
     let _camelCaseLet
 
     var _camelCaseVar
+
+    const X = 0
+
+    const PascalCaseConst = 0
+
+    let PascalCaseLet
+
+    var PascalCaseVar
 }

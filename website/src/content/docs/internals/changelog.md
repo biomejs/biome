@@ -23,6 +23,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Now Biome can detect the script language in Svelte and Vue script blocks more reliably ([#2245](https://github.com/biomejs/biome/issues/2245)). Contributed by @Sec-ant
 
+#### Enhancements
+
+- Complete the well-known file lists for JSON-like files. Trailing commas are allowed in `.jsonc` files by default. Some well-known files like `tsconfig.json` and `.babelrc` don't use the `.jsonc` extension but still allow comments and trailing commas. While others, such as `.eslintrc.json`, only allow comments. Biome is able to identify these files and adjusts the `json.parser.allowTrailingCommas` option accordingly to ensure they are correctly parsed. Contributed by @Sec-ant
+
 ### CLI
 
 #### New features
@@ -166,6 +170,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Editors
 
+#### Bug fixes
+
+- Biome extension is now able to parse the JSX syntax in files that associated with the `javascript` [language identifier](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem). This is an ad hoc fix, because [in the React world, `.js` files are allowed to include JSX syntax](https://github.com/facebook/create-react-app/issues/87#issuecomment-234627904), and these files are often associated with the `javascript` language identifier in most of the editors. Plus, [some editor extensions](https://github.com/michaelgmcd/vscode-language-babel/blob/8b3a472748ad07c99dc022b66795c9eb46be4ccb/package.json#L63-L80) will also associate `.jsx` files with the `javascript` language identifier. Relative links: [discussion](https://github.com/biomejs/biome/discussions/838#discussioncomment-9047539), [#2085](https://github.com/biomejs/biome/issues/2085). Contributed by @Sec-ant
+
 ### Formatter
 
 ### JavaScript APIs
@@ -188,6 +196,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - [style/useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention/) now allows prefixing a filename with `+` ([#2341](https://github.com/biomejs/biome/issues/2341)).
 
   This is a convention used by [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
+
+  Contributed by @Conaclos
+
+- [style/useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accept `PAscalCase` for local and top-level variables.
+
+  This allows supporting local variables that hold a component or a regular class.
+  The following code is now accepted:
+
+  ```tsx
+  function loadComponent() {
+    const Component = getComponent();
+    return <Component />;
+  }
+  ```
 
   Contributed by @Conaclos
 
