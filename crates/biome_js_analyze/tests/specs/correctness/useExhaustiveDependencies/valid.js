@@ -263,3 +263,14 @@ function ComponentWithRecursiveCallback() {
       return fib(num - 1) + fib(num - 2);
     }, []);
 }
+
+function func() {
+    setValue("some")
+}
+
+function OutsideFunctionDeclaration() {
+    useEffect(() => {
+      func()
+    }, [])
+}
+  

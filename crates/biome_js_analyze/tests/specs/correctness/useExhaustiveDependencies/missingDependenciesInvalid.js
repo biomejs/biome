@@ -153,3 +153,18 @@ function MyComponent15() {
 			console.log(ref.current);
 	}, []);
 }
+
+// https://github.com/biomejs/biome/issues/2362
+function MissingFunctionDeclaration() {
+  const [value, setValue] = useState("")
+
+  function func() {
+    setValue("some")
+  }
+
+  useEffect(() => {
+    func()
+  }, [])
+
+  return <>{value}</>
+}
