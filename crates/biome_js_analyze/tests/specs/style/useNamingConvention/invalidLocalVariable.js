@@ -4,6 +4,8 @@ export default function () {
     let CONSTANT_CASE_LET
 
     var CONSTANT_CASE_VAR
+
+    const { prop: Unknown_Style } = obj
 }
 
 export function f() {

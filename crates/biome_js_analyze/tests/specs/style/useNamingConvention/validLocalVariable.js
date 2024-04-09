@@ -22,4 +22,6 @@ export default function () {
     let PascalCaseLet
 
     var PascalCaseVar
+
+    const { Unknown_Style: local } = obj
 }

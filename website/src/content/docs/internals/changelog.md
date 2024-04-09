@@ -206,7 +206,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- [style/useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accept `PascalCase` for local and top-level variables.
+- [style/useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accepts `PascalCase` for local and top-level variables.
 
   This allows supporting local variables that hold a component or a regular class.
   The following code is now accepted:
@@ -223,6 +223,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Lint rules `useNodejsImportProtocol`, `useNodeAssertStrict`, `noRestrictedImports`, `noNodejsModules` will no longer check `declare module` statements anymore. Contributed by @Sec-ant
+
+- [style/useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accepts any case for variables from object destructuring ([#2332](https://github.com/biomejs/biome/issues/2332)).
+
+  The following name is now ignored:
+
+  ```js
+  const { Strange_Style } = obj;
+  ```
+
+  Previously, the rule renamed this variable. This led to a runtime error.
+
+  Contributed by @Conaclos
 
 ### Parser
 
