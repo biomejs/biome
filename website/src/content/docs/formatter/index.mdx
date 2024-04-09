@@ -41,23 +41,23 @@ The following defaults are applied:
 {
   "formatter": {
     "enabled": true,
-    "ignore": [],
     "formatWithErrors": false,
+    "ignore": [],
+    "attributePosition": "auto",
     "indentStyle": "tab",
     "indentWidth": 2,
-    "lineWidth": 80,
     "lineEnding": "lf",
-    "attributePosition": "auto"
+    "lineWidth": 80
   },
   "javascript": {
     "formatter": {
       "arrowParentheses":"always",
-      "jsxQuoteStyle": "double",
-      "semicolons": "always",
-      "trailingComma": "all",
-      "quoteProperties": "asNeeded",
       "bracketSameLine": false,
-      "bracketSpacing": true
+      "bracketSpacing": true,
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "semicolons": "always",
+      "trailingComma": "all"
     }
   },
   "json": {
@@ -70,9 +70,9 @@ The following defaults are applied:
 
 The main language-agnostic options supported by the Biome formatter are:
 
-- indent style (default: `tab`): Use spaces or tabs for indention
-- tab width (default: `2`): The number of spaces per indention level
-- line width (default: `80`): The column width at which Biome wraps code
+- indent style (default: `tab`): Use spaces or tabs for indention;
+- line width (default: `80`): The column width at which Biome wraps code;
+- tab width (default: `2`): The number of spaces per indention level.
 
 See the [configuration reference](/reference/configuration/#formatter) for more details.
 
