@@ -32,10 +32,10 @@ invalid.js:1:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━
   
   i Safe fix: Replace unnecessary flatMap call to flat instead.
   
-     1    │ - array.flatMap(function·f(arr)·{·return·arr·});␍
-        1 │ + array.flat();␍
-     2  2 │   ␍
-     3  3 │   array.flatMap(function (arr) { return arr });␍
+     1    │ - array.flatMap(function·f(arr)·{·return·arr·});
+        1 │ + array.flat();
+     2  2 │   
+     3  3 │   array.flatMap(function (arr) { return arr });
   
 
 ```
@@ -56,12 +56,12 @@ invalid.js:3:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━
   
   i Safe fix: Replace unnecessary flatMap call to flat instead.
   
-     1  1 │   array.flatMap(function f(arr) { return arr });␍
-     2  2 │   ␍
-     3    │ - array.flatMap(function·(arr)·{·return·arr·});␍
-        3 │ + array.flat();␍
-     4  4 │   ␍
-     5  5 │   array.flatMap((arr) => arr)␍
+     1  1 │   array.flatMap(function f(arr) { return arr });
+     2  2 │   
+     3    │ - array.flatMap(function·(arr)·{·return·arr·});
+        3 │ + array.flat();
+     4  4 │   
+     5  5 │   array.flatMap((arr) => arr)
   
 
 ```
@@ -82,12 +82,12 @@ invalid.js:5:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━
   
   i Safe fix: Replace unnecessary flatMap call to flat instead.
   
-     3  3 │   array.flatMap(function (arr) { return arr });␍
-     4  4 │   ␍
-     5    │ - array.flatMap((arr)·=>·arr)␍
-        5 │ + array.flat()␍
-     6  6 │   ␍
-     7  7 │   array.flatMap((arr) => {return arr})␍
+     3  3 │   array.flatMap(function (arr) { return arr });
+     4  4 │   
+     5    │ - array.flatMap((arr)·=>·arr)
+        5 │ + array.flat()
+     6  6 │   
+     7  7 │   array.flatMap((arr) => {return arr})
   
 
 ```
@@ -108,12 +108,12 @@ invalid.js:7:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━
   
   i Safe fix: Replace unnecessary flatMap call to flat instead.
   
-     5  5 │   array.flatMap((arr) => arr)␍
-     6  6 │   ␍
-     7    │ - array.flatMap((arr)·=>·{return·arr})␍
-        7 │ + array.flat()␍
-     8  8 │   ␍
-     9  9 │   array.flatMap(arr => arr)␍
+     5  5 │   array.flatMap((arr) => arr)
+     6  6 │   
+     7    │ - array.flatMap((arr)·=>·{return·arr})
+        7 │ + array.flat()
+     8  8 │   
+     9  9 │   array.flatMap(arr => arr)
   
 
 ```
@@ -134,11 +134,11 @@ invalid.js:9:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━━
   
   i Safe fix: Replace unnecessary flatMap call to flat instead.
   
-     7  7 │   array.flatMap((arr) => {return arr})␍
-     8  8 │   ␍
-     9    │ - array.flatMap(arr·=>·arr)␍
-        9 │ + array.flat()␍
-    10 10 │   ␍
+     7  7 │   array.flatMap((arr) => {return arr})
+     8  8 │   
+     9    │ - array.flatMap(arr·=>·arr)
+        9 │ + array.flat()
+    10 10 │   
     11 11 │   array.flatMap(arr => {return arr})
   
 
@@ -158,8 +158,8 @@ invalid.js:11:1 lint/nursery/noFlatMapIdentity  FIXABLE  ━━━━━━━�
   
   i Safe fix: Replace unnecessary flatMap call to flat instead.
   
-     9  9 │   array.flatMap(arr => arr)␍
-    10 10 │   ␍
+     9  9 │   array.flatMap(arr => arr)
+    10 10 │   
     11    │ - array.flatMap(arr·=>·{return·arr})
        11 │ + array.flat()
   
