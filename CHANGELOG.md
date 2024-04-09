@@ -19,6 +19,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - `useExhaustiveDependencies` no longer reports recursive calls as missing
   dependencies ([#2361](https://github.com/biomejs/biome/issues/2361)).
   Contributed by @arendjr
+- `useExhaustiveDependencies` correctly reports missing dependencies declared
+  using function declarations ([#2362](https://github.com/biomejs/biome/issues/2362)).
+  Contributed by @arendjr
 
 #### Enhancements
 

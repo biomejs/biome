@@ -270,4 +270,14 @@ function ComponentWithRecursiveCallback() {
     }, []);
 }
 
+function func() {
+    setValue("some")
+}
+
+function OutsideFunctionDeclaration() {
+    useEffect(() => {
+      func()
+    }, [])
+}
+  
 ```

@@ -160,6 +160,21 @@ function MyComponent15() {
 	}, []);
 }
 
+// https://github.com/biomejs/biome/issues/2362
+function MissingFunctionDeclaration() {
+  const [value, setValue] = useState("")
+
+  function func() {
+    setValue("some")
+  }
+
+  useEffect(() => {
+    func()
+  }, [])
+
+  return <>{value}</>
+}
+
 ```
 
 # Diagnostics
@@ -839,6 +854,31 @@ missingDependenciesInvalid.js:152:2 lint/correctness/useExhaustiveDependencies �
         │ 			            ^^^^^^^^^^^
     154 │ 	}, []);
     155 │ }
+  
+  i Either include it or remove the dependency array
+  
+
+```
+
+```
+missingDependenciesInvalid.js:165:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook does not specify all of its dependencies: func
+  
+    163 │   }
+    164 │ 
+  > 165 │   useEffect(() => {
+        │   ^^^^^^^^^
+    166 │     func()
+    167 │   }, [])
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    165 │   useEffect(() => {
+  > 166 │     func()
+        │     ^^^^
+    167 │   }, [])
+    168 │ 
   
   i Either include it or remove the dependency array
   
