@@ -1681,7 +1681,7 @@ export type FilenameCases = FilenameCase[];
  * Supported cases for TypeScript `enum` member names.
  */
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
-export type StableHookResult = "None" | "Identity" | { Indices: number[] };
+export type StableHookResult = boolean | number[];
 /**
  * Supported cases for file names.
  */
