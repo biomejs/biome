@@ -412,6 +412,7 @@ impl<L: Language + Default> RegistryRule<L> {
             let query_result = <R::Query as Queryable>::unwrap_match(params.services, query_result);
             let globals = params.options.globals();
             let preferred_quote = params.options.preferred_quote();
+            let jsx_runtime = params.options.jsx_runtime();
             let options = params.options.rule_options::<R>().unwrap_or_default();
             let ctx = match RuleContext::new(
                 &query_result,
@@ -421,6 +422,7 @@ impl<L: Language + Default> RegistryRule<L> {
                 &params.options.file_path,
                 &options,
                 preferred_quote,
+                jsx_runtime,
             ) {
                 Ok(ctx) => ctx,
                 Err(error) => return Err(error),

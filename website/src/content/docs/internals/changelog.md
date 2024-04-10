@@ -200,12 +200,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Add a new option `ignoreReact` to [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports).
+- Add a new option `jsxRuntime` to the `javascript` configuration. When set to `react_classic`, the [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) rules uses this information to make an exception for the React global that is required by the React Classic JSX transform.
 
-  When `ignoreReact` is enabled, Biome ignores imports of `React` from the `react` package.
-  The option is disabled by default.
+  This is only necessary for React users who haven't upgraded to the [new JSX transform](https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html).
 
-  Contributed by @Conaclos
+  Contributed by @Conaclos and @arendjr
 
 - Implement [#2043](https://github.com/biomejs/biome/issues/2043): The React rule [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) is now also compatible with Preact hooks imported from `preact/hooks` or `preact/compat`. Contributed by @arendjr
 

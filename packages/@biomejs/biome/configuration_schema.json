@@ -737,7 +737,7 @@
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UnusedImportsConfiguration" },
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1107,6 +1107,10 @@
 					"description": "A list of global bindings that should be ignored by the analyzers\n\nIf defined here, they should not emit diagnostics.",
 					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				},
+				"jsx_runtime": {
+					"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
+					"anyOf": [{ "$ref": "#/definitions/JsxRuntime" }, { "type": "null" }]
+				},
 				"organize_imports": {
 					"anyOf": [
 						{ "$ref": "#/definitions/JavascriptOrganizeImports" },
@@ -1300,6 +1304,21 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"JsxRuntime": {
+			"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
+			"oneOf": [
+				{
+					"description": "Indicates a modern or native JSX environment, that doesn't require special handling by Biome.",
+					"type": "string",
+					"enum": ["Transparent"]
+				},
+				{
+					"description": "Indicates a classic React environment that requires the `React` import.\n\nCorresponds to the `react` value for the `jsx` option in TypeScript's `tsconfig.json`.\n\nThis option should only be necessary if you cannot upgrade to a React version that supports the new JSX runtime. For more information about the old vs. new JSX runtime, please see: https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html",
+					"type": "string",
+					"enum": ["ReactClassic"]
+				}
+			]
 		},
 		"LineEnding": {
 			"oneOf": [
@@ -1865,15 +1884,6 @@
 			"properties": {
 				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
 				"options": { "$ref": "#/definitions/RestrictedImportsOptions" }
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUnusedImportsOptions": {
-			"type": "object",
-			"required": ["level", "options"],
-			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/UnusedImportsOptions" }
 			},
 			"additionalProperties": false
 		},
@@ -2701,23 +2711,6 @@
 					"enum": ["all"]
 				}
 			]
-		},
-		"UnusedImportsConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUnusedImportsOptions" }
-			]
-		},
-		"UnusedImportsOptions": {
-			"type": "object",
-			"required": ["ignoreReact"],
-			"properties": {
-				"ignoreReact": {
-					"description": "Ignore `React` imports from the `react` package when set to `true`.",
-					"type": "boolean"
-				}
-			},
-			"additionalProperties": false
 		},
 		"UtilityClassSortingConfiguration": {
 			"anyOf": [

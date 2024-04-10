@@ -22,6 +22,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Never,
     QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
+use biome_configuration::javascript::JsxRuntime;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
     AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
@@ -44,6 +45,7 @@ use biome_js_syntax::{
 };
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache};
+use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
 use std::path::PathBuf;
@@ -84,12 +86,25 @@ pub struct JsLinterSettings {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsOrganizeImportsSettings {}
 
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct JsEnvironmentSettings {
+    pub jsx_runtime: JsxRuntime,
+}
+
+impl From<JsxRuntime> for JsEnvironmentSettings {
+    fn from(jsx_runtime: JsxRuntime) -> Self {
+        Self { jsx_runtime }
+    }
+}
+
 impl ServiceLanguage for JsLanguage {
     type FormatterSettings = JsFormatterSettings;
     type LinterSettings = JsLinterSettings;
     type FormatOptions = JsFormatOptions;
     type OrganizeImportsSettings = JsOrganizeImportsSettings;
     type ParserSettings = JsParserSettings;
+    type EnvironmentSettings = JsEnvironmentSettings;
 
     fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self> {
         &languages.javascript
@@ -820,17 +835,27 @@ fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> An
             }
         })
         .unwrap_or_default();
+
+    let path = BiomePath::new(file_path.as_path());
+    let jsx_runtime = match settings
+        .override_settings
+        .override_jsx_runtime(&path, settings.languages.javascript.environment.jsx_runtime)
+    {
+        // In the future, we may wish to map an `Auto` variant to a concrete
+        // analyzer value for easy access by the analyzer.
+        JsxRuntime::Transparent => biome_analyze::options::JsxRuntime::Transparent,
+        JsxRuntime::ReactClassic => biome_analyze::options::JsxRuntime::ReactClassic,
+    };
+
     let configuration = AnalyzerConfiguration {
         rules: to_analyzer_rules(settings, file_path.as_path()),
         globals: settings
             .override_settings
-            .override_js_globals(
-                &BiomePath::new(file_path.as_path()),
-                &settings.languages.javascript.globals,
-            )
+            .override_js_globals(&path, &settings.languages.javascript.globals)
             .into_iter()
             .collect(),
         preferred_quote,
+        jsx_runtime,
     };
 
     AnalyzerOptions {
