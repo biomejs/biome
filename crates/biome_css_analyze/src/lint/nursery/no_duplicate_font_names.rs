@@ -44,7 +44,7 @@ declare_rule! {
         version: "next",
         name: "noDuplicateFontNames",
         recommended: true,
-        source: RuleSource::Stylelint("font-family-no-duplicate-names"),
+        sources: &[RuleSource::Stylelint("font-family-no-duplicate-names")],
     }
 }
 
