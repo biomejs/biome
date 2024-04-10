@@ -116,5 +116,10 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
             gitignore_matches,
         })?;
 
-    execute_mode(Execution::new_ci(), session, &cli_options, paths)
+    execute_mode(
+        Execution::new_ci().set_report(&cli_options),
+        session,
+        &cli_options,
+        paths,
+    )
 }

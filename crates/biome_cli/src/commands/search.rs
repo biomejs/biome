@@ -1,6 +1,5 @@
 use crate::cli_options::CliOptions;
 use crate::commands::{get_stdin, resolve_manifest, validate_configuration_diagnostics};
-use crate::execute::ReportMode;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
@@ -72,16 +71,8 @@ pub(crate) fn search(
     let console = &mut *session.app.console;
     let stdin = get_stdin(stdin_file_path, console, "search")?;
 
-    let execution = if cli_options.json {
-        Execution::with_report(
-            TraversalMode::Search { pattern, stdin },
-            ReportMode::Json {
-                pretty: cli_options.json_pretty,
-            },
-        )
-    } else {
-        Execution::new(TraversalMode::Search { pattern, stdin })
-    };
+    let execution =
+        Execution::new(TraversalMode::Search { pattern, stdin }).set_report(&cli_options);
 
     execute_mode(execution, session, &cli_options, paths)
 }

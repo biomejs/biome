@@ -2830,3 +2830,70 @@ fn should_show_formatter_diagnostics_for_files_ignored_by_linter() {
         result,
     ));
 }
+
+#[test]
+fn print_json() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("fix.js");
+    fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("check"),
+                ("--apply-unsafe"),
+                "--json",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "print_json",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn print_json_pretty() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("fix.js");
+    fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("check"),
+                ("--apply-unsafe"),
+                "--json",
+                "--json-pretty",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "print_json_pretty",
+        fs,
+        console,
+        result,
+    ));
+}

@@ -141,7 +141,8 @@ pub(crate) fn check(
         Execution::new(TraversalMode::Check {
             fix_file_mode,
             stdin,
-        }),
+        })
+        .set_report(&cli_options),
         session,
         &cli_options,
         paths,

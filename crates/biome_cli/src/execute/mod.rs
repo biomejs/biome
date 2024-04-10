@@ -217,13 +217,16 @@ impl Execution {
         }
     }
 
-    /// Creates an instance of [Execution] by passing [traversal mode](TraversalMode) and [report mode](ReportMode)
-    pub(crate) fn with_report(traversal_mode: TraversalMode, report_mode: ReportMode) -> Self {
-        Self {
-            traversal_mode,
-            report_mode,
-            max_diagnostics: 20,
-        }
+    /// It sets the reporting mode by reading the [CliOptions]
+    pub(crate) fn set_report(mut self, cli_options: &CliOptions) -> Self {
+        self.report_mode = if cli_options.json {
+            ReportMode::Json {
+                pretty: cli_options.json_pretty,
+            }
+        } else {
+            ReportMode::Terminal
+        };
+        self
     }
 
     pub(crate) fn traversal_mode(&self) -> &TraversalMode {
