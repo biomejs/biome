@@ -56,6 +56,8 @@ impl ServiceLanguage for JsonLanguage {
     type OrganizeImportsSettings = ();
     type FormatOptions = JsonFormatOptions;
     type ParserSettings = JsonParserSettings;
+    type EnvironmentSettings = ();
+
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
         &language.json
     }
@@ -397,6 +399,7 @@ fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> An
         rules: to_analyzer_rules(settings.as_ref(), file_path.as_path()),
         globals: vec![],
         preferred_quote: PreferredQuote::Double,
+        jsx_runtime: Default::default(),
     };
     AnalyzerOptions {
         configuration,

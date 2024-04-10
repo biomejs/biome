@@ -4,10 +4,10 @@ use crate::{
     JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, options::JsxRuntime, ActionCategory, FixKind, Rule,
+    RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_semantic::ReferencesExtensions;
@@ -16,10 +16,6 @@ use biome_js_syntax::{
     JsIdentifierBinding, JsImport, JsLanguage, JsNamedImportSpecifierList, JsSyntaxNode, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutation, BatchMutationExt};
-use serde::{Deserialize, Serialize};
-
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
 
 declare_rule! {
     /// Disallow unused imports.
@@ -34,22 +30,9 @@ declare_rule! {
     ///
     /// ## Options
     ///
-    /// The rule provides a single option `ignoreReact`.
-    /// When this option is set to `true`, imports named `React` from the package `react` are ignored.
-    /// `ignoreReact` is disabled by default.
-    ///
-    /// ```json
-    /// {
-    ///     "//": "...",
-    ///     "options": {
-    ///         "ignoreReact": true
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// This option should only be necessary if you cannot upgrade to a React version that supports the new JSX runtime.
-    /// In the new JSX runtime, you no longer need to import `React`.
-    /// You can find more details in [this comment](https://github.com/biomejs/biome/issues/571#issuecomment-1774026734).
+    /// This rule respects the [`jsxRuntime`](https://biomejs.dev/reference/configuration/#javascriptjsxruntime)
+    /// setting and will make an exception for React globals if it is set to
+    /// `"reactClassic"`.
     ///
     /// ## Examples
     ///
@@ -105,7 +88,7 @@ impl Rule for NoUnusedImports {
     type Query = Semantic<JsIdentifierBinding>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = UnusedImportsOptions;
+    type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
@@ -113,7 +96,9 @@ impl Rule for NoUnusedImports {
         if !is_import(&declaration) {
             return None;
         }
-        if ctx.options().ignore_react && is_global_react_import(binding, ReactLibrary::React) {
+        if ctx.has_jsx_runtime(JsxRuntime::ReactClassic)
+            && is_global_react_import(binding, ReactLibrary::React)
+        {
             return None;
         }
         let model = ctx.model();
@@ -180,14 +165,6 @@ impl Rule for NoUnusedImports {
             message: markup! { "Remove the unused import." }.to_owned(),
         })
     }
-}
-
-#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct UnusedImportsOptions {
-    /// Ignore `React` imports from the `react` package when set to `true`.
-    ignore_react: bool,
 }
 
 fn remove_import_specifier(
