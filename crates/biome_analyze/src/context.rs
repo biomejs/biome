@@ -26,6 +26,7 @@ impl<'a, R> RuleContext<'a, R>
 where
     R: Rule + Sized + 'static,
 {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         query_result: &'a RuleQueryResult<R>,
         root: &'a RuleRoot<R>,

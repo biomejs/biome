@@ -315,7 +315,6 @@ pub struct LanguageListSettings {
 impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
     fn from(javascript: JavascriptConfiguration) -> Self {
         let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
-        language_setting.environment = javascript.jsx_runtime.into();
 
         let formatter = javascript.formatter;
         language_setting.formatter.quote_style = Some(formatter.quote_style);
@@ -334,6 +333,7 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
             javascript.parser.unsafe_parameter_decorators_enabled;
 
         language_setting.globals = Some(javascript.globals.into_index_set());
+        language_setting.environment = javascript.jsx_runtime.into();
 
         language_setting
     }

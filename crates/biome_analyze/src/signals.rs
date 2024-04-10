@@ -375,7 +375,7 @@ where
             &globals,
             &self.options.file_path,
             &options,
-            &self.options.preferred_quote(),
+            self.options.preferred_quote(),
             self.options.jsx_runtime(),
         )
         .ok();
@@ -421,7 +421,7 @@ where
             &globals,
             &self.options.file_path,
             &options,
-            &self.options.preferred_quote(),
+            self.options.preferred_quote(),
             self.options.jsx_runtime(),
         )
         .ok();
