@@ -16,12 +16,15 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Now Biome can detect the script language in Svelte and Vue script blocks more reliably ([#2245](https://github.com/biomejs/biome/issues/2245)). Contributed by @Sec-ant
+
 - `useExhaustiveDependencies` no longer reports recursive calls as missing
   dependencies ([#2361](https://github.com/biomejs/biome/issues/2361)).
   Contributed by @arendjr
+
 - `useExhaustiveDependencies` correctly reports missing dependencies declared
   using function declarations ([#2362](https://github.com/biomejs/biome/issues/2362)).
   Contributed by @arendjr
+
 - Biome now can handle `.svelte` and `.vue` files with `CRLF` as the end-of-line sequence. Contributed by @Sec-ant
 
 #### Enhancements
@@ -130,6 +133,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnositic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
 
 - Biome now correctly filters out files that are not present in the current directory when using the `--changed` flag [#1996](https://github.com/biomejs/biome/issues/1996). Contributed by @castarco
+
+- Biome now skips traversing `fifo` or `socket` files ([#2311](https://github.com/biomejs/biome/issues/2311)). Contributed by @Sec-ant
 
 ### Configuration
 

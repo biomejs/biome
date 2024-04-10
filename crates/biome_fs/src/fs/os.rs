@@ -83,6 +83,14 @@ impl FileSystem for OsFileSystem {
         path.is_file()
     }
 
+    fn path_is_dir(&self, path: &Path) -> bool {
+        path.is_dir()
+    }
+
+    fn path_is_symlink(&self, path: &Path) -> bool {
+        path.is_symlink()
+    }
+
     fn resolve_configuration(
         &self,
         specifier: &str,
