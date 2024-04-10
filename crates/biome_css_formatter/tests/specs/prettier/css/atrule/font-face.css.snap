@@ -108,35 +108,35 @@ format(
    font-family: "Open Sans";
 -  src:
 -    url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
-+  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2") ,
++  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
      url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
  }
  @font-face {
    font-family: "Open Sans";
 -  src:
 -    url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
-+  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2") ,
++  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
      url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
  }
  @font-face {
    font-family: "Open Sans";
 -  src:
 -    url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
-+  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2") ,
++  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
      url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
  }
  @font-face {
    font-family: "Open Sans";
 -  src:
 -    url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
-+  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2") ,
++  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
      url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
  }
  @font-face {
    font-family: "Open Sans";
 -  src:
 -    url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
-+  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2") ,
++  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
      url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
  }
  @font-face {
@@ -144,7 +144,7 @@ format(
  
 -  src:
 -    url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
-+  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2") ,
++  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
      url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
  }
 ```
@@ -154,33 +154,33 @@ format(
 ```css
 @font-face {
   font-family: "Open Sans";
-  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2") ,
+  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
     url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 @font-face {
   font-family: "Open Sans";
-  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2") ,
+  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
     url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 @font-face {
   font-family: "Open Sans";
-  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2") ,
+  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
     url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 @font-face {
   font-family: "Open Sans";
-  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2") ,
+  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
     url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 @font-face {
   font-family: "Open Sans";
-  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2") ,
+  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
     url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 @font-face {
   font-family: "Open Sans";
 
-  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2") ,
+  src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
     url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 ```

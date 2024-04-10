@@ -29,7 +29,7 @@ div {
 -    Helvetica,
 -    Arial,
 +    mix($warningbackgroundcolors, $warningbordercolors, 50%);
-+  $fontfamily: "Lato" , -apple-system , "Helvetica Neue" , helvetica , arial ,
++  $fontfamily: "Lato", -apple-system, "Helvetica Neue", helvetica, arial,
      sans-serif;
  }
 ```
@@ -40,7 +40,7 @@ div {
 div {
   border-left: 1px solid
     mix($warningbackgroundcolors, $warningbordercolors, 50%);
-  $fontfamily: "Lato" , -apple-system , "Helvetica Neue" , helvetica , arial ,
+  $fontfamily: "Lato", -apple-system, "Helvetica Neue", helvetica, arial,
     sans-serif;
 }
 ```
