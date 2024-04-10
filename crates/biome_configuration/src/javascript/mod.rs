@@ -85,7 +85,7 @@ impl FromStr for JsxRuntime {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "transparent" => Ok(Self::Transparent),
-            "reactClassic" => Ok(Self::ReactClassic),
+            "react-classic" | "reactClassic" => Ok(Self::ReactClassic),
             _ => Err("Unexpected value".to_string()),
         }
     }
