@@ -23,7 +23,7 @@ pub enum Tag {
     /// Reduces the indention of the specified content either by one level or to the root, depending on the mode.
     /// Reverse operation of `Indent` and can be used to *undo* an `Align` for nested content.
     StartDedent(DedentMode),
-    EndDedent,
+    EndDedent(DedentMode),
 
     /// Creates a logical group where its content is either consistently printed:
     /// * on a single line: Omitting `LineMode::Soft` line breaks and printing spaces for `LineMode::SoftOrSpace`
@@ -41,7 +41,7 @@ pub enum Tag {
     /// Optimized version of [Tag::StartConditionalContent] for the case where some content
     /// should be indented if the specified group breaks.
     StartIndentIfGroupBreaks(GroupId),
-    EndIndentIfGroupBreaks,
+    EndIndentIfGroupBreaks(GroupId),
 
     /// Concatenates multiple elements together with a given separator printed in either
     /// flat or expanded mode to fill the print width. Expect that the content is a list of alternating
@@ -99,10 +99,10 @@ impl Tag {
         match self {
             StartIndent | EndIndent => TagKind::Indent,
             StartAlign(_) | EndAlign => TagKind::Align,
-            StartDedent(_) | EndDedent => TagKind::Dedent,
+            StartDedent(_) | EndDedent(_) => TagKind::Dedent,
             StartGroup(_) | EndGroup => TagKind::Group,
             StartConditionalContent(_) | EndConditionalContent => TagKind::ConditionalContent,
-            StartIndentIfGroupBreaks(_) | EndIndentIfGroupBreaks => TagKind::IndentIfGroupBreaks,
+            StartIndentIfGroupBreaks(_) | EndIndentIfGroupBreaks(_) => TagKind::IndentIfGroupBreaks,
             StartFill | EndFill => TagKind::Fill,
             StartEntry | EndEntry => TagKind::Entry,
             StartLineSuffix | EndLineSuffix => TagKind::LineSuffix,

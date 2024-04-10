@@ -745,6 +745,35 @@ impl<Context> Format<Context> for HardSpace {
 /// # Ok(())
 /// # }
 /// ```
+///
+/// When the indent_style is tab, [indent] convert the preceding alignments to indents
+/// ```
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+///
+/// # fn main() -> FormatResult<()> {
+/// let block = format!(
+///     SimpleFormatContext::default(),
+///     [
+///         text("root"),
+///         indent(&format_args![align(
+///             2,
+///             &format_args![indent(&format_args![
+///                 hard_line_break(),
+///                 text("shoud be 3 tabs"),
+///             ])]
+///         )])
+///     ]
+/// )?;
+///
+/// assert_eq!(
+///     "root\n\t\t\tshoud be 3 tabs",
+///     block.print()?.as_code()
+/// );
+/// #    Ok(())
+/// # }
+/// ```
+
 #[inline]
 pub fn indent<Content, Context>(content: &Content) -> Indent<Context>
 where
@@ -814,6 +843,95 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 /// # Ok(())
 /// # }
 /// ```
+///
+/// ```
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args, IndentStyle, IndentWidth, SimpleFormatOptions};
+///
+/// # fn main() -> FormatResult<()> {
+///     let context = SimpleFormatContext::new(SimpleFormatOptions {
+///         indent_width: IndentWidth::try_from(8).unwrap(),
+///         indent_style: IndentStyle::Space,
+///         ..SimpleFormatOptions::default()
+///     });
+///     let elements = format!(
+///         context,
+///         [
+///             text("root"),
+///             indent(&format_args![
+///                 hard_line_break(),
+///                 text("Indented"),
+///                 align(
+///                     2,
+///                     &format_args![
+///                         hard_line_break(),
+///                         text("Indented and aligned"),
+///                         dedent(&format_args![
+///                             hard_line_break(),
+///                             text("Indented, not aligned"),
+///                         ]),
+///                     ]
+///                 ),
+///             ]),
+///             align(
+///                 2,
+///                 &format_args![
+///                     hard_line_break(),
+///                     text("Aligned"),
+///                     indent(&format_args![
+///                         hard_line_break(),
+///                         text("Aligned, and indented"),
+///                         dedent(&format_args![
+///                             hard_line_break(),
+///                             text("aligned, not Intended"),
+///                         ]),
+///                     ])
+///                 ]
+///             ),
+///             dedent(&format_args![hard_line_break(), text("root level")])
+///         ]
+///     )?;
+///     assert_eq!(
+///      "root\n        Indented\n          Indented and aligned\n        Indented, not aligned\n  Aligned\n          Aligned, and indented\n  aligned, not Intended\nroot level",
+///      elements.print()?.as_code()
+///  );
+/// #    Ok(())
+/// # }
+/// ```
+///
+/// ```
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+///
+/// # fn main() -> FormatResult<()> {
+/// let block = format!(
+///     SimpleFormatContext::default(),
+///     [
+///         text("root"),
+///         indent(&format_args![align(
+///             2,
+///             &format_args![align(
+///                 2,
+///                 &format_args![indent(&format_args![
+///                     hard_line_break(),
+///                     text("should be 4 tabs"),
+///                     dedent(&format_args![
+///                         hard_line_break(),
+///                         text("should be 1 tab and 4 spaces"),
+///                     ]),
+///                 ])]
+///             ),]
+///         )])
+///     ]
+/// )?;
+/// assert_eq!(
+///     "root\n\t\t\t\tshould be 4 tabs\n\t    should be 1 tab and 4 spaces",
+///     block.print()?.as_code()
+/// );
+/// # Ok(())
+/// # }
+/// ```
+
 #[inline]
 pub fn dedent<Content, Context>(content: &Content) -> Dedent<Context>
 where
@@ -835,7 +953,7 @@ impl<Context> Format<Context> for Dedent<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartDedent(self.mode)))?;
         Arguments::from(&self.content).fmt(f)?;
-        f.write_element(FormatElement::Tag(EndDedent))
+        f.write_element(FormatElement::Tag(EndDedent(self.mode)))
     }
 }
 
@@ -2107,7 +2225,7 @@ impl<Context> Format<Context> for IndentIfGroupBreaks<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartIndentIfGroupBreaks(self.group_id)))?;
         Arguments::from(&self.content).fmt(f)?;
-        f.write_element(FormatElement::Tag(EndIndentIfGroupBreaks))
+        f.write_element(FormatElement::Tag(EndIndentIfGroupBreaks(self.group_id)))
     }
 }
 

@@ -1,0 +1,94 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/expression/nested_conditional_expression/nested_conditional_expression.js
+---
+# Input
+
+```js
+a // test
+? // nested test in consequence
+    b
+    ? // nested consequence in consequence
+        c
+    : // nested alternate in consequence
+        d
+: // nested test in alternate
+    e
+    ? // nested consequence in alternate
+        f
+    : // nested alternate in alternate
+        g;
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```js
+a // test
+	? // nested test in consequence
+		b
+		? // nested consequence in consequence
+			c
+		: // nested alternate in consequence
+			d
+	: // nested test in alternate
+		e
+		? // nested consequence in alternate
+			f
+		: // nested alternate in alternate
+			g;
+```
+
+## Output 1
+
+-----
+Indent style: Space
+Indent width: 4
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```js
+a // test
+    ? // nested test in consequence
+      b
+        ? // nested consequence in consequence
+          c
+        : // nested alternate in consequence
+          d
+    : // nested test in alternate
+      e
+      ? // nested consequence in alternate
+        f
+      : // nested alternate in alternate
+        g;
+```
