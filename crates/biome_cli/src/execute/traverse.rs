@@ -499,7 +499,8 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
     }
 
     fn can_handle(&self, biome_path: &BiomePath) -> bool {
-        if !self.fs.path_is_file(biome_path.as_path()) {
+        let path = biome_path.as_path();
+        if self.fs.path_is_dir(path) || self.fs.path_is_symlink(path) {
             // handle:
             // - directories
             // - symlinks
@@ -517,6 +518,11 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
                     false
                 });
             return can_handle;
+        }
+
+        // bail on fifo and socket files
+        if !self.fs.path_is_file(path) {
+            return false;
         }
 
         let file_features = self.workspace.file_features(SupportsFeatureParams {

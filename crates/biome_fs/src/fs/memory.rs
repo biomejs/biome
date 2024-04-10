@@ -191,6 +191,14 @@ impl FileSystem for MemoryFileSystem {
         files.get(path).is_some()
     }
 
+    fn path_is_dir(&self, path: &Path) -> bool {
+        !self.path_is_file(path)
+    }
+
+    fn path_is_symlink(&self, _path: &Path) -> bool {
+        false
+    }
+
     fn get_changed_files(&self, _base: &str) -> io::Result<Vec<String>> {
         let cb_arc = self.on_get_changed_files.as_ref().unwrap().clone();
 
