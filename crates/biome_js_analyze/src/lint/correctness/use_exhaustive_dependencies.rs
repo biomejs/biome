@@ -376,6 +376,12 @@ pub enum Fix {
         component_function: JsSyntaxNode,
         dependencies: Vec<AnyJsExpression>,
     },
+    /// When a dependency is too unstable (changes every render).
+    DependencyTooUnstable {
+        function_name_range: TextRange,
+        dependency_name: String,
+        dependency_range: TextRange,
+    },
     /// When a dependency is more deep than the capture
     DependencyTooDeep {
         function_name_range: TextRange,
@@ -409,27 +415,29 @@ fn get_whole_static_member_expression(reference: &JsSyntaxNode) -> Option<AnyJsM
 // Test if a capture needs to be in the dependency list
 // of a react hook call
 fn capture_needs_to_be_in_the_dependency_list(
-    capture: Capture,
+    capture: &Capture,
     component_function_range: &TextRange,
     model: &SemanticModel,
     options: &ReactExtensiveDependenciesOptions,
-) -> Option<Capture> {
+) -> bool {
     // Ignore if referenced in TS typeof
     if capture
         .node()
         .ancestors()
         .any(|a| TsTypeofType::can_cast(a.kind()))
     {
-        return None;
+        return false;
     }
 
     let binding = capture.binding();
 
     // Ignore if imported
     if binding.is_imported() {
-        return None;
+        return false;
     }
-    let decl = binding.tree().declaration()?;
+    let Some(decl) = binding.tree().declaration() else {
+        return false;
+    };
     match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
         // These declarations are always stable
         AnyJsBindingDeclaration::JsClassDeclaration(_)
@@ -439,7 +447,7 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsInferType(_)
         | AnyJsBindingDeclaration::TsMappedType(_)
-        | AnyJsBindingDeclaration::TsTypeParameter(_) => None,
+        | AnyJsBindingDeclaration::TsTypeParameter(_) => false,
         // Function declarations are unstable if ...
         AnyJsBindingDeclaration::JsFunctionDeclaration(declaration) => {
             let declaration_range = declaration.syntax().text_range();
@@ -447,28 +455,35 @@ fn capture_needs_to_be_in_the_dependency_list(
             // ... they are declared inside the component function
             component_function_range
                 .intersect(declaration_range)
-                .filter(|range| !range.is_empty())
-                .map(|_| capture)
+                .map_or(false, |range| !range.is_empty())
         }
         // Variable declarators are stable if ...
         AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
-            let declaration = declarator
+            let Some(declaration) = declarator
                 .syntax()
                 .ancestors()
-                .find_map(JsVariableDeclaration::cast)?;
+                .find_map(JsVariableDeclaration::cast)
+            else {
+                return false;
+            };
             let declaration_range = declaration.syntax().text_range();
 
             // ... they are declared outside of the component function
-            let _ = component_function_range
+            if component_function_range
                 .intersect(declaration_range)
-                .filter(|range| !range.is_empty())?;
+                .map_or(true, TextRange::is_empty)
+            {
+                return false;
+            }
 
             if declaration.is_const() {
                 // ... they are `const` and their initializer is constant
-                let initializer = declarator.initializer()?;
-                let expr = initializer.expression().ok()?;
-                if model.is_constant(&expr) {
-                    return None;
+                if declarator
+                    .initializer()
+                    .and_then(|initializer| initializer.expression().ok())
+                    .map_or(true, |expr| model.is_constant(&expr))
+                {
+                    return false;
                 }
             }
 
@@ -478,13 +493,11 @@ fn capture_needs_to_be_in_the_dependency_list(
                 .ancestors()
                 .any(|ancestor| &ancestor == declaration.syntax())
             {
-                return None;
+                return false;
             }
 
             // ... they are assign to stable returns of another React function
-            let not_stable =
-                !is_binding_react_stable(&binding.tree(), model, &options.stable_config);
-            not_stable.then_some(capture)
+            !is_binding_react_stable(&binding.tree(), model, &options.stable_config)
         }
 
         // all others need to be in the dependency list
@@ -500,10 +513,10 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
         | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
         | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
-        | AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(capture),
+        | AnyJsBindingDeclaration::JsCatchDeclaration(_) => true,
 
         // Ignore TypeScript `import <id> =`
-        AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => None,
+        AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => false,
 
         // This should be unreachable because we call `parent_binding_pattern_declaration`
         AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
@@ -631,7 +644,7 @@ impl Rule for UseExhaustiveDependencies {
 
             let captures: Vec<_> = result
                 .all_captures(model)
-                .filter_map(|capture| {
+                .filter(|capture| {
                     capture_needs_to_be_in_the_dependency_list(
                         capture,
                         &component_function_range,
@@ -715,19 +728,19 @@ impl Rule for UseExhaustiveDependencies {
                 }
             }
 
-            let mut remove_deps: Vec<AnyJsExpression> = vec![];
-            // Search for dependencies not captured
-            for dep in deps {
-                let covers_any_capture = captures.iter().any(|(_, _, capture_path)| {
-                    let (capture_contains_dep, dep_contains_capture) =
-                        compare_member_depth(capture_path, dep.syntax());
-                    capture_contains_dep || dep_contains_capture
+            // Split deps into correctly specified ones and unnecessary ones.
+            let (correct_deps, excessive_deps): (Vec<_>, Vec<_>) =
+                deps.into_iter().partition(|dep| {
+                    captures.iter().any(|(_, _, capture_path)| {
+                        let (capture_contains_dep, dep_contains_capture) =
+                            compare_member_depth(capture_path, dep.syntax());
+                        capture_contains_dep || dep_contains_capture
+                    })
                 });
 
-                if !covers_any_capture {
-                    remove_deps.push(dep);
-                }
-            }
+            // Find correctly specified dependencies with an unstable identity,
+            // since they would trigger re-evaluation on every render.
+            let unstable_deps = correct_deps.into_iter().filter(|dep| true /* TODO */);
 
             // Generate signals
             for captures in add_deps {
@@ -738,11 +751,19 @@ impl Rule for UseExhaustiveDependencies {
                 });
             }
 
-            if !remove_deps.is_empty() {
+            if !excessive_deps.is_empty() {
                 signals.push(Fix::RemoveDependency {
                     function_name_range: result.function_name_range,
                     component_function,
-                    dependencies: remove_deps,
+                    dependencies: excessive_deps,
+                });
+            }
+
+            for unstable_dep in unstable_deps {
+                signals.push(Fix::DependencyTooUnstable {
+                    dependency_name: unstable_dep.syntax().to_string(),
+                    dependency_range: unstable_dep.range(),
+                    function_name_range: result.function_name_range,
                 });
             }
         }
@@ -815,6 +836,24 @@ impl Rule for UseExhaustiveDependencies {
                     }
                 }
 
+                Some(diag)
+            }
+            Fix::DependencyTooUnstable {
+                dependency_name,
+                dependency_range,
+                function_name_range,
+            } => {
+                let diag = RuleDiagnostic::new(
+                    rule_category!(),
+                    function_name_range,
+                    markup! {
+                        "The "<Emphasis>{dependency_name}</Emphasis>" changes on every re-render and should not be used as a hook dependency."
+                    },
+                )
+                .detail(dependency_range, "Used in this dependency array.")
+                .note(markup! {
+                    "To fix this, wrap the definition of "<Emphasis>{dependency_name}</Emphasis>" in its own useCallback() hook."
+                });
                 Some(diag)
             }
             Fix::DependencyTooDeep {
