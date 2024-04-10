@@ -94,6 +94,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Added two new options to customise the emitted output of the CLI: `--json` and `--json-pretty`. With `--json`, the diagnostics and the
+  summary will be printed in the **terminal** in JSON format. Using `--json-pretty` _together_ with `--json` will output the same output, but formatted.
+
+  NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future.
+
 #### Enhancements
 
 - Improve support of `.prettierignore` when migrating from Prettier
@@ -113,7 +118,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- Support `overrides` field in Prettier configuration files when migrating from Prettier. 
+- Support `overrides` field in Prettier configuration files when migrating from Prettier.
   Contributed by @Conaclos
 
 #### Bug fixes
