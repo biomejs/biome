@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use biome_formatter::write;
 
+use crate::utils::format_node_without_comments::FormatAnyJsExpressionWithoutComments;
 use biome_js_syntax::{JsxSpreadChild, JsxSpreadChildFields};
 
 #[derive(Debug, Clone, Default)]
@@ -18,14 +19,33 @@ impl FormatNodeRule<JsxSpreadChild> for FormatJsxSpreadChild {
         let expression = expression?;
 
         let format_inner = format_with(|f| {
-            write!(
-                f,
-                [
-                    dotdotdot_token.format(),
-                    expression.format(),
-                    line_suffix_boundary()
-                ]
-            )
+            if f.comments().is_suppressed(expression.syntax()) {
+                write!(
+                    f,
+                    [
+                        dotdotdot_token.format(),
+                        expression.format(),
+                        line_suffix_boundary()
+                    ]
+                )
+            } else {
+                write!(
+                    f,
+                    [
+                        format_leading_comments(expression.syntax()),
+                        dotdotdot_token.format(),
+                    ]
+                )?;
+                FormatAnyJsExpressionWithoutComments.fmt(&expression, f)?;
+                write!(
+                    f,
+                    [
+                        format_dangling_comments(expression.syntax()).with_soft_block_indent(),
+                        format_trailing_comments(expression.syntax()),
+                        line_suffix_boundary()
+                    ]
+                )
+            }
         });
 
         write!(f, [l_curly_token.format()])?;

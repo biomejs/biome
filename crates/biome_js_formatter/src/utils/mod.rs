@@ -6,6 +6,7 @@ pub mod string_utils;
 
 pub(crate) mod format_class;
 pub(crate) mod format_modifiers;
+pub(crate) mod format_node_without_comments;
 pub(crate) mod function_body;
 pub mod jsx;
 pub(crate) mod member_chain;
