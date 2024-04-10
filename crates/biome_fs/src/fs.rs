@@ -350,11 +350,11 @@ where
     }
 
     fn path_is_dir(&self, path: &Path) -> bool {
-        T::path_is_dir(&self, path)
+        T::path_is_dir(self, path)
     }
 
     fn path_is_symlink(&self, path: &Path) -> bool {
-        T::path_is_symlink(&self, path)
+        T::path_is_symlink(self, path)
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
