@@ -25,9 +25,7 @@ where
                     // A separator should not be added before the comma because the comma acts as a `CssGenericDelimiter`.
                     let is_comma = CssGenericDelimiter::cast_ref(element.syntax())
                         .and_then(|node| node.value().ok())
-                        .map_or(false, |node|{
-                            node.kind() == CssSyntaxKind::COMMA
-                        });
+                        .map_or(false, |node| node.kind() == CssSyntaxKind::COMMA);
 
                     if !is_comma {
                         write!(f, [soft_line_break_or_space()])?
