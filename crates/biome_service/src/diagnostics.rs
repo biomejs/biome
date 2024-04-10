@@ -91,12 +91,6 @@ impl WorkspaceError {
         })
     }
 
-    pub fn report_not_serializable(reason: impl Into<String>) -> Self {
-        Self::ReportNotSerializable(ReportNotSerializable {
-            reason: reason.into(),
-        })
-    }
-
     pub fn vcs_disabled() -> Self {
         Self::Vcs(VcsDiagnostic::DisabledVcs(DisabledVcs {}))
     }

@@ -73,7 +73,12 @@ pub(crate) fn search(
     let stdin = get_stdin(stdin_file_path, console, "search")?;
 
     let execution = if cli_options.json {
-        Execution::with_report(TraversalMode::Search { pattern, stdin }, ReportMode::Json)
+        Execution::with_report(
+            TraversalMode::Search { pattern, stdin },
+            ReportMode::Json {
+                pretty: cli_options.json_pretty,
+            },
+        )
     } else {
         Execution::new(TraversalMode::Search { pattern, stdin })
     };

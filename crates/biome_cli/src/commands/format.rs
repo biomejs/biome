@@ -184,7 +184,9 @@ pub(crate) fn format(
                 write,
                 stdin,
             },
-            ReportMode::Json,
+            ReportMode::Json {
+                pretty: cli_options.json_pretty,
+            },
         )
     } else {
         Execution::new(TraversalMode::Format {

@@ -6,15 +6,19 @@ pub(crate) mod traverse;
 
 use crate::cli_options::CliOptions;
 use crate::commands::MigrateSubCommand;
+use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::traverse;
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
 use biome_console::{markup, ConsoleExt};
+use biome_diagnostics::adapters::SerdeJsonError;
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
-use biome_service::workspace::{FeatureName, FeaturesBuilder, FixFileMode};
+use biome_service::workspace::{
+    FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams,
+};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
@@ -182,7 +186,7 @@ pub enum ReportMode {
     #[default]
     Terminal,
     /// Reports information in JSON format
-    Json,
+    Json { pretty: bool },
 }
 
 impl Execution {
@@ -383,7 +387,10 @@ pub fn execute_mode(
                 };
                 reporter.write(&mut ConsoleReporterVisitor(console))?;
             }
-            ReportMode::Json => {
+            ReportMode::Json { pretty } => {
+                console.error(markup!{
+                    <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
+                });
                 // let file_name = PathBuf::from("report.json");
                 // let fs = session.app.fs;
                 let reporter = JsonReporter {
@@ -397,9 +404,30 @@ pub fn execute_mode(
                 };
                 let mut buffer = JsonReporterVisitor::new(summary_result);
                 reporter.write(&mut buffer)?;
-                console.log(markup! {
-                    {buffer}
-                });
+                if pretty {
+                    let content = serde_json::to_string(&buffer).map_err(|error| {
+                        CliDiagnostic::Report(ReportDiagnostic::Serialisation(
+                            SerdeJsonError::from(error),
+                        ))
+                    })?;
+                    let report_file = BiomePath::new("_report_output.json");
+                    session.app.workspace.open_file(OpenFileParams {
+                        content,
+                        path: report_file.clone(),
+                        version: 0,
+                        document_file_source: None,
+                    })?;
+                    let code = session.app.workspace.format_file(FormatFileParams {
+                        path: report_file.clone(),
+                    })?;
+                    console.log(markup! {
+                        {code.as_code()}
+                    });
+                } else {
+                    console.log(markup! {
+                        {buffer}
+                    });
+                }
             }
         }
 

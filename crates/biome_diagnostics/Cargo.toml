@@ -1,14 +1,14 @@
 [package]
-authors.workspace    = true
+authors.workspace = true
 categories.workspace = true
-description          = "Biome's shared infrastructure to implement reporting pretty error and diagnostics"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
-name                 = "biome_diagnostics"
+description = "Biome's shared infrastructure to implement reporting pretty error and diagnostics"
+edition.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+name = "biome_diagnostics"
 repository.workspace = true
-version              = "0.5.7"
+version = "0.5.7"
 
 [[example]]
 name = "cli"
@@ -27,27 +27,28 @@ name = "serde"
 test = true
 
 [dependencies]
-backtrace                    = "0.3.66"
-biome_console                = { workspace = true, features = ["serde_markup"] }
+backtrace = "0.3.66"
+biome_console = { workspace = true, features = ["serde_markup"] }
 biome_diagnostics_categories = { workspace = true, features = ["serde"] }
-biome_diagnostics_macros     = { workspace = true }
-biome_rowan                  = { workspace = true }
-biome_text_edit              = { workspace = true }
-biome_text_size              = { workspace = true }
-bitflags                     = { workspace = true }
-bpaf                         = { workspace = true }
-oxc_resolver                 = { workspace = true }
-schemars                     = { workspace = true, optional = true }
-serde                        = { workspace = true, features = ["derive"] }
-termcolor                    = "1.1.2"
-unicode-width                = "0.1.9"
+biome_diagnostics_macros = { workspace = true }
+biome_rowan = { workspace = true }
+biome_text_edit = { workspace = true }
+biome_text_size = { workspace = true }
+bitflags = { workspace = true }
+bpaf = { workspace = true }
+oxc_resolver = { workspace = true }
+schemars = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+termcolor = "1.1.2"
+unicode-width = "0.1.9"
 
 [features]
 schema = ["schemars", "biome_text_edit/schemars", "biome_diagnostics_categories/schemars"]
 
 [dev-dependencies]
 serde_json = { workspace = true }
-trybuild   = "1.0.80"
+trybuild = "1.0.80"
 
 [lints]
 workspace = true
