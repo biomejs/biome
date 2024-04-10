@@ -148,6 +148,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Now setting group level `all` to `false` can disable recommended rules from that group when top level `recommended` is `true` or unset. Contributed by @Sec-ant
 
+- Biome configuration files can correctly extends `.jsonc` configuration files now ([#2279](https://github.com/biomejs/biome/issues/2279)). Contributed by @Sec-ant
+
 #### Enhancements
 
 - Biome now displays the location of a parsing error for its configuration file ([#1627](https://github.com/biomejs/biome/issues/1627)).

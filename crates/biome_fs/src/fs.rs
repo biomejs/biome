@@ -113,7 +113,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                             Err(err) => {
                                 if !is_searching_in_parent_dir && should_error_if_file_not_found {
                                     let error_message = format!(
-                                        "Biome couldn't read the config file {:?}, reason:\n {}",
+                                        "Biome couldn't read the file {:?}, reason:\n {}",
                                         file_path, err
                                     );
                                     errors.push((
@@ -134,7 +134,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                     Err(err) => {
                         if !is_searching_in_parent_dir && should_error_if_file_not_found {
                             let error_message = format!(
-                                "Biome couldn't find the config file {:?}, reason:\n {}",
+                                "Biome couldn't find the file {:?}, reason:\n {}",
                                 file_path, err
                             );
                             errors.push((
