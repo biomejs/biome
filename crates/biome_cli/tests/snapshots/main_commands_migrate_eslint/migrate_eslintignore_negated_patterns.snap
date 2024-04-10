@@ -33,7 +33,7 @@ These patterns cannot be migrated because Biome doesn't support them.
 ```block
 biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Configuration file can be updated.
+  × Configuration file can be updated.
   
     1    │ - {·"linter":·{·"enabled":·true·}·}
        1 │ + {

@@ -32,7 +32,7 @@ generated/*.spec.js
 ```block
 biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Configuration file can be updated.
+  × Configuration file can be updated.
   
     1    │ - {·"linter":·{·"enabled":·true·}·}
        1 │ + {
