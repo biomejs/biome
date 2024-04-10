@@ -231,7 +231,6 @@ impl StableReactHookConfiguration {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
 pub enum StableHookResult {
     /// Used to indicate the hook does not have a stable result.
     #[default]
@@ -250,6 +249,55 @@ pub enum StableHookResult {
     /// For example, React's `useState()` hook returns a stable function at
     /// index 1.
     Indices(Vec<u8>),
+}
+
+#[cfg(feature = "schemars")]
+impl JsonSchema for StableHookResult {
+    fn schema_name() -> String {
+        "StableHookResult".to_owned()
+    }
+
+    fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        use schemars::schema::*;
+        Schema::Object(SchemaObject {
+            subschemas: Some(Box::new(SubschemaValidation {
+                one_of: Some(vec![
+                    Schema::Object(SchemaObject {
+                        instance_type: Some(InstanceType::Boolean.into()),
+                        metadata: Some(Box::new(Metadata {
+                            description: Some("Whether the hook has a stable result.".to_owned()),
+                            ..Default::default()
+                        })),
+                        ..Default::default()
+                    }),
+                    Schema::Object(SchemaObject {
+                        instance_type: Some(InstanceType::Array.into()),
+                        array: Some(Box::new(ArrayValidation {
+                            items: Some(SingleOrVec::Single(Box::new(Schema::Object(SchemaObject {
+                                instance_type: Some(InstanceType::Integer.into()),
+                                format: Some("uint8".to_owned()),
+                                number: Some(Box::new(NumberValidation {
+                                    minimum: Some(0.),
+                                    maximum: Some(255.),
+                                    ..Default::default()
+                                })),
+                                ..Default::default()
+                            })))),
+                            min_items: Some(1),
+                            ..Default::default()
+                        })),
+                        metadata: Some(Box::new(Metadata {
+                            description: Some("Used to indicate the hook returns an array and some of its indices have stable identities.".to_owned()),
+                            ..Default::default()
+                        })),
+                        ..Default::default()
+                    })
+                ]),
+                ..Default::default()
+            })),
+            ..Default::default()
+        })
+    }
 }
 
 impl biome_deserialize::Deserializable for StableHookResult {

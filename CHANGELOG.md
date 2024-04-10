@@ -144,6 +144,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Biome configuration files can correctly extends `.jsonc` configuration files now ([#2279](https://github.com/biomejs/biome/issues/2279)). Contributed by @Sec-ant
 
+- Fixed the JSON schema for React hooks configuration ([#2396](https://github.com/biomejs/biome/issues/2396)). Contributed by @arendjr
+
 #### Enhancements
 
 - Biome now displays the location of a parsing error for its configuration file ([#1627](https://github.com/biomejs/biome/issues/1627)).
