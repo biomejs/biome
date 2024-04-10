@@ -1,7 +1,11 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{
+    react::{is_global_react_import, ReactLibrary},
+    services::semantic::Semantic,
+    JsRuleAction,
+};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    context::RuleContext, declare_rule, options::JsxRuntime, ActionCategory, FixKind, Rule,
+    RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -29,6 +33,12 @@ declare_rule! {
     ///
     /// The rule ensures that all imports used only as a type use a type-only `import`.
     /// It also groups inline type imports into a grouped `import type`.
+    ///
+    /// ## Options
+    ///
+    /// This rule respects the [`jsxRuntime`](https://biomejs.dev/reference/configuration/#javascriptjsxruntime)
+    /// setting and will make an exception for React globals if it is set to
+    /// `"reactClassic"`.
     ///
     /// ## Examples
     ///
@@ -135,6 +145,12 @@ impl Rule for UseImportType {
                     AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(namespace_specifier) => {
                         let namespace_binding = namespace_specifier.local_name().ok()?;
                         let namespace_binding = namespace_binding.as_js_identifier_binding()?;
+                        if ctx.has_jsx_runtime(JsxRuntime::ReactClassic)
+                            && is_global_react_import(namespace_binding, ReactLibrary::React)
+                        {
+                            return None;
+                        }
+
                         match (
                             is_default_used_as_type,
                             is_only_used_as_type(model, namespace_binding),
@@ -150,6 +166,12 @@ impl Rule for UseImportType {
             AnyJsImportClause::JsImportDefaultClause(clause) => {
                 let default_binding = clause.default_specifier().ok()?.local_name().ok()?;
                 let default_binding = default_binding.as_js_identifier_binding()?;
+                if ctx.has_jsx_runtime(JsxRuntime::ReactClassic)
+                    && is_global_react_import(default_binding, ReactLibrary::React)
+                {
+                    return None;
+                }
+
                 is_only_used_as_type(model, default_binding).then_some(ImportTypeFix::UseImportType)
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
@@ -163,6 +185,12 @@ impl Rule for UseImportType {
             AnyJsImportClause::JsImportNamespaceClause(clause) => {
                 let namespace_binding = clause.namespace_specifier().ok()?.local_name().ok()?;
                 let namespace_binding = namespace_binding.as_js_identifier_binding()?;
+                if ctx.has_jsx_runtime(JsxRuntime::ReactClassic)
+                    && is_global_react_import(namespace_binding, ReactLibrary::React)
+                {
+                    return None;
+                }
+
                 is_only_used_as_type(model, namespace_binding)
                     .then_some(ImportTypeFix::UseImportType)
             }

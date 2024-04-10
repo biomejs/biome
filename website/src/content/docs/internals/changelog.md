@@ -202,7 +202,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Add a new option `jsxRuntime` to the `javascript` configuration. When set to `reactClassic`, the [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) rule uses this information to make an exception for the React global that is required by the React Classic JSX transform.
+- Add a new option `jsxRuntime` to the `javascript` configuration. When set to `reactClassic`, the [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) and [useImportType](https://biomejs.dev/linter/rules/use-import-type) rules use this information to make exceptions for the React global that is required by the React Classic JSX transform.
 
   This is only necessary for React users who haven't upgraded to the [new JSX transform](https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html).
 
