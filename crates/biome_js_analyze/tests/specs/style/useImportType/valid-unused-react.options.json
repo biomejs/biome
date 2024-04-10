@@ -1,0 +1,12 @@
+{
+    "linter": {
+        "rules": {
+            "style": {
+                "useImportType": "error"
+            }
+        }
+    },
+    "javascript": {
+        "jsxRuntime": "reactClassic"
+    }
+}

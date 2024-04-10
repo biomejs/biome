@@ -101,9 +101,9 @@ where
         self.options
     }
 
-    /// Checks whether the JSX runtime matches the given value.
-    pub fn has_jsx_runtime(&self, jsx_runtime: JsxRuntime) -> bool {
-        self.jsx_runtime == jsx_runtime
+    /// Returns the JSX runtime in use.
+    pub fn jsx_runtime(&self) -> JsxRuntime {
+        self.jsx_runtime
     }
 
     /// Checks whether the provided text belongs to globals
