@@ -96,7 +96,7 @@ impl Rule for NoUnusedImports {
         if !is_import(&declaration) {
             return None;
         }
-        if ctx.has_jsx_runtime(JsxRuntime::ReactClassic)
+        if ctx.jsx_runtime() == JsxRuntime::ReactClassic
             && is_global_react_import(binding, ReactLibrary::React)
         {
             return None;

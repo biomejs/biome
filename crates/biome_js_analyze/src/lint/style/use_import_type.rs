@@ -145,7 +145,7 @@ impl Rule for UseImportType {
                     AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(namespace_specifier) => {
                         let namespace_binding = namespace_specifier.local_name().ok()?;
                         let namespace_binding = namespace_binding.as_js_identifier_binding()?;
-                        if ctx.has_jsx_runtime(JsxRuntime::ReactClassic)
+                        if ctx.jsx_runtime() == JsxRuntime::ReactClassic
                             && is_global_react_import(namespace_binding, ReactLibrary::React)
                         {
                             return None;
@@ -166,7 +166,7 @@ impl Rule for UseImportType {
             AnyJsImportClause::JsImportDefaultClause(clause) => {
                 let default_binding = clause.default_specifier().ok()?.local_name().ok()?;
                 let default_binding = default_binding.as_js_identifier_binding()?;
-                if ctx.has_jsx_runtime(JsxRuntime::ReactClassic)
+                if ctx.jsx_runtime() == JsxRuntime::ReactClassic
                     && is_global_react_import(default_binding, ReactLibrary::React)
                 {
                     return None;
@@ -185,7 +185,7 @@ impl Rule for UseImportType {
             AnyJsImportClause::JsImportNamespaceClause(clause) => {
                 let namespace_binding = clause.namespace_specifier().ok()?.local_name().ok()?;
                 let namespace_binding = namespace_binding.as_js_identifier_binding()?;
-                if ctx.has_jsx_runtime(JsxRuntime::ReactClassic)
+                if ctx.jsx_runtime() == JsxRuntime::ReactClassic
                     && is_global_react_import(namespace_binding, ReactLibrary::React)
                 {
                     return None;

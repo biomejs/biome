@@ -19,6 +19,12 @@ This also ensures that some modules are not loaded at runtime.
 The rule ensures that all imports used only as a type use a type-only `import`.
 It also groups inline type imports into a grouped `import type`.
 
+## Options
+
+This rule respects the [`jsxRuntime`](https://biomejs.dev/reference/configuration/#javascriptjsxruntime)
+setting and will make an exception for React globals if it is set to
+`"reactClassic"`.
+
 ## Examples
 
 ### Invalid
