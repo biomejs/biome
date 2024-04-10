@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use crate::utils::expression::FormatAnyJsExpressionWithoutComments;
+use crate::utils::format_node_without_comments::FormatAnyJsExpressionWithoutComments;
 use biome_formatter::write;
 use biome_js_syntax::{JsxSpreadAttribute, JsxSpreadAttributeFields};
 

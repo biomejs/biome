@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_formatter::write;
 
-use crate::utils::expression::FormatAnyJsExpressionWithoutComments;
+use crate::utils::format_node_without_comments::FormatAnyJsExpressionWithoutComments;
 use biome_js_syntax::{JsxSpreadChild, JsxSpreadChildFields};
 
 #[derive(Debug, Clone, Default)]
