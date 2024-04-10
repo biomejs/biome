@@ -41,6 +41,7 @@ use crate::ts::expressions::satisfies_expression::FormatTsSatisfiesExpression;
 use crate::ts::expressions::type_assertion_expression::FormatTsTypeAssertionExpression;
 use crate::{js::expressions::identifier_expression::FormatJsIdentifierExpression, prelude::*};
 use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatAnyJsExpressionWithoutComments;
 
