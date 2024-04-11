@@ -24,6 +24,7 @@ description: Available commands and arguments in the Biome CLI.
   * [`biome lsp-proxy`↴](#biome-lsp-proxy)
   * [`biome migrate`↴](#biome-migrate)
   * [`biome migrate prettier`↴](#biome-migrate-prettier)
+  * [`biome migrate eslint`↴](#biome-migrate-eslint)
   * [`biome explain`↴](#biome-explain)
 
 ## biome
@@ -808,6 +809,8 @@ It updates the configuration when there are breaking changes
 **Available commands:**
 - **`prettier`** &mdash; 
   It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`, and map the Prettier's configuration into Biome's configuration file.
+- **`eslint`** &mdash; 
+  It attempts to find the ESLint configuration file in the working directory, and update the Biome's configuration file as a result.
 
 
 ## biome migrate prettier
@@ -817,6 +820,21 @@ It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore
 **Usage**: **`biome`** **`migrate`** **`prettier`** 
 
 **Available options:**
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+## biome migrate eslint
+
+It attempts to find the ESLint configuration file in the working directory, and update the Biome's configuration file as a result.
+
+**Usage**: **`biome`** **`migrate`** **`eslint`** \[**`--include-inspired`**\] \[**`--include-nursery`**\]
+
+**Available options:**
+- **`    --include-inspired`** &mdash; 
+  Includes rules inspired from an eslint rule in the migration
+- **`    --include-nursery`** &mdash; 
+  Includes nursery rules in the migration
 - **`-h`**, **`--help`** &mdash; 
   Prints help information
 
