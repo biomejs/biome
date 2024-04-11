@@ -119,7 +119,8 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         Execution::new(TraversalMode::Lint {
             fix_file_mode,
             stdin,
-        }),
+        })
+        .set_report(&cli_options),
         session,
         &cli_options,
         paths,

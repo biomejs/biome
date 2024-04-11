@@ -24,5 +24,3 @@ rome.json migrate ━━━━━━━━━━━━━━━━━━━━�
 ```block
 Run the command with the option --write to apply the changes.
 ```
-
-

@@ -54,7 +54,7 @@ div {
 	all: revert-layer;
 
 	all: unknown-value;
-	all: a , value list;
+	all: a, value list;
 }
 
 :root {

@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `fix.js`
+
+```js
+const a = 4;
+console.log(a);
+
+```
+
+# Emitted Messages
+
+```block
+The --json option is unstable/experimental and its output might change between patches/minor releases.
+```
+
+```block
+{
+	"summary": {
+		"changed": 1,
+		"unchanged": 0,
+		"errors": 0,
+		"warnings": 0,
+		"skipped": 0,
+		"suggestedFixesSkipped": 0,
+		"diagnosticsNotPrinted": 0
+	},
+	"diagnostics": [],
+	"command": "check"
+}
+
+```

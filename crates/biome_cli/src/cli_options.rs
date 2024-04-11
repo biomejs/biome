@@ -47,8 +47,12 @@ pub struct CliOptions {
     pub error_on_warnings: bool,
 
     /// Reports information using the JSON format
-    #[bpaf(long("json"), switch, hide_usage, hide)]
+    #[bpaf(long("json"), switch, hide_usage)]
     pub json: bool,
+
+    /// Reports information using the JSON format, formatted. It takes precedence over the `--json` option.
+    #[bpaf(long("json-pretty"), switch, hide_usage)]
+    pub json_pretty: bool,
 
     #[bpaf(
         long("log-level"),

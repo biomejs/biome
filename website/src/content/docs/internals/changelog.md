@@ -112,6 +112,67 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Added two new options to customise the emitted output of the CLI: `--json` and `--json-pretty`. With `--json`, the diagnostics and the
+  summary will be printed in the **terminal** in JSON format. Using `--json-pretty` _together_ with `--json` will output the same output, but formatted.
+
+  NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future.
+
+  <details>
+  <summary>Example of output when running `biome format` command</summary>
+  ```json
+  {
+    "summary": {
+      "changed": 0,
+      "unchanged": 1,
+      "errors": 1,
+      "warnings": 0,
+      "skipped": 0,
+      "suggestedFixesSkipped": 0,
+      "diagnosticsNotPrinted": 0
+    },
+    "diagnostics": [
+      {
+        "category": "format",
+        "severity": "error",
+        "description": "Formatter would have printed the following content:",
+        "message": [
+          {
+            "elements": [],
+            "content": "Formatter would have printed the following content:"
+          }
+        ],
+        "advices": {
+          "advices": [
+            {
+              "diff": {
+                "dictionary": "  statement();\n",
+                "ops": [
+                  { "diffOp": { "delete": { "range": [0, 2] } } },
+                  { "diffOp": { "equal": { "range": [2, 12] } } },
+                  { "diffOp": { "delete": { "range": [0, 2] } } },
+                  { "diffOp": { "equal": { "range": [12, 13] } } },
+                  { "diffOp": { "delete": { "range": [0, 2] } } },
+                  { "diffOp": { "insert": { "range": [13, 15] } } }
+                ]
+              }
+            }
+          ]
+        },
+        "verboseAdvices": { "advices": [] },
+        "location": {
+          "path": { "file": "format.js" },
+          "span": null,
+          "sourceCode": null
+        },
+        "tags": [],
+        "source": null
+      }
+    ],
+    "command": "format"
+  }
+  ```
+  </details>
+
 #### Enhancements
 
 - Improve support of `.prettierignore` when migrating from Prettier
@@ -131,7 +192,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- Support `overrides` field in Prettier configuration files when migrating from Prettier. 
+- Support `overrides` field in Prettier configuration files when migrating from Prettier.
   Contributed by @Conaclos
 
 #### Bug fixes
@@ -253,6 +314,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 ### Parser
+
+#### Bug fixes
+
+- Fixed an issue when Unicode surrogate pairs were encoded in JavaScript strings
+  using an escape sequence ([#2384](https://github.com/biomejs/biome/issues/2384)).
+  Contributed by @arendjr
 
 
 ## 1.6.4 (2022-04-03)

@@ -2,14 +2,15 @@
 //!
 use crate::execute::diagnostics::{ContentDiffAdvice, FormatDiffDiagnostic};
 use crate::execute::Execution;
-use crate::{CliDiagnostic, CliSession};
+use crate::{CliDiagnostic, CliSession, TraversalMode};
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::BiomePath;
 use biome_service::workspace::{
-    ChangeFileParams, FeaturesBuilder, FixFileParams, FormatFileParams, OpenFileParams,
-    OrganizeImportsParams, PullDiagnosticsParams, RuleCategories, SupportsFeatureParams,
+    ChangeFileParams, DropPatternParams, FeaturesBuilder, FixFileParams, FormatFileParams,
+    OpenFileParams, OrganizeImportsParams, PullDiagnosticsParams, RuleCategories,
+    SupportsFeatureParams,
 };
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
@@ -179,6 +180,13 @@ pub(crate) fn run<'a>(
                 })
             }
         }
+    } else if let TraversalMode::Search { pattern, .. } = mode.traversal_mode() {
+        // Make sure patterns are always cleaned up at the end of execution.
+        let _ = session.app.workspace.drop_pattern(DropPatternParams {
+            pattern: pattern.clone(),
+        });
+
+        console.append(markup! {{content}});
     } else {
         console.append(markup! {{content}});
     }
