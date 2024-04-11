@@ -15,7 +15,7 @@ use crate::{
 
 /// Serializable representation for a [Diagnostic](super::Diagnostic).
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[cfg_attr(not(target_arch = "wasm32"), serde(rename_all = "camelCase"))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(test, derive(Eq, PartialEq))]
 pub struct Diagnostic {
@@ -421,8 +421,8 @@ mod tests {
     fn serialized() -> Value {
         let advices = json!([
             {
-                "Log": [
-                    "Warn",
+                "log": [
+                    "warn",
                     [
                         {
                             "content": "log",
@@ -455,7 +455,7 @@ mod tests {
                 "path": {
                     "file": "path"
                 },
-                "source_code": "source_code",
+                "sourceCode": "source_code",
                 "span": [
                     0,
                     6

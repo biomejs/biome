@@ -1809,7 +1809,7 @@ export interface Diagnostic {
 	severity: Severity;
 	source?: Diagnostic;
 	tags: DiagnosticTags;
-	verbose_advices: Advices;
+	verboseAdvices: Advices;
 }
 /**
  * Implementation of [Visitor] collecting serializable [Advice] into a vector.
@@ -2071,7 +2071,7 @@ export type Category =
 	| "semanticTests";
 export interface Location {
 	path?: Resource_for_String;
-	source_code?: string;
+	sourceCode?: string;
 	span?: TextRange;
 }
 export type MarkupBuf = MarkupNodeBuf[];
@@ -2086,13 +2086,13 @@ export type DiagnosticTags = DiagnosticTag[];
 See the [Visitor] trait for additional documentation on all the supported advice types. 
 	 */
 export type Advice =
-	| { Log: [LogCategory, MarkupBuf] }
-	| { List: MarkupBuf[] }
-	| { Frame: Location }
-	| { Diff: TextEdit }
-	| { Backtrace: [MarkupBuf, Backtrace] }
-	| { Command: string }
-	| { Group: [MarkupBuf, Advices] };
+	| { log: [LogCategory, MarkupBuf] }
+	| { list: MarkupBuf[] }
+	| { frame: Location }
+	| { diff: TextEdit }
+	| { backtrace: [MarkupBuf, Backtrace] }
+	| { command: string }
+	| { group: [MarkupBuf, Advices] };
 /**
  * Represents the resource a diagnostic is associated with.
  */
@@ -2114,7 +2114,7 @@ export type DiagnosticTag =
 /**
  * The category for a log advice, defines how the message should be presented to the user.
  */
-export type LogCategory = "None" | "Info" | "Warn" | "Error";
+export type LogCategory = "none" | "info" | "warn" | "error";
 export interface TextEdit {
 	dictionary: string;
 	ops: CompressedOp[];
@@ -2137,8 +2137,8 @@ export type MarkupElement =
 	| "Inverse"
 	| { Hyperlink: { href: string } };
 export type CompressedOp =
-	| { DiffOp: DiffOp }
-	| { EqualLines: { line_count: number } };
+	| { diffOp: DiffOp }
+	| { equalLines: { line_count: number } };
 /**
  * Serializable representation of a backtrace frame.
  */
@@ -2147,9 +2147,9 @@ export interface BacktraceFrame {
 	symbols: BacktraceSymbol[];
 }
 export type DiffOp =
-	| { Equal: { range: TextRange } }
-	| { Insert: { range: TextRange } }
-	| { Delete: { range: TextRange } };
+	| { equal: { range: TextRange } }
+	| { insert: { range: TextRange } }
+	| { delete: { range: TextRange } };
 /**
  * Serializable representation of a backtrace frame symbol.
  */
