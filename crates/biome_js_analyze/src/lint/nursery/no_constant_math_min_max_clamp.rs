@@ -1,15 +1,18 @@
 use std::{cmp::Ordering, str::FromStr};
 
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
+use biome_diagnostics::Applicability;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     global_identifier, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression,
-    JsCallExpression,
+    JsCallExpression, JsNumberLiteralExpression,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, BatchMutationExt};
 
-use crate::services::semantic::Semantic;
+use crate::{services::semantic::Semantic, JsRuleAction};
 
 declare_rule! {
     /// Disallow the use of `Math.min` and `Math.max` to clamp a value where the result itself is constant.
@@ -36,12 +39,13 @@ declare_rule! {
         name: "noConstantMathMinMaxClamp",
         sources: &[RuleSource::Clippy("min_max")],
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
 impl Rule for NoConstantMathMinMaxClamp {
     type Query = Semantic<JsCallExpression>;
-    type State = ();
+    type State = (JsNumberLiteralExpression, JsNumberLiteralExpression);
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -66,24 +70,49 @@ impl Rule for NoConstantMathMinMaxClamp {
             outer_call.kind,
             outer_call
                 .constant_argument
-                .partial_cmp(&inner_call.constant_argument),
+                .as_number()?
+                .partial_cmp(&inner_call.constant_argument.as_number()?),
         ) {
             (MinMaxKind::Min, Some(Ordering::Less))
-            | (MinMaxKind::Max, Some(Ordering::Greater)) => Some(()),
+            | (MinMaxKind::Max, Some(Ordering::Greater)) => {
+                Some((outer_call.constant_argument, inner_call.constant_argument))
+            }
             _ => None,
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
 
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                "This "<Emphasis>"Math.min/Math.max"</Emphasis>" combination leads to a constant result."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "This "<Emphasis>"Math.min/Math.max"</Emphasis>" combination leads to a constant result."
+                }
+            ).detail(
+                state.0.range(),
+                markup! {
+                    "It always evaluates to "<Emphasis>{state.0.text()}</Emphasis>"."
+                }
+            )
+        )
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let mut mutation = ctx.root().begin();
+
+        mutation.replace_node(state.0.clone(), state.1.clone());
+        mutation.replace_node(state.1.clone(), state.0.clone());
+
+        Some(JsRuleAction {
+            mutation,
+            message: markup! {"Swap "<Emphasis>{state.0.text()}</Emphasis>" with "<Emphasis>{state.1.text()}</Emphasis>"."}
+                .to_owned(),
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+        })
     }
 }
 
@@ -107,7 +136,7 @@ impl FromStr for MinMaxKind {
 #[derive(Debug, Clone)]
 struct MathMinOrMaxCall {
     kind: MinMaxKind,
-    constant_argument: f64,
+    constant_argument: JsNumberLiteralExpression,
     other_expression_argument: AnyJsExpression,
 }
 
@@ -161,7 +190,7 @@ fn get_math_min_or_max_call(
             any_expression,
         ) => Some(MathMinOrMaxCall {
             kind: min_or_max,
-            constant_argument: constant_value.as_number()?,
+            constant_argument: constant_value.clone(),
             other_expression_argument: any_expression.clone(),
         }),
         _ => None,
