@@ -394,8 +394,6 @@ pub fn execute_mode(
                 console.error(markup!{
                     <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
                 });
-                // let file_name = PathBuf::from("report.json");
-                // let fs = session.app.fs;
                 let reporter = JsonReporter {
                     summary: summary_result,
                     diagnostics: DiagnosticsPayload {
