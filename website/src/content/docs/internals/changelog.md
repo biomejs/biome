@@ -252,6 +252,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+#### Bug fixes
+
+- Fixed an issue when Unicode surrogate pairs were encoded in JavaScript strings
+  using an escape sequence ([#2384](https://github.com/biomejs/biome/issues/2384)).
+  Contributed by @arendjr
+
 
 ## 1.6.4 (2022-04-03)
 
