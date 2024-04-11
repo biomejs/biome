@@ -46,11 +46,11 @@ pub struct CliOptions {
     #[bpaf(long("error-on-warnings"), switch)]
     pub error_on_warnings: bool,
 
-    /// It prints to terminal diagnostics and summary in JSON format
+    /// Reports information using the JSON format
     #[bpaf(long("json"), switch, hide_usage)]
     pub json: bool,
 
-    /// It prints to terminal diagnostics and summary in JSON format, formatted. It takes precedence over the `--json` option.
+    /// Reports information using the JSON format, formatted. It takes precedence over the `--json` option.
     #[bpaf(long("json-pretty"), switch, hide_usage)]
     pub json_pretty: bool,
 

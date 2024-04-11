@@ -267,7 +267,7 @@ impl DeprecatedArgument {
 #[derive(Debug, Diagnostic)]
 pub enum ReportDiagnostic {
     /// Emitted when trying to serialise the report
-    Serialisation(SerdeJsonError),
+    Serialization(SerdeJsonError),
 }
 
 /// Advices for the [CliDiagnostic]

@@ -407,7 +407,7 @@ pub fn execute_mode(
                 reporter.write(&mut buffer)?;
                 if pretty {
                     let content = serde_json::to_string(&buffer).map_err(|error| {
-                        CliDiagnostic::Report(ReportDiagnostic::Serialisation(
+                        CliDiagnostic::Report(ReportDiagnostic::Serialization(
                             SerdeJsonError::from(error),
                         ))
                     })?;
