@@ -11,7 +11,7 @@ use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::{category, DiagnosticExt, Error, Resource, Severity};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
-use biome_service::workspace::IsPathIgnoredParams;
+use biome_service::workspace::{DropPatternParams, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
@@ -92,6 +92,13 @@ pub(crate) fn traverse(
 
         (elapsed, diagnostics)
     });
+
+    // Make sure patterns are always cleaned up at the end of traversal.
+    if let TraversalMode::Search { pattern, .. } = execution.traversal_mode() {
+        let _ = session.app.workspace.drop_pattern(DropPatternParams {
+            pattern: pattern.clone(),
+        });
+    }
 
     let errors = printer.errors();
     let warnings = printer.warnings();

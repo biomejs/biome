@@ -13,7 +13,7 @@ use crate::reporter::terminal::{ConsoleReporterBuilder, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
-use biome_service::workspace::{FeatureName, FeaturesBuilder, FixFileMode};
+use biome_service::workspace::{FeatureName, FeaturesBuilder, FixFileMode, PatternId};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
@@ -148,7 +148,7 @@ pub enum TraversalMode {
         /// The GritQL pattern to search for.
         ///
         /// Note that the search command (currently) does not support rewrites.
-        pattern: String,
+        pattern: PatternId,
 
         /// An optional tuple.
         /// 1. The virtual path to the file
