@@ -9,7 +9,7 @@ Math.min(0, Math.max(100, x));
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/noConstantMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/nursery/noConstantMathMinMaxClamp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This Math.min/Math.max combination leads to a constant result.
   
@@ -26,7 +26,7 @@ Math.max(100, Math.min(0, x));
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/noConstantMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/nursery/noConstantMathMinMaxClamp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This Math.min/Math.max combination leads to a constant result.
   

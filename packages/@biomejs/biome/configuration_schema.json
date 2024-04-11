@@ -1421,7 +1421,7 @@
 						{ "type": "null" }
 					]
 				},
-				"noConstantMathMinMax": {
+				"noConstantMathMinMaxClamp": {
 					"description": "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },

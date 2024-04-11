@@ -2595,7 +2595,7 @@ pub struct Nursery {
     pub no_console: Option<RuleConfiguration<NoConsole>>,
     #[doc = "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_constant_math_min_max: Option<RuleConfiguration<NoConstantMathMinMax>>,
+    pub no_constant_math_min_max_clamp: Option<RuleConfiguration<NoConstantMathMinMaxClamp>>,
     #[doc = "Disallow using a callback in asynchronous tests and hooks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_done_callback: Option<RuleConfiguration<NoDoneCallback>>,
@@ -2680,7 +2680,7 @@ impl Nursery {
         "noBarrelFile",
         "noColorInvalidHex",
         "noConsole",
-        "noConstantMathMinMax",
+        "noConstantMathMinMaxClamp",
         "noDoneCallback",
         "noDuplicateElseIf",
         "noDuplicateJsonKeys",
@@ -2784,7 +2784,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
-        if let Some(rule) = self.no_constant_math_min_max.as_ref() {
+        if let Some(rule) = self.no_constant_math_min_max_clamp.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
@@ -2913,7 +2913,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
-        if let Some(rule) = self.no_constant_math_min_max.as_ref() {
+        if let Some(rule) = self.no_constant_math_min_max_clamp.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
@@ -3071,8 +3071,8 @@ impl Nursery {
                 .no_console
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noConstantMathMinMax" => self
-                .no_constant_math_min_max
+            "noConstantMathMinMaxClamp" => self
+                .no_constant_math_min_max_clamp
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDoneCallback" => self

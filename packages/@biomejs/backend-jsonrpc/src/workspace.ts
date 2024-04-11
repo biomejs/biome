@@ -911,7 +911,7 @@ export interface Nursery {
 	/**
 	 * Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.
 	 */
-	noConstantMathMinMax?: RuleConfiguration_for_Null;
+	noConstantMathMinMaxClamp?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
@@ -1915,7 +1915,7 @@ export type Category =
 	| "lint/nursery/noBarrelFile"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
-	| "lint/nursery/noConstantMathMinMax"
+	| "lint/nursery/noConstantMathMinMaxClamp"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateJsonKeys"

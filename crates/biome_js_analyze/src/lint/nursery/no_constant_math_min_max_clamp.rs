@@ -31,15 +31,15 @@ declare_rule! {
     /// Math.min(100, Math.max(0, x));
     /// ```
     ///
-    pub NoConstantMathMinMax {
+    pub NoConstantMathMinMaxClamp {
         version: "next",
-        name: "noConstantMathMinMax",
+        name: "noConstantMathMinMaxClamp",
         sources: &[RuleSource::Clippy("min_max")],
         recommended: false,
     }
 }
 
-impl Rule for NoConstantMathMinMax {
+impl Rule for NoConstantMathMinMaxClamp {
     type Query = Semantic<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
