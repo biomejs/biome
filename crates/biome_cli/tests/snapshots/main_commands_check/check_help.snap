@@ -89,8 +89,8 @@ Global options applied to all commands
                               during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit warnings.
         --json                It prints to terminal diagnostics and summary in JSON format
-        --json-pretty         It formats the JSON output using the same options defined in the configuration
-                              file
+        --json-pretty         It prints to terminal diagnostics and summary in JSON format, formatted.
+                              It takes precedence over the `--json` option.
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most verbose
                               to the least verbose: debug, info, warn, error.
                               The value `none` won't show any logging.

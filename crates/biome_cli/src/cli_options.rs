@@ -50,7 +50,7 @@ pub struct CliOptions {
     #[bpaf(long("json"), switch, hide_usage)]
     pub json: bool,
 
-    /// It formats the JSON output using the same options defined in the configuration file
+    /// It prints to terminal diagnostics and summary in JSON format, formatted. It takes precedence over the `--json` option.
     #[bpaf(long("json-pretty"), switch, hide_usage)]
     pub json_pretty: bool,
 

@@ -219,10 +219,10 @@ impl Execution {
 
     /// It sets the reporting mode by reading the [CliOptions]
     pub(crate) fn set_report(mut self, cli_options: &CliOptions) -> Self {
-        self.report_mode = if cli_options.json {
-            ReportMode::Json {
-                pretty: cli_options.json_pretty,
-            }
+        self.report_mode = if cli_options.json_pretty {
+            ReportMode::Json { pretty: true }
+        } else if cli_options.json {
+            ReportMode::Json { pretty: false }
         } else {
             ReportMode::Terminal
         };
