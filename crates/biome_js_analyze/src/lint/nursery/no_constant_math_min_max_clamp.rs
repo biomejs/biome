@@ -123,12 +123,13 @@ enum MinMaxKind {
 }
 
 impl FromStr for MinMaxKind {
-    type Err = String;
+    type Err = &'static str;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "min" => Ok(MinMaxKind::Min),
             "max" => Ok(MinMaxKind::Max),
-            _ => Err("Value not supported for math min max kind".to_string()),
+            _ => Err("Value not supported for math min max kind"),
         }
     }
 }
@@ -155,11 +156,7 @@ fn get_math_min_or_max_call(
     let object = member_expr.object().ok()?.omit_parentheses();
     let (reference, name) = global_identifier(&object)?;
 
-    if name.text() != "Math" {
-        return None;
-    }
-
-    if model.binding(&reference).is_some() {
+    if name.text() != "Math" || model.binding(&reference).is_some() {
         return None;
     }
 
@@ -172,6 +169,8 @@ fn get_math_min_or_max_call(
     let second_argument = iter.next()?.ok()?;
     let second_argument = second_argument.as_any_js_expression()?;
 
+    // `Math.min` and `Math.max` are variadic functions.
+    // We give up if they have more than 2 arguments.
     if iter.next().is_some() {
         return None;
     }
