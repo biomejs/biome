@@ -1,6 +1,7 @@
-use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::CliOptions;
-use crate::commands::{get_stdin, resolve_manifest, validate_configuration_diagnostics};
+use crate::commands::{
+    get_files_to_process, get_stdin, resolve_manifest, validate_configuration_diagnostics,
+};
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
@@ -122,23 +123,12 @@ pub(crate) fn check(
 
     let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "check")?;
 
-    if since.is_some() {
-        if !changed {
-            return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
-        }
-        if staged {
-            return Err(CliDiagnostic::incompatible_arguments("since", "staged"));
-        }
+    if let Some(_paths) =
+        get_files_to_process(since, changed, staged, &session.app.fs, &fs_configuration)?
+    {
+        paths = _paths;
     }
 
-    if changed {
-        if staged {
-            return Err(CliDiagnostic::incompatible_arguments("changed", "staged"));
-        }
-        paths = get_changed_files(&session.app.fs, &fs_configuration, since)?;
-    } else if staged {
-        paths = get_staged_files(&session.app.fs)?;
-    }
     session
         .app
         .workspace
