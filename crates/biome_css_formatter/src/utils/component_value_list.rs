@@ -1,5 +1,5 @@
 use crate::comments::CssComments;
-use biome_css_syntax::CssLanguage;
+use biome_css_syntax::{CssGenericDelimiter, CssLanguage, CssSyntaxKind};
 use biome_formatter::FormatResult;
 use biome_formatter::{write, CstFormatContext};
 
@@ -14,9 +14,30 @@ where
 {
     let layout = get_value_list_layout(node, f.context().comments());
     let values = format_with(|f: &mut Formatter<'_, CssFormatContext>| {
-        f.fill()
-            .entries(&soft_line_break_or_space(), node.iter().formatted())
-            .finish()
+        let mut fill = f.fill();
+
+        for (element, formatted) in node.iter().zip(node.iter().formatted()) {
+            fill.entry(
+                &format_once(|f| {
+                    // If the current element is not a comma, insert a soft line break or a space.
+                    // Consider the CSS example: `font: first , second;`
+                    // The desired format is: `font: first, second;`
+                    // A separator should not be added before the comma because the comma acts as a `CssGenericDelimiter`.
+                    let is_comma = CssGenericDelimiter::cast_ref(element.syntax())
+                        .and_then(|node| node.value().ok())
+                        .map_or(false, |node| node.kind() == CssSyntaxKind::COMMA);
+
+                    if !is_comma {
+                        write!(f, [soft_line_break_or_space()])?
+                    }
+
+                    Ok(())
+                }),
+                &formatted,
+            );
+        }
+
+        fill.finish()
     });
 
     match layout {

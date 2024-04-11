@@ -8,7 +8,7 @@ use biome_deserialize::Merge;
 use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
-use biome_service::workspace::UpdateSettingsParams;
+use biome_service::workspace::{ParsePatternParams, UpdateSettingsParams};
 use std::ffi::OsString;
 
 pub(crate) struct SearchCommandPayload {
@@ -58,18 +58,20 @@ pub(crate) fn search(
     let (vcs_base_path, gitignore_matches) =
         configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
-    session
-        .app
-        .workspace
-        .update_settings(UpdateSettingsParams {
-            working_directory: session.app.fs.working_directory(),
-            configuration,
-            vcs_base_path,
-            gitignore_matches,
-        })?;
+    let workspace = &session.app.workspace;
+    workspace.update_settings(UpdateSettingsParams {
+        working_directory: session.app.fs.working_directory(),
+        configuration,
+        vcs_base_path,
+        gitignore_matches,
+    })?;
 
     let console = &mut *session.app.console;
     let stdin = get_stdin(stdin_file_path, console, "search")?;
+
+    let pattern = workspace
+        .parse_pattern(ParsePatternParams { pattern })?
+        .pattern_id;
 
     let execution =
         Execution::new(TraversalMode::Search { pattern, stdin }).set_report(&cli_options);

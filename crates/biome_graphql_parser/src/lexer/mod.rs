@@ -149,6 +149,7 @@ impl<'src> GraphqlLexer<'src> {
             b'.' => self.consume_ellipsis(),
             b':' => self.consume_byte(T![:]),
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b',' => self.consume_commas(),
             b'"' => self.consume_string(),
             b'=' => self.consume_byte(T![=]),
             b'@' => self.consume_byte(T![@]),
@@ -714,6 +715,15 @@ impl<'src> GraphqlLexer<'src> {
             }
         }
         COMMENT
+    }
+
+    fn consume_commas(&mut self) -> GraphqlSyntaxKind {
+        while self.current_byte() == Some(b',') {
+            self.assert_byte(b',');
+            self.advance(1);
+        }
+
+        COMMA
     }
 }
 

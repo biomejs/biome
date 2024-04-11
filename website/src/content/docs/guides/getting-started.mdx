@@ -63,22 +63,8 @@ Alternatively, you can run `biome init --jsonc` to emit a `biome.jsonc` file ins
 
 <PackageManagerBiomeCommand command="init --jsonc"/>
 
-```json title="biome.jsonc"
-{
-  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
-  "organizeImports": {
-    "enabled": false
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true
-    }
-  }
-}
-```
-
 The `linter.enabled: true` enables the linter and `rules.recommended: true` enables the [recommended rules](/linter/rules/).
+This corresponds to the default settings.
 
 Formatting is enabled **by default**, but you can [disable](/reference/configuration/#formatterenabled) it by explicitly using `formatter.enabled: false`.
 
@@ -88,7 +74,7 @@ Biome CLI comes with many commands and options, so you can use only what you nee
 
 You can format files and directories using the [`format`](/reference/cli#biome-format) command and the `--write` option:
 
-<PackageManagerBiomeCommand command="format <files> --write"/>
+<PackageManagerBiomeCommand command="format --write <files>"/>
 
 You can lint and apply [safe fixes](/linter#safe-fixes) to files and directories using the [`lint`](/reference/cli#biome-lint) command with the `--apply`:
 
@@ -112,6 +98,7 @@ We recommend installing an editor plugin to get the most out of Biome. Check out
 
 If you're using Node.js, the recommended way to run Biome in CI is to use [your favourite package manager](/guides/getting-started#installation).
 This ensures that your CI pipeline uses the same version of Biome as you do inside the editor or when running local CLI commands.
+Alternatively, you can use dedicated [CI Actions](/recipes/continuous-integration/).
 
 ## Next Steps
 

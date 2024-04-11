@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-unused-react-types.tsx
+---
+# Input
+```tsx
+import * as React from "react";
+
+function Component() {
+    const onClick = (event: React.MouseEvent) => { };
+
+    return <div onClick={onClick}></div>;
+}
+
+```

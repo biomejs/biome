@@ -23,9 +23,21 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Now Biome can detect the script language in Svelte and Vue script blocks more reliably ([#2245](https://github.com/biomejs/biome/issues/2245)). Contributed by @Sec-ant
 
+- `useExhaustiveDependencies` no longer reports recursive calls as missing
+  dependencies ([#2361](https://github.com/biomejs/biome/issues/2361)).
+  Contributed by @arendjr
+
+- `useExhaustiveDependencies` correctly reports missing dependencies declared
+  using function declarations ([#2362](https://github.com/biomejs/biome/issues/2362)).
+  Contributed by @arendjr
+
+- Biome now can handle `.svelte` and `.vue` files with `CRLF` as the end-of-line sequence. Contributed by @Sec-ant
+
 #### Enhancements
 
 - Complete the well-known file lists for JSON-like files. Trailing commas are allowed in `.jsonc` files by default. Some well-known files like `tsconfig.json` and `.babelrc` don't use the `.jsonc` extension but still allow comments and trailing commas. While others, such as `.eslintrc.json`, only allow comments. Biome is able to identify these files and adjusts the `json.parser.allowTrailingCommas` option accordingly to ensure they are correctly parsed. Contributed by @Sec-ant
+
+- Fix dedent logic inconsistent with prettier where the indent-style is space and the indent-width is not 2. Contributed by @mdm317
 
 ### CLI
 
@@ -189,11 +201,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Biome now correctly filters out files that are not present in the current directory when using the `--changed` flag [#1996](https://github.com/biomejs/biome/issues/1996). Contributed by @castarco
 
+- Biome now skips traversing `fifo` or `socket` files ([#2311](https://github.com/biomejs/biome/issues/2311)). Contributed by @Sec-ant
+
 ### Configuration
 
 #### Bug fixes
 
 - Now setting group level `all` to `false` can disable recommended rules from that group when top level `recommended` is `true` or unset. Contributed by @Sec-ant
+
+- Biome configuration files can correctly extends `.jsonc` configuration files now ([#2279](https://github.com/biomejs/biome/issues/2279)). Contributed by @Sec-ant
+
+- Fixed the JSON schema for React hooks configuration ([#2396](https://github.com/biomejs/biome/issues/2396)). Contributed by @arendjr
 
 #### Enhancements
 
@@ -231,7 +249,15 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Editors
 
+#### Bug fixes
+
+- Biome extension is now able to parse the JSX syntax in files that associated with the `javascript` [language identifier](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem). This is an ad hoc fix, because [in the React world, `.js` files are allowed to include JSX syntax](https://github.com/facebook/create-react-app/issues/87#issuecomment-234627904), and these files are often associated with the `javascript` language identifier in most of the editors. Plus, [some editor extensions](https://github.com/michaelgmcd/vscode-language-babel/blob/8b3a472748ad07c99dc022b66795c9eb46be4ccb/package.json#L63-L80) will also associate `.jsx` files with the `javascript` language identifier. Relative links: [discussion](https://github.com/biomejs/biome/discussions/838#discussioncomment-9047539), [#2085](https://github.com/biomejs/biome/issues/2085). Contributed by @Sec-ant
+
 ### Formatter
+
+#### Bug fixes
+
+- Fix [#2291](https://github.com/biomejs/biome/issues/2291) by correctly handle comment placement for JSX spread attributes and JSX spread children. Contributed by @ah-yu
 
 ### JavaScript APIs
 
@@ -239,12 +265,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Add a new option `ignoreReact` to [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports).
+- Add a new option `jsxRuntime` to the `javascript` configuration. When set to `reactClassic`, the [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) and [useImportType](https://biomejs.dev/linter/rules/use-import-type) rules use this information to make exceptions for the React global that is required by the React Classic JSX transform.
 
-  When `ignoreReact` is enabled, Biome ignores imports of `React` from the `react` package.
-  The option is disabled by default.
+  This is only necessary for React users who haven't upgraded to the [new JSX transform](https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html).
 
-  Contributed by @Conaclos
+  Contributed by @Conaclos and @arendjr
 
 - Implement [#2043](https://github.com/biomejs/biome/issues/2043): The React rule [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) is now also compatible with Preact hooks imported from `preact/hooks` or `preact/compat`. Contributed by @arendjr
 
@@ -256,11 +281,43 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [style/useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accepts `PascalCase` for local and top-level variables.
+
+  This allows supporting local variables that hold a component or a regular class.
+  The following code is now accepted:
+
+  ```tsx
+  function loadComponent() {
+    const Component = getComponent();
+    return <Component />;
+  }
+  ```
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Lint rules `useNodejsImportProtocol`, `useNodeAssertStrict`, `noRestrictedImports`, `noNodejsModules` will no longer check `declare module` statements anymore. Contributed by @Sec-ant
 
+- [style/useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accepts any case for variables from object destructuring ([#2332](https://github.com/biomejs/biome/issues/2332)).
+
+  The following name is now ignored:
+
+  ```js
+  const { Strange_Style } = obj;
+  ```
+
+  Previously, the rule renamed this variable. This led to a runtime error.
+
+  Contributed by @Conaclos
+
 ### Parser
+
+#### Bug fixes
+
+- Fixed an issue when Unicode surrogate pairs were encoded in JavaScript strings
+  using an escape sequence ([#2384](https://github.com/biomejs/biome/issues/2384)).
+  Contributed by @arendjr
 
 
 ## 1.6.4 (2022-04-03)
@@ -290,6 +347,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix the unexpected code deletion and repetition when `quickfix.biome` is enabled and some `import`-related rules are applied ([#2222](https://github.com/biomejs/biome/issues/2222), [#688](https://github.com/biomejs/biome/issues/688), [#1015](https://github.com/biomejs/biome/issues/1015)). Contributed by @Sec-ant
 
 ### Linter
+
+#### New features
+
+- Add [nursery/noMisplacedAssertion](https://biomejs.dev/linter/rules/no-misplaced-assertion/). COntributed by @ematipico
 
 #### Bug fixes
 
@@ -394,6 +455,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Support applying lint fixes when calling the `lintContent` method of the `Biome` class ([#1956](https://github.com/biomejs/biome/pull/1956)). Contributed by @mnahkies
 
 ### Linter
+
+#### New features
+
+- Add [nursery/noDuplicateElseIf](https://biomejs.dev/linter/rules/no-duplicate-else-if/). COntributed by @mdm317
 
 #### Bug fixes
 
@@ -964,7 +1029,7 @@ Additionally, the following rules are now recommended:
 - Add rule [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test) which disallows `export` or `modules.exports` in files
   containing test. Contributed by @ah-yu
 
-- Add rule [noSemicolonInJsx](https://biomejs.dev/linter/rules/no-semicolon-in-jsx/) to detect possible wrong semicolons inside JSX elements.
+- Add rule [noSemicolonInJsx](https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx/) to detect possible wrong semicolons inside JSX elements.
 
   ```jsx
   const Component = () => {

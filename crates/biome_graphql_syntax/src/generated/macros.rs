@@ -107,10 +107,6 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::GraphqlFragmentDefinition::new_unchecked(node) };
                     $body
                 }
-                $crate::GraphqlSyntaxKind::GRAPHQL_FRAGMENT_NAME => {
-                    let $pattern = unsafe { $crate::GraphqlFragmentName::new_unchecked(node) };
-                    $body
-                }
                 $crate::GraphqlSyntaxKind::GRAPHQL_FRAGMENT_SPREAD => {
                     let $pattern = unsafe { $crate::GraphqlFragmentSpread::new_unchecked(node) };
                     $body

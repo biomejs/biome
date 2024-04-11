@@ -78,7 +78,7 @@ declare_rule! {
     /// ```
     ///
     pub NoMisplacedAssertion {
-        version: "next",
+        version: "1.6.4",
         name: "noMisplacedAssertion",
         recommended: false,
         sources: &[RuleSource::EslintJest("no-standalone-expect")],

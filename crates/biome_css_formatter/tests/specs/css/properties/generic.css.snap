@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/properties/generic.css
 ---
-
 # Input
 
 ```css
@@ -44,10 +43,8 @@ div {
 	/* Custom property, always generic */
 	unknown-property: one-value;
 	unknown-property: multiple values;
-	unknown-property: delimited , values;
+	unknown-property: delimited, values;
 	unknown-property: delimited / slash / values;
-	unknown-property: mixed , delimiters / can be , used;
+	unknown-property: mixed, delimiters / can be, used;
 }
 ```
-
-

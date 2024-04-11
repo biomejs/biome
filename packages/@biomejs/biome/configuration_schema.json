@@ -737,7 +737,7 @@
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UnusedImportsConfiguration" },
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1107,6 +1107,10 @@
 					"description": "A list of global bindings that should be ignored by the analyzers\n\nIf defined here, they should not emit diagnostics.",
 					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				},
+				"jsx_runtime": {
+					"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
+					"anyOf": [{ "$ref": "#/definitions/JsxRuntime" }, { "type": "null" }]
+				},
 				"organize_imports": {
 					"anyOf": [
 						{ "$ref": "#/definitions/JavascriptOrganizeImports" },
@@ -1301,6 +1305,21 @@
 			},
 			"additionalProperties": false
 		},
+		"JsxRuntime": {
+			"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
+			"oneOf": [
+				{
+					"description": "Indicates a modern or native JSX environment, that doesn't require special handling by Biome.",
+					"type": "string",
+					"enum": ["Transparent"]
+				},
+				{
+					"description": "Indicates a classic React environment that requires the `React` import.\n\nCorresponds to the `react` value for the `jsx` option in TypeScript's `tsconfig.json`.\n\nThis option should only be necessary if you cannot upgrade to a React version that supports the new JSX runtime. For more information about the old vs. new JSX runtime, please see: https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html",
+					"type": "string",
+					"enum": ["ReactClassic"]
+				}
+			]
+		},
 		"LineEnding": {
 			"oneOf": [
 				{
@@ -1411,6 +1430,13 @@
 				},
 				"noDuplicateElseIf": {
 					"description": "Disallow duplicate conditions in if-else-if chains",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateFontNames": {
+					"description": "Disallow duplicate names within font families.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1868,15 +1894,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUnusedImportsOptions": {
-			"type": "object",
-			"required": ["level", "options"],
-			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/UnusedImportsOptions" }
-			},
-			"additionalProperties": false
-		},
 		"RuleWithUtilityClassSortingOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -1973,26 +1990,19 @@
 		"StableHookResult": {
 			"oneOf": [
 				{
-					"description": "Used to indicate the hook does not have a stable result.",
-					"type": "string",
-					"enum": ["None"]
+					"description": "Whether the hook has a stable result.",
+					"type": "boolean"
 				},
 				{
-					"description": "Used to indicate the identity of the result value is stable.\n\nNote this does not imply internal stability. For instance, the ref objects returned by React's `useRef()` always have a stable identity, but their internal value may be mutable.",
-					"type": "string",
-					"enum": ["Identity"]
-				},
-				{
-					"description": "Used to indicate the hook returns an array and some of its indices have stable identities.\n\nFor example, React's `useState()` hook returns a stable function at index 1.",
-					"type": "object",
-					"required": ["Indices"],
-					"properties": {
-						"Indices": {
-							"type": "array",
-							"items": { "type": "integer", "format": "uint8", "minimum": 0.0 }
-						}
+					"description": "Used to indicate the hook returns an array and some of its indices have stable identities.",
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"format": "uint8",
+						"maximum": 255.0,
+						"minimum": 0.0
 					},
-					"additionalProperties": false
+					"minItems": 1
 				}
 			]
 		},
@@ -2701,23 +2711,6 @@
 					"enum": ["all"]
 				}
 			]
-		},
-		"UnusedImportsConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUnusedImportsOptions" }
-			]
-		},
-		"UnusedImportsOptions": {
-			"type": "object",
-			"required": ["ignoreReact"],
-			"properties": {
-				"ignoreReact": {
-					"description": "Ignore `React` imports from the `react` package when set to `true`.",
-					"type": "boolean"
-				}
-			},
-			"additionalProperties": false
 		},
 		"UtilityClassSortingConfiguration": {
 			"anyOf": [

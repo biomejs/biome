@@ -357,6 +357,7 @@ where
             &self.options.file_path,
             &options,
             preferred_quote,
+            self.options.jsx_runtime(),
         )
         .ok()?;
 
@@ -374,7 +375,8 @@ where
             &globals,
             &self.options.file_path,
             &options,
-            &self.options.configuration.preferred_quote,
+            self.options.preferred_quote(),
+            self.options.jsx_runtime(),
         )
         .ok();
         if let Some(ctx) = ctx {
@@ -419,7 +421,8 @@ where
             &globals,
             &self.options.file_path,
             &options,
-            &self.options.configuration.preferred_quote,
+            self.options.preferred_quote(),
+            self.options.jsx_runtime(),
         )
         .ok();
         if let Some(ctx) = ctx {

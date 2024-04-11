@@ -11,17 +11,23 @@
 
 .empty-line {
     color: blue;
-    
+
     background-color: red;
 }
 .grouping {
 color: blue   ;color: green    ;
     color  : red ;
-    
+
 
         background-color:      red;
     font-size:   12px;
-    
-    
+
+
     font-weight   :   700;
+}
+
+a {
+	--bs-font-monospace: sfmono-regular /  menlo;
+	--bs-font-monospace: sfmono-regular , menlo , monaco , consolas ,
+	'Liberation Mono' , 'Courier New' , monospace;
 }

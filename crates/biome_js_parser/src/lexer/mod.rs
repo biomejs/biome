@@ -543,7 +543,7 @@ impl<'src> JsLexer<'src> {
     }
 
     // Read a `\u{000...}` escape sequence, this expects the cur char to be the `{`
-    fn read_codepoint_escape(&mut self) -> Result<char, ()> {
+    fn read_codepoint_escape_char(&mut self) -> Result<char, ()> {
         let start = self.position + 1;
         self.read_hexnumber();
 
@@ -609,17 +609,19 @@ impl<'src> JsLexer<'src> {
         }
     }
 
-    // Read a `\u0000` escape sequence, this expects the current char to be the `u`, it also does not skip over the escape sequence
-    // The pos after this method is the last hex digit
-    fn read_unicode_escape(&mut self, advance: bool) -> Result<char, ()> {
+    /// Reads a `\u0000` escape sequence.
+    ///
+    /// This expects the current char to be the `u`. Afterwards, the current
+    /// char is the last hex digit.
+    ///
+    /// This returns a `u32` since not all escape sequences produce valid
+    /// Unicode characters.
+    fn read_unicode_escape(&mut self) -> Result<u32, ()> {
         self.assert_byte(b'u');
 
-        for idx in 0..4 {
+        for _ in 0..4 {
             match self.next_byte_bounded() {
                 None => {
-                    if !advance {
-                        self.position -= idx + 1;
-                    }
                     let err = invalid_digits_after_unicode_escape_sequence(
                         self.position - 1,
                         self.position + 1,
@@ -632,9 +634,6 @@ impl<'src> JsLexer<'src> {
                         self.position - 1,
                         self.position + 1,
                     );
-                    if !advance {
-                        self.position -= idx + 1;
-                    }
                     self.push_diagnostic(err);
                     return Err(());
                 }
@@ -642,24 +641,37 @@ impl<'src> JsLexer<'src> {
             }
         }
 
-        unsafe {
-            // Safety: input to the lexer is guaranteed to be valid utf8 and so is the range since we return if there is a wrong amount of digits beforehand
-            let digits_str = std::str::from_utf8_unchecked(
+        // Safety: input to the lexer is guaranteed to be valid utf8 and so is
+        // the range since we return if there is a wrong amount of digits
+        // beforehand.
+        let digits_str = unsafe {
+            std::str::from_utf8_unchecked(
                 self.source
                     .as_bytes()
                     .get_unchecked((self.position - 3)..(self.position + 1)),
-            );
-            if let Ok(digits) = u32::from_str_radix(digits_str, 16) {
-                if !advance {
-                    self.position -= 4;
-                }
-                Ok(std::char::from_u32_unchecked(digits))
-            } else {
-                // Safety: we know this is unreachable because 4 hexdigits cannot make an out of bounds char,
-                // and we make sure that the chars are actually hex digits
-                core::hint::unreachable_unchecked();
-            }
+            )
+        };
+        if let Ok(digits) = u32::from_str_radix(digits_str, 16) {
+            Ok(digits)
+        } else {
+            // Safety: we know this is unreachable because 4 hexdigits cannot
+            // make an out of bounds char, and we make sure that the chars are
+            // actually hex digits.
+            unsafe { core::hint::unreachable_unchecked() };
         }
+    }
+
+    /// Reads a `\u0000` escape sequence and converts the sequence to a valid
+    /// Unicode character.
+    ///
+    /// This expects the current char to be the `u`. Afterwards, the current
+    /// char is the last hex digit.
+    ///
+    /// This function makes no attempt to match surrogate pairs, since those are
+    /// not valid characters inside JS identifiers anyway.
+    fn read_unicode_escape_char(&mut self) -> Result<char, ()> {
+        self.read_unicode_escape()
+            .and_then(|codepoint| std::char::from_u32(codepoint).ok_or(()))
     }
 
     // Validate a `\x00 escape sequence, this expects the current char to be the `x`, it also does not skip over the escape sequence
@@ -708,9 +720,9 @@ impl<'src> JsLexer<'src> {
                 }
                 b'u' if self.peek_byte() == Some(b'{') => {
                     self.advance(1); // eats '{'
-                    self.read_codepoint_escape().is_ok()
+                    self.read_codepoint_escape_char().is_ok()
                 }
-                b'u' => self.read_unicode_escape(true).is_ok(),
+                b'u' => self.read_unicode_escape().is_ok(),
                 b'x' => self.validate_hex_escape(),
                 b'\r' => {
                     if let Some(b'\n') = self.next_byte() {
@@ -847,9 +859,9 @@ impl<'src> JsLexer<'src> {
                 self.next_byte();
                 let res = if self.peek_byte() == Some(b'{') {
                     self.next_byte();
-                    self.read_codepoint_escape()
+                    self.read_codepoint_escape_char()
                 } else {
-                    self.read_unicode_escape(true)
+                    self.read_unicode_escape_char()
                 };
 
                 if let Ok(c) = res {
@@ -879,14 +891,14 @@ impl<'src> JsLexer<'src> {
 
         match lookup_byte(b) {
             BSL if self.peek_byte() == Some(b'u') => {
+                let start = self.position;
                 self.next_byte();
-                if let Ok(chr) = self.read_unicode_escape(false) {
+                if let Ok(chr) = self.read_unicode_escape_char() {
                     if is_js_id_start(chr) {
-                        self.advance(5);
                         return true;
                     }
                 }
-                self.position -= 1;
+                self.position = start;
                 false
             }
             UNI => {
@@ -1821,9 +1833,9 @@ impl<'src> JsLexer<'src> {
                     self.next_byte();
                     let res = if self.peek_byte() == Some(b'{') {
                         self.next_byte();
-                        self.read_codepoint_escape()
+                        self.read_codepoint_escape_char()
                     } else {
-                        self.read_unicode_escape(true)
+                        self.read_unicode_escape_char()
                     };
 
                     match res {

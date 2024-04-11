@@ -1,0 +1,12 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+a { font-family: "Lucida Grande", "Arial", sans-serif; }
+a { font: 1em "Lucida Grande", 'Arial', sans-serif; }
+a { font: 1em "Lucida Grande", 'Arial', "sans-serif", sans-serif; }
+a { font-family: Times, serif; }
+b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif; }
+```

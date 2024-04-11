@@ -42,10 +42,28 @@ Biome支持的与语言无关的选项有：
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
+    "ignore": [],
+    "attributePosition": "auto",
     "indentStyle": "tab",
     "indentWidth": 2,
-    "lineWidth": 80,
-    "ignore": []
+    "lineEnding": "lf",
+    "lineWidth": 80
+  },
+  "javascript": {
+    "formatter": {
+      "arrowParentheses":"always",
+      "bracketSameLine": false,
+      "bracketSpacing": true,
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "semicolons": "always",
+      "trailingComma": "all"
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
   }
 }
 ```
@@ -84,197 +102,3 @@ const expr =
     0,
   ];
 ```
-
-## 与Prettier的差异
-
-与Prettier存在一些差异。
-
-### 类属性上的虚假或重复修饰符
-
-输入
-
-```ts title="example.ts"
-// 多个可访问性修饰符
-class Foo {
-  private a = 1;
-}
-
-// 带有函数体的声明函数
-declare function foo() {};
-
-// 无效使用abstract
-class Bar {
-  abstract foo;
-}
-
-// 重复的Readonly
-class Read {
-  readonly x: number;
-}
-```
-
-差异
-
-```ts title="example.ts" del={3, 8, 13, 19} ins={4, 9, 14, 20}
-// 多个可访问性修饰符
-class Foo {
-  private a = 1;
-  private a = 1;
-}
-
-// 带有函数体的声明函数
-declare function foo() {};
-declare function foo() {};
-
-// 无效使用abstract
-class Bar {
-  abstract foo;
-  abstract foo;
-}
-
-// 重复的Readonly
-class Read {
-  readonly x: number;
-  readonly x: number;
-}
-```
-
-#### 原因
-
-Prettier基于Babel的JS/TS解析非常宽松，并且允许忽略多个错误。Biome的解析器故意比Prettier更严格，正确断言这些测试中的语句是无效的。函数的重复修饰符在语义上无效，函数声明不允许有主体，非抽象类不能有抽象属性等。
-
-在Prettier中，这些错误不被视为解析错误，并且AST仍然以适当的节点构建出来。在格式化时，Prettier只是将这些节点视为正常节点并相应地进行格式化。
-
-在Biome中，解析错误会导致一个Bogus节点，它可以包含任意数量的有效节点、无效节点和/或原始令牌。在格式化时，Biome将Bogus节点视为纯文本，将其原样打印到生成的代码中，而不进行任何格式化，因为尝试进行格式化可能是不正确的并引起语义更改。
-
-对于类属性，Prettier的当前解析策略还使用布尔字段表示修饰符，这意味着每种修饰符只能出现一次（可访问性修饰符存储为单个字符串）。在打印时，Prettier只查看布尔列表，并决定要重新打印哪些修饰符。Biome相反保留修饰符列表，这意味着重复的修饰符仍然存在并可进行分析（因此解析错误消息中有关重复修饰符和排序的信息）。在打印出Bogus节点时，此列表仍然保持不变，打印未格式化的文本会导致这些修饰符继续存在。
-
-Biome可以解决这个问题的方法。一种可能性是在格式化时尝试解释Bogus节点并构建有效节点。如果可以构建有效节点，则像正常节点一样进行格式化，否则按原样打印Bogus文本，就像当前所做的那样。然而，这很混乱，并引入了一种形式的解析逻辑到格式化程序中，这实际上没有意义。
-
-另一个选择是在解析器中引入一种形式的“语法上有效的Bogus节点”，它接受这些纯语义错误（重复修饰符、非抽象类中的抽象属性）。它将继续像正常一样构建节点（实际上与Prettier的行为相匹配），但将它们存储在一个新的Bogus节点中，其中包括诊断信息。在格式化时，这些特殊的Bogus节点将尝试格式化内部节点，然后在出现错误时回退（现有的`format_or_verbatim`实用程序已经执行此操作）。这样可以保持解析和格式化逻辑彼此分离，但会使解析器更复杂，允许考虑无效状态为半有效。
-
-### Prettier不会取消引用一些在JavaScript中有效的对象属性。
-
-```js title="example.js"
-const obj = {
-  a: true,
-  b: true,
-  "𐊧": true,
-};
-```
-
-差异
-
-```js title="exmaple.js" del={4} ins={5}
-const obj = {
-  a: true,
-  b: true,
-  "𐊧": true,
-  𐊧: true,
-};
-```
-
-#### 原因
-
-Prettier和Biome都会取消引用在JavaScript中有效的对象和类属性。Prettier [仅取消引用有效的ES5标识符](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646)。
-
-在ES2015已经广泛应用的生态系统中，这似乎是一种遗留的限制。因此，我们决定在这里偏离，并取消引用ES2015+中的所有有效的JavaScript标识符。
-
-一个可能的解决方法是引入一个配置来设置项目使用的ECMAScript版本。然后，我们可以根据该版本调整取消引用行为。将ECMAScript版本设置为“ES5”可以与Prettier的行为相匹配。
-
-### Prettier对计算键中的赋值具有不一致的行为。
-
-输入
-
-```js title="example.js"
-a = {
-  [(this.resource = resource)]: 1,
-};
-```
-
-差异
-
-```js title="example.js" del={2} ins={3}
-a = {
-  [(this.resource = resource)]: 1,
-  [(this.resource = resource)]: 1,
-};
-```
-
-#### 原因
-
-Prettier和Biome在某些情况下，会在括号中包含一些赋值表达式，特别是在条件语句中。这样可以识别可能是比较的表达式。
-
-Prettier的行为是不一致的，因为它在对象属性的计算键中添加括号，但在类属性的计算键中不添加括号，如下面的示例所示：
-
-输入
-
-```js title="example.js"
-a = {
-  [(x = 0)]: 1,
-};
-
-class C {
-  [x = 0] = 1;
-}
-```
-
-输出
-
-```js title="example.js"
-a = {
-  [(x = 0)]: 1,
-};
-
-class C {
-  [x = 0] = 1;
-}
-```
-
-[Playground链接](https://biomejs.dev/playground?enabledLinting=false&code=YQAgAD0AIAB7AAoAIAAgAFsAeAAgAD0AIAAwAF0AOgAgADEALAAKAH0ACgAKAGMAbABhAHMAcwAgAEMAIAB7AAoAIAAgACAAIABbAHgAIAA9ACAAMABdACAAPQAgADEACgB9AAoA)
-
-为了保持一致，我们决定与Prettier分歧，并省略括号。或者，我们可以在对象或类的计算键中包含任何赋值。
-
-### Prettier接受接口的类型参数中的错误修饰符。
-
-输入
-
-```ts title="example.js"
-interface L<const in T> {}
-```
-
-差异
-
-```ts title="example.js" del={1} ins={2}
-interface L<const in T> {}
-interface L<const in T> {}
-```
-
-#### 原因
-
-如前所述，Prettier基于Babel的JS/TS解析非常宽松，允许忽略多个错误。Biome的解析器故意比Prettier更严格，正确断言接口的类型参数不允许使用`const`修饰符。
-
-在Prettier中，这个错误不被视为解析错误，AST仍然以适当的节点构建。在格式化时，Prettier会将这些节点视为正常节点并进行相应的格式化。
-
-在Biome中，解析错误会导致Bogus节点，它可以包含任意数量的有效节点、无效节点和/或原始令牌。在格式化时，Biome将Bogus节点视为纯文本，将其原样打印到生成的代码中，而不进行任何格式化，因为尝试格式化可能是不正确的并引起语义更改。
-
-### Prettier在箭头函数的类型参数中添加尾随逗号，即使不需要。
-
-输入
-
-```tsx title="example.tsx"
-<T = unknown,>() => {};
-```
-
-差异
-
-```tsx title="example.tsx" del={1} ins={2}
-<T = unknown,>() => {};
-<T = unknown,>() => {};
-```
-
-#### 原因
-
-在某些特定情况下，箭头函数的类型参数列表需要一个尾随逗号，以区分它与JSX元素。当提供默认类型时，不需要尾随逗号。在这里，我们与Prettier分歧，因为我们认为它更好地尊重了Prettier的原始意图，即仅在必要时添加尾随逗号。
-
-或者，我们可以在对象或类的计算键中包含任何赋值。

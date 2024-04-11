@@ -56,6 +56,9 @@ pub struct AnalyzerConfiguration {
 
     /// Allows to choose a different quote when applying fixes inside the lint rules
     pub preferred_quote: PreferredQuote,
+
+    /// Indicates the type of runtime or transformation used for interpreting JSX.
+    pub jsx_runtime: JsxRuntime,
 }
 
 /// A set of information useful to the analyzer infrastructure
@@ -67,6 +70,7 @@ pub struct AnalyzerOptions {
     /// The file that is being analyzed
     pub file_path: PathBuf,
 }
+
 impl AnalyzerOptions {
     pub fn globals(&self) -> Vec<&str> {
         self.configuration
@@ -74,6 +78,10 @@ impl AnalyzerOptions {
             .iter()
             .map(|global| global.as_str())
             .collect()
+    }
+
+    pub fn jsx_runtime(&self) -> JsxRuntime {
+        self.configuration.jsx_runtime
     }
 
     pub fn rule_options<R: 'static>(&self) -> Option<R::Options>
@@ -109,4 +117,11 @@ impl PreferredQuote {
     pub const fn is_single(&self) -> bool {
         matches!(self, Self::Single)
     }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum JsxRuntime {
+    #[default]
+    Transparent,
+    ReactClassic,
 }

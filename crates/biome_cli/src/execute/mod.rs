@@ -17,7 +17,7 @@ use biome_diagnostics::adapters::SerdeJsonError;
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
 use biome_service::workspace::{
-    FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams,
+    FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams, PatternId,
 };
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
@@ -157,7 +157,7 @@ pub enum TraversalMode {
         /// The GritQL pattern to search for.
         ///
         /// Note that the search command (currently) does not support rewrites.
-        pattern: String,
+        pattern: PatternId,
 
         /// An optional tuple.
         /// 1. The virtual path to the file
