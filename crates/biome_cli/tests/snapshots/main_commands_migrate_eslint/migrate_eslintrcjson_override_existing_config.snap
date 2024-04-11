@@ -26,7 +26,7 @@ expression: content
 ```block
 biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Configuration file can be updated.
+  i Configuration file can be updated.
   
     1   │ - {·"linter":·{·"rules":·{·"recommended":·true,·"suspicious":·{·"noDoubleEquals":·"error"·}·}·}·}
       1 │ + {

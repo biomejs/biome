@@ -13,7 +13,7 @@ expression: content
 ```block
 rome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Configuration file can be updated.
+  i Configuration file can be updated.
   
   - rome.json
   + biome.json

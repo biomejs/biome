@@ -59,7 +59,7 @@ pub(crate) struct OrganizeImportsDiffDiagnostic {
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
 	category = "migrate",
-	severity = Error,
+	severity = Information,
 	message = "Configuration file can be updated."
 )]
 pub(crate) struct MigrateDiffDiagnostic {
