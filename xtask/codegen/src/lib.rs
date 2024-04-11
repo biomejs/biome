@@ -5,7 +5,7 @@ mod css_kinds_src;
 mod formatter;
 mod generate_analyzer;
 mod generate_macros;
-pub mod generate_new_lintrule;
+pub mod generate_new_analyzer_rule;
 mod generate_node_factory;
 mod generate_nodes;
 mod generate_nodes_mut;
@@ -29,13 +29,14 @@ mod unicode;
 use bpaf::Bpaf;
 use std::path::Path;
 
+use crate::generate_new_analyzer_rule::Category;
 use xtask::{glue::fs2, Mode, Result};
 
 pub use self::ast::generate_ast;
 pub use self::formatter::generate_formatters;
 pub use self::generate_analyzer::generate_analyzer;
 pub use self::generate_crate::generate_crate;
-pub use self::generate_new_lintrule::{generate_new_lintrule, RuleKind};
+pub use self::generate_new_analyzer_rule::{generate_new_analyzer_rule, RuleKind};
 pub use self::parser_tests::generate_parser_tests;
 pub use self::unicode::generate_tables;
 
@@ -105,14 +106,19 @@ pub enum TaskCommand {
     Unicode,
     /// Creates a new lint rule
     #[bpaf(command, long("new-lintrule"))]
-    NewLintRule(
+    NewRule {
         /// Path of the rule
         #[bpaf(long("kind"))]
-        RuleKind,
+        kind: RuleKind,
+
         /// Name of the rule
         #[bpaf(long("name"))]
-        String,
-    ),
+        name: String,
+
+        /// Name of the rule
+        #[bpaf(long("category"))]
+        category: Category,
+    },
     /// Promotes a nursery rule
     #[bpaf(command, long("promote-rule"))]
     PromoteRule {

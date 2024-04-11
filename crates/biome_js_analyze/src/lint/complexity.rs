@@ -1,6 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use biome_analyze::declare_group;
+use biome_analyze::declare_lint_group;
 
 pub mod no_banned_types;
 pub mod no_empty_type_parameters;
@@ -32,7 +32,7 @@ pub mod use_regex_literals;
 pub mod use_simple_number_keys;
 pub mod use_simplified_logic_expression;
 
-declare_group! {
+declare_lint_group! {
     pub Complexity {
         name : "complexity" ,
         rules : [

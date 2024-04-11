@@ -1,6 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use biome_analyze::declare_group;
+use biome_analyze::declare_lint_group;
 
 pub mod no_duplicate_at_import_rules;
 pub mod no_duplicate_font_names;
@@ -19,7 +19,7 @@ pub mod no_unmatchable_anb_selector;
 pub mod use_consistent_grid_areas;
 pub mod use_generic_font_names;
 
-declare_group! {
+declare_lint_group! {
     pub Nursery {
         name : "nursery" ,
         rules : [

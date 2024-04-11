@@ -32,6 +32,26 @@ impl FromStr for RuleKind {
     }
 }
 
+#[derive(Debug, Clone, Bpaf)]
+pub enum Category {
+    /// Lint rules
+    Lint,
+    /// Assist rules
+    Assist,
+}
+
+impl FromStr for Category {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match s {
+            "lint" => Ok(Self::Lint),
+            "assist" => Ok(Self::Assist),
+            _ => Err("Not supported"),
+        }
+    }
+}
+
 fn generate_rule_template(
     kind: &RuleKind,
     rule_name_upper_camel: &str,
@@ -198,13 +218,15 @@ impl Rule for {rule_name_upper_camel} {{
     }
 }
 
-pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
+pub fn generate_new_analyzer_rule(kind: RuleKind, category: Category, rule_name: &str) {
     let rule_name_camel = Case::Camel.convert(rule_name);
     let rule_kind = kind.as_str();
     let crate_folder = project_root().join(format!("crates/biome_{rule_kind}_analyze"));
-    let rule_folder = crate_folder.join("src/lint/nursery");
     let test_folder = crate_folder.join("tests/specs/nursery");
-
+    let rule_folder = match &category {
+        Category::Lint => crate_folder.join("src/lint/nursery"),
+        Category::Assist => crate_folder.join("src/assists/nursery"),
+    };
     // Generate rule code
     let code = generate_rule_template(
         &kind,
@@ -224,11 +246,17 @@ pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
     if !categories.contains(&rule_name_camel) {
         let kebab_case_rule = Case::Kebab.convert(&rule_name_camel);
         // We sort rules to reduce conflicts between contributions made in parallel.
-        let rule_line = format!(
-            r#"    "lint/nursery/{rule_name_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
-        );
+        let rule_line = match category {
+            Category::Lint => format!(
+                r#"    "lint/nursery/{rule_name_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
+            ),
+            Category::Assist => format!(r#"    "assist/nursery/{rule_name_camel}","#),
+        };
         let lint_start = "define_categories! {\n";
-        let lint_end = "\n    ;\n";
+        let lint_end = match category {
+            Category::Lint => "\n    ; // end lint rules\n",
+            Category::Assist => "\n    // end assist rules\n",
+        };
         debug_assert!(categories.contains(lint_start));
         debug_assert!(categories.contains(lint_end));
         let lint_start_index = categories.find(lint_start).unwrap() + lint_start.len();
