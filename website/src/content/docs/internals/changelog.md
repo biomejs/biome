@@ -176,7 +176,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Added new `--staged` flag to the `check`, `format` and `lint` subcommands.
 
   This new option allows users to apply the command _only_ to the files that are staged (the
-  ones that will be committed), which can be very useful to simplify writting git hook scripts
+  ones that will be committed), which can be very useful to simplify writing git hook scripts
   such as `pre-commit`. Contributed by @castarco
 
 #### Enhancements
