@@ -187,11 +187,20 @@ fn get_math_min_or_max_call(
                 AnyJsLiteralExpression::JsNumberLiteralExpression(constant_value),
             ),
             any_expression,
-        ) => Some(MathMinOrMaxCall {
-            kind: min_or_max,
-            constant_argument: constant_value.clone(),
-            other_expression_argument: any_expression.clone(),
-        }),
+        ) => {
+            // The non-number literal argument must either be a call expression or an identifier expression.
+            if any_expression.as_js_call_expression().is_none()
+                && any_expression.as_js_identifier_expression().is_none()
+            {
+                return None;
+            }
+
+            Some(MathMinOrMaxCall {
+                kind: min_or_max,
+                constant_argument: constant_value.clone(),
+                other_expression_argument: any_expression.clone(),
+            })
+        }
         _ => None,
     }
 }

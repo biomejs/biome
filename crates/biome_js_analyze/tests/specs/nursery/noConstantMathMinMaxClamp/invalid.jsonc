@@ -1,4 +1,0 @@
-[
-	"Math.min(0, Math.max(100, x));",
-	"Math.max(100, Math.min(0, x));"
-]
