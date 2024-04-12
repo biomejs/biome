@@ -22,7 +22,7 @@ var a= !foo?true:false;
 
 # Diagnostics
 ```
-invalid_without_trivia.js:1:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_without_trivia.js:1:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary use of boolean literals in conditional expression.
   
@@ -47,7 +47,7 @@ invalid_without_trivia.js:1:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
 ```
 
 ```
-invalid_without_trivia.js:2:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_without_trivia.js:2:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary use of boolean literals in conditional expression.
   
@@ -74,7 +74,7 @@ invalid_without_trivia.js:2:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
 ```
 
 ```
-invalid_without_trivia.js:4:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_without_trivia.js:4:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary use of boolean literals in conditional expression.
   
@@ -103,7 +103,7 @@ invalid_without_trivia.js:4:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
 ```
 
 ```
-invalid_without_trivia.js:5:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_without_trivia.js:5:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary use of boolean literals in conditional expression.
   
@@ -131,7 +131,7 @@ invalid_without_trivia.js:5:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
 ```
 
 ```
-invalid_without_trivia.js:6:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_without_trivia.js:6:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary use of boolean literals in conditional expression.
   
@@ -160,7 +160,7 @@ invalid_without_trivia.js:6:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
 ```
 
 ```
-invalid_without_trivia.js:7:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_without_trivia.js:7:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary use of boolean literals in conditional expression.
   
@@ -189,7 +189,7 @@ invalid_without_trivia.js:7:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
 ```
 
 ```
-invalid_without_trivia.js:9:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_without_trivia.js:9:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary use of boolean literals in conditional expression.
   
@@ -218,7 +218,7 @@ invalid_without_trivia.js:9:9 lint/nursery/noUselessTernary  FIXABLE  ━━━�
 ```
 
 ```
-invalid_without_trivia.js:10:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_without_trivia.js:10:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary use of boolean literals in conditional expression.
   
@@ -246,7 +246,7 @@ invalid_without_trivia.js:10:9 lint/nursery/noUselessTernary  FIXABLE  ━━━
 ```
 
 ```
-invalid_without_trivia.js:11:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_without_trivia.js:11:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary use of boolean literals in conditional expression.
   
@@ -275,7 +275,7 @@ invalid_without_trivia.js:11:9 lint/nursery/noUselessTernary  FIXABLE  ━━━
 ```
 
 ```
-invalid_without_trivia.js:12:9 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_without_trivia.js:12:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary use of boolean literals in conditional expression.
   
@@ -304,7 +304,7 @@ invalid_without_trivia.js:12:9 lint/nursery/noUselessTernary  FIXABLE  ━━━
 ```
 
 ```
-invalid_without_trivia.js:14:8 lint/nursery/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_without_trivia.js:14:8 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unnecessary use of boolean literals in conditional expression.
   
@@ -324,5 +324,3 @@ invalid_without_trivia.js:14:8 lint/nursery/noUselessTernary  FIXABLE  ━━━
        │            ----------- 
 
 ```
-
-

@@ -600,7 +600,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   <div></div>
   ```
 
-- Add lint rule useJsxKeyInIterable from Eslint rule [`react/jsx-key`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-key.md). Contributed by @vohoanglong0107
 - The analyzer now **infers** the correct quote from `javascript.formatter.quoteStyle`, if set. This means that code fixes suggested by the analyzer will use the same quote of the formatter. Contributed by @ematipico
 
 #### Enhancements
@@ -763,6 +762,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```
   Contributed by @ematipico
+
 - Fix [#1774](https://github.com/biomejs/biome/issues/1774) by taking into account the option `--no-errors-on-unmatched` when running the CLI using `--changed`. Contributed by @antogyn
 
 #### Enhancements

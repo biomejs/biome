@@ -19,6 +19,7 @@ pub mod no_useless_label;
 pub mod no_useless_lone_block_statements;
 pub mod no_useless_rename;
 pub mod no_useless_switch_case;
+pub mod no_useless_ternary;
 pub mod no_useless_this_alias;
 pub mod no_useless_type_constraint;
 pub mod no_void;
@@ -52,6 +53,7 @@ declare_group! {
             self :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements ,
             self :: no_useless_rename :: NoUselessRename ,
             self :: no_useless_switch_case :: NoUselessSwitchCase ,
+            self :: no_useless_ternary :: NoUselessTernary ,
             self :: no_useless_this_alias :: NoUselessThisAlias ,
             self :: no_useless_type_constraint :: NoUselessTypeConstraint ,
             self :: no_void :: NoVoid ,

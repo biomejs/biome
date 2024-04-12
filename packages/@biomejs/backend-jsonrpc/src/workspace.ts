@@ -687,6 +687,10 @@ export interface Complexity {
 	 */
 	noUselessSwitchCase?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow ternary operators when simpler alternatives exist.
+	 */
+	noUselessTernary?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow useless this aliasing.
 	 */
 	noUselessThisAlias?: RuleConfiguration_for_Null;
@@ -960,10 +964,6 @@ export interface Nursery {
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow ternary operators when simpler alternatives exist.
-	 */
-	noUselessTernary?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1864,6 +1864,7 @@ export type Category =
 	| "lint/complexity/noUselessLoneBlockStatements"
 	| "lint/complexity/noUselessRename"
 	| "lint/complexity/noUselessSwitchCase"
+	| "lint/complexity/noUselessTernary"
 	| "lint/complexity/noUselessThisAlias"
 	| "lint/complexity/noUselessTypeConstraint"
 	| "lint/complexity/noVoid"
@@ -1930,7 +1931,6 @@ export type Category =
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
-	| "lint/nursery/noUselessTernary"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxKeyInIterable"

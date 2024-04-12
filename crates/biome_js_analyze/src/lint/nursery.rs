@@ -14,7 +14,6 @@ pub mod no_nodejs_modules;
 pub mod no_re_export_all;
 pub mod no_restricted_imports;
 pub mod no_undeclared_dependencies;
-pub mod no_useless_ternary;
 pub mod use_import_restrictions;
 pub mod use_jsx_key_in_iterable;
 pub mod use_node_assert_strict;
@@ -36,7 +35,6 @@ declare_group! {
             self :: no_re_export_all :: NoReExportAll ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
-            self :: no_useless_ternary :: NoUselessTernary ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_jsx_key_in_iterable :: UseJsxKeyInIterable ,
             self :: use_node_assert_strict :: UseNodeAssertStrict ,

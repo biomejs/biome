@@ -426,6 +426,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessTernary": {
+					"description": "Disallow ternary operators when simpler alternatives exist.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessThisAlias": {
 					"description": "Disallow useless this aliasing.",
 					"anyOf": [
@@ -1507,13 +1514,6 @@
 				},
 				"noUndeclaredDependencies": {
 					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessTernary": {
-					"description": "Disallow ternary operators when simpler alternatives exist.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -225,7 +225,7 @@ pub type NoUselessRename =
 pub type NoUselessSwitchCase =
     <lint::complexity::no_useless_switch_case::NoUselessSwitchCase as biome_analyze::Rule>::Options;
 pub type NoUselessTernary =
-    <lint::nursery::no_useless_ternary::NoUselessTernary as biome_analyze::Rule>::Options;
+    <lint::complexity::no_useless_ternary::NoUselessTernary as biome_analyze::Rule>::Options;
 pub type NoUselessThisAlias =
     <lint::complexity::no_useless_this_alias::NoUselessThisAlias as biome_analyze::Rule>::Options;
 pub type NoUselessTypeConstraint = < lint :: complexity :: no_useless_type_constraint :: NoUselessTypeConstraint as biome_analyze :: Rule > :: Options ;
