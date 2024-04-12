@@ -3532,7 +3532,7 @@ fn print_json() {
         Args::from(
             [
                 ("format"),
-                "--json",
+                "--reporter=json",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -3566,8 +3566,7 @@ fn print_json_pretty() {
         Args::from(
             [
                 ("format"),
-                "--json",
-                "--json-pretty",
+                "--reporter=json-pretty",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),

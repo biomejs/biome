@@ -112,8 +112,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- Added two new options to customise the emitted output of the CLI: `--json` and `--json-pretty`. With `--json`, the diagnostics and the
-  summary will be printed in the **terminal** in JSON format. Using `--json-pretty` _together_ with `--json` will output the same output, but formatted.
+- Added two new options to customise the emitted output of the CLI: `--reporter=json` and `--reporter=json-pretty`. With `--reporter=json`, the diagnostics and the
+  summary will be printed in the **terminal** in JSON format. With `--reporter=json-pretty`, you can print the same information, but formatted using the same options of your configuration.
 
   NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future.
 
