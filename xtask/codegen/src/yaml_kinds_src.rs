@@ -24,7 +24,6 @@ pub const YAML_KINDS_SRC: KindsSrc = KindsSrc {
         "YAML_ROOT",
         "YAML_DOCUMENT_LIST",
         "ANY_YAML_NODE",
-        "YAML_SCALAR",
         "YAML_SEQUENCE",
         "YAML_SEQUENCE_ELEMENTS",
         "YAML_MAPPING",
