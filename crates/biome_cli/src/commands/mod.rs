@@ -61,7 +61,8 @@ pub enum BiomeCommand {
     /// Start the Biome daemon server process
     #[bpaf(command)]
     Start(
-        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        /// Allows to set a custom file path to the configuration file,
+        /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
         Option<PathBuf>,
     ),
@@ -271,7 +272,8 @@ pub enum BiomeCommand {
     /// Acts as a server for the Language Server Protocol over stdin/stdout
     #[bpaf(command("lsp-proxy"))]
     LspProxy(
-        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        /// Allows to set a custom file path to the configuration file,
+        /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
         Option<PathBuf>,
         /// Bogus argument to make the command work with vscode-languageclient
@@ -348,7 +350,8 @@ pub enum BiomeCommand {
     RunServer {
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
         stop_on_disconnect: bool,
-        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        /// Allows to set a custom file path to the configuration file,
+        /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
         config_path: Option<PathBuf>,
     },
@@ -482,7 +485,7 @@ fn resolve_manifest(cli_session: &CliSession) -> Result<(), WorkspaceError> {
     let workspace = &*cli_session.app.workspace;
 
     let result = fs.auto_search(
-        fs.working_directory().unwrap_or_default(),
+        &fs.working_directory().unwrap_or_default(),
         &["package.json"],
         false,
     )?;

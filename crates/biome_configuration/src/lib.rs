@@ -233,26 +233,38 @@ pub struct ConfigurationPayload {
     pub deserialized: Deserialized<PartialConfiguration>,
     /// The path of where the `biome.json` or `biome.jsonc` file was found. This contains the file name.
     pub configuration_file_path: PathBuf,
-    /// The base path of where the `biome.json` or `biome.jsonc` file was found.
-    /// This has to be used to resolve other configuration files.
-    pub configuration_directory_path: PathBuf,
+    /// The base path where the external configuration in a package should be resolved from
+    pub external_resolution_base_path: PathBuf,
 }
 
 #[derive(Debug, Default, PartialEq)]
-pub enum ConfigurationBasePath {
+pub enum ConfigurationPathHint {
     /// The default mode, not having a configuration file is not an error.
+    /// The path will be filled with the working directory if it is not filled at the time of usage.
     #[default]
     None,
-    /// The base path provided by the LSP, not having a configuration file is not an error.
-    Lsp(PathBuf),
-    /// The base path provided by the user, not having a configuration file is an error.
+    /// The configuration path provided by the LSP, not having a configuration file is not an error.
+    /// The path will always be a directory path.
+    FromLsp(PathBuf),
+    /// The configuration path provided by the user, not having a configuration file is an error.
+    /// The path can either be a directory path or a file path.
     /// Throws any kind of I/O errors.
     FromUser(PathBuf),
 }
 
-impl ConfigurationBasePath {
+impl ConfigurationPathHint {
     pub const fn is_from_user(&self) -> bool {
-        matches!(self, ConfigurationBasePath::FromUser(_))
+        matches!(self, Self::FromUser(_))
+    }
+    pub const fn is_from_lsp(&self) -> bool {
+        matches!(self, Self::FromLsp(_))
+    }
+    pub fn is_file(&self) -> bool {
+        if let Self::FromUser(path) = self {
+            path.is_file()
+        } else {
+            false
+        }
     }
 }
 

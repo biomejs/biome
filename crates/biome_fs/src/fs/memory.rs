@@ -233,7 +233,7 @@ impl FileSystem for MemoryFileSystem {
     fn resolve_configuration(
         &self,
         _specifier: &str,
-        _path: Option<&Path>,
+        _path: &Path,
     ) -> Result<Resolution, ResolveError> {
         todo!()
     }

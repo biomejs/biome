@@ -10,10 +10,9 @@ Acts as a server for the Language Server Protocol over stdin/stdout
 Usage: lsp-proxy [--config-path=PATH]
 
 Available options:
-        --config-path=PATH  Allows to set a custom path when discovering the configuration file `biome.json`
+        --config-path=PATH  Allows to set a custom file path to the configuration file, or a custom directory
+                            path to find `biome.json` or `biome.jsonc`
                             [env:BIOME_CONFIG_PATH: N/A]
     -h, --help              Prints help information
 
 ```
-
-

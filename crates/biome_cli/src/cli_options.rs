@@ -1,6 +1,6 @@
 use crate::logging::LoggingKind;
 use crate::LoggingLevel;
-use biome_configuration::ConfigurationBasePath;
+use biome_configuration::ConfigurationPathHint;
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
 use std::fmt::{Display, Formatter};
@@ -22,7 +22,7 @@ pub struct CliOptions {
     #[bpaf(long("verbose"), switch, fallback(false))]
     pub verbose: bool,
 
-    /// Set the directory of the biome.json or biome.jsonc configuration file and disable default configuration file resolution.
+    /// Set the file path to the configuration file, or the directory path to find `biome.json` or `biome.jsonc`. Disable default configuration file resolution.
     #[bpaf(long("config-path"), argument("PATH"), optional)]
     pub config_path: Option<String>,
 
@@ -86,11 +86,11 @@ pub struct CliOptions {
 }
 
 impl CliOptions {
-    /// Computes the [ConfigurationBasePath] based on the options passed by the user
-    pub(crate) fn as_configuration_base_path(&self) -> ConfigurationBasePath {
+    /// Computes the [ConfigurationPathHint] based on the options passed by the user
+    pub(crate) fn as_configuration_path_hint(&self) -> ConfigurationPathHint {
         match self.config_path.as_ref() {
-            None => ConfigurationBasePath::default(),
-            Some(path) => ConfigurationBasePath::FromUser(PathBuf::from(path)),
+            None => ConfigurationPathHint::default(),
+            Some(path) => ConfigurationPathHint::FromUser(PathBuf::from(path)),
         }
     }
 }
