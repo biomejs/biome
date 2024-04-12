@@ -937,10 +937,6 @@ export interface Nursery {
 	 */
 	noEvolvingAny?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow using export or module.exports in files containing tests
-	 */
-	noExportsInTest?: RuleConfiguration_for_Null;
-	/**
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
@@ -1312,6 +1308,10 @@ export interface Suspicious {
 	 * Disallow the any type usage.
 	 */
 	noExplicitAny?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow using export or module.exports in files containing tests
+	 */
+	noExportsInTest?: RuleConfiguration_for_Null;
 	/**
 	 * Prevents the wrong usage of the non-null assertion operator (!) in TypeScript files.
 	 */
@@ -1923,7 +1923,6 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noExcessiveNestedTestSuites"
-	| "lint/nursery/noExportsInTest"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noNamespaceImport"
 	| "lint/nursery/noNodejsModules"
@@ -2006,6 +2005,7 @@ export type Category =
 	| "lint/suspicious/noEmptyBlockStatements"
 	| "lint/suspicious/noEmptyInterface"
 	| "lint/suspicious/noExplicitAny"
+	| "lint/suspicious/noExportsInTest"
 	| "lint/suspicious/noExtraNonNullAssertion"
 	| "lint/suspicious/noFallthroughSwitchClause"
 	| "lint/suspicious/noFocusedTests"

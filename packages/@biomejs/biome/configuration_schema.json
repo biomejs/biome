@@ -1470,13 +1470,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noExportsInTest": {
-					"description": "Disallow using export or module.exports in files containing tests",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noMisplacedAssertion": {
 					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
 					"anyOf": [
@@ -2456,6 +2449,13 @@
 				},
 				"noExplicitAny": {
 					"description": "Disallow the any type usage.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noExportsInTest": {
+					"description": "Disallow using export or module.exports in files containing tests",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

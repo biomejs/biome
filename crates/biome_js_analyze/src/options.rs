@@ -83,7 +83,7 @@ pub type NoExcessiveNestedTestSuites = < lint :: complexity :: no_excessive_nest
 pub type NoExplicitAny =
     <lint::suspicious::no_explicit_any::NoExplicitAny as biome_analyze::Rule>::Options;
 pub type NoExportsInTest =
-    <lint::nursery::no_exports_in_test::NoExportsInTest as biome_analyze::Rule>::Options;
+    <lint::suspicious::no_exports_in_test::NoExportsInTest as biome_analyze::Rule>::Options;
 pub type NoExtraBooleanCast =
     <lint::complexity::no_extra_boolean_cast::NoExtraBooleanCast as biome_analyze::Rule>::Options;
 pub type NoExtraNonNullAssertion = < lint :: suspicious :: no_extra_non_null_assertion :: NoExtraNonNullAssertion as biome_analyze :: Rule > :: Options ;

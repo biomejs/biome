@@ -6,7 +6,6 @@ pub mod no_console;
 pub mod no_done_callback;
 pub mod no_duplicate_else_if;
 pub mod no_evolving_any;
-pub mod no_exports_in_test;
 pub mod no_misplaced_assertion;
 pub mod no_namespace_import;
 pub mod no_nodejs_modules;
@@ -25,7 +24,6 @@ declare_group! {
             self :: no_done_callback :: NoDoneCallback ,
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,
             self :: no_evolving_any :: NoEvolvingAny ,
-            self :: no_exports_in_test :: NoExportsInTest ,
             self :: no_misplaced_assertion :: NoMisplacedAssertion ,
             self :: no_namespace_import :: NoNamespaceImport ,
             self :: no_nodejs_modules :: NoNodejsModules ,
