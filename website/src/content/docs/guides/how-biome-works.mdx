@@ -115,16 +115,16 @@ The `extends` option allows to break down a configuration in multiple file and "
 }
 ```
 
-The files defined in this array:
+The entries defined in this array:
 - must exist in the file system;
 - are resolved from the path where the `biome.json` file is defined;
-- must be relative paths. Paths to libraries are not resolved;
-- must be reachable by Biome, e.g. symbolic links might not be resolved by Biome;
+- must be relative paths or [paths to library](#extends-biomejson-from-a-library)
+- must be reachable by Biome, e.g. symbolic links might not be resolved by Biome, if they are relative paths;
 - will be processed in order: from the first one to the last one;
 - can override the same properties, but ultimately only the last one will be used by Biome;
 
 
-#### Import `biome.json` from a library
+### Extends `biome.json` from a library
 
 From version `v1.6.0`, Biome is able to resolve configuration files from `node_modules/`, so you can export your configuration file from a library, and import it in multiple projects.
 
@@ -161,6 +161,43 @@ To avoid a breaking change with how the existing resolution works, paths that st
 :::
 
 For more information about the resolution algorithm, read the [Node.js documentation](https://nodejs.org/api/esm.html#resolution-and-loading-algorithm).
+
+### Resolution of globs and paths
+
+Globs and relative file paths are resolved from the working directory. The working directory is:
+- in a CLI context, the directory where you run the biome command;
+- in a LSP context, is the root directory
+
+This means that if you take advantage of the [configuration file resolution](#configuration-file-resolution), you run a CLI command from a folder, and the configuration file is found in some **parent folder**, the paths/globs present on said files will be relative from where the command was run. Let's see an example:
+
+<FileTree>
+- ~home/
+  - biome.json
+  - www/
+    - todo-app/
+      - dist/
+      - src/
+      - package.json
+</FileTree>
+
+
+```json title="~home/biome.json"
+{
+  "files": {
+    "ignore": ["dist/**"]
+  }
+}
+```
+
+```json title="~home/www/todo-app/package.json"
+{
+  "scripts": {
+    "check": "biome check ./"
+  }
+}
+```
+
+Given the previous example, when you run the command `npm run check`, Biome will eventually find the configuration file in `~home`. Since the command was run from `~home/www/too-app`, that folder is considered the **working directory**. Biome will read the `files.ignore` option, and all those entries will be resolved from `~home/www/todo-app`.json
 
 ## Protected Files
 
