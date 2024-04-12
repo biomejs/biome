@@ -965,10 +965,6 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
-	 * Disallow disabled tests.
-	 */
-	noSkippedTests?: RuleConfiguration_for_Null;
-	/**
 	 * It detects possible "wrong" semicolons inside JSX elements.
 	 */
 	noSuspiciousSemicolonInJsx?: RuleConfiguration_for_Null;
@@ -1392,6 +1388,10 @@ export interface Suspicious {
 	 * Disallow identifiers from shadowing restricted names.
 	 */
 	noShadowRestrictedNames?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow disabled tests.
+	 */
+	noSkippedTests?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow sparse arrays
 	 */
@@ -1917,19 +1917,18 @@ export type Category =
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateElseIf"
+	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateTestHooks"
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noExportsInTest"
 	| "lint/nursery/noFocusedTests"
-	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noNamespaceImport"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReExportAll"
 	| "lint/nursery/noRestrictedImports"
-	| "lint/nursery/noSkippedTests"
 	| "lint/nursery/noSuspiciousSemicolonInJsx"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
@@ -2025,6 +2024,7 @@ export type Category =
 	| "lint/suspicious/noRedundantUseStrict"
 	| "lint/suspicious/noSelfCompare"
 	| "lint/suspicious/noShadowRestrictedNames"
+	| "lint/suspicious/noSkippedTests"
 	| "lint/suspicious/noSparseArray"
 	| "lint/suspicious/noThenProperty"
 	| "lint/suspicious/noUnsafeDeclarationMerging"

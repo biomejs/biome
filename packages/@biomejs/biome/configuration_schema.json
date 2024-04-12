@@ -1519,13 +1519,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noSkippedTests": {
-					"description": "Disallow disabled tests.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noSuspiciousSemicolonInJsx": {
 					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
 					"anyOf": [
@@ -2596,6 +2589,13 @@
 				},
 				"noShadowRestrictedNames": {
 					"description": "Disallow identifiers from shadowing restricted names.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSkippedTests": {
+					"description": "Disallow disabled tests.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

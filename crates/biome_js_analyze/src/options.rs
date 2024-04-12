@@ -174,7 +174,7 @@ pub type NoShadowRestrictedNames = < lint :: suspicious :: no_shadow_restricted_
 pub type NoShoutyConstants =
     <lint::style::no_shouty_constants::NoShoutyConstants as biome_analyze::Rule>::Options;
 pub type NoSkippedTests =
-    <lint::nursery::no_skipped_tests::NoSkippedTests as biome_analyze::Rule>::Options;
+    <lint::suspicious::no_skipped_tests::NoSkippedTests as biome_analyze::Rule>::Options;
 pub type NoSparseArray =
     <lint::suspicious::no_sparse_array::NoSparseArray as biome_analyze::Rule>::Options;
 pub type NoStaticOnlyClass =

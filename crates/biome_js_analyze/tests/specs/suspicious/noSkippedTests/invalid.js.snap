@@ -15,7 +15,7 @@ xtest('foo', () => {});
 
 # Diagnostics
 ```
-invalid.js:1:10 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:10 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't disable tests.
   
@@ -36,7 +36,7 @@ invalid.js:1:10 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:2:4 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:4 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't disable tests.
   
@@ -58,7 +58,7 @@ invalid.js:2:4 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.js:3:6 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:6 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't disable tests.
   
@@ -81,7 +81,7 @@ invalid.js:3:6 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.js:4:1 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't disable tests.
   
@@ -109,7 +109,7 @@ invalid.js:4:1 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.js:5:1 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't disable tests.
   
@@ -137,7 +137,7 @@ invalid.js:5:1 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.js:6:1 lint/nursery/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't disable tests.
   

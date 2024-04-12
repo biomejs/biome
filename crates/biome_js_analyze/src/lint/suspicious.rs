@@ -42,6 +42,7 @@ pub mod no_redeclare;
 pub mod no_redundant_use_strict;
 pub mod no_self_compare;
 pub mod no_shadow_restricted_names;
+pub mod no_skipped_tests;
 pub mod no_sparse_array;
 pub mod no_then_property;
 pub mod no_unsafe_declaration_merging;
@@ -97,6 +98,7 @@ declare_group! {
             self :: no_redundant_use_strict :: NoRedundantUseStrict ,
             self :: no_self_compare :: NoSelfCompare ,
             self :: no_shadow_restricted_names :: NoShadowRestrictedNames ,
+            self :: no_skipped_tests :: NoSkippedTests ,
             self :: no_sparse_array :: NoSparseArray ,
             self :: no_then_property :: NoThenProperty ,
             self :: no_unsafe_declaration_merging :: NoUnsafeDeclarationMerging ,
