@@ -32,6 +32,7 @@ pub mod use_fragment_syntax;
 pub mod use_import_type;
 pub mod use_literal_enum_members;
 pub mod use_naming_convention;
+pub mod use_node_assert_strict;
 pub mod use_nodejs_import_protocol;
 pub mod use_number_namespace;
 pub mod use_numeric_literals;
@@ -78,6 +79,7 @@ declare_group! {
             self :: use_import_type :: UseImportType ,
             self :: use_literal_enum_members :: UseLiteralEnumMembers ,
             self :: use_naming_convention :: UseNamingConvention ,
+            self :: use_node_assert_strict :: UseNodeAssertStrict ,
             self :: use_nodejs_import_protocol :: UseNodejsImportProtocol ,
             self :: use_number_namespace :: UseNumberNamespace ,
             self :: use_numeric_literals :: UseNumericLiterals ,

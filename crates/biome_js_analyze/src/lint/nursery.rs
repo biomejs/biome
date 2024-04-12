@@ -13,7 +13,6 @@ pub mod no_re_export_all;
 pub mod no_restricted_imports;
 pub mod no_undeclared_dependencies;
 pub mod use_import_restrictions;
-pub mod use_node_assert_strict;
 pub mod use_sorted_classes;
 
 declare_group! {
@@ -31,7 +30,6 @@ declare_group! {
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
             self :: use_import_restrictions :: UseImportRestrictions ,
-            self :: use_node_assert_strict :: UseNodeAssertStrict ,
             self :: use_sorted_classes :: UseSortedClasses ,
         ]
      }

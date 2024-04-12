@@ -297,7 +297,7 @@ pub type UseNamespaceKeyword =
 pub type UseNamingConvention =
     <lint::style::use_naming_convention::UseNamingConvention as biome_analyze::Rule>::Options;
 pub type UseNodeAssertStrict =
-    <lint::nursery::use_node_assert_strict::UseNodeAssertStrict as biome_analyze::Rule>::Options;
+    <lint::style::use_node_assert_strict::UseNodeAssertStrict as biome_analyze::Rule>::Options;
 pub type UseNodejsImportProtocol = < lint :: style :: use_nodejs_import_protocol :: UseNodejsImportProtocol as biome_analyze :: Rule > :: Options ;
 pub type UseNumberNamespace =
     <lint::style::use_number_namespace::UseNumberNamespace as biome_analyze::Rule>::Options;

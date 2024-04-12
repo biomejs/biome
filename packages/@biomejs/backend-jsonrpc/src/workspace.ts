@@ -969,10 +969,6 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
 	/**
-	 * Promotes the usage of node:assert/strict over node:assert.
-	 */
-	useNodeAssertStrict?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleConfiguration_for_UtilityClassSortingOptions;
@@ -1159,6 +1155,10 @@ export interface Style {
 	 * Enforce naming conventions for everything across a codebase.
 	 */
 	useNamingConvention?: RuleConfiguration_for_NamingConventionOptions;
+	/**
+	 * Promotes the usage of node:assert/strict over node:assert.
+	 */
+	useNodeAssertStrict?: RuleConfiguration_for_Null;
 	/**
 	 * Enforces using the node: protocol for Node.js builtin modules.
 	 */
@@ -1932,7 +1932,6 @@ export type Category =
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useNodeAssertStrict"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
@@ -1970,6 +1969,7 @@ export type Category =
 	| "lint/style/useImportType"
 	| "lint/style/useLiteralEnumMembers"
 	| "lint/style/useNamingConvention"
+	| "lint/style/useNodeAssertStrict"
 	| "lint/style/useNodejsImportProtocol"
 	| "lint/style/useNumberNamespace"
 	| "lint/style/useNumericLiterals"
