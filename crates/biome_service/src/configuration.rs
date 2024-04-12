@@ -444,9 +444,9 @@ impl PartialConfigurationExt for PartialConfiguration {
                         err.to_string(),
                     )
                     .with_verbose_advice(markup! {
-                        "Biome tried to load the extend configuration file \""<Emphasis>{
+                        "Biome tried to load the configuration file \""<Emphasis>{
                             extend_configuration_file_path.display().to_string()
-                        }</Emphasis>"\" using \""<Emphasis>{
+                        }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
                             external_resolution_base_path.display().to_string()
                         }</Emphasis>"\" as the base path."
                     })
