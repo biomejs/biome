@@ -269,6 +269,25 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### Promoted rules
+
+New rules are incubated in the nursery group.
+Once stable, we promote them to a stable group.
+The following rules are promoted:
+
+- [complecity/noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites)
+- [complexity/noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary)
+- [correctness/useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable)
+- [performance/noBarrelFile](https://biomejs.dev/linter/rules/no-barrel-file/)
+- [performance/noReExportAll](https://biomejs.dev/linter/rules/no-re-export-all/)
+- [style/noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import/)
+- [style/useNodeAssertStrict](https://biomejs.dev/linter/rules/use-node-assert-strict/)
+- [suspicious/noDuplicateTestHooks](https://biomejs.dev/linter/rules/no-duplicate-test-hooks/)
+- [suspicious/noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test/)
+- [suspicious/noFocusedTests](https://biomejs.dev/linter/rules/no-focused-tests/)
+- [suspicious/noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests/)
+- [suspicious/noSuspiciousSemicolonInJsx](https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx)
+
 #### New features
 
 - Add a new option `jsxRuntime` to the `javascript` configuration. When set to `reactClassic`, the [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) and [useImportType](https://biomejs.dev/linter/rules/use-import-type) rules use this information to make exceptions for the React global that is required by the React Classic JSX transform.
@@ -606,7 +625,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   <div></div>
   ```
 
-- Add lint rule useJsxKeyInIterable from Eslint rule [`react/jsx-key`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-key.md). Contributed by @vohoanglong0107
 - The analyzer now **infers** the correct quote from `javascript.formatter.quoteStyle`, if set. This means that code fixes suggested by the analyzer will use the same quote of the formatter. Contributed by @ematipico
 
 #### Enhancements
@@ -769,6 +787,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```
   Contributed by @ematipico
+
 - Fix [#1774](https://github.com/biomejs/biome/issues/1774) by taking into account the option `--no-errors-on-unmatched` when running the CLI using `--changed`. Contributed by @antogyn
 
 #### Enhancements
@@ -1054,6 +1073,15 @@ Additionally, the following rules are now recommended:
   export * from "foo";
   ```
   Contributed by @togami2864
+
+- Add rule [noReExportAll](https://biomejs.dev/linter/rules/no-re-export-all/) that report `export * from "mod"`.
+  Contributed by @mdm317
+
+- Add rule [noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites/).
+  Contributed by @vasucp1207
+
+- Add rule [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/). 
+  Contributed by @vohoanglong0107
 
 #### Enhancements
 

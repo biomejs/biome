@@ -2,11 +2,7 @@
 title: useNodeAssertStrict (since v1.6.0)
 ---
 
-**Diagnostic Category: `lint/nursery/useNodeAssertStrict`**
-
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
-:::
+**Diagnostic Category: `lint/style/useNodeAssertStrict`**
 
 Promotes the usage of `node:assert/strict` over `node:assert`.
 
@@ -20,7 +16,7 @@ If you prefer stricter assertions when using the Node.js assertion module, the p
 import * as assert from "node:assert"
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useNodeAssertStrict.js:1:25 <a href="https://biomejs.dev/linter/rules/use-node-assert-strict">lint/nursery/useNodeAssertStrict</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useNodeAssertStrict.js:1:25 <a href="https://biomejs.dev/linter/rules/use-node-assert-strict">lint/style/useNodeAssertStrict</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use </span><span style="color: Orange;"><strong>node:assert/strict</strong></span><span style="color: Orange;"> instead.</span>
   

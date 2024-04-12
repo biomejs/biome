@@ -55,6 +55,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noConstructorReturn
   - noEmptyCharacterClassInRegex
   - noEmptyPattern
+  - noExportsInTest
   - noGlobalObjectCalls
   - noInnerDeclarations
   - noInvalidConstructorSuper
@@ -149,5 +150,3 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

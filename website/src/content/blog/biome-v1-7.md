@@ -157,11 +157,30 @@ Thus, we still recommend using a [dedicated pre-commit tool](/recipes/git-hooks/
 
 ## Linter
 
-### New rules
+### Promoted rules
 
-This release comes with several new rules.
+Once stable, a nursery rule is promoted to a stable group
+The following rules are promoted:
+
+- [complecity/noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites)
+- [complexity/noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary/)
+- [correctness/useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/)
+- [performance/noBarrelFile](https://biomejs.dev/linter/rules/no-barrel-file/)
+- [performance/noReExportAll](https://biomejs.dev/linter/rules/no-re-export-all/)
+- [style/noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import/)
+- [style/useNodeAssertStrict](https://biomejs.dev/linter/rules/use-node-assert-strict/)
+- [suspicious/noDuplicateTestHooks](https://biomejs.dev/linter/rules/no-duplicate-test-hooks/)
+- [suspicious/noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test/)
+- [suspicious/noFocusedTests](https://biomejs.dev/linter/rules/no-focused-tests/)
+- [suspicious/noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests/)
+- [suspicious/noSuspiciousSemicolonInJsx](https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx)
+
+### New nursery rules
+
+Since _Biome 1.6_, we added several new rules.
 New rules are incubated in the nursery group.
 Nursery rules are subject to breaking changes.
+The new rules are:
 
 - [nursery/noDoneCallback](https://biomejs.dev/linter/rules/no-done-callback/)
 - [nursery/noDuplicateElseIf](https://biomejs.dev/linter/rules/no-duplicate-else-if/)

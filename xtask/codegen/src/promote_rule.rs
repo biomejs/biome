@@ -15,10 +15,10 @@ const KNOWN_GROUPS: [&str; 7] = [
     "complexity",
 ];
 
-const KNOWN_PATHS: [&str; 3] = [
-    "crates/biome_js_analyze/src/analyzers",
-    "crates/biome_js_analyze/src/semantic_analyzers",
-    "crates/biome_js_analyze/src/aria_analyzers",
+const KNOWN_PATHS: &[&str] = &[
+    "crates/biome_js_analyze/src/lint",
+    "crates/biome_css_analyze/src/lint",
+    "crates/biome_json_analyze/src/lint",
 ];
 pub fn promote_rule(rule_name: &str, new_group: &str) {
     let current_dir = env::current_dir().ok().unwrap();
