@@ -15,7 +15,6 @@ pub mod no_namespace_import;
 pub mod no_nodejs_modules;
 pub mod no_re_export_all;
 pub mod no_restricted_imports;
-pub mod no_suspicious_semicolon_in_jsx;
 pub mod no_undeclared_dependencies;
 pub mod no_useless_ternary;
 pub mod use_import_restrictions;
@@ -40,7 +39,6 @@ declare_group! {
             self :: no_nodejs_modules :: NoNodejsModules ,
             self :: no_re_export_all :: NoReExportAll ,
             self :: no_restricted_imports :: NoRestrictedImports ,
-            self :: no_suspicious_semicolon_in_jsx :: NoSuspiciousSemicolonInJsx ,
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
             self :: no_useless_ternary :: NoUselessTernary ,
             self :: use_import_restrictions :: UseImportRestrictions ,

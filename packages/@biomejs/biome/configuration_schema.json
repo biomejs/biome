@@ -1512,13 +1512,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noSuspiciousSemicolonInJsx": {
-					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noUndeclaredDependencies": {
 					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
 					"anyOf": [
@@ -2603,6 +2596,13 @@
 				},
 				"noSparseArray": {
 					"description": "Disallow sparse arrays",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSuspiciousSemicolonInJsx": {
+					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

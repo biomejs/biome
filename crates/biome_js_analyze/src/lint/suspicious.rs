@@ -45,6 +45,7 @@ pub mod no_self_compare;
 pub mod no_shadow_restricted_names;
 pub mod no_skipped_tests;
 pub mod no_sparse_array;
+pub mod no_suspicious_semicolon_in_jsx;
 pub mod no_then_property;
 pub mod no_unsafe_declaration_merging;
 pub mod no_unsafe_negation;
@@ -102,6 +103,7 @@ declare_group! {
             self :: no_shadow_restricted_names :: NoShadowRestrictedNames ,
             self :: no_skipped_tests :: NoSkippedTests ,
             self :: no_sparse_array :: NoSparseArray ,
+            self :: no_suspicious_semicolon_in_jsx :: NoSuspiciousSemicolonInJsx ,
             self :: no_then_property :: NoThenProperty ,
             self :: no_unsafe_declaration_merging :: NoUnsafeDeclarationMerging ,
             self :: no_unsafe_negation :: NoUnsafeNegation ,

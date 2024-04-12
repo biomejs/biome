@@ -961,10 +961,6 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
-	 * It detects possible "wrong" semicolons inside JSX elements.
-	 */
-	noSuspiciousSemicolonInJsx?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
@@ -1396,6 +1392,10 @@ export interface Suspicious {
 	 * Disallow sparse arrays
 	 */
 	noSparseArray?: RuleConfiguration_for_Null;
+	/**
+	 * It detects possible "wrong" semicolons inside JSX elements.
+	 */
+	noSuspiciousSemicolonInJsx?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow then property.
 	 */
@@ -1928,7 +1928,6 @@ export type Category =
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReExportAll"
 	| "lint/nursery/noRestrictedImports"
-	| "lint/nursery/noSuspiciousSemicolonInJsx"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUselessTernary"
@@ -2026,6 +2025,7 @@ export type Category =
 	| "lint/suspicious/noShadowRestrictedNames"
 	| "lint/suspicious/noSkippedTests"
 	| "lint/suspicious/noSparseArray"
+	| "lint/suspicious/noSuspiciousSemicolonInJsx"
 	| "lint/suspicious/noThenProperty"
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
