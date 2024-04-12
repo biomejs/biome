@@ -2846,7 +2846,7 @@ fn print_json() {
             [
                 ("check"),
                 ("--apply-unsafe"),
-                "--json",
+                "--reporter=json",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -2879,8 +2879,7 @@ fn print_json_pretty() {
             [
                 ("check"),
                 ("--apply-unsafe"),
-                "--json",
-                "--json-pretty",
+                "--reporter=json-pretty",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),

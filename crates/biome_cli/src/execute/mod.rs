@@ -4,7 +4,7 @@ mod process_file;
 mod std_in;
 pub(crate) mod traverse;
 
-use crate::cli_options::CliOptions;
+use crate::cli_options::{CliOptions, CliReporter};
 use crate::commands::MigrateSubCommand;
 use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
@@ -189,6 +189,16 @@ pub enum ReportMode {
     Json { pretty: bool },
 }
 
+impl From<CliReporter> for ReportMode {
+    fn from(value: CliReporter) -> Self {
+        match value {
+            CliReporter::Default => Self::Terminal,
+            CliReporter::Json => Self::Json { pretty: false },
+            CliReporter::JsonPretty => Self::Json { pretty: true },
+        }
+    }
+}
+
 impl Execution {
     pub(crate) fn new(mode: TraversalMode) -> Self {
         Self {
@@ -219,13 +229,7 @@ impl Execution {
 
     /// It sets the reporting mode by reading the [CliOptions]
     pub(crate) fn set_report(mut self, cli_options: &CliOptions) -> Self {
-        self.report_mode = if cli_options.json_pretty {
-            ReportMode::Json { pretty: true }
-        } else if cli_options.json {
-            ReportMode::Json { pretty: false }
-        } else {
-            ReportMode::Terminal
-        };
+        self.report_mode = cli_options.reporter.clone().into();
         self
     }
 
