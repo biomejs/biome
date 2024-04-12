@@ -259,13 +259,6 @@ impl ConfigurationPathHint {
     pub const fn is_from_lsp(&self) -> bool {
         matches!(self, Self::FromLsp(_))
     }
-    pub fn is_file(&self) -> bool {
-        if let Self::FromUser(path) = self {
-            path.is_file()
-        } else {
-            false
-        }
-    }
 }
 
 #[cfg(test)]
