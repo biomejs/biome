@@ -888,6 +888,10 @@ export interface Correctness {
 	 */
 	useIsNan?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow missing key props in iterators/collection literals.
+	 */
+	useJsxKeyInIterable?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce "for" loop update clause moving the counter in the right direction.
 	 */
 	useValidForDirection?: RuleConfiguration_for_Null;
@@ -972,10 +976,6 @@ export interface Nursery {
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow missing key props in iterators/collection literals.
-	 */
-	useJsxKeyInIterable?: RuleConfiguration_for_Null;
 	/**
 	 * Promotes the usage of node:assert/strict over node:assert.
 	 */
@@ -1910,6 +1910,7 @@ export type Category =
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useIsNan"
+	| "lint/correctness/useJsxKeyInIterable"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
@@ -1933,7 +1934,6 @@ export type Category =
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useJsxKeyInIterable"
 	| "lint/nursery/useNodeAssertStrict"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"

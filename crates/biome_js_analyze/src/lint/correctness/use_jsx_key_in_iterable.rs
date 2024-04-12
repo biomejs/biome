@@ -40,7 +40,7 @@ declare_rule! {
         name: "useJsxKeyInIterable",
         sources: &[RuleSource::EslintReact("jsx-key")],
         source_kind: RuleSourceKind::SameLogic,
-        recommended: false,
+        recommended: true,
     }
 }
 

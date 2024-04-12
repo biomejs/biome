@@ -49,7 +49,7 @@ React.Children.map(c => React.cloneElement(c));
 
 # Diagnostics
 ```
-invalid.jsx:3:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:2 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -68,7 +68,7 @@ invalid.jsx:3:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:3:13 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:13 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -87,7 +87,7 @@ invalid.jsx:3:13 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:3:24 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:24 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -106,7 +106,7 @@ invalid.jsx:3:24 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:5:29 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:29 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -125,7 +125,7 @@ invalid.jsx:5:29 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:5:6 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:6 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -144,7 +144,7 @@ invalid.jsx:5:6 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:5:17 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:17 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -163,7 +163,7 @@ invalid.jsx:5:17 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:7:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:2 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -182,7 +182,7 @@ invalid.jsx:7:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:7:41 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:41 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -201,7 +201,7 @@ invalid.jsx:7:41 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:9:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:9:2 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -220,7 +220,7 @@ invalid.jsx:9:2 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:9:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:9:9 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -239,7 +239,7 @@ invalid.jsx:9:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:9:16 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:9:16 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -258,7 +258,7 @@ invalid.jsx:9:16 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:11:15 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:11:15 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -277,7 +277,7 @@ invalid.jsx:11:15 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:13:15 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:13:15 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -296,7 +296,7 @@ invalid.jsx:13:15 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:17:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:17:30 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -315,7 +315,7 @@ invalid.jsx:17:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:20:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:20:9 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -333,7 +333,7 @@ invalid.jsx:20:9 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:23:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:21 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -352,7 +352,7 @@ invalid.jsx:23:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:23:48 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:48 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -371,7 +371,7 @@ invalid.jsx:23:48 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:23:75 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:75 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -390,7 +390,7 @@ invalid.jsx:23:75 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:25:34 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:25:34 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -409,7 +409,7 @@ invalid.jsx:25:34 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:27:43 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:27:43 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -428,7 +428,7 @@ invalid.jsx:27:43 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:29:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:29:21 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -447,7 +447,7 @@ invalid.jsx:29:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:31:8 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:31:8 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -466,7 +466,7 @@ invalid.jsx:31:8 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:31:19 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:31:19 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -485,7 +485,7 @@ invalid.jsx:31:19 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:31:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:31:30 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -504,7 +504,7 @@ invalid.jsx:31:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:33:8 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:33:8 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -523,7 +523,7 @@ invalid.jsx:33:8 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:33:19 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:33:19 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Cannot determine whether this child has the required key prop.
   
@@ -542,7 +542,7 @@ invalid.jsx:33:19 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:33:24 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:33:24 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Cannot determine whether this child has the required key prop.
   
@@ -561,7 +561,7 @@ invalid.jsx:33:24 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:35:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:35:21 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -580,7 +580,7 @@ invalid.jsx:35:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:37:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:37:21 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Cannot determine whether this child has the required key prop.
   
@@ -599,7 +599,7 @@ invalid.jsx:37:21 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:39:22 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:39:22 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   
@@ -618,7 +618,7 @@ invalid.jsx:39:22 lint/nursery/useJsxKeyInIterable ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:41:30 lint/nursery/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:41:30 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing key property for this element in iterable.
   

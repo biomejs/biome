@@ -1888,6 +1888,9 @@ pub struct Correctness {
     #[doc = "Require calls to isNaN() when checking for NaN."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_is_nan: Option<RuleConfiguration<UseIsNan>>,
+    #[doc = "Disallow missing key props in iterators/collection literals."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_jsx_key_in_iterable: Option<RuleConfiguration<UseJsxKeyInIterable>>,
     #[doc = "Enforce \"for\" loop update clause moving the counter in the right direction."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_for_direction: Option<RuleConfiguration<UseValidForDirection>>,
@@ -1911,7 +1914,7 @@ impl DeserializableValidator for Correctness {
 }
 impl Correctness {
     const GROUP_NAME: &'static str = "correctness";
-    pub(crate) const GROUP_RULES: [&'static str; 36] = [
+    pub(crate) const GROUP_RULES: [&'static str; 37] = [
         "noChildrenProp",
         "noConstAssign",
         "noConstantCondition",
@@ -1946,10 +1949,11 @@ impl Correctness {
         "useExhaustiveDependencies",
         "useHookAtTopLevel",
         "useIsNan",
+        "useJsxKeyInIterable",
         "useValidForDirection",
         "useYield",
     ];
-    const RECOMMENDED_RULES: [&'static str; 30] = [
+    const RECOMMENDED_RULES: [&'static str; 31] = [
         "noChildrenProp",
         "noConstAssign",
         "noConstantCondition",
@@ -1978,10 +1982,11 @@ impl Correctness {
         "noVoidTypeReturn",
         "useExhaustiveDependencies",
         "useIsNan",
+        "useJsxKeyInIterable",
         "useValidForDirection",
         "useYield",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 30] = [
+    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 31] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2012,8 +2017,9 @@ impl Correctness {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 36] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 37] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2050,6 +2056,7 @@ impl Correctness {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -2236,14 +2243,19 @@ impl Correctness {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.use_valid_for_direction.as_ref() {
+        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_yield.as_ref() {
+        if let Some(rule) = self.use_valid_for_direction.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
+            }
+        }
+        if let Some(rule) = self.use_yield.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
         index_set
@@ -2420,14 +2432,19 @@ impl Correctness {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.use_valid_for_direction.as_ref() {
+        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_yield.as_ref() {
+        if let Some(rule) = self.use_valid_for_direction.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
+            }
+        }
+        if let Some(rule) = self.use_yield.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
         index_set
@@ -2440,10 +2457,10 @@ impl Correctness {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 30] {
+    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 31] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 36] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 37] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -2602,6 +2619,10 @@ impl Correctness {
                 .use_is_nan
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useJsxKeyInIterable" => self
+                .use_jsx_key_in_iterable
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "useValidForDirection" => self
                 .use_valid_for_direction
                 .as_ref()
@@ -2674,9 +2695,6 @@ pub struct Nursery {
     #[doc = "Disallows package private imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_import_restrictions: Option<RuleConfiguration<UseImportRestrictions>>,
-    #[doc = "Disallow missing key props in iterators/collection literals."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_jsx_key_in_iterable: Option<RuleConfiguration<UseJsxKeyInIterable>>,
     #[doc = "Promotes the usage of node:assert/strict over node:assert."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_node_assert_strict: Option<RuleConfiguration<UseNodeAssertStrict>>,
@@ -2700,7 +2718,7 @@ impl DeserializableValidator for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 19] = [
+    pub(crate) const GROUP_RULES: [&'static str; 18] = [
         "noColorInvalidHex",
         "noConsole",
         "noDoneCallback",
@@ -2717,7 +2735,6 @@ impl Nursery {
         "noRestrictedImports",
         "noUndeclaredDependencies",
         "useImportRestrictions",
-        "useJsxKeyInIterable",
         "useNodeAssertStrict",
         "useSortedClasses",
     ];
@@ -2739,7 +2756,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 19] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 18] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2758,7 +2775,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -2855,19 +2871,14 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
+        if let Some(rule) = self.use_node_assert_strict.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.use_node_assert_strict.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
-            }
-        }
         if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
         index_set
@@ -2954,19 +2965,14 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
+        if let Some(rule) = self.use_node_assert_strict.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.use_node_assert_strict.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
-            }
-        }
         if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
         index_set
@@ -2982,7 +2988,7 @@ impl Nursery {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 7] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 19] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 18] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3067,10 +3073,6 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useImportRestrictions" => self
                 .use_import_restrictions
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useJsxKeyInIterable" => self
-                .use_jsx_key_in_iterable
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useNodeAssertStrict" => self
