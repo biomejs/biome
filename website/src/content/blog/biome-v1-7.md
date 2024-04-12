@@ -25,16 +25,16 @@ npm install --save-dev --save-exact @biomejs/biome@latest
 npx @biomejs/biome migrate
 ```
 
-## Migrate from ESLint with a single command
+## Migrate from _ESLint_ with a single command
 
 This release introduces a new command called `biome migrate eslint`.
-This command will read your ESLint configurations and attempt to port their settings to Biome.
+This command will read your _ESLint_ configurations and attempt to port their settings to Biome.
 
-The command is able to handle both the legacy and the flat ESLint configurations.
+The command is able to handle both the legacy and the flat _ESLint_ configurations.
 It supports the `extends` field of the legacy configuration and loads both shared and plugin configurations!
 The command also attempts to migrate `.eslintignore`.
 
-Given the following ESLint configuration:
+Given the following _ESLint_ configuration:
 
 ```json
 {
@@ -58,7 +58,7 @@ Given the following ESLint configuration:
 }
 ```
 
-And the following Biome configuration (obtained by running `biome init`):
+And the following _Biome_ configuration (obtained by running `biome init`):
 
 ```json
 {
@@ -75,8 +75,8 @@ And the following Biome configuration (obtained by running `biome init`):
 ```
 
 Run `biome migrate eslint --write` to migrate your ESLint configuration to Biome.
-This results in the following Biome configuration.
-Note that this overrides your initial Biome configuration.
+This results in the following _Biome_ configuration.
+Note that this overrides your initial _Biome_ configuration.
 
 ```json
 {
@@ -115,14 +115,45 @@ Note that this overrides your initial Biome configuration.
 ```
 
 The command requires _Node.js_ to be installed to load _JavaScript_ configurations such as `eslint.config.js` and to resolve the `extends` field.
-For now, `biome migrate eslint` doesn't support configuration written in YAML.
+For now, `biome migrate eslint` doesn't support configuration written in _YAML_.
 
 
-## Migrate from Prettier with a single command
+## Migrate from _Prettier_ with a single command
 
-[Biome v1.6 introduced the command `biome migrate prettier`](https://biomejs.dev/blog/biome-v1-6/#easier-migration-from-prettier).
+[_Biome v1.6_ introduced the command `biome migrate prettier`](/blog/biome-v1-6/#easier-migration-from-prettier).
 
-This new version adds the support of the `overrides` field and attempts to convert `.prettierignore` glob patterns to globs supported by Biome.
+This new version adds the support of the `overrides` field and attempts to convert `.prettierignore` glob patterns to globs supported by _Biome_.
+
+
+## Emit formatting and linting reports
+
+_Biome_ is now able to output _JSON_ reports detailing the diagnostics obtained from a run.
+
+For instance, you can emit a report when you lint a codebase:
+
+```shell
+biome lint --reporter=json .
+```
+
+For now, we support two report formats: `json` and `jsonPretty`.
+
+Note that the report format is subject to breaking changes.
+So you should not rely on it yet.
+Please try this feature and let us know if any information is missing from the reports.
+
+
+## Check _Git_ staged files
+
+_Biome v1.5_ added the `--changed` flag on its main commands `biome format`, `biome lint`, and `biome check ` to format and lint _Git_ tracked files that have been changed.
+
+Today we are introducing a new flag `--staged` which allows you to check only files that have been added to the Git index (_staged files_).
+This is useful for checking that the files you want to commit are formatted and linted.
+
+This is handy for writing your own [pre-commit script](/recipes/git-hooks/#shell-script).
+Note that, unstaged changes on a staged file are **not** ignored.
+Thus, we still recommend using a [dedicated pre-commit tool](/recipes/git-hooks/).
+
+`--changed` and `--staged` are not available on the command `biome ci` because they don't make sense in a CI environment.
 
 
 ## Linter
@@ -146,6 +177,6 @@ Nursery rules are subject to breaking changes.
 - Biome now displays the location of a parsing error for its configuration file.
 - Biome extension is now able to parse the JSX syntax in files that associated with the javaScript language identifier.
   In React ecosystem, `.js` files are allowed to include JSX syntax.
-- You can now ignore `React` imports in the rule [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/#options).
+- You can now ignore `React` imports in the rules [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/#options) and [useImportType](https://biomejs.dev/linter/rules/use-import-type/#options) by setting [`javascript.jsxRuntime`](https://biomejs.dev/reference/configuration/#javascriptjsxruntime) to `reactClassic`.
 - [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now supports _Preact_.
 
