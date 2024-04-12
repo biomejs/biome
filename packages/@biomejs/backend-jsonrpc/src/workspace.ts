@@ -941,10 +941,6 @@ export interface Nursery {
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow the use of namespace imports.
-	 */
-	noNamespaceImport?: RuleConfiguration_for_Null;
-	/**
 	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration_for_Null;
@@ -1055,6 +1051,10 @@ export interface Style {
 	 * Disallow the use of TypeScript's namespaces.
 	 */
 	noNamespace?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow the use of namespace imports.
+	 */
+	noNamespaceImport?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow negation in the condition of an if statement if it has an else clause.
 	 */
@@ -1924,7 +1924,6 @@ export type Category =
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noMisplacedAssertion"
-	| "lint/nursery/noNamespaceImport"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReExportAll"
 	| "lint/nursery/noRestrictedImports"
@@ -1945,6 +1944,7 @@ export type Category =
 	| "lint/style/noImplicitBoolean"
 	| "lint/style/noInferrableTypes"
 	| "lint/style/noNamespace"
+	| "lint/style/noNamespaceImport"
 	| "lint/style/noNegationElse"
 	| "lint/style/noNonNullAssertion"
 	| "lint/style/noParameterAssign"

@@ -127,7 +127,7 @@ pub type NoMisrefactoredShorthandAssign = < lint :: suspicious :: no_misrefactor
 pub type NoMultipleSpacesInRegularExpressionLiterals = < lint :: complexity :: no_multiple_spaces_in_regular_expression_literals :: NoMultipleSpacesInRegularExpressionLiterals as biome_analyze :: Rule > :: Options ;
 pub type NoNamespace = <lint::style::no_namespace::NoNamespace as biome_analyze::Rule>::Options;
 pub type NoNamespaceImport =
-    <lint::nursery::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
+    <lint::style::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
 pub type NoNegationElse =
     <lint::style::no_negation_else::NoNegationElse as biome_analyze::Rule>::Options;
 pub type NoNewSymbol =

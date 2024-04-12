@@ -8,6 +8,7 @@ pub mod no_default_export;
 pub mod no_implicit_boolean;
 pub mod no_inferrable_types;
 pub mod no_namespace;
+pub mod no_namespace_import;
 pub mod no_negation_else;
 pub mod no_non_null_assertion;
 pub mod no_parameter_assign;
@@ -55,6 +56,7 @@ declare_group! {
             self :: no_implicit_boolean :: NoImplicitBoolean ,
             self :: no_inferrable_types :: NoInferrableTypes ,
             self :: no_namespace :: NoNamespace ,
+            self :: no_namespace_import :: NoNamespaceImport ,
             self :: no_negation_else :: NoNegationElse ,
             self :: no_non_null_assertion :: NoNonNullAssertion ,
             self :: no_parameter_assign :: NoParameterAssign ,

@@ -10,7 +10,7 @@ import * as foo from "foo"
 
 # Diagnostics
 ```
-invalid.js:1:8 lint/nursery/noNamespaceImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:8 lint/style/noNamespaceImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid namespace imports, it can prevent efficient tree shaking and increase bundle size.
   
@@ -22,5 +22,3 @@ invalid.js:1:8 lint/nursery/noNamespaceImport ━━━━━━━━━━━�
   
 
 ```
-
-

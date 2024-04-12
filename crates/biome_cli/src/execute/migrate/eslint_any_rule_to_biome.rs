@@ -285,12 +285,8 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "barrel-files/avoid-namespace-import" => {
-            if !options.include_inspired {
-                results.has_inspired_rules = true;
-                return false;
-            }
-            let group = rules.performance.get_or_insert_with(Default::default);
-            let rule = group.no_barrel_file.get_or_insert(Default::default());
+            let group = rules.style.get_or_insert_with(Default::default);
+            let rule = group.no_namespace_import.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "barrel-files/avoid-re-export-all" => {
