@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 83
+expression: valid.jsx
+---
+# Input
+```jsx
+<div>Hello world!</div>
+
+<div class="greeting">Hello world!</div>
+
+```

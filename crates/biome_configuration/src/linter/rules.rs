@@ -2632,6 +2632,9 @@ pub struct Nursery {
     #[doc = "Avoid re-export all."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_re_export_all: Option<RuleConfiguration<NoReExportAll>>,
+    #[doc = "Succinct description of the rule."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_react_specific_props: Option<RuleConfiguration<NoReactSpecificProps>>,
     #[doc = "Disallow specified modules when loaded by import or require."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_imports: Option<RuleConfiguration<NoRestrictedImports>>,
@@ -2676,7 +2679,7 @@ impl DeserializableValidator for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 25] = [
+    pub(crate) const GROUP_RULES: [&'static str; 26] = [
         "noBarrelFile",
         "noColorInvalidHex",
         "noConsole",
@@ -2693,6 +2696,7 @@ impl Nursery {
         "noNamespaceImport",
         "noNodejsModules",
         "noReExportAll",
+        "noReactSpecificProps",
         "noRestrictedImports",
         "noSkippedTests",
         "noSuspiciousSemicolonInJsx",
@@ -2726,10 +2730,10 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 25] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 26] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2755,6 +2759,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -2851,49 +2856,54 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.no_react_specific_props.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_skipped_tests.as_ref() {
+        if let Some(rule) = self.no_restricted_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_suspicious_semicolon_in_jsx.as_ref() {
+        if let Some(rule) = self.no_skipped_tests.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_suspicious_semicolon_in_jsx.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_useless_ternary.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.no_useless_ternary.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_node_assert_strict.as_ref() {
+        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_node_assert_strict.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
         index_set
@@ -2980,49 +2990,54 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.no_react_specific_props.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_skipped_tests.as_ref() {
+        if let Some(rule) = self.no_restricted_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_suspicious_semicolon_in_jsx.as_ref() {
+        if let Some(rule) = self.no_skipped_tests.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_suspicious_semicolon_in_jsx.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_useless_ternary.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.no_useless_ternary.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_node_assert_strict.as_ref() {
+        if let Some(rule) = self.use_jsx_key_in_iterable.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_node_assert_strict.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
         index_set
@@ -3038,7 +3053,7 @@ impl Nursery {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 11] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 25] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 26] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3123,6 +3138,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noReExportAll" => self
                 .no_re_export_all
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noReactSpecificProps" => self
+                .no_react_specific_props
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noRestrictedImports" => self

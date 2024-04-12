@@ -15,6 +15,7 @@ pub mod no_misplaced_assertion;
 pub mod no_namespace_import;
 pub mod no_nodejs_modules;
 pub mod no_re_export_all;
+pub mod no_react_specific_props;
 pub mod no_restricted_imports;
 pub mod no_skipped_tests;
 pub mod no_suspicious_semicolon_in_jsx;
@@ -42,6 +43,7 @@ declare_group! {
             self :: no_namespace_import :: NoNamespaceImport ,
             self :: no_nodejs_modules :: NoNodejsModules ,
             self :: no_re_export_all :: NoReExportAll ,
+            self :: no_react_specific_props :: NoReactSpecificProps ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_skipped_tests :: NoSkippedTests ,
             self :: no_suspicious_semicolon_in_jsx :: NoSuspiciousSemicolonInJsx ,

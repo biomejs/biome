@@ -1512,6 +1512,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactSpecificProps": {
+					"description": "Disallow usage of React-specific JSX properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRestrictedImports": {
 					"description": "Disallow specified modules when loaded by import or require.",
 					"anyOf": [

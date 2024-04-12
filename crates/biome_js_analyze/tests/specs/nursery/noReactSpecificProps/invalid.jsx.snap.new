@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 83
+expression: invalid.jsx
+---
+# Input
+```jsx
+<div className="greeting">Hello world!</div>
+
+<div className={"greeting"}>Hello world!</div>
+
+<div htmlFor="greeting">Hello world!</div>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:1:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This JSX property is specific to React.
+  
+  > 1 │ <div className="greeting">Hello world!</div>
+      │      ^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ <div className={"greeting"}>Hello world!</div>
+  
+
+```
+
+```
+invalid.jsx:5:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This JSX property is specific to React.
+  
+    3 │ <div className={"greeting"}>Hello world!</div>
+    4 │ 
+  > 5 │ <div htmlFor="greeting">Hello world!</div>
+      │      ^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+
+```
