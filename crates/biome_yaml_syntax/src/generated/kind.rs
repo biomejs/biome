@@ -23,6 +23,8 @@ pub enum YamlSyntaxKind {
     PERCENT,
     ASTERISK,
     HASH,
+    SHL,
+    AMP,
     DOC_START,
     DOC_END,
     YAML_SCALAR,
@@ -50,7 +52,7 @@ impl YamlSyntaxKind {
     pub const fn is_punct(self) -> bool {
         match self {
             COLON | COMMA | L_CURLY | R_CURLY | L_BRACK | R_BRACK | DASH | PERCENT | ASTERISK
-            | HASH | DOC_START | DOC_END => true,
+            | HASH | SHL | AMP | DOC_START | DOC_END => true,
             _ => false,
         }
     }
@@ -84,9 +86,11 @@ impl YamlSyntaxKind {
             PERCENT => "%",
             ASTERISK => "*",
             HASH => "#",
+            SHL => "<<",
+            AMP => "&",
             DOC_START => "---",
             DOC_END => "...",
-            GRAPHQL_STRING_LITERAL => "string literal",
+            YAML_STRING_LITERAL => "string literal",
             _ => return None,
         };
         Some(tok)
@@ -94,4 +98,4 @@ impl YamlSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [:] => { $ crate :: YamlSyntaxKind :: COLON } ; [,] => { $ crate :: YamlSyntaxKind :: COMMA } ; ['{'] => { $ crate :: YamlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: YamlSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: YamlSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: YamlSyntaxKind :: R_BRACK } ; [-] => { $ crate :: YamlSyntaxKind :: DASH } ; [%] => { $ crate :: YamlSyntaxKind :: PERCENT } ; [*] => { $ crate :: YamlSyntaxKind :: ASTERISK } ; [#] => { $ crate :: YamlSyntaxKind :: HASH } ; [---] => { $ crate :: YamlSyntaxKind :: DOC_START } ; [...] => { $ crate :: YamlSyntaxKind :: DOC_END } ; [ident] => { $ crate :: YamlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: YamlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: YamlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: YamlSyntaxKind :: HASH } ; }
+macro_rules ! T { [:] => { $ crate :: YamlSyntaxKind :: COLON } ; [,] => { $ crate :: YamlSyntaxKind :: COMMA } ; ['{'] => { $ crate :: YamlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: YamlSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: YamlSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: YamlSyntaxKind :: R_BRACK } ; [-] => { $ crate :: YamlSyntaxKind :: DASH } ; [%] => { $ crate :: YamlSyntaxKind :: PERCENT } ; [*] => { $ crate :: YamlSyntaxKind :: ASTERISK } ; [#] => { $ crate :: YamlSyntaxKind :: HASH } ; [<<] => { $ crate :: YamlSyntaxKind :: SHL } ; [&] => { $ crate :: YamlSyntaxKind :: AMP } ; [---] => { $ crate :: YamlSyntaxKind :: DOC_START } ; [...] => { $ crate :: YamlSyntaxKind :: DOC_END } ; [ident] => { $ crate :: YamlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: YamlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: YamlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: YamlSyntaxKind :: HASH } ; }
