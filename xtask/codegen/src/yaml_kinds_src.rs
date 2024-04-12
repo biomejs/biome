@@ -1,0 +1,35 @@
+use crate::kind_src::KindsSrc;
+
+pub const YAML_KINDS_SRC: KindsSrc = KindsSrc {
+    punct: &[
+        (":", "COLON"),
+        (",", "COMMA"),
+        ("{", "L_CURLY"),
+        ("}", "R_CURLY"),
+        ("[", "L_BRACK"),
+        ("]", "R_BRACK"),
+        ("-", "DASH"),
+        ("%", "PERCENT"),
+        ("*", "ASTERISK"),
+        ("#", "HASH"),
+        ("---", "DOC_START"),
+        ("...", "DOC_END"),
+    ],
+    keywords: &[],
+    literals: &["YAML_SCALAR"],
+    tokens: &["NEWLINE", "WHITESPACE", "IDENT", "COMMENT"],
+    nodes: &[
+        "YAML_ROOT",
+        "YAML_DOCUMENT_LIST",
+        "ANY_YAML_NODE",
+        "YAML_SCALAR",
+        "YAML_SEQUENCE",
+        "YAML_SEQUENCE_ELEMENTS",
+        "YAML_MAPPING",
+        "YAML_MAPPING_ENTRY",
+        "YAML_MAPPING_ENTRIES",
+        "YAML_ALIAS",
+        "YAML_BOGUS",
+        "YAML_COMMENT",
+    ],
+};
