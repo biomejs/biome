@@ -941,10 +941,6 @@ export interface Nursery {
 	 */
 	noExportsInTest?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow focused tests.
-	 */
-	noFocusedTests?: RuleConfiguration_for_Null;
-	/**
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
@@ -1328,6 +1324,10 @@ export interface Suspicious {
 	 * Disallow fallthrough of switch clauses.
 	 */
 	noFallthroughSwitchClause?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow focused tests.
+	 */
+	noFocusedTests?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow reassigning function declarations.
 	 */
@@ -1923,7 +1923,6 @@ export type Category =
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noExportsInTest"
-	| "lint/nursery/noFocusedTests"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noNamespaceImport"
 	| "lint/nursery/noNodejsModules"
@@ -2009,6 +2008,7 @@ export type Category =
 	| "lint/suspicious/noExplicitAny"
 	| "lint/suspicious/noExtraNonNullAssertion"
 	| "lint/suspicious/noFallthroughSwitchClause"
+	| "lint/suspicious/noFocusedTests"
 	| "lint/suspicious/noFunctionAssign"
 	| "lint/suspicious/noGlobalAssign"
 	| "lint/suspicious/noGlobalIsFinite"

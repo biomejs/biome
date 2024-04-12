@@ -27,6 +27,7 @@ pub mod no_empty_interface;
 pub mod no_explicit_any;
 pub mod no_extra_non_null_assertion;
 pub mod no_fallthrough_switch_clause;
+pub mod no_focused_tests;
 pub mod no_function_assign;
 pub mod no_global_assign;
 pub mod no_global_is_finite;
@@ -83,6 +84,7 @@ declare_group! {
             self :: no_explicit_any :: NoExplicitAny ,
             self :: no_extra_non_null_assertion :: NoExtraNonNullAssertion ,
             self :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause ,
+            self :: no_focused_tests :: NoFocusedTests ,
             self :: no_function_assign :: NoFunctionAssign ,
             self :: no_global_assign :: NoGlobalAssign ,
             self :: no_global_is_finite :: NoGlobalIsFinite ,

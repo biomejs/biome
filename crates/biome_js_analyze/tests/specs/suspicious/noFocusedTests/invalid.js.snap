@@ -23,7 +23,7 @@ fit("foo", () => {});
 
 # Diagnostics
 ```
-invalid.js:1:10 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -44,7 +44,7 @@ invalid.js:1:10 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:2:4 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -66,7 +66,7 @@ invalid.js:2:4 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.js:3:6 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -89,7 +89,7 @@ invalid.js:3:6 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.js:5:10 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -112,7 +112,7 @@ invalid.js:5:10 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:6:4 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -134,7 +134,7 @@ invalid.js:6:4 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.js:7:6 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -157,7 +157,7 @@ invalid.js:7:6 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.js:9:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -180,7 +180,7 @@ invalid.js:9:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.js:10:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -202,7 +202,7 @@ invalid.js:10:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:11:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -225,7 +225,7 @@ invalid.js:11:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:13:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
@@ -253,7 +253,7 @@ invalid.js:13:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:14:1 lint/nursery/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
   
