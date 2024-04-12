@@ -22,6 +22,7 @@ pub mod no_duplicate_class_members;
 pub mod no_duplicate_jsx_props;
 pub mod no_duplicate_object_keys;
 pub mod no_duplicate_parameters;
+pub mod no_duplicate_test_hooks;
 pub mod no_empty_block_statements;
 pub mod no_empty_interface;
 pub mod no_explicit_any;
@@ -80,6 +81,7 @@ declare_group! {
             self :: no_duplicate_jsx_props :: NoDuplicateJsxProps ,
             self :: no_duplicate_object_keys :: NoDuplicateObjectKeys ,
             self :: no_duplicate_parameters :: NoDuplicateParameters ,
+            self :: no_duplicate_test_hooks :: NoDuplicateTestHooks ,
             self :: no_empty_block_statements :: NoEmptyBlockStatements ,
             self :: no_empty_interface :: NoEmptyInterface ,
             self :: no_explicit_any :: NoExplicitAny ,

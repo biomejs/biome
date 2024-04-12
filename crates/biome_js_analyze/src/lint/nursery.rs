@@ -5,7 +5,6 @@ use biome_analyze::declare_group;
 pub mod no_console;
 pub mod no_done_callback;
 pub mod no_duplicate_else_if;
-pub mod no_duplicate_test_hooks;
 pub mod no_evolving_any;
 pub mod no_exports_in_test;
 pub mod no_misplaced_assertion;
@@ -25,7 +24,6 @@ declare_group! {
             self :: no_console :: NoConsole ,
             self :: no_done_callback :: NoDoneCallback ,
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,
-            self :: no_duplicate_test_hooks :: NoDuplicateTestHooks ,
             self :: no_evolving_any :: NoEvolvingAny ,
             self :: no_exports_in_test :: NoExportsInTest ,
             self :: no_misplaced_assertion :: NoMisplacedAssertion ,

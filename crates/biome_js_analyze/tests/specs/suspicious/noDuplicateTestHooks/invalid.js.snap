@@ -138,7 +138,7 @@ describe("foo", () => {
 
 # Diagnostics
 ```
-invalid.js:3:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -155,7 +155,7 @@ invalid.js:3:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:12:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -172,7 +172,7 @@ invalid.js:12:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━
 ```
 
 ```
-invalid.js:20:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -189,7 +189,7 @@ invalid.js:20:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━
 ```
 
 ```
-invalid.js:28:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -206,7 +206,7 @@ invalid.js:28:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━
 ```
 
 ```
-invalid.js:36:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -223,7 +223,7 @@ invalid.js:36:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━
 ```
 
 ```
-invalid.js:37:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -240,7 +240,7 @@ invalid.js:37:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━
 ```
 
 ```
-invalid.js:45:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:45:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -257,7 +257,7 @@ invalid.js:45:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━
 ```
 
 ```
-invalid.js:47:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:47:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -274,7 +274,7 @@ invalid.js:47:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━
 ```
 
 ```
-invalid.js:55:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:55:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -291,7 +291,7 @@ invalid.js:55:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━
 ```
 
 ```
-invalid.js:69:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:69:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -308,7 +308,7 @@ invalid.js:69:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━
 ```
 
 ```
-invalid.js:91:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:91:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -324,7 +324,7 @@ invalid.js:91:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━
 ```
 
 ```
-invalid.js:92:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:92:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -341,7 +341,7 @@ invalid.js:92:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━
 ```
 
 ```
-invalid.js:108:4 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:108:4 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -358,7 +358,7 @@ invalid.js:108:4 lint/nursery/noDuplicateTestHooks ━━━━━━━━━�
 ```
 
 ```
-invalid.js:117:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:117:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -375,7 +375,7 @@ invalid.js:117:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━�
 ```
 
 ```
-invalid.js:125:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:125:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
@@ -390,5 +390,3 @@ invalid.js:125:3 lint/nursery/noDuplicateTestHooks ━━━━━━━━━�
   
 
 ```
-
-

@@ -933,10 +933,6 @@ export interface Nursery {
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
 	/**
-	 * A describe block should not contain duplicate hooks.
-	 */
-	noDuplicateTestHooks?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
 	noEvolvingAny?: RuleConfiguration_for_Null;
@@ -1300,6 +1296,10 @@ export interface Suspicious {
 	 * Disallow duplicate function parameter name.
 	 */
 	noDuplicateParameters?: RuleConfiguration_for_Null;
+	/**
+	 * A describe block should not contain duplicate hooks.
+	 */
+	noDuplicateTestHooks?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow empty block statements and static blocks.
 	 */
@@ -1921,7 +1921,6 @@ export type Category =
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
-	| "lint/nursery/noDuplicateTestHooks"
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noExportsInTest"
@@ -2003,6 +2002,7 @@ export type Category =
 	| "lint/suspicious/noDuplicateJsxProps"
 	| "lint/suspicious/noDuplicateObjectKeys"
 	| "lint/suspicious/noDuplicateParameters"
+	| "lint/suspicious/noDuplicateTestHooks"
 	| "lint/suspicious/noEmptyBlockStatements"
 	| "lint/suspicious/noEmptyInterface"
 	| "lint/suspicious/noExplicitAny"

@@ -1463,13 +1463,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noDuplicateTestHooks": {
-					"description": "A describe block should not contain duplicate hooks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noEvolvingAny": {
 					"description": "Disallow variables from evolving into any type through reassignments.",
 					"anyOf": [
@@ -2435,6 +2428,13 @@
 				},
 				"noDuplicateParameters": {
 					"description": "Disallow duplicate function parameter name.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateTestHooks": {
+					"description": "A describe block should not contain duplicate hooks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
