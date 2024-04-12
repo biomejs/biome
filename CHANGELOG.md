@@ -263,6 +263,25 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### Promoted rules
+
+New rules are incubated in the nursery group.
+Once stable, we promote them to a stable group.
+The following rules are promoted:
+
+- [complecity/noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites)
+- [complexity/noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary)
+- [correctness/useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable)
+- [performance/noBarrelFile](https://biomejs.dev/linter/rules/no-barrel-file/)
+- [performance/noReExportAll](https://biomejs.dev/linter/rules/no-re-export-all/)
+- [style/noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import/)
+- [style/useNodeAssertStrict](https://biomejs.dev/linter/rules/use-node-assert-strict/)
+- [suspicious/noDuplicateTestHooks](https://biomejs.dev/linter/rules/no-duplicate-test-hooks/)
+- [suspicious/noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test/)
+- [suspicious/noFocusedTests](https://biomejs.dev/linter/rules/no-focused-tests/)
+- [suspicious/noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests/)
+- [suspicious/noSuspiciousSemicolonInJsx](https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx)
+
 #### New features
 
 - Add a new option `jsxRuntime` to the `javascript` configuration. When set to `reactClassic`, the [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) and [useImportType](https://biomejs.dev/linter/rules/use-import-type) rules use this information to make exceptions for the React global that is required by the React Classic JSX transform.
@@ -1048,6 +1067,15 @@ Additionally, the following rules are now recommended:
   export * from "foo";
   ```
   Contributed by @togami2864
+
+- Add rule [noReExportAll](https://biomejs.dev/linter/rules/no-re-export-all/) that report `export * from "mod"`.
+  Contributed by @mdm317
+
+- Add rule [noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites/).
+  Contributed by @vasucp1207
+
+- Add rule [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/). 
+  Contributed by @vohoanglong0107
 
 #### Enhancements
 

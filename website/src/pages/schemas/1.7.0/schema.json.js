@@ -351,6 +351,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noExcessiveNestedTestSuites: {
+						description:
+							"This rule enforces a maximum depth to nested describe() in test files.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noExtraBooleanCast: {
 						description: "Disallow unnecessary boolean casts",
 						anyOf: [
@@ -441,6 +449,14 @@ export function GET() {
 					},
 					noUselessSwitchCase: {
 						description: "Disallow useless case in switch statements.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noUselessTernary: {
+						description:
+							"Disallow ternary operators when simpler alternatives exist.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -848,6 +864,14 @@ export function GET() {
 					},
 					useIsNan: {
 						description: "Require calls to isNaN() when checking for NaN.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					useJsxKeyInIterable: {
+						description:
+							"Disallow missing key props in iterators/collection literals.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1498,13 +1522,6 @@ export function GET() {
 						description: "It enables ALL rules for this group.",
 						type: ["boolean", "null"],
 					},
-					noBarrelFile: {
-						description: "Disallow the use of barrel file.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					noColorInvalidHex: {
 						description: "[WIP] This rule hasn't been implemented yet.",
 						anyOf: [
@@ -1549,39 +1566,9 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
-					noDuplicateTestHooks: {
-						description: "A describe block should not contain duplicate hooks.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					noEvolvingAny: {
 						description:
 							"Disallow variables from evolving into any type through reassignments.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noExcessiveNestedTestSuites: {
-						description:
-							"This rule enforces a maximum depth to nested describe() in test files.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noExportsInTest: {
-						description:
-							"Disallow using export or module.exports in files containing tests",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noFocusedTests: {
-						description: "Disallow focused tests.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1595,22 +1582,8 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
-					noNamespaceImport: {
-						description: "Disallow the use of namespace imports.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					noNodejsModules: {
 						description: "Forbid the use of Node.js builtin modules.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noReExportAll: {
-						description: "Avoid re-export all.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1624,32 +1597,9 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
-					noSkippedTests: {
-						description: "Disallow disabled tests.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noSuspiciousSemicolonInJsx: {
-						description:
-							'It detects possible "wrong" semicolons inside JSX elements.',
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					noUndeclaredDependencies: {
 						description:
 							"Disallow the use of dependencies that aren't specified in the package.json.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noUselessTernary: {
-						description:
-							"Disallow ternary operators when simpler alternatives exist.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1661,22 +1611,6 @@ export function GET() {
 					},
 					useImportRestrictions: {
 						description: "Disallows package private imports.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useJsxKeyInIterable: {
-						description:
-							"Disallow missing key props in iterators/collection literals.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useNodeAssertStrict: {
-						description:
-							"Promotes the usage of node:assert/strict over node:assert.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1863,8 +1797,22 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noBarrelFile: {
+						description: "Disallow the use of barrel file.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noDelete: {
 						description: "Disallow the use of the delete operator.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noReExportAll: {
+						description: "Avoid re-export all.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -2186,6 +2134,13 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noNamespaceImport: {
+						description: "Disallow the use of namespace imports.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noNegationElse: {
 						description:
 							"Disallow negation in the condition of an if statement if it has an else clause.",
@@ -2371,6 +2326,14 @@ export function GET() {
 							"Enforce naming conventions for everything across a codebase.",
 						anyOf: [
 							{ $ref: "#/definitions/NamingConventionConfiguration" },
+							{ type: "null" },
+						],
+					},
+					useNodeAssertStrict: {
+						description:
+							"Promotes the usage of node:assert/strict over node:assert.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
 						],
 					},
@@ -2617,6 +2580,13 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noDuplicateTestHooks: {
+						description: "A describe block should not contain duplicate hooks.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noEmptyBlockStatements: {
 						description: "Disallow empty block statements and static blocks.",
 						anyOf: [
@@ -2638,6 +2608,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noExportsInTest: {
+						description:
+							"Disallow using export or module.exports in files containing tests",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noExtraNonNullAssertion: {
 						description:
 							"Prevents the wrong usage of the non-null assertion operator (!) in TypeScript files.",
@@ -2648,6 +2626,13 @@ export function GET() {
 					},
 					noFallthroughSwitchClause: {
 						description: "Disallow fallthrough of switch clauses.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noFocusedTests: {
+						description: "Disallow focused tests.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -2765,8 +2750,23 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noSkippedTests: {
+						description: "Disallow disabled tests.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noSparseArray: {
 						description: "Disallow sparse arrays",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noSuspiciousSemicolonInJsx: {
+						description:
+							'It detects possible "wrong" semicolons inside JSX elements.',
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
