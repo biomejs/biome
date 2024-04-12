@@ -55,7 +55,6 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noConstructorReturn
   - noEmptyCharacterClassInRegex
   - noEmptyPattern
-  - noExportsInTest
   - noGlobalObjectCalls
   - noInnerDeclarations
   - noInvalidConstructorSuper
@@ -84,6 +83,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useExhaustiveDependencies
   - useHookAtTopLevel
   - useIsNan
+  - useJsxKeyInIterable
   - useValidForDirection
   - useYield
   
@@ -112,6 +112,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noImplicitBoolean
   - noInferrableTypes
   - noNamespace
+  - noNamespaceImport
   - noNegationElse
   - noNonNullAssertion
   - noParameterAssign
@@ -136,6 +137,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useImportType
   - useLiteralEnumMembers
   - useNamingConvention
+  - useNodeAssertStrict
   - useNodejsImportProtocol
   - useNumberNamespace
   - useNumericLiterals
