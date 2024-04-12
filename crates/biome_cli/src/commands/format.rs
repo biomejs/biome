@@ -1,6 +1,7 @@
-use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
-use crate::commands::{get_stdin, resolve_manifest, validate_configuration_diagnostics};
+use crate::commands::{
+    get_files_to_process, get_stdin, resolve_manifest, validate_configuration_diagnostics,
+};
 use crate::diagnostics::DeprecatedArgument;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
@@ -30,6 +31,7 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) write: bool,
     pub(crate) cli_options: CliOptions,
     pub(crate) paths: Vec<OsString>,
+    pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
 }
@@ -51,6 +53,7 @@ pub(crate) fn format(
         mut json_formatter,
         mut css_formatter,
         since,
+        staged,
         changed,
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
@@ -156,12 +159,10 @@ pub(crate) fn format(
     let (vcs_base_path, gitignore_matches) =
         configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
-    if since.is_some() && !changed {
-        return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
-    }
-
-    if changed {
-        paths = get_changed_files(&session.app.fs, &configuration, since)?;
+    if let Some(_paths) =
+        get_files_to_process(since, changed, staged, &session.app.fs, &configuration)?
+    {
+        paths = _paths;
     }
 
     session

@@ -7,7 +7,7 @@ expression: content
 ```block
 Run various checks on a set of files.
 
-Usage: lint [--apply] [--apply-unsafe] [--changed] [--since=REF] [PATH]...
+Usage: lint [--apply] [--apply-unsafe] [--staged] [--changed] [--since=REF] [PATH]...
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-client-kind=<git>  The kind of client.
@@ -66,6 +66,8 @@ Available options:
                               The file doesn't need to exist on disk, what matters is the extension of
                               the file. Based on the extension, Biome knows how to lint the code.
                               Example: `echo 'let a;' | biome lint --stdin-file-path=file.js`
+        --staged              When set to true, only the files that have been staged (the ones prepared
+                              to be committed) will be linted.
         --changed             When set to true, only the files that have been changed compared to your
                               `defaultBranch` configuration will be linted.
         --since=REF           Use this to specify the base branch to compare against when you're using

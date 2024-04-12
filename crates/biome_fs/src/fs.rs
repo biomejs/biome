@@ -180,6 +180,8 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>>;
 
+    fn get_staged_files(&self) -> io::Result<Vec<String>>;
+
     fn resolve_configuration(
         &self,
         specifier: &str,
@@ -359,6 +361,10 @@ where
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
         T::get_changed_files(self, base)
+    }
+
+    fn get_staged_files(&self) -> io::Result<Vec<String>> {
+        T::get_staged_files(self)
     }
 
     fn resolve_configuration(

@@ -1,6 +1,7 @@
-use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
-use crate::commands::{get_stdin, resolve_manifest, validate_configuration_diagnostics};
+use crate::commands::{
+    get_files_to_process, get_stdin, resolve_manifest, validate_configuration_diagnostics,
+};
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
@@ -24,6 +25,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) files_configuration: Option<PartialFilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) stdin_file_path: Option<String>,
+    pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
 }
@@ -39,6 +41,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         stdin_file_path,
         vcs_configuration,
         files_configuration,
+        staged,
         changed,
         since,
     } = payload;
@@ -95,12 +98,10 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     let (vcs_base_path, gitignore_matches) =
         fs_configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
-    if since.is_some() && !changed {
-        return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
-    }
-
-    if changed {
-        paths = get_changed_files(&session.app.fs, &fs_configuration, since)?;
+    if let Some(_paths) =
+        get_files_to_process(since, changed, staged, &session.app.fs, &fs_configuration)?
+    {
+        paths = _paths;
     }
 
     let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "lint")?;

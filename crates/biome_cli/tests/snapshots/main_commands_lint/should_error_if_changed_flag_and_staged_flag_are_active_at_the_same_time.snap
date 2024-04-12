@@ -1,0 +1,14 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Termination Message
+
+```block
+flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Incompatible arguments changed and staged
+  
+
+
+```

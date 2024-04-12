@@ -1,3 +1,4 @@
+use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{cli_options, CliOptions, ColorsArg};
 use crate::diagnostics::DeprecatedConfigurationFile;
 use crate::execute::Stdin;
@@ -14,11 +15,11 @@ use biome_configuration::{
 use biome_configuration::{ConfigurationDiagnostic, PartialConfiguration};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
-use biome_fs::BiomePath;
+use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::documentation::Doc;
 use biome_service::workspace::{OpenProjectParams, UpdateProjectParams};
-use biome_service::WorkspaceError;
+use biome_service::{DynRef, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -109,6 +110,11 @@ pub enum BiomeCommand {
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 
+        /// When set to true, only the files that have been staged (the ones prepared to be committed)
+        /// will be linted.
+        #[bpaf(long("staged"), switch)]
+        staged: bool,
+
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.
         #[bpaf(long("changed"), switch)]
@@ -150,6 +156,10 @@ pub enum BiomeCommand {
         /// Example: `echo 'let a;' | biome lint --stdin-file-path=file.js`
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
+        /// When set to true, only the files that have been staged (the ones prepared to be committed)
+        /// will be linted.
+        #[bpaf(long("staged"), switch)]
+        staged: bool,
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.
         #[bpaf(long("changed"), switch)]
@@ -196,6 +206,11 @@ pub enum BiomeCommand {
         /// Writes formatted files to file system.
         #[bpaf(switch)]
         write: bool,
+
+        /// When set to true, only the files that have been staged (the ones prepared to be committed)
+        /// will be linted.
+        #[bpaf(long("staged"), switch)]
+        staged: bool,
 
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.
@@ -508,6 +523,34 @@ pub(crate) fn get_stdin(
     };
 
     Ok(stdin)
+}
+
+fn get_files_to_process(
+    since: Option<String>,
+    changed: bool,
+    staged: bool,
+    fs: &DynRef<'_, dyn FileSystem>,
+    configuration: &PartialConfiguration,
+) -> Result<Option<Vec<OsString>>, CliDiagnostic> {
+    if since.is_some() {
+        if !changed {
+            return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+        }
+        if staged {
+            return Err(CliDiagnostic::incompatible_arguments("since", "staged"));
+        }
+    }
+
+    if changed {
+        if staged {
+            return Err(CliDiagnostic::incompatible_arguments("changed", "staged"));
+        }
+        Ok(Some(get_changed_files(fs, configuration, since)?))
+    } else if staged {
+        Ok(Some(get_staged_files(fs)?))
+    } else {
+        Ok(None)
+    }
 }
 
 /// Tests that all CLI options adhere to the invariants expected by `bpaf`.
