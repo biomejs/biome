@@ -2674,9 +2674,6 @@ pub struct Nursery {
     #[doc = "Forbid the use of Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_nodejs_modules: Option<RuleConfiguration<NoNodejsModules>>,
-    #[doc = "Avoid re-export all."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_re_export_all: Option<RuleConfiguration<NoReExportAll>>,
     #[doc = "Disallow specified modules when loaded by import or require."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_imports: Option<RuleConfiguration<NoRestrictedImports>>,
@@ -2706,7 +2703,7 @@ impl DeserializableValidator for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 14] = [
+    pub(crate) const GROUP_RULES: [&'static str; 13] = [
         "noColorInvalidHex",
         "noConsole",
         "noDoneCallback",
@@ -2716,7 +2713,6 @@ impl Nursery {
         "noEvolvingAny",
         "noMisplacedAssertion",
         "noNodejsModules",
-        "noReExportAll",
         "noRestrictedImports",
         "noUndeclaredDependencies",
         "useImportRestrictions",
@@ -2736,7 +2732,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 14] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 13] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2750,7 +2746,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -2812,29 +2807,24 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_re_export_all.as_ref() {
+        if let Some(rule) = self.no_restricted_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
-            }
-        }
         if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
         index_set
@@ -2886,29 +2876,24 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_re_export_all.as_ref() {
+        if let Some(rule) = self.no_restricted_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
-            }
-        }
         if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
         index_set
@@ -2924,7 +2909,7 @@ impl Nursery {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 5] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 14] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 13] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -2983,10 +2968,6 @@ impl Nursery {
                 .no_nodejs_modules
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noReExportAll" => self
-                .no_re_export_all
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
             "noRestrictedImports" => self
                 .no_restricted_imports
                 .as_ref()
@@ -3028,6 +3009,9 @@ pub struct Performance {
     #[doc = "Disallow the use of the delete operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_delete: Option<RuleConfiguration<NoDelete>>,
+    #[doc = "Avoid re-export all."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_re_export_all: Option<RuleConfiguration<NoReExportAll>>,
 }
 impl DeserializableValidator for Performance {
     fn validate(
@@ -3045,17 +3029,22 @@ impl DeserializableValidator for Performance {
 }
 impl Performance {
     const GROUP_NAME: &'static str = "performance";
-    pub(crate) const GROUP_RULES: [&'static str; 3] =
-        ["noAccumulatingSpread", "noBarrelFile", "noDelete"];
+    pub(crate) const GROUP_RULES: [&'static str; 4] = [
+        "noAccumulatingSpread",
+        "noBarrelFile",
+        "noDelete",
+        "noReExportAll",
+    ];
     const RECOMMENDED_RULES: [&'static str; 2] = ["noAccumulatingSpread", "noDelete"];
     const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 2] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 3] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 4] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -3087,6 +3076,11 @@ impl Performance {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
+        if let Some(rule) = self.no_re_export_all.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
+            }
+        }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -3106,6 +3100,11 @@ impl Performance {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
+        if let Some(rule) = self.no_re_export_all.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
+            }
+        }
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
@@ -3119,7 +3118,7 @@ impl Performance {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 2] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 3] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 4] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3152,6 +3151,10 @@ impl Performance {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDelete" => self
                 .no_delete
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noReExportAll" => self
+                .no_re_export_all
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,

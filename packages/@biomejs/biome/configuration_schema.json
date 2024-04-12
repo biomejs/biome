@@ -1484,13 +1484,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noReExportAll": {
-					"description": "Avoid re-export all.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noRestrictedImports": {
 					"description": "Disallow specified modules when loaded by import or require.",
 					"anyOf": [
@@ -1697,6 +1690,13 @@
 				},
 				"noDelete": {
 					"description": "Disallow the use of the delete operator.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReExportAll": {
+					"description": "Avoid re-export all.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

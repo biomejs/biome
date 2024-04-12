@@ -10,7 +10,7 @@ export * as foo from 'foo';
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/noReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/performance/noReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Do not use export all ( export * from ... ).
   
@@ -24,7 +24,7 @@ invalid.js:1:1 lint/nursery/noReExportAll ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:2:1 lint/nursery/noReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:1 lint/performance/noReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Do not use export all ( export * from ... ).
   
@@ -36,5 +36,3 @@ invalid.js:2:1 lint/nursery/noReExportAll ━━━━━━━━━━━━�
   
 
 ```
-
-

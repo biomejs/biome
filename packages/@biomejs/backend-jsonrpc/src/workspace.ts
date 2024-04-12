@@ -945,10 +945,6 @@ export interface Nursery {
 	 */
 	noNodejsModules?: RuleConfiguration_for_Null;
 	/**
-	 * Avoid re-export all.
-	 */
-	noReExportAll?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
@@ -989,6 +985,10 @@ export interface Performance {
 	 * Disallow the use of the delete operator.
 	 */
 	noDelete?: RuleConfiguration_for_Null;
+	/**
+	 * Avoid re-export all.
+	 */
+	noReExportAll?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1925,7 +1925,6 @@ export type Category =
 	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noNodejsModules"
-	| "lint/nursery/noReExportAll"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
@@ -1935,6 +1934,7 @@ export type Category =
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
+	| "lint/performance/noReExportAll"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"

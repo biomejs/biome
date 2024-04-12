@@ -8,7 +8,6 @@ pub mod no_duplicate_else_if;
 pub mod no_evolving_any;
 pub mod no_misplaced_assertion;
 pub mod no_nodejs_modules;
-pub mod no_re_export_all;
 pub mod no_restricted_imports;
 pub mod no_undeclared_dependencies;
 pub mod use_import_restrictions;
@@ -24,7 +23,6 @@ declare_group! {
             self :: no_evolving_any :: NoEvolvingAny ,
             self :: no_misplaced_assertion :: NoMisplacedAssertion ,
             self :: no_nodejs_modules :: NoNodejsModules ,
-            self :: no_re_export_all :: NoReExportAll ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
             self :: use_import_restrictions :: UseImportRestrictions ,

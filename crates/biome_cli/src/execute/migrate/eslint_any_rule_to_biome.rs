@@ -290,10 +290,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "barrel-files/avoid-re-export-all" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.performance.get_or_insert_with(Default::default);
             let rule = group.no_re_export_all.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
