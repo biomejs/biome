@@ -22,7 +22,8 @@ pub struct CliOptions {
     #[bpaf(long("verbose"), switch, fallback(false))]
     pub verbose: bool,
 
-    /// Set the file path to the configuration file, or the directory path to find `biome.json` or `biome.jsonc`. Disable default configuration file resolution.
+    /// Set the file path to the configuration file, or the directory path to find `biome.json` or `biome.jsonc`.
+    /// If used, it disables the default configuration file resolution.
     #[bpaf(long("config-path"), argument("PATH"), optional)]
     pub config_path: Option<String>,
 

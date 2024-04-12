@@ -200,7 +200,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Now you can pass a `.json`/`.jsonc` file path with any filename to the `--config-path` flag or the
   `BIOME_CONFIG_PATH` environment variable. This will disable the configuration auto-resolution and Biome
   will try to read the configuration from the said file path ([#2265](https://github.com/biomejs/biome/issues/2265)).
-  
+
+  ```shell
+  biome format --config-path=../biome.json ./src
+  ```
+
   Contributed by @Sec-ant
 
 #### Bug fixes
