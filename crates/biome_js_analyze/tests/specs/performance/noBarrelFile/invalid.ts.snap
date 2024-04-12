@@ -9,7 +9,7 @@ export { foo, type Bar } from "foo";
 
 # Diagnostics
 ```
-invalid.ts:1:1 lint/nursery/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:1:1 lint/performance/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
   
@@ -20,5 +20,3 @@ invalid.ts:1:1 lint/nursery/noBarrelFile ━━━━━━━━━━━━━
   
 
 ```
-
-

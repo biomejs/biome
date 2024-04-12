@@ -16,7 +16,7 @@ pub type NoAutofocus = <lint::a11y::no_autofocus::NoAutofocus as biome_analyze::
 pub type NoBannedTypes =
     <lint::complexity::no_banned_types::NoBannedTypes as biome_analyze::Rule>::Options;
 pub type NoBarrelFile =
-    <lint::nursery::no_barrel_file::NoBarrelFile as biome_analyze::Rule>::Options;
+    <lint::performance::no_barrel_file::NoBarrelFile as biome_analyze::Rule>::Options;
 pub type NoBlankTarget =
     <lint::a11y::no_blank_target::NoBlankTarget as biome_analyze::Rule>::Options;
 pub type NoCatchAssign =

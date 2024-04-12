@@ -897,10 +897,6 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Disallow the use of barrel file.
-	 */
-	noBarrelFile?: RuleConfiguration_for_Null;
-	/**
 	 * [WIP] This rule hasn't been implemented yet.
 	 */
 	noColorInvalidHex?: RuleConfiguration_for_Null;
@@ -1001,6 +997,10 @@ export interface Performance {
 	 * Disallow the use of spread (...) syntax on accumulators.
 	 */
 	noAccumulatingSpread?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow the use of barrel file.
+	 */
+	noBarrelFile?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of the delete operator.
 	 */
@@ -1912,7 +1912,6 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noApproximativeNumericConstant"
-	| "lint/nursery/noBarrelFile"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDoneCallback"
@@ -1937,6 +1936,7 @@ export type Category =
 	| "lint/nursery/useNodeAssertStrict"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
+	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"

@@ -10,7 +10,7 @@ export { module as module1 } from "./module1";
 
 # Diagnostics
 ```
-invalid_named_alias_reexport.ts:1:1 lint/nursery/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_named_alias_reexport.ts:1:1 lint/performance/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
   
@@ -22,5 +22,3 @@ invalid_named_alias_reexport.ts:1:1 lint/nursery/noBarrelFile ━━━━━━
   
 
 ```
-
-
