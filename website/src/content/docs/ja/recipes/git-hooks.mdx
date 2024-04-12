@@ -197,8 +197,7 @@ Biome は`--files-ignore-unknown=true`を指定することで未知のファイ
   #!/bin/sh
   set -eu
 
-  git diff -z --staged --name-only --diff-filter=ACMR | \
-      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched $STAGED_FILES
+  npx biome check --staged --files-ignore-unknown=true --no-errors-on-unmatched
   ```
 
 - コミット前にformatやlintのチェック、安全な修正を行う
@@ -212,8 +211,7 @@ Biome は`--files-ignore-unknown=true`を指定することで未知のファイ
     exit 1;
   fi
 
-  git diff -z --staged --name-only --diff-filter=ACMR | \
-      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched
+  npx biome check --apply --staged --files-ignore-unknown=true --no-errors-on-unmatched
 
   git update-index --again
   ```
