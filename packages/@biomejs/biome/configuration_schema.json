@@ -328,6 +328,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveNestedTestSuites": {
+					"description": "This rule enforces a maximum depth to nested describe() in test files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExtraBooleanCast": {
 					"description": "Disallow unnecessary boolean casts",
 					"anyOf": [
@@ -1451,13 +1458,6 @@
 				},
 				"noEvolvingAny": {
 					"description": "Disallow variables from evolving into any type through reassignments.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noExcessiveNestedTestSuites": {
-					"description": "This rule enforces a maximum depth to nested describe() in test files.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

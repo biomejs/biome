@@ -54,7 +54,7 @@ describe("foo", () => {
 
 # Diagnostics
 ```
-invalid.js:6:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:6 lint/complexity/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive `describe()` nesting detected.
   
@@ -78,7 +78,7 @@ invalid.js:6:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━
 ```
 
 ```
-invalid.js:24:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:6 lint/complexity/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive `describe()` nesting detected.
   
@@ -102,7 +102,7 @@ invalid.js:24:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━�
 ```
 
 ```
-invalid.js:30:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:6 lint/complexity/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive `describe()` nesting detected.
   
@@ -124,5 +124,3 @@ invalid.js:30:6 lint/nursery/noExcessiveNestedTestSuites ━━━━━━━�
   
 
 ```
-
-

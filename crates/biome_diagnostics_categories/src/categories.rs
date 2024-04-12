@@ -46,6 +46,7 @@ define_categories! {
     "lint/complexity/noBannedTypes": "https://biomejs.dev/linter/rules/no-banned-types",
     "lint/complexity/noEmptyTypeParameters": "https://biomejs.dev/linter/rules/no-empty-type-parameters",
     "lint/complexity/noExcessiveCognitiveComplexity": "https://biomejs.dev/linter/rules/no-excessive-cognitive-complexity",
+    "lint/complexity/noExcessiveNestedTestSuites": "https://biomejs.dev/linter/rules/no-excessive-nested-test-suites",
     "lint/complexity/noExtraBooleanCast": "https://biomejs.dev/linter/rules/no-extra-boolean-cast",
     "lint/complexity/noForEach": "https://biomejs.dev/linter/rules/no-for-each",
     "lint/complexity/noMultipleSpacesInRegularExpressionLiterals": "https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals",

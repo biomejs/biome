@@ -631,6 +631,10 @@ export interface Complexity {
 	 */
 	noExcessiveCognitiveComplexity?: RuleConfiguration_for_ComplexityOptions;
 	/**
+	 * This rule enforces a maximum depth to nested describe() in test files.
+	 */
+	noExcessiveNestedTestSuites?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary boolean casts
 	 */
 	noExtraBooleanCast?: RuleConfiguration_for_Null;
@@ -928,10 +932,6 @@ export interface Nursery {
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
 	noEvolvingAny?: RuleConfiguration_for_Null;
-	/**
-	 * This rule enforces a maximum depth to nested describe() in test files.
-	 */
-	noExcessiveNestedTestSuites?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow using export or module.exports in files containing tests
 	 */
@@ -1850,6 +1850,7 @@ export type Category =
 	| "lint/complexity/noBannedTypes"
 	| "lint/complexity/noEmptyTypeParameters"
 	| "lint/complexity/noExcessiveCognitiveComplexity"
+	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
 	| "lint/complexity/noMultipleSpacesInRegularExpressionLiterals"

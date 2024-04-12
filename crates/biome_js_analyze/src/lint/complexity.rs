@@ -5,6 +5,7 @@ use biome_analyze::declare_group;
 pub mod no_banned_types;
 pub mod no_empty_type_parameters;
 pub mod no_excessive_cognitive_complexity;
+pub mod no_excessive_nested_test_suites;
 pub mod no_extra_boolean_cast;
 pub mod no_for_each;
 pub mod no_multiple_spaces_in_regular_expression_literals;
@@ -37,6 +38,7 @@ declare_group! {
             self :: no_banned_types :: NoBannedTypes ,
             self :: no_empty_type_parameters :: NoEmptyTypeParameters ,
             self :: no_excessive_cognitive_complexity :: NoExcessiveCognitiveComplexity ,
+            self :: no_excessive_nested_test_suites :: NoExcessiveNestedTestSuites ,
             self :: no_extra_boolean_cast :: NoExtraBooleanCast ,
             self :: no_for_each :: NoForEach ,
             self :: no_multiple_spaces_in_regular_expression_literals :: NoMultipleSpacesInRegularExpressionLiterals ,

@@ -52,6 +52,7 @@ Rules that focus on inspecting complex code that could be simplified.
 | [noBannedTypes](/linter/rules/no-banned-types) | Disallow primitive type aliases and misleading types. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [noEmptyTypeParameters](/linter/rules/no-empty-type-parameters) | Disallow empty type parameters in type aliases and interfaces. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noExcessiveCognitiveComplexity](/linter/rules/no-excessive-cognitive-complexity) | Disallow functions that exceed a given Cognitive Complexity score. |  |
+| [noExcessiveNestedTestSuites](/linter/rules/no-excessive-nested-test-suites) | This rule enforces a maximum depth to nested <code>describe()</code> in test files. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noExtraBooleanCast](/linter/rules/no-extra-boolean-cast) | Disallow unnecessary boolean casts | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noForEach](/linter/rules/no-for-each) | Prefer <code>for...of</code> statement instead of <code>Array.forEach</code>. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noMultipleSpacesInRegularExpressionLiterals](/linter/rules/no-multiple-spaces-in-regular-expression-literals) | Disallow unclear usage of consecutive space characters in regular expression literals | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
@@ -263,7 +264,6 @@ Rules that belong to this group <strong>are not subject to semantic version</str
 | [noDuplicateJsonKeys](/linter/rules/no-duplicate-json-keys) | Disallow two keys with the same name inside a JSON object. |  |
 | [noDuplicateTestHooks](/linter/rules/no-duplicate-test-hooks) | A <code>describe</code> block should not contain duplicate hooks. |  |
 | [noEvolvingAny](/linter/rules/no-evolving-any) | Disallow variables from evolving into <code>any</code> type through reassignments. |  |
-| [noExcessiveNestedTestSuites](/linter/rules/no-excessive-nested-test-suites) | This rule enforces a maximum depth to nested <code>describe()</code> in test files. |  |
 | [noExportsInTest](/linter/rules/no-exports-in-test) | Disallow using <code>export</code> or <code>module.exports</code> in files containing tests |  |
 | [noMisplacedAssertion](/linter/rules/no-misplaced-assertion) | Checks that the assertion function, for example <code>expect</code>, is placed inside an <code>it()</code> function call. |  |
 | [noNamespaceImport](/linter/rules/no-namespace-import) | Disallow the use of namespace imports. |  |
