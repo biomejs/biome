@@ -1,10 +1,11 @@
-use crate::{css_kinds_src::CSS_KINDS_SRC, yaml_kinds_src::YAML_KINDS_SRC};
+use crate::css_kinds_src::CSS_KINDS_SRC;
 use crate::graphql_kind_src::GRAPHQL_KINDS_SRC;
 use crate::grit_kinds_src::GRIT_KINDS_SRC;
 use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::js_kinds_src::JS_KINDS_SRC;
 use crate::json_kinds_src::JSON_KINDS_SRC;
 use crate::kind_src::KindsSrc;
+use crate::yaml_kinds_src::YAML_KINDS_SRC;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use std::str::FromStr;
@@ -21,7 +22,7 @@ pub enum LanguageKind {
     Graphql,
     Grit,
     Html,
-    Yaml
+    Yaml,
 }
 
 impl std::fmt::Display for LanguageKind {
