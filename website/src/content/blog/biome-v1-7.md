@@ -1,6 +1,6 @@
 ---
 title: Biome v1.7
-description: Migrate from Prettier and ESLint with one commad!
+description: Migrate from Prettier and ESLint with one command!
 summary: |
   This new version provides an easy path to migrate from ESLint and Prettier.
   As usual, it also comes with new linter rules.
@@ -40,7 +40,7 @@ Given the following _ESLint_ configuration:
 {
   "extends": ["plugin:unicorn/recommended"],
   "plugins": ["unicorn"],
-  "ignore_patterns": ["dist//**"],
+  "ignore_patterns": ["dist/**"],
   "globals": {
     "Global1": "readonly"
   },
@@ -132,10 +132,10 @@ _Biome_ is now able to output _JSON_ reports detailing the diagnostics obtained 
 For instance, you can emit a report when you lint a codebase:
 
 ```shell
-biome lint --reporter=json .
+biome lint --reporter=json-pretty .
 ```
 
-For now, we support two report formats: `json` and `jsonPretty`.
+For now, we support two report formats: `json` and `json-pretty`.
 
 Note that the report format is subject to breaking changes.
 So you should not rely on it yet.
@@ -175,8 +175,9 @@ Nursery rules are subject to breaking changes.
 - Biome is able to apply specific settings to [well-known files](https://biomejs.dev/guides/how-biome-works/#well-known-files).
   It now recognized more files and is able to differentiate JSON files that allows only comments and JSON files that allows both comments and trailing commas.
 - Biome now displays the location of a parsing error for its configuration file.
-- Biome extension is now able to parse the JSX syntax in files that associated with the javaScript language identifier.
+- Biome extension is now able to parse the JSX syntax in files that associated with the _JavaScript_ language identifier.
   In React ecosystem, `.js` files are allowed to include JSX syntax.
 - You can now ignore `React` imports in the rules [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/#options) and [useImportType](https://biomejs.dev/linter/rules/use-import-type/#options) by setting [`javascript.jsxRuntime`](https://biomejs.dev/reference/configuration/#javascriptjsxruntime) to `reactClassic`.
 - [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now supports _Preact_.
 
+See the [changelog](/internals/changelog/#170-2024-04-15) for more details.
