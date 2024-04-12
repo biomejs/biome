@@ -72,6 +72,7 @@ pub trait Visit {
 /// to the user.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub enum LogCategory {
     /// The advice doesn't have any specific category, the message will be
     /// printed as plain markup.

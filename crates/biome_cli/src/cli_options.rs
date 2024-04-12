@@ -3,6 +3,7 @@ use crate::LoggingLevel;
 use biome_configuration::ConfigurationBasePath;
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
+use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use std::str::FromStr;
 
@@ -46,9 +47,13 @@ pub struct CliOptions {
     #[bpaf(long("error-on-warnings"), switch)]
     pub error_on_warnings: bool,
 
-    /// Reports information using the JSON format
-    #[bpaf(long("json"), switch, hide_usage, hide)]
-    pub json: bool,
+    /// Allows to change how diagnostics and summary are reported.
+    #[bpaf(
+        long("reporter"),
+        argument("json|json-pretty"),
+        fallback(CliReporter::default())
+    )]
+    pub reporter: CliReporter,
 
     #[bpaf(
         long("log-level"),
@@ -106,6 +111,41 @@ impl FromStr for ColorsArg {
             _ => Err(format!(
                 "value {s:?} is not valid for the --colors argument"
             )),
+        }
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+pub enum CliReporter {
+    /// The default reporter
+    #[default]
+    Default,
+    /// Reports information using the JSON format
+    Json,
+    /// Reports information using the JSON format, formatted.
+    JsonPretty,
+}
+
+impl FromStr for CliReporter {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "json" => Ok(Self::Json),
+            "json-pretty" => Ok(Self::JsonPretty),
+            _ => Err(format!(
+                "value {s:?} is not valid for the --reporter argument"
+            )),
+        }
+    }
+}
+
+impl Display for CliReporter {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CliReporter::Default => f.write_str("default"),
+            CliReporter::Json => f.write_str("json"),
+            CliReporter::JsonPretty => f.write_str("json-pretty"),
         }
     }
 }

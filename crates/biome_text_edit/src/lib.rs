@@ -17,6 +17,7 @@ use similar::{utils::TextDiffRemapper, TextDiff};
 
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct TextEdit {
     dictionary: String,
     ops: Vec<CompressedOp>,
@@ -24,6 +25,7 @@ pub struct TextEdit {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub enum CompressedOp {
     DiffOp(DiffOp),
     EqualLines { line_count: NonZeroU32 },
@@ -31,6 +33,7 @@ pub enum CompressedOp {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub enum DiffOp {
     Equal { range: TextRange },
     Insert { range: TextRange },

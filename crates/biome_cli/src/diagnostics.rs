@@ -1,6 +1,6 @@
 use biome_console::fmt::Display;
 use biome_console::markup;
-use biome_diagnostics::adapters::{BpafError, IoError};
+use biome_diagnostics::adapters::{BpafError, IoError, SerdeJsonError};
 use biome_diagnostics::{
     Advices, Category, Diagnostic, Error, LogCategory, MessageAndDescription, Severity, Visit,
 };
@@ -54,6 +54,8 @@ pub enum CliDiagnostic {
     NoFilesWereProcessed(NoFilesWereProcessed),
     /// Errors thrown when running the `biome migrate` command
     MigrateError(MigrationDiagnostic),
+    /// Emitted during the reporting phase
+    Report(ReportDiagnostic),
 }
 
 #[derive(Debug, Diagnostic)]
@@ -260,6 +262,12 @@ impl DeprecatedArgument {
             message: MessageAndDescription::from(markup! {{message}}.to_owned()),
         }
     }
+}
+
+#[derive(Debug, Diagnostic)]
+pub enum ReportDiagnostic {
+    /// Emitted when trying to serialise the report
+    Serialization(SerdeJsonError),
 }
 
 /// Advices for the [CliDiagnostic]

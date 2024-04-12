@@ -27,3 +27,13 @@ pub(crate) fn get_changed_files(
 
     Ok(filtered_changed_files)
 }
+
+pub(crate) fn get_staged_files(
+    fs: &DynRef<'_, dyn FileSystem>,
+) -> Result<Vec<OsString>, CliDiagnostic> {
+    let staged_files = fs.get_staged_files()?;
+
+    let filtered_staged_files = staged_files.iter().map(OsString::from).collect::<Vec<_>>();
+
+    Ok(filtered_staged_files)
+}

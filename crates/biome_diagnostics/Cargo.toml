@@ -39,6 +39,7 @@ bpaf                         = { workspace = true }
 oxc_resolver                 = { workspace = true }
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"] }
+serde_json                   = { workspace = true }
 termcolor                    = "1.1.2"
 unicode-width                = "0.1.9"
 

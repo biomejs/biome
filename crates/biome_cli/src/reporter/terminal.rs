@@ -1,69 +1,22 @@
-use crate::cli_options::CliOptions;
 use crate::execute::{Execution, TraversalMode};
 use crate::reporter::{DiagnosticsPayload, ReporterVisitor, TraversalSummary};
 use crate::Reporter;
 use biome_console::fmt::Formatter;
 use biome_console::{fmt, markup, Console, ConsoleExt};
-use biome_diagnostics::{Error, PrintDiagnostic, PrintGitHubDiagnostic};
+use biome_diagnostics::{PrintDiagnostic, PrintGitHubDiagnostic};
 use std::io;
 use std::time::Duration;
 
-pub(crate) struct ConsoleReporter<'a> {
-    summary: &'a TraversalSummary,
-    diagnostics_payload: DiagnosticsPayload<'a>,
-    execution: &'a Execution,
+pub(crate) struct ConsoleReporter {
+    pub(crate) summary: TraversalSummary,
+    pub(crate) diagnostics_payload: DiagnosticsPayload,
+    pub(crate) execution: Execution,
 }
 
-#[derive(Default)]
-pub(crate) struct ConsoleReporterBuilder<'a> {
-    cli_options: Option<&'a CliOptions>,
-    execution: Option<&'a Execution>,
-    summary: Option<&'a TraversalSummary>,
-    diagnostics: Vec<Error>,
-}
-
-impl<'a> ConsoleReporterBuilder<'a> {
-    pub(crate) fn with_cli_options(mut self, cli_options: &'a CliOptions) -> Self {
-        self.cli_options = Some(cli_options);
-        self
-    }
-
-    pub(crate) fn with_execution(mut self, execution: &'a Execution) -> Self {
-        self.execution = Some(execution);
-        self
-    }
-    pub(crate) fn with_summary(mut self, summary_result: &'a TraversalSummary) -> Self {
-        self.summary = Some(summary_result);
-        self
-    }
-
-    pub(crate) fn with_diagnostics(mut self, diagnostics: Vec<Error>) -> Self {
-        self.diagnostics = diagnostics;
-        self
-    }
-
-    pub(crate) fn finish(self) -> ConsoleReporter<'a> {
-        let cli_options = self.cli_options.expect("to call with_cli_options()");
-        let summary = self.summary.expect("to call with_summary()");
-        let execution = self.execution.expect("to call with_traversal()");
-        let diagnostics_payload = DiagnosticsPayload {
-            execution,
-            verbose: cli_options.verbose,
-            diagnostic_level: cli_options.diagnostic_level,
-            diagnostics: self.diagnostics,
-        };
-
-        ConsoleReporter {
-            summary,
-            diagnostics_payload,
-            execution,
-        }
-    }
-}
-impl<'a> Reporter for ConsoleReporter<'a> {
-    fn write(&mut self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_diagnostics(&self.diagnostics_payload)?;
-        visitor.report_summary(self.execution, self.summary)?;
+impl Reporter for ConsoleReporter {
+    fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
+        visitor.report_diagnostics(&self.execution, self.diagnostics_payload)?;
+        visitor.report_summary(&self.execution, self.summary)?;
         Ok(())
     }
 }
@@ -73,7 +26,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
     fn report_summary(
         &mut self,
         execution: &Execution,
-        summary: &TraversalSummary,
+        summary: TraversalSummary,
     ) -> io::Result<()> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
             self.0.log(markup! {
@@ -90,13 +43,17 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
         }
 
         self.0.log(markup! {
-            {ConsoleTraversalSummary(execution.traversal_mode(), summary)}
+            {ConsoleTraversalSummary(execution.traversal_mode(), &summary)}
         });
 
         Ok(())
     }
 
-    fn report_diagnostics(&mut self, diagnostics_payload: &DiagnosticsPayload) -> io::Result<()> {
+    fn report_diagnostics(
+        &mut self,
+        execution: &Execution,
+        diagnostics_payload: DiagnosticsPayload,
+    ) -> io::Result<()> {
         for diagnostic in &diagnostics_payload.diagnostics {
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() && diagnostics_payload.verbose {
@@ -107,7 +64,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
                         .error(markup! {{PrintDiagnostic::simple(diagnostic)}});
                 }
             }
-            if diagnostics_payload.execution.is_ci_github() {
+            if execution.is_ci_github() {
                 self.0
                     .log(markup! {{PrintGitHubDiagnostic::simple(diagnostic)}});
             }
