@@ -12,6 +12,8 @@ pub const YAML_KINDS_SRC: KindsSrc = KindsSrc {
         ("%", "PERCENT"),
         ("*", "ASTERISK"),
         ("#", "HASH"),
+        ("<<", "SHL"),
+        ("&", "AMP"),
         ("---", "DOC_START"),
         ("...", "DOC_END"),
     ],
