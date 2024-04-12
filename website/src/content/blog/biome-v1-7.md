@@ -137,14 +137,13 @@ biome lint --reporter=json-pretty .
 
 For now, we support two report formats: `json` and `json-pretty`.
 
-Note that the report format is subject to breaking changes.
-So you should not rely on it yet.
+Note that the report format is subject to breaking changes, so you should not rely on it yet.
 Please try this feature and let us know if any information is missing from the reports.
 
 
 ## Check _Git_ staged files
 
-_Biome v1.5_ added the `--changed` flag on its main commands `biome format`, `biome lint`, and `biome check ` to format and lint _Git_ tracked files that have been changed.
+_Biome v1.5_ added the `--changed` flag on its main commands `biome format`, `biome lint`, and `biome check` to format and lint _Git_ tracked files that have been changed.
 
 Today we are introducing a new flag `--staged` which allows you to check only files that have been added to the Git index (_staged files_).
 This is useful for checking that the files you want to commit are formatted and linted.
@@ -173,10 +172,10 @@ Nursery rules are subject to breaking changes.
 ## Miscellaneous
 
 - Biome is able to apply specific settings to [well-known files](https://biomejs.dev/guides/how-biome-works/#well-known-files).
-  It now recognized more files and is able to differentiate JSON files that allows only comments and JSON files that allows both comments and trailing commas.
+  It now recognizes more files and is able to differentiate JSON files that allow only comments and JSON files that allow both comments and trailing commas.
 - Biome now displays the location of a parsing error for its configuration file.
-- Biome extension is now able to parse the JSX syntax in files that associated with the _JavaScript_ language identifier.
-  In React ecosystem, `.js` files are allowed to include JSX syntax.
+- _Biome_ extension is now able to parse _JSX_ syntax in files that associated with the _JavaScript_ language identifier.
+  In the _React_ ecosystem, `.js` files are allowed to include JSX syntax.
 - You can now ignore `React` imports in the rules [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/#options) and [useImportType](https://biomejs.dev/linter/rules/use-import-type/#options) by setting [`javascript.jsxRuntime`](https://biomejs.dev/reference/configuration/#javascriptjsxruntime) to `reactClassic`.
 - [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now supports _Preact_.
 
