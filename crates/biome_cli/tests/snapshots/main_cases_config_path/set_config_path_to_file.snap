@@ -5,23 +5,22 @@ expression: content
 ## `config/a.jsonc`
 
 ```jsonc
-
-        {
-          "organizeImports": {
-            "enabled": true
-          },
-          "linter": {
-            "enabled": false
-          },
-          "formatter": {
-            "enabled": true,
-          },
-          "javascript": {
-            "formatter": {
-              "quoteStyle": "single", // comment
-            }
-          }
-        }
+{
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": false
+  },
+  "formatter": {
+    "enabled": true,
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single", // comment
+    }
+  }
+}
 ```
 
 ## `src/index.js`

@@ -17,23 +17,22 @@ fn set_config_path_to_directory() {
     let config_path = Path::new("config/biome.jsonc");
     fs.insert(
         config_path.into(),
-        r#"
-        {
-          "organizeImports": {
-            "enabled": true
-          },
-          "linter": {
-            "enabled": false
-          },
-          "formatter": {
-            "enabled": true,
-          },
-          "javascript": {
-            "formatter": {
-              "quoteStyle": "single", // comment
-            }
-          }
-        }"#
+        r#"{
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": false
+  },
+  "formatter": {
+    "enabled": true,
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single", // comment
+    }
+  }
+}"#
         .as_bytes(),
     );
 
@@ -65,23 +64,22 @@ fn set_config_path_to_file() {
     let config_path = Path::new("config/a.jsonc");
     fs.insert(
         config_path.into(),
-        r#"
-        {
-          "organizeImports": {
-            "enabled": true
-          },
-          "linter": {
-            "enabled": false
-          },
-          "formatter": {
-            "enabled": true,
-          },
-          "javascript": {
-            "formatter": {
-              "quoteStyle": "single", // comment
-            }
-          }
-        }"#
+        r#"{
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": false
+  },
+  "formatter": {
+    "enabled": true,
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single", // comment
+    }
+  }
+}"#
         .as_bytes(),
     );
 
