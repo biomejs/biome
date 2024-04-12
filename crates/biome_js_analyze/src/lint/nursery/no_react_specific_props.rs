@@ -61,11 +61,18 @@ impl Rule for NoReactSpecificProps {
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let mut attributes = state.1.iter();
 
-        let diagnostic = RuleDiagnostic::new(
+        let mut diagnostic = RuleDiagnostic::new(
             rule_category!(),
             attributes.next()?.syntax().text_trimmed_range(),
             markup!("This JSX property is specific to React."),
         );
+
+        for attr in attributes {
+            diagnostic = diagnostic.detail(
+                attr.syntax().text_trimmed_range(),
+                "This JSX property is specific to React.",
+            )
+        }
 
         Some(diagnostic)
     }
