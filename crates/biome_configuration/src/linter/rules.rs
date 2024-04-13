@@ -2632,7 +2632,7 @@ pub struct Nursery {
     #[doc = "Avoid re-export all."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_re_export_all: Option<RuleConfiguration<NoReExportAll>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Prevents React-specific JSX properties from being used."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_react_specific_props: Option<RuleConfiguration<NoReactSpecificProps>>,
     #[doc = "Disallow specified modules when loaded by import or require."]
