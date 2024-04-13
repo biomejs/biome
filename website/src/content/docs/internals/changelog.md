@@ -301,6 +301,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [complexity/useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) no longer report computed properties named `__proto__` ([#2430](https://github.com/biomejs/biome/issues/2430)).
+
+  In JavaScript, `{["__proto__"]: null}` and `{__proto__: null}` have not the same semantic.
+  The first code set a regular property to `null`.
+  The second one set the prototype of the object to `null`.
+  See the [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto) for more details.
+
+  The rule now ignores computed properties named `__proto__`.
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Lint rules `useNodejsImportProtocol`, `useNodeAssertStrict`, `noRestrictedImports`, `noNodejsModules` will no longer check `declare module` statements anymore. Contributed by @Sec-ant
