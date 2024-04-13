@@ -129,7 +129,7 @@ You can use the _CLI_ flag `--include-inspired` to migrate them.
 
 ## Migrate from _Prettier_ with a single command
 
-[_Biome v1.6_ introduced the command `biome migrate prettier`](/blog/biome-v1-6/#easier-migration-from-prettier).
+[_Biome 1.6_ introduced the command `biome migrate prettier`](/blog/biome-v1-6/#easier-migration-from-prettier).
 
 This new version adds the support of the `overrides` field and attempts to convert `.prettierignore` glob patterns to globs supported by _Biome_.
 
