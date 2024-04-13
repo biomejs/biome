@@ -32,7 +32,7 @@ This is a completely redundant operation, as this is the same as not renaming at
 import { foo as foo } from "bar";
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessRename.js:1:10 <a href="https://biomejs.dev/linter/rules/no-useless-rename">lint/complexity/noUselessRename</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessRename.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-useless-rename">lint/complexity/noUselessRename</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Useless rename.</span>
   
@@ -50,7 +50,7 @@ import { foo as foo } from "bar";
 export { foo as foo };
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessRename.js:1:10 <a href="https://biomejs.dev/linter/rules/no-useless-rename">lint/complexity/noUselessRename</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessRename.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-useless-rename">lint/complexity/noUselessRename</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Useless rename.</span>
   
@@ -68,7 +68,7 @@ export { foo as foo };
 let { foo: foo } = bar;
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessRename.js:1:7 <a href="https://biomejs.dev/linter/rules/no-useless-rename">lint/complexity/noUselessRename</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessRename.jsx:1:7 <a href="https://biomejs.dev/linter/rules/no-useless-rename">lint/complexity/noUselessRename</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Useless rename.</span>
   

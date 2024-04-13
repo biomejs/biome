@@ -20,7 +20,7 @@ Prevents JSX properties to be assigned multiple times.
 <Hello name="John" name="John" />
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateJsxProps.js:1:8 <a href="https://biomejs.dev/linter/rules/no-duplicate-jsx-props">lint/suspicious/noDuplicateJsxProps</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateJsxProps.jsx:1:8 <a href="https://biomejs.dev/linter/rules/no-duplicate-jsx-props">lint/suspicious/noDuplicateJsxProps</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This JSX property is assigned multiple times.</span>
   
@@ -40,7 +40,7 @@ Prevents JSX properties to be assigned multiple times.
 <label xml:lang="en-US" xml:lang="en-US"></label>
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateJsxProps.js:1:8 <a href="https://biomejs.dev/linter/rules/no-duplicate-jsx-props">lint/suspicious/noDuplicateJsxProps</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateJsxProps.jsx:1:8 <a href="https://biomejs.dev/linter/rules/no-duplicate-jsx-props">lint/suspicious/noDuplicateJsxProps</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This JSX property is assigned multiple times.</span>
   

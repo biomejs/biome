@@ -20,7 +20,7 @@ usually using `void(0)` (which is equivalent to `void 0`). In these cases, the g
 void 0;
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noVoid.js:1:1 <a href="https://biomejs.dev/linter/rules/no-void">lint/complexity/noVoid</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noVoid.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-void">lint/complexity/noVoid</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The use of </span><span style="color: Orange;"><strong>void</strong></span><span style="color: Orange;"> is not allowed.</span>
   

@@ -27,7 +27,7 @@ async function fetchData() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/useAwait.js:1:1 <a href="https://biomejs.dev/linter/rules/use-await">lint/suspicious/useAwait</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/useAwait.jsx:1:1 <a href="https://biomejs.dev/linter/rules/use-await">lint/suspicious/useAwait</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>async</strong></span><span style="color: Orange;"> function lacks an </span><span style="color: Orange;"><strong>await</strong></span><span style="color: Orange;"> expression.</span>
   

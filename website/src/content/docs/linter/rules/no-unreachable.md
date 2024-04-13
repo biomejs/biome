@@ -23,7 +23,7 @@ function example() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnreachable.js:3:5 <a href="https://biomejs.dev/linter/rules/no-unreachable">lint/correctness/noUnreachable</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnreachable.jsx:3:5 <a href="https://biomejs.dev/linter/rules/no-unreachable">lint/correctness/noUnreachable</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This code will never be reached ...</span>
   
@@ -52,7 +52,7 @@ function example() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnreachable.js:2:28 <a href="https://biomejs.dev/linter/rules/no-unreachable">lint/correctness/noUnreachable</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnreachable.jsx:2:28 <a href="https://biomejs.dev/linter/rules/no-unreachable">lint/correctness/noUnreachable</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This code will never be reached ...</span>
   
@@ -82,7 +82,7 @@ function example() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnreachable.js:4:9 <a href="https://biomejs.dev/linter/rules/no-unreachable">lint/correctness/noUnreachable</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnreachable.jsx:4:9 <a href="https://biomejs.dev/linter/rules/no-unreachable">lint/correctness/noUnreachable</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This code will never be reached ...</span>
   

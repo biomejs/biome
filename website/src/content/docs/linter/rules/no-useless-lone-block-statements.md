@@ -24,7 +24,7 @@ In ES6, code blocks may create a new scope if a block-level binding (let and con
 {}
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessLoneBlockStatements.js:1:1 <a href="https://biomejs.dev/linter/rules/no-useless-lone-block-statements">lint/complexity/noUselessLoneBlockStatements</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessLoneBlockStatements.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-useless-lone-block-statements">lint/complexity/noUselessLoneBlockStatements</a> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This block statement doesn't serve any purpose and can be safely removed.</span>
   
@@ -45,7 +45,7 @@ if (foo) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessLoneBlockStatements.js:3:3 <a href="https://biomejs.dev/linter/rules/no-useless-lone-block-statements">lint/complexity/noUselessLoneBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessLoneBlockStatements.jsx:3:3 <a href="https://biomejs.dev/linter/rules/no-useless-lone-block-statements">lint/complexity/noUselessLoneBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This block statement doesn't serve any purpose and can be safely removed.</span>
   

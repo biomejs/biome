@@ -35,7 +35,7 @@ type TypeOfA = typeof A;
 let a: A;
 ```
 
-<pre class="language-text"><code class="language-text">style/useImportType.js:1:1 <a href="https://biomejs.dev/linter/rules/use-import-type">lint/style/useImportType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useImportType.ts:1:1 <a href="https://biomejs.dev/linter/rules/use-import-type">lint/style/useImportType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">All these imports are only used as types.</span>
   
@@ -56,7 +56,7 @@ let a: A;
 import { type A, type B } from "./mod.js";
 ```
 
-<pre class="language-text"><code class="language-text">style/useImportType.js:1:1 <a href="https://biomejs.dev/linter/rules/use-import-type">lint/style/useImportType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useImportType.ts:1:1 <a href="https://biomejs.dev/linter/rules/use-import-type">lint/style/useImportType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">All these imports are only used as types.</span>
   
