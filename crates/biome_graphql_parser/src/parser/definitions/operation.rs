@@ -40,8 +40,7 @@ impl ParseNodeList for SelectionList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        // stop at closing brace or at the start of a new operation
-        p.at(T!['}']) || is_at_definition(p)
+        is_at_selection_set_end(p)
     }
 
     fn recover(
@@ -61,7 +60,7 @@ impl ParseRecovery for SelectionListParseRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_BOGUS_SELECTION;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_selection(p)
+        is_at_selection(p) || is_at_selection_set_end(p)
     }
 }
 
@@ -272,6 +271,12 @@ pub(crate) fn is_at_operation(p: &GraphqlParser<'_>) -> bool {
 #[inline]
 fn is_at_selection_set(p: &GraphqlParser) -> bool {
     p.at(T!['{'])
+}
+
+#[inline]
+fn is_at_selection_set_end(p: &GraphqlParser) -> bool {
+    // stop at closing brace or at the start of a new definition
+    p.at(T!['}']) || is_at_definition(p)
 }
 
 #[inline]

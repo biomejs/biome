@@ -19,3 +19,20 @@ query ($: ) {
 	likeStory(storyId: $)
 }
 
+# malformed arguments
+query ($storyId: ID!) {
+	likeStory storyId: $storyId)
+}
+
+query ($storyId: ID!) {
+	likeStory(storyId: $storyId
+}
+
+query ($storyId: ID!  {
+	likeStory storyId: $storyId
+}
+
+query ($storyId: ID!) {
+	likeStory storyId: $storyId
+}
+
