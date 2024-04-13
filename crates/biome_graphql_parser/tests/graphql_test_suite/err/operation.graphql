@@ -2,6 +2,8 @@ query likeStory }
 
 query likeStory
 
+query like$Story
+
 # malformed variables
 query ($storyId: ID! {
 	likeStory(storyId: $storyId)
@@ -19,6 +21,30 @@ query ($: ) {
 	likeStory(storyId: $)
 }
 
+query (a: ) {
+	likeStory
+}
+
+query (a:  {
+	likeStory
+}
+
+query (: ) {
+	likeStory
+}
+
+query (:  {
+	likeStory
+}
+
+query (  {
+	likeStory
+}
+
+query ($storyId: = @ {
+	likeStory
+}
+
 # malformed arguments
 query ($storyId: ID!) {
 	likeStory storyId: $storyId)
@@ -28,11 +54,15 @@ query ($storyId: ID!) {
 	likeStory(storyId: $storyId
 }
 
-query ($storyId: ID!  {
+query ($storyId: ID!)  {
 	likeStory storyId: $storyId
 }
 
 query ($storyId: ID!) {
-	likeStory storyId: $storyId
+	likeStory storyId: $
 }
 
+# malformed directives
+query ($storyId: ID!) @ {
+	likeStory
+}

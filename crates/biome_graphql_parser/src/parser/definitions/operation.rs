@@ -1,6 +1,6 @@
 use crate::parser::{
     argument::parse_arguments,
-    directive::DirectiveList,
+    directive::{is_at_directive, DirectiveList},
     is_at_name,
     parse_error::{
         expected_any_selection, expected_name, expected_named_type, expected_type, expected_value,
@@ -78,7 +78,7 @@ impl ParseNodeList for VariableDefinitionList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')']) || !is_at_variable(p)
+        is_at_variable_definitions_end(p)
     }
 
     fn recover(
@@ -99,10 +99,10 @@ struct VariableDefinitionListParseRecovery;
 impl ParseRecovery for VariableDefinitionListParseRecovery {
     type Kind = GraphqlSyntaxKind;
     type Parser<'source> = GraphqlParser<'source>;
-    const RECOVERED_KIND: Self::Kind = GRAPHQL_VARIABLE_DEFINITION;
+    const RECOVERED_KIND: Self::Kind = GRAPHQL_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_variable(p)
+        is_at_variable(p) || is_at_variable_definitions_end(p)
     }
 }
 
@@ -266,6 +266,11 @@ fn parse_default_value(p: &mut GraphqlParser) -> ParsedSyntax {
 #[inline]
 pub(crate) fn is_at_operation(p: &GraphqlParser<'_>) -> bool {
     p.at_ts(OPERATION_TYPE) || is_at_selection_set(p)
+}
+
+#[inline]
+fn is_at_variable_definitions_end(p: &GraphqlParser) -> bool {
+    p.at(T![')']) || is_at_directive(p) || is_at_selection_set(p)
 }
 
 #[inline]
