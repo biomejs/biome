@@ -1,6 +1,6 @@
 /// Sorted array of ES builtin
 ///
-/// Source: https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L2-L70
+/// Source: <https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L2-L70>
 pub const ES_BUILTIN: &[&str; 67] = &[
     "AggregateError",
     "Array",
@@ -73,7 +73,7 @@ pub const ES_BUILTIN: &[&str; 67] = &[
 
 /// Sorted array of ES5 builtin
 ///
-/// Source: https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L71-L110
+/// Source: <https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L71-L110>
 pub const ES_5: &[&str; 38] = &[
     "Array",
     "Boolean",
@@ -117,7 +117,7 @@ pub const ES_5: &[&str; 38] = &[
 
 /// Sorted array of ES2015 builtin
 ///
-/// Source: https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L111-L170
+/// Source: <https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L111-L170>
 pub const ES_2015: &[&str; 58] = &[
     "Array",
     "ArrayBuffer",
@@ -181,7 +181,7 @@ pub const ES_2015: &[&str; 58] = &[
 
 /// Sorted array of ES2017 builtin
 ///
-/// Source: https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L171-L232
+/// Source: <https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L171-L232>
 pub const ES_2017: &[&str; 60] = &[
     "Array",
     "ArrayBuffer",
@@ -247,7 +247,7 @@ pub const ES_2017: &[&str; 60] = &[
 
 /// Sorted array of ES2020 builtin
 ///
-/// Source: https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L233-L298
+/// Source: <https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L233-L298>
 pub const ES_2020: &[&str; 64] = &[
     "Array",
     "ArrayBuffer",
@@ -317,7 +317,7 @@ pub const ES_2020: &[&str; 64] = &[
 
 /// Sorted array of ES2021 builtin
 ///
-/// Source: https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L299-L367
+/// Source: <https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L299-L367>
 pub const ES_2021: &[&str; 67] = &[
     "AggregateError",
     "Array",

@@ -102,10 +102,10 @@ impl PartialEq for SemanticModelData {
 impl Eq for SemanticModelData {}
 
 /// The façade for all semantic information.
-/// - Scope: [Scope]
-/// - Declarations: [declaration]
+/// - [Scope]
+/// - Declarations
 ///
-/// See [SemanticModelData] for more information about the internals.
+/// See `SemanticModelData` for more information about the internals.
 #[derive(Clone, Debug)]
 pub struct SemanticModel {
     pub(crate) data: Rc<SemanticModelData>,

@@ -368,7 +368,7 @@ pub struct A11y {
     #[doc = "Enforces that no distracting elements are used."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_distracting_elements: Option<RuleConfiguration<NoDistractingElements>>,
-    #[doc = "The scope prop should be used only on <th> elements."]
+    #[doc = "The scope prop should be used only on \\<th> elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_header_scope: Option<RuleConfiguration<NoHeaderScope>>,
     #[doc = "Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements."]
@@ -2587,7 +2587,7 @@ pub struct Nursery {
     #[doc = "Disallow the use of barrel file."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_barrel_file: Option<RuleConfiguration<NoBarrelFile>>,
-    #[doc = "[WIP] This rule hasn't been implemented yet."]
+    #[doc = "WIP: This rule hasn't been implemented yet."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_color_invalid_hex: Option<RuleConfiguration<NoColorInvalidHex>>,
     #[doc = "Disallow the use of console."]
@@ -3523,7 +3523,7 @@ pub struct Style {
     #[doc = "Enforce using else if instead of nested if in else clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_collapsed_else_if: Option<RuleConfiguration<UseCollapsedElseIf>>,
-    #[doc = "Require consistently using either T[] or Array<T>"]
+    #[doc = "Require consistently using either T\\[] or Array\\<T>"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_array_type: Option<RuleConfiguration<UseConsistentArrayType>>,
     #[doc = "Require const declarations for variables that are never reassigned after declared."]
@@ -3547,7 +3547,7 @@ pub struct Style {
     #[doc = "This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_for_of: Option<RuleConfiguration<UseForOf>>,
-    #[doc = "This rule enforces the use of <>...</> over <Fragment>...</Fragment>."]
+    #[doc = "This rule enforces the use of \\<>...\\</> over \\<Fragment>...\\</Fragment>."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_fragment_syntax: Option<RuleConfiguration<UseFragmentSyntax>>,
     #[doc = "Promotes the use of import type for types."]
@@ -3571,7 +3571,7 @@ pub struct Style {
     #[doc = "Prevent extra closing tags for components without children"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_self_closing_elements: Option<RuleConfiguration<UseSelfClosingElements>>,
-    #[doc = "When expressing array types, this rule promotes the usage of T[] shorthand instead of Array<T>."]
+    #[doc = "When expressing array types, this rule promotes the usage of T\\[] shorthand instead of Array\\<T>."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_shorthand_array_type: Option<RuleConfiguration<UseShorthandArrayType>>,
     #[doc = "Require assignment operator shorthand where possible."]

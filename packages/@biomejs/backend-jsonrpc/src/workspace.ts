@@ -510,7 +510,7 @@ export interface A11y {
 	 */
 	noDistractingElements?: RuleConfiguration_for_Null;
 	/**
-	 * The scope prop should be used only on <th> elements.
+	 * The scope prop should be used only on \<th> elements.
 	 */
 	noHeaderScope?: RuleConfiguration_for_Null;
 	/**
@@ -901,7 +901,7 @@ export interface Nursery {
 	 */
 	noBarrelFile?: RuleConfiguration_for_Null;
 	/**
-	 * [WIP] This rule hasn't been implemented yet.
+	 * WIP: This rule hasn't been implemented yet.
 	 */
 	noColorInvalidHex?: RuleConfiguration_for_Null;
 	/**
@@ -1132,7 +1132,7 @@ export interface Style {
 	 */
 	useCollapsedElseIf?: RuleConfiguration_for_Null;
 	/**
-	 * Require consistently using either T[] or Array<T>
+	 * Require consistently using either T\[] or Array\<T>
 	 */
 	useConsistentArrayType?: RuleConfiguration_for_ConsistentArrayTypeOptions;
 	/**
@@ -1164,7 +1164,7 @@ export interface Style {
 	 */
 	useForOf?: RuleConfiguration_for_Null;
 	/**
-	 * This rule enforces the use of <>...</> over <Fragment>...</Fragment>.
+	 * This rule enforces the use of \<>...\</> over \<Fragment>...\</Fragment>.
 	 */
 	useFragmentSyntax?: RuleConfiguration_for_Null;
 	/**
@@ -1196,7 +1196,7 @@ export interface Style {
 	 */
 	useSelfClosingElements?: RuleConfiguration_for_Null;
 	/**
-	 * When expressing array types, this rule promotes the usage of T[] shorthand instead of Array<T>.
+	 * When expressing array types, this rule promotes the usage of T\[] shorthand instead of Array\<T>.
 	 */
 	useShorthandArrayType?: RuleConfiguration_for_Null;
 	/**
