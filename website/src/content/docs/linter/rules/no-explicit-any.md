@@ -29,7 +29,7 @@ It also accepts any value, however it requires to check that a property exists b
 let variable: any = 1;
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noExplicitAny.js:1:15 <a href="https://biomejs.dev/linter/rules/no-explicit-any">lint/suspicious/noExplicitAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noExplicitAny.ts:1:15 <a href="https://biomejs.dev/linter/rules/no-explicit-any">lint/suspicious/noExplicitAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;">. Specify a different type.</span>
   
@@ -47,7 +47,7 @@ class SomeClass {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noExplicitAny.js:2:24 <a href="https://biomejs.dev/linter/rules/no-explicit-any">lint/suspicious/noExplicitAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noExplicitAny.ts:2:24 <a href="https://biomejs.dev/linter/rules/no-explicit-any">lint/suspicious/noExplicitAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;">. Specify a different type.</span>
   
@@ -65,7 +65,7 @@ class SomeClass {
 function fn(param: Array<any>): void {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noExplicitAny.js:1:26 <a href="https://biomejs.dev/linter/rules/no-explicit-any">lint/suspicious/noExplicitAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noExplicitAny.ts:1:26 <a href="https://biomejs.dev/linter/rules/no-explicit-any">lint/suspicious/noExplicitAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;">. Specify a different type.</span>
   

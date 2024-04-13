@@ -21,7 +21,7 @@ function foo() { };
 foo = bar;
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.js:1:10 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not reassign a function declaration.</span>
   
@@ -47,7 +47,7 @@ function foo() {
  }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.js:1:10 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not reassign a function declaration.</span>
   
@@ -73,7 +73,7 @@ foo = bar;
 function foo() { };
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.js:2:10 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.jsx:2:10 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not reassign a function declaration.</span>
   
@@ -100,7 +100,7 @@ function foo() { };
 function foo() { };
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.js:2:10 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.jsx:2:10 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not reassign a function declaration.</span>
   
@@ -127,7 +127,7 @@ function foo() { };
 function foo() { };
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.js:2:10 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.jsx:2:10 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not reassign a function declaration.</span>
   
@@ -155,7 +155,7 @@ function foo() {
  }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.js:1:10 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not reassign a function declaration.</span>
   
@@ -183,7 +183,7 @@ function foo() {
  })();
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.js:3:14 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noFunctionAssign.jsx:3:14 <a href="https://biomejs.dev/linter/rules/no-function-assign">lint/suspicious/noFunctionAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not reassign a function declaration.</span>
   

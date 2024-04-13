@@ -24,7 +24,7 @@ However, in pull/merge request, you usually want to run all the test suite.
 describe.only("foo", () => {});
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noFocusedTests.js:1:10 <a href="https://biomejs.dev/linter/rules/no-focused-tests">lint/suspicious/noFocusedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noFocusedTests.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-focused-tests">lint/suspicious/noFocusedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Don't focus the test.</span>
   
@@ -46,7 +46,7 @@ describe.only("foo", () => {});
 test.only("foo", () => {});
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noFocusedTests.js:1:6 <a href="https://biomejs.dev/linter/rules/no-focused-tests">lint/suspicious/noFocusedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noFocusedTests.jsx:1:6 <a href="https://biomejs.dev/linter/rules/no-focused-tests">lint/suspicious/noFocusedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Don't focus the test.</span>
   

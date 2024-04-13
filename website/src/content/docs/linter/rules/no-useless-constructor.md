@@ -38,7 +38,7 @@ class A {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:2:5 <a href="https://biomejs.dev/linter/rules/no-useless-constructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.jsx:2:5 <a href="https://biomejs.dev/linter/rules/no-useless-constructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This constructor is unnecessary.</span>
   
@@ -65,7 +65,7 @@ class B extends A {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:2:5 <a href="https://biomejs.dev/linter/rules/no-useless-constructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.ts:2:5 <a href="https://biomejs.dev/linter/rules/no-useless-constructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This constructor is unnecessary.</span>
   
@@ -98,7 +98,7 @@ class C {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:5:5 <a href="https://biomejs.dev/linter/rules/no-useless-constructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.jsx:5:5 <a href="https://biomejs.dev/linter/rules/no-useless-constructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This constructor is unnecessary.</span>
   
@@ -136,7 +136,7 @@ class B extends A {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.jsx:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">'protected' modifier can only be used in TypeScript files</span>
   

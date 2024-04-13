@@ -30,7 +30,7 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noInvalidUseBeforeDeclaration.js:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noInvalidUseBeforeDeclaration.jsx:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Const declarations must have an initialized value.</span>
   
@@ -52,7 +52,7 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noInvalidUseBeforeDeclaration.js:2:17 <a href="https://biomejs.dev/linter/rules/no-invalid-use-before-declaration">lint/correctness/noInvalidUseBeforeDeclaration</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noInvalidUseBeforeDeclaration.jsx:2:17 <a href="https://biomejs.dev/linter/rules/no-invalid-use-before-declaration">lint/correctness/noInvalidUseBeforeDeclaration</a> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable is used before its declaration.</span>
   
@@ -77,7 +77,7 @@ function f() {
 function f(a = b, b = 0) {}
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noInvalidUseBeforeDeclaration.js:1:16 <a href="https://biomejs.dev/linter/rules/no-invalid-use-before-declaration">lint/correctness/noInvalidUseBeforeDeclaration</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noInvalidUseBeforeDeclaration.jsx:1:16 <a href="https://biomejs.dev/linter/rules/no-invalid-use-before-declaration">lint/correctness/noInvalidUseBeforeDeclaration</a> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This parameter is used before its declaration.</span>
   

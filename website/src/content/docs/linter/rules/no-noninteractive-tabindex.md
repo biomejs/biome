@@ -24,7 +24,7 @@ Keep the tab ring small, which is the order of elements when tabbing, for a more
 <div tabIndex="0" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noNoninteractiveTabindex.js:1:6 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/a11y/noNoninteractiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noNoninteractiveTabindex.jsx:1:6 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/a11y/noNoninteractiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The HTML element </span><span style="color: Tomato;"><strong>div</strong></span><span style="color: Tomato;"> is non-interactive. Do not use </span><span style="color: Tomato;"><strong>tabIndex</strong></span><span style="color: Tomato;">.</span>
   
@@ -44,7 +44,7 @@ Keep the tab ring small, which is the order of elements when tabbing, for a more
 <div role="article" tabIndex="0" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noNoninteractiveTabindex.js:1:21 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/a11y/noNoninteractiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noNoninteractiveTabindex.jsx:1:21 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/a11y/noNoninteractiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The HTML element </span><span style="color: Tomato;"><strong>div</strong></span><span style="color: Tomato;"> is non-interactive. Do not use </span><span style="color: Tomato;"><strong>tabIndex</strong></span><span style="color: Tomato;">.</span>
   
@@ -64,7 +64,7 @@ Keep the tab ring small, which is the order of elements when tabbing, for a more
 <article tabIndex="0" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noNoninteractiveTabindex.js:1:10 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/a11y/noNoninteractiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noNoninteractiveTabindex.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/a11y/noNoninteractiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The HTML element </span><span style="color: Tomato;"><strong>article</strong></span><span style="color: Tomato;"> is non-interactive. Do not use </span><span style="color: Tomato;"><strong>tabIndex</strong></span><span style="color: Tomato;">.</span>
   

@@ -24,7 +24,7 @@ That is what this rule enforces.
 let foo = 0, bar, baz;
 ```
 
-<pre class="language-text"><code class="language-text">style/useSingleVarDeclarator.js:1:1 <a href="https://biomejs.dev/linter/rules/use-single-var-declarator">lint/style/useSingleVarDeclarator</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useSingleVarDeclarator.jsx:1:1 <a href="https://biomejs.dev/linter/rules/use-single-var-declarator">lint/style/useSingleVarDeclarator</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Declare variables separately</span>
   

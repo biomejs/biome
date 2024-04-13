@@ -27,7 +27,7 @@ describe('a test', () => {
 });
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noExportsInTest.js:1:1 <a href="https://biomejs.dev/linter/rules/no-exports-in-test">lint/suspicious/noExportsInTest</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noExportsInTest.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-exports-in-test">lint/suspicious/noExportsInTest</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not export from a test file.</span>
   

@@ -18,7 +18,7 @@ Disabled test are useful when developing and debugging, although they should not
 describe.skip("test", () => {});
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noSkippedTests.js:1:10 <a href="https://biomejs.dev/linter/rules/no-skipped-tests">lint/suspicious/noSkippedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noSkippedTests.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-skipped-tests">lint/suspicious/noSkippedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't disable tests.</span>
   
@@ -40,7 +40,7 @@ describe.skip("test", () => {});
 test.skip("test", () => {});
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noSkippedTests.js:1:6 <a href="https://biomejs.dev/linter/rules/no-skipped-tests">lint/suspicious/noSkippedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noSkippedTests.jsx:1:6 <a href="https://biomejs.dev/linter/rules/no-skipped-tests">lint/suspicious/noSkippedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't disable tests.</span>
   

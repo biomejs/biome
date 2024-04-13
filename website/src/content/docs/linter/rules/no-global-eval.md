@@ -28,7 +28,7 @@ Moreover, changing variables in the caller's scope is expensive in modern _JavaS
 eval("var a = 0");
 ```
 
-<pre class="language-text"><code class="language-text">security/noGlobalEval.js:1:1 <a href="https://biomejs.dev/linter/rules/no-global-eval">lint/security/noGlobalEval</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">security/noGlobalEval.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-global-eval">lint/security/noGlobalEval</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>eval()</strong></span><span style="color: Tomato;"> exposes to security risks and performance issues.</span>
   
@@ -46,7 +46,7 @@ eval("var a = 0");
 (0, globalThis.eval)("var a = 0")
 ```
 
-<pre class="language-text"><code class="language-text">security/noGlobalEval.js:1:5 <a href="https://biomejs.dev/linter/rules/no-global-eval">lint/security/noGlobalEval</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">security/noGlobalEval.jsx:1:5 <a href="https://biomejs.dev/linter/rules/no-global-eval">lint/security/noGlobalEval</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>eval()</strong></span><span style="color: Tomato;"> exposes to security risks and performance issues.</span>
   
@@ -64,7 +64,7 @@ eval("var a = 0");
 f(eval);
 ```
 
-<pre class="language-text"><code class="language-text">security/noGlobalEval.js:1:3 <a href="https://biomejs.dev/linter/rules/no-global-eval">lint/security/noGlobalEval</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">security/noGlobalEval.jsx:1:3 <a href="https://biomejs.dev/linter/rules/no-global-eval">lint/security/noGlobalEval</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>eval()</strong></span><span style="color: Tomato;"> exposes to security risks and performance issues.</span>
   
@@ -82,7 +82,7 @@ f(eval);
 const aliasedEval = eval;
 ```
 
-<pre class="language-text"><code class="language-text">security/noGlobalEval.js:1:21 <a href="https://biomejs.dev/linter/rules/no-global-eval">lint/security/noGlobalEval</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">security/noGlobalEval.jsx:1:21 <a href="https://biomejs.dev/linter/rules/no-global-eval">lint/security/noGlobalEval</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>eval()</strong></span><span style="color: Tomato;"> exposes to security risks and performance issues.</span>
   

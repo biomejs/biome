@@ -215,7 +215,7 @@ fn migrate_eslintrcjson_rule_options() {
             }]
         },
         "overrides": [{
-            "files": ["default.js"],
+            "files": "default.js",
             "rules": {
                 "no-restricted-globals": "error",
                 "jsx-a11y/aria-role": "error",

@@ -24,7 +24,7 @@ Disallow literal numbers that lose precision
 const x = 9007199254740993
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noPrecisionLoss.js:1:11 <a href="https://biomejs.dev/linter/rules/no-precision-loss">lint/correctness/noPrecisionLoss</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noPrecisionLoss.jsx:1:11 <a href="https://biomejs.dev/linter/rules/no-precision-loss">lint/correctness/noPrecisionLoss</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This number literal will lose precision at runtime.</span>
   
@@ -40,7 +40,7 @@ const x = 9007199254740993
 const x = 5.123000000000000000000000000001
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noPrecisionLoss.js:1:11 <a href="https://biomejs.dev/linter/rules/no-precision-loss">lint/correctness/noPrecisionLoss</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noPrecisionLoss.jsx:1:11 <a href="https://biomejs.dev/linter/rules/no-precision-loss">lint/correctness/noPrecisionLoss</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This number literal will lose precision at runtime.</span>
   
@@ -56,7 +56,7 @@ const x = 5.123000000000000000000000000001
 const x = 0x20000000000001
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noPrecisionLoss.js:1:11 <a href="https://biomejs.dev/linter/rules/no-precision-loss">lint/correctness/noPrecisionLoss</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noPrecisionLoss.jsx:1:11 <a href="https://biomejs.dev/linter/rules/no-precision-loss">lint/correctness/noPrecisionLoss</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This number literal will lose precision at runtime.</span>
   
@@ -72,7 +72,7 @@ const x = 0x20000000000001
 const x = 0x2_000000000_0001;
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noPrecisionLoss.js:1:11 <a href="https://biomejs.dev/linter/rules/no-precision-loss">lint/correctness/noPrecisionLoss</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noPrecisionLoss.jsx:1:11 <a href="https://biomejs.dev/linter/rules/no-precision-loss">lint/correctness/noPrecisionLoss</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This number literal will lose precision at runtime.</span>
   

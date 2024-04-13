@@ -28,7 +28,7 @@ This rule ignores var(--custom-property) variable syntaxes now.
 a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noDuplicateFontNames.js:1:56 <a href="https://biomejs.dev/linter/rules/no-font-family-duplicate-names">lint/nursery/noDuplicateFontNames</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noDuplicateFontNames.css:1:56 <a href="https://biomejs.dev/linter/rules/no-font-family-duplicate-names">lint/nursery/noDuplicateFontNames</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected duplicate font name: </span><span style="color: Tomato;"><strong>sans-serif</strong></span>
   
@@ -44,7 +44,7 @@ a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
 a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noDuplicateFontNames.js:1:44 <a href="https://biomejs.dev/linter/rules/no-font-family-duplicate-names">lint/nursery/noDuplicateFontNames</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noDuplicateFontNames.css:1:44 <a href="https://biomejs.dev/linter/rules/no-font-family-duplicate-names">lint/nursery/noDuplicateFontNames</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected duplicate font name: </span><span style="color: Tomato;"><strong>Arial</strong></span>
   
@@ -60,7 +60,7 @@ a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
 a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noDuplicateFontNames.js:1:39 <a href="https://biomejs.dev/linter/rules/no-font-family-duplicate-names">lint/nursery/noDuplicateFontNames</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noDuplicateFontNames.css:1:39 <a href="https://biomejs.dev/linter/rules/no-font-family-duplicate-names">lint/nursery/noDuplicateFontNames</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected duplicate font name: </span><span style="color: Tomato;"><strong>Arial</strong></span>
   

@@ -24,7 +24,7 @@ Using the literal forms enable static code analysis and avoid unnecessary comput
 parseInt("111110111", 2);
 ```
 
-<pre class="language-text"><code class="language-text">style/useNumericLiterals.js:1:1 <a href="https://biomejs.dev/linter/rules/use-numeric-literals">lint/style/useNumericLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useNumericLiterals.jsx:1:1 <a href="https://biomejs.dev/linter/rules/use-numeric-literals">lint/style/useNumericLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This call to </span><span style="color: Tomato;"><strong>parseInt()</strong></span><span style="color: Tomato;"> can be replaced by a binary literal.</span>
   
@@ -46,7 +46,7 @@ parseInt("111110111", 2);
 Number.parseInt("767", 8);
 ```
 
-<pre class="language-text"><code class="language-text">style/useNumericLiterals.js:1:1 <a href="https://biomejs.dev/linter/rules/use-numeric-literals">lint/style/useNumericLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useNumericLiterals.jsx:1:1 <a href="https://biomejs.dev/linter/rules/use-numeric-literals">lint/style/useNumericLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This call to </span><span style="color: Tomato;"><strong>Number.parseInt()</strong></span><span style="color: Tomato;"> can be replaced by an octal literal.</span>
   
@@ -68,7 +68,7 @@ Number.parseInt("767", 8);
 Number.parseInt("-1f7", 16);
 ```
 
-<pre class="language-text"><code class="language-text">style/useNumericLiterals.js:1:1 <a href="https://biomejs.dev/linter/rules/use-numeric-literals">lint/style/useNumericLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useNumericLiterals.jsx:1:1 <a href="https://biomejs.dev/linter/rules/use-numeric-literals">lint/style/useNumericLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This call to </span><span style="color: Tomato;"><strong>Number.parseInt()</strong></span><span style="color: Tomato;"> can be replaced by a hexadecimal literal.</span>
   

@@ -35,7 +35,7 @@ class X {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noStaticOnlyClass.js:1:1 <a href="https://biomejs.dev/linter/rules/no-static-only-class">lint/complexity/noStaticOnlyClass</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noStaticOnlyClass.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-static-only-class">lint/complexity/noStaticOnlyClass</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid classes that contain only static members.</span>
   
@@ -61,7 +61,7 @@ class StaticConstants {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noStaticOnlyClass.js:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noStaticOnlyClass.jsx:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">'readonly' modifier can only be used in TypeScript files</span>
   
@@ -113,7 +113,7 @@ export class Utilities {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noStaticOnlyClass.js:1:8 <a href="https://biomejs.dev/linter/rules/no-static-only-class">lint/complexity/noStaticOnlyClass</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noStaticOnlyClass.jsx:1:8 <a href="https://biomejs.dev/linter/rules/no-static-only-class">lint/complexity/noStaticOnlyClass</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid classes that contain only static members.</span>
   

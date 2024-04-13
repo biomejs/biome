@@ -29,7 +29,7 @@ class Foo {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateClassMembers.js:3:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-class-members">lint/suspicious/noDuplicateClassMembers</a> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateClassMembers.jsx:3:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-class-members">lint/suspicious/noDuplicateClassMembers</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Duplicate class member name &quot;bar&quot;</span>
   
@@ -49,7 +49,7 @@ class Foo {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateClassMembers.js:3:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-class-members">lint/suspicious/noDuplicateClassMembers</a> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateClassMembers.jsx:3:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-class-members">lint/suspicious/noDuplicateClassMembers</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Duplicate class member name &quot;bar&quot;</span>
   
@@ -69,7 +69,7 @@ class Foo {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateClassMembers.js:3:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-class-members">lint/suspicious/noDuplicateClassMembers</a> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateClassMembers.jsx:3:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-class-members">lint/suspicious/noDuplicateClassMembers</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Duplicate class member name &quot;bar&quot;</span>
   
@@ -89,7 +89,7 @@ class Foo {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateClassMembers.js:3:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-class-members">lint/suspicious/noDuplicateClassMembers</a> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateClassMembers.jsx:3:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-class-members">lint/suspicious/noDuplicateClassMembers</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Duplicate class member name &quot;bar&quot;</span>
   

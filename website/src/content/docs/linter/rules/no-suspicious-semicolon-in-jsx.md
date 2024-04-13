@@ -26,7 +26,7 @@ const Component = () => {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noSuspiciousSemicolonInJsx.js:4:14 <a href="https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx">lint/suspicious/noSuspiciousSemicolonInJsx</a> ━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noSuspiciousSemicolonInJsx.jsx:4:14 <a href="https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx">lint/suspicious/noSuspiciousSemicolonInJsx</a> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">There is a suspicious </span><span style="color: Tomato;"><strong>semicolon</strong></span><span style="color: Tomato;"> in the JSX element.</span>
   
