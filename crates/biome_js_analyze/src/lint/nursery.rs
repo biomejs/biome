@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_group;
 
+pub mod components_return_once;
 pub mod no_barrel_file;
 pub mod no_console;
 pub mod no_done_callback;
@@ -29,6 +30,7 @@ declare_group! {
     pub Nursery {
         name : "nursery" ,
         rules : [
+            self :: components_return_once :: ComponentsReturnOnce ,
             self :: no_barrel_file :: NoBarrelFile ,
             self :: no_console :: NoConsole ,
             self :: no_done_callback :: NoDoneCallback ,

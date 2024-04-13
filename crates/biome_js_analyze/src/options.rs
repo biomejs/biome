@@ -2,6 +2,8 @@
 
 use crate::lint;
 
+pub type ComponentsReturnOnce =
+    <lint::nursery::components_return_once::ComponentsReturnOnce as biome_analyze::Rule>::Options;
 pub type NoAccessKey = <lint::a11y::no_access_key::NoAccessKey as biome_analyze::Rule>::Options;
 pub type NoAccumulatingSpread = < lint :: performance :: no_accumulating_spread :: NoAccumulatingSpread as biome_analyze :: Rule > :: Options ;
 pub type NoApproximativeNumericConstant = < lint :: suspicious :: no_approximative_numeric_constant :: NoApproximativeNumericConstant as biome_analyze :: Rule > :: Options ;
