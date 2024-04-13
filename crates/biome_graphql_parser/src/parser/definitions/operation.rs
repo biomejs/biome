@@ -21,6 +21,8 @@ use biome_parser::{
     prelude::ParsedSyntax::*, token_set, Parser, TokenSet,
 };
 
+use super::is_at_definition;
+
 const OPERATION_TYPE: TokenSet<GraphqlSyntaxKind> =
     token_set![T![query], T![mutation], T![subscription]];
 
@@ -38,7 +40,8 @@ impl ParseNodeList for SelectionList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}'])
+        // stop at closing brace or at the start of a new operation
+        p.at(T!['}']) || is_at_definition(p)
     }
 
     fn recover(
@@ -262,7 +265,7 @@ fn parse_default_value(p: &mut GraphqlParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(crate) fn is_at_operation(p: &mut GraphqlParser<'_>) -> bool {
+pub(crate) fn is_at_operation(p: &GraphqlParser<'_>) -> bool {
     p.at_ts(OPERATION_TYPE) || is_at_selection_set(p)
 }
 

@@ -4,9 +4,11 @@ expression: snapshot
 ---
 ## Input
 ```graphql
+query likeStory }
+
 query likeStory
 
-
+query likeStory
 
 ```
 
@@ -21,7 +23,37 @@ GraphqlRoot {
                 value_token: QUERY_KW@0..6 "query" [] [Whitespace(" ")],
             },
             name: GraphqlName {
-                value_token: GRAPHQL_NAME@6..15 "likeStory" [] [],
+                value_token: GRAPHQL_NAME@6..16 "likeStory" [] [Whitespace(" ")],
+            },
+            variables: missing (optional),
+            directives: GraphqlDirectiveList [],
+            selection_set: GraphqlSelectionSet {
+                l_curly_token: missing (required),
+                selections: GraphqlSelectionList [],
+                r_curly_token: R_CURLY@16..17 "}" [] [],
+            },
+        },
+        GraphqlOperationDefinition {
+            ty: GraphqlOperationType {
+                value_token: QUERY_KW@17..25 "query" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            },
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@25..34 "likeStory" [] [],
+            },
+            variables: missing (optional),
+            directives: GraphqlDirectiveList [],
+            selection_set: GraphqlSelectionSet {
+                l_curly_token: missing (required),
+                selections: GraphqlSelectionList [],
+                r_curly_token: missing (required),
+            },
+        },
+        GraphqlOperationDefinition {
+            ty: GraphqlOperationType {
+                value_token: QUERY_KW@34..42 "query" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            },
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@42..51 "likeStory" [] [],
             },
             variables: missing (optional),
             directives: GraphqlDirectiveList [],
@@ -32,44 +64,91 @@ GraphqlRoot {
             },
         },
     ],
-    eof_token: EOF@15..18 "" [Newline("\n"), Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@51..52 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: GRAPHQL_ROOT@0..18
+0: GRAPHQL_ROOT@0..52
   0: (empty)
-  1: GRAPHQL_DEFINITION_LIST@0..15
-    0: GRAPHQL_OPERATION_DEFINITION@0..15
+  1: GRAPHQL_DEFINITION_LIST@0..51
+    0: GRAPHQL_OPERATION_DEFINITION@0..17
       0: GRAPHQL_OPERATION_TYPE@0..6
         0: QUERY_KW@0..6 "query" [] [Whitespace(" ")]
-      1: GRAPHQL_NAME@6..15
-        0: GRAPHQL_NAME@6..15 "likeStory" [] []
+      1: GRAPHQL_NAME@6..16
+        0: GRAPHQL_NAME@6..16 "likeStory" [] [Whitespace(" ")]
       2: (empty)
-      3: GRAPHQL_DIRECTIVE_LIST@15..15
-      4: GRAPHQL_SELECTION_SET@15..15
+      3: GRAPHQL_DIRECTIVE_LIST@16..16
+      4: GRAPHQL_SELECTION_SET@16..17
         0: (empty)
-        1: GRAPHQL_SELECTION_LIST@15..15
+        1: GRAPHQL_SELECTION_LIST@16..16
+        2: R_CURLY@16..17 "}" [] []
+    1: GRAPHQL_OPERATION_DEFINITION@17..34
+      0: GRAPHQL_OPERATION_TYPE@17..25
+        0: QUERY_KW@17..25 "query" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: GRAPHQL_NAME@25..34
+        0: GRAPHQL_NAME@25..34 "likeStory" [] []
+      2: (empty)
+      3: GRAPHQL_DIRECTIVE_LIST@34..34
+      4: GRAPHQL_SELECTION_SET@34..34
+        0: (empty)
+        1: GRAPHQL_SELECTION_LIST@34..34
         2: (empty)
-  2: EOF@15..18 "" [Newline("\n"), Newline("\n"), Newline("\n")] []
+    2: GRAPHQL_OPERATION_DEFINITION@34..51
+      0: GRAPHQL_OPERATION_TYPE@34..42
+        0: QUERY_KW@34..42 "query" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: GRAPHQL_NAME@42..51
+        0: GRAPHQL_NAME@42..51 "likeStory" [] []
+      2: (empty)
+      3: GRAPHQL_DIRECTIVE_LIST@51..51
+      4: GRAPHQL_SELECTION_SET@51..51
+        0: (empty)
+        1: GRAPHQL_SELECTION_LIST@51..51
+        2: (empty)
+  2: EOF@51..52 "" [Newline("\n")] []
 
 ```
 
 ## Diagnostics
 
 ```
-operation.graphql:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+operation.graphql:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `}`
+  
+  > 1 │ query likeStory }
+      │                 ^
+    2 │ 
+    3 │ query likeStory
+  
+  i Remove }
+  
+operation.graphql:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `query`
+  
+    3 │ query likeStory
+    4 │ 
+  > 5 │ query likeStory
+      │ ^^^^^
+    6 │ 
+  
+  i Remove query
+  
+operation.graphql:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead the file ends
   
-  > 4 │ 
+    5 │ query likeStory
+  > 6 │ 
       │ 
   
   i the file ends here
   
-  > 4 │ 
+    5 │ query likeStory
+  > 6 │ 
       │ 
   
 ```
