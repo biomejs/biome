@@ -15,7 +15,7 @@ coverImage:
 socialImage: "@/assets/social-logo.png"
 ---
 
-Today we’re excited to announce the release of _Biome 1.7_!
+Today we’re excited to announce the release of _Biome v1.7_!
 
 This new version provides an easy path to migrate from ESLint and Prettier.
 It also introduces experimental machine-readable reports for the formatter and the linter, new linter rules, and many fixes.
@@ -211,7 +211,7 @@ Please try this feature and let us know if any information is missing from the r
 
 ## Check _Git_ staged files
 
-_Biome 1.5_ added the `--changed` flag on its main commands `biome format`, `biome lint`, and `biome check` to format and lint _Git_ tracked files that have been changed.
+_Biome v1.5_ added the `--changed` flag on its main commands `biome format`, `biome lint`, and `biome check` to format and lint _Git_ tracked files that have been changed.
 
 Today we are introducing a new flag `--staged` which allows you to check only files that have been added to the _Git index_ (_staged files_).
 This is useful for checking that the files you want to commit are formatted and linted:
@@ -231,7 +231,7 @@ Thus, we still recommend using a [dedicated pre-commit tool](/recipes/git-hooks/
 
 ### New nursery rules
 
-Since _Biome 1.6_, we added several new rules.
+Since _Biome v1.6_, we added several new rules.
 New rules are incubated in the nursery group.
 Nursery rules are subject to breaking changes.
 The new rules are:
@@ -289,3 +289,16 @@ The following rules are promoted:
 - [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now supports _Preact_.
 
 See the [changelog](/internals/changelog/#170-2024-04-15) for more details.
+
+
+## What’s Next?
+
+We have started work on the _CSS_ formatter and linter.
+Some of our contributors have also started preliminary work on support for [_GraphQL_](https://github.com/biomejs/biome/issues/1927) and [_YAML_](https://github.com/biomejs/biome/issues/2365).
+Any help is welcome!
+
+If _Biome_ is valuable to you or your company, consider making a monthly donation to our [Open Collective](https://opencollective.com/biome).
+You can also [sponsor us on GitHub](https://github.com/sponsors/biomejs).
+This is important for the sustainability of the project.
+
+Follow us on [our Twitter](https://twitter.com/home) and join [our Discord community](https://discord.gg/BypW39g6Yc).
