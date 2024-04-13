@@ -47,6 +47,12 @@ for (let i = 0, j = 0; i < array.length; i++) {
  }
 ```
 
+```jsx
+for (var i of array) {
+  console.log(i)
+}
+```
+
 ## Related links
 
 - [Disable a rule](/linter/#disable-a-lint-rule)
