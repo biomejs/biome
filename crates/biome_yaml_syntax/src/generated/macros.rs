@@ -16,24 +16,8 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::YamlSyntaxNode::kind(&node) {
-                $crate::YamlSyntaxKind::YAML_ALIAS => {
-                    let $pattern = unsafe { $crate::YamlAlias::new_unchecked(node) };
-                    $body
-                }
-                $crate::YamlSyntaxKind::YAML_COMMENT => {
-                    let $pattern = unsafe { $crate::YamlComment::new_unchecked(node) };
-                    $body
-                }
                 $crate::YamlSyntaxKind::YAML_DOCUMENT => {
                     let $pattern = unsafe { $crate::YamlDocument::new_unchecked(node) };
-                    $body
-                }
-                $crate::YamlSyntaxKind::YAML_MAPPING => {
-                    let $pattern = unsafe { $crate::YamlMapping::new_unchecked(node) };
-                    $body
-                }
-                $crate::YamlSyntaxKind::YAML_MAPPING_ENTRY => {
-                    let $pattern = unsafe { $crate::YamlMappingEntry::new_unchecked(node) };
                     $body
                 }
                 $crate::YamlSyntaxKind::YAML_ROOT => {
@@ -44,24 +28,20 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlScalar::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_SEQUENCE => {
-                    let $pattern = unsafe { $crate::YamlSequence::new_unchecked(node) };
-                    $body
-                }
                 $crate::YamlSyntaxKind::YAML_BOGUS => {
                     let $pattern = unsafe { $crate::YamlBogus::new_unchecked(node) };
                     $body
                 }
+                $crate::YamlSyntaxKind::YAML_BOGUS_VALUE => {
+                    let $pattern = unsafe { $crate::YamlBogusValue::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_CONTENT_LIST => {
+                    let $pattern = unsafe { $crate::YamlContentList::new_unchecked(node) };
+                    $body
+                }
                 $crate::YamlSyntaxKind::YAML_DOCUMENT_LIST => {
                     let $pattern = unsafe { $crate::YamlDocumentList::new_unchecked(node) };
-                    $body
-                }
-                $crate::YamlSyntaxKind::YAML_MAPPING_ENTRIES => {
-                    let $pattern = unsafe { $crate::YamlMappingEntries::new_unchecked(node) };
-                    $body
-                }
-                $crate::YamlSyntaxKind::YAML_SEQUENCE_ELEMENTS => {
-                    let $pattern = unsafe { $crate::YamlSequenceElements::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

@@ -21,12 +21,19 @@ pub enum YamlSyntaxKind {
     R_BRACK,
     DASH,
     PERCENT,
-    ASTERISK,
+    STAR,
     HASH,
+    BANG,
+    AT,
     SHL,
     AMP,
+    PIPE,
+    R_ANGLE,
+    TILDE,
+    BACKTICK,
     DOC_START,
     DOC_END,
+    NULL_KW,
     YAML_SCALAR,
     NEWLINE,
     WHITESPACE,
@@ -34,16 +41,11 @@ pub enum YamlSyntaxKind {
     COMMENT,
     YAML_ROOT,
     YAML_DOCUMENT_LIST,
-    ANY_YAML_NODE,
-    YAML_SCALAR,
-    YAML_SEQUENCE,
-    YAML_SEQUENCE_ELEMENTS,
-    YAML_MAPPING,
-    YAML_MAPPING_ENTRY,
-    YAML_MAPPING_ENTRIES,
-    YAML_ALIAS,
+    YAML_DOCUMENT,
+    YAML_CONTENT_LIST,
+    ANY_YAML_CONTENT,
     YAML_BOGUS,
-    YAML_COMMENT,
+    YAML_BOGUS_VALUE,
     #[doc(hidden)]
     __LAST,
 }
@@ -51,8 +53,9 @@ use self::YamlSyntaxKind::*;
 impl YamlSyntaxKind {
     pub const fn is_punct(self) -> bool {
         match self {
-            COLON | COMMA | L_CURLY | R_CURLY | L_BRACK | R_BRACK | DASH | PERCENT | ASTERISK
-            | HASH | SHL | AMP | DOC_START | DOC_END => true,
+            COLON | COMMA | L_CURLY | R_CURLY | L_BRACK | R_BRACK | DASH | PERCENT | STAR
+            | HASH | BANG | AT | SHL | AMP | PIPE | R_ANGLE | TILDE | BACKTICK | DOC_START
+            | DOC_END => true,
             _ => false,
         }
     }
@@ -64,12 +67,13 @@ impl YamlSyntaxKind {
     }
     pub const fn is_list(self) -> bool {
         match self {
-            YAML_DOCUMENT_LIST => true,
+            YAML_DOCUMENT_LIST | YAML_CONTENT_LIST => true,
             _ => false,
         }
     }
     pub fn from_keyword(ident: &str) -> Option<YamlSyntaxKind> {
         let kw = match ident {
+            "null" => NULL_KW,
             _ => return None,
         };
         Some(kw)
@@ -84,12 +88,19 @@ impl YamlSyntaxKind {
             R_BRACK => "]",
             DASH => "-",
             PERCENT => "%",
-            ASTERISK => "*",
+            STAR => "*",
             HASH => "#",
+            BANG => "!",
+            AT => "@",
             SHL => "<<",
             AMP => "&",
+            PIPE => "|",
+            R_ANGLE => ">",
+            TILDE => "~",
+            BACKTICK => "`",
             DOC_START => "---",
             DOC_END => "...",
+            NULL_KW => "null",
             YAML_STRING_LITERAL => "string literal",
             _ => return None,
         };
@@ -98,4 +109,4 @@ impl YamlSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [:] => { $ crate :: YamlSyntaxKind :: COLON } ; [,] => { $ crate :: YamlSyntaxKind :: COMMA } ; ['{'] => { $ crate :: YamlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: YamlSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: YamlSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: YamlSyntaxKind :: R_BRACK } ; [-] => { $ crate :: YamlSyntaxKind :: DASH } ; [%] => { $ crate :: YamlSyntaxKind :: PERCENT } ; [*] => { $ crate :: YamlSyntaxKind :: ASTERISK } ; [#] => { $ crate :: YamlSyntaxKind :: HASH } ; [<<] => { $ crate :: YamlSyntaxKind :: SHL } ; [&] => { $ crate :: YamlSyntaxKind :: AMP } ; [---] => { $ crate :: YamlSyntaxKind :: DOC_START } ; [...] => { $ crate :: YamlSyntaxKind :: DOC_END } ; [ident] => { $ crate :: YamlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: YamlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: YamlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: YamlSyntaxKind :: HASH } ; }
+macro_rules ! T { [:] => { $ crate :: YamlSyntaxKind :: COLON } ; [,] => { $ crate :: YamlSyntaxKind :: COMMA } ; ['{'] => { $ crate :: YamlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: YamlSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: YamlSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: YamlSyntaxKind :: R_BRACK } ; [-] => { $ crate :: YamlSyntaxKind :: DASH } ; [%] => { $ crate :: YamlSyntaxKind :: PERCENT } ; [*] => { $ crate :: YamlSyntaxKind :: STAR } ; [#] => { $ crate :: YamlSyntaxKind :: HASH } ; [!] => { $ crate :: YamlSyntaxKind :: BANG } ; [@] => { $ crate :: YamlSyntaxKind :: AT } ; [<<] => { $ crate :: YamlSyntaxKind :: SHL } ; [&] => { $ crate :: YamlSyntaxKind :: AMP } ; [|] => { $ crate :: YamlSyntaxKind :: PIPE } ; [>] => { $ crate :: YamlSyntaxKind :: R_ANGLE } ; [~] => { $ crate :: YamlSyntaxKind :: TILDE } ; ['`'] => { $ crate :: YamlSyntaxKind :: BACKTICK } ; [---] => { $ crate :: YamlSyntaxKind :: DOC_START } ; [...] => { $ crate :: YamlSyntaxKind :: DOC_END } ; [null] => { $ crate :: YamlSyntaxKind :: NULL_KW } ; [ident] => { $ crate :: YamlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: YamlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: YamlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: YamlSyntaxKind :: HASH } ; }

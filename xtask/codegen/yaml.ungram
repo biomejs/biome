@@ -24,35 +24,19 @@
 // - Bogus nodes are special nodes used to keep track of broken code; they are
 //   not part of the grammar but they will appear inside the green tree
 
-// BOGUS NODES
 SyntaxElement = SyntaxElement
-YamlBogus = SyntaxElement*
 
-// ROOT
+YamlBogus = SyntaxElement*
+YamlBogusValue = SyntaxElement*
+
 YamlRoot =
     bom: 'UNICODE_BOM'?
     documents: YamlDocumentList
     eof: 'EOF'
 
 YamlDocumentList = YamlDocument*
+YamlDocument = content: YamlContentList
+YamlContentList = AnyYamlContent*
 
-YamlDocument = content: AnyYamlNode?
-
-AnyYamlNode =
-    YamlScalar
-    | YamlSequence
-    | YamlAlias
-    | YamlBogus
-
-YamlScalar = 'SCALAR_VALUE'
-
-YamlSequence = '[' elements: YamlSequenceElements ']'
-YamlSequenceElements = (AnyYamlNode (',' AnyYamlNode)* ','?)
-
-YamlMapping = '{' entries: YamlMappingEntries '}'
-YamlMappingEntries = (YamlMappingEntry (',' YamlMappingEntry)* ','?) // sequence of mapping entries
-YamlMappingEntry = key: YamlScalar ':' value: AnyYamlNode
-
-YamlAlias = '*' label: 'yaml_alias'
-
-YamlComment = '#' text: 'yaml_comment_text'
+AnyYamlContent = YamlScalar | YamlBogusValue
+YamlScalar = 'YAML_SCALAR'
