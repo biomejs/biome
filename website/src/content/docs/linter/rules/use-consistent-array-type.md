@@ -20,7 +20,7 @@ Using the same style consistently across your codebase makes it easier for devel
 let invalid: Array<foo>;
 ```
 
-<pre class="language-text"><code class="language-text">style/useConsistentArrayType.js:1:14 <a href="https://biomejs.dev/linter/rules/use-consistent-array-type">lint/style/useConsistentArrayType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useConsistentArrayType.ts:1:14 <a href="https://biomejs.dev/linter/rules/use-consistent-array-type">lint/style/useConsistentArrayType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use </span><span style="color: Orange;"><strong>shorthand T[] syntax</strong></span><span style="color: Orange;"> instead of </span><span style="color: Orange;"><strong>Array&lt;T&gt; syntax.</strong></span>
   
@@ -40,7 +40,7 @@ let invalid: Array<foo>;
 let invalid: Promise<Array<string>>;
 ```
 
-<pre class="language-text"><code class="language-text">style/useConsistentArrayType.js:1:22 <a href="https://biomejs.dev/linter/rules/use-consistent-array-type">lint/style/useConsistentArrayType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useConsistentArrayType.ts:1:22 <a href="https://biomejs.dev/linter/rules/use-consistent-array-type">lint/style/useConsistentArrayType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use </span><span style="color: Orange;"><strong>shorthand T[] syntax</strong></span><span style="color: Orange;"> instead of </span><span style="color: Orange;"><strong>Array&lt;T&gt; syntax.</strong></span>
   
@@ -60,7 +60,7 @@ let invalid: Promise<Array<string>>;
 let invalid3: Array<Foo<Bar>>;
 ```
 
-<pre class="language-text"><code class="language-text">style/useConsistentArrayType.js:1:15 <a href="https://biomejs.dev/linter/rules/use-consistent-array-type">lint/style/useConsistentArrayType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useConsistentArrayType.ts:1:15 <a href="https://biomejs.dev/linter/rules/use-consistent-array-type">lint/style/useConsistentArrayType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use </span><span style="color: Orange;"><strong>shorthand T[] syntax</strong></span><span style="color: Orange;"> instead of </span><span style="color: Orange;"><strong>Array&lt;T&gt; syntax.</strong></span>
   

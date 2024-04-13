@@ -22,7 +22,7 @@ class Person {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/useGetterReturn.js:2:5 <a href="https://biomejs.dev/linter/rules/use-getter-return">lint/suspicious/useGetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/useGetterReturn.jsx:2:5 <a href="https://biomejs.dev/linter/rules/use-getter-return">lint/suspicious/useGetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>getter</strong></span><span style="color: Tomato;"> should </span><span style="color: Tomato;"><strong>return</strong></span><span style="color: Tomato;"> a value.</span>
   
@@ -42,7 +42,7 @@ const obj = {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/useGetterReturn.js:3:9 <a href="https://biomejs.dev/linter/rules/use-getter-return">lint/suspicious/useGetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/useGetterReturn.jsx:3:9 <a href="https://biomejs.dev/linter/rules/use-getter-return">lint/suspicious/useGetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>return</strong></span><span style="color: Tomato;"> should return a value because it is located in a </span><span style="color: Tomato;"><strong>getter</strong></span><span style="color: Tomato;">.</span>
   
@@ -67,7 +67,7 @@ class Option {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/useGetterReturn.js:2:5 <a href="https://biomejs.dev/linter/rules/use-getter-return">lint/suspicious/useGetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/useGetterReturn.jsx:2:5 <a href="https://biomejs.dev/linter/rules/use-getter-return">lint/suspicious/useGetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>getter</strong></span><span style="color: Tomato;"> should </span><span style="color: Tomato;"><strong>return</strong></span><span style="color: Tomato;"> a value.</span>
   

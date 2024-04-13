@@ -23,7 +23,7 @@ Check out React documentation for [explanation on the why does React need keys.]
 [<Hello />];
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useJsxKeyInIterable.js:1:2 <a href="https://biomejs.dev/linter/rules/use-jsx-key-in-iterable">lint/nursery/useJsxKeyInIterable</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useJsxKeyInIterable.jsx:1:2 <a href="https://biomejs.dev/linter/rules/use-jsx-key-in-iterable">lint/nursery/useJsxKeyInIterable</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Missing </span><span style="color: Orange;"><strong>key</strong></span><span style="color: Orange;"> property for this element in iterable.</span>
   
@@ -41,7 +41,7 @@ Check out React documentation for [explanation on the why does React need keys.]
 data.map((x) => <Hello>{x}</Hello>);
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useJsxKeyInIterable.js:1:17 <a href="https://biomejs.dev/linter/rules/use-jsx-key-in-iterable">lint/nursery/useJsxKeyInIterable</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useJsxKeyInIterable.jsx:1:17 <a href="https://biomejs.dev/linter/rules/use-jsx-key-in-iterable">lint/nursery/useJsxKeyInIterable</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Missing </span><span style="color: Orange;"><strong>key</strong></span><span style="color: Orange;"> property for this element in iterable.</span>
   

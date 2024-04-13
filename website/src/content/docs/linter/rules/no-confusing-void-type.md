@@ -26,7 +26,7 @@ If you think you need this then you probably want the `undefined` type instead.
 let foo: void;
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noConfusingVoidType.js:1:10 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/suspicious/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noConfusingVoidType.ts:1:10 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/suspicious/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">void is only valid as a return type or a type argument in generic type</span>
   
@@ -42,7 +42,7 @@ let foo: void;
 function logSomething(thing: void) {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noConfusingVoidType.js:1:30 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/suspicious/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noConfusingVoidType.ts:1:30 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/suspicious/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">void is only valid as a return type or a type argument in generic type</span>
   
@@ -60,7 +60,7 @@ interface Interface {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noConfusingVoidType.js:2:11 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/suspicious/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noConfusingVoidType.ts:2:11 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/suspicious/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">void is only valid as a return type or a type argument in generic type</span>
   
@@ -78,7 +78,7 @@ interface Interface {
 type PossibleValues = number | void;
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noConfusingVoidType.js:1:32 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/suspicious/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noConfusingVoidType.ts:1:32 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/suspicious/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">void is not valid as a constituent in a union type</span>
   

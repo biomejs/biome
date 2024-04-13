@@ -18,7 +18,7 @@ Disallow negation in the condition of an `if` statement if it has an `else` clau
 if (!cond) { f();} else { g();}
 ```
 
-<pre class="language-text"><code class="language-text">style/noNegationElse.js:1:1 <a href="https://biomejs.dev/linter/rules/no-negation-else">lint/style/noNegationElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noNegationElse.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-negation-else">lint/style/noNegationElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Invert blocks when performing a negation test.</span>
   
@@ -38,7 +38,7 @@ if (!cond) { f();} else { g();}
 !cond ? 0 : 1
 ```
 
-<pre class="language-text"><code class="language-text">style/noNegationElse.js:1:1 <a href="https://biomejs.dev/linter/rules/no-negation-else">lint/style/noNegationElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noNegationElse.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-negation-else">lint/style/noNegationElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Invert blocks when performing a negation test.</span>
   

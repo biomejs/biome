@@ -31,7 +31,7 @@ It ignores CommonJS default exports.
 export default function f() {};
 ```
 
-<pre class="language-text"><code class="language-text">style/noDefaultExport.js:1:8 <a href="https://biomejs.dev/linter/rules/no-default-export">lint/style/noDefaultExport</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noDefaultExport.jsx:1:8 <a href="https://biomejs.dev/linter/rules/no-default-export">lint/style/noDefaultExport</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Avoid </span><span style="color: Orange;"><strong>default</strong></span><span style="color: Orange;"> exports.</span>
   
@@ -49,7 +49,7 @@ export default function f() {};
 export default class C {};
 ```
 
-<pre class="language-text"><code class="language-text">style/noDefaultExport.js:1:8 <a href="https://biomejs.dev/linter/rules/no-default-export">lint/style/noDefaultExport</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noDefaultExport.jsx:1:8 <a href="https://biomejs.dev/linter/rules/no-default-export">lint/style/noDefaultExport</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Avoid </span><span style="color: Orange;"><strong>default</strong></span><span style="color: Orange;"> exports.</span>
   
@@ -70,7 +70,7 @@ export default {
 };
 ```
 
-<pre class="language-text"><code class="language-text">style/noDefaultExport.js:1:8 <a href="https://biomejs.dev/linter/rules/no-default-export">lint/style/noDefaultExport</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noDefaultExport.jsx:1:8 <a href="https://biomejs.dev/linter/rules/no-default-export">lint/style/noDefaultExport</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Avoid </span><span style="color: Orange;"><strong>default</strong></span><span style="color: Orange;"> exports.</span>
   
@@ -89,7 +89,7 @@ export default {
 export { X as default };
 ```
 
-<pre class="language-text"><code class="language-text">style/noDefaultExport.js:1:15 <a href="https://biomejs.dev/linter/rules/no-default-export">lint/style/noDefaultExport</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noDefaultExport.jsx:1:15 <a href="https://biomejs.dev/linter/rules/no-default-export">lint/style/noDefaultExport</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Avoid </span><span style="color: Orange;"><strong>default</strong></span><span style="color: Orange;"> exports.</span>
   
