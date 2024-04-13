@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+//Case with className
+<div className="greeting">Hello world!</div>;
+
+//Case with className with expression
+<div className={"greeting"}>Hello world!</div>;
+
+//Case with htmlFor
+<div htmlFor="greeting">Hello world!</div>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This JSX property is specific to React.
+  
+    1 │ //Case with className
+  > 2 │ <div className="greeting">Hello world!</div>;
+      │      ^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ //Case with className with expression
+  
+
+```
+
+```
+invalid.jsx:5:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This JSX property is specific to React.
+  
+    4 │ //Case with className with expression
+  > 5 │ <div className={"greeting"}>Hello world!</div>;
+      │      ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ //Case with htmlFor
+  
+
+```
+
+```
+invalid.jsx:8:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This JSX property is specific to React.
+  
+    7 │ //Case with htmlFor
+  > 8 │ <div htmlFor="greeting">Hello world!</div>;
+      │      ^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+
+```
