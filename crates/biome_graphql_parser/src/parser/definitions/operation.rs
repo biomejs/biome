@@ -79,7 +79,7 @@ impl ParseNodeList for VariableDefinitionList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')'])
+        p.at(T![')']) || !is_at_variable(p)
     }
 
     fn recover(

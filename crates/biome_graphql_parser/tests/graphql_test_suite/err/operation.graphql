@@ -2,4 +2,20 @@ query likeStory }
 
 query likeStory
 
-query likeStory
+# malformed variables
+query ($storyId: ID! {
+	likeStory(storyId: $storyId)
+}
+
+query $storyId: ID! {
+	likeStory(storyId: $storyId)
+}
+
+query $storyId: ID!) {
+	likeStory(storyId: $storyId)
+}
+
+query ($: ) {
+	likeStory(storyId: $)
+}
+
