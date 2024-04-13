@@ -62,7 +62,19 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
     }
 
     fn to_bogus(&self) -> GraphqlSyntaxKind {
-        GRAPHQL_BOGUS
+        match self {
+            kind if AnyGraphqlDefinition::can_cast(*kind) => GRAPHQL_BOGUS_DEFINITION,
+            kind if AnyGraphqlSelection::can_cast(*kind) => GRAPHQL_BOGUS_SELECTION,
+            kind if AnyGraphqlValue::can_cast(*kind) => GRAPHQL_BOGUS_VALUE,
+            kind if AnyGraphqlType::can_cast(*kind) => GRAPHQL_BOGUS_TYPE,
+            kind if AnyGraphqlSchemaExtension::can_cast(*kind) => GRAPHQL_BOGUS_EXTENSION,
+            kind if AnyGraphqlObjectTypeExtension::can_cast(*kind) => GRAPHQL_BOGUS_EXTENSION,
+            kind if AnyGraphqlInterfaceTypeExtension::can_cast(*kind) => GRAPHQL_BOGUS_EXTENSION,
+            kind if AnyGraphqlUnionTypeExtension::can_cast(*kind) => GRAPHQL_BOGUS_EXTENSION,
+            kind if AnyGraphqlEnumTypeExtension::can_cast(*kind) => GRAPHQL_BOGUS_EXTENSION,
+            kind if AnyGraphqlInputObjectTypeExtension::can_cast(*kind) => GRAPHQL_BOGUS_EXTENSION,
+            _ => GRAPHQL_BOGUS,
+        }
     }
 
     #[inline]
