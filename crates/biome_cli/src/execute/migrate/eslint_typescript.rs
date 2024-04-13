@@ -127,7 +127,7 @@ impl From<NamingConventionOptions> for use_naming_convention::NamingConventionOp
 #[derive(Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
 pub(crate) struct NamingConventionSelection {
-    pub(crate) selector: eslint_eslint::Shorthand<Selector>,
+    pub(crate) selector: eslint_eslint::ShorthandVec<Selector>,
     pub(crate) modifiers: Option<Vec<Modifier>>,
     pub(crate) types: Option<Vec<Type>>,
     //pub(crate) custom: Option<Custom>,
