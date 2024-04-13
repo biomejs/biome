@@ -58,7 +58,7 @@ impl Rule for NoReExportAll {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                ctx.query().syntax().parent()?.text_trimmed_range(),
+                ctx.query().range(),
                 markup! {
                     "Do not use export all ( "<Emphasis>"export * from ..."</Emphasis>" )."
                 },
