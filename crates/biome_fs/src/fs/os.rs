@@ -94,14 +94,9 @@ impl FileSystem for OsFileSystem {
     fn resolve_configuration(
         &self,
         specifier: &str,
-        path: Option<&Path>,
+        path: &Path,
     ) -> Result<Resolution, ResolveError> {
-        if let Some(path) = path {
-            self.configuration_resolver.resolve(path, specifier)
-        } else {
-            self.configuration_resolver
-                .resolve(self.working_directory().unwrap_or_default(), specifier)
-        }
+        self.configuration_resolver.resolve(path, specifier)
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {

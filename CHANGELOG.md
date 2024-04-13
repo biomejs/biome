@@ -195,6 +195,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Support `overrides` field in Prettier configuration files when migrating from Prettier.
   Contributed by @Conaclos
 
+- Support passing a file path to the `--config-path` flag or the `BIOME_CONFIG_PATH` environment variable.
+
+  Now you can pass a `.json`/`.jsonc` file path with any filename to the `--config-path` flag or the
+  `BIOME_CONFIG_PATH` environment variable. This will disable the configuration auto-resolution and Biome
+  will try to read the configuration from the said file path ([#2265](https://github.com/biomejs/biome/issues/2265)).
+
+  ```shell
+  biome format --config-path=../biome.json ./src
+  ```
+
+  Contributed by @Sec-ant
+
 #### Bug fixes
 
 - Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnositic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
@@ -202,6 +214,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Biome now correctly filters out files that are not present in the current directory when using the `--changed` flag [#1996](https://github.com/biomejs/biome/issues/1996). Contributed by @castarco
 
 - Biome now skips traversing `fifo` or `socket` files ([#2311](https://github.com/biomejs/biome/issues/2311)). Contributed by @Sec-ant
+
+- Biome now resolves configuration files exported from external libraries in `extends` from the working directory (CLI) or project root (LSP). This is the documented behavior and previous resolution behavior is considered as a bug ([#2231](https://github.com/biomejs/biome/issues/2231)). Contributed by @Sec-ant
 
 ### Configuration
 

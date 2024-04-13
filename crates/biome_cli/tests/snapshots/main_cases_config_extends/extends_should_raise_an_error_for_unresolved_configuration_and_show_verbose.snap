@@ -35,10 +35,8 @@ formatTYPO.json configuration ━━━━━━━━━━━━━━━━�
   
   Verbose advice
   
-    i Biome tried to load the configuration file  using formatTYPO.json as base path.
+    i Biome tried to load the configuration file "formatTYPO.json" in "extends" using "" as the base path.
     
 
 
 ```
-
-

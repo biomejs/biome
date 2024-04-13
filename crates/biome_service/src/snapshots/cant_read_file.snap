@@ -4,4 +4,4 @@ expression: content
 ---
 example.js internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: example.js
+  × Biome couldn't read the following file, maybe for permissions reasons or it doesn't exist: example.js
