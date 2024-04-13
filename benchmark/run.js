@@ -155,7 +155,7 @@ function benchmarkLinter(biome) {
 		deleteFile(path.join(projectDirectory, "/eslintrc.js"));
 
 		// Override eslint config
-		const eslintConfig = fs.readFileSync("./bench.eslint.js");
+		const eslintConfig = fs.readFileSync("./bench.eslint.config.js");
 		fs.writeFileSync(
 			path.join(projectDirectory, "eslint.config.js"),
 			eslintConfig,
