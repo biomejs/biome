@@ -324,8 +324,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
 
-    let mut number_of_recommended_rules: u8 = 0;
-    let number_of_rules = Literal::u8_unsuffixed(rules.len() as u8);
     for (index, (rule, metadata)) in rules.iter().enumerate() {
         let summary = {
             let mut docs = String::new();
@@ -382,7 +380,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             lines_recommended_rule.push(quote! {
                 #rule
             });
-            number_of_recommended_rules += 1;
         }
         lines_all_rule_as_filter.push(quote! {
             RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
@@ -423,8 +420,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
     }
 
     let group_struct_name = Ident::new(&to_capitalized(group), Span::call_site());
-
-    let number_of_recommended_rules = Literal::u8_unsuffixed(number_of_recommended_rules);
 
     quote! {
         #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
@@ -468,19 +463,19 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         impl #group_struct_name {
 
             const GROUP_NAME: &'static str = #group;
-            pub(crate) const GROUP_RULES: [&'static str; #number_of_rules] = [
+            pub(crate) const GROUP_RULES: &'static [&'static str] = &[
                 #( #lines_rule ),*
             ];
 
-            const RECOMMENDED_RULES: [&'static str; #number_of_recommended_rules] = [
+            const RECOMMENDED_RULES: &'static [&'static str] = &[
                 #( #lines_recommended_rule ),*
             ];
 
-            const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; #number_of_recommended_rules] = [
+            const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
                 #( #lines_recommended_rule_as_filter ),*
             ];
 
-            const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; #number_of_rules] = [
+            const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
                 #( #lines_all_rule_as_filter ),*
             ];
 
@@ -524,11 +519,11 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                  Self::RECOMMENDED_RULES.contains(&rule_name)
             }
 
-            pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; #number_of_recommended_rules] {
+            pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
                 Self::RECOMMENDED_RULES_AS_FILTERS
             }
 
-            pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; #number_of_rules] {
+            pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
                 Self::ALL_RULES_AS_FILTERS
             }
 
@@ -564,7 +559,7 @@ fn generate_push_to_analyzer_rules(group: &str) -> TokenStream {
     let group_identifier = Ident::new(group, Span::call_site());
     quote! {
        if let Some(rules) = rules.#group_identifier.as_ref() {
-            for rule_name in &#group_struct_name::GROUP_RULES {
+            for rule_name in #group_struct_name::GROUP_RULES {
                 if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name) {
                     if let Some(rule_key) = metadata.find_rule(#group, rule_name) {
                         analyzer_rules.push_rule(rule_key, rule_options);
