@@ -12,7 +12,7 @@ This rule hasn't been released yet.
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-**[WIP] This rule hasn't been implemented yet.**
+**WIP: This rule hasn't been implemented yet.**
 
 This is sample rule
 

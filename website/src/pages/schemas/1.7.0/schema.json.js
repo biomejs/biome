@@ -122,7 +122,8 @@ export function GET() {
 						],
 					},
 					noHeaderScope: {
-						description: "The scope prop should be used only on <th> elements.",
+						description:
+							"The scope prop should be used only on \\<th> elements.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1428,7 +1429,7 @@ export function GET() {
 					},
 					{
 						description:
-							"Indicates a classic React environment that requires the `React` import.\n\nCorresponds to the `react` value for the `jsx` option in TypeScript's `tsconfig.json`.\n\nThis option should only be necessary if you cannot upgrade to a React version that supports the new JSX runtime. For more information about the old vs. new JSX runtime, please see: https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html",
+							"Indicates a classic React environment that requires the `React` import.\n\nCorresponds to the `react` value for the `jsx` option in TypeScript's `tsconfig.json`.\n\nThis option should only be necessary if you cannot upgrade to a React version that supports the new JSX runtime. For more information about the old vs. new JSX runtime, please see: <https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html>",
 						type: "string",
 						enum: ["ReactClassic"],
 					},
@@ -1523,7 +1524,7 @@ export function GET() {
 						type: ["boolean", "null"],
 					},
 					noColorInvalidHex: {
-						description: "[WIP] This rule hasn't been implemented yet.",
+						description: "WIP: This rule hasn't been implemented yet.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1531,6 +1532,14 @@ export function GET() {
 					},
 					noConsole: {
 						description: "Disallow the use of console.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noConstantMathMinMaxClamp: {
+						description:
+							"Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1569,6 +1578,13 @@ export function GET() {
 					noEvolvingAny: {
 						description:
 							"Disallow variables from evolving into any type through reassignments.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noFlatMapIdentity: {
+						description: "Disallow to use unnecessary callback on flatMap.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -2238,7 +2254,8 @@ export function GET() {
 						],
 					},
 					useConsistentArrayType: {
-						description: "Require consistently using either T[] or Array<T>",
+						description:
+							"Require consistently using either T\\[] or Array\\<T>",
 						anyOf: [
 							{ $ref: "#/definitions/ConsistentArrayTypeConfiguration" },
 							{ type: "null" },
@@ -2301,7 +2318,7 @@ export function GET() {
 					},
 					useFragmentSyntax: {
 						description:
-							"This rule enforces the use of <>...</> over <Fragment>...</Fragment>.",
+							"This rule enforces the use of \\<>...\\</> over \\<Fragment>...\\</Fragment>.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -2370,7 +2387,7 @@ export function GET() {
 					},
 					useShorthandArrayType: {
 						description:
-							"When expressing array types, this rule promotes the usage of T[] shorthand instead of Array<T>.",
+							"When expressing array types, this rule promotes the usage of T\\[] shorthand instead of Array\\<T>.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },

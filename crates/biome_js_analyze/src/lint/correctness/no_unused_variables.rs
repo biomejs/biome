@@ -142,7 +142,7 @@ fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedF
 // Returning None means is ok to be unused
 fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
     let decl = binding.declaration()?;
-    // It is fine to ignore unused rest spread silbings
+    // It is fine to ignore unused rest spread siblings
     if let node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
     | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)) = &decl
     {

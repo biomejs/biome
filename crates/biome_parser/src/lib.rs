@@ -143,16 +143,16 @@ pub trait Parser: Sized {
     type Kind: SyntaxKind;
     type Source: TokenSource<Kind = Self::Kind>;
 
-    /// Returns a reference to the [`ParserContext`](ParserContext)
+    /// Returns a reference to the [ParserContext].
     fn context(&self) -> &ParserContext<Self::Kind>;
 
-    /// Returns a mutable reference to the [`ParserContext`](ParserContext).
+    /// Returns a mutable reference to the [ParserContext].
     fn context_mut(&mut self) -> &mut ParserContext<Self::Kind>;
 
     /// Returns a reference to the [`TokenSource``](TokenSource]
     fn source(&self) -> &Self::Source;
 
-    /// Returns a mutable reference to the [`TokenSource`](TokenSource)
+    /// Returns a mutable reference to the [TokenSource].
     fn source_mut(&mut self) -> &mut Self::Source;
 
     /// Returns `true` if the parser is trying to parse some syntax but only if it has no errors.

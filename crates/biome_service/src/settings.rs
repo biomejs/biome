@@ -86,7 +86,7 @@ impl WorkspaceSettings {
         &self.organize_imports
     }
 
-    /// The (configuration)[Configuration] is merged into the workspace
+    /// The [PartialConfiguration] is merged into the workspace
     #[tracing::instrument(level = "trace", skip(self))]
     pub fn merge_with_configuration(
         &mut self,

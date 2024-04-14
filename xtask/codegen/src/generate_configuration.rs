@@ -336,7 +336,8 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                         docs.push_str(text.as_ref());
                     }
                     Event::Code(text) => {
-                        docs.push_str(text.as_ref());
+                        // Escape `[` and `<` to obtain valid Markdown
+                        docs.push_str(text.replace('[', "\\[").replace('<', "\\<").as_ref());
                     }
                     Event::SoftBreak => {
                         docs.push(' ');

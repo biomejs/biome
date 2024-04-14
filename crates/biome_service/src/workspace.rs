@@ -815,9 +815,9 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Returns debug information about this workspace.
     fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError>;
 
-    /// Parses a pattern to be used in follow-up [`search_pattern`] requests.
+    /// Parses a pattern to be used in follow-up [`Self::search_pattern`] requests.
     ///
-    /// Clients should call [`drop_pattern()`] when they no need longer need it.
+    /// Clients should call [`Self::drop_pattern()`] when they no need longer need it.
     fn parse_pattern(
         &self,
         params: ParsePatternParams,
