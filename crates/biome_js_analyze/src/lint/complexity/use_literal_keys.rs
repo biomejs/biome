@@ -10,9 +10,8 @@ use biome_js_factory::make::{
     js_static_member_expression, token,
 };
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsComputedMember, AnyJsExpression, AnyJsLiteralExpression,
-    AnyJsMemberExpression, AnyJsName, AnyJsObjectMemberName, JsComputedMemberName,
-    JsLiteralMemberName, JsSyntaxKind, T,
+    AnyJsAssignment, AnyJsComputedMember, AnyJsMemberExpression, AnyJsName, AnyJsObjectMemberName,
+    JsComputedMemberName, JsLiteralMemberName, JsSyntaxKind, T,
 };
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
 use biome_unicode_table::is_js_ident;
@@ -82,28 +81,19 @@ impl Rule for UseLiteralKeys {
             }
             AnyJsMember::JsComputedMemberName(member) => member.expression().ok()?,
         };
-        match inner_expression {
-            AnyJsExpression::AnyJsLiteralExpression(
-                AnyJsLiteralExpression::JsStringLiteralExpression(string_literal),
-            ) => {
-                let value = string_literal.inner_string_text().ok()?;
-                // A computed property `["something"]` can always be simplified to a string literal "something".
-                if matches!(node, AnyJsMember::JsComputedMemberName(_)) || is_js_ident(&value) {
-                    return Some((string_literal.range(), value.to_string()));
-                }
-            }
-            AnyJsExpression::JsTemplateExpression(template_expression) => {
-                let mut value = String::new();
-                for element in template_expression.elements() {
-                    let chunk = element.as_js_template_chunk_element()?;
-                    value.push_str(chunk.template_chunk_token().ok()?.text_trimmed());
-                }
-                // A computed property ``[`something`]`` can always be simplified to a string literal "something".
-                if matches!(node, AnyJsMember::JsComputedMemberName(_)) || is_js_ident(&value) {
-                    return Some((template_expression.range(), value));
-                }
-            }
-            _ => {}
+        let value = inner_expression.as_static_value()?;
+        let value = value.as_string_constant()?;
+        // `{["__proto__"]: null }` and `{"__proto__": null}`/`{"__proto__": null}`
+        // have different semantic.
+        // The first is a regular property.
+        // The second is a specical property that changes the object prototype.
+        // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto
+        if matches!(node, AnyJsMember::JsComputedMemberName(_)) && value == "__proto__" {
+            return None;
+        }
+        // A computed property `["something"]` can always be simplified to a string literal "something".
+        if matches!(node, AnyJsMember::JsComputedMemberName(_)) || is_js_ident(value) {
+            return Some((inner_expression.range(), value.to_string()));
         }
         None
     }
