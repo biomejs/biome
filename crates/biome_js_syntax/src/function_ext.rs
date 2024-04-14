@@ -103,7 +103,7 @@ impl AnyFunctionLike {
 }
 
 impl JsCallArguments {
-    /// Get [AnyJsCallArgument] by its index inside the [JsCallExpression] argument list.
+    /// Get [AnyJsCallArgument] by its index inside the [crate::JsCallExpression] argument list.
     ///
     /// Each index inside `indices` should be unique qnd in-order.
     ///

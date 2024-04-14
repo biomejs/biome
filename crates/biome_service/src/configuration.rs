@@ -14,6 +14,7 @@ use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_js_analyze::metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
+use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
@@ -413,7 +414,12 @@ impl PartialConfigurationExt for PartialConfiguration {
             })?;
             let deserialized = deserialize_from_json_str::<PartialConfiguration>(
                 content.as_str(),
-                JsonParserOptions::default(),
+                match config_path.extension().and_then(OsStr::to_str) {
+                    Some("json") => JsonParserOptions::default(),
+                    _ => JsonParserOptions::default()
+                        .with_allow_comments()
+                        .with_allow_trailing_commas(),
+                },
                 "",
             );
             deserialized_configurations.push(deserialized)

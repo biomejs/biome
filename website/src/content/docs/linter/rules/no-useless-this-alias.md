@@ -30,7 +30,7 @@ class A {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessThisAlias.js:3:15 <a href="https://biomejs.dev/linter/rules/no-useless-this-alias">lint/complexity/noUselessThisAlias</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessThisAlias.jsx:3:15 <a href="https://biomejs.dev/linter/rules/no-useless-this-alias">lint/complexity/noUselessThisAlias</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This aliasing of </span><span style="color: Tomato;"><strong>this</strong></span><span style="color: Tomato;"> is unnecessary.</span>
   

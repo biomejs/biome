@@ -131,3 +131,28 @@ impl Diagnostic for ResolveError {
         fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
     }
 }
+
+#[derive(Debug)]
+pub struct SerdeJsonError {
+    error: serde_json::Error,
+}
+
+impl From<serde_json::Error> for SerdeJsonError {
+    fn from(error: serde_json::Error) -> Self {
+        Self { error }
+    }
+}
+
+impl Diagnostic for SerdeJsonError {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("internalError/io"))
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(fmt, "{}", self.error)
+    }
+
+    fn message(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
+        fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
+    }
+}

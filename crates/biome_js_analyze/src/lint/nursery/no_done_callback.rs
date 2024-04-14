@@ -44,7 +44,7 @@ declare_rule! {
     /// ```
     ///
     pub NoDoneCallback {
-        version: "next",
+        version: "1.6.1",
         name: "noDoneCallback",
         recommended: true,
         sources: &[RuleSource::EslintJest("no-done-callback")],

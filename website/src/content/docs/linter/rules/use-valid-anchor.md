@@ -43,7 +43,7 @@ For a detailed explanation, check out https://marcysutton.com/links-vs-buttons-i
 <a href={null}>navigate here</a>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useValidAnchor.js:1:4 <a href="https://biomejs.dev/linter/rules/use-valid-anchor">lint/a11y/useValidAnchor</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAnchor.jsx:1:4 <a href="https://biomejs.dev/linter/rules/use-valid-anchor">lint/a11y/useValidAnchor</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a valid value for the attribute </span><span style="color: Tomato;"><strong>href</strong></span><span style="color: Tomato;">.</span>
   
@@ -61,7 +61,7 @@ For a detailed explanation, check out https://marcysutton.com/links-vs-buttons-i
 <a href={undefined}>navigate here</a>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useValidAnchor.js:1:4 <a href="https://biomejs.dev/linter/rules/use-valid-anchor">lint/a11y/useValidAnchor</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAnchor.jsx:1:4 <a href="https://biomejs.dev/linter/rules/use-valid-anchor">lint/a11y/useValidAnchor</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a valid value for the attribute </span><span style="color: Tomato;"><strong>href</strong></span><span style="color: Tomato;">.</span>
   
@@ -79,7 +79,7 @@ For a detailed explanation, check out https://marcysutton.com/links-vs-buttons-i
 <a href>navigate here</a>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useValidAnchor.js:1:4 <a href="https://biomejs.dev/linter/rules/use-valid-anchor">lint/a11y/useValidAnchor</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAnchor.jsx:1:4 <a href="https://biomejs.dev/linter/rules/use-valid-anchor">lint/a11y/useValidAnchor</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a valid value for the attribute </span><span style="color: Tomato;"><strong>href</strong></span><span style="color: Tomato;">.</span>
   
@@ -97,7 +97,7 @@ For a detailed explanation, check out https://marcysutton.com/links-vs-buttons-i
 <a href="javascript:void(0)">navigate here</a>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useValidAnchor.js:1:4 <a href="https://biomejs.dev/linter/rules/use-valid-anchor">lint/a11y/useValidAnchor</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAnchor.jsx:1:4 <a href="https://biomejs.dev/linter/rules/use-valid-anchor">lint/a11y/useValidAnchor</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a valid value for the attribute </span><span style="color: Tomato;"><strong>href</strong></span><span style="color: Tomato;">.</span>
   
@@ -115,7 +115,7 @@ For a detailed explanation, check out https://marcysutton.com/links-vs-buttons-i
 <a onClick={something}>navigate here</a>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useValidAnchor.js:1:4 <a href="https://biomejs.dev/linter/rules/use-valid-anchor">lint/a11y/useValidAnchor</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAnchor.jsx:1:4 <a href="https://biomejs.dev/linter/rules/use-valid-anchor">lint/a11y/useValidAnchor</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use a </span><span style="color: Tomato;"><strong>button</strong></span><span style="color: Tomato;"> element instead of an </span><span style="color: Tomato;"><strong>a</strong></span><span style="color: Tomato;"> element.</span>
   

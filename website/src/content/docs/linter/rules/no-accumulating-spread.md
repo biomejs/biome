@@ -26,7 +26,7 @@ var a = ['a', 'b', 'c'];
 a.reduce((acc, val) => [...acc, val], []);
 ```
 
-<pre class="language-text"><code class="language-text">performance/noAccumulatingSpread.js:2:25 <a href="https://biomejs.dev/linter/rules/no-accumulating-spread">lint/performance/noAccumulatingSpread</a> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">performance/noAccumulatingSpread.jsx:2:25 <a href="https://biomejs.dev/linter/rules/no-accumulating-spread">lint/performance/noAccumulatingSpread</a> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid the use of spread (`...`) syntax on accumulators.</span>
   
@@ -46,7 +46,7 @@ var a = ['a', 'b', 'c'];
 a.reduce((acc, val) => {return [...acc, val];}, []);
 ```
 
-<pre class="language-text"><code class="language-text">performance/noAccumulatingSpread.js:2:33 <a href="https://biomejs.dev/linter/rules/no-accumulating-spread">lint/performance/noAccumulatingSpread</a> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">performance/noAccumulatingSpread.jsx:2:33 <a href="https://biomejs.dev/linter/rules/no-accumulating-spread">lint/performance/noAccumulatingSpread</a> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid the use of spread (`...`) syntax on accumulators.</span>
   
@@ -66,7 +66,7 @@ var a = ['a', 'b', 'c'];
 a.reduce((acc, val) => ({...acc, [val]: val}), {});
 ```
 
-<pre class="language-text"><code class="language-text">performance/noAccumulatingSpread.js:2:26 <a href="https://biomejs.dev/linter/rules/no-accumulating-spread">lint/performance/noAccumulatingSpread</a> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">performance/noAccumulatingSpread.jsx:2:26 <a href="https://biomejs.dev/linter/rules/no-accumulating-spread">lint/performance/noAccumulatingSpread</a> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid the use of spread (`...`) syntax on accumulators.</span>
   

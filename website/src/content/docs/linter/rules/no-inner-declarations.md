@@ -54,7 +54,7 @@ if (test) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noInnerDeclarations.js:2:5 <a href="https://biomejs.dev/linter/rules/no-inner-declarations">lint/correctness/noInnerDeclarations</a> ━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noInnerDeclarations.jsx:2:5 <a href="https://biomejs.dev/linter/rules/no-inner-declarations">lint/correctness/noInnerDeclarations</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>var</strong></span><span style="color: Tomato;"> should be declared at the root of the </span><span style="color: Tomato;"><strong>module</strong></span><span style="color: Tomato;">.</span>
   
@@ -101,7 +101,7 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noInnerDeclarations.js:3:9 <a href="https://biomejs.dev/linter/rules/no-inner-declarations">lint/correctness/noInnerDeclarations</a> ━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noInnerDeclarations.jsx:3:9 <a href="https://biomejs.dev/linter/rules/no-inner-declarations">lint/correctness/noInnerDeclarations</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>var</strong></span><span style="color: Tomato;"> should be declared at the root of the </span><span style="color: Tomato;"><strong>enclosing function</strong></span><span style="color: Tomato;">.</span>
   

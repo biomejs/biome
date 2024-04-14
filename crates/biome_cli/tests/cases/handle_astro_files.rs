@@ -51,6 +51,9 @@ import { getLocale } from "astro:i18n";
 ---
 <div></div>"#;
 
+const ASTRO_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED: &str =
+    "---\r\n  const a    = \"b\";\r\n---\r\n<div></div>";
+
 #[test]
 fn format_astro_files() {
     let mut fs = MemoryFileSystem::default();
@@ -140,6 +143,40 @@ fn format_empty_astro_files_write() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_empty_astro_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_astro_carriage_return_line_feed_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let astro_file_path = Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        ASTRO_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), astro_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(
+        &fs,
+        astro_file_path,
+        ASTRO_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED,
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_astro_carriage_return_line_feed_files",
         fs,
         console,
         result,

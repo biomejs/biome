@@ -1,6 +1,6 @@
 use crate::{CliDiagnostic, CliSession};
 use biome_configuration::PartialConfiguration;
-use biome_console::{markup, ConsoleExt, HorizontalLine};
+use biome_console::{markup, ConsoleExt};
 use biome_fs::ConfigName;
 use biome_service::configuration::create_config;
 
@@ -8,33 +8,40 @@ pub(crate) fn init(mut session: CliSession, emit_jsonc: bool) -> Result<(), CliD
     let fs = &mut session.app.fs;
     create_config(fs, PartialConfiguration::init(), emit_jsonc)?;
     let file_created = if emit_jsonc {
-        format!("{}: ", ConfigName::biome_jsonc())
+        ConfigName::biome_jsonc()
     } else {
-        format!("{}: ", ConfigName::biome_json())
+        ConfigName::biome_json()
     };
-
     session.app.console.log(markup! {
-"\n"<Inverse>"Welcome to Biome! Let's get you started..."</Inverse>"
+"
+Welcome to Biome! Let's get you started...
 
-"<Info><Emphasis>"Files created "</Emphasis></Info>{HorizontalLine::new(106)}"
+"<Info><Emphasis>"Files created "</Emphasis></Info>"
 
-  "<Dim>"- "</Dim><Emphasis>{file_created}</Emphasis>"Your project configuration. Documentation: "<Hyperlink href="https://biomejs.dev/reference/configuration">"https://biomejs.dev/reference/configuration"</Hyperlink>"
+  "<Dim>"- "</Dim><Emphasis>{file_created}</Emphasis>"
+    Your project configuration. See "<Hyperlink href="https://biomejs.dev/reference/configuration">"https://biomejs.dev/reference/configuration"</Hyperlink>"
 
-"<Info><Emphasis>"Next Steps "</Emphasis></Info>{HorizontalLine::new(109)}"
+"<Info><Emphasis>"Next Steps "</Emphasis></Info>"
 
   "<Dim>"1."</Dim>" "<Emphasis>"Setup an editor extension"</Emphasis>"
-     Get live errors as you type and format when you save. Learn more: "<Hyperlink href="https://biomejs.dev/guides/getting-started#editor-setup">"https://biomejs.dev/guides/getting-started#editor-setup"</Hyperlink>"
+     Get live errors as you type and format when you save.
+     Learn more at "<Hyperlink href="https://biomejs.dev/guides/integrate-in-editor/">"https://biomejs.dev/guides/integrate-in-editor/"</Hyperlink>"
 
   "<Dim>"2."</Dim>" "<Emphasis>"Try a command"</Emphasis>"
-     "<Italic>"biome ci"</Italic>" checks for lint errors and verifies formatting. Run " <Italic>"biome --help"</Italic>" for a full list of commands and options.
+     "<Italic>"biome check"</Italic>"  checks formatting, import sorting, and lint rules.
+     "<Italic>"biome --help"</Italic>" displays the available commands.
 
-  "<Dim>"3."</Dim>" "<Emphasis>"Read the documentation"</Emphasis>"
-     Our website serves as a comprehensive source of guides and documentation: "<Hyperlink href="https://biomejs.dev">"https://biomejs.dev"</Hyperlink>"
+  "<Dim>"3."</Dim>" "<Emphasis>"Migrate from ESLint and Prettier"</Emphasis>"
+     "<Italic>"biome migrate eslint"</Italic>"   migrates your ESLint configuration to Biome.
+     "<Italic>"biome migrate prettier"</Italic>" migrates your Prettier configuration to Biome.
 
-  "<Dim>"4."</Dim>" "<Emphasis>"Get involved in the community"</Emphasis>"
-     Ask questions, get support, or contribute by participating on GitHub ("<Hyperlink href="https://github.com/biomejs/biome">"https://github.com/biomejs/biome"</Hyperlink>"),
-     or join our community Discord ("<Hyperlink href="https://discord.gg/BypW39g6Yc">"https://discord.gg/BypW39g6Yc"</Hyperlink>")"
+  "<Dim>"4."</Dim>" "<Emphasis>"Read the documentation"</Emphasis>"
+     Find guides and documentation at "<Hyperlink href="https://biomejs.dev/guides/getting-started/">"https://biomejs.dev/guides/getting-started/"</Hyperlink>"
+
+  "<Dim>"5."</Dim>" "<Emphasis>"Get involved with the community"</Emphasis>"
+     Ask questions and contribute on GitHub: "<Hyperlink href="https://github.com/biomejs/biome">"https://github.com/biomejs/biome"</Hyperlink>"
+     Seek for help on Discord: "<Hyperlink href="https://discord.gg/BypW39g6Yc">"https://discord.gg/BypW39g6Yc"</Hyperlink>"
+"
     });
-
     Ok(())
 }

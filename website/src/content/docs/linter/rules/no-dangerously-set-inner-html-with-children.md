@@ -23,7 +23,7 @@ function createMarkup() {
 <Component dangerouslySetInnerHTML={createMarkup()}>"child1"</Component>
 ```
 
-<pre class="language-text"><code class="language-text">security/noDangerouslySetInnerHtmlWithChildren.js:4:12 <a href="https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children">lint/security/noDangerouslySetInnerHtmlWithChildren</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">security/noDangerouslySetInnerHtmlWithChildren.jsx:4:12 <a href="https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children">lint/security/noDangerouslySetInnerHtmlWithChildren</a> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid passing both </span><span style="color: Tomato;"><strong>children</strong></span><span style="color: Tomato;"> and the </span><span style="color: Tomato;"><strong>dangerouslySetInnerHTML</strong></span><span style="color: Tomato;"> prop.</span>
   
@@ -52,7 +52,7 @@ function createMarkup() {
 <Component dangerouslySetInnerHTML={createMarkup()} children="child1" />
 ```
 
-<pre class="language-text"><code class="language-text">security/noDangerouslySetInnerHtmlWithChildren.js:4:12 <a href="https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children">lint/security/noDangerouslySetInnerHtmlWithChildren</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">security/noDangerouslySetInnerHtmlWithChildren.jsx:4:12 <a href="https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children">lint/security/noDangerouslySetInnerHtmlWithChildren</a> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid passing both </span><span style="color: Tomato;"><strong>children</strong></span><span style="color: Tomato;"> and the </span><span style="color: Tomato;"><strong>dangerouslySetInnerHTML</strong></span><span style="color: Tomato;"> prop.</span>
   
@@ -78,7 +78,7 @@ function createMarkup() {
 React.createElement('div', { dangerouslySetInnerHTML: { __html: 'HTML' } }, 'children')
 ```
 
-<pre class="language-text"><code class="language-text">security/noDangerouslySetInnerHtmlWithChildren.js:1:30 <a href="https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children">lint/security/noDangerouslySetInnerHtmlWithChildren</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">security/noDangerouslySetInnerHtmlWithChildren.jsx:1:30 <a href="https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children">lint/security/noDangerouslySetInnerHtmlWithChildren</a> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid passing both </span><span style="color: Tomato;"><strong>children</strong></span><span style="color: Tomato;"> and the </span><span style="color: Tomato;"><strong>dangerouslySetInnerHTML</strong></span><span style="color: Tomato;"> prop.</span>
   

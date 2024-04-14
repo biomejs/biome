@@ -18,7 +18,7 @@ use std::cmp::Ordering;
 ///
 /// These information **are printed in this exact order**.
 ///
-#[derive(Debug, Diagnostic, Clone)]
+#[derive(Clone, Debug, Diagnostic)]
 #[diagnostic(category = "parse", severity = Error)]
 pub struct ParseDiagnostic {
     /// The location where the error is occurred
@@ -32,14 +32,14 @@ pub struct ParseDiagnostic {
 }
 
 /// Possible details related to the diagnostic
-#[derive(Debug, Default, Clone)]
+#[derive(Clone, Debug, Default)]
 struct ParserAdvice {
     advice_list: Vec<ParserAdviceKind>,
 }
 
 /// The structure of the advice. A message that gives details, a possible range so
 /// the diagnostic is able to highlight the part of the code we want to explain.
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 struct ParserAdviceDetail {
     /// A message that should explain this detail
     message: MarkupBuf,
@@ -47,7 +47,7 @@ struct ParserAdviceDetail {
     span: Option<TextRange>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 enum ParserAdviceKind {
     /// A list a possible details that can be attached to the diagnostic.
     /// Useful to explain the nature errors.

@@ -364,3 +364,30 @@ fn dot() {
         ERROR_TOKEN:1
     }
 }
+
+#[test]
+fn trivia() {
+    assert_lex! {
+        r#",  ,
+        ,,,,,"#,
+        COMMA:1,
+        WHITESPACE:2,
+        COMMA:1,
+        NEWLINE:1,
+        WHITESPACE:8,
+        COMMA:5
+    }
+
+    assert_lex! {
+        r#"(1,  , ,,,,,2)"#,
+        L_PAREN:1,
+        GRAPHQL_INT_LITERAL:1,
+        COMMA:1,
+        WHITESPACE:2,
+        COMMA:1,
+        WHITESPACE:1,
+        COMMA:5,
+        GRAPHQL_INT_LITERAL:1,
+        R_PAREN:1
+    }
+}

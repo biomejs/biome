@@ -37,7 +37,7 @@ misunderstandings and bugs that can arise from the unique behavior of `this` and
  }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noThisInStatic.js:5:9 <a href="https://biomejs.dev/linter/rules/no-this-in-static">lint/complexity/noThisInStatic</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noThisInStatic.jsx:5:9 <a href="https://biomejs.dev/linter/rules/no-this-in-static">lint/complexity/noThisInStatic</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using </span><span style="color: Tomato;"><strong>this</strong></span><span style="color: Tomato;"> in a </span><span style="color: Tomato;"><strong>static</strong></span><span style="color: Tomato;"> context can be confusing.</span>
   
@@ -68,7 +68,7 @@ misunderstandings and bugs that can arise from the unique behavior of `this` and
  }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noThisInStatic.js:3:9 <a href="https://biomejs.dev/linter/rules/no-this-in-static">lint/complexity/noThisInStatic</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noThisInStatic.jsx:3:9 <a href="https://biomejs.dev/linter/rules/no-this-in-static">lint/complexity/noThisInStatic</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using </span><span style="color: Tomato;"><strong>super</strong></span><span style="color: Tomato;"> in a </span><span style="color: Tomato;"><strong>static</strong></span><span style="color: Tomato;"> context can be confusing.</span>
   

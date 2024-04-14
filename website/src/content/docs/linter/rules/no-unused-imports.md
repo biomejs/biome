@@ -16,22 +16,9 @@ like `@ts-expect-error` won't be transferred to a wrong place.
 
 ## Options
 
-The rule provides a single option `ignoreReact`.
-When this option is set to `true`, imports named `React` from the package `react` are ignored.
-`ignoreReact` is disabled by default.
-
-```json
-{
-    "//": "...",
-    "options": {
-        "ignoreReact": true
-    }
-}
-```
-
-This option should only be necessary if you cannot upgrade to a React version that supports the new JSX runtime.
-In the new JSX runtime, you no longer need to import `React`.
-You can find more details in [this comment](https://github.com/biomejs/biome/issues/571#issuecomment-1774026734).
+This rule respects the [`jsxRuntime`](https://biomejs.dev/reference/configuration/#javascriptjsxruntime)
+setting and will make an exception for React globals if it is set to
+`"reactClassic"`.
 
 ## Examples
 
@@ -41,7 +28,7 @@ You can find more details in [this comment](https://github.com/biomejs/biome/iss
 import A from 'mod';
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnusedImports.js:1:8 <a href="https://biomejs.dev/linter/rules/no-unused-imports">lint/correctness/noUnusedImports</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedImports.jsx:1:8 <a href="https://biomejs.dev/linter/rules/no-unused-imports">lint/correctness/noUnusedImports</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>import</strong></span><span style="color: Orange;"> is unused.</span>
   
@@ -61,7 +48,7 @@ import A from 'mod';
 import * as A from 'mod';
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnusedImports.js:1:13 <a href="https://biomejs.dev/linter/rules/no-unused-imports">lint/correctness/noUnusedImports</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedImports.jsx:1:13 <a href="https://biomejs.dev/linter/rules/no-unused-imports">lint/correctness/noUnusedImports</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>import</strong></span><span style="color: Orange;"> is unused.</span>
   
@@ -83,7 +70,7 @@ import { type A, B } from 'mod';
 export { B }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnusedImports.js:1:15 <a href="https://biomejs.dev/linter/rules/no-unused-imports">lint/correctness/noUnusedImports</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedImports.ts:1:15 <a href="https://biomejs.dev/linter/rules/no-unused-imports">lint/correctness/noUnusedImports</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>import</strong></span><span style="color: Orange;"> is unused.</span>
   
@@ -115,7 +102,7 @@ import {
 export { B }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnusedImports.js:7:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedImports.jsx:7:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">'import { type x ident }' are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.</span>
   

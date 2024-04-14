@@ -253,3 +253,24 @@ function MyComponent23 ({ arr })  {
     }
   }, [arr])
 }
+
+// https://github.com/biomejs/biome/issues/2361
+function ComponentWithRecursiveCallback() {  
+    const fib = useCallback((num) => {
+      if (num < 2) {
+        return num;
+      }
+      return fib(num - 1) + fib(num - 2);
+    }, []);
+}
+
+function func() {
+    setValue("some")
+}
+
+function OutsideFunctionDeclaration() {
+    useEffect(() => {
+      func()
+    }, [])
+}
+  

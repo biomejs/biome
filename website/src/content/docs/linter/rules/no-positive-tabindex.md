@@ -26,7 +26,7 @@ Avoid positive `tabIndex` property values to synchronize the flow of the page wi
 <div tabIndex={1}>foo</div>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noPositiveTabindex.js:1:15 <a href="https://biomejs.dev/linter/rules/no-positive-tabindex">lint/a11y/noPositiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noPositiveTabindex.jsx:1:15 <a href="https://biomejs.dev/linter/rules/no-positive-tabindex">lint/a11y/noPositiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid positive values for the </span><span style="color: Tomato;"><strong>tabIndex</strong></span><span style="color: Tomato;"> prop.</span>
   
@@ -50,7 +50,7 @@ Avoid positive `tabIndex` property values to synchronize the flow of the page wi
 <div tabIndex={"1"} />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noPositiveTabindex.js:1:15 <a href="https://biomejs.dev/linter/rules/no-positive-tabindex">lint/a11y/noPositiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noPositiveTabindex.jsx:1:15 <a href="https://biomejs.dev/linter/rules/no-positive-tabindex">lint/a11y/noPositiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid positive values for the </span><span style="color: Tomato;"><strong>tabIndex</strong></span><span style="color: Tomato;"> prop.</span>
   
@@ -74,7 +74,7 @@ Avoid positive `tabIndex` property values to synchronize the flow of the page wi
 React.createElement("div", { tabIndex: 1 })
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noPositiveTabindex.js:1:40 <a href="https://biomejs.dev/linter/rules/no-positive-tabindex">lint/a11y/noPositiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noPositiveTabindex.jsx:1:40 <a href="https://biomejs.dev/linter/rules/no-positive-tabindex">lint/a11y/noPositiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid positive values for the </span><span style="color: Tomato;"><strong>tabIndex</strong></span><span style="color: Tomato;"> prop.</span>
   

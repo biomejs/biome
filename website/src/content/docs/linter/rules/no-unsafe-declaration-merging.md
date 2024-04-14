@@ -33,7 +33,7 @@ const foo = new Foo();
 foo.f(); // Runtime Error: Cannot read properties of undefined.
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noUnsafeDeclarationMerging.js:5:7 <a href="https://biomejs.dev/linter/rules/no-unsafe-declaration-merging">lint/suspicious/noUnsafeDeclarationMerging</a> ━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noUnsafeDeclarationMerging.ts:5:7 <a href="https://biomejs.dev/linter/rules/no-unsafe-declaration-merging">lint/suspicious/noUnsafeDeclarationMerging</a> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>class</strong></span><span style="color: Tomato;"> is unsafely merged with an </span><span style="color: Tomato;"><strong>interface</strong></span><span style="color: Tomato;">.</span>
   

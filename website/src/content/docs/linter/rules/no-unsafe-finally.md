@@ -33,7 +33,7 @@ which is considered as unexpected behavior.
 })();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnsafeFinally.js:7:9 <a href="https://biomejs.dev/linter/rules/no-unsafe-finally">lint/correctness/noUnsafeFinally</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnsafeFinally.jsx:7:9 <a href="https://biomejs.dev/linter/rules/no-unsafe-finally">lint/correctness/noUnsafeFinally</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unsafe usage of 'return'.</span>
   
@@ -58,7 +58,7 @@ which is considered as unexpected behavior.
 })();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnsafeFinally.js:5:9 <a href="https://biomejs.dev/linter/rules/no-unsafe-finally">lint/correctness/noUnsafeFinally</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnsafeFinally.jsx:5:9 <a href="https://biomejs.dev/linter/rules/no-unsafe-finally">lint/correctness/noUnsafeFinally</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unsafe usage of 'return'.</span>
   
@@ -85,7 +85,7 @@ which is considered as unexpected behavior.
 })();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnsafeFinally.js:7:9 <a href="https://biomejs.dev/linter/rules/no-unsafe-finally">lint/correctness/noUnsafeFinally</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnsafeFinally.jsx:7:9 <a href="https://biomejs.dev/linter/rules/no-unsafe-finally">lint/correctness/noUnsafeFinally</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unsafe usage of 'throw'.</span>
   
@@ -111,7 +111,7 @@ which is considered as unexpected behavior.
 })();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnsafeFinally.js:5:7 <a href="https://biomejs.dev/linter/rules/no-unsafe-finally">lint/correctness/noUnsafeFinally</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnsafeFinally.jsx:5:7 <a href="https://biomejs.dev/linter/rules/no-unsafe-finally">lint/correctness/noUnsafeFinally</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unsafe usage of 'break'.</span>
   
@@ -144,7 +144,7 @@ function a() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnsafeFinally.js:8:9 <a href="https://biomejs.dev/linter/rules/no-unsafe-finally">lint/correctness/noUnsafeFinally</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnsafeFinally.jsx:8:9 <a href="https://biomejs.dev/linter/rules/no-unsafe-finally">lint/correctness/noUnsafeFinally</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unsafe usage of 'break'.</span>
   

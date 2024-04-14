@@ -44,6 +44,8 @@ impl ServiceLanguage for CssLanguage {
     type OrganizeImportsSettings = ();
     type FormatOptions = CssFormatOptions;
     type ParserSettings = CssParserSettings;
+    type EnvironmentSettings = ();
+
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
         &language.css
     }

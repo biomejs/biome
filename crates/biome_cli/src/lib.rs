@@ -88,6 +88,7 @@ impl<'app> CliSession<'app> {
                 linter_enabled,
                 organize_imports_enabled,
                 formatter_enabled,
+                staged,
                 changed,
                 since,
             } => commands::check::check(
@@ -102,6 +103,7 @@ impl<'app> CliSession<'app> {
                     linter_enabled,
                     organize_imports_enabled,
                     formatter_enabled,
+                    staged,
                     changed,
                     since,
                 },
@@ -115,6 +117,7 @@ impl<'app> CliSession<'app> {
                 stdin_file_path,
                 vcs_configuration,
                 files_configuration,
+                staged,
                 changed,
                 since,
             } => commands::lint::lint(
@@ -128,6 +131,7 @@ impl<'app> CliSession<'app> {
                     stdin_file_path,
                     vcs_configuration,
                     files_configuration,
+                    staged,
                     changed,
                     since,
                 },
@@ -165,6 +169,7 @@ impl<'app> CliSession<'app> {
                 files_configuration,
                 json_formatter,
                 css_formatter,
+                staged,
                 changed,
                 since,
             } => commands::format::format(
@@ -180,6 +185,7 @@ impl<'app> CliSession<'app> {
                     files_configuration,
                     json_formatter,
                     css_formatter,
+                    staged,
                     changed,
                     since,
                 },

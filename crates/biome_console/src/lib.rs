@@ -188,6 +188,14 @@ impl Console for EnvConsole {
 pub struct BufferConsole {
     pub out_buffer: Vec<Message>,
     pub in_buffer: Vec<String>,
+    pub print_json: bool,
+}
+
+impl BufferConsole {
+    pub fn with_json(mut self) -> Self {
+        self.print_json = true;
+        self
+    }
 }
 
 /// Individual message entry printed to a [BufferConsole]

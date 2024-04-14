@@ -12,7 +12,7 @@
 //! You probably do not want to use the parser struct, unless you want to parse fragments of Js source code or make your own productions.
 //! Instead use functions such as [parse_script], and [parse_module] which offer abstracted versions for parsing.
 //!
-//! For more finer control, use [parse](crate::parse::parse) or [parse_js_with_cache],
+//! For more finer control, use [parse](crate::parse::parse()) or [parse_js_with_cache],
 //!
 //! Notable features of the parser are:
 //! - Extremely fast parsing and lexing through the extremely fast lexer.

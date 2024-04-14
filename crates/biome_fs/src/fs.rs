@@ -62,6 +62,12 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// Checks if the given path is a regular file
     fn path_is_file(&self, path: &Path) -> bool;
 
+    /// Checks if the given path is a directory
+    fn path_is_dir(&self, path: &Path) -> bool;
+
+    /// Checks if the given path is a symlink
+    fn path_is_symlink(&self, path: &Path) -> bool;
+
     /// Method that takes a path to a folder `file_path`, and a `file_name`. It attempts to find
     /// and read the file from that folder and if not found, it reads the parent directories recursively
     /// until:
@@ -107,7 +113,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                             Err(err) => {
                                 if !is_searching_in_parent_dir && should_error_if_file_not_found {
                                     let error_message = format!(
-                                        "Biome couldn't read the config file {:?}, reason:\n {}",
+                                        "Biome couldn't read the file {:?}, reason:\n {}",
                                         file_path, err
                                     );
                                     errors.push((
@@ -128,7 +134,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                     Err(err) => {
                         if !is_searching_in_parent_dir && should_error_if_file_not_found {
                             let error_message = format!(
-                                "Biome couldn't find the config file {:?}, reason:\n {}",
+                                "Biome couldn't find the file {:?}, reason:\n {}",
                                 file_path, err
                             );
                             errors.push((
@@ -173,6 +179,8 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>>;
+
+    fn get_staged_files(&self) -> io::Result<Vec<String>>;
 
     fn resolve_configuration(
         &self,
@@ -343,8 +351,20 @@ where
         T::path_is_file(self, path)
     }
 
+    fn path_is_dir(&self, path: &Path) -> bool {
+        T::path_is_dir(self, path)
+    }
+
+    fn path_is_symlink(&self, path: &Path) -> bool {
+        T::path_is_symlink(self, path)
+    }
+
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
         T::get_changed_files(self, base)
+    }
+
+    fn get_staged_files(&self) -> io::Result<Vec<String>> {
+        T::get_staged_files(self)
     }
 
     fn resolve_configuration(

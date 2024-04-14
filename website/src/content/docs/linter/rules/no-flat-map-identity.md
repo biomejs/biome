@@ -26,7 +26,7 @@ To achieve the same result (flattening an array) more concisely and efficiently,
 array.flatMap((arr) => arr);
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noFlatMapIdentity.js:1:1 <a href="https://biomejs.dev/linter/rules/no-flat-map-identity">lint/nursery/noFlatMapIdentity</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noFlatMapIdentity.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-flat-map-identity">lint/nursery/noFlatMapIdentity</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid unnecessary callback in </span><span style="color: Tomato;"><strong>flatMap</strong></span><span style="color: Tomato;"> call.</span>
   
@@ -48,7 +48,7 @@ array.flatMap((arr) => arr);
 array.flatMap((arr) => {return arr});
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noFlatMapIdentity.js:1:1 <a href="https://biomejs.dev/linter/rules/no-flat-map-identity">lint/nursery/noFlatMapIdentity</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noFlatMapIdentity.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-flat-map-identity">lint/nursery/noFlatMapIdentity</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid unnecessary callback in </span><span style="color: Tomato;"><strong>flatMap</strong></span><span style="color: Tomato;"> call.</span>
   

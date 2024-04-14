@@ -1,4 +1,4 @@
-use crate::options::PreferredQuote;
+use crate::options::{JsxRuntime, PreferredQuote};
 use crate::{registry::RuleRoot, FromServices, Queryable, Rule, RuleKey, ServiceBag};
 use biome_diagnostics::{Error, Result};
 use std::ops::Deref;
@@ -19,12 +19,14 @@ where
     file_path: &'a Path,
     options: &'a R::Options,
     preferred_quote: &'a PreferredQuote,
+    jsx_runtime: JsxRuntime,
 }
 
 impl<'a, R> RuleContext<'a, R>
 where
     R: Rule + Sized + 'static,
 {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         query_result: &'a RuleQueryResult<R>,
         root: &'a RuleRoot<R>,
@@ -33,6 +35,7 @@ where
         file_path: &'a Path,
         options: &'a R::Options,
         preferred_quote: &'a PreferredQuote,
+        jsx_runtime: JsxRuntime,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
@@ -44,6 +47,7 @@ where
             file_path,
             options,
             preferred_quote,
+            jsx_runtime,
         })
     }
 
@@ -95,6 +99,11 @@ where
     /// ```
     pub fn options(&self) -> &R::Options {
         self.options
+    }
+
+    /// Returns the JSX runtime in use.
+    pub fn jsx_runtime(&self) -> JsxRuntime {
+        self.jsx_runtime
     }
 
     /// Checks whether the provided text belongs to globals

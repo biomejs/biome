@@ -33,7 +33,7 @@ it must either have an inherent tabIndex of zero or declare a tabIndex attribute
 <div aria-activedescendant={someID} />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAriaActivedescendantWithTabindex.js:1:1 <a href="https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex">lint/a11y/useAriaActivedescendantWithTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAriaActivedescendantWithTabindex.jsx:1:1 <a href="https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex">lint/a11y/useAriaActivedescendantWithTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Enforce elements with aria-activedescendant are tabbable.</span>
   

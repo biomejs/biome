@@ -590,6 +590,28 @@ enum BlockType {
     Css,
 }
 
+impl BlockType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            BlockType::Js(source_type) => {
+                if source_type.variant().is_jsx() {
+                    match source_type.language() {
+                        Language::JavaScript => "jsx",
+                        Language::TypeScript { .. } => "tsx",
+                    }
+                } else {
+                    match source_type.language() {
+                        Language::JavaScript => "js",
+                        Language::TypeScript { .. } => "ts",
+                    }
+                }
+            }
+            BlockType::Json => "json",
+            BlockType::Css => "css",
+        }
+    }
+}
+
 struct CodeBlockTest {
     block_type: BlockType,
     expect_diagnostic: bool,
@@ -669,7 +691,7 @@ fn assert_lint(
     content: &mut Vec<u8>,
     has_fix_kind: bool,
 ) -> Result<()> {
-    let file = format!("{group}/{rule}.js");
+    let file = format!("{group}/{rule}.{}", test.block_type.as_str());
 
     let mut write = HTML(content);
     let mut diagnostic_count = 0;

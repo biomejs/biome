@@ -22,7 +22,7 @@ This rule disallows empty type parameter lists in type alias and interface decla
 interface Foo<> {}
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noEmptyTypeParameters.js:1:14 <a href="https://biomejs.dev/linter/rules/no-empty-type-parameters">lint/complexity/noEmptyTypeParameters</a> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noEmptyTypeParameters.ts:1:14 <a href="https://biomejs.dev/linter/rules/no-empty-type-parameters">lint/complexity/noEmptyTypeParameters</a> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using an </span><span style="color: Tomato;"><strong>empty type parameter list</strong></span><span style="color: Tomato;"> is confusing.</span>
   
@@ -38,7 +38,7 @@ interface Foo<> {}
 type Bar<> = {};
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noEmptyTypeParameters.js:1:9 <a href="https://biomejs.dev/linter/rules/no-empty-type-parameters">lint/complexity/noEmptyTypeParameters</a> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noEmptyTypeParameters.ts:1:9 <a href="https://biomejs.dev/linter/rules/no-empty-type-parameters">lint/complexity/noEmptyTypeParameters</a> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using an </span><span style="color: Tomato;"><strong>empty type parameter list</strong></span><span style="color: Tomato;"> is confusing.</span>
   

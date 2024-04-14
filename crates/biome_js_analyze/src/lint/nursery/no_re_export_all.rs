@@ -2,7 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_js_syntax::JsExport;
+use biome_js_syntax::JsExportFromClause;
 use biome_rowan::AstNode;
 
 declare_rule! {
@@ -17,17 +17,22 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// export * from 'foo';
+    /// export * from "foo";
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// export * as foo from 'foo';
+    /// export * as foo from "foo";
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
     /// export { foo } from "foo";
+    /// ```
+    ///
+    /// ```ts
+    /// export type * from "foo";
+    /// export type * as bar from "bar";
     /// ```
     ///
     pub NoReExportAll {
@@ -40,30 +45,20 @@ declare_rule! {
 }
 
 impl Rule for NoReExportAll {
-    type Query = Ast<JsExport>;
+    type Query = Ast<JsExportFromClause>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        node.export_clause()
-            .ok()?
-            .as_js_export_from_clause()
-            .and_then(|clause| {
-                if clause.from_token().is_ok() && clause.star_token().is_ok() {
-                    Some(())
-                } else {
-                    None
-                }
-            })
+        ctx.query().type_token().is_none().then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _reference: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                ctx.query().range(),
+                ctx.query().syntax().parent()?.text_trimmed_range(),
                 markup! {
                     "Do not use export all ( "<Emphasis>"export * from ..."</Emphasis>" )."
                 },

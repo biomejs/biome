@@ -31,7 +31,7 @@ switch (foo) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessSwitchCase.js:2:5 <a href="https://biomejs.dev/linter/rules/no-useless-switch-case">lint/complexity/noUselessSwitchCase</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessSwitchCase.jsx:2:5 <a href="https://biomejs.dev/linter/rules/no-useless-switch-case">lint/complexity/noUselessSwitchCase</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Useless </span><span style="color: Tomato;"><strong>case clause</strong></span><span style="color: Tomato;">.</span>
   
@@ -71,7 +71,7 @@ switch (foo) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessSwitchCase.js:3:5 <a href="https://biomejs.dev/linter/rules/no-useless-switch-case">lint/complexity/noUselessSwitchCase</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessSwitchCase.jsx:3:5 <a href="https://biomejs.dev/linter/rules/no-useless-switch-case">lint/complexity/noUselessSwitchCase</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Useless </span><span style="color: Tomato;"><strong>case clause</strong></span><span style="color: Tomato;">.</span>
   

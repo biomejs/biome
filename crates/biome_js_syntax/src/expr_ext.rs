@@ -1667,11 +1667,11 @@ impl JsCallExpression {
     /// 5. The second argument has to be an [arrow function expression] or [function expression]
     /// 6. Both function must have zero or one parameters
     ///
-    /// [call expression]: crate::biome_js_syntax::JsCallExpression
-    /// [callee]: crate::biome_js_syntax::AnyJsExpression
-    /// [arguments]: crate::biome_js_syntax::JsCallArgumentList
-    /// [arrow function expression]: crate::biome_js_syntax::JsArrowFunctionExpression
-    /// [function expression]: crate::biome_js_syntax::JsCallArgumentList
+    /// [call expression]: crate::JsCallExpression
+    /// [callee]: crate::AnyJsExpression
+    /// [arguments]: crate::JsCallArgumentList
+    /// [arrow function expression]: crate::JsArrowFunctionExpression
+    /// [function expression]: crate::JsCallArgumentList
     pub fn is_test_call_expression(&self) -> SyntaxResult<bool> {
         use AnyJsExpression::*;
 

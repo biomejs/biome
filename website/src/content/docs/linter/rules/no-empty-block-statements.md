@@ -27,7 +27,7 @@ This rule ignores block statements or static blocks which contain a comment (for
 function emptyFunctionBody () {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noEmptyBlockStatements.js:1:31 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/suspicious/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noEmptyBlockStatements.jsx:1:31 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/suspicious/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected empty block.</span>
   
@@ -47,7 +47,7 @@ try {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noEmptyBlockStatements.js:3:13 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/suspicious/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noEmptyBlockStatements.jsx:3:13 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/suspicious/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected empty block.</span>
   
@@ -70,7 +70,7 @@ class Foo {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noEmptyBlockStatements.js:2:3 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/suspicious/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noEmptyBlockStatements.jsx:2:3 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/suspicious/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected empty block.</span>
   

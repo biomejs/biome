@@ -29,7 +29,7 @@ try {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessCatch.js:4:5 <a href="https://biomejs.dev/linter/rules/no-useless-catch">lint/complexity/noUselessCatch</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessCatch.jsx:4:5 <a href="https://biomejs.dev/linter/rules/no-useless-catch">lint/complexity/noUselessCatch</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The </span><span style="color: Tomato;"><strong>catch</strong></span><span style="color: Tomato;"> clause that only rethrows the original error is redundant.</span>
   
@@ -54,7 +54,7 @@ try {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessCatch.js:4:5 <a href="https://biomejs.dev/linter/rules/no-useless-catch">lint/complexity/noUselessCatch</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessCatch.jsx:4:5 <a href="https://biomejs.dev/linter/rules/no-useless-catch">lint/complexity/noUselessCatch</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The </span><span style="color: Tomato;"><strong>catch</strong></span><span style="color: Tomato;"> clause that only rethrows the original error is redundant.</span>
   

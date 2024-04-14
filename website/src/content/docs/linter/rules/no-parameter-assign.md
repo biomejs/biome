@@ -29,7 +29,7 @@ function f(param) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/noParameterAssign.js:2:5 <a href="https://biomejs.dev/linter/rules/no-parameter-assign">lint/style/noParameterAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noParameterAssign.jsx:2:5 <a href="https://biomejs.dev/linter/rules/no-parameter-assign">lint/style/noParameterAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Reassigning a </span><span style="color: Tomato;"><strong>function parameter</strong></span><span style="color: Tomato;"> is confusing.</span>
   
@@ -56,7 +56,7 @@ function f(param) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/noParameterAssign.js:2:5 <a href="https://biomejs.dev/linter/rules/no-parameter-assign">lint/style/noParameterAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noParameterAssign.jsx:2:5 <a href="https://biomejs.dev/linter/rules/no-parameter-assign">lint/style/noParameterAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Reassigning a </span><span style="color: Tomato;"><strong>function parameter</strong></span><span style="color: Tomato;"> is confusing.</span>
   
@@ -83,7 +83,7 @@ function f(param) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/noParameterAssign.js:2:10 <a href="https://biomejs.dev/linter/rules/no-parameter-assign">lint/style/noParameterAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noParameterAssign.jsx:2:10 <a href="https://biomejs.dev/linter/rules/no-parameter-assign">lint/style/noParameterAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Reassigning a </span><span style="color: Tomato;"><strong>function parameter</strong></span><span style="color: Tomato;"> is confusing.</span>
   
@@ -112,7 +112,7 @@ class C {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/noParameterAssign.js:3:9 <a href="https://biomejs.dev/linter/rules/no-parameter-assign">lint/style/noParameterAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noParameterAssign.ts:3:9 <a href="https://biomejs.dev/linter/rules/no-parameter-assign">lint/style/noParameterAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Reassigning a </span><span style="color: Tomato;"><strong>function parameter</strong></span><span style="color: Tomato;"> is confusing.</span>
   

@@ -28,6 +28,7 @@ pub struct MemoryFileSystem {
     files: AssertUnwindSafe<RwLock<FxHashMap<PathBuf, FileEntry>>>,
     errors: FxHashMap<PathBuf, ErrorEntry>,
     allow_write: bool,
+    on_get_staged_files: OnGetChangedFiles,
     on_get_changed_files: OnGetChangedFiles,
 }
 
@@ -37,6 +38,9 @@ impl Default for MemoryFileSystem {
             files: Default::default(),
             errors: Default::default(),
             allow_write: true,
+            on_get_staged_files: Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(Box::new(
+                Vec::new,
+            )))))),
             on_get_changed_files: Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(Box::new(
                 Vec::new,
             )))))),
@@ -109,6 +113,13 @@ impl MemoryFileSystem {
         cfn: Box<dyn FnOnce() -> Vec<String> + Send + RefUnwindSafe + 'static>,
     ) {
         self.on_get_changed_files = Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(cfn)))));
+    }
+
+    pub fn set_on_get_staged_files(
+        &mut self,
+        cfn: Box<dyn FnOnce() -> Vec<String> + Send + RefUnwindSafe + 'static>,
+    ) {
+        self.on_get_staged_files = Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(cfn)))));
     }
 }
 
@@ -191,8 +202,26 @@ impl FileSystem for MemoryFileSystem {
         files.get(path).is_some()
     }
 
+    fn path_is_dir(&self, path: &Path) -> bool {
+        !self.path_is_file(path)
+    }
+
+    fn path_is_symlink(&self, _path: &Path) -> bool {
+        false
+    }
+
     fn get_changed_files(&self, _base: &str) -> io::Result<Vec<String>> {
         let cb_arc = self.on_get_changed_files.as_ref().unwrap().clone();
+
+        let mut cb_guard = cb_arc.lock();
+
+        let cb = cb_guard.take().unwrap();
+
+        Ok(cb())
+    }
+
+    fn get_staged_files(&self) -> io::Result<Vec<String>> {
+        let cb_arc = self.on_get_staged_files.as_ref().unwrap().clone();
 
         let mut cb_guard = cb_arc.lock();
 

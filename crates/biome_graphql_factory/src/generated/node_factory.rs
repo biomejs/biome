@@ -429,7 +429,7 @@ pub fn graphql_float_value(graphql_float_literal_token: SyntaxToken) -> GraphqlF
 }
 pub fn graphql_fragment_definition(
     fragment_token: SyntaxToken,
-    name: GraphqlFragmentName,
+    name: GraphqlName,
     type_condition: GraphqlTypeCondition,
     directives: GraphqlDirectiveList,
     selection_set: GraphqlSelectionSet,
@@ -445,15 +445,9 @@ pub fn graphql_fragment_definition(
         ],
     ))
 }
-pub fn graphql_fragment_name(name: GraphqlName) -> GraphqlFragmentName {
-    GraphqlFragmentName::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_FRAGMENT_NAME,
-        [Some(SyntaxElement::Node(name.into_syntax()))],
-    ))
-}
 pub fn graphql_fragment_spread(
     dotdotdot_token: SyntaxToken,
-    name: GraphqlFragmentName,
+    name: GraphqlName,
     directives: GraphqlDirectiveList,
 ) -> GraphqlFragmentSpread {
     GraphqlFragmentSpread::unwrap_cast(SyntaxNode::new_detached(

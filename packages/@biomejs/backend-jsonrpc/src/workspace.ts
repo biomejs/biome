@@ -163,6 +163,10 @@ export interface PartialJavascriptConfiguration {
 If defined here, they should not emit diagnostics. 
 	 */
 	globals?: StringSet;
+	/**
+	 * Indicates the type of runtime or transformation used for interpreting JSX.
+	 */
+	jsx_runtime?: JsxRuntime;
 	organize_imports?: PartialJavascriptOrganizeImports;
 	/**
 	 * Parsing options
@@ -352,6 +356,10 @@ export interface PartialJavascriptFormatter {
 	 */
 	trailingComma?: TrailingComma;
 }
+/**
+ * Indicates the type of runtime or transformation used for interpreting JSX.
+ */
+export type JsxRuntime = "Transparent" | "ReactClassic";
 export interface PartialJavascriptOrganizeImports {}
 /**
  * Options that changes how the JavaScript parser behaves
@@ -502,7 +510,7 @@ export interface A11y {
 	 */
 	noDistractingElements?: RuleConfiguration_for_Null;
 	/**
-	 * The scope prop should be used only on <th> elements.
+	 * The scope prop should be used only on \<th> elements.
 	 */
 	noHeaderScope?: RuleConfiguration_for_Null;
 	/**
@@ -834,7 +842,7 @@ export interface Correctness {
 	/**
 	 * Disallow unused imports.
 	 */
-	noUnusedImports?: RuleConfiguration_for_UnusedImportsOptions;
+	noUnusedImports?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unused labels.
 	 */
@@ -893,13 +901,17 @@ export interface Nursery {
 	 */
 	noBarrelFile?: RuleConfiguration_for_Null;
 	/**
-	 * [WIP] This rule hasn't been implemented yet.
+	 * WIP: This rule hasn't been implemented yet.
 	 */
 	noColorInvalidHex?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of console.
 	 */
 	noConsole?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.
+	 */
+	noConstantMathMinMaxClamp?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
@@ -908,6 +920,10 @@ export interface Nursery {
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow duplicate names within font families.
+	 */
+	noDuplicateFontNames?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
@@ -1124,7 +1140,7 @@ export interface Style {
 	 */
 	useCollapsedElseIf?: RuleConfiguration_for_Null;
 	/**
-	 * Require consistently using either T[] or Array<T>
+	 * Require consistently using either T\[] or Array\<T>
 	 */
 	useConsistentArrayType?: RuleConfiguration_for_ConsistentArrayTypeOptions;
 	/**
@@ -1156,7 +1172,7 @@ export interface Style {
 	 */
 	useForOf?: RuleConfiguration_for_Null;
 	/**
-	 * This rule enforces the use of <>...</> over <Fragment>...</Fragment>.
+	 * This rule enforces the use of \<>...\</> over \<Fragment>...\</Fragment>.
 	 */
 	useFragmentSyntax?: RuleConfiguration_for_Null;
 	/**
@@ -1188,7 +1204,7 @@ export interface Style {
 	 */
 	useSelfClosingElements?: RuleConfiguration_for_Null;
 	/**
-	 * When expressing array types, this rule promotes the usage of T[] shorthand instead of Array<T>.
+	 * When expressing array types, this rule promotes the usage of T\[] shorthand instead of Array\<T>.
 	 */
 	useShorthandArrayType?: RuleConfiguration_for_Null;
 	/**
@@ -1485,9 +1501,6 @@ export type RuleConfiguration_for_ValidAriaRoleOptions =
 export type RuleConfiguration_for_ComplexityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ComplexityOptions;
-export type RuleConfiguration_for_UnusedImportsOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UnusedImportsOptions;
 export type RuleConfiguration_for_HooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_HooksOptions;
@@ -1524,10 +1537,6 @@ export interface RuleWithOptions_for_ValidAriaRoleOptions {
 export interface RuleWithOptions_for_ComplexityOptions {
 	level: RulePlainConfiguration;
 	options: ComplexityOptions;
-}
-export interface RuleWithOptions_for_UnusedImportsOptions {
-	level: RulePlainConfiguration;
-	options: UnusedImportsOptions;
 }
 export interface RuleWithOptions_for_HooksOptions {
 	level: RulePlainConfiguration;
@@ -1573,12 +1582,6 @@ export interface ComplexityOptions {
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
 	maxAllowedComplexity: number;
-}
-export interface UnusedImportsOptions {
-	/**
-	 * Ignore `React` imports from the `react` package when set to `true`.
-	 */
-	ignoreReact: boolean;
 }
 /**
  * Options for the rule `useExhaustiveDependencies`
@@ -1690,7 +1693,7 @@ export type FilenameCases = FilenameCase[];
  * Supported cases for TypeScript `enum` member names.
  */
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
-export type StableHookResult = "None" | "Identity" | { Indices: number[] };
+export type StableHookResult = boolean | number[];
 /**
  * Supported cases for file names.
  */
@@ -1813,7 +1816,7 @@ export interface Diagnostic {
 	severity: Severity;
 	source?: Diagnostic;
 	tags: DiagnosticTags;
-	verbose_advices: Advices;
+	verboseAdvices: Advices;
 }
 /**
  * Implementation of [Visitor] collecting serializable [Advice] into a vector.
@@ -1920,6 +1923,7 @@ export type Category =
 	| "lint/nursery/noBarrelFile"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
+	| "lint/nursery/noConstantMathMinMaxClamp"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateJsonKeys"
@@ -1929,6 +1933,7 @@ export type Category =
 	| "lint/nursery/noExportsInTest"
 	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noFocusedTests"
+	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noNamespaceImport"
 	| "lint/nursery/noNodejsModules"
@@ -2076,7 +2081,7 @@ export type Category =
 	| "semanticTests";
 export interface Location {
 	path?: Resource_for_String;
-	source_code?: string;
+	sourceCode?: string;
 	span?: TextRange;
 }
 export type MarkupBuf = MarkupNodeBuf[];
@@ -2091,13 +2096,13 @@ export type DiagnosticTags = DiagnosticTag[];
 See the [Visitor] trait for additional documentation on all the supported advice types. 
 	 */
 export type Advice =
-	| { Log: [LogCategory, MarkupBuf] }
-	| { List: MarkupBuf[] }
-	| { Frame: Location }
-	| { Diff: TextEdit }
-	| { Backtrace: [MarkupBuf, Backtrace] }
-	| { Command: string }
-	| { Group: [MarkupBuf, Advices] };
+	| { log: [LogCategory, MarkupBuf] }
+	| { list: MarkupBuf[] }
+	| { frame: Location }
+	| { diff: TextEdit }
+	| { backtrace: [MarkupBuf, Backtrace] }
+	| { command: string }
+	| { group: [MarkupBuf, Advices] };
 /**
  * Represents the resource a diagnostic is associated with.
  */
@@ -2119,7 +2124,7 @@ export type DiagnosticTag =
 /**
  * The category for a log advice, defines how the message should be presented to the user.
  */
-export type LogCategory = "None" | "Info" | "Warn" | "Error";
+export type LogCategory = "none" | "info" | "warn" | "error";
 export interface TextEdit {
 	dictionary: string;
 	ops: CompressedOp[];
@@ -2142,8 +2147,8 @@ export type MarkupElement =
 	| "Inverse"
 	| { Hyperlink: { href: string } };
 export type CompressedOp =
-	| { DiffOp: DiffOp }
-	| { EqualLines: { line_count: number } };
+	| { diffOp: DiffOp }
+	| { equalLines: { line_count: number } };
 /**
  * Serializable representation of a backtrace frame.
  */
@@ -2152,9 +2157,9 @@ export interface BacktraceFrame {
 	symbols: BacktraceSymbol[];
 }
 export type DiffOp =
-	| { Equal: { range: TextRange } }
-	| { Insert: { range: TextRange } }
-	| { Delete: { range: TextRange } };
+	| { equal: { range: TextRange } }
+	| { insert: { range: TextRange } }
+	| { delete: { range: TextRange } };
 /**
  * Serializable representation of a backtrace frame symbol.
  */

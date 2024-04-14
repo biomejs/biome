@@ -24,7 +24,7 @@ var a;
 a = 2;
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noImplicitAnyLet.js:1:5 <a href="https://biomejs.dev/linter/rules/no-implicit-any-let">lint/suspicious/noImplicitAnyLet</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noImplicitAnyLet.ts:1:5 <a href="https://biomejs.dev/linter/rules/no-implicit-any-let">lint/suspicious/noImplicitAnyLet</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable implicitly has the </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> type.</span>
   
@@ -42,7 +42,7 @@ let b;
 b = 1
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noImplicitAnyLet.js:1:5 <a href="https://biomejs.dev/linter/rules/no-implicit-any-let">lint/suspicious/noImplicitAnyLet</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noImplicitAnyLet.ts:1:5 <a href="https://biomejs.dev/linter/rules/no-implicit-any-let">lint/suspicious/noImplicitAnyLet</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable implicitly has the </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> type.</span>
   
