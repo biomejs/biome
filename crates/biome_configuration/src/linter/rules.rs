@@ -460,7 +460,7 @@ impl DeserializableValidator for A11y {
 }
 impl A11y {
     const GROUP_NAME: &'static str = "a11y";
-    pub(crate) const GROUP_RULES: [&'static str; 30] = [
+    pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "noAccessKey",
         "noAriaHiddenOnFocusable",
         "noAriaUnsupportedElements",
@@ -492,7 +492,7 @@ impl A11y {
         "useValidAriaValues",
         "useValidLang",
     ];
-    const RECOMMENDED_RULES: [&'static str; 30] = [
+    const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noAccessKey",
         "noAriaHiddenOnFocusable",
         "noAriaUnsupportedElements",
@@ -524,7 +524,7 @@ impl A11y {
         "useValidAriaValues",
         "useValidLang",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 30] = [
+    const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -556,7 +556,7 @@ impl A11y {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 30] = [
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -917,10 +917,10 @@ impl A11y {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 30] {
+    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 30] {
+    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -1185,7 +1185,7 @@ impl DeserializableValidator for Complexity {
 }
 impl Complexity {
     const GROUP_NAME: &'static str = "complexity";
-    pub(crate) const GROUP_RULES: [&'static str; 29] = [
+    pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "noBannedTypes",
         "noEmptyTypeParameters",
         "noExcessiveCognitiveComplexity",
@@ -1216,7 +1216,7 @@ impl Complexity {
         "useSimpleNumberKeys",
         "useSimplifiedLogicExpression",
     ];
-    const RECOMMENDED_RULES: [&'static str; 26] = [
+    const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noBannedTypes",
         "noEmptyTypeParameters",
         "noExcessiveNestedTestSuites",
@@ -1244,7 +1244,7 @@ impl Complexity {
         "useRegexLiterals",
         "useSimpleNumberKeys",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 26] = [
+    const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
@@ -1272,7 +1272,7 @@ impl Complexity {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 29] = [
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -1628,10 +1628,10 @@ impl Complexity {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 26] {
+    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 29] {
+    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -1914,7 +1914,7 @@ impl DeserializableValidator for Correctness {
 }
 impl Correctness {
     const GROUP_NAME: &'static str = "correctness";
-    pub(crate) const GROUP_RULES: [&'static str; 37] = [
+    pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "noChildrenProp",
         "noConstAssign",
         "noConstantCondition",
@@ -1953,7 +1953,7 @@ impl Correctness {
         "useValidForDirection",
         "useYield",
     ];
-    const RECOMMENDED_RULES: [&'static str; 31] = [
+    const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noChildrenProp",
         "noConstAssign",
         "noConstantCondition",
@@ -1986,7 +1986,7 @@ impl Correctness {
         "useValidForDirection",
         "useYield",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 31] = [
+    const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2019,7 +2019,7 @@ impl Correctness {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 37] = [
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2457,10 +2457,10 @@ impl Correctness {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 31] {
+    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 37] {
+    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -2709,7 +2709,7 @@ impl DeserializableValidator for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 15] = [
+    pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "noColorInvalidHex",
         "noConsole",
         "noConstantMathMinMaxClamp",
@@ -2726,7 +2726,7 @@ impl Nursery {
         "useImportRestrictions",
         "useSortedClasses",
     ];
-    const RECOMMENDED_RULES: [&'static str; 6] = [
+    const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noDoneCallback",
         "noDuplicateElseIf",
         "noDuplicateFontNames",
@@ -2734,7 +2734,7 @@ impl Nursery {
         "noEvolvingAny",
         "noFlatMapIdentity",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 6] = [
+    const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
@@ -2742,7 +2742,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 15] = [
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2938,10 +2938,10 @@ impl Nursery {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 6] {
+    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 15] {
+    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3069,18 +3069,18 @@ impl DeserializableValidator for Performance {
 }
 impl Performance {
     const GROUP_NAME: &'static str = "performance";
-    pub(crate) const GROUP_RULES: [&'static str; 4] = [
+    pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "noAccumulatingSpread",
         "noBarrelFile",
         "noDelete",
         "noReExportAll",
     ];
-    const RECOMMENDED_RULES: [&'static str; 2] = ["noAccumulatingSpread", "noDelete"];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 2] = [
+    const RECOMMENDED_RULES: &'static [&'static str] = &["noAccumulatingSpread", "noDelete"];
+    const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 4] = [
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -3155,10 +3155,10 @@ impl Performance {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 2] {
+    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 4] {
+    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3240,22 +3240,22 @@ impl DeserializableValidator for Security {
 }
 impl Security {
     const GROUP_NAME: &'static str = "security";
-    pub(crate) const GROUP_RULES: [&'static str; 3] = [
+    pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "noDangerouslySetInnerHtml",
         "noDangerouslySetInnerHtmlWithChildren",
         "noGlobalEval",
     ];
-    const RECOMMENDED_RULES: [&'static str; 3] = [
+    const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noDangerouslySetInnerHtml",
         "noDangerouslySetInnerHtmlWithChildren",
         "noGlobalEval",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 3] = [
+    const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 3] = [
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -3319,10 +3319,10 @@ impl Security {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 3] {
+    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 3] {
+    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3519,7 +3519,7 @@ impl DeserializableValidator for Style {
 }
 impl Style {
     const GROUP_NAME: &'static str = "style";
-    pub(crate) const GROUP_RULES: [&'static str; 43] = [
+    pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "noArguments",
         "noCommaOperator",
         "noDefaultExport",
@@ -3564,7 +3564,7 @@ impl Style {
         "useTemplate",
         "useWhile",
     ];
-    const RECOMMENDED_RULES: [&'static str; 24] = [
+    const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noArguments",
         "noCommaOperator",
         "noInferrableTypes",
@@ -3590,7 +3590,7 @@ impl Style {
         "useTemplate",
         "useWhile",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 24] = [
+    const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
@@ -3616,7 +3616,7 @@ impl Style {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 43] = [
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -4120,10 +4120,10 @@ impl Style {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 24] {
+    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 43] {
+    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -4518,7 +4518,7 @@ impl DeserializableValidator for Suspicious {
 }
 impl Suspicious {
     const GROUP_NAME: &'static str = "suspicious";
-    pub(crate) const GROUP_RULES: [&'static str; 55] = [
+    pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "noApproximativeNumericConstant",
         "noArrayIndexKey",
         "noAssignInExpressions",
@@ -4575,7 +4575,7 @@ impl Suspicious {
         "useNamespaceKeyword",
         "useValidTypeof",
     ];
-    const RECOMMENDED_RULES: [&'static str; 51] = [
+    const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noApproximativeNumericConstant",
         "noArrayIndexKey",
         "noAssignInExpressions",
@@ -4628,7 +4628,7 @@ impl Suspicious {
         "useNamespaceKeyword",
         "useValidTypeof",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 51] = [
+    const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -4681,7 +4681,7 @@ impl Suspicious {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 55] = [
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -5317,10 +5317,10 @@ impl Suspicious {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 51] {
+    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 55] {
+    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
