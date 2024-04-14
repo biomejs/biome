@@ -236,9 +236,11 @@ New rules are incubated in the nursery group.
 Nursery rules are subject to breaking changes.
 The new rules are:
 
+- [nursery/noConstantMathMinMaxClamp](/linter/rules/no-constant-math-min-max-clamp/)
 - [nursery/noDoneCallback](/linter/rules/no-done-callback/)
 - [nursery/noDuplicateElseIf](/linter/rules/no-duplicate-else-if/)
 - [nursery/noEvolvingAny](/linter/rules/no-evolving-any/)
+- [nursery/noFlatMapIdentity](/linter/rules/no-flat-map-identity/)
 - [nursery/noMisplacedAssertion](/linter/rules/no-misplaced-assertion/)
 
 ### Promoted rules

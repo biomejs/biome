@@ -35,7 +35,7 @@ declare_rule! {
     /// ```
     ///
     pub NoConstantMathMinMaxClamp {
-        version: "next",
+        version: "1.7.0",
         name: "noConstantMathMinMaxClamp",
         sources: &[RuleSource::Clippy("min_max")],
         recommended: false,

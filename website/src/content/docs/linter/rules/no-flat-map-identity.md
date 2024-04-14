@@ -1,12 +1,8 @@
 ---
-title: noFlatMapIdentity (not released)
+title: noFlatMapIdentity (since v1.7.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noFlatMapIdentity`**
-
-:::danger
-This rule hasn't been released yet.
-:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

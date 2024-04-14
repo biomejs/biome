@@ -37,7 +37,7 @@ declare_rule! {
     /// ```
     ///
     pub NoFlatMapIdentity {
-        version: "next",
+        version: "1.7.0",
         name: "noFlatMapIdentity",
         recommended: true,
         sources: &[RuleSource::Clippy("flat_map_identity")],
