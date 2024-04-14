@@ -44,6 +44,7 @@ pub type NoConstEnum =
     <lint::suspicious::no_const_enum::NoConstEnum as biome_analyze::Rule>::Options;
 pub type NoConstantCondition =
     <lint::correctness::no_constant_condition::NoConstantCondition as biome_analyze::Rule>::Options;
+pub type NoConstantMathMinMaxClamp = < lint :: nursery :: no_constant_math_min_max_clamp :: NoConstantMathMinMaxClamp as biome_analyze :: Rule > :: Options ;
 pub type NoConstructorReturn =
     <lint::correctness::no_constructor_return::NoConstructorReturn as biome_analyze::Rule>::Options;
 pub type NoControlCharactersInRegex = < lint :: suspicious :: no_control_characters_in_regex :: NoControlCharactersInRegex as biome_analyze :: Rule > :: Options ;
