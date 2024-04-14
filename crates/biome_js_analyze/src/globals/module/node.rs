@@ -1,6 +1,6 @@
 /// Sorted array of Node builtin modules
 ///
-/// Source: https://github.com/inspect-js/is-core-module/blob/8317b311856a61935d7257ad5f31f9b0cfd13b5f/core.json#L1-L158
+/// Source: <https://github.com/inspect-js/is-core-module/blob/8317b311856a61935d7257ad5f31f9b0cfd13b5f/core.json#L1-L158>
 pub const BUILTIN_MODULES: &[&str; 156] = &[
     "_debug_agent",
     "_debugger",

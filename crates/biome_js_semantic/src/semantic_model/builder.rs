@@ -7,8 +7,8 @@ use std::collections::hash_map::Entry;
 /// For a good example on how to use it see [semantic_model].
 ///
 /// [SemanticModelBuilder] consumes all the [SemanticEvent] and build all the
-/// data necessary to build a [SemanticModelData], that is allocated with an [Arc]
-/// and stored inside the [SemanticModel].
+/// data necessary to build a semantic model, that is allocated with an
+/// [std::sync::Arc] and stored inside the [SemanticModel].
 pub struct SemanticModelBuilder {
     root: AnyJsRoot,
     node_by_range: FxHashMap<TextRange, JsSyntaxNode>,

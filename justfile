@@ -61,8 +61,8 @@ gen-grammar *args='':
 
 # Generates the linter documentation and Rust documentation
 documentation:
-  cargo lintdoc
-  cargo documentation
+  RUSTDOCFLAGS='-D warnings' cargo lintdoc
+  RUSTDOCFLAGS='-D warnings' cargo documentation
 
 # Creates a new lint rule in the given path, with the given name. Name has to be camel case.
 new-js-lintrule rulename:

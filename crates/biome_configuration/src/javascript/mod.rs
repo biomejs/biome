@@ -76,7 +76,7 @@ pub enum JsxRuntime {
     /// This option should only be necessary if you cannot upgrade to a React
     /// version that supports the new JSX runtime. For more information about
     /// the old vs. new JSX runtime, please see:
-    /// https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html
+    /// <https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html>
     ReactClassic,
 }
 
