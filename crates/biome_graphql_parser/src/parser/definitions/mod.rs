@@ -8,6 +8,7 @@ use biome_parser::{
 };
 
 use self::operation::{is_at_operation, parse_operation_definition};
+pub(crate) use operation::is_at_selection_set_end;
 
 struct DefinitionListParseRecovery;
 

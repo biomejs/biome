@@ -279,7 +279,7 @@ fn is_at_selection_set(p: &GraphqlParser) -> bool {
 }
 
 #[inline]
-fn is_at_selection_set_end(p: &GraphqlParser) -> bool {
+pub(crate) fn is_at_selection_set_end(p: &GraphqlParser) -> bool {
     // stop at closing brace or at the start of a new definition
     p.at(T!['}']) || is_at_definition(p)
 }
