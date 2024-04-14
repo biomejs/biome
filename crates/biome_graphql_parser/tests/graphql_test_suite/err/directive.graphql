@@ -1,0 +1,35 @@
+{
+  hero @
+}
+
+{
+  hero @ @
+}
+
+{
+  hero @deprecated(: "Deprecated")
+}
+
+{
+  hero @deprecated(reason:)
+}
+
+{
+  hero @deprecated(reason: "Deprecated"
+}
+
+{
+  hero @(reason: "Deprecated"
+}
+
+{
+  hero @(: "Deprecated"
+}
+
+{
+  hero @(:
+}
+
+{
+  hero @(:)
+}
