@@ -1484,6 +1484,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noFlatMapIdentity": {
+					"description": "Disallow to use unnecessary callback on flatMap.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFocusedTests": {
 					"description": "Disallow focused tests.",
 					"anyOf": [

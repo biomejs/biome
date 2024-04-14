@@ -945,6 +945,10 @@ export interface Nursery {
 	 */
 	noExportsInTest?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow to use unnecessary callback on flatMap.
+	 */
+	noFlatMapIdentity?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow focused tests.
 	 */
 	noFocusedTests?: RuleConfiguration_for_Null;
@@ -1927,6 +1931,7 @@ export type Category =
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noExportsInTest"
+	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noFocusedTests"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noMisplacedAssertion"
