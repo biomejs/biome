@@ -24,7 +24,7 @@ Disallow the use of `Math.min` and `Math.max` to clamp a value where the result 
 Math.min(0, Math.max(100, x));
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noConstantMathMinMaxClamp.js:1:1 <a href="https://biomejs.dev/linter/rules/no-constant-math-min-max-clamp">lint/nursery/noConstantMathMinMaxClamp</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConstantMathMinMaxClamp.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-constant-math-min-max-clamp">lint/nursery/noConstantMathMinMaxClamp</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>Math.min/Math.max</strong></span><span style="color: Orange;"> combination leads to a constant result.</span>
   
@@ -50,7 +50,7 @@ Math.min(0, Math.max(100, x));
 Math.max(100, Math.min(0, x));
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noConstantMathMinMaxClamp.js:1:1 <a href="https://biomejs.dev/linter/rules/no-constant-math-min-max-clamp">lint/nursery/noConstantMathMinMaxClamp</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConstantMathMinMaxClamp.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-constant-math-min-max-clamp">lint/nursery/noConstantMathMinMaxClamp</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>Math.min/Math.max</strong></span><span style="color: Orange;"> combination leads to a constant result.</span>
   

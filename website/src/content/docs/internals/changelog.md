@@ -203,7 +203,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnositic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
+- Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnostic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
 
 - Biome now correctly filters out files that are not present in the current directory when using the `--changed` flag [#1996](https://github.com/biomejs/biome/issues/1996). Contributed by @castarco
 
@@ -545,7 +545,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) now reports duplicate type parameters in a same declaration.
 
-  The following type parameters are now reported as a redeclaraion:
+  The following type parameters are now reported as a redeclaration:
 
   ```ts
   function f<T, T>() {}
@@ -624,7 +624,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Enhancements
 
-- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) ignores unused rest spread silbings.
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) ignores unused rest spread siblings.
 
   The following code is now valid:
 
@@ -1004,7 +1004,7 @@ Additionally, the following rules are now recommended:
   ```
   Contributed by @DaniGuardiola
 
-- Add rule [noUndeclaredependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies), to detect the use of
+- Add rule [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies), to detect the use of
   dependencies that aren't present in the `package.json`.
 
   The rule ignores imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
@@ -2260,9 +2260,9 @@ no longer repports missing dependencies for React hooks without dependency array
 
 - Add option `--line-feed` to the `format` command. Contributed by @SuperchupuDev
 
-- Add option `--bracket-same-line` to the `format` command. Contributed by @faultyserve
+- Add option `--bracket-same-line` to the `format` command. Contributed by @faultyserver
 
-- Add option `--bracket-spacing` to the `format` command. Contributed by @faultyserve
+- Add option `--bracket-spacing` to the `format` command. Contributed by @faultyserver
 
 #### Bug fixes
 
@@ -3448,7 +3448,7 @@ The following rules are promoted:
   which instructs Biome to exit with an error code when warnings are emitted.
 
   ```shell
-  biome check --error-on-wanrings ./src
+  biome check --error-on-warnings ./src
   ```
 
 - Add a configuration to enable parsing comments inside JSON files:

@@ -117,8 +117,8 @@
 | [role-has-required-aria-props](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/role-has-required-aria-props.md) |[useAriaPropsForRole](/linter/rules//lint/rules/use-aria-props-for-role) |
 | [scope](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/scope.md) |[noHeaderScope](/linter/rules//lint/rules/no-header-scope) |
 | [tabindex-no-positive](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/tabindex-no-positive.md) |[noPositiveTabindex](/linter/rules//lint/rules/no-positive-tabindex) |
-## eslint-plugin-mysticates rules to Biome
-| eslint-plugin-mysticates rule name | Biome rule name |
+## @mysticatea/eslint-plugin rules to Biome
+| @mysticatea/eslint-plugin rule name | Biome rule name |
 | ---- | ---- |
 | [no-this-in-static](https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-this-in-static.md) |[noThisInStatic](/linter/rules//lint/rules/no-this-in-static) |
 ## eslint-plugin-react rules to Biome
