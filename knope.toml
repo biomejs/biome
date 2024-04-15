@@ -1,8 +1,10 @@
 ## npm packages
-# Empty for now
+[packages.biome]
+versioned_files = ["packages/@biomejs/biome/package.json"]
+changelog = "CHANGELOG.md"
 
 
-## Rust crates
+## Rust crates. DO NOT CHANGE!
 [packages.biome_analyze]
 versioned_files = ["crates/biome_analyze/Cargo.toml"]
 changelog = "crates/biome_analyze/CHANGELOG.md"
@@ -135,11 +137,80 @@ changelog = "crates/biome_graphql_syntax/CHANGELOG.md"
 [packages.biome_graphql_factory]
 versioned_files = ["crates/biome_graphql_factory/Cargo.toml"]
 changelog = "crates/biome_graphql_factory/CHANGELOG.md"
-
-[package."biome_html_parser"]
-versioned_files = ["creates/biome_html_parser/Cargo.toml"]
+[packages.biome_html_parser]
+versioned_files = ["crates/biome_html_parser/Cargo.toml"]
 changelog = "crates/biome_html_parser/CHANGELOG.md"
-
-[package."biome_configuration"]
-versioned_files = ["creates/biome_configuration/Cargo.toml"]
+[packages.biome_configuration]
+versioned_files = ["crates/biome_configuration/Cargo.toml"]
 changelog = "crates/biome_configuration/CHANGELOG.md"
+
+## End of crates. DO NOT CHANGE!
+
+# Artifact names
+[[package.assets]]
+path = "dist/biome-win32-x64.tgz"
+name = "biome-win32-x64.tgz"
+[[package.assets]]
+path = "dist/biome-win32-arm64.tgz"
+name = "biome-win32-arm64.tgz"
+[[package.assets]]
+path = "dist/biome-linux-x64.tgz"
+name = "biome-linux-x64.tgz"
+[[package.assets]]
+path = "dist/biome-linux-arm64.tgz"
+name = "biome-linux-arm64.tgz"
+[[package.assets]]
+path = "dist/biome-linux-x64-musl.tgz"
+name = "biome-linux-x64-musl.tgz"
+[[package.assets]]
+path = "dist/biome-linux-arm64-musl.tgz"
+name = "biome-linux-arm64-musl.tgz"
+[[package.assets]]
+path = "dist/biome-darwin-x64.tgz"
+name = "biome-darwin-x64.tgz"
+[[package.assets]]
+path = "dist/biome-darwin-arm64.tgz"
+name = "biome-darwin-arm64.tgz"
+
+# Workflow to create a changeset
+[[workflows]]
+name = "document-change"
+
+[[workflows.steps]]
+type = "CreateChangeFile"
+
+
+# Workflow that creates a PR via github actions and create a release
+[[workflows]]
+name = "preprare-release"
+[[workflows.steps]]
+type = "Command"
+command = "git switch -c release"
+
+[[workflows.steps]]
+type = "PrepareRelease"
+
+[[workflows.steps]]
+type = "Command"
+command = "git commit -m \"chore: prepare release $version\""
+
+[[workflows.steps]]
+type = "Command"
+command = "git push --force --set-upstream origin release"
+
+[workflows.steps.variables]
+"$version" = "Version"
+
+[[workflows.steps]]
+type = "CreatePullRequest"
+base = "main"
+
+[workflows.steps.title]
+template = "chore: prepare release $version"
+variables = { "$version" = "Version" }
+
+[workflows.steps.body]
+template = "This PR was created by Knope. Merging it will create a new release\n\n$changelog"
+variables = { "$changelog" = "ChangelogEntry" }
+
+

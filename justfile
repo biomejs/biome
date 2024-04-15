@@ -152,6 +152,7 @@ new-crate name:
 new-changeset:
     knope document-change
 
-dry-run:
-    knope release --dry-run > out.txt
+# Dry-run of the release
+new-release *args='':
+    knope release --dry-run {{args}}
 
