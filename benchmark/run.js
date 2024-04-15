@@ -1,14 +1,14 @@
-const fs = require("node:fs");
-const child_process = require("node:child_process");
-const path = require("node:path");
-const os = require("node:os");
+import * as fs from "node:fs";
+import { execSync } from "node:child_process";
+import * as path from "node:path";
+import * as os from "node:os";
 
 const TMP_DIRECTORY = path.resolve("./target");
 
 function buildBiome() {
 	console.log("Building Biome...");
 
-	child_process.execSync("cargo build --bin biome --release", {
+	execSync("cargo build --bin biome --release", {
 		stdio: "inherit",
 	});
 
@@ -71,7 +71,7 @@ function benchmarkFormatter(biome) {
 	console.log("");
 
 	// Run Dprint once to run the installer
-	child_process.execSync("npx dprint --version");
+	execSync("npx dprint --version");
 
 	for (const [name, configuration] of Object.entries(BENCHMARKS.formatter)) {
 		console.log(`[${name}]`);
@@ -95,7 +95,7 @@ function benchmarkFormatter(biome) {
 			os.cpus().length
 		}`;
 
-		const dprintCommand = `${resolveDprint()} fmt --incremental=false --config '${require.resolve(
+		const dprintCommand = `${resolveDprint()} fmt --incremental=false --config '${import.meta.resolve(
 			"./dprint.json",
 		)}' ${Object.keys(configuration.sourceDirectories)
 			.map((path) => `'${path}/**/*'`)
@@ -117,7 +117,7 @@ function benchmarkFormatter(biome) {
 		const hyperfineCommand = `hyperfine --show-output -w 2 -n Prettier "${prettierCommand}" -n "Parallel-Prettier" "${parallelPrettierCommand}" -n dprint "${dprintCommand}" -n Biome "${biomeCommand}" --shell=${shellOption()} -n "Biome (1 thread)" "${biomeSingleCoreCommand}"`;
 		console.log(hyperfineCommand);
 
-		child_process.execSync(hyperfineCommand, {
+		execSync(hyperfineCommand, {
 			cwd: projectDirectory,
 			stdio: "inherit",
 		});
@@ -187,7 +187,7 @@ function benchmarkLinter(biome) {
 		const hyperfineCommand = `hyperfine -i -w 2 -n ESLint "${eslintCommand}" -n Biome "${biomeCommand}" --shell=${shellOption()} -n "Biome (1 thread)" "${biomeSingleCoreCommand}"`;
 		console.log(hyperfineCommand);
 
-		child_process.execSync(hyperfineCommand, {
+		execSync(hyperfineCommand, {
 			cwd: projectDirectory,
 			stdio: "inherit",
 		});
@@ -221,7 +221,7 @@ function withEnvVariable(name, value, command) {
 function withDirectory(cwd) {
 	return {
 		run(command, options) {
-			child_process.execSync(command, {
+			execSync(command, {
 				cwd,
 				...options,
 			});
