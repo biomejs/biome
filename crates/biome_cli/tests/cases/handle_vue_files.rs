@@ -393,11 +393,7 @@ fn format_vue_generic_component_files() {
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(
-        &fs,
-        vue_file_path,
-        VUE_GENERIC_COMPONENT_FILE_UNFORMATTED,
-    );
+    assert_file_contents(&fs, vue_file_path, VUE_GENERIC_COMPONENT_FILE_UNFORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
