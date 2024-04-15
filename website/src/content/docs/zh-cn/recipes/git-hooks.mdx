@@ -198,8 +198,7 @@ pre-commit 配置项 `files ` 是可选的，
   #!/bin/sh
   set -eu
 
-  git diff -z --staged --name-only --diff-filter=ACMR | \
-      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched $STAGED_FILES
+  npx biome check --staged --files-ignore-unknown=true --no-errors-on-unmatched
   ```
 
 - 提交前进行格式化，lint，以及进行安全地代码修复
@@ -213,8 +212,7 @@ pre-commit 配置项 `files ` 是可选的，
     exit 1;
   fi
 
-  git diff -z --staged --name-only --diff-filter=ACMR | \
-      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched
+  npx biome check --apply --staged --files-ignore-unknown=true --no-errors-on-unmatched
 
   git update-index --again
   ```

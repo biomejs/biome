@@ -67,7 +67,7 @@ pub(crate) fn check(
     };
 
     let loaded_configuration =
-        load_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
+        load_configuration(&session.app.fs, cli_options.as_configuration_path_hint())?;
     validate_configuration_diagnostics(
         &loaded_configuration,
         session.app.console,

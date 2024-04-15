@@ -2,10 +2,10 @@
 title: noFocusedTests (since v1.6.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noFocusedTests`**
+**Diagnostic Category: `lint/suspicious/noFocusedTests`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Inspired from: <a href="https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-focused-tests.md" target="_blank"><code>no-focused-tests</code></a>
@@ -24,7 +24,7 @@ However, in pull/merge request, you usually want to run all the test suite.
 describe.only("foo", () => {});
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noFocusedTests.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-focused-tests">lint/nursery/noFocusedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noFocusedTests.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-focused-tests">lint/suspicious/noFocusedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Don't focus the test.</span>
   
@@ -46,7 +46,7 @@ describe.only("foo", () => {});
 test.only("foo", () => {});
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noFocusedTests.jsx:1:6 <a href="https://biomejs.dev/linter/rules/no-focused-tests">lint/nursery/noFocusedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noFocusedTests.jsx:1:6 <a href="https://biomejs.dev/linter/rules/no-focused-tests">lint/suspicious/noFocusedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Don't focus the test.</span>
   

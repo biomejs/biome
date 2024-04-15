@@ -2,10 +2,10 @@
 title: noDuplicateTestHooks (since v1.6.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noDuplicateTestHooks`**
+**Diagnostic Category: `lint/suspicious/noDuplicateTestHooks`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Inspired from: <a href="https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-duplicate-hooks.md" target="_blank"><code>no-duplicate-hooks</code></a>
@@ -30,7 +30,7 @@ describe('foo', () => {
 });
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noDuplicateTestHooks.jsx:5:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-test-hooks">lint/nursery/noDuplicateTestHooks</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateTestHooks.jsx:5:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-test-hooks">lint/suspicious/noDuplicateTestHooks</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Disallow duplicate setup and teardown hooks.</span>
   
@@ -64,7 +64,7 @@ describe('foo', () => {
 });
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noDuplicateTestHooks.jsx:9:4 <a href="https://biomejs.dev/linter/rules/no-duplicate-test-hooks">lint/nursery/noDuplicateTestHooks</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateTestHooks.jsx:9:4 <a href="https://biomejs.dev/linter/rules/no-duplicate-test-hooks">lint/suspicious/noDuplicateTestHooks</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Disallow duplicate setup and teardown hooks.</span>
   

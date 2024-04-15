@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_named_reexprt.ts
+---
+# Input
+```ts
+export { baz, qux } from "foobar";
+
+```
+
+# Diagnostics
+```
+invalid_named_reexprt.ts:1:1 lint/performance/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
+  
+  > 1 │ export { baz, qux } from "foobar";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```

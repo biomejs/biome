@@ -4,4 +4,4 @@ expression: content
 ---
 example/ internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exists: example/
+  × Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exist: example/

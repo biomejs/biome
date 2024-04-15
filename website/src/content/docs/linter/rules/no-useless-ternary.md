@@ -2,10 +2,10 @@
 title: noUselessTernary (since v1.5.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noUselessTernary`**
+**Diagnostic Category: `lint/complexity/noUselessTernary`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Source: <a href="https://eslint.org/docs/latest/rules/no-unneeded-ternary" target="_blank"><code>no-unneeded-ternary</code></a>
@@ -23,7 +23,7 @@ boolean values instead of using the logical NOT (`!`) or double NOT (`!!`) to co
 var a = x ? true : true;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessTernary.jsx:1:9 <a href="https://biomejs.dev/linter/rules/no-useless-ternary">lint/nursery/noUselessTernary</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTernary.jsx:1:9 <a href="https://biomejs.dev/linter/rules/no-useless-ternary">lint/complexity/noUselessTernary</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unnecessary use of boolean literals in conditional expression.</span>
   
@@ -46,7 +46,7 @@ var a = x ? true : true;
 var a = foo === 1 ? false : true;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessTernary.jsx:1:9 <a href="https://biomejs.dev/linter/rules/no-useless-ternary">lint/nursery/noUselessTernary</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTernary.jsx:1:9 <a href="https://biomejs.dev/linter/rules/no-useless-ternary">lint/complexity/noUselessTernary</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unnecessary use of boolean literals in conditional expression.</span>
   
@@ -71,7 +71,7 @@ var a = foo === 1 ? false : true;
 var a = foo + 1 ? false : true;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessTernary.jsx:1:9 <a href="https://biomejs.dev/linter/rules/no-useless-ternary">lint/nursery/noUselessTernary</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTernary.jsx:1:9 <a href="https://biomejs.dev/linter/rules/no-useless-ternary">lint/complexity/noUselessTernary</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unnecessary use of boolean literals in conditional expression.</span>
   
@@ -96,7 +96,7 @@ var a = foo + 1 ? false : true;
 var a = foo + 1 ? true : false;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessTernary.jsx:1:9 <a href="https://biomejs.dev/linter/rules/no-useless-ternary">lint/nursery/noUselessTernary</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTernary.jsx:1:9 <a href="https://biomejs.dev/linter/rules/no-useless-ternary">lint/complexity/noUselessTernary</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unnecessary use of boolean literals in conditional expression.</span>
   

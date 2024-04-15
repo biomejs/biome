@@ -15,7 +15,7 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## 1.7.0 (2024-04-15)
 
 ### Analyzer
 
@@ -211,6 +211,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Support `overrides` field in Prettier configuration files when migrating from Prettier.
   Contributed by @Conaclos
 
+- Support passing a file path to the `--config-path` flag or the `BIOME_CONFIG_PATH` environment variable.
+
+  Now you can pass a `.json`/`.jsonc` file path with any filename to the `--config-path` flag or the
+  `BIOME_CONFIG_PATH` environment variable. This will disable the configuration auto-resolution and Biome
+  will try to read the configuration from the said file path ([#2265](https://github.com/biomejs/biome/issues/2265)).
+
+  ```shell
+  biome format --config-path=../biome.json ./src
+  ```
+
+  Contributed by @Sec-ant
+
 #### Bug fixes
 
 - Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnostic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
@@ -218,6 +230,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Biome now correctly filters out files that are not present in the current directory when using the `--changed` flag [#1996](https://github.com/biomejs/biome/issues/1996). Contributed by @castarco
 
 - Biome now skips traversing `fifo` or `socket` files ([#2311](https://github.com/biomejs/biome/issues/2311)). Contributed by @Sec-ant
+
+- Biome now resolves configuration files exported from external libraries in `extends` from the working directory (CLI) or project root (LSP). This is the documented behavior and previous resolution behavior is considered as a bug ([#2231](https://github.com/biomejs/biome/issues/2231)). Contributed by @Sec-ant
 
 ### Configuration
 
@@ -278,6 +292,25 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### JavaScript APIs
 
 ### Linter
+
+#### Promoted rules
+
+New rules are incubated in the nursery group.
+Once stable, we promote them to a stable group.
+The following rules are promoted:
+
+- [complecity/noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites)
+- [complexity/noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary)
+- [correctness/useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable)
+- [performance/noBarrelFile](https://biomejs.dev/linter/rules/no-barrel-file/)
+- [performance/noReExportAll](https://biomejs.dev/linter/rules/no-re-export-all/)
+- [style/noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import/)
+- [style/useNodeAssertStrict](https://biomejs.dev/linter/rules/use-node-assert-strict/)
+- [suspicious/noDuplicateTestHooks](https://biomejs.dev/linter/rules/no-duplicate-test-hooks/)
+- [suspicious/noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test/)
+- [suspicious/noFocusedTests](https://biomejs.dev/linter/rules/no-focused-tests/)
+- [suspicious/noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests/)
+- [suspicious/noSuspiciousSemicolonInJsx](https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx)
 
 #### New features
 
@@ -351,7 +384,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @arendjr
 
 
-## 1.6.4 (2022-04-03)
+## 1.6.4 (2024-04-03)
 
 ### Analyzer
 
@@ -631,7 +664,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   <div></div>
   ```
 
-- Add lint rule useJsxKeyInIterable from Eslint rule [`react/jsx-key`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-key.md). Contributed by @vohoanglong0107
 - The analyzer now **infers** the correct quote from `javascript.formatter.quoteStyle`, if set. This means that code fixes suggested by the analyzer will use the same quote of the formatter. Contributed by @ematipico
 
 #### Enhancements
@@ -794,6 +826,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```
   Contributed by @ematipico
+
 - Fix [#1774](https://github.com/biomejs/biome/issues/1774) by taking into account the option `--no-errors-on-unmatched` when running the CLI using `--changed`. Contributed by @antogyn
 
 #### Enhancements
@@ -1079,6 +1112,15 @@ Additionally, the following rules are now recommended:
   export * from "foo";
   ```
   Contributed by @togami2864
+
+- Add rule [noReExportAll](https://biomejs.dev/linter/rules/no-re-export-all/) that report `export * from "mod"`.
+  Contributed by @mdm317
+
+- Add rule [noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites/).
+  Contributed by @vasucp1207
+
+- Add rule [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/). 
+  Contributed by @vohoanglong0107
 
 #### Enhancements
 

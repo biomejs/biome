@@ -167,7 +167,7 @@ impl FromStr for LoggingKind {
             "compact" => Ok(Self::Compact),
             "pretty" => Ok(Self::Pretty),
             "json" => Ok(Self::Json),
-            _ => Err("This log kind doesn't exists".to_string()),
+            _ => Err("This log kind doesn't exist".to_string()),
         }
     }
 }

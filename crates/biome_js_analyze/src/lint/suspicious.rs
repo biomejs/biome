@@ -22,11 +22,14 @@ pub mod no_duplicate_class_members;
 pub mod no_duplicate_jsx_props;
 pub mod no_duplicate_object_keys;
 pub mod no_duplicate_parameters;
+pub mod no_duplicate_test_hooks;
 pub mod no_empty_block_statements;
 pub mod no_empty_interface;
 pub mod no_explicit_any;
+pub mod no_exports_in_test;
 pub mod no_extra_non_null_assertion;
 pub mod no_fallthrough_switch_clause;
+pub mod no_focused_tests;
 pub mod no_function_assign;
 pub mod no_global_assign;
 pub mod no_global_is_finite;
@@ -42,7 +45,9 @@ pub mod no_redeclare;
 pub mod no_redundant_use_strict;
 pub mod no_self_compare;
 pub mod no_shadow_restricted_names;
+pub mod no_skipped_tests;
 pub mod no_sparse_array;
+pub mod no_suspicious_semicolon_in_jsx;
 pub mod no_then_property;
 pub mod no_unsafe_declaration_merging;
 pub mod no_unsafe_negation;
@@ -77,11 +82,14 @@ declare_group! {
             self :: no_duplicate_jsx_props :: NoDuplicateJsxProps ,
             self :: no_duplicate_object_keys :: NoDuplicateObjectKeys ,
             self :: no_duplicate_parameters :: NoDuplicateParameters ,
+            self :: no_duplicate_test_hooks :: NoDuplicateTestHooks ,
             self :: no_empty_block_statements :: NoEmptyBlockStatements ,
             self :: no_empty_interface :: NoEmptyInterface ,
             self :: no_explicit_any :: NoExplicitAny ,
+            self :: no_exports_in_test :: NoExportsInTest ,
             self :: no_extra_non_null_assertion :: NoExtraNonNullAssertion ,
             self :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause ,
+            self :: no_focused_tests :: NoFocusedTests ,
             self :: no_function_assign :: NoFunctionAssign ,
             self :: no_global_assign :: NoGlobalAssign ,
             self :: no_global_is_finite :: NoGlobalIsFinite ,
@@ -97,7 +105,9 @@ declare_group! {
             self :: no_redundant_use_strict :: NoRedundantUseStrict ,
             self :: no_self_compare :: NoSelfCompare ,
             self :: no_shadow_restricted_names :: NoShadowRestrictedNames ,
+            self :: no_skipped_tests :: NoSkippedTests ,
             self :: no_sparse_array :: NoSparseArray ,
+            self :: no_suspicious_semicolon_in_jsx :: NoSuspiciousSemicolonInJsx ,
             self :: no_then_property :: NoThenProperty ,
             self :: no_unsafe_declaration_merging :: NoUnsafeDeclarationMerging ,
             self :: no_unsafe_negation :: NoUnsafeNegation ,

@@ -2,11 +2,7 @@
 title: noNamespaceImport (since v1.6.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noNamespaceImport`**
-
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
-:::
+**Diagnostic Category: `lint/style/noNamespaceImport`**
 
 Source: <a href="https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/avoid-namespace-import.md" target="_blank"><code>avoid-namespace-import</code></a>
 
@@ -24,7 +20,7 @@ Modern bundlers are generally capable of handling namespace imports effectively,
 import * as foo from "foo";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noNamespaceImport.jsx:1:8 <a href="https://biomejs.dev/linter/rules/no-namespace-import">lint/nursery/noNamespaceImport</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noNamespaceImport.jsx:1:8 <a href="https://biomejs.dev/linter/rules/no-namespace-import">lint/style/noNamespaceImport</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Avoid namespace imports, it can prevent efficient tree shaking and increase bundle size.</span>
   

@@ -44,10 +44,10 @@ When you run `biome init`, the default configuration emitted is the following:
 
 ### Configuration file resolution
 
-Biome uses auto discovery to find the nearest `biome.json` file. It starts looking for `biome.json` in the current
+Biome uses auto discovery to find the nearest configuration file. It starts looking for one in the current
 working directory, and then it starts looking in the parent directories until:
-- it finds a `biome.json` file;
-- it applies Biome's defaults if **no `biome.json` is found**;
+- it finds a `biome.json` or a `biome.jsonc` file;
+- it applies Biome's defaults if **no configuration file is found**;
 
 Here's an example:
 
@@ -65,12 +65,14 @@ Here's an example:
 </FileTree>
 
 
-- biome commands that run in `app/backend/package.json` will use the configuration file `app/backend/biome.json`;
-- biome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
+- Biome commands that run in `app/backend/package.json` will use the configuration file `app/backend/biome.json`;
+- Biome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
 will use the configuration file `app/frontend/biome.json`;
 
 :::note
-Most biome commands also support the `--config-path` command line option to point to a custom directory for the `biome.json` file. In this case, the above configuration file resolution is **disabled**.
+Most Biome commands support using the `--config-path` command line option. This allows you to specify a custom configuration file or a directory where Biome can look for a `biome.json` or `biome.jsonc` file. When you use `--config-path`, the standard configuration file resolution process is **disabled**.
+
+If `--config-path` points directly to a file, you can use names other than `biome.json` or `biome.jsonc`. Biome will read a `.json` file using a standard JSON parser. For files with other extensions, Biome will treat them as `.jsonc` files, using a more flexible JSON parser that allows comments and trailing commas.
 :::
 
 :::caution
@@ -79,7 +81,9 @@ Biome doesn't support nested `biome.json` files, neither in CLI nor in LSP. [Fol
 
 ### The `extends` option
 
-The `extends` option allows to break down a configuration in multiple file and "share" common patterns among multiple projects/folders.
+The `extends` option allows you to split your configuration across multiple files. This way, you can share common settings across different projects or folders.
+
+Here's an example of how you might set up your `biome.json` to extend other configuration files:
 
 ```json title="biome.json"
 {
@@ -87,6 +91,8 @@ The `extends` option allows to break down a configuration in multiple file and "
   "extends": ["./formatter.json", "./linter.json"]
 }
 ```
+
+For instance, you could define formatter settings in `formatter.json`:
 
 ```json title="formatter.json"
 {
@@ -102,6 +108,8 @@ The `extends` option allows to break down a configuration in multiple file and "
 }
 ```
 
+And linter rules in `linter.json`:
+
 ```json title="linter.json"
 {
   "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
@@ -115,20 +123,18 @@ The `extends` option allows to break down a configuration in multiple file and "
 }
 ```
 
-The files defined in this array:
+The entries defined in this array:
 - must exist in the file system;
 - are resolved from the path where the `biome.json` file is defined;
-- must be relative paths. Paths to libraries are not resolved;
-- must be reachable by Biome, e.g. symbolic links might not be resolved by Biome;
-- will be processed in order: from the first one to the last one;
-- can override the same properties, but ultimately only the last one will be used by Biome;
+- must be relative paths or [paths to library](#extends-biomejson-from-a-library)
+- must be reachable by Biome, e.g. symbolic links might not be resolved by Biome, if they are relative paths;
+- are processed in the order they are listed, with settings in later files overriding earlier ones;
 
+### Extend `biome.json` from a library
 
-#### Import `biome.json` from a library
+Starting from version `v1.6.0`, Biome is able to resolve configuration files from the `node_modules/` directory. So you can export your configuration file from a library, and import it in multiple projects.
 
-From version `v1.6.0`, Biome is able to resolve configuration files from `node_modules/`, so you can export your configuration file from a library, and import it in multiple projects.
-
-In order to do so, the first thing to do is to set up your "shared" Biome configuration in a certain way. Let's suppose that your library is called `@org/shared-configs`, and you want to import the Biome configuration using the specifier `@org/shared-configs/biome`. You have to set up the `package.json` is a specific way:
+In order to do so, the first thing to do is to set up your "shared" Biome configuration in a certain way. Let's suppose that your library is called `@org/shared-configs`, and you want to import the Biome configuration using the specifier `@org/shared-configs/biome`. You have to set up the `package.json` in a specific way:
 
 ```json title="package.json" ins={5,3}
 {
@@ -157,10 +163,47 @@ Biome will attempt to **resolve** your library `@org/shared-configs/` from your 
 - when using the LSP, the root directory of your project.
 
 :::caution
-To avoid a breaking change with how the existing resolution works, paths that start with a dot `.` or contains `.json`/`.jsonc` in their name, they **won't** be resolved from `node_modules/`.
+To avoid a breaking change with how the existing resolution works, paths starting with a dot `.` or ending with `.json` or `.jsonc` **won't** be resolved from `node_modules/`.
 :::
 
-For more information about the resolution algorithm, read the [Node.js documentation](https://nodejs.org/api/esm.html#resolution-and-loading-algorithm).
+For more information about the resolution algorithm, refer to the [Node.js documentation](https://nodejs.org/api/esm.html#resolution-and-loading-algorithm).
+
+### Resolution of globs and paths
+
+Globs and relative file paths are resolved from the working directory. The working directory is:
+- in a CLI context, the directory where you run the biome command;
+- in a LSP context, is the root directory
+
+This means that if you take advantage of the [configuration file resolution](#configuration-file-resolution), you run a CLI command from a folder, and the configuration file is found in some **parent folder**, the paths/globs present on said files will be relative from where the command was run. Let's see an example:
+
+<FileTree>
+- ~home/
+  - biome.json
+  - www/
+    - todo-app/
+      - dist/
+      - src/
+      - package.json
+</FileTree>
+
+
+```json title="~home/biome.json"
+{
+  "files": {
+    "ignore": ["dist/**"]
+  }
+}
+```
+
+```json title="~home/www/todo-app/package.json"
+{
+  "scripts": {
+    "check": "biome check ./"
+  }
+}
+```
+
+Given the previous example, when you run the command `npm run check`, Biome will eventually find the configuration file in `~home`. Since the command was run from `~home/www/too-app`, that folder is considered the **working directory**. Biome will read the `files.ignore` option, and all those entries will be resolved from `~home/www/todo-app`.json
 
 ## Protected Files
 

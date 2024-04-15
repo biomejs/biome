@@ -200,8 +200,8 @@ pub struct FormatWithErrorsDisabled;
 #[diagnostic(
     category = "internalError/fs",
     message(
-        message("Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exists: "{self.path}),
-        description = "Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exists: {path}"
+        message("Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exist: "{self.path}),
+        description = "Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exist: {path}"
     )
 )]
 pub struct CantReadDirectory {
@@ -213,8 +213,8 @@ pub struct CantReadDirectory {
 #[diagnostic(
     category = "internalError/fs",
     message(
-        message("Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: "{self.path}),
-        description = "Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: {path}"
+        message("Biome couldn't read the following file, maybe for permissions reasons or it doesn't exist: "{self.path}),
+        description = "Biome couldn't read the following file, maybe for permissions reasons or it doesn't exist: {path}"
     )
 )]
 pub struct CantReadFile {
