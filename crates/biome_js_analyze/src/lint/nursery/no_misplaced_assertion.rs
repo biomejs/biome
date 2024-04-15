@@ -77,6 +77,12 @@ declare_rule! {
     /// })
     /// ```
     ///
+    /// ```js
+    /// test.each([1, 2, 3])('test', (a, b, expected) => {
+    ///     expect(a + b).toBe(expected)
+    /// })
+    /// ```
+    ///
     pub NoMisplacedAssertion {
         version: "1.6.4",
         name: "noMisplacedAssertion",
@@ -113,16 +119,8 @@ impl Rule for NoMisplacedAssertion {
                     .filter_map(JsCallExpression::cast)
                     .find_map(|call_expression| {
                         let callee = call_expression.callee().ok()?;
-                        let expr = match callee {
-                            AnyJsExpression::JsCallExpression(call_expr) => {
-                                call_expr.callee().ok()?
-                            }
-                            AnyJsExpression::JsTemplateExpression(template_expr) => {
-                                template_expr.tag()?
-                            }
-                            _ => callee,
-                        };
-                        expr.contains_it_call().then_some(true)
+                        let callee = may_extract_nested_expr(callee)?;
+                        callee.contains_it_call().then_some(true)
                     })
                     .unwrap_or_default()
             };
@@ -133,6 +131,7 @@ impl Rule for NoMisplacedAssertion {
                     .filter_map(JsCallExpression::cast)
                     .find_map(|call_expression| {
                         let callee = call_expression.callee().ok()?;
+                        let callee = may_extract_nested_expr(callee)?;
                         callee.contains_describe_call().then_some(true)
                     })
             };
@@ -188,5 +187,14 @@ impl Rule for NoMisplacedAssertion {
                 "Move the assertion inside a "<Emphasis>"it()"</Emphasis>", "<Emphasis>"test()"</Emphasis>" or "<Emphasis>"Deno.test()"</Emphasis>" function call."
             }),
         )
+    }
+}
+
+/// Returns the nested expression if the callee is a call expression or a template expression.
+fn may_extract_nested_expr(callee: AnyJsExpression) -> Option<AnyJsExpression> {
+    match callee {
+        AnyJsExpression::JsCallExpression(call_expr) => call_expr.callee().ok(),
+        AnyJsExpression::JsTemplateExpression(template_expr) => template_expr.tag(),
+        _ => Some(callee),
     }
 }
