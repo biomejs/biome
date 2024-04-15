@@ -113,7 +113,16 @@ impl Rule for NoMisplacedAssertion {
                     .filter_map(JsCallExpression::cast)
                     .find_map(|call_expression| {
                         let callee = call_expression.callee().ok()?;
-                        callee.contains_it_call().then_some(true)
+                        let expr = match callee {
+                            AnyJsExpression::JsCallExpression(call_expr) => {
+                                call_expr.callee().ok()?
+                            }
+                            AnyJsExpression::JsTemplateExpression(template_expr) => {
+                                template_expr.tag()?
+                            }
+                            _ => callee,
+                        };
+                        expr.contains_it_call().then_some(true)
                     })
                     .unwrap_or_default()
             };
