@@ -8,6 +8,7 @@ expression: snapshot
 	field_value(
 		float_value: 1.1.1,
 		string_value: "string""",
+		string_value: "string,
 		boolean_value: truee,
 		null_value: nulll,
 		enum_value: ENUM,
@@ -70,194 +71,206 @@ GraphqlRoot {
                                         },
                                         GraphqlArgument {
                                             name: GraphqlName {
-                                                value_token: GRAPHQL_NAME@65..81 "boolean_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                                value_token: GRAPHQL_NAME@65..80 "string_value" [Newline("\n"), Whitespace("\t\t")] [],
                                             },
-                                            colon_token: COLON@81..83 ":" [] [Whitespace(" ")],
-                                            value: GraphqlEnumValue {
-                                                graphql_name: GraphqlName {
-                                                    value_token: GRAPHQL_NAME@83..89 "truee" [] [Skipped(",")],
-                                                },
-                                            },
-                                        },
-                                        GraphqlArgument {
-                                            name: GraphqlName {
-                                                value_token: GRAPHQL_NAME@89..102 "null_value" [Newline("\n"), Whitespace("\t\t")] [],
-                                            },
-                                            colon_token: COLON@102..104 ":" [] [Whitespace(" ")],
-                                            value: GraphqlEnumValue {
-                                                graphql_name: GraphqlName {
-                                                    value_token: GRAPHQL_NAME@104..110 "nulll" [] [Skipped(",")],
-                                                },
-                                            },
-                                        },
-                                        GraphqlArgument {
-                                            name: GraphqlName {
-                                                value_token: GRAPHQL_NAME@110..123 "enum_value" [Newline("\n"), Whitespace("\t\t")] [],
-                                            },
-                                            colon_token: COLON@123..125 ":" [] [Whitespace(" ")],
+                                            colon_token: COLON@80..82 ":" [] [Whitespace(" ")],
                                             value: missing (required),
                                         },
                                         GraphqlBogus {
                                             items: [
-                                                UPPER_ENUM_KW@125..130 "ENUM" [] [Skipped(",")],
+                                                ERROR_TOKEN@82..90 "\"string," [] [],
                                             ],
                                         },
                                         GraphqlArgument {
                                             name: GraphqlName {
-                                                value_token: GRAPHQL_NAME@130..143 "list_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                                value_token: GRAPHQL_NAME@90..106 "boolean_value" [Newline("\n"), Whitespace("\t\t")] [],
                                             },
-                                            colon_token: COLON@143..145 ":" [] [Whitespace(" ")],
+                                            colon_token: COLON@106..108 ":" [] [Whitespace(" ")],
+                                            value: GraphqlEnumValue {
+                                                graphql_name: GraphqlName {
+                                                    value_token: GRAPHQL_NAME@108..114 "truee" [] [Skipped(",")],
+                                                },
+                                            },
+                                        },
+                                        GraphqlArgument {
+                                            name: GraphqlName {
+                                                value_token: GRAPHQL_NAME@114..127 "null_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@127..129 ":" [] [Whitespace(" ")],
+                                            value: GraphqlEnumValue {
+                                                graphql_name: GraphqlName {
+                                                    value_token: GRAPHQL_NAME@129..135 "nulll" [] [Skipped(",")],
+                                                },
+                                            },
+                                        },
+                                        GraphqlArgument {
+                                            name: GraphqlName {
+                                                value_token: GRAPHQL_NAME@135..148 "enum_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@148..150 ":" [] [Whitespace(" ")],
+                                            value: missing (required),
+                                        },
+                                        GraphqlBogus {
+                                            items: [
+                                                UPPER_ENUM_KW@150..155 "ENUM" [] [Skipped(",")],
+                                            ],
+                                        },
+                                        GraphqlArgument {
+                                            name: GraphqlName {
+                                                value_token: GRAPHQL_NAME@155..168 "list_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@168..170 ":" [] [Whitespace(" ")],
                                             value: GraphqlListValue {
-                                                l_brack_token: L_BRACK@145..146 "[" [] [],
+                                                l_brack_token: L_BRACK@170..171 "[" [] [],
                                                 elements: GraphqlListValueElementList [
                                                     GraphqlIntValue {
-                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@146..149 "1" [] [Skipped(","), Whitespace(" ")],
+                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@171..174 "1" [] [Skipped(","), Whitespace(" ")],
                                                     },
                                                     GraphqlIntValue {
-                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@149..152 "2" [] [Skipped(","), Whitespace(" ")],
+                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@174..177 "2" [] [Skipped(","), Whitespace(" ")],
                                                     },
                                                     GraphqlIntValue {
-                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@152..154 "3" [] [Skipped(",")],
+                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@177..179 "3" [] [Skipped(",")],
                                                     },
                                                     GraphqlEnumValue {
                                                         graphql_name: GraphqlName {
-                                                            value_token: GRAPHQL_NAME@154..167 "list_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                                            value_token: GRAPHQL_NAME@179..192 "list_value" [Newline("\n"), Whitespace("\t\t")] [],
                                                         },
                                                     },
                                                     GraphqlBogusValue {
                                                         items: [
-                                                            COLON@167..169 ":" [] [Whitespace(" ")],
+                                                            COLON@192..194 ":" [] [Whitespace(" ")],
                                                         ],
                                                     },
                                                     GraphqlIntValue {
-                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@169..172 "1" [] [Skipped(","), Whitespace(" ")],
+                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@194..197 "1" [] [Skipped(","), Whitespace(" ")],
                                                     },
                                                     GraphqlIntValue {
-                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@172..175 "2" [] [Skipped(","), Whitespace(" ")],
+                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@197..200 "2" [] [Skipped(","), Whitespace(" ")],
                                                     },
                                                     GraphqlIntValue {
-                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@175..176 "3" [] [],
+                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@200..201 "3" [] [],
                                                     },
                                                 ],
-                                                r_brack_token: R_BRACK@176..178 "]" [] [Skipped(",")],
+                                                r_brack_token: R_BRACK@201..203 "]" [] [Skipped(",")],
                                             },
                                         },
                                         GraphqlArgument {
                                             name: GraphqlName {
-                                                value_token: GRAPHQL_NAME@178..191 "list_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                                value_token: GRAPHQL_NAME@203..216 "list_value" [Newline("\n"), Whitespace("\t\t")] [],
                                             },
-                                            colon_token: COLON@191..193 ":" [] [Whitespace(" ")],
+                                            colon_token: COLON@216..218 ":" [] [Whitespace(" ")],
                                             value: GraphqlIntValue {
-                                                graphql_int_literal_token: GRAPHQL_INT_LITERAL@193..196 "1" [] [Skipped(","), Whitespace(" ")],
+                                                graphql_int_literal_token: GRAPHQL_INT_LITERAL@218..221 "1" [] [Skipped(","), Whitespace(" ")],
                                             },
                                         },
                                         GraphqlBogus {
                                             items: [
-                                                GRAPHQL_INT_LITERAL@196..199 "2" [] [Skipped(","), Whitespace(" ")],
-                                                GRAPHQL_INT_LITERAL@199..201 "3" [] [Skipped(",")],
+                                                GRAPHQL_INT_LITERAL@221..224 "2" [] [Skipped(","), Whitespace(" ")],
+                                                GRAPHQL_INT_LITERAL@224..226 "3" [] [Skipped(",")],
                                             ],
                                         },
                                         GraphqlArgument {
                                             name: GraphqlName {
-                                                value_token: GRAPHQL_NAME@201..216 "object_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                                value_token: GRAPHQL_NAME@226..241 "object_value" [Newline("\n"), Whitespace("\t\t")] [],
                                             },
-                                            colon_token: COLON@216..218 ":" [] [Whitespace(" ")],
+                                            colon_token: COLON@241..243 ":" [] [Whitespace(" ")],
                                             value: GraphqlObjectValue {
-                                                l_curly_token: L_CURLY@218..219 "{" [] [],
+                                                l_curly_token: L_CURLY@243..244 "{" [] [],
                                                 members: GraphqlObjectValueMemberList [
                                                     GraphqlObjectField {
                                                         name: GraphqlName {
-                                                            value_token: GRAPHQL_NAME@219..222 "key" [] [],
+                                                            value_token: GRAPHQL_NAME@244..247 "key" [] [],
                                                         },
-                                                        colon_token: COLON@222..224 ":" [] [Whitespace(" ")],
+                                                        colon_token: COLON@247..249 ":" [] [Whitespace(" ")],
                                                         value: GraphqlStringValue {
-                                                            graphql_string_literal_token: GRAPHQL_STRING_LITERAL@224..231 "\"value\"" [] [],
+                                                            graphql_string_literal_token: GRAPHQL_STRING_LITERAL@249..256 "\"value\"" [] [],
                                                         },
                                                     },
                                                     GraphqlObjectField {
                                                         name: GraphqlName {
-                                                            value_token: GRAPHQL_NAME@231..246 "object_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                                            value_token: GRAPHQL_NAME@256..271 "object_value" [Newline("\n"), Whitespace("\t\t")] [],
                                                         },
-                                                        colon_token: COLON@246..248 ":" [] [Whitespace(" ")],
+                                                        colon_token: COLON@271..273 ":" [] [Whitespace(" ")],
                                                         value: GraphqlObjectValue {
-                                                            l_curly_token: L_CURLY@248..249 "{" [] [],
+                                                            l_curly_token: L_CURLY@273..274 "{" [] [],
                                                             members: GraphqlObjectValueMemberList [
                                                                 GraphqlObjectField {
                                                                     name: GraphqlName {
-                                                                        value_token: GRAPHQL_NAME@249..252 "key" [] [],
+                                                                        value_token: GRAPHQL_NAME@274..277 "key" [] [],
                                                                     },
-                                                                    colon_token: COLON@252..253 ":" [] [],
+                                                                    colon_token: COLON@277..278 ":" [] [],
                                                                     value: missing (required),
                                                                 },
                                                             ],
-                                                            r_curly_token: R_CURLY@253..254 "}" [] [],
+                                                            r_curly_token: R_CURLY@278..279 "}" [] [],
                                                         },
                                                     },
                                                     GraphqlObjectField {
                                                         name: GraphqlName {
-                                                            value_token: GRAPHQL_NAME@254..269 "object_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                                            value_token: GRAPHQL_NAME@279..294 "object_value" [Newline("\n"), Whitespace("\t\t")] [],
                                                         },
-                                                        colon_token: COLON@269..271 ":" [] [Whitespace(" ")],
+                                                        colon_token: COLON@294..296 ":" [] [Whitespace(" ")],
                                                         value: GraphqlObjectValue {
-                                                            l_curly_token: L_CURLY@271..272 "{" [] [],
+                                                            l_curly_token: L_CURLY@296..297 "{" [] [],
                                                             members: GraphqlObjectValueMemberList [
                                                                 GraphqlObjectField {
                                                                     name: GraphqlName {
-                                                                        value_token: GRAPHQL_NAME@272..275 "key" [] [],
+                                                                        value_token: GRAPHQL_NAME@297..300 "key" [] [],
                                                                     },
                                                                     colon_token: missing (required),
                                                                     value: missing (required),
                                                                 },
                                                             ],
-                                                            r_curly_token: R_CURLY@275..276 "}" [] [],
+                                                            r_curly_token: R_CURLY@300..301 "}" [] [],
                                                         },
                                                     },
                                                     GraphqlObjectField {
                                                         name: GraphqlName {
-                                                            value_token: GRAPHQL_NAME@276..291 "object_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                                            value_token: GRAPHQL_NAME@301..316 "object_value" [Newline("\n"), Whitespace("\t\t")] [],
                                                         },
-                                                        colon_token: COLON@291..293 ":" [] [Whitespace(" ")],
+                                                        colon_token: COLON@316..318 ":" [] [Whitespace(" ")],
                                                         value: GraphqlEnumValue {
                                                             graphql_name: GraphqlName {
-                                                                value_token: GRAPHQL_NAME@293..296 "key" [] [],
+                                                                value_token: GRAPHQL_NAME@318..321 "key" [] [],
                                                             },
                                                         },
                                                     },
                                                 ],
-                                                r_curly_token: R_CURLY@296..297 "}" [] [],
+                                                r_curly_token: R_CURLY@321..322 "}" [] [],
                                             },
                                         },
                                     ],
                                 },
-                                R_PAREN@297..300 ")" [Newline("\n"), Whitespace("\t")] [],
+                                R_PAREN@322..325 ")" [Newline("\n"), Whitespace("\t")] [],
                             ],
                         },
                         GraphqlDirectiveList [],
                     ],
                 },
             ],
-            r_curly_token: R_CURLY@300..302 "}" [Newline("\n")] [],
+            r_curly_token: R_CURLY@325..327 "}" [Newline("\n")] [],
         },
     ],
-    eof_token: EOF@302..303 "" [Newline("\n")] [],
+    eof_token: EOF@327..328 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: GRAPHQL_ROOT@0..303
+0: GRAPHQL_ROOT@0..328
   0: (empty)
-  1: GRAPHQL_DEFINITION_LIST@0..302
-    0: GRAPHQL_SELECTION_SET@0..302
+  1: GRAPHQL_DEFINITION_LIST@0..327
+    0: GRAPHQL_SELECTION_SET@0..327
       0: L_CURLY@0..1 "{" [] []
-      1: GRAPHQL_SELECTION_LIST@1..300
-        0: GRAPHQL_BOGUS_SELECTION@1..300
+      1: GRAPHQL_SELECTION_LIST@1..325
+        0: GRAPHQL_BOGUS_SELECTION@1..325
           0: GRAPHQL_NAME@1..14
             0: GRAPHQL_NAME@1..14 "field_value" [Newline("\n"), Whitespace("\t")] []
-          1: GRAPHQL_BOGUS@14..300
+          1: GRAPHQL_BOGUS@14..325
             0: L_PAREN@14..15 "(" [] []
-            1: GRAPHQL_BOGUS@15..297
+            1: GRAPHQL_BOGUS@15..322
               0: GRAPHQL_ARGUMENT@15..31
                 0: GRAPHQL_NAME@15..29
                   0: GRAPHQL_NAME@15..29 "float_value" [Newline("\n"), Whitespace("\t\t")] []
@@ -273,112 +286,119 @@ GraphqlRoot {
                   0: GRAPHQL_STRING_LITERAL@54..62 "\"string\"" [] []
               3: GRAPHQL_BOGUS@62..65
                 0: GRAPHQL_STRING_LITERAL@62..65 "\"\"" [] [Skipped(",")]
-              4: GRAPHQL_ARGUMENT@65..89
-                0: GRAPHQL_NAME@65..81
-                  0: GRAPHQL_NAME@65..81 "boolean_value" [Newline("\n"), Whitespace("\t\t")] []
-                1: COLON@81..83 ":" [] [Whitespace(" ")]
-                2: GRAPHQL_ENUM_VALUE@83..89
-                  0: GRAPHQL_NAME@83..89
-                    0: GRAPHQL_NAME@83..89 "truee" [] [Skipped(",")]
-              5: GRAPHQL_ARGUMENT@89..110
-                0: GRAPHQL_NAME@89..102
-                  0: GRAPHQL_NAME@89..102 "null_value" [Newline("\n"), Whitespace("\t\t")] []
-                1: COLON@102..104 ":" [] [Whitespace(" ")]
-                2: GRAPHQL_ENUM_VALUE@104..110
-                  0: GRAPHQL_NAME@104..110
-                    0: GRAPHQL_NAME@104..110 "nulll" [] [Skipped(",")]
-              6: GRAPHQL_ARGUMENT@110..125
-                0: GRAPHQL_NAME@110..123
-                  0: GRAPHQL_NAME@110..123 "enum_value" [Newline("\n"), Whitespace("\t\t")] []
-                1: COLON@123..125 ":" [] [Whitespace(" ")]
+              4: GRAPHQL_ARGUMENT@65..82
+                0: GRAPHQL_NAME@65..80
+                  0: GRAPHQL_NAME@65..80 "string_value" [Newline("\n"), Whitespace("\t\t")] []
+                1: COLON@80..82 ":" [] [Whitespace(" ")]
                 2: (empty)
-              7: GRAPHQL_BOGUS@125..130
-                0: UPPER_ENUM_KW@125..130 "ENUM" [] [Skipped(",")]
-              8: GRAPHQL_ARGUMENT@130..178
-                0: GRAPHQL_NAME@130..143
-                  0: GRAPHQL_NAME@130..143 "list_value" [Newline("\n"), Whitespace("\t\t")] []
-                1: COLON@143..145 ":" [] [Whitespace(" ")]
-                2: GRAPHQL_LIST_VALUE@145..178
-                  0: L_BRACK@145..146 "[" [] []
-                  1: GRAPHQL_LIST_VALUE_ELEMENT_LIST@146..176
-                    0: GRAPHQL_INT_VALUE@146..149
-                      0: GRAPHQL_INT_LITERAL@146..149 "1" [] [Skipped(","), Whitespace(" ")]
-                    1: GRAPHQL_INT_VALUE@149..152
-                      0: GRAPHQL_INT_LITERAL@149..152 "2" [] [Skipped(","), Whitespace(" ")]
-                    2: GRAPHQL_INT_VALUE@152..154
-                      0: GRAPHQL_INT_LITERAL@152..154 "3" [] [Skipped(",")]
-                    3: GRAPHQL_ENUM_VALUE@154..167
-                      0: GRAPHQL_NAME@154..167
-                        0: GRAPHQL_NAME@154..167 "list_value" [Newline("\n"), Whitespace("\t\t")] []
-                    4: GRAPHQL_BOGUS_VALUE@167..169
-                      0: COLON@167..169 ":" [] [Whitespace(" ")]
-                    5: GRAPHQL_INT_VALUE@169..172
-                      0: GRAPHQL_INT_LITERAL@169..172 "1" [] [Skipped(","), Whitespace(" ")]
-                    6: GRAPHQL_INT_VALUE@172..175
-                      0: GRAPHQL_INT_LITERAL@172..175 "2" [] [Skipped(","), Whitespace(" ")]
-                    7: GRAPHQL_INT_VALUE@175..176
-                      0: GRAPHQL_INT_LITERAL@175..176 "3" [] []
-                  2: R_BRACK@176..178 "]" [] [Skipped(",")]
-              9: GRAPHQL_ARGUMENT@178..196
-                0: GRAPHQL_NAME@178..191
-                  0: GRAPHQL_NAME@178..191 "list_value" [Newline("\n"), Whitespace("\t\t")] []
-                1: COLON@191..193 ":" [] [Whitespace(" ")]
-                2: GRAPHQL_INT_VALUE@193..196
-                  0: GRAPHQL_INT_LITERAL@193..196 "1" [] [Skipped(","), Whitespace(" ")]
-              10: GRAPHQL_BOGUS@196..201
-                0: GRAPHQL_INT_LITERAL@196..199 "2" [] [Skipped(","), Whitespace(" ")]
-                1: GRAPHQL_INT_LITERAL@199..201 "3" [] [Skipped(",")]
-              11: GRAPHQL_ARGUMENT@201..297
-                0: GRAPHQL_NAME@201..216
-                  0: GRAPHQL_NAME@201..216 "object_value" [Newline("\n"), Whitespace("\t\t")] []
+              5: GRAPHQL_BOGUS@82..90
+                0: ERROR_TOKEN@82..90 "\"string," [] []
+              6: GRAPHQL_ARGUMENT@90..114
+                0: GRAPHQL_NAME@90..106
+                  0: GRAPHQL_NAME@90..106 "boolean_value" [Newline("\n"), Whitespace("\t\t")] []
+                1: COLON@106..108 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_ENUM_VALUE@108..114
+                  0: GRAPHQL_NAME@108..114
+                    0: GRAPHQL_NAME@108..114 "truee" [] [Skipped(",")]
+              7: GRAPHQL_ARGUMENT@114..135
+                0: GRAPHQL_NAME@114..127
+                  0: GRAPHQL_NAME@114..127 "null_value" [Newline("\n"), Whitespace("\t\t")] []
+                1: COLON@127..129 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_ENUM_VALUE@129..135
+                  0: GRAPHQL_NAME@129..135
+                    0: GRAPHQL_NAME@129..135 "nulll" [] [Skipped(",")]
+              8: GRAPHQL_ARGUMENT@135..150
+                0: GRAPHQL_NAME@135..148
+                  0: GRAPHQL_NAME@135..148 "enum_value" [Newline("\n"), Whitespace("\t\t")] []
+                1: COLON@148..150 ":" [] [Whitespace(" ")]
+                2: (empty)
+              9: GRAPHQL_BOGUS@150..155
+                0: UPPER_ENUM_KW@150..155 "ENUM" [] [Skipped(",")]
+              10: GRAPHQL_ARGUMENT@155..203
+                0: GRAPHQL_NAME@155..168
+                  0: GRAPHQL_NAME@155..168 "list_value" [Newline("\n"), Whitespace("\t\t")] []
+                1: COLON@168..170 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_LIST_VALUE@170..203
+                  0: L_BRACK@170..171 "[" [] []
+                  1: GRAPHQL_LIST_VALUE_ELEMENT_LIST@171..201
+                    0: GRAPHQL_INT_VALUE@171..174
+                      0: GRAPHQL_INT_LITERAL@171..174 "1" [] [Skipped(","), Whitespace(" ")]
+                    1: GRAPHQL_INT_VALUE@174..177
+                      0: GRAPHQL_INT_LITERAL@174..177 "2" [] [Skipped(","), Whitespace(" ")]
+                    2: GRAPHQL_INT_VALUE@177..179
+                      0: GRAPHQL_INT_LITERAL@177..179 "3" [] [Skipped(",")]
+                    3: GRAPHQL_ENUM_VALUE@179..192
+                      0: GRAPHQL_NAME@179..192
+                        0: GRAPHQL_NAME@179..192 "list_value" [Newline("\n"), Whitespace("\t\t")] []
+                    4: GRAPHQL_BOGUS_VALUE@192..194
+                      0: COLON@192..194 ":" [] [Whitespace(" ")]
+                    5: GRAPHQL_INT_VALUE@194..197
+                      0: GRAPHQL_INT_LITERAL@194..197 "1" [] [Skipped(","), Whitespace(" ")]
+                    6: GRAPHQL_INT_VALUE@197..200
+                      0: GRAPHQL_INT_LITERAL@197..200 "2" [] [Skipped(","), Whitespace(" ")]
+                    7: GRAPHQL_INT_VALUE@200..201
+                      0: GRAPHQL_INT_LITERAL@200..201 "3" [] []
+                  2: R_BRACK@201..203 "]" [] [Skipped(",")]
+              11: GRAPHQL_ARGUMENT@203..221
+                0: GRAPHQL_NAME@203..216
+                  0: GRAPHQL_NAME@203..216 "list_value" [Newline("\n"), Whitespace("\t\t")] []
                 1: COLON@216..218 ":" [] [Whitespace(" ")]
-                2: GRAPHQL_OBJECT_VALUE@218..297
-                  0: L_CURLY@218..219 "{" [] []
-                  1: GRAPHQL_OBJECT_VALUE_MEMBER_LIST@219..296
-                    0: GRAPHQL_OBJECT_FIELD@219..231
-                      0: GRAPHQL_NAME@219..222
-                        0: GRAPHQL_NAME@219..222 "key" [] []
-                      1: COLON@222..224 ":" [] [Whitespace(" ")]
-                      2: GRAPHQL_STRING_VALUE@224..231
-                        0: GRAPHQL_STRING_LITERAL@224..231 "\"value\"" [] []
-                    1: GRAPHQL_OBJECT_FIELD@231..254
-                      0: GRAPHQL_NAME@231..246
-                        0: GRAPHQL_NAME@231..246 "object_value" [Newline("\n"), Whitespace("\t\t")] []
-                      1: COLON@246..248 ":" [] [Whitespace(" ")]
-                      2: GRAPHQL_OBJECT_VALUE@248..254
-                        0: L_CURLY@248..249 "{" [] []
-                        1: GRAPHQL_OBJECT_VALUE_MEMBER_LIST@249..253
-                          0: GRAPHQL_OBJECT_FIELD@249..253
-                            0: GRAPHQL_NAME@249..252
-                              0: GRAPHQL_NAME@249..252 "key" [] []
-                            1: COLON@252..253 ":" [] []
+                2: GRAPHQL_INT_VALUE@218..221
+                  0: GRAPHQL_INT_LITERAL@218..221 "1" [] [Skipped(","), Whitespace(" ")]
+              12: GRAPHQL_BOGUS@221..226
+                0: GRAPHQL_INT_LITERAL@221..224 "2" [] [Skipped(","), Whitespace(" ")]
+                1: GRAPHQL_INT_LITERAL@224..226 "3" [] [Skipped(",")]
+              13: GRAPHQL_ARGUMENT@226..322
+                0: GRAPHQL_NAME@226..241
+                  0: GRAPHQL_NAME@226..241 "object_value" [Newline("\n"), Whitespace("\t\t")] []
+                1: COLON@241..243 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_OBJECT_VALUE@243..322
+                  0: L_CURLY@243..244 "{" [] []
+                  1: GRAPHQL_OBJECT_VALUE_MEMBER_LIST@244..321
+                    0: GRAPHQL_OBJECT_FIELD@244..256
+                      0: GRAPHQL_NAME@244..247
+                        0: GRAPHQL_NAME@244..247 "key" [] []
+                      1: COLON@247..249 ":" [] [Whitespace(" ")]
+                      2: GRAPHQL_STRING_VALUE@249..256
+                        0: GRAPHQL_STRING_LITERAL@249..256 "\"value\"" [] []
+                    1: GRAPHQL_OBJECT_FIELD@256..279
+                      0: GRAPHQL_NAME@256..271
+                        0: GRAPHQL_NAME@256..271 "object_value" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@271..273 ":" [] [Whitespace(" ")]
+                      2: GRAPHQL_OBJECT_VALUE@273..279
+                        0: L_CURLY@273..274 "{" [] []
+                        1: GRAPHQL_OBJECT_VALUE_MEMBER_LIST@274..278
+                          0: GRAPHQL_OBJECT_FIELD@274..278
+                            0: GRAPHQL_NAME@274..277
+                              0: GRAPHQL_NAME@274..277 "key" [] []
+                            1: COLON@277..278 ":" [] []
                             2: (empty)
-                        2: R_CURLY@253..254 "}" [] []
-                    2: GRAPHQL_OBJECT_FIELD@254..276
-                      0: GRAPHQL_NAME@254..269
-                        0: GRAPHQL_NAME@254..269 "object_value" [Newline("\n"), Whitespace("\t\t")] []
-                      1: COLON@269..271 ":" [] [Whitespace(" ")]
-                      2: GRAPHQL_OBJECT_VALUE@271..276
-                        0: L_CURLY@271..272 "{" [] []
-                        1: GRAPHQL_OBJECT_VALUE_MEMBER_LIST@272..275
-                          0: GRAPHQL_OBJECT_FIELD@272..275
-                            0: GRAPHQL_NAME@272..275
-                              0: GRAPHQL_NAME@272..275 "key" [] []
+                        2: R_CURLY@278..279 "}" [] []
+                    2: GRAPHQL_OBJECT_FIELD@279..301
+                      0: GRAPHQL_NAME@279..294
+                        0: GRAPHQL_NAME@279..294 "object_value" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@294..296 ":" [] [Whitespace(" ")]
+                      2: GRAPHQL_OBJECT_VALUE@296..301
+                        0: L_CURLY@296..297 "{" [] []
+                        1: GRAPHQL_OBJECT_VALUE_MEMBER_LIST@297..300
+                          0: GRAPHQL_OBJECT_FIELD@297..300
+                            0: GRAPHQL_NAME@297..300
+                              0: GRAPHQL_NAME@297..300 "key" [] []
                             1: (empty)
                             2: (empty)
-                        2: R_CURLY@275..276 "}" [] []
-                    3: GRAPHQL_OBJECT_FIELD@276..296
-                      0: GRAPHQL_NAME@276..291
-                        0: GRAPHQL_NAME@276..291 "object_value" [Newline("\n"), Whitespace("\t\t")] []
-                      1: COLON@291..293 ":" [] [Whitespace(" ")]
-                      2: GRAPHQL_ENUM_VALUE@293..296
-                        0: GRAPHQL_NAME@293..296
-                          0: GRAPHQL_NAME@293..296 "key" [] []
-                  2: R_CURLY@296..297 "}" [] []
-            2: R_PAREN@297..300 ")" [Newline("\n"), Whitespace("\t")] []
-          2: GRAPHQL_DIRECTIVE_LIST@300..300
-      2: R_CURLY@300..302 "}" [Newline("\n")] []
-  2: EOF@302..303 "" [Newline("\n")] []
+                        2: R_CURLY@300..301 "}" [] []
+                    3: GRAPHQL_OBJECT_FIELD@301..321
+                      0: GRAPHQL_NAME@301..316
+                        0: GRAPHQL_NAME@301..316 "object_value" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@316..318 ":" [] [Whitespace(" ")]
+                      2: GRAPHQL_ENUM_VALUE@318..321
+                        0: GRAPHQL_NAME@318..321
+                          0: GRAPHQL_NAME@318..321 "key" [] []
+                  2: R_CURLY@321..322 "}" [] []
+            2: R_PAREN@322..325 ")" [Newline("\n"), Whitespace("\t")] []
+          2: GRAPHQL_DIRECTIVE_LIST@325..325
+      2: R_CURLY@325..327 "}" [Newline("\n")] []
+  2: EOF@327..328 "" [Newline("\n")] []
 
 ```
 
@@ -394,7 +414,7 @@ value.graphql:3:16 parse ━━━━━━━━━━━━━━━━━━�
   > 3 │ 		float_value: 1.1.1,
       │ 		             ^^^^^
     4 │ 		string_value: "string""",
-    5 │ 		boolean_value: truee,
+    5 │ 		string_value: "string,
   
   i Expected a value here.
   
@@ -403,7 +423,7 @@ value.graphql:3:16 parse ━━━━━━━━━━━━━━━━━━�
   > 3 │ 		float_value: 1.1.1,
       │ 		             ^^^^^
     4 │ 		string_value: "string""",
-    5 │ 		boolean_value: truee,
+    5 │ 		string_value: "string,
   
 value.graphql:3:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -414,7 +434,7 @@ value.graphql:3:19 parse ━━━━━━━━━━━━━━━━━━�
   > 3 │ 		float_value: 1.1.1,
       │ 		                ^
     4 │ 		string_value: "string""",
-    5 │ 		boolean_value: truee,
+    5 │ 		string_value: "string,
   
 value.graphql:4:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -424,8 +444,8 @@ value.graphql:4:25 parse ━━━━━━━━━━━━━━━━━━�
     3 │ 		float_value: 1.1.1,
   > 4 │ 		string_value: "string""",
       │ 		                      ^^
-    5 │ 		boolean_value: truee,
-    6 │ 		null_value: nulll,
+    5 │ 		string_value: "string,
+    6 │ 		boolean_value: truee,
   
   i Expected an argument here.
   
@@ -433,99 +453,110 @@ value.graphql:4:25 parse ━━━━━━━━━━━━━━━━━━�
     3 │ 		float_value: 1.1.1,
   > 4 │ 		string_value: "string""",
       │ 		                      ^^
-    5 │ 		boolean_value: truee,
-    6 │ 		null_value: nulll,
+    5 │ 		string_value: "string,
+    6 │ 		boolean_value: truee,
   
-value.graphql:7:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+value.graphql:5:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    3 │ 		float_value: 1.1.1,
+    4 │ 		string_value: "string""",
+  > 5 │ 		string_value: "string,
+      │ 		              ^^^^^^^^
+    6 │ 		boolean_value: truee,
+    7 │ 		null_value: nulll,
+  
+value.graphql:8:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a value but instead found 'ENUM'.
   
-    5 │ 		boolean_value: truee,
-    6 │ 		null_value: nulll,
-  > 7 │ 		enum_value: ENUM,
-      │ 		            ^^^^
-    8 │ 		list_value: [1, 2, 3,
-    9 │ 		list_value: 1, 2, 3],
+     6 │ 		boolean_value: truee,
+     7 │ 		null_value: nulll,
+   > 8 │ 		enum_value: ENUM,
+       │ 		            ^^^^
+     9 │ 		list_value: [1, 2, 3,
+    10 │ 		list_value: 1, 2, 3],
   
   i Expected a value here.
   
-    5 │ 		boolean_value: truee,
-    6 │ 		null_value: nulll,
-  > 7 │ 		enum_value: ENUM,
-      │ 		            ^^^^
-    8 │ 		list_value: [1, 2, 3,
-    9 │ 		list_value: 1, 2, 3],
+     6 │ 		boolean_value: truee,
+     7 │ 		null_value: nulll,
+   > 8 │ 		enum_value: ENUM,
+       │ 		            ^^^^
+     9 │ 		list_value: [1, 2, 3,
+    10 │ 		list_value: 1, 2, 3],
   
-value.graphql:9:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+value.graphql:10:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a value but instead found ':'.
   
-     7 │ 		enum_value: ENUM,
-     8 │ 		list_value: [1, 2, 3,
-   > 9 │ 		list_value: 1, 2, 3],
+     8 │ 		enum_value: ENUM,
+     9 │ 		list_value: [1, 2, 3,
+  > 10 │ 		list_value: 1, 2, 3],
        │ 		          ^
-    10 │ 		list_value: 1, 2, 3,
-    11 │ 		object_value: {key: "value"
+    11 │ 		list_value: 1, 2, 3,
+    12 │ 		object_value: {key: "value"
   
   i Expected a value here.
   
-     7 │ 		enum_value: ENUM,
-     8 │ 		list_value: [1, 2, 3,
-   > 9 │ 		list_value: 1, 2, 3],
+     8 │ 		enum_value: ENUM,
+     9 │ 		list_value: [1, 2, 3,
+  > 10 │ 		list_value: 1, 2, 3],
        │ 		          ^
-    10 │ 		list_value: 1, 2, 3,
-    11 │ 		object_value: {key: "value"
+    11 │ 		list_value: 1, 2, 3,
+    12 │ 		object_value: {key: "value"
   
-value.graphql:10:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+value.graphql:11:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an argument but instead found '2, 3'.
   
-     8 │ 		list_value: [1, 2, 3,
-     9 │ 		list_value: 1, 2, 3],
-  > 10 │ 		list_value: 1, 2, 3,
+     9 │ 		list_value: [1, 2, 3,
+    10 │ 		list_value: 1, 2, 3],
+  > 11 │ 		list_value: 1, 2, 3,
        │ 		               ^^^^
-    11 │ 		object_value: {key: "value"
-    12 │ 		object_value: {key:}
+    12 │ 		object_value: {key: "value"
+    13 │ 		object_value: {key:}
   
   i Expected an argument here.
   
-     8 │ 		list_value: [1, 2, 3,
-     9 │ 		list_value: 1, 2, 3],
-  > 10 │ 		list_value: 1, 2, 3,
+     9 │ 		list_value: [1, 2, 3,
+    10 │ 		list_value: 1, 2, 3],
+  > 11 │ 		list_value: 1, 2, 3,
        │ 		               ^^^^
-    11 │ 		object_value: {key: "value"
-    12 │ 		object_value: {key:}
+    12 │ 		object_value: {key: "value"
+    13 │ 		object_value: {key:}
   
-value.graphql:12:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+value.graphql:13:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a value but instead found '}'.
   
-    10 │ 		list_value: 1, 2, 3,
-    11 │ 		object_value: {key: "value"
-  > 12 │ 		object_value: {key:}
+    11 │ 		list_value: 1, 2, 3,
+    12 │ 		object_value: {key: "value"
+  > 13 │ 		object_value: {key:}
        │ 		                   ^
-    13 │ 		object_value: {key}
-    14 │ 		object_value: key}
+    14 │ 		object_value: {key}
+    15 │ 		object_value: key}
   
   i Expected a value here.
   
-    10 │ 		list_value: 1, 2, 3,
-    11 │ 		object_value: {key: "value"
-  > 12 │ 		object_value: {key:}
+    11 │ 		list_value: 1, 2, 3,
+    12 │ 		object_value: {key: "value"
+  > 13 │ 		object_value: {key:}
        │ 		                   ^
-    13 │ 		object_value: {key}
-    14 │ 		object_value: key}
+    14 │ 		object_value: {key}
+    15 │ 		object_value: key}
   
-value.graphql:13:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+value.graphql:14:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `}`
   
-    11 │ 		object_value: {key: "value"
-    12 │ 		object_value: {key:}
-  > 13 │ 		object_value: {key}
+    12 │ 		object_value: {key: "value"
+    13 │ 		object_value: {key:}
+  > 14 │ 		object_value: {key}
        │ 		                  ^
-    14 │ 		object_value: key}
-    15 │ 	)
+    15 │ 		object_value: key}
+    16 │ 	)
   
   i Remove }
   

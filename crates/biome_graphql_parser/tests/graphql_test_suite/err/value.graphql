@@ -2,6 +2,7 @@
 	field_value(
 		float_value: 1.1.1,
 		string_value: "string""",
+		string_value: "string,
 		boolean_value: truee,
 		null_value: nulll,
 		enum_value: ENUM,
