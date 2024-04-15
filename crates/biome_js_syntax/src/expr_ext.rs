@@ -1651,12 +1651,12 @@ impl JsCallExpression {
         })
     }
 
-    /// This is a specialised function that checks if the current [call expression]
+    /// This is a specialized function that checks if the current [call expression]
     /// resembles a call expression usually used by a testing frameworks.
     ///
     /// If the [call expression] matches the criteria, a different formatting is applied.
     ///
-    /// To evaluable the eligibility of a  [call expression] to be a test framework like,
+    /// To evaluate the eligibility of a  [call expression] to be a test framework like,
     /// we need to check its [callee] and its [arguments].
     ///
     /// 1. The [callee] must contain a name or a chain of names that belongs to the
