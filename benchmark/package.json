@@ -6,6 +6,7 @@
 	"main": "run.js",
 	"author": "Biome Developers and Contributors",
 	"license": "MIT OR Apache-2.0",
+	"type": "module",
 	"devDependencies": {
 		"@mixer/parallel-prettier": "2.0.3",
 		"dprint": "0.45.1",
