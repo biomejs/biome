@@ -13,8 +13,8 @@ expression: snapshot
 		null_value: nulll,
 		enum_value: ENUM,
 		list_value: [1, 2, 3,
-		list_value: 1, 2, 3],
 		list_value: 1, 2, 3,
+		list_value: 1, 2, 3],
 		object_value: {key: "value"
 		object_value: {key:}
 		object_value: {key}
@@ -132,42 +132,39 @@ GraphqlRoot {
                                                     GraphqlIntValue {
                                                         graphql_int_literal_token: GRAPHQL_INT_LITERAL@177..179 "3" [] [Skipped(",")],
                                                     },
-                                                    GraphqlEnumValue {
-                                                        graphql_name: GraphqlName {
-                                                            value_token: GRAPHQL_NAME@179..192 "list_value" [Newline("\n"), Whitespace("\t\t")] [],
-                                                        },
-                                                    },
-                                                    GraphqlBogusValue {
-                                                        items: [
-                                                            COLON@192..194 ":" [] [Whitespace(" ")],
-                                                        ],
-                                                    },
-                                                    GraphqlIntValue {
-                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@194..197 "1" [] [Skipped(","), Whitespace(" ")],
-                                                    },
-                                                    GraphqlIntValue {
-                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@197..200 "2" [] [Skipped(","), Whitespace(" ")],
-                                                    },
-                                                    GraphqlIntValue {
-                                                        graphql_int_literal_token: GRAPHQL_INT_LITERAL@200..201 "3" [] [],
-                                                    },
                                                 ],
-                                                r_brack_token: R_BRACK@201..203 "]" [] [Skipped(",")],
+                                                r_brack_token: missing (required),
                                             },
                                         },
                                         GraphqlArgument {
                                             name: GraphqlName {
-                                                value_token: GRAPHQL_NAME@203..216 "list_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                                value_token: GRAPHQL_NAME@179..192 "list_value" [Newline("\n"), Whitespace("\t\t")] [],
                                             },
-                                            colon_token: COLON@216..218 ":" [] [Whitespace(" ")],
+                                            colon_token: COLON@192..194 ":" [] [Whitespace(" ")],
                                             value: GraphqlIntValue {
-                                                graphql_int_literal_token: GRAPHQL_INT_LITERAL@218..221 "1" [] [Skipped(","), Whitespace(" ")],
+                                                graphql_int_literal_token: GRAPHQL_INT_LITERAL@194..197 "1" [] [Skipped(","), Whitespace(" ")],
                                             },
                                         },
                                         GraphqlBogus {
                                             items: [
-                                                GRAPHQL_INT_LITERAL@221..224 "2" [] [Skipped(","), Whitespace(" ")],
-                                                GRAPHQL_INT_LITERAL@224..226 "3" [] [Skipped(",")],
+                                                GRAPHQL_INT_LITERAL@197..200 "2" [] [Skipped(","), Whitespace(" ")],
+                                                GRAPHQL_INT_LITERAL@200..202 "3" [] [Skipped(",")],
+                                            ],
+                                        },
+                                        GraphqlArgument {
+                                            name: GraphqlName {
+                                                value_token: GRAPHQL_NAME@202..215 "list_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@215..217 ":" [] [Whitespace(" ")],
+                                            value: GraphqlIntValue {
+                                                graphql_int_literal_token: GRAPHQL_INT_LITERAL@217..220 "1" [] [Skipped(","), Whitespace(" ")],
+                                            },
+                                        },
+                                        GraphqlBogus {
+                                            items: [
+                                                GRAPHQL_INT_LITERAL@220..223 "2" [] [Skipped(","), Whitespace(" ")],
+                                                GRAPHQL_INT_LITERAL@223..224 "3" [] [],
+                                                R_BRACK@224..226 "]" [] [Skipped(",")],
                                             ],
                                         },
                                         GraphqlArgument {
@@ -314,41 +311,40 @@ GraphqlRoot {
                 2: (empty)
               9: GRAPHQL_BOGUS@150..155
                 0: UPPER_ENUM_KW@150..155 "ENUM" [] [Skipped(",")]
-              10: GRAPHQL_ARGUMENT@155..203
+              10: GRAPHQL_ARGUMENT@155..179
                 0: GRAPHQL_NAME@155..168
                   0: GRAPHQL_NAME@155..168 "list_value" [Newline("\n"), Whitespace("\t\t")] []
                 1: COLON@168..170 ":" [] [Whitespace(" ")]
-                2: GRAPHQL_LIST_VALUE@170..203
+                2: GRAPHQL_LIST_VALUE@170..179
                   0: L_BRACK@170..171 "[" [] []
-                  1: GRAPHQL_LIST_VALUE_ELEMENT_LIST@171..201
+                  1: GRAPHQL_LIST_VALUE_ELEMENT_LIST@171..179
                     0: GRAPHQL_INT_VALUE@171..174
                       0: GRAPHQL_INT_LITERAL@171..174 "1" [] [Skipped(","), Whitespace(" ")]
                     1: GRAPHQL_INT_VALUE@174..177
                       0: GRAPHQL_INT_LITERAL@174..177 "2" [] [Skipped(","), Whitespace(" ")]
                     2: GRAPHQL_INT_VALUE@177..179
                       0: GRAPHQL_INT_LITERAL@177..179 "3" [] [Skipped(",")]
-                    3: GRAPHQL_ENUM_VALUE@179..192
-                      0: GRAPHQL_NAME@179..192
-                        0: GRAPHQL_NAME@179..192 "list_value" [Newline("\n"), Whitespace("\t\t")] []
-                    4: GRAPHQL_BOGUS_VALUE@192..194
-                      0: COLON@192..194 ":" [] [Whitespace(" ")]
-                    5: GRAPHQL_INT_VALUE@194..197
-                      0: GRAPHQL_INT_LITERAL@194..197 "1" [] [Skipped(","), Whitespace(" ")]
-                    6: GRAPHQL_INT_VALUE@197..200
-                      0: GRAPHQL_INT_LITERAL@197..200 "2" [] [Skipped(","), Whitespace(" ")]
-                    7: GRAPHQL_INT_VALUE@200..201
-                      0: GRAPHQL_INT_LITERAL@200..201 "3" [] []
-                  2: R_BRACK@201..203 "]" [] [Skipped(",")]
-              11: GRAPHQL_ARGUMENT@203..221
-                0: GRAPHQL_NAME@203..216
-                  0: GRAPHQL_NAME@203..216 "list_value" [Newline("\n"), Whitespace("\t\t")] []
-                1: COLON@216..218 ":" [] [Whitespace(" ")]
-                2: GRAPHQL_INT_VALUE@218..221
-                  0: GRAPHQL_INT_LITERAL@218..221 "1" [] [Skipped(","), Whitespace(" ")]
-              12: GRAPHQL_BOGUS@221..226
-                0: GRAPHQL_INT_LITERAL@221..224 "2" [] [Skipped(","), Whitespace(" ")]
-                1: GRAPHQL_INT_LITERAL@224..226 "3" [] [Skipped(",")]
-              13: GRAPHQL_ARGUMENT@226..322
+                  2: (empty)
+              11: GRAPHQL_ARGUMENT@179..197
+                0: GRAPHQL_NAME@179..192
+                  0: GRAPHQL_NAME@179..192 "list_value" [Newline("\n"), Whitespace("\t\t")] []
+                1: COLON@192..194 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_INT_VALUE@194..197
+                  0: GRAPHQL_INT_LITERAL@194..197 "1" [] [Skipped(","), Whitespace(" ")]
+              12: GRAPHQL_BOGUS@197..202
+                0: GRAPHQL_INT_LITERAL@197..200 "2" [] [Skipped(","), Whitespace(" ")]
+                1: GRAPHQL_INT_LITERAL@200..202 "3" [] [Skipped(",")]
+              13: GRAPHQL_ARGUMENT@202..220
+                0: GRAPHQL_NAME@202..215
+                  0: GRAPHQL_NAME@202..215 "list_value" [Newline("\n"), Whitespace("\t\t")] []
+                1: COLON@215..217 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_INT_VALUE@217..220
+                  0: GRAPHQL_INT_LITERAL@217..220 "1" [] [Skipped(","), Whitespace(" ")]
+              14: GRAPHQL_BOGUS@220..226
+                0: GRAPHQL_INT_LITERAL@220..223 "2" [] [Skipped(","), Whitespace(" ")]
+                1: GRAPHQL_INT_LITERAL@223..224 "3" [] []
+                2: R_BRACK@224..226 "]" [] [Skipped(",")]
+              15: GRAPHQL_ARGUMENT@226..322
                 0: GRAPHQL_NAME@226..241
                   0: GRAPHQL_NAME@226..241 "object_value" [Newline("\n"), Whitespace("\t\t")] []
                 1: COLON@241..243 ":" [] [Whitespace(" ")]
@@ -476,7 +472,7 @@ value.graphql:8:15 parse ━━━━━━━━━━━━━━━━━━�
    > 8 │ 		enum_value: ENUM,
        │ 		            ^^^^
      9 │ 		list_value: [1, 2, 3,
-    10 │ 		list_value: 1, 2, 3],
+    10 │ 		list_value: 1, 2, 3,
   
   i Expected a value here.
   
@@ -485,45 +481,58 @@ value.graphql:8:15 parse ━━━━━━━━━━━━━━━━━━�
    > 8 │ 		enum_value: ENUM,
        │ 		            ^^^^
      9 │ 		list_value: [1, 2, 3,
-    10 │ 		list_value: 1, 2, 3],
+    10 │ 		list_value: 1, 2, 3,
   
-value.graphql:10:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+value.graphql:10:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a value but instead found ':'.
+  × expected `]` but instead found `list_value`
   
      8 │ 		enum_value: ENUM,
      9 │ 		list_value: [1, 2, 3,
-  > 10 │ 		list_value: 1, 2, 3],
-       │ 		          ^
-    11 │ 		list_value: 1, 2, 3,
+  > 10 │ 		list_value: 1, 2, 3,
+       │ 		^^^^^^^^^^
+    11 │ 		list_value: 1, 2, 3],
     12 │ 		object_value: {key: "value"
   
-  i Expected a value here.
+  i Remove list_value
+  
+value.graphql:10:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an argument but instead found '2, 3'.
   
      8 │ 		enum_value: ENUM,
      9 │ 		list_value: [1, 2, 3,
-  > 10 │ 		list_value: 1, 2, 3],
-       │ 		          ^
-    11 │ 		list_value: 1, 2, 3,
+  > 10 │ 		list_value: 1, 2, 3,
+       │ 		               ^^^^
+    11 │ 		list_value: 1, 2, 3],
+    12 │ 		object_value: {key: "value"
+  
+  i Expected an argument here.
+  
+     8 │ 		enum_value: ENUM,
+     9 │ 		list_value: [1, 2, 3,
+  > 10 │ 		list_value: 1, 2, 3,
+       │ 		               ^^^^
+    11 │ 		list_value: 1, 2, 3],
     12 │ 		object_value: {key: "value"
   
 value.graphql:11:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an argument but instead found '2, 3'.
+  × Expected an argument but instead found '2, 3]'.
   
      9 │ 		list_value: [1, 2, 3,
-    10 │ 		list_value: 1, 2, 3],
-  > 11 │ 		list_value: 1, 2, 3,
-       │ 		               ^^^^
+    10 │ 		list_value: 1, 2, 3,
+  > 11 │ 		list_value: 1, 2, 3],
+       │ 		               ^^^^^
     12 │ 		object_value: {key: "value"
     13 │ 		object_value: {key:}
   
   i Expected an argument here.
   
      9 │ 		list_value: [1, 2, 3,
-    10 │ 		list_value: 1, 2, 3],
-  > 11 │ 		list_value: 1, 2, 3,
-       │ 		               ^^^^
+    10 │ 		list_value: 1, 2, 3,
+  > 11 │ 		list_value: 1, 2, 3],
+       │ 		               ^^^^^
     12 │ 		object_value: {key: "value"
     13 │ 		object_value: {key:}
   
@@ -531,7 +540,7 @@ value.graphql:13:22 parse ━━━━━━━━━━━━━━━━━━
 
   × Expected a value but instead found '}'.
   
-    11 │ 		list_value: 1, 2, 3,
+    11 │ 		list_value: 1, 2, 3],
     12 │ 		object_value: {key: "value"
   > 13 │ 		object_value: {key:}
        │ 		                   ^
@@ -540,7 +549,7 @@ value.graphql:13:22 parse ━━━━━━━━━━━━━━━━━━
   
   i Expected a value here.
   
-    11 │ 		list_value: 1, 2, 3,
+    11 │ 		list_value: 1, 2, 3],
     12 │ 		object_value: {key: "value"
   > 13 │ 		object_value: {key:}
        │ 		                   ^

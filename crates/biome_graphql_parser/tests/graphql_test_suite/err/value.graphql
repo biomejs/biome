@@ -7,8 +7,8 @@
 		null_value: nulll,
 		enum_value: ENUM,
 		list_value: [1, 2, 3,
-		list_value: 1, 2, 3],
 		list_value: 1, 2, 3,
+		list_value: 1, 2, 3],
 		object_value: {key: "value"
 		object_value: {key:}
 		object_value: {key}

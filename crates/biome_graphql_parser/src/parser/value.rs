@@ -11,6 +11,7 @@ use biome_parser::{
 };
 
 use super::{
+    argument::is_at_argument_list_end,
     is_at_name,
     parse_error::{expected_object_field, expected_value},
     variable::{is_at_variable, parse_variable},
@@ -26,7 +27,7 @@ impl ParseRecovery for ListValueElementListParseRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_BOGUS_VALUE;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_value(p)
+        is_at_value(p) || is_at_list_end(p)
     }
 }
 
@@ -44,7 +45,7 @@ impl ParseNodeList for ListValueElementList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![']'])
+        is_at_list_end(p)
     }
 
     fn recover(
@@ -265,6 +266,15 @@ fn is_at_enum(p: &GraphqlParser) -> bool {
 #[inline]
 fn is_at_list(p: &GraphqlParser) -> bool {
     p.at(T!['['])
+}
+
+#[inline]
+fn is_at_list_end(p: &mut GraphqlParser) -> bool {
+    p.at(T![']'])
+    // at next argument
+    || p.lookahead() == T![:]
+    // value is only used in argument
+    || is_at_argument_list_end(p)
 }
 
 #[inline]
