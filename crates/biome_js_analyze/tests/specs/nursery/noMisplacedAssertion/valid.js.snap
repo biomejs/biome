@@ -17,5 +17,4 @@ test("something", () => {
 Deno.test("something", () => {
     expect("something").toBeTrue()
 })
-
 ```
