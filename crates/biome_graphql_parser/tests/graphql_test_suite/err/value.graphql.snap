@@ -19,6 +19,7 @@ expression: snapshot
 		object_value: {key:}
 		object_value: {key}
 		object_value: key}
+		object_value: {
 	)
 }
 
@@ -237,37 +238,48 @@ GraphqlRoot {
                                                 r_curly_token: R_CURLY@321..322 "}" [] [],
                                             },
                                         },
+                                        GraphqlArgument {
+                                            name: GraphqlName {
+                                                value_token: GRAPHQL_NAME@322..337 "object_value" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@337..339 ":" [] [Whitespace(" ")],
+                                            value: GraphqlObjectValue {
+                                                l_curly_token: L_CURLY@339..340 "{" [] [],
+                                                members: GraphqlObjectValueMemberList [],
+                                                r_curly_token: missing (required),
+                                            },
+                                        },
                                     ],
                                 },
-                                R_PAREN@322..325 ")" [Newline("\n"), Whitespace("\t")] [],
+                                R_PAREN@340..343 ")" [Newline("\n"), Whitespace("\t")] [],
                             ],
                         },
                         GraphqlDirectiveList [],
                     ],
                 },
             ],
-            r_curly_token: R_CURLY@325..327 "}" [Newline("\n")] [],
+            r_curly_token: R_CURLY@343..345 "}" [Newline("\n")] [],
         },
     ],
-    eof_token: EOF@327..328 "" [Newline("\n")] [],
+    eof_token: EOF@345..346 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: GRAPHQL_ROOT@0..328
+0: GRAPHQL_ROOT@0..346
   0: (empty)
-  1: GRAPHQL_DEFINITION_LIST@0..327
-    0: GRAPHQL_SELECTION_SET@0..327
+  1: GRAPHQL_DEFINITION_LIST@0..345
+    0: GRAPHQL_SELECTION_SET@0..345
       0: L_CURLY@0..1 "{" [] []
-      1: GRAPHQL_SELECTION_LIST@1..325
-        0: GRAPHQL_BOGUS_SELECTION@1..325
+      1: GRAPHQL_SELECTION_LIST@1..343
+        0: GRAPHQL_BOGUS_SELECTION@1..343
           0: GRAPHQL_NAME@1..14
             0: GRAPHQL_NAME@1..14 "field_value" [Newline("\n"), Whitespace("\t")] []
-          1: GRAPHQL_BOGUS@14..325
+          1: GRAPHQL_BOGUS@14..343
             0: L_PAREN@14..15 "(" [] []
-            1: GRAPHQL_BOGUS@15..322
+            1: GRAPHQL_BOGUS@15..340
               0: GRAPHQL_ARGUMENT@15..31
                 0: GRAPHQL_NAME@15..29
                   0: GRAPHQL_NAME@15..29 "float_value" [Newline("\n"), Whitespace("\t\t")] []
@@ -391,10 +403,18 @@ GraphqlRoot {
                         0: GRAPHQL_NAME@318..321
                           0: GRAPHQL_NAME@318..321 "key" [] []
                   2: R_CURLY@321..322 "}" [] []
-            2: R_PAREN@322..325 ")" [Newline("\n"), Whitespace("\t")] []
-          2: GRAPHQL_DIRECTIVE_LIST@325..325
-      2: R_CURLY@325..327 "}" [Newline("\n")] []
-  2: EOF@327..328 "" [Newline("\n")] []
+              16: GRAPHQL_ARGUMENT@322..340
+                0: GRAPHQL_NAME@322..337
+                  0: GRAPHQL_NAME@322..337 "object_value" [Newline("\n"), Whitespace("\t\t")] []
+                1: COLON@337..339 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_OBJECT_VALUE@339..340
+                  0: L_CURLY@339..340 "{" [] []
+                  1: GRAPHQL_OBJECT_VALUE_MEMBER_LIST@340..340
+                  2: (empty)
+            2: R_PAREN@340..343 ")" [Newline("\n"), Whitespace("\t")] []
+          2: GRAPHQL_DIRECTIVE_LIST@343..343
+      2: R_CURLY@343..345 "}" [Newline("\n")] []
+  2: EOF@345..346 "" [Newline("\n")] []
 
 ```
 
@@ -565,8 +585,21 @@ value.graphql:14:21 parse ━━━━━━━━━━━━━━━━━━
   > 14 │ 		object_value: {key}
        │ 		                  ^
     15 │ 		object_value: key}
-    16 │ 	)
+    16 │ 		object_value: {
   
   i Remove }
+  
+value.graphql:17:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `)`
+  
+    15 │ 		object_value: key}
+    16 │ 		object_value: {
+  > 17 │ 	)
+       │ 	^
+    18 │ }
+    19 │ 
+  
+  i Remove )
   
 ```

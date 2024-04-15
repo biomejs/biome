@@ -65,7 +65,7 @@ impl ParseRecovery for ObjectValueMemberListParseRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_OBJECT_FIELD;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_name(p)
+        is_at_name(p) || is_at_object_end(p)
     }
 }
 
@@ -83,7 +83,7 @@ impl ParseNodeList for ObjectValueMemberList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}'])
+        is_at_object_end(p)
     }
 
     fn recover(
@@ -285,4 +285,11 @@ fn is_at_object(p: &GraphqlParser) -> bool {
 #[inline]
 fn is_at_object_field(p: &GraphqlParser) -> bool {
     is_at_name(p)
+}
+
+#[inline]
+fn is_at_object_end(p: &GraphqlParser) -> bool {
+    p.at(T!['}'])
+    // value is only used in argument
+    || is_at_argument_list_end(p)
 }
