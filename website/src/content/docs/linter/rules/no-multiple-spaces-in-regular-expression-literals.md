@@ -20,7 +20,7 @@ Disallow unclear usage of consecutive space characters in regular expression lit
 /   /
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noMultipleSpacesInRegularExpressionLiterals.js:1:2 <a href="https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals">lint/complexity/noMultipleSpacesInRegularExpressionLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noMultipleSpacesInRegularExpressionLiterals.jsx:1:2 <a href="https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals">lint/complexity/noMultipleSpacesInRegularExpressionLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This regular expression contains unclear uses of consecutive spaces.</span>
   
@@ -42,7 +42,7 @@ Disallow unclear usage of consecutive space characters in regular expression lit
 /foo  */
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noMultipleSpacesInRegularExpressionLiterals.js:1:5 <a href="https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals">lint/complexity/noMultipleSpacesInRegularExpressionLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noMultipleSpacesInRegularExpressionLiterals.jsx:1:5 <a href="https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals">lint/complexity/noMultipleSpacesInRegularExpressionLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This regular expression contains unclear uses of consecutive spaces.</span>
   
@@ -64,7 +64,7 @@ Disallow unclear usage of consecutive space characters in regular expression lit
 /foo  {2,}bar   {3,5}baz/
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noMultipleSpacesInRegularExpressionLiterals.js:1:5 <a href="https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals">lint/complexity/noMultipleSpacesInRegularExpressionLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noMultipleSpacesInRegularExpressionLiterals.jsx:1:5 <a href="https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals">lint/complexity/noMultipleSpacesInRegularExpressionLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This regular expression contains unclear uses of consecutive spaces.</span>
   
@@ -86,7 +86,7 @@ Disallow unclear usage of consecutive space characters in regular expression lit
 /foo [ba]r  b(a|z)/
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noMultipleSpacesInRegularExpressionLiterals.js:1:11 <a href="https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals">lint/complexity/noMultipleSpacesInRegularExpressionLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noMultipleSpacesInRegularExpressionLiterals.jsx:1:11 <a href="https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals">lint/complexity/noMultipleSpacesInRegularExpressionLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This regular expression contains unclear uses of consecutive spaces.</span>
   

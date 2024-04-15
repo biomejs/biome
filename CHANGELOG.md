@@ -197,7 +197,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnositic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
+- Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnostic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
 
 - Biome now correctly filters out files that are not present in the current directory when using the `--changed` flag [#1996](https://github.com/biomejs/biome/issues/1996). Contributed by @castarco
 
@@ -273,6 +273,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Implement [#2043](https://github.com/biomejs/biome/issues/2043): The React rule [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) is now also compatible with Preact hooks imported from `preact/hooks` or `preact/compat`. Contributed by @arendjr
 
+- Add rule [noFlatMapIdentity](https://biomejs.dev/linter/rules/no-flat-map-identity) to disallow unnecessary callback use on `flatMap`. Contributed by @isnakode
+
+- Add rule [noConstantMathMinMaxClamp](https://biomejs.dev/linter/rules/no-constant-math-min-max-clamp), which disallows using `Math.min` and `Math.max` to clamp a value where the result itself is constant. Contributed by @mgomulak
+
 #### Enhancements
 
 - [style/useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention/) now allows prefixing a filename with `+` ([#2341](https://github.com/biomejs/biome/issues/2341)).
@@ -292,6 +296,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
     return <Component />;
   }
   ```
+
+  Contributed by @Conaclos
+
+- [complexity/useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) no longer report computed properties named `__proto__` ([#2430](https://github.com/biomejs/biome/issues/2430)).
+
+  In JavaScript, `{["__proto__"]: null}` and `{__proto__: null}` have not the same semantic.
+  The first code set a regular property to `null`.
+  The second one set the prototype of the object to `null`.
+  See the [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto) for more details.
+
+  The rule now ignores computed properties named `__proto__`.
 
   Contributed by @Conaclos
 
@@ -526,7 +541,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) now reports duplicate type parameters in a same declaration.
 
-  The following type parameters are now reported as a redeclaraion:
+  The following type parameters are now reported as a redeclaration:
 
   ```ts
   function f<T, T>() {}
@@ -605,7 +620,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Enhancements
 
-- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) ignores unused rest spread silbings.
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) ignores unused rest spread siblings.
 
   The following code is now valid:
 
@@ -985,7 +1000,7 @@ Additionally, the following rules are now recommended:
   ```
   Contributed by @DaniGuardiola
 
-- Add rule [noUndeclaredependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies), to detect the use of
+- Add rule [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies), to detect the use of
   dependencies that aren't present in the `package.json`.
 
   The rule ignores imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
@@ -2241,9 +2256,9 @@ no longer repports missing dependencies for React hooks without dependency array
 
 - Add option `--line-feed` to the `format` command. Contributed by @SuperchupuDev
 
-- Add option `--bracket-same-line` to the `format` command. Contributed by @faultyserve
+- Add option `--bracket-same-line` to the `format` command. Contributed by @faultyserver
 
-- Add option `--bracket-spacing` to the `format` command. Contributed by @faultyserve
+- Add option `--bracket-spacing` to the `format` command. Contributed by @faultyserver
 
 #### Bug fixes
 
@@ -3429,7 +3444,7 @@ The following rules are promoted:
   which instructs Biome to exit with an error code when warnings are emitted.
 
   ```shell
-  biome check --error-on-wanrings ./src
+  biome check --error-on-warnings ./src
   ```
 
 - Add a configuration to enable parsing comments inside JSON files:

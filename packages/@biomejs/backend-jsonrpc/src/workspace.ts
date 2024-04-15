@@ -510,7 +510,7 @@ export interface A11y {
 	 */
 	noDistractingElements?: RuleConfiguration_for_Null;
 	/**
-	 * The scope prop should be used only on <th> elements.
+	 * The scope prop should be used only on \<th> elements.
 	 */
 	noHeaderScope?: RuleConfiguration_for_Null;
 	/**
@@ -901,13 +901,17 @@ export interface Nursery {
 	 */
 	noBarrelFile?: RuleConfiguration_for_Null;
 	/**
-	 * [WIP] This rule hasn't been implemented yet.
+	 * WIP: This rule hasn't been implemented yet.
 	 */
 	noColorInvalidHex?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of console.
 	 */
 	noConsole?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.
+	 */
+	noConstantMathMinMaxClamp?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
@@ -940,6 +944,10 @@ export interface Nursery {
 	 * Disallow using export or module.exports in files containing tests
 	 */
 	noExportsInTest?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow to use unnecessary callback on flatMap.
+	 */
+	noFlatMapIdentity?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow focused tests.
 	 */
@@ -1132,7 +1140,7 @@ export interface Style {
 	 */
 	useCollapsedElseIf?: RuleConfiguration_for_Null;
 	/**
-	 * Require consistently using either T[] or Array<T>
+	 * Require consistently using either T\[] or Array\<T>
 	 */
 	useConsistentArrayType?: RuleConfiguration_for_ConsistentArrayTypeOptions;
 	/**
@@ -1164,7 +1172,7 @@ export interface Style {
 	 */
 	useForOf?: RuleConfiguration_for_Null;
 	/**
-	 * This rule enforces the use of <>...</> over <Fragment>...</Fragment>.
+	 * This rule enforces the use of \<>...\</> over \<Fragment>...\</Fragment>.
 	 */
 	useFragmentSyntax?: RuleConfiguration_for_Null;
 	/**
@@ -1196,7 +1204,7 @@ export interface Style {
 	 */
 	useSelfClosingElements?: RuleConfiguration_for_Null;
 	/**
-	 * When expressing array types, this rule promotes the usage of T[] shorthand instead of Array<T>.
+	 * When expressing array types, this rule promotes the usage of T\[] shorthand instead of Array\<T>.
 	 */
 	useShorthandArrayType?: RuleConfiguration_for_Null;
 	/**
@@ -1915,6 +1923,7 @@ export type Category =
 	| "lint/nursery/noBarrelFile"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
+	| "lint/nursery/noConstantMathMinMaxClamp"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateJsonKeys"
@@ -1922,6 +1931,7 @@ export type Category =
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noExcessiveNestedTestSuites"
 	| "lint/nursery/noExportsInTest"
+	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noFocusedTests"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noMisplacedAssertion"

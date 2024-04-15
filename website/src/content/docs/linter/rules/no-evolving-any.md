@@ -23,7 +23,7 @@ This rule prevents such cases by ensuring variables do not evolve into `any` typ
 let a;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEvolvingAny.js:1:5 <a href="https://biomejs.dev/linter/rules/no-evolving-any">lint/nursery/noEvolvingAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noEvolvingAny.ts:1:5 <a href="https://biomejs.dev/linter/rules/no-evolving-any">lint/nursery/noEvolvingAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable's type is not allowed to evolve implicitly, leading to potential </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> types.</span>
   
@@ -39,7 +39,7 @@ let a;
 const b = [];
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEvolvingAny.js:1:7 <a href="https://biomejs.dev/linter/rules/no-evolving-any">lint/nursery/noEvolvingAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noEvolvingAny.ts:1:7 <a href="https://biomejs.dev/linter/rules/no-evolving-any">lint/nursery/noEvolvingAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable's type is not allowed to evolve implicitly, leading to potential </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> types.</span>
   
@@ -55,7 +55,7 @@ const b = [];
 let c = null;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEvolvingAny.js:1:5 <a href="https://biomejs.dev/linter/rules/no-evolving-any">lint/nursery/noEvolvingAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noEvolvingAny.ts:1:5 <a href="https://biomejs.dev/linter/rules/no-evolving-any">lint/nursery/noEvolvingAny</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable's type is not allowed to evolve implicitly, leading to potential </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> types.</span>
   

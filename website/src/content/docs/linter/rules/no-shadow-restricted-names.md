@@ -20,7 +20,7 @@ Disallow identifiers from shadowing restricted names.
 function NaN() {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noShadowRestrictedNames.js:1:10 <a href="https://biomejs.dev/linter/rules/no-shadow-restricted-names">lint/suspicious/noShadowRestrictedNames</a> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noShadowRestrictedNames.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-shadow-restricted-names">lint/suspicious/noShadowRestrictedNames</a> ━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not shadow the global &quot;NaN&quot; property.</span>
   
@@ -36,7 +36,7 @@ function NaN() {}
 let Set;
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noShadowRestrictedNames.js:1:5 <a href="https://biomejs.dev/linter/rules/no-shadow-restricted-names">lint/suspicious/noShadowRestrictedNames</a> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noShadowRestrictedNames.jsx:1:5 <a href="https://biomejs.dev/linter/rules/no-shadow-restricted-names">lint/suspicious/noShadowRestrictedNames</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not shadow the global &quot;Set&quot; property.</span>
   
@@ -52,7 +52,7 @@ let Set;
 try {	} catch(Object) {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noShadowRestrictedNames.js:1:15 <a href="https://biomejs.dev/linter/rules/no-shadow-restricted-names">lint/suspicious/noShadowRestrictedNames</a> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noShadowRestrictedNames.jsx:1:15 <a href="https://biomejs.dev/linter/rules/no-shadow-restricted-names">lint/suspicious/noShadowRestrictedNames</a> ━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not shadow the global &quot;Object&quot; property.</span>
   
@@ -68,7 +68,7 @@ try {	} catch(Object) {}
 function Array() {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noShadowRestrictedNames.js:1:10 <a href="https://biomejs.dev/linter/rules/no-shadow-restricted-names">lint/suspicious/noShadowRestrictedNames</a> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noShadowRestrictedNames.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-shadow-restricted-names">lint/suspicious/noShadowRestrictedNames</a> ━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not shadow the global &quot;Array&quot; property.</span>
   
@@ -84,7 +84,7 @@ function Array() {}
 function test(JSON) {console.log(JSON)}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noShadowRestrictedNames.js:1:15 <a href="https://biomejs.dev/linter/rules/no-shadow-restricted-names">lint/suspicious/noShadowRestrictedNames</a> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noShadowRestrictedNames.jsx:1:15 <a href="https://biomejs.dev/linter/rules/no-shadow-restricted-names">lint/suspicious/noShadowRestrictedNames</a> ━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not shadow the global &quot;JSON&quot; property.</span>
   

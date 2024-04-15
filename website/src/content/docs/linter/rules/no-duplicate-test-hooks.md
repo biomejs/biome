@@ -30,7 +30,7 @@ describe('foo', () => {
 });
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noDuplicateTestHooks.js:5:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-test-hooks">lint/nursery/noDuplicateTestHooks</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noDuplicateTestHooks.jsx:5:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-test-hooks">lint/nursery/noDuplicateTestHooks</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Disallow duplicate setup and teardown hooks.</span>
   
@@ -64,7 +64,7 @@ describe('foo', () => {
 });
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noDuplicateTestHooks.js:9:4 <a href="https://biomejs.dev/linter/rules/no-duplicate-test-hooks">lint/nursery/noDuplicateTestHooks</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noDuplicateTestHooks.jsx:9:4 <a href="https://biomejs.dev/linter/rules/no-duplicate-test-hooks">lint/nursery/noDuplicateTestHooks</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Disallow duplicate setup and teardown hooks.</span>
   

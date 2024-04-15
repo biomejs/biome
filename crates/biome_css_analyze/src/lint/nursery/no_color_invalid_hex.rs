@@ -4,7 +4,7 @@ use biome_css_syntax::CssDeclarationOrRuleBlock;
 use biome_rowan::AstNode;
 
 declare_rule! {
-    /// **[WIP] This rule hasn't been implemented yet.**
+    /// **WIP: This rule hasn't been implemented yet.**
     ///
     /// This is sample rule
     ///

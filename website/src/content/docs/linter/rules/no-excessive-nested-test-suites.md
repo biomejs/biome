@@ -36,7 +36,7 @@ describe('foo', () => {
 });
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noExcessiveNestedTestSuites.js:6:11 <a href="https://biomejs.dev/linter/rules/no-excessive-nested-test-suites">lint/nursery/noExcessiveNestedTestSuites</a> ━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noExcessiveNestedTestSuites.jsx:6:11 <a href="https://biomejs.dev/linter/rules/no-excessive-nested-test-suites">lint/nursery/noExcessiveNestedTestSuites</a> ━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Excessive `describe()` nesting detected.</span>
   

@@ -18,7 +18,7 @@ Let's say you want to create a new language that has the extension `html`, you'l
 1. Create a new `html.ungram` file in this folder.
    Add this legend to the `.ungram` file.
 
-  ```
+  ```text
   // This grammar specifies the structure of [LANGUAGE]'s concrete syntax tree.
   // It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
   // Tokens are processed -- contextual keywords are recognised, compound operators glued.
@@ -94,7 +94,7 @@ The lexer is the lower primitive of a Biome parser. It usually consumes characte
 
 Create a `lexer/mod.rs` inside the parser crate.
 
-```rust , ignore
+```rust,ignore
 use biome_beta_syntax::BetaSyntaxKind;
 use biome_parser::ParseDiagnostic;
 
@@ -104,10 +104,10 @@ pub(crate) struct BetaLexer<'source> {
 
     /// The start byte position in the source text of the next token.
     position: usize,
-    
+
     /// the current token
     current_kind: BetaSyntaxKind, 
-    
+
     /// diagnostics emitted during the parsing phase
     diagnostics: Vec<ParseDiagnostic>,
 }
@@ -115,7 +115,7 @@ pub(crate) struct BetaLexer<'source> {
 
 The import and implementation of the `Lexer` trait from the `biome_parser` crate.
 
-```rust ,ignore
+```rust,ignore
 impl<'source> Lexer<'source> for BetaLexer<'source> {}
 ```
 
@@ -134,7 +134,7 @@ A parser is a `struct` that must implement the [`Parser`](https://docs.rs/biome_
 
 Notably, the `struct` save the token source, the parser context and possible options:
 
-```rust ,ignore
+```rust,ignore
 pub(crate) struct BetaParser<'source> {
     context: ParserContext<BetaSyntaxKind>,
     source: BetaTokenSource<'source>,
@@ -167,7 +167,7 @@ You're free to add additional parameters to your function if needed. There are r
 
 Let's assume you want to parse the JS `if` statement:
 
-```js , ignore
+```js,ignore
 JsIfStatement =
  if
  (
@@ -181,7 +181,7 @@ JsIfStatement =
 
 Now, the parsing function must first test if the parser is positioned at an `if` statement and return `Absent` if that's not the case.
 
-```rust, ignore
+```rust,ignore
 if !p.at(T![if]) {
  return ParsedSyntax::Absent;
 }
@@ -192,7 +192,7 @@ Why return `ParsedSyntax::Absent`? The function must return `ParsedSyntax::Absen
 Your rule implementation may want to consider more than just the first child to determine if it can parse at least some of the expected children.
 For example, the if statement rule could test if the parser is located at an `else` clause and then create an `if` statement where all children are missing except the `else` clause:
 
-```rust, ignore
+```rust,ignore
 if !p.at(T![if]) && !p.at(T![else]){
   return Absent
 }
@@ -200,7 +200,7 @@ if !p.at(T![if]) && !p.at(T![else]){
 
 Your implementation can also call into another parsing rule if the first child is a node and not a token.
 
-```rust, ignore
+```rust,ignore
 let assignment_target = parse_assignment_target(p);
 
 if assignment_target.is_absent() {
@@ -226,7 +226,7 @@ it parses the block statement if it is present in the source code and adds a mis
 
 Using the above-described rules result in the following implementation for the `if` statement rule.
 
-```rust, ignore
+```rust,ignore
 fn parse_if_statement(p: &mut Parser) -> ParsedSyntax {
  if !p.at(T![if]) {
   return Absent;
@@ -269,13 +269,13 @@ The general structure for parsing a list is (yes, that's something the parser in
 
 Let's try to parse an array:
 
-```js , ignore
+```js,ignore
 [ 1, 3, 6 ]
 ```
 
 We will use  `ParseSeparatedList` in order to achieve that
 
-```rust ,ignore
+```rust,ignore
 struct ArrayElementsList;
 
 impl ParseSeparatedList for ArrayElementsList {
@@ -305,7 +305,7 @@ impl ParseSeparatedList for ArrayElementsList {
 
 Let's run through this step by step:
 
-```rust ,ignore
+```rust,ignore
 parsed_element.or_recover(
     p,
     &ParseRecoveryTokenSet::new(JS_BOGUS_STATEMENT, STMT_RECOVERY_SET),
@@ -347,7 +347,7 @@ However, conditional syntax must be handled because we want to add a diagnostic 
 
 Let's have a look at the `with` statement that is only allowed in loose mode/sloppy mode:
 
-```rust , ignore
+```rust,ignore
 fn parse_with_statement(p: &mut Parser) -> ParsedSyntax {
  if !p.at(T![with]) {
   return Absent;
@@ -369,7 +369,7 @@ fn parse_with_statement(p: &mut Parser) -> ParsedSyntax {
 
 The start of the rule is the same as for any other rule. The exciting bits start with
 
-```rust , ignore
+```rust,ignore
 fn parse_something() {
     let conditional = StrictMode.excluding_syntax(p, with_stmt, |p, marker| {
         p.err_builder("`with` statements are not allowed in strict mode", marker.range(p))

@@ -252,8 +252,9 @@ Rules that belong to this group <strong>are not subject to semantic version</str
 | Rule name | Description | Properties |
 | --- | --- | --- |
 | [noBarrelFile](/linter/rules/no-barrel-file) | Disallow the use of barrel file. |  |
-| [noColorInvalidHex](/linter/rules/no-color-invalid-hex) | <strong>[WIP] This rule hasn't been implemented yet.</strong> |  |
+| [noColorInvalidHex](/linter/rules/no-color-invalid-hex) | <strong>WIP: This rule hasn't been implemented yet.</strong> |  |
 | [noConsole](/linter/rules/no-console) | Disallow the use of <code>console</code>. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
+| [noConstantMathMinMaxClamp](/linter/rules/no-constant-math-min-max-clamp) | Disallow the use of <code>Math.min</code> and <code>Math.max</code> to clamp a value where the result itself is constant. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noDoneCallback](/linter/rules/no-done-callback) | Disallow using a callback in asynchronous tests and hooks. |  |
 | [noDuplicateElseIf](/linter/rules/no-duplicate-else-if) | Disallow duplicate conditions in if-else-if chains |  |
 | [noDuplicateFontNames](/linter/rules/no-duplicate-font-names) | Disallow duplicate names within font families. |  |
@@ -262,6 +263,7 @@ Rules that belong to this group <strong>are not subject to semantic version</str
 | [noEvolvingAny](/linter/rules/no-evolving-any) | Disallow variables from evolving into <code>any</code> type through reassignments. |  |
 | [noExcessiveNestedTestSuites](/linter/rules/no-excessive-nested-test-suites) | This rule enforces a maximum depth to nested <code>describe()</code> in test files. |  |
 | [noExportsInTest](/linter/rules/no-exports-in-test) | Disallow using <code>export</code> or <code>module.exports</code> in files containing tests |  |
+| [noFlatMapIdentity](/linter/rules/no-flat-map-identity) | Disallow to use unnecessary callback on <code>flatMap</code>. | <span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [noFocusedTests](/linter/rules/no-focused-tests) | Disallow focused tests. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noMisplacedAssertion](/linter/rules/no-misplaced-assertion) | Checks that the assertion function, for example <code>expect</code>, is placed inside an <code>it()</code> function call. |  |
 | [noNamespaceImport](/linter/rules/no-namespace-import) | Disallow the use of namespace imports. |  |

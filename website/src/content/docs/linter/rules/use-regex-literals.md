@@ -31,7 +31,7 @@ and are easier to analyze statically.
 new RegExp("abc", "u");
 ```
 
-<pre class="language-text"><code class="language-text">complexity/useRegexLiterals.js:1:1 <a href="https://biomejs.dev/linter/rules/use-regex-literals">lint/complexity/useRegexLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/useRegexLiterals.jsx:1:1 <a href="https://biomejs.dev/linter/rules/use-regex-literals">lint/complexity/useRegexLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use a regular expression literal instead of the </span><span style="color: Tomato;"><strong>RegExp</strong></span><span style="color: Tomato;"> constructor.</span>
   

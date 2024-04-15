@@ -29,6 +29,12 @@ declare_rule! {
     /// ### Valid
     ///
     /// ```js
+    /// for (let item of array) {
+    ///    console.log(item);
+    ///  }
+    /// ```
+    ///
+    /// ```js
     /// for (let i = 0; i < array.length; i++) {
     ///    console.log(i, array[i]);
     ///  }
