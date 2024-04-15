@@ -242,10 +242,10 @@ The new rules are:
 
 ### Promoted rules
 
-Once stable, a nursery rule is promoted to a stable group
+Once stable, a nursery rule is promoted to a stable group.
 The following rules are promoted:
 
-- [complecity/noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites)
+- [complexity/noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites)
 - [complexity/noUselessTernary](/linter/rules/no-useless-ternary/)
 - [correctness/useJsxKeyInIterable](/linter/rules/use-jsx-key-in-iterable/)
 - [performance/noBarrelFile](/linter/rules/no-barrel-file/)
