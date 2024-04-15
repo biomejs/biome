@@ -201,15 +201,15 @@ biome lint --reporter=json-pretty .
 
 For now, we support two report formats: `json` and `json-pretty`.
 
-Note that the report format is **experimental** and it might change in the future.
-Please try this feature and let us know if any information is missing from the reports.
+Note that the report format is **experimental**, and it might change in the future.
+Please try this feature and let us know if any information needs to be added to the reports.
 
 
 ## Check `git` staged files
 
 Biome v1.5 added the `--changed` to format and lint `git` tracked files that have been changed.
 
-Today we are introducing a new option `--staged` which allows you to check only files that have been added to the _Git index_ (_staged files_).
+Today we are introducing a new option `--staged` which allows you to check only files added to the _Git index_ (_staged files_).
 This is useful for checking that the files you want to commit are formatted and linted:
 
 ```shell
@@ -217,8 +217,8 @@ biome check --staged .
 ```
 
 This is handy for writing your own [pre-commit script](/recipes/git-hooks/#shell-script).
-Note that, unstaged changes on a staged file are **not** ignored.
-Thus, we still recommend using a [dedicated pre-commit tool](/recipes/git-hooks/)..
+Note that unstaged changes on a staged file are **not** ignored.
+Thus, we still recommend using a [dedicated pre-commit tool](/recipes/git-hooks/).
 
 Thanks to [@castarco](https://github.com/castarco) for implementing this feature!
 
@@ -230,6 +230,7 @@ Thanks to [@castarco](https://github.com/castarco) for implementing this feature
 Since _Biome v1.6_, we added several new rules.
 New rules are incubated in the nursery group.
 Nursery rules are exempt from semantic versioning.
+
 The new rules are:
 
 - [nursery/noConstantMathMinMaxClamp](/linter/rules/no-constant-math-min-max-clamp/)
@@ -260,16 +261,16 @@ The following rules are promoted:
 
 ## Miscellaneous
 
-- By default, Biome searches a configuration file in the working directory and in parent directories if it doesn't exist.
+- By default, Biome searches a configuration file in the working directory and parent directories if it doesn't exist.
   Biome provides a CLI option `--config-path` and an environment variable `BIOME_CONFIG_PATH` that allows which can be used to override this behavior.
   Previously, they required a directory containing a Biome configuration file.
-  For example, the following command uses the Biome configuration file located in `./config/`.
+  For example, the following command uses the Biome configuration file in `./config/`.
 
   ```shell
   biome format --config-path=./config/ ./src
   ```
 
-  This was confusing for many users who are used to specifying the configuration file path directly.
+  This wasn't very clear for many users who are used to specifying the configuration file path directly.
   They now accept a file, so the following command is valid:
 
   ```shell
@@ -292,11 +293,11 @@ See the [changelog](/internals/changelog/#170-2024-04-15) for more details.
 ## What’s Next?
 
 We have started work on the CSS formatter and linter.
-Early implementation towards a [plugin system](https://github.com/biomejs/biome/discussions/2286) is underway as well.
-Some of our contributors have also started preliminary work for [_GraphQL_](https://github.com/biomejs/biome/issues/1927) and [YAML](https://github.com/biomejs/biome/issues/2365).
+Early implementation towards a [plugin system](https://github.com/biomejs/biome/discussions/2286) is also underway.
+Some of our contributors have started preliminary work for [_GraphQL_](https://github.com/biomejs/biome/issues/1927) and [YAML](https://github.com/biomejs/biome/issues/2365).
 Any help is welcome!
 
-If Biome is valuable to you or your company, consider making a monthly donation to our [Open Collective](https://opencollective.com/biome).
+If Biome is valuable to you or your company, consider donating monthly to our [Open Collective](https://opencollective.com/biome).
 You can also [sponsor us on GitHub](https://github.com/sponsors/biomejs).
 This is important for the sustainability of the project.
 
