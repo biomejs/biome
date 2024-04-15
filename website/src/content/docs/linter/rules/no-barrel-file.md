@@ -4,7 +4,7 @@ title: noBarrelFile (since v1.6.0)
 
 **Diagnostic Category: `lint/performance/noBarrelFile`**
 
-Inspired from: <a href="https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/avoid-namespace-import.md" target="_blank"><code>avoid-namespace-import</code></a>
+Inspired from: <a href="https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/avoid-barrel-files.md" target="_blank"><code>avoid-barrel-files</code></a>
 
 Disallow the use of barrel file.
 
