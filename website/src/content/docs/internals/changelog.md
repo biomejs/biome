@@ -33,6 +33,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Biome now can handle `.svelte` and `.vue` files with `CRLF` as the end-of-line sequence. Contributed by @Sec-ant
 
+- Biome now can handle `.vue` files with [generic components](https://vuejs.org/api/sfc-script-setup#generics) ([#2456](https://github.com/biomejs/biome/issues/2456)).
+  ```vue
+  <script generic="T extends Record<string, any>" lang="ts" setup>
+  //...
+  </script>
+  ```
+  Contributed by @Sec-ant
+
 #### Enhancements
 
 - Complete the well-known file lists for JSON-like files. Trailing commas are allowed in `.jsonc` files by default. Some well-known files like `tsconfig.json` and `.babelrc` don't use the `.jsonc` extension but still allow comments and trailing commas. While others, such as `.eslintrc.json`, only allow comments. Biome is able to identify these files and adjusts the `json.parser.allowTrailingCommas` option accordingly to ensure they are correctly parsed. Contributed by @Sec-ant
