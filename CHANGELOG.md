@@ -27,6 +27,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Biome now can handle `.svelte` and `.vue` files with `CRLF` as the end-of-line sequence. Contributed by @Sec-ant
 
+- `noMisplacedAssertion` no longer reports method calls by `describe`, `test`, `it` objects (e.g. `test.each([])()`) ([#2443](https://github.com/biomejs/biome/issues/2443)). Contributed by @unvalley.
+
 - Biome now can handle `.vue` files with [generic components](https://vuejs.org/api/sfc-script-setup#generics) ([#2456](https://github.com/biomejs/biome/issues/2456)).
   ```vue
   <script generic="T extends Record<string, any>" lang="ts" setup>
