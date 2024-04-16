@@ -142,6 +142,7 @@ biome_suppression   = { version = "0.5.7", path = "./crates/biome_suppression" }
 biome_text_edit     = { version = "0.5.7", path = "./crates/biome_text_edit" }
 biome_text_size     = { version = "0.5.7", path = "./crates/biome_text_size" }
 biome_unicode_table = { version = "0.5.7", path = "./crates/biome_unicode_table" }
+
 # not publish
 biome_cli            = { path = "./crates/biome_cli" }
 biome_configuration  = { path = "./crates/biome_configuration" }
