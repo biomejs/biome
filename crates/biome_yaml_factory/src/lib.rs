@@ -1,14 +1,11 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+use biome_yaml_syntax::YamlLanguage;
+use biome_rowan::TreeBuilder;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+mod generated;
+pub use crate::generated::YamlSyntaxFactory;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+// Re-exported for tests
+#[doc(hidden)]
+pub use biome_yaml_syntax as syntax;
+
+pub type YamlSyntaxTreeBuilder = TreeBuilder<'static, YamlLanguage, YamlSyntaxFactory>;
