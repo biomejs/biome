@@ -344,15 +344,22 @@ impl NodeCache {
     /// Removes nodes, tokens and trivia entries from the cache when their
     /// generation doesn't match the current generation of the whole cache
     pub(crate) fn sweep_cache(&mut self) {
-        self.nodes
-            .drain_filter(|node, _| node.node.generation() != self.generation);
+        let nodes = self
+            .nodes
+            .extract_if(|node, _| node.node.generation() != self.generation);
+        nodes.for_each(drop);
 
-        self.tokens
-            .drain_filter(|token, _| token.0.generation() != self.generation);
+        let tokens = self
+            .tokens
+            .extract_if(|token, _| token.0.generation() != self.generation);
 
-        self.trivia
+        tokens.for_each(drop);
+
+        let trivia = self
+            .trivia
             .cache
-            .drain_filter(|trivia, _| trivia.0.generation() != self.generation);
+            .extract_if(|trivia, _| trivia.0.generation() != self.generation);
+        trivia.for_each(drop);
     }
 }
 

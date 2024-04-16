@@ -19,11 +19,11 @@ indicatif          = { version = "0.17.0", features = ["improved_unicode"] }
 once_cell          = "1.9.0"
 pico-args          = { version = "0.5.0", features = ["eq-separator"] }
 regex              = "1.5.5"
-serde              = { version = "1.0.133", features = ["derive"] }
-serde_json         = "1.0.74"
+serde              = { workspace = true, features = ["derive"] }
+serde_json         = { workspace = true }
 serde_yaml         = "0.9.31"
 tracing            = { workspace = true }
-tracing-subscriber = { version = "0.3.11", features = ["env-filter", "std"] }
+tracing-subscriber = { workspace = true, features = ["env-filter", "std"] }
 walkdir            = "2.3.2"
 xtask              = { path = '../', version = "0.0" }
 yastl              = "0.1.2"
