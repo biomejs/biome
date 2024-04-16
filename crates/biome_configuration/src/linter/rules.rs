@@ -3027,10 +3027,6 @@ impl Nursery {
                 .no_react_specific_props
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noReactSpecificProps" => self
-                .no_react_specific_props
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
             "noRestrictedImports" => self
                 .no_restricted_imports
                 .as_ref()

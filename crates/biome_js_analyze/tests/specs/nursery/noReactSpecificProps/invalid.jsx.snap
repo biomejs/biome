@@ -23,7 +23,15 @@ invalid.jsx:2:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━
   
     1 │ //Case with className
   > 2 │ <div className="greeting">Hello world!</div>;
-      │      ^^^^^^^^^^^^^^^^^^^^
+      │      ^^^^^^^^^
+    3 │ 
+    4 │ //Case with className with expression
+  
+  i Replace this attribute name with "class"
+  
+    1 │ //Case with className
+  > 2 │ <div className="greeting">Hello world!</div>;
+      │      ^^^^^^^^^
     3 │ 
     4 │ //Case with className with expression
   
@@ -37,7 +45,15 @@ invalid.jsx:5:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━
   
     4 │ //Case with className with expression
   > 5 │ <div className={"greeting"}>Hello world!</div>;
-      │      ^^^^^^^^^^^^^^^^^^^^^^
+      │      ^^^^^^^^^
+    6 │ 
+    7 │ //Case with htmlFor
+  
+  i Replace this attribute name with "class"
+  
+    4 │ //Case with className with expression
+  > 5 │ <div className={"greeting"}>Hello world!</div>;
+      │      ^^^^^^^^^
     6 │ 
     7 │ //Case with htmlFor
   
@@ -51,7 +67,14 @@ invalid.jsx:8:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━
   
     7 │ //Case with htmlFor
   > 8 │ <div htmlFor="greeting">Hello world!</div>;
-      │      ^^^^^^^^^^^^^^^^^^
+      │      ^^^^^^^
+    9 │ 
+  
+  i Replace this attribute name with "for"
+  
+    7 │ //Case with htmlFor
+  > 8 │ <div htmlFor="greeting">Hello world!</div>;
+      │      ^^^^^^^
     9 │ 
   
 
