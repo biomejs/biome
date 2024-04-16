@@ -145,7 +145,7 @@ fn parse_float(p: &mut GraphqlParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_string(p: &mut GraphqlParser) -> ParsedSyntax {
+pub(crate) fn parse_string(p: &mut GraphqlParser) -> ParsedSyntax {
     if !is_at_string(p) {
         return Absent;
     }
@@ -244,7 +244,7 @@ fn is_at_float(p: &GraphqlParser) -> bool {
 }
 
 #[inline]
-fn is_at_string(p: &GraphqlParser) -> bool {
+pub(crate) fn is_at_string(p: &GraphqlParser) -> bool {
     p.at(GRAPHQL_STRING_LITERAL)
 }
 
@@ -288,7 +288,7 @@ fn is_at_object_field(p: &GraphqlParser) -> bool {
 }
 
 #[inline]
-fn is_at_object_end(p: &GraphqlParser) -> bool {
+fn is_at_object_end(p: &mut GraphqlParser) -> bool {
     p.at(T!['}'])
     // value is only used in argument
     || is_at_argument_list_end(p)

@@ -1,0 +1,15 @@
+schema {
+  quer: MyQueryRootType
+  mutatio: MyMutationRootType
+	subscriptio: MySubscriptionRootType
+	: MySubscriptionRootType
+	8: MySubscriptionRootType
+}
+
+schema {
+  quer:
+}
+
+"sth schema {
+  quer:
+}
