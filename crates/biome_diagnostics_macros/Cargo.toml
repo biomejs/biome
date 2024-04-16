@@ -15,9 +15,9 @@ proc-macro = true
 
 [dependencies]
 proc-macro-error = { version = "1.0.4", default-features = false }
-proc-macro2      = "1.0.63"
-quote            = "1.0.14"
-syn              = "1.0.85"
+proc-macro2      = { workspace = true }
+quote            = { workspace = true }
+syn              = { workspace = true }
 
 [lints]
 workspace = true

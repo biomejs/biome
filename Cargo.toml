@@ -152,30 +152,33 @@ biome_ungrammar      = { path = "./crates/biome_ungrammar" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
-bitflags          = "2.5.0"
-bpaf              = { version = "0.9.9", features = ["derive"] }
-countme           = "3.0.1"
-crossbeam         = "0.8.4"
-dashmap           = "5.4.0"
-ignore            = "0.4.21"
-indexmap          = "1.9.3"
-insta             = "1.38.0"
-lazy_static       = "1.4.0"
-oxc_resolver      = "1.4.0"
-quickcheck        = "1.0.3"
-quickcheck_macros = "1.0.0"
-quote             = { version = "1.0.36" }
-rayon             = "1.8.1"
-regex             = "1.10.4"
-rustc-hash        = "1.1.0"
-schemars          = { version = "0.8.12" }
-serde             = { version = "1.0.163", features = ["derive"] }
-serde_json        = "1.0.115"
-smallvec          = { version = "1.10.0", features = ["union", "const_new"] }
-tokio             = { version = "1.36.0" }
-tracing           = { version = "0.1.37", default-features = false, features = ["std"] }
-unicode-bom       = "2.0.3"
-
+bitflags           = "2.5.0"
+bpaf               = { version = "0.9.9", features = ["derive"] }
+countme            = "3.0.1"
+crossbeam          = "0.8.4"
+dashmap            = "5.4.0"
+ignore             = "0.4.21"
+indexmap           = "1.9.3"
+insta              = "1.38.0"
+lazy_static        = "1.4.0"
+oxc_resolver       = "1.4.0"
+proc-macro2        = "1.0.80"
+quickcheck         = "1.0.3"
+quickcheck_macros  = "1.0.0"
+quote              = "1.0.36"
+rayon              = "1.8.1"
+regex              = "1.10.4"
+rustc-hash         = "1.1.0"
+schemars           = { version = "0.8.12" }
+serde              = { version = "1.0.163", features = ["derive"] }
+serde_json         = "1.0.115"
+similar            = "2.5.0"
+smallvec           = { version = "1.10.0", features = ["union", "const_new"] }
+syn                = "1.0.109"
+tokio              = { version = "1.36.0" }
+tracing            = { version = "0.1.37", default-features = false, features = ["std"] }
+tracing-subscriber = "0.3.18"
+unicode-bom        = "2.0.3"
 
 [profile.dev.package.biome_wasm]
 debug     = true
