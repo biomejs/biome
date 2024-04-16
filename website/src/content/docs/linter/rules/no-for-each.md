@@ -52,7 +52,7 @@ els.forEach((el) => {
 })
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noForEach.js:1:1 <a href="https://biomejs.dev/linter/rules/no-for-each">lint/complexity/noForEach</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noForEach.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-for-each">lint/complexity/noForEach</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Prefer </span><span style="color: Tomato;"><strong>for...of</strong></span><span style="color: Tomato;"> instead of </span><span style="color: Tomato;"><strong>forEach</strong></span><span style="color: Tomato;">.</span>
   
@@ -73,7 +73,7 @@ els["forEach"](el => {
 })
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noForEach.js:1:1 <a href="https://biomejs.dev/linter/rules/no-for-each">lint/complexity/noForEach</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noForEach.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-for-each">lint/complexity/noForEach</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Prefer </span><span style="color: Tomato;"><strong>for...of</strong></span><span style="color: Tomato;"> instead of </span><span style="color: Tomato;"><strong>forEach</strong></span><span style="color: Tomato;">.</span>
   

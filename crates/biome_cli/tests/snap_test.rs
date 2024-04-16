@@ -59,7 +59,12 @@ impl CliSnapshot {
         if let Some((configuration, file_name)) = &self.configuration {
             let redacted = redact_snapshot(configuration).unwrap_or(String::new().into());
 
-            let parsed = parse_json(&redacted, JsonParserOptions::default());
+            let parsed = parse_json(
+                &redacted,
+                JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas(),
+            );
             let formatted = format_node(
                 JsonFormatOptions::default()
                     .with_indent_style(IndentStyle::Space)

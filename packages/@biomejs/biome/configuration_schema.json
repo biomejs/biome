@@ -123,7 +123,7 @@
 					]
 				},
 				"noHeaderScope": {
-					"description": "The scope prop should be used only on <th> elements.",
+					"description": "The scope prop should be used only on \\<th> elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -328,6 +328,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveNestedTestSuites": {
+					"description": "This rule enforces a maximum depth to nested describe() in test files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExtraBooleanCast": {
 					"description": "Disallow unnecessary boolean casts",
 					"anyOf": [
@@ -414,6 +421,13 @@
 				},
 				"noUselessSwitchCase": {
 					"description": "Disallow useless case in switch statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessTernary": {
+					"description": "Disallow ternary operators when simpler alternatives exist.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -796,6 +810,13 @@
 				},
 				"useIsNan": {
 					"description": "Require calls to isNaN() when checking for NaN.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useJsxKeyInIterable": {
+					"description": "Disallow missing key props in iterators/collection literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1314,7 +1335,7 @@
 					"enum": ["Transparent"]
 				},
 				{
-					"description": "Indicates a classic React environment that requires the `React` import.\n\nCorresponds to the `react` value for the `jsx` option in TypeScript's `tsconfig.json`.\n\nThis option should only be necessary if you cannot upgrade to a React version that supports the new JSX runtime. For more information about the old vs. new JSX runtime, please see: https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html",
+					"description": "Indicates a classic React environment that requires the `React` import.\n\nCorresponds to the `react` value for the `jsx` option in TypeScript's `tsconfig.json`.\n\nThis option should only be necessary if you cannot upgrade to a React version that supports the new JSX runtime. For more information about the old vs. new JSX runtime, please see: <https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html>",
 					"type": "string",
 					"enum": ["ReactClassic"]
 				}
@@ -1400,15 +1421,8 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"noBarrelFile": {
-					"description": "Disallow the use of barrel file.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noColorInvalidHex": {
-					"description": "[WIP] This rule hasn't been implemented yet.",
+					"description": "WIP: This rule hasn't been implemented yet.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1416,6 +1430,13 @@
 				},
 				"noConsole": {
 					"description": "Disallow the use of console.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noConstantMathMinMaxClamp": {
+					"description": "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1449,13 +1470,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noDuplicateTestHooks": {
-					"description": "A describe block should not contain duplicate hooks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noEvolvingAny": {
 					"description": "Disallow variables from evolving into any type through reassignments.",
 					"anyOf": [
@@ -1463,22 +1477,8 @@
 						{ "type": "null" }
 					]
 				},
-				"noExcessiveNestedTestSuites": {
-					"description": "This rule enforces a maximum depth to nested describe() in test files.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noExportsInTest": {
-					"description": "Disallow using export or module.exports in files containing tests",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noFocusedTests": {
-					"description": "Disallow focused tests.",
+				"noFlatMapIdentity": {
+					"description": "Disallow to use unnecessary callback on flatMap.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1491,13 +1491,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noNamespaceImport": {
-					"description": "Disallow the use of namespace imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noNodejsModules": {
 					"description": "Forbid the use of Node.js builtin modules.",
 					"anyOf": [
@@ -1505,8 +1498,8 @@
 						{ "type": "null" }
 					]
 				},
-				"noReExportAll": {
-					"description": "Avoid re-export all.",
+				"noReactSpecificProps": {
+					"description": "Prevents React-specific JSX properties from being used.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1526,29 +1519,8 @@
 						{ "type": "null" }
 					]
 				},
-				"noSkippedTests": {
-					"description": "Disallow disabled tests.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noSuspiciousSemicolonInJsx": {
-					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noUndeclaredDependencies": {
 					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessTernary": {
-					"description": "Disallow ternary operators when simpler alternatives exist.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1560,20 +1532,6 @@
 				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useJsxKeyInIterable": {
-					"description": "Disallow missing key props in iterators/collection literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useNodeAssertStrict": {
-					"description": "Promotes the usage of node:assert/strict over node:assert.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1751,8 +1709,22 @@
 						{ "type": "null" }
 					]
 				},
+				"noBarrelFile": {
+					"description": "Disallow the use of barrel file.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDelete": {
 					"description": "Disallow the use of the delete operator.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReExportAll": {
+					"description": "Avoid re-export all.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2068,6 +2040,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNamespaceImport": {
+					"description": "Disallow the use of namespace imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNegationElse": {
 					"description": "Disallow negation in the condition of an if statement if it has an else clause.",
 					"anyOf": [
@@ -2157,7 +2136,7 @@
 					]
 				},
 				"useConsistentArrayType": {
-					"description": "Require consistently using either T[] or Array<T>",
+					"description": "Require consistently using either T\\[] or Array\\<T>",
 					"anyOf": [
 						{ "$ref": "#/definitions/ConsistentArrayTypeConfiguration" },
 						{ "type": "null" }
@@ -2213,7 +2192,7 @@
 					]
 				},
 				"useFragmentSyntax": {
-					"description": "This rule enforces the use of <>...</> over <Fragment>...</Fragment>.",
+					"description": "This rule enforces the use of \\<>...\\</> over \\<Fragment>...\\</Fragment>.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2237,6 +2216,13 @@
 					"description": "Enforce naming conventions for everything across a codebase.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NamingConventionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNodeAssertStrict": {
+					"description": "Promotes the usage of node:assert/strict over node:assert.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2269,7 +2255,7 @@
 					]
 				},
 				"useShorthandArrayType": {
-					"description": "When expressing array types, this rule promotes the usage of T[] shorthand instead of Array<T>.",
+					"description": "When expressing array types, this rule promotes the usage of T\\[] shorthand instead of Array\\<T>.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2468,6 +2454,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateTestHooks": {
+					"description": "A describe block should not contain duplicate hooks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmptyBlockStatements": {
 					"description": "Disallow empty block statements and static blocks.",
 					"anyOf": [
@@ -2489,6 +2482,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExportsInTest": {
+					"description": "Disallow using export or module.exports in files containing tests",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExtraNonNullAssertion": {
 					"description": "Prevents the wrong usage of the non-null assertion operator (!) in TypeScript files.",
 					"anyOf": [
@@ -2498,6 +2498,13 @@
 				},
 				"noFallthroughSwitchClause": {
 					"description": "Disallow fallthrough of switch clauses.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noFocusedTests": {
+					"description": "Disallow focused tests.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2608,8 +2615,22 @@
 						{ "type": "null" }
 					]
 				},
+				"noSkippedTests": {
+					"description": "Disallow disabled tests.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSparseArray": {
 					"description": "Disallow sparse arrays",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSuspiciousSemicolonInJsx": {
+					"description": "It detects possible \"wrong\" semicolons inside JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

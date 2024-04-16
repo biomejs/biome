@@ -23,7 +23,7 @@ hidden, then the rule will always succeed.
 <img src="src" alt="photo content" />;
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noRedundantAlt.js:1:20 <a href="https://biomejs.dev/linter/rules/no-redundant-alt">lint/a11y/noRedundantAlt</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noRedundantAlt.jsx:1:20 <a href="https://biomejs.dev/linter/rules/no-redundant-alt">lint/a11y/noRedundantAlt</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid the words &quot;image&quot;, &quot;picture&quot;, or &quot;photo&quot; in </span><span style="color: Tomato;"><strong>img</strong></span><span style="color: Tomato;"> element alt text.</span>
   
@@ -39,7 +39,7 @@ hidden, then the rule will always succeed.
 <img alt={`picture doing ${things}`} {...this.props} />;
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noRedundantAlt.js:1:10 <a href="https://biomejs.dev/linter/rules/no-redundant-alt">lint/a11y/noRedundantAlt</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noRedundantAlt.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-redundant-alt">lint/a11y/noRedundantAlt</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid the words &quot;image&quot;, &quot;picture&quot;, or &quot;photo&quot; in </span><span style="color: Tomato;"><strong>img</strong></span><span style="color: Tomato;"> element alt text.</span>
   
@@ -55,7 +55,7 @@ hidden, then the rule will always succeed.
 <img alt="picture of cool person" aria-hidden={false} />;
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noRedundantAlt.js:1:10 <a href="https://biomejs.dev/linter/rules/no-redundant-alt">lint/a11y/noRedundantAlt</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noRedundantAlt.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-redundant-alt">lint/a11y/noRedundantAlt</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid the words &quot;image&quot;, &quot;picture&quot;, or &quot;photo&quot; in </span><span style="color: Tomato;"><strong>img</strong></span><span style="color: Tomato;"> element alt text.</span>
   

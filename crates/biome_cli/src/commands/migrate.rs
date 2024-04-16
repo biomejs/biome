@@ -14,7 +14,7 @@ pub(crate) fn migrate(
     write: bool,
     sub_command: Option<MigrateSubCommand>,
 ) -> Result<(), CliDiagnostic> {
-    let base_path = cli_options.as_configuration_base_path();
+    let base_path = cli_options.as_configuration_path_hint();
     let LoadedConfiguration {
         configuration: _,
         diagnostics: _,

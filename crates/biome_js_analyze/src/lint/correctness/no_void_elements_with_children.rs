@@ -94,7 +94,6 @@ pub enum NoVoidElementsWithChildrenCause {
         dangerous_prop_cause: Option<JsPropertyObjectMember>,
         /// If the current element has the prop `children`
         children_prop: Option<JsPropertyObjectMember>,
-        /// An instance of [ReactCreateElementCall]
         react_create_element: ReactCreateElementCall,
     },
 }

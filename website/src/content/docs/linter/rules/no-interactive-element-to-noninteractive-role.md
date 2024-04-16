@@ -28,7 +28,7 @@ Non-interactive ARIA roles include `article`, `banner`, `complementary`, `img`, 
 <input role="img" />;
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noInteractiveElementToNoninteractiveRole.js:1:1 <a href="https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role">lint/a11y/noInteractiveElementToNoninteractiveRole</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noInteractiveElementToNoninteractiveRole.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role">lint/a11y/noInteractiveElementToNoninteractiveRole</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Interactive elements should not be assigned non-interactive roles.</span>
   

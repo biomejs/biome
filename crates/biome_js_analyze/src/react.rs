@@ -189,7 +189,7 @@ pub(crate) fn is_react_call_api(
     api_name: &str,
 ) -> bool {
     if matches!(lib, ReactLibrary::React) {
-        // we bail straight away if the API doesn't exists in React
+        // we bail straight away if the API doesn't exist in React
         debug_assert!(VALID_REACT_API.contains(&api_name));
     }
 

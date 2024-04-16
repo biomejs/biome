@@ -2,10 +2,10 @@
 title: noExcessiveNestedTestSuites (since v1.6.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noExcessiveNestedTestSuites`**
+**Diagnostic Category: `lint/complexity/noExcessiveNestedTestSuites`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Source: <a href="https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/max-nested-describe.md" target="_blank"><code>max-nested-describe</code></a>
@@ -36,7 +36,7 @@ describe('foo', () => {
 });
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noExcessiveNestedTestSuites.js:6:11 <a href="https://biomejs.dev/linter/rules/no-excessive-nested-test-suites">lint/nursery/noExcessiveNestedTestSuites</a> ━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noExcessiveNestedTestSuites.jsx:6:11 <a href="https://biomejs.dev/linter/rules/no-excessive-nested-test-suites">lint/complexity/noExcessiveNestedTestSuites</a> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Excessive `describe()` nesting detected.</span>
   

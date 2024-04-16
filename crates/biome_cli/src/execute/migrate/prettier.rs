@@ -11,10 +11,9 @@ use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
 use biome_json_parser::JsonParserOptions;
 use biome_service::DynRef;
-use indexmap::IndexSet;
 use std::path::Path;
 
-use super::node;
+use super::{eslint_eslint::ShorthandVec, node};
 
 #[derive(Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
@@ -30,7 +29,7 @@ pub(crate) struct Config {
     pub(crate) data: PrettierConfiguration,
 }
 
-#[derive(Clone, Debug, Deserializable, Eq, PartialEq)]
+#[derive(Debug, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
 pub(crate) struct PrettierConfiguration {
     /// https://prettier.io/docs/en/options#print-width
@@ -81,9 +80,9 @@ impl Default for PrettierConfiguration {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
+#[derive(Debug, Default, Deserializable)]
 pub(crate) struct Override {
-    files: IndexSet<String>,
+    files: ShorthandVec<String>,
     options: OverrideOptions,
 }
 
@@ -268,7 +267,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
     type Error = LineWidthFromIntError;
     fn try_from(Override { files, options }: Override) -> Result<Self, Self::Error> {
         let mut result = biome_configuration::OverridePattern {
-            include: Some(StringSet::new(files)),
+            include: Some(StringSet::new(files.into_iter().collect())),
             ..Default::default()
         };
         if options.print_width.is_some()
@@ -505,13 +504,10 @@ mod tests {
         .into_deserialized()
         .unwrap();
 
-        assert_eq!(
+        assert!(matches!(
             configuration,
-            PrettierConfiguration {
-                use_tabs: true,
-                ..PrettierConfiguration::default()
-            }
-        )
+            PrettierConfiguration { use_tabs: true, .. }
+        ))
     }
 
     #[test]
@@ -534,7 +530,7 @@ mod tests {
         .into_deserialized()
         .unwrap();
 
-        assert_eq!(
+        assert!(matches!(
             configuration,
             PrettierConfiguration {
                 use_tabs: true,
@@ -544,8 +540,8 @@ mod tests {
                 tab_width: 2,
                 trailing_comma: PrettierTrailingComma::Es5,
                 jsx_single_quote: true,
-                ..PrettierConfiguration::default()
+                ..
             }
-        )
+        ))
     }
 }

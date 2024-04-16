@@ -97,10 +97,10 @@ pub(crate) struct EslintPackageJson {
 #[derive(Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
 pub(crate) struct LegacyConfigData {
-    pub(crate) extends: Shorthand<String>,
+    pub(crate) extends: ShorthandVec<String>,
     pub(crate) globals: Globals,
     /// The glob patterns that ignore to lint.
-    pub(crate) ignore_patterns: Shorthand<String>,
+    pub(crate) ignore_patterns: ShorthandVec<String>,
     /// The parser options.
     pub(crate) rules: Rules,
     pub(crate) overrides: Vec<OverrideConfigData>,
@@ -183,52 +183,52 @@ pub(crate) enum GlobalConfQualifier {
 #[derive(Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
 pub(crate) struct OverrideConfigData {
-    pub(crate) extends: Shorthand<String>,
+    pub(crate) extends: ShorthandVec<String>,
     pub(crate) globals: Globals,
     /// The glob patterns for excluded files.
-    pub(crate) excluded_files: Shorthand<String>,
+    pub(crate) excluded_files: ShorthandVec<String>,
     /// The glob patterns for target files.
-    pub(crate) files: Shorthand<String>,
+    pub(crate) files: ShorthandVec<String>,
     pub(crate) rules: Rules,
 }
 
 #[derive(Debug, Default)]
-pub(crate) struct Shorthand<T>(Vec<T>);
-impl<T> Merge for Shorthand<T> {
+pub(crate) struct ShorthandVec<T>(Vec<T>);
+impl<T> Merge for ShorthandVec<T> {
     fn merge_with(&mut self, mut other: Self) {
         self.0.append(&mut other.0);
     }
 }
-impl<T> From<T> for Shorthand<T> {
+impl<T> From<T> for ShorthandVec<T> {
     fn from(value: T) -> Self {
         Self(vec![value])
     }
 }
-impl<T> Deref for Shorthand<T> {
+impl<T> Deref for ShorthandVec<T> {
     type Target = Vec<T>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
-impl<T> DerefMut for Shorthand<T> {
+impl<T> DerefMut for ShorthandVec<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
-impl<T> IntoIterator for Shorthand<T> {
+impl<T> IntoIterator for ShorthandVec<T> {
     type Item = T;
     type IntoIter = vec::IntoIter<T>;
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
     }
 }
-impl<T: Deserializable> Deserializable for Shorthand<T> {
+impl<T: Deserializable> Deserializable for ShorthandVec<T> {
     fn deserialize(
         value: &impl DeserializableValue,
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        Some(Shorthand(
+        Some(ShorthandVec(
             if value.visitable_type()? == VisitableType::ARRAY {
                 Deserializable::deserialize(value, name, diagnostics)?
             } else {

@@ -2,11 +2,7 @@
 title: noSkippedTests (since v1.6.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noSkippedTests`**
-
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
-:::
+**Diagnostic Category: `lint/suspicious/noSkippedTests`**
 
 Inspired from: <a href="https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-disabled-tests.md" target="_blank"><code>no-disabled-tests</code></a>
 
@@ -22,7 +18,7 @@ Disabled test are useful when developing and debugging, although they should not
 describe.skip("test", () => {});
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noSkippedTests.js:1:10 <a href="https://biomejs.dev/linter/rules/no-skipped-tests">lint/nursery/noSkippedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noSkippedTests.jsx:1:10 <a href="https://biomejs.dev/linter/rules/no-skipped-tests">lint/suspicious/noSkippedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't disable tests.</span>
   
@@ -44,7 +40,7 @@ describe.skip("test", () => {});
 test.skip("test", () => {});
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noSkippedTests.js:1:6 <a href="https://biomejs.dev/linter/rules/no-skipped-tests">lint/nursery/noSkippedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noSkippedTests.jsx:1:6 <a href="https://biomejs.dev/linter/rules/no-skipped-tests">lint/suspicious/noSkippedTests</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't disable tests.</span>
   

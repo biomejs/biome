@@ -336,7 +336,7 @@ impl Execution {
     }
 }
 
-/// Based on the [mode](ExecutionMode), the function might launch a traversal of the file system
+/// Based on the [mode](TraversalMode), the function might launch a traversal of the file system
 /// or handles the stdin file.
 pub fn execute_mode(
     mut execution: Execution,

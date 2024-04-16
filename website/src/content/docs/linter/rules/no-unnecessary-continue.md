@@ -20,7 +20,7 @@ loop: for (let i = 0; i < 5; i++) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnnecessaryContinue.js:2:3 <a href="https://biomejs.dev/linter/rules/no-unnecessary-continue">lint/correctness/noUnnecessaryContinue</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnnecessaryContinue.jsx:2:3 <a href="https://biomejs.dev/linter/rules/no-unnecessary-continue">lint/correctness/noUnnecessaryContinue</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unnecessary continue statement</span>
   
@@ -45,7 +45,7 @@ while (i--) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnnecessaryContinue.js:2:3 <a href="https://biomejs.dev/linter/rules/no-unnecessary-continue">lint/correctness/noUnnecessaryContinue</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnnecessaryContinue.jsx:2:3 <a href="https://biomejs.dev/linter/rules/no-unnecessary-continue">lint/correctness/noUnnecessaryContinue</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unnecessary continue statement</span>
   
@@ -70,7 +70,7 @@ while (1) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnnecessaryContinue.js:2:3 <a href="https://biomejs.dev/linter/rules/no-unnecessary-continue">lint/correctness/noUnnecessaryContinue</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnnecessaryContinue.jsx:2:3 <a href="https://biomejs.dev/linter/rules/no-unnecessary-continue">lint/correctness/noUnnecessaryContinue</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unnecessary continue statement</span>
   
@@ -102,7 +102,7 @@ for (let i = 0; i < 10; i++) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnnecessaryContinue.js:4:5 <a href="https://biomejs.dev/linter/rules/no-unnecessary-continue">lint/correctness/noUnnecessaryContinue</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnnecessaryContinue.jsx:4:5 <a href="https://biomejs.dev/linter/rules/no-unnecessary-continue">lint/correctness/noUnnecessaryContinue</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unnecessary continue statement</span>
   
@@ -129,7 +129,7 @@ for (let i = 0; i < 9; i++) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnnecessaryContinue.js:2:3 <a href="https://biomejs.dev/linter/rules/no-unnecessary-continue">lint/correctness/noUnnecessaryContinue</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnnecessaryContinue.jsx:2:3 <a href="https://biomejs.dev/linter/rules/no-unnecessary-continue">lint/correctness/noUnnecessaryContinue</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unnecessary continue statement</span>
   
@@ -154,7 +154,7 @@ test2: do {
 } while (true);
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnnecessaryContinue.js:2:2 <a href="https://biomejs.dev/linter/rules/no-unnecessary-continue">lint/correctness/noUnnecessaryContinue</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnnecessaryContinue.jsx:2:2 <a href="https://biomejs.dev/linter/rules/no-unnecessary-continue">lint/correctness/noUnnecessaryContinue</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unnecessary continue statement</span>
   

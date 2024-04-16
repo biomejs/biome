@@ -23,7 +23,7 @@ what people come up with or the used constant exceeds the maximum precision of t
 let x = 3.141;
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noApproximativeNumericConstant.js:1:9 <a href="https://biomejs.dev/linter/rules/no-approximative-numeric-constant">lint/suspicious/noApproximativeNumericConstant</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noApproximativeNumericConstant.jsx:1:9 <a href="https://biomejs.dev/linter/rules/no-approximative-numeric-constant">lint/suspicious/noApproximativeNumericConstant</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Prefer constants from the standard library.</span>
   
@@ -43,7 +43,7 @@ let x = 3.141;
 let x = 2.302;
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noApproximativeNumericConstant.js:1:9 <a href="https://biomejs.dev/linter/rules/no-approximative-numeric-constant">lint/suspicious/noApproximativeNumericConstant</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noApproximativeNumericConstant.jsx:1:9 <a href="https://biomejs.dev/linter/rules/no-approximative-numeric-constant">lint/suspicious/noApproximativeNumericConstant</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Prefer constants from the standard library.</span>
   

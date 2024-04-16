@@ -24,9 +24,9 @@ use super::parse_lang_from_script_opening_tag;
 pub struct SvelteFileHandler;
 
 lazy_static! {
-    // https://regex101.com/r/E4n4hh/4
+    // https://regex101.com/r/E4n4hh/6
     pub static ref SVELTE_FENCE: Regex = Regex::new(
-        r#"(?ixs)(?<opening><script[^>]*>)\r?\n(?<script>(?U:.*))</script>"#
+        r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n(?<script>(?U:.*))</script>"#
     )
     .unwrap();
 }

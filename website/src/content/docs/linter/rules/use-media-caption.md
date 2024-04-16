@@ -20,7 +20,7 @@ Enforces that `audio` and `video` elements must have a `track` for captions.
 	<video />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useMediaCaption.js:1:2 <a href="https://biomejs.dev/linter/rules/use-media-caption">lint/a11y/useMediaCaption</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useMediaCaption.jsx:1:2 <a href="https://biomejs.dev/linter/rules/use-media-caption">lint/a11y/useMediaCaption</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a </span><span style="color: Tomato;"><strong>track</strong></span><span style="color: Tomato;"> for captions when using </span><span style="color: Tomato;"><strong>audio</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>video</strong></span><span style="color: Tomato;"> elements.</span>
   
@@ -36,7 +36,7 @@ Enforces that `audio` and `video` elements must have a `track` for captions.
 	<audio>child</audio>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useMediaCaption.js:1:2 <a href="https://biomejs.dev/linter/rules/use-media-caption">lint/a11y/useMediaCaption</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useMediaCaption.jsx:1:2 <a href="https://biomejs.dev/linter/rules/use-media-caption">lint/a11y/useMediaCaption</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a </span><span style="color: Tomato;"><strong>track</strong></span><span style="color: Tomato;"> for captions when using </span><span style="color: Tomato;"><strong>audio</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>video</strong></span><span style="color: Tomato;"> elements.</span>
   

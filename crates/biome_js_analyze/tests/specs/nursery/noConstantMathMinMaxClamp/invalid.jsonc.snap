@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```cjs
+Math.min(0, Math.max(100, x));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.min/Math.max combination leads to a constant result.
+  
+  > 1 │ Math.min(0, Math.max(100, x));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i It always evaluates to 0.
+  
+  > 1 │ Math.min(0, Math.max(100, x));
+      │          ^
+  
+  i Unsafe fix: Swap 0 with 100.
+  
+  - Math.min(0,·Math.max(100,·x));
+  + Math.min(100,·Math.max(0,·x));
+  
+
+```
+
+# Input
+```cjs
+Math.max(100, Math.min(0, x));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Math.min/Math.max combination leads to a constant result.
+  
+  > 1 │ Math.max(100, Math.min(0, x));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i It always evaluates to 100.
+  
+  > 1 │ Math.max(100, Math.min(0, x));
+      │          ^^^
+  
+  i Unsafe fix: Swap 100 with 0.
+  
+  - Math.max(100,·Math.min(0,·x));
+  + Math.max(0,·Math.min(100,·x));
+  
+
+```

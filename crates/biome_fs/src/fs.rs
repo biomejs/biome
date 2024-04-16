@@ -68,107 +68,67 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// Checks if the given path is a symlink
     fn path_is_symlink(&self, path: &Path) -> bool;
 
-    /// Method that takes a path to a folder `file_path`, and a `file_name`. It attempts to find
-    /// and read the file from that folder and if not found, it reads the parent directories recursively
-    /// until:
-    /// - the file is found, then it reads and return its contents
-    /// - the file is not found
+    /// This method accepts a directory path (`search_dir`) and a list of filenames (`file_names`),
+    /// It looks for the files in the specified directory in the order they appear in the list.
+    /// If a file is not found in the initial directory, the search may continue into the parent
+    /// directories based on the `should_error_if_file_not_found` flag.
     ///
-    /// If `should_error_if_file_not_found` it `true`, it returns an error.
+    /// Behavior if files are not found in `search_dir`:
+    ///
+    /// - If `should_error_if_file_not_found` is set to `true`, the method will return an error.
+    /// - If `should_error_if_file_not_found` is set to `false`, the method will search for the files in the parent
+    ///   directories of `search_dir` recursively until:
+    ///     - It finds a file, reads it, and returns its contents along with its path.
+    ///     - It confirms that the file doesn't exist in any of the checked directories.
     ///
     /// ## Errors
     ///
-    /// - The file can't be read
+    /// The method returns an error if `should_error_if_file_not_found` is `true`,
+    /// and the file is not found or cannot be opened or read.
     ///
     fn auto_search(
         &self,
-        mut search_dir: PathBuf,
-        filenames: &[&str],
+        search_dir: &Path,
+        file_names: &[&str],
         should_error_if_file_not_found: bool,
     ) -> AutoSearchResultAlias {
+        let mut curret_search_dir = search_dir.to_path_buf();
         let mut is_searching_in_parent_dir = false;
         loop {
-            let mut errors: Vec<(FileSystemDiagnostic, String)> = vec![];
+            let mut errors: Vec<FileSystemDiagnostic> = vec![];
 
-            for filename in filenames {
-                let file_path = search_dir.join(filename);
-                let open_options = OpenOptions::default().read(true);
-                match self.open_with_options(&file_path, open_options) {
-                    Ok(mut file) => {
-                        let mut buffer = String::new();
-                        match file.read_to_string(&mut buffer) {
-                            Ok(_) => {
-                                if is_searching_in_parent_dir {
-                                    info!(
-                                        "Biome auto discovered the file at following path that wasn't in the working directory: {}",
-                                        search_dir.display()
-                                    );
-                                }
-                                return Ok(Some(AutoSearchResult {
-                                    content: buffer,
-                                    file_path,
-                                    directory_path: search_dir,
-                                }));
-                            }
-                            Err(err) => {
-                                if !is_searching_in_parent_dir && should_error_if_file_not_found {
-                                    let error_message = format!(
-                                        "Biome couldn't read the file {:?}, reason:\n {}",
-                                        file_path, err
-                                    );
-                                    errors.push((
-                                        FileSystemDiagnostic {
-                                            path: file_path.display().to_string(),
-                                            severity: Severity::Error,
-                                            error_kind: ErrorKind::CantReadFile(
-                                                file_path.display().to_string(),
-                                            ),
-                                        },
-                                        error_message,
-                                    ));
-                                }
-                                continue;
-                            }
-                        }
-                    }
-                    Err(err) => {
-                        if !is_searching_in_parent_dir && should_error_if_file_not_found {
-                            let error_message = format!(
-                                "Biome couldn't find the file {:?}, reason:\n {}",
-                                file_path, err
+            // Iterate all possible file names
+            for file_name in file_names {
+                let file_path = curret_search_dir.join(file_name);
+                match self.read_file_from_path(&file_path) {
+                    Ok(content) => {
+                        if is_searching_in_parent_dir {
+                            info!(
+                                "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
+                                curret_search_dir.display()
                             );
-                            errors.push((
-                                FileSystemDiagnostic {
-                                    path: file_path.display().to_string(),
-                                    severity: Severity::Error,
-                                    error_kind: ErrorKind::CantReadFile(
-                                        file_path.display().to_string(),
-                                    ),
-                                },
-                                error_message,
-                            ));
                         }
-                        continue;
+                        return Ok(Some(AutoSearchResult { content, file_path }));
+                    }
+                    Err(error) => {
+                        // We don't return the error immediately because
+                        // there're multiple valid file names to search for
+                        if !is_searching_in_parent_dir && should_error_if_file_not_found {
+                            errors.push(error);
+                        }
                     }
                 }
             }
 
             if !is_searching_in_parent_dir && should_error_if_file_not_found {
-                if let Some(diagnostic) = errors
-                    .into_iter()
-                    .map(|(diagnostic, message)| {
-                        error!(message);
-                        diagnostic
-                    })
-                    .last()
-                {
-                    // we can only return one Err, so we return the last diagnostic.
+                if let Some(diagnostic) = errors.into_iter().next() {
+                    // We can only return one Err, so we return the first diagnostic.
                     return Err(diagnostic);
                 }
             }
 
-            if let Some(parent_search_dir) = search_dir.parent() {
-                search_dir = PathBuf::from(parent_search_dir);
+            if let Some(parent_search_dir) = curret_search_dir.parent() {
+                curret_search_dir = PathBuf::from(parent_search_dir);
                 is_searching_in_parent_dir = true;
             } else {
                 break;
@@ -178,6 +138,47 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
         Ok(None)
     }
 
+    /// Reads the content of a file specified by `file_path`.
+    ///
+    /// This method attempts to open and read the entire content of a file at the given path.
+    ///
+    /// ## Errors
+    /// This method logs an error message and returns a `FileSystemDiagnostic` error in two scenarios:
+    /// - If the file cannot be opened, possibly due to incorrect path or permission issues.
+    /// - If the file is opened but its content cannot be read, potentially due to the file being damaged.
+    fn read_file_from_path(&self, file_path: &PathBuf) -> Result<String, FileSystemDiagnostic> {
+        match self.open_with_options(file_path, OpenOptions::default().read(true)) {
+            Ok(mut file) => {
+                let mut content = String::new();
+                match file.read_to_string(&mut content) {
+                    Ok(_) => Ok(content),
+                    Err(err) => {
+                        error!(
+                            "Biome couldn't read the file {:?}, reason:\n{:?}",
+                            file_path, err
+                        );
+                        Err(FileSystemDiagnostic {
+                            path: file_path.display().to_string(),
+                            severity: Severity::Error,
+                            error_kind: ErrorKind::CantReadFile(file_path.display().to_string()),
+                        })
+                    }
+                }
+            }
+            Err(err) => {
+                error!(
+                    "Biome couldn't open the file {:?}, reason:\n{:?}",
+                    file_path, err
+                );
+                Err(FileSystemDiagnostic {
+                    path: file_path.display().to_string(),
+                    severity: Severity::Error,
+                    error_kind: ErrorKind::CantReadFile(file_path.display().to_string()),
+                })
+            }
+        }
+    }
+
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>>;
 
     fn get_staged_files(&self) -> io::Result<Vec<String>>;
@@ -185,7 +186,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     fn resolve_configuration(
         &self,
         specifier: &str,
-        path: Option<&Path>,
+        path: &Path,
     ) -> Result<Resolution, ResolveError>;
 }
 
@@ -194,8 +195,6 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
 pub struct AutoSearchResult {
     /// The content of the file
     pub content: String,
-    /// The path of the directory where the file was found
-    pub directory_path: PathBuf,
     /// The path of the file found
     pub file_path: PathBuf,
 }
@@ -370,7 +369,7 @@ where
     fn resolve_configuration(
         &self,
         specifier: &str,
-        path: Option<&Path>,
+        path: &Path,
     ) -> Result<Resolution, ResolveError> {
         T::resolve_configuration(self, specifier, path)
     }
@@ -410,7 +409,7 @@ pub enum ErrorKind {
 impl console::fmt::Display for ErrorKind {
     fn fmt(&self, fmt: &mut console::fmt::Formatter) -> io::Result<()> {
         match self {
-            ErrorKind::CantReadFile(_) => fmt.write_str("Biome couldn't read the file"),
+            ErrorKind::CantReadFile(_) => fmt.write_str("Cannot read file"),
             ErrorKind::UnknownFileType => fmt.write_str("Unknown file type"),
             ErrorKind::DereferencedSymlink(_) => fmt.write_str("Dereferenced symlink"),
             ErrorKind::DeeplyNestedSymlinkExpansion(_) => {
@@ -423,7 +422,7 @@ impl console::fmt::Display for ErrorKind {
 impl std::fmt::Display for ErrorKind {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ErrorKind::CantReadFile(_) => fmt.write_str("Biome couldn't read the file"),
+            ErrorKind::CantReadFile(_) => fmt.write_str("Cannot read file"),
             ErrorKind::UnknownFileType => write!(fmt, "Unknown file type"),
             ErrorKind::DereferencedSymlink(_) => write!(fmt, "Dereferenced symlink"),
             ErrorKind::DeeplyNestedSymlinkExpansion(_) => {
@@ -437,8 +436,8 @@ impl Advices for ErrorKind {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         match self {
 			ErrorKind::CantReadFile(path) => visitor.record_log(
-		LogCategory::Error,
-			&format!("Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: {}", path)
+		        LogCategory::Error,
+			    &format!("Biome can't read the following file, maybe for permissions reasons or it doesn't exist: {}", path)
 			),
 
             ErrorKind::UnknownFileType => visitor.record_log(

@@ -2,13 +2,9 @@
 title: noBarrelFile (since v1.6.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noBarrelFile`**
+**Diagnostic Category: `lint/performance/noBarrelFile`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
-:::
-
-Inspired from: <a href="https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/avoid-namespace-import.md" target="_blank"><code>avoid-namespace-import</code></a>
+Inspired from: <a href="https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/avoid-barrel-files.md" target="_blank"><code>avoid-barrel-files</code></a>
 
 Disallow the use of barrel file.
 
@@ -28,7 +24,7 @@ export * from "foo";
 export * from "bar";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noBarrelFile.js:1:1 <a href="https://biomejs.dev/linter/rules/no-barrel-file">lint/nursery/noBarrelFile</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">performance/noBarrelFile.ts:1:1 <a href="https://biomejs.dev/linter/rules/no-barrel-file">lint/performance/noBarrelFile</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.</span>
   
@@ -46,7 +42,7 @@ export { foo } from "foo";
 export { bar } from "bar";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noBarrelFile.js:1:1 <a href="https://biomejs.dev/linter/rules/no-barrel-file">lint/nursery/noBarrelFile</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">performance/noBarrelFile.ts:1:1 <a href="https://biomejs.dev/linter/rules/no-barrel-file">lint/performance/noBarrelFile</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.</span>
   
@@ -63,7 +59,7 @@ export { bar } from "bar";
 export { default as module1 } from "./module1";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noBarrelFile.js:1:1 <a href="https://biomejs.dev/linter/rules/no-barrel-file">lint/nursery/noBarrelFile</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">performance/noBarrelFile.ts:1:1 <a href="https://biomejs.dev/linter/rules/no-barrel-file">lint/performance/noBarrelFile</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.</span>
   

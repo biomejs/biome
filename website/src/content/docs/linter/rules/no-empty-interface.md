@@ -25,7 +25,7 @@ The rule ignores empty interfaces that `extends` one or multiple types.
 interface A {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noEmptyInterface.js:1:1 <a href="https://biomejs.dev/linter/rules/no-empty-interface">lint/suspicious/noEmptyInterface</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noEmptyInterface.ts:1:1 <a href="https://biomejs.dev/linter/rules/no-empty-interface">lint/suspicious/noEmptyInterface</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">An </span><span style="color: Tomato;"><strong>empty interface</strong></span><span style="color: Tomato;"> is equivalent to </span><span style="color: Tomato;"><strong>{}</strong></span><span style="color: Tomato;">.</span>
   

@@ -8,7 +8,7 @@ expression: content
 {
   "formatter": {
     // disable formatter
-    "enabled": false,
+    "enabled": false
   }
 }
 ```

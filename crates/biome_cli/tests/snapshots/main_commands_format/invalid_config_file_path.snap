@@ -11,14 +11,12 @@ content
 # Termination Message
 
 ```block
-test/rome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test/biome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome couldn't read the file
+  × Cannot read file
   
-  × Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: test/rome.json
+  × Biome can't read the following file, maybe for permissions reasons or it doesn't exist: test/biome.json
   
 
 
 ```
-
-

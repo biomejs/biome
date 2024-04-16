@@ -41,7 +41,7 @@ describe("describe", () => {
 })
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noMisplacedAssertion.js:2:5 <a href="https://biomejs.dev/linter/rules/no-misplaced-assertion">lint/nursery/noMisplacedAssertion</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noMisplacedAssertion.jsx:2:5 <a href="https://biomejs.dev/linter/rules/no-misplaced-assertion">lint/nursery/noMisplacedAssertion</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The assertion isn't inside a </span><span style="color: Orange;"><strong>it()</strong></span><span style="color: Orange;">, </span><span style="color: Orange;"><strong>test()</strong></span><span style="color: Orange;"> or </span><span style="color: Orange;"><strong>Deno.test()</strong></span><span style="color: Orange;"> function call.</span>
   
@@ -64,7 +64,7 @@ describe("describe", () => {
 })
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noMisplacedAssertion.js:3:5 <a href="https://biomejs.dev/linter/rules/no-misplaced-assertion">lint/nursery/noMisplacedAssertion</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noMisplacedAssertion.jsx:3:5 <a href="https://biomejs.dev/linter/rules/no-misplaced-assertion">lint/nursery/noMisplacedAssertion</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The assertion isn't inside a </span><span style="color: Orange;"><strong>it()</strong></span><span style="color: Orange;">, </span><span style="color: Orange;"><strong>test()</strong></span><span style="color: Orange;"> or </span><span style="color: Orange;"><strong>Deno.test()</strong></span><span style="color: Orange;"> function call.</span>
   
@@ -86,7 +86,7 @@ import {test, expect} from "bun:test";
 expect(1, 2)
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noMisplacedAssertion.js:2:1 <a href="https://biomejs.dev/linter/rules/no-misplaced-assertion">lint/nursery/noMisplacedAssertion</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noMisplacedAssertion.jsx:2:1 <a href="https://biomejs.dev/linter/rules/no-misplaced-assertion">lint/nursery/noMisplacedAssertion</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The assertion isn't inside a </span><span style="color: Orange;"><strong>it()</strong></span><span style="color: Orange;">, </span><span style="color: Orange;"><strong>test()</strong></span><span style="color: Orange;"> or </span><span style="color: Orange;"><strong>Deno.test()</strong></span><span style="color: Orange;"> function call.</span>
   
@@ -110,7 +110,7 @@ Deno.test("url test", () => {
 });
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noMisplacedAssertion.js:3:1 <a href="https://biomejs.dev/linter/rules/no-misplaced-assertion">lint/nursery/noMisplacedAssertion</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noMisplacedAssertion.jsx:3:1 <a href="https://biomejs.dev/linter/rules/no-misplaced-assertion">lint/nursery/noMisplacedAssertion</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The assertion isn't inside a </span><span style="color: Orange;"><strong>it()</strong></span><span style="color: Orange;">, </span><span style="color: Orange;"><strong>test()</strong></span><span style="color: Orange;"> or </span><span style="color: Orange;"><strong>Deno.test()</strong></span><span style="color: Orange;"> function call.</span>
   
@@ -143,6 +143,12 @@ describe("describe", () => {
     it("it", () => {
         expect()
     })
+})
+```
+
+```jsx
+test.each([1, 2, 3])('test', (a, b, expected) => {
+    expect(a + b).toBe(expected)
 })
 ```
 

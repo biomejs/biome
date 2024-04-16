@@ -14,10 +14,12 @@ description: A page that maps lint rules from other sources to Biome
 - [noRedundantUseStrict](/linter/rules/no-redundant-use-strict) 
 - [noRenderReturnValue](/linter/rules/no-render-return-value) 
 - [noShoutyConstants](/linter/rules/no-shouty-constants) 
+- [noSuspiciousSemicolonInJsx](/linter/rules/no-suspicious-semicolon-in-jsx) 
 - [noSvgWithoutTitle](/linter/rules/no-svg-without-title) 
 - [noUnnecessaryContinue](/linter/rules/no-unnecessary-continue) 
 - [noUnusedImports](/linter/rules/no-unused-imports) 
 - [noVoidTypeReturn](/linter/rules/no-void-type-return) 
+- [useNodeAssertStrict](/linter/rules/use-node-assert-strict) 
 - [useShorthandArrayType](/linter/rules/use-shorthand-array-type) 
 - [useSimpleNumberKeys](/linter/rules/use-simple-number-keys) 
 - [useSimplifiedLogicExpression](/linter/rules/use-simplified-logic-expression) 
@@ -27,6 +29,10 @@ description: A page that maps lint rules from other sources to Biome
 :::note
 Some **Biome** rules might **not** have options, compared to the original rule.
 :::
+### @mysticatea/eslint-plugin
+| @mysticatea/eslint-plugin rule name | Biome rule name |
+| ---- | ---- |
+| [no-this-in-static](https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-this-in-static.md) |[noThisInStatic](/linter/rules/no-this-in-static) (inspired) |
 ### Clippy
 | Clippy rule name | Biome rule name |
 | ---- | ---- |
@@ -106,6 +112,7 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [no-sparse-array](https://eslint.org/docs/latest/rules/no-sparse-array) |[noSparseArray](/linter/rules/no-sparse-array) |
 | [no-this-before-super](https://eslint.org/docs/latest/rules/no-this-before-super) |[noUnreachableSuper](/linter/rules/no-unreachable-super) |
 | [no-undef](https://eslint.org/docs/latest/rules/no-undef) |[noUndeclaredVariables](/linter/rules/no-undeclared-variables) |
+| [no-unneeded-ternary](https://eslint.org/docs/latest/rules/no-unneeded-ternary) |[noUselessTernary](/linter/rules/no-useless-ternary) |
 | [no-unreachable](https://eslint.org/docs/latest/rules/no-unreachable) |[noUnreachable](/linter/rules/no-unreachable) |
 | [no-unsafe-finally](https://eslint.org/docs/latest/rules/no-unsafe-finally) |[noUnsafeFinally](/linter/rules/no-unsafe-finally) |
 | [no-unsafe-negation](https://eslint.org/docs/latest/rules/no-unsafe-negation) |[noUnsafeNegation](/linter/rules/no-unsafe-negation) |
@@ -133,10 +140,24 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [require-yield](https://eslint.org/docs/latest/rules/require-yield) |[useYield](/linter/rules/use-yield) |
 | [use-isnan](https://eslint.org/docs/latest/rules/use-isnan) |[useIsNan](/linter/rules/use-is-nan) |
 | [valid-typeof](https://eslint.org/docs/latest/rules/valid-typeof) |[useValidTypeof](/linter/rules/use-valid-typeof) |
+### eslint-plugin-barrel-files
+| eslint-plugin-barrel-files rule name | Biome rule name |
+| ---- | ---- |
+| [avoid-barrel-files](https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/avoid-barrel-files.md) |[noBarrelFile](/linter/rules/no-barrel-file) (inspired) |
+| [avoid-namespace-import](https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/avoid-namespace-import.md) |[noNamespaceImport](/linter/rules/no-namespace-import) |
+| [avoid-re-export-all](https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/avoid-re-export-all.md) |[noReExportAll](/linter/rules/no-re-export-all) |
 ### eslint-plugin-import
 | eslint-plugin-import rule name | Biome rule name |
 | ---- | ---- |
 | [no-default-export](https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-default-export.md) |[noDefaultExport](/linter/rules/no-default-export) (inspired) |
+### eslint-plugin-jest
+| eslint-plugin-jest rule name | Biome rule name |
+| ---- | ---- |
+| [max-nested-describe](https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/max-nested-describe.md) |[noExcessiveNestedTestSuites](/linter/rules/no-excessive-nested-test-suites) |
+| [no-disabled-tests](https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-disabled-tests.md) |[noSkippedTests](/linter/rules/no-skipped-tests) (inspired) |
+| [no-duplicate-hooks](https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-duplicate-hooks.md) |[noDuplicateTestHooks](/linter/rules/no-duplicate-test-hooks) (inspired) |
+| [no-export](https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-export.md) |[noExportsInTest](/linter/rules/no-exports-in-test) (inspired) |
+| [no-focused-tests](https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-focused-tests.md) |[noFocusedTests](/linter/rules/no-focused-tests) (inspired) |
 ### eslint-plugin-jsx-a11y
 | eslint-plugin-jsx-a11y rule name | Biome rule name |
 | ---- | ---- |
@@ -166,16 +187,13 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [role-has-required-aria-props](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/role-has-required-aria-props.md) |[useAriaPropsForRole](/linter/rules/use-aria-props-for-role) |
 | [scope](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/scope.md) |[noHeaderScope](/linter/rules/no-header-scope) |
 | [tabindex-no-positive](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/tabindex-no-positive.md) |[noPositiveTabindex](/linter/rules/no-positive-tabindex) |
-### eslint-plugin-mysticates
-| eslint-plugin-mysticates rule name | Biome rule name |
-| ---- | ---- |
-| [no-this-in-static](https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-this-in-static.md) |[noThisInStatic](/linter/rules/no-this-in-static) (inspired) |
 ### eslint-plugin-react
 | eslint-plugin-react rule name | Biome rule name |
 | ---- | ---- |
 | [button-has-type](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/button-has-type.md) |[useButtonType](/linter/rules/use-button-type) |
 | [jsx-boolean-value](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-boolean-value.md) |[noImplicitBoolean](/linter/rules/no-implicit-boolean) |
 | [jsx-fragments](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-fragments.md) |[useFragmentSyntax](/linter/rules/use-fragment-syntax) |
+| [jsx-key](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-key.md) |[useJsxKeyInIterable](/linter/rules/use-jsx-key-in-iterable) |
 | [jsx-no-comment-textnodes](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-no-comment-textnodes.md) |[noCommentText](/linter/rules/no-comment-text) |
 | [jsx-no-duplicate-props](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-no-duplicate-props.md) |[noDuplicateJsxProps](/linter/rules/no-duplicate-jsx-props) |
 | [jsx-no-target-blank](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-no-target-blank.md) |[noBlankTarget](/linter/rules/no-blank-target) |

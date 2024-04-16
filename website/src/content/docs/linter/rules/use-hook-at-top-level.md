@@ -22,7 +22,7 @@ function Component1({ a }) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/useHookAtTopLevel.js:3:9 <a href="https://biomejs.dev/linter/rules/use-hook-at-top-level">lint/correctness/useHookAtTopLevel</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/useHookAtTopLevel.jsx:3:9 <a href="https://biomejs.dev/linter/rules/use-hook-at-top-level">lint/correctness/useHookAtTopLevel</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.</span>
   
@@ -49,7 +49,7 @@ function Component1({ a }) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/useHookAtTopLevel.js:6:5 <a href="https://biomejs.dev/linter/rules/use-hook-at-top-level">lint/correctness/useHookAtTopLevel</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/useHookAtTopLevel.jsx:6:5 <a href="https://biomejs.dev/linter/rules/use-hook-at-top-level">lint/correctness/useHookAtTopLevel</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.</span>
   

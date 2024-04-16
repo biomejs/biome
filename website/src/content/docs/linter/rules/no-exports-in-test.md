@@ -2,10 +2,10 @@
 title: noExportsInTest (since v1.6.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noExportsInTest`**
+**Diagnostic Category: `lint/suspicious/noExportsInTest`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Inspired from: <a href="https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/no-export.md" target="_blank"><code>no-export</code></a>
@@ -27,7 +27,7 @@ describe('a test', () => {
 });
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noExportsInTest.js:1:1 <a href="https://biomejs.dev/linter/rules/no-exports-in-test">lint/nursery/noExportsInTest</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noExportsInTest.jsx:1:1 <a href="https://biomejs.dev/linter/rules/no-exports-in-test">lint/suspicious/noExportsInTest</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not export from a test file.</span>
   

@@ -11,9 +11,9 @@ To get a benchmark comparison, you need to run the benchmark for `main` branch a
 ```bash
 # (commit your code on pr branch, run)
 git checkout main
-cargo bench_parser --save-baseline main
+cargo bench --bench js_parser -- --save-baseline main
 git checkout -
-cargo bench_parser --save-baseline pr
+cargo bench --bench js_parser -- --save-baseline pr
 critcmp main pr # (cargo install critcmp)
 ```
 
@@ -44,9 +44,9 @@ To get a benchmark comparison, you need to run the benchmark for `main` branch a
 ```bash
 # (commit your code on pr branch, run)
 git checkout main
-cargo bench_formatter --save-baseline main
+cargo bench --bench js_formatter -- --save-baseline main
 git checkout -
-cargo bench_formatter --save-baseline pr
+cargo bench --bench js_formatter -- --save-baseline pr
 critcmp main pr # (cargo install critcmp)
 ```
 

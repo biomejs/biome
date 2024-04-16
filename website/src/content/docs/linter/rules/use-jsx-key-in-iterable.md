@@ -2,10 +2,10 @@
 title: useJsxKeyInIterable (since v1.6.0)
 ---
 
-**Diagnostic Category: `lint/nursery/useJsxKeyInIterable`**
+**Diagnostic Category: `lint/correctness/useJsxKeyInIterable`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Source: <a href="https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-key.md" target="_blank"><code>jsx-key</code></a>
@@ -23,9 +23,9 @@ Check out React documentation for [explanation on the why does React need keys.]
 [<Hello />];
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useJsxKeyInIterable.js:1:2 <a href="https://biomejs.dev/linter/rules/use-jsx-key-in-iterable">lint/nursery/useJsxKeyInIterable</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/useJsxKeyInIterable.jsx:1:2 <a href="https://biomejs.dev/linter/rules/use-jsx-key-in-iterable">lint/correctness/useJsxKeyInIterable</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Missing </span><span style="color: Orange;"><strong>key</strong></span><span style="color: Orange;"> property for this element in iterable.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Missing </span><span style="color: Tomato;"><strong>key</strong></span><span style="color: Tomato;"> property for this element in iterable.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>[&lt;Hello /&gt;];
    <strong>   │ </strong> <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -41,9 +41,9 @@ Check out React documentation for [explanation on the why does React need keys.]
 data.map((x) => <Hello>{x}</Hello>);
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useJsxKeyInIterable.js:1:17 <a href="https://biomejs.dev/linter/rules/use-jsx-key-in-iterable">lint/nursery/useJsxKeyInIterable</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/useJsxKeyInIterable.jsx:1:17 <a href="https://biomejs.dev/linter/rules/use-jsx-key-in-iterable">lint/correctness/useJsxKeyInIterable</a> ━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Missing </span><span style="color: Orange;"><strong>key</strong></span><span style="color: Orange;"> property for this element in iterable.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Missing </span><span style="color: Tomato;"><strong>key</strong></span><span style="color: Tomato;"> property for this element in iterable.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>data.map((x) =&gt; &lt;Hello&gt;{x}&lt;/Hello&gt;);
    <strong>   │ </strong>                <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
