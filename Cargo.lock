@@ -1018,6 +1018,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_yaml_parser"
+version = "0.0.1"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_parser",
+ "biome_rowan",
+ "biome_test_utils",
+ "biome_unicode_table",
+ "biome_yaml_factory",
+ "biome_yaml_syntax",
+ "insta",
+ "quickcheck",
+ "quickcheck_macros",
+ "tests_macros",
+ "tracing",
+]
+
+[[package]]
 name = "biome_yaml_syntax"
 version = "0.0.1"
 dependencies = [

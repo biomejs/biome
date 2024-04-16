@@ -132,6 +132,7 @@ biome_json_parser            = { version = "0.5.7", path = "./crates/biome_json_
 biome_json_syntax            = { version = "0.5.7", path = "./crates/biome_json_syntax" }
 biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
 biome_yaml_syntax            = { version = "0.0.1", path = "./crates/biome_yaml_syntax" }
+biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }
 
 biome_markup        = { version = "0.5.7", path = "./crates/biome_markup" }
 biome_parser        = { version = "0.5.7", path = "./crates/biome_parser" }
