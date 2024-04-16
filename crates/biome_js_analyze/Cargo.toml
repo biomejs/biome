@@ -28,7 +28,7 @@ biome_suppression        = { workspace = true }
 biome_unicode_table      = { workspace = true }
 lazy_static              = { workspace = true }
 natord                   = "1.0.9"
-roaring                  = "0.10.1"
+roaring                  = "0.10.3"
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }

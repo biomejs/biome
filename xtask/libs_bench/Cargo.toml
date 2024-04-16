@@ -5,15 +5,15 @@ publish = false
 version = "0.0.0"
 
 [dependencies]
-regex = { version = "1.6.0" }
+regex = { version = "1.10.4" }
 
 [dev-dependencies]
 criterion    = "0.5.1"
 fastbloom-rs = "0.5.9"
 fst          = "0.4.7"
 iai          = "0.1.1"
-memchr       = "2.5.0"
-qp-trie      = "0.8.0"
+memchr       = "2.7.2"
+qp-trie      = "0.8.2"
 
 [[bench]]
 harness = false

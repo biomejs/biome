@@ -19,7 +19,7 @@ biome_json_parser  = { workspace = true }
 biome_json_syntax  = { workspace = true }
 biome_service      = { workspace = true }
 biome_string_case  = { workspace = true }
-pulldown-cmark     = { version = "0.9", default-features = false }
+pulldown-cmark     = { version = "0.10", default-features = false }
 xtask              = { path = '../', version = "0.0" }
 
 [lints]

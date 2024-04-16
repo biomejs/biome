@@ -26,7 +26,7 @@ biome_unicode_table          = { workspace = true }
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"], optional = true }
 smallvec                     = { workspace = true }
-unicode-width                = "0.1.9"
+unicode-width                = "0.1.11"
 
 [dev-dependencies]
 biome_formatter_test = { path = "../biome_formatter_test" }

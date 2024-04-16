@@ -12,8 +12,8 @@ version              = "0.5.7"
 
 [dependencies]
 biome_rowan = { workspace = true }
-schemars    = { version = "0.8.10", optional = true }
-serde       = { version = "1.0.136", features = ["derive"], optional = true }
+schemars    = { version = "0.8.16", optional = true }
+serde       = { version = "1.0.197", features = ["derive"], optional = true }
 
 [features]
 serde = ["dep:serde", "schemars", "biome_rowan/serde"]

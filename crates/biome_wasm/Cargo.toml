@@ -23,16 +23,16 @@ format_css = ["biome_service/format_css"]
 biome_console      = { workspace = true }
 biome_diagnostics  = { workspace = true }
 biome_service      = { workspace = true }
-js-sys             = "0.3.59"
+js-sys             = "0.3.69"
 serde              = { workspace = true }
-serde-wasm-bindgen = "0.4.5"
-wasm-bindgen       = { version = "0.2.82", features = ["serde-serialize"] }
+serde-wasm-bindgen = "0.6.5"
+wasm-bindgen       = { version = "0.2.92", features = ["serde-serialize"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
 # code size when deploying.
-console_error_panic_hook = { version = "0.1.6", optional = true }
+console_error_panic_hook = { version = "0.1.7", optional = true }
 
 
 [build-dependencies]

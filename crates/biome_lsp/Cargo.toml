@@ -14,7 +14,7 @@ version              = "0.0.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow              = "1.0.52"
+anyhow              = "1.0.82"
 biome_analyze       = { workspace = true }
 biome_configuration = { workspace = true }
 biome_console       = { workspace = true }
@@ -28,12 +28,12 @@ rustc-hash          = { workspace = true }
 serde               = { workspace = true, features = ["derive"] }
 serde_json          = { workspace = true }
 tokio               = { workspace = true, features = ["rt", "io-std"] }
-tower-lsp           = { version = "0.19.0" }
+tower-lsp           = { version = "0.20.0" }
 tracing             = { workspace = true, features = ["attributes"] }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
-tower = { version = "0.4.12", features = ["timeout"] }
+tower = { version = "0.4.13", features = ["timeout"] }
 
 [lints]
 workspace = true

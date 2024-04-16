@@ -22,13 +22,13 @@ biome_rowan          = { workspace = true }
 
 
 ansi_rgb                  = "0.2.0"
-codspeed-criterion-compat = { version = "2.3.3", optional = true }
+codspeed-criterion-compat = { version = "2.4.1", optional = true }
 criterion                 = "0.5.1"
-ureq                      = "2.7.1"
-url                       = "2.2.2"
+ureq                      = "2.9.6"
+url                       = "2.5.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-mimalloc = "0.1.29"
+mimalloc = "0.1.39"
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
 tikv-jemallocator = "0.5.1"

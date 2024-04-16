@@ -5,10 +5,10 @@ publish = false
 version = "0.0.0"
 
 [dependencies]
-html-escape = "0.2.11"
+html-escape = "0.2.13"
 pico-args   = "0.5.0"
 serde       = { workspace = true, features = ["derive"] }
-ureq        = { version = "2.4.0", features = ["json"] }
+ureq        = { version = "2.9.6", features = ["json"] }
 xtask       = { path = '../', version = "0.0" }
 
 [lints]
