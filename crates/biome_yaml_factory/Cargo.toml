@@ -1,6 +1,6 @@
 [package]
 name = "biome_yaml_factory"
-version = "0.1.0"
+version = "0.0.1"
 authors.workspace = true
 categories.workspace = true
 edition.workspace = true
@@ -14,7 +14,7 @@ description = "Utilities to create YAML AST for biome_yaml_parser"
 
 [dependencies]
 biome_yaml_syntax = { workspace = true }
-biome_rowan       = { workspace = true }
+biome_rowan = { workspace = true }
 
 [lints]
 workspace = true

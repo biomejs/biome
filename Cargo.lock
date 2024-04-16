@@ -1011,11 +1011,20 @@ dependencies = [
 
 [[package]]
 name = "biome_yaml_factory"
-version = "0.1.0"
+version = "0.0.1"
+dependencies = [
+ "biome_rowan",
+ "biome_yaml_syntax",
+]
 
 [[package]]
 name = "biome_yaml_syntax"
-version = "0.1.0"
+version = "0.0.1"
+dependencies = [
+ "biome_rowan",
+ "schemars",
+ "serde",
+]
 
 [[package]]
 name = "bitflags"
