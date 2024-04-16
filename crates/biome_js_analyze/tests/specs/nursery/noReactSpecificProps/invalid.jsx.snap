@@ -17,7 +17,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This JSX property is specific to React.
   
@@ -35,11 +35,19 @@ invalid.jsx:2:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━
     3 │ 
     4 │ //Case with className with expression
   
+  i Safe fix: Rename this property.
+  
+    1 1 │   //Case with className
+    2   │ - <div·className="greeting">Hello·world!</div>;
+      2 │ + <div·class="greeting">Hello·world!</div>;
+    3 3 │   
+    4 4 │   //Case with className with expression
+  
 
 ```
 
 ```
-invalid.jsx:5:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This JSX property is specific to React.
   
@@ -57,11 +65,20 @@ invalid.jsx:5:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━
     6 │ 
     7 │ //Case with htmlFor
   
+  i Safe fix: Rename this property.
+  
+    3 3 │   
+    4 4 │   //Case with className with expression
+    5   │ - <div·className={"greeting"}>Hello·world!</div>;
+      5 │ + <div·class={"greeting"}>Hello·world!</div>;
+    6 6 │   
+    7 7 │   //Case with htmlFor
+  
 
 ```
 
 ```
-invalid.jsx:8:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This JSX property is specific to React.
   
@@ -76,6 +93,14 @@ invalid.jsx:8:6 lint/nursery/noReactSpecificProps ━━━━━━━━━━
   > 8 │ <div htmlFor="greeting">Hello world!</div>;
       │      ^^^^^^^
     9 │ 
+  
+  i Safe fix: Rename this property.
+  
+    6 6 │   
+    7 7 │   //Case with htmlFor
+    8   │ - <div·htmlFor="greeting">Hello·world!</div>;
+      8 │ + <div·for="greeting">Hello·world!</div>;
+    9 9 │   
   
 
 ```
