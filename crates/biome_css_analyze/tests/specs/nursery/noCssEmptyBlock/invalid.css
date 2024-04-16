@@ -1,3 +1,12 @@
-var a = 1;
-a = 2;
-a = 3;
+a {}
+a {}
+a {\n}
+a {\r\n}
+a {\n\n}
+a {\t}
+a {\t\t}
+@media print {}
+@media print {\n}
+@media print {\r\n}
+@media print {\t}
+@media print { a {} }

@@ -1,0 +1,3 @@
+a { /* foo */ color: pink; }
+a {\n/* foo */\ncolor: pink;\n}
+@import "foo.css";
