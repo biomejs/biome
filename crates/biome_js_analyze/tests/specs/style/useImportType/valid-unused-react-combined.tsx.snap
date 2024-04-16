@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-unused-react-combined.tsx
+---
+# Input
+```tsx
+import React, { MouseEvent } from 'react';
+
+function Component() {
+    const onClick = (event: MouseEvent) => { };
+    const onDblClick = (event: React.MouseEvent) => { };
+
+    return <div onClick={onClick} onDblClick={onDblClick}></div>;
+}
+
+```
+
+# Diagnostics
+```
+valid-unused-react-combined.tsx:1:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+  > 1 │ import React, { MouseEvent } from 'react';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ function Component() {
+  
+  i This import is only used as a type.
+  
+  > 1 │ import React, { MouseEvent } from 'react';
+      │                 ^^^^^^^^^^
+    2 │ 
+    3 │ function Component() {
+  
+  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    1 │ import·React,·{·type·MouseEvent·}·from·'react';
+      │                 +++++                          
+
+```
