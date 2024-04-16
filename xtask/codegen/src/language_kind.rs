@@ -60,7 +60,7 @@ impl FromStr for LanguageKind {
             "graphql" => Ok(LanguageKind::Graphql),
             "grit" => Ok(LanguageKind::Grit),
             "html" => Ok(LanguageKind::Html),
-            "yaml" | "yml" => Ok(LanguageKind::Yaml),
+            "yaml" => Ok(LanguageKind::Yaml),
             _ => Err(format!(
                 "Language {} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html`, `yaml` or yml",
                 kind
