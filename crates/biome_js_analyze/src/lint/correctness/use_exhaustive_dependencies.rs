@@ -378,9 +378,9 @@ pub enum Fix {
     },
     /// When a dependency is too unstable (changes every render).
     DependencyTooUnstable {
-        function_name_range: TextRange,
         dependency_name: String,
         dependency_range: TextRange,
+        kind: UnstableDependencyKind,
     },
     /// When a dependency is more deep than the capture
     DependencyTooDeep {
@@ -389,6 +389,11 @@ pub enum Fix {
         dependency_range: TextRange,
         dependency_text: String,
     },
+}
+
+pub enum UnstableDependencyKind {
+    Function,
+    ObjectLiteral,
 }
 
 fn get_whole_static_member_expression(reference: &JsSyntaxNode) -> Option<AnyJsMemberExpression> {
@@ -557,9 +562,7 @@ fn is_out_of_function_scope(
     function: &JsSyntaxNode,
     model: &SemanticModel,
 ) -> Option<bool> {
-    let identifier_name = JsIdentifierExpression::cast_ref(identifier.syntax())?
-        .name()
-        .ok()?;
+    let identifier_name = identifier.as_js_identifier_expression()?.name().ok()?;
 
     let declaration = model.binding(&identifier_name)?.tree().declaration()?;
 
@@ -568,6 +571,65 @@ fn is_out_of_function_scope(
             .scope(declaration.syntax())
             .is_ancestor_of(&model.scope(function)),
     )
+}
+
+fn root_identifier_of_dependency(dependency: &AnyJsExpression) -> Option<JsIdentifierExpression> {
+    match dependency {
+        AnyJsExpression::JsIdentifierExpression(identifier) => Some(identifier.clone()),
+        AnyJsExpression::JsComputedMemberExpression(member) => member
+            .object()
+            .ok()
+            .as_ref()
+            .and_then(root_identifier_of_dependency),
+        AnyJsExpression::JsStaticMemberExpression(member) => member
+            .object()
+            .ok()
+            .as_ref()
+            .and_then(root_identifier_of_dependency),
+        _ => None,
+    }
+}
+
+/// Checks if a dependency gets a new identity every render. If so, it returns
+/// the kind of unstable dependency
+///
+/// Note we can only reliably determine this for some types of declarations.
+/// Not every unstable dependency is expected to be reported.
+///
+/// This function assumes the identifier is declared within the same scope, so
+/// it should only be used on dependencies that are otherwise correctly included
+/// in the dependencies array.
+fn determine_unstable_dependency(
+    dependency: &AnyJsExpression,
+    model: &SemanticModel,
+) -> Option<UnstableDependencyKind> {
+    let identifier_name = root_identifier_of_dependency(dependency)?.name().ok()?;
+
+    let declaration = model.binding(&identifier_name)?.tree().declaration()?;
+    match declaration {
+        AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+        | AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
+            Some(UnstableDependencyKind::Function)
+        }
+        AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_) => {
+            Some(UnstableDependencyKind::ObjectLiteral)
+        }
+        AnyJsBindingDeclaration::JsVariableDeclarator(declaration) => {
+            let initializer = declaration.initializer()?;
+            match initializer.expression().ok()? {
+                AnyJsExpression::JsArrowFunctionExpression(_)
+                | AnyJsExpression::JsFunctionExpression(_) => {
+                    Some(UnstableDependencyKind::Function)
+                }
+                AnyJsExpression::JsArrayExpression(_) | AnyJsExpression::JsObjectExpression(_) => {
+                    Some(UnstableDependencyKind::ObjectLiteral)
+                }
+                _ => None,
+            }
+        }
+        _ => None,
+    }
 }
 
 fn into_member_vec(node: &JsSyntaxNode) -> Vec<String> {
@@ -740,7 +802,9 @@ impl Rule for UseExhaustiveDependencies {
 
             // Find correctly specified dependencies with an unstable identity,
             // since they would trigger re-evaluation on every render.
-            let unstable_deps = correct_deps.into_iter().filter(|dep| true /* TODO */);
+            let unstable_deps = correct_deps.into_iter().filter_map(|dep| {
+                determine_unstable_dependency(&dep, model).map(|kind| (dep, kind))
+            });
 
             // Generate signals
             for captures in add_deps {
@@ -759,11 +823,11 @@ impl Rule for UseExhaustiveDependencies {
                 });
             }
 
-            for unstable_dep in unstable_deps {
+            for (unstable_dep, kind) in unstable_deps {
                 signals.push(Fix::DependencyTooUnstable {
                     dependency_name: unstable_dep.syntax().to_string(),
                     dependency_range: unstable_dep.range(),
-                    function_name_range: result.function_name_range,
+                    kind,
                 });
             }
         }
@@ -841,18 +905,21 @@ impl Rule for UseExhaustiveDependencies {
             Fix::DependencyTooUnstable {
                 dependency_name,
                 dependency_range,
-                function_name_range,
+                kind,
             } => {
+                let suggested_hook = match kind {
+                    UnstableDependencyKind::Function => "useCallback()",
+                    UnstableDependencyKind::ObjectLiteral => "useMemo()",
+                };
                 let diag = RuleDiagnostic::new(
                     rule_category!(),
-                    function_name_range,
+                    dependency_range,
                     markup! {
-                        "The "<Emphasis>{dependency_name}</Emphasis>" changes on every re-render and should not be used as a hook dependency."
+                        <Emphasis>{dependency_name}</Emphasis>" changes on every re-render and should not be used as a hook dependency."
                     },
                 )
-                .detail(dependency_range, "Used in this dependency array.")
                 .note(markup! {
-                    "To fix this, wrap the definition of "<Emphasis>{dependency_name}</Emphasis>" in its own useCallback() hook."
+                    "To fix this, wrap the definition of "<Emphasis>{dependency_name}</Emphasis>" in its own "<Emphasis>{suggested_hook}</Emphasis>" hook."
                 });
                 Some(diag)
             }
