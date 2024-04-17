@@ -44,7 +44,6 @@ pub enum YamlSyntaxKind {
     YAML_DOCUMENT_LIST,
     YAML_DOCUMENT,
     YAML_CONTENT_LIST,
-    ANY_YAML_CONTENT,
     YAML_BOGUS,
     YAML_BOGUS_VALUE,
     #[doc(hidden)]

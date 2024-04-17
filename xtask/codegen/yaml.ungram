@@ -40,3 +40,4 @@ YamlContentList = AnyYamlContent*
 
 AnyYamlContent = YamlScalar | YamlBogusValue
 YamlScalar = value: 'yaml_scalar'
+YamlStringLiteral = value: 'yaml_string_literal'

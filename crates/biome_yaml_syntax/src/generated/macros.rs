@@ -28,6 +28,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlScalar::new_unchecked(node) };
                     $body
                 }
+                $crate::YamlSyntaxKind::YAML_STRING_LITERAL => {
+                    let $pattern = unsafe { $crate::YamlStringLiteral::new_unchecked(node) };
+                    $body
+                }
                 $crate::YamlSyntaxKind::YAML_BOGUS => {
                     let $pattern = unsafe { $crate::YamlBogus::new_unchecked(node) };
                     $body

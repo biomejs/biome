@@ -2,6 +2,7 @@ use biome_rowan::TreeBuilder;
 use biome_yaml_syntax::YamlLanguage;
 
 mod generated;
+pub mod make;
 pub use crate::generated::YamlSyntaxFactory;
 
 // Re-exported for tests

@@ -143,6 +143,42 @@ pub struct YamlScalarFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct YamlStringLiteral {
+    pub(crate) syntax: SyntaxNode,
+}
+impl YamlStringLiteral {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> YamlStringLiteralFields {
+        YamlStringLiteralFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for YamlStringLiteral {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct YamlStringLiteralFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyYamlContent {
     YamlBogusValue(YamlBogusValue),
@@ -284,6 +320,47 @@ impl From<YamlScalar> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for YamlStringLiteral {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(YAML_STRING_LITERAL as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == YAML_STRING_LITERAL
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for YamlStringLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("YamlStringLiteral")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<YamlStringLiteral> for SyntaxNode {
+    fn from(n: YamlStringLiteral) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<YamlStringLiteral> for SyntaxElement {
+    fn from(n: YamlStringLiteral) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl From<YamlBogusValue> for AnyYamlContent {
     fn from(node: YamlBogusValue) -> AnyYamlContent {
         AnyYamlContent::YamlBogusValue(node)
@@ -359,6 +436,11 @@ impl std::fmt::Display for YamlRoot {
     }
 }
 impl std::fmt::Display for YamlScalar {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for YamlStringLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

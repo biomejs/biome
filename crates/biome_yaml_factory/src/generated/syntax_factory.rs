@@ -88,6 +88,25 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.into_node(YAML_SCALAR, children)
             }
+            YAML_STRING_LITERAL => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == YAML_STRING_LITERAL {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        YAML_STRING_LITERAL.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(YAML_STRING_LITERAL, children)
+            }
             YAML_CONTENT_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyYamlContent::can_cast)
             }

@@ -31,7 +31,7 @@ pub const YAML_KINDS_SRC: KindsSrc = KindsSrc {
         "YAML_DOCUMENT_LIST",
         "YAML_DOCUMENT",
         "YAML_CONTENT_LIST",
-        "ANY_YAML_CONTENT",
+        // Bogus nodes
         "YAML_BOGUS",
         "YAML_BOGUS_VALUE",
     ],

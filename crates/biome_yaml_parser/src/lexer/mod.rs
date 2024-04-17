@@ -17,6 +17,7 @@ pub(crate) struct YamlLexer<'src> {
     after_newline: bool,
 
     /// If the source starts with a Unicode BOM, this is the number of bytes for that token.
+    #[allow(unused)]
     unicode_bom_length: usize,
 
     /// Byte offset of the current token from the start of the source
@@ -68,7 +69,7 @@ impl<'src> Lexer<'src> for YamlLexer<'src> {
         self.current_start
     }
 
-    fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
+    fn next_token(&mut self, _context: Self::LexContext) -> Self::Kind {
         todo!()
     }
 
@@ -80,7 +81,7 @@ impl<'src> Lexer<'src> for YamlLexer<'src> {
         self.current_flags.has_unicode_escape()
     }
 
-    fn rewind(&mut self, checkpoint: biome_parser::lexer::LexerCheckpoint<Self::Kind>) {
+    fn rewind(&mut self, _checkpoint: biome_parser::lexer::LexerCheckpoint<Self::Kind>) {
         todo!()
     }
 

@@ -47,6 +47,12 @@ pub fn yaml_scalar(value_token: SyntaxToken) -> YamlScalar {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn yaml_string_literal(value_token: SyntaxToken) -> YamlStringLiteral {
+    YamlStringLiteral::unwrap_cast(SyntaxNode::new_detached(
+        YamlSyntaxKind::YAML_STRING_LITERAL,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn yaml_content_list<I>(items: I) -> YamlContentList
 where
     I: IntoIterator<Item = AnyYamlContent>,
