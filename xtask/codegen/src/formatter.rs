@@ -789,6 +789,9 @@ fn get_node_concept(
                 _ if name.ends_with("Value") => NodeConcept::Value,
                 _ => NodeConcept::Auxiliary,
             },
+
+            // TODO: implement formatter
+            LanguageKind::Yaml => NodeConcept::Auxiliary,
         }
     }
 }
@@ -853,6 +856,7 @@ impl LanguageKind {
             LanguageKind::Graphql => "GraphqlFormatter",
             LanguageKind::Grit => "GritFormatter",
             LanguageKind::Html => "HtmlFormatter",
+            LanguageKind::Yaml => "YamlFormatter",
         };
 
         Ident::new(name, Span::call_site())
@@ -866,6 +870,7 @@ impl LanguageKind {
             LanguageKind::Graphql => "GraphqlFormatContext",
             LanguageKind::Grit => "GritFormatContext",
             LanguageKind::Html => "HtmlFormatContext",
+            LanguageKind::Yaml => "YamlFormatContext",
         };
 
         Ident::new(name, Span::call_site())

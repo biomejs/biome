@@ -130,15 +130,20 @@ biome_json_factory           = { version = "0.5.7", path = "./crates/biome_json_
 biome_json_formatter         = { version = "0.5.7", path = "./crates/biome_json_formatter" }
 biome_json_parser            = { version = "0.5.7", path = "./crates/biome_json_parser" }
 biome_json_syntax            = { version = "0.5.7", path = "./crates/biome_json_syntax" }
-biome_markup                 = { version = "0.5.7", path = "./crates/biome_markup" }
-biome_parser                 = { version = "0.5.7", path = "./crates/biome_parser" }
-biome_project                = { version = "0.5.7", path = "./crates/biome_project" }
-biome_rowan                  = { version = "0.5.7", path = "./crates/biome_rowan" }
-biome_string_case            = { version = "0.5.7", path = "./crates/biome_string_case" }
-biome_suppression            = { version = "0.5.7", path = "./crates/biome_suppression" }
-biome_text_edit              = { version = "0.5.7", path = "./crates/biome_text_edit" }
-biome_text_size              = { version = "0.5.7", path = "./crates/biome_text_size" }
-biome_unicode_table          = { version = "0.5.7", path = "./crates/biome_unicode_table" }
+biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
+biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }
+biome_yaml_syntax            = { version = "0.0.1", path = "./crates/biome_yaml_syntax" }
+
+biome_markup        = { version = "0.5.7", path = "./crates/biome_markup" }
+biome_parser        = { version = "0.5.7", path = "./crates/biome_parser" }
+biome_project       = { version = "0.5.7", path = "./crates/biome_project" }
+biome_rowan         = { version = "0.5.7", path = "./crates/biome_rowan" }
+biome_string_case   = { version = "0.5.7", path = "./crates/biome_string_case" }
+biome_suppression   = { version = "0.5.7", path = "./crates/biome_suppression" }
+biome_text_edit     = { version = "0.5.7", path = "./crates/biome_text_edit" }
+biome_text_size     = { version = "0.5.7", path = "./crates/biome_text_size" }
+biome_unicode_table = { version = "0.5.7", path = "./crates/biome_unicode_table" }
+
 # not publish
 biome_cli            = { path = "./crates/biome_cli" }
 biome_configuration  = { path = "./crates/biome_configuration" }

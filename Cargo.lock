@@ -1010,6 +1010,42 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_yaml_factory"
+version = "0.0.1"
+dependencies = [
+ "biome_rowan",
+ "biome_yaml_syntax",
+]
+
+[[package]]
+name = "biome_yaml_parser"
+version = "0.0.1"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_parser",
+ "biome_rowan",
+ "biome_test_utils",
+ "biome_unicode_table",
+ "biome_yaml_factory",
+ "biome_yaml_syntax",
+ "insta",
+ "quickcheck",
+ "quickcheck_macros",
+ "tests_macros",
+ "tracing",
+]
+
+[[package]]
+name = "biome_yaml_syntax"
+version = "0.0.1"
+dependencies = [
+ "biome_rowan",
+ "schemars",
+ "serde",
+]
+
+[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
