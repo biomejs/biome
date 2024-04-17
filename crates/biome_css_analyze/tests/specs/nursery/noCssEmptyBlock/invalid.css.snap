@@ -1,0 +1,83 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+a {}
+a {}
+a {\n}
+a {\r\n}
+a {\n\n}
+a {\t}
+a {\t\t}
+@media print {}
+@media print {\n}
+@media print {\r\n}
+@media print {\t}
+@media print { a {} }
+```
+
+# Diagnostics
+```
+invalid.css:1:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+  > 1 │ a {}
+      │   ^^
+    2 │ a {}
+    3 │ a {\n}
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:2:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    1 │ a {}
+  > 2 │ a {}
+      │   ^^
+    3 │ a {\n}
+    4 │ a {\r\n}
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:8:14 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+     6 │ a {\t}
+     7 │ a {\t\t}
+   > 8 │ @media print {}
+       │              ^^
+     9 │ @media print {\n}
+    10 │ @media print {\r\n}
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:12:18 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    10 │ @media print {\r\n}
+    11 │ @media print {\t}
+  > 12 │ @media print { a {} }
+       │                  ^^
+  
+  i This note will give you more information.
+  
+
+```

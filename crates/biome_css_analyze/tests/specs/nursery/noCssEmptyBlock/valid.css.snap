@@ -1,0 +1,50 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+@import "foo.css";
+a { color: pink; }
+a { /* foo */ }
+a {\n/* foo */\n}
+a {\n/* foo */\n/* bar */\n}
+a {\n/*\nfoo\nbar\n*/\n}
+@media print { a { color: pink; } }
+@media print { a { /* foo */ } }
+@import url(x.css)
+```
+
+# Diagnostics
+```
+valid.css:3:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    1 │ @import "foo.css";
+    2 │ a { color: pink; }
+  > 3 │ a { /* foo */ }
+      │   ^^^^^^^^^^^^^
+    4 │ a {\n/* foo */\n}
+    5 │ a {\n/* foo */\n/* bar */\n}
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+valid.css:8:18 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    6 │ a {\n/*\nfoo\nbar\n*/\n}
+    7 │ @media print { a { color: pink; } }
+  > 8 │ @media print { a { /* foo */ } }
+      │                  ^^^^^^^^^^^^^
+    9 │ @import url(x.css)
+  
+  i This note will give you more information.
+  
+
+```

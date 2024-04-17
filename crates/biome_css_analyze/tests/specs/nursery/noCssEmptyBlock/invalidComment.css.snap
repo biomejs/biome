@@ -1,0 +1,10 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidComment.css
+---
+# Input
+```css
+a { /* foo */ color: pink; }
+a {\n/* foo */\ncolor: pink;\n}
+@import "foo.css";
+```
