@@ -1,37 +1,37 @@
 [package]
-authors.workspace = true
+authors.workspace    = true
 categories.workspace = true
-description = "Biome's custom Rowan definition"
-edition.workspace = true
-homepage.workspace = true
-keywords.workspace = true
-license.workspace = true
-name = "biome_rowan"
+description          = "Biome's custom Rowan definition"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_rowan"
 repository.workspace = true
-version = "0.5.7"
+version              = "0.5.7"
 
 [dependencies]
 biome_text_edit = { workspace = true }
 biome_text_size = { workspace = true }
-countme = { workspace = true }
-hashbrown = { version = "0.12.3", features = ["inline-more"], default-features = false }
-memoffset = "0.8.0"
-rustc-hash = { workspace = true }
-serde = { workspace = true, optional = true }
-tracing = { workspace = true }
+countme         = { workspace = true }
+hashbrown       = { version = "0.12.3", features = ["inline-more"], default-features = false }
+memoffset       = "0.8.0"
+rustc-hash      = { workspace = true }
+serde           = { workspace = true, optional = true }
+tracing         = { workspace = true }
 
 [dev-dependencies]
-iai = "0.1.1"
-quickcheck = { workspace = true }
+iai               = "0.1.1"
+quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
-serde_json = { workspace = true }
+serde_json        = { workspace = true }
 
 [features]
 serde = ["dep:serde", "biome_text_size/serde", "biome_text_size/schemars"]
 
 [[bench]]
 harness = false
-name = "mutation"
+name    = "mutation"
 
 [lints]
 workspace = true
