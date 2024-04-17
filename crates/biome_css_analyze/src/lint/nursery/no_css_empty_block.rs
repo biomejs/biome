@@ -43,27 +43,31 @@ declare_rule! {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NoCssEmptyBlockOptions {
-    ignore: Vec<String>,
+    pub ignore: Vec<String>,
 }
 
 impl Rule for NoCssEmptyBlock {
     type Query = Ast<CssDeclarationOrRuleBlock>;
     type State = CssDeclarationOrRuleBlock;
     type Signals = Option<Self::State>;
-    type Options = NoCssEmptyBlockOptions;
+    type Options = Box<NoCssEmptyBlockOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let options = ctx.options();
-        let is_ignore_comment = options.ignore.iter().any(|i| i == "comment");
+        let should_alert_comments = options.ignore.iter().any(|i| i == "comments");
 
-        if node.items().into_iter().next().is_none()
+        if should_alert_comments {
+            if node.items().into_iter().next().is_none() {
+                return Some(node.clone());
+            }
+        } else if node.items().into_iter().next().is_none()
             && !node.r_curly_token().ok()?.has_leading_comments()
             && !node.l_curly_token().ok()?.has_trailing_comments()
-            && !is_ignore_comment
         {
             return Some(node.clone());
         }
+
         None
     }
 
