@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleBlock;
 use biome_rowan::AstNode;
@@ -32,9 +32,17 @@ declare_rule! {
     pub NoCssEmptyBlock {
         version: "next",
         name: "noCssEmptyBlock",
-        recommended: false,
+        recommended: true,
+        sources: &[RuleSource::Stylelint("no-empty-block")],
     }
 }
+
+// #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+// #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+// #[serde(rename_all = "camelCase", deny_unknown_fields)]
+// pub struct NoCssEmptyBlockOptions {
+//     ignore: Vec<String>,
+// }
 
 impl Rule for NoCssEmptyBlock {
     type Query = Ast<CssDeclarationOrRuleBlock>;
@@ -44,7 +52,10 @@ impl Rule for NoCssEmptyBlock {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if node.items().into_iter().next().is_none() {
+        if node.items().into_iter().next().is_none()
+            && !node.r_curly_token().ok()?.has_leading_comments()
+            && !node.l_curly_token().ok()?.has_trailing_comments()
+        {
             return Some(node.clone());
         }
         None

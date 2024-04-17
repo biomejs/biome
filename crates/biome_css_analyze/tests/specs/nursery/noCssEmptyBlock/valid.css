@@ -1,9 +1,16 @@
 @import "foo.css";
 a { color: pink; }
 a { /* foo */ }
-a {\n/* foo */\n}
-a {\n/* foo */\n/* bar */\n}
-a {\n/*\nfoo\nbar\n*/\n}
+a {
+    /* foo */
+}
+a {
+    /* foo */
+    /* bar */
+}
+a {
+    /*\nfoo\nbar\n*/
+}
 @media print { a { color: pink; } }
 @media print { a { /* foo */ } }
 @import url(x.css)

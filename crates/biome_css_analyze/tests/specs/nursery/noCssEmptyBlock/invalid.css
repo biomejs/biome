@@ -1,12 +1,17 @@
 a {}
-a {}
-a {\n}
-a {\r\n}
-a {\n\n}
-a {\t}
-a {\t\t}
+a { }
+a {
+
+}
+
+.b {}
+.b { }
+.b {
+
+}
+
 @media print {}
-@media print {\n}
-@media print {\r\n}
-@media print {\t}
+@media print {
+
+}
 @media print { a {} }
