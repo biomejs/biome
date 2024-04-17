@@ -198,26 +198,22 @@ ignore_conventional_commits = true
 [[workflows.steps]]
 type = "Command"
 # WARNING: if you change this message, remember to update the `prepare_release.yml` too, because it uses this message
-command = "git commit -m \"chore: prepare release $version\""
+command = "git commit -m \"chore: prepare release\""
 
 [[workflows.steps]]
 command = "git push --force --set-upstream origin release"
 type = "Command"
 
-[workflows.steps.variables]
-"$version" = "Version"
 
 [[workflows.steps]]
 base = "main"
 type = "CreatePullRequest"
 
 [workflows.steps.title]
-template = "chore: prepare release $version"
-variables = { "$version" = "Version" }
+template = "chore: prepare release"
 
 [workflows.steps.body]
-template = "This PR was created by Knope. Merging it will create a new release\n\n$changelog"
-variables = { "$changelog" = "ChangelogEntry" }
+template = "This PR was created by Knope. Merging it will create a new release"
 
 # The release workflow that will run in CI. It is triggered when the prepare-release PR is merged
 [[workflows]]
