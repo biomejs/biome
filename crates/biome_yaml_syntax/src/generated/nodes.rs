@@ -122,10 +122,10 @@ impl YamlScalar {
     }
     pub fn as_fields(&self) -> YamlScalarFields {
         YamlScalarFields {
-            YAML_SCALAR_token: self.YAML_SCALAR_token(),
+            value_token: self.value_token(),
         }
     }
-    pub fn YAML_SCALAR_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
 }
@@ -140,7 +140,7 @@ impl Serialize for YamlScalar {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct YamlScalarFields {
-    pub YAML_SCALAR_token: SyntaxResult<SyntaxToken>,
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
@@ -268,8 +268,8 @@ impl std::fmt::Debug for YamlScalar {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("YamlScalar")
             .field(
-                "YAML_SCALAR_token",
-                &support::DebugSyntaxResult(self.YAML_SCALAR_token()),
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
             )
             .finish()
     }

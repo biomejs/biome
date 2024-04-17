@@ -24,7 +24,7 @@ pub const YAML_KINDS_SRC: KindsSrc = KindsSrc {
         ("...", "DOC_END"),
     ],
     keywords: &["null"],
-    literals: &["YAML_SCALAR"],
+    literals: &["YAML_STRING_LITERAL", "YAML_SCALAR"],
     tokens: &["NEWLINE", "WHITESPACE", "IDENT", "COMMENT"],
     nodes: &[
         "YAML_ROOT",

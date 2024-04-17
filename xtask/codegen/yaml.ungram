@@ -39,4 +39,4 @@ YamlDocument = content: YamlContentList
 YamlContentList = AnyYamlContent*
 
 AnyYamlContent = YamlScalar | YamlBogusValue
-YamlScalar = 'YAML_SCALAR'
+YamlScalar = value: 'yaml_scalar'

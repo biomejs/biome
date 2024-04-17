@@ -34,6 +34,7 @@ pub enum YamlSyntaxKind {
     DOC_START,
     DOC_END,
     NULL_KW,
+    YAML_STRING_LITERAL,
     YAML_SCALAR,
     NEWLINE,
     WHITESPACE,
@@ -61,7 +62,7 @@ impl YamlSyntaxKind {
     }
     pub const fn is_literal(self) -> bool {
         match self {
-            YAML_SCALAR => true,
+            YAML_STRING_LITERAL | YAML_SCALAR => true,
             _ => false,
         }
     }

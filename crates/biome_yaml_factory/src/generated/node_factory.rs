@@ -41,10 +41,10 @@ impl YamlRootBuilder {
         ))
     }
 }
-pub fn yaml_scalar(YAML_SCALAR_token: SyntaxToken) -> YamlScalar {
+pub fn yaml_scalar(value_token: SyntaxToken) -> YamlScalar {
     YamlScalar::unwrap_cast(SyntaxNode::new_detached(
         YamlSyntaxKind::YAML_SCALAR,
-        [Some(SyntaxElement::Token(YAML_SCALAR_token))],
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn yaml_content_list<I>(items: I) -> YamlContentList

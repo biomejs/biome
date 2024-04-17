@@ -32,7 +32,7 @@ impl YamlRoot {
     }
 }
 impl YamlScalar {
-    pub fn with_YAML_SCALAR_token(self, element: SyntaxToken) -> Self {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
