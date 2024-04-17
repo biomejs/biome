@@ -84,10 +84,10 @@ impl GitRepo {
 
     fn check_path(&self, path: &Path) {
         if self.dirty.contains(path) {
-            panic!("Codegen would overwrite '{}' but it has uncommited changes. Commit the file to git, or pass --allow-dirty to the command to proceed anyway", path.display());
+            panic!("Codegen would overwrite '{}' but it has uncommitted changes. Commit the file to git, or pass --allow-dirty to the command to proceed anyway", path.display());
         }
         if self.staged.contains(path) {
-            panic!("Codegen would overwrite '{}' but it has uncommited changes. Commit the file to git, or pass --allow-staged to the command to proceed anyway", path.display());
+            panic!("Codegen would overwrite '{}' but it has uncommitted changes. Commit the file to git, or pass --allow-staged to the command to proceed anyway", path.display());
         }
     }
 

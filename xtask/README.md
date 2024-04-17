@@ -5,4 +5,4 @@ This directory contains Rust scripts for code generation, running coverage tests
 Please checkout their respective READMEs for usage instructions.
 
 This `xtask` crate contains common utilities for working with these scripts.
-For example, running `rustfmt` and gettting the project root.
+For example, running `rustfmt` and getting the project root.
