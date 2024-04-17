@@ -1,0 +1,79 @@
+---
+source: crates/biome_graphql_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```graphql
+"abc" scalar 123 @()
+
+```
+
+## AST
+
+```
+GraphqlRoot {
+    bom_token: missing (optional),
+    definitions: GraphqlDefinitionList [
+        GraphqlScalarTypeDefinition {
+            description: GraphqlDescription {
+                graphql_string_value: GraphqlStringValue {
+                    graphql_string_literal_token: GRAPHQL_STRING_LITERAL@0..6 "\"abc\"" [] [Whitespace(" ")],
+                },
+            },
+            scalar_token: SCALAR_KW@6..13 "scalar" [] [Whitespace(" ")],
+            name: missing (required),
+            directives: GraphqlDirectiveList [],
+        },
+        GraphqlBogusDefinition {
+            items: [
+                GRAPHQL_INT_LITERAL@13..17 "123" [] [Whitespace(" ")],
+                AT@17..18 "@" [] [],
+                L_PAREN@18..19 "(" [] [],
+                R_PAREN@19..20 ")" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@20..21 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRAPHQL_ROOT@0..21
+  0: (empty)
+  1: GRAPHQL_DEFINITION_LIST@0..20
+    0: GRAPHQL_SCALAR_TYPE_DEFINITION@0..13
+      0: GRAPHQL_DESCRIPTION@0..6
+        0: GRAPHQL_STRING_VALUE@0..6
+          0: GRAPHQL_STRING_LITERAL@0..6 "\"abc\"" [] [Whitespace(" ")]
+      1: SCALAR_KW@6..13 "scalar" [] [Whitespace(" ")]
+      2: (empty)
+      3: GRAPHQL_DIRECTIVE_LIST@13..13
+    1: GRAPHQL_BOGUS_DEFINITION@13..20
+      0: GRAPHQL_INT_LITERAL@13..17 "123" [] [Whitespace(" ")]
+      1: AT@17..18 "@" [] []
+      2: L_PAREN@18..19 "(" [] []
+      3: R_PAREN@19..20 ")" [] []
+  2: EOF@20..21 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+scalar.graphql:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found '123'.
+  
+  > 1 │ "abc" scalar 123 @()
+      │              ^^^
+    2 │ 
+  
+  i Expected a name here.
+  
+  > 1 │ "abc" scalar 123 @()
+      │              ^^^
+    2 │ 
+  
+```
