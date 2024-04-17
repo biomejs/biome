@@ -44,3 +44,6 @@ quote              = "1.0.14"
 
 [lints]
 workspace = true
+
+[package.metadata.wasm-pack.profile.profiling]
+wasm-opt = false
