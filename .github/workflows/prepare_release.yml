@@ -4,6 +4,8 @@ on:
 name: Create Release PR
 jobs:
   prepare-release:
+    permissions:
+      pull-requests: write
     if: "!contains(github.event.head_commit.message, 'chore: prepare release')" # Skip merges from releases
     runs-on: ubuntu-latest
     steps:
