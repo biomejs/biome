@@ -28,7 +28,7 @@ declare_rule! {
     /// <Hello class="Doe" />
     /// ```
  pub NoReactSpecificProps {
-        version: "1.0.0",
+        version: "next",
         name: "noReactSpecificProps",
         sources: &[RuleSource::EslintSolid("no-react-specific-props")],
         recommended: false,
@@ -37,11 +37,11 @@ declare_rule! {
 
 const REACT_SPECIFIC_JSX_PROPS: &[&str] = &["className", "htmlFor"];
 
-fn get_replacement_for_react_prop(str: &str) -> &'static str {
+fn get_replacement_for_react_prop(str: &str) -> Option<&'static str> {
     match str {
-        "className" => "class",
-        "htmlFor" => "for",
-        _ => panic!("should be a React prop: {str:?}"),
+        "className" => Some("class"),
+        "htmlFor" => Some("for"),
+        _ => None,
     }
 }
 
@@ -58,27 +58,19 @@ impl Rule for NoReactSpecificProps {
         let name = name.text();
 
         if REACT_SPECIFIC_JSX_PROPS.contains(&name.as_str()) {
-            Some((range, get_replacement_for_react_prop(&name)))
+            let replacement = get_replacement_for_react_prop(&name)?;
+            Some((range, replacement))
         } else {
             None
         }
     }
 
-    fn diagnostic(
-        _: &RuleContext<Self>,
-        (range, replacement): &Self::State,
-    ) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                range,
-                markup!("This JSX property is specific to React."),
-            )
-            .detail(
-                range,
-                format!("Replace this attribute name with {replacement:?}"),
-            ),
-        )
+    fn diagnostic(_: &RuleContext<Self>, (range, _): &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            range,
+            markup!("This JSX property is specific to React."),
+        ))
     }
 
     fn action(ctx: &RuleContext<Self>, (_, replacement): &Self::State) -> Option<JsRuleAction> {
@@ -92,7 +84,7 @@ impl Rule for NoReactSpecificProps {
             category: ActionCategory::QuickFix,
             applicability: Applicability::Always,
             message: markup! {
-                "Rename this property."
+                "Replace this attribute name with {replacement:?}"
             }
             .to_owned(),
             mutation,
