@@ -923,7 +923,7 @@ export interface Nursery {
 	/**
 	 * Succinct description of the rule.
 	 */
-	noCssEmptyBlock?: RuleConfiguration_for_Null;
+	noCssEmptyBlock?: RuleConfiguration_for_NoCssEmptyBlockOptions;
 	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
@@ -1515,6 +1515,9 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
+export type RuleConfiguration_for_NoCssEmptyBlockOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoCssEmptyBlockOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -1553,6 +1556,10 @@ export interface RuleWithOptions_for_HooksOptions {
 export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	level: RulePlainConfiguration;
 	options: DeprecatedHooksOptions;
+}
+export interface RuleWithOptions_for_NoCssEmptyBlockOptions {
+	level: RulePlainConfiguration;
+	options: NoCssEmptyBlockOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	level: RulePlainConfiguration;
@@ -1604,6 +1611,9 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
+export interface NoCssEmptyBlockOptions {
+	ignore: string[];
+}
 /**
  * Options for the rule `noRestrictedImports`.
  */

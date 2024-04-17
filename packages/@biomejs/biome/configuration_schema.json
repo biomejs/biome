@@ -1413,6 +1413,20 @@
 			},
 			"additionalProperties": false
 		},
+		"NoCssEmptyBlockConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoCssEmptyBlockOptions" }
+			]
+		},
+		"NoCssEmptyBlockOptions": {
+			"type": "object",
+			"required": ["ignore"],
+			"properties": {
+				"ignore": { "type": "array", "items": { "type": "string" } }
+			},
+			"additionalProperties": false
+		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1445,7 +1459,7 @@
 				"noCssEmptyBlock": {
 					"description": "Succinct description of the rule.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoCssEmptyBlockConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1844,6 +1858,15 @@
 			"properties": {
 				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
 				"options": { "$ref": "#/definitions/NamingConventionOptions" }
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoCssEmptyBlockOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
+				"options": { "$ref": "#/definitions/NoCssEmptyBlockOptions" }
 			},
 			"additionalProperties": false
 		},

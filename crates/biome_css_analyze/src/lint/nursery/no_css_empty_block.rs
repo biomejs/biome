@@ -1,7 +1,9 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleBlock;
+use biome_deserialize_macros::Deserializable;
 use biome_rowan::AstNode;
+use serde::{Deserialize, Serialize};
 
 declare_rule! {
     /// Succinct description of the rule.
@@ -37,24 +39,28 @@ declare_rule! {
     }
 }
 
-// #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-// #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-// #[serde(rename_all = "camelCase", deny_unknown_fields)]
-// pub struct NoCssEmptyBlockOptions {
-//     ignore: Vec<String>,
-// }
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Deserializable, Eq, PartialEq)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NoCssEmptyBlockOptions {
+    ignore: Vec<String>,
+}
 
 impl Rule for NoCssEmptyBlock {
     type Query = Ast<CssDeclarationOrRuleBlock>;
     type State = CssDeclarationOrRuleBlock;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoCssEmptyBlockOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
+        let options = ctx.options();
+        let is_ignore_comment = options.ignore.iter().any(|i| i == "comment");
+
         if node.items().into_iter().next().is_none()
             && !node.r_curly_token().ok()?.has_leading_comments()
             && !node.l_curly_token().ok()?.has_trailing_comments()
+            && !is_ignore_comment
         {
             return Some(node.clone());
         }
