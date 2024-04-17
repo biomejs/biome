@@ -10,9 +10,7 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsSyntaxKind, JsSyntaxNode,
     JsVariableDeclaration, TextRange,
 };
-use biome_js_syntax::{
-    AnyJsExpression, AnyJsMemberExpression, JsIdentifierExpression, TsTypeofType,
-};
+use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, TsTypeofType};
 use biome_rowan::{AstNode, SyntaxNodeCast};
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
@@ -573,23 +571,6 @@ fn is_out_of_function_scope(
     )
 }
 
-fn root_identifier_of_dependency(dependency: &AnyJsExpression) -> Option<JsIdentifierExpression> {
-    match dependency {
-        AnyJsExpression::JsIdentifierExpression(identifier) => Some(identifier.clone()),
-        AnyJsExpression::JsComputedMemberExpression(member) => member
-            .object()
-            .ok()
-            .as_ref()
-            .and_then(root_identifier_of_dependency),
-        AnyJsExpression::JsStaticMemberExpression(member) => member
-            .object()
-            .ok()
-            .as_ref()
-            .and_then(root_identifier_of_dependency),
-        _ => None,
-    }
-}
-
 /// Checks if a dependency gets a new identity every render. If so, it returns
 /// the kind of unstable dependency
 ///
@@ -603,7 +584,7 @@ fn determine_unstable_dependency(
     dependency: &AnyJsExpression,
     model: &SemanticModel,
 ) -> Option<UnstableDependencyKind> {
-    let identifier_name = root_identifier_of_dependency(dependency)?.name().ok()?;
+    let identifier_name = dependency.as_js_identifier_expression()?.name().ok()?;
 
     let declaration = model.binding(&identifier_name)?.tree().declaration()?;
     match declaration {

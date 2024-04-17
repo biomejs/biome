@@ -25,9 +25,9 @@ const Component = () => {
         }
 
         fetchData().then((res) => {
-            return mapping.something[res.body] || res;
+            return mapping[res.body] || res;
         });
-    }, [fetchThings, fetchMoreThings, mapping.something]);
+    }, [fetchThings, fetchMoreThings, mapping]);
 
     if (!things) {
         return <div>Loading...</div>;

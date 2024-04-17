@@ -31,9 +31,9 @@ const Component = () => {
         }
 
         fetchData().then((res) => {
-            return mapping.something[res.body] || res;
+            return mapping[res.body] || res;
         });
-    }, [fetchThings, fetchMoreThings, mapping.something]);
+    }, [fetchThings, fetchMoreThings, mapping]);
 
     if (!things) {
         return <div>Loading...</div>;
@@ -52,9 +52,9 @@ unstableDependency.jsx:30:9 lint/correctness/useExhaustiveDependencies ━━━
 
   ! fetchThings changes on every re-render and should not be used as a hook dependency.
   
-    28 │             return mapping.something[res.body] || res;
+    28 │             return mapping[res.body] || res;
     29 │         });
-  > 30 │     }, [fetchThings, fetchMoreThings, mapping.something]);
+  > 30 │     }, [fetchThings, fetchMoreThings, mapping]);
        │         ^^^^^^^^^^^
     31 │ 
     32 │     if (!things) {
@@ -69,9 +69,9 @@ unstableDependency.jsx:30:22 lint/correctness/useExhaustiveDependencies ━━�
 
   ! fetchMoreThings changes on every re-render and should not be used as a hook dependency.
   
-    28 │             return mapping.something[res.body] || res;
+    28 │             return mapping[res.body] || res;
     29 │         });
-  > 30 │     }, [fetchThings, fetchMoreThings, mapping.something]);
+  > 30 │     }, [fetchThings, fetchMoreThings, mapping]);
        │                      ^^^^^^^^^^^^^^^
     31 │ 
     32 │     if (!things) {
@@ -84,16 +84,16 @@ unstableDependency.jsx:30:22 lint/correctness/useExhaustiveDependencies ━━�
 ```
 unstableDependency.jsx:30:39 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! mapping.something changes on every re-render and should not be used as a hook dependency.
+  ! mapping changes on every re-render and should not be used as a hook dependency.
   
-    28 │             return mapping.something[res.body] || res;
+    28 │             return mapping[res.body] || res;
     29 │         });
-  > 30 │     }, [fetchThings, fetchMoreThings, mapping.something]);
-       │                                       ^^^^^^^^^^^^^^^^^
+  > 30 │     }, [fetchThings, fetchMoreThings, mapping]);
+       │                                       ^^^^^^^
     31 │ 
     32 │     if (!things) {
   
-  i To fix this, wrap the definition of mapping.something in its own useMemo() hook.
+  i To fix this, wrap the definition of mapping in its own useMemo() hook.
   
 
 ```
