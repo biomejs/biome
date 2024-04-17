@@ -84,7 +84,7 @@ impl Rule for NoReactSpecificProps {
             category: ActionCategory::QuickFix,
             applicability: Applicability::Always,
             message: markup! {
-                "Replace this attribute name with {replacement:?}"
+                {format!("Replace this attribute name with {replacement:?}")}
             }
             .to_owned(),
             mutation,
