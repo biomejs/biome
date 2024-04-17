@@ -148,10 +148,11 @@ new-crate name:
   cargo new --lib crates/{{snakecase(name)}}
   cargo run -p xtask_codegen -- new-crate --name={{snakecase(name)}}
 
-# Creates a new changeset for the final changelog. ONLY FOR CRATES, FOR NOW
+# Creates a new changeset for the final changelog
 new-changeset:
     knope document-change
 
-dry-run:
-    knope release --dry-run > out.txt
+# Dry-run of the release
+new-dry-run-release *args='':
+    knope release --dry-run {{args}}
 
