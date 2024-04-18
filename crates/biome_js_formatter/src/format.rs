@@ -1192,11 +1192,6 @@ impl Format for biome_js_syntax::TsExtendsClause {
         self.format_node(formatter)
     }
 }
-impl Format for biome_js_syntax::TsNameWithTypeArguments {
-    fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
-        self.format_node(formatter)
-    }
-}
 impl Format for biome_js_syntax::TsCallSignatureTypeMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)

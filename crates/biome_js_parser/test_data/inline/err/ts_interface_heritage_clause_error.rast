@@ -23,7 +23,7 @@ JsModule {
                 TsImplementsClause {
                     implements_token: IMPLEMENTS_KW@27..38 "implements" [] [Whitespace(" ")],
                     types: TsTypeList [
-                        TsNameWithTypeArguments {
+                        TsReferenceType {
                             name: JsReferenceIdentifier {
                                 value_token: IDENT@38..40 "A" [] [Whitespace(" ")],
                             },
@@ -45,7 +45,7 @@ JsModule {
                 TsExtendsClause {
                     extends_token: EXTENDS_KW@55..63 "extends" [] [Whitespace(" ")],
                     types: TsTypeList [
-                        TsNameWithTypeArguments {
+                        TsReferenceType {
                             name: JsReferenceIdentifier {
                                 value_token: IDENT@63..65 "A" [] [Whitespace(" ")],
                             },
@@ -56,7 +56,7 @@ JsModule {
                 TsExtendsClause {
                     extends_token: EXTENDS_KW@65..73 "extends" [] [Whitespace(" ")],
                     types: TsTypeList [
-                        TsNameWithTypeArguments {
+                        TsReferenceType {
                             name: JsReferenceIdentifier {
                                 value_token: IDENT@73..75 "B" [] [Whitespace(" ")],
                             },
@@ -92,7 +92,7 @@ JsModule {
             extends_clause: TsExtendsClause {
                 extends_token: EXTENDS_KW@113..121 "extends" [] [Whitespace(" ")],
                 types: TsTypeList [
-                    TsNameWithTypeArguments {
+                    TsReferenceType {
                         name: JsReferenceIdentifier {
                             value_token: IDENT@121..122 "A" [] [],
                         },
@@ -131,7 +131,7 @@ JsModule {
       2: TS_IMPLEMENTS_CLAUSE@27..40
         0: IMPLEMENTS_KW@27..38 "implements" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@38..40
-          0: TS_NAME_WITH_TYPE_ARGUMENTS@38..40
+          0: TS_REFERENCE_TYPE@38..40
             0: JS_REFERENCE_IDENTIFIER@38..40
               0: IDENT@38..40 "A" [] [Whitespace(" ")]
             1: (empty)
@@ -145,14 +145,14 @@ JsModule {
       2: TS_EXTENDS_CLAUSE@55..65
         0: EXTENDS_KW@55..63 "extends" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@63..65
-          0: TS_NAME_WITH_TYPE_ARGUMENTS@63..65
+          0: TS_REFERENCE_TYPE@63..65
             0: JS_REFERENCE_IDENTIFIER@63..65
               0: IDENT@63..65 "A" [] [Whitespace(" ")]
             1: (empty)
       3: TS_EXTENDS_CLAUSE@65..75
         0: EXTENDS_KW@65..73 "extends" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@73..75
-          0: TS_NAME_WITH_TYPE_ARGUMENTS@73..75
+          0: TS_REFERENCE_TYPE@73..75
             0: JS_REFERENCE_IDENTIFIER@73..75
               0: IDENT@73..75 "B" [] [Whitespace(" ")]
             1: (empty)
@@ -178,7 +178,7 @@ JsModule {
       3: TS_EXTENDS_CLAUSE@113..124
         0: EXTENDS_KW@113..121 "extends" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@121..124
-          0: TS_NAME_WITH_TYPE_ARGUMENTS@121..122
+          0: TS_REFERENCE_TYPE@121..122
             0: JS_REFERENCE_IDENTIFIER@121..122
               0: IDENT@121..122 "A" [] []
             1: (empty)

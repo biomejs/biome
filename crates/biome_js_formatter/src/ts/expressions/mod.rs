@@ -2,7 +2,6 @@
 
 pub(crate) mod as_expression;
 pub(crate) mod instantiation_expression;
-pub(crate) mod name_with_type_arguments;
 pub(crate) mod non_null_assertion_expression;
 pub(crate) mod satisfies_expression;
 pub(crate) mod type_arguments;

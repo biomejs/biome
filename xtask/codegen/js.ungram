@@ -1989,7 +1989,7 @@ TsExtendsClause =
 	'extends'
 	types: TsTypeList
 
-TsTypeList = (TsNameWithTypeArguments (',' TsNameWithTypeArguments)*)
+TsTypeList = (TsReferenceType (',' TsReferenceType)*)
 
 TsTypeMemberList = AnyTsTypeMember*
 
@@ -2206,10 +2206,6 @@ TsSatisfiesExpression =
 TsNonNullAssertionExpression =
 	expression: AnyJsExpression
 	'!'
-
-TsNameWithTypeArguments =
-	name: AnyTsName
-	type_arguments: TsTypeArguments?
 
 AnyTsName =
 	JsReferenceIdentifier

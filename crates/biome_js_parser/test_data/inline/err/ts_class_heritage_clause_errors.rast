@@ -38,7 +38,7 @@ JsModule {
                 TsImplementsClause {
                     implements_token: IMPLEMENTS_KW@36..47 "implements" [] [Whitespace(" ")],
                     types: TsTypeList [
-                        TsNameWithTypeArguments {
+                        TsReferenceType {
                             name: JsReferenceIdentifier {
                                 value_token: IDENT@47..51 "Int" [] [Whitespace(" ")],
                             },
@@ -70,7 +70,7 @@ JsModule {
                 TsImplementsClause {
                     implements_token: IMPLEMENTS_KW@72..83 "implements" [] [Whitespace(" ")],
                     types: TsTypeList [
-                        TsNameWithTypeArguments {
+                        TsReferenceType {
                             name: JsReferenceIdentifier {
                                 value_token: IDENT@83..87 "Int" [] [Whitespace(" ")],
                             },
@@ -81,7 +81,7 @@ JsModule {
                 TsImplementsClause {
                     implements_token: IMPLEMENTS_KW@87..98 "implements" [] [Whitespace(" ")],
                     types: TsTypeList [
-                        TsNameWithTypeArguments {
+                        TsReferenceType {
                             name: JsReferenceIdentifier {
                                 value_token: IDENT@98..102 "Int" [] [Whitespace(" ")],
                             },
@@ -190,7 +190,7 @@ JsModule {
       3: TS_IMPLEMENTS_CLAUSE@36..51
         0: IMPLEMENTS_KW@36..47 "implements" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@47..51
-          0: TS_NAME_WITH_TYPE_ARGUMENTS@47..51
+          0: TS_REFERENCE_TYPE@47..51
             0: JS_REFERENCE_IDENTIFIER@47..51
               0: IDENT@47..51 "Int" [] [Whitespace(" ")]
             1: (empty)
@@ -211,14 +211,14 @@ JsModule {
       3: TS_IMPLEMENTS_CLAUSE@72..87
         0: IMPLEMENTS_KW@72..83 "implements" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@83..87
-          0: TS_NAME_WITH_TYPE_ARGUMENTS@83..87
+          0: TS_REFERENCE_TYPE@83..87
             0: JS_REFERENCE_IDENTIFIER@83..87
               0: IDENT@83..87 "Int" [] [Whitespace(" ")]
             1: (empty)
       4: TS_IMPLEMENTS_CLAUSE@87..102
         0: IMPLEMENTS_KW@87..98 "implements" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@98..102
-          0: TS_NAME_WITH_TYPE_ARGUMENTS@98..102
+          0: TS_REFERENCE_TYPE@98..102
             0: JS_REFERENCE_IDENTIFIER@98..102
               0: IDENT@98..102 "Int" [] [Whitespace(" ")]
             1: (empty)

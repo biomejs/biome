@@ -5,6 +5,7 @@ mod statement;
 pub mod ts_parse_error;
 mod types;
 
+use self::types::parse_ts_reference_type;
 use crate::syntax::expr::{parse_identifier, parse_unary_expr, ExpressionContext};
 use crate::syntax::js_parse_error::expected_expression;
 
@@ -97,7 +98,7 @@ pub(crate) fn parse_ts_implements_clause(p: &mut JsParser) -> ParsedSyntax {
 fn expect_ts_type_list(p: &mut JsParser, clause_name: &str) -> CompletedMarker {
     let list = p.start();
 
-    if parse_ts_name_with_type_arguments(p).is_absent() {
+    if parse_ts_reference_type(p, TypeContext::default()).is_absent() {
         p.error(p.err_builder(
             format!("'{}' list cannot be empty.", clause_name),
             p.cur_range().start()..p.cur_range().start(),
@@ -110,25 +111,13 @@ fn expect_ts_type_list(p: &mut JsParser, clause_name: &str) -> CompletedMarker {
         // test_err ts ts_extends_trailing_comma
         // interface A {}
         // interface B extends A, {}
-        if parse_ts_name_with_type_arguments(p).is_absent() {
+        if parse_ts_reference_type(p, TypeContext::default()).is_absent() {
             p.error(p.err_builder("Trailing comma not allowed.", comma_range));
             break;
         }
     }
 
     list.complete(p, TS_TYPE_LIST)
-}
-
-fn parse_ts_name_with_type_arguments(p: &mut JsParser) -> ParsedSyntax {
-    parse_ts_name(p).map(|name| {
-        let m = name.precede(p);
-
-        if !p.has_preceding_line_break() {
-            parse_ts_type_arguments(p, TypeContext::default()).ok();
-        }
-
-        m.complete(p, TS_NAME_WITH_TYPE_ARGUMENTS)
-    })
 }
 
 pub(crate) fn try_parse<T, E>(

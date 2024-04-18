@@ -23,7 +23,7 @@ JsModule {
             extends_clause: TsExtendsClause {
                 extends_token: EXTENDS_KW@27..35 "extends" [] [Whitespace(" ")],
                 types: TsTypeList [
-                    TsNameWithTypeArguments {
+                    TsReferenceType {
                         name: JsReferenceIdentifier {
                             value_token: IDENT@35..36 "A" [] [],
                         },
@@ -63,7 +63,7 @@ JsModule {
       3: TS_EXTENDS_CLAUSE@27..38
         0: EXTENDS_KW@27..35 "extends" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@35..38
-          0: TS_NAME_WITH_TYPE_ARGUMENTS@35..36
+          0: TS_REFERENCE_TYPE@35..36
             0: JS_REFERENCE_IDENTIFIER@35..36
               0: IDENT@35..36 "A" [] []
             1: (empty)
