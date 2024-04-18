@@ -19,6 +19,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Editors
 
+#### Bug fixes
+
+- Fix [#2403](https://github.com/biomejs/biome/issues/2403) by printing the errors in the client console. Contributed by @ematipico
+
 ### Formatter
 
 #### Bug fixes
@@ -1142,7 +1146,7 @@ Additionally, the following rules are now recommended:
 - Add rule [noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites/).
   Contributed by @vasucp1207
 
-- Add rule [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/). 
+- Add rule [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/).
   Contributed by @vohoanglong0107
 
 #### Enhancements
