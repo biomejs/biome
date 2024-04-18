@@ -21,7 +21,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           # Configure which types are allowed (newline-delimited).
-          # Default: https://github.com/commitizen/conventional-commit-types
+          # ref: CONTRIBUTING.md
           types: |
             feat
             fix
