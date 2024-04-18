@@ -293,6 +293,8 @@ docs: fix link to website page
 test(lint): add more cases to handle invalid rules
 ```
 
+We are using [action-semantic-pull-request](https://github.com/amannn/action-semantic-pull-request) to lint the titles of pull requests. If the 'Lint Pull Request Titles' workflow fails, please correct the title.
+
 ## Creating pull requests
 
 When creating a new pull request, it's preferable to use a conventional commit-formatted title, as this title will be used as the default commit message on the squashed commit after merging.
