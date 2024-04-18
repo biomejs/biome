@@ -6,11 +6,19 @@ use biome_formatter::{
 
 use crate::context::TabWidth;
 use crate::js::expressions::array_expression::FormatJsArrayExpressionOptions;
-use crate::js::lists::template_element_list::{TemplateElementIndention, TemplateElementLayout};
+use crate::js::lists::template_element_list::TemplateElementIndention;
 use biome_js_syntax::{
     AnyJsExpression, JsSyntaxNode, JsSyntaxToken, JsTemplateElement, TsTemplateElement,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+
+enum TemplateElementLayout {
+    /// Tries to format the expression on a single line regardless of the print width.
+    SingleLine,
+
+    /// Tries to format the expression on a single line but may break the expression if the line otherwise exceeds the print width.
+    Fit,
+}
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsTemplateElement {
@@ -44,8 +52,6 @@ declare_node_union! {
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct TemplateElementOptions {
-    pub(crate) layout: TemplateElementLayout,
-
     /// The indention to use for this element
     pub(crate) indention: TemplateElementIndention,
 
@@ -66,7 +72,7 @@ impl FormatTemplateElement {
 
 impl Format<JsFormatContext> for FormatTemplateElement {
     fn fmt(&self, f: &mut JsFormatter) -> FormatResult<()> {
-        let format_expression = format_with(|f| match &self.element {
+        let mut format_expression = format_with(|f| match &self.element {
             AnyTemplateElement::JsTemplateElement(template) => match template.expression()? {
                 AnyJsExpression::JsArrayExpression(expression) => {
                     let option = FormatJsArrayExpressionOptions {
@@ -80,9 +86,19 @@ impl Format<JsFormatContext> for FormatTemplateElement {
             AnyTemplateElement::TsTemplateElement(template) => {
                 write!(f, [template.ty().format()])
             }
-        });
+        })
+        .memoized();
 
-        let format_inner = format_with(|f: &mut JsFormatter| match self.options.layout {
+        let layout =
+            if !self.element.has_new_line_in_range() && 
+            // to make sure the expression won't break to avoid reformatting issue
+            !format_expression.inspect(f)?.will_break() {
+                TemplateElementLayout::SingleLine
+            } else {
+                TemplateElementLayout::Fit
+            };
+
+        let format_inner = format_with(|f: &mut JsFormatter| match layout {
             TemplateElementLayout::SingleLine => {
                 let mut buffer = RemoveSoftLinesBuffer::new(f);
                 write!(buffer, [format_expression])
@@ -111,6 +127,7 @@ impl Format<JsFormatContext> for FormatTemplateElement {
                                 | JsLogicalExpression(_)
                                 | JsInstanceofExpression(_)
                                 | JsInExpression(_)
+                                | JsIdentifierExpression(_)
                         )
                     );
 
@@ -178,6 +195,10 @@ impl AnyTemplateElement {
             AnyTemplateElement::JsTemplateElement(template) => template.r_curly_token(),
             AnyTemplateElement::TsTemplateElement(template) => template.r_curly_token(),
         }
+    }
+
+    fn has_new_line_in_range(&self) -> bool {
+        self.syntax().text().contains_char('\n')
     }
 }
 
