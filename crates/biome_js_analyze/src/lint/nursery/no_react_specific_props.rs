@@ -69,7 +69,7 @@ impl Rule for NoReactSpecificProps {
         Some(RuleDiagnostic::new(
             rule_category!(),
             range,
-            markup!("This JSX property is specific to React."),
+            markup!("This JSX attribute is specific to React."),
         ))
     }
 
