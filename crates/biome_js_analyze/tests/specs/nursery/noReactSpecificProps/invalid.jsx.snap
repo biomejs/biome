@@ -19,7 +19,15 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX property is specific to React.
+  ! This JSX attribute is specific to React.
+  
+    1 │ //Case with className
+  > 2 │ <div className="greeting">Hello world!</div>;
+      │      ^^^^^^^^^
+    3 │ 
+    4 │ //Case with className with expression
+  
+  i This attribute may not be supported by non-React frameworks, as it is not native to HTML.
   
     1 │ //Case with className
   > 2 │ <div className="greeting">Hello world!</div>;
@@ -41,7 +49,15 @@ invalid.jsx:2:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:5:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX property is specific to React.
+  ! This JSX attribute is specific to React.
+  
+    4 │ //Case with className with expression
+  > 5 │ <div className={"greeting"}>Hello world!</div>;
+      │      ^^^^^^^^^
+    6 │ 
+    7 │ //Case with htmlFor
+  
+  i This attribute may not be supported by non-React frameworks, as it is not native to HTML.
   
     4 │ //Case with className with expression
   > 5 │ <div className={"greeting"}>Hello world!</div>;
@@ -64,7 +80,14 @@ invalid.jsx:5:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:8:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX property is specific to React.
+  ! This JSX attribute is specific to React.
+  
+    7 │ //Case with htmlFor
+  > 8 │ <div htmlFor="greeting">Hello world!</div>;
+      │      ^^^^^^^
+    9 │ 
+  
+  i This attribute may not be supported by non-React frameworks, as it is not native to HTML.
   
     7 │ //Case with htmlFor
   > 8 │ <div htmlFor="greeting">Hello world!</div>;
