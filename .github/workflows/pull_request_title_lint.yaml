@@ -23,15 +23,13 @@ jobs:
           # Configure which types are allowed (newline-delimited).
           # Default: https://github.com/commitizen/conventional-commit-types
           types: |
-            fix
             feat
-            chore
-            ci
+            fix
             docs
-            refactor
-            release
             test
-            revert
+            chore
+            perf
+            refactor
           # Configure that a scope must always be provided.
           requireScope: false
           # Configure which scopes are disallowed in PR titles (newline-delimited).
@@ -57,4 +55,3 @@ jobs:
           # event triggers in your workflow.
           ignoreLabels: |
             bot
-            ignore-semantic-pull-request
