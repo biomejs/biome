@@ -63,7 +63,7 @@ impl Rule for NoCssEmptyBlock {
             }
         } else if node.is_empty() {
             let has_comments_inside_block = node.r_curly_token().ok()?.has_leading_comments()
-                && node.l_curly_token().ok()?.has_trailing_comments();
+                || node.l_curly_token().ok()?.has_trailing_comments();
 
             if has_comments_inside_block {
                 return None;

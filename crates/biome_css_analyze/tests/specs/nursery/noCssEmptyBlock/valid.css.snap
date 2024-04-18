@@ -4,7 +4,7 @@ expression: valid.css
 ---
 # Input
 ```css
-@import "foo.css";
+/* CssDeclarationOrRuleBlock */
 a { color: pink; }
 a { /* foo */ }
 a {
@@ -17,102 +17,61 @@ a {
 a {
     /*\nfoo\nbar\n*/
 }
+
+/* CssRuleBlock */
 @media print { a { color: pink; } }
 @media print { a { /* foo */ } }
+
+/* CssDeclarationBlock */
+@font-palette-values --identifier {
+    font-family: Bixa;
+}
+
+@font-face {
+    font-family: "Trickster";
+    src:
+      local("Trickster"),
+      url("trickster-COLRv1.otf") format("opentype") tech(color-COLRv1),
+      url("trickster-outline.otf") format("opentype"),
+      url("trickster-outline.woff") format("woff");
+}
+
+/* CssKeyframesBlock */
+@keyframes slidein {
+    from {
+      transform: translateX(0%);
+    }
+
+    to {
+      transform: translateX(100%);
+    }
+}
+
+/* CssFontFeatureValuesBlock */
+@font-feature-values Font One {
+  @styleset {
+    nice-style: 12;
+  }
+}
+
+/* CssPageAtRuleBlock */
+@page {
+  size: 8.5in 9in;
+  margin-top: 4in;
+}
+@page :right {
+  size: 11in;
+  margin-top: 4in;
+}
+
+
+/* CssDeclarationOrAtRuleBlock */
+@page {
+  @top-right {
+    content: "Page " counter(pageNumber);
+  }
+}
+
+@import "foo.css";
 @import url(x.css)
-```
-
-# Diagnostics
-```
-valid.css:3:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected empty block is not allowed
-  
-    1 │ @import "foo.css";
-    2 │ a { color: pink; }
-  > 3 │ a { /* foo */ }
-      │   ^^^^^^^^^^^^^
-    4 │ a {
-    5 │     /* foo */
-  
-  i Consider removing the empty block or adding styles inside it.
-  
-
-```
-
-```
-valid.css:4:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected empty block is not allowed
-  
-    2 │ a { color: pink; }
-    3 │ a { /* foo */ }
-  > 4 │ a {
-      │   ^
-  > 5 │     /* foo */
-  > 6 │ }
-      │ ^
-    7 │ a {
-    8 │     /* foo */
-  
-  i Consider removing the empty block or adding styles inside it.
-  
-
-```
-
-```
-valid.css:7:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected empty block is not allowed
-  
-     5 │     /* foo */
-     6 │ }
-   > 7 │ a {
-       │   ^
-   > 8 │     /* foo */
-   > 9 │     /* bar */
-  > 10 │ }
-       │ ^
-    11 │ a {
-    12 │     /*\nfoo\nbar\n*/
-  
-  i Consider removing the empty block or adding styles inside it.
-  
-
-```
-
-```
-valid.css:11:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected empty block is not allowed
-  
-     9 │     /* bar */
-    10 │ }
-  > 11 │ a {
-       │   ^
-  > 12 │     /*\nfoo\nbar\n*/
-  > 13 │ }
-       │ ^
-    14 │ @media print { a { color: pink; } }
-    15 │ @media print { a { /* foo */ } }
-  
-  i Consider removing the empty block or adding styles inside it.
-  
-
-```
-
-```
-valid.css:15:18 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected empty block is not allowed
-  
-    13 │ }
-    14 │ @media print { a { color: pink; } }
-  > 15 │ @media print { a { /* foo */ } }
-       │                  ^^^^^^^^^^^^^
-    16 │ @import url(x.css)
-  
-  i Consider removing the empty block or adding styles inside it.
-  
-
 ```
