@@ -73,7 +73,7 @@ impl Rule for NoReactSpecificProps {
             )
             .detail(
                 range,
-                "This attribute may not be supported by non-React frameworks, as they are not native to HTML.",
+                "This attribute may not be supported by non-React frameworks, as it is not native to HTML.",
             ),
         )
     }
