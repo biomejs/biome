@@ -1,6 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_syntax::CssDeclarationOrRuleBlock;
+use biome_css_syntax::stmt_ext::CssBlockLike;
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
@@ -47,25 +47,29 @@ pub struct NoCssEmptyBlockOptions {
 }
 
 impl Rule for NoCssEmptyBlock {
-    type Query = Ast<CssDeclarationOrRuleBlock>;
-    type State = CssDeclarationOrRuleBlock;
+    type Query = Ast<CssBlockLike>;
+    type State = CssBlockLike;
     type Signals = Option<Self::State>;
     type Options = Box<NoCssEmptyBlockOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let options = ctx.options();
-        let should_alert_comments = options.ignore.iter().any(|i| i == "comments");
+        let disallow_comments_inside_empty_block = options.ignore.iter().any(|i| i == "comments");
 
-        if should_alert_comments {
-            if node.items().into_iter().next().is_none() {
+        if disallow_comments_inside_empty_block {
+            if node.is_empty() {
                 return Some(node.clone());
             }
-        } else if node.items().into_iter().next().is_none()
-            && !node.r_curly_token().ok()?.has_leading_comments()
-            && !node.l_curly_token().ok()?.has_trailing_comments()
-        {
-            return Some(node.clone());
+        } else if node.is_empty() {
+            let has_comments_inside_block = node.r_curly_token().ok()?.has_leading_comments()
+                && node.l_curly_token().ok()?.has_trailing_comments();
+
+            if has_comments_inside_block {
+                return None;
+            } else {
+                return Some(node.clone());
+            }
         }
 
         None
@@ -86,7 +90,7 @@ impl Rule for NoCssEmptyBlock {
                 },
             )
             .note(markup! {
-                    "This note will give you more information."
+                    "Consider removing the empty block or adding styles inside it."
             }),
         )
     }

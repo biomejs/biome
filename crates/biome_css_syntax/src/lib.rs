@@ -1,6 +1,7 @@
 #[macro_use]
 mod file_source;
 mod generated;
+pub mod stmt_ext;
 mod syntax_node;
 
 pub use self::generated::*;
