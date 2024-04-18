@@ -8,6 +8,7 @@ use biome_parser::{
 };
 
 use self::operation::{is_at_operation, parse_operation_definition};
+pub(crate) use operation::is_at_selection_set_end;
 
 struct DefinitionListParseRecovery;
 
@@ -17,8 +18,7 @@ impl ParseRecovery for DefinitionListParseRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_BOGUS_DEFINITION;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        // TODO: recover at any definition
-        is_at_operation(p)
+        is_at_definition(p)
     }
 }
 
@@ -55,4 +55,10 @@ fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
         _ if is_at_operation(p) => parse_operation_definition(p),
         _ => Absent,
     }
+}
+
+#[inline]
+fn is_at_definition(p: &GraphqlParser<'_>) -> bool {
+    // TODO: recover at any definition
+    is_at_operation(p)
 }

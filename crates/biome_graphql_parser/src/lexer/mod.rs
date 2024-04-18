@@ -507,10 +507,10 @@ impl<'src> GraphqlLexer<'src> {
                 b'\\' => self.consume_escape_sequence_in_string(state),
                 b'\n' | b'\r' => (
                     LexStringState::Terminated,
-                    Some(
-                        ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                            .with_detail(self.position..self.position + 1, "line breaks here"),
-                    ),
+                    Some(ParseDiagnostic::new(
+                        "Missing closing quote",
+                        start..self.text_position(),
+                    )),
                 ),
                 _ => {
                     self.advance_char_unchecked();

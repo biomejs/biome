@@ -1,0 +1,79 @@
+{
+	hero {
+		name,
+		age
+
+}
+
+{
+	hero(name: "Tony Stark"
+}
+
+{
+	hero(name "Tony Stark")
+		country,
+		name,
+		age
+	}
+}
+
+{
+	hero(name: "Tony Stark") {
+		country,
+		name,
+		age,
+		height(unit FOOT,
+	}
+}
+
+{
+  ironMan: (name: "Tony Stark")
+}
+
+{
+  ironMan: hero(name: "Tony Stark" {
+		country,
+		firstWife: wife(name: "Pepper"){
+		}
+}
+
+{
+  ironMan: hero(name: "Tony Stark") @{
+		country @,
+		name,
+		age
+	}
+}
+
+# Fragment spread
+{
+  ...
+}
+
+{
+  ... @deprecated
+}
+
+{
+  ironMan: (: "Tony Stark") @ {
+		...
+	}
+}
+
+{
+  ... {
+		hero
+}
+
+{
+  ... @
+		hero
+	}
+}
+
+{
+	...  Hero @ {
+		name,
+		age
+	}
+}

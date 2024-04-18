@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/comments/return-statement.js
 ---
-
 # Input
 
 ```js
@@ -128,14 +127,14 @@ function inlineComment() {
   ) || 42
 }
 
-// TODO: fix idempotency issue
-// function multilineBlockSameLine() {
-//   return (
-//     /**
-//     * @type {string}
-//     */ 'result'
-//   )
-// }
+
+function multilineBlockSameLine() {
+  return (
+    /**
+    * @type {string}
+    */ 'result'
+  )
+}
 
 function multilineBlockNextLine() {
   return (
@@ -201,28 +200,6 @@ function singleLineBlockNextLine() {
  }
  
  function excessiveEverything() {
-@@ -119,13 +121,14 @@
-   return /* hi */ 42 || 42;
- }
- 
--function multilineBlockSameLine() {
--  return (
--    /**
--     * @type {string}
--     */ "result"
--  );
--}
-+// TODO: fix idempotency issue
-+// function multilineBlockSameLine() {
-+//   return (
-+//     /**
-+//     * @type {string}
-+//     */ 'result'
-+//   )
-+// }
- 
- function multilineBlockNextLine() {
-   return (
 ```
 
 # Output
@@ -351,14 +328,13 @@ function inlineComment() {
   return /* hi */ 42 || 42;
 }
 
-// TODO: fix idempotency issue
-// function multilineBlockSameLine() {
-//   return (
-//     /**
-//     * @type {string}
-//     */ 'result'
-//   )
-// }
+function multilineBlockSameLine() {
+  return (
+    /**
+     * @type {string}
+     */ "result"
+  );
+}
 
 function multilineBlockNextLine() {
   return (
@@ -397,5 +373,3 @@ function singleLineBlockNextLine() {
   );
 }
 ```
-
-

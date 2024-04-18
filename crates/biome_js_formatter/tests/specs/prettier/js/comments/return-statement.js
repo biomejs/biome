@@ -120,14 +120,14 @@ function inlineComment() {
   ) || 42
 }
 
-// TODO: fix idempotency issue
-// function multilineBlockSameLine() {
-//   return (
-//     /**
-//     * @type {string}
-//     */ 'result'
-//   )
-// }
+
+function multilineBlockSameLine() {
+  return (
+    /**
+    * @type {string}
+    */ 'result'
+  )
+}
 
 function multilineBlockNextLine() {
   return (
