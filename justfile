@@ -40,8 +40,6 @@ gen-lint:
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
   just gen-bindings
   just format
-  cargo lintdoc
-  just gen-web
 
 # Generates code generated files for the website
 gen-web:
