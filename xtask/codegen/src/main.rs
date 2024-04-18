@@ -8,8 +8,6 @@ mod generate_license;
 mod generate_migrate_eslint;
 #[cfg(feature = "schema")]
 mod generate_schema;
-#[cfg(feature = "website")]
-mod generate_website;
 mod promote_rule;
 use xtask::{project_root, pushd, Result};
 
@@ -23,8 +21,6 @@ use crate::generate_license::generate_license;
 use crate::generate_migrate_eslint::generate_migrate_eslint;
 #[cfg(feature = "schema")]
 use crate::generate_schema::generate_configuration_schema;
-#[cfg(feature = "website")]
-use crate::generate_website::generate_files;
 use crate::promote_rule::promote_rule;
 
 use xtask::Mode::Overwrite;
@@ -79,18 +75,12 @@ fn main() -> Result<()> {
         TaskCommand::PromoteRule { name, group } => {
             promote_rule(&name, &group);
         }
-        TaskCommand::Website => {
-            #[cfg(feature = "website")]
-            generate_files()?;
-        }
         TaskCommand::All => {
             generate_tables()?;
             generate_ast(Overwrite, vec![])?;
             generate_parser_tests(Overwrite)?;
             generate_formatters();
             generate_analyzer()?;
-            #[cfg(feature = "website")]
-            generate_files()?;
             #[cfg(feature = "configuration")]
             generate_rules_configuration(Overwrite)?;
             #[cfg(feature = "schema")]
