@@ -64,6 +64,6 @@ pub(crate) fn parse_directive(p: &mut GraphqlParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_directive(p: &mut GraphqlParser<'_>) -> bool {
+pub(crate) fn is_at_directive(p: &GraphqlParser<'_>) -> bool {
     p.at(T![@])
 }

@@ -9,6 +9,8 @@ use biome_parser::{
 };
 
 use super::{
+    definitions::is_at_selection_set_end,
+    directive::is_at_directive,
     is_at_name,
     parse_error::{expected_argument, expected_value},
     value::parse_value,
@@ -22,7 +24,7 @@ impl ParseRecovery for ArgumentListParseRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_ARGUMENT;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_name(p)
+        is_at_name(p) || is_at_argument_list_end(p)
     }
 }
 
@@ -40,7 +42,7 @@ impl ParseNodeList for ArgumentList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')'])
+        is_at_argument_list_end(p)
     }
 
     fn recover(
@@ -80,4 +82,16 @@ fn parse_argument(p: &mut GraphqlParser) -> ParsedSyntax {
     parse_value(p).or_add_diagnostic(p, expected_value);
 
     Present(m.complete(p, GRAPHQL_ARGUMENT))
+}
+
+/// Arguments are only allowed in the following cases:
+/// - Inside a selection set
+/// - In a directive
+#[inline]
+pub(crate) fn is_at_argument_list_end(p: &GraphqlParser<'_>) -> bool {
+    p.at(T![')'])
+    // also handle the start of a selection set
+    || is_at_selection_set_end(p)
+    // at the start of a new directive
+    || is_at_directive(p)
 }

@@ -1,0 +1,8 @@
+query ($storyId: !, $comments: [!], $tags: [!]!, $posts: PostInput]!, $input: [InputType!) {
+	likeStory
+}
+
+query ($storyId: ![, $comments: !], $tags: [[[) {
+	likeStory
+}
+
