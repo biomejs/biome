@@ -1,3 +1,4 @@
+use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
@@ -5,8 +6,6 @@ use biome_diagnostics::Applicability;
 use biome_js_factory::make::{jsx_ident, jsx_name};
 use biome_js_syntax::{AnyJsxAttributeName, JsxAttribute};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
-
-use crate::JsRuleAction;
 
 declare_rule! {
     /// Prevents React-specific JSX properties from being used.
@@ -66,11 +65,17 @@ impl Rule for NoReactSpecificProps {
     }
 
     fn diagnostic(_: &RuleContext<Self>, (range, _): &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            range,
-            markup!("This JSX attribute is specific to React."),
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                range,
+                markup!("This JSX attribute is specific to React."),
+            )
+            .detail(
+                range,
+                "This attribute may not be supported by non-React frameworks, as they are not native to HTML.",
+            ),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, (_, replacement): &Self::State) -> Option<JsRuleAction> {
