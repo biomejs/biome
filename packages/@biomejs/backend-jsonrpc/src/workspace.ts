@@ -909,6 +909,10 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Disallow non adjacent overload signatures.
+	 */
+	noAdjacentOverloadSignatures?: RuleConfiguration_for_Null;
+	/**
 	 * WIP: This rule hasn't been implemented yet.
 	 */
 	noColorInvalidHex?: RuleConfiguration_for_Null;
@@ -1997,6 +2001,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/noAdjacentOverloadSignatures"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"

@@ -1,0 +1,147 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+declare namespace Foo {
+  export function foo_declare(s: string): void;
+  export function bar_declare(): void;
+  export function foo_declare(n: number): void;
+  export function foo_declare(sn: string | number): void;
+}
+
+type Foo = {
+  foo_type(s: string): void;
+  foo_type(n: number): void;
+  bar_type(): void;
+  foo_type(sn: string | number): void;
+};
+
+interface Foo {
+  foo_interface(s: string): void;
+  foo_interface(n: number): void;
+  bar_interface(): void;
+  foo_interface(sn: string | number): void;
+}
+
+class A {
+  fooA(s: string): void;
+  fooA(n: number): void;
+  barA(): void {};
+  fooA(sn: string | number): void {};
+}
+
+class B {
+  fooB(s: string): void;
+  barB(): void {};
+  fooB(n: number): void;
+  fooB(sn: string | number): void {};
+}
+
+class C {
+  barC(): void {};
+  fooC(s: string): void;
+  fooC(s: string): void;
+  barC(): void {};
+  fooC(s: string): void;
+  fooC(sn: string | number): void {};
+  barC(): void {};
+}
+
+export function foo(s: string): void;
+export function foo(n: number): void;
+export function bar(): void;
+export function foo(sn: string | number): void;
+
+```
+
+# Diagnostics
+```
+invalid.js:5:19 lint/nursery/noAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All foo_declare signatures must be adjacent.
+  
+    3 │   export function bar_declare(): void;
+    4 │   export function foo_declare(n: number): void;
+  > 5 │   export function foo_declare(sn: string | number): void;
+      │                   ^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i All foo_type signatures must be adjacent.
+  
+     9 │   foo_type(s: string): void;
+    10 │   foo_type(n: number): void;
+  > 11 │   bar_type(): void;
+       │                    
+  > 12 │   foo_type(sn: string | number): void;
+       │   ^^^^^^^^
+    13 │ };
+    14 │ 
+  
+  i All foo_interface signatures must be adjacent.
+  
+    16 │   foo_interface(s: string): void;
+    17 │   foo_interface(n: number): void;
+  > 18 │   bar_interface(): void;
+       │                         
+  > 19 │   foo_interface(sn: string | number): void;
+       │   ^^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i All fooA signatures must be adjacent.
+  
+    23 │   fooA(s: string): void;
+    24 │   fooA(n: number): void;
+  > 25 │   barA(): void {};
+       │                   
+  > 26 │   fooA(sn: string | number): void {};
+       │   ^^^^
+    27 │ }
+    28 │ 
+  
+  i All fooB signatures must be adjacent.
+  
+    30 │   fooB(s: string): void;
+    31 │   barB(): void {};
+  > 32 │   fooB(n: number): void;
+       │                         
+  > 33 │   fooB(sn: string | number): void {};
+       │   ^^^^
+    34 │ }
+    35 │ 
+  
+  i All barC signatures must be adjacent.
+  
+    40 │   barC(): void {};
+    41 │   fooC(s: string): void;
+  > 42 │   fooC(sn: string | number): void {};
+       │                                      
+  > 43 │   barC(): void {};
+       │   ^^^^
+    44 │ }
+    45 │ 
+  
+  i All fooC signatures must be adjacent.
+  
+    39 │   fooC(s: string): void;
+    40 │   barC(): void {};
+  > 41 │   fooC(s: string): void;
+       │                         
+  > 42 │   fooC(sn: string | number): void {};
+       │   ^^^^
+    43 │   barC(): void {};
+    44 │ }
+  
+  i All foo signatures must be adjacent.
+  
+    47 │ export function foo(n: number): void;
+    48 │ export function bar(): void;
+  > 49 │ export function foo(sn: string | number): void;
+       │                 ^^^
+    50 │ 
+  
+
+```

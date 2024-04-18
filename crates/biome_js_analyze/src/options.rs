@@ -4,6 +4,7 @@ use crate::lint;
 
 pub type NoAccessKey = <lint::a11y::no_access_key::NoAccessKey as biome_analyze::Rule>::Options;
 pub type NoAccumulatingSpread = < lint :: performance :: no_accumulating_spread :: NoAccumulatingSpread as biome_analyze :: Rule > :: Options ;
+pub type NoAdjacentOverloadSignatures = < lint :: nursery :: no_adjacent_overload_signatures :: NoAdjacentOverloadSignatures as biome_analyze :: Rule > :: Options ;
 pub type NoApproximativeNumericConstant = < lint :: suspicious :: no_approximative_numeric_constant :: NoApproximativeNumericConstant as biome_analyze :: Rule > :: Options ;
 pub type NoArguments = <lint::style::no_arguments::NoArguments as biome_analyze::Rule>::Options;
 pub type NoAriaHiddenOnFocusable = < lint :: a11y :: no_aria_hidden_on_focusable :: NoAriaHiddenOnFocusable as biome_analyze :: Rule > :: Options ;
