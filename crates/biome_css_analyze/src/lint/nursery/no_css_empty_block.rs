@@ -6,14 +6,10 @@ use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
 
 declare_rule! {
-    /// Succinct description of the rule.
+    /// Disallow css empty blocks.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding stylelint rule (if any):
+    /// This rule disallows empty block.
+    /// By default, it will allow empty blocks with comments inside.
     ///
     /// ## Examples
     ///
@@ -23,11 +19,43 @@ declare_rule! {
     /// p {}
     /// ```
     ///
+    /// ```css,expect_diagnostic
+    /// .b {}
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// @media print { a {} }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```css
     /// p {
     ///   color: red;
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// p {
+    ///   /* foo */
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// @media print { a { color: pink; } }
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// Exclude comments from being treated as content inside of a block.
+    ///
+    /// ```json
+    /// {
+    ///     "noCssEmptyBlock": {
+    ///         "options": {
+    ///           "ignore": ["comments"]
+    ///         }
+    ///     }
     /// }
     /// ```
     ///
@@ -76,10 +104,6 @@ impl Rule for NoCssEmptyBlock {
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
         let span = node.range();
         Some(
             RuleDiagnostic::new(
