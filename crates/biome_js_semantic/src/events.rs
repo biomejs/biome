@@ -564,7 +564,7 @@ impl SemanticEventExtractor {
                         .find(|x| x.kind() != TS_QUALIFIED_NAME)
                         .kind()
                     {
-                        Some(TS_REFERENCE_TYPE | TS_NAME_WITH_TYPE_ARGUMENTS) => {
+                        Some(TS_REFERENCE_TYPE) => {
                             if matches!(node.syntax().parent().kind(), Some(TS_QUALIFIED_NAME)) {
                                 self.push_reference(
                                     BindingName::Value(name),

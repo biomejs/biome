@@ -54,7 +54,7 @@ JsModule {
             extends_clause: TsExtendsClause {
                 extends_token: EXTENDS_KW@45..53 "extends" [] [Whitespace(" ")],
                 types: TsTypeList [
-                    TsNameWithTypeArguments {
+                    TsReferenceType {
                         name: JsReferenceIdentifier {
                             value_token: IDENT@53..54 "A" [] [],
                         },
@@ -83,7 +83,7 @@ JsModule {
             extends_clause: TsExtendsClause {
                 extends_token: EXTENDS_KW@78..86 "extends" [] [Whitespace(" ")],
                 types: TsTypeList [
-                    TsNameWithTypeArguments {
+                    TsReferenceType {
                         name: JsReferenceIdentifier {
                             value_token: IDENT@86..87 "A" [] [],
                         },
@@ -98,7 +98,7 @@ JsModule {
                         },
                     },
                     COMMA@95..97 "," [] [Whitespace(" ")],
-                    TsNameWithTypeArguments {
+                    TsReferenceType {
                         name: JsReferenceIdentifier {
                             value_token: IDENT@97..99 "B" [] [Whitespace(" ")],
                         },
@@ -157,7 +157,7 @@ JsModule {
       3: TS_EXTENDS_CLAUSE@45..63
         0: EXTENDS_KW@45..53 "extends" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@53..63
-          0: TS_NAME_WITH_TYPE_ARGUMENTS@53..63
+          0: TS_REFERENCE_TYPE@53..63
             0: JS_REFERENCE_IDENTIFIER@53..54
               0: IDENT@53..54 "A" [] []
             1: TS_TYPE_ARGUMENTS@54..63
@@ -177,7 +177,7 @@ JsModule {
       3: TS_EXTENDS_CLAUSE@78..99
         0: EXTENDS_KW@78..86 "extends" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@86..99
-          0: TS_NAME_WITH_TYPE_ARGUMENTS@86..95
+          0: TS_REFERENCE_TYPE@86..95
             0: JS_REFERENCE_IDENTIFIER@86..87
               0: IDENT@86..87 "A" [] []
             1: TS_TYPE_ARGUMENTS@87..95
@@ -187,7 +187,7 @@ JsModule {
                   0: NUMBER_KW@88..94 "number" [] []
               2: R_ANGLE@94..95 ">" [] []
           1: COMMA@95..97 "," [] [Whitespace(" ")]
-          2: TS_NAME_WITH_TYPE_ARGUMENTS@97..99
+          2: TS_REFERENCE_TYPE@97..99
             0: JS_REFERENCE_IDENTIFIER@97..99
               0: IDENT@97..99 "B" [] [Whitespace(" ")]
             1: (empty)

@@ -5619,32 +5619,6 @@ pub fn ts_module_declaration(
         ],
     ))
 }
-pub fn ts_name_with_type_arguments(name: AnyTsName) -> TsNameWithTypeArgumentsBuilder {
-    TsNameWithTypeArgumentsBuilder {
-        name,
-        type_arguments: None,
-    }
-}
-pub struct TsNameWithTypeArgumentsBuilder {
-    name: AnyTsName,
-    type_arguments: Option<TsTypeArguments>,
-}
-impl TsNameWithTypeArgumentsBuilder {
-    pub fn with_type_arguments(mut self, type_arguments: TsTypeArguments) -> Self {
-        self.type_arguments = Some(type_arguments);
-        self
-    }
-    pub fn build(self) -> TsNameWithTypeArguments {
-        TsNameWithTypeArguments::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::TS_NAME_WITH_TYPE_ARGUMENTS,
-            [
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.type_arguments
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
-}
 pub fn ts_named_tuple_type_element(
     name: JsName,
     colon_token: SyntaxToken,
@@ -7130,7 +7104,7 @@ where
 }
 pub fn ts_type_list<I, S>(items: I, separators: S) -> TsTypeList
 where
-    I: IntoIterator<Item = TsNameWithTypeArguments>,
+    I: IntoIterator<Item = TsReferenceType>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = JsSyntaxToken>,
     S::IntoIter: ExactSizeIterator,

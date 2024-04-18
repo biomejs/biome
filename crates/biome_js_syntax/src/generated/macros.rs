@@ -1010,10 +1010,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TsModuleDeclaration::new_unchecked(node) };
                     $body
                 }
-                $crate::JsSyntaxKind::TS_NAME_WITH_TYPE_ARGUMENTS => {
-                    let $pattern = unsafe { $crate::TsNameWithTypeArguments::new_unchecked(node) };
-                    $body
-                }
                 $crate::JsSyntaxKind::TS_NAMED_TUPLE_TYPE_ELEMENT => {
                     let $pattern = unsafe { $crate::TsNamedTupleTypeElement::new_unchecked(node) };
                     $body
