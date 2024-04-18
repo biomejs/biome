@@ -96,19 +96,6 @@ jobs:
       - name: Run doctests
         run: cargo test --doc
 
-#  fuzz-all:
-#    name: Build and init fuzzers
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout PR branch
-#        uses: actions/checkout@v4
-#      - name: Install toolchain
-#        uses: moonrepo/setup-rust@v1
-#        with:
-#          bins: cargo-fuzz
-#      - name: Run init-fuzzer
-#        run: bash fuzz/init-fuzzer.sh
-
   test-node-api:
     name: Test node.js API
     runs-on: ubuntu-latest
@@ -190,10 +177,6 @@ jobs:
         run: cargo codegen-schema
       - name: Run the bindings codegen
         run: cargo codegen-bindings
-      - name: Run the website codegen
-        run: |
-          cargo lintdoc
-          cargo codegen-website
       - name: Check for git diff
         run: |
           if [[ `git status --porcelain` ]]; then
