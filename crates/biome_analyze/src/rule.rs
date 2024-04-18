@@ -75,6 +75,8 @@ pub enum RuleSource {
     EslintReact(&'static str),
     /// Rules from [Eslint Plugin React Hooks](https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md)
     EslintReactHooks(&'static str),
+    /// Rules from [Eslint Plugin Solid](https://github.com/solidjs-community/eslint-plugin-solid)
+    EslintSolid(&'static str),
     /// Rules from [Eslint Plugin Sonar](https://github.com/SonarSource/eslint-plugin-sonarjs)
     EslintSonarJs(&'static str),
     /// Rules from [Eslint Plugin Stylistic](https://eslint.style)
@@ -108,6 +110,7 @@ impl std::fmt::Display for RuleSource {
             RuleSource::EslintJsxA11y(_) => write!(f, "eslint-plugin-jsx-a11y"),
             RuleSource::EslintReact(_) => write!(f, "eslint-plugin-react"),
             RuleSource::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
+            RuleSource::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
             RuleSource::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
             RuleSource::EslintStylistic(_) => write!(f, "eslint-plugin-stylistic"),
             RuleSource::EslintTypeScript(_) => write!(f, "typescript-eslint"),
@@ -153,6 +156,7 @@ impl RuleSource {
             | Self::EslintReact(rule_name)
             | Self::EslintReactHooks(rule_name)
             | Self::EslintTypeScript(rule_name)
+            | Self::EslintSolid(rule_name)
             | Self::EslintSonarJs(rule_name)
             | Self::EslintStylistic(rule_name)
             | Self::EslintUnicorn(rule_name)
@@ -172,6 +176,7 @@ impl RuleSource {
             Self::EslintReact(rule_name) => format!("react/{rule_name}"),
             Self::EslintReactHooks(rule_name) => format!("react-hooks/{rule_name}"),
             Self::EslintTypeScript(rule_name) => format!("@typescript-eslint/{rule_name}"),
+            Self::EslintSolid(rule_name) => format!("solidjs/{rule_name}"),
             Self::EslintSonarJs(rule_name) => format!("sonarjs/{rule_name}"),
             Self::EslintStylistic(rule_name) => format!("@stylistic/{rule_name}"),
             Self::EslintUnicorn(rule_name) => format!("unicorn/{rule_name}"),
@@ -192,6 +197,7 @@ impl RuleSource {
             Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),
             Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
+            Self::EslintSolid(rule_name) => format!("https://github.com/solidjs-community/eslint-plugin-solid/blob/main/docs/{rule_name}.md"),
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
             Self::EslintStylistic(rule_name) => format!("https://eslint.style/rules/default/{rule_name}"),
             Self::EslintUnicorn(rule_name) => format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}.md"),

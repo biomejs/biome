@@ -953,6 +953,10 @@ export interface Nursery {
 	 */
 	noNodejsModules?: RuleConfiguration_for_Null;
 	/**
+	 * Prevents React-specific JSX properties from being used.
+	 */
+	noReactSpecificProps?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
@@ -1933,6 +1937,7 @@ export type Category =
 	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noNodejsModules"
+	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"

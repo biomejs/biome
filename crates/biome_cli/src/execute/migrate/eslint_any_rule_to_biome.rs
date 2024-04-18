@@ -1190,6 +1190,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_yield.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "solidjs/no-react-specific-props" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_react_specific_props
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "sonarjs/cognitive-complexity" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
