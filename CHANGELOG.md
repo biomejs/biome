@@ -19,9 +19,15 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Editors
 
+#### Bug fixes
+
+- Fix [#2403](https://github.com/biomejs/biome/issues/2403) by printing the errors in the client console. Contributed by @ematipico
+
 ### Formatter
 
 #### Bug fixes
+
+- Add parentheses for the return expression that has leading multiline comments. [#2504](https://github.com/biomejs/biome/pull/2504). Contributed by @ah-yu
 
 ### JavaScript APIs
 
@@ -30,6 +36,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 #### Bug fixes
+
+- Fix case where `jsxRuntime` wasn't being respected by `useImportType` rule ([#2473](https://github.com/biomejs/biome/issues/2473)).Contributed by @arendjr
 
 ### Parser
 
@@ -1138,7 +1146,7 @@ Additionally, the following rules are now recommended:
 - Add rule [noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites/).
   Contributed by @vasucp1207
 
-- Add rule [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/). 
+- Add rule [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/).
   Contributed by @vohoanglong0107
 
 #### Enhancements

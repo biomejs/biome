@@ -23,9 +23,7 @@ gen-all:
   cargo run -p xtask_codegen -- all
   cargo run -p xtask_codegen -- configuration
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
-  cargo lintdoc
   just gen-bindings
-  just gen-web
   just format
 
 # Generates TypeScript types and JSON schema of the configuration
@@ -40,8 +38,6 @@ gen-lint:
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
   just gen-bindings
   just format
-  cargo lintdoc
-  just gen-web
 
 # Generates code generated files for the website
 gen-web:
@@ -61,7 +57,6 @@ gen-grammar *args='':
 
 # Generates the linter documentation and Rust documentation
 documentation:
-  RUSTDOCFLAGS='-D warnings' cargo lintdoc
   RUSTDOCFLAGS='-D warnings' cargo documentation
 
 # Creates a new lint rule in the given path, with the given name. Name has to be camel case.
@@ -148,10 +143,11 @@ new-crate name:
   cargo new --lib crates/{{snakecase(name)}}
   cargo run -p xtask_codegen -- new-crate --name={{snakecase(name)}}
 
-# Creates a new changeset for the final changelog. ONLY FOR CRATES, FOR NOW
+# Creates a new changeset for the final changelog
 new-changeset:
     knope document-change
 
-dry-run:
-    knope release --dry-run > out.txt
+# Dry-run of the release
+new-dry-run-release *args='':
+    knope release --dry-run {{args}}
 

@@ -1,9 +1,12 @@
 blank_issues_enabled: false
 contact_links:
-  - name: VSCode extension issues
+  - name: 📚 Documentation issues
+    url: https://github.com/biomejs/website
+    about: File an issue in the website repository
+  - name: 🧩 VSCode extension issues
     url: https://github.com/biomejs/biome-vscode
     about: File an issue in the biome-vscode repository
-  - name: IntelliJ extension issues
+  - name: 🧩 IntelliJ extension issues
     url: https://github.com/biomejs/biome-intellij
     about: File an issue in the biome-intellij repository
   - name: ✅ Linter rule requests
@@ -21,4 +24,3 @@ contact_links:
   - name: 🆘 Code of Conduct Reports
     url: https://github.com/biomejs/biome/blob/main/CODE_OF_CONDUCT.md#contributor-covenant-code-of-conduct
     about: Please use the contact information in Code of Conduct as issues created here are public
-

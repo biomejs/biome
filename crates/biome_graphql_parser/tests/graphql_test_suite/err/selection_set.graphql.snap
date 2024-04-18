@@ -1,0 +1,1451 @@
+---
+source: crates/biome_graphql_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```graphql
+{
+	hero {
+		name,
+		age
+
+}
+
+{
+	hero(name: "Tony Stark"
+}
+
+{
+	hero(name "Tony Stark")
+		country,
+		name,
+		age
+	}
+}
+
+{
+	hero(name: "Tony Stark") {
+		country,
+		name,
+		age,
+		height(unit FOOT,
+	}
+}
+
+{
+  ironMan: (name: "Tony Stark")
+}
+
+{
+  ironMan: hero(name: "Tony Stark" {
+		country,
+		firstWife: wife(name: "Pepper"){
+		}
+}
+
+{
+  ironMan: hero(name: "Tony Stark") @{
+		country @,
+		name,
+		age
+	}
+}
+
+# Fragment spread
+{
+  ...
+}
+
+{
+  ... @deprecated
+}
+
+{
+  ironMan: (: "Tony Stark") @ {
+		...
+	}
+}
+
+{
+  ... {
+		hero
+}
+
+{
+  ... @
+		hero
+	}
+}
+
+{
+	...  Hero @ {
+		name,
+		age
+	}
+}
+
+```
+
+## AST
+
+```
+GraphqlRoot {
+    bom_token: missing (optional),
+    definitions: GraphqlDefinitionList [
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            selections: GraphqlSelectionList [
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@1..8 "hero" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                    },
+                    arguments: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: GraphqlSelectionSet {
+                        l_curly_token: L_CURLY@8..9 "{" [] [],
+                        selections: GraphqlSelectionList [
+                            GraphqlField {
+                                alias: missing (optional),
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@9..17 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                                },
+                                arguments: missing (optional),
+                                directives: GraphqlDirectiveList [],
+                                selection_set: missing (optional),
+                            },
+                            GraphqlField {
+                                alias: missing (optional),
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@17..23 "age" [Newline("\n"), Whitespace("\t\t")] [],
+                                },
+                                arguments: missing (optional),
+                                directives: GraphqlDirectiveList [],
+                                selection_set: missing (optional),
+                            },
+                        ],
+                        r_curly_token: R_CURLY@23..26 "}" [Newline("\n"), Newline("\n")] [],
+                    },
+                },
+            ],
+            r_curly_token: missing (required),
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@26..29 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@29..35 "hero" [Newline("\n"), Whitespace("\t")] [],
+                    },
+                    arguments: GraphqlArguments {
+                        l_paren_token: L_PAREN@35..36 "(" [] [],
+                        arguments: GraphqlArgumentList [
+                            GraphqlArgument {
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@36..40 "name" [] [],
+                                },
+                                colon_token: COLON@40..42 ":" [] [Whitespace(" ")],
+                                value: GraphqlStringValue {
+                                    graphql_string_literal_token: GRAPHQL_STRING_LITERAL@42..54 "\"Tony Stark\"" [] [],
+                                },
+                            },
+                        ],
+                        r_paren_token: missing (required),
+                    },
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@54..56 "}" [Newline("\n")] [],
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@56..59 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@59..65 "hero" [Newline("\n"), Whitespace("\t")] [],
+                    },
+                    arguments: GraphqlArguments {
+                        l_paren_token: L_PAREN@65..66 "(" [] [],
+                        arguments: GraphqlArgumentList [
+                            GraphqlArgument {
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@66..71 "name" [] [Whitespace(" ")],
+                                },
+                                colon_token: missing (required),
+                                value: GraphqlStringValue {
+                                    graphql_string_literal_token: GRAPHQL_STRING_LITERAL@71..83 "\"Tony Stark\"" [] [],
+                                },
+                            },
+                        ],
+                        r_paren_token: R_PAREN@83..84 ")" [] [],
+                    },
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@84..95 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                    },
+                    arguments: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@95..103 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                    },
+                    arguments: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@103..109 "age" [Newline("\n"), Whitespace("\t\t")] [],
+                    },
+                    arguments: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@109..112 "}" [Newline("\n"), Whitespace("\t")] [],
+        },
+        GraphqlBogusDefinition {
+            items: [
+                R_CURLY@112..114 "}" [Newline("\n")] [],
+            ],
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@114..117 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@117..123 "hero" [Newline("\n"), Whitespace("\t")] [],
+                    },
+                    arguments: GraphqlArguments {
+                        l_paren_token: L_PAREN@123..124 "(" [] [],
+                        arguments: GraphqlArgumentList [
+                            GraphqlArgument {
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@124..128 "name" [] [],
+                                },
+                                colon_token: COLON@128..130 ":" [] [Whitespace(" ")],
+                                value: GraphqlStringValue {
+                                    graphql_string_literal_token: GRAPHQL_STRING_LITERAL@130..142 "\"Tony Stark\"" [] [],
+                                },
+                            },
+                        ],
+                        r_paren_token: R_PAREN@142..144 ")" [] [Whitespace(" ")],
+                    },
+                    directives: GraphqlDirectiveList [],
+                    selection_set: GraphqlSelectionSet {
+                        l_curly_token: L_CURLY@144..145 "{" [] [],
+                        selections: GraphqlSelectionList [
+                            GraphqlField {
+                                alias: missing (optional),
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@145..156 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                                },
+                                arguments: missing (optional),
+                                directives: GraphqlDirectiveList [],
+                                selection_set: missing (optional),
+                            },
+                            GraphqlField {
+                                alias: missing (optional),
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@156..164 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                                },
+                                arguments: missing (optional),
+                                directives: GraphqlDirectiveList [],
+                                selection_set: missing (optional),
+                            },
+                            GraphqlField {
+                                alias: missing (optional),
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@164..171 "age" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                                },
+                                arguments: missing (optional),
+                                directives: GraphqlDirectiveList [],
+                                selection_set: missing (optional),
+                            },
+                            GraphqlField {
+                                alias: missing (optional),
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@171..180 "height" [Newline("\n"), Whitespace("\t\t")] [],
+                                },
+                                arguments: GraphqlArguments {
+                                    l_paren_token: L_PAREN@180..181 "(" [] [],
+                                    arguments: GraphqlArgumentList [
+                                        GraphqlArgument {
+                                            name: GraphqlName {
+                                                value_token: GRAPHQL_NAME@181..186 "unit" [] [Whitespace(" ")],
+                                            },
+                                            colon_token: missing (required),
+                                            value: GraphqlEnumValue {
+                                                graphql_name: GraphqlName {
+                                                    value_token: GRAPHQL_NAME@186..191 "FOOT" [] [Skipped(",")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                    r_paren_token: missing (required),
+                                },
+                                directives: GraphqlDirectiveList [],
+                                selection_set: missing (optional),
+                            },
+                        ],
+                        r_curly_token: R_CURLY@191..194 "}" [Newline("\n"), Whitespace("\t")] [],
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@194..196 "}" [Newline("\n")] [],
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@196..199 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlField {
+                    alias: GraphqlAlias {
+                        value: GraphqlName {
+                            value_token: GRAPHQL_NAME@199..209 "ironMan" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@209..211 ":" [] [Whitespace(" ")],
+                    },
+                    name: missing (required),
+                    arguments: GraphqlArguments {
+                        l_paren_token: L_PAREN@211..212 "(" [] [],
+                        arguments: GraphqlArgumentList [
+                            GraphqlArgument {
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@212..216 "name" [] [],
+                                },
+                                colon_token: COLON@216..218 ":" [] [Whitespace(" ")],
+                                value: GraphqlStringValue {
+                                    graphql_string_literal_token: GRAPHQL_STRING_LITERAL@218..230 "\"Tony Stark\"" [] [],
+                                },
+                            },
+                        ],
+                        r_paren_token: R_PAREN@230..231 ")" [] [],
+                    },
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@231..233 "}" [Newline("\n")] [],
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@233..236 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlField {
+                    alias: GraphqlAlias {
+                        value: GraphqlName {
+                            value_token: GRAPHQL_NAME@236..246 "ironMan" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@246..248 ":" [] [Whitespace(" ")],
+                    },
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@248..252 "hero" [] [],
+                    },
+                    arguments: GraphqlArguments {
+                        l_paren_token: L_PAREN@252..253 "(" [] [],
+                        arguments: GraphqlArgumentList [
+                            GraphqlArgument {
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@253..257 "name" [] [],
+                                },
+                                colon_token: COLON@257..259 ":" [] [Whitespace(" ")],
+                                value: GraphqlStringValue {
+                                    graphql_string_literal_token: GRAPHQL_STRING_LITERAL@259..272 "\"Tony Stark\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                        r_paren_token: missing (required),
+                    },
+                    directives: GraphqlDirectiveList [],
+                    selection_set: GraphqlSelectionSet {
+                        l_curly_token: L_CURLY@272..273 "{" [] [],
+                        selections: GraphqlSelectionList [
+                            GraphqlField {
+                                alias: missing (optional),
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@273..284 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                                },
+                                arguments: missing (optional),
+                                directives: GraphqlDirectiveList [],
+                                selection_set: missing (optional),
+                            },
+                            GraphqlField {
+                                alias: GraphqlAlias {
+                                    value: GraphqlName {
+                                        value_token: GRAPHQL_NAME@284..296 "firstWife" [Newline("\n"), Whitespace("\t\t")] [],
+                                    },
+                                    colon_token: COLON@296..298 ":" [] [Whitespace(" ")],
+                                },
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@298..302 "wife" [] [],
+                                },
+                                arguments: GraphqlArguments {
+                                    l_paren_token: L_PAREN@302..303 "(" [] [],
+                                    arguments: GraphqlArgumentList [
+                                        GraphqlArgument {
+                                            name: GraphqlName {
+                                                value_token: GRAPHQL_NAME@303..307 "name" [] [],
+                                            },
+                                            colon_token: COLON@307..309 ":" [] [Whitespace(" ")],
+                                            value: GraphqlStringValue {
+                                                graphql_string_literal_token: GRAPHQL_STRING_LITERAL@309..317 "\"Pepper\"" [] [],
+                                            },
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@317..318 ")" [] [],
+                                },
+                                directives: GraphqlDirectiveList [],
+                                selection_set: GraphqlSelectionSet {
+                                    l_curly_token: L_CURLY@318..319 "{" [] [],
+                                    selections: GraphqlSelectionList [],
+                                    r_curly_token: R_CURLY@319..323 "}" [Newline("\n"), Whitespace("\t\t")] [],
+                                },
+                            },
+                        ],
+                        r_curly_token: R_CURLY@323..325 "}" [Newline("\n")] [],
+                    },
+                },
+            ],
+            r_curly_token: missing (required),
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@325..328 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlField {
+                    alias: GraphqlAlias {
+                        value: GraphqlName {
+                            value_token: GRAPHQL_NAME@328..338 "ironMan" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@338..340 ":" [] [Whitespace(" ")],
+                    },
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@340..344 "hero" [] [],
+                    },
+                    arguments: GraphqlArguments {
+                        l_paren_token: L_PAREN@344..345 "(" [] [],
+                        arguments: GraphqlArgumentList [
+                            GraphqlArgument {
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@345..349 "name" [] [],
+                                },
+                                colon_token: COLON@349..351 ":" [] [Whitespace(" ")],
+                                value: GraphqlStringValue {
+                                    graphql_string_literal_token: GRAPHQL_STRING_LITERAL@351..363 "\"Tony Stark\"" [] [],
+                                },
+                            },
+                        ],
+                        r_paren_token: R_PAREN@363..365 ")" [] [Whitespace(" ")],
+                    },
+                    directives: GraphqlDirectiveList [
+                        GraphqlDirective {
+                            at_token: AT@365..366 "@" [] [],
+                            name: missing (required),
+                            arguments: missing (optional),
+                        },
+                    ],
+                    selection_set: GraphqlSelectionSet {
+                        l_curly_token: L_CURLY@366..367 "{" [] [],
+                        selections: GraphqlSelectionList [
+                            GraphqlField {
+                                alias: missing (optional),
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@367..378 "country" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
+                                },
+                                arguments: missing (optional),
+                                directives: GraphqlDirectiveList [
+                                    GraphqlDirective {
+                                        at_token: AT@378..380 "@" [] [Skipped(",")],
+                                        name: GraphqlName {
+                                            value_token: GRAPHQL_NAME@380..388 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                                        },
+                                        arguments: missing (optional),
+                                    },
+                                ],
+                                selection_set: missing (optional),
+                            },
+                            GraphqlField {
+                                alias: missing (optional),
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@388..394 "age" [Newline("\n"), Whitespace("\t\t")] [],
+                                },
+                                arguments: missing (optional),
+                                directives: GraphqlDirectiveList [],
+                                selection_set: missing (optional),
+                            },
+                        ],
+                        r_curly_token: R_CURLY@394..397 "}" [Newline("\n"), Whitespace("\t")] [],
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@397..399 "}" [Newline("\n")] [],
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@399..420 "{" [Newline("\n"), Newline("\n"), Comments("# Fragment spread"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlInlineFragment {
+                    dotdotdot_token: DOT3@420..426 "..." [Newline("\n"), Whitespace("  ")] [],
+                    type_condition: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: GraphqlSelectionSet {
+                        l_curly_token: missing (required),
+                        selections: GraphqlSelectionList [],
+                        r_curly_token: R_CURLY@426..428 "}" [Newline("\n")] [],
+                    },
+                },
+            ],
+            r_curly_token: missing (required),
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@428..431 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlInlineFragment {
+                    dotdotdot_token: DOT3@431..438 "..." [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                    type_condition: missing (optional),
+                    directives: GraphqlDirectiveList [
+                        GraphqlDirective {
+                            at_token: AT@438..439 "@" [] [],
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@439..449 "deprecated" [] [],
+                            },
+                            arguments: missing (optional),
+                        },
+                    ],
+                    selection_set: GraphqlSelectionSet {
+                        l_curly_token: missing (required),
+                        selections: GraphqlSelectionList [],
+                        r_curly_token: R_CURLY@449..451 "}" [Newline("\n")] [],
+                    },
+                },
+            ],
+            r_curly_token: missing (required),
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@451..454 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlBogusSelection {
+                    items: [
+                        GraphqlAlias {
+                            value: GraphqlName {
+                                value_token: GRAPHQL_NAME@454..464 "ironMan" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                            colon_token: COLON@464..466 ":" [] [Whitespace(" ")],
+                        },
+                        GraphqlBogus {
+                            items: [
+                                L_PAREN@466..467 "(" [] [],
+                                GraphqlBogus {
+                                    items: [
+                                        GraphqlBogus {
+                                            items: [
+                                                COLON@467..469 ":" [] [Whitespace(" ")],
+                                                GRAPHQL_STRING_LITERAL@469..481 "\"Tony Stark\"" [] [],
+                                            ],
+                                        },
+                                    ],
+                                },
+                                R_PAREN@481..483 ")" [] [Whitespace(" ")],
+                            ],
+                        },
+                        GraphqlDirectiveList [
+                            GraphqlDirective {
+                                at_token: AT@483..485 "@" [] [Whitespace(" ")],
+                                name: missing (required),
+                                arguments: missing (optional),
+                            },
+                        ],
+                        GraphqlSelectionSet {
+                            l_curly_token: L_CURLY@485..486 "{" [] [],
+                            selections: GraphqlSelectionList [
+                                GraphqlInlineFragment {
+                                    dotdotdot_token: DOT3@486..492 "..." [Newline("\n"), Whitespace("\t\t")] [],
+                                    type_condition: missing (optional),
+                                    directives: GraphqlDirectiveList [],
+                                    selection_set: GraphqlSelectionSet {
+                                        l_curly_token: missing (required),
+                                        selections: GraphqlSelectionList [],
+                                        r_curly_token: R_CURLY@492..495 "}" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                },
+                            ],
+                            r_curly_token: R_CURLY@495..497 "}" [Newline("\n")] [],
+                        },
+                    ],
+                },
+            ],
+            r_curly_token: missing (required),
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@497..500 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlInlineFragment {
+                    dotdotdot_token: DOT3@500..507 "..." [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                    type_condition: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: GraphqlSelectionSet {
+                        l_curly_token: L_CURLY@507..508 "{" [] [],
+                        selections: GraphqlSelectionList [
+                            GraphqlField {
+                                alias: missing (optional),
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@508..515 "hero" [Newline("\n"), Whitespace("\t\t")] [],
+                                },
+                                arguments: missing (optional),
+                                directives: GraphqlDirectiveList [],
+                                selection_set: missing (optional),
+                            },
+                        ],
+                        r_curly_token: R_CURLY@515..517 "}" [Newline("\n")] [],
+                    },
+                },
+            ],
+            r_curly_token: missing (required),
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@517..520 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlInlineFragment {
+                    dotdotdot_token: DOT3@520..527 "..." [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                    type_condition: missing (optional),
+                    directives: GraphqlDirectiveList [
+                        GraphqlDirective {
+                            at_token: AT@527..528 "@" [] [],
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@528..535 "hero" [Newline("\n"), Whitespace("\t\t")] [],
+                            },
+                            arguments: missing (optional),
+                        },
+                    ],
+                    selection_set: GraphqlSelectionSet {
+                        l_curly_token: missing (required),
+                        selections: GraphqlSelectionList [],
+                        r_curly_token: R_CURLY@535..538 "}" [Newline("\n"), Whitespace("\t")] [],
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@538..540 "}" [Newline("\n")] [],
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@540..543 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlFragmentSpread {
+                    dotdotdot_token: DOT3@543..550 "..." [Newline("\n"), Whitespace("\t")] [Whitespace("  ")],
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@550..555 "Hero" [] [Whitespace(" ")],
+                    },
+                    directives: GraphqlDirectiveList [
+                        GraphqlDirective {
+                            at_token: AT@555..557 "@" [] [Whitespace(" ")],
+                            name: missing (required),
+                            arguments: missing (optional),
+                        },
+                    ],
+                },
+            ],
+            r_curly_token: missing (required),
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@557..558 "{" [] [],
+            selections: GraphqlSelectionList [
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@558..566 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                    },
+                    arguments: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@566..572 "age" [Newline("\n"), Whitespace("\t\t")] [],
+                    },
+                    arguments: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@572..575 "}" [Newline("\n"), Whitespace("\t")] [],
+        },
+        GraphqlBogusDefinition {
+            items: [
+                R_CURLY@575..577 "}" [Newline("\n")] [],
+            ],
+        },
+    ],
+    eof_token: EOF@577..578 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRAPHQL_ROOT@0..578
+  0: (empty)
+  1: GRAPHQL_DEFINITION_LIST@0..577
+    0: GRAPHQL_SELECTION_SET@0..26
+      0: L_CURLY@0..1 "{" [] []
+      1: GRAPHQL_SELECTION_LIST@1..26
+        0: GRAPHQL_FIELD@1..26
+          0: (empty)
+          1: GRAPHQL_NAME@1..8
+            0: GRAPHQL_NAME@1..8 "hero" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+          2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@8..8
+          4: GRAPHQL_SELECTION_SET@8..26
+            0: L_CURLY@8..9 "{" [] []
+            1: GRAPHQL_SELECTION_LIST@9..23
+              0: GRAPHQL_FIELD@9..17
+                0: (empty)
+                1: GRAPHQL_NAME@9..17
+                  0: GRAPHQL_NAME@9..17 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+                2: (empty)
+                3: GRAPHQL_DIRECTIVE_LIST@17..17
+                4: (empty)
+              1: GRAPHQL_FIELD@17..23
+                0: (empty)
+                1: GRAPHQL_NAME@17..23
+                  0: GRAPHQL_NAME@17..23 "age" [Newline("\n"), Whitespace("\t\t")] []
+                2: (empty)
+                3: GRAPHQL_DIRECTIVE_LIST@23..23
+                4: (empty)
+            2: R_CURLY@23..26 "}" [Newline("\n"), Newline("\n")] []
+      2: (empty)
+    1: GRAPHQL_SELECTION_SET@26..56
+      0: L_CURLY@26..29 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@29..54
+        0: GRAPHQL_FIELD@29..54
+          0: (empty)
+          1: GRAPHQL_NAME@29..35
+            0: GRAPHQL_NAME@29..35 "hero" [Newline("\n"), Whitespace("\t")] []
+          2: GRAPHQL_ARGUMENTS@35..54
+            0: L_PAREN@35..36 "(" [] []
+            1: GRAPHQL_ARGUMENT_LIST@36..54
+              0: GRAPHQL_ARGUMENT@36..54
+                0: GRAPHQL_NAME@36..40
+                  0: GRAPHQL_NAME@36..40 "name" [] []
+                1: COLON@40..42 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_STRING_VALUE@42..54
+                  0: GRAPHQL_STRING_LITERAL@42..54 "\"Tony Stark\"" [] []
+            2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@54..54
+          4: (empty)
+      2: R_CURLY@54..56 "}" [Newline("\n")] []
+    2: GRAPHQL_SELECTION_SET@56..112
+      0: L_CURLY@56..59 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@59..109
+        0: GRAPHQL_FIELD@59..84
+          0: (empty)
+          1: GRAPHQL_NAME@59..65
+            0: GRAPHQL_NAME@59..65 "hero" [Newline("\n"), Whitespace("\t")] []
+          2: GRAPHQL_ARGUMENTS@65..84
+            0: L_PAREN@65..66 "(" [] []
+            1: GRAPHQL_ARGUMENT_LIST@66..83
+              0: GRAPHQL_ARGUMENT@66..83
+                0: GRAPHQL_NAME@66..71
+                  0: GRAPHQL_NAME@66..71 "name" [] [Whitespace(" ")]
+                1: (empty)
+                2: GRAPHQL_STRING_VALUE@71..83
+                  0: GRAPHQL_STRING_LITERAL@71..83 "\"Tony Stark\"" [] []
+            2: R_PAREN@83..84 ")" [] []
+          3: GRAPHQL_DIRECTIVE_LIST@84..84
+          4: (empty)
+        1: GRAPHQL_FIELD@84..95
+          0: (empty)
+          1: GRAPHQL_NAME@84..95
+            0: GRAPHQL_NAME@84..95 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+          2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@95..95
+          4: (empty)
+        2: GRAPHQL_FIELD@95..103
+          0: (empty)
+          1: GRAPHQL_NAME@95..103
+            0: GRAPHQL_NAME@95..103 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+          2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@103..103
+          4: (empty)
+        3: GRAPHQL_FIELD@103..109
+          0: (empty)
+          1: GRAPHQL_NAME@103..109
+            0: GRAPHQL_NAME@103..109 "age" [Newline("\n"), Whitespace("\t\t")] []
+          2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@109..109
+          4: (empty)
+      2: R_CURLY@109..112 "}" [Newline("\n"), Whitespace("\t")] []
+    3: GRAPHQL_BOGUS_DEFINITION@112..114
+      0: R_CURLY@112..114 "}" [Newline("\n")] []
+    4: GRAPHQL_SELECTION_SET@114..196
+      0: L_CURLY@114..117 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@117..194
+        0: GRAPHQL_FIELD@117..194
+          0: (empty)
+          1: GRAPHQL_NAME@117..123
+            0: GRAPHQL_NAME@117..123 "hero" [Newline("\n"), Whitespace("\t")] []
+          2: GRAPHQL_ARGUMENTS@123..144
+            0: L_PAREN@123..124 "(" [] []
+            1: GRAPHQL_ARGUMENT_LIST@124..142
+              0: GRAPHQL_ARGUMENT@124..142
+                0: GRAPHQL_NAME@124..128
+                  0: GRAPHQL_NAME@124..128 "name" [] []
+                1: COLON@128..130 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_STRING_VALUE@130..142
+                  0: GRAPHQL_STRING_LITERAL@130..142 "\"Tony Stark\"" [] []
+            2: R_PAREN@142..144 ")" [] [Whitespace(" ")]
+          3: GRAPHQL_DIRECTIVE_LIST@144..144
+          4: GRAPHQL_SELECTION_SET@144..194
+            0: L_CURLY@144..145 "{" [] []
+            1: GRAPHQL_SELECTION_LIST@145..191
+              0: GRAPHQL_FIELD@145..156
+                0: (empty)
+                1: GRAPHQL_NAME@145..156
+                  0: GRAPHQL_NAME@145..156 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+                2: (empty)
+                3: GRAPHQL_DIRECTIVE_LIST@156..156
+                4: (empty)
+              1: GRAPHQL_FIELD@156..164
+                0: (empty)
+                1: GRAPHQL_NAME@156..164
+                  0: GRAPHQL_NAME@156..164 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+                2: (empty)
+                3: GRAPHQL_DIRECTIVE_LIST@164..164
+                4: (empty)
+              2: GRAPHQL_FIELD@164..171
+                0: (empty)
+                1: GRAPHQL_NAME@164..171
+                  0: GRAPHQL_NAME@164..171 "age" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+                2: (empty)
+                3: GRAPHQL_DIRECTIVE_LIST@171..171
+                4: (empty)
+              3: GRAPHQL_FIELD@171..191
+                0: (empty)
+                1: GRAPHQL_NAME@171..180
+                  0: GRAPHQL_NAME@171..180 "height" [Newline("\n"), Whitespace("\t\t")] []
+                2: GRAPHQL_ARGUMENTS@180..191
+                  0: L_PAREN@180..181 "(" [] []
+                  1: GRAPHQL_ARGUMENT_LIST@181..191
+                    0: GRAPHQL_ARGUMENT@181..191
+                      0: GRAPHQL_NAME@181..186
+                        0: GRAPHQL_NAME@181..186 "unit" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: GRAPHQL_ENUM_VALUE@186..191
+                        0: GRAPHQL_NAME@186..191
+                          0: GRAPHQL_NAME@186..191 "FOOT" [] [Skipped(",")]
+                  2: (empty)
+                3: GRAPHQL_DIRECTIVE_LIST@191..191
+                4: (empty)
+            2: R_CURLY@191..194 "}" [Newline("\n"), Whitespace("\t")] []
+      2: R_CURLY@194..196 "}" [Newline("\n")] []
+    5: GRAPHQL_SELECTION_SET@196..233
+      0: L_CURLY@196..199 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@199..231
+        0: GRAPHQL_FIELD@199..231
+          0: GRAPHQL_ALIAS@199..211
+            0: GRAPHQL_NAME@199..209
+              0: GRAPHQL_NAME@199..209 "ironMan" [Newline("\n"), Whitespace("  ")] []
+            1: COLON@209..211 ":" [] [Whitespace(" ")]
+          1: (empty)
+          2: GRAPHQL_ARGUMENTS@211..231
+            0: L_PAREN@211..212 "(" [] []
+            1: GRAPHQL_ARGUMENT_LIST@212..230
+              0: GRAPHQL_ARGUMENT@212..230
+                0: GRAPHQL_NAME@212..216
+                  0: GRAPHQL_NAME@212..216 "name" [] []
+                1: COLON@216..218 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_STRING_VALUE@218..230
+                  0: GRAPHQL_STRING_LITERAL@218..230 "\"Tony Stark\"" [] []
+            2: R_PAREN@230..231 ")" [] []
+          3: GRAPHQL_DIRECTIVE_LIST@231..231
+          4: (empty)
+      2: R_CURLY@231..233 "}" [Newline("\n")] []
+    6: GRAPHQL_SELECTION_SET@233..325
+      0: L_CURLY@233..236 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@236..325
+        0: GRAPHQL_FIELD@236..325
+          0: GRAPHQL_ALIAS@236..248
+            0: GRAPHQL_NAME@236..246
+              0: GRAPHQL_NAME@236..246 "ironMan" [Newline("\n"), Whitespace("  ")] []
+            1: COLON@246..248 ":" [] [Whitespace(" ")]
+          1: GRAPHQL_NAME@248..252
+            0: GRAPHQL_NAME@248..252 "hero" [] []
+          2: GRAPHQL_ARGUMENTS@252..272
+            0: L_PAREN@252..253 "(" [] []
+            1: GRAPHQL_ARGUMENT_LIST@253..272
+              0: GRAPHQL_ARGUMENT@253..272
+                0: GRAPHQL_NAME@253..257
+                  0: GRAPHQL_NAME@253..257 "name" [] []
+                1: COLON@257..259 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_STRING_VALUE@259..272
+                  0: GRAPHQL_STRING_LITERAL@259..272 "\"Tony Stark\"" [] [Whitespace(" ")]
+            2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@272..272
+          4: GRAPHQL_SELECTION_SET@272..325
+            0: L_CURLY@272..273 "{" [] []
+            1: GRAPHQL_SELECTION_LIST@273..323
+              0: GRAPHQL_FIELD@273..284
+                0: (empty)
+                1: GRAPHQL_NAME@273..284
+                  0: GRAPHQL_NAME@273..284 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+                2: (empty)
+                3: GRAPHQL_DIRECTIVE_LIST@284..284
+                4: (empty)
+              1: GRAPHQL_FIELD@284..323
+                0: GRAPHQL_ALIAS@284..298
+                  0: GRAPHQL_NAME@284..296
+                    0: GRAPHQL_NAME@284..296 "firstWife" [Newline("\n"), Whitespace("\t\t")] []
+                  1: COLON@296..298 ":" [] [Whitespace(" ")]
+                1: GRAPHQL_NAME@298..302
+                  0: GRAPHQL_NAME@298..302 "wife" [] []
+                2: GRAPHQL_ARGUMENTS@302..318
+                  0: L_PAREN@302..303 "(" [] []
+                  1: GRAPHQL_ARGUMENT_LIST@303..317
+                    0: GRAPHQL_ARGUMENT@303..317
+                      0: GRAPHQL_NAME@303..307
+                        0: GRAPHQL_NAME@303..307 "name" [] []
+                      1: COLON@307..309 ":" [] [Whitespace(" ")]
+                      2: GRAPHQL_STRING_VALUE@309..317
+                        0: GRAPHQL_STRING_LITERAL@309..317 "\"Pepper\"" [] []
+                  2: R_PAREN@317..318 ")" [] []
+                3: GRAPHQL_DIRECTIVE_LIST@318..318
+                4: GRAPHQL_SELECTION_SET@318..323
+                  0: L_CURLY@318..319 "{" [] []
+                  1: GRAPHQL_SELECTION_LIST@319..319
+                  2: R_CURLY@319..323 "}" [Newline("\n"), Whitespace("\t\t")] []
+            2: R_CURLY@323..325 "}" [Newline("\n")] []
+      2: (empty)
+    7: GRAPHQL_SELECTION_SET@325..399
+      0: L_CURLY@325..328 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@328..397
+        0: GRAPHQL_FIELD@328..397
+          0: GRAPHQL_ALIAS@328..340
+            0: GRAPHQL_NAME@328..338
+              0: GRAPHQL_NAME@328..338 "ironMan" [Newline("\n"), Whitespace("  ")] []
+            1: COLON@338..340 ":" [] [Whitespace(" ")]
+          1: GRAPHQL_NAME@340..344
+            0: GRAPHQL_NAME@340..344 "hero" [] []
+          2: GRAPHQL_ARGUMENTS@344..365
+            0: L_PAREN@344..345 "(" [] []
+            1: GRAPHQL_ARGUMENT_LIST@345..363
+              0: GRAPHQL_ARGUMENT@345..363
+                0: GRAPHQL_NAME@345..349
+                  0: GRAPHQL_NAME@345..349 "name" [] []
+                1: COLON@349..351 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_STRING_VALUE@351..363
+                  0: GRAPHQL_STRING_LITERAL@351..363 "\"Tony Stark\"" [] []
+            2: R_PAREN@363..365 ")" [] [Whitespace(" ")]
+          3: GRAPHQL_DIRECTIVE_LIST@365..366
+            0: GRAPHQL_DIRECTIVE@365..366
+              0: AT@365..366 "@" [] []
+              1: (empty)
+              2: (empty)
+          4: GRAPHQL_SELECTION_SET@366..397
+            0: L_CURLY@366..367 "{" [] []
+            1: GRAPHQL_SELECTION_LIST@367..394
+              0: GRAPHQL_FIELD@367..388
+                0: (empty)
+                1: GRAPHQL_NAME@367..378
+                  0: GRAPHQL_NAME@367..378 "country" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
+                2: (empty)
+                3: GRAPHQL_DIRECTIVE_LIST@378..388
+                  0: GRAPHQL_DIRECTIVE@378..388
+                    0: AT@378..380 "@" [] [Skipped(",")]
+                    1: GRAPHQL_NAME@380..388
+                      0: GRAPHQL_NAME@380..388 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+                    2: (empty)
+                4: (empty)
+              1: GRAPHQL_FIELD@388..394
+                0: (empty)
+                1: GRAPHQL_NAME@388..394
+                  0: GRAPHQL_NAME@388..394 "age" [Newline("\n"), Whitespace("\t\t")] []
+                2: (empty)
+                3: GRAPHQL_DIRECTIVE_LIST@394..394
+                4: (empty)
+            2: R_CURLY@394..397 "}" [Newline("\n"), Whitespace("\t")] []
+      2: R_CURLY@397..399 "}" [Newline("\n")] []
+    8: GRAPHQL_SELECTION_SET@399..428
+      0: L_CURLY@399..420 "{" [Newline("\n"), Newline("\n"), Comments("# Fragment spread"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@420..428
+        0: GRAPHQL_INLINE_FRAGMENT@420..428
+          0: DOT3@420..426 "..." [Newline("\n"), Whitespace("  ")] []
+          1: (empty)
+          2: GRAPHQL_DIRECTIVE_LIST@426..426
+          3: GRAPHQL_SELECTION_SET@426..428
+            0: (empty)
+            1: GRAPHQL_SELECTION_LIST@426..426
+            2: R_CURLY@426..428 "}" [Newline("\n")] []
+      2: (empty)
+    9: GRAPHQL_SELECTION_SET@428..451
+      0: L_CURLY@428..431 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@431..451
+        0: GRAPHQL_INLINE_FRAGMENT@431..451
+          0: DOT3@431..438 "..." [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+          1: (empty)
+          2: GRAPHQL_DIRECTIVE_LIST@438..449
+            0: GRAPHQL_DIRECTIVE@438..449
+              0: AT@438..439 "@" [] []
+              1: GRAPHQL_NAME@439..449
+                0: GRAPHQL_NAME@439..449 "deprecated" [] []
+              2: (empty)
+          3: GRAPHQL_SELECTION_SET@449..451
+            0: (empty)
+            1: GRAPHQL_SELECTION_LIST@449..449
+            2: R_CURLY@449..451 "}" [Newline("\n")] []
+      2: (empty)
+    10: GRAPHQL_SELECTION_SET@451..497
+      0: L_CURLY@451..454 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@454..497
+        0: GRAPHQL_BOGUS_SELECTION@454..497
+          0: GRAPHQL_ALIAS@454..466
+            0: GRAPHQL_NAME@454..464
+              0: GRAPHQL_NAME@454..464 "ironMan" [Newline("\n"), Whitespace("  ")] []
+            1: COLON@464..466 ":" [] [Whitespace(" ")]
+          1: GRAPHQL_BOGUS@466..483
+            0: L_PAREN@466..467 "(" [] []
+            1: GRAPHQL_BOGUS@467..481
+              0: GRAPHQL_BOGUS@467..481
+                0: COLON@467..469 ":" [] [Whitespace(" ")]
+                1: GRAPHQL_STRING_LITERAL@469..481 "\"Tony Stark\"" [] []
+            2: R_PAREN@481..483 ")" [] [Whitespace(" ")]
+          2: GRAPHQL_DIRECTIVE_LIST@483..485
+            0: GRAPHQL_DIRECTIVE@483..485
+              0: AT@483..485 "@" [] [Whitespace(" ")]
+              1: (empty)
+              2: (empty)
+          3: GRAPHQL_SELECTION_SET@485..497
+            0: L_CURLY@485..486 "{" [] []
+            1: GRAPHQL_SELECTION_LIST@486..495
+              0: GRAPHQL_INLINE_FRAGMENT@486..495
+                0: DOT3@486..492 "..." [Newline("\n"), Whitespace("\t\t")] []
+                1: (empty)
+                2: GRAPHQL_DIRECTIVE_LIST@492..492
+                3: GRAPHQL_SELECTION_SET@492..495
+                  0: (empty)
+                  1: GRAPHQL_SELECTION_LIST@492..492
+                  2: R_CURLY@492..495 "}" [Newline("\n"), Whitespace("\t")] []
+            2: R_CURLY@495..497 "}" [Newline("\n")] []
+      2: (empty)
+    11: GRAPHQL_SELECTION_SET@497..517
+      0: L_CURLY@497..500 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@500..517
+        0: GRAPHQL_INLINE_FRAGMENT@500..517
+          0: DOT3@500..507 "..." [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+          1: (empty)
+          2: GRAPHQL_DIRECTIVE_LIST@507..507
+          3: GRAPHQL_SELECTION_SET@507..517
+            0: L_CURLY@507..508 "{" [] []
+            1: GRAPHQL_SELECTION_LIST@508..515
+              0: GRAPHQL_FIELD@508..515
+                0: (empty)
+                1: GRAPHQL_NAME@508..515
+                  0: GRAPHQL_NAME@508..515 "hero" [Newline("\n"), Whitespace("\t\t")] []
+                2: (empty)
+                3: GRAPHQL_DIRECTIVE_LIST@515..515
+                4: (empty)
+            2: R_CURLY@515..517 "}" [Newline("\n")] []
+      2: (empty)
+    12: GRAPHQL_SELECTION_SET@517..540
+      0: L_CURLY@517..520 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@520..538
+        0: GRAPHQL_INLINE_FRAGMENT@520..538
+          0: DOT3@520..527 "..." [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+          1: (empty)
+          2: GRAPHQL_DIRECTIVE_LIST@527..535
+            0: GRAPHQL_DIRECTIVE@527..535
+              0: AT@527..528 "@" [] []
+              1: GRAPHQL_NAME@528..535
+                0: GRAPHQL_NAME@528..535 "hero" [Newline("\n"), Whitespace("\t\t")] []
+              2: (empty)
+          3: GRAPHQL_SELECTION_SET@535..538
+            0: (empty)
+            1: GRAPHQL_SELECTION_LIST@535..535
+            2: R_CURLY@535..538 "}" [Newline("\n"), Whitespace("\t")] []
+      2: R_CURLY@538..540 "}" [Newline("\n")] []
+    13: GRAPHQL_SELECTION_SET@540..557
+      0: L_CURLY@540..543 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@543..557
+        0: GRAPHQL_FRAGMENT_SPREAD@543..557
+          0: DOT3@543..550 "..." [Newline("\n"), Whitespace("\t")] [Whitespace("  ")]
+          1: GRAPHQL_NAME@550..555
+            0: GRAPHQL_NAME@550..555 "Hero" [] [Whitespace(" ")]
+          2: GRAPHQL_DIRECTIVE_LIST@555..557
+            0: GRAPHQL_DIRECTIVE@555..557
+              0: AT@555..557 "@" [] [Whitespace(" ")]
+              1: (empty)
+              2: (empty)
+      2: (empty)
+    14: GRAPHQL_SELECTION_SET@557..575
+      0: L_CURLY@557..558 "{" [] []
+      1: GRAPHQL_SELECTION_LIST@558..572
+        0: GRAPHQL_FIELD@558..566
+          0: (empty)
+          1: GRAPHQL_NAME@558..566
+            0: GRAPHQL_NAME@558..566 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+          2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@566..566
+          4: (empty)
+        1: GRAPHQL_FIELD@566..572
+          0: (empty)
+          1: GRAPHQL_NAME@566..572
+            0: GRAPHQL_NAME@566..572 "age" [Newline("\n"), Whitespace("\t\t")] []
+          2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@572..572
+          4: (empty)
+      2: R_CURLY@572..575 "}" [Newline("\n"), Whitespace("\t")] []
+    15: GRAPHQL_BOGUS_DEFINITION@575..577
+      0: R_CURLY@575..577 "}" [Newline("\n")] []
+  2: EOF@577..578 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+selection_set.graphql:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `{`
+  
+     6 │ }
+     7 │ 
+   > 8 │ {
+       │ ^
+     9 │ 	hero(name: "Tony Stark"
+    10 │ }
+  
+  i Remove {
+  
+selection_set.graphql:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `}`
+  
+     8 │ {
+     9 │ 	hero(name: "Tony Stark"
+  > 10 │ }
+       │ ^
+    11 │ 
+    12 │ {
+  
+  i Remove }
+  
+selection_set.graphql:13:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `"Tony Stark"`
+  
+    12 │ {
+  > 13 │ 	hero(name "Tony Stark")
+       │ 	          ^^^^^^^^^^^^
+    14 │ 		country,
+    15 │ 		name,
+  
+  i Remove "Tony Stark"
+  
+selection_set.graphql:18:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a definition but instead found '}'.
+  
+    16 │ 		age
+    17 │ 	}
+  > 18 │ }
+       │ ^
+    19 │ 
+    20 │ {
+  
+  i Expected a definition here.
+  
+    16 │ 		age
+    17 │ 	}
+  > 18 │ }
+       │ ^
+    19 │ 
+    20 │ {
+  
+selection_set.graphql:25:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `FOOT`
+  
+    23 │ 		name,
+    24 │ 		age,
+  > 25 │ 		height(unit FOOT,
+       │ 		            ^^^^
+    26 │ 	}
+    27 │ }
+  
+  i Remove FOOT
+  
+selection_set.graphql:26:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `}`
+  
+    24 │ 		age,
+    25 │ 		height(unit FOOT,
+  > 26 │ 	}
+       │ 	^
+    27 │ }
+    28 │ 
+  
+  i Remove }
+  
+selection_set.graphql:30:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found '('.
+  
+    29 │ {
+  > 30 │   ironMan: (name: "Tony Stark")
+       │            ^
+    31 │ }
+    32 │ 
+  
+  i Expected a name here.
+  
+    29 │ {
+  > 30 │   ironMan: (name: "Tony Stark")
+       │            ^
+    31 │ }
+    32 │ 
+  
+selection_set.graphql:34:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+    33 │ {
+  > 34 │   ironMan: hero(name: "Tony Stark" {
+       │                                    ^
+    35 │ 		country,
+    36 │ 		firstWife: wife(name: "Pepper"){
+  
+  i Remove {
+  
+selection_set.graphql:40:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `{`
+  
+    38 │ }
+    39 │ 
+  > 40 │ {
+       │ ^
+    41 │   ironMan: hero(name: "Tony Stark") @{
+    42 │ 		country @,
+  
+  i Remove {
+  
+selection_set.graphql:41:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found '{'.
+  
+    40 │ {
+  > 41 │   ironMan: hero(name: "Tony Stark") @{
+       │                                      ^
+    42 │ 		country @,
+    43 │ 		name,
+  
+  i Expected a name here.
+  
+    40 │ {
+  > 41 │   ironMan: hero(name: "Tony Stark") @{
+       │                                      ^
+    42 │ 		country @,
+    43 │ 		name,
+  
+selection_set.graphql:51:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `}`
+  
+    49 │ {
+    50 │   ...
+  > 51 │ }
+       │ ^
+    52 │ 
+    53 │ {
+  
+  i Remove }
+  
+selection_set.graphql:53:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `{`
+  
+    51 │ }
+    52 │ 
+  > 53 │ {
+       │ ^
+    54 │   ... @deprecated
+    55 │ }
+  
+  i Remove {
+  
+selection_set.graphql:55:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `}`
+  
+    53 │ {
+    54 │   ... @deprecated
+  > 55 │ }
+       │ ^
+    56 │ 
+    57 │ {
+  
+  i Remove }
+  
+selection_set.graphql:57:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `{`
+  
+    55 │ }
+    56 │ 
+  > 57 │ {
+       │ ^
+    58 │   ironMan: (: "Tony Stark") @ {
+    59 │ 		...
+  
+  i Remove {
+  
+selection_set.graphql:58:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found '('.
+  
+    57 │ {
+  > 58 │   ironMan: (: "Tony Stark") @ {
+       │            ^
+    59 │ 		...
+    60 │ 	}
+  
+  i Expected a name here.
+  
+    57 │ {
+  > 58 │   ironMan: (: "Tony Stark") @ {
+       │            ^
+    59 │ 		...
+    60 │ 	}
+  
+selection_set.graphql:58:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an argument but instead found ': "Tony Stark"'.
+  
+    57 │ {
+  > 58 │   ironMan: (: "Tony Stark") @ {
+       │             ^^^^^^^^^^^^^^
+    59 │ 		...
+    60 │ 	}
+  
+  i Expected an argument here.
+  
+    57 │ {
+  > 58 │   ironMan: (: "Tony Stark") @ {
+       │             ^^^^^^^^^^^^^^
+    59 │ 		...
+    60 │ 	}
+  
+selection_set.graphql:58:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found '{'.
+  
+    57 │ {
+  > 58 │   ironMan: (: "Tony Stark") @ {
+       │                               ^
+    59 │ 		...
+    60 │ 	}
+  
+  i Expected a name here.
+  
+    57 │ {
+  > 58 │   ironMan: (: "Tony Stark") @ {
+       │                               ^
+    59 │ 		...
+    60 │ 	}
+  
+selection_set.graphql:60:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `}`
+  
+    58 │   ironMan: (: "Tony Stark") @ {
+    59 │ 		...
+  > 60 │ 	}
+       │ 	^
+    61 │ }
+    62 │ 
+  
+  i Remove }
+  
+selection_set.graphql:63:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `{`
+  
+    61 │ }
+    62 │ 
+  > 63 │ {
+       │ ^
+    64 │   ... {
+    65 │ 		hero
+  
+  i Remove {
+  
+selection_set.graphql:68:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `{`
+  
+    66 │ }
+    67 │ 
+  > 68 │ {
+       │ ^
+    69 │   ... @
+    70 │ 		hero
+  
+  i Remove {
+  
+selection_set.graphql:71:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `}`
+  
+    69 │   ... @
+    70 │ 		hero
+  > 71 │ 	}
+       │ 	^
+    72 │ }
+    73 │ 
+  
+  i Remove }
+  
+selection_set.graphql:75:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found '{'.
+  
+    74 │ {
+  > 75 │ 	...  Hero @ {
+       │ 	            ^
+    76 │ 		name,
+    77 │ 		age
+  
+  i Expected a name here.
+  
+    74 │ {
+  > 75 │ 	...  Hero @ {
+       │ 	            ^
+    76 │ 		name,
+    77 │ 		age
+  
+selection_set.graphql:79:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a definition but instead found '}'.
+  
+    77 │ 		age
+    78 │ 	}
+  > 79 │ }
+       │ ^
+    80 │ 
+  
+  i Expected a definition here.
+  
+    77 │ 		age
+    78 │ 	}
+  > 79 │ }
+       │ ^
+    80 │ 
+  
+```

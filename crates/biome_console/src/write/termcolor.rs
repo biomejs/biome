@@ -196,7 +196,7 @@ where
 }
 
 /// Determines if a unicode grapheme consists only of code points
-/// which are considered whitepsace characters in ASCII
+/// which are considered whitespace characters in ASCII
 fn grapheme_is_whitespace(grapheme: &str) -> bool {
     grapheme.chars().all(|c| c.is_whitespace())
 }

@@ -113,7 +113,7 @@ impl std::fmt::Display for RuleSource {
             RuleSource::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
             RuleSource::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
             RuleSource::EslintStylistic(_) => write!(f, "eslint-plugin-stylistic"),
-            RuleSource::EslintTypeScript(_) => write!(f, "eslint-plugin-typescript"),
+            RuleSource::EslintTypeScript(_) => write!(f, "typescript-eslint"),
             RuleSource::EslintUnicorn(_) => write!(f, "eslint-plugin-unicorn"),
             RuleSource::EslintMysticatea(_) => write!(f, "@mysticatea/eslint-plugin"),
             RuleSource::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),

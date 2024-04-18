@@ -76,7 +76,7 @@ type JsonRpcResult = Result<Box<RawValue>, TransportError>;
 /// the requests are pushed to the channel as serialized byte buffers)
 /// - `pending_requests` is handle to a shared hashmap where the keys are `u64`
 /// corresponding to request IDs, and the values are sender handles to oneshot
-/// channel instances that can be consumed to fullfill the associated request
+/// channel instances that can be consumed to fulfill the associated request
 ///
 /// Creating a new `SocketTransport` instance requires providing a `tokio`
 /// runtime instance as well as the "read half" and "write half" of the socket

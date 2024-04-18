@@ -51,7 +51,7 @@ smallvec                 = { workspace = true }
 tokio                    = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }
 tracing                  = { workspace = true }
 tracing-appender         = "0.2"
-tracing-subscriber       = { version = "0.3.16", features = ["env-filter", "json"] }
+tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
 tracing-tree             = "0.3.0"
 
 [target.'cfg(unix)'.dependencies]

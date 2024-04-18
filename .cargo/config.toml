@@ -7,7 +7,6 @@ codegen-configuration = "run -p xtask_codegen --features configuration -- config
 # updates a newly created crate
 codegen-license = "run -p xtask_codegen --features license -- license"
 codegen-schema = "run -p xtask_codegen --features schema -- schema"
-codegen-website = "run -p xtask_codegen --features website -- website"
 contributors = "run -p xtask_contributors --"
 coverage = "run -p xtask_coverage --profile=release-with-debug --"
 documentation = """
@@ -34,7 +33,6 @@ documentation = """
 """
 format = "fmt --all --verbose"
 lint = "clippy --workspace --all-targets -- --deny warnings"
-lintdoc = "run -p xtask_lintdoc --"
 new-crate = "run -p xtask_codegen -- new-crate"
 
 [profile.release]

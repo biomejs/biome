@@ -126,7 +126,13 @@ impl Rule for UseImportType {
             AnyJsImportClause::JsImportCombinedClause(clause) => {
                 let default_binding = clause.default_specifier().ok()?.local_name().ok()?;
                 let default_binding = default_binding.as_js_identifier_binding()?;
-                let is_default_used_as_type = is_only_used_as_type(model, default_binding);
+                let is_default_used_as_type = if ctx.jsx_runtime() == JsxRuntime::ReactClassic
+                    && is_global_react_import(default_binding, ReactLibrary::React)
+                {
+                    false
+                } else {
+                    is_only_used_as_type(model, default_binding)
+                };
                 match clause.specifier().ok()? {
                     AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named_specifiers) => {
                         match named_import_type_fix(model, &named_specifiers) {

@@ -15,6 +15,7 @@ mod graphql_kind_src;
 mod grit_kinds_src;
 mod js_kinds_src;
 mod json_kinds_src;
+mod yaml_kinds_src;
 
 mod generate_crate;
 mod html_kinds_src;
@@ -122,9 +123,6 @@ pub enum TaskCommand {
         #[bpaf(long("group"), argument("STRING"))]
         group: String,
     },
-    /// Generates website files
-    #[bpaf(command)]
-    Website,
     /// Runs ALL the codegen
     #[bpaf(command)]
     All,

@@ -17,7 +17,6 @@ We can use help in a bunch of areas and any help is greatly appreciated!
   + [Formatter](#formatter)
 * [Crate dependencies](#crate-dependencies)
 * [Node.js development](#nodejs-development)
-* [Website development](#website-development)
   + [Translations](#translations)
 * [Commit messages](#commit-messages)
 * [Creating pull requests](#creating-pull-requests)
@@ -260,11 +259,6 @@ For testing and developing, you need to build these packages, following the step
 The tests are run against the compiled files, which means that you need to run the
 `build` script after you implemented features/bug fixes.
 
-## Website development
-
-The [Biome website](https://biomejs.dev/) is built with [Astro](https://astro.build).
-To contribute to its development please check our [README](./website/README.md)
-
 ### Translations
 
 For more information on how to help with translation, please see the [translation contribution guidelines for our docs](./website/TRANSLATIONS.md).
@@ -292,6 +286,8 @@ fix: fix nasty unhandled error
 docs: fix link to website page
 test(lint): add more cases to handle invalid rules
 ```
+
+We are using [action-semantic-pull-request](https://github.com/amannn/action-semantic-pull-request) to lint the titles of pull requests. If the 'Lint Pull Request Titles' workflow fails, please correct the title.
 
 ## Creating pull requests
 
