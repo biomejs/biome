@@ -21,7 +21,7 @@ invalidComment.css:1:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━�
     2 │ a {
     3 │     /* foo */
   
-  i This note will give you more information.
+  i Consider removing the empty block or adding styles inside it.
   
 
 ```
@@ -38,7 +38,7 @@ invalidComment.css:2:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i This note will give you more information.
+  i Consider removing the empty block or adding styles inside it.
   
 
 ```
