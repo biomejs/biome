@@ -3922,28 +3922,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "xtask_lintdoc"
-version = "0.0.0"
-dependencies = [
- "biome_analyze",
- "biome_console",
- "biome_css_analyze",
- "biome_css_parser",
- "biome_css_syntax",
- "biome_diagnostics",
- "biome_js_analyze",
- "biome_js_parser",
- "biome_js_syntax",
- "biome_json_analyze",
- "biome_json_parser",
- "biome_json_syntax",
- "biome_service",
- "biome_string_case",
- "pulldown-cmark",
- "xtask",
-]
-
-[[package]]
 name = "xxhash-rust"
 version = "0.8.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"

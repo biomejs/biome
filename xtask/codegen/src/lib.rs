@@ -123,9 +123,6 @@ pub enum TaskCommand {
         #[bpaf(long("group"), argument("STRING"))]
         group: String,
     },
-    /// Generates website files
-    #[bpaf(command)]
-    Website,
     /// Runs ALL the codegen
     #[bpaf(command)]
     All,
