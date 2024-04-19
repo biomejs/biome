@@ -1413,6 +1413,18 @@
 			},
 			"additionalProperties": false
 		},
+		"NoCssEmptyBlockConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoCssEmptyBlockOptions" }
+			]
+		},
+		"NoCssEmptyBlockOptions": {
+			"type": "object",
+			"required": ["allowComments"],
+			"properties": { "allowComments": { "type": "boolean" } },
+			"additionalProperties": false
+		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1439,6 +1451,13 @@
 					"description": "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noCssEmptyBlock": {
+					"description": "Disallow CSS empty blocks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoCssEmptyBlockConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1837,6 +1856,15 @@
 			"properties": {
 				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
 				"options": { "$ref": "#/definitions/NamingConventionOptions" }
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoCssEmptyBlockOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
+				"options": { "$ref": "#/definitions/NoCssEmptyBlockOptions" }
 			},
 			"additionalProperties": false
 		},
