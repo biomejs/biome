@@ -120,19 +120,17 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"{
-	"foo": "",
-	"foo": "",
-	"foo": "",
-	"bar": "",
-	"bar": ""
-}
+        const SOURCE: &str = r#"	{
+		"loreum": "",
+		"loreum": "",
+		"loreum": ""
+	}
 "#;
 
         let parsed = parse_json(SOURCE, JsonParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
-        let rule_filter = RuleFilter::Rule("nursery", "noDuplicateKeys");
+        let rule_filter = RuleFilter::Rule("nursery", "noDuplicateJsonKeys");
         let options = AnalyzerOptions::default();
         analyze(
             &parsed.tree(),
