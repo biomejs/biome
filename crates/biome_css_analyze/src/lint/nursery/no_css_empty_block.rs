@@ -6,9 +6,8 @@ use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
 
 declare_rule! {
-    /// Disallow css empty blocks.
+    /// Disallow CSS empty blocks.
     ///
-    /// This rule disallows empty block.
     /// By default, it will allow empty blocks with comments inside.
     ///
     /// ## Examples
@@ -53,7 +52,7 @@ declare_rule! {
     /// {
     ///     "noCssEmptyBlock": {
     ///         "options": {
-    ///           "ignore": ["comments"]
+    ///           "allow_comments": false
     ///         }
     ///     }
     /// }
@@ -67,29 +66,36 @@ declare_rule! {
     }
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, Deserializable, Eq, PartialEq)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(Debug, Clone, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NoCssEmptyBlockOptions {
     pub allow_comments: bool,
+}
+
+impl Default for NoCssEmptyBlockOptions {
+    fn default() -> Self {
+        Self {
+            allow_comments: true,
+        }
+    }
 }
 
 impl Rule for NoCssEmptyBlock {
     type Query = Ast<CssBlockLike>;
     type State = CssBlockLike;
     type Signals = Option<Self::State>;
-    type Options = Box<NoCssEmptyBlockOptions>;
+    type Options = NoCssEmptyBlockOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let options = ctx.options();
         let allow_comments_inside_empty_block = options.allow_comments;
-
         if allow_comments_inside_empty_block {
             let has_comments_inside_block = node.r_curly_token().ok()?.has_leading_comments()
                 || node.l_curly_token().ok()?.has_trailing_comments();
 
-            if has_comments_inside_block {
+            if !node.is_empty() || has_comments_inside_block {
                 return None;
             } else {
                 return Some(node.clone());
@@ -108,7 +114,7 @@ impl Rule for NoCssEmptyBlock {
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected empty block is not allowed"
+                    "Empty blocks aren't allowed."
                 },
             )
             .note(markup! {

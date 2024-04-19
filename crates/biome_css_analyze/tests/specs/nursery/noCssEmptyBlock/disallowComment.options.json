@@ -6,9 +6,7 @@
                 "noCssEmptyBlock": {
                     "level": "error",
                     "options": {
-                        "ignore": [
-                         "comments"
-                        ]
+                        "allowComments": false
                     }
                 }
             }

@@ -29,7 +29,7 @@ a {
 ```
 disallowComment.css:1:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! Empty blocks aren't allowed.
   
   > 1 │ a { /* foo */ }
       │   ^^^^^^^^^^^^^
@@ -44,7 +44,7 @@ disallowComment.css:1:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━
 ```
 disallowComment.css:2:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! Empty blocks aren't allowed.
   
     1 │ a { /* foo */ }
   > 2 │ a {
@@ -63,7 +63,7 @@ disallowComment.css:2:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━
 ```
 disallowComment.css:6:4 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! Empty blocks aren't allowed.
   
     4 │ }
     5 │ 
@@ -80,7 +80,7 @@ disallowComment.css:6:4 lint/nursery/noCssEmptyBlock ━━━━━━━━━
 ```
 disallowComment.css:7:4 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! Empty blocks aren't allowed.
   
      6 │ .b { /* foo */ }
    > 7 │ .b {
@@ -99,7 +99,7 @@ disallowComment.css:7:4 lint/nursery/noCssEmptyBlock ━━━━━━━━━
 ```
 disallowComment.css:11:14 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! Empty blocks aren't allowed.
   
      9 │ }
     10 │ 
@@ -116,7 +116,7 @@ disallowComment.css:11:14 lint/nursery/noCssEmptyBlock ━━━━━━━━�
 ```
 disallowComment.css:12:14 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! Empty blocks aren't allowed.
   
     11 │ @media print { /* foo */ }
   > 12 │ @media print {
@@ -135,7 +135,7 @@ disallowComment.css:12:14 lint/nursery/noCssEmptyBlock ━━━━━━━━�
 ```
 disallowComment.css:16:5 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! Empty blocks aren't allowed.
   
     14 │ }
     15 │ @media print {
