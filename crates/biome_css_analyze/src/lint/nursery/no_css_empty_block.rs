@@ -46,7 +46,7 @@ declare_rule! {
     ///
     /// ## Options
     ///
-    /// Exclude comments from being treated as content inside of a block.
+    /// If false, exclude comments from being treated as content inside of a block.
     ///
     /// ```json
     /// {

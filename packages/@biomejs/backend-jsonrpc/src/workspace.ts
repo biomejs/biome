@@ -921,7 +921,7 @@ export interface Nursery {
 	 */
 	noConstantMathMinMaxClamp?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow css empty blocks.
+	 * Disallow CSS empty blocks.
 	 */
 	noCssEmptyBlock?: RuleConfiguration_for_NoCssEmptyBlockOptions;
 	/**

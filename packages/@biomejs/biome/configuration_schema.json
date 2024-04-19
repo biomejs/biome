@@ -1455,7 +1455,7 @@
 					]
 				},
 				"noCssEmptyBlock": {
-					"description": "Disallow css empty blocks.",
+					"description": "Disallow CSS empty blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoCssEmptyBlockConfiguration" },
 						{ "type": "null" }

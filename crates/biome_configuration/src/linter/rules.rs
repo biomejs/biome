@@ -2656,7 +2656,7 @@ pub struct Nursery {
     #[doc = "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_constant_math_min_max_clamp: Option<RuleConfiguration<NoConstantMathMinMaxClamp>>,
-    #[doc = "Disallow css empty blocks."]
+    #[doc = "Disallow CSS empty blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_css_empty_block: Option<RuleConfiguration<NoCssEmptyBlock>>,
     #[doc = "Disallow using a callback in asynchronous tests and hooks."]
