@@ -44,6 +44,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
   Contributed by @ematipico
 
+#### Enhancements
+
+- The rule `noMisplacedAssertions` now considers valid calling `expect` inside `waitFor`:
+  ```js
+  import { waitFor } from '@testing-library/react';
+
+  await waitFor(() => {
+    expect(111).toBe(222);
+  });
+  ```
+  Contributed by @ematipico
+
+
 ### Parser
 
 
