@@ -2656,6 +2656,9 @@ pub struct Nursery {
     #[doc = "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_constant_math_min_max_clamp: Option<RuleConfiguration<NoConstantMathMinMaxClamp>>,
+    #[doc = "Succinct description of the rule."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_css_empty_block: Option<RuleConfiguration<NoCssEmptyBlock>>,
     #[doc = "Disallow using a callback in asynchronous tests and hooks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_done_callback: Option<RuleConfiguration<NoDoneCallback>>,
@@ -2716,6 +2719,7 @@ impl Nursery {
         "noColorInvalidHex",
         "noConsole",
         "noConstantMathMinMaxClamp",
+        "noCssEmptyBlock",
         "noDoneCallback",
         "noDuplicateElseIf",
         "noDuplicateFontNames",
@@ -2739,12 +2743,12 @@ impl Nursery {
         "noFlatMapIdentity",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -2794,47 +2798,51 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
-        if let Some(rule) = self.no_done_callback.as_ref() {
+        if let Some(rule) = self.no_css_empty_block.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
+        if let Some(rule) = self.no_done_callback.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
+        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_evolving_any.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_flat_map_identity.as_ref() {
+        if let Some(rule) = self.no_evolving_any.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_misplaced_assertion.as_ref() {
+        if let Some(rule) = self.no_flat_map_identity.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_nodejs_modules.as_ref() {
+        if let Some(rule) = self.no_misplaced_assertion.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.no_react_specific_props.as_ref() {
+=======
+        if let Some(rule) = self.no_nodejs_modules.as_ref() {
+>>>>>>> 51963430b5 (chore: rebase)
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
@@ -2878,47 +2886,47 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
-        if let Some(rule) = self.no_done_callback.as_ref() {
+        if let Some(rule) = self.no_css_empty_block.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
+        if let Some(rule) = self.no_done_callback.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
+        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_evolving_any.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_flat_map_identity.as_ref() {
+        if let Some(rule) = self.no_evolving_any.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_misplaced_assertion.as_ref() {
+        if let Some(rule) = self.no_flat_map_identity.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_nodejs_modules.as_ref() {
+        if let Some(rule) = self.no_misplaced_assertion.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_react_specific_props.as_ref() {
+        if let Some(rule) = self.no_nodejs_modules.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
@@ -2989,6 +2997,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noConstantMathMinMaxClamp" => self
                 .no_constant_math_min_max_clamp
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noCssEmptyBlock" => self
+                .no_css_empty_block
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDoneCallback" => self

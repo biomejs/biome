@@ -921,6 +921,10 @@ export interface Nursery {
 	 */
 	noConstantMathMinMaxClamp?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noCssEmptyBlock?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
 	noDoneCallback?: RuleConfiguration_for_Null;
@@ -1929,6 +1933,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
+	| "lint/nursery/noCssEmptyBlock"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"

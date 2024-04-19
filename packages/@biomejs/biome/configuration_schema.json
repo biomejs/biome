@@ -1442,6 +1442,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noCssEmptyBlock": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDoneCallback": {
 					"description": "Disallow using a callback in asynchronous tests and hooks.",
 					"anyOf": [
