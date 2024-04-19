@@ -39,6 +39,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix case where `jsxRuntime` wasn't being respected by `useImportType` rule ([#2473](https://github.com/biomejs/biome/issues/2473)).Contributed by @arendjr
 
+#### Enhancements
+
+- The rule `noMisplacedAssertions` now considers valid calling `expect` inside `waitFor`:
+  ```js
+  import { waitFor } from '@testing-library/react';
+
+  await waitFor(() => {
+    expect(111).toBe(222);
+  });
+  ```
+  Contributed by @ematipico
+
+
 ### Parser
 
 

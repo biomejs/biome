@@ -1086,9 +1086,10 @@ impl AnyJsExpression {
     }
 
     /// Checks whether the current function call is:
-    /// - `it`
-    /// - `test`
-    /// - `Deno.test`
+    /// - `it`: many libraries such as Node.js, Mocha, Jest, etc.
+    /// - `test`: many libraries such as Node.js, bun, etc.
+    /// - [`Deno.test`](https://docs.deno.com/runtime/manual/basics/testing/)
+    /// - [`waitFor`](https://testing-library.com/docs/dom-testing-library/api-async/#waitfor)
     pub fn contains_it_call(&self) -> bool {
         let mut members = CalleeNamesIterator::new(self.clone());
 
@@ -1100,7 +1101,7 @@ impl AnyJsExpression {
         let second = rev.next().map(|t| t.text());
 
         match first {
-            Some("test" | "it") => true,
+            Some("test" | "it" | "waitFor") => true,
             Some("Deno") => matches!(second, Some("test")),
             _ => false,
         }
