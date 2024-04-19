@@ -1,0 +1,5 @@
+@keyframes foo { from {} from {}}
+
+@keyframes foo { from {} FROM {}}
+
+@keyframes foo { 0% {} 0% {}}

@@ -1,0 +1,60 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+@keyframes foo { from {} from {}}
+
+@keyframes foo { from {} FROM {}}
+
+@keyframes foo { 0% {} 0% {}}
+```
+
+# Diagnostics
+```
+invalid.css:1:16 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected duplicate selector
+  
+  > 1 │ @keyframes foo { from {} from {}}
+      │                ^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ @keyframes foo { from {} FROM {}}
+  
+  i Consider using different selector here!
+  
+
+```
+
+```
+invalid.css:3:16 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected duplicate selector
+  
+    1 │ @keyframes foo { from {} from {}}
+    2 │ 
+  > 3 │ @keyframes foo { from {} FROM {}}
+      │                ^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ @keyframes foo { 0% {} 0% {}}
+  
+  i Consider using different selector here!
+  
+
+```
+
+```
+invalid.css:5:16 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected duplicate selector
+  
+    3 │ @keyframes foo { from {} FROM {}}
+    4 │ 
+  > 5 │ @keyframes foo { 0% {} 0% {}}
+      │                ^^^^^^^^^^^^^^
+  
+  i Consider using different selector here!
+  
+
+```
