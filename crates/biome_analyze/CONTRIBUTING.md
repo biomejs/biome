@@ -62,6 +62,11 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
    ```
    The script will create a new **lint** rule for the _JavaScript_ language, inside the `biome_js_analyze`
 
+   If you want to create a _CSS_ lint rule, run this script. It will generate a new lint rule in `biome_css_analyze`
+   ```shell
+   just new-css-lintrule myRuleName
+   ```
+
 1. The `Ast` query type allows you to query the AST of a program.
 1. The `State` type doesn't have to be used, so it can be considered optional. However, it has to be defined as `type State = ()`.
 1. Implement the `run` function:
