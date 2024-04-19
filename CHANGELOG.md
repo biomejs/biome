@@ -43,7 +43,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   callFunction(<>{bar}</>)
   ```
   Contributed by @ematipico
-
+- Fix [#2366](https://github.com/biomejs/biome/issues/2366), where `noDuplicateJsonKeys` incorrectly computed the kes to highlight. Contributed by @ematipico
 #### Enhancements
 
 - The rule `noMisplacedAssertions` now considers valid calling `expect` inside `waitFor`:
