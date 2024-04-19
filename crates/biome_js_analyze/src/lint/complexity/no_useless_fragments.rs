@@ -123,7 +123,6 @@ impl Rule for NoUselessFragments {
         let node = ctx.query();
         let model = ctx.model();
         let mut in_jsx_attr_expr = false;
-        dbg!("slsl");
         match node {
             NoUselessFragmentsQuery::JsxFragment(fragment) => {
                 let parents_where_fragments_must_be_preserved = node.syntax().parent().map_or(
