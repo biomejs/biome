@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_syntax::{AnyCssKeyframesItem, CssKeyframesBlock};
+use biome_css_syntax::{AnyCssKeyframesItem, AnyCssKeyframesSelector, CssKeyframesBlock};
 use biome_rowan::AstNode;
 
 declare_rule! {
@@ -44,20 +44,20 @@ declare_rule! {
 
 impl Rule for NoDuplicateSelectorsKeyframeBlock {
     type Query = Ast<CssKeyframesBlock>;
-    type State = ();
+    type State = AnyCssKeyframesSelector;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let mut selector_list = HashSet::new();
-        for keyframe_item in node.items().into_iter() {
+        for keyframe_item in node.items() {
             match keyframe_item {
                 AnyCssKeyframesItem::CssKeyframesItem(item) => {
                     let keyframe_selector = item.selectors().into_iter().next()?;
                     let keyframe_selector = keyframe_selector.ok()?;
                     if !selector_list.insert(keyframe_selector.text().to_lowercase()) {
-                        return Some(());
+                        return Some(keyframe_selector);
                     }
                 }
                 _ => return None,
@@ -66,14 +66,13 @@ impl Rule for NoDuplicateSelectorsKeyframeBlock {
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _node: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Unexpected duplicate selector"
+                    "Unexpected duplicate selector: "<Emphasis>{node.text()}</Emphasis>
                 },
             )
             .note(markup! {

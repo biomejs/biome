@@ -13,12 +13,12 @@ expression: invalid.css
 
 # Diagnostics
 ```
-invalid.css:1:16 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:26 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected duplicate selector
+  ! Unexpected duplicate selector: from
   
   > 1 │ @keyframes foo { from {} from {}}
-      │                ^^^^^^^^^^^^^^^^^^
+      │                          ^^^^
     2 │ 
     3 │ @keyframes foo { from {} FROM {}}
   
@@ -28,14 +28,14 @@ invalid.css:1:16 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━�
 ```
 
 ```
-invalid.css:3:16 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:26 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected duplicate selector
+  ! Unexpected duplicate selector: FROM
   
     1 │ @keyframes foo { from {} from {}}
     2 │ 
   > 3 │ @keyframes foo { from {} FROM {}}
-      │                ^^^^^^^^^^^^^^^^^^
+      │                          ^^^^
     4 │ 
     5 │ @keyframes foo { 0% {} 0% {}}
   
@@ -45,14 +45,14 @@ invalid.css:3:16 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━�
 ```
 
 ```
-invalid.css:5:16 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:24 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected duplicate selector
+  ! Unexpected duplicate selector: 0%
   
     3 │ @keyframes foo { from {} FROM {}}
     4 │ 
   > 5 │ @keyframes foo { 0% {} 0% {}}
-      │                ^^^^^^^^^^^^^^
+      │                        ^^
   
   i Consider using different selector here!
   
