@@ -1612,7 +1612,7 @@ export interface HooksOptions {
  */
 export interface DeprecatedHooksOptions {}
 export interface NoCssEmptyBlockOptions {
-	ignore: string[];
+	allowComments: boolean;
 }
 /**
  * Options for the rule `noRestrictedImports`.

@@ -1421,10 +1421,8 @@
 		},
 		"NoCssEmptyBlockOptions": {
 			"type": "object",
-			"required": ["ignore"],
-			"properties": {
-				"ignore": { "type": "array", "items": { "type": "string" } }
-			},
+			"required": ["allowComments"],
+			"properties": { "allowComments": { "type": "boolean" } },
 			"additionalProperties": false
 		},
 		"Nursery": {

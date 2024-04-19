@@ -71,7 +71,7 @@ declare_rule! {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NoCssEmptyBlockOptions {
-    pub ignore: Vec<String>,
+    pub allow_comments: bool,
 }
 
 impl Rule for NoCssEmptyBlock {
@@ -83,13 +83,9 @@ impl Rule for NoCssEmptyBlock {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let options = ctx.options();
-        let disallow_comments_inside_empty_block = options.ignore.iter().any(|i| i == "comments");
+        let allow_comments_inside_empty_block = options.allow_comments;
 
-        if disallow_comments_inside_empty_block {
-            if node.is_empty() {
-                return Some(node.clone());
-            }
-        } else if node.is_empty() {
+        if allow_comments_inside_empty_block {
             let has_comments_inside_block = node.r_curly_token().ok()?.has_leading_comments()
                 || node.l_curly_token().ok()?.has_trailing_comments();
 
@@ -98,6 +94,8 @@ impl Rule for NoCssEmptyBlock {
             } else {
                 return Some(node.clone());
             }
+        } else if node.is_empty() {
+            return Some(node.clone());
         }
 
         None
