@@ -52,7 +52,7 @@ declare_rule! {
     /// {
     ///     "noCssEmptyBlock": {
     ///         "options": {
-    ///           "allow_comments": false
+    ///           "allowComments": false
     ///         }
     ///     }
     /// }
