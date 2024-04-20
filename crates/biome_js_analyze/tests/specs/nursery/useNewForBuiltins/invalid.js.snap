@@ -1,0 +1,632 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+Object()
+Array()
+ArrayBuffer()
+BigInt64Array()
+BigUint64Array()
+DataView()
+Date()
+Error()
+Float32Array()
+Float64Array()
+Function()
+Int8Array()
+Int16Array()
+Int32Array()
+Map()
+WeakMap()
+Set()
+WeakSet()
+Promise()
+RegExp()
+Uint8Array()
+Uint16Array()
+Uint32Array()
+Uint8ClampedArray()
+SharedArrayBuffer()
+Proxy()
+WeakRef()
+FinalizationRegistry()
+window.Object()
+globalThis.Object()
+function foo() {
+    return globalThis.Object({ foo: 'bar' })
+}
+
+new String()
+new Number()
+new Boolean()
+new Symbol()
+new BigInt()
+new window.String()
+new globalThis.String()
+function foo() {
+    return new globalThis.String("foo")
+}
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Object() instead of Object().
+  
+  > 1 │ Object()
+      │ ^^^^^^^^
+    2 │ Array()
+    3 │ ArrayBuffer()
+  
+
+```
+
+```
+invalid.js:2:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Array() instead of Array().
+  
+    1 │ Object()
+  > 2 │ Array()
+      │ ^^^^^^^
+    3 │ ArrayBuffer()
+    4 │ BigInt64Array()
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new ArrayBuffer() instead of ArrayBuffer().
+  
+    1 │ Object()
+    2 │ Array()
+  > 3 │ ArrayBuffer()
+      │ ^^^^^^^^^^^^^
+    4 │ BigInt64Array()
+    5 │ BigUint64Array()
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new BigInt64Array() instead of BigInt64Array().
+  
+    2 │ Array()
+    3 │ ArrayBuffer()
+  > 4 │ BigInt64Array()
+      │ ^^^^^^^^^^^^^^^
+    5 │ BigUint64Array()
+    6 │ DataView()
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new BigUint64Array() instead of BigUint64Array().
+  
+    3 │ ArrayBuffer()
+    4 │ BigInt64Array()
+  > 5 │ BigUint64Array()
+      │ ^^^^^^^^^^^^^^^^
+    6 │ DataView()
+    7 │ Date()
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new DataView() instead of DataView().
+  
+    4 │ BigInt64Array()
+    5 │ BigUint64Array()
+  > 6 │ DataView()
+      │ ^^^^^^^^^^
+    7 │ Date()
+    8 │ Error()
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Date() instead of Date().
+  
+    5 │ BigUint64Array()
+    6 │ DataView()
+  > 7 │ Date()
+      │ ^^^^^^
+    8 │ Error()
+    9 │ Float32Array()
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Error() instead of Error().
+  
+     6 │ DataView()
+     7 │ Date()
+   > 8 │ Error()
+       │ ^^^^^^^
+     9 │ Float32Array()
+    10 │ Float64Array()
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Float32Array() instead of Float32Array().
+  
+     7 │ Date()
+     8 │ Error()
+   > 9 │ Float32Array()
+       │ ^^^^^^^^^^^^^^
+    10 │ Float64Array()
+    11 │ Function()
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Float64Array() instead of Float64Array().
+  
+     8 │ Error()
+     9 │ Float32Array()
+  > 10 │ Float64Array()
+       │ ^^^^^^^^^^^^^^
+    11 │ Function()
+    12 │ Int8Array()
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Function() instead of Function().
+  
+     9 │ Float32Array()
+    10 │ Float64Array()
+  > 11 │ Function()
+       │ ^^^^^^^^^^
+    12 │ Int8Array()
+    13 │ Int16Array()
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Int8Array() instead of Int8Array().
+  
+    10 │ Float64Array()
+    11 │ Function()
+  > 12 │ Int8Array()
+       │ ^^^^^^^^^^^
+    13 │ Int16Array()
+    14 │ Int32Array()
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Int16Array() instead of Int16Array().
+  
+    11 │ Function()
+    12 │ Int8Array()
+  > 13 │ Int16Array()
+       │ ^^^^^^^^^^^^
+    14 │ Int32Array()
+    15 │ Map()
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Int32Array() instead of Int32Array().
+  
+    12 │ Int8Array()
+    13 │ Int16Array()
+  > 14 │ Int32Array()
+       │ ^^^^^^^^^^^^
+    15 │ Map()
+    16 │ WeakMap()
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Map() instead of Map().
+  
+    13 │ Int16Array()
+    14 │ Int32Array()
+  > 15 │ Map()
+       │ ^^^^^
+    16 │ WeakMap()
+    17 │ Set()
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new WeakMap() instead of WeakMap().
+  
+    14 │ Int32Array()
+    15 │ Map()
+  > 16 │ WeakMap()
+       │ ^^^^^^^^^
+    17 │ Set()
+    18 │ WeakSet()
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Set() instead of Set().
+  
+    15 │ Map()
+    16 │ WeakMap()
+  > 17 │ Set()
+       │ ^^^^^
+    18 │ WeakSet()
+    19 │ Promise()
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new WeakSet() instead of WeakSet().
+  
+    16 │ WeakMap()
+    17 │ Set()
+  > 18 │ WeakSet()
+       │ ^^^^^^^^^
+    19 │ Promise()
+    20 │ RegExp()
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Promise() instead of Promise().
+  
+    17 │ Set()
+    18 │ WeakSet()
+  > 19 │ Promise()
+       │ ^^^^^^^^^
+    20 │ RegExp()
+    21 │ Uint8Array()
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new RegExp() instead of RegExp().
+  
+    18 │ WeakSet()
+    19 │ Promise()
+  > 20 │ RegExp()
+       │ ^^^^^^^^
+    21 │ Uint8Array()
+    22 │ Uint16Array()
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Uint8Array() instead of Uint8Array().
+  
+    19 │ Promise()
+    20 │ RegExp()
+  > 21 │ Uint8Array()
+       │ ^^^^^^^^^^^^
+    22 │ Uint16Array()
+    23 │ Uint32Array()
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Uint16Array() instead of Uint16Array().
+  
+    20 │ RegExp()
+    21 │ Uint8Array()
+  > 22 │ Uint16Array()
+       │ ^^^^^^^^^^^^^
+    23 │ Uint32Array()
+    24 │ Uint8ClampedArray()
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Uint32Array() instead of Uint32Array().
+  
+    21 │ Uint8Array()
+    22 │ Uint16Array()
+  > 23 │ Uint32Array()
+       │ ^^^^^^^^^^^^^
+    24 │ Uint8ClampedArray()
+    25 │ SharedArrayBuffer()
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Uint8ClampedArray() instead of Uint8ClampedArray().
+  
+    22 │ Uint16Array()
+    23 │ Uint32Array()
+  > 24 │ Uint8ClampedArray()
+       │ ^^^^^^^^^^^^^^^^^^^
+    25 │ SharedArrayBuffer()
+    26 │ Proxy()
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new SharedArrayBuffer() instead of SharedArrayBuffer().
+  
+    23 │ Uint32Array()
+    24 │ Uint8ClampedArray()
+  > 25 │ SharedArrayBuffer()
+       │ ^^^^^^^^^^^^^^^^^^^
+    26 │ Proxy()
+    27 │ WeakRef()
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Proxy() instead of Proxy().
+  
+    24 │ Uint8ClampedArray()
+    25 │ SharedArrayBuffer()
+  > 26 │ Proxy()
+       │ ^^^^^^^
+    27 │ WeakRef()
+    28 │ FinalizationRegistry()
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new WeakRef() instead of WeakRef().
+  
+    25 │ SharedArrayBuffer()
+    26 │ Proxy()
+  > 27 │ WeakRef()
+       │ ^^^^^^^^^
+    28 │ FinalizationRegistry()
+    29 │ window.Object()
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new FinalizationRegistry() instead of FinalizationRegistry().
+  
+    26 │ Proxy()
+    27 │ WeakRef()
+  > 28 │ FinalizationRegistry()
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    29 │ window.Object()
+    30 │ globalThis.Object()
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Object() instead of Object().
+  
+    27 │ WeakRef()
+    28 │ FinalizationRegistry()
+  > 29 │ window.Object()
+       │ ^^^^^^^^^^^^^^^
+    30 │ globalThis.Object()
+    31 │ function foo() {
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Object() instead of Object().
+  
+    28 │ FinalizationRegistry()
+    29 │ window.Object()
+  > 30 │ globalThis.Object()
+       │ ^^^^^^^^^^^^^^^^^^^
+    31 │ function foo() {
+    32 │     return globalThis.Object({ foo: 'bar' })
+  
+
+```
+
+```
+invalid.js:32:12 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Object() instead of Object().
+  
+    30 │ globalThis.Object()
+    31 │ function foo() {
+  > 32 │     return globalThis.Object({ foo: 'bar' })
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ }
+    34 │ 
+  
+
+```
+
+```
+invalid.js:35:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    33 │ }
+    34 │ 
+  > 35 │ new String()
+       │ ^^^^^^^^^^^^
+    36 │ new Number()
+    37 │ new Boolean()
+  
+
+```
+
+```
+invalid.js:36:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Number() instead of new Number().
+  
+    35 │ new String()
+  > 36 │ new Number()
+       │ ^^^^^^^^^^^^
+    37 │ new Boolean()
+    38 │ new Symbol()
+  
+
+```
+
+```
+invalid.js:37:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Boolean() instead of new Boolean().
+  
+    35 │ new String()
+    36 │ new Number()
+  > 37 │ new Boolean()
+       │ ^^^^^^^^^^^^^
+    38 │ new Symbol()
+    39 │ new BigInt()
+  
+
+```
+
+```
+invalid.js:38:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Symbol() instead of new Symbol().
+  
+    36 │ new Number()
+    37 │ new Boolean()
+  > 38 │ new Symbol()
+       │ ^^^^^^^^^^^^
+    39 │ new BigInt()
+    40 │ new window.String()
+  
+
+```
+
+```
+invalid.js:39:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use BigInt() instead of new BigInt().
+  
+    37 │ new Boolean()
+    38 │ new Symbol()
+  > 39 │ new BigInt()
+       │ ^^^^^^^^^^^^
+    40 │ new window.String()
+    41 │ new globalThis.String()
+  
+
+```
+
+```
+invalid.js:40:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    38 │ new Symbol()
+    39 │ new BigInt()
+  > 40 │ new window.String()
+       │ ^^^^^^^^^^^^^^^^^^^
+    41 │ new globalThis.String()
+    42 │ function foo() {
+  
+
+```
+
+```
+invalid.js:41:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    39 │ new BigInt()
+    40 │ new window.String()
+  > 41 │ new globalThis.String()
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ function foo() {
+    43 │     return new globalThis.String("foo")
+  
+
+```
+
+```
+invalid.js:43:12 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    41 │ new globalThis.String()
+    42 │ function foo() {
+  > 43 │     return new globalThis.String("foo")
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ }
+  
+
+```
