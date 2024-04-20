@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_syntax::CssDeclarationOrRuleBlock;
-use biome_rowan::AstNode;
+use biome_css_syntax::CssUnknownDimension;
+use biome_rowan::TextRange;
 
 declare_rule! {
     /// Disallow unknown units.
@@ -59,36 +59,50 @@ declare_rule! {
     }
 }
 
+pub struct RuleState {
+    value: String,
+    span: TextRange,
+}
+
+fn is_css_hack_unit(value: &str) -> bool {
+    value == "\\0"
+}
+
 impl Rule for NoUnknownUnit {
-    type Query = Ast<CssDeclarationOrRuleBlock>;
-    type State = CssDeclarationOrRuleBlock;
+    type Query = Ast<CssUnknownDimension>;
+    type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if node.items().into_iter().next().is_none() {
-            return Some(node.clone());
+
+        if let Ok(unit_token) = node.unit_token() {
+            let value = unit_token.text().to_string();
+            let span = unit_token.text_range();
+
+            if is_css_hack_unit(&value) {
+                return None;
+            }
+
+            return Some(RuleState { value, span });
         }
+
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
-        let span = node.range();
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let span = state.span;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected empty block is not allowed"
+                    "Unexpected unknown unit: "<Emphasis>{ state.value }</Emphasis>
                 },
             )
             .note(markup! {
-                    "This note will give you more information."
+                "Fix to a known unit."
             }),
         )
     }
