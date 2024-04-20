@@ -121,6 +121,7 @@ impl Rule for NoUnknownUnit {
 
                                 if strip_vendor_prefix(function_name.as_str()) == "image-set" {
                                     allow_x = true;
+                                    break;
                                 }
                             }
                             CssSyntaxKind::CSS_QUERY_FEATURE_PLAIN => {
@@ -135,6 +136,7 @@ impl Rule for NoUnknownUnit {
 
                                 if RESOLUTION_MEDIA_FEATURE_NAMES.contains(&feature_name.as_str()) {
                                     allow_x = true;
+                                    break;
                                 }
                             }
                             CssSyntaxKind::CSS_GENERIC_PROPERTY => {
@@ -150,6 +152,7 @@ impl Rule for NoUnknownUnit {
 
                                 if property_name == "image-resolution" {
                                     allow_x = true;
+                                    break;
                                 }
                             }
                             _ => {}
