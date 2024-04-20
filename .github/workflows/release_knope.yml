@@ -207,9 +207,8 @@ jobs:
 
       - name: Set release infos
         if: needs.build.outputs.prerelease == 'true'
+        # TODO: review this part for nightly releases
         run: node packages/@biomejs/biome/scripts/update-nightly-version.mjs
-      - name: Generate npm packages
-        run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
       - name: Publish npm packages as latest
         run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag latest --access public --provenance; fi; done
