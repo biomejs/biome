@@ -8,7 +8,12 @@ expression: invalid.json
 	"foo": "",
 	"foo": "",
 	"foo": "",
-	"foo": ""
+	"foo": "",
+	"new": {
+		"lorem": "",
+		"ipsum": "",
+		"lorem": ""
+	}
 }
 
 ```
@@ -32,7 +37,7 @@ invalid.json:2:2 lint/nursery/noDuplicateJsonKeys ━━━━━━━━━━
   > 3 │ 	"foo": "",
       │ 	^^^^^
     4 │ 	"foo": "",
-    5 │ 	"foo": ""
+    5 │ 	"foo": "",
   
   i This where a duplicated key was declared again.
   
@@ -40,21 +45,45 @@ invalid.json:2:2 lint/nursery/noDuplicateJsonKeys ━━━━━━━━━━
     3 │ 	"foo": "",
   > 4 │ 	"foo": "",
       │ 	^^^^^
-    5 │ 	"foo": ""
-    6 │ }
+    5 │ 	"foo": "",
+    6 │ 	"new": {
   
   i This where a duplicated key was declared again.
   
     3 │ 	"foo": "",
     4 │ 	"foo": "",
-  > 5 │ 	"foo": ""
+  > 5 │ 	"foo": "",
       │ 	^^^^^
-    6 │ }
-    7 │ 
+    6 │ 	"new": {
+    7 │ 		"lorem": "",
   
   i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
   
 
 ```
 
+```
+invalid.json:7:3 lint/nursery/noDuplicateJsonKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! The key lorem was already declared.
+  
+    5 │ 	"foo": "",
+    6 │ 	"new": {
+  > 7 │ 		"lorem": "",
+      │ 		^^^^^^^
+    8 │ 		"ipsum": "",
+    9 │ 		"lorem": ""
+  
+  i This where a duplicated key was declared again.
+  
+     7 │ 		"lorem": "",
+     8 │ 		"ipsum": "",
+   > 9 │ 		"lorem": ""
+       │ 		^^^^^^^
+    10 │ 	}
+    11 │ }
+  
+  i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+  
+
+```
