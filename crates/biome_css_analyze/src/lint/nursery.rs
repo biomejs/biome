@@ -5,6 +5,7 @@ use biome_analyze::declare_group;
 pub mod no_color_invalid_hex;
 pub mod no_css_empty_block;
 pub mod no_duplicate_font_names;
+pub mod no_duplicate_selectors_keyframe_block;
 
 declare_group! {
     pub Nursery {
@@ -13,6 +14,7 @@ declare_group! {
             self :: no_color_invalid_hex :: NoColorInvalidHex ,
             self :: no_css_empty_block :: NoCssEmptyBlock ,
             self :: no_duplicate_font_names :: NoDuplicateFontNames ,
+            self :: no_duplicate_selectors_keyframe_block :: NoDuplicateSelectorsKeyframeBlock ,
         ]
      }
 }

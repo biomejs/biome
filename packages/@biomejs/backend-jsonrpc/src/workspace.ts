@@ -941,6 +941,10 @@ export interface Nursery {
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate selectors within keyframe blocks.
+	 */
+	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
 	noEvolvingAny?: RuleConfiguration_for_Null;
@@ -1948,6 +1952,7 @@ export type Category =
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
+	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noMisplacedAssertion"
