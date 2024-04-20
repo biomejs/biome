@@ -18,11 +18,7 @@
 		"enabled": true
 	},
 	"files": {
-		"include": [
-			"packages/@biomejs/biome",
-			"packages/@biomejs/biome-jsonrpc",
-			"packages/@biomejs/js-api",
-			"packages/tailwindcss-config-analyzer"
-		]
+		"ignore": ["packages/@biomejs/wasm-*"],
+		"include": ["packages/@biomejs/**", "packages/tailwindcss-config-analyzer"]
 	}
 }

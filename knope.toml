@@ -1,7 +1,18 @@
 ## npm packages
 [packages."@biomejs/biome"]
-changelog       = "CHANGELOG.md"
-versioned_files = ["packages/@biomejs/biome/package.json"]
+changelog = "CHANGELOG.md"
+versioned_files = [
+  "packages/@biomejs/biome/package.json",
+  "packages/@biomejs/biome/cli-darwin-arm64/package.json",
+  "packages/@biomejs/biome/cli-darwin-x64/package.json",
+  "packages/@biomejs/biome/cli-linux-arm64/package.json",
+  "packages/@biomejs/biome/cli-linux-arm64-musl/package.json",
+  "packages/@biomejs/biome/cli-linux-x64/package.json",
+  "packages/@biomejs/biome/cli-linux-x64-musl/package.json",
+  "packages/@biomejs/biome/cli-win32-arm64/package.json",
+  "packages/@biomejs/biome/cli-win32-x64/package.json",
+]
+
 
 # Special crate. This is the main binary that we are going to release.
 [packages.biome_cli]
@@ -194,6 +205,12 @@ type    = "Command"
 type = "PrepareRelease"
 # we have been following conventional commits, although inside the monorepo it's difficult to define scopes
 ignore_conventional_commits = true
+
+[[workflows.steps]]
+type = "Command"
+# Workaround to update the lock files
+# https://github.com/knope-dev/knope/issues/162
+command = "cargo build"
 
 [[workflows.steps]]
 type = "Command"
