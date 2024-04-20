@@ -23,7 +23,7 @@ expression: invalid.css
 ```
 invalid.css:1:26 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected duplicate selector: from
+  ! The duplicate keyframe selector is overwritten by later one.
   
   > 1 │ @keyframes foo { from {} from {}}
       │                          ^^^^
@@ -38,7 +38,7 @@ invalid.css:1:26 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━�
 ```
 invalid.css:3:26 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected duplicate selector: FROM
+  ! The duplicate keyframe selector is overwritten by later one.
   
     1 │ @keyframes foo { from {} from {}}
     2 │ 
@@ -55,7 +55,7 @@ invalid.css:3:26 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━�
 ```
 invalid.css:5:24 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected duplicate selector: 0%
+  ! The duplicate keyframe selector is overwritten by later one.
   
     3 │ @keyframes foo { from {} FROM {}}
     4 │ 
@@ -72,7 +72,7 @@ invalid.css:5:24 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━�
 ```
 invalid.css:7:32 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected duplicate selector: to
+  ! The duplicate keyframe selector is overwritten by later one.
   
     5 │ @keyframes foo { 0% {} 0% {}}
     6 │ 
@@ -89,7 +89,7 @@ invalid.css:7:32 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━�
 ```
 invalid.css:9:24 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected duplicate selector: 0%
+  ! The duplicate keyframe selector is overwritten by later one.
   
      7 │ @keyframes foo { from {} to {} to {} }
      8 │ 
@@ -106,7 +106,7 @@ invalid.css:9:24 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━�
 ```
 invalid.css:11:32 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected duplicate selector: 0%
+  ! The duplicate keyframe selector is overwritten by later one.
   
      9 │ @keyframes foo { 0% {} 0% {} 100% {} }
     10 │ 
@@ -123,7 +123,7 @@ invalid.css:11:32 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━
 ```
 invalid.css:13:29 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected duplicate selector: 0%
+  ! The duplicate keyframe selector is overwritten by later one.
   
     11 │ @-webkit-keyframes foo { 0% {} 0% {} 100% {} }
     12 │ 
