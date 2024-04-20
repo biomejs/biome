@@ -203,8 +203,7 @@ things you would need to run and check:
 - `just l` (alias for `just lint`), run the linter for the whole project.
 - Code generation. The code generation of the repository is spread in the different parts of the code base. Sometimes is needed and sometime it isn't:
   - run `just gen-lint` when you're working on the **linter**;
-  - run `just gen-bindings` in case you worked around the **workspace**;
-  - run `just gen-web` when you update the `CHANGELOG.md`.
+  - run `just gen-bindings` in case you worked around the **workspace**.
 
 > [!NOTE]
 > You can run `just ready` as well, although it's a command that runs the codegen of the whole repository, which will take some time
@@ -342,12 +341,6 @@ Make sure that the created subsections are ordered in the following order:
 #### Enhancements
 
 #### Bug fixes
-```
-
-Because the website displays the changelog, you should update the website using the following command:
-
-```sh
-just gen-web
 ```
 
 #### Writing a changelog line
