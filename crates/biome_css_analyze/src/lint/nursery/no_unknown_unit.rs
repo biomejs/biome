@@ -84,8 +84,6 @@ impl Rule for NoUnknownUnit {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
 
-        // dbg!(ctx.root());
-
         match node {
             AnyCssDimension::CssUnknownDimension(dimension) => {
                 let unit_token = dimension.unit_token().ok()?;
