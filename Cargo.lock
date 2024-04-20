@@ -262,6 +262,7 @@ dependencies = [
  "biome_test_utils",
  "insta",
  "lazy_static",
+ "regex",
  "tests_macros",
 ]
 

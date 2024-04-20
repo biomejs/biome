@@ -1,7 +1,18 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_syntax::CssUnknownDimension;
-use biome_rowan::TextRange;
+use biome_css_syntax::{
+    AnyCssDimension, CssFunction, CssGenericProperty, CssQueryFeaturePlain, CssSyntaxKind,
+};
+use biome_rowan::{SyntaxNodeCast, TextRange};
+
+use crate::utils::strip_vendor_prefix;
+
+const RESOLUTION_MEDIA_FEATURE_NAMES: [&str; 3] =
+    ["resolution", "min-resolution", "max-resolution"];
+
+fn is_css_hack_unit(value: &str) -> bool {
+    value == "\\0"
+}
 
 declare_rule! {
     /// Disallow unknown units.
@@ -64,12 +75,8 @@ pub struct RuleState {
     span: TextRange,
 }
 
-fn is_css_hack_unit(value: &str) -> bool {
-    value == "\\0"
-}
-
 impl Rule for NoUnknownUnit {
-    type Query = Ast<CssUnknownDimension>;
+    type Query = Ast<AnyCssDimension>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -77,18 +84,90 @@ impl Rule for NoUnknownUnit {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
 
-        if let Ok(unit_token) = node.unit_token() {
-            let value = unit_token.text().to_string();
-            let span = unit_token.text_range();
+        // dbg!(ctx.root());
 
-            if is_css_hack_unit(&value) {
-                return None;
+        match node {
+            AnyCssDimension::CssUnknownDimension(dimension) => {
+                let unit_token = dimension.unit_token().ok()?;
+                let unit = unit_token.text_trimmed().to_string();
+
+                if is_css_hack_unit(&unit) {
+                    return None;
+                }
+
+                Some(RuleState {
+                    value: unit,
+                    span: unit_token.text_trimmed_range(),
+                })
             }
+            AnyCssDimension::CssRegularDimension(dimension) => {
+                let unit_token = dimension.unit_token().ok()?;
+                let unit = unit_token.text_trimmed().to_string();
 
-            return Some(RuleState { value, span });
+                if unit == "x" {
+                    let mut allow_x = false;
+
+                    for ancestor in dimension.unit_token().ok()?.ancestors() {
+                        match ancestor.kind() {
+                            CssSyntaxKind::CSS_FUNCTION => {
+                                let function_name = ancestor
+                                    .cast::<CssFunction>()?
+                                    .name()
+                                    .ok()?
+                                    .value_token()
+                                    .ok()?
+                                    .text_trimmed()
+                                    .to_lowercase();
+
+                                if strip_vendor_prefix(function_name.as_str()) == "image-set" {
+                                    allow_x = true;
+                                }
+                            }
+                            CssSyntaxKind::CSS_QUERY_FEATURE_PLAIN => {
+                                let feature_name = ancestor
+                                    .cast::<CssQueryFeaturePlain>()?
+                                    .name()
+                                    .ok()?
+                                    .value_token()
+                                    .ok()?
+                                    .text_trimmed()
+                                    .to_lowercase();
+
+                                if RESOLUTION_MEDIA_FEATURE_NAMES.contains(&feature_name.as_str()) {
+                                    allow_x = true;
+                                }
+                            }
+                            CssSyntaxKind::CSS_GENERIC_PROPERTY => {
+                                let property_name = ancestor
+                                    .cast::<CssGenericProperty>()?
+                                    .name()
+                                    .ok()?
+                                    .as_css_identifier()?
+                                    .value_token()
+                                    .ok()?
+                                    .text_trimmed()
+                                    .to_lowercase();
+
+                                if property_name == "image-resolution" {
+                                    allow_x = true;
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+
+                    if !allow_x {
+                        return Some(RuleState {
+                            value: unit,
+                            span: unit_token.text_trimmed_range(),
+                        });
+                    }
+                }
+
+                None
+            }
+            _ => None,
         }
-
-        None
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
