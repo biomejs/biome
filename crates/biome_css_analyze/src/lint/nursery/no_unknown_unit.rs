@@ -70,14 +70,14 @@ declare_rule! {
     }
 }
 
-pub struct RuleState {
-    value: String,
+pub struct NoUnknownUnitState {
+    unit: String,
     span: TextRange,
 }
 
 impl Rule for NoUnknownUnit {
     type Query = Ast<AnyCssDimension>;
-    type State = RuleState;
+    type State = NoUnknownUnitState;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -93,8 +93,8 @@ impl Rule for NoUnknownUnit {
                     return None;
                 }
 
-                Some(RuleState {
-                    value: unit,
+                Some(NoUnknownUnitState {
+                    unit,
                     span: unit_token.text_trimmed_range(),
                 })
             }
@@ -158,8 +158,8 @@ impl Rule for NoUnknownUnit {
                     }
 
                     if !allow_x {
-                        return Some(RuleState {
-                            value: unit,
+                        return Some(NoUnknownUnitState {
+                            unit,
                             span: unit_token.text_trimmed_range(),
                         });
                     }
@@ -172,13 +172,12 @@ impl Rule for NoUnknownUnit {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let span = state.span;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                span,
+                state.span,
                 markup! {
-                    "Unexpected unknown unit: "<Emphasis>{ state.value }</Emphasis>
+                    "Unexpected unknown unit: "<Emphasis>{ state.unit }</Emphasis>
                 },
             )
             .note(markup! {
