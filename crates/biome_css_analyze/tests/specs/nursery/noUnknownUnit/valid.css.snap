@@ -76,23 +76,4 @@ a { background-image: image-set(url('first.png') calc(1x * 1), url('second.png')
 @media ( resOLution:  2x) {}
 a { image-resolution: 1x; }
 a { width: 8ic; }
-@font-face { unicode-range: U+0100-024F; }
-
-```
-
-# Diagnostics
-```
-valid.css:73:39 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected unknown unit: F
-  
-    71 │ a { image-resolution: 1x; }
-    72 │ a { width: 8ic; }
-  > 73 │ @font-face { unicode-range: U+0100-024F; }
-       │                                       ^
-    74 │ 
-  
-  i Fix to a known unit.
-  
-
 ```

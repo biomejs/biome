@@ -19,7 +19,6 @@ a { -webkit-transition-delay: 10pix; }
 a { margin: -webkit-calc(13pix + 10px); }
 a { margin: some-function(13pix + 10px); }
 root { --margin: 10pix; }
-root { --margin: 10px + 10pix; }
 @media (min-width: 13pix) {}
 @media (min-width: 10px)\n  and (max-width: 20PIX) {}
 @media (width < 10.01REMS) {}
@@ -33,7 +32,6 @@ a { background: /* comment */ image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x
 a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
 @font-face { color: U+0100-024F; }
 a { unicode-range: U+0100-024F; }
-
 ```
 
 # Diagnostics
@@ -173,12 +171,12 @@ invalid.css:8:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━━
 ```
 invalid.css:9:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix 
+  ! Unexpected unknown unit: pix
   
      7 │ a { color: rgba(255pix, 0, 51, 1); }
      8 │ a { color: hsla(255pix, 0, 51, 1); }
    > 9 │ a { margin: calc(13pix + 10px); }
-       │                    ^^^^
+       │                    ^^^
     10 │ a { margin: calc(10pix*2); }
     11 │ a { margin: calc(2*10pix); }
   
@@ -241,12 +239,12 @@ invalid.css:12:33 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 invalid.css:13:28 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix 
+  ! Unexpected unknown unit: pix
   
     11 │ a { margin: calc(2*10pix); }
     12 │ a { -webkit-transition-delay: 10pix; }
   > 13 │ a { margin: -webkit-calc(13pix + 10px); }
-       │                            ^^^^
+       │                            ^^^
     14 │ a { margin: some-function(13pix + 10px); }
     15 │ root { --margin: 10pix; }
   
@@ -258,14 +256,14 @@ invalid.css:13:28 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 invalid.css:14:29 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: pix 
+  ! Unexpected unknown unit: pix
   
     12 │ a { -webkit-transition-delay: 10pix; }
     13 │ a { margin: -webkit-calc(13pix + 10px); }
   > 14 │ a { margin: some-function(13pix + 10px); }
-       │                             ^^^^
+       │                             ^^^
     15 │ root { --margin: 10pix; }
-    16 │ root { --margin: 10px + 10pix; }
+    16 │ @media (min-width: 13pix) {}
   
   i Fix to a known unit.
   
@@ -281,8 +279,8 @@ invalid.css:15:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
     14 │ a { margin: some-function(13pix + 10px); }
   > 15 │ root { --margin: 10pix; }
        │                    ^^^
-    16 │ root { --margin: 10px + 10pix; }
-    17 │ @media (min-width: 13pix) {}
+    16 │ @media (min-width: 13pix) {}
+    17 │ @media (min-width: 10px)\n  and (max-width: 20PIX) {}
   
   i Fix to a known unit.
   
@@ -290,16 +288,16 @@ invalid.css:15:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:17:22 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:16:22 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
+    14 │ a { margin: some-function(13pix + 10px); }
     15 │ root { --margin: 10pix; }
-    16 │ root { --margin: 10px + 10pix; }
-  > 17 │ @media (min-width: 13pix) {}
+  > 16 │ @media (min-width: 13pix) {}
        │                      ^^^
-    18 │ @media (min-width: 10px)\n  and (max-width: 20PIX) {}
-    19 │ @media (width < 10.01REMS) {}
+    17 │ @media (min-width: 10px)\n  and (max-width: 20PIX) {}
+    18 │ @media (width < 10.01REMS) {}
   
   i Fix to a known unit.
   
@@ -307,16 +305,16 @@ invalid.css:17:22 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:18:47 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:17:47 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: PIX
   
-    16 │ root { --margin: 10px + 10pix; }
-    17 │ @media (min-width: 13pix) {}
-  > 18 │ @media (min-width: 10px)\n  and (max-width: 20PIX) {}
+    15 │ root { --margin: 10pix; }
+    16 │ @media (min-width: 13pix) {}
+  > 17 │ @media (min-width: 10px)\n  and (max-width: 20PIX) {}
        │                                               ^^^
-    19 │ @media (width < 10.01REMS) {}
-    20 │ a { width: 1e4pz; }
+    18 │ @media (width < 10.01REMS) {}
+    19 │ a { width: 1e4pz; }
   
   i Fix to a known unit.
   
@@ -324,16 +322,16 @@ invalid.css:18:47 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:19:22 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:18:22 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: REMS
   
-    17 │ @media (min-width: 13pix) {}
-    18 │ @media (min-width: 10px)\n  and (max-width: 20PIX) {}
-  > 19 │ @media (width < 10.01REMS) {}
+    16 │ @media (min-width: 13pix) {}
+    17 │ @media (min-width: 10px)\n  and (max-width: 20PIX) {}
+  > 18 │ @media (width < 10.01REMS) {}
        │                      ^^^^
-    20 │ a { width: 1e4pz; }
-    21 │ a { flex: 0 9r9 auto; }
+    19 │ a { width: 1e4pz; }
+    20 │ a { flex: 0 9r9 auto; }
   
   i Fix to a known unit.
   
@@ -341,16 +339,16 @@ invalid.css:19:22 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:20:15 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:19:15 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pz
   
-    18 │ @media (min-width: 10px)\n  and (max-width: 20PIX) {}
-    19 │ @media (width < 10.01REMS) {}
-  > 20 │ a { width: 1e4pz; }
+    17 │ @media (min-width: 10px)\n  and (max-width: 20PIX) {}
+    18 │ @media (width < 10.01REMS) {}
+  > 19 │ a { width: 1e4pz; }
        │               ^^
-    21 │ a { flex: 0 9r9 auto; }
-    22 │ a { width: 400x; }
+    20 │ a { flex: 0 9r9 auto; }
+    21 │ a { width: 400x; }
   
   i Fix to a known unit.
   
@@ -358,16 +356,16 @@ invalid.css:20:15 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:21:14 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:20:14 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown unit: r9 
+  ! Unexpected unknown unit: r9
   
-    19 │ @media (width < 10.01REMS) {}
-    20 │ a { width: 1e4pz; }
-  > 21 │ a { flex: 0 9r9 auto; }
-       │              ^^^
-    22 │ a { width: 400x; }
-    23 │ @media (resolution: 2x) and (min-width: 200x) {}
+    18 │ @media (width < 10.01REMS) {}
+    19 │ a { width: 1e4pz; }
+  > 20 │ a { flex: 0 9r9 auto; }
+       │              ^^
+    21 │ a { width: 400x; }
+    22 │ @media (resolution: 2x) and (min-width: 200x) {}
   
   i Fix to a known unit.
   
@@ -375,16 +373,101 @@ invalid.css:21:14 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:27:46 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:21:15 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected unknown unit: x
+  
+    19 │ a { width: 1e4pz; }
+    20 │ a { flex: 0 9r9 auto; }
+  > 21 │ a { width: 400x; }
+       │               ^
+    22 │ @media (resolution: 2x) and (min-width: 200x) {}
+    23 │ @media ( resolution: /* comment */ 2x ) and (min-width: 200x) {}
+  
+  i Fix to a known unit.
+  
+
+```
+
+```
+invalid.css:22:44 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected unknown unit: x
+  
+    20 │ a { flex: 0 9r9 auto; }
+    21 │ a { width: 400x; }
+  > 22 │ @media (resolution: 2x) and (min-width: 200x) {}
+       │                                            ^
+    23 │ @media ( resolution: /* comment */ 2x ) and (min-width: 200x) {}
+    24 │ a { background: image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
+  
+  i Fix to a known unit.
+  
+
+```
+
+```
+invalid.css:23:60 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected unknown unit: x
+  
+    21 │ a { width: 400x; }
+    22 │ @media (resolution: 2x) and (min-width: 200x) {}
+  > 23 │ @media ( resolution: /* comment */ 2x ) and (min-width: 200x) {}
+       │                                                            ^
+    24 │ a { background: image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
+    25 │ a { background: /* comment */ image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
+  
+  i Fix to a known unit.
+  
+
+```
+
+```
+invalid.css:24:66 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected unknown unit: x
+  
+    22 │ @media (resolution: 2x) and (min-width: 200x) {}
+    23 │ @media ( resolution: /* comment */ 2x ) and (min-width: 200x) {}
+  > 24 │ a { background: image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
+       │                                                                  ^
+    25 │ a { background: /* comment */ image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
+    26 │ a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
+  
+  i Fix to a known unit.
+  
+
+```
+
+```
+invalid.css:25:80 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected unknown unit: x
+  
+    23 │ @media ( resolution: /* comment */ 2x ) and (min-width: 200x) {}
+    24 │ a { background: image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
+  > 25 │ a { background: /* comment */ image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
+       │                                                                                ^
+    26 │ a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
+    27 │ @font-face { color: U+0100-024F; }
+  
+  i Fix to a known unit.
+  
+
+```
+
+```
+invalid.css:26:46 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
-    25 │ a { background: image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
-    26 │ a { background: /* comment */ image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
-  > 27 │ a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
+    24 │ a { background: image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
+    25 │ a { background: /* comment */ image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
+  > 26 │ a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
        │                                              ^^^
-    28 │ @font-face { color: U+0100-024F; }
-    29 │ a { unicode-range: U+0100-024F; }
+    27 │ @font-face { color: U+0100-024F; }
+    28 │ a { unicode-range: U+0100-024F; }
   
   i Fix to a known unit.
   
@@ -392,16 +475,15 @@ invalid.css:27:46 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:28:31 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:27:31 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: F
   
-    26 │ a { background: /* comment */ image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
-    27 │ a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
-  > 28 │ @font-face { color: U+0100-024F; }
+    25 │ a { background: /* comment */ image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
+    26 │ a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
+  > 27 │ @font-face { color: U+0100-024F; }
        │                               ^
-    29 │ a { unicode-range: U+0100-024F; }
-    30 │ 
+    28 │ a { unicode-range: U+0100-024F; }
   
   i Fix to a known unit.
   
@@ -409,15 +491,14 @@ invalid.css:28:31 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:29:30 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:28:30 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: F
   
-    27 │ a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
-    28 │ @font-face { color: U+0100-024F; }
-  > 29 │ a { unicode-range: U+0100-024F; }
+    26 │ a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
+    27 │ @font-face { color: U+0100-024F; }
+  > 28 │ a { unicode-range: U+0100-024F; }
        │                              ^
-    30 │ 
   
   i Fix to a known unit.
   

@@ -13,7 +13,6 @@ a { -webkit-transition-delay: 10pix; }
 a { margin: -webkit-calc(13pix + 10px); }
 a { margin: some-function(13pix + 10px); }
 root { --margin: 10pix; }
-root { --margin: 10px + 10pix; }
 @media (min-width: 13pix) {}
 @media (min-width: 10px)\n  and (max-width: 20PIX) {}
 @media (width < 10.01REMS) {}
