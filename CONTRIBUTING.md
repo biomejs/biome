@@ -121,7 +121,7 @@ cargo t
 You can run **a single test** with cargo by passing the test name after the `test` command:
 
 ```shell
-cd crate/biome_js_formatter
+cd crates/biome_js_formatter
 
 cargo t quick_test
 ```
@@ -261,7 +261,7 @@ The tests are run against the compiled files, which means that you need to run t
 
 ### Translations
 
-For more information on how to help with translation, please see the [translation contribution guidelines for our docs](./website/TRANSLATIONS.md).
+For more information on how to help with translation, please see the [translation contribution guidelines for our docs](https://github.com/biomejs/website/blob/main/TRANSLATIONS.md).
 
 ## Commit messages
 
