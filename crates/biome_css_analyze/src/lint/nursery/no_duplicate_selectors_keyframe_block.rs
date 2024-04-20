@@ -54,8 +54,7 @@ impl Rule for NoDuplicateSelectorsKeyframeBlock {
         for keyframe_item in node.items() {
             match keyframe_item {
                 AnyCssKeyframesItem::CssKeyframesItem(item) => {
-                    let keyframe_selector = item.selectors().into_iter().next()?;
-                    let keyframe_selector = keyframe_selector.ok()?;
+                    let keyframe_selector = item.selectors().into_iter().next()?.ok()?;
                     if !selector_list.insert(keyframe_selector.text().to_lowercase()) {
                         return Some(keyframe_selector);
                     }
@@ -76,7 +75,7 @@ impl Rule for NoDuplicateSelectorsKeyframeBlock {
                 },
             )
             .note(markup! {
-                    "Consider using different selector here!"
+                    "Consider using a different percentage value or keyword to avoid duplication"
             }),
         )
     }
