@@ -32,7 +32,7 @@ SharedArrayBuffer()
 Proxy()
 WeakRef()
 FinalizationRegistry()
-window.Object()
+window.Object({})
 globalThis.Object()
 function foo() {
     return globalThis.Object({ foo: 'bar' })
@@ -43,11 +43,12 @@ new Number()
 new Boolean()
 new Symbol()
 new BigInt()
-new window.String()
+new window.String(123)
 new globalThis.String()
 function foo() {
     return new globalThis.String("foo")
 }
+
 ```
 
 # Diagnostics
@@ -448,7 +449,7 @@ invalid.js:27:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
   > 27 │ WeakRef()
        │ ^^^^^^^^^
     28 │ FinalizationRegistry()
-    29 │ window.Object()
+    29 │ window.Object({})
   
 
 ```
@@ -462,7 +463,7 @@ invalid.js:28:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     27 │ WeakRef()
   > 28 │ FinalizationRegistry()
        │ ^^^^^^^^^^^^^^^^^^^^^^
-    29 │ window.Object()
+    29 │ window.Object({})
     30 │ globalThis.Object()
   
 
@@ -475,8 +476,8 @@ invalid.js:29:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
   
     27 │ WeakRef()
     28 │ FinalizationRegistry()
-  > 29 │ window.Object()
-       │ ^^^^^^^^^^^^^^^
+  > 29 │ window.Object({})
+       │ ^^^^^^^^^^^^^^^^^
     30 │ globalThis.Object()
     31 │ function foo() {
   
@@ -489,7 +490,7 @@ invalid.js:30:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
   ! Use new Object() instead of Object().
   
     28 │ FinalizationRegistry()
-    29 │ window.Object()
+    29 │ window.Object({})
   > 30 │ globalThis.Object()
        │ ^^^^^^^^^^^^^^^^^^^
     31 │ function foo() {
@@ -514,7 +515,7 @@ invalid.js:32:12 lint/nursery/useNewForBuiltins ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:35:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:35:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use String() instead of new String().
   
@@ -525,11 +526,15 @@ invalid.js:35:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     36 │ new Number()
     37 │ new Boolean()
   
+  i Unsafe fix: Remove new.
+  
+    35 │ new·String()
+       │ ----        
 
 ```
 
 ```
-invalid.js:36:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Number() instead of new Number().
   
@@ -539,11 +544,15 @@ invalid.js:36:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     37 │ new Boolean()
     38 │ new Symbol()
   
+  i Unsafe fix: Remove new.
+  
+    36 │ new·Number()
+       │ ----        
 
 ```
 
 ```
-invalid.js:37:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Boolean() instead of new Boolean().
   
@@ -554,11 +563,15 @@ invalid.js:37:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     38 │ new Symbol()
     39 │ new BigInt()
   
+  i Unsafe fix: Remove new.
+  
+    37 │ new·Boolean()
+       │ ----         
 
 ```
 
 ```
-invalid.js:38:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:38:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Symbol() instead of new Symbol().
   
@@ -567,13 +580,17 @@ invalid.js:38:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
   > 38 │ new Symbol()
        │ ^^^^^^^^^^^^
     39 │ new BigInt()
-    40 │ new window.String()
+    40 │ new window.String(123)
   
+  i Unsafe fix: Remove new.
+  
+    38 │ new·Symbol()
+       │ ----        
 
 ```
 
 ```
-invalid.js:39:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:39:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use BigInt() instead of new BigInt().
   
@@ -581,44 +598,56 @@ invalid.js:39:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     38 │ new Symbol()
   > 39 │ new BigInt()
        │ ^^^^^^^^^^^^
-    40 │ new window.String()
+    40 │ new window.String(123)
     41 │ new globalThis.String()
   
+  i Unsafe fix: Remove new.
+  
+    39 │ new·BigInt()
+       │ ----        
 
 ```
 
 ```
-invalid.js:40:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:40:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use String() instead of new String().
   
     38 │ new Symbol()
     39 │ new BigInt()
-  > 40 │ new window.String()
-       │ ^^^^^^^^^^^^^^^^^^^
+  > 40 │ new window.String(123)
+       │ ^^^^^^^^^^^^^^^^^^^^^^
     41 │ new globalThis.String()
     42 │ function foo() {
   
+  i Unsafe fix: Remove new.
+  
+    40 │ new·window.String(123)
+       │ ----                  
 
 ```
 
 ```
-invalid.js:41:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:41:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use String() instead of new String().
   
     39 │ new BigInt()
-    40 │ new window.String()
+    40 │ new window.String(123)
   > 41 │ new globalThis.String()
        │ ^^^^^^^^^^^^^^^^^^^^^^^
     42 │ function foo() {
     43 │     return new globalThis.String("foo")
   
+  i Unsafe fix: Remove new.
+  
+    41 │ new·globalThis.String()
+       │ ----                   
 
 ```
 
 ```
-invalid.js:43:12 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:12 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use String() instead of new String().
   
@@ -627,6 +656,11 @@ invalid.js:43:12 lint/nursery/useNewForBuiltins ━━━━━━━━━━�
   > 43 │     return new globalThis.String("foo")
        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     44 │ }
+    45 │ 
   
+  i Unsafe fix: Remove new.
+  
+    43 │ ····return·new·globalThis.String("foo")
+       │            ----                        
 
 ```

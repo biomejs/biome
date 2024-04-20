@@ -4,8 +4,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_factory::make;
-use biome_js_syntax::{global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression};
+use biome_js_factory::make::{self, token_decorated_with_space};
+use biome_js_syntax::{global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression, JsSyntaxKind};
 use biome_rowan::{chain_trivia_pieces, declare_node_union, AstNode, BatchMutationExt};
 
 declare_rule! {
@@ -111,7 +111,8 @@ impl Rule for UseNewForBuiltins {
         let name_text = name.text();
 
         if creation_rule.forbidden_builtins_list().contains(&name_text) {
-            return ctx.model()
+            return ctx
+                .model()
                 .binding(&reference)
                 .is_none()
                 .then_some(UseNewForBuiltinsState {
@@ -124,7 +125,7 @@ impl Rule for UseNewForBuiltins {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+        let node: &JsNewOrCallExpression = ctx.query();
 
         let name = &state.name;
 
@@ -143,19 +144,12 @@ impl Rule for UseNewForBuiltins {
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
-        let node: &JsNewOrCallExpression = ctx.query();
-        let call_expression = convert_new_expression_to_call_expression(node)?;
-        let mut mutation = ctx.root().begin();
-        mutation.replace_node_discard_trivia::<AnyJsExpression>(
-            node.clone().into(),
-            call_expression.into(),
-        );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove "<Emphasis>"new"</Emphasis>"." }.to_owned(),
-            mutation,
-        })
+        let node = ctx.query();
+
+        match node {
+            JsNewOrCallExpression::JsNewExpression(node) => action_remove_new(ctx, node),
+            JsNewOrCallExpression::JsCallExpression(_) => None,
+        }
     }
 }
 
@@ -169,7 +163,7 @@ fn extract_callee_and_rule(
             Some((callee, BuiltinCreationRule::MustNotUseNew))
         }
         JsNewOrCallExpression::JsCallExpression(node) => {
-            let callee = node.callee().ok()?;
+            let callee: AnyJsExpression = node.callee().ok()?;
 
             Some((callee, BuiltinCreationRule::MustUseNew))
         }
@@ -188,3 +182,48 @@ fn convert_new_expression_to_call_expression(expr: &JsNewExpression) -> Option<J
     Some(make::js_call_expression(callee, expr.arguments()?).build())
 }
 
+fn action_remove_new(ctx: &RuleContext<UseNewForBuiltins>, node: &JsNewExpression) -> Option<JsRuleAction> {
+    let call_expression = convert_new_expression_to_call_expression(node)?;
+    let mut mutation = ctx.root().begin();
+    mutation.replace_node::<AnyJsExpression>(
+        node.clone().into(),
+        call_expression.into(),
+    );
+    Some(JsRuleAction {
+        category: ActionCategory::QuickFix,
+        applicability: Applicability::MaybeIncorrect,
+        message: markup! { "Remove "<Emphasis>"new"</Emphasis>"." }.to_owned(),
+        mutation,
+    })
+}
+
+fn _convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option<JsNewExpression> {
+    let new_token = token_decorated_with_space(JsSyntaxKind::NEW_KW);
+
+    let mut callee = expr.callee().ok()?;
+    if new_token.has_leading_comments() || new_token.has_trailing_comments() {
+        callee = callee.prepend_trivia_pieces(chain_trivia_pieces(
+            new_token.leading_trivia().pieces(),
+            new_token.trailing_trivia().pieces(),
+        ))?;
+    }
+
+    // TODO. make::js_new_expression currently does not accept arguments.
+    // To fix that js.ungram needs to be updated, but that breaks a lot of rules.
+    Some(make::js_new_expression(new_token,  callee).build())
+}
+
+fn _action_add_new(ctx: &RuleContext<UseNewForBuiltins>, node: &JsCallExpression) -> Option<JsRuleAction> {
+    let new_expression = _convert_call_expression_to_new_expression(node)?;
+    let mut mutation = ctx.root().begin();
+    mutation.replace_node::<AnyJsExpression>(
+        node.clone().into(),
+        new_expression.into(),
+    );
+    Some(JsRuleAction {
+        category: ActionCategory::QuickFix,
+        applicability: Applicability::MaybeIncorrect,
+        message: markup! { "Add "<Emphasis>"new"</Emphasis>"." }.to_owned(),
+        mutation,
+    })
+}

@@ -26,7 +26,7 @@ new SharedArrayBuffer()
 new Proxy()
 new WeakRef()
 new FinalizationRegistry()
-new window.Object()
+new window.Object({})
 new globalThis.Object()
 function foo() {
     return new globalThis.Object()
@@ -38,7 +38,7 @@ Boolean()
 Symbol()
 BigInt()
 window.String()
-globalThis.String()
+globalThis.String(123)
 function foo() {
     return globalThis.String()
 }
