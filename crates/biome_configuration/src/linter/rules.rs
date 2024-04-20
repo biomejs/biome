@@ -2671,7 +2671,7 @@ pub struct Nursery {
     #[doc = "Disallow two keys with the same name inside a JSON object."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_json_keys: Option<RuleConfiguration<NoDuplicateJsonKeys>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow duplicate selectors within keyframe blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_selectors_keyframe_block:
         Option<RuleConfiguration<NoDuplicateSelectorsKeyframeBlock>>,
@@ -2745,6 +2745,7 @@ impl Nursery {
         "noDuplicateElseIf",
         "noDuplicateFontNames",
         "noDuplicateJsonKeys",
+        "noDuplicateSelectorsKeyframeBlock",
         "noEvolvingAny",
         "noFlatMapIdentity",
     ];
@@ -2754,6 +2755,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
     ];

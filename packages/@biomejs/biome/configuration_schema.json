@@ -1490,7 +1490,7 @@
 					]
 				},
 				"noDuplicateSelectorsKeyframeBlock": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow duplicate selectors within keyframe blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
