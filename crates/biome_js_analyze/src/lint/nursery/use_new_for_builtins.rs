@@ -5,7 +5,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{self, token_decorated_with_space};
-use biome_js_syntax::{global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression, JsSyntaxKind};
+use biome_js_syntax::{
+    global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression, JsSyntaxKind,
+};
 use biome_rowan::{chain_trivia_pieces, declare_node_union, AstNode, BatchMutationExt};
 
 declare_rule! {
@@ -13,7 +15,7 @@ declare_rule! {
     ///
     /// They work the same, but new should be preferred for consistency with other constructors.
     /// Enforces the use of new for following builtins:
-    /// 
+    ///
     /// - Object
     /// - Array
     /// - ArrayBuffer
@@ -42,7 +44,7 @@ declare_rule! {
     /// - Proxy
     /// - WeakRef
     /// - FinalizationRegistry
-    /// 
+    ///
     /// Disallows the use of new for following builtins.
     ///
     /// - String
@@ -50,9 +52,9 @@ declare_rule! {
     /// - Boolean
     /// - Symbol
     /// - BigInt
-    /// 
+    ///
     /// > These should not use new as that would create object wrappers for the primitive values, which is not what you want. However, without new they can be useful for coercing a value to that type.
-    /// 
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -224,13 +226,13 @@ fn convert_new_expression_to_call_expression(expr: &JsNewExpression) -> Option<J
     Some(make::js_call_expression(callee, expr.arguments()?).build())
 }
 
-fn action_remove_new(ctx: &RuleContext<UseNewForBuiltins>, node: &JsNewExpression) -> Option<JsRuleAction> {
+fn action_remove_new(
+    ctx: &RuleContext<UseNewForBuiltins>,
+    node: &JsNewExpression,
+) -> Option<JsRuleAction> {
     let call_expression = convert_new_expression_to_call_expression(node)?;
     let mut mutation = ctx.root().begin();
-    mutation.replace_node::<AnyJsExpression>(
-        node.clone().into(),
-        call_expression.into(),
-    );
+    mutation.replace_node::<AnyJsExpression>(node.clone().into(), call_expression.into());
     Some(JsRuleAction {
         category: ActionCategory::QuickFix,
         applicability: Applicability::MaybeIncorrect,
@@ -252,16 +254,16 @@ fn _convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option
 
     // TODO. make::js_new_expression currently does not accept arguments.
     // To fix that js.ungram needs to be updated, but that breaks a lot of rules.
-    Some(make::js_new_expression(new_token,  callee).build())
+    Some(make::js_new_expression(new_token, callee).build())
 }
 
-fn _action_add_new(ctx: &RuleContext<UseNewForBuiltins>, node: &JsCallExpression) -> Option<JsRuleAction> {
+fn _action_add_new(
+    ctx: &RuleContext<UseNewForBuiltins>,
+    node: &JsCallExpression,
+) -> Option<JsRuleAction> {
     let new_expression = _convert_call_expression_to_new_expression(node)?;
     let mut mutation = ctx.root().begin();
-    mutation.replace_node::<AnyJsExpression>(
-        node.clone().into(),
-        new_expression.into(),
-    );
+    mutation.replace_node::<AnyJsExpression>(node.clone().into(), new_expression.into());
     Some(JsRuleAction {
         category: ActionCategory::QuickFix,
         applicability: Applicability::MaybeIncorrect,

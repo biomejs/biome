@@ -1218,6 +1218,14 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "unicorn/new-for-builtins" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_new_for_builtins.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "unicorn/no-array-for-each" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.no_for_each.get_or_insert(Default::default());

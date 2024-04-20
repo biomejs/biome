@@ -1557,7 +1557,7 @@
 					]
 				},
 				"useNewForBuiltins": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

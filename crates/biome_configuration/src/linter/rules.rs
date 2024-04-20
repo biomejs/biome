@@ -2699,7 +2699,7 @@ pub struct Nursery {
     #[doc = "Disallows package private imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_import_restrictions: Option<RuleConfiguration<UseImportRestrictions>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_new_for_builtins: Option<RuleConfiguration<UseNewForBuiltins>>,
     #[doc = "Enforce the sorting of CSS utility classes."]
