@@ -59,7 +59,7 @@ a::before10pix { margin: 10px; }
 a { color: #1f1f1f; }
 @media (min-width: 10px) {}
 @media (min-width: 10px)\n  and (max-width: 20px) {}
-@media screen and (min-width:0\\0) {}
+@media screen and (min-width:0\0) {}
 @import 'foo.css';
 a { background-image: image-set('img-1x.jpg' 1x, 'img-2x.jpg' 2x, 'img-3x.jpg' 3x) }
 a { background-image: -webkit-image-set('img-1x.jpg' 1x, 'img-2x.jpg' 2x) }
