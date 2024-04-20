@@ -11,26 +11,68 @@ use biome_rowan::{chain_trivia_pieces, declare_node_union, AstNode, BatchMutatio
 declare_rule! {
     /// Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
     ///
-    /// TODO. Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    /// They work the same, but new should be preferred for consistency with other constructors.
+    /// Enforces the use of new for following builtins:
+    /// 
+    /// - Object
+    /// - Array
+    /// - ArrayBuffer
+    /// - BigInt64Array
+    /// - BigUint64Array
+    /// - DataView
+    /// - Date
+    /// - Error
+    /// - Float32Array
+    /// - Float64Array
+    /// - Function
+    /// - Int8Array
+    /// - Int16Array
+    /// - Int32Array
+    /// - Map
+    /// - WeakMap
+    /// - Set
+    /// - WeakSet
+    /// - Promise
+    /// - RegExp
+    /// - Uint8Array
+    /// - Uint16Array
+    /// - Uint32Array
+    /// - Uint8ClampedArray
+    /// - SharedArrayBuffer
+    /// - Proxy
+    /// - WeakRef
+    /// - FinalizationRegistry
+    /// 
+    /// Disallows the use of new for following builtins.
     ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding ESLint rule (if any):
-    ///
+    /// - String
+    /// - Number
+    /// - Boolean
+    /// - Symbol
+    /// - BigInt
+    /// 
+    /// > These should not use new as that would create object wrappers for the primitive values, which is not what you want. However, without new they can be useful for coercing a value to that type.
+    /// 
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// const list = Array(10);
+    /// const now = Date();
+    /// const map = Map([
+    ///   ['foo', 'bar']
+    /// ]);
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// // var a = 1;
+    /// const list = new Array(10);
+    /// const now = new Date();
+    /// const map = new Map([
+    ///  ['foo', 'bar']
+    /// ]);
     /// ```
     ///
     pub UseNewForBuiltins {
