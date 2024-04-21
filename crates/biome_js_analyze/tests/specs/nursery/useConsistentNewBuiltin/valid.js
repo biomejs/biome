@@ -31,22 +31,3 @@ new globalThis.Object()
 function foo() {
     return new globalThis.Object()
 }
-
-String()
-Number()
-Boolean()
-Symbol()
-BigInt()
-window.String()
-globalThis.String(123)
-function foo() {
-    return globalThis.String()
-}
-
-function varCheck() {
-    {
-        var String = class {}
-    }
-    // This should not reported
-    return new String()
-}

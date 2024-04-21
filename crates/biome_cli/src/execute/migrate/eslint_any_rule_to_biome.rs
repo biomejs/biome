@@ -1223,7 +1223,9 @@ pub(crate) fn migrate_eslint_any_rule(
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group.use_new_for_builtins.get_or_insert(Default::default());
+            let rule = group
+                .use_consistent_new_builtin
+                .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "unicorn/no-array-for-each" => {

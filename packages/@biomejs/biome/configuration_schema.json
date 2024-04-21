@@ -1549,15 +1549,15 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
-				"useImportRestrictions": {
-					"description": "Disallows package private imports.",
+				"useConsistentNewBuiltin": {
+					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"useNewForBuiltins": {
-					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
+				"useImportRestrictions": {
+					"description": "Disallows package private imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

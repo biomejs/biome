@@ -257,6 +257,7 @@ pub type UseButtonType =
 pub type UseCollapsedElseIf =
     <lint::style::use_collapsed_else_if::UseCollapsedElseIf as biome_analyze::Rule>::Options;
 pub type UseConsistentArrayType = < lint :: style :: use_consistent_array_type :: UseConsistentArrayType as biome_analyze :: Rule > :: Options ;
+pub type UseConsistentNewBuiltin = < lint :: nursery :: use_consistent_new_builtin :: UseConsistentNewBuiltin as biome_analyze :: Rule > :: Options ;
 pub type UseConst = <lint::style::use_const::UseConst as biome_analyze::Rule>::Options;
 pub type UseDefaultParameterLast = < lint :: style :: use_default_parameter_last :: UseDefaultParameterLast as biome_analyze :: Rule > :: Options ;
 pub type UseDefaultSwitchClauseLast = < lint :: suspicious :: use_default_switch_clause_last :: UseDefaultSwitchClauseLast as biome_analyze :: Rule > :: Options ;
@@ -301,8 +302,6 @@ pub type UseNamespaceKeyword =
     <lint::suspicious::use_namespace_keyword::UseNamespaceKeyword as biome_analyze::Rule>::Options;
 pub type UseNamingConvention =
     <lint::style::use_naming_convention::UseNamingConvention as biome_analyze::Rule>::Options;
-pub type UseNewForBuiltins =
-    <lint::nursery::use_new_for_builtins::UseNewForBuiltins as biome_analyze::Rule>::Options;
 pub type UseNodeAssertStrict =
     <lint::style::use_node_assert_strict::UseNodeAssertStrict as biome_analyze::Rule>::Options;
 pub type UseNodejsImportProtocol = < lint :: style :: use_nodejs_import_protocol :: UseNodejsImportProtocol as biome_analyze :: Rule > :: Options ;

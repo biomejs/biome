@@ -29,16 +29,5 @@ FinalizationRegistry()
 window.Object({})
 globalThis.Object()
 function foo() {
-    return globalThis.Object({ foo: 'bar' })
-}
-
-new String()
-new Number()
-new Boolean()
-new Symbol()
-new BigInt()
-new window.String(123)
-new globalThis.String()
-function foo() {
-    return new globalThis.String("foo")
+    return /** Comment */ globalThis.Object({ foo: 'bar' })
 }

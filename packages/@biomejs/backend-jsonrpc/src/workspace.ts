@@ -977,13 +977,13 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
+	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
+	 */
+	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
-	/**
-	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
-	 */
-	useNewForBuiltins?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -1966,8 +1966,8 @@ export type Category =
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentNewBuiltin"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useNewForBuiltins"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"

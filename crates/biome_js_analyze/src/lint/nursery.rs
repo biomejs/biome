@@ -13,8 +13,8 @@ pub mod no_nodejs_modules;
 pub mod no_react_specific_props;
 pub mod no_restricted_imports;
 pub mod no_undeclared_dependencies;
+pub mod use_consistent_new_builtin;
 pub mod use_import_restrictions;
-pub mod use_new_for_builtins;
 pub mod use_sorted_classes;
 
 declare_group! {
@@ -32,8 +32,8 @@ declare_group! {
             self :: no_react_specific_props :: NoReactSpecificProps ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
+            self :: use_consistent_new_builtin :: UseConsistentNewBuiltin ,
             self :: use_import_restrictions :: UseImportRestrictions ,
-            self :: use_new_for_builtins :: UseNewForBuiltins ,
             self :: use_sorted_classes :: UseSortedClasses ,
         ]
      }
