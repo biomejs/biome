@@ -141,7 +141,7 @@ impl Rule for NoDuplicateFontNames {
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected duplicate font name: "<Emphasis>{ state.value }</Emphasis>
+                    "Duplicate font names are redundant and unnecessary: "<Emphasis>{ state.value }</Emphasis>
                 },
             )
             .note(markup! {
