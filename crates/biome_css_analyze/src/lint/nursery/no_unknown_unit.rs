@@ -16,8 +16,6 @@ fn is_css_hack(value: &str) -> bool {
 declare_rule! {
     /// Disallow unknown units.
     ///
-    /// This rule considers units defined in the CSS Specifications, up to and including Editor's Drafts, to be known.
-    ///
     ///
     /// ## Examples
     ///
