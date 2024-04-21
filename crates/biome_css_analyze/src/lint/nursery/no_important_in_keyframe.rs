@@ -6,9 +6,9 @@ use biome_css_syntax::{
 use biome_rowan::AstNode;
 
 declare_rule! {
-    /// Disallow invalid !important within keyframe declarations
+    /// Disallow invalid `!important` within keyframe declarations
     ///
-    /// Using !important within keyframes declarations is completely ignored in some browsers.
+    /// Using `!important` within keyframes declarations is completely ignored in some browsers.
     ///
     /// ## Examples
     ///
@@ -79,11 +79,11 @@ impl Rule for NoImportantInKeyframe {
                 rule_category!(),
                 span,
                 markup! {
-                    "Using !important within keyframes declaration is completely ignored in some browsers"
+                    "Using !important within keyframes declaration is completely ignored in some browsers."
                 },
             )
             .note(markup! {
-                    "Consider removing useless !important declaration"
+                    "Consider removing useless !important declaration."
             }),
         )
     }
