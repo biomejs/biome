@@ -18,7 +18,7 @@ expression: invalid.css
 ```
 invalid.css:6:16 lint/nursery/noImportantInKeyframe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Consider removing useless !important declaration
+  ! Using !important within keyframes declaration is completely ignored in some browsers
   
     4 │   }
     5 │   to {
@@ -27,7 +27,7 @@ invalid.css:6:16 lint/nursery/noImportantInKeyframe ━━━━━━━━━�
     7 │   }
     8 │ }
   
-  i Using !important within keyframes declaration is completely ignored in some browsers
+  i Consider removing useless !important declaration
   
 
 ```
