@@ -78,11 +78,11 @@ impl Rule for NoArrayConstructor {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Variable is read here."
+                    "Don't use `Array` constructors."
                 },
             )
             .note(markup! {
-                "This note will give you more information."
+                "The array literal notation [] is preferable."
             }),
         )
     }
