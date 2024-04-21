@@ -179,8 +179,15 @@ impl Rule for NoUnknownUnit {
                 },
             )
             .note(markup! {
-                "Fix to a known unit."
-            }),
+                "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Values_and_units#lengths">"MDN web docs"</Hyperlink>" for more details."
+            })
+            .footer_list(
+                markup! {
+                    "Use a known unit instead, such as:"
+                },
+                &["px", "em", "rem", "etc."],
+            ),
+
         )
     }
 }
