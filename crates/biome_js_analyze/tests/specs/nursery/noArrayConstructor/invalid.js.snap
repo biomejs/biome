@@ -29,6 +29,8 @@ invalid.js:1:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━
     2 │ 
     3 │ Array(0, 1, 2);
   
+  i Use of the Array constructor is not allowed except creating sparse arrays of a specified size by giving a single numeric argument.
+  
   i The array literal notation [] is preferable.
   
 
@@ -45,6 +47,8 @@ invalid.js:3:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━
       │ ^^^^^^^^^^^^^^^
     4 │ 
     5 │ Array(...args);
+  
+  i Use of the Array constructor is not allowed except creating sparse arrays of a specified size by giving a single numeric argument.
   
   i The array literal notation [] is preferable.
   
@@ -63,6 +67,8 @@ invalid.js:5:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━
     6 │ 
     7 │ new Array();
   
+  i Use of the Array constructor is not allowed except creating sparse arrays of a specified size by giving a single numeric argument.
+  
   i The array literal notation [] is preferable.
   
 
@@ -79,6 +85,8 @@ invalid.js:7:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━
       │ ^^^^^^^^^^^^
     8 │ 
     9 │ new Array(0, 1, 2);
+  
+  i Use of the Array constructor is not allowed except creating sparse arrays of a specified size by giving a single numeric argument.
   
   i The array literal notation [] is preferable.
   
@@ -97,6 +105,8 @@ invalid.js:9:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━
     10 │ 
     11 │ new Array(...args);
   
+  i Use of the Array constructor is not allowed except creating sparse arrays of a specified size by giving a single numeric argument.
+  
   i The array literal notation [] is preferable.
   
 
@@ -112,6 +122,8 @@ invalid.js:11:1 lint/nursery/noArrayConstructor ━━━━━━━━━━�
   > 11 │ new Array(...args);
        │ ^^^^^^^^^^^^^^^^^^^
     12 │ 
+  
+  i Use of the Array constructor is not allowed except creating sparse arrays of a specified size by giving a single numeric argument.
   
   i The array literal notation [] is preferable.
   

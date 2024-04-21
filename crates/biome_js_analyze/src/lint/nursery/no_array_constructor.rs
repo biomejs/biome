@@ -8,8 +8,8 @@ use biome_rowan::AstNode;
 declare_rule! {
     /// Disallow Array constructors.
     ///
-    /// The corresponding ESLint rule:
-    /// https://eslint.org/docs/latest/rules/no-array-constructor#rule-details
+    /// Use of the Array constructor to construct a new array is generally discouraged in favor of array literal notation because of the single-argument pitfall and because the Array global may be redefined.
+    /// The exception is when the Array constructor is used to intentionally create sparse arrays of a specified size by giving the constructor a single numeric argument.
     ///
     /// ## Examples
     ///
@@ -72,6 +72,9 @@ impl Rule for NoArrayConstructor {
                 },
             )
             .note(markup! {
+                "Use of the Array constructor is not allowed except creating sparse arrays of a specified size by giving a single numeric argument."
+            })
+            .note(markup! {
                 "The array literal notation [] is preferable."
             }),
         )
@@ -79,13 +82,13 @@ impl Rule for NoArrayConstructor {
 }
 
 fn validate(callee: &AnyJsExpression, arguments: &JsCallArguments) -> Option<()> {
-    let len = arguments.args().into_iter().count();
+    let mut args_iter = arguments.args().into_iter();
+    let first_arg = args_iter.next();
+    let second_arg = args_iter.next();
     if callee.text() == "Array" {
-        if len == 1
-            && !matches!(
-                arguments.args().into_iter().next()?.ok()?,
-                AnyJsCallArgument::JsSpread(_)
-            )
+        if first_arg.is_some()
+            && second_arg.is_none()
+            && !matches!(first_arg?.ok()?, AnyJsCallArgument::JsSpread(_))
         {
             return None;
         }
