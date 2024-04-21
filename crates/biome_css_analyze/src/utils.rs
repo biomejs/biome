@@ -5,7 +5,6 @@ use crate::keywords::{
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
-use regex::Regex;
 
 pub fn is_font_family_keyword(value: &str) -> bool {
     BASIC_KEYWORDS.contains(&value) || FONT_FAMILY_KEYWORDS.contains(&value)
@@ -92,9 +91,4 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
         }
     }
     font_families
-}
-
-pub fn strip_vendor_prefix(property: &str) -> String {
-    let re = Regex::new(r"^-\w+-").unwrap();
-    re.replace(property, "").to_string()
 }

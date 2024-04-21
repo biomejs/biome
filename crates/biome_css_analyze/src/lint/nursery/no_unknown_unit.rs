@@ -5,8 +5,6 @@ use biome_css_syntax::{
 };
 use biome_rowan::{SyntaxNodeCast, TextRange};
 
-use crate::utils::strip_vendor_prefix;
-
 const RESOLUTION_MEDIA_FEATURE_NAMES: [&str; 3] =
     ["resolution", "min-resolution", "max-resolution"];
 
@@ -117,7 +115,7 @@ impl Rule for NoUnknownUnit {
                                     .text_trimmed()
                                     .to_lowercase();
 
-                                if strip_vendor_prefix(function_name.as_str()) == "image-set" {
+                                if function_name.ends_with("image-set") {
                                     allow_x = true;
                                     break;
                                 }
