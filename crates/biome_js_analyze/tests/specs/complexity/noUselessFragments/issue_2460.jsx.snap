@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_2460.jsx
+---
+# Input
+```jsx
+callFunction(<>{bar}</>)
+
+```
+
+# Diagnostics
+```
+issue_2460.jsx:1:14 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+  > 1 │ callFunction(<>{bar}</>)
+      │              ^^^^^^^^^^
+    2 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    1 │ callFunction(<>{bar}</>)
+      │              ---   ---- 
+
+```

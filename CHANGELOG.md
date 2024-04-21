@@ -38,6 +38,24 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix case where `jsxRuntime` wasn't being respected by `useImportType` rule ([#2473](https://github.com/biomejs/biome/issues/2473)).Contributed by @arendjr
+- Fix [#2460](https://github.com/biomejs/biome/issues/2460), where the rule `noUselessFragments` was crashing the linter in some cases. Now cases like these are correctly handled:
+  ```jsx
+  callFunction(<>{bar}</>)
+  ```
+  Contributed by @ematipico
+- Fix [#2366](https://github.com/biomejs/biome/issues/2366), where `noDuplicateJsonKeys` incorrectly computed the kes to highlight. Contributed by @ematipico
+#### Enhancements
+
+- The rule `noMisplacedAssertions` now considers valid calling `expect` inside `waitFor`:
+  ```js
+  import { waitFor } from '@testing-library/react';
+
+  await waitFor(() => {
+    expect(111).toBe(222);
+  });
+  ```
+  Contributed by @ematipico
+
 
 ### Parser
 

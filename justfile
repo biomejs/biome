@@ -39,10 +39,6 @@ gen-lint:
   just gen-bindings
   just format
 
-# Generates code generated files for the website
-gen-web:
-  cargo codegen-website
-
 # Generates the initial files for all formatter crates
 gen-formatter:
   cargo run -p xtask_codegen -- formatter

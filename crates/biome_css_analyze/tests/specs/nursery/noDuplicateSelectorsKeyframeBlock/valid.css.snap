@@ -1,0 +1,10 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+@keyframes foo { from {} to {} }
+
+@keyframes foo { 0% {} 100% {} }
+```

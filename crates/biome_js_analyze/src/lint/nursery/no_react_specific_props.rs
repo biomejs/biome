@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{jsx_ident, jsx_name};
@@ -31,6 +31,7 @@ declare_rule! {
         name: "noReactSpecificProps",
         sources: &[RuleSource::EslintSolid("no-react-specific-props")],
         recommended: false,
+        fix_kind: FixKind::Safe,
     }
 }
 

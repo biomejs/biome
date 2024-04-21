@@ -83,6 +83,13 @@ declare_rule! {
     /// })
     /// ```
     ///
+    /// ```js
+    /// import { waitFor } from '@testing-library/react';
+    /// await waitFor(() => {
+    ///   expect(111).toBe(222);
+    /// });
+    /// ```
+    ///
     pub NoMisplacedAssertion {
         version: "1.6.4",
         name: "noMisplacedAssertion",

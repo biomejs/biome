@@ -257,12 +257,16 @@ dependencies = [
  "biome_console",
  "biome_css_parser",
  "biome_css_syntax",
+ "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_rowan",
  "biome_test_utils",
  "insta",
  "lazy_static",
  "regex",
+ "schemars",
+ "serde",
  "tests_macros",
 ]
 

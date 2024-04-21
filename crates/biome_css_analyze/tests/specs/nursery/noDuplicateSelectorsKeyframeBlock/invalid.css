@@ -1,0 +1,13 @@
+@keyframes foo { from {} from {}}
+
+@keyframes foo { from {} FROM {}}
+
+@keyframes foo { 0% {} 0% {}}
+
+@keyframes foo { from {} to {} to {} }
+
+@keyframes foo { 0% {} 0% {} 100% {} }
+
+@-webkit-keyframes foo { 0% {} 0% {} 100% {} }
+
+@-moz-keyframes foo { 0% {} 0% {} 100% {} }

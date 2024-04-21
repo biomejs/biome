@@ -921,6 +921,10 @@ export interface Nursery {
 	 */
 	noConstantMathMinMaxClamp?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow CSS empty blocks.
+	 */
+	noCssEmptyBlock?: RuleConfiguration_for_NoCssEmptyBlockOptions;
+	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
 	noDoneCallback?: RuleConfiguration_for_Null;
@@ -936,6 +940,10 @@ export interface Nursery {
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow duplicate selectors within keyframe blocks.
+	 */
+	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
@@ -1515,6 +1523,9 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
+export type RuleConfiguration_for_NoCssEmptyBlockOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoCssEmptyBlockOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -1553,6 +1564,10 @@ export interface RuleWithOptions_for_HooksOptions {
 export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	level: RulePlainConfiguration;
 	options: DeprecatedHooksOptions;
+}
+export interface RuleWithOptions_for_NoCssEmptyBlockOptions {
+	level: RulePlainConfiguration;
+	options: NoCssEmptyBlockOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	level: RulePlainConfiguration;
@@ -1604,6 +1619,9 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
+export interface NoCssEmptyBlockOptions {
+	allowComments: boolean;
+}
 /**
  * Options for the rule `noRestrictedImports`.
  */
@@ -1933,10 +1951,12 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
+	| "lint/nursery/noCssEmptyBlock"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
+	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noMisplacedAssertion"
