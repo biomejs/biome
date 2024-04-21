@@ -50,16 +50,14 @@ impl Rule for NoArrayConstructor {
             AnyJsExpression::JsCallExpression(call_expression) => {
                 let callee = call_expression.callee().ok()?;
                 let arguments = call_expression.arguments().ok()?;
-                return validate(callee, arguments);
+                validate(&callee, &arguments)
             }
             AnyJsExpression::JsNewExpression(new_expression) => {
                 let callee = new_expression.callee().ok()?;
                 let arguments = new_expression.arguments()?;
-                return validate(callee, arguments);
+                validate(&callee, &arguments)
             }
-            _ => {
-                return None;
-            }
+            _ => None,
         }
     }
 
@@ -80,19 +78,19 @@ impl Rule for NoArrayConstructor {
     }
 }
 
-fn validate(callee: AnyJsExpression, arguments: JsCallArguments) -> Option<()> {
+fn validate(callee: &AnyJsExpression, arguments: &JsCallArguments) -> Option<()> {
     let len = arguments.args().into_iter().count();
     if callee.text() == "Array" {
         if len == 1
             && !matches!(
-                arguments.args().into_iter().nth(0)?.ok()?,
+                arguments.args().into_iter().next()?.ok()?,
                 AnyJsCallArgument::JsSpread(_)
             )
         {
             return None;
         }
-        return Some(());
+        Some(())
     } else {
-        return None;
+        None
     }
 }
