@@ -122,21 +122,6 @@ impl Rule for NoUnknownUnit {
                                     break;
                                 }
                             }
-                            CssSyntaxKind::CSS_QUERY_FEATURE_PLAIN => {
-                                let feature_name = ancestor
-                                    .cast::<CssQueryFeaturePlain>()?
-                                    .name()
-                                    .ok()?
-                                    .value_token()
-                                    .ok()?
-                                    .text_trimmed()
-                                    .to_lowercase();
-
-                                if RESOLUTION_MEDIA_FEATURE_NAMES.contains(&feature_name.as_str()) {
-                                    allow_x = true;
-                                    break;
-                                }
-                            }
                             CssSyntaxKind::CSS_GENERIC_PROPERTY => {
                                 let property_name = ancestor
                                     .cast::<CssGenericProperty>()?
@@ -149,6 +134,21 @@ impl Rule for NoUnknownUnit {
                                     .to_lowercase();
 
                                 if property_name == "image-resolution" {
+                                    allow_x = true;
+                                    break;
+                                }
+                            }
+                            CssSyntaxKind::CSS_QUERY_FEATURE_PLAIN => {
+                                let feature_name = ancestor
+                                    .cast::<CssQueryFeaturePlain>()?
+                                    .name()
+                                    .ok()?
+                                    .value_token()
+                                    .ok()?
+                                    .text_trimmed()
+                                    .to_lowercase();
+
+                                if RESOLUTION_MEDIA_FEATURE_NAMES.contains(&feature_name.as_str()) {
                                     allow_x = true;
                                     break;
                                 }
