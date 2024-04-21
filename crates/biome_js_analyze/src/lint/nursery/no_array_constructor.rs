@@ -8,26 +8,22 @@ use biome_rowan::AstNode;
 declare_rule! {
     /// Disallow Array constructors.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding ESLint rule (if any):
+    /// The corresponding ESLint rule:
+    /// https://eslint.org/docs/latest/rules/no-array-constructor#rule-details
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// Array(0, 1, 1);
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// // var a = 1;
+    /// Array(500);
+    /// [0, 1, 2];
     /// ```
     ///
     pub NoArrayConstructor {
@@ -68,17 +64,13 @@ impl Rule for NoArrayConstructor {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
         let node = ctx.query();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Don't use `Array` constructors."
+                    "Don't use Array constructors."
                 },
             )
             .note(markup! {
