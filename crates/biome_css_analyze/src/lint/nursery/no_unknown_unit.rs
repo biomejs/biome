@@ -65,7 +65,7 @@ declare_rule! {
     pub NoUnknownUnit {
         version: "next",
         name: "noUnknownUnit",
-        recommended: false,
+        recommended: true,
         sources: &[RuleSource::Stylelint("unit-no-unknown")],
     }
 }
