@@ -997,6 +997,10 @@ export interface Nursery {
 	 */
 	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
 	/**
+	 * Require default cases in switch statements.
+	 */
+	useDefaultCase?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow a missing generic family keyword within font families.
 	 */
 	useGenericFontNames?: RuleConfiguration_for_Null;
@@ -1997,6 +2001,7 @@ export type Category =
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentNewBuiltin"
+	| "lint/nursery/useDefaultCase"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"

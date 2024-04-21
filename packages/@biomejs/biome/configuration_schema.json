@@ -1584,6 +1584,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useDefaultCase": {
+					"description": "Require default cases in switch statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGenericFontNames": {
 					"description": "Disallow a missing generic family keyword within font families.",
 					"anyOf": [

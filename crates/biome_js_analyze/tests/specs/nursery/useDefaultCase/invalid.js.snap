@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+switch (foo) {
+	case 1:
+		/* code */
+		break;
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/useDefaultCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected a default case.
+  
+  > 1 │ switch (foo) {
+      │ ^^^^^^^^^^^^^^
+  > 2 │ 	case 1:
+  > 3 │ 		/* code */
+  > 4 │ 		break;
+  > 5 │ }
+      │ ^
+    6 │ 
+  
+
+```
