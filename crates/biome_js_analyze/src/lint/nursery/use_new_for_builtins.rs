@@ -1,6 +1,6 @@
 use crate::{services::semantic::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -82,11 +82,12 @@ declare_rule! {
         name: "useNewForBuiltins",
         sources: &[RuleSource::EslintUnicorn("new-for-builtins")],
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
+/// Sorted array of builtins that require new keyword.
 const BUILTINS_REQUIRING_NEW: &[&str] = &[
-    "Object",
     "Array",
     "ArrayBuffer",
     "BigInt64Array",
@@ -94,29 +95,31 @@ const BUILTINS_REQUIRING_NEW: &[&str] = &[
     "DataView",
     "Date",
     "Error",
+    "FinalizationRegistry",
     "Float32Array",
     "Float64Array",
     "Function",
-    "Int8Array",
     "Int16Array",
     "Int32Array",
+    "Int8Array",
     "Map",
-    "WeakMap",
-    "Set",
-    "WeakSet",
+    "Object",
     "Promise",
+    "Proxy",
     "RegExp",
-    "Uint8Array",
+    "Set",
+    "SharedArrayBuffer",
     "Uint16Array",
     "Uint32Array",
+    "Uint8Array",
     "Uint8ClampedArray",
-    "SharedArrayBuffer",
-    "Proxy",
+    "WeakMap",
     "WeakRef",
-    "FinalizationRegistry",
+    "WeakSet",
 ];
 
-const BUILTINS_NOT_REQUIRING_NEW: &[&str] = &["String", "Number", "Boolean", "Symbol", "BigInt"];
+/// Sorted array of builtins that should not use new keyword.
+const BUILTINS_NOT_REQUIRING_NEW: &[&str] = &["BigInt", "Boolean", "Number", "String", "Symbol"];
 
 enum BuiltinCreationRule {
     MustUseNew,
@@ -154,14 +157,18 @@ impl Rule for UseNewForBuiltins {
         let (reference, name) = global_identifier(&callee.omit_parentheses())?;
         let name_text = name.text();
 
-        if creation_rule.forbidden_builtins_list().contains(&name_text) {
+        if creation_rule
+            .forbidden_builtins_list()
+            .binary_search(&name_text)
+            .is_ok()
+        {
             return ctx
                 .model()
                 .binding(&reference)
                 .is_none()
                 .then_some(UseNewForBuiltinsState {
                     name: name_text.to_string(),
-                    creation_rule: creation_rule,
+                    creation_rule,
                 });
         }
 
@@ -192,7 +199,7 @@ impl Rule for UseNewForBuiltins {
 
         match node {
             JsNewOrCallExpression::JsNewExpression(node) => action_remove_new(ctx, node),
-            JsNewOrCallExpression::JsCallExpression(_) => None,
+            JsNewOrCallExpression::JsCallExpression(node) => action_add_new(ctx, node),
         }
     }
 }
@@ -231,7 +238,7 @@ fn action_remove_new(
     node: &JsNewExpression,
 ) -> Option<JsRuleAction> {
     let call_expression = convert_new_expression_to_call_expression(node)?;
-    let mut mutation = ctx.root().begin();
+    let mut mutation: biome_rowan::BatchMutation<biome_js_syntax::JsLanguage> = ctx.root().begin();
     mutation.replace_node::<AnyJsExpression>(node.clone().into(), call_expression.into());
     Some(JsRuleAction {
         category: ActionCategory::QuickFix,
@@ -241,7 +248,7 @@ fn action_remove_new(
     })
 }
 
-fn _convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option<JsNewExpression> {
+fn convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option<JsNewExpression> {
     let new_token = token_decorated_with_space(JsSyntaxKind::NEW_KW);
 
     let mut callee = expr.callee().ok()?;
@@ -252,16 +259,18 @@ fn _convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option
         ))?;
     }
 
-    // TODO. make::js_new_expression currently does not accept arguments.
-    // To fix that js.ungram needs to be updated, but that breaks a lot of rules.
-    Some(make::js_new_expression(new_token, callee).build())
+    Some(
+        make::js_new_expression(new_token, callee)
+            .with_arguments(expr.arguments().ok()?)
+            .build(),
+    )
 }
 
-fn _action_add_new(
+fn action_add_new(
     ctx: &RuleContext<UseNewForBuiltins>,
     node: &JsCallExpression,
 ) -> Option<JsRuleAction> {
-    let new_expression = _convert_call_expression_to_new_expression(node)?;
+    let new_expression = convert_call_expression_to_new_expression(node)?;
     let mut mutation = ctx.root().begin();
     mutation.replace_node::<AnyJsExpression>(node.clone().into(), new_expression.into());
     Some(JsRuleAction {
@@ -270,4 +279,14 @@ fn _action_add_new(
         message: markup! { "Add "<Emphasis>"new"</Emphasis>"." }.to_owned(),
         mutation,
     })
+}
+
+#[test]
+fn test_order() {
+    for items in BUILTINS_REQUIRING_NEW.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in BUILTINS_NOT_REQUIRING_NEW.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
 }

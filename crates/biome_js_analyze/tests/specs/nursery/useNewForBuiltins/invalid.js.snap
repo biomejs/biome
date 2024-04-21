@@ -53,7 +53,7 @@ function foo() {
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Object() instead of Object().
   
@@ -62,11 +62,15 @@ invalid.js:1:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━�
     2 │ Array()
     3 │ ArrayBuffer()
   
+  i Unsafe fix: Add new.
+  
+    1 │ new·Object()
+      │ ++++        
 
 ```
 
 ```
-invalid.js:2:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Array() instead of Array().
   
@@ -76,11 +80,18 @@ invalid.js:2:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━�
     3 │ ArrayBuffer()
     4 │ BigInt64Array()
   
+  i Unsafe fix: Add new.
+  
+     1  1 │   Object()
+        2 │ + new·
+     2  3 │   Array()
+     3  4 │   ArrayBuffer()
+  
 
 ```
 
 ```
-invalid.js:3:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new ArrayBuffer() instead of ArrayBuffer().
   
@@ -91,11 +102,19 @@ invalid.js:3:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━�
     4 │ BigInt64Array()
     5 │ BigUint64Array()
   
+  i Unsafe fix: Add new.
+  
+     1  1 │   Object()
+     2  2 │   Array()
+        3 │ + new·
+     3  4 │   ArrayBuffer()
+     4  5 │   BigInt64Array()
+  
 
 ```
 
 ```
-invalid.js:4:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new BigInt64Array() instead of BigInt64Array().
   
@@ -106,11 +125,19 @@ invalid.js:4:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━�
     5 │ BigUint64Array()
     6 │ DataView()
   
+  i Unsafe fix: Add new.
+  
+     2  2 │   Array()
+     3  3 │   ArrayBuffer()
+        4 │ + new·
+     4  5 │   BigInt64Array()
+     5  6 │   BigUint64Array()
+  
 
 ```
 
 ```
-invalid.js:5:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new BigUint64Array() instead of BigUint64Array().
   
@@ -121,11 +148,19 @@ invalid.js:5:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━�
     6 │ DataView()
     7 │ Date()
   
+  i Unsafe fix: Add new.
+  
+     3  3 │   ArrayBuffer()
+     4  4 │   BigInt64Array()
+        5 │ + new·
+     5  6 │   BigUint64Array()
+     6  7 │   DataView()
+  
 
 ```
 
 ```
-invalid.js:6:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new DataView() instead of DataView().
   
@@ -136,11 +171,19 @@ invalid.js:6:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━�
     7 │ Date()
     8 │ Error()
   
+  i Unsafe fix: Add new.
+  
+     4  4 │   BigInt64Array()
+     5  5 │   BigUint64Array()
+        6 │ + new·
+     6  7 │   DataView()
+     7  8 │   Date()
+  
 
 ```
 
 ```
-invalid.js:7:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Date() instead of Date().
   
@@ -151,11 +194,19 @@ invalid.js:7:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━�
     8 │ Error()
     9 │ Float32Array()
   
+  i Unsafe fix: Add new.
+  
+     5  5 │   BigUint64Array()
+     6  6 │   DataView()
+        7 │ + new·
+     7  8 │   Date()
+     8  9 │   Error()
+  
 
 ```
 
 ```
-invalid.js:8:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error().
   
@@ -166,11 +217,19 @@ invalid.js:8:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━�
      9 │ Float32Array()
     10 │ Float64Array()
   
+  i Unsafe fix: Add new.
+  
+     6  6 │   DataView()
+     7  7 │   Date()
+        8 │ + new·
+     8  9 │   Error()
+     9 10 │   Float32Array()
+  
 
 ```
 
 ```
-invalid.js:9:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Float32Array() instead of Float32Array().
   
@@ -181,11 +240,19 @@ invalid.js:9:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━�
     10 │ Float64Array()
     11 │ Function()
   
+  i Unsafe fix: Add new.
+  
+     7  7 │   Date()
+     8  8 │   Error()
+        9 │ + new·
+     9 10 │   Float32Array()
+    10 11 │   Float64Array()
+  
 
 ```
 
 ```
-invalid.js:10:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Float64Array() instead of Float64Array().
   
@@ -196,11 +263,19 @@ invalid.js:10:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     11 │ Function()
     12 │ Int8Array()
   
+  i Unsafe fix: Add new.
+  
+     8  8 │   Error()
+     9  9 │   Float32Array()
+       10 │ + new·
+    10 11 │   Float64Array()
+    11 12 │   Function()
+  
 
 ```
 
 ```
-invalid.js:11:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Function() instead of Function().
   
@@ -211,11 +286,19 @@ invalid.js:11:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     12 │ Int8Array()
     13 │ Int16Array()
   
+  i Unsafe fix: Add new.
+  
+     9  9 │   Float32Array()
+    10 10 │   Float64Array()
+       11 │ + new·
+    11 12 │   Function()
+    12 13 │   Int8Array()
+  
 
 ```
 
 ```
-invalid.js:12:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Int8Array() instead of Int8Array().
   
@@ -226,11 +309,19 @@ invalid.js:12:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     13 │ Int16Array()
     14 │ Int32Array()
   
+  i Unsafe fix: Add new.
+  
+    10 10 │   Float64Array()
+    11 11 │   Function()
+       12 │ + new·
+    12 13 │   Int8Array()
+    13 14 │   Int16Array()
+  
 
 ```
 
 ```
-invalid.js:13:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Int16Array() instead of Int16Array().
   
@@ -241,11 +332,19 @@ invalid.js:13:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     14 │ Int32Array()
     15 │ Map()
   
+  i Unsafe fix: Add new.
+  
+    11 11 │   Function()
+    12 12 │   Int8Array()
+       13 │ + new·
+    13 14 │   Int16Array()
+    14 15 │   Int32Array()
+  
 
 ```
 
 ```
-invalid.js:14:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Int32Array() instead of Int32Array().
   
@@ -256,11 +355,19 @@ invalid.js:14:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     15 │ Map()
     16 │ WeakMap()
   
+  i Unsafe fix: Add new.
+  
+    12 12 │   Int8Array()
+    13 13 │   Int16Array()
+       14 │ + new·
+    14 15 │   Int32Array()
+    15 16 │   Map()
+  
 
 ```
 
 ```
-invalid.js:15:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Map() instead of Map().
   
@@ -271,11 +378,19 @@ invalid.js:15:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     16 │ WeakMap()
     17 │ Set()
   
+  i Unsafe fix: Add new.
+  
+    13 13 │   Int16Array()
+    14 14 │   Int32Array()
+       15 │ + new·
+    15 16 │   Map()
+    16 17 │   WeakMap()
+  
 
 ```
 
 ```
-invalid.js:16:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new WeakMap() instead of WeakMap().
   
@@ -286,11 +401,19 @@ invalid.js:16:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     17 │ Set()
     18 │ WeakSet()
   
+  i Unsafe fix: Add new.
+  
+    14 14 │   Int32Array()
+    15 15 │   Map()
+       16 │ + new·
+    16 17 │   WeakMap()
+    17 18 │   Set()
+  
 
 ```
 
 ```
-invalid.js:17:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Set() instead of Set().
   
@@ -301,11 +424,19 @@ invalid.js:17:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     18 │ WeakSet()
     19 │ Promise()
   
+  i Unsafe fix: Add new.
+  
+    15 15 │   Map()
+    16 16 │   WeakMap()
+       17 │ + new·
+    17 18 │   Set()
+    18 19 │   WeakSet()
+  
 
 ```
 
 ```
-invalid.js:18:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new WeakSet() instead of WeakSet().
   
@@ -316,11 +447,19 @@ invalid.js:18:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     19 │ Promise()
     20 │ RegExp()
   
+  i Unsafe fix: Add new.
+  
+    16 16 │   WeakMap()
+    17 17 │   Set()
+       18 │ + new·
+    18 19 │   WeakSet()
+    19 20 │   Promise()
+  
 
 ```
 
 ```
-invalid.js:19:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Promise() instead of Promise().
   
@@ -331,11 +470,19 @@ invalid.js:19:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     20 │ RegExp()
     21 │ Uint8Array()
   
+  i Unsafe fix: Add new.
+  
+    17 17 │   Set()
+    18 18 │   WeakSet()
+       19 │ + new·
+    19 20 │   Promise()
+    20 21 │   RegExp()
+  
 
 ```
 
 ```
-invalid.js:20:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new RegExp() instead of RegExp().
   
@@ -346,11 +493,19 @@ invalid.js:20:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     21 │ Uint8Array()
     22 │ Uint16Array()
   
+  i Unsafe fix: Add new.
+  
+    18 18 │   WeakSet()
+    19 19 │   Promise()
+       20 │ + new·
+    20 21 │   RegExp()
+    21 22 │   Uint8Array()
+  
 
 ```
 
 ```
-invalid.js:21:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Uint8Array() instead of Uint8Array().
   
@@ -361,11 +516,19 @@ invalid.js:21:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     22 │ Uint16Array()
     23 │ Uint32Array()
   
+  i Unsafe fix: Add new.
+  
+    19 19 │   Promise()
+    20 20 │   RegExp()
+       21 │ + new·
+    21 22 │   Uint8Array()
+    22 23 │   Uint16Array()
+  
 
 ```
 
 ```
-invalid.js:22:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Uint16Array() instead of Uint16Array().
   
@@ -376,11 +539,19 @@ invalid.js:22:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     23 │ Uint32Array()
     24 │ Uint8ClampedArray()
   
+  i Unsafe fix: Add new.
+  
+    20 20 │   RegExp()
+    21 21 │   Uint8Array()
+       22 │ + new·
+    22 23 │   Uint16Array()
+    23 24 │   Uint32Array()
+  
 
 ```
 
 ```
-invalid.js:23:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Uint32Array() instead of Uint32Array().
   
@@ -391,11 +562,19 @@ invalid.js:23:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     24 │ Uint8ClampedArray()
     25 │ SharedArrayBuffer()
   
+  i Unsafe fix: Add new.
+  
+    21 21 │   Uint8Array()
+    22 22 │   Uint16Array()
+       23 │ + new·
+    23 24 │   Uint32Array()
+    24 25 │   Uint8ClampedArray()
+  
 
 ```
 
 ```
-invalid.js:24:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Uint8ClampedArray() instead of Uint8ClampedArray().
   
@@ -406,11 +585,19 @@ invalid.js:24:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     25 │ SharedArrayBuffer()
     26 │ Proxy()
   
+  i Unsafe fix: Add new.
+  
+    22 22 │   Uint16Array()
+    23 23 │   Uint32Array()
+       24 │ + new·
+    24 25 │   Uint8ClampedArray()
+    25 26 │   SharedArrayBuffer()
+  
 
 ```
 
 ```
-invalid.js:25:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new SharedArrayBuffer() instead of SharedArrayBuffer().
   
@@ -421,11 +608,19 @@ invalid.js:25:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     26 │ Proxy()
     27 │ WeakRef()
   
+  i Unsafe fix: Add new.
+  
+    23 23 │   Uint32Array()
+    24 24 │   Uint8ClampedArray()
+       25 │ + new·
+    25 26 │   SharedArrayBuffer()
+    26 27 │   Proxy()
+  
 
 ```
 
 ```
-invalid.js:26:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Proxy() instead of Proxy().
   
@@ -436,11 +631,19 @@ invalid.js:26:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     27 │ WeakRef()
     28 │ FinalizationRegistry()
   
+  i Unsafe fix: Add new.
+  
+    24 24 │   Uint8ClampedArray()
+    25 25 │   SharedArrayBuffer()
+       26 │ + new·
+    26 27 │   Proxy()
+    27 28 │   WeakRef()
+  
 
 ```
 
 ```
-invalid.js:27:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new WeakRef() instead of WeakRef().
   
@@ -451,11 +654,19 @@ invalid.js:27:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     28 │ FinalizationRegistry()
     29 │ window.Object({})
   
+  i Unsafe fix: Add new.
+  
+    25 25 │   SharedArrayBuffer()
+    26 26 │   Proxy()
+       27 │ + new·
+    27 28 │   WeakRef()
+    28 29 │   FinalizationRegistry()
+  
 
 ```
 
 ```
-invalid.js:28:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new FinalizationRegistry() instead of FinalizationRegistry().
   
@@ -466,11 +677,19 @@ invalid.js:28:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     29 │ window.Object({})
     30 │ globalThis.Object()
   
+  i Unsafe fix: Add new.
+  
+    26 26 │   Proxy()
+    27 27 │   WeakRef()
+       28 │ + new·
+    28 29 │   FinalizationRegistry()
+    29 30 │   window.Object({})
+  
 
 ```
 
 ```
-invalid.js:29:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:29:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Object() instead of Object().
   
@@ -481,11 +700,19 @@ invalid.js:29:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     30 │ globalThis.Object()
     31 │ function foo() {
   
+  i Unsafe fix: Add new.
+  
+    27 27 │   WeakRef()
+    28 28 │   FinalizationRegistry()
+       29 │ + new·
+    29 30 │   window.Object({})
+    30 31 │   globalThis.Object()
+  
 
 ```
 
 ```
-invalid.js:30:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:1 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Object() instead of Object().
   
@@ -496,11 +723,19 @@ invalid.js:30:1 lint/nursery/useNewForBuiltins ━━━━━━━━━━━
     31 │ function foo() {
     32 │     return globalThis.Object({ foo: 'bar' })
   
+  i Unsafe fix: Add new.
+  
+    28 28 │   FinalizationRegistry()
+    29 29 │   window.Object({})
+       30 │ + new·
+    30 31 │   globalThis.Object()
+    31 32 │   function foo() {
+  
 
 ```
 
 ```
-invalid.js:32:12 lint/nursery/useNewForBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:12 lint/nursery/useNewForBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Object() instead of Object().
   
@@ -511,6 +746,10 @@ invalid.js:32:12 lint/nursery/useNewForBuiltins ━━━━━━━━━━�
     33 │ }
     34 │ 
   
+  i Unsafe fix: Add new.
+  
+    32 │ ····return·new·globalThis.Object({·foo:·'bar'·})
+       │            ++++                                 
 
 ```
 
