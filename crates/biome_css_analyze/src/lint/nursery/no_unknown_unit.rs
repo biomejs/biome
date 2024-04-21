@@ -8,11 +8,6 @@ use biome_rowan::{SyntaxNodeCast, TextRange};
 const RESOLUTION_MEDIA_FEATURE_NAMES: [&str; 3] =
     ["resolution", "min-resolution", "max-resolution"];
 
-// Check if the value is a CSS hack used in Internet Explorer.
-fn is_css_hack(value: &str) -> bool {
-    value == "\\0"
-}
-
 declare_rule! {
     /// Disallow unknown CSS units.
     ///
@@ -87,11 +82,6 @@ impl Rule for NoUnknownUnit {
             AnyCssDimension::CssUnknownDimension(dimension) => {
                 let unit_token = dimension.unit_token().ok()?;
                 let unit = unit_token.text_trimmed().to_string();
-
-                // Ignore CSS hack because it's parsed as an unknown unit.
-                if is_css_hack(&unit) {
-                    return None;
-                }
 
                 Some(NoUnknownUnitState {
                     unit,
