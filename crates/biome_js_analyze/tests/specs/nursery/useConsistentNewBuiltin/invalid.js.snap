@@ -51,7 +51,7 @@ invalid.js:1:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
     2 │ Array()
     3 │ ArrayBuffer()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     1 │ new·Object()
       │ ++++        
@@ -69,7 +69,7 @@ invalid.js:2:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
     3 │ ArrayBuffer()
     4 │ BigInt64Array()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     2 │ new·Array()
       │ ++++       
@@ -88,7 +88,7 @@ invalid.js:3:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
     4 │ BigInt64Array()
     5 │ BigUint64Array()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     3 │ new·ArrayBuffer()
       │ ++++             
@@ -107,7 +107,7 @@ invalid.js:4:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
     5 │ BigUint64Array()
     6 │ DataView()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     4 │ new·BigInt64Array()
       │ ++++               
@@ -126,7 +126,7 @@ invalid.js:5:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
     6 │ DataView()
     7 │ Date()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     5 │ new·BigUint64Array()
       │ ++++                
@@ -145,7 +145,7 @@ invalid.js:6:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
     7 │ Date()
     8 │ Error()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     6 │ new·DataView()
       │ ++++          
@@ -164,7 +164,7 @@ invalid.js:7:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
     8 │ Error()
     9 │ Float32Array()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     7 │ new·Date()
       │ ++++      
@@ -183,7 +183,7 @@ invalid.js:8:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
      9 │ Float32Array()
     10 │ Float64Array()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     8 │ new·Error()
       │ ++++       
@@ -202,7 +202,7 @@ invalid.js:9:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
     10 │ Float64Array()
     11 │ Function()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     9 │ new·Float32Array()
       │ ++++              
@@ -221,7 +221,7 @@ invalid.js:10:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     11 │ Function()
     12 │ Int8Array()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     10 │ new·Float64Array()
        │ ++++              
@@ -240,7 +240,7 @@ invalid.js:11:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     12 │ Int8Array()
     13 │ Int16Array()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     11 │ new·Function()
        │ ++++          
@@ -259,7 +259,7 @@ invalid.js:12:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     13 │ Int16Array()
     14 │ Int32Array()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     12 │ new·Int8Array()
        │ ++++           
@@ -278,7 +278,7 @@ invalid.js:13:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     14 │ Int32Array()
     15 │ Map()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     13 │ new·Int16Array()
        │ ++++            
@@ -297,7 +297,7 @@ invalid.js:14:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     15 │ Map()
     16 │ WeakMap()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     14 │ new·Int32Array()
        │ ++++            
@@ -316,7 +316,7 @@ invalid.js:15:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     16 │ WeakMap()
     17 │ Set()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     15 │ new·Map()
        │ ++++     
@@ -335,7 +335,7 @@ invalid.js:16:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     17 │ Set()
     18 │ WeakSet()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     16 │ new·WeakMap()
        │ ++++         
@@ -354,7 +354,7 @@ invalid.js:17:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     18 │ WeakSet()
     19 │ Promise()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     17 │ new·Set()
        │ ++++     
@@ -373,7 +373,7 @@ invalid.js:18:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     19 │ Promise()
     20 │ RegExp()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     18 │ new·WeakSet()
        │ ++++         
@@ -392,7 +392,7 @@ invalid.js:19:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     20 │ RegExp()
     21 │ Uint8Array()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     19 │ new·Promise()
        │ ++++         
@@ -411,7 +411,7 @@ invalid.js:20:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     21 │ Uint8Array()
     22 │ Uint16Array()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     20 │ new·RegExp()
        │ ++++        
@@ -430,7 +430,7 @@ invalid.js:21:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     22 │ Uint16Array()
     23 │ Uint32Array()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     21 │ new·Uint8Array()
        │ ++++            
@@ -449,7 +449,7 @@ invalid.js:22:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     23 │ Uint32Array()
     24 │ Uint8ClampedArray()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     22 │ new·Uint16Array()
        │ ++++             
@@ -468,7 +468,7 @@ invalid.js:23:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     24 │ Uint8ClampedArray()
     25 │ SharedArrayBuffer()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     23 │ new·Uint32Array()
        │ ++++             
@@ -487,7 +487,7 @@ invalid.js:24:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     25 │ SharedArrayBuffer()
     26 │ Proxy()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     24 │ new·Uint8ClampedArray()
        │ ++++                   
@@ -506,7 +506,7 @@ invalid.js:25:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     26 │ Proxy()
     27 │ WeakRef()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     25 │ new·SharedArrayBuffer()
        │ ++++                   
@@ -525,7 +525,7 @@ invalid.js:26:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     27 │ WeakRef()
     28 │ FinalizationRegistry()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     26 │ new·Proxy()
        │ ++++       
@@ -544,7 +544,7 @@ invalid.js:27:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     28 │ FinalizationRegistry()
     29 │ window.Object({})
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     27 │ new·WeakRef()
        │ ++++         
@@ -563,7 +563,7 @@ invalid.js:28:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     29 │ window.Object({})
     30 │ globalThis.Object()
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     28 │ new·FinalizationRegistry()
        │ ++++                      
@@ -582,7 +582,7 @@ invalid.js:29:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     30 │ globalThis.Object()
     31 │ function foo() {
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     29 │ new·window.Object({})
        │ ++++                 
@@ -601,7 +601,7 @@ invalid.js:30:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     31 │ function foo() {
     32 │     return /** Comment */ globalThis.Object({ foo: 'bar' })
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     30 │ new·globalThis.Object()
        │ ++++                   
@@ -620,7 +620,7 @@ invalid.js:32:27 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
     33 │ }
     34 │ 
   
-  i Unsafe fix: Add new.
+  i Unsafe fix: Add new keyword.
   
     32 │ ····return·/**·Comment·*/·new·globalThis.Object({·foo:·'bar'·})
        │                           ++++                                 

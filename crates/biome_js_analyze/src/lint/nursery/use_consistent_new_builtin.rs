@@ -164,7 +164,7 @@ impl Rule for UseConsistentNewBuiltin {
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Add "<Emphasis>"new"</Emphasis>"." }.to_owned(),
+            message: markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
             mutation,
         })
     }
