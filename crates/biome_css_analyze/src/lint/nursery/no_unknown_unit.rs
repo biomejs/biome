@@ -92,9 +92,8 @@ impl Rule for NoUnknownUnit {
                 let unit_token = dimension.unit_token().ok()?;
                 let unit = unit_token.text_trimmed().to_string();
 
-                // The `x` unit is parsed as `CssRegularDimension`, but it is used for describing resolutions in media queries.
+                // The `x` unit is parsed as `CssRegularDimension`, but it is used for describing resolutions.
                 // This check is to disallow the use of the `x` unit outside this specific context.
-                // See MDN web docs (https://developer.mozilla.org/en-US/docs/Web/CSS/resolution) for more details on the `x` unit.
                 if unit == "x" {
                     let mut allow_x = false;
 
