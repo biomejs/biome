@@ -973,7 +973,7 @@ export interface Nursery {
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow unknown units.
+	 * Disallow unknown CSS units.
 	 */
 	noUnknownUnit?: RuleConfiguration_for_Null;
 	/**

@@ -1546,7 +1546,7 @@
 					]
 				},
 				"noUnknownUnit": {
-					"description": "Disallow unknown units.",
+					"description": "Disallow unknown CSS units.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
