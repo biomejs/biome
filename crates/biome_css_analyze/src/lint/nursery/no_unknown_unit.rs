@@ -14,7 +14,9 @@ fn is_css_hack(value: &str) -> bool {
 }
 
 declare_rule! {
-    /// Disallow unknown units.
+    /// Disallow unknown CSS units.
+    ///
+    /// For details on known CSS units, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Values_and_units#lengths).
     ///
     ///
     /// ## Examples
