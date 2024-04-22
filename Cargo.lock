@@ -144,7 +144,7 @@ dependencies = [
 name = "biome_aria_metadata"
 version = "0.5.7"
 dependencies = [
- "case",
+ "biome_string_case",
  "proc-macro2",
  "quote",
 ]
@@ -3868,7 +3868,6 @@ dependencies = [
  "biome_string_case",
  "biome_ungrammar",
  "bpaf",
- "case",
  "filetime",
  "fs_extra",
  "git2",

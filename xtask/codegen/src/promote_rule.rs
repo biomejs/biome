@@ -1,4 +1,4 @@
-use case::CaseExt;
+use biome_string_case::Case;
 use fs_extra::dir::{create, move_dir, CopyOptions};
 use fs_extra::file;
 use fs_extra::file::move_file;
@@ -31,7 +31,7 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
         )
     }
 
-    let rule_name_snake = rule_name.to_snake();
+    let rule_name_snake = Case::Snake.convert(rule_name);
 
     // look for the rule in the source code
     let mut rule_path = None;
