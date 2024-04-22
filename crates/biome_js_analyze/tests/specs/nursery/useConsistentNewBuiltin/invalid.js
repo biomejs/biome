@@ -29,7 +29,7 @@ FinalizationRegistry()
 window.Object({})
 globalThis.Object()
 function foo() {
-    return /** Comment */ globalThis.Object({ foo: 'bar' })
+    return /** Start */ globalThis.Object({ foo: 'bar' }) /** End */
 }
 
 new String()
@@ -38,5 +38,5 @@ new Boolean()
 new window.String(123)
 new globalThis.String()
 function foo() {
-    return new globalThis.String("foo")
+    return /** Start */ new globalThis.String("foo") /** End */
 }

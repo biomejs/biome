@@ -140,7 +140,7 @@ impl BuiltinCreationRule {
     }
 }
 
-pub struct UseNewForBuiltinsState {
+pub struct UseConsistentNewBuiltinState {
     name: String,
     creation_rule: BuiltinCreationRule,
 }
@@ -151,26 +151,28 @@ declare_node_union! {
 
 impl Rule for UseConsistentNewBuiltin {
     type Query = Semantic<JsNewOrCallExpression>;
-    type State = UseNewForBuiltinsState;
+    type State = UseConsistentNewBuiltinState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let (callee, creation_rule) = extract_callee_and_rule(node)?;
-
         let (reference, name) = global_identifier(&callee.omit_parentheses())?;
+
         let name_text = name.text();
 
-        if creation_rule.forbidden_builtins_list().binary_search(&name_text).is_ok() {
-            return ctx
-                .model()
-                .binding(&reference)
-                .is_none()
-                .then_some(UseNewForBuiltinsState {
+        if creation_rule
+            .forbidden_builtins_list()
+            .binary_search(&name_text)
+            .is_ok()
+        {
+            return ctx.model().binding(&reference).is_none().then_some(
+                UseConsistentNewBuiltinState {
                     name: name_text.to_string(),
                     creation_rule,
-                });
+                },
+            );
         }
 
         None
@@ -204,24 +206,20 @@ impl Rule for UseConsistentNewBuiltin {
             JsNewOrCallExpression::JsNewExpression(node) => {
                 let call_expression = convert_new_expression_to_call_expression(node)?;
 
-                mutation.replace_node_discard_trivia::<AnyJsExpression>(
-                    node.clone().into(),
-                    call_expression.into(),
-                );
+                mutation
+                    .replace_node::<AnyJsExpression>(node.clone().into(), call_expression.into());
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
                     applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Remove "<Emphasis>"new"</Emphasis>"." }.to_owned(),
+                    message: markup! { "Remove "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,
                 })
             }
             JsNewOrCallExpression::JsCallExpression(node) => {
                 let new_expression = convert_call_expression_to_new_expression(node)?;
 
-                mutation.replace_node_discard_trivia::<AnyJsExpression>(
-                    node.clone().into(),
-                    new_expression.into(),
-                );
+                mutation
+                    .replace_node::<AnyJsExpression>(node.clone().into(), new_expression.into());
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
                     applicability: Applicability::MaybeIncorrect,
@@ -263,18 +261,17 @@ fn convert_new_expression_to_call_expression(expr: &JsNewExpression) -> Option<J
 }
 
 fn convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option<JsNewExpression> {
-    let mut callee: AnyJsExpression = expr.callee().ok()?;
+    let mut callee = expr.callee().ok()?;
     let leading_trivia_pieces = callee.syntax().first_leading_trivia()?.pieces();
 
     let new_token = make::token(JsSyntaxKind::NEW_KW)
         .with_leading_trivia_pieces(leading_trivia_pieces)
         .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
 
-    // Remove leading trivia from the callee.
     callee = callee.with_leading_trivia_pieces([])?;
 
     Some(
-        make::js_new_expression(new_token.clone(), callee)
+        make::js_new_expression(new_token, callee)
             .with_arguments(expr.arguments().ok()?)
             .build(),
     )

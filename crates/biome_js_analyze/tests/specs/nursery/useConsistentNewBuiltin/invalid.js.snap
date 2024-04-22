@@ -35,9 +35,17 @@ FinalizationRegistry()
 window.Object({})
 globalThis.Object()
 function foo() {
-    return /** Comment */ globalThis.Object({ foo: 'bar' })
+    return /** Start */ globalThis.Object({ foo: 'bar' }) /** End */
 }
 
+new String()
+new Number()
+new Boolean()
+new window.String(123)
+new globalThis.String()
+function foo() {
+    return /** Start */ new globalThis.String("foo") /** End */
+}
 ```
 
 # Diagnostics
@@ -599,7 +607,7 @@ invalid.js:30:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
   > 30 │ globalThis.Object()
        │ ^^^^^^^^^^^^^^^^^^^
     31 │ function foo() {
-    32 │     return /** Comment */ globalThis.Object({ foo: 'bar' })
+    32 │     return /** Start */ globalThis.Object({ foo: 'bar' }) /** End */
   
   i Unsafe fix: Add new keyword.
   
@@ -609,20 +617,132 @@ invalid.js:30:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:32:27 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:25 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Object() instead of Object().
   
     30 │ globalThis.Object()
     31 │ function foo() {
-  > 32 │     return /** Comment */ globalThis.Object({ foo: 'bar' })
-       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 32 │     return /** Start */ globalThis.Object({ foo: 'bar' }) /** End */
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     33 │ }
     34 │ 
   
   i Unsafe fix: Add new keyword.
   
-    32 │ ····return·/**·Comment·*/·new·globalThis.Object({·foo:·'bar'·})
-       │                           ++++                                 
+    32 │ ····return·/**·Start·*/·new·globalThis.Object({·foo:·'bar'·})·/**·End·*/
+       │                         ++++                                            
+
+```
+
+```
+invalid.js:35:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    33 │ }
+    34 │ 
+  > 35 │ new String()
+       │ ^^^^^^^^^^^^
+    36 │ new Number()
+    37 │ new Boolean()
+  
+  i Unsafe fix: Remove new keyword.
+  
+    35 │ new·String()
+       │ ----        
+
+```
+
+```
+invalid.js:36:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Number() instead of new Number().
+  
+    35 │ new String()
+  > 36 │ new Number()
+       │ ^^^^^^^^^^^^
+    37 │ new Boolean()
+    38 │ new window.String(123)
+  
+  i Unsafe fix: Remove new keyword.
+  
+    36 │ new·Number()
+       │ ----        
+
+```
+
+```
+invalid.js:37:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Boolean() instead of new Boolean().
+  
+    35 │ new String()
+    36 │ new Number()
+  > 37 │ new Boolean()
+       │ ^^^^^^^^^^^^^
+    38 │ new window.String(123)
+    39 │ new globalThis.String()
+  
+  i Unsafe fix: Remove new keyword.
+  
+    37 │ new·Boolean()
+       │ ----         
+
+```
+
+```
+invalid.js:38:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    36 │ new Number()
+    37 │ new Boolean()
+  > 38 │ new window.String(123)
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    39 │ new globalThis.String()
+    40 │ function foo() {
+  
+  i Unsafe fix: Remove new keyword.
+  
+    38 │ new·window.String(123)
+       │ ----                  
+
+```
+
+```
+invalid.js:39:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    37 │ new Boolean()
+    38 │ new window.String(123)
+  > 39 │ new globalThis.String()
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ function foo() {
+    41 │     return /** Start */ new globalThis.String("foo") /** End */
+  
+  i Unsafe fix: Remove new keyword.
+  
+    39 │ new·globalThis.String()
+       │ ----                   
+
+```
+
+```
+invalid.js:41:25 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    39 │ new globalThis.String()
+    40 │ function foo() {
+  > 41 │     return /** Start */ new globalThis.String("foo") /** End */
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ }
+  
+  i Unsafe fix: Remove new keyword.
+  
+    41 │ ····return·/**·Start·*/·new·globalThis.String("foo")·/**·End·*/
+       │                         ----                                   
 
 ```
