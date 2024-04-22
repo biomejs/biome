@@ -23,29 +23,35 @@ jobs:
           # Configure which types are allowed (newline-delimited).
           # ref: CONTRIBUTING.md
           types: |
+            build
+            chore
+            ci
+            docs
             feat
             fix
-            docs
-            test
-            chore
             perf
             refactor
+            release
+            test
           # Configure that a scope must always be provided.
           requireScope: false
-          # Configure which scopes are disallowed in PR titles (newline-delimited).
-          # For instance by setting the value below, `chore(release): ...` (lowercase)
-          # and `ci(e2e,release): ...` (unknown scope) will be rejected.
+          # Configure which scopes are disallowed in PR titles.
           # These are regex patterns auto-wrapped in `^ $`.
+          #
+          # We disable the following scopes:
+          # - `release` because we have the `release` type
+          # - UPPERCASE titles because we promote the use of lowercase
           disallowScopes: |
             release
-            [A-Z]+
+            [A-Z_-]+
           # Configure additional validation for the subject based on a regex.
-          # This example ensures the subject doesn't start with an uppercase character.
-          subjectPattern: ^(?![A-Z]).+$
+          # Ensures that the subject doesn't start with an uppercase character.
+          subjectPattern: ^[^A-Z]
           # If `subjectPattern` is configured, you can use this property to override
           # the default error message that is shown when the pattern doesn't match.
           # The variables `subject` and `title` can be used within the message.
           subjectPatternError: |
             The subject "{subject}" found in the pull request title "{title}"
-            didn't match the configured pattern. Please ensure that the subject
-            doesn't start with an uppercase character.
+            didn't match the configured pattern.
+            Please ensure that the subject doesn't start with an uppercase character.
+            The scope should not be in UPPERCASE.

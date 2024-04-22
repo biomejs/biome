@@ -269,13 +269,16 @@ The following this convention encourages commit best-practices and facilitates c
 
 The following commit prefixes are supported:
 
+- `build:`, a change that affects the build system or external dependencies
+- `chore:`, project housekeeping
+- `ci:`, a change that affects CI
+- `docs:`, a documentation update
 - `feat:`, a new feature
 - `fix:`, a bugfix
-- `docs:`, a documentation update
-- `test:`, a test update
-- `chore:`, project housekeeping
 - `perf:`, project performance
 - `refactor:`, refactor of the code without change in functionality
+- `release:`, release of a new version
+- `test:`, a test update
 
 Below are examples of well-formatted commits:
 
