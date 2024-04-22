@@ -856,6 +856,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_new_symbol.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-new-wrappers" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_consistent_new_builtin
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-nonoctal-decimal-escape" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group

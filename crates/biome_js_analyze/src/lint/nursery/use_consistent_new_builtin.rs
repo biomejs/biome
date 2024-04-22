@@ -6,16 +6,15 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression, JsSyntaxKind,
+    global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression, JsNewOrCallExpression,
+    JsSyntaxKind,
 };
-use biome_rowan::{
-    chain_trivia_pieces, declare_node_union, AstNode, BatchMutationExt, TriviaPieceKind,
-};
+use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt, TriviaPieceKind};
 
 declare_rule! {
-    /// Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
+    /// Enforce the use of new for all builtins, except `String`, `Number`, `Boolean`, `Symbol` and `BigInt`.
     ///
-    /// They work the same, but new should be preferred for consistency with other constructors.
+    /// `new Builtin()` and `Builtin()` work the same, but new should be preferred for consistency with other constructors.
     /// Enforces the use of new for following builtins:
     ///
     /// - Object
@@ -65,8 +64,14 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// const list = Array(10);
+    /// const text = new String(10);
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// const now = Date();
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// const map = Map([
     ///   ['foo', 'bar']
     /// ]);
@@ -75,8 +80,14 @@ declare_rule! {
     /// ### Valid
     ///
     /// ```js
-    /// const list = new Array(10);
+    /// const text = String(10);
+    /// ```
+    ///
+    /// ```js
     /// const now = new Date();
+    /// ```
+    ///
+    /// ```js
     /// const map = new Map([
     ///  ['foo', 'bar']
     /// ]);
@@ -85,68 +96,10 @@ declare_rule! {
     pub UseConsistentNewBuiltin {
         version: "next",
         name: "useConsistentNewBuiltin",
-        sources: &[RuleSource::EslintUnicorn("new-for-builtins")],
+        sources: &[RuleSource::EslintUnicorn("new-for-builtins"), RuleSource::Eslint("no-new-wrappers")],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
-}
-
-/// Sorted array of builtins that require new keyword.
-const BUILTINS_REQUIRING_NEW: &[&str] = &[
-    "Array",
-    "ArrayBuffer",
-    "BigInt64Array",
-    "BigUint64Array",
-    "DataView",
-    "Date",
-    "Error",
-    "FinalizationRegistry",
-    "Float32Array",
-    "Float64Array",
-    "Function",
-    "Int16Array",
-    "Int32Array",
-    "Int8Array",
-    "Map",
-    "Object",
-    "Promise",
-    "Proxy",
-    "RegExp",
-    "Set",
-    "SharedArrayBuffer",
-    "Uint16Array",
-    "Uint32Array",
-    "Uint8Array",
-    "Uint8ClampedArray",
-    "WeakMap",
-    "WeakRef",
-    "WeakSet",
-];
-
-/// Sorted array of builtins that should not use new keyword.
-const BUILTINS_NOT_REQUIRING_NEW: &[&str] = &["Boolean", "Number", "String"];
-
-enum BuiltinCreationRule {
-    MustUseNew,
-    MustNotUseNew,
-}
-
-impl BuiltinCreationRule {
-    fn forbidden_builtins_list(&self) -> &[&str] {
-        match self {
-            BuiltinCreationRule::MustUseNew => BUILTINS_REQUIRING_NEW,
-            BuiltinCreationRule::MustNotUseNew => BUILTINS_NOT_REQUIRING_NEW,
-        }
-    }
-}
-
-pub struct UseConsistentNewBuiltinState {
-    name: String,
-    creation_rule: BuiltinCreationRule,
-}
-
-declare_node_union! {
-    pub JsNewOrCallExpression = JsNewExpression | JsCallExpression
 }
 
 impl Rule for UseConsistentNewBuiltin {
@@ -229,6 +182,60 @@ impl Rule for UseConsistentNewBuiltin {
             }
         }
     }
+}
+
+/// Sorted array of builtins that require new keyword.
+const BUILTINS_REQUIRING_NEW: &[&str] = &[
+    "Array",
+    "ArrayBuffer",
+    "BigInt64Array",
+    "BigUint64Array",
+    "DataView",
+    "Date",
+    "Error",
+    "FinalizationRegistry",
+    "Float32Array",
+    "Float64Array",
+    "Function",
+    "Int16Array",
+    "Int32Array",
+    "Int8Array",
+    "Map",
+    "Object",
+    "Promise",
+    "Proxy",
+    "RegExp",
+    "Set",
+    "SharedArrayBuffer",
+    "Uint16Array",
+    "Uint32Array",
+    "Uint8Array",
+    "Uint8ClampedArray",
+    "WeakMap",
+    "WeakRef",
+    "WeakSet",
+];
+
+/// Sorted array of builtins that should not use new keyword.
+const BUILTINS_NOT_REQUIRING_NEW: &[&str] = &["Boolean", "Number", "String"];
+
+enum BuiltinCreationRule {
+    MustUseNew,
+    MustNotUseNew,
+}
+
+impl BuiltinCreationRule {
+    fn forbidden_builtins_list(&self) -> &[&str] {
+        match self {
+            BuiltinCreationRule::MustUseNew => BUILTINS_REQUIRING_NEW,
+            BuiltinCreationRule::MustNotUseNew => BUILTINS_NOT_REQUIRING_NEW,
+        }
+    }
+}
+
+pub struct UseConsistentNewBuiltinState {
+    name: String,
+    creation_rule: BuiltinCreationRule,
 }
 
 fn extract_callee_and_rule(
