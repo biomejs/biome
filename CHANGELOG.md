@@ -9,8 +9,49 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## 1.7.1 (2024-04-22)
+## Unreleased
 
+### Analyzer
+
+#### Bug fixes
+
+- Import sorting now ignores side effect imports ([#817](https://github.com/biomejs/biome/issues/817)).
+
+  A side effect import consists now in its own group.
+  This ensures that side effect imports are not reordered.
+
+  Here is an example of how imports are now sorted:
+
+  ```diff
+    import "z"
+    - import { D } from "d";
+    import { C } from "c";
+    + import { D } from "d";
+    import "y"
+    import "x"
+    - import { B } from "b";
+    import { A } from "a";
+    + import { B } from "b";
+    import "w"
+  ```
+
+  Contributed by @Conaclos
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+### Parser
+
+## 1.7.1 (2024-04-22)
 
 ### Editors
 
