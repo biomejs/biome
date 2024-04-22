@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Dispatch event on push
         if: ${{ github.event_name == 'push' }}
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
         with:
           token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
           repository: ${{ env.BIOME_WEBSITE_REPO }}
@@ -25,7 +25,7 @@ jobs:
       # For testing only, the payload is mocked
       - name: Dispatch event on workflow dispatch
         if: ${{ github.event_name == 'workflow_dispatch' }}
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
         with:
           token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
           repository: ${{ env.BIOME_WEBSITE_REPO }}
