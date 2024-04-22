@@ -131,6 +131,9 @@ We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific feat
       <td align="center" valign="middle">
         <a href="https://nanabit.dev/" target="_blank"><img src="https://images.opencollective.com/nanabit/d15fd98/logo/256.png?height=80" width="80"></a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://vital.io/" target="_blank"><img src="https://avatars.githubusercontent.com/u/25357309?s=200" width="80"></a>
+      </td>
     </tr>
   </tbody>
 </table>
