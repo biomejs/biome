@@ -1,7 +1,9 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_syntax::CssDeclarationOrRuleBlock;
-use biome_rowan::AstNode;
+use biome_css_syntax::CssFunction;
+use biome_rowan::{AstNode, TextRange};
+
+use crate::utils::is_function_keyword;
 
 declare_rule! {
     /// Disallow unknown functions.
@@ -23,42 +25,43 @@ declare_rule! {
     pub NoUnknownFunction {
         version: "next",
         name: "noUnknownFunction",
-        recommended: false,
+        recommended: true,
         sources: &[RuleSource::Stylelint("function-no-unknown")],
     }
 }
 
+pub struct NoUnknownFunctionState {
+    function_name: String,
+    span: TextRange,
+}
+
 impl Rule for NoUnknownFunction {
-    type Query = Ast<CssDeclarationOrRuleBlock>;
-    type State = CssDeclarationOrRuleBlock;
+    type Query = Ast<CssFunction>;
+    type State = NoUnknownFunctionState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if node.items().into_iter().next().is_none() {
-            return Some(node.clone());
+        let function_name = node.name().ok()?.text();
+
+        if !is_function_keyword(&function_name) {
+            return Some(NoUnknownFunctionState {
+                function_name,
+                span: node.name().ok()?.range(),
+            });
         }
+
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
-        let span = node.range();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                span,
-                markup! {
-                    "Unexpected empty block is not allowed"
-                },
-            )
-            .note(markup! {
-                    "This note will give you more information."
-            }),
-        )
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            state.span,
+            markup! {
+                "Unexpected unknown function: "<Emphasis>{state.function_name}</Emphasis>
+            },
+        ))
     }
 }
