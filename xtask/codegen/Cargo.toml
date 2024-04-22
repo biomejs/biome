@@ -7,8 +7,6 @@ version = "0.0.0"
 [dependencies]
 anyhow         = "1.0.82"
 bpaf           = { workspace = true, features = ["derive"] }
-filetime       = "0.2.23"
-fs_extra       = "1.3.0"
 git2           = { version = "0.18.3", default-features = false }
 proc-macro2    = { workspace = true, features = ["span-locations"] }
 pulldown-cmark = { version = "0.9", default-features = false, optional = true }
