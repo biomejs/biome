@@ -30,9 +30,18 @@ declare_rule! {
     ///     /* code */
     ///     break;
     ///
-    /// default:
+    ///     default:
     ///     /* code */
     ///     break;
+    /// }
+    /// ```
+    /// ```js
+    /// switch (a) {
+    ///     case 1:
+    ///     /* code */
+    ///     break;
+    ///
+    ///     // no default
     /// }
     /// ```
     pub UseDefaultCase {
