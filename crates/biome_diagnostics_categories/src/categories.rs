@@ -121,6 +121,7 @@ define_categories! {
     "lint/nursery/noDuplicateSelectorsKeyframeBlock": "https://biomejs.dev/linter/rules/no-duplicate-selectors-keyframe-block",
     "lint/nursery/noEvolvingAny": "https://biomejs.dev/linter/rules/no-evolving-any",
     "lint/nursery/noFlatMapIdentity": "https://biomejs.dev/linter/rules/no-flat-map-identity",
+    "lint/nursery/noImportantInKeyframe": "https://biomejs.dev/linter/rules/no-important-in-keyframe",
     "lint/nursery/noMisplacedAssertion": "https://biomejs.dev/linter/rules/no-misplaced-assertion",
     "lint/nursery/noNodejsModules": "https://biomejs.dev/linter/rules/no-nodejs-modules",
     "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",
