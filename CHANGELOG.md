@@ -29,6 +29,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add parentheses for the return expression that has leading multiline comments. [#2504](https://github.com/biomejs/biome/pull/2504). Contributed by @ah-yu
 
+- Correctly format dangling comments of continue statements. [#2555](https://github.com/biomejs/biome/pull/2555). Contributed by @ah-yu
+
 ### JavaScript APIs
 
 ### Linter
