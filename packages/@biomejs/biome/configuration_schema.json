@@ -1510,6 +1510,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noImportantInKeyframe": {
+					"description": "Disallow invalid !important within keyframe declarations",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisplacedAssertion": {
 					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
 					"anyOf": [

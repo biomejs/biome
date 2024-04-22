@@ -953,6 +953,10 @@ export interface Nursery {
 	 */
 	noFlatMapIdentity?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow invalid !important within keyframe declarations
+	 */
+	noImportantInKeyframe?: RuleConfiguration_for_Null;
+	/**
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
@@ -1959,6 +1963,7 @@ export type Category =
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noFlatMapIdentity"
+	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReactSpecificProps"
