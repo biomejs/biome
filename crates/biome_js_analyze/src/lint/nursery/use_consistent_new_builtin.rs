@@ -8,7 +8,9 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression, JsSyntaxKind,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{
+    chain_trivia_pieces, declare_node_union, AstNode, BatchMutationExt, TriviaPieceKind,
+};
 
 declare_rule! {
     /// Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
@@ -45,13 +47,18 @@ declare_rule! {
     /// - WeakRef
     /// - FinalizationRegistry
     ///
-    /// Following builtins are handled by [noInvalidBuiltin](https://biomejs.dev/linter/rules/no-invalid-new-builtin/):
+    /// Disallows the use of new for following builtins:
     ///
     /// - String
     /// - Number
     /// - Boolean
+    ///
+    /// These builtins are handled by [noInvalidBuiltin](https://biomejs.dev/linter/rules/no-invalid-new-builtin/) rule:
+    ///
     /// - Symbol
     /// - BigInt
+    ///
+    /// > These should not use new as that would create object wrappers for the primitive values, which is not what you want. However, without new they can be useful for coercing a value to that type.
     ///
     /// ## Examples
     ///
@@ -116,25 +123,54 @@ const BUILTINS_REQUIRING_NEW: &[&str] = &[
     "WeakSet",
 ];
 
+/// Sorted array of builtins that should not use new keyword.
+const BUILTINS_NOT_REQUIRING_NEW: &[&str] = &["Boolean", "Number", "String"];
+
+enum BuiltinCreationRule {
+    MustUseNew,
+    MustNotUseNew,
+}
+
+impl BuiltinCreationRule {
+    fn forbidden_builtins_list(&self) -> &[&str] {
+        match self {
+            BuiltinCreationRule::MustUseNew => BUILTINS_REQUIRING_NEW,
+            BuiltinCreationRule::MustNotUseNew => BUILTINS_NOT_REQUIRING_NEW,
+        }
+    }
+}
+
+pub struct UseNewForBuiltinsState {
+    name: String,
+    creation_rule: BuiltinCreationRule,
+}
+
+declare_node_union! {
+    pub JsNewOrCallExpression = JsNewExpression | JsCallExpression
+}
+
 impl Rule for UseConsistentNewBuiltin {
-    type Query = Semantic<JsCallExpression>;
-    type State = String;
+    type Query = Semantic<JsNewOrCallExpression>;
+    type State = UseNewForBuiltinsState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let callee = node.callee().ok()?;
+        let (callee, creation_rule) = extract_callee_and_rule(node)?;
 
         let (reference, name) = global_identifier(&callee.omit_parentheses())?;
         let name_text = name.text();
 
-        if BUILTINS_REQUIRING_NEW.binary_search(&name_text).is_ok() {
+        if creation_rule.forbidden_builtins_list().binary_search(&name_text).is_ok() {
             return ctx
                 .model()
                 .binding(&reference)
                 .is_none()
-                .then_some(name_text.to_string());
+                .then_some(UseNewForBuiltinsState {
+                    name: name_text.to_string(),
+                    creation_rule,
+                });
         }
 
         None
@@ -143,35 +179,91 @@ impl Rule for UseConsistentNewBuiltin {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
 
+        let name = &state.name;
+
+        let (use_this, instead_of) = match state.creation_rule {
+            BuiltinCreationRule::MustUseNew => ("new ", ""),
+            BuiltinCreationRule::MustNotUseNew => ("", "new "),
+        };
+
         Some(RuleDiagnostic::new(
             rule_category!(),
             node.range(),
             markup! {
-                "Use "<Emphasis>"new "{state}"()"</Emphasis>" instead of "<Emphasis>{state}"()"</Emphasis>"."
+                "Use "<Emphasis>{use_this}{name}"()"</Emphasis>" instead of "<Emphasis>{instead_of}{name}"()"</Emphasis>"."
             },
         ))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
-        let new_expression = convert_call_expression_to_new_expression(node)?;
 
         let mut mutation = ctx.root().begin();
-        mutation.replace_node_discard_trivia::<AnyJsExpression>(
-            node.clone().into(),
-            new_expression.into(),
-        );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
-            mutation,
-        })
+
+        match node {
+            JsNewOrCallExpression::JsNewExpression(node) => {
+                let call_expression = convert_new_expression_to_call_expression(node)?;
+
+                mutation.replace_node_discard_trivia::<AnyJsExpression>(
+                    node.clone().into(),
+                    call_expression.into(),
+                );
+                Some(JsRuleAction {
+                    category: ActionCategory::QuickFix,
+                    applicability: Applicability::MaybeIncorrect,
+                    message: markup! { "Remove "<Emphasis>"new"</Emphasis>"." }.to_owned(),
+                    mutation,
+                })
+            }
+            JsNewOrCallExpression::JsCallExpression(node) => {
+                let new_expression = convert_call_expression_to_new_expression(node)?;
+
+                mutation.replace_node_discard_trivia::<AnyJsExpression>(
+                    node.clone().into(),
+                    new_expression.into(),
+                );
+                Some(JsRuleAction {
+                    category: ActionCategory::QuickFix,
+                    applicability: Applicability::MaybeIncorrect,
+                    message: markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
+                    mutation,
+                })
+            }
+        }
     }
 }
 
-fn convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option<JsNewExpression> {
+fn extract_callee_and_rule(
+    node: &JsNewOrCallExpression,
+) -> Option<(AnyJsExpression, BuiltinCreationRule)> {
+    match node {
+        JsNewOrCallExpression::JsNewExpression(node) => {
+            let callee = node.callee().ok()?;
+
+            Some((callee, BuiltinCreationRule::MustNotUseNew))
+        }
+        JsNewOrCallExpression::JsCallExpression(node) => {
+            let callee: AnyJsExpression = node.callee().ok()?;
+
+            Some((callee, BuiltinCreationRule::MustUseNew))
+        }
+    }
+}
+
+fn convert_new_expression_to_call_expression(expr: &JsNewExpression) -> Option<JsCallExpression> {
+    let new_token = expr.new_token().ok()?;
     let mut callee = expr.callee().ok()?;
+    if new_token.has_leading_comments() || new_token.has_trailing_comments() {
+        callee = callee.prepend_trivia_pieces(chain_trivia_pieces(
+            new_token.leading_trivia().pieces(),
+            new_token.trailing_trivia().pieces(),
+        ))?;
+    }
+    Some(make::js_call_expression(callee, expr.arguments()?).build())
+}
+
+fn convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option<JsNewExpression> {
+    let mut callee: AnyJsExpression = expr.callee().ok()?;
     let leading_trivia_pieces = callee.syntax().first_leading_trivia()?.pieces();
 
     let new_token = make::token(JsSyntaxKind::NEW_KW)
@@ -191,6 +283,9 @@ fn convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option<
 #[test]
 fn test_order() {
     for items in BUILTINS_REQUIRING_NEW.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in BUILTINS_NOT_REQUIRING_NEW.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }

@@ -31,3 +31,12 @@ globalThis.Object()
 function foo() {
     return /** Comment */ globalThis.Object({ foo: 'bar' })
 }
+
+new String()
+new Number()
+new Boolean()
+new window.String(123)
+new globalThis.String()
+function foo() {
+    return new globalThis.String("foo")
+}

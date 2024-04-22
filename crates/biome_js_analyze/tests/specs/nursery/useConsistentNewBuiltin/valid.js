@@ -31,3 +31,20 @@ new globalThis.Object()
 function foo() {
     return new globalThis.Object()
 }
+
+String()
+Number()
+Boolean()
+window.String()
+globalThis.String(123)
+function foo() {
+    return globalThis.String()
+}
+
+function varCheck() {
+    {
+        var String = class {}
+    }
+    // This should not be reported
+    return new String()
+}
