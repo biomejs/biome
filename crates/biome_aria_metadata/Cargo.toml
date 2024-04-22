@@ -16,9 +16,9 @@ version              = "0.5.7"
 
 
 [build-dependencies]
-case        = "1.0.0"
-proc-macro2 = { version = "1.0.63", features = ["span-locations"] }
-quote       = { workspace = true }
+biome_string_case = { workspace = true }
+proc-macro2       = { version = "1.0.63", features = ["span-locations"] }
+quote             = { workspace = true }
 
 [lints]
 workspace = true
