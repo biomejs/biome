@@ -25,4 +25,17 @@ impl FormatNodeRule<JsContinueStatement> for FormatJsContinueStatement {
 
         write!(f, [FormatStatementSemicolon::new(semicolon_token.as_ref())])
     }
+
+    fn fmt_dangling_comments(
+        &self,
+        node: &JsContinueStatement,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        if !f.comments().has_dangling_comments(node.syntax()) {
+            return Ok(());
+        }
+        let content =
+            format_with(|f| write!(f, [space(), format_dangling_comments(node.syntax())]));
+        write!(f, [line_suffix(&content), expand_parent()])
+    }
 }
