@@ -73,6 +73,30 @@ impl Rule for OrganizeImports {
                 continue;
             };
 
+            let is_side_effect_import = matches!(
+                import.import_clause(),
+                Ok(AnyJsImportClause::JsImportBareClause(_))
+            );
+            if is_side_effect_import {
+                if let Some(first_node) = first_node.take() {
+                    groups.push(ImportGroup {
+                        first_node,
+                        nodes: take(&mut nodes),
+                    });
+                }
+                // A side effect import creates its own import group
+                let mut nodes = BTreeMap::new();
+                nodes.insert(
+                    ImportKey(import.source_text().ok()?),
+                    vec![ImportNode::from(import.clone())],
+                );
+                groups.push(ImportGroup {
+                    first_node: import.clone(),
+                    nodes,
+                });
+                continue;
+            }
+
             // If this is not the first import in the group, check for a group break
             if has_empty_line(&import.import_token().ok()?.leading_trivia()) {
                 if let Some(first_node) = first_node.take() {
