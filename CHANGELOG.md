@@ -9,13 +9,8 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## 1.7.1 (2024-04-22)
 
-### Analyzer
-
-### CLI
-
-### Configuration
 
 ### Editors
 
@@ -31,11 +26,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Correctly format dangling comments of continue statements. [#2555](https://github.com/biomejs/biome/pull/2555). Contributed by @ah-yu
 
-### JavaScript APIs
-
 ### Linter
-
-#### New features
 
 #### Bug fixes
 
@@ -57,9 +48,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   });
   ```
   Contributed by @ematipico
-
-
-### Parser
 
 
 ## 1.7.0 (2024-04-15)
