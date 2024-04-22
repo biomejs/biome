@@ -16,13 +16,28 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// Array(0, 1, 1);
+    /// Array();
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// Array(0, 1, 2);
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// new Array(0, 1, 2);
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// Array(...args);
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
     /// Array(500);
+    /// ```
+    ///
+    /// ```js
     /// [0, 1, 2];
     /// ```
     ///
