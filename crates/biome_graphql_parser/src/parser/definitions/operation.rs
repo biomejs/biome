@@ -3,11 +3,11 @@ use crate::parser::{
     directive::{is_at_directive, DirectiveList},
     is_at_name,
     parse_error::{
-        expected_any_selection, expected_name, expected_named_type, expected_type, expected_value,
+        expected_any_selection, expected_name, expected_type, expected_value,
         expected_variable_definition,
     },
     parse_name,
-    r#type::{parse_named_type, parse_type},
+    r#type::parse_type,
     value::parse_value,
     variable::{is_at_variable, parse_variable},
     GraphqlParser,
@@ -21,7 +21,10 @@ use biome_parser::{
     prelude::ParsedSyntax::*, token_set, Parser, TokenSet,
 };
 
-use super::is_at_definition;
+use super::{
+    fragment::{is_at_type_condition, parse_type_condition},
+    is_at_definition,
+};
 
 const OPERATION_TYPE: TokenSet<GraphqlSyntaxKind> =
     token_set![T![query], T![mutation], T![subscription]];
@@ -136,7 +139,7 @@ pub(crate) fn parse_operation_definition(p: &mut GraphqlParser) -> ParsedSyntax 
 }
 
 #[inline]
-fn parse_selection_set(p: &mut GraphqlParser) -> ParsedSyntax {
+pub(crate) fn parse_selection_set(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
     p.expect(T!['{']);
     SelectionList.parse_list(p);
@@ -204,11 +207,8 @@ fn parse_fragment(p: &mut GraphqlParser) -> ParsedSyntax {
         DirectiveList.parse_list(p);
         Present(m.complete(p, GRAPHQL_FRAGMENT_SPREAD))
     } else {
-        if p.at(T![on]) {
-            let m = p.start();
-            p.bump(T![on]);
-            parse_named_type(p).or_add_diagnostic(p, expected_named_type);
-            m.complete(p, GRAPHQL_TYPE_CONDITION);
+        if is_at_type_condition(p) {
+            parse_type_condition(p);
         }
         DirectiveList.parse_list(p);
         parse_selection_set(p).ok();

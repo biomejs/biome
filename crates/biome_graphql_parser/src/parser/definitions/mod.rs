@@ -1,3 +1,4 @@
+mod fragment;
 mod operation;
 
 use crate::parser::{parse_error::expected_any_definition, GraphqlParser};
@@ -7,7 +8,10 @@ use biome_parser::{
     prelude::ParsedSyntax::*, Parser,
 };
 
-use self::operation::{is_at_operation, parse_operation_definition};
+use self::{
+    fragment::{is_at_fragment_definition, parse_fragment_definition},
+    operation::{is_at_operation, parse_operation_definition},
+};
 pub(crate) use operation::is_at_selection_set_end;
 
 struct DefinitionListParseRecovery;
@@ -50,15 +54,18 @@ impl ParseNodeList for DefinitionList {
 
 #[inline]
 fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    match p.cur() {
-        // TODO: parse any definition
-        _ if is_at_operation(p) => parse_operation_definition(p),
-        _ => Absent,
+    // TODO: parse any definition
+    if is_at_operation(p) {
+        parse_operation_definition(p)
+    } else if is_at_fragment_definition(p) {
+        parse_fragment_definition(p)
+    } else {
+        Absent
     }
 }
 
 #[inline]
 fn is_at_definition(p: &GraphqlParser<'_>) -> bool {
     // TODO: recover at any definition
-    is_at_operation(p)
+    is_at_operation(p) || is_at_fragment_definition(p)
 }
