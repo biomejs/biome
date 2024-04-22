@@ -4,10 +4,22 @@ expression: invalid.js
 ---
 # Input
 ```jsx
-switch (foo) {
+switch (a) {
 	case 1:
-		/* code */
 		break;
+}
+
+switch (a) {
+	// no default
+	case 1:
+		break;
+}
+
+switch (a) {
+	case 1:
+		break;
+	// no default
+	// nope
 }
 
 ```
@@ -18,14 +30,54 @@ invalid.js:1:1 lint/nursery/useDefaultCase ━━━━━━━━━━━━�
 
   ! Expected a default case.
   
-  > 1 │ switch (foo) {
-      │ ^^^^^^^^^^^^^^
+  > 1 │ switch (a) {
+      │ ^^^^^^^^^^^^
   > 2 │ 	case 1:
-  > 3 │ 		/* code */
-  > 4 │ 		break;
-  > 5 │ }
+  > 3 │ 		break;
+  > 4 │ }
       │ ^
-    6 │ 
+    5 │ 
+    6 │ switch (a) {
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useDefaultCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected a default case.
+  
+     4 │ }
+     5 │ 
+   > 6 │ switch (a) {
+       │ ^^^^^^^^^^^^
+   > 7 │ 	// no default
+   > 8 │ 	case 1:
+   > 9 │ 		break;
+  > 10 │ }
+       │ ^
+    11 │ 
+    12 │ switch (a) {
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useDefaultCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected a default case.
+  
+    10 │ }
+    11 │ 
+  > 12 │ switch (a) {
+       │ ^^^^^^^^^^^^
+  > 13 │ 	case 1:
+  > 14 │ 		break;
+  > 15 │ 	// no default
+  > 16 │ 	// nope
+  > 17 │ }
+       │ ^
+    18 │ 
   
 
 ```
