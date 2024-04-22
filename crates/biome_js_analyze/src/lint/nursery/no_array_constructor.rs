@@ -97,18 +97,17 @@ impl Rule for NoArrayConstructor {
 }
 
 fn validate(callee: &AnyJsExpression, arguments: &JsCallArguments) -> Option<()> {
+    if callee.text() != "Array" {
+        return None;
+    }
     let mut args_iter = arguments.args().into_iter();
     let first_arg = args_iter.next();
     let second_arg = args_iter.next();
-    if callee.text() == "Array" {
-        if first_arg.is_some()
-            && second_arg.is_none()
-            && !matches!(first_arg?.ok()?, AnyJsCallArgument::JsSpread(_))
-        {
-            return None;
-        }
-        Some(())
-    } else {
-        None
+    if first_arg.is_some()
+        && second_arg.is_none()
+        && !matches!(first_arg?.ok()?, AnyJsCallArgument::JsSpread(_))
+    {
+        return None;
     }
+    Some(())
 }
