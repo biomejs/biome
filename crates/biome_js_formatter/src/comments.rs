@@ -14,8 +14,8 @@ use biome_js_syntax::{
     AnyJsClass, AnyJsName, AnyJsRoot, AnyJsStatement, JsArrayHole, JsArrowFunctionExpression,
     JsBlockStatement, JsCallArguments, JsCatchClause, JsEmptyStatement, JsFinallyClause,
     JsFormalParameter, JsFunctionBody, JsIdentifierBinding, JsIdentifierExpression, JsIfStatement,
-    JsLanguage, JsParameters, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement,
-    TsInterfaceDeclaration, TsMappedType,
+    JsLanguage, JsNamedImportSpecifiers, JsParameters, JsSyntaxKind, JsSyntaxNode,
+    JsVariableDeclarator, JsWhileStatement, TsInterfaceDeclaration, TsMappedType,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
 use biome_suppression::parse_suppression_comment;
@@ -118,7 +118,8 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_mapped_type_comment)
                 .or_else(handle_switch_default_case_comment)
                 .or_else(handle_after_arrow_fat_arrow_comment)
-                .or_else(handle_import_export_specifier_comment),
+                .or_else(handle_import_export_specifier_comment)
+                .or_else(handle_import_named_clause_comments),
             CommentTextPosition::OwnLine => handle_member_expression_comment(comment)
                 .or_else(handle_function_comment)
                 .or_else(handle_if_statement_comment)
@@ -135,7 +136,8 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_continue_break_comment)
                 .or_else(handle_union_type_comment)
                 .or_else(handle_import_export_specifier_comment)
-                .or_else(handle_class_method_comment),
+                .or_else(handle_class_method_comment)
+                .or_else(handle_import_named_clause_comments),
             CommentTextPosition::SameLine => handle_if_statement_comment(comment)
                 .or_else(handle_while_comment)
                 .or_else(handle_for_comment)
@@ -145,7 +147,8 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_call_expression_comment)
                 .or_else(handle_continue_break_comment)
                 .or_else(handle_class_comment)
-                .or_else(handle_declare_comment),
+                .or_else(handle_declare_comment)
+                .or_else(handle_import_named_clause_comments),
         }
     }
 }
@@ -1303,6 +1306,48 @@ fn handle_class_method_comment(
                 ) {
                     if let Some(preceding) = comment.preceding_node() {
                         return CommentPlacement::trailing(preceding.clone(), comment);
+                    }
+                }
+            }
+            CommentPlacement::Default(comment)
+        }
+        _ => CommentPlacement::Default(comment),
+    }
+}
+
+fn handle_import_named_clause_comments(
+    comment: DecoratedComment<JsLanguage>,
+) -> CommentPlacement<JsLanguage> {
+    let enclosing_node = comment.enclosing_node();
+    match enclosing_node.kind() {
+        JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE => {
+            if let Some(import_specifiers) = comment
+                .preceding_node()
+                .and_then(JsNamedImportSpecifiers::cast_ref)
+            {
+                let specifier_list = import_specifiers.specifiers();
+                // attach comments to the last specifier as trailing comments if comments are at the end of the line
+                // ```javascript
+                // import { a } from // comment
+                // "foo"
+                // ```
+                if specifier_list.len() != 0 && comment.text_position() == CommentTextPosition::EndOfLine{
+                    if let Some(Ok(last_specifier)) = specifier_list.last() {
+                        return CommentPlacement::trailing(last_specifier.into_syntax(), comment);
+                    }
+                } else {
+                    // attach comments to the import specifier as leading comments if comments are placed after the from keyword
+                    // ```javascript
+                    // import {} from // comment 
+                    // "foo"
+                    // ```
+                    let is_after_from_keyword = comment
+                        .following_token()
+                        .map_or(true, |token| token.kind() != JsSyntaxKind::FROM_KW);
+                    if is_after_from_keyword {
+                        if let Some(following_node) = comment.following_node() {
+                            return CommentPlacement::leading(following_node.clone(), comment);
+                        }
                     }
                 }
             }
