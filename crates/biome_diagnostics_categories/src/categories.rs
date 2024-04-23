@@ -110,6 +110,7 @@ define_categories! {
     "lint/correctness/useValidForDirection": "https://biomejs.dev/linter/rules/use-valid-for-direction",
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
     "lint/nursery/colorNoInvalidHex": "https://biomejs.dev/linter/rules/color-no-invalid-hex",
+    "lint/nursery/noArrayConstructor": "https://biomejs.dev/linter/rules/no-array-constructor",
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
     "lint/nursery/noConsole": "https://biomejs.dev/linter/rules/no-console",
     "lint/nursery/noConstantMathMinMaxClamp": "https://biomejs.dev/linter/rules/no-constant-math-min-max-clamp",
