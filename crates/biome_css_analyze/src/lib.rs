@@ -122,13 +122,12 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#".something {}
-"#;
+        const SOURCE: &str = r#"@font-face { font-family: Gentium; }"#;
 
         let parsed = parse_css(SOURCE, CssParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
-        let rule_filter = RuleFilter::Rule("nursery", "noDuplicateKeys");
+        let rule_filter = RuleFilter::Rule("nursery", "noMissingGenericFamilyKeyword");
         let options = AnalyzerOptions::default();
         analyze(
             &parsed.tree(),
