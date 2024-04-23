@@ -166,8 +166,8 @@ If defined here, they should not emit diagnostics.
 	/**
 	 * Indicates the type of runtime or transformation used for interpreting JSX.
 	 */
-	jsx_runtime?: JsxRuntime;
-	organize_imports?: PartialJavascriptOrganizeImports;
+	jsxRuntime?: JsxRuntime;
+	organizeImports?: PartialJavascriptOrganizeImports;
 	/**
 	 * Parsing options
 	 */

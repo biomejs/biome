@@ -1132,7 +1132,7 @@
 					"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
 					"anyOf": [{ "$ref": "#/definitions/JsxRuntime" }, { "type": "null" }]
 				},
-				"organize_imports": {
+				"organizeImports": {
 					"anyOf": [
 						{ "$ref": "#/definitions/JavascriptOrganizeImports" },
 						{ "type": "null" }
