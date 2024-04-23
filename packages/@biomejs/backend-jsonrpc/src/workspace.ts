@@ -961,6 +961,10 @@ export interface Nursery {
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noMissingGenericFamilyKeyword?: RuleConfiguration_for_Null;
+	/**
 	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration_for_Null;
@@ -1983,6 +1987,7 @@ export type Category =
 	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noMisplacedAssertion"
+	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"

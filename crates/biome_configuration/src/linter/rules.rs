@@ -2687,6 +2687,9 @@ pub struct Nursery {
     #[doc = "Checks that the assertion function, for example expect, is placed inside an it() function call."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misplaced_assertion: Option<RuleConfiguration<NoMisplacedAssertion>>,
+    #[doc = "Succinct description of the rule."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_missing_generic_family_keyword: Option<RuleConfiguration<NoMissingGenericFamilyKeyword>>,
     #[doc = "Forbid the use of Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_nodejs_modules: Option<RuleConfiguration<NoNodejsModules>>,
@@ -2749,6 +2752,7 @@ impl Nursery {
         "noFlatMapIdentity",
         "noImportantInKeyframe",
         "noMisplacedAssertion",
+        "noMissingGenericFamilyKeyword",
         "noNodejsModules",
         "noReactSpecificProps",
         "noRestrictedImports",
@@ -2889,27 +2893,31 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.no_nodejs_modules.as_ref() {
+        if let Some(rule) = self.no_missing_generic_family_keyword.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_react_specific_props.as_ref() {
+        if let Some(rule) = self.no_nodejs_modules.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.no_react_specific_props.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_restricted_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.no_unknown_unit.as_ref() {
+=======
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+>>>>>>> eafdd01b6c (feat: init rule)
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
@@ -3008,27 +3016,31 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.no_nodejs_modules.as_ref() {
+        if let Some(rule) = self.no_missing_generic_family_keyword.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_react_specific_props.as_ref() {
+        if let Some(rule) = self.no_nodejs_modules.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.no_react_specific_props.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_restricted_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
+<<<<<<< HEAD
         if let Some(rule) = self.no_unknown_unit.as_ref() {
+=======
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+>>>>>>> eafdd01b6c (feat: init rule)
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
@@ -3144,6 +3156,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noMisplacedAssertion" => self
                 .no_misplaced_assertion
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noMissingGenericFamilyKeyword" => self
+                .no_missing_generic_family_keyword
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noNodejsModules" => self
