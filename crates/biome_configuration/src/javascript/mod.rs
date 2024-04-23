@@ -1,5 +1,7 @@
 mod formatter;
 
+use std::str::FromStr;
+
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
@@ -28,6 +30,10 @@ pub struct JavascriptConfiguration {
     #[partial(bpaf(hide))]
     pub globals: StringSet,
 
+    /// Indicates the type of runtime or transformation used for interpreting JSX.
+    #[partial(bpaf(hide))]
+    pub jsx_runtime: JsxRuntime,
+
     #[partial(type, bpaf(external(partial_javascript_organize_imports), optional))]
     pub organize_imports: JavascriptOrganizeImports,
 }
@@ -49,4 +55,38 @@ pub struct JavascriptParser {
     /// These decorators belong to an old proposal, and they are subject to change.
     #[partial(bpaf(hide))]
     pub unsafe_parameter_decorators_enabled: bool,
+}
+
+/// Indicates the type of runtime or transformation used for interpreting JSX.
+#[derive(
+    Bpaf, Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum JsxRuntime {
+    /// Indicates a modern or native JSX environment, that doesn't require
+    /// special handling by Biome.
+    #[default]
+    Transparent,
+
+    /// Indicates a classic React environment that requires the `React` import.
+    ///
+    /// Corresponds to the `react` value for the `jsx` option in TypeScript's
+    /// `tsconfig.json`.
+    ///
+    /// This option should only be necessary if you cannot upgrade to a React
+    /// version that supports the new JSX runtime. For more information about
+    /// the old vs. new JSX runtime, please see:
+    /// <https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html>
+    ReactClassic,
+}
+
+impl FromStr for JsxRuntime {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "transparent" => Ok(Self::Transparent),
+            "react-classic" | "reactClassic" => Ok(Self::ReactClassic),
+            _ => Err("Unexpected value".to_string()),
+        }
+    }
 }

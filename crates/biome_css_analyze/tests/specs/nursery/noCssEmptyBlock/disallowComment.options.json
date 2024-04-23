@@ -1,0 +1,15 @@
+{
+    "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noCssEmptyBlock": {
+                    "level": "error",
+                    "options": {
+                        "allowComments": false
+                    }
+                }
+            }
+        }
+    }
+}

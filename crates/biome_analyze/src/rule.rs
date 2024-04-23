@@ -33,7 +33,7 @@ pub struct RuleMetadata {
     /// The kind of fix
     pub fix_kind: Option<FixKind>,
     /// The source URL of the rule
-    pub source: Option<RuleSource>,
+    pub sources: &'static [RuleSource],
     /// The source kind of the rule
     pub source_kind: Option<RuleSourceKind>,
 }
@@ -75,6 +75,8 @@ pub enum RuleSource {
     EslintReact(&'static str),
     /// Rules from [Eslint Plugin React Hooks](https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md)
     EslintReactHooks(&'static str),
+    /// Rules from [Eslint Plugin Solid](https://github.com/solidjs-community/eslint-plugin-solid)
+    EslintSolid(&'static str),
     /// Rules from [Eslint Plugin Sonar](https://github.com/SonarSource/eslint-plugin-sonarjs)
     EslintSonarJs(&'static str),
     /// Rules from [Eslint Plugin Stylistic](https://eslint.style)
@@ -87,6 +89,8 @@ pub enum RuleSource {
     EslintMysticatea(&'static str),
     /// Rules from [Eslint Plugin Barrel Files](https://github.com/thepassle/eslint-plugin-barrel-files)
     EslintBarrelFiles(&'static str),
+    /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
+    Stylelint(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -106,12 +110,14 @@ impl std::fmt::Display for RuleSource {
             RuleSource::EslintJsxA11y(_) => write!(f, "eslint-plugin-jsx-a11y"),
             RuleSource::EslintReact(_) => write!(f, "eslint-plugin-react"),
             RuleSource::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
+            RuleSource::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
             RuleSource::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
             RuleSource::EslintStylistic(_) => write!(f, "eslint-plugin-stylistic"),
-            RuleSource::EslintTypeScript(_) => write!(f, "eslint-plugin-typescript"),
+            RuleSource::EslintTypeScript(_) => write!(f, "typescript-eslint"),
             RuleSource::EslintUnicorn(_) => write!(f, "eslint-plugin-unicorn"),
-            RuleSource::EslintMysticatea(_) => write!(f, "eslint-plugin-mysticates"),
+            RuleSource::EslintMysticatea(_) => write!(f, "@mysticatea/eslint-plugin"),
             RuleSource::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
+            RuleSource::Stylelint(_) => write!(f, "Stylelint"),
         }
     }
 }
@@ -150,11 +156,33 @@ impl RuleSource {
             | Self::EslintReact(rule_name)
             | Self::EslintReactHooks(rule_name)
             | Self::EslintTypeScript(rule_name)
+            | Self::EslintSolid(rule_name)
             | Self::EslintSonarJs(rule_name)
             | Self::EslintStylistic(rule_name)
             | Self::EslintUnicorn(rule_name)
             | Self::EslintMysticatea(rule_name)
-            | Self::EslintBarrelFiles(rule_name) => rule_name,
+            | Self::EslintBarrelFiles(rule_name)
+            | Self::Stylelint(rule_name) => rule_name,
+        }
+    }
+
+    pub fn to_namespaced_rule_name(&self) -> String {
+        match self {
+            Self::Clippy(rule_name) | Self::Eslint(rule_name) => (*rule_name).to_string(),
+            Self::EslintImport(rule_name) => format!("import/{rule_name}"),
+            Self::EslintImportAccess(rule_name) => format!("import-access/{rule_name}"),
+            Self::EslintJest(rule_name) => format!("jest/{rule_name}"),
+            Self::EslintJsxA11y(rule_name) => format!("jsx-a11y/{rule_name}"),
+            Self::EslintReact(rule_name) => format!("react/{rule_name}"),
+            Self::EslintReactHooks(rule_name) => format!("react-hooks/{rule_name}"),
+            Self::EslintTypeScript(rule_name) => format!("@typescript-eslint/{rule_name}"),
+            Self::EslintSolid(rule_name) => format!("solidjs/{rule_name}"),
+            Self::EslintSonarJs(rule_name) => format!("sonarjs/{rule_name}"),
+            Self::EslintStylistic(rule_name) => format!("@stylistic/{rule_name}"),
+            Self::EslintUnicorn(rule_name) => format!("unicorn/{rule_name}"),
+            Self::EslintMysticatea(rule_name) => format!("@mysticatea/{rule_name}"),
+            Self::EslintBarrelFiles(rule_name) => format!("barrel-files/{rule_name}"),
+            Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
         }
     }
 
@@ -169,11 +197,13 @@ impl RuleSource {
             Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),
             Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
+            Self::EslintSolid(rule_name) => format!("https://github.com/solidjs-community/eslint-plugin-solid/blob/main/docs/{rule_name}.md"),
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
             Self::EslintStylistic(rule_name) => format!("https://eslint.style/rules/default/{rule_name}"),
             Self::EslintUnicorn(rule_name) => format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintMysticatea(rule_name) => format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}.md"),
-            Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md")
+            Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
+            Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
         }
     }
 
@@ -186,33 +216,17 @@ impl RuleSource {
         matches!(self, Self::Eslint(_))
     }
 
-    /// TypeScript plugin
-    pub const fn is_eslint_typescript(&self) -> bool {
-        matches!(self, Self::EslintTypeScript(_))
-    }
-
     /// All ESLint plugins, exception for the TypeScript one
     pub const fn is_eslint_plugin(&self) -> bool {
-        matches!(
-            self,
-            Self::EslintImport(_)
-                | Self::EslintImportAccess(_)
-                | Self::EslintJest(_)
-                | Self::EslintStylistic(_)
-                | Self::EslintJsxA11y(_)
-                | Self::EslintReact(_)
-                | Self::EslintReactHooks(_)
-                | Self::EslintSonarJs(_)
-                | Self::EslintUnicorn(_)
-        )
+        !matches!(self, Self::Clippy(_) | Self::Eslint(_))
     }
 
-    pub const fn is_clippy(&self) -> bool {
-        matches!(self, Self::Clippy(_))
+    pub const fn is_stylelint(&self) -> bool {
+        matches!(self, Self::Stylelint(_))
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub enum RuleSourceKind {
     /// The rule implements the same logic of the source
     #[default]
@@ -236,7 +250,7 @@ impl RuleMetadata {
             docs,
             recommended: false,
             fix_kind: None,
-            source: None,
+            sources: &[],
             source_kind: None,
         }
     }
@@ -256,8 +270,8 @@ impl RuleMetadata {
         self
     }
 
-    pub const fn source(mut self, source: RuleSource) -> Self {
-        self.source = Some(source);
+    pub const fn sources(mut self, sources: &'static [RuleSource]) -> Self {
+        self.sources = sources;
         //if self.source_kind.is_none() {
         //    self.source_kind = Some(RuleSourceKind::SameLogic);
         //}

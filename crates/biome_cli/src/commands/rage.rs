@@ -1,4 +1,4 @@
-use biome_configuration::ConfigurationBasePath;
+use biome_configuration::ConfigurationPathHint;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{fmt, markup, ConsoleExt, HorizontalLine, Markup};
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
@@ -184,7 +184,7 @@ impl Display for RageConfiguration<'_, '_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         Section("Biome Configuration").fmt(fmt)?;
 
-        match load_configuration(self.fs, ConfigurationBasePath::default()) {
+        match load_configuration(self.fs, ConfigurationPathHint::default()) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.directory_path.is_none() {
                     KeyValuePair("Status", markup!(<Dim>"unset"</Dim>)).fmt(fmt)?;

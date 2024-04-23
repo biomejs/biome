@@ -1,0 +1,3 @@
+{
+  "extends": ["./extends_jsonc_s.jsonc"]
+}

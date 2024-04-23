@@ -56,6 +56,8 @@ impl ServiceLanguage for JsonLanguage {
     type OrganizeImportsSettings = ();
     type FormatOptions = JsonFormatOptions;
     type ParserSettings = JsonParserSettings;
+    type EnvironmentSettings = ();
+
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
         &language.json
     }
@@ -151,9 +153,9 @@ fn parse(
         biome_path,
         JsonParserOptions {
             allow_comments: parser.allow_comments
-                || optional_json_file_source.map_or(false, |x| x.get_allow_comments()),
+                || optional_json_file_source.map_or(false, |x| x.allow_comments()),
             allow_trailing_commas: parser.allow_trailing_commas
-                || optional_json_file_source.map_or(false, |x| x.get_allow_trailing_commas()),
+                || optional_json_file_source.map_or(false, |x| x.allow_trailing_commas()),
         },
     );
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
@@ -397,6 +399,7 @@ fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> An
         rules: to_analyzer_rules(settings.as_ref(), file_path.as_path()),
         globals: vec![],
         preferred_quote: PreferredQuote::Double,
+        jsx_runtime: Default::default(),
     };
     AnalyzerOptions {
         configuration,

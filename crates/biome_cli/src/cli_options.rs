@@ -1,8 +1,9 @@
 use crate::logging::LoggingKind;
 use crate::LoggingLevel;
-use biome_configuration::ConfigurationBasePath;
+use biome_configuration::ConfigurationPathHint;
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
+use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use std::str::FromStr;
 
@@ -21,7 +22,8 @@ pub struct CliOptions {
     #[bpaf(long("verbose"), switch, fallback(false))]
     pub verbose: bool,
 
-    /// Set the directory of the biome.json or biome.jsonc configuration file and disable default configuration file resolution.
+    /// Set the file path to the configuration file, or the directory path to find `biome.json` or `biome.jsonc`.
+    /// If used, it disables the default configuration file resolution.
     #[bpaf(long("config-path"), argument("PATH"), optional)]
     pub config_path: Option<String>,
 
@@ -46,9 +48,13 @@ pub struct CliOptions {
     #[bpaf(long("error-on-warnings"), switch)]
     pub error_on_warnings: bool,
 
-    /// Reports information using the JSON format
-    #[bpaf(long("json"), switch, hide_usage, hide)]
-    pub json: bool,
+    /// Allows to change how diagnostics and summary are reported.
+    #[bpaf(
+        long("reporter"),
+        argument("json|json-pretty"),
+        fallback(CliReporter::default())
+    )]
+    pub reporter: CliReporter,
 
     #[bpaf(
         long("log-level"),
@@ -81,11 +87,11 @@ pub struct CliOptions {
 }
 
 impl CliOptions {
-    /// Computes the [ConfigurationBasePath] based on the options passed by the user
-    pub(crate) fn as_configuration_base_path(&self) -> ConfigurationBasePath {
+    /// Computes the [ConfigurationPathHint] based on the options passed by the user
+    pub(crate) fn as_configuration_path_hint(&self) -> ConfigurationPathHint {
         match self.config_path.as_ref() {
-            None => ConfigurationBasePath::default(),
-            Some(path) => ConfigurationBasePath::FromUser(PathBuf::from(path)),
+            None => ConfigurationPathHint::default(),
+            Some(path) => ConfigurationPathHint::FromUser(PathBuf::from(path)),
         }
     }
 }
@@ -106,6 +112,41 @@ impl FromStr for ColorsArg {
             _ => Err(format!(
                 "value {s:?} is not valid for the --colors argument"
             )),
+        }
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+pub enum CliReporter {
+    /// The default reporter
+    #[default]
+    Default,
+    /// Reports information using the JSON format
+    Json,
+    /// Reports information using the JSON format, formatted.
+    JsonPretty,
+}
+
+impl FromStr for CliReporter {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "json" => Ok(Self::Json),
+            "json-pretty" => Ok(Self::JsonPretty),
+            _ => Err(format!(
+                "value {s:?} is not valid for the --reporter argument"
+            )),
+        }
+    }
+}
+
+impl Display for CliReporter {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CliReporter::Default => f.write_str("default"),
+            CliReporter::Json => f.write_str("json"),
+            CliReporter::JsonPretty => f.write_str("json-pretty"),
         }
     }
 }

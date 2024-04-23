@@ -360,7 +360,7 @@ fn lint_warning() {
 
     // The console buffer is expected to contain the following message:
     // 0: "Formatter would have printed the following content"
-    // 1: "Compared 1 files"
+    // 1: "Checked 1 files"
     assert_eq!(
         console.out_buffer.len(),
         2,
@@ -3512,6 +3512,74 @@ fn should_format_files_in_folders_ignored_by_linter() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_format_files_in_folders_ignored_by_linter",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn print_json() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("format.js");
+    fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                "--reporter=json",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "print_json",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn print_json_pretty() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("format.js");
+    fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                "--reporter=json-pretty",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "print_json_pretty",
         fs,
         console,
         result,

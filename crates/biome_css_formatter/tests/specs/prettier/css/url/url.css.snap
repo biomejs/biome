@@ -65,13 +65,13 @@ a {
 -    no-repeat url(foo.ttf?query=foo,bar,),
 -    no-repeat url(foo.woff2?foo=rgb\(255,255,0\))
 -    no-repeat url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
-+  background: no-repeat url(https://example.com/\)\).jpg) , no-repeat
-+    url(https://example.com/\(\(.jpg) , no-repeat
-+    url(https://example.com/\ \ .jpg) , no-repeat
-+    url(https://example.com/\)\).jpg   ) , no-repeat
-+    url(https://example.com/\(\(.jpg   ) , no-repeat
-+    url(https://example.com/\ \ .jpg   ) , no-repeat url(foo.ttf?query=foo,bar,)
-+    , no-repeat url(foo.woff2?foo=rgb\(255,255,0\)) no-repeat
++  background: no-repeat url(https://example.com/\)\).jpg), no-repeat
++    url(https://example.com/\(\(.jpg), no-repeat
++    url(https://example.com/\ \ .jpg), no-repeat
++    url(https://example.com/\)\).jpg   ), no-repeat
++    url(https://example.com/\(\(.jpg   ), no-repeat
++    url(https://example.com/\ \ .jpg   ), no-repeat url(foo.ttf?query=foo,bar,),
++    no-repeat url(foo.woff2?foo=rgb\(255,255,0\)) no-repeat
 +    url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
 +  ;
  }
@@ -99,13 +99,13 @@ a {
   content: url(https://example.com/\(\(.jpg   );
   content: url(https://example.com/\ \ .jpg   );
 
-  background: no-repeat url(https://example.com/\)\).jpg) , no-repeat
-    url(https://example.com/\(\(.jpg) , no-repeat
-    url(https://example.com/\ \ .jpg) , no-repeat
-    url(https://example.com/\)\).jpg   ) , no-repeat
-    url(https://example.com/\(\(.jpg   ) , no-repeat
-    url(https://example.com/\ \ .jpg   ) , no-repeat url(foo.ttf?query=foo,bar,)
-    , no-repeat url(foo.woff2?foo=rgb\(255,255,0\)) no-repeat
+  background: no-repeat url(https://example.com/\)\).jpg), no-repeat
+    url(https://example.com/\(\(.jpg), no-repeat
+    url(https://example.com/\ \ .jpg), no-repeat
+    url(https://example.com/\)\).jpg   ), no-repeat
+    url(https://example.com/\(\(.jpg   ), no-repeat
+    url(https://example.com/\ \ .jpg   ), no-repeat url(foo.ttf?query=foo,bar,),
+    no-repeat url(foo.woff2?foo=rgb\(255,255,0\)) no-repeat
     url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
   ;
 }

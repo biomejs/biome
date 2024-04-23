@@ -1,6 +1,7 @@
-use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
-use crate::commands::{get_stdin, resolve_manifest, validate_configuration_diagnostics};
+use crate::commands::{
+    get_files_to_process, get_stdin, resolve_manifest, validate_configuration_diagnostics,
+};
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
@@ -26,6 +27,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
     pub(crate) linter_enabled: Option<bool>,
     pub(crate) organize_imports_enabled: Option<bool>,
+    pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
 }
@@ -46,6 +48,7 @@ pub(crate) fn check(
         organize_imports_enabled,
         formatter_enabled,
         since,
+        staged,
         changed,
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
@@ -64,7 +67,7 @@ pub(crate) fn check(
     };
 
     let loaded_configuration =
-        load_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
+        load_configuration(&session.app.fs, cli_options.as_configuration_path_hint())?;
     validate_configuration_diagnostics(
         &loaded_configuration,
         session.app.console,
@@ -120,13 +123,12 @@ pub(crate) fn check(
 
     let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "check")?;
 
-    if since.is_some() && !changed {
-        return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+    if let Some(_paths) =
+        get_files_to_process(since, changed, staged, &session.app.fs, &fs_configuration)?
+    {
+        paths = _paths;
     }
 
-    if changed {
-        paths = get_changed_files(&session.app.fs, &fs_configuration, since)?;
-    }
     session
         .app
         .workspace
@@ -141,7 +143,8 @@ pub(crate) fn check(
         Execution::new(TraversalMode::Check {
             fix_file_mode,
             stdin,
-        }),
+        })
+        .set_report(&cli_options),
         session,
         &cli_options,
         paths,

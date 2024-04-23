@@ -1,6 +1,6 @@
 /// Sorted array of TypeScript Node globals
 ///
-/// Source: https://github.com/DefinitelyTyped/DefinitelyTyped/blob/8279710799f3c39d5cd129cac5705b809b66022a/types/node/globals.d.ts#L17-L411
+/// Source: <https://github.com/DefinitelyTyped/DefinitelyTyped/blob/8279710799f3c39d5cd129cac5705b809b66022a/types/node/globals.d.ts#L17-L411>
 pub const NODE: &[&str; 42] = &[
     "AbortController",
     "AbortSignal",

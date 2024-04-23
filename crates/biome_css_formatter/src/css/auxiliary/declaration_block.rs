@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use crate::utils::block_like::CssBlockLike;
+use crate::utils::block_like::FormatCssBlockLike;
+use biome_css_syntax::stmt_ext::CssBlockLike;
 use biome_css_syntax::CssDeclarationBlock;
 use biome_formatter::write;
 
@@ -7,7 +8,10 @@ use biome_formatter::write;
 pub(crate) struct FormatCssDeclarationBlock;
 impl FormatNodeRule<CssDeclarationBlock> for FormatCssDeclarationBlock {
     fn fmt_fields(&self, node: &CssDeclarationBlock, f: &mut CssFormatter) -> FormatResult<()> {
-        write!(f, [CssBlockLike::from(node.clone())])
+        write!(
+            f,
+            [FormatCssBlockLike::new(&CssBlockLike::from(node.clone()))]
+        )
     }
 
     fn fmt_dangling_comments(

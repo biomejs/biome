@@ -163,6 +163,10 @@ export interface PartialJavascriptConfiguration {
 If defined here, they should not emit diagnostics. 
 	 */
 	globals?: StringSet;
+	/**
+	 * Indicates the type of runtime or transformation used for interpreting JSX.
+	 */
+	jsx_runtime?: JsxRuntime;
 	organize_imports?: PartialJavascriptOrganizeImports;
 	/**
 	 * Parsing options
@@ -352,6 +356,10 @@ export interface PartialJavascriptFormatter {
 	 */
 	trailingComma?: TrailingComma;
 }
+/**
+ * Indicates the type of runtime or transformation used for interpreting JSX.
+ */
+export type JsxRuntime = "Transparent" | "ReactClassic";
 export interface PartialJavascriptOrganizeImports {}
 /**
  * Options that changes how the JavaScript parser behaves
@@ -502,7 +510,7 @@ export interface A11y {
 	 */
 	noDistractingElements?: RuleConfiguration_for_Null;
 	/**
-	 * The scope prop should be used only on <th> elements.
+	 * The scope prop should be used only on \<th> elements.
 	 */
 	noHeaderScope?: RuleConfiguration_for_Null;
 	/**
@@ -623,6 +631,10 @@ export interface Complexity {
 	 */
 	noExcessiveCognitiveComplexity?: RuleConfiguration_for_ComplexityOptions;
 	/**
+	 * This rule enforces a maximum depth to nested describe() in test files.
+	 */
+	noExcessiveNestedTestSuites?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary boolean casts
 	 */
 	noExtraBooleanCast?: RuleConfiguration_for_Null;
@@ -674,6 +686,10 @@ export interface Complexity {
 	 * Disallow useless case in switch statements.
 	 */
 	noUselessSwitchCase?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow ternary operators when simpler alternatives exist.
+	 */
+	noUselessTernary?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow useless this aliasing.
 	 */
@@ -872,6 +888,10 @@ export interface Correctness {
 	 */
 	useIsNan?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow missing key props in iterators/collection literals.
+	 */
+	useJsxKeyInIterable?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce "for" loop update clause moving the counter in the right direction.
 	 */
 	useValidForDirection?: RuleConfiguration_for_Null;
@@ -889,17 +909,21 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Disallow the use of barrel file.
-	 */
-	noBarrelFile?: RuleConfiguration_for_Null;
-	/**
-	 * [WIP] This rule hasn't been implemented yet.
+	 * WIP: This rule hasn't been implemented yet.
 	 */
 	noColorInvalidHex?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of console.
 	 */
 	noConsole?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.
+	 */
+	noConstantMathMinMaxClamp?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow CSS empty blocks.
+	 */
+	noCssEmptyBlock?: RuleConfiguration_for_NoCssEmptyBlockOptions;
 	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
@@ -909,65 +933,49 @@ export interface Nursery {
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate names within font families.
+	 */
+	noDuplicateFontNames?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
 	/**
-	 * A describe block should not contain duplicate hooks.
+	 * Disallow duplicate selectors within keyframe blocks.
 	 */
-	noDuplicateTestHooks?: RuleConfiguration_for_Null;
+	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
 	noEvolvingAny?: RuleConfiguration_for_Null;
 	/**
-	 * This rule enforces a maximum depth to nested describe() in test files.
+	 * Disallow to use unnecessary callback on flatMap.
 	 */
-	noExcessiveNestedTestSuites?: RuleConfiguration_for_Null;
+	noFlatMapIdentity?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow using export or module.exports in files containing tests
+	 * Disallow invalid !important within keyframe declarations
 	 */
-	noExportsInTest?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow focused tests.
-	 */
-	noFocusedTests?: RuleConfiguration_for_Null;
+	noImportantInKeyframe?: RuleConfiguration_for_Null;
 	/**
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow the use of namespace imports.
-	 */
-	noNamespaceImport?: RuleConfiguration_for_Null;
-	/**
 	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration_for_Null;
 	/**
-	 * Avoid re-export all.
+	 * Prevents React-specific JSX properties from being used.
 	 */
-	noReExportAll?: RuleConfiguration_for_Null;
+	noReactSpecificProps?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
-	 * Disallow disabled tests.
-	 */
-	noSkippedTests?: RuleConfiguration_for_Null;
-	/**
-	 * It detects possible "wrong" semicolons inside JSX elements.
-	 */
-	noSuspiciousSemicolonInJsx?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow ternary operators when simpler alternatives exist.
-	 */
-	noUselessTernary?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -976,14 +984,6 @@ export interface Nursery {
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow missing key props in iterators/collection literals.
-	 */
-	useJsxKeyInIterable?: RuleConfiguration_for_Null;
-	/**
-	 * Promotes the usage of node:assert/strict over node:assert.
-	 */
-	useNodeAssertStrict?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -1002,9 +1002,17 @@ export interface Performance {
 	 */
 	noAccumulatingSpread?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of barrel file.
+	 */
+	noBarrelFile?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of the delete operator.
 	 */
 	noDelete?: RuleConfiguration_for_Null;
+	/**
+	 * Avoid re-export all.
+	 */
+	noReExportAll?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1068,6 +1076,10 @@ export interface Style {
 	 */
 	noNamespace?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of namespace imports.
+	 */
+	noNamespaceImport?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow negation in the condition of an if statement if it has an else clause.
 	 */
 	noNegationElse?: RuleConfiguration_for_Null;
@@ -1120,7 +1132,7 @@ export interface Style {
 	 */
 	useCollapsedElseIf?: RuleConfiguration_for_Null;
 	/**
-	 * Require consistently using either T[] or Array<T>
+	 * Require consistently using either T\[] or Array\<T>
 	 */
 	useConsistentArrayType?: RuleConfiguration_for_ConsistentArrayTypeOptions;
 	/**
@@ -1152,7 +1164,7 @@ export interface Style {
 	 */
 	useForOf?: RuleConfiguration_for_Null;
 	/**
-	 * This rule enforces the use of <>...</> over <Fragment>...</Fragment>.
+	 * This rule enforces the use of \<>...\</> over \<Fragment>...\</Fragment>.
 	 */
 	useFragmentSyntax?: RuleConfiguration_for_Null;
 	/**
@@ -1167,6 +1179,10 @@ export interface Style {
 	 * Enforce naming conventions for everything across a codebase.
 	 */
 	useNamingConvention?: RuleConfiguration_for_NamingConventionOptions;
+	/**
+	 * Promotes the usage of node:assert/strict over node:assert.
+	 */
+	useNodeAssertStrict?: RuleConfiguration_for_Null;
 	/**
 	 * Enforces using the node: protocol for Node.js builtin modules.
 	 */
@@ -1184,7 +1200,7 @@ export interface Style {
 	 */
 	useSelfClosingElements?: RuleConfiguration_for_Null;
 	/**
-	 * When expressing array types, this rule promotes the usage of T[] shorthand instead of Array<T>.
+	 * When expressing array types, this rule promotes the usage of T\[] shorthand instead of Array\<T>.
 	 */
 	useShorthandArrayType?: RuleConfiguration_for_Null;
 	/**
@@ -1301,6 +1317,10 @@ export interface Suspicious {
 	 */
 	noDuplicateParameters?: RuleConfiguration_for_Null;
 	/**
+	 * A describe block should not contain duplicate hooks.
+	 */
+	noDuplicateTestHooks?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow empty block statements and static blocks.
 	 */
 	noEmptyBlockStatements?: RuleConfiguration_for_Null;
@@ -1313,6 +1333,10 @@ export interface Suspicious {
 	 */
 	noExplicitAny?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow using export or module.exports in files containing tests
+	 */
+	noExportsInTest?: RuleConfiguration_for_Null;
+	/**
 	 * Prevents the wrong usage of the non-null assertion operator (!) in TypeScript files.
 	 */
 	noExtraNonNullAssertion?: RuleConfiguration_for_Null;
@@ -1320,6 +1344,10 @@ export interface Suspicious {
 	 * Disallow fallthrough of switch clauses.
 	 */
 	noFallthroughSwitchClause?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow focused tests.
+	 */
+	noFocusedTests?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow reassigning function declarations.
 	 */
@@ -1381,9 +1409,17 @@ export interface Suspicious {
 	 */
 	noShadowRestrictedNames?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow disabled tests.
+	 */
+	noSkippedTests?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow sparse arrays
 	 */
 	noSparseArray?: RuleConfiguration_for_Null;
+	/**
+	 * It detects possible "wrong" semicolons inside JSX elements.
+	 */
+	noSuspiciousSemicolonInJsx?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow then property.
 	 */
@@ -1487,6 +1523,9 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
+export type RuleConfiguration_for_NoCssEmptyBlockOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoCssEmptyBlockOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -1525,6 +1564,10 @@ export interface RuleWithOptions_for_HooksOptions {
 export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	level: RulePlainConfiguration;
 	options: DeprecatedHooksOptions;
+}
+export interface RuleWithOptions_for_NoCssEmptyBlockOptions {
+	level: RulePlainConfiguration;
+	options: NoCssEmptyBlockOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	level: RulePlainConfiguration;
@@ -1576,6 +1619,9 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
+export interface NoCssEmptyBlockOptions {
+	allowComments: boolean;
+}
 /**
  * Options for the rule `noRestrictedImports`.
  */
@@ -1673,7 +1719,7 @@ export type FilenameCases = FilenameCase[];
  * Supported cases for TypeScript `enum` member names.
  */
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
-export type StableHookResult = "None" | "Identity" | { Indices: number[] };
+export type StableHookResult = boolean | number[];
 /**
  * Supported cases for file names.
  */
@@ -1796,7 +1842,7 @@ export interface Diagnostic {
 	severity: Severity;
 	source?: Diagnostic;
 	tags: DiagnosticTags;
-	verbose_advices: Advices;
+	verboseAdvices: Advices;
 }
 /**
  * Implementation of [Visitor] collecting serializable [Advice] into a vector.
@@ -1838,6 +1884,7 @@ export type Category =
 	| "lint/complexity/noBannedTypes"
 	| "lint/complexity/noEmptyTypeParameters"
 	| "lint/complexity/noExcessiveCognitiveComplexity"
+	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
 	| "lint/complexity/noMultipleSpacesInRegularExpressionLiterals"
@@ -1851,6 +1898,7 @@ export type Category =
 	| "lint/complexity/noUselessLoneBlockStatements"
 	| "lint/complexity/noUselessRename"
 	| "lint/complexity/noUselessSwitchCase"
+	| "lint/complexity/noUselessTernary"
 	| "lint/complexity/noUselessThisAlias"
 	| "lint/complexity/noUselessTypeConstraint"
 	| "lint/complexity/noVoid"
@@ -1896,38 +1944,35 @@ export type Category =
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useIsNan"
+	| "lint/correctness/useJsxKeyInIterable"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
-	| "lint/nursery/noApproximativeNumericConstant"
-	| "lint/nursery/noBarrelFile"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
+	| "lint/nursery/noConstantMathMinMaxClamp"
+	| "lint/nursery/noCssEmptyBlock"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateElseIf"
+	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
-	| "lint/nursery/noDuplicateTestHooks"
+	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noEvolvingAny"
-	| "lint/nursery/noExcessiveNestedTestSuites"
-	| "lint/nursery/noExportsInTest"
-	| "lint/nursery/noFocusedTests"
+	| "lint/nursery/noFlatMapIdentity"
+	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noMisplacedAssertion"
-	| "lint/nursery/noNamespaceImport"
 	| "lint/nursery/noNodejsModules"
-	| "lint/nursery/noReExportAll"
+	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
-	| "lint/nursery/noSkippedTests"
-	| "lint/nursery/noSuspiciousSemicolonInJsx"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
-	| "lint/nursery/noUselessTernary"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useJsxKeyInIterable"
-	| "lint/nursery/useNodeAssertStrict"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
+	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
+	| "lint/performance/noReExportAll"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"
@@ -1937,6 +1982,7 @@ export type Category =
 	| "lint/style/noImplicitBoolean"
 	| "lint/style/noInferrableTypes"
 	| "lint/style/noNamespace"
+	| "lint/style/noNamespaceImport"
 	| "lint/style/noNegationElse"
 	| "lint/style/noNonNullAssertion"
 	| "lint/style/noParameterAssign"
@@ -1961,6 +2007,7 @@ export type Category =
 	| "lint/style/useImportType"
 	| "lint/style/useLiteralEnumMembers"
 	| "lint/style/useNamingConvention"
+	| "lint/style/useNodeAssertStrict"
 	| "lint/style/useNodejsImportProtocol"
 	| "lint/style/useNumberNamespace"
 	| "lint/style/useNumericLiterals"
@@ -1992,11 +2039,14 @@ export type Category =
 	| "lint/suspicious/noDuplicateJsxProps"
 	| "lint/suspicious/noDuplicateObjectKeys"
 	| "lint/suspicious/noDuplicateParameters"
+	| "lint/suspicious/noDuplicateTestHooks"
 	| "lint/suspicious/noEmptyBlockStatements"
 	| "lint/suspicious/noEmptyInterface"
 	| "lint/suspicious/noExplicitAny"
+	| "lint/suspicious/noExportsInTest"
 	| "lint/suspicious/noExtraNonNullAssertion"
 	| "lint/suspicious/noFallthroughSwitchClause"
+	| "lint/suspicious/noFocusedTests"
 	| "lint/suspicious/noFunctionAssign"
 	| "lint/suspicious/noGlobalAssign"
 	| "lint/suspicious/noGlobalIsFinite"
@@ -2012,7 +2062,9 @@ export type Category =
 	| "lint/suspicious/noRedundantUseStrict"
 	| "lint/suspicious/noSelfCompare"
 	| "lint/suspicious/noShadowRestrictedNames"
+	| "lint/suspicious/noSkippedTests"
 	| "lint/suspicious/noSparseArray"
+	| "lint/suspicious/noSuspiciousSemicolonInJsx"
 	| "lint/suspicious/noThenProperty"
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
@@ -2058,7 +2110,7 @@ export type Category =
 	| "semanticTests";
 export interface Location {
 	path?: Resource_for_String;
-	source_code?: string;
+	sourceCode?: string;
 	span?: TextRange;
 }
 export type MarkupBuf = MarkupNodeBuf[];
@@ -2073,13 +2125,13 @@ export type DiagnosticTags = DiagnosticTag[];
 See the [Visitor] trait for additional documentation on all the supported advice types. 
 	 */
 export type Advice =
-	| { Log: [LogCategory, MarkupBuf] }
-	| { List: MarkupBuf[] }
-	| { Frame: Location }
-	| { Diff: TextEdit }
-	| { Backtrace: [MarkupBuf, Backtrace] }
-	| { Command: string }
-	| { Group: [MarkupBuf, Advices] };
+	| { log: [LogCategory, MarkupBuf] }
+	| { list: MarkupBuf[] }
+	| { frame: Location }
+	| { diff: TextEdit }
+	| { backtrace: [MarkupBuf, Backtrace] }
+	| { command: string }
+	| { group: [MarkupBuf, Advices] };
 /**
  * Represents the resource a diagnostic is associated with.
  */
@@ -2101,7 +2153,7 @@ export type DiagnosticTag =
 /**
  * The category for a log advice, defines how the message should be presented to the user.
  */
-export type LogCategory = "None" | "Info" | "Warn" | "Error";
+export type LogCategory = "none" | "info" | "warn" | "error";
 export interface TextEdit {
 	dictionary: string;
 	ops: CompressedOp[];
@@ -2124,8 +2176,8 @@ export type MarkupElement =
 	| "Inverse"
 	| { Hyperlink: { href: string } };
 export type CompressedOp =
-	| { DiffOp: DiffOp }
-	| { EqualLines: { line_count: number } };
+	| { diffOp: DiffOp }
+	| { equalLines: { line_count: number } };
 /**
  * Serializable representation of a backtrace frame.
  */
@@ -2134,9 +2186,9 @@ export interface BacktraceFrame {
 	symbols: BacktraceSymbol[];
 }
 export type DiffOp =
-	| { Equal: { range: TextRange } }
-	| { Insert: { range: TextRange } }
-	| { Delete: { range: TextRange } };
+	| { equal: { range: TextRange } }
+	| { insert: { range: TextRange } }
+	| { delete: { range: TextRange } };
 /**
  * Serializable representation of a backtrace frame symbol.
  */

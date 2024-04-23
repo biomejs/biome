@@ -41,7 +41,7 @@ declare_rule! {
     pub NoEmptyCharacterClassInRegex {
         version: "1.3.0",
         name: "noEmptyCharacterClassInRegex",
-        source: RuleSource::Eslint("no-empty-character-class"),
+        sources: &[RuleSource::Eslint("no-empty-character-class")],
         recommended: true,
     }
 }

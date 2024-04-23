@@ -30,11 +30,7 @@ impl AnyJsIdentifierUsage {
                             .skip(1)
                             .find(|x| x.kind() != JsSyntaxKind::TS_QUALIFIED_NAME)
                             .kind(),
-                        Some(
-                            JsSyntaxKind::TS_REFERENCE_TYPE
-                                | JsSyntaxKind::TS_NAME_WITH_TYPE_ARGUMENTS
-                                | JsSyntaxKind::TS_TYPEOF_TYPE
-                        )
+                        Some(JsSyntaxKind::TS_REFERENCE_TYPE | JsSyntaxKind::TS_TYPEOF_TYPE)
                     )
             }
             AnyJsIdentifierUsage::JsxReferenceIdentifier(_)

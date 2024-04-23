@@ -70,6 +70,13 @@ import Button from "./components/Button.vue";
 </script>
 <template></template>"#;
 
+const VUE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED: &str =
+    "<script>\r\n  const a    = \"b\";\r\n</script>\r\n<template></template>";
+
+const VUE_GENERIC_COMPONENT_FILE_UNFORMATTED: &str = r#"<script generic="T extends Record<string, any>" lang="ts" setup>
+const a     =     "a";
+</script>"#;
+
 #[test]
 fn format_vue_implicit_js_files() {
     let mut fs = MemoryFileSystem::default();
@@ -327,6 +334,70 @@ fn format_empty_vue_ts_files_write() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_empty_vue_ts_files_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_vue_carriage_return_line_feed_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        VUE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(
+        &fs,
+        vue_file_path,
+        VUE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED,
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_vue_carriage_return_line_feed_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_vue_generic_component_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        VUE_GENERIC_COMPONENT_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, VUE_GENERIC_COMPONENT_FILE_UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_vue_generic_component_files",
         fs,
         console,
         result,

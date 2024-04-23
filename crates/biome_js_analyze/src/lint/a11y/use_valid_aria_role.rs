@@ -67,7 +67,7 @@ declare_rule! {
     pub UseValidAriaRole {
         version: "1.4.0",
         name: "useValidAriaRole",
-        source: RuleSource::EslintJsxA11y("aria-role"),
+        sources: &[RuleSource::EslintJsxA11y("aria-role")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }
@@ -77,8 +77,8 @@ declare_rule! {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ValidAriaRoleOptions {
-    allow_invalid_roles: Vec<String>,
-    ignore_non_dom: bool,
+    pub allow_invalid_roles: Vec<String>,
+    pub ignore_non_dom: bool,
 }
 
 impl Rule for UseValidAriaRole {

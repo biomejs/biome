@@ -8,7 +8,8 @@ use std::io;
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
     category = "format",
-    message = "File content differs from formatting output"
+    message = "File content differs from formatting output",
+    severity = Error
 )]
 pub(crate) struct CIFormatDiffDiagnostic {
     #[location(resource)]
@@ -31,9 +32,9 @@ pub(crate) struct CIOrganizeImportsDiffDiagnostic {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-category = "format",
-severity = Information,
-message = "Formatter would have printed the following content:"
+    category = "format",
+    severity = Error,
+    message = "Formatter would have printed the following content:"
 )]
 pub(crate) struct FormatDiffDiagnostic {
     #[location(resource)]
@@ -45,7 +46,7 @@ pub(crate) struct FormatDiffDiagnostic {
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
 	category = "organizeImports",
-	severity = Information,
+	severity = Error,
 	message = "Import statements could be sorted:"
 )]
 pub(crate) struct OrganizeImportsDiffDiagnostic {

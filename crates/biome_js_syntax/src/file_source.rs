@@ -1,5 +1,5 @@
 use biome_rowan::FileSourceError;
-use std::path::Path;
+use std::{ffi::OsStr, path::Path};
 
 /// Enum of the different ECMAScript standard versions.
 /// The versions are ordered in increasing order; The newest version comes last.
@@ -158,12 +158,12 @@ impl JsFileSource {
     }
 
     /// language: JS, variant: JSX, module_kind: Module, version: Latest
-    pub fn jsx() -> JsFileSource {
+    pub fn jsx() -> Self {
         Self::js_module().with_variant(LanguageVariant::Jsx)
     }
 
     /// language: TS, variant: Standard, module_kind: Module, version: Latest
-    pub fn ts() -> JsFileSource {
+    pub fn ts() -> Self {
         Self {
             language: Language::TypeScript {
                 definition_file: false,
@@ -173,18 +173,18 @@ impl JsFileSource {
     }
 
     /// language: TS, variant: StandardRestricted, module_kind: Module, version: Latest
-    pub fn ts_restricted() -> JsFileSource {
+    pub fn ts_restricted() -> Self {
         Self::ts().with_variant(LanguageVariant::StandardRestricted)
     }
 
     /// language: TS, variant: JSX, module_kind: Module, version: Latest
-    pub fn tsx() -> JsFileSource {
+    pub fn tsx() -> Self {
         Self::ts().with_variant(LanguageVariant::Jsx)
     }
 
     /// TypeScript definition file
     /// language: TS, ambient, variant: Standard, module_kind: Module, version: Latest
-    pub fn d_ts() -> JsFileSource {
+    pub fn d_ts() -> Self {
         Self {
             language: Language::TypeScript {
                 definition_file: true,
@@ -280,6 +280,68 @@ impl JsFileSource {
             }
         }
     }
+
+    /// Try to return the JS file source corresponding to this file name from well-known files
+    pub fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
+        // TODO: to be implemented
+        Err(FileSourceError::UnknownFileName(file_name.into()))
+    }
+
+    /// Try to return the JS file source corresponding to this file extension
+    pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
+        match extension {
+            "js" | "mjs" | "jsx" => Ok(Self::jsx()),
+            "cjs" => Ok(Self::js_script()),
+            "ts" => Ok(Self::ts()),
+            "mts" | "cts" => Ok(Self::ts_restricted()),
+            "tsx" => Ok(Self::tsx()),
+            // Note: the extension passed to this function can contain dots,
+            // this should be handled properly by the extension provider
+            "d.ts" | "d.mts" | "d.cts" => Ok(Self::d_ts()),
+            // TODO: Remove once we have full support of astro files
+            "astro" => Ok(Self::astro()),
+            // TODO: Remove once we have full support of vue files
+            "vue" => Ok(Self::vue()),
+            // TODO: Remove once we have full support of svelte files
+            "svelte" => Ok(Self::svelte()),
+            _ => Err(FileSourceError::UnknownExtension(
+                Default::default(),
+                extension.into(),
+            )),
+        }
+    }
+
+    /// Try to return the JS file source corresponding to this language ID
+    ///
+    /// See the [LSP spec] and [VS Code spec] for a list of language identifiers
+    ///
+    /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
+    /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
+    pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
+        match language_id {
+            // We use Self::jsx() for the javascript language id
+            // because `.js` files will be associated with the javascript language id
+            // and we already use Self::jsx() for `.js` files in try_from_extension().
+            // This will make LSP and CLI work consistently.
+            //
+            // This also fixes the issue where some plugins like babel plugin will
+            // associate `.jsx` files with the javascript language id.
+            //
+            // TODO: This should be considered as an ad hoc fix.
+            // We might want to reconsider the design and variants of the file source.
+            "javascript" => Ok(Self::jsx()),
+            "typescript" => Ok(Self::ts()),
+            "javascriptreact" => Ok(Self::jsx()),
+            "typescriptreact" => Ok(Self::tsx()),
+            // TODO: Remove once we have full support of astro files
+            "astro" => Ok(Self::astro()),
+            // TODO: Remove once we have full support of vue files
+            "vue" => Ok(Self::vue()),
+            // TODO: Remove once we have full support of svelte files
+            "svelte" => Ok(Self::svelte()),
+            _ => Err(FileSourceError::UnknownLanguageId(language_id.into())),
+        }
+    }
 }
 
 impl TryFrom<&Path> for JsFileSource {
@@ -288,48 +350,44 @@ impl TryFrom<&Path> for JsFileSource {
     fn try_from(path: &Path) -> Result<Self, Self::Error> {
         let file_name = path
             .file_name()
-            .ok_or_else(|| FileSourceError::MissingFileName(path.into()))?
-            .to_str()
+            .and_then(OsStr::to_str)
             .ok_or_else(|| FileSourceError::MissingFileName(path.into()))?;
 
-        let extension = path
-            .extension()
-            .ok_or_else(|| FileSourceError::MissingFileExtension(path.into()))?
-            .to_str()
-            .ok_or_else(|| FileSourceError::MissingFileExtension(path.into()))?;
-
-        compute_source_type_from_path_or_extension(file_name, extension)
-    }
-}
-
-/// It deduce the [JsFileSource] from the file name and its extension
-fn compute_source_type_from_path_or_extension(
-    file_name: &str,
-    extension: &str,
-) -> Result<JsFileSource, FileSourceError> {
-    let source_type = if file_name.ends_with(".d.ts")
-        || file_name.ends_with(".d.mts")
-        || file_name.ends_with(".d.cts")
-    {
-        JsFileSource::d_ts()
-    } else {
-        match extension {
-            "js" | "mjs" | "jsx" => JsFileSource::jsx(),
-            "cjs" => JsFileSource::js_script(),
-            "ts" => JsFileSource::ts(),
-            "mts" | "cts" => JsFileSource::ts_restricted(),
-            "tsx" => JsFileSource::tsx(),
-            // TODO: Remove once we have full support of astro files
-            "astro" => JsFileSource::astro(),
-            "vue" => JsFileSource::vue(),
-            "svelte" => JsFileSource::svelte(),
-            _ => {
-                return Err(FileSourceError::UnknownExtension(
-                    file_name.into(),
-                    extension.into(),
-                ));
-            }
+        if let Ok(file_source) = Self::try_from_well_known(file_name) {
+            return Ok(file_source);
         }
-    };
-    Ok(source_type)
+
+        // We assume the file extensions are case-insensitive
+        // and we use the lowercase form of them for pattern matching
+        // TODO: This should be extracted to a dedicated function, maybe in biome_fs
+        // because the same logic is also used in DocumentFileSource::from_path_optional
+        // and we may support more and more extensions with more than one dots.
+        let extension = &match path {
+            _ if path
+                .to_str()
+                .is_some_and(|p| p.to_lowercase().ends_with(".d.ts")) =>
+            {
+                Some("d.ts".to_owned())
+            }
+            _ if path
+                .to_str()
+                .is_some_and(|p| p.to_lowercase().ends_with(".d.mts")) =>
+            {
+                Some("d.mts".to_owned())
+            }
+            _ if path
+                .to_str()
+                .is_some_and(|p| p.to_lowercase().ends_with(".d.cts")) =>
+            {
+                Some("d.cts".to_owned())
+            }
+            path => path
+                .extension()
+                .and_then(OsStr::to_str)
+                .map(|s| s.to_lowercase()),
+        }
+        .ok_or_else(|| FileSourceError::MissingFileExtension(path.into()))?;
+
+        Self::try_from_extension(extension)
+    }
 }

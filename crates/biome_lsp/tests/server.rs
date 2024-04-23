@@ -1942,6 +1942,70 @@ async fn format_with_syntax_errors() -> Result<()> {
 }
 
 #[tokio::test]
+async fn format_jsx_in_javascript_file() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create(None).into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: url!("document"),
+                    language_id: String::from("javascript"),
+                    version: 0,
+                    text: String::from("const f  =  () => <div/>;"),
+                },
+            },
+        )
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: url!("document"),
+                },
+                options: FormattingOptions::default(),
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    let edits = res.context("formatting did not return an edit list")?;
+    assert!(!edits.is_empty(), "formatting returned an empty edit list");
+
+    server
+        .notify(
+            "textDocument/didClose",
+            DidCloseTextDocumentParams {
+                text_document: TextDocumentIdentifier {
+                    uri: url!("document"),
+                },
+            },
+        )
+        .await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn does_not_format_ignored_files() -> Result<()> {
     let factory = ServerFactory::default();
     let mut fs = MemoryFileSystem::default();

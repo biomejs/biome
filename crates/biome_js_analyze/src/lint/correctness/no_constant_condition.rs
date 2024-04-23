@@ -82,7 +82,7 @@ declare_rule! {
     pub NoConstantCondition    {
         version: "1.0.0",
         name: "noConstantCondition",
-        source: RuleSource::Eslint("no-constant-condition"),
+        sources: &[RuleSource::Eslint("no-constant-condition")],
         recommended: true,
     }
 }

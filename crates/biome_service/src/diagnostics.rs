@@ -7,6 +7,7 @@ use biome_diagnostics::{
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
+use biome_grit_patterns::ParseError;
 use biome_js_analyze::utils::rename::RenameError;
 use biome_js_analyze::RuleError;
 use serde::{Deserialize, Serialize};
@@ -56,6 +57,8 @@ pub enum WorkspaceError {
     Vcs(VcsDiagnostic),
     /// Diagnostic raised when a file is protected
     ProtectedFile(ProtectedFile),
+    /// Error when searching for a pattern
+    SearchError(SearchError),
 }
 
 impl WorkspaceError {
@@ -88,12 +91,6 @@ impl WorkspaceError {
             file_source: language,
             path,
             extension,
-        })
-    }
-
-    pub fn report_not_serializable(reason: impl Into<String>) -> Self {
-        Self::ReportNotSerializable(ReportNotSerializable {
-            reason: reason.into(),
         })
     }
 
@@ -203,8 +200,8 @@ pub struct FormatWithErrorsDisabled;
 #[diagnostic(
     category = "internalError/fs",
     message(
-        message("Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exists: "{self.path}),
-        description = "Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exists: {path}"
+        message("Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exist: "{self.path}),
+        description = "Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exist: {path}"
     )
 )]
 pub struct CantReadDirectory {
@@ -216,8 +213,8 @@ pub struct CantReadDirectory {
 #[diagnostic(
     category = "internalError/fs",
     message(
-        message("Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: "{self.path}),
-        description = "Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: {path}"
+        message("Biome couldn't read the following file, maybe for permissions reasons or it doesn't exist: "{self.path}),
+        description = "Biome couldn't read the following file, maybe for permissions reasons or it doesn't exist: {path}"
     )
 )]
 pub struct CantReadFile {
@@ -316,6 +313,24 @@ impl Diagnostic for SourceFileNotSupported {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+pub enum SearchError {
+    /// An invalid patterns was given
+    ParsePatternError(ParseError),
+    /// No pattern with the given ID
+    InvalidPattern(InvalidPattern),
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "search",
+    message(
+        message("Invalid pattern -- this is a bug in Biome."),
+        description = "If this problem persists, please report here: https://github.com/biomejs/biome/issues/"
+    )
+)]
+pub struct InvalidPattern;
+
 pub fn extension_error(path: &BiomePath) -> WorkspaceError {
     let file_source = DocumentFileSource::from_path(path);
     WorkspaceError::source_file_not_supported(
@@ -397,6 +412,12 @@ pub enum VcsDiagnostic {
 impl From<VcsDiagnostic> for WorkspaceError {
     fn from(value: VcsDiagnostic) -> Self {
         Self::Vcs(value)
+    }
+}
+
+impl From<ParseError> for WorkspaceError {
+    fn from(value: ParseError) -> Self {
+        Self::SearchError(SearchError::ParsePatternError(value))
     }
 }
 

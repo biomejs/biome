@@ -37,7 +37,7 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
     let loaded_configuration =
-        load_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
+        load_configuration(&session.app.fs, cli_options.as_configuration_path_hint())?;
 
     validate_configuration_diagnostics(
         &loaded_configuration,
@@ -116,5 +116,10 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
             gitignore_matches,
         })?;
 
-    execute_mode(Execution::new_ci(), session, &cli_options, paths)
+    execute_mode(
+        Execution::new_ci().set_report(&cli_options),
+        session,
+        &cli_options,
+        paths,
+    )
 }

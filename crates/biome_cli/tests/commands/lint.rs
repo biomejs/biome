@@ -1455,13 +1455,6 @@ fn max_diagnostics_default() {
 
     console.out_buffer = filtered_messages;
 
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "max_diagnostics_default",
-        fs,
-        console,
-        result,
-    ));
     assert_eq!(diagnostic_count, 20);
 }
 
@@ -1510,14 +1503,6 @@ fn max_diagnostics() {
     }
 
     console.out_buffer = filtered_messages;
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "max_diagnostics",
-        fs,
-        console,
-        result,
-    ));
 
     assert_eq!(diagnostic_count, 10);
 }
@@ -1737,7 +1722,7 @@ fn nursery_unstable() {
 }
 
 #[test]
-fn all_rules() {
+fn top_level_all_true() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -1763,7 +1748,7 @@ fn all_rules() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "all_rules",
+        "top_level_all_true",
         fs,
         console,
         result,
@@ -1771,7 +1756,7 @@ fn all_rules() {
 }
 
 #[test]
-fn top_level_all_down_level_not_all() {
+fn top_level_all_true_group_level_all_false() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -1811,7 +1796,7 @@ fn top_level_all_down_level_not_all() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "top_level_all_down_level_not_all",
+        "top_level_all_true_group_level_all_false",
         fs,
         console,
         result,
@@ -1819,7 +1804,7 @@ fn top_level_all_down_level_not_all() {
 }
 
 #[test]
-fn top_level_not_all_down_level_all() {
+fn top_level_all_false_group_level_all_true() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -1859,7 +1844,7 @@ fn top_level_not_all_down_level_all() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "top_level_not_all_down_level_all",
+        "top_level_all_false_group_level_all_true",
         fs,
         console,
         result,
@@ -1867,7 +1852,7 @@ fn top_level_not_all_down_level_all() {
 }
 
 #[test]
-fn top_level_all_down_level_empty() {
+fn top_level_all_true_group_level_empty() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -1911,7 +1896,7 @@ fn top_level_all_down_level_empty() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "top_level_all_down_level_empty",
+        "top_level_all_true_group_level_empty",
         fs,
         console,
         result,
@@ -1919,7 +1904,50 @@ fn top_level_all_down_level_empty() {
 }
 
 #[test]
-fn group_level_disable_recommended_enable_specific() {
+fn top_level_recommended_true_group_level_all_false() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // no suspicious rule should be enabled
+    let biome_json = r#"{
+        "linter": {
+            "rules": {
+                "recommended": true,
+                "suspicious": {
+                    "all": false
+                }
+            }
+        }
+    }"#;
+
+    // suspicious/noAssignInExpressions
+    let code = r#"let a = 0; let b = 0; a = (b = 1) + 1;"#;
+
+    let file_path = Path::new("fix.js");
+    fs.insert(file_path.into(), code.as_bytes());
+
+    let config_path = Path::new("biome.json");
+    fs.insert(config_path.into(), biome_json.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "top_level_recommended_true_group_level_all_false",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn group_level_recommended_false_enable_specific() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -1957,7 +1985,7 @@ fn group_level_disable_recommended_enable_specific() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "group_level_disable_recommended_enable_specific",
+        "group_level_recommended_false_enable_specific",
         fs,
         console,
         result,
@@ -2972,6 +3000,171 @@ fn should_not_error_for_no_changed_files_with_no_errors_on_unmatched() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_not_error_for_no_changed_files_with_no_errors_on_unmatched",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_error_if_changed_flag_and_staged_flag_are_active_at_the_same_time() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), "--staged", "--changed"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_error_if_changed_flag_and_staged_flag_are_active_at_the_same_time",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_only_processes_staged_files_when_staged_flag_is_set() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.set_on_get_staged_files(Box::new(|| vec![String::from("staged.js")]));
+    fs.set_on_get_changed_files(Box::new(|| vec![String::from("changed.js")]));
+
+    // Staged (prepared to be committed)
+    fs.insert(
+        Path::new("staged.js").into(),
+        r#"console.log('staged');"#.as_bytes(),
+    );
+
+    // Changed (already recorded in git history)
+    fs.insert(
+        Path::new("changed.js").into(),
+        r#"console.log('changed');"#.as_bytes(),
+    );
+
+    // Unstaged (not yet recorded in git history, and not prepared to be committed)
+    fs.insert(
+        Path::new("file2.js").into(),
+        r#"console.log('file2');"#.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), "--staged"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_only_processes_staged_files_when_staged_flag_is_set",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_only_process_staged_file_if_its_included() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.set_on_get_staged_files(Box::new(|| {
+        vec![String::from("file.js"), String::from("file2.js")]
+    }));
+
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"
+{
+    "files": {
+        "include": ["file.js"]
+    },
+    "vcs": {
+        "defaultBranch": "main"
+    }
+}
+        "#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Path::new("file.js").into(),
+        r#"console.log('file');"#.as_bytes(),
+    );
+    fs.insert(
+        Path::new("file2.js").into(),
+        r#"console.log('file2');"#.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), "--staged"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_only_process_staged_file_if_its_included",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_not_process_ignored_file_even_if_its_staged() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.set_on_get_staged_files(Box::new(|| vec![String::from("file.js")]));
+
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"
+{
+    "files": {
+        "ignore": ["file.js"]
+    },
+    "vcs": {
+        "defaultBranch": "main"
+    }
+}
+        "#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Path::new("file.js").into(),
+        r#"console.log('file');"#.as_bytes(),
+    );
+    fs.insert(
+        Path::new("file2.js").into(),
+        r#"console.log('file2');"#.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), "--staged"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_process_ignored_file_even_if_its_staged",
         fs,
         console,
         result,

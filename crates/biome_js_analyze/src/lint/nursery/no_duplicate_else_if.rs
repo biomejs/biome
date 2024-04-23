@@ -45,10 +45,10 @@ declare_rule! {
     /// ```
     ///
     pub NoDuplicateElseIf {
-        version: "next",
+        version: "1.6.2",
         name: "noDuplicateElseIf",
         recommended: true,
-        source: RuleSource::Eslint("no-dupe-else-if"),
+        sources: &[RuleSource::Eslint("no-dupe-else-if")],
     }
 }
 

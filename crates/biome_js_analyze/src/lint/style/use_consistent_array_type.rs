@@ -70,7 +70,7 @@ declare_rule! {
     pub UseConsistentArrayType {
         version: "1.5.0",
         name: "useConsistentArrayType",
-        source: RuleSource::EslintTypeScript("array-type"),
+        sources: &[RuleSource::EslintTypeScript("array-type")],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
@@ -473,7 +473,7 @@ where
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ConsistentArrayTypeOptions {
-    syntax: ConsistentArrayType,
+    pub syntax: ConsistentArrayType,
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]

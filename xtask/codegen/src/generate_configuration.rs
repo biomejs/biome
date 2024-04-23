@@ -115,11 +115,14 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
 
         let (global_all, global_recommended) = if group == "nursery" {
             (
-                quote! { self.is_all() && biome_flags::is_unstable() },
-                quote! { self.is_recommended() && biome_flags::is_unstable() },
+                quote! { self.is_all_true() && biome_flags::is_unstable() },
+                quote! { !self.is_recommended_false() && biome_flags::is_unstable() },
             )
         } else {
-            (quote! { self.is_all() }, quote! { self.is_recommended() })
+            (
+                quote! { self.is_all_true() },
+                quote! { !self.is_recommended_false() },
+            )
         };
 
         group_as_default_rules.push(quote! {
@@ -254,14 +257,13 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 }
             }
 
-            pub(crate) const fn is_recommended(&self) -> bool {
-                // It is only considered _not_ recommended when
-                // the configuration is `"recommended": false`.
-                // Hence, omission of the setting or set to `true` are considered recommended.
-                !matches!(self.recommended, Some(false))
+            // Note: In top level, it is only considered _not_ recommended
+            // when the recommended option is false
+            pub(crate) const fn is_recommended_false(&self) -> bool {
+                matches!(self.recommended, Some(false))
             }
 
-            pub(crate) const fn is_all(&self) -> bool {
+            pub(crate) const fn is_all_true(&self) -> bool {
                 matches!(self.all, Some(true))
             }
 
@@ -322,8 +324,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
 
-    let mut number_of_recommended_rules: u8 = 0;
-    let number_of_rules = Literal::u8_unsuffixed(rules.len() as u8);
     for (index, (rule, metadata)) in rules.iter().enumerate() {
         let summary = {
             let mut docs = String::new();
@@ -334,7 +334,8 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                         docs.push_str(text.as_ref());
                     }
                     Event::Code(text) => {
-                        docs.push_str(text.as_ref());
+                        // Escape `[` and `<` to obtain valid Markdown
+                        docs.push_str(text.replace('[', "\\[").replace('<', "\\<").as_ref());
                     }
                     Event::SoftBreak => {
                         docs.push(' ');
@@ -379,7 +380,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             lines_recommended_rule.push(quote! {
                 #rule
             });
-            number_of_recommended_rules += 1;
         }
         lines_all_rule_as_filter.push(quote! {
             RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
@@ -420,8 +420,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
     }
 
     let group_struct_name = Ident::new(&to_capitalized(group), Span::call_site());
-
-    let number_of_recommended_rules = Literal::u8_unsuffixed(number_of_recommended_rules);
 
     quote! {
         #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
@@ -465,24 +463,24 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         impl #group_struct_name {
 
             const GROUP_NAME: &'static str = #group;
-            pub(crate) const GROUP_RULES: [&'static str; #number_of_rules] = [
+            pub(crate) const GROUP_RULES: &'static [&'static str] = &[
                 #( #lines_rule ),*
             ];
 
-            const RECOMMENDED_RULES: [&'static str; #number_of_recommended_rules] = [
+            const RECOMMENDED_RULES: &'static [&'static str] = &[
                 #( #lines_recommended_rule ),*
             ];
 
-            const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; #number_of_recommended_rules] = [
+            const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
                 #( #lines_recommended_rule_as_filter ),*
             ];
 
-            const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; #number_of_rules] = [
+            const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
                 #( #lines_all_rule_as_filter ),*
             ];
 
             /// Retrieves the recommended rules
-            pub(crate) fn is_recommended(&self) -> bool {
+            pub(crate) fn is_recommended_true(&self) -> bool {
                 // we should inject recommended rules only when they are set to "true"
                 matches!(self.recommended, Some(true))
             }
@@ -491,7 +489,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 self.recommended.is_none()
             }
 
-            pub(crate) fn is_all(&self) -> bool {
+            pub(crate) fn is_all_true(&self) -> bool {
                 matches!(self.all, Some(true))
             }
 
@@ -521,11 +519,11 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                  Self::RECOMMENDED_RULES.contains(&rule_name)
             }
 
-            pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; #number_of_recommended_rules] {
+            pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
                 Self::RECOMMENDED_RULES_AS_FILTERS
             }
 
-            pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; #number_of_rules] {
+            pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
                 Self::ALL_RULES_AS_FILTERS
             }
 
@@ -538,9 +536,10 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 parent_is_recommended: bool,
                 enabled_rules: &mut IndexSet<RuleFilter>,
             ) {
-                if self.is_all() || self.is_all_unset() && parent_is_all {
+                // The order of the if-else branches MATTERS!
+                if self.is_all_true() || self.is_all_unset() && parent_is_all {
                     enabled_rules.extend(Self::all_rules_as_filters());
-                } else if self.is_recommended() || self.is_recommended_unset() && parent_is_recommended && !parent_is_all {
+                } else if self.is_recommended_true() || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended {
                     enabled_rules.extend(Self::recommended_rules_as_filters());
                 }
             }
@@ -560,7 +559,7 @@ fn generate_push_to_analyzer_rules(group: &str) -> TokenStream {
     let group_identifier = Ident::new(group, Span::call_site());
     quote! {
        if let Some(rules) = rules.#group_identifier.as_ref() {
-            for rule_name in &#group_struct_name::GROUP_RULES {
+            for rule_name in #group_struct_name::GROUP_RULES {
                 if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name) {
                     if let Some(rule_key) = metadata.find_rule(#group, rule_name) {
                         analyzer_rules.push_rule(rule_key, rule_options);

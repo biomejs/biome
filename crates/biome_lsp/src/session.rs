@@ -5,7 +5,7 @@ use crate::extension_settings::CONFIGURATION_SECTION;
 use crate::utils;
 use anyhow::Result;
 use biome_analyze::RuleCategories;
-use biome_configuration::ConfigurationBasePath;
+use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
 use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, FileSystem};
@@ -415,11 +415,11 @@ impl Session {
     #[tracing::instrument(level = "trace", skip(self))]
     pub(crate) async fn load_workspace_settings(&self) {
         let base_path = if let Some(config_path) = &self.config_path {
-            ConfigurationBasePath::FromUser(config_path.clone())
+            ConfigurationPathHint::FromUser(config_path.clone())
         } else {
             match self.base_path() {
-                None => ConfigurationBasePath::default(),
-                Some(path) => ConfigurationBasePath::Lsp(path),
+                None => ConfigurationPathHint::default(),
+                Some(path) => ConfigurationPathHint::FromLsp(path),
             }
         };
 
@@ -487,9 +487,7 @@ impl Session {
             .map(PathBuf::from)
             .or(self.base_path());
         if let Some(base_path) = base_path {
-            let result = self
-                .fs
-                .auto_search(base_path.clone(), &["package.json"], false);
+            let result = self.fs.auto_search(&base_path, &["package.json"], false);
             match result {
                 Ok(result) => {
                     if let Some(result) = result {

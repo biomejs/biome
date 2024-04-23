@@ -1086,9 +1086,10 @@ impl AnyJsExpression {
     }
 
     /// Checks whether the current function call is:
-    /// - `it`
-    /// - `test`
-    /// - `Deno.test`
+    /// - `it`: many libraries such as Node.js, Mocha, Jest, etc.
+    /// - `test`: many libraries such as Node.js, bun, etc.
+    /// - [`Deno.test`](https://docs.deno.com/runtime/manual/basics/testing/)
+    /// - [`waitFor`](https://testing-library.com/docs/dom-testing-library/api-async/#waitfor)
     pub fn contains_it_call(&self) -> bool {
         let mut members = CalleeNamesIterator::new(self.clone());
 
@@ -1100,7 +1101,7 @@ impl AnyJsExpression {
         let second = rev.next().map(|t| t.text());
 
         match first {
-            Some("test" | "it") => true,
+            Some("test" | "it" | "waitFor") => true,
             Some("Deno") => matches!(second, Some("test")),
             _ => false,
         }
@@ -1651,12 +1652,12 @@ impl JsCallExpression {
         })
     }
 
-    /// This is a specialised function that checks if the current [call expression]
+    /// This is a specialized function that checks if the current [call expression]
     /// resembles a call expression usually used by a testing frameworks.
     ///
     /// If the [call expression] matches the criteria, a different formatting is applied.
     ///
-    /// To evaluable the eligibility of a  [call expression] to be a test framework like,
+    /// To evaluate the eligibility of a  [call expression] to be a test framework like,
     /// we need to check its [callee] and its [arguments].
     ///
     /// 1. The [callee] must contain a name or a chain of names that belongs to the
@@ -1667,11 +1668,11 @@ impl JsCallExpression {
     /// 5. The second argument has to be an [arrow function expression] or [function expression]
     /// 6. Both function must have zero or one parameters
     ///
-    /// [call expression]: crate::biome_js_syntax::JsCallExpression
-    /// [callee]: crate::biome_js_syntax::AnyJsExpression
-    /// [arguments]: crate::biome_js_syntax::JsCallArgumentList
-    /// [arrow function expression]: crate::biome_js_syntax::JsArrowFunctionExpression
-    /// [function expression]: crate::biome_js_syntax::JsCallArgumentList
+    /// [call expression]: crate::JsCallExpression
+    /// [callee]: crate::AnyJsExpression
+    /// [arguments]: crate::JsCallArgumentList
+    /// [arrow function expression]: crate::JsArrowFunctionExpression
+    /// [function expression]: crate::JsCallArgumentList
     pub fn is_test_call_expression(&self) -> SyntaxResult<bool> {
         use AnyJsExpression::*;
 

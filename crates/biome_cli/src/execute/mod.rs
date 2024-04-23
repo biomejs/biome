@@ -2,21 +2,30 @@ mod diagnostics;
 mod migrate;
 mod process_file;
 mod std_in;
-mod traverse;
+pub(crate) mod traverse;
 
-use crate::cli_options::CliOptions;
+use crate::cli_options::{CliOptions, CliReporter};
+use crate::commands::MigrateSubCommand;
+use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::traverse;
-use crate::{CliDiagnostic, CliSession};
+use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
+use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
+use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
+use biome_console::{markup, ConsoleExt};
+use biome_diagnostics::adapters::SerdeJsonError;
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
-use biome_service::workspace::{FeatureName, FeaturesBuilder, FixFileMode};
+use biome_service::workspace::{
+    FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams, PatternId,
+};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
 
 /// Useful information during the traversal of files and virtual content
-pub(crate) struct Execution {
+#[derive(Debug, Clone)]
+pub struct Execution {
     /// How the information should be collected and reported
     report_mode: ReportMode,
 
@@ -25,6 +34,24 @@ pub(crate) struct Execution {
 
     /// The maximum number of diagnostics that can be printed in console
     max_diagnostics: u16,
+}
+
+impl Execution {
+    pub fn new_format() -> Self {
+        Self {
+            traversal_mode: TraversalMode::Format {
+                ignore_errors: false,
+                write: false,
+                stdin: None,
+            },
+            report_mode: ReportMode::default(),
+            max_diagnostics: 0,
+        }
+    }
+
+    pub fn report_mode(&self) -> &ReportMode {
+        &self.report_mode
+    }
 }
 
 impl Execution {
@@ -43,14 +70,14 @@ impl Execution {
     }
 }
 
-#[derive(Debug)]
-pub(crate) enum ExecutionEnvironment {
+#[derive(Debug, Clone, Copy)]
+pub enum ExecutionEnvironment {
     GitHub,
 }
 
 /// A type that holds the information to execute the CLI via `stdin
-#[derive(Debug)]
-pub(crate) struct Stdin(
+#[derive(Debug, Clone)]
+pub struct Stdin(
     /// The virtual path to the file
     PathBuf,
     /// The content of the file
@@ -73,8 +100,8 @@ impl From<(PathBuf, String)> for Stdin {
     }
 }
 
-#[derive(Debug)]
-pub(crate) enum TraversalMode {
+#[derive(Debug, Clone)]
+pub enum TraversalMode {
     /// This mode is enabled when running the command `biome check`
     Check {
         /// The type of fixes that should be applied when analyzing a file.
@@ -123,15 +150,14 @@ pub(crate) enum TraversalMode {
         configuration_file_path: PathBuf,
         /// The path directory where `biome.json` is placed
         configuration_directory_path: PathBuf,
-        /// Migrate from prettier
-        prettier: bool,
+        sub_command: Option<MigrateSubCommand>,
     },
     /// This mode is enabled when running the command `biome search`
     Search {
         /// The GritQL pattern to search for.
         ///
         /// Note that the search command (currently) does not support rewrites.
-        pattern: String,
+        pattern: PatternId,
 
         /// An optional tuple.
         /// 1. The virtual path to the file
@@ -154,13 +180,23 @@ impl Display for TraversalMode {
 }
 
 /// Tells to the execution of the traversal how the information should be reported
-#[derive(Copy, Clone, Default)]
-pub(crate) enum ReportMode {
+#[derive(Copy, Clone, Default, Debug)]
+pub enum ReportMode {
     /// Reports information straight to the console, it's the default mode
     #[default]
     Terminal,
     /// Reports information in JSON format
-    Json,
+    Json { pretty: bool },
+}
+
+impl From<CliReporter> for ReportMode {
+    fn from(value: CliReporter) -> Self {
+        match value {
+            CliReporter::Default => Self::Terminal,
+            CliReporter::Json => Self::Json { pretty: false },
+            CliReporter::JsonPretty => Self::Json { pretty: true },
+        }
+    }
 }
 
 impl Execution {
@@ -191,18 +227,10 @@ impl Execution {
         }
     }
 
-    /// Creates an instance of [Execution] by passing [traversal mode](TraversalMode) and [report mode](ReportMode)
-    pub(crate) fn with_report(traversal_mode: TraversalMode, report_mode: ReportMode) -> Self {
-        Self {
-            traversal_mode,
-            report_mode,
-            max_diagnostics: 20,
-        }
-    }
-
-    /// Tells if the reporting is happening straight to terminal
-    pub(crate) fn should_report_to_terminal(&self) -> bool {
-        matches!(self.report_mode, ReportMode::Terminal)
+    /// It sets the reporting mode by reading the [CliOptions]
+    pub(crate) fn set_report(mut self, cli_options: &CliOptions) -> Self {
+        self.report_mode = cli_options.reporter.clone().into();
+        self
     }
 
     pub(crate) fn traversal_mode(&self) -> &TraversalMode {
@@ -238,6 +266,13 @@ impl Execution {
 
     pub(crate) const fn is_ci(&self) -> bool {
         matches!(self.traversal_mode, TraversalMode::CI { .. })
+    }
+
+    pub(crate) const fn is_ci_github(&self) -> bool {
+        if let TraversalMode::CI { environment } = &self.traversal_mode {
+            return matches!(environment, Some(ExecutionEnvironment::GitHub));
+        }
+        false
     }
 
     pub(crate) const fn is_check(&self) -> bool {
@@ -301,22 +336,22 @@ impl Execution {
     }
 }
 
-/// Based on the [mode](ExecutionMode), the function might launch a traversal of the file system
+/// Based on the [mode](TraversalMode), the function might launch a traversal of the file system
 /// or handles the stdin file.
-pub(crate) fn execute_mode(
-    mut mode: Execution,
-    session: CliSession,
+pub fn execute_mode(
+    mut execution: Execution,
+    mut session: CliSession,
     cli_options: &CliOptions,
     paths: Vec<OsString>,
 ) -> Result<(), CliDiagnostic> {
-    mode.max_diagnostics = cli_options.max_diagnostics;
+    execution.max_diagnostics = cli_options.max_diagnostics;
 
     // don't do any traversal if there's some content coming from stdin
-    if let Some(stdin) = mode.as_stdin_file() {
+    if let Some(stdin) = execution.as_stdin_file() {
         let biome_path = BiomePath::new(stdin.as_path());
         std_in::run(
             session,
-            &mode,
+            &execution,
             biome_path,
             stdin.as_content(),
             cli_options.verbose,
@@ -325,8 +360,8 @@ pub(crate) fn execute_mode(
         write,
         configuration_file_path,
         configuration_directory_path,
-        prettier,
-    } = mode.traversal_mode
+        sub_command,
+    } = execution.traversal_mode
     {
         let payload = MigratePayload {
             session,
@@ -334,10 +369,91 @@ pub(crate) fn execute_mode(
             configuration_file_path,
             configuration_directory_path,
             verbose: cli_options.verbose,
-            prettier,
+            sub_command,
         };
         migrate::run(payload)
     } else {
-        traverse(mode, session, cli_options, paths)
+        let (summary_result, diagnostics) = traverse(&execution, &mut session, cli_options, paths)?;
+        let console = session.app.console;
+        let errors = summary_result.errors;
+        let skipped = summary_result.skipped;
+        let processed = summary_result.changed + summary_result.unchanged;
+
+        let should_exit_on_warnings = summary_result.warnings > 0 && cli_options.error_on_warnings;
+
+        match execution.report_mode {
+            ReportMode::Terminal => {
+                let reporter = ConsoleReporter {
+                    summary: summary_result,
+                    diagnostics_payload: DiagnosticsPayload {
+                        verbose: cli_options.verbose,
+                        diagnostic_level: cli_options.diagnostic_level,
+                        diagnostics,
+                    },
+                    execution: execution.clone(),
+                };
+                reporter.write(&mut ConsoleReporterVisitor(console))?;
+            }
+            ReportMode::Json { pretty } => {
+                console.error(markup!{
+                    <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
+                });
+                let reporter = JsonReporter {
+                    summary: summary_result,
+                    diagnostics: DiagnosticsPayload {
+                        verbose: cli_options.verbose,
+                        diagnostic_level: cli_options.diagnostic_level,
+                        diagnostics,
+                    },
+                    execution: execution.clone(),
+                };
+                let mut buffer = JsonReporterVisitor::new(summary_result);
+                reporter.write(&mut buffer)?;
+                if pretty {
+                    let content = serde_json::to_string(&buffer).map_err(|error| {
+                        CliDiagnostic::Report(ReportDiagnostic::Serialization(
+                            SerdeJsonError::from(error),
+                        ))
+                    })?;
+                    let report_file = BiomePath::new("_report_output.json");
+                    session.app.workspace.open_file(OpenFileParams {
+                        content,
+                        path: report_file.clone(),
+                        version: 0,
+                        document_file_source: None,
+                    })?;
+                    let code = session.app.workspace.format_file(FormatFileParams {
+                        path: report_file.clone(),
+                    })?;
+                    console.log(markup! {
+                        {code.as_code()}
+                    });
+                } else {
+                    console.log(markup! {
+                        {buffer}
+                    });
+                }
+            }
+        }
+
+        // Processing emitted error diagnostics, exit with a non-zero code
+        if processed.saturating_sub(skipped) == 0 && !cli_options.no_errors_on_unmatched {
+            Err(CliDiagnostic::no_files_processed())
+        } else if errors > 0 || should_exit_on_warnings {
+            let category = execution.as_diagnostic_category();
+            if should_exit_on_warnings {
+                if execution.is_check_apply() {
+                    Err(CliDiagnostic::apply_warnings(category))
+                } else {
+                    Err(CliDiagnostic::check_warnings(category))
+                }
+            } else if execution.is_check_apply() {
+                Err(CliDiagnostic::apply_error(category))
+            } else {
+                Err(CliDiagnostic::check_error(category))
+            }
+        } else {
+            Ok(())
+        }
     }
 }

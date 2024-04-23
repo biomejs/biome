@@ -5,7 +5,7 @@ expression: content
 ## `file.svelte`
 
 ```svelte
-<script setup lang="ts">
+<script lang="ts">
 import Button from "./components/Button.svelte";
 import * as svelteUse from "svelte-use";
 </script>
@@ -30,7 +30,7 @@ file.svelte organizeImports ━━━━━━━━━━━━━━━━━�
 
   × Import statements could be sorted:
   
-    1 1 │   <script setup lang="ts">
+    1 1 │   <script lang="ts">
     2   │ - import·Button·from·"./components/Button.svelte";
     3   │ - import·*·as·svelteUse·from·"svelte-use";
       2 │ + import·*·as·svelteUse·from·"svelte-use";

@@ -17,7 +17,6 @@ We can use help in a bunch of areas and any help is greatly appreciated!
   + [Formatter](#formatter)
 * [Crate dependencies](#crate-dependencies)
 * [Node.js development](#nodejs-development)
-* [Website development](#website-development)
   + [Translations](#translations)
 * [Commit messages](#commit-messages)
 * [Creating pull requests](#creating-pull-requests)
@@ -122,7 +121,7 @@ cargo t
 You can run **a single test** with cargo by passing the test name after the `test` command:
 
 ```shell
-cd crate/biome_js_formatter
+cd crates/biome_js_formatter
 
 cargo t quick_test
 ```
@@ -204,8 +203,7 @@ things you would need to run and check:
 - `just l` (alias for `just lint`), run the linter for the whole project.
 - Code generation. The code generation of the repository is spread in the different parts of the code base. Sometimes is needed and sometime it isn't:
   - run `just gen-lint` when you're working on the **linter**;
-  - run `just gen-bindings` in case you worked around the **workspace**;
-  - run `just gen-web` when you update the `CHANGELOG.md`.
+  - run `just gen-bindings` in case you worked around the **workspace**.
 
 > [!NOTE]
 > You can run `just ready` as well, although it's a command that runs the codegen of the whole repository, which will take some time
@@ -260,14 +258,9 @@ For testing and developing, you need to build these packages, following the step
 The tests are run against the compiled files, which means that you need to run the
 `build` script after you implemented features/bug fixes.
 
-## Website development
-
-The [Biome website](https://biomejs.dev/) is built with [Astro](https://astro.build).
-To contribute to its development please check our [README](./website/README.md)
-
 ### Translations
 
-For more information on how to help with translation, please see the [translation contribution guidelines for our docs](./website/TRANSLATIONS.md).
+For more information on how to help with translation, please see the [translation contribution guidelines for our docs](https://github.com/biomejs/website/blob/main/TRANSLATIONS.md).
 
 ## Commit messages
 
@@ -276,13 +269,16 @@ The following this convention encourages commit best-practices and facilitates c
 
 The following commit prefixes are supported:
 
+- `build:`, a change that affects the build system or external dependencies
+- `chore:`, project housekeeping
+- `ci:`, a change that affects CI
+- `docs:`, a documentation update
 - `feat:`, a new feature
 - `fix:`, a bugfix
-- `docs:`, a documentation update
-- `test:`, a test update
-- `chore:`, project housekeeping
 - `perf:`, project performance
 - `refactor:`, refactor of the code without change in functionality
+- `release:`, release of a new version
+- `test:`, a test update
 
 Below are examples of well-formatted commits:
 
@@ -292,6 +288,8 @@ fix: fix nasty unhandled error
 docs: fix link to website page
 test(lint): add more cases to handle invalid rules
 ```
+
+We are using [action-semantic-pull-request](https://github.com/amannn/action-semantic-pull-request) to lint the titles of pull requests. If the 'Lint Pull Request Titles' workflow fails, please correct the title.
 
 ## Creating pull requests
 
@@ -346,12 +344,6 @@ Make sure that the created subsections are ordered in the following order:
 #### Enhancements
 
 #### Bug fixes
-```
-
-Because the website displays the changelog, you should update the website using the following command:
-
-```sh
-just gen-web
 ```
 
 #### Writing a changelog line

@@ -36,6 +36,7 @@ pub mod no_void_type_return;
 pub mod use_exhaustive_dependencies;
 pub mod use_hook_at_top_level;
 pub mod use_is_nan;
+pub mod use_jsx_key_in_iterable;
 pub mod use_valid_for_direction;
 pub mod use_yield;
 
@@ -77,6 +78,7 @@ declare_group! {
             self :: use_exhaustive_dependencies :: UseExhaustiveDependencies ,
             self :: use_hook_at_top_level :: UseHookAtTopLevel ,
             self :: use_is_nan :: UseIsNan ,
+            self :: use_jsx_key_in_iterable :: UseJsxKeyInIterable ,
             self :: use_valid_for_direction :: UseValidForDirection ,
             self :: use_yield :: UseYield ,
         ]

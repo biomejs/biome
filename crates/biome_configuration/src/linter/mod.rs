@@ -79,7 +79,7 @@ impl<T: Default + Deserializable> Deserializable for RuleConfiguration<T> {
         rule_name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        if value.is_type(VisitableType::STR) {
+        if value.visitable_type()? == VisitableType::STR {
             Deserializable::deserialize(value, rule_name, diagnostics).map(Self::Plain)
         } else {
             Deserializable::deserialize(value, rule_name, diagnostics)
@@ -122,6 +122,13 @@ impl<T: Default> RuleConfiguration<T> {
         match self {
             RuleConfiguration::Plain(plain) => *plain,
             RuleConfiguration::WithOptions(options) => options.level,
+        }
+    }
+
+    pub fn set_level(&mut self, level: RulePlainConfiguration) {
+        match self {
+            RuleConfiguration::Plain(plain) => *plain = level,
+            RuleConfiguration::WithOptions(options) => options.level = level,
         }
     }
 }

@@ -5,6 +5,7 @@ use std::{
     collections::HashMap,
     fs, mem,
     path::{Path, PathBuf},
+    time::SystemTime,
 };
 
 use crate::{update, Mode};
@@ -94,10 +95,7 @@ pub fn generate_parser_tests(mode: Mode) -> Result<()> {
     )?;
 
     if some_file_was_updated {
-        let _ = filetime::set_file_mtime(
-            "crates/biome_js_parser/src/tests.rs",
-            filetime::FileTime::now(),
-        );
+        fs::File::open("crates/biome_js_parser/src/tests.rs")?.set_modified(SystemTime::now())?;
     }
 
     Ok(())

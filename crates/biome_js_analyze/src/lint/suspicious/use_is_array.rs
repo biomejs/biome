@@ -39,7 +39,7 @@ declare_rule! {
     pub UseIsArray {
         version: "1.0.0",
         name: "useIsArray",
-        source: RuleSource::EslintUnicorn("no-instanceof-array"),
+        sources: &[RuleSource::EslintUnicorn("no-instanceof-array")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

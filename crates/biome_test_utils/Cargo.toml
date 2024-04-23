@@ -26,7 +26,7 @@ biome_service       = { workspace = true }
 countme             = { workspace = true, features = ["enable"] }
 json_comments       = "0.2.1"
 serde_json          = { workspace = true }
-similar             = { version = "2.2.1" }
+similar             = { workspace = true }
 
 [lints]
 workspace = true

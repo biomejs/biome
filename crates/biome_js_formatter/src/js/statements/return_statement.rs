@@ -138,6 +138,14 @@ fn has_argument_leading_comments(argument: &AnyJsExpression, comments: &JsCommen
             return true;
         }
 
+        if comments
+            .leading_comments(argument.syntax())
+            .iter()
+            .any(|comment| comment.piece().has_newline())
+        {
+            return true;
+        };
+
         current = get_expression_left_side(&expression);
     }
 

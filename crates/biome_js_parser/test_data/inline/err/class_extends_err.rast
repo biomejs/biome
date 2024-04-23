@@ -76,7 +76,7 @@ JsModule {
                     items: [
                         IMPLEMENTS_KW@71..82 "implements" [] [Whitespace(" ")],
                         TsTypeList [
-                            TsNameWithTypeArguments {
+                            TsReferenceType {
                                 name: JsReferenceIdentifier {
                                     value_token: IDENT@82..84 "B" [] [Whitespace(" ")],
                                 },
@@ -145,7 +145,7 @@ JsModule {
       3: JS_BOGUS@71..84
         0: IMPLEMENTS_KW@71..82 "implements" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@82..84
-          0: TS_NAME_WITH_TYPE_ARGUMENTS@82..84
+          0: TS_REFERENCE_TYPE@82..84
             0: JS_REFERENCE_IDENTIFIER@82..84
               0: IDENT@82..84 "B" [] [Whitespace(" ")]
             1: (empty)

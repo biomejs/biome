@@ -1,0 +1,57 @@
+name: "Lint Pull Request Titles"
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - synchronize
+
+permissions:
+  pull-requests: read
+
+jobs:
+  main:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@e9fabac35e210fea40ca5b14c0da95a099eff26f # v5
+        id: lint_pr_title
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Configure which types are allowed (newline-delimited).
+          # ref: CONTRIBUTING.md
+          types: |
+            build
+            chore
+            ci
+            docs
+            feat
+            fix
+            perf
+            refactor
+            release
+            test
+          # Configure that a scope must always be provided.
+          requireScope: false
+          # Configure which scopes are disallowed in PR titles.
+          # These are regex patterns auto-wrapped in `^ $`.
+          #
+          # We disable the following scopes:
+          # - `release` because we have the `release` type
+          # - UPPERCASE titles because we promote the use of lowercase
+          disallowScopes: |
+            release
+            [A-Z_-]+
+          # Configure additional validation for the subject based on a regex.
+          # Ensures that the subject doesn't start with an uppercase character.
+          subjectPattern: ^[^A-Z].*$
+          # If `subjectPattern` is configured, you can use this property to override
+          # the default error message that is shown when the pattern doesn't match.
+          # The variables `subject` and `title` can be used within the message.
+          subjectPatternError: |
+            The subject "{subject}" found in the pull request title "{title}"
+            didn't match the configured pattern.
+            Please ensure that the subject doesn't start with an uppercase character.
+            The scope should not be in UPPERCASE.

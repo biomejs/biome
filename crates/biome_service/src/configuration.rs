@@ -3,17 +3,20 @@ use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::CantLoadExtendFile;
 use biome_configuration::{
-    push_to_analyzer_rules, ConfigurationBasePath, ConfigurationDiagnostic, ConfigurationPayload,
+    push_to_analyzer_rules, ConfigurationDiagnostic, ConfigurationPathHint, ConfigurationPayload,
     PartialConfiguration,
 };
 use biome_console::markup;
+use biome_css_analyze::metadata as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
-use biome_js_analyze::metadata;
+use biome_js_analyze::metadata as js_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
+use std::ffi::OsStr;
+use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
 use std::path::{Path, PathBuf};
@@ -100,7 +103,7 @@ impl LoadedConfiguration {
         };
 
         let ConfigurationPayload {
-            configuration_directory_path,
+            external_resolution_base_path,
             configuration_file_path,
             deserialized,
         } = value;
@@ -112,7 +115,7 @@ impl LoadedConfiguration {
                     partial_configuration.apply_extends(
                         fs,
                         &configuration_file_path,
-                        &configuration_directory_path,
+                        &external_resolution_base_path,
                         &mut diagnostics,
                     )?;
                     partial_configuration.migrate_deprecated_fields();
@@ -126,7 +129,7 @@ impl LoadedConfiguration {
                     diagnostic.with_file_path(configuration_file_path.display().to_string())
                 })
                 .collect(),
-            directory_path: Some(configuration_directory_path),
+            directory_path: configuration_file_path.parent().map(PathBuf::from),
             file_path: Some(configuration_file_path),
         })
     }
@@ -135,7 +138,7 @@ impl LoadedConfiguration {
 /// Load the partial configuration for this session of the CLI.
 pub fn load_configuration(
     fs: &DynRef<'_, dyn FileSystem>,
-    config_path: ConfigurationBasePath,
+    config_path: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
     let config = load_config(fs, config_path)?;
     LoadedConfiguration::try_from_payload(config, fs)
@@ -148,74 +151,109 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 
 /// Load the configuration from the file system.
 ///
-/// The configuration file will be read from the `file_system`. A [base path](ConfigurationBasePath) should be provided.
+/// The configuration file will be read from the `file_system`. A [path hint](ConfigurationPathHint) should be provided.
 ///
-/// The function will try to traverse upwards the file system until if finds a `biome.json` file, or there
-/// aren't directories anymore.
+/// - If the path hint is a path to a file that is provided by the user, the function will try to load that file or error.
+/// The name doesn't have to be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`, Biome will try to
+/// deserialize it as a `.jsonc` file.
 ///
-/// If a the configuration base path was provided by the user, the function will error. If not, Biome will use
-/// its defaults.
+/// - If the path hint is a path to a directory which is provided by the user, the function will try to find a `biome.json`
+/// or `biome.jsonc` file in order in that directory. And If it cannot find one, it will error.
+///
+/// - Otherwise, the function will try to traverse upwards the file system until it finds a `biome.json` or `biome.jsonc`
+/// file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
+/// means Biome will use the default configuration.
 fn load_config(
     file_system: &DynRef<'_, dyn FileSystem>,
-    base_path: ConfigurationBasePath,
+    base_path: ConfigurationPathHint,
 ) -> LoadConfig {
-    let deprecated_config_name = file_system.deprecated_config_name();
-    let working_directory = file_system.working_directory();
-    let configuration_directory = match base_path {
-        ConfigurationBasePath::Lsp(ref path) | ConfigurationBasePath::FromUser(ref path) => {
-            path.clone()
+    // This path is used for configuration resolution from external packages.
+    let external_resolution_base_path = match base_path {
+        // Path hint from LSP is always the workspace root
+        // we use it as the resolution base path.
+        ConfigurationPathHint::FromLsp(ref path) => path.clone(),
+        // Path hint from user means the command is invoked from the CLI
+        // So we use the working directory (CWD) as the resolution base path
+        ConfigurationPathHint::FromUser(_) | ConfigurationPathHint::None => file_system
+            .working_directory()
+            .map_or(PathBuf::new(), |working_directory| working_directory),
+    };
+
+    // If the configuration path hint is from user and is a file path,
+    // we'll load it directly
+    if let ConfigurationPathHint::FromUser(ref configuration_file_path) = base_path {
+        if file_system.path_is_file(configuration_file_path) {
+            let content = file_system.read_file_from_path(configuration_file_path)?;
+            let parser_options = match configuration_file_path.extension().and_then(OsStr::to_str) {
+                Some("json") => JsonParserOptions::default(),
+                _ => JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas(),
+            };
+            let deserialized =
+                deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
+            return Ok(Some(ConfigurationPayload {
+                deserialized,
+                configuration_file_path: PathBuf::from(configuration_file_path),
+                external_resolution_base_path,
+            }));
         }
-        _ => match working_directory {
-            Some(wd) => wd,
+    }
+
+    // If the configuration path hint is not a file path
+    // we'll auto search for the configuration file
+    let should_error = base_path.is_from_user();
+    let configuration_directory = match base_path {
+        ConfigurationPathHint::FromLsp(path) => path,
+        ConfigurationPathHint::FromUser(path) => path,
+        // working directory will only work in
+        _ => match file_system.working_directory() {
+            Some(working_directory) => working_directory,
             None => PathBuf::new(),
         },
     };
-    let should_error = base_path.is_from_user();
 
-    let auto_search_result;
-    let result = file_system.auto_search(
-        configuration_directory.clone(),
+    // We first search for `biome.json` or `biome.jsonc` files
+    if let Some(auto_search_result) = match file_system.auto_search(
+        &configuration_directory,
         ConfigName::file_names().as_slice(),
         should_error,
-    );
-    if let Ok(result) = result {
-        if result.is_none() {
-            auto_search_result = file_system.auto_search(
-                configuration_directory.clone(),
-                [deprecated_config_name].as_slice(),
-                should_error,
-            )?;
-        } else {
-            auto_search_result = result;
-        }
-    } else {
-        auto_search_result = file_system.auto_search(
-            configuration_directory.clone(),
-            [deprecated_config_name].as_slice(),
+    ) {
+        Ok(Some(auto_search_result)) => Some(auto_search_result),
+        // We then search for the deprecated `rome.json` file
+        // if neither `biome.json` nor `biome.jsonc` is found
+        // TODO: The following arms should be removed in v2.0.0
+        Ok(None) => file_system.auto_search(
+            &configuration_directory,
+            [file_system.deprecated_config_name()].as_slice(),
             should_error,
-        )?;
-    }
+        )?,
+        Err(error) => file_system
+            .auto_search(
+                &configuration_directory,
+                [file_system.deprecated_config_name()].as_slice(),
+                should_error,
+            )
+            // Map the error so users won't see error messages
+            // that contains `rome.json`
+            .map_err(|_| error)?,
+    } {
+        let AutoSearchResult { content, file_path } = auto_search_result;
 
-    if let Some(auto_search_result) = auto_search_result {
-        let AutoSearchResult {
-            content,
-            directory_path,
-            file_path,
-        } = auto_search_result;
-        let parser_options =
-            if file_path.file_name().and_then(|s| s.to_str()) == Some(ConfigName::biome_jsonc()) {
-                JsonParserOptions::default()
-                    .with_allow_comments()
-                    .with_allow_trailing_commas()
-            } else {
-                JsonParserOptions::default()
-            };
+        let parser_options = match file_path.extension().and_then(OsStr::to_str) {
+            Some("json") => JsonParserOptions::default(),
+            _ => JsonParserOptions::default()
+                .with_allow_comments()
+                .with_allow_trailing_commas(),
+        };
+
         let deserialized =
             deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
+
         Ok(Some(ConfigurationPayload {
             deserialized,
             configuration_file_path: file_path,
-            configuration_directory_path: directory_path,
+            external_resolution_base_path,
         }))
     } else {
         Ok(None)
@@ -284,7 +322,8 @@ pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerR
     let overrides = &settings.override_settings;
     let mut analyzer_rules = AnalyzerRules::default();
     if let Some(rules) = linter_settings.rules.as_ref() {
-        push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, js_lint_metadata(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, css_lint_metadata(), &mut analyzer_rules);
     }
 
     overrides.override_analyzer_rules(path, analyzer_rules)
@@ -295,14 +334,15 @@ pub trait PartialConfigurationExt {
         &mut self,
         fs: &DynRef<'_, dyn FileSystem>,
         file_path: &Path,
-        directory_path: &Path,
+        external_resolution_base_path: &Path,
         diagnostics: &mut Vec<Error>,
     ) -> Result<(), WorkspaceError>;
 
     fn deserialize_extends(
         &mut self,
         fs: &DynRef<'_, dyn FileSystem>,
-        directory_path: &Path,
+        relative_resolution_base_path: &Path,
+        external_resolution_base_path: &Path,
     ) -> Result<Vec<Deserialized<PartialConfiguration>>, WorkspaceError>;
 
     fn migrate_deprecated_fields(&mut self);
@@ -325,10 +365,14 @@ impl PartialConfigurationExt for PartialConfiguration {
         &mut self,
         fs: &DynRef<'_, dyn FileSystem>,
         file_path: &Path,
-        directory_path: &Path,
+        external_resolution_base_path: &Path,
         diagnostics: &mut Vec<Error>,
     ) -> Result<(), WorkspaceError> {
-        let deserialized = self.deserialize_extends(fs, directory_path)?;
+        let deserialized = self.deserialize_extends(
+            fs,
+            file_path.parent().expect("file path should have a parent"),
+            external_resolution_base_path,
+        )?;
         let (configurations, errors): (Vec<_>, Vec<_>) = deserialized
             .into_iter()
             .map(|d| d.consume())
@@ -362,30 +406,29 @@ impl PartialConfigurationExt for PartialConfiguration {
     fn deserialize_extends(
         &mut self,
         fs: &DynRef<'_, dyn FileSystem>,
-        directory_path: &Path,
+        relative_resolution_base_path: &Path,
+        external_resolution_base_path: &Path,
     ) -> Result<Vec<Deserialized<PartialConfiguration>>, WorkspaceError> {
         let Some(extends) = &self.extends else {
             return Ok(Vec::new());
         };
 
         let mut deserialized_configurations = vec![];
-        for path in extends.iter() {
-            let as_path = Path::new(path);
-            let extension = as_path.extension().and_then(|ext| ext.to_str());
-            // TODO: Remove extension in Biome 2.0
-            let config_path = if as_path.starts_with(".")
-                || extension == Some("json")
-                || extension == Some("jsonc")
-            {
-                directory_path.join(path)
+        for extend_entry in extends.iter() {
+            let extend_entry_as_path = Path::new(extend_entry);
+
+            let extend_configuration_file_path = if extend_entry_as_path.starts_with(".")
+                // TODO: Remove extension in Biome 2.0
+                || matches!(
+                    extend_entry_as_path.extension().and_then(OsStr::to_str),
+                    Some("json" | "jsonc")
+                ) {
+                relative_resolution_base_path.join(extend_entry)
             } else {
-                fs.resolve_configuration(path.as_str(), Some(directory_path))
+                fs.resolve_configuration(extend_entry.as_str(), external_resolution_base_path)
                     .map_err(|error| {
                         ConfigurationDiagnostic::cant_resolve(
-                            fs.working_directory()
-                                .unwrap_or_default()
-                                .display()
-                                .to_string(),
+                            external_resolution_base_path.display().to_string(),
                             error,
                         )
                     })?
@@ -393,17 +436,27 @@ impl PartialConfigurationExt for PartialConfiguration {
             };
 
             let mut file = fs
-                .open_with_options(config_path.as_path(), OpenOptions::default().read(true))
+                .open_with_options(
+                    extend_configuration_file_path.as_path(),
+                    OpenOptions::default().read(true),
+                )
                 .map_err(|err| {
-                    CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
-                        markup!{
-                            "Biome tried to load the configuration file "<Emphasis>{directory_path.display().to_string()}</Emphasis>" using "<Emphasis>{config_path.display().to_string()}</Emphasis>" as base path."
-                        }
+                    CantLoadExtendFile::new(
+                        extend_configuration_file_path.display().to_string(),
+                        err.to_string(),
                     )
+                    .with_verbose_advice(markup! {
+                        "Biome tried to load the configuration file \""<Emphasis>{
+                            extend_configuration_file_path.display().to_string()
+                        }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
+                            external_resolution_base_path.display().to_string()
+                        }</Emphasis>"\" as the base path."
+                    })
                 })?;
+
             let mut content = String::new();
             file.read_to_string(&mut content).map_err(|err| {
-                CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
+                CantLoadExtendFile::new(extend_configuration_file_path.display().to_string(), err.to_string()).with_verbose_advice(
                     markup!{
                         "It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
                     }
@@ -412,7 +465,15 @@ impl PartialConfigurationExt for PartialConfiguration {
             })?;
             let deserialized = deserialize_from_json_str::<PartialConfiguration>(
                 content.as_str(),
-                JsonParserOptions::default(),
+                match extend_configuration_file_path
+                    .extension()
+                    .and_then(OsStr::to_str)
+                {
+                    Some("json") => JsonParserOptions::default(),
+                    _ => JsonParserOptions::default()
+                        .with_allow_comments()
+                        .with_allow_trailing_commas(),
+                },
                 "",
             );
             deserialized_configurations.push(deserialized)
@@ -480,12 +541,12 @@ impl PartialConfigurationExt for PartialConfiguration {
             if let Some(client_kind) = &vcs.client_kind {
                 if !vcs.ignore_file_disabled() {
                     let result = file_system
-                        .auto_search(vcs_base_path, &[client_kind.ignore_file()], false)
+                        .auto_search(&vcs_base_path, &[client_kind.ignore_file()], false)
                         .map_err(WorkspaceError::from)?;
 
                     if let Some(result) = result {
                         return Ok((
-                            Some(result.directory_path),
+                            result.file_path.parent().map(PathBuf::from),
                             result
                                 .content
                                 .lines()

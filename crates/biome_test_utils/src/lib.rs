@@ -1,4 +1,4 @@
-use biome_analyze::options::PreferredQuote;
+use biome_analyze::options::{JsxRuntime, PreferredQuote};
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
 use biome_configuration::PartialConfiguration;
 use biome_console::fmt::{Formatter, Termcolor};
@@ -32,8 +32,8 @@ pub fn create_analyzer_options(
     diagnostics: &mut Vec<String>,
 ) -> AnalyzerOptions {
     let options = AnalyzerOptions {
-        configuration: Default::default(),
         file_path: input_file.to_path_buf(),
+        ..Default::default()
     };
     // We allow a test file to configure its rule using a special
     // file with the same name as the test but with extension ".options.json"
@@ -42,6 +42,7 @@ pub fn create_analyzer_options(
         rules: AnalyzerRules::default(),
         globals: vec![],
         preferred_quote: PreferredQuote::Double,
+        jsx_runtime: JsxRuntime::Transparent,
     };
     let options_file = input_file.with_extension("options.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
@@ -81,6 +82,18 @@ pub fn create_analyzer_options(
                     })
                 })
                 .unwrap_or_default();
+
+            use biome_configuration::javascript::JsxRuntime::*;
+            analyzer_configuration.jsx_runtime = match configuration
+                .javascript
+                .as_ref()
+                .and_then(|js| js.jsx_runtime)
+                .unwrap_or_default()
+            {
+                ReactClassic => JsxRuntime::ReactClassic,
+                Transparent => JsxRuntime::Transparent,
+            };
+
             settings
                 .merge_with_configuration(configuration, None, None, &[])
                 .unwrap();

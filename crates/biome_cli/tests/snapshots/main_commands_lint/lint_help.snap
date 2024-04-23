@@ -7,7 +7,7 @@ expression: content
 ```block
 Run various checks on a set of files.
 
-Usage: lint [--apply] [--apply-unsafe] [--changed] [--since=REF] [PATH]...
+Usage: lint [--apply] [--apply-unsafe] [--staged] [--changed] [--since=REF] [PATH]...
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-client-kind=<git>  The kind of client.
@@ -33,14 +33,16 @@ Global options applied to all commands
                               output is determined to be incompatible
         --use-server          Connect to a running instance of the Biome daemon server.
         --verbose             Print additional diagnostics, and some diagnostics show more information.
-        --config-path=PATH    Set the directory of the biome.json or biome.jsonc configuration file and
-                              disable default configuration file resolution.
+        --config-path=PATH    Set the file path to the configuration file, or the directory path to find
+                              `biome.json` or `biome.jsonc`. If used, it disables the default configuration
+                              file resolution.
         --max-diagnostics=NUMBER  Cap the amount of diagnostics displayed.
                               [default: 20]
         --skip-errors         Skip over files containing syntax errors instead of emitting an error diagnostic.
         --no-errors-on-unmatched  Silence errors that would be emitted in case no files were processed
                               during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit warnings.
+        --reporter=<json|json-pretty>  Allows to change how diagnostics and summary are reported.
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most verbose
                               to the least verbose: debug, info, warn, error.
                               The value `none` won't show any logging.
@@ -63,6 +65,8 @@ Available options:
                               The file doesn't need to exist on disk, what matters is the extension of
                               the file. Based on the extension, Biome knows how to lint the code.
                               Example: `echo 'let a;' | biome lint --stdin-file-path=file.js`
+        --staged              When set to true, only the files that have been staged (the ones prepared
+                              to be committed) will be linted.
         --changed             When set to true, only the files that have been changed compared to your
                               `defaultBranch` configuration will be linted.
         --since=REF           Use this to specify the base branch to compare against when you're using

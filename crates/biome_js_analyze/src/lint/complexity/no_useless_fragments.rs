@@ -10,9 +10,9 @@ use biome_js_factory::make::{
     jsx_tag_expression, token, JsxExpressionChildBuilder,
 };
 use biome_js_syntax::{
-    AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsParenthesizedExpression, JsSyntaxKind,
-    JsxChildList, JsxElement, JsxExpressionAttributeValue, JsxFragment, JsxTagExpression, JsxText,
-    T,
+    AnyJsExpression, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage,
+    JsParenthesizedExpression, JsSyntaxKind, JsxChildList, JsxElement, JsxExpressionAttributeValue,
+    JsxFragment, JsxTagExpression, JsxText, T,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
 
@@ -62,7 +62,7 @@ declare_rule! {
     pub NoUselessFragments {
         version: "1.0.0",
         name: "noUselessFragments",
-        source: RuleSource::EslintReact("jsx-no-useless-fragment"),
+        sources: &[RuleSource::EslintReact("jsx-no-useless-fragment")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }
@@ -292,7 +292,11 @@ impl Rule for NoUselessFragments {
                             })
                         } else {
                             child.expression().map(|expression| {
-                                js_expression_statement(expression).build().into_syntax()
+                                if let AnyJsExpression::JsIdentifierExpression(node) = expression {
+                                    node.into_syntax()
+                                } else {
+                                    js_expression_statement(expression).build().into_syntax()
+                                }
                             })
                         }
                     }

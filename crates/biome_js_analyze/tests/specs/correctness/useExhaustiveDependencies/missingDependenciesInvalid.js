@@ -10,7 +10,7 @@ import {
 	useReducer,
 	useTransition,
 } from "react";
-import { useRef } from "preact/hooks"
+import { useRef } from "unknown/hooks"
 
 function MyComponent1() {
     let a = 1;
@@ -152,4 +152,19 @@ function MyComponent15() {
 	useEffect(() => {
 			console.log(ref.current);
 	}, []);
+}
+
+// https://github.com/biomejs/biome/issues/2362
+function MissingFunctionDeclaration() {
+  const [value, setValue] = useState("")
+
+  function func() {
+    setValue("some")
+  }
+
+  useEffect(() => {
+    func()
+  }, [])
+
+  return <>{value}</>
 }

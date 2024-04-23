@@ -66,7 +66,7 @@ declare_rule! {
     pub NoArrayIndexKey {
         version: "1.0.0",
         name: "noArrayIndexKey",
-        source: RuleSource::EslintReact("no-array-index-key"),
+        sources: &[RuleSource::EslintReact("no-array-index-key")],
         recommended: true,
     }
 }

@@ -2,6 +2,7 @@ use crate::workspace::DocumentFileSource;
 use crate::{Matcher, WorkspaceError};
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
+use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
     push_to_analyzer_rules, ConfigurationDiagnostic, CssConfiguration, FilesConfiguration,
@@ -85,7 +86,7 @@ impl WorkspaceSettings {
         &self.organize_imports
     }
 
-    /// The (configuration)[Configuration] is merged into the workspace
+    /// The [PartialConfiguration] is merged into the workspace
     #[tracing::instrument(level = "trace", skip(self))]
     pub fn merge_with_configuration(
         &mut self,
@@ -314,6 +315,7 @@ pub struct LanguageListSettings {
 impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
     fn from(javascript: JavascriptConfiguration) -> Self {
         let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
+
         let formatter = javascript.formatter;
         language_setting.formatter.quote_style = Some(formatter.quote_style);
         language_setting.formatter.jsx_quote_style = Some(formatter.jsx_quote_style);
@@ -331,6 +333,7 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
             javascript.parser.unsafe_parameter_decorators_enabled;
 
         language_setting.globals = Some(javascript.globals.into_index_set());
+        language_setting.environment = javascript.jsx_runtime.into();
 
         language_setting
     }
@@ -381,6 +384,9 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Settings that belong to the parser
     type ParserSettings: Default;
 
+    /// Settings related to the environment/runtime in which the language is used.
+    type EnvironmentSettings: Default;
+
     /// Read the settings type for this language from the [LanguageListSettings] map
     fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self>;
 
@@ -411,6 +417,9 @@ pub struct LanguageSettings<L: ServiceLanguage> {
 
     /// Parser settings for this language
     pub parser: L::ParserSettings,
+
+    /// Environment settings for this language
+    pub environment: L::EnvironmentSettings,
 }
 
 /// Filesystem settings for the entire workspace
@@ -587,6 +596,21 @@ impl OverrideSettings {
             })
             .cloned()
             .unwrap_or_default()
+    }
+
+    pub fn override_jsx_runtime(&self, path: &BiomePath, base_setting: JsxRuntime) -> JsxRuntime {
+        self.patterns
+            .iter()
+            .fold(base_setting, |jsx_runtime, pattern| {
+                let included = pattern.include.matches_path(path);
+                let excluded = pattern.exclude.matches_path(path);
+
+                if included && !excluded {
+                    pattern.languages.javascript.environment.jsx_runtime
+                } else {
+                    jsx_runtime
+                }
+            })
     }
 
     /// It scans the current override rules and return the formatting options that of the first override is matched
@@ -1154,6 +1178,10 @@ fn to_javascript_language_settings(
         .globals
         .map(StringSet::into_index_set)
         .or_else(|| parent_settings.globals.clone());
+
+    language_setting.environment.jsx_runtime = conf
+        .jsx_runtime
+        .unwrap_or(parent_settings.environment.jsx_runtime);
 
     language_setting
 }

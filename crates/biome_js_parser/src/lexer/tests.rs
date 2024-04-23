@@ -122,6 +122,33 @@ fn identifier() {
 }
 
 #[test]
+fn unicode_identifier() {
+    assert_lex! {
+        r#"\uD83D\uDCA9"#,
+        ERROR_TOKEN:5,
+        IDENT: 1,
+        ERROR_TOKEN:5,
+        JS_NUMBER_LITERAL: 1,
+    }
+
+    assert_lex! {
+        r#"a\uD83D\uDCA9"#,
+        IDENT:1,
+        ERROR_TOKEN:5,
+        IDENT: 1,
+        ERROR_TOKEN:5,
+        JS_NUMBER_LITERAL: 1,
+    }
+
+    assert_lex! {
+        r#"a\uD83D"#,
+        IDENT:1,
+        ERROR_TOKEN:5,
+        IDENT: 1,
+    }
+}
+
+#[test]
 fn punctuators() {
     assert_lex! {
         "!%%&()*+,-.:;<=>?[]^{}|~",
@@ -299,6 +326,19 @@ fn string_unicode_escape_valid() {
     assert_lex! {
         r"'abcd\u2000a'",
         JS_STRING_LITERAL:13
+    }
+}
+
+#[test]
+fn string_unicode_escape_surrogates() {
+    assert_lex! {
+        r#""\uD83D\uDCA9""#,
+        JS_STRING_LITERAL:14
+    }
+
+    assert_lex! {
+        r#""\uD83D""#,
+        JS_STRING_LITERAL:8
     }
 }
 

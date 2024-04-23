@@ -11145,47 +11145,6 @@ pub struct TsModuleDeclarationFields {
     pub body: SyntaxResult<TsModuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct TsNameWithTypeArguments {
-    pub(crate) syntax: SyntaxNode,
-}
-impl TsNameWithTypeArguments {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> TsNameWithTypeArgumentsFields {
-        TsNameWithTypeArgumentsFields {
-            name: self.name(),
-            type_arguments: self.type_arguments(),
-        }
-    }
-    pub fn name(&self) -> SyntaxResult<AnyTsName> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn type_arguments(&self) -> Option<TsTypeArguments> {
-        support::node(&self.syntax, 1usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for TsNameWithTypeArguments {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct TsNameWithTypeArgumentsFields {
-    pub name: SyntaxResult<AnyTsName>,
-    pub type_arguments: Option<TsTypeArguments>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TsNamedTupleTypeElement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -27131,48 +27090,6 @@ impl From<TsModuleDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for TsNameWithTypeArguments {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(TS_NAME_WITH_TYPE_ARGUMENTS as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == TS_NAME_WITH_TYPE_ARGUMENTS
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for TsNameWithTypeArguments {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsNameWithTypeArguments")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "type_arguments",
-                &support::DebugOptionalElement(self.type_arguments()),
-            )
-            .finish()
-    }
-}
-impl From<TsNameWithTypeArguments> for SyntaxNode {
-    fn from(n: TsNameWithTypeArguments) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<TsNameWithTypeArguments> for SyntaxElement {
-    fn from(n: TsNameWithTypeArguments) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for TsNamedTupleTypeElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -38550,11 +38467,6 @@ impl std::fmt::Display for TsModuleDeclaration {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for TsNameWithTypeArguments {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for TsNamedTupleTypeElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -42348,7 +42260,7 @@ impl Serialize for TsTypeList {
 }
 impl AstSeparatedList for TsTypeList {
     type Language = Language;
-    type Node = TsNameWithTypeArguments;
+    type Node = TsReferenceType;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -42363,15 +42275,15 @@ impl Debug for TsTypeList {
     }
 }
 impl IntoIterator for TsTypeList {
-    type Item = SyntaxResult<TsNameWithTypeArguments>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, TsNameWithTypeArguments>;
+    type Item = SyntaxResult<TsReferenceType>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, TsReferenceType>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for &TsTypeList {
-    type Item = SyntaxResult<TsNameWithTypeArguments>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, TsNameWithTypeArguments>;
+    type Item = SyntaxResult<TsReferenceType>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, TsReferenceType>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

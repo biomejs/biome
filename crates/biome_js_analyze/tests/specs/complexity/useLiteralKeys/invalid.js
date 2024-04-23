@@ -36,6 +36,9 @@ a = {
 a = {
 	[""]: 2
 }
+a = {
+	"__proto__": null,
+}
 
 // optional chain
 a?.["b"]?.['c']?.d?.e?.["f"]

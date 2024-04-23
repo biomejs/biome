@@ -8404,40 +8404,6 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsModuleDeclaration {
         )
     }
 }
-impl FormatRule<biome_js_syntax::TsNameWithTypeArguments>
-    for crate::ts::expressions::name_with_type_arguments::FormatTsNameWithTypeArguments
-{
-    type Context = JsFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_js_syntax::TsNameWithTypeArguments,
-        f: &mut JsFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_js_syntax::TsNameWithTypeArguments>::fmt(self, node, f)
-    }
-}
-impl AsFormat<JsFormatContext> for biome_js_syntax::TsNameWithTypeArguments {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_js_syntax::TsNameWithTypeArguments,
-        crate::ts::expressions::name_with_type_arguments::FormatTsNameWithTypeArguments,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule :: new (self , crate :: ts :: expressions :: name_with_type_arguments :: FormatTsNameWithTypeArguments :: default ())
-    }
-}
-impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNameWithTypeArguments {
-    type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsNameWithTypeArguments,
-        crate::ts::expressions::name_with_type_arguments::FormatTsNameWithTypeArguments,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule :: new (self , crate :: ts :: expressions :: name_with_type_arguments :: FormatTsNameWithTypeArguments :: default ())
-    }
-}
 impl FormatRule<biome_js_syntax::TsNamedTupleTypeElement>
     for crate::ts::auxiliary::named_tuple_type_element::FormatTsNamedTupleTypeElement
 {

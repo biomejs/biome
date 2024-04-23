@@ -48,7 +48,7 @@ declare_rule! {
     pub NoNamespace {
         version: "1.0.0",
         name: "noNamespace",
-        source: RuleSource::EslintTypeScript("no-namespace"),
+        sources: &[RuleSource::EslintTypeScript("no-namespace")],
         recommended: false,
     }
 }
@@ -71,7 +71,7 @@ impl Rule for NoNamespace {
                 rule_category!(),
                 node.syntax().text_trimmed_range(),
                 markup! {
-                    "TypeScript's namespaces are an oudated way to organize code."
+                    "TypeScript's namespaces are an outdated way to organize code."
                 },
             )
             .note(markup! {

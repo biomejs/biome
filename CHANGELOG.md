@@ -13,17 +13,311 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### Bug fixes
+
+- Import sorting now ignores side effect imports ([#817](https://github.com/biomejs/biome/issues/817)).
+
+  A side effect import consists now in its own group.
+  This ensures that side effect imports are not reordered.
+
+  Here is an example of how imports are now sorted:
+
+  ```diff
+    import "z"
+    - import { D } from "d";
+    import { C } from "c";
+    + import { D } from "d";
+    import "y"
+    import "x"
+    - import { B } from "b";
+    import { A } from "a";
+    + import { B } from "b";
+    import "w"
+  ```
+
+  Contributed by @Conaclos
+
 ### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+### Parser
+
+## 1.7.1 (2024-04-22)
+
+### Editors
 
 #### Bug fixes
 
-- Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnositic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
+- Fix [#2403](https://github.com/biomejs/biome/issues/2403) by printing the errors in the client console. Contributed by @ematipico
 
-#### New features
+### Formatter
+
+#### Bug fixes
+
+- Add parentheses for the return expression that has leading multiline comments. [#2504](https://github.com/biomejs/biome/pull/2504). Contributed by @ah-yu
+
+- Correctly format dangling comments of continue statements. [#2555](https://github.com/biomejs/biome/pull/2555). Contributed by @ah-yu
+
+### Linter
+
+#### Bug fixes
+
+- Fix case where `jsxRuntime` wasn't being respected by `useImportType` rule ([#2473](https://github.com/biomejs/biome/issues/2473)).Contributed by @arendjr
+- Fix [#2460](https://github.com/biomejs/biome/issues/2460), where the rule `noUselessFragments` was crashing the linter in some cases. Now cases like these are correctly handled:
+  ```jsx
+  callFunction(<>{bar}</>)
+  ```
+  Contributed by @ematipico
+- Fix [#2366](https://github.com/biomejs/biome/issues/2366), where `noDuplicateJsonKeys` incorrectly computed the kes to highlight. Contributed by @ematipico
+#### Enhancements
+
+- The rule `noMisplacedAssertions` now considers valid calling `expect` inside `waitFor`:
+  ```js
+  import { waitFor } from '@testing-library/react';
+
+  await waitFor(() => {
+    expect(111).toBe(222);
+  });
+  ```
+  Contributed by @ematipico
+
+
+## 1.7.0 (2024-04-15)
+
+### Analyzer
+
+#### Bug fixes
+
+- Now Biome can detect the script language in Svelte and Vue script blocks more reliably ([#2245](https://github.com/biomejs/biome/issues/2245)). Contributed by @Sec-ant
+
+- `useExhaustiveDependencies` no longer reports recursive calls as missing
+  dependencies ([#2361](https://github.com/biomejs/biome/issues/2361)).
+  Contributed by @arendjr
+
+- `useExhaustiveDependencies` correctly reports missing dependencies declared
+  using function declarations ([#2362](https://github.com/biomejs/biome/issues/2362)).
+  Contributed by @arendjr
+
+- Biome now can handle `.svelte` and `.vue` files with `CRLF` as the end-of-line sequence. Contributed by @Sec-ant
+
+- `noMisplacedAssertion` no longer reports method calls by `describe`, `test`, `it` objects (e.g. `test.each([])()`) ([#2443](https://github.com/biomejs/biome/issues/2443)). Contributed by @unvalley.
+
+- Biome now can handle `.vue` files with [generic components](https://vuejs.org/api/sfc-script-setup#generics) ([#2456](https://github.com/biomejs/biome/issues/2456)).
+  ```vue
+  <script generic="T extends Record<string, any>" lang="ts" setup>
+  //...
+  </script>
+  ```
+  Contributed by @Sec-ant
 
 #### Enhancements
 
+- Complete the well-known file lists for JSON-like files. Trailing commas are allowed in `.jsonc` files by default. Some well-known files like `tsconfig.json` and `.babelrc` don't use the `.jsonc` extension but still allow comments and trailing commas. While others, such as `.eslintrc.json`, only allow comments. Biome is able to identify these files and adjusts the `json.parser.allowTrailingCommas` option accordingly to ensure they are correctly parsed. Contributed by @Sec-ant
+
+- Fix dedent logic inconsistent with prettier where the indent-style is space and the indent-width is not 2. Contributed by @mdm317
+
+### CLI
+
+#### New features
+
+- Add a command to migrate from ESLint
+
+  `biome migrate eslint` allows you to migrate an ESLint configuration to Biome.
+  The command supports [legacy ESLint configurations](https://eslint.org/docs/latest/use/configure/configuration-files) and [new flat ESLint configurations](https://eslint.org/docs/latest/use/configure/configuration-files-new).
+  Legacy ESLint configurations using the YAML format are not supported.
+
+  When loading a legacy ESLint configuration, Biome resolves the `extends` field.
+  It resolves both shared configurations and plugin presets!
+  To do this, it invokes _Node.js_.
+
+  Biome relies on the metadata of its rules to determine the [equivalent rule of an ESLint rule](https://biomejs.dev/linter/rules-sources/).
+  A Biome rule is either inspired or roughly identical to an ESLint rules.
+  By default, inspired and nursery rules are excluded from the migration.
+  You can use the CLI flags `--include-inspired` and `--include-nursery` to migrate them as well.
+
+  Note that this is a best-effort approach.
+  You are not guaranteed to get the same behavior as ESLint.
+
+  Given the following ESLint configuration:
+
+  ```json
+  {
+        "ignore_patterns": ["**/*.test.js"],
+        "globals": { "var2": "readonly" },
+        "rules": {
+            "eqeqeq": "error"
+        },
+        "overrides": [{
+            "files": ["lib/*.js"],
+            "rules": {
+              "default-param-last": "off"
+            }
+        }]
+  }
+  ```
+
+  `biome migrate eslint --write` changes the Biome configuration as follows:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "recommended": false,
+        "suspicious": {
+          "noDoubleEquals": "error"
+        }
+      }
+    },
+    "javascript": { "globals": ["var2"] },
+    "overrides": [{
+      "include": ["lib/*.js"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useDefaultParameterLast": "off"
+          }
+        }
+      }
+    }]
+  }
+  ```
+
+  Also, if the working directory contains `.eslintignore`, then Biome migrates the glob patterns.
+  Nested `.eslintignore` in subdirectories and negated glob patterns are not supported.
+
+  If you find any issue, please don't hesitate to report them.
+
+  Contributed by @Conaclos
+
+- Added two new options to customise the emitted output of the CLI: `--reporter=json` and `--reporter=json-pretty`. With `--reporter=json`, the diagnostics and the
+  summary will be printed in the **terminal** in JSON format. With `--reporter=json-pretty`, you can print the same information, but formatted using the same options of your configuration.
+
+  NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future.
+
+  <details>
+  <summary>Example of output when running `biome format` command</summary>
+  ```json
+  {
+    "summary": {
+      "changed": 0,
+      "unchanged": 1,
+      "errors": 1,
+      "warnings": 0,
+      "skipped": 0,
+      "suggestedFixesSkipped": 0,
+      "diagnosticsNotPrinted": 0
+    },
+    "diagnostics": [
+      {
+        "category": "format",
+        "severity": "error",
+        "description": "Formatter would have printed the following content:",
+        "message": [
+          {
+            "elements": [],
+            "content": "Formatter would have printed the following content:"
+          }
+        ],
+        "advices": {
+          "advices": [
+            {
+              "diff": {
+                "dictionary": "  statement();\n",
+                "ops": [
+                  { "diffOp": { "delete": { "range": [0, 2] } } },
+                  { "diffOp": { "equal": { "range": [2, 12] } } },
+                  { "diffOp": { "delete": { "range": [0, 2] } } },
+                  { "diffOp": { "equal": { "range": [12, 13] } } },
+                  { "diffOp": { "delete": { "range": [0, 2] } } },
+                  { "diffOp": { "insert": { "range": [13, 15] } } }
+                ]
+              }
+            }
+          ]
+        },
+        "verboseAdvices": { "advices": [] },
+        "location": {
+          "path": { "file": "format.js" },
+          "span": null,
+          "sourceCode": null
+        },
+        "tags": [],
+        "source": null
+      }
+    ],
+    "command": "format"
+  }
+  ```
+  </details>
+
+- Added new `--staged` flag to the `check`, `format` and `lint` subcommands.
+
+  This new option allows users to apply the command _only_ to the files that are staged (the
+  ones that will be committed), which can be very useful to simplify writing git hook scripts
+  such as `pre-commit`. Contributed by @castarco
+
+#### Enhancements
+
+- Improve support of `.prettierignore` when migrating from Prettier
+
+  Now, Biome translates most of the glob patterns in `.prettierignore` to the equivalent Biome ignore pattern.
+  Only negated glob patterns are not supported.
+
+  Contributed by @Conaclos
+
+- Support JavaScript configuration files when migrating from Prettier
+
+  `biome migrate prettier` is now able to migrate Prettier configuration files
+  ending with `js`, `mjs`, or `cjs` extensions.
+  To do this, Biome invokes Node.js.
+
+  Also, embedded Prettier configurations in `package.json` are now supported.
+
+  Contributed by @Conaclos
+
+- Support `overrides` field in Prettier configuration files when migrating from Prettier.
+  Contributed by @Conaclos
+
+- Support passing a file path to the `--config-path` flag or the `BIOME_CONFIG_PATH` environment variable.
+
+  Now you can pass a `.json`/`.jsonc` file path with any filename to the `--config-path` flag or the
+  `BIOME_CONFIG_PATH` environment variable. This will disable the configuration auto-resolution and Biome
+  will try to read the configuration from the said file path ([#2265](https://github.com/biomejs/biome/issues/2265)).
+
+  ```shell
+  biome format --config-path=../biome.json ./src
+  ```
+
+  Contributed by @Sec-ant
+
+#### Bug fixes
+
+- Biome now tags the diagnostics emitted by `organizeImports` and `formatter` with correct severity levels, so they will be properly filtered by the flag `--diagnostic-level` ([#2288](https://github.com/biomejs/biome/issues/2288)). Contributed by @Sec-ant
+
+- Biome now correctly filters out files that are not present in the current directory when using the `--changed` flag [#1996](https://github.com/biomejs/biome/issues/1996). Contributed by @castarco
+
+- Biome now skips traversing `fifo` or `socket` files ([#2311](https://github.com/biomejs/biome/issues/2311)). Contributed by @Sec-ant
+
+- Biome now resolves configuration files exported from external libraries in `extends` from the working directory (CLI) or project root (LSP). This is the documented behavior and previous resolution behavior is considered as a bug ([#2231](https://github.com/biomejs/biome/issues/2231)). Contributed by @Sec-ant
+
 ### Configuration
+
+#### Bug fixes
+
+- Now setting group level `all` to `false` can disable recommended rules from that group when top level `recommended` is `true` or unset. Contributed by @Sec-ant
+
+- Biome configuration files can correctly extends `.jsonc` configuration files now ([#2279](https://github.com/biomejs/biome/issues/2279)). Contributed by @Sec-ant
+
+- Fixed the JSON schema for React hooks configuration ([#2396](https://github.com/biomejs/biome/issues/2396)). Contributed by @arendjr
 
 #### Enhancements
 
@@ -35,28 +329,138 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- `options` is no longer required for rules without any options ([#2313](https://github.com/biomejs/biome/issues/2313)).
+
+  Previously, the JSON schema required to set `options` to `null` when an object is used to set the diagnostic level of a rule without any option.
+  However, if `options` is set to `null`, Biome emits an error.
+
+  The schema is now fixed and it no longer requires specifying `options`.
+  This makes the following configuration valid:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "style": {
+          "noDefaultExport": {
+            "level": "off"
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  Contributed by @Conaclos
+
 ### Editors
 
+#### Bug fixes
+
+- Biome extension is now able to parse the JSX syntax in files that associated with the `javascript` [language identifier](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem). This is an ad hoc fix, because [in the React world, `.js` files are allowed to include JSX syntax](https://github.com/facebook/create-react-app/issues/87#issuecomment-234627904), and these files are often associated with the `javascript` language identifier in most of the editors. Plus, [some editor extensions](https://github.com/michaelgmcd/vscode-language-babel/blob/8b3a472748ad07c99dc022b66795c9eb46be4ccb/package.json#L63-L80) will also associate `.jsx` files with the `javascript` language identifier. Relative links: [discussion](https://github.com/biomejs/biome/discussions/838#discussioncomment-9047539), [#2085](https://github.com/biomejs/biome/issues/2085). Contributed by @Sec-ant
+
 ### Formatter
+
+#### Bug fixes
+
+- Fix [#2291](https://github.com/biomejs/biome/issues/2291) by correctly handle comment placement for JSX spread attributes and JSX spread children. Contributed by @ah-yu
 
 ### JavaScript APIs
 
 ### Linter
 
+#### Promoted rules
+
+New rules are incubated in the nursery group.
+Once stable, we promote them to a stable group.
+The following rules are promoted:
+
+- [complecity/noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites)
+- [complexity/noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary)
+- [correctness/useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable)
+- [performance/noBarrelFile](https://biomejs.dev/linter/rules/no-barrel-file/)
+- [performance/noReExportAll](https://biomejs.dev/linter/rules/no-re-export-all/)
+- [style/noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import/)
+- [style/useNodeAssertStrict](https://biomejs.dev/linter/rules/use-node-assert-strict/)
+- [suspicious/noDuplicateTestHooks](https://biomejs.dev/linter/rules/no-duplicate-test-hooks/)
+- [suspicious/noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test/)
+- [suspicious/noFocusedTests](https://biomejs.dev/linter/rules/no-focused-tests/)
+- [suspicious/noSkippedTests](https://biomejs.dev/linter/rules/no-skipped-tests/)
+- [suspicious/noSuspiciousSemicolonInJsx](https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx)
+
+#### New features
+
+- Add a new option `jsxRuntime` to the `javascript` configuration. When set to `reactClassic`, the [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) and [useImportType](https://biomejs.dev/linter/rules/use-import-type) rules use this information to make exceptions for the React global that is required by the React Classic JSX transform.
+
+  This is only necessary for React users who haven't upgraded to the [new JSX transform](https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html).
+
+  Contributed by @Conaclos and @arendjr
+
+- Implement [#2043](https://github.com/biomejs/biome/issues/2043): The React rule [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) is now also compatible with Preact hooks imported from `preact/hooks` or `preact/compat`. Contributed by @arendjr
+
+- Add rule [noFlatMapIdentity](https://biomejs.dev/linter/rules/no-flat-map-identity) to disallow unnecessary callback use on `flatMap`. Contributed by @isnakode
+
+- Add rule [noConstantMathMinMaxClamp](https://biomejs.dev/linter/rules/no-constant-math-min-max-clamp), which disallows using `Math.min` and `Math.max` to clamp a value where the result itself is constant. Contributed by @mgomulak
+
+#### Enhancements
+
+- [style/useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention/) now allows prefixing a filename with `+` ([#2341](https://github.com/biomejs/biome/issues/2341)).
+
+  This is a convention used by [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
+
+  Contributed by @Conaclos
+
+- [style/useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accepts `PascalCase` for local and top-level variables.
+
+  This allows supporting local variables that hold a component or a regular class.
+  The following code is now accepted:
+
+  ```tsx
+  function loadComponent() {
+    const Component = getComponent();
+    return <Component />;
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [complexity/useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) no longer report computed properties named `__proto__` ([#2430](https://github.com/biomejs/biome/issues/2430)).
+
+  In JavaScript, `{["__proto__"]: null}` and `{__proto__: null}` have not the same semantic.
+  The first code set a regular property to `null`.
+  The second one set the prototype of the object to `null`.
+  See the [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto) for more details.
+
+  The rule now ignores computed properties named `__proto__`.
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Lint rules `useNodejsImportProtocol`, `useNodeAssertStrict`, `noRestrictedImports`, `noNodejsModules` will no longer check `declare module` statements anymore. Contributed by @Sec-ant
 
-#### New features
+- [style/useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accepts any case for variables from object destructuring ([#2332](https://github.com/biomejs/biome/issues/2332)).
 
-#### Enhancements
+  The following name is now ignored:
 
-#### Bug fixes
+  ```js
+  const { Strange_Style } = obj;
+  ```
+
+  Previously, the rule renamed this variable. This led to a runtime error.
+
+  Contributed by @Conaclos
 
 ### Parser
 
+#### Bug fixes
 
-## 1.6.4 (2022-04-03)
+- Fixed an issue when Unicode surrogate pairs were encoded in JavaScript strings
+  using an escape sequence ([#2384](https://github.com/biomejs/biome/issues/2384)).
+  Contributed by @arendjr
+
+
+## 1.6.4 (2024-04-03)
 
 ### Analyzer
 
@@ -83,6 +487,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix the unexpected code deletion and repetition when `quickfix.biome` is enabled and some `import`-related rules are applied ([#2222](https://github.com/biomejs/biome/issues/2222), [#688](https://github.com/biomejs/biome/issues/688), [#1015](https://github.com/biomejs/biome/issues/1015)). Contributed by @Sec-ant
 
 ### Linter
+
+#### New features
+
+- Add [nursery/noMisplacedAssertion](https://biomejs.dev/linter/rules/no-misplaced-assertion/). COntributed by @ematipico
 
 #### Bug fixes
 
@@ -188,6 +596,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### New features
+
+- Add [nursery/noDuplicateElseIf](https://biomejs.dev/linter/rules/no-duplicate-else-if/). COntributed by @mdm317
+
 #### Bug fixes
 
 - Rule `noUndeclaredDependencies` now also validates `peerDependencies` and `optionalDependencies` ([#2122](https://github.com/biomejs/biome/issues/2122)). Contributed by @Sec-ant
@@ -254,7 +666,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) now reports duplicate type parameters in a same declaration.
 
-  The following type parameters are now reported as a redeclaraion:
+  The following type parameters are now reported as a redeclaration:
 
   ```ts
   function f<T, T>() {}
@@ -328,12 +740,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   <div></div>
   ```
 
-- Add lint rule useJsxKeyInIterable from Eslint rule [`react/jsx-key`](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-key.md). Contributed by @vohoanglong0107
 - The analyzer now **infers** the correct quote from `javascript.formatter.quoteStyle`, if set. This means that code fixes suggested by the analyzer will use the same quote of the formatter. Contributed by @ematipico
 
 #### Enhancements
 
-- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) ignores unused rest spread silbings.
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) ignores unused rest spread siblings.
 
   The following code is now valid:
 
@@ -491,6 +902,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```
   Contributed by @ematipico
+
 - Fix [#1774](https://github.com/biomejs/biome/issues/1774) by taking into account the option `--no-errors-on-unmatched` when running the CLI using `--changed`. Contributed by @antogyn
 
 #### Enhancements
@@ -709,11 +1121,11 @@ Additionally, the following rules are now recommended:
 
   ```diff
   - <div class="px-2 foo p-4 bar" />
-  + <div class="foo·bar·p-4·px-2" />
+  + <div class="foo bar p-4 px-2" />
   ```
   Contributed by @DaniGuardiola
 
-- Add rule [noUndeclaredependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies), to detect the use of
+- Add rule [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies), to detect the use of
   dependencies that aren't present in the `package.json`.
 
   The rule ignores imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
@@ -757,7 +1169,7 @@ Additionally, the following rules are now recommended:
 - Add rule [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test) which disallows `export` or `modules.exports` in files
   containing test. Contributed by @ah-yu
 
-- Add rule [noSemicolonInJsx](https://biomejs.dev/linter/rules/no-semicolon-in-jsx/) to detect possible wrong semicolons inside JSX elements.
+- Add rule [noSemicolonInJsx](https://biomejs.dev/linter/rules/no-suspicious-semicolon-in-jsx/) to detect possible wrong semicolons inside JSX elements.
 
   ```jsx
   const Component = () => {
@@ -776,6 +1188,15 @@ Additionally, the following rules are now recommended:
   export * from "foo";
   ```
   Contributed by @togami2864
+
+- Add rule [noReExportAll](https://biomejs.dev/linter/rules/no-re-export-all/) that report `export * from "mod"`.
+  Contributed by @mdm317
+
+- Add rule [noExcessiveNestedTestSuites](https://biomejs.dev/linter/rules/no-excessive-nested-test-suites/).
+  Contributed by @vasucp1207
+
+- Add rule [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/).
+  Contributed by @vohoanglong0107
 
 #### Enhancements
 
@@ -931,7 +1352,7 @@ Additionally, the following rules are now recommended:
 - Fix [#1656](https://github.com/biomejs/biome/issues/1656). [useOptionalChain](https://biomejs.dev/linter/rules/use-optional-chain/) code action now correctly handles logical and chains where methods with the same name are invoked with different arguments:
 
   ```diff
-  - tags·&&·tags.includes('a')·&&·tags.includes('b')
+  - tags && tags.includes('a') && tags.includes('b')
   + tags?.includes('a') && tags.includes('b')
   ```
 
@@ -1969,9 +2390,9 @@ no longer repports missing dependencies for React hooks without dependency array
 
 - Add option `--line-feed` to the `format` command. Contributed by @SuperchupuDev
 
-- Add option `--bracket-same-line` to the `format` command. Contributed by @faultyserve
+- Add option `--bracket-same-line` to the `format` command. Contributed by @faultyserver
 
-- Add option `--bracket-spacing` to the `format` command. Contributed by @faultyserve
+- Add option `--bracket-spacing` to the `format` command. Contributed by @faultyserver
 
 #### Bug fixes
 
@@ -3157,7 +3578,7 @@ The following rules are promoted:
   which instructs Biome to exit with an error code when warnings are emitted.
 
   ```shell
-  biome check --error-on-wanrings ./src
+  biome check --error-on-warnings ./src
   ```
 
 - Add a configuration to enable parsing comments inside JSON files:

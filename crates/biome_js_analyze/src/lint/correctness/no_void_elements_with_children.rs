@@ -33,7 +33,7 @@ declare_rule! {
     pub NoVoidElementsWithChildren {
         version: "1.0.0",
         name: "noVoidElementsWithChildren",
-        source: RuleSource::EslintReact("void-dom-elements-no-children"),
+        sources: &[RuleSource::EslintReact("void-dom-elements-no-children")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }
@@ -94,7 +94,6 @@ pub enum NoVoidElementsWithChildrenCause {
         dangerous_prop_cause: Option<JsPropertyObjectMember>,
         /// If the current element has the prop `children`
         children_prop: Option<JsPropertyObjectMember>,
-        /// An instance of [ReactCreateElementCall]
         react_create_element: ReactCreateElementCall,
     },
 }

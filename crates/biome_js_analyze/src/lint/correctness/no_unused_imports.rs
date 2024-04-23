@@ -1,6 +1,11 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{
+    react::{is_global_react_import, ReactLibrary},
+    services::semantic::Semantic,
+    JsRuleAction,
+};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, options::JsxRuntime, ActionCategory, FixKind, Rule,
+    RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -22,6 +27,12 @@ declare_rule! {
     /// Note that the leading trivia, e.g., comments or newlines preceding
     /// the unused imports will also be removed. So that comment directives
     /// like `@ts-expect-error` won't be transferred to a wrong place.
+    ///
+    /// ## Options
+    ///
+    /// This rule respects the [`jsxRuntime`](https://biomejs.dev/reference/configuration/#javascriptjsxruntime)
+    /// setting and will make an exception for React globals if it is set to
+    /// `"reactClassic"`.
     ///
     /// ## Examples
     ///
@@ -85,7 +96,11 @@ impl Rule for NoUnusedImports {
         if !is_import(&declaration) {
             return None;
         }
-
+        if ctx.jsx_runtime() == JsxRuntime::ReactClassic
+            && is_global_react_import(binding, ReactLibrary::React)
+        {
+            return None;
+        }
         let model = ctx.model();
         binding.all_references(model).next().is_none().then_some(())
     }

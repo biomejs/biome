@@ -393,7 +393,6 @@ impl LanguageServer for LSPServer {
         let result = biome_diagnostics::panic::catch_unwind(move || {
             handlers::formatting::format_range(&self.session, params)
         });
-
         self.map_op_error(result).await
     }
 

@@ -25,7 +25,7 @@ JsModule {
             implements_clause: TsImplementsClause {
                 implements_token: IMPLEMENTS_KW@15..26 "implements" [] [Whitespace(" ")],
                 types: TsTypeList [
-                    TsNameWithTypeArguments {
+                    TsReferenceType {
                         name: JsReferenceIdentifier {
                             value_token: IDENT@26..28 "B" [] [Whitespace(" ")],
                         },
@@ -67,7 +67,7 @@ JsModule {
       6: TS_IMPLEMENTS_CLAUSE@15..28
         0: IMPLEMENTS_KW@15..26 "implements" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@26..28
-          0: TS_NAME_WITH_TYPE_ARGUMENTS@26..28
+          0: TS_REFERENCE_TYPE@26..28
             0: JS_REFERENCE_IDENTIFIER@26..28
               0: IDENT@26..28 "B" [] [Whitespace(" ")]
             1: (empty)

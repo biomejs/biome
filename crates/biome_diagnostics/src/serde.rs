@@ -15,6 +15,7 @@ use crate::{
 
 /// Serializable representation for a [Diagnostic](super::Diagnostic).
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(not(target_arch = "wasm32"), serde(rename_all = "camelCase"))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(test, derive(Eq, PartialEq))]
 pub struct Diagnostic {
@@ -129,6 +130,7 @@ impl<D: super::Diagnostic + ?Sized> std::fmt::Display for PrintDescription<'_, D
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(not(target_arch = "wasm32"), serde(rename_all = "camelCase"))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(test, derive(Eq, PartialEq))]
 struct Location {
@@ -151,6 +153,7 @@ impl From<super::Location<'_>> for Location {
 
 /// Implementation of [Visitor] collecting serializable [Advice] into a vector.
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(test, derive(Eq, PartialEq))]
 struct Advices {
@@ -237,6 +240,7 @@ impl super::Advices for Advices {
 /// See the [Visitor] trait for additional documentation on all the supported
 /// advice types.
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(test, derive(Eq, PartialEq))]
 enum Advice {
@@ -417,8 +421,8 @@ mod tests {
     fn serialized() -> Value {
         let advices = json!([
             {
-                "Log": [
-                    "Warn",
+                "log": [
+                    "warn",
                     [
                         {
                             "content": "log",
@@ -444,14 +448,14 @@ mod tests {
             "advices": {
                 "advices": advices
             },
-            "verbose_advices": {
+            "verboseAdvices": {
                 "advices": advices
             },
             "location": {
                 "path": {
                     "file": "path"
                 },
-                "source_code": "source_code",
+                "sourceCode": "source_code",
                 "span": [
                     0,
                     6
@@ -471,7 +475,7 @@ mod tests {
         let json = to_value(&diag).unwrap();
 
         let expected = serialized();
-        assert_eq!(json, expected, "actual:\n{json:#}\nexpected:\n{expected:#}");
+        assert_eq!(json, expected);
     }
 
     #[test]
@@ -482,9 +486,6 @@ mod tests {
         let expected = TestDiagnostic::default();
         let expected = super::Diagnostic::new(expected);
 
-        assert_eq!(
-            diag, expected,
-            "actual:\n{diag:#?}\nexpected:\n{expected:#?}"
-        );
+        assert_eq!(diag, expected);
     }
 }

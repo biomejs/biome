@@ -1,3 +1,4 @@
+use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{cli_options, CliOptions, ColorsArg};
 use crate::diagnostics::DeprecatedConfigurationFile;
 use crate::execute::Stdin;
@@ -14,11 +15,11 @@ use biome_configuration::{
 use biome_configuration::{ConfigurationDiagnostic, PartialConfiguration};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
-use biome_fs::BiomePath;
+use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::documentation::Doc;
 use biome_service::workspace::{OpenProjectParams, UpdateProjectParams};
-use biome_service::WorkspaceError;
+use biome_service::{DynRef, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -60,7 +61,8 @@ pub enum BiomeCommand {
     /// Start the Biome daemon server process
     #[bpaf(command)]
     Start(
-        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        /// Allows to set a custom file path to the configuration file,
+        /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
         Option<PathBuf>,
     ),
@@ -109,6 +111,11 @@ pub enum BiomeCommand {
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 
+        /// When set to true, only the files that have been staged (the ones prepared to be committed)
+        /// will be linted.
+        #[bpaf(long("staged"), switch)]
+        staged: bool,
+
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.
         #[bpaf(long("changed"), switch)]
@@ -150,6 +157,10 @@ pub enum BiomeCommand {
         /// Example: `echo 'let a;' | biome lint --stdin-file-path=file.js`
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
+        /// When set to true, only the files that have been staged (the ones prepared to be committed)
+        /// will be linted.
+        #[bpaf(long("staged"), switch)]
+        staged: bool,
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.
         #[bpaf(long("changed"), switch)]
@@ -196,6 +207,11 @@ pub enum BiomeCommand {
         /// Writes formatted files to file system.
         #[bpaf(switch)]
         write: bool,
+
+        /// When set to true, only the files that have been staged (the ones prepared to be committed)
+        /// will be linted.
+        #[bpaf(long("staged"), switch)]
+        staged: bool,
 
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.
@@ -256,7 +272,8 @@ pub enum BiomeCommand {
     /// Acts as a server for the Language Server Protocol over stdin/stdout
     #[bpaf(command("lsp-proxy"))]
     LspProxy(
-        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        /// Allows to set a custom file path to the configuration file,
+        /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
         Option<PathBuf>,
         /// Bogus argument to make the command work with vscode-languageclient
@@ -333,7 +350,8 @@ pub enum BiomeCommand {
     RunServer {
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
         stop_on_disconnect: bool,
-        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        /// Allows to set a custom file path to the configuration file,
+        /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
         config_path: Option<PathBuf>,
     },
@@ -346,6 +364,16 @@ pub enum MigrateSubCommand {
     /// It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`, and map the Prettier's configuration into Biome's configuration file.
     #[bpaf(command)]
     Prettier,
+    /// It attempts to find the ESLint configuration file in the working directory, and update the Biome's configuration file as a result.
+    #[bpaf(command)]
+    Eslint {
+        /// Includes rules inspired from an eslint rule in the migration
+        #[bpaf(long("include-inspired"))]
+        include_inspired: bool,
+        /// Includes nursery rules in the migration
+        #[bpaf(long("include-nursery"))]
+        include_nursery: bool,
+    },
 }
 
 impl MigrateSubCommand {
@@ -457,7 +485,7 @@ fn resolve_manifest(cli_session: &CliSession) -> Result<(), WorkspaceError> {
     let workspace = &*cli_session.app.workspace;
 
     let result = fs.auto_search(
-        fs.working_directory().unwrap_or_default(),
+        &fs.working_directory().unwrap_or_default(),
         &["package.json"],
         false,
     )?;
@@ -498,6 +526,34 @@ pub(crate) fn get_stdin(
     };
 
     Ok(stdin)
+}
+
+fn get_files_to_process(
+    since: Option<String>,
+    changed: bool,
+    staged: bool,
+    fs: &DynRef<'_, dyn FileSystem>,
+    configuration: &PartialConfiguration,
+) -> Result<Option<Vec<OsString>>, CliDiagnostic> {
+    if since.is_some() {
+        if !changed {
+            return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+        }
+        if staged {
+            return Err(CliDiagnostic::incompatible_arguments("since", "staged"));
+        }
+    }
+
+    if changed {
+        if staged {
+            return Err(CliDiagnostic::incompatible_arguments("changed", "staged"));
+        }
+        Ok(Some(get_changed_files(fs, configuration, since)?))
+    } else if staged {
+        Ok(Some(get_staged_files(fs)?))
+    } else {
+        Ok(None)
+    }
 }
 
 /// Tests that all CLI options adhere to the invariants expected by `bpaf`.

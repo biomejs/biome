@@ -184,14 +184,6 @@ pub fn graphql_directive_location(value_token_token: SyntaxToken) -> GraphqlDire
         [Some(SyntaxElement::Token(value_token_token))],
     ))
 }
-pub fn graphql_document(graphql_definition_list: GraphqlDefinitionList) -> GraphqlDocument {
-    GraphqlDocument::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_DOCUMENT,
-        [Some(SyntaxElement::Node(
-            graphql_definition_list.into_syntax(),
-        ))],
-    ))
-}
 pub fn graphql_enum_type_definition(
     enum_token: SyntaxToken,
     name: GraphqlName,
@@ -437,7 +429,7 @@ pub fn graphql_float_value(graphql_float_literal_token: SyntaxToken) -> GraphqlF
 }
 pub fn graphql_fragment_definition(
     fragment_token: SyntaxToken,
-    name: GraphqlFragmentName,
+    name: GraphqlName,
     type_condition: GraphqlTypeCondition,
     directives: GraphqlDirectiveList,
     selection_set: GraphqlSelectionSet,
@@ -453,15 +445,9 @@ pub fn graphql_fragment_definition(
         ],
     ))
 }
-pub fn graphql_fragment_name(name: GraphqlName) -> GraphqlFragmentName {
-    GraphqlFragmentName::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_FRAGMENT_NAME,
-        [Some(SyntaxElement::Node(name.into_syntax()))],
-    ))
-}
 pub fn graphql_fragment_spread(
     dotdotdot_token: SyntaxToken,
-    name: GraphqlFragmentName,
+    name: GraphqlName,
     directives: GraphqlDirectiveList,
 ) -> GraphqlFragmentSpread {
     GraphqlFragmentSpread::unwrap_cast(SyntaxNode::new_detached(
@@ -1125,6 +1111,37 @@ pub fn graphql_operation_type(value_token_token: SyntaxToken) -> GraphqlOperatio
         GraphqlSyntaxKind::GRAPHQL_OPERATION_TYPE,
         [Some(SyntaxElement::Token(value_token_token))],
     ))
+}
+pub fn graphql_root(
+    definitions: GraphqlDefinitionList,
+    eof_token: SyntaxToken,
+) -> GraphqlRootBuilder {
+    GraphqlRootBuilder {
+        definitions,
+        eof_token,
+        bom_token: None,
+    }
+}
+pub struct GraphqlRootBuilder {
+    definitions: GraphqlDefinitionList,
+    eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
+}
+impl GraphqlRootBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn build(self) -> GraphqlRoot {
+        GraphqlRoot::unwrap_cast(SyntaxNode::new_detached(
+            GraphqlSyntaxKind::GRAPHQL_ROOT,
+            [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.definitions.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
 }
 pub fn graphql_root_operation_type_definition(
     operation_type: GraphqlOperationType,

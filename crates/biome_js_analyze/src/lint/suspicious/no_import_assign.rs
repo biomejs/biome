@@ -52,7 +52,7 @@ declare_rule! {
     pub NoImportAssign {
         version: "1.0.0",
         name: "noImportAssign",
-        source: RuleSource::Eslint("no-import-assign"),
+        sources: &[RuleSource::Eslint("no-import-assign")],
         recommended: true,
     }
 }

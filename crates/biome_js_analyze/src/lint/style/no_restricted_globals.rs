@@ -48,7 +48,7 @@ declare_rule! {
     pub NoRestrictedGlobals {
         version: "1.0.0",
         name: "noRestrictedGlobals",
-        source: RuleSource::Eslint("no-restricted-globals"),
+        sources: &[RuleSource::Eslint("no-restricted-globals")],
         recommended: false,
     }
 }
@@ -62,7 +62,7 @@ const RESTRICTED_GLOBALS: [&str; 2] = ["event", "error"];
 pub struct RestrictedGlobalsOptions {
     /// A list of names that should trigger the rule
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    denied_globals: Vec<String>,
+    pub denied_globals: Vec<String>,
 }
 
 impl Rule for NoRestrictedGlobals {

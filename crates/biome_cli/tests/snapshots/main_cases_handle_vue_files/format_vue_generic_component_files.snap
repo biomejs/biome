@@ -1,0 +1,42 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `file.vue`
+
+```vue
+<script generic="T extends Record<string, any>" lang="ts" setup>
+const a     =     "a";
+</script>
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.vue format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   <script generic="T extends Record<string, any>" lang="ts" setup>
+    2   │ - const·a·····=·····"a";
+      2 │ + const·a·=·"a";
+    3 3 │   </script>
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes needed.
+Found 1 error.
+```

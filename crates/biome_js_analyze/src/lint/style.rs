@@ -8,6 +8,7 @@ pub mod no_default_export;
 pub mod no_implicit_boolean;
 pub mod no_inferrable_types;
 pub mod no_namespace;
+pub mod no_namespace_import;
 pub mod no_negation_else;
 pub mod no_non_null_assertion;
 pub mod no_parameter_assign;
@@ -32,6 +33,7 @@ pub mod use_fragment_syntax;
 pub mod use_import_type;
 pub mod use_literal_enum_members;
 pub mod use_naming_convention;
+pub mod use_node_assert_strict;
 pub mod use_nodejs_import_protocol;
 pub mod use_number_namespace;
 pub mod use_numeric_literals;
@@ -54,6 +56,7 @@ declare_group! {
             self :: no_implicit_boolean :: NoImplicitBoolean ,
             self :: no_inferrable_types :: NoInferrableTypes ,
             self :: no_namespace :: NoNamespace ,
+            self :: no_namespace_import :: NoNamespaceImport ,
             self :: no_negation_else :: NoNegationElse ,
             self :: no_non_null_assertion :: NoNonNullAssertion ,
             self :: no_parameter_assign :: NoParameterAssign ,
@@ -78,6 +81,7 @@ declare_group! {
             self :: use_import_type :: UseImportType ,
             self :: use_literal_enum_members :: UseLiteralEnumMembers ,
             self :: use_naming_convention :: UseNamingConvention ,
+            self :: use_node_assert_strict :: UseNodeAssertStrict ,
             self :: use_nodejs_import_protocol :: UseNodejsImportProtocol ,
             self :: use_number_namespace :: UseNumberNamespace ,
             self :: use_numeric_literals :: UseNumericLiterals ,

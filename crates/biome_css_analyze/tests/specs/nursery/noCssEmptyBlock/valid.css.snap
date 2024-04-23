@@ -1,0 +1,77 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* CssDeclarationOrRuleBlock */
+a { color: pink; }
+a { /* foo */ }
+a {
+    /* foo */
+}
+a {
+    /* foo */
+    /* bar */
+}
+a {
+    /*\nfoo\nbar\n*/
+}
+
+/* CssRuleBlock */
+@media print { a { color: pink; } }
+@media print { a { /* foo */ } }
+
+/* CssDeclarationBlock */
+@font-palette-values --identifier {
+    font-family: Bixa;
+}
+
+@font-face {
+    font-family: "Trickster";
+    src:
+      local("Trickster"),
+      url("trickster-COLRv1.otf") format("opentype") tech(color-COLRv1),
+      url("trickster-outline.otf") format("opentype"),
+      url("trickster-outline.woff") format("woff");
+}
+
+/* CssKeyframesBlock */
+@keyframes slidein {
+    from {
+      transform: translateX(0%);
+    }
+
+    to {
+      transform: translateX(100%);
+    }
+}
+
+/* CssFontFeatureValuesBlock */
+@font-feature-values Font One {
+  @styleset {
+    nice-style: 12;
+  }
+}
+
+/* CssPageAtRuleBlock */
+@page {
+  size: 8.5in 9in;
+  margin-top: 4in;
+}
+@page :right {
+  size: 11in;
+  margin-top: 4in;
+}
+
+
+/* CssDeclarationOrAtRuleBlock */
+@page {
+  @top-right {
+    content: "Page " counter(pageNumber);
+  }
+}
+
+@import "foo.css";
+@import url(x.css)
+```

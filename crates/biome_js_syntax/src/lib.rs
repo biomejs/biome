@@ -309,7 +309,7 @@ pub fn inner_string_text(token: &JsSyntaxToken) -> TokenText {
     text
 }
 
-/// Returns `Ok(true)` if `maybe_argument` is an argument of a [test call expression](is_test_call_expression).
+/// Returns `Ok(true)` if `maybe_argument` is an argument of a [test call expression](JsCallExpression::is_test_call_expression).
 pub fn is_test_call_argument(maybe_argument: &JsSyntaxNode) -> SyntaxResult<bool> {
     let call_expression = maybe_argument
         .parent()

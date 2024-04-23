@@ -476,42 +476,6 @@ pub struct GraphqlDirectiveLocationFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GraphqlDocument {
-    pub(crate) syntax: SyntaxNode,
-}
-impl GraphqlDocument {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> GraphqlDocumentFields {
-        GraphqlDocumentFields {
-            graphql_definition_list: self.graphql_definition_list(),
-        }
-    }
-    pub fn graphql_definition_list(&self) -> GraphqlDefinitionList {
-        support::list(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for GraphqlDocument {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GraphqlDocumentFields {
-    pub graphql_definition_list: GraphqlDefinitionList,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GraphqlEnumTypeDefinition {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1027,7 +991,7 @@ impl GraphqlFragmentDefinition {
     pub fn fragment_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<GraphqlFragmentName> {
+    pub fn name(&self) -> SyntaxResult<GraphqlName> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn type_condition(&self) -> SyntaxResult<GraphqlTypeCondition> {
@@ -1052,44 +1016,10 @@ impl Serialize for GraphqlFragmentDefinition {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GraphqlFragmentDefinitionFields {
     pub fragment_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<GraphqlFragmentName>,
+    pub name: SyntaxResult<GraphqlName>,
     pub type_condition: SyntaxResult<GraphqlTypeCondition>,
     pub directives: GraphqlDirectiveList,
     pub selection_set: SyntaxResult<GraphqlSelectionSet>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GraphqlFragmentName {
-    pub(crate) syntax: SyntaxNode,
-}
-impl GraphqlFragmentName {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> GraphqlFragmentNameFields {
-        GraphqlFragmentNameFields { name: self.name() }
-    }
-    pub fn name(&self) -> SyntaxResult<GraphqlName> {
-        support::required_node(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for GraphqlFragmentName {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct GraphqlFragmentNameFields {
-    pub name: SyntaxResult<GraphqlName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GraphqlFragmentSpread {
@@ -1115,7 +1045,7 @@ impl GraphqlFragmentSpread {
     pub fn dotdotdot_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<GraphqlFragmentName> {
+    pub fn name(&self) -> SyntaxResult<GraphqlName> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn directives(&self) -> GraphqlDirectiveList {
@@ -1134,7 +1064,7 @@ impl Serialize for GraphqlFragmentSpread {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GraphqlFragmentSpreadFields {
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<GraphqlFragmentName>,
+    pub name: SyntaxResult<GraphqlName>,
     pub directives: GraphqlDirectiveList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -2420,6 +2350,52 @@ impl Serialize for GraphqlOperationType {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GraphqlOperationTypeFields {
     pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GraphqlRoot {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GraphqlRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GraphqlRootFields {
+        GraphqlRootFields {
+            bom_token: self.bom_token(),
+            definitions: self.definitions(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn bom_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn definitions(&self) -> GraphqlDefinitionList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for GraphqlRoot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct GraphqlRootFields {
+    pub bom_token: Option<SyntaxToken>,
+    pub definitions: GraphqlDefinitionList,
+    pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GraphqlRootOperationTypeDefinition {
@@ -4174,44 +4150,6 @@ impl From<GraphqlDirectiveLocation> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for GraphqlDocument {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRAPHQL_DOCUMENT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRAPHQL_DOCUMENT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for GraphqlDocument {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlDocument")
-            .field("graphql_definition_list", &self.graphql_definition_list())
-            .finish()
-    }
-}
-impl From<GraphqlDocument> for SyntaxNode {
-    fn from(n: GraphqlDocument) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<GraphqlDocument> for SyntaxElement {
-    fn from(n: GraphqlDocument) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for GraphqlEnumTypeDefinition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4718,44 +4656,6 @@ impl From<GraphqlFragmentDefinition> for SyntaxNode {
 }
 impl From<GraphqlFragmentDefinition> for SyntaxElement {
     fn from(n: GraphqlFragmentDefinition) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for GraphqlFragmentName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRAPHQL_FRAGMENT_NAME as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRAPHQL_FRAGMENT_NAME
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for GraphqlFragmentName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlFragmentName")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
-    }
-}
-impl From<GraphqlFragmentName> for SyntaxNode {
-    fn from(n: GraphqlFragmentName) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<GraphqlFragmentName> for SyntaxElement {
-    fn from(n: GraphqlFragmentName) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -6003,6 +5903,49 @@ impl From<GraphqlOperationType> for SyntaxNode {
 }
 impl From<GraphqlOperationType> for SyntaxElement {
     fn from(n: GraphqlOperationType) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for GraphqlRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRAPHQL_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRAPHQL_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GraphqlRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GraphqlRoot")
+            .field(
+                "bom_token",
+                &support::DebugOptionalElement(self.bom_token()),
+            )
+            .field("definitions", &self.definitions())
+            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+            .finish()
+    }
+}
+impl From<GraphqlRoot> for SyntaxNode {
+    fn from(n: GraphqlRoot) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GraphqlRoot> for SyntaxElement {
+    fn from(n: GraphqlRoot) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -8256,11 +8199,6 @@ impl std::fmt::Display for GraphqlDirectiveLocation {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for GraphqlDocument {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for GraphqlEnumTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -8312,11 +8250,6 @@ impl std::fmt::Display for GraphqlFloatValue {
     }
 }
 impl std::fmt::Display for GraphqlFragmentDefinition {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for GraphqlFragmentName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -8452,6 +8385,11 @@ impl std::fmt::Display for GraphqlOperationDefinition {
     }
 }
 impl std::fmt::Display for GraphqlOperationType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GraphqlRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

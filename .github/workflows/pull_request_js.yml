@@ -1,4 +1,3 @@
-
 # Jobs run on pull request in js folders
 name: Pull request JS
 on:
@@ -6,9 +5,8 @@ on:
     branches:
       - main
     paths: # Only run when changes are made to js code
-      - 'website/**'
       - 'editors/**'
-#     - 'crates/**'
+      #     - 'crates/**'
       - 'packages/@biomejs/js-api/**'
 
 # Cancel jobs when the PR is updated
@@ -41,36 +39,3 @@ jobs:
         run: |
           pnpm i
           pnpm run ci
-
-  type-check:
-    name: Type-check JS Files
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout PR Branch
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
-      - name: Cache pnpm modules
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-
-      - uses: pnpm/action-setup@v3
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@b8edcc56aab474d90c7cf0bb8beeaf8334c15e9f # v1
-        with:
-          cache-base: main
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-      - name: Build WASM module for the web
-        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --scope biomedev crates/biome_wasm
-      - name: Install libraries
-        run: pnpm i --filter @biomejs/website
-      - name: Build JS
-        working-directory: website
-        run: pnpm build:js
-      - name: Type check
-        working-directory: website
-        run: pnpm tsc

@@ -192,8 +192,19 @@ where
         self.request("biome/rage", params)
     }
 
+    fn parse_pattern(
+        &self,
+        params: super::ParsePatternParams,
+    ) -> Result<super::ParsePatternResult, WorkspaceError> {
+        self.request("biome/parse_pattern", params)
+    }
+
     fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
         self.request("biome/search_pattern", params)
+    }
+
+    fn drop_pattern(&self, params: super::DropPatternParams) -> Result<(), WorkspaceError> {
+        self.request("biome/drop_pattern", params)
     }
 
     fn server_info(&self) -> Option<&ServerInfo> {

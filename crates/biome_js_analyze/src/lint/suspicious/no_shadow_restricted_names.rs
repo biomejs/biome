@@ -33,7 +33,7 @@ declare_rule! {
     pub NoShadowRestrictedNames {
         version: "1.0.0",
         name: "noShadowRestrictedNames",
-        source: RuleSource::Eslint("no-shadow-restricted-names"),
+        sources: &[RuleSource::Eslint("no-shadow-restricted-names")],
         recommended: true,
     }
 }

@@ -26,7 +26,7 @@ declare_rule! {
     ///
     /// This rule is a port of the rule [react-hooks/exhaustive-deps](https://legacy.reactjs.org/docs/hooks-rules.html#eslint-plugin), and it's meant to target projects that uses React.
     ///
-    /// If your project _doesn't_ use React, **you shouldn't use this rule**.
+    /// If your project _doesn't_ use React (or Preact), **you shouldn't use this rule**.
     ///
     /// The rule will inspect the following **known** hooks:
     ///
@@ -213,10 +213,15 @@ declare_rule! {
     /// const doAction = useCallback(() => dispatch(someAction()), []);
     /// ```
     ///
+    /// ## Preact support
+    ///
+    /// This rule recognizes rules imported from `preact/compat` and
+    /// `preact/hooks` and applies the same rules as for React hooks.
+    ///
     pub UseExhaustiveDependencies {
         version: "1.0.0",
         name: "useExhaustiveDependencies",
-        source: RuleSource::EslintReactHooks("exhaustive-deps"),
+        sources: &[RuleSource::EslintReactHooks("exhaustive-deps")],
         recommended: true,
     }
 }
@@ -427,8 +432,7 @@ fn capture_needs_to_be_in_the_dependency_list(
     let decl = binding.tree().declaration()?;
     match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
         // These declarations are always stable
-        AnyJsBindingDeclaration::JsFunctionDeclaration(_)
-        | AnyJsBindingDeclaration::JsClassDeclaration(_)
+        AnyJsBindingDeclaration::JsClassDeclaration(_)
         | AnyJsBindingDeclaration::TsEnumDeclaration(_)
         | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
         | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
@@ -436,6 +440,16 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsInferType(_)
         | AnyJsBindingDeclaration::TsMappedType(_)
         | AnyJsBindingDeclaration::TsTypeParameter(_) => None,
+        // Function declarations are unstable if ...
+        AnyJsBindingDeclaration::JsFunctionDeclaration(declaration) => {
+            let declaration_range = declaration.syntax().text_range();
+
+            // ... they are declared inside the component function
+            component_function_range
+                .intersect(declaration_range)
+                .filter(|range| !range.is_empty())
+                .map(|_| capture)
+        }
         // Variable declarators are stable if ...
         AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
             let declaration = declarator
@@ -445,7 +459,9 @@ fn capture_needs_to_be_in_the_dependency_list(
             let declaration_range = declaration.syntax().text_range();
 
             // ... they are declared outside of the component function
-            let _ = component_function_range.intersect(declaration_range)?;
+            let _ = component_function_range
+                .intersect(declaration_range)
+                .filter(|range| !range.is_empty())?;
 
             if declaration.is_const() {
                 // ... they are `const` and their initializer is constant
@@ -454,6 +470,15 @@ fn capture_needs_to_be_in_the_dependency_list(
                 if model.is_constant(&expr) {
                     return None;
                 }
+            }
+
+            // ... they are recursively used by the binding being created
+            if capture
+                .node()
+                .ancestors()
+                .any(|ancestor| &ancestor == declaration.syntax())
+            {
+                return None;
             }
 
             // ... they are assign to stable returns of another React function

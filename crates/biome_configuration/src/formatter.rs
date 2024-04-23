@@ -39,10 +39,6 @@ pub struct FormatterConfiguration {
 
     /// What's the max width of a line. Defaults to 80.
     #[partial(bpaf(long("line-width"), argument("NUMBER"), optional))]
-    #[partial(serde(
-        deserialize_with = "deserialize_line_width",
-        serialize_with = "serialize_line_width"
-    ))]
     pub line_width: LineWidth,
 
     /// The attribute position style in HTMLish languages. By default auto.
@@ -114,22 +110,6 @@ impl From<PlainIndentStyle> for IndentStyle {
             PlainIndentStyle::Space => IndentStyle::Space,
         }
     }
-}
-
-pub fn deserialize_line_width<'de, D>(deserializer: D) -> Result<Option<LineWidth>, D::Error>
-where
-    D: serde::de::Deserializer<'de>,
-{
-    let value: u16 = Deserialize::deserialize(deserializer)?;
-    let line_width = LineWidth::try_from(value).map_err(serde::de::Error::custom)?;
-    Ok(Some(line_width))
-}
-
-pub fn serialize_line_width<S>(line_width: &Option<LineWidth>, s: S) -> Result<S::Ok, S::Error>
-where
-    S: serde::ser::Serializer,
-{
-    s.serialize_u16(line_width.unwrap_or_default().get())
 }
 
 #[derive(

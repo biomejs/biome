@@ -54,8 +54,12 @@ declare_rule! {
     pub NoEmptyBlockStatements {
         version: "1.3.0",
         name: "noEmptyBlockStatements",
-        // Include also `eslint/no-empty-static-block`
-        source: RuleSource::Eslint("no-empty"),
+        sources: &[
+            RuleSource::Eslint("no-empty"),
+            RuleSource::Eslint("no-empty-static-block"),
+            RuleSource::Eslint("no-empty-function"),
+            RuleSource::EslintTypeScript("no-empty-function"),
+        ],
         recommended: false,
     }
 }

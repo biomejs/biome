@@ -30,7 +30,7 @@ declare_rule! {
     pub UseFragmentSyntax {
         version: "1.0.0",
         name: "useFragmentSyntax",
-        source: RuleSource::EslintReact("jsx-fragments"),
+        sources: &[RuleSource::EslintReact("jsx-fragments")],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

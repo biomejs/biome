@@ -43,9 +43,10 @@ declare_rule! {
     ///
     /// ### Variable names
     ///
-    /// All variables, including function parameters and catch parameters, are in [`camelCase`].
+    /// All variables, including function parameters, are in [`camelCase`] or [`PascalCase`].
+    /// Catch parameters are always in [`camelCase`].
     ///
-    /// Additionally, top-level variables declared as `const` or `var` may be in [`CONSTANT_CASE`] or [`PascalCase`].
+    /// Additionally, top-level variables declared as `const` or `var` may be in [`CONSTANT_CASE`].
     /// Top-level variables are declared at module or script level.
     /// Variables declared in a TypeScript `module` or `namespace` are also considered top-level.
     ///
@@ -60,8 +61,6 @@ declare_rule! {
     /// }
     ///
     /// export const A_CONSTANT = 5;
-    ///
-    /// export const Person = class {}
     ///
     /// let aVariable = 0;
     ///
@@ -81,7 +80,7 @@ declare_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// function f(FirstParam) {}
+    /// function f(FIRST_PARAM) {}
     /// ```
     ///
     /// ### Function names
@@ -286,7 +285,7 @@ declare_rule! {
     pub UseNamingConvention {
         version: "1.0.0",
         name: "useNamingConvention",
-        source: RuleSource::EslintTypeScript("naming-convention"),
+        sources: &[RuleSource::EslintTypeScript("naming-convention")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
         fix_kind: FixKind::Safe,
@@ -424,9 +423,15 @@ impl Rule for UseNamingConvention {
                 if binding.is_exported(model) {
                     return None;
                 }
-                if let Some(AnyJsBindingDeclaration::TsPropertyParameter(_)) = binding.declaration()
+                // Property parameters are also class properties.
+                // Shorthand binding patterns such as `const { a_a } = x;` should not be renamed.
+                // Shorthand named import specifiers such as `import { a_a } from "mod";` should not be renamed.
+                if let Some(
+                    AnyJsBindingDeclaration::TsPropertyParameter(_)
+                    | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
+                    | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_),
+                ) = binding.declaration()
                 {
-                    // Property parameters are also class properties.
                     return None;
                 }
 
@@ -606,16 +611,17 @@ enum Named {
     ClassStaticMethod,
     ClassStaticProperty,
     ClassStaticSetter,
+    DestructuredObjectMember,
     Enum,
     EnumMember,
+    Export,
     ExportAlias,
     ExportNamespace,
-    ExportSource,
     Function,
     FunctionParameter,
+    Import,
     ImportAlias,
     ImportNamespace,
-    ImportSource,
     IndexParameter,
     Interface,
     LocalConst,
@@ -669,8 +675,8 @@ impl Named {
             AnyIdentifierBindingLike::JsLiteralExportName(export_name) => {
                 let parent = export_name.syntax().parent()?;
                 match parent.kind() {
-                    JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER => Some(Named::ImportSource),
-                    JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER => Some(Named::ExportSource),
+                    JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER => Some(Named::Import),
+                    JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER => Some(Named::Export),
                     JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER => Some(Named::ExportAlias),
                     JsSyntaxKind::JS_EXPORT_AS_CLAUSE => {
                         if parent.parent()?.kind() == JsSyntaxKind::JS_EXPORT_FROM_CLAUSE {
@@ -801,9 +807,11 @@ impl Named {
             AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
             | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+            | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_) => {
                 Self::from_parent_binding_pattern_declaration(decl.parent_binding_pattern_declaration()?)
+            }
+            AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+                Some(Named::DestructuredObjectMember)
             }
             AnyJsBindingDeclaration::JsVariableDeclarator(var) => {
                 Named::from_variable_declarator(var)
@@ -834,7 +842,7 @@ impl Named {
             AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => Some(Named::Interface),
             AnyJsBindingDeclaration::TsEnumDeclaration(_) => Some(Named::Enum),
             AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_) => {
-                Some(Named::ImportSource)
+                Some(Named::Import)
             }
             AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
             // Type parameters should be handled at call site
@@ -924,19 +932,12 @@ impl Named {
             | Named::ClassSetter
             | Named::ClassStaticMethod
             | Named::ClassStaticSetter
-            | Named::FunctionParameter
             | Named::IndexParameter
-            | Named::LocalConst
-            | Named::LocalLet
-            | Named::LocalVar
-            | Named::LocalVariable
-            | Named::LocalUsing
             | Named::ObjectGetter
             | Named::ObjectMethod
             | Named::ObjectProperty
             | Named::ObjectSetter
             | Named::ParameterProperty
-            | Named::TopLevelLet
             | Named::TypeMethod
             | Named::TypeProperty
             | Named::TypeSetter => SmallVec::from_slice(&[Case::Camel]),
@@ -953,11 +954,18 @@ impl Named {
             Named::ExportAlias | Named::ImportAlias | Named::TopLevelConst | Named::TopLevelVar => {
                 SmallVec::from_slice(&[Case::Camel, Case::Pascal, Case::Constant])
             }
-            Named::ExportSource | Named::ImportSource => SmallVec::new(),
+            Named::DestructuredObjectMember | Named::Export | Named::Import => SmallVec::new(),
             Named::ExportNamespace
             | Named::Function
+            | Named::FunctionParameter
             | Named::ImportNamespace
-            | Named::Namespace => SmallVec::from_slice(&[Case::Camel, Case::Pascal]),
+            | Named::LocalConst
+            | Named::LocalLet
+            | Named::LocalVar
+            | Named::LocalVariable
+            | Named::LocalUsing
+            | Named::Namespace
+            | Named::TopLevelLet => SmallVec::from_slice(&[Case::Camel, Case::Pascal]),
         }
     }
 }
@@ -975,16 +983,17 @@ impl std::fmt::Display for Named {
             Named::ClassStaticMethod => "static method",
             Named::ClassStaticProperty => "static property",
             Named::ClassStaticSetter => "static setter",
+            Named::DestructuredObjectMember => "destructured object member",
             Named::Enum => "enum",
             Named::EnumMember => "enum member",
             Named::ExportAlias => "export alias",
             Named::ExportNamespace => "export namespace",
-            Named::ExportSource => "export source",
+            Named::Export => "export source",
             Named::Function => "function",
             Named::FunctionParameter => "function parameter",
             Named::ImportAlias => "import alias",
             Named::ImportNamespace => "import namespace",
-            Named::ImportSource => "import source",
+            Named::Import => "import source",
             Named::IndexParameter => "index parameter",
             Named::Interface => "interface",
             Named::LocalConst => "local const",

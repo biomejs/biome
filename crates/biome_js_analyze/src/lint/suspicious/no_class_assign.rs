@@ -68,7 +68,7 @@ declare_rule! {
     pub NoClassAssign {
         version: "1.0.0",
         name: "noClassAssign",
-        source: RuleSource::Eslint("no-class-assign"),
+        sources: &[RuleSource::Eslint("no-class-assign")],
         recommended: true,
     }
 }

@@ -33,7 +33,7 @@ declare_rule! {
     pub UseMediaCaption {
         version: "1.0.0",
         name: "useMediaCaption",
-        source: RuleSource::EslintJsxA11y("media-has-caption"),
+        sources: &[RuleSource::EslintJsxA11y("media-has-caption")],
         recommended: true,
     }
 }

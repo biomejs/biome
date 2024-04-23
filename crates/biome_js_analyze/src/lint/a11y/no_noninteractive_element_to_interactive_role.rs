@@ -48,7 +48,7 @@ declare_rule! {
     pub NoNoninteractiveElementToInteractiveRole {
         version: "1.0.0",
         name: "noNoninteractiveElementToInteractiveRole",
-        source: RuleSource::EslintJsxA11y("no-noninteractive-element-to-interactive-role"),
+        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-element-to-interactive-role")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

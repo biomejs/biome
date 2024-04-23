@@ -70,7 +70,7 @@ declare_rule! {
     pub UseArrowFunction {
         version: "1.0.0",
         name: "useArrowFunction",
-        source: RuleSource::Eslint("prefer-arrow-callback"),
+        sources: &[RuleSource::Eslint("prefer-arrow-callback")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
         fix_kind: FixKind::Safe,

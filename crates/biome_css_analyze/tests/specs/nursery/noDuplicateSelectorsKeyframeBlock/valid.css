@@ -1,0 +1,3 @@
+@keyframes foo { from {} to {} }
+
+@keyframes foo { 0% {} 100% {} }

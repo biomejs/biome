@@ -84,10 +84,10 @@ impl GitRepo {
 
     fn check_path(&self, path: &Path) {
         if self.dirty.contains(path) {
-            panic!("Codegen would overwrite '{}' but it has uncommited changes. Commit the file to git, or pass --allow-dirty to the command to proceed anyway", path.display());
+            panic!("Codegen would overwrite '{}' but it has uncommitted changes. Commit the file to git, or pass --allow-dirty to the command to proceed anyway", path.display());
         }
         if self.staged.contains(path) {
-            panic!("Codegen would overwrite '{}' but it has uncommited changes. Commit the file to git, or pass --allow-staged to the command to proceed anyway", path.display());
+            panic!("Codegen would overwrite '{}' but it has uncommitted changes. Commit the file to git, or pass --allow-staged to the command to proceed anyway", path.display());
         }
     }
 
@@ -789,6 +789,9 @@ fn get_node_concept(
                 _ if name.ends_with("Value") => NodeConcept::Value,
                 _ => NodeConcept::Auxiliary,
             },
+
+            // TODO: implement formatter
+            LanguageKind::Yaml => NodeConcept::Auxiliary,
         }
     }
 }
@@ -853,6 +856,7 @@ impl LanguageKind {
             LanguageKind::Graphql => "GraphqlFormatter",
             LanguageKind::Grit => "GritFormatter",
             LanguageKind::Html => "HtmlFormatter",
+            LanguageKind::Yaml => "YamlFormatter",
         };
 
         Ident::new(name, Span::call_site())
@@ -866,6 +870,7 @@ impl LanguageKind {
             LanguageKind::Graphql => "GraphqlFormatContext",
             LanguageKind::Grit => "GritFormatContext",
             LanguageKind::Html => "HtmlFormatContext",
+            LanguageKind::Yaml => "YamlFormatContext",
         };
 
         Ident::new(name, Span::call_site())

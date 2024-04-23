@@ -61,7 +61,7 @@ declare_rule! {
     pub NoControlCharactersInRegex {
         version: "1.0.0",
         name: "noControlCharactersInRegex",
-        source: RuleSource::Eslint("no-control-regex"),
+        sources: &[RuleSource::Eslint("no-control-regex")],
         recommended: true,
     }
 }

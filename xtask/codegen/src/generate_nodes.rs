@@ -5,6 +5,7 @@ use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::js_kinds_src::{AstNodeSrc, AstSrc, Field, TokenKind, JS_KINDS_SRC};
 use crate::json_kinds_src::JSON_KINDS_SRC;
 use crate::language_kind::LanguageKind;
+use crate::yaml_kinds_src::YAML_KINDS_SRC;
 use biome_string_case::Case;
 use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
@@ -969,6 +970,7 @@ pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> Tok
         LanguageKind::Grit => GRIT_KINDS_SRC,
         LanguageKind::Html => HTML_KINDS_SRC,
         LanguageKind::Graphql => GRAPHQL_KINDS_SRC,
+        LanguageKind::Yaml => YAML_KINDS_SRC,
     };
     if kind_source.literals.contains(&kind_variant_name.as_str())
         || kind_source.tokens.contains(&kind_variant_name.as_str())

@@ -39,7 +39,7 @@ declare_rule! {
     pub NoVar {
         version: "1.0.0",
         name: "noVar",
-        source: RuleSource::Eslint("no-var"),
+        sources: &[RuleSource::Eslint("no-var")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

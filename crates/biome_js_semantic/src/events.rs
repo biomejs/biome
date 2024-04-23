@@ -122,7 +122,7 @@ impl SemanticEvent {
 /// example. As soon `a` is hoisted, all references of `a` are solved
 /// on this node.
 ///
-/// For a simpler way to extract [SemanticEvent] see [semantic_events] or [SemanticEventIterator].
+/// For a simpler way to extract [SemanticEvent] see [semantic_events].
 ///
 /// To use the [SemanticEventExtractor] one must push the current node, following
 /// the pre-order of the tree, and must pull events until `pop` returns [None].
@@ -285,7 +285,7 @@ impl SemanticEventExtractor {
         }
     }
 
-    /// See [SemanticEvent] for a more detailed description of which events [SyntaxNode] generates.
+    /// See [SemanticEvent] for a more detailed description of which events [JsSyntaxNode] generates.
     #[inline]
     pub fn enter(&mut self, node: &JsSyntaxNode) {
         // If you push a scope for a given node type, don't forget to also update `Self::leave`.
@@ -564,7 +564,7 @@ impl SemanticEventExtractor {
                         .find(|x| x.kind() != TS_QUALIFIED_NAME)
                         .kind()
                     {
-                        Some(TS_REFERENCE_TYPE | TS_NAME_WITH_TYPE_ARGUMENTS) => {
+                        Some(TS_REFERENCE_TYPE) => {
                             if matches!(node.syntax().parent().kind(), Some(TS_QUALIFIED_NAME)) {
                                 self.push_reference(
                                     BindingName::Value(name),

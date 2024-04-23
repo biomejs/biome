@@ -29,6 +29,12 @@ declare_rule! {
     /// ### Valid
     ///
     /// ```js
+    /// for (let item of array) {
+    ///    console.log(item);
+    ///  }
+    /// ```
+    ///
+    /// ```js
     /// for (let i = 0; i < array.length; i++) {
     ///    console.log(i, array[i]);
     ///  }
@@ -43,7 +49,10 @@ declare_rule! {
     pub UseForOf {
         version: "1.5.0",
         name: "useForOf",
-        source: RuleSource::EslintTypeScript("prefer-for-of"),
+        sources: &[
+            RuleSource::EslintTypeScript("prefer-for-of"),
+            RuleSource::EslintUnicorn("no-for-loop"),
+        ],
         recommended: false,
     }
 }

@@ -22,9 +22,8 @@ upgrade-tools:
 gen-all:
   cargo run -p xtask_codegen -- all
   cargo run -p xtask_codegen -- configuration
-  cargo lintdoc
+  cargo run -p xtask_codegen --features configuration -- migrate-eslint
   just gen-bindings
-  just gen-web
   just format
 
 # Generates TypeScript types and JSON schema of the configuration
@@ -34,20 +33,15 @@ gen-bindings:
 
 # Generates code generated files for the linter
 gen-lint:
-  cargo codegen analyzer
+  cargo run -p xtask_codegen -- analyzer
   cargo codegen-configuration
+  cargo run -p xtask_codegen --features configuration -- migrate-eslint
   just gen-bindings
   just format
-  cargo lintdoc
-  just gen-web
-
-# Generates code generated files for the website
-gen-web:
-  cargo codegen-website
 
 # Generates the initial files for all formatter crates
 gen-formatter:
-    run -p xtask_codegen -- formatter
+  cargo run -p xtask_codegen -- formatter
 
 # Generates the Tailwind CSS preset for utility class sorting (requires Bun)
 gen-tw:
@@ -59,8 +53,7 @@ gen-grammar *args='':
 
 # Generates the linter documentation and Rust documentation
 documentation:
-  cargo lintdoc
-  cargo documentation
+  RUSTDOCFLAGS='-D warnings' cargo documentation
 
 # Creates a new lint rule in the given path, with the given name. Name has to be camel case.
 new-js-lintrule rulename:
@@ -111,8 +104,10 @@ test-doc:
 test-lintrule name:
   just _touch crates/biome_js_analyze/tests/spec_tests.rs
   just _touch crates/biome_json_analyze/tests/spec_tests.rs
+  just _touch crates/biome_css_analyze/tests/spec_tests.rs
   cargo test -p biome_js_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_json_analyze -- {{snakecase(name)}} --show-output
+  cargo test -p biome_css_analyze -- {{snakecase(name)}} --show-output
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-transformation name:
@@ -144,10 +139,11 @@ new-crate name:
   cargo new --lib crates/{{snakecase(name)}}
   cargo run -p xtask_codegen -- new-crate --name={{snakecase(name)}}
 
-# Creates a new changeset for the final changelog. ONLY FOR CRATES, FOR NOW
+# Creates a new changeset for the final changelog
 new-changeset:
     knope document-change
 
-dry-run:
-    knope release --dry-run > out.txt
+# Dry-run of the release
+new-dry-run-release *args='':
+    knope release --dry-run {{args}}
 

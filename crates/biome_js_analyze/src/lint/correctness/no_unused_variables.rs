@@ -90,7 +90,10 @@ declare_rule! {
     pub NoUnusedVariables {
         version: "1.0.0",
         name: "noUnusedVariables",
-        source: RuleSource::Eslint("no-unused-vars"),
+        sources: &[
+            RuleSource::Eslint("no-unused-vars"),
+            RuleSource::EslintTypeScript("no-unused-vars"),
+        ],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
@@ -139,7 +142,7 @@ fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedF
 // Returning None means is ok to be unused
 fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
     let decl = binding.declaration()?;
-    // It is fine to ignore unused rest spread silbings
+    // It is fine to ignore unused rest spread siblings
     if let node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
     | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)) = &decl
     {
