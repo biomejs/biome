@@ -1,7 +1,8 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssAtRule, AnyCssGenericComponentValue, CssAtRule, CssGenericProperty, CssSyntaxKind,
+    AnyCssAtRule, AnyCssGenericComponentValue, AnyCssValue, CssAtRule,
+    CssGenericComponentValueList, CssGenericProperty, CssSyntaxKind,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
 
@@ -70,15 +71,7 @@ impl Rule for NoMissingGenericFamilyKeyword {
         let property_name = node.name().ok()?.text().to_lowercase();
 
         // Ignore `@font-face`. See more detail: https://drafts.csswg.org/css-fonts/#font-face-rule
-        if node
-            .syntax()
-            .ancestors()
-            .find(|n| n.kind() == CssSyntaxKind::CSS_AT_RULE)
-            .and_then(|n| n.cast::<CssAtRule>())
-            .and_then(|n| n.rule().ok())
-            .map(|n| matches!(n, AnyCssAtRule::CssFontFaceAtRule(_)))
-            .is_some()
-        {
+        if is_in_font_face_at_rule(node) {
             return None;
         }
 
@@ -89,18 +82,17 @@ impl Rule for NoMissingGenericFamilyKeyword {
             return None;
         }
 
-        let value_list = node.value();
-        let mut value_list_iter = value_list.clone().into_iter();
-        let len = value_list_iter.len();
-        if is_font && len == 1 && value_list_iter.any(|v| is_system_family_name_keyword(&v.text()))
-        {
+        // handle shorthand font property with special value
+        // e.g: { font: caption }, { font: inherit }
+        let properties = node.value();
+        if is_font && is_shorthand_font_property_with_keyword(&properties) {
             return None;
         }
 
         let font_families = if is_font {
-            find_font_family(value_list)
+            find_font_family(properties)
         } else {
-            value_list
+            properties
                 .into_iter()
                 .filter_map(|v| match v {
                     AnyCssGenericComponentValue::AnyCssValue(value) => Some(value),
@@ -111,14 +103,13 @@ impl Rule for NoMissingGenericFamilyKeyword {
 
         if font_families.is_empty() {
             return None;
-        } else {
-            for f in font_families.iter() {
-                if is_system_family_name_keyword(&f.text()) || is_font_family_keyword(&f.text()) {
-                    return None;
-                }
-            }
         }
 
+        if has_generic_font_family_property(&font_families) {
+            return None;
+        }
+
+        // Ignore the last value if it's a CSS variable now.
         let last_value = font_families.last()?;
         if is_css_variable(&last_value.text()) {
             return None;
@@ -141,4 +132,26 @@ impl Rule for NoMissingGenericFamilyKeyword {
             }),
         )
     }
+}
+
+fn is_in_font_face_at_rule(node: &CssGenericProperty) -> bool {
+    node.syntax()
+        .ancestors()
+        .find(|n| n.kind() == CssSyntaxKind::CSS_AT_RULE)
+        .and_then(|n| n.cast::<CssAtRule>())
+        .and_then(|n| n.rule().ok())
+        .is_some_and(|n| matches!(n, AnyCssAtRule::CssFontFaceAtRule(_)))
+}
+
+fn is_shorthand_font_property_with_keyword(properties: &CssGenericComponentValueList) -> bool {
+    properties.into_iter().len() == 1
+        && properties
+            .into_iter()
+            .any(|p| is_system_family_name_keyword(&p.text()))
+}
+
+fn has_generic_font_family_property(nodes: &[AnyCssValue]) -> bool {
+    nodes
+        .iter()
+        .any(|n| is_font_family_keyword(&n.text()) || is_system_family_name_keyword(&n.text()))
 }
