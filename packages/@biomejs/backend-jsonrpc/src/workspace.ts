@@ -359,7 +359,7 @@ export interface PartialJavascriptFormatter {
 /**
  * Indicates the type of runtime or transformation used for interpreting JSX.
  */
-export type JsxRuntime = "Transparent" | "ReactClassic";
+export type JsxRuntime = "transparent" | "reactClassic";
 export interface PartialJavascriptOrganizeImports {}
 /**
  * Options that changes how the JavaScript parser behaves
