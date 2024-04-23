@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
-assertion_line: 83
 expression: invalid.css
 ---
 # Input
@@ -21,6 +20,10 @@ invalid.css:1:16 lint/nursery/noUnknownFunction ━━━━━━━━━━�
     2 │ a { transform: UNKNOWN(4); }
     3 │ a { width: calc(10% * unknown(1)); }
   
+  i Use a known function instead.
+  
+  i See MDN web docs for more details.
+  
 
 ```
 
@@ -34,6 +37,10 @@ invalid.css:2:16 lint/nursery/noUnknownFunction ━━━━━━━━━━�
       │                ^^^^^^^
     3 │ a { width: calc(10% * unknown(1)); }
   
+  i Use a known function instead.
+  
+  i See MDN web docs for more details.
+  
 
 ```
 
@@ -46,6 +53,10 @@ invalid.css:3:23 lint/nursery/noUnknownFunction ━━━━━━━━━━�
     2 │ a { transform: UNKNOWN(4); }
   > 3 │ a { width: calc(10% * unknown(1)); }
       │                       ^^^^^^^
+  
+  i Use a known function instead.
+  
+  i See MDN web docs for more details.
   
 
 ```

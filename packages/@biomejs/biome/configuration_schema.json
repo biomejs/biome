@@ -1553,7 +1553,7 @@
 					]
 				},
 				"noUnknownFunction": {
-					"description": "Disallow unknown functions.",
+					"description": "Disallow unknown CSS value functions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

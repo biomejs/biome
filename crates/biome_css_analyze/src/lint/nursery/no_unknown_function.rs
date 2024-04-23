@@ -6,7 +6,12 @@ use biome_rowan::{AstNode, TextRange};
 use crate::utils::is_function_keyword;
 
 declare_rule! {
-    /// Disallow unknown functions.
+    /// Disallow unknown CSS value functions.
+    ///
+    /// Data sources of known CSS functions are:
+    /// - MDN reference on [CSS value functions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Functions)
+    /// - MDN reference on [CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference)
+    /// - MDN [browser compatibility data for CSS functions](https://github.com/mdn/browser-compat-data/tree/main/css/types)
     ///
     /// ## Examples
     ///
@@ -56,12 +61,20 @@ impl Rule for NoUnknownFunction {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.span,
-            markup! {
-                "Unexpected unknown function: "<Emphasis>{state.function_name}</Emphasis>
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.span,
+                markup! {
+                    "Unexpected unknown function: "<Emphasis>{state.function_name}</Emphasis>
+                },
+            )
+            .note(markup! {
+                "Use a known function instead."
+            })
+            .note(markup! {
+                "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Functions">"MDN web docs"</Hyperlink>" for more details."
+            }),
+        )
     }
 }

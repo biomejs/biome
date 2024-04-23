@@ -2699,7 +2699,7 @@ pub struct Nursery {
     #[doc = "Disallow the use of dependencies that aren't specified in the package.json."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_undeclared_dependencies: Option<RuleConfiguration<NoUndeclaredDependencies>>,
-    #[doc = "Disallow unknown functions."]
+    #[doc = "Disallow unknown CSS value functions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_function: Option<RuleConfiguration<NoUnknownFunction>>,
     #[doc = "Disallows package private imports."]

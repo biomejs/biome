@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
-assertion_line: 83
 expression: valid.css
 ---
 # Input

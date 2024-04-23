@@ -977,7 +977,7 @@ export interface Nursery {
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow unknown functions.
+	 * Disallow unknown CSS value functions.
 	 */
 	noUnknownFunction?: RuleConfiguration_for_Null;
 	/**
