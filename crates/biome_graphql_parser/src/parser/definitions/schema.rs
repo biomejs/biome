@@ -76,18 +76,13 @@ impl ParseRecovery for RootOperationTypeDefinitionListRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(OPERATION_TYPE)
-        // missing operation type
-        || p.at(T![:])
-        // there is likely a typo in the operation type
-        || p.lookahead_at(T![:])
-        || is_at_root_operation_type_definition_end(p)
+        is_at_root_operation_type_definition(p) || is_at_root_operation_type_definition_end(p)
     }
 }
 
 #[inline]
 fn parse_root_operation_type_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !(p.at_ts(OPERATION_TYPE) || p.at(T![:]) || p.lookahead_at(T![:])) {
+    if !(is_at_root_operation_type_definition(p)) {
         return Absent;
     }
     let m = p.start();
@@ -117,7 +112,16 @@ pub(crate) fn is_at_schema_definition(p: &mut GraphqlParser<'_>) -> bool {
 }
 
 #[inline]
+fn is_at_root_operation_type_definition(p: &mut GraphqlParser<'_>) -> bool {
+    p.at_ts(OPERATION_TYPE)
+        // missing operation type
+        || p.at(T![:])
+        // there is likely a typo in the operation type
+        || p.lookahead_at(T![:])
+}
+
+#[inline]
 fn is_at_root_operation_type_definition_end(p: &mut GraphqlParser<'_>) -> bool {
     // stop at closing brace or at the start of a new definition
-    p.at(T!['}']) || { !p.at_ts(OPERATION_TYPE) && is_at_definition(p) }
+    p.at(T!['}']) || (!p.at_ts(OPERATION_TYPE) && is_at_definition(p))
 }
