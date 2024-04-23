@@ -192,6 +192,8 @@ pub type NoThenProperty =
     <lint::suspicious::no_then_property::NoThenProperty as biome_analyze::Rule>::Options;
 pub type NoThisInStatic =
     <lint::complexity::no_this_in_static::NoThisInStatic as biome_analyze::Rule>::Options;
+pub type NoTsIgnoreComment =
+    <lint::nursery::no_ts_ignore_comment::NoTsIgnoreComment as biome_analyze::Rule>::Options;
 pub type NoUndeclaredDependencies = < lint :: nursery :: no_undeclared_dependencies :: NoUndeclaredDependencies as biome_analyze :: Rule > :: Options ;
 pub type NoUndeclaredVariables = < lint :: correctness :: no_undeclared_variables :: NoUndeclaredVariables as biome_analyze :: Rule > :: Options ;
 pub type NoUnnecessaryContinue = < lint :: correctness :: no_unnecessary_continue :: NoUnnecessaryContinue as biome_analyze :: Rule > :: Options ;

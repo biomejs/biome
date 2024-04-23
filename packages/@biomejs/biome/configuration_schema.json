@@ -1545,6 +1545,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noTsIgnoreComment": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUndeclaredDependencies": {
 					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
 					"anyOf": [

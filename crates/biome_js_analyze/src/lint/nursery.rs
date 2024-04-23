@@ -12,6 +12,7 @@ pub mod no_misplaced_assertion;
 pub mod no_nodejs_modules;
 pub mod no_react_specific_props;
 pub mod no_restricted_imports;
+pub mod no_ts_ignore_comment;
 pub mod no_undeclared_dependencies;
 pub mod use_import_restrictions;
 pub mod use_sorted_classes;
@@ -30,6 +31,7 @@ declare_group! {
             self :: no_nodejs_modules :: NoNodejsModules ,
             self :: no_react_specific_props :: NoReactSpecificProps ,
             self :: no_restricted_imports :: NoRestrictedImports ,
+            self :: no_ts_ignore_comment :: NoTsIgnoreComment ,
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_sorted_classes :: UseSortedClasses ,

@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+// This is a ts ignore comment!
+// @ts-ignore
+const a: number = "123";
+
+// @ts-ignore with an extra comment
+const b: string = 123;
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noTsIgnoreComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use @ts-ignore.
+  
+    1 │ // This is a ts ignore comment!
+  > 2 │ // @ts-ignore
+      │ ^^^^^^^^^^^^^
+    3 │ const a: number = "123";
+    4 │ 
+  
+  i Using @ts-ignore suppresses all errors for the following line. Consider fixing the issue or use `@ts-expect-error` instead.
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/noTsIgnoreComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use @ts-ignore.
+  
+    3 │ const a: number = "123";
+    4 │ 
+  > 5 │ // @ts-ignore with an extra comment
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ const b: string = 123;
+  
+  i Using @ts-ignore suppresses all errors for the following line. Consider fixing the issue or use `@ts-expect-error` instead.
+  
+
+```
