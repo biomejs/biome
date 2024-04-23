@@ -133,5 +133,8 @@ fn is_at_root_operation_type_definition(p: &mut GraphqlParser<'_>) -> bool {
 #[inline]
 fn is_at_root_operation_type_definition_end(p: &mut GraphqlParser<'_>) -> bool {
     // stop at closing brace or at the start of a new definition
-    p.at(T!['}']) || (!p.at_ts(OPERATION_TYPE) && is_at_definition(p))
+    p.at(T!['}'])
+        || (!p.at_ts(OPERATION_TYPE) && is_at_definition(p))
+        // start of a new operation definition
+        || (p.at_ts(OPERATION_TYPE) && !p.lookahead_at(T![:]))
 }
