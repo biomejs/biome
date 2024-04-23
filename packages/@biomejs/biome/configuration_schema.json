@@ -1552,6 +1552,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownUnit": {
+					"description": "Disallow unknown CSS units.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
