@@ -18,6 +18,10 @@ declare_rule! {
     /// - omitted if a keyword related to property inheritance or a system font is used
     ///
     /// This rule checks the font and font-family properties.
+    /// The following special situations are ignored:
+    /// - Property with a keyword value such as `inherit`, `caption`.
+    /// - The last value being a CSS variable.
+    /// - `font-family` property in an `@font-face` rule.
     ///
     /// ## Examples
     ///
@@ -46,11 +50,11 @@ declare_rule! {
     /// ```
     ///
     /// ```css
-    /// a { font: caption; }
+    /// a { font-family: var(--font); }
     /// ```
     ///
     /// ```css
-    /// a { font-family: revert }
+    /// @font-face { font-family: Gentium; }
     /// ```
     ///
     pub NoMissingGenericFamilyKeyword {
@@ -124,12 +128,18 @@ impl Rule for NoMissingGenericFamilyKeyword {
                 rule_category!(),
                 span,
                 markup! {
-                    "Missing generic family keyword in declaration."
+                    "Generic font family missing."
                 },
             )
             .note(markup! {
-                    "This note will give you more information."
-            }),
+                    "Consider adding a generic font family as a fallback."
+            })
+            .footer_list(
+                markup! {
+                    "for example:"
+                },
+                &["serif", "sans-serif", "monospace", "etc."],
+            ),
         )
     }
 }
