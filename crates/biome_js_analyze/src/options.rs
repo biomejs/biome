@@ -263,6 +263,7 @@ pub type UseDefaultSwitchClauseLast = < lint :: suspicious :: use_default_switch
 pub type UseEnumInitializers =
     <lint::style::use_enum_initializers::UseEnumInitializers as biome_analyze::Rule>::Options;
 pub type UseExhaustiveDependencies = < lint :: correctness :: use_exhaustive_dependencies :: UseExhaustiveDependencies as biome_analyze :: Rule > :: Options ;
+pub type UseExplicitLengthCheck = < lint :: nursery :: use_explicit_length_check :: UseExplicitLengthCheck as biome_analyze :: Rule > :: Options ;
 pub type UseExponentiationOperator = < lint :: style :: use_exponentiation_operator :: UseExponentiationOperator as biome_analyze :: Rule > :: Options ;
 pub type UseExportType =
     <lint::style::use_export_type::UseExportType as biome_analyze::Rule>::Options;

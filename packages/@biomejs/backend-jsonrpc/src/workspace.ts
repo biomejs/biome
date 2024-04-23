@@ -981,6 +981,10 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
+	 * Succinct description of the rule.
+	 */
+	useExplicitLengthCheck?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
@@ -1967,6 +1971,7 @@ export type Category =
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"

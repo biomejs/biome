@@ -1,0 +1,49 @@
+// // Not length check
+// if (foo.notLength) {}
+// if (length) {}
+// if (foo[length]) {}
+// if (foo["length"]) {}
+
+// // Not boolean
+// const bar = foo.length
+// const bar = +foo.length
+// const x = Boolean(foo.length, foo.length)
+// const x = new Boolean(foo.length)
+// const x = NotBoolean(foo.length)
+// const length = foo.length ?? 0
+// if (foo.length ?? bar) {}
+
+
+// // Valid style
+// foo.length === 0
+// foo.length > 0
+// while (foo.length > 0) {
+//     foo.pop();
+// }
+// if (foo.length > 0) {
+//     return;
+// }
+// for (; foo.length > 0; foo.pop()); {}
+
+// if (foo.length !== 1) {}
+// if (foo.length > 1) {}
+// if (foo.length > 1) {}
+// if (foo.length < 2) {}
+
+// // With known static length value
+// const foo = { size: "small" }; if (foo.size) {}, // Not a number
+// const foo = { length: -1 }; if (foo.length) {}, // Array lengths cannot be negative
+// const foo = { length: 1.5 }; if (foo.length) {}, // Array lengths must be integers
+// const foo = { length: NaN }; if (foo.length) {}, // Array lengths cannot be NaN
+// const foo = { length: Infinity }; if (foo.length) {}, // Array lengths cannot be Infinity
+// // Logical OR
+// const x = foo.length || 2,
+// const A_NUMBER = 2; const x = foo.length || A_NUMBER,
+
+
+// class A {
+//     a() {
+//         if (this.length) {};
+//         while (!this.size || foo);
+//     }
+// }
