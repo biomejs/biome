@@ -120,6 +120,16 @@ fn is_at_root_operation_type_definition(p: &mut GraphqlParser<'_>) -> bool {
         || p.lookahead_at(T![:])
 }
 
+/// To prevent a missing closing brace from causing the parser to include the next definition
+/// as part of the root operation type definition
+/// ```graphql
+/// schema {
+///    query: Query
+///    mutation: Mutation
+///
+/// schema {
+///   query: Query
+/// }
 #[inline]
 fn is_at_root_operation_type_definition_end(p: &mut GraphqlParser<'_>) -> bool {
     // stop at closing brace or at the start of a new definition
