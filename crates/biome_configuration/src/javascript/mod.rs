@@ -62,6 +62,7 @@ pub struct JavascriptParser {
     Bpaf, Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub enum JsxRuntime {
     /// Indicates a modern or native JSX environment, that doesn't require
     /// special handling by Biome.
