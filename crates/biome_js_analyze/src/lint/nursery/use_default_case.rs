@@ -2,8 +2,11 @@ use std::ops::Not;
 
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{JsLanguage, JsSwitchStatement};
 use biome_rowan::{syntax::SyntaxTrivia, AstNode};
+use regex::Regex;
+use serde::{Deserialize, Serialize};
 
 declare_rule! {
     /// Require default cases in switch statements.
@@ -51,14 +54,29 @@ declare_rule! {
     }
 }
 
+/// Options for the rule `useDefaultCase`.
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct UseDefaultCaseOptions {
+    /// Regular expression that filters the comment pattern to disable the rule.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub comment_pattern: Option<String>,
+}
+
 impl Rule for UseDefaultCase {
     type Query = Ast<JsSwitchStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = Box<UseDefaultCaseOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let options = ctx.options();
+        let comment_pattern = options
+            .comment_pattern
+            .clone()
+            .unwrap_or(String::from("^no default$"));
 
         let has_case_clauses = node.cases().into_iter().len() > 0;
         let is_missing_default_case = node
@@ -76,7 +94,8 @@ impl Rule for UseDefaultCase {
             None
         };
 
-        let has_disable_comment_in_switch_block = has_disable_comment(trivia_in_switch_block);
+        let has_disable_comment_in_switch_block =
+            has_disable_comment(trivia_in_switch_block, &comment_pattern);
 
         let has_disable_comment_in_switch_expression = node
             .discriminant()
@@ -88,7 +107,7 @@ impl Rule for UseDefaultCase {
 
                 if let Some(switch_identifier) = identifier_expression.name().ok() {
                     for token in switch_identifier.value_token().into_iter() {
-                        if has_disable_comment(Some(token.trailing_trivia())) {
+                        if has_disable_comment(Some(token.trailing_trivia()), &comment_pattern) {
                             return true;
                         }
                     }
@@ -119,13 +138,25 @@ impl Rule for UseDefaultCase {
     }
 }
 
-fn has_disable_comment(trivia: Option<SyntaxTrivia<JsLanguage>>) -> bool {
+fn has_disable_comment(trivia: Option<SyntaxTrivia<JsLanguage>>, comment_pattern: &str) -> bool {
     if trivia.is_some() {
+        let comment_regex = Regex::new(comment_pattern).unwrap();
         let comments = trivia.unwrap().pieces().filter(|token| token.is_comments());
         let last_comment = comments.last();
 
         return match last_comment {
-            Some(comment) => comment.text().to_lowercase().contains("no default"),
+            Some(comment) => {
+                let comment_text = comment
+                    .text()
+                    .to_lowercase()
+                    .replace("//", "")
+                    .replace("/*", "")
+                    .replace("*/", "");
+
+                let is_disable_comment =
+                    comment_regex.captures_iter(comment_text.trim()).count() > 0;
+                is_disable_comment
+            }
             None => false,
         };
     }

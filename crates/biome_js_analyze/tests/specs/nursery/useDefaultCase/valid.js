@@ -13,7 +13,6 @@ switch (a) {
 		break;
 }
 
-
 switch (a) {
 	case 1:
 		break;
@@ -59,6 +58,18 @@ switch (a) {
 	case 1:
 		a = 4;
 	/* no default */
+}
+
+switch (a) {
+	case 1:
+		a = 4;
+	/*  no default  */
+}
+
+switch (a) {
+	case 1:
+		a = 4;
+	//  no default
 }
 
 switch (a) {
