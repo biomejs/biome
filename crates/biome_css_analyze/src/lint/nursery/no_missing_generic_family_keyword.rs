@@ -10,29 +10,46 @@ use crate::utils::{
 };
 
 declare_rule! {
-    /// Succinct description of the rule.
+    /// Disallow a missing generic family keyword within font families.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    /// The generic font family can be:
+    /// - placed anywhere in the font family list
+    /// - omitted if a keyword related to property inheritance or a system font is used
     ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding stylelint rule (if any):
+    /// This rule checks the font and font-family properties.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```css,expect_diagnostic
-    /// p {}
+    /// a { font-family: Arial; }
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
     /// ```
     ///
     /// ### Valid
     ///
     /// ```css
-    /// p {
-    ///   color: red;
-    /// }
+    /// a { font-family: "Lucida Grande", "Arial", sans-serif; }
+    /// ```
+    ///
+    /// ```css
+    /// a { font-family: inherit; }
+    /// ```
+    ///
+    /// ```css
+    /// a { font-family: sans-serif; }
+    /// ```
+    ///
+    /// ```css
+    /// a { font: caption; }
+    /// ```
+    ///
+    /// ```css
+    /// a { font-family: revert }
     /// ```
     ///
     pub NoMissingGenericFamilyKeyword {
@@ -42,14 +59,9 @@ declare_rule! {
     }
 }
 
-pub struct RuleState {
-    pub value: String,
-    pub span: TextRange,
-}
-
 impl Rule for NoMissingGenericFamilyKeyword {
     type Query = Ast<CssGenericProperty>;
-    type State = RuleState;
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -112,14 +124,10 @@ impl Rule for NoMissingGenericFamilyKeyword {
             return None;
         }
 
-        Some(RuleState {
-            value: last_value.text(),
-            span: last_value.range(),
-        })
+        Some(last_value.range())
     }
 
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let span = state.span;
+    fn diagnostic(_: &RuleContext<Self>, span: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
