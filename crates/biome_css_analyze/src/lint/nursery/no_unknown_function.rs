@@ -8,10 +8,10 @@ use crate::utils::is_function_keyword;
 declare_rule! {
     /// Disallow unknown CSS value functions.
     ///
-    /// Data sources of known CSS functions are:
+    /// Data sources of known CSS value functions are:
     /// - MDN reference on [CSS value functions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Functions)
     /// - MDN reference on [CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference)
-    /// - MDN [browser compatibility data for CSS functions](https://github.com/mdn/browser-compat-data/tree/main/css/types)
+    /// - MDN [browser compatibility data for CSS value functions](https://github.com/mdn/browser-compat-data/tree/main/css/types)
     ///
     /// ## Examples
     ///
