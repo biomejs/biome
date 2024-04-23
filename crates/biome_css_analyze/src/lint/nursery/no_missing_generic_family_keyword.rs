@@ -5,7 +5,9 @@ use biome_css_syntax::{
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
 
-use crate::utils::{find_font_family, is_css_variable, is_system_family_name_keyword};
+use crate::utils::{
+    find_font_family, is_css_variable, is_font_family_keyword, is_system_family_name_keyword,
+};
 
 declare_rule! {
     /// Succinct description of the rule.
@@ -99,7 +101,7 @@ impl Rule for NoMissingGenericFamilyKeyword {
             return None;
         } else {
             for f in font_families.iter() {
-                if is_system_family_name_keyword(&f.text()) {
+                if is_system_family_name_keyword(&f.text()) || is_font_family_keyword(&f.text()) {
                     return None;
                 }
             }

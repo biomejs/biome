@@ -1,0 +1,128 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+a { font-family: Arial; }
+a { font-family: 'Arial', "Lucida Grande", Arial; }
+a { fOnT-fAmIlY: '  Lucida Grande '; }
+a { font-family: Times; }
+a { FONT: italic 300 16px/30px Arial, " Arial"; }
+a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
+a { font: 1em Lucida Grande, Arial, "sans-serif" }
+```
+
+# Diagnostics
+```
+invalid.css:1:18 lint/nursery/noMissingGenericFamilyKeyword ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing generic family keyword in declaration.
+  
+  > 1 │ a { font-family: Arial; }
+      │                  ^^^^^
+    2 │ a { font-family: 'Arial', "Lucida Grande", Arial; }
+    3 │ a { fOnT-fAmIlY: '  Lucida Grande '; }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:2:44 lint/nursery/noMissingGenericFamilyKeyword ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing generic family keyword in declaration.
+  
+    1 │ a { font-family: Arial; }
+  > 2 │ a { font-family: 'Arial', "Lucida Grande", Arial; }
+      │                                            ^^^^^
+    3 │ a { fOnT-fAmIlY: '  Lucida Grande '; }
+    4 │ a { font-family: Times; }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:3:18 lint/nursery/noMissingGenericFamilyKeyword ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing generic family keyword in declaration.
+  
+    1 │ a { font-family: Arial; }
+    2 │ a { font-family: 'Arial', "Lucida Grande", Arial; }
+  > 3 │ a { fOnT-fAmIlY: '  Lucida Grande '; }
+      │                  ^^^^^^^^^^^^^^^^^^
+    4 │ a { font-family: Times; }
+    5 │ a { FONT: italic 300 16px/30px Arial, " Arial"; }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:4:18 lint/nursery/noMissingGenericFamilyKeyword ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing generic family keyword in declaration.
+  
+    2 │ a { font-family: 'Arial', "Lucida Grande", Arial; }
+    3 │ a { fOnT-fAmIlY: '  Lucida Grande '; }
+  > 4 │ a { font-family: Times; }
+      │                  ^^^^^
+    5 │ a { FONT: italic 300 16px/30px Arial, " Arial"; }
+    6 │ a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:5:39 lint/nursery/noMissingGenericFamilyKeyword ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing generic family keyword in declaration.
+  
+    3 │ a { fOnT-fAmIlY: '  Lucida Grande '; }
+    4 │ a { font-family: Times; }
+  > 5 │ a { FONT: italic 300 16px/30px Arial, " Arial"; }
+      │                                       ^^^^^^^^
+    6 │ a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
+    7 │ a { font: 1em Lucida Grande, Arial, "sans-serif" }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:6:43 lint/nursery/noMissingGenericFamilyKeyword ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing generic family keyword in declaration.
+  
+    4 │ a { font-family: Times; }
+    5 │ a { FONT: italic 300 16px/30px Arial, " Arial"; }
+  > 6 │ a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
+      │                                           ^^^^^^^^^^^^^^^^^^
+    7 │ a { font: 1em Lucida Grande, Arial, "sans-serif" }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:7:37 lint/nursery/noMissingGenericFamilyKeyword ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing generic family keyword in declaration.
+  
+    5 │ a { FONT: italic 300 16px/30px Arial, " Arial"; }
+    6 │ a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
+  > 7 │ a { font: 1em Lucida Grande, Arial, "sans-serif" }
+      │                                     ^^^^^^^^^^^^
+  
+  i This note will give you more information.
+  
+
+```
