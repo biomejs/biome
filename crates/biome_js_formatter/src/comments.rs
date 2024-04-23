@@ -1331,14 +1331,16 @@ fn handle_import_named_clause_comments(
                 // import { a } from // comment
                 // "foo"
                 // ```
-                if specifier_list.len() != 0 && comment.text_position() == CommentTextPosition::EndOfLine{
+                if specifier_list.len() != 0
+                    && comment.text_position() == CommentTextPosition::EndOfLine
+                {
                     if let Some(Ok(last_specifier)) = specifier_list.last() {
                         return CommentPlacement::trailing(last_specifier.into_syntax(), comment);
                     }
                 } else {
                     // attach comments to the import specifier as leading comments if comments are placed after the from keyword
                     // ```javascript
-                    // import {} from // comment 
+                    // import {} from // comment
                     // "foo"
                     // ```
                     let is_after_from_keyword = comment
