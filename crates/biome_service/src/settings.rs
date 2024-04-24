@@ -36,19 +36,10 @@ use std::{
     sync::{RwLock, RwLockReadGuard},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct PathToSettings {
     path: BiomePath,
     settings: Settings,
-}
-
-impl Default for PathToSettings {
-    fn default() -> Self {
-        Self {
-            path: BiomePath::default(),
-            settings: Settings::default(),
-        }
-    }
 }
 
 #[derive(Debug, Default)]
@@ -60,7 +51,7 @@ pub struct WorkspaceSettings {
 impl WorkspaceSettings {
     pub fn current_settings(&self) -> &Settings {
         debug_assert!(
-            self.data.paths.len() > 0,
+            !self.data.paths.is_empty(),
             "You must have at least one workspace."
         );
         let data = self.data.paths.get(self.current_workspace).unwrap();
@@ -73,7 +64,7 @@ impl WorkspaceSettings {
 
     pub fn current_settings_mut(&mut self) -> &mut Settings {
         debug_assert!(
-            self.data.paths.len() > 0,
+            !self.data.paths.is_empty(),
             "You must have at least one workspace."
         );
         &mut self.data.get_mut(self.current_workspace).unwrap().settings
@@ -90,11 +81,11 @@ impl WorkspaceSettings {
     pub fn current_workspace_path(&self, path: &BiomePath) -> (WorkspaceKey, &BiomePath) {
         debug_assert!(path.is_absolute(), "Workspaces paths must be absolutes.");
         debug_assert!(
-            self.data.paths.len() > 0,
+            !self.data.paths.is_empty(),
             "You must have at least one workspace."
         );
         for (key, path_to_settings) in &self.data.paths {
-            if let Ok(_) = path.strip_prefix(path_to_settings.path.as_path()) {
+            if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
                 return (key, &path_to_settings.path);
             }
         }
@@ -104,11 +95,11 @@ impl WorkspaceSettings {
     pub fn get_settings_by_path(&self, path: &BiomePath) -> &Settings {
         debug_assert!(path.is_absolute(), "Workspaces paths must be absolutes.");
         debug_assert!(
-            self.data.paths.len() > 0,
+            !self.data.paths.is_empty(),
             "You must have at least one workspace."
         );
         for (_, path_to_settings) in &self.data.paths {
-            if let Ok(_) = path.strip_prefix(path_to_settings.path.as_path()) {
+            if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
                 return &path_to_settings.settings;
             }
         }
@@ -118,11 +109,11 @@ impl WorkspaceSettings {
     pub fn get_settings_by_path_mut(&mut self, path: &Path) -> &mut Settings {
         debug_assert!(path.is_absolute(), "Workspaces paths must be absolutes.");
         debug_assert!(
-            self.data.paths.len() > 0,
+            !self.data.paths.is_empty(),
             "You must have at least one workspace."
         );
         for (_, path_to_settings) in &mut self.data.paths {
-            if let Ok(_) = path.strip_prefix(path_to_settings.path.as_path()) {
+            if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
                 return &mut path_to_settings.settings;
             }
         }
@@ -601,7 +592,7 @@ impl<'a> SettingsHandle<'a> {
 
 impl<'a> AsRef<Settings> for SettingsHandle<'a> {
     fn as_ref(&self) -> &Settings {
-        &self.inner.current_settings()
+        self.inner.current_settings()
     }
 }
 
