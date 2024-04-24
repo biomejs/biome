@@ -93,6 +93,12 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
     font_families
 }
 
+/// Check if the value is a known CSS value function.
 pub fn is_function_keyword(value: &str) -> bool {
     FUNCTION_KEYWORDS.contains(&value.to_lowercase().as_str())
+}
+
+/// Check if the value is a double-dashed custom function.
+pub fn is_custom_function(value: &str) -> bool {
+    value.starts_with("--")
 }

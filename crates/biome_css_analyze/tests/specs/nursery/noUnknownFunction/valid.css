@@ -1,5 +1,6 @@
 a { transform: translate(1px); }
 a { transform: TRANSLATE(1px); }
+a { transform: --custom-function(1px); }
 a { transform: scale(0.5) translate(-100%, -100%); }
 a { animation-timeline: scroll(); }
 a { background: -webkit-gradient(linear, 0 50%, 0 100%, from(white), color-stop(0.5, yellow), to(red)); }
