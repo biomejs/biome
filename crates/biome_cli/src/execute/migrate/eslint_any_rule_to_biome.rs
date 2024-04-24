@@ -955,6 +955,16 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-undef-init" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_useless_undefined_initialization
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-unneeded-ternary" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.no_useless_ternary.get_or_insert(Default::default());
