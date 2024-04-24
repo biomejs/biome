@@ -71,6 +71,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Correctly format dangling comments of continue statements. [#2555](https://github.com/biomejs/biome/pull/2555). Contributed by @ah-yu
 
+- Prevent comments from being eaten by the formatter [#2578](https://github.com/biomejs/biome/pull/2578). Now the comments won't be eaten for the following code:
+  ```js
+  console.log((a,b/* comment */));
+  ```
+  Contributed by @ah-yu
+
 ### Linter
 
 #### Bug fixes
