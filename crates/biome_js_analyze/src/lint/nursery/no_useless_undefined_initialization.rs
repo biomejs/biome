@@ -117,7 +117,7 @@ impl Rule for NoUselessUndefinedInitialization {
 
             match element.id() {
                 Ok(id) => id.text() == state.0,
-                Err(_) => false
+                Err(_) => false,
             }
         })?;
 
