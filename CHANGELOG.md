@@ -24,14 +24,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```diff
     import "z"
-    - import { D } from "d";
+  - import { D } from "d";
     import { C } from "c";
-    + import { D } from "d";
+  + import { D } from "d";
     import "y"
     import "x"
-    - import { B } from "b";
+  - import { B } from "b";
     import { A } from "a";
-    + import { B } from "b";
+  + import { B } from "b";
     import "w"
   ```
 
@@ -47,6 +47,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   This causes `biome migrate eslint` to fail or ignore them.
   These edge cases are now handled correctly.
 
+  Contributed by @Conaclos
+
 ### Configuration
 
 ### Editors
@@ -60,6 +62,22 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### JavaScript APIs
 
 ### Linter
+
+#### Bug fixes
+
+- [useConst](https://biomejs.dev/linter/rules/use-const/) now ignores a variable that is read before its assignment.
+
+  Previously, the rule reported the following example:
+
+  ```js
+  let x;
+  x; // read
+  x = 0; // write
+  ```
+
+  It is now correctly ignored.
+
+  Contributed by @Conaclos
 
 ### Parser
 

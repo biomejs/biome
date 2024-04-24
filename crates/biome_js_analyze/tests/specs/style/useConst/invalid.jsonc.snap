@@ -11,12 +11,12 @@ let x = 1; foo(x);
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let x = 1; foo(x);
       │ ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is never reassigned.
   
   > 1 │ let x = 1; foo(x);
       │     ^
@@ -38,12 +38,12 @@ for (let i in [1,2,3]) { foo(i); }
 ```
 invalid.jsonc:1:6 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ for (let i in [1,2,3]) { foo(i); }
       │      ^^^
   
-  i 'i' is never re-assigned.
+  i 'i' is never reassigned.
   
   > 1 │ for (let i in [1,2,3]) { foo(i); }
       │          ^
@@ -65,12 +65,12 @@ for (let x of [1,2,3]) { foo(x); }
 ```
 invalid.jsonc:1:6 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ for (let x of [1,2,3]) { foo(x); }
       │      ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is never reassigned.
   
   > 1 │ for (let x of [1,2,3]) { foo(x); }
       │          ^
@@ -92,12 +92,12 @@ invalid.jsonc:1:6 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.jsonc:1:15 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ (function() { let x = 1; foo(x); })();
       │               ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is never reassigned.
   
   > 1 │ (function() { let x = 1; foo(x); })();
       │                   ^
@@ -119,12 +119,12 @@ invalid.jsonc:1:15 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ (function() { for (let i in [1,2,3]) { foo(i); } })();
       │                    ^^^
   
-  i 'i' is never re-assigned.
+  i 'i' is never reassigned.
   
   > 1 │ (function() { for (let i in [1,2,3]) { foo(i); } })();
       │                        ^
@@ -146,12 +146,12 @@ invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ (function() { for (let x of [1,2,3]) { foo(x); } })();
       │                    ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is never reassigned.
   
   > 1 │ (function() { for (let x of [1,2,3]) { foo(x); } })();
       │                        ^
@@ -173,12 +173,12 @@ let f = (function() { let g = x; })(); f = 1;
 ```
 invalid.jsonc:1:23 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let f = (function() { let g = x; })(); f = 1;
       │                       ^^^
   
-  i 'g' is never re-assigned.
+  i 'g' is never reassigned.
   
   > 1 │ let f = (function() { let g = x; })(); f = 1;
       │                           ^
@@ -200,12 +200,12 @@ let x = 0; { let x = 1; foo(x); } x = 0;
 ```
 invalid.jsonc:1:14 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let x = 0; { let x = 1; foo(x); } x = 0;
       │              ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is never reassigned.
   
   > 1 │ let x = 0; { let x = 1; foo(x); } x = 0;
       │                  ^
@@ -227,12 +227,12 @@ for (let i = 0; i < 10; ++i) { let x = 1; foo(x); }
 ```
 invalid.jsonc:1:32 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ for (let i = 0; i < 10; ++i) { let x = 1; foo(x); }
       │                                ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is never reassigned.
   
   > 1 │ for (let i = 0; i < 10; ++i) { let x = 1; foo(x); }
       │                                    ^
@@ -254,12 +254,12 @@ for (let i in [1,2,3]) { let x = 1; foo(x); }
 ```
 invalid.jsonc:1:6 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ for (let i in [1,2,3]) { let x = 1; foo(x); }
       │      ^^^
   
-  i 'i' is never re-assigned.
+  i 'i' is never reassigned.
   
   > 1 │ for (let i in [1,2,3]) { let x = 1; foo(x); }
       │          ^
@@ -275,12 +275,12 @@ invalid.jsonc:1:6 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.jsonc:1:26 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ for (let i in [1,2,3]) { let x = 1; foo(x); }
       │                          ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is never reassigned.
   
   > 1 │ for (let i in [1,2,3]) { let x = 1; foo(x); }
       │                              ^
@@ -302,15 +302,15 @@ var foo = function() { for (const b of c) { let a; a = 1; } };
 ```
 invalid.jsonc:1:45 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ var foo = function() { for (const b of c) { let a; a = 1; } };
       │                                             ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is only assigned here.
   
   > 1 │ var foo = function() { for (const b of c) { let a; a = 1; } };
-      │                                                 ^
+      │                                                    ^
   
 
 ```
@@ -324,15 +324,15 @@ var foo = function() { for (const b of c) { let a; ({a} = 1); } };
 ```
 invalid.jsonc:1:45 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ var foo = function() { for (const b of c) { let a; ({a} = 1); } };
       │                                             ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is only assigned here.
   
   > 1 │ var foo = function() { for (const b of c) { let a; ({a} = 1); } };
-      │                                                 ^
+      │                                                      ^
   
 
 ```
@@ -346,15 +346,15 @@ let x; x = 0;
 ```
 invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let x; x = 0;
       │ ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is only assigned here.
   
   > 1 │ let x; x = 0;
-      │     ^
+      │        ^
   
 
 ```
@@ -368,15 +368,15 @@ switch (a) { case 0: let x; x = 0; }
 ```
 invalid.jsonc:1:22 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ switch (a) { case 0: let x; x = 0; }
       │                      ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is only assigned here.
   
   > 1 │ switch (a) { case 0: let x; x = 0; }
-      │                          ^
+      │                             ^
   
 
 ```
@@ -390,15 +390,15 @@ invalid.jsonc:1:22 lint/style/useConst ━━━━━━━━━━━━━�
 ```
 invalid.jsonc:1:15 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ (function() { let x; x = 1; })();
       │               ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is only assigned here.
   
   > 1 │ (function() { let x; x = 1; })();
-      │                   ^
+      │                      ^
   
 
 ```
@@ -412,17 +412,17 @@ let {a: {b, c}} = {a: {b: 1, c: 2}}
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ let {a: {b, c}} = {a: {b: 1, c: 2}}
       │ ^^^
   
-  i 'b' is never re-assigned.
+  i 'b' is never reassigned.
   
   > 1 │ let {a: {b, c}} = {a: {b: 1, c: 2}}
       │          ^
   
-  i 'c' is never re-assigned.
+  i 'c' is never reassigned.
   
   > 1 │ let {a: {b, c}} = {a: {b: 1, c: 2}}
       │             ^
@@ -444,17 +444,17 @@ let {a = 0, b} = obj; foo(a, b);
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ let {a = 0, b} = obj; foo(a, b);
       │ ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ let {a = 0, b} = obj; foo(a, b);
       │      ^
   
-  i 'b' is never re-assigned.
+  i 'b' is never reassigned.
   
   > 1 │ let {a = 0, b} = obj; foo(a, b);
       │             ^
@@ -476,12 +476,12 @@ let [a] = [1]
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let [a] = [1]
       │ ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ let [a] = [1]
       │      ^
@@ -503,12 +503,12 @@ let {a} = obj
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let {a} = obj
       │ ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ let {a} = obj
       │      ^
@@ -530,20 +530,20 @@ let a, b; ({a = 0, b} = obj); foo(a, b);
 ```
 invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ let a, b; ({a = 0, b} = obj); foo(a, b);
       │ ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is only assigned here.
   
   > 1 │ let a, b; ({a = 0, b} = obj); foo(a, b);
-      │     ^
+      │             ^
   
-  i 'b' is never re-assigned.
+  i 'b' is only assigned here.
   
   > 1 │ let a, b; ({a = 0, b} = obj); foo(a, b);
-      │        ^
+      │                    ^
   
 
 ```
@@ -557,15 +557,15 @@ let x; function foo() { bar(x); } x = 0;
 ```
 invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let x; function foo() { bar(x); } x = 0;
       │ ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is only assigned here.
   
   > 1 │ let x; function foo() { bar(x); } x = 0;
-      │     ^
+      │                                   ^
   
 
 ```
@@ -579,12 +579,12 @@ invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━
 ```
 invalid.jsonc:1:24 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ /*eslint use-x:error*/ let x = 1
       │                        ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is never reassigned.
   
   > 1 │ /*eslint use-x:error*/ let x = 1
       │                            ^
@@ -606,12 +606,12 @@ invalid.jsonc:1:24 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.jsonc:1:26 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ /*eslint use-x:error*/ { let x = 1 }
       │                          ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is never reassigned.
   
   > 1 │ /*eslint use-x:error*/ { let x = 1 }
       │                              ^
@@ -633,17 +633,17 @@ let { foo, bar } = baz;
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ let { foo, bar } = baz;
       │ ^^^
   
-  i 'foo' is never re-assigned.
+  i 'foo' is never reassigned.
   
   > 1 │ let { foo, bar } = baz;
       │       ^^^
   
-  i 'bar' is never re-assigned.
+  i 'bar' is never reassigned.
   
   > 1 │ let { foo, bar } = baz;
       │            ^^^
@@ -665,12 +665,12 @@ const x = [1,2]; let [,y] = x;
 ```
 invalid.jsonc:1:18 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ const x = [1,2]; let [,y] = x;
       │                  ^^^
   
-  i 'y' is never re-assigned.
+  i 'y' is never reassigned.
   
   > 1 │ const x = [1,2]; let [,y] = x;
       │                        ^
@@ -692,17 +692,17 @@ const x = [1,2,3]; let [y,,z] = x;
 ```
 invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ const x = [1,2,3]; let [y,,z] = x;
       │                    ^^^
   
-  i 'y' is never re-assigned.
+  i 'y' is never reassigned.
   
   > 1 │ const x = [1,2,3]; let [y,,z] = x;
       │                         ^
   
-  i 'z' is never re-assigned.
+  i 'z' is never reassigned.
   
   > 1 │ const x = [1,2,3]; let [y,,z] = x;
       │                            ^
@@ -724,15 +724,15 @@ let predicate; [, {foo:returnType, predicate}] = foo();
 ```
 invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let predicate; [, {foo:returnType, predicate}] = foo();
       │ ^^^
   
-  i 'predicate' is never re-assigned.
+  i 'predicate' is only assigned here.
   
   > 1 │ let predicate; [, {foo:returnType, predicate}] = foo();
-      │     ^^^^^^^^^
+      │                                    ^^^^^^^^^
   
 
 ```
@@ -746,15 +746,15 @@ let predicate; [, {foo:returnType, predicate}, ...bar ] = foo();
 ```
 invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let predicate; [, {foo:returnType, predicate}, ...bar ] = foo();
       │ ^^^
   
-  i 'predicate' is never re-assigned.
+  i 'predicate' is only assigned here.
   
   > 1 │ let predicate; [, {foo:returnType, predicate}, ...bar ] = foo();
-      │     ^^^^^^^^^
+      │                                    ^^^^^^^^^
   
 
 ```
@@ -768,15 +768,15 @@ let predicate; [, {foo:returnType, ...predicate} ] = foo();
 ```
 invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let predicate; [, {foo:returnType, ...predicate} ] = foo();
       │ ^^^
   
-  i 'predicate' is never re-assigned.
+  i 'predicate' is only assigned here.
   
   > 1 │ let predicate; [, {foo:returnType, ...predicate} ] = foo();
-      │     ^^^^^^^^^
+      │                                       ^^^^^^^^^
   
 
 ```
@@ -790,17 +790,17 @@ let x = 'x', y = 'y';
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ let x = 'x', y = 'y';
       │ ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is never reassigned.
   
   > 1 │ let x = 'x', y = 'y';
       │     ^
   
-  i 'y' is never re-assigned.
+  i 'y' is never reassigned.
   
   > 1 │ let x = 'x', y = 'y';
       │              ^
@@ -822,17 +822,17 @@ let x = 1, y = 'y'; let z = 1;
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ let x = 1, y = 'y'; let z = 1;
       │ ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is never reassigned.
   
   > 1 │ let x = 1, y = 'y'; let z = 1;
       │     ^
   
-  i 'y' is never re-assigned.
+  i 'y' is never reassigned.
   
   > 1 │ let x = 1, y = 'y'; let z = 1;
       │            ^
@@ -848,12 +848,12 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.jsonc:1:21 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let x = 1, y = 'y'; let z = 1;
       │                     ^^^
   
-  i 'z' is never re-assigned.
+  i 'z' is never reassigned.
   
   > 1 │ let x = 1, y = 'y'; let z = 1;
       │                         ^
@@ -875,22 +875,22 @@ let { a, b, c} = obj; let { x, y, z} = anotherObj; x = 2;
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ let { a, b, c} = obj; let { x, y, z} = anotherObj; x = 2;
       │ ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ let { a, b, c} = obj; let { x, y, z} = anotherObj; x = 2;
       │       ^
   
-  i 'b' is never re-assigned.
+  i 'b' is never reassigned.
   
   > 1 │ let { a, b, c} = obj; let { x, y, z} = anotherObj; x = 2;
       │          ^
   
-  i 'c' is never re-assigned.
+  i 'c' is never reassigned.
   
   > 1 │ let { a, b, c} = obj; let { x, y, z} = anotherObj; x = 2;
       │             ^
@@ -912,17 +912,17 @@ let x = 'x', y = 'y'; function someFunc() { let a = 1, b = 2; foo(a, b) }
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ let x = 'x', y = 'y'; function someFunc() { let a = 1, b = 2; foo(a, b) }
       │ ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is never reassigned.
   
   > 1 │ let x = 'x', y = 'y'; function someFunc() { let a = 1, b = 2; foo(a, b) }
       │     ^
   
-  i 'y' is never re-assigned.
+  i 'y' is never reassigned.
   
   > 1 │ let x = 'x', y = 'y'; function someFunc() { let a = 1, b = 2; foo(a, b) }
       │              ^
@@ -938,17 +938,17 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.jsonc:1:45 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ let x = 'x', y = 'y'; function someFunc() { let a = 1, b = 2; foo(a, b) }
       │                                             ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ let x = 'x', y = 'y'; function someFunc() { let a = 1, b = 2; foo(a, b) }
       │                                                 ^
   
-  i 'b' is never re-assigned.
+  i 'b' is never reassigned.
   
   > 1 │ let x = 'x', y = 'y'; function someFunc() { let a = 1, b = 2; foo(a, b) }
       │                                                        ^
@@ -970,12 +970,12 @@ let someFunc = () => { let a = 1, b = 2; foo(a, b) }
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let someFunc = () => { let a = 1, b = 2; foo(a, b) }
       │ ^^^
   
-  i 'someFunc' is never re-assigned.
+  i 'someFunc' is never reassigned.
   
   > 1 │ let someFunc = () => { let a = 1, b = 2; foo(a, b) }
       │     ^^^^^^^^
@@ -991,17 +991,17 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.jsonc:1:24 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ let someFunc = () => { let a = 1, b = 2; foo(a, b) }
       │                        ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ let someFunc = () => { let a = 1, b = 2; foo(a, b) }
       │                            ^
   
-  i 'b' is never re-assigned.
+  i 'b' is never reassigned.
   
   > 1 │ let someFunc = () => { let a = 1, b = 2; foo(a, b) }
       │                                   ^
@@ -1023,12 +1023,12 @@ invalid.jsonc:1:24 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.jsonc:1:32 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ /*eslint no-undef-init:error*/ let foo = undefined;
       │                                ^^^
   
-  i 'foo' is never re-assigned.
+  i 'foo' is never reassigned.
   
   > 1 │ /*eslint no-undef-init:error*/ let foo = undefined;
       │                                    ^^^
@@ -1050,12 +1050,12 @@ let a = 1; class C { static { a; } }
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let a = 1; class C { static { a; } }
       │ ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ let a = 1; class C { static { a; } }
       │     ^
@@ -1077,12 +1077,12 @@ class C { static { a; } } let a = 1;
 ```
 invalid.jsonc:1:27 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ class C { static { a; } } let a = 1;
       │                           ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ class C { static { a; } } let a = 1;
       │                               ^
@@ -1104,12 +1104,12 @@ class C { static { let a = 1; } }
 ```
 invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ class C { static { let a = 1; } }
       │                    ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ class C { static { let a = 1; } }
       │                        ^
@@ -1131,12 +1131,12 @@ class C { static { if (foo) { let a = 1; } } }
 ```
 invalid.jsonc:1:31 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ class C { static { if (foo) { let a = 1; } } }
       │                               ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ class C { static { if (foo) { let a = 1; } } }
       │                                   ^
@@ -1158,12 +1158,12 @@ class C { static { let a = 1; if (foo) { a; } } }
 ```
 invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ class C { static { let a = 1; if (foo) { a; } } }
       │                    ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ class C { static { let a = 1; if (foo) { a; } } }
       │                        ^
@@ -1185,15 +1185,15 @@ class C { static { if (foo) { let a; a = 1; } } }
 ```
 invalid.jsonc:1:31 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ class C { static { if (foo) { let a; a = 1; } } }
       │                               ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is only assigned here.
   
   > 1 │ class C { static { if (foo) { let a; a = 1; } } }
-      │                                   ^
+      │                                      ^
   
 
 ```
@@ -1207,15 +1207,15 @@ class C { static { let a; a = 1; } }
 ```
 invalid.jsonc:1:20 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ class C { static { let a; a = 1; } }
       │                    ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is only assigned here.
   
   > 1 │ class C { static { let a; a = 1; } }
-      │                        ^
+      │                           ^
   
 
 ```
@@ -1229,17 +1229,17 @@ class C { static { let { a, b } = foo; } }
 ```
 invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ class C { static { let { a, b } = foo; } }
       │                    ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ class C { static { let { a, b } = foo; } }
       │                          ^
   
-  i 'b' is never re-assigned.
+  i 'b' is never reassigned.
   
   > 1 │ class C { static { let { a, b } = foo; } }
       │                             ^
@@ -1261,20 +1261,20 @@ class C { static { let a, b; ({ a, b } = foo); } }
 ```
 invalid.jsonc:1:20 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ class C { static { let a, b; ({ a, b } = foo); } }
       │                    ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is only assigned here.
   
   > 1 │ class C { static { let a, b; ({ a, b } = foo); } }
-      │                        ^
+      │                                 ^
   
-  i 'b' is never re-assigned.
+  i 'b' is only assigned here.
   
   > 1 │ class C { static { let a, b; ({ a, b } = foo); } }
-      │                           ^
+      │                                    ^
   
 
 ```
@@ -1288,15 +1288,15 @@ class C { static { let a; let b; ({ a, b } = foo); } }
 ```
 invalid.jsonc:1:20 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ class C { static { let a; let b; ({ a, b } = foo); } }
       │                    ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is only assigned here.
   
   > 1 │ class C { static { let a; let b; ({ a, b } = foo); } }
-      │                        ^
+      │                                     ^
   
 
 ```
@@ -1304,15 +1304,15 @@ invalid.jsonc:1:20 lint/style/useConst ━━━━━━━━━━━━━�
 ```
 invalid.jsonc:1:27 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ class C { static { let a; let b; ({ a, b } = foo); } }
       │                           ^^^
   
-  i 'b' is never re-assigned.
+  i 'b' is only assigned here.
   
   > 1 │ class C { static { let a; let b; ({ a, b } = foo); } }
-      │                               ^
+      │                                        ^
   
 
 ```
@@ -1326,15 +1326,15 @@ class C { static { let a; a = 0; console.log(a); } }
 ```
 invalid.jsonc:1:20 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ class C { static { let a; a = 0; console.log(a); } }
       │                    ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is only assigned here.
   
   > 1 │ class C { static { let a; a = 0; console.log(a); } }
-      │                        ^
+      │                           ^
   
 
 ```
@@ -1348,22 +1348,22 @@ let { itemId, list } = {}, obj = []; console.log(itemId, list, obj);
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ let { itemId, list } = {}, obj = []; console.log(itemId, list, obj);
       │ ^^^
   
-  i 'itemId' is never re-assigned.
+  i 'itemId' is never reassigned.
   
   > 1 │ let { itemId, list } = {}, obj = []; console.log(itemId, list, obj);
       │       ^^^^^^
   
-  i 'list' is never re-assigned.
+  i 'list' is never reassigned.
   
   > 1 │ let { itemId, list } = {}, obj = []; console.log(itemId, list, obj);
       │               ^^^^
   
-  i 'obj' is never re-assigned.
+  i 'obj' is never reassigned.
   
   > 1 │ let { itemId, list } = {}, obj = []; console.log(itemId, list, obj);
       │                            ^^^
@@ -1385,22 +1385,22 @@ let [ itemId, list ] = [], obj = []; console.log(itemId, list, obj);
 ```
 invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares some variables which are never re-assigned.
+  ! This let declares some variables that are only assigned once.
   
   > 1 │ let [ itemId, list ] = [], obj = []; console.log(itemId, list, obj);
       │ ^^^
   
-  i 'itemId' is never re-assigned.
+  i 'itemId' is never reassigned.
   
   > 1 │ let [ itemId, list ] = [], obj = []; console.log(itemId, list, obj);
       │       ^^^^^^
   
-  i 'list' is never re-assigned.
+  i 'list' is never reassigned.
   
   > 1 │ let [ itemId, list ] = [], obj = []; console.log(itemId, list, obj);
       │               ^^^^
   
-  i 'obj' is never re-assigned.
+  i 'obj' is never reassigned.
   
   > 1 │ let [ itemId, list ] = [], obj = []; console.log(itemId, list, obj);
       │                            ^^^
@@ -1422,12 +1422,12 @@ class C { static { () => a; let a = 1; } };
 ```
 invalid.jsonc:1:29 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ class C { static { () => a; let a = 1; } };
       │                             ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ class C { static { () => a; let a = 1; } };
       │                                 ^
@@ -1449,17 +1449,15 @@ let x; function foo() { bar(x); } x = 0;
 ```
 invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let declares a variable which is never re-assigned.
+  ! This let declares a variable that is only assigned once.
   
   > 1 │ let x; function foo() { bar(x); } x = 0;
       │ ^^^
   
-  i 'x' is never re-assigned.
+  i 'x' is only assigned here.
   
   > 1 │ let x; function foo() { bar(x); } x = 0;
-      │     ^
+      │                                   ^
   
 
 ```
-
-
