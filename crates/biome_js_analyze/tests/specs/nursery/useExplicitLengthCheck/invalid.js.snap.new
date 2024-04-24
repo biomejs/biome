@@ -5,111 +5,77 @@ expression: invalid.js
 ---
 # Input
 ```jsx
-foo.length != 0
-if (foo.size) {}
-Boolean(foo.length)
-new Boolean(foo.length)
-!foo.length
-!this.length
+foo.length!=0
+/** A */ 0 /** B */ != /** D */ foo.length /** E */
+if (/** A */foo.size /** B */) {}
+// Boolean(foo.length)
+// new Boolean(foo.length)
+// !foo.length
+// !this.length
+// true ? foo.length : 0
+// true ? foo.length == 0 : 0
 
-
-!!!(!!foo.length)
+// !!!(!!foo.length)
 ```
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/useExplicitLengthCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 with .length is not zero.
   
-  > 1 │ foo.length != 0
-      │ ^^^^^^^^^^
-    2 │ if (foo.size) {}
-    3 │ Boolean(foo.length)
+  > 1 │ foo.length!=0
+      │ ^^^^^^^^^^^^^
+    2 │ /** A */ 0 /** B */ != /** D */ foo.length /** E */
+    3 │ if (/** A */foo.size /** B */) {}
+  
+  i Unsafe fix: Add new keyword.
+  
+     1    │ - foo.length!=0
+        1 │ + foo.length·<·0
+     2  2 │   /** A */ 0 /** B */ != /** D */ foo.length /** E */
+     3  3 │   if (/** A */foo.size /** B */) {}
   
 
 ```
 
 ```
-invalid.js:2:5 lint/nursery/useExplicitLengthCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:10 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+    1 │ foo.length!=0
+  > 2 │ /** A */ 0 /** B */ != /** D */ foo.length /** E */
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ if (/** A */foo.size /** B */) {}
+    4 │ // Boolean(foo.length)
+  
+  i Unsafe fix: Add new keyword.
+  
+     1  1 │   foo.length!=0
+     2    │ - /**·A·*/·0·/**·B·*/·!=·/**·D·*/·foo.length·/**·E·*/
+        2 │ + /**·A·*/·0·/**·B·*/·>·foo.length·/**·E·*/
+     3  3 │   if (/** A */foo.size /** B */) {}
+     4  4 │   // Boolean(foo.length)
+  
+
+```
+
+```
+invalid.js:3:13 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .size > 0 with .size is not zero.
   
-    1 │ foo.length != 0
-  > 2 │ if (foo.size) {}
-      │     ^^^^^^^^
-    3 │ Boolean(foo.length)
-    4 │ new Boolean(foo.length)
+    1 │ foo.length!=0
+    2 │ /** A */ 0 /** B */ != /** D */ foo.length /** E */
+  > 3 │ if (/** A */foo.size /** B */) {}
+      │             ^^^^^^^^
+    4 │ // Boolean(foo.length)
+    5 │ // new Boolean(foo.length)
   
-
-```
-
-```
-invalid.js:3:9 lint/nursery/useExplicitLengthCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use .length > 0 with .length is not zero.
+  i Unsafe fix: Replace with
   
-    1 │ foo.length != 0
-    2 │ if (foo.size) {}
-  > 3 │ Boolean(foo.length)
-      │         ^^^^^^^^^^
-    4 │ new Boolean(foo.length)
-    5 │ !foo.length
-  
-
-```
-
-```
-invalid.js:4:13 lint/nursery/useExplicitLengthCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use .length > 0 with .length is not zero.
-  
-    2 │ if (foo.size) {}
-    3 │ Boolean(foo.length)
-  > 4 │ new Boolean(foo.length)
-      │             ^^^^^^^^^^
-    5 │ !foo.length
-    6 │ !this.length
-  
-
-```
-
-```
-invalid.js:5:2 lint/nursery/useExplicitLengthCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use .length > 0 with .length is not zero.
-  
-    3 │ Boolean(foo.length)
-    4 │ new Boolean(foo.length)
-  > 5 │ !foo.length
-      │  ^^^^^^^^^^
-    6 │ !this.length
-    7 │ 
-  
-
-```
-
-```
-invalid.js:6:2 lint/nursery/useExplicitLengthCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use .length > 0 with .length is not zero.
-  
-    4 │ new Boolean(foo.length)
-    5 │ !foo.length
-  > 6 │ !this.length
-      │  ^^^^^^^^^^^
-    7 │ 
-  
-
-```
-
-```
-invalid.js:9:7 lint/nursery/useExplicitLengthCheck ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use .length > 0 with .length is not zero.
-  
-  > 9 │ !!!(!!foo.length)
-      │       ^^^^^^^^^^
-  
+    3 │ if·(/**·A·*/foo.size·/**·B·*/·>·0)·{}
+      │                              ++++    
 
 ```

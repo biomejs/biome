@@ -1,13 +1,19 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource, RuleSourceKind,
+};
 use biome_console::markup;
+use biome_diagnostics::Applicability;
+use biome_js_factory::make::{self, token};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsConditionalExpression,
-    JsDoWhileStatement, JsForStatement, JsIfStatement, JsNewExpression,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
-    JsUnaryExpression, JsUnaryOperator, JsWhileStatement,
+    JsDoWhileStatement, JsForStatement, JsIfStatement, JsNewExpression, JsStaticMemberExpression,
+    JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, JsWhileStatement, T,
 };
-use biome_rowan::{AstNode, SyntaxNodeCast};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
+
+use crate::JsRuleAction;
 
 declare_rule! {
     /// Succinct description of the rule.
@@ -38,6 +44,10 @@ declare_rule! {
         version: "next",
         name: "useExplicitLengthCheck",
         recommended: false,
+        sources: &[RuleSource::EslintUnicorn("explicit-length-check")],
+        source_kind: RuleSourceKind::Inspired,
+        recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -62,15 +72,17 @@ impl Rule for UseExplicitLengthCheck {
         let parent_syntax = syntax.parent()?;
 
         if is_in_boolean_context(syntax).is_some()
-            || is_negation(&parent_syntax).is_some()
             || is_boolean_call(&parent_syntax).unwrap_or(false)
             || is_boolean_constructor_call(&parent_syntax).unwrap_or(false)
         {
             return Some(UseExplicitLengthCheckState {
                 check: LengthCheck::NonZero,
+                suggested_fix: LengthFixKind::ReplaceWhole(AnyJsExpression::cast(syntax.clone())?),
                 member_name,
             });
         }
+
+                    // || is_negation(&parent_syntax).is_some()
 
         // Get from parent
         let parent_syntax = syntax.parent()?;
@@ -103,6 +115,7 @@ impl Rule for UseExplicitLengthCheck {
         if matches_numeric_binary_condition(condition, &invalid_zero_len_checks) {
             return Some(UseExplicitLengthCheckState {
                 check: LengthCheck::Zero,
+                suggested_fix: LengthFixKind::ModifyBinary(binary_expr, member_position),
                 member_name,
             });
         }
@@ -137,6 +150,7 @@ impl Rule for UseExplicitLengthCheck {
         if matches_numeric_binary_condition(condition, &invalid_non_zero_len_checks) {
             return Some(UseExplicitLengthCheckState {
                 check: LengthCheck::NonZero,
+                suggested_fix: LengthFixKind::ModifyBinary(binary_expr, member_position),
                 member_name,
             });
         }
@@ -144,21 +158,88 @@ impl Rule for UseExplicitLengthCheck {
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        // let node = ctx.query();
 
         let (code, type_text) = match state.check {
             LengthCheck::Zero => ("=== 0", "zero"),
             LengthCheck::NonZero => ("> 0", "not zero"),
         };
 
+        let span = match &state.suggested_fix {
+            LengthFixKind::ReplaceWhole(node) => node.range(),
+            LengthFixKind::ModifyBinary(node, _) => node.range(),
+        };
+
         Some(RuleDiagnostic::new(
             rule_category!(),
-            node.range(),
+            span,
             markup! {
                 "Use "<Emphasis>"."{state.member_name}" "{code}</Emphasis>" with "<Emphasis>"."{state.member_name}</Emphasis>" is "{type_text}"."
             },
         ))
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let mut mutation = ctx.root().begin();
+
+        match &state.suggested_fix {
+            LengthFixKind::ReplaceWhole(node) => {
+                let operator_syntax = match state.check {
+                    LengthCheck::Zero => T![===],
+                    LengthCheck::NonZero => T![>],
+                };
+
+                let new_binary_expr = make::js_binary_expression(
+                    node.clone().into(),
+                    make::token_decorated_with_space(operator_syntax),
+                    AnyJsExpression::AnyJsLiteralExpression(
+                        AnyJsLiteralExpression::JsNumberLiteralExpression(
+                            make::js_number_literal_expression(make::js_number_literal("0")),
+                        ),
+                    ),
+                );
+
+                mutation.replace_node_discard_trivia::<AnyJsExpression>(node.clone().into(), new_binary_expr.into());
+
+                Some(JsRuleAction {
+                    category: ActionCategory::QuickFix,
+                    applicability: Applicability::MaybeIncorrect,
+                    message: markup! { "Replace with" }.to_owned(),
+                    mutation,
+                })
+            }
+            LengthFixKind::ModifyBinary(binary_expr, member_position) => {
+                let operator_syntax = match state.check {
+                    LengthCheck::Zero => match member_position {
+                        MemberPosition::Left => T![===],
+                        MemberPosition::Right => T![===],
+                    },
+                    LengthCheck::NonZero => match member_position {
+                        MemberPosition::Left => T![>],
+                        MemberPosition::Right => T![<],
+                    },
+                };
+
+                let new_binary_expr = make::js_binary_expression(
+                    binary_expr.left().ok()?.clone().trim_trailing_trivia()?,
+                    make::token_decorated_with_space(operator_syntax),
+                    binary_expr.right().ok()?.clone().trim_leading_trivia()?,
+                );
+
+                mutation.replace_node::<AnyJsExpression>(
+                    binary_expr.clone().into(),
+                    new_binary_expr.into(),
+                );
+
+                Some(JsRuleAction {
+                    category: ActionCategory::QuickFix,
+                    applicability: Applicability::MaybeIncorrect,
+                    message: markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
+                    mutation,
+                })
+            }
+        }
     }
 }
 
@@ -167,10 +248,11 @@ const LENGTH_MEMBER_NAMES: &[&str] = &["byteLength", "byteOffset", "length", "si
 
 pub struct UseExplicitLengthCheckState {
     check: LengthCheck,
+    suggested_fix: LengthFixKind,
     member_name: String,
 }
 
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Clone, Copy)]
 enum MemberPosition {
     Left,
     Right,
@@ -179,6 +261,11 @@ enum MemberPosition {
 enum LengthCheck {
     Zero,
     NonZero,
+}
+
+enum LengthFixKind {
+    ReplaceWhole(AnyJsExpression),
+    ModifyBinary(JsBinaryExpression, MemberPosition),
 }
 
 fn extract_binary_position_and_literal(
