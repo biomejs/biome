@@ -1552,15 +1552,15 @@
 						{ "type": "null" }
 					]
 				},
-				"noUselessUndefinedInitialization": {
-					"description": "Disallow initializing variables to undefined.",
+				"noUnknownUnit": {
+					"description": "Disallow unknown CSS units.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"noUnknownUnit": {
-					"description": "Disallow unknown CSS units.",
+				"noUselessUndefinedInitialization": {
+					"description": "Disallow initializing variables to undefined.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

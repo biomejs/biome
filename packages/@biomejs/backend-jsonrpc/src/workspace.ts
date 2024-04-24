@@ -977,13 +977,13 @@ export interface Nursery {
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow initializing variables to undefined.
-	*/
-	noUselessUndefinedInitialization?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow unknown CSS units.
 	 */
 	noUnknownUnit?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow initializing variables to undefined.
+	 */
+	noUselessUndefinedInitialization?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
