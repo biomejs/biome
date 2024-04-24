@@ -84,7 +84,7 @@ pub const LINE_HEIGHT_KEYWORDS: [&str; 1] = ["normal"];
 
 /// List of known CSS value functions sourced from [`css-functions-list`](https://www.npmjs.com/package/css-functions-list).
 /// See the original list [here](https://github.com/niksy/css-functions-list/blob/master/index.json).
-pub const FUNCTION_KEYWORDS: [&str; 675] = [
+pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "abs",
     "acos",
     "anchor",
@@ -128,7 +128,6 @@ pub const FUNCTION_KEYWORDS: [&str; 675] = [
     "hwb",
     "hypot",
     "image",
-    "image-rect",
     "image-set",
     "inset",
     "invert",
@@ -263,7 +262,6 @@ pub const FUNCTION_KEYWORDS: [&str; 675] = [
     "-webkit-hwb",
     "-webkit-hypot",
     "-webkit-image",
-    "-webkit-image-rect",
     "-webkit-image-set",
     "-webkit-inset",
     "-webkit-invert",
@@ -533,7 +531,6 @@ pub const FUNCTION_KEYWORDS: [&str; 675] = [
     "-o-hwb",
     "-o-hypot",
     "-o-image",
-    "-o-image-rect",
     "-o-image-set",
     "-o-inset",
     "-o-invert",
@@ -668,7 +665,6 @@ pub const FUNCTION_KEYWORDS: [&str; 675] = [
     "-ms-hwb",
     "-ms-hypot",
     "-ms-image",
-    "-ms-image-rect",
     "-ms-image-set",
     "-ms-inset",
     "-ms-invert",
