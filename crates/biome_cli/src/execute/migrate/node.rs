@@ -5,21 +5,10 @@ use crate::{diagnostics::MigrationDiagnostic, CliDiagnostic};
 /// Imports `specifier` using Node's `import()` or node's `require()` and
 /// returns the JSONified content of its default export.
 pub(crate) fn load_config(specifier: &str) -> Result<Resolution, CliDiagnostic> {
-    // JSON.stringify replacer to avoid serializing cyclic references
-    let replacer = "(_key, val) => {
-        if (val != null && typeof val == 'object') {
-            if (seen.has(val)) { return; }
-            seen.add(val);
-        }
-        return val;
-    }";
     let content_output = Command::new("node")
         .arg("--eval")
         .arg(format!(
-            "import('{specifier}').then((c) => {{
-                const seen = new Set();
-                console.log(JSON.stringify(c.default, {replacer}));
-            }})"
+            "{UNCYCLE_FUNCTION} import('{specifier}').then((c) => console.log(JSON.stringify(uncycle(c.default))))"
         ))
         .output();
     match content_output {
@@ -41,7 +30,7 @@ pub(crate) fn load_config(specifier: &str) -> Result<Resolution, CliDiagnostic> 
                 let output2 = Command::new("node")
                     .arg("--eval")
                     .arg(format!(
-                        "const seen = new Set(); console.log(JSON.stringify(require('{specifier}'), {replacer}))"
+                        "{UNCYCLE_FUNCTION} console.log(JSON.stringify(uncycle(require('{specifier}'))))"
                     ))
                     .output();
                 if let Ok(output2) = output2 {
@@ -73,3 +62,20 @@ pub(crate) struct Resolution {
     /// File content in JSON
     pub(crate) content: String,
 }
+
+/// JavaScript function used to remove cyclic references.
+const UNCYCLE_FUNCTION: &str = "function uncycle(obj, seen = new Set()) {
+    seen.add(obj);
+    for (const [key, val] of Object.entries(obj)) {
+        if (val != null && typeof val == 'object') {
+            if (seen.has(val)) {
+                // Remove cycle
+                obj[key] = null;
+            } else {
+                uncycle(val, seen);
+            }
+        }
+    }
+    seen.delete(obj);
+    return obj;
+}";
