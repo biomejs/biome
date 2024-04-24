@@ -83,17 +83,11 @@ impl Rule for UseDefaultCase {
         let is_missing_default_case = node
             .cases()
             .into_iter()
-            .find(|clause| clause.as_js_default_clause().is_some())
-            .is_some()
+            .any(|clause| clause.as_js_default_clause().is_some())
             .not();
 
         let curly_token = node.r_curly_token().ok();
-
-        let trivia_in_switch_block = if curly_token.is_some() {
-            Some(curly_token.unwrap().leading_trivia())
-        } else {
-            None
-        };
+        let trivia_in_switch_block = curly_token.map(|c| c.leading_trivia());
 
         let has_disable_comment_in_switch_block =
             has_disable_comment(trivia_in_switch_block, &comment_pattern);
@@ -103,20 +97,19 @@ impl Rule for UseDefaultCase {
             .ok()
             .into_iter()
             .filter(|token| token.as_js_identifier_expression().is_some())
-            .find(|token| {
+            .any(|token| {
                 let identifier_expression = token.as_js_identifier_expression().unwrap();
 
-                if let Some(switch_identifier) = identifier_expression.name().ok() {
-                    for token in switch_identifier.value_token().into_iter() {
+                if let Ok(switch_identifier) = identifier_expression.name() {
+                    if let Ok(token) = switch_identifier.value_token() {
                         if has_disable_comment(Some(token.trailing_trivia()), &comment_pattern) {
                             return true;
                         }
                     }
                 }
 
-                return false;
-            })
-            .is_some();
+                false
+            });
 
         let is_valid = is_missing_default_case
             && has_case_clauses
