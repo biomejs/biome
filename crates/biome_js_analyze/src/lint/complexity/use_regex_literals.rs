@@ -7,12 +7,10 @@ use biome_js_factory::make::js_regex_literal_expression;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     global_identifier, static_value::StaticValue, AnyJsCallArgument, AnyJsExpression,
-    AnyJsLiteralExpression, JsCallArguments, JsCallExpression, JsComputedMemberExpression,
-    JsNewExpression, JsSyntaxKind, JsSyntaxToken,
+    AnyJsLiteralExpression, JsCallArguments, JsComputedMemberExpression, JsNewOrCallExpression,
+    JsSyntaxKind, JsSyntaxToken,
 };
-use biome_rowan::{
-    declare_node_union, AstNode, AstSeparatedList, BatchMutationExt, SyntaxError, TokenText,
-};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxError, TokenText};
 
 use crate::{services::semantic::Semantic, JsRuleAction};
 
@@ -52,10 +50,6 @@ declare_rule! {
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }
-}
-
-declare_node_union! {
-    pub JsNewOrCallExpression = JsNewExpression | JsCallExpression
 }
 
 pub struct UseRegexLiteralsState {
