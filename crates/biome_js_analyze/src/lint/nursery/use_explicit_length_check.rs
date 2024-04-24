@@ -84,7 +84,6 @@ impl Rule for UseExplicitLengthCheck {
 
                     // || is_negation(&parent_syntax).is_some()
 
-        // Get from parent
         let parent_syntax = syntax.parent()?;
         let binary_expr = match parent_syntax.kind() {
             JsSyntaxKind::JS_BINARY_EXPRESSION => {
@@ -364,6 +363,44 @@ fn is_negation(node: &JsSyntaxNode) -> Option<JsUnaryExpression> {
     let unary_expr = JsUnaryExpression::cast_ref(node)?;
     if unary_expr.operator().ok()? == JsUnaryOperator::LogicalNot {
         Some(unary_expr)
+    } else {
+        None
+    }
+}
+
+
+/// Check if the SyntaxNode is a Double Negation. Including the edge case
+/// ```js
+/// !(!x)
+/// ```
+/// Return [Rule::State] `(JsAnyExpression, ExtraBooleanCastType)` if it is a DoubleNegation Expression
+///
+fn is_double_negation_ignore_parenthesis(
+    syntax: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>,
+) -> Option<(AnyJsExpression, ExtraBooleanCastType)> {
+    if let Some(negation_expr) = is_negation(syntax) {
+        let argument = negation_expr.argument().ok()?;
+        match argument {
+            AnyJsExpression::JsUnaryExpression(expr)
+                if expr.operator().ok()? == JsUnaryOperator::LogicalNot =>
+            {
+                expr.argument()
+                    .ok()
+                    .map(|argument| (argument, ExtraBooleanCastType::DoubleNegation))
+            }
+            // Check edge case `!(!xxx)`
+            AnyJsExpression::JsParenthesizedExpression(expr) => {
+                expr.expression().ok().and_then(|expr| {
+                    is_negation(expr.syntax()).and_then(|negation| {
+                        Some((
+                            negation.argument().ok()?,
+                            ExtraBooleanCastType::DoubleNegation,
+                        ))
+                    })
+                })
+            }
+            _ => None,
+        }
     } else {
         None
     }
