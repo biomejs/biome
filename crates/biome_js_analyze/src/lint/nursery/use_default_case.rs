@@ -76,7 +76,8 @@ impl Rule for UseDefaultCase {
         let comment_pattern = options
             .comment_pattern
             .clone()
-            .unwrap_or(String::from("^no default$"));
+            .unwrap_or(String::from("^no default$"))
+            .replace("\\\\", "\\");
 
         let has_case_clauses = node.cases().into_iter().len() > 0;
         let is_missing_default_case = node
