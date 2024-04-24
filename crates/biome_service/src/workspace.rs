@@ -63,6 +63,7 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
+use slotmap::{new_key_type, DenseSlotMap};
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
@@ -71,7 +72,7 @@ use tracing::debug;
 
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use crate::file_handlers::DocumentFileSource;
-use crate::settings::WorkspaceSettings;
+use crate::settings::Settings;
 
 mod client;
 mod server;
@@ -149,7 +150,7 @@ impl FileFeaturesResult {
 
     pub(crate) fn with_settings_and_language(
         mut self,
-        settings: &WorkspaceSettings,
+        settings: &Settings,
         file_source: &DocumentFileSource,
         path: &Path,
     ) -> Self {
@@ -405,7 +406,7 @@ pub struct UpdateSettingsParams {
     pub vcs_base_path: Option<PathBuf>,
     // @ematipico TODO: have a better data structure for this
     pub gitignore_matches: Vec<String>,
-    pub working_directory: Option<PathBuf>,
+    pub workspace_directory: Option<PathBuf>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -731,6 +732,13 @@ pub struct IsPathIgnoredParams {
     pub features: Vec<FeatureName>,
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct RegisterWorkspaceFoldersParams {
+    pub path: Option<PathBuf>,
+    pub set_as_current_workspace: bool,
+}
+
 pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Checks whether a certain feature is supported. There are different conditions:
     /// - Biome doesn't recognize a file, so it can't provide the feature;
@@ -757,6 +765,12 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Add a new project to the workspace
     fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError>;
+
+    /// Register a possible workspace folders. Returns the key of said workspace. Use this key when you want to switch to different workspaces.
+    fn register_workspace_folder(
+        &self,
+        params: RegisterWorkspaceFoldersParams,
+    ) -> Result<WorkspaceKey, WorkspaceError>;
 
     /// Sets the current project path
     fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError>;
@@ -982,5 +996,37 @@ impl<'app, W: Workspace + ?Sized> Drop for FileGuard<'app, W> {
 fn test_order() {
     for items in FileFeaturesResult::PROTECTED_FILES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+}
+
+new_key_type! {
+    pub struct WorkspaceKey;
+}
+
+#[derive(Debug, Default)]
+pub struct WorkspaceData<T> {
+    /// [DenseSlotMap] is the slowest type in insertion/removal, but the fastest in iteration
+    ///
+    /// Users wouldn't change workspace folders very often,
+    pub paths: DenseSlotMap<WorkspaceKey, T>,
+}
+
+impl<T> WorkspaceData<T> {
+    /// Inserts an item
+    pub fn insert(&mut self, item: impl Into<T>) {
+        self.paths.insert(Into::into(item));
+    }
+
+    /// Removes an item
+    pub fn remove(&mut self, key: WorkspaceKey) {
+        self.paths.remove(key);
+    }
+
+    pub fn get_value_by_key(&self, key: WorkspaceKey) -> Option<&T> {
+        self.paths.get(key)
+    }
+
+    pub fn get_mut(&mut self, key: WorkspaceKey) -> Option<&mut T> {
+        self.paths.get_mut(key)
     }
 }

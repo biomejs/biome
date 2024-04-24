@@ -1,4 +1,4 @@
-use crate::workspace::DocumentFileSource;
+use crate::workspace::{DocumentFileSource, WorkspaceData, WorkspaceKey};
 use crate::{Matcher, WorkspaceError};
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
@@ -30,14 +30,109 @@ use indexmap::IndexSet;
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
+use std::sync::RwLockWriteGuard;
 use std::{
     num::NonZeroU64,
     sync::{RwLock, RwLockReadGuard},
 };
 
-/// Global settings for the entire workspace
+#[derive(Debug)]
+pub struct PathToSettings {
+    path: BiomePath,
+    settings: Settings,
+}
+
+impl Default for PathToSettings {
+    fn default() -> Self {
+        Self {
+            path: BiomePath::default(),
+            settings: Settings::default(),
+        }
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct WorkspaceSettings {
+    data: WorkspaceData<PathToSettings>,
+    current_workspace: WorkspaceKey,
+}
+
+impl WorkspaceSettings {
+    pub fn current_settings(&self) -> &Settings {
+        debug_assert!(
+            self.data.paths.len() > 0,
+            "You must have at least one workspace."
+        );
+        let data = self.data.paths.get(self.current_workspace).unwrap();
+        &data.settings
+    }
+
+    pub fn register_current_workspace(&mut self, key: WorkspaceKey) {
+        self.current_workspace = key;
+    }
+
+    pub fn current_settings_mut(&mut self) -> &mut Settings {
+        debug_assert!(
+            self.data.paths.len() > 0,
+            "You must have at least one workspace."
+        );
+        &mut self.data.get_mut(self.current_workspace).unwrap().settings
+    }
+
+    pub fn insert_workspace(&mut self, workspace_path: impl Into<PathBuf>) -> WorkspaceKey {
+        self.data.paths.insert(PathToSettings {
+            path: BiomePath::new(workspace_path.into()),
+            settings: Settings::default(),
+        })
+    }
+
+    ///
+    pub fn current_workspace_path(&self, path: &BiomePath) -> (WorkspaceKey, &BiomePath) {
+        debug_assert!(path.is_absolute(), "Workspaces paths must be absolutes.");
+        debug_assert!(
+            self.data.paths.len() > 0,
+            "You must have at least one workspace."
+        );
+        for (key, path_to_settings) in &self.data.paths {
+            if let Ok(_) = path.strip_prefix(path_to_settings.path.as_path()) {
+                return (key, &path_to_settings.path);
+            }
+        }
+        unreachable!("We should not reach here, the assertions should help.")
+    }
+
+    pub fn get_settings_by_path(&self, path: &BiomePath) -> &Settings {
+        debug_assert!(path.is_absolute(), "Workspaces paths must be absolutes.");
+        debug_assert!(
+            self.data.paths.len() > 0,
+            "You must have at least one workspace."
+        );
+        for (_, path_to_settings) in &self.data.paths {
+            if let Ok(_) = path.strip_prefix(path_to_settings.path.as_path()) {
+                return &path_to_settings.settings;
+            }
+        }
+        unreachable!("We should not reach here, the assertions should help.")
+    }
+
+    pub fn get_settings_by_path_mut(&mut self, path: &Path) -> &mut Settings {
+        debug_assert!(path.is_absolute(), "Workspaces paths must be absolutes.");
+        debug_assert!(
+            self.data.paths.len() > 0,
+            "You must have at least one workspace."
+        );
+        for (_, path_to_settings) in &mut self.data.paths {
+            if let Ok(_) = path.strip_prefix(path_to_settings.path.as_path()) {
+                return &mut path_to_settings.settings;
+            }
+        }
+        unreachable!("We should not reach here, the assertions should help.")
+    }
+}
+
+/// Global settings for the entire workspace
+#[derive(Debug, Default)]
+pub struct Settings {
     /// Formatter settings applied to all files in the workspaces
     pub formatter: FormatSettings,
     /// Linter settings applied to all files in the workspace
@@ -52,40 +147,7 @@ pub struct WorkspaceSettings {
     pub override_settings: OverrideSettings,
 }
 
-impl WorkspaceSettings {
-    /// Retrieves the settings of the formatter
-    pub fn formatter(&self) -> &FormatSettings {
-        &self.formatter
-    }
-
-    /// Whether the formatter is disabled for JavaScript files
-    pub fn javascript_formatter_disabled(&self) -> bool {
-        let enabled = self.languages.javascript.formatter.enabled.as_ref();
-        enabled == Some(&false)
-    }
-
-    /// Whether the formatter is disabled for JSON files
-    pub fn json_formatter_disabled(&self) -> bool {
-        let enabled = self.languages.json.formatter.enabled.as_ref();
-        enabled == Some(&false)
-    }
-
-    /// Whether the formatter is disabled for CSS files
-    pub fn css_formatter_disabled(&self) -> bool {
-        let enabled = self.languages.css.formatter.enabled.as_ref();
-        enabled == Some(&false)
-    }
-
-    /// Retrieves the settings of the linter
-    pub fn linter(&self) -> &LinterSettings {
-        &self.linter
-    }
-
-    /// Retrieves the settings of the organize imports
-    pub fn organize_imports(&self) -> &OrganizeImportsSettings {
-        &self.organize_imports
-    }
-
+impl Settings {
     /// The [PartialConfiguration] is merged into the workspace
     #[tracing::instrument(level = "trace", skip(self))]
     pub fn merge_with_configuration(
@@ -146,6 +208,39 @@ impl WorkspaceSettings {
         }
 
         Ok(())
+    }
+
+    /// Retrieves the settings of the formatter
+    pub fn formatter(&self) -> &FormatSettings {
+        &self.formatter
+    }
+
+    /// Whether the formatter is disabled for JavaScript files
+    pub fn javascript_formatter_disabled(&self) -> bool {
+        let enabled = self.languages.javascript.formatter.enabled.as_ref();
+        enabled == Some(&false)
+    }
+
+    /// Whether the formatter is disabled for JSON files
+    pub fn json_formatter_disabled(&self) -> bool {
+        let enabled = self.languages.json.formatter.enabled.as_ref();
+        enabled == Some(&false)
+    }
+
+    /// Whether the formatter is disabled for CSS files
+    pub fn css_formatter_disabled(&self) -> bool {
+        let enabled = self.languages.css.formatter.enabled.as_ref();
+        enabled == Some(&false)
+    }
+
+    /// Retrieves the settings of the linter
+    pub fn linter(&self) -> &LinterSettings {
+        &self.linter
+    }
+
+    /// Retrieves the settings of the organize imports
+    pub fn organize_imports(&self) -> &OrganizeImportsSettings {
+        &self.organize_imports
     }
 
     /// It retrieves the severity based on the `code` of the rule and the current configuration.
@@ -504,9 +599,9 @@ impl<'a> SettingsHandle<'a> {
     }
 }
 
-impl<'a> AsRef<WorkspaceSettings> for SettingsHandle<'a> {
-    fn as_ref(&self) -> &WorkspaceSettings {
-        &self.inner
+impl<'a> AsRef<Settings> for SettingsHandle<'a> {
+    fn as_ref(&self) -> &Settings {
+        &self.inner.current_settings()
     }
 }
 
@@ -521,12 +616,49 @@ impl<'a> SettingsHandle<'a> {
         L: ServiceLanguage,
     {
         L::resolve_format_options(
-            &self.inner.formatter,
-            &self.inner.override_settings,
-            &L::lookup_settings(&self.inner.languages).formatter,
+            &self.inner.current_settings().formatter,
+            &self.inner.current_settings().override_settings,
+            &L::lookup_settings(&self.inner.current_settings().languages).formatter,
             path,
             file_source,
         )
+    }
+}
+
+#[derive(Debug)]
+pub struct SettingsHandleMut<'a> {
+    inner: RwLockWriteGuard<'a, WorkspaceSettings>,
+}
+
+impl<'a> SettingsHandleMut<'a> {
+    pub(crate) fn new(settings: &'a RwLock<WorkspaceSettings>) -> Self {
+        Self {
+            inner: settings.write().unwrap(),
+        }
+    }
+}
+
+impl<'a> AsMut<Settings> for SettingsHandleMut<'a> {
+    fn as_mut(&mut self) -> &mut Settings {
+        self.inner.current_settings_mut()
+    }
+}
+
+pub struct WorkspacesHandleMut<'a> {
+    inner: RwLockWriteGuard<'a, WorkspaceSettings>,
+}
+
+impl<'a> WorkspacesHandleMut<'a> {
+    pub(crate) fn new(settings: &'a RwLock<WorkspaceSettings>) -> Self {
+        Self {
+            inner: settings.write().unwrap(),
+        }
+    }
+}
+
+impl<'a> AsMut<WorkspaceSettings> for WorkspacesHandleMut<'a> {
+    fn as_mut(&mut self) -> &mut WorkspaceSettings {
+        &mut self.inner
     }
 }
 
@@ -1042,7 +1174,7 @@ impl TryFrom<OverrideOrganizeImportsConfiguration> for OrganizeImportsSettings {
 pub fn to_override_settings(
     working_directory: Option<PathBuf>,
     overrides: Overrides,
-    current_settings: &WorkspaceSettings,
+    current_settings: &Settings,
 ) -> Result<OverrideSettings, WorkspaceError> {
     let mut override_settings = OverrideSettings::default();
     for mut pattern in overrides.0 {
