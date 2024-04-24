@@ -68,6 +68,12 @@ declare_rule! {
     /// import { type A, type B } from "./mod.js";
     /// ```
     ///
+    /// ```ts,expect_diagnostic
+    /// import { type A, B } from "./mod.js";
+    /// let c: A;
+    /// let d: typeof B;
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```ts
@@ -78,6 +84,12 @@ declare_rule! {
     /// ```ts
     /// import { B } from "./mod.js";
     /// let a: B = new B();
+    /// ```
+    ///
+    /// ```ts
+    /// import { type A, B } from "./mod.js";
+    /// let c: A;
+    /// let d = new B();
     /// ```
     ///
     /// The rule ignores unused imports and imports with import attributes.

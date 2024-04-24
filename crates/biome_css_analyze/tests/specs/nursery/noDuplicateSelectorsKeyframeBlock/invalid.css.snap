@@ -1,0 +1,136 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+@keyframes foo { from {} from {}}
+
+@keyframes foo { from {} FROM {}}
+
+@keyframes foo { 0% {} 0% {}}
+
+@keyframes foo { from {} to {} to {} }
+
+@keyframes foo { 0% {} 0% {} 100% {} }
+
+@-webkit-keyframes foo { 0% {} 0% {} 100% {} }
+
+@-moz-keyframes foo { 0% {} 0% {} 100% {} }
+```
+
+# Diagnostics
+```
+invalid.css:1:26 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The duplicate keyframe selector is overwritten by later one.
+  
+  > 1 │ @keyframes foo { from {} from {}}
+      │                          ^^^^
+    2 │ 
+    3 │ @keyframes foo { from {} FROM {}}
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:3:26 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The duplicate keyframe selector is overwritten by later one.
+  
+    1 │ @keyframes foo { from {} from {}}
+    2 │ 
+  > 3 │ @keyframes foo { from {} FROM {}}
+      │                          ^^^^
+    4 │ 
+    5 │ @keyframes foo { 0% {} 0% {}}
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:5:24 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The duplicate keyframe selector is overwritten by later one.
+  
+    3 │ @keyframes foo { from {} FROM {}}
+    4 │ 
+  > 5 │ @keyframes foo { 0% {} 0% {}}
+      │                        ^^
+    6 │ 
+    7 │ @keyframes foo { from {} to {} to {} }
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:7:32 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The duplicate keyframe selector is overwritten by later one.
+  
+    5 │ @keyframes foo { 0% {} 0% {}}
+    6 │ 
+  > 7 │ @keyframes foo { from {} to {} to {} }
+      │                                ^^
+    8 │ 
+    9 │ @keyframes foo { 0% {} 0% {} 100% {} }
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:9:24 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The duplicate keyframe selector is overwritten by later one.
+  
+     7 │ @keyframes foo { from {} to {} to {} }
+     8 │ 
+   > 9 │ @keyframes foo { 0% {} 0% {} 100% {} }
+       │                        ^^
+    10 │ 
+    11 │ @-webkit-keyframes foo { 0% {} 0% {} 100% {} }
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:11:32 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The duplicate keyframe selector is overwritten by later one.
+  
+     9 │ @keyframes foo { 0% {} 0% {} 100% {} }
+    10 │ 
+  > 11 │ @-webkit-keyframes foo { 0% {} 0% {} 100% {} }
+       │                                ^^
+    12 │ 
+    13 │ @-moz-keyframes foo { 0% {} 0% {} 100% {} }
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:13:29 lint/nursery/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The duplicate keyframe selector is overwritten by later one.
+  
+    11 │ @-webkit-keyframes foo { 0% {} 0% {} 100% {} }
+    12 │ 
+  > 13 │ @-moz-keyframes foo { 0% {} 0% {} 100% {} }
+       │                             ^^
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```

@@ -1128,11 +1128,11 @@
 					"description": "A list of global bindings that should be ignored by the analyzers\n\nIf defined here, they should not emit diagnostics.",
 					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				},
-				"jsx_runtime": {
+				"jsxRuntime": {
 					"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
 					"anyOf": [{ "$ref": "#/definitions/JsxRuntime" }, { "type": "null" }]
 				},
-				"organize_imports": {
+				"organizeImports": {
 					"anyOf": [
 						{ "$ref": "#/definitions/JavascriptOrganizeImports" },
 						{ "type": "null" }
@@ -1332,12 +1332,12 @@
 				{
 					"description": "Indicates a modern or native JSX environment, that doesn't require special handling by Biome.",
 					"type": "string",
-					"enum": ["Transparent"]
+					"enum": ["transparent"]
 				},
 				{
 					"description": "Indicates a classic React environment that requires the `React` import.\n\nCorresponds to the `react` value for the `jsx` option in TypeScript's `tsconfig.json`.\n\nThis option should only be necessary if you cannot upgrade to a React version that supports the new JSX runtime. For more information about the old vs. new JSX runtime, please see: <https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html>",
 					"type": "string",
-					"enum": ["ReactClassic"]
+					"enum": ["reactClassic"]
 				}
 			]
 		},
@@ -1489,6 +1489,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateSelectorsKeyframeBlock": {
+					"description": "Disallow duplicate selectors within keyframe blocks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEvolvingAny": {
 					"description": "Disallow variables from evolving into any type through reassignments.",
 					"anyOf": [
@@ -1498,6 +1505,13 @@
 				},
 				"noFlatMapIdentity": {
 					"description": "Disallow to use unnecessary callback on flatMap.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImportantInKeyframe": {
+					"description": "Disallow invalid !important within keyframe declarations",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1545,9 +1559,23 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownUnit": {
+					"description": "Disallow unknown CSS units.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useConsistentNewBuiltin": {
+					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",

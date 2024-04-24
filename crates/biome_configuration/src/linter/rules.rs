@@ -2671,12 +2671,19 @@ pub struct Nursery {
     #[doc = "Disallow two keys with the same name inside a JSON object."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_json_keys: Option<RuleConfiguration<NoDuplicateJsonKeys>>,
+    #[doc = "Disallow duplicate selectors within keyframe blocks."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_duplicate_selectors_keyframe_block:
+        Option<RuleConfiguration<NoDuplicateSelectorsKeyframeBlock>>,
     #[doc = "Disallow variables from evolving into any type through reassignments."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_evolving_any: Option<RuleConfiguration<NoEvolvingAny>>,
     #[doc = "Disallow to use unnecessary callback on flatMap."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_flat_map_identity: Option<RuleConfiguration<NoFlatMapIdentity>>,
+    #[doc = "Disallow invalid !important within keyframe declarations"]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_important_in_keyframe: Option<RuleConfiguration<NoImportantInKeyframe>>,
     #[doc = "Checks that the assertion function, for example expect, is placed inside an it() function call."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misplaced_assertion: Option<RuleConfiguration<NoMisplacedAssertion>>,
@@ -2696,6 +2703,12 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_undefined_initialization:
         Option<RuleConfiguration<NoUselessUndefinedInitialization>>,
+    #[doc = "Disallow unknown CSS units."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_unknown_unit: Option<RuleConfiguration<NoUnknownUnit>>,
+    #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_consistent_new_builtin: Option<RuleConfiguration<UseConsistentNewBuiltin>>,
     #[doc = "Disallows package private imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_import_restrictions: Option<RuleConfiguration<UseImportRestrictions>>,
@@ -2728,14 +2741,18 @@ impl Nursery {
         "noDuplicateElseIf",
         "noDuplicateFontNames",
         "noDuplicateJsonKeys",
+        "noDuplicateSelectorsKeyframeBlock",
         "noEvolvingAny",
         "noFlatMapIdentity",
+        "noImportantInKeyframe",
         "noMisplacedAssertion",
         "noNodejsModules",
         "noReactSpecificProps",
         "noRestrictedImports",
         "noUndeclaredDependencies",
         "noUselessUndefinedInitialization",
+        "noUnknownUnit",
+        "useConsistentNewBuiltin",
         "useImportRestrictions",
         "useSortedClasses",
     ];
@@ -2745,8 +2762,11 @@ impl Nursery {
         "noDuplicateElseIf",
         "noDuplicateFontNames",
         "noDuplicateJsonKeys",
+        "noDuplicateSelectorsKeyframeBlock",
         "noEvolvingAny",
         "noFlatMapIdentity",
+        "noImportantInKeyframe",
+        "noUnknownUnit",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
@@ -2756,6 +2776,9 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -2776,6 +2799,9 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -2832,54 +2858,74 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_evolving_any.as_ref() {
+        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_flat_map_identity.as_ref() {
+        if let Some(rule) = self.no_evolving_any.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_misplaced_assertion.as_ref() {
+        if let Some(rule) = self.no_flat_map_identity.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_nodejs_modules.as_ref() {
+        if let Some(rule) = self.no_important_in_keyframe.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.no_react_specific_props.as_ref() {
+        if let Some(rule) = self.no_misplaced_assertion.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.no_nodejs_modules.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_react_specific_props.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
+        if let Some(rule) = self.no_restricted_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
+            }
+        }
+        if let Some(rule) = self.no_unknown_unit.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
+            }
+        }
+        if let Some(rule) = self.use_consistent_new_builtin.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
+            }
+        }
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
         index_set
@@ -2926,54 +2972,74 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_evolving_any.as_ref() {
+        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_flat_map_identity.as_ref() {
+        if let Some(rule) = self.no_evolving_any.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_misplaced_assertion.as_ref() {
+        if let Some(rule) = self.no_flat_map_identity.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_nodejs_modules.as_ref() {
+        if let Some(rule) = self.no_important_in_keyframe.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.no_react_specific_props.as_ref() {
+        if let Some(rule) = self.no_misplaced_assertion.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.no_nodejs_modules.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_react_specific_props.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
+        if let Some(rule) = self.no_restricted_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
+            }
+        }
+        if let Some(rule) = self.no_unknown_unit.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
+            }
+        }
+        if let Some(rule) = self.use_consistent_new_builtin.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
+            }
+        }
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
         index_set
@@ -3044,12 +3110,20 @@ impl Nursery {
                 .no_duplicate_json_keys
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "noDuplicateSelectorsKeyframeBlock" => self
+                .no_duplicate_selectors_keyframe_block
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "noEvolvingAny" => self
                 .no_evolving_any
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noFlatMapIdentity" => self
                 .no_flat_map_identity
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noImportantInKeyframe" => self
+                .no_important_in_keyframe
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noMisplacedAssertion" => self
@@ -3073,7 +3147,15 @@ impl Nursery {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUselessUndefinedInitialization" => self
-                .no_useless_undefined_initialization
+            .no_useless_undefined_initialization
+            .as_ref()
+            .map(|conf| (conf.level(), conf.get_options())),
+            "noUnknownUnit" => self
+                .no_unknown_unit
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useConsistentNewBuiltin" => self
+                .use_consistent_new_builtin
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useImportRestrictions" => self

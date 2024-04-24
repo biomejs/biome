@@ -23,6 +23,10 @@ const GLOBAL_THIS: &str = "globalThis";
 const UNDEFINED: &str = "undefined";
 const WINDOW: &str = "window";
 
+declare_node_union! {
+    pub JsNewOrCallExpression = JsNewExpression | JsCallExpression
+}
+
 impl JsReferenceIdentifier {
     /// Returns `true` if this identifier refers to the `undefined` symbol.
     ///

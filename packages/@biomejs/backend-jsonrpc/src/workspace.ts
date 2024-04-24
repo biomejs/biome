@@ -166,8 +166,8 @@ If defined here, they should not emit diagnostics.
 	/**
 	 * Indicates the type of runtime or transformation used for interpreting JSX.
 	 */
-	jsx_runtime?: JsxRuntime;
-	organize_imports?: PartialJavascriptOrganizeImports;
+	jsxRuntime?: JsxRuntime;
+	organizeImports?: PartialJavascriptOrganizeImports;
 	/**
 	 * Parsing options
 	 */
@@ -359,7 +359,7 @@ export interface PartialJavascriptFormatter {
 /**
  * Indicates the type of runtime or transformation used for interpreting JSX.
  */
-export type JsxRuntime = "Transparent" | "ReactClassic";
+export type JsxRuntime = "transparent" | "reactClassic";
 export interface PartialJavascriptOrganizeImports {}
 /**
  * Options that changes how the JavaScript parser behaves
@@ -941,6 +941,10 @@ export interface Nursery {
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate selectors within keyframe blocks.
+	 */
+	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
 	noEvolvingAny?: RuleConfiguration_for_Null;
@@ -948,6 +952,10 @@ export interface Nursery {
 	 * Disallow to use unnecessary callback on flatMap.
 	 */
 	noFlatMapIdentity?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow invalid !important within keyframe declarations
+	 */
+	noImportantInKeyframe?: RuleConfiguration_for_Null;
 	/**
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
@@ -970,12 +978,20 @@ export interface Nursery {
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow initializing variables to undefined.
-	 */
+	*/
 	noUselessUndefinedInitialization?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown CSS units.
+	 */
+	noUnknownUnit?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
+	 */
+	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -1952,8 +1968,10 @@ export type Category =
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
+	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noFlatMapIdentity"
+	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReactSpecificProps"
@@ -1961,7 +1979,9 @@ export type Category =
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUselessUndefinedInitialization"
+	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentNewBuiltin"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
