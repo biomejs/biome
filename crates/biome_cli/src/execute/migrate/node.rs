@@ -5,10 +5,21 @@ use crate::{diagnostics::MigrationDiagnostic, CliDiagnostic};
 /// Imports `specifier` using Node's `import()` or node's `require()` and
 /// returns the JSONified content of its default export.
 pub(crate) fn load_config(specifier: &str) -> Result<Resolution, CliDiagnostic> {
+    // JSON.stringify replacer to avoid serializing cyclic references
+    let replacer = "(_key, val) => {
+        if (val != null && typeof val == 'object') {
+            if (seen.has(val)) { return; }
+            seen.add(val);
+        }
+        return val;
+    }";
     let content_output = Command::new("node")
         .arg("--eval")
         .arg(format!(
-            "import('{specifier}').then((c) => console.log(JSON.stringify(c.default)))"
+            "import('{specifier}').then((c) => {{
+                const seen = new Set();
+                console.log(JSON.stringify(c.default, {replacer}));
+            }})"
         ))
         .output();
     match content_output {
@@ -28,9 +39,9 @@ pub(crate) fn load_config(specifier: &str) -> Result<Resolution, CliDiagnostic> 
             if !output.stderr.is_empty() {
                 // Try with `require` before giving up.
                 let output2 = Command::new("node")
-                    .arg("--print")
+                    .arg("--eval")
                     .arg(format!(
-                        "JSON.stringify(require('{specifier}'))"
+                        "const seen = new Set(); console.log(JSON.stringify(require('{specifier}'), {replacer}))"
                     ))
                     .output();
                 if let Ok(output2) = output2 {
