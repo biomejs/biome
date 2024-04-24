@@ -597,6 +597,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_positive_tabindex.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-array-constructor" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_array_literals.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-async-promise-executor" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
@@ -1285,14 +1293,6 @@ pub(crate) fn migrate_eslint_any_rule(
         "unicorn/prefer-number-properties" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.use_number_namespace.get_or_insert(Default::default());
-            rule.set_level(rule_severity.into());
-        }
-        "use-array-literals" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group.use_array_literals.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "use-isnan" => {
