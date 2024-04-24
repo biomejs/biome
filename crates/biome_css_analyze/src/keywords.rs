@@ -82,6 +82,8 @@ pub const FONT_SIZE_KEYWORDS: [&str; 9] = [
 
 pub const LINE_HEIGHT_KEYWORDS: [&str; 1] = ["normal"];
 
+/// List of known CSS value functions sourced from [`css-functions-list`](https://www.npmjs.com/package/css-functions-list).
+/// See the original list [here](https://github.com/niksy/css-functions-list/blob/master/index.json).
 pub const FUNCTION_KEYWORDS: [&str; 675] = [
     "abs",
     "acos",
