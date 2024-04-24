@@ -39,6 +39,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Bug fixes
+
+- `biome migrate eslint` now handles cyclic references.
+
+  Some plugins and configurations export objects with cyclic references.
+  This causes `biome migrate eslint` to fail or ignore them.
+  These edge cases are now handled correctly.
+
 ### Configuration
 
 ### Editors
