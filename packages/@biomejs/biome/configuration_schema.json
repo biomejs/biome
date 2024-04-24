@@ -923,7 +923,7 @@
 			"type": "object",
 			"properties": {
 				"commentPattern": {
-					"description": "Regular expression string to change the default comment test pattern (`^no default$`)",
+					"description": "Regular expression string to change the default comment test pattern (`^no default$`). The pattern is matched in a case-insensitive manner.",
 					"type": "string"
 				}
 			}
