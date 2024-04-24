@@ -1960,7 +1960,6 @@ export type Category =
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
-	| "lint/nursery/noUselessInitialization"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useImportRestrictions"

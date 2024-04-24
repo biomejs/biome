@@ -23,9 +23,9 @@ declare_rule! {
     ///
     /// ```js,expect_diagnostic
     /// var a = undefined;
-    /// 
+    ///
     /// let b = undefined, c = 1, d = undefined;
-    /// 
+    ///
     /// for (let i = 0; i < 100; i++) {
     /// 	let i = undefined;
     /// }
@@ -90,8 +90,6 @@ impl Rule for NoUselessUndefinedInitialization {
                     };
                     signals.push((binding_name, decl_range));
                 }
-            } else {
-                continue;
             }
         }
 
@@ -117,10 +115,10 @@ impl Rule for NoUselessUndefinedInitialization {
                 Err(_) => return false,
             };
 
-            return match element.id() {
+            match element.id() {
                 Ok(id) => id.text() == state.0,
-                Err(_) => return false,
-            };
+                Err(_) => false
+            }
         })?;
 
         let initializer = match marked_binding {
