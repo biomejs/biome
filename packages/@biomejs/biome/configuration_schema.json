@@ -908,6 +908,26 @@
 			},
 			"additionalProperties": false
 		},
+		"DefaultCaseConfiguration": {
+			"description": "Configuration for `useDefaultCase` rule.",
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/definitions/DefaultCaseOptions"
+				}
+			}
+		},
+		"DefaultCaseOptions": {
+			"description": "Options for the `useDefaultCase` rule",
+			"type": "object",
+			"properties": {
+				"commentPattern": {
+					"description": "Regular expression string to change the default comment test pattern (`^no default$`)",
+					"type": "string"
+				}
+			}
+		},
 		"DeprecatedHooksConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1588,6 +1608,7 @@
 					"description": "Require default cases in switch statements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/DefaultCaseConfiguration" },
 						{ "type": "null" }
 					]
 				},
