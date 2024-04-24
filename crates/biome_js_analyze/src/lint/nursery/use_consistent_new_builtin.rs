@@ -6,8 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression, JsNewOrCallExpression,
-    JsSyntaxKind,
+    global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression, JsNewOrCallExpression, T,
 };
 use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt, TriviaPieceKind};
 
@@ -271,7 +270,7 @@ fn convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option<
     let mut callee = expr.callee().ok()?;
     let leading_trivia_pieces = callee.syntax().first_leading_trivia()?.pieces();
 
-    let new_token = make::token(JsSyntaxKind::NEW_KW)
+    let new_token = make::token(T![new])
         .with_leading_trivia_pieces(leading_trivia_pieces)
         .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
 
