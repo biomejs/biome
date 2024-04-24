@@ -12,15 +12,14 @@ repository.workspace = true
 version              = "0.0.1"
 
 [dependencies]
-biome_console     = { workspace = true }
-biome_diagnostics = { workspace = true }
-#biome_grit_parser = { workspace = true } TODO: will be used in a future PR
-#marzano-core      = { git = "https://github.com/getgrit/gritql.git", optional = true }
-serde = { workspace = true, features = ["derive"] }
-
-[features]
-default = [] # add "grit" to enable linking to Grit's Marzano engine
-#grit    = ["dep:marzano-core"]
+anyhow             = "1.0.52"
+biome_console      = { workspace = true }
+biome_diagnostics  = { workspace = true }
+biome_grit_parser  = { workspace = true }
+grit-core-patterns = { git = "https://github.com/arendjr/gritql.git", branch = "grit-core-patterns-crate" }
+grit-util          = { git = "https://github.com/arendjr/gritql.git", branch = "grit-core-patterns-crate" }
+im                 = { version = "15.1.0" }
+serde              = { workspace = true, features = ["derive"] }
 
 [lints]
 workspace = true

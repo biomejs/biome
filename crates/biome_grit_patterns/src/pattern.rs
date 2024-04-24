@@ -1,10 +1,8 @@
-#[cfg(feature = "grit")]
-use marzano_core::pattern::patterns::Pattern;
+use crate::grit_context::GritQueryContext;
+use grit_core_patterns::pattern::patterns::Pattern;
 
 pub struct GritPattern {
-    #[allow(dead_code)]
-    #[cfg(feature = "grit")]
-    pub(crate) pattern: Pattern,
+    pub(crate) _pattern: Pattern<GritQueryContext>,
 
     pub source: String,
 }
