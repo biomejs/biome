@@ -1,8 +1,6 @@
-use case::CaseExt;
-use fs_extra::dir::{create, move_dir, CopyOptions};
-use fs_extra::file;
-use fs_extra::file::move_file;
+use biome_string_case::Case;
 use std::env;
+use std::fs;
 use std::path::PathBuf;
 
 const KNOWN_GROUPS: [&str; 7] = [
@@ -31,7 +29,7 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
         )
     }
 
-    let rule_name_snake = rule_name.to_snake();
+    let rule_name_snake = Case::Snake.convert(rule_name);
 
     // look for the rule in the source code
     let mut rule_path = None;
@@ -75,14 +73,9 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
         categories.replace_range(lint_start_index..lint_end_index, &new_lint_rule_text);
 
         if !new_group_path.exists() {
-            create(new_rule_path.clone(), false).expect("To create the group folder");
+            fs::create_dir(new_rule_path.clone()).expect("To create the group folder");
         }
-        move_file(
-            rule_path.clone(),
-            new_rule_path.clone(),
-            &file::CopyOptions::default(),
-        )
-        .unwrap_or_else(|_| {
+        fs::rename(rule_path.clone(), new_rule_path.clone()).unwrap_or_else(|_| {
             panic!(
                 "To copy {} to {}",
                 rule_path.display(),
@@ -98,18 +91,7 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
             .join("crates/biome_js_analyze/tests/specs")
             .join(new_group)
             .join(rule_name);
-
-        std::fs::create_dir(new_test_path).unwrap();
-        move_dir(
-            old_test_path.display().to_string(),
-            current_dir
-                .join("crates/biome_js_analyze/tests/specs")
-                .join(new_group)
-                .display()
-                .to_string(),
-            &CopyOptions::new(),
-        )
-        .unwrap();
+        fs::rename(old_test_path, new_test_path).unwrap();
     } else {
         panic!("Couldn't find the rule {}", rule_name);
     }

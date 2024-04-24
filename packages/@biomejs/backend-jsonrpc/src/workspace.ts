@@ -166,8 +166,8 @@ If defined here, they should not emit diagnostics.
 	/**
 	 * Indicates the type of runtime or transformation used for interpreting JSX.
 	 */
-	jsx_runtime?: JsxRuntime;
-	organize_imports?: PartialJavascriptOrganizeImports;
+	jsxRuntime?: JsxRuntime;
+	organizeImports?: PartialJavascriptOrganizeImports;
 	/**
 	 * Parsing options
 	 */
@@ -359,7 +359,7 @@ export interface PartialJavascriptFormatter {
 /**
  * Indicates the type of runtime or transformation used for interpreting JSX.
  */
-export type JsxRuntime = "Transparent" | "ReactClassic";
+export type JsxRuntime = "transparent" | "reactClassic";
 export interface PartialJavascriptOrganizeImports {}
 /**
  * Options that changes how the JavaScript parser behaves
@@ -976,6 +976,10 @@ export interface Nursery {
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown CSS units.
+	 */
+	noUnknownUnit?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1970,6 +1974,7 @@ export type Category =
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
+	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentNewBuiltin"
 	| "lint/nursery/useImportRestrictions"

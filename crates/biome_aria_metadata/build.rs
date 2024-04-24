@@ -3,7 +3,7 @@
 //! - ARIA property types
 //! - ARIA roles
 
-use case::CaseExt;
+use biome_string_case::Case;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use quote::quote;
 use std::path::PathBuf;
@@ -250,7 +250,10 @@ fn generate_enums(len: usize, array: std::slice::Iter<&str>, enum_name: &str) ->
     let mut from_enum_metadata = Vec::with_capacity(len);
     let mut from_string_metadata = Vec::with_capacity(len);
     for property in array {
-        let name = Ident::new(&property.replace('-', "_").to_camel(), Span::call_site());
+        let name = Ident::new(
+            &Case::Pascal.convert(&property.replace('-', "_")),
+            Span::call_site(),
+        );
         let property = Literal::string(property);
         from_enum_metadata.push(quote! {
             #enum_name::#name => #property

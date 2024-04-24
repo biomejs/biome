@@ -281,7 +281,7 @@ We would like to set the options in the `biome.json` configuration file:
 The first step is to create the Rust data representation of the rule's options.
 
 ```rust,ignore
-use biome_deserializable_macros::Deserializable;
+use biome_deserialize_macros::Deserializable;
 
 #[derive(Clone, Debug, Default, Deserializable)]
 pub struct MyRuleOptions {
