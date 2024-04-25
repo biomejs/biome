@@ -5,6 +5,7 @@ expression: valid.css
 ---
 # Input
 ```css
+/* Same selector with different parent nodes are allowed */
 .foo {
     width: 12;
 }
@@ -15,29 +16,18 @@ expression: valid.css
     }
 }
 
-/* 
-.foo {
-    .foo {
+.bar {
+    .bar {
         width: 12;
     }
 }
 
-.foo {
-    width: 12;
-}
-
-.bar {
-    width: 12;
-}
-
+/* Same selector in a different list */
 .foo .bar {
     width: 12;
 }
 
-.bar .foo {
-    width: 12;
-}
-
+/* Net list is different */
 a b {
     width: 12;
 }
@@ -48,5 +38,5 @@ a {
     & c {
         width: 12;
     }
-} */
+}
 ```

@@ -22,6 +22,8 @@ impl Rule for NoDuplicateSelectors {
     type Signals = Option<Self::State>;
     type Options = ();
 
+    // TODO: Should allow duplicate in list (option)
+    // TODO: Traverse and compare with the entire sheet
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let mut selector_list = HashSet::new();
@@ -32,8 +34,6 @@ impl Rule for NoDuplicateSelectors {
                 return Some(valid_selector)
             }
         }
-
-
         None
     }
 

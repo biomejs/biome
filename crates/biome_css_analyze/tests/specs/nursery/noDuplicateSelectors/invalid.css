@@ -1,34 +1,31 @@
-.foo,
-.bar,
-.foo {
+/* Duplication of single selectors in a rule's selector list */
+.alpha,
+.beta,
+.alpha {
     width: 12;
 }
 
-.foo {
-    width: 12;
-}
-
-
-.bar {
-    width: 12;
-}
-
-.foo {
-    width: 12;
-}
-
+/* Duplication of selector lists within the style sheet */
+/* Duplication is found even if the selectors have different ordering */
 .foo .bar {
     width: 12;
 }
 
-.bar {
+.bar .foo {
     width: 12;
 }
 
-.foo .bar {
+a .can,
+b+.dle {
     width: 12;
 }
 
+b+.dle,
+a .can {
+    width: 12;
+}
+
+/* Duplication within @ rule */
 @media (min-width: 10px) {
     .foo {
         width: 12;
@@ -39,26 +36,7 @@
     }
 }
 
-.foo,
-.bar {
-    width: 12;
-}
-
-.bar,
-.foo {
-    width: 12;
-}
-
-a .foo,
-b+.bar {
-    width: 12;
-}
-
-b+.bar,
-a .foo {
-    width: 12;
-}
-
+/* Duplication when the net result of nesting is the same */
 a b {
     width: 12;
 }
