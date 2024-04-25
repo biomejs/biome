@@ -79,6 +79,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Fix [useTemplate](https://biomejs.dev/linter/rules/use-template/) that wrongly escaped strings in some edge cases ([#2580](https://github.com/biomejs/biome/issues/2580)).
+
+  Previously, the rule didn't correctly escaped characters preceded by an escaped character.
+
+  Contributed by @Conaclos
+
 ### Parser
 
 ## 1.7.1 (2024-04-22)
