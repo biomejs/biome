@@ -2687,7 +2687,7 @@ pub struct Nursery {
     #[doc = "Checks that the assertion function, for example expect, is placed inside an it() function call."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misplaced_assertion: Option<RuleConfiguration<NoMisplacedAssertion>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow a missing generic family keyword within font families."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_missing_generic_family_keyword: Option<RuleConfiguration<NoMissingGenericFamilyKeyword>>,
     #[doc = "Forbid the use of Node.js builtin modules."]
@@ -2786,7 +2786,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -2913,11 +2913,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-<<<<<<< HEAD
-        if let Some(rule) = self.no_unknown_unit.as_ref() {
-=======
         if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
->>>>>>> eafdd01b6c (feat: init rule)
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
@@ -3036,11 +3032,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-<<<<<<< HEAD
-        if let Some(rule) = self.no_unknown_unit.as_ref() {
-=======
         if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
->>>>>>> eafdd01b6c (feat: init rule)
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }

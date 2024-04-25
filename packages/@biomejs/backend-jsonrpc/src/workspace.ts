@@ -961,7 +961,7 @@ export interface Nursery {
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow a missing generic family keyword within font families.
 	 */
 	noMissingGenericFamilyKeyword?: RuleConfiguration_for_Null;
 	/**

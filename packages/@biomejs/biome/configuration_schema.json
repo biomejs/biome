@@ -1525,7 +1525,7 @@
 					]
 				},
 				"noMissingGenericFamilyKeyword": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow a missing generic family keyword within font families.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
