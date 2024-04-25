@@ -2,10 +2,10 @@ use super::{
     ChangeFileParams, CloseFileParams, FeatureName, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams,
-    ParsePatternParams, ParsePatternResult, PatternId, PullActionsParams, PullActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RegisterWorkspaceFoldersParams, RenameResult,
-    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateProjectParams,
-    UpdateSettingsParams, WorkspaceKey,
+    ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
+    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RegisterProjectFolderParams,
+    RenameResult, SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateProjectParams,
+    UpdateSettingsParams,
 };
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
@@ -441,16 +441,16 @@ impl Workspace for WorkspaceServer {
         Ok(())
     }
 
-    fn register_workspace_folder(
+    fn register_project_folder(
         &self,
-        params: RegisterWorkspaceFoldersParams,
-    ) -> Result<WorkspaceKey, WorkspaceError> {
+        params: RegisterProjectFolderParams,
+    ) -> Result<ProjectKey, WorkspaceError> {
         let mut workspace = self.workspaces_mut();
         let key = workspace
             .as_mut()
-            .insert_workspace(params.path.unwrap_or_default());
+            .insert_project(params.path.unwrap_or_default());
         if params.set_as_current_workspace {
-            workspace.as_mut().register_current_workspace(key);
+            workspace.as_mut().register_current_project(key);
         }
         Ok(key)
     }

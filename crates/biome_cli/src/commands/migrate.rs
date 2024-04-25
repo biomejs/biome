@@ -4,7 +4,7 @@ use crate::execute::{execute_mode, Execution, TraversalMode};
 use crate::{setup_cli_subscriber, CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
-use biome_service::workspace::RegisterWorkspaceFoldersParams;
+use biome_service::workspace::RegisterProjectFolderParams;
 
 use super::MigrateSubCommand;
 
@@ -27,7 +27,7 @@ pub(crate) fn migrate(
     session
         .app
         .workspace
-        .register_workspace_folder(RegisterWorkspaceFoldersParams {
+        .register_project_folder(RegisterProjectFolderParams {
             path: session.app.fs.working_directory(),
             set_as_current_workspace: true,
         })?;

@@ -8,7 +8,7 @@ use biome_deserialize::Merge;
 use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
-use biome_service::workspace::{RegisterWorkspaceFoldersParams, UpdateSettingsParams};
+use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
 
 pub(crate) struct CiCommandPayload {
@@ -109,7 +109,7 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
     session
         .app
         .workspace
-        .register_workspace_folder(RegisterWorkspaceFoldersParams {
+        .register_project_folder(RegisterProjectFolderParams {
             path: session.app.fs.working_directory(),
             set_as_current_workspace: true,
         })?;

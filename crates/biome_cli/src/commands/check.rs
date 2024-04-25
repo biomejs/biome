@@ -11,7 +11,7 @@ use biome_configuration::{
 };
 use biome_deserialize::Merge;
 use biome_service::configuration::PartialConfigurationExt;
-use biome_service::workspace::RegisterWorkspaceFoldersParams;
+use biome_service::workspace::RegisterProjectFolderParams;
 use biome_service::{
     configuration::{load_configuration, LoadedConfiguration},
     workspace::{FixFileMode, UpdateSettingsParams},
@@ -133,7 +133,7 @@ pub(crate) fn check(
     session
         .app
         .workspace
-        .register_workspace_folder(RegisterWorkspaceFoldersParams {
+        .register_project_folder(RegisterProjectFolderParams {
             path: session.app.fs.working_directory(),
             set_as_current_workspace: true,
         })?;

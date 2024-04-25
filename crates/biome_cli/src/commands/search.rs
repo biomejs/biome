@@ -9,7 +9,7 @@ use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::workspace::{
-    ParsePatternParams, RegisterWorkspaceFoldersParams, UpdateSettingsParams,
+    ParsePatternParams, RegisterProjectFolderParams, UpdateSettingsParams,
 };
 use std::ffi::OsString;
 
@@ -64,7 +64,7 @@ pub(crate) fn search(
     session
         .app
         .workspace
-        .register_workspace_folder(RegisterWorkspaceFoldersParams {
+        .register_project_folder(RegisterProjectFolderParams {
             path: session.app.fs.working_directory(),
             set_as_current_workspace: true,
         })?;

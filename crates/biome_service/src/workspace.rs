@@ -737,7 +737,7 @@ pub struct IsPathIgnoredParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct RegisterWorkspaceFoldersParams {
+pub struct RegisterProjectFolderParams {
     pub path: Option<PathBuf>,
     pub set_as_current_workspace: bool,
 }
@@ -770,10 +770,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError>;
 
     /// Register a possible workspace folders. Returns the key of said workspace. Use this key when you want to switch to different workspaces.
-    fn register_workspace_folder(
+    fn register_project_folder(
         &self,
-        params: RegisterWorkspaceFoldersParams,
-    ) -> Result<WorkspaceKey, WorkspaceError>;
+        params: RegisterProjectFolderParams,
+    ) -> Result<ProjectKey, WorkspaceError>;
 
     /// Sets the current project path
     fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError>;
@@ -1003,11 +1003,11 @@ fn test_order() {
 }
 
 new_key_type! {
-    pub struct WorkspaceKey;
+    pub struct ProjectKey;
 }
 
 #[cfg(feature = "schema")]
-impl JsonSchema for WorkspaceKey {
+impl JsonSchema for ProjectKey {
     fn schema_name() -> String {
         "WorkspaceKey".to_string()
     }
@@ -1022,7 +1022,7 @@ pub struct WorkspaceData<T> {
     /// [DenseSlotMap] is the slowest type in insertion/removal, but the fastest in iteration
     ///
     /// Users wouldn't change workspace folders very often,
-    pub paths: DenseSlotMap<WorkspaceKey, T>,
+    pub paths: DenseSlotMap<ProjectKey, T>,
 }
 
 impl<T> WorkspaceData<T> {
@@ -1032,15 +1032,15 @@ impl<T> WorkspaceData<T> {
     }
 
     /// Removes an item
-    pub fn remove(&mut self, key: WorkspaceKey) {
+    pub fn remove(&mut self, key: ProjectKey) {
         self.paths.remove(key);
     }
 
-    pub fn get_value_by_key(&self, key: WorkspaceKey) -> Option<&T> {
+    pub fn get_value_by_key(&self, key: ProjectKey) -> Option<&T> {
         self.paths.get(key)
     }
 
-    pub fn get_mut(&mut self, key: WorkspaceKey) -> Option<&mut T> {
+    pub fn get_mut(&mut self, key: ProjectKey) -> Option<&mut T> {
         self.paths.get_mut(key)
     }
 }

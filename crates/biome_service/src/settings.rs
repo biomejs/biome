@@ -1,4 +1,4 @@
-use crate::workspace::{DocumentFileSource, WorkspaceData, WorkspaceKey};
+use crate::workspace::{DocumentFileSource, ProjectKey, WorkspaceData};
 use crate::{Matcher, WorkspaceError};
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
@@ -45,53 +45,44 @@ pub struct PathToSettings {
 #[derive(Debug, Default)]
 pub struct WorkspaceSettings {
     data: WorkspaceData<PathToSettings>,
-    current_workspace: WorkspaceKey,
+    current_workspace: ProjectKey,
 }
 
 impl WorkspaceSettings {
+    /// Retrieves the settings of the current workspace folder
     pub fn current_settings(&self) -> &Settings {
-        debug_assert!(
-            !self.data.paths.is_empty(),
-            "You must have at least one workspace."
-        );
-        let data = self.data.paths.get(self.current_workspace).unwrap();
+        let data = self
+            .data
+            .paths
+            .get(self.current_workspace)
+            .expect("You must have at least one workspace.");
         &data.settings
     }
 
-    pub fn register_current_workspace(&mut self, key: WorkspaceKey) {
+    /// Register a new
+    pub fn register_current_project(&mut self, key: ProjectKey) {
         self.current_workspace = key;
     }
 
-    pub fn current_settings_mut(&mut self) -> &mut Settings {
-        debug_assert!(
-            !self.data.paths.is_empty(),
-            "You must have at least one workspace."
-        );
-        &mut self.data.get_mut(self.current_workspace).unwrap().settings
+    /// Retrieves a mutable reference of the settings of the current project
+    pub fn get_current_settings_mut(&mut self) -> &mut Settings {
+        &mut self
+            .data
+            .get_mut(self.current_workspace)
+            .expect("You must have at least one workspace.")
+            .settings
     }
 
-    pub fn insert_workspace(&mut self, workspace_path: impl Into<PathBuf>) -> WorkspaceKey {
+    /// Register a new project using its folder. Use [WorkspaceSettings::get_current_settings_mut] to retrieve
+    /// its settings and change them.
+    pub fn insert_project(&mut self, workspace_path: impl Into<PathBuf>) -> ProjectKey {
         self.data.paths.insert(PathToSettings {
             path: BiomePath::new(workspace_path.into()),
             settings: Settings::default(),
         })
     }
 
-    ///
-    pub fn current_workspace_path(&self, path: &BiomePath) -> (WorkspaceKey, &BiomePath) {
-        debug_assert!(path.is_absolute(), "Workspaces paths must be absolutes.");
-        debug_assert!(
-            !self.data.paths.is_empty(),
-            "You must have at least one workspace."
-        );
-        for (key, path_to_settings) in &self.data.paths {
-            if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
-                return (key, &path_to_settings.path);
-            }
-        }
-        unreachable!("We should not reach here, the assertions should help.")
-    }
-
+    /// Retrieves the settings by path.
     pub fn get_settings_by_path(&self, path: &BiomePath) -> &Settings {
         debug_assert!(path.is_absolute(), "Workspaces paths must be absolutes.");
         debug_assert!(
@@ -101,20 +92,6 @@ impl WorkspaceSettings {
         for (_, path_to_settings) in &self.data.paths {
             if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
                 return &path_to_settings.settings;
-            }
-        }
-        unreachable!("We should not reach here, the assertions should help.")
-    }
-
-    pub fn get_settings_by_path_mut(&mut self, path: &Path) -> &mut Settings {
-        debug_assert!(path.is_absolute(), "Workspaces paths must be absolutes.");
-        debug_assert!(
-            !self.data.paths.is_empty(),
-            "You must have at least one workspace."
-        );
-        for (_, path_to_settings) in &mut self.data.paths {
-            if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
-                return &mut path_to_settings.settings;
             }
         }
         unreachable!("We should not reach here, the assertions should help.")
@@ -631,7 +608,7 @@ impl<'a> SettingsHandleMut<'a> {
 
 impl<'a> AsMut<Settings> for SettingsHandleMut<'a> {
     fn as_mut(&mut self) -> &mut Settings {
-        self.inner.current_settings_mut()
+        self.inner.get_current_settings_mut()
     }
 }
 

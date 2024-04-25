@@ -124,9 +124,9 @@ export class Biome {
 	 */
 	public applyConfiguration(configuration: Configuration): void {
 		try {
-			this.workspace.registerWorkspaceFolder({
-				setAsCurrentWorkspace: true
-			})
+			this.workspace.registerProjectFolder({
+				setAsCurrentWorkspace: true,
+			});
 			this.workspace.updateSettings({
 				configuration,
 				gitignore_matches: [],

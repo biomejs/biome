@@ -15,7 +15,7 @@ use biome_service::configuration::{
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
-    RegisterWorkspaceFoldersParams, SupportsFeatureParams, UpdateProjectParams,
+    RegisterProjectFolderParams, SupportsFeatureParams, UpdateProjectParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::Workspace;
@@ -452,8 +452,8 @@ impl Session {
                     match result {
                         Ok((vcs_base_path, gitignore_matches)) => {
                             // We don't need the key for now, but will soon
-                            let _ = self.workspace.register_workspace_folder(
-                                RegisterWorkspaceFoldersParams {
+                            let _ = self.workspace.register_project_folder(
+                                RegisterProjectFolderParams {
                                     path: fs.working_directory(),
                                     set_as_current_workspace: true,
                                 },
