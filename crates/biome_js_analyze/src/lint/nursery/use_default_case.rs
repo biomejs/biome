@@ -25,26 +25,49 @@ declare_rule! {
     /// }
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// switch (a) {
+    ///     // no default
+    /// 	case 1:
+    ///         break;
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// switch (a) {
+    ///     case 1:
+    ///         break;
+    ///     // no default
+    ///     // nope
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
     /// switch (a) {
     ///     case 1:
-    ///     /* code */
-    ///     break;
+    ///         /* code */
+    ///         break;
     ///
     ///     default:
-    ///     /* code */
-    ///     break;
+    ///         /* code */
+    ///         break;
     /// }
     /// ```
+    ///
     /// ```js
     /// switch (a) {
     ///     case 1:
-    ///     /* code */
-    ///     break;
+    ///         /* code */
+    ///         break;
     ///
     ///     // no default
+    /// }
+    /// ```
+    ///
+    /// ```js
+    /// switch (a) {
     /// }
     /// ```
     pub UseDefaultCase {
