@@ -233,7 +233,7 @@ impl LanguageServer for LSPServer {
     // The `root_path` field is deprecated, but we still read it so we can print a warning about it
     #[allow(deprecated)]
     #[tracing::instrument(
-        level = "debug",
+        level = "trace",
         skip_all,
         fields(
             root_uri = params.root_uri.as_ref().map(display),
@@ -250,10 +250,6 @@ impl LanguageServer for LSPServer {
         let server_capabilities = server_capabilities(&params.capabilities);
         if params.root_path.is_some() {
             warn!("The Biome Server was initialized with the deprecated `root_path` parameter: this is not supported, use `root_uri` instead");
-        }
-
-        if let Some(_folders) = &params.workspace_folders {
-            warn!("The Biome Server was initialized with the `workspace_folders` parameter: this is unsupported at the moment, use `root_uri` instead");
         }
 
         self.session.initialize(

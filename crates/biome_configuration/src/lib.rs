@@ -237,12 +237,15 @@ pub struct ConfigurationPayload {
     pub external_resolution_base_path: PathBuf,
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Clone)]
 pub enum ConfigurationPathHint {
     /// The default mode, not having a configuration file is not an error.
     /// The path will be filled with the working directory if it is not filled at the time of usage.
     #[default]
     None,
+
+    Workspace(PathBuf),
+
     /// The configuration path provided by the LSP, not having a configuration file is not an error.
     /// The path will always be a directory path.
     FromLsp(PathBuf),

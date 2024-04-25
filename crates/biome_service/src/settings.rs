@@ -35,6 +35,7 @@ use std::{
     num::NonZeroU64,
     sync::{RwLock, RwLockReadGuard},
 };
+use tracing::debug;
 
 #[derive(Debug, Default)]
 pub struct PathToSettings {
@@ -45,29 +46,30 @@ pub struct PathToSettings {
 #[derive(Debug, Default)]
 pub struct WorkspaceSettings {
     data: WorkspaceData<PathToSettings>,
-    current_workspace: ProjectKey,
+    current_project: ProjectKey,
 }
 
 impl WorkspaceSettings {
     /// Retrieves the settings of the current workspace folder
     pub fn current_settings(&self) -> &Settings {
+        debug!("Current key {:?}", self.current_project);
         let data = self
             .data
-            .get_value_by_key(self.current_workspace)
+            .get_value_by_key(self.current_project)
             .expect("You must have at least one workspace.");
         &data.settings
     }
 
     /// Register a new
     pub fn register_current_project(&mut self, key: ProjectKey) {
-        self.current_workspace = key;
+        self.current_project = key;
     }
 
     /// Retrieves a mutable reference of the settings of the current project
     pub fn get_current_settings_mut(&mut self) -> &mut Settings {
         &mut self
             .data
-            .get_mut(self.current_workspace)
+            .get_mut(self.current_project)
             .expect("You must have at least one workspace.")
             .settings
     }
@@ -75,26 +77,37 @@ impl WorkspaceSettings {
     /// Register a new project using its folder. Use [WorkspaceSettings::get_current_settings_mut] to retrieve
     /// its settings and change them.
     pub fn insert_project(&mut self, workspace_path: impl Into<PathBuf>) -> ProjectKey {
+        let path = BiomePath::new(workspace_path.into());
+        debug!("Insert workspace folder: {:?}", path);
         self.data.insert(PathToSettings {
-            path: BiomePath::new(workspace_path.into()),
+            path,
             settings: Settings::default(),
         })
     }
 
-    /// Retrieves the settings by path.
-    pub fn get_settings_by_path(&self, path: &BiomePath) -> &Settings {
-        debug_assert!(path.is_absolute(), "Workspaces paths must be absolutes.");
+    /// If updates the current
+    pub fn update_current_project(&mut self, path: &BiomePath) {
+        debug_assert!(
+            path.is_absolute(),
+            "Workspaces paths must be absolutes {path:?}."
+        );
         debug_assert!(
             !self.data.is_empty(),
             "You must have at least one workspace."
         );
         let iter = self.data.iter();
-        for (_, path_to_settings) in iter {
+        for (key, path_to_settings) in iter {
+            debug!(
+                "Workspace path {:?}, file path {:?}",
+                path_to_settings.path, path
+            );
             if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
-                return &path_to_settings.settings;
+                if key != self.current_project {
+                    debug!("Update workspace to {:?}", key);
+                    self.current_project = key;
+                }
             }
         }
-        unreachable!("We should not reach here, the assertions should help.")
     }
 }
 
