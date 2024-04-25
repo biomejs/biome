@@ -26,6 +26,12 @@ let nestedObj: { inner: { (): boolean } };
 // Object type with call signature as a type union member
 type UnionWithCallSignature = { (): string } | string;
 
+// Object type with call signature as a type intersection member
+export type IntersectionCallSignature = { (): string } & string;
+
+// Object type with call signature as a type array
+export type ArrayCallSignature = readonly { (): string }[];
+
 // Generic object type with a call signature
 type GenericCallSignature<T> = { (arg: T): T };
 

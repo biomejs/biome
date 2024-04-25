@@ -9,10 +9,10 @@ use biome_js_factory::make;
 use biome_js_factory::make::ts_type_alias_declaration;
 use biome_js_syntax::AnyTsType::TsThisType;
 use biome_js_syntax::{
-    AnyJsDeclarationClause, AnyTsReturnType, AnyTsType, TsCallSignatureTypeMember, TsFunctionType,
-    TsInterfaceDeclaration, TsObjectType, TsTypeMemberList, T,
+    AnyJsDeclarationClause, AnyTsReturnType, AnyTsType, JsSyntaxKind, TsCallSignatureTypeMember,
+    TsFunctionType, TsInterfaceDeclaration, TsObjectType, TsTypeMemberList, T,
 };
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, TriviaPieceKind};
 
 declare_rule! {
     /// Enforce using function types instead of object type with call signatures.
@@ -152,7 +152,6 @@ impl Rule for UseShorthandFunctionType {
                 AnyJsDeclarationClause::from(interface_decl),
                 AnyJsDeclarationClause::from(type_alias_declaration),
             );
-
             return Some(JsRuleAction {
                 category: ActionCategory::QuickFix,
                 applicability: Applicability::Always,
@@ -163,12 +162,38 @@ impl Rule for UseShorthandFunctionType {
 
         if let Some(ts_object_type) = ts_type_member_list.parent::<TsObjectType>() {
             let new_function_type = convert_ts_call_signature_type_member_to_function_type(node)?;
+            // This is a simplification of the `needs_parentheses`
+            // available in biome_js_formatter/src/ts/types/function_type.rs
+            let needs_parens = matches!(
+                ts_object_type.syntax().parent().kind(),
+                Some(
+                    JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION
+                        | JsSyntaxKind::TS_CONDITIONAL_TYPE
+                        | JsSyntaxKind::TS_ARRAY_TYPE
+                        | JsSyntaxKind::TS_TYPE_OPERATOR_TYPE
+                        | JsSyntaxKind::TS_REST_TUPLE_TYPE_ELEMENT
+                        | JsSyntaxKind::TS_OPTIONAL_TUPLE_TYPE_ELEMENT
+                        | JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST
+                        | JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST
+                )
+            ) || matches!(new_function_type.return_type().map(|return_type| {
+                let AnyTsReturnType::AnyTsType(any_ts_type) = return_type else {
+                    return None;
+                };
+                Some(any_ts_type)
+            }), Ok(Some(AnyTsType::TsInferType(infer_type))) if infer_type.constraint().is_some());
+            let new_function_type: AnyTsType = if needs_parens {
+                make::ts_parenthesized_type(
+                    make::token(T!['(']),
+                    new_function_type.trim_trivia()?.into(),
+                    make::token(T![')']),
+                )
+                .into()
+            } else {
+                new_function_type.into()
+            };
 
-            mutation.replace_node(
-                AnyTsType::from(ts_object_type),
-                AnyTsType::from(new_function_type),
-            );
-
+            mutation.replace_node(AnyTsType::from(ts_object_type), new_function_type);
             return Some(JsRuleAction {
                 category: ActionCategory::QuickFix,
                 applicability: Applicability::Always,

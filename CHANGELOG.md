@@ -79,9 +79,21 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Fix [useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type/) that suggested invalid code fixes when parentheses are required ([#2595](https://github.com/biomejs/biome/issues/2595)).
+
+  Previously, the rule didn't add parentheses when they were needed.
+  It now adds parentheses when the function signature is inside an array, a union, or an intersection.
+
+  ```diff
+  - type Union = { (): number } | string;
+  + type Union = (() => number) | string;
+  ```
+
+  Contributed by @Conaclos
+
 - Fix [useTemplate](https://biomejs.dev/linter/rules/use-template/) that wrongly escaped strings in some edge cases ([#2580](https://github.com/biomejs/biome/issues/2580)).
 
-  Previously, the rule didn't correctly escaped characters preceded by an escaped character.
+  Previously, the rule didn't correctly escape characters preceded by an escaped character.
 
   Contributed by @Conaclos
 
