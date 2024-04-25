@@ -39,14 +39,14 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 <TEMP_DIR>/include_files_in_subdir/subdir/file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
-  × This let declares a variable which is never re-assigned.
+  × This let declares a variable that is only assigned once.
   
   > 1 │ let a = 4;
       │ ^^^
     2 │ debugger;
     3 │ console.log(a);
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ let a = 4;
       │     ^

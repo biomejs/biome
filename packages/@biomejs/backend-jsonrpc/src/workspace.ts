@@ -1144,7 +1144,7 @@ export interface Style {
 	 */
 	useConsistentArrayType?: RuleConfiguration_for_ConsistentArrayTypeOptions;
 	/**
-	 * Require const declarations for variables that are never reassigned after declared.
+	 * Require const declarations for variables that are only assigned once.
 	 */
 	useConst?: RuleConfiguration_for_Null;
 	/**

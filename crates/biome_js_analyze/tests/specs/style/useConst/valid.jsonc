@@ -98,5 +98,10 @@
 
 	// https://github.com/eslint/eslint/issues/16266
 	"let { itemId, list } = {}, obj = [], total = 0; total = 9; console.log(itemId, list, obj, total);",
-	"let [ itemId, list ] = [], total = 0; total = 9; console.log(itemId, list, total);"
+	"let [ itemId, list ] = [], total = 0; total = 9; console.log(itemId, list, total);",
+
+	// Read before an assignement
+	"let x; x; x = 0;",
+	"let x; { x; }; x = 0;",
+	"let x; { { x; } }; x = 0;"
 ]
