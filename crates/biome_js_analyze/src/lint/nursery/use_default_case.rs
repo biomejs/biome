@@ -96,12 +96,7 @@ impl Rule for UseDefaultCase {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let options = ctx.options();
-        let comment_pattern = options
-            .comment_pattern
-            .clone()
-            .unwrap_or(String::from("^no default$"))
-            .replace("\\\\", "\\");
+        let comment_pattern = get_comment_pattern(ctx);
 
         let has_case_clauses = node.cases().into_iter().len() > 0;
         let is_missing_default_case = node
@@ -145,15 +140,32 @@ impl Rule for UseDefaultCase {
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
+        let comment_pattern = get_comment_pattern(ctx);
 
-        Some(RuleDiagnostic::new(
+        Some(
+            RuleDiagnostic::new(
             rule_category!(),
             node.range(),
             markup! {
                 "Expected a default case."
             },
-        ))
+            )
+            .note(markup! {
+                "The lack of a default clause can result in unexpected behaviors in your code."
+            }).note(markup! {
+                "Consider adding a default clause or a comment explicitly stating that the default clause is not required, following the regex /" {comment_pattern} "/"
+            }),
+        )
     }
+}
+
+fn get_comment_pattern(ctx: &RuleContext<UseDefaultCase>) -> String {
+    return ctx
+        .options()
+        .comment_pattern
+        .clone()
+        .unwrap_or(String::from("^no default$"))
+        .replace("\\\\", "\\");
 }
 
 fn has_disable_comment(trivia: Option<SyntaxTrivia<JsLanguage>>, comment_pattern: &str) -> bool {
