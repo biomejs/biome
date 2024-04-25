@@ -6,7 +6,7 @@
 use std::fs::{self, read_to_string};
 use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
 
-#[derive(Debug, Clone, Eq, Hash, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq, Default)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)

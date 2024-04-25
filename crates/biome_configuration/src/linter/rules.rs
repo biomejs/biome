@@ -3576,7 +3576,7 @@ pub struct Style {
     #[doc = "Require consistently using either T\\[] or Array\\<T>"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_array_type: Option<RuleConfiguration<UseConsistentArrayType>>,
-    #[doc = "Require const declarations for variables that are never reassigned after declared."]
+    #[doc = "Require const declarations for variables that are only assigned once."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_const: Option<RuleConfiguration<UseConst>>,
     #[doc = "Enforce default function parameters and optional function parameters to be last."]

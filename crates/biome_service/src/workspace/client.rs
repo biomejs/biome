@@ -1,7 +1,7 @@
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OpenProjectParams,
-    OrganizeImportsParams, OrganizeImportsResult, RageParams, RageResult, ServerInfo,
-    UpdateProjectParams,
+    OrganizeImportsParams, OrganizeImportsResult, ProjectKey, RageParams, RageResult,
+    RegisterProjectFolderParams, ServerInfo, UpdateProjectParams,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -110,7 +110,6 @@ where
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
         self.request("biome/is_path_ignored", params)
     }
-
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
         self.request("biome/update_settings", params)
     }
@@ -121,6 +120,13 @@ where
 
     fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError> {
         self.request("biome/open_project", params)
+    }
+
+    fn register_project_folder(
+        &self,
+        params: RegisterProjectFolderParams,
+    ) -> Result<ProjectKey, WorkspaceError> {
+        self.request("biome/register_project_folder", params)
     }
 
     fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {

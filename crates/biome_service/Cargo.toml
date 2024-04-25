@@ -53,8 +53,8 @@ rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, features = ["indexmap1"], optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true, features = ["raw_value"] }
+slotmap                  = { workspace = true, features = ["serde"] }
 tracing                  = { workspace = true, features = ["attributes", "log"] }
-
 [features]
 format_css = ["biome_css_formatter/format_css"]
 schema = [

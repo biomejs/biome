@@ -4,6 +4,7 @@ use crate::execute::{execute_mode, Execution, TraversalMode};
 use crate::{setup_cli_subscriber, CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
+use biome_service::workspace::RegisterProjectFolderParams;
 
 use super::MigrateSubCommand;
 
@@ -22,6 +23,14 @@ pub(crate) fn migrate(
         file_path,
     } = load_configuration(&session.app.fs, base_path)?;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
+
+    session
+        .app
+        .workspace
+        .register_project_folder(RegisterProjectFolderParams {
+            path: session.app.fs.working_directory(),
+            set_as_current_workspace: true,
+        })?;
 
     if let (Some(path), Some(directory_path)) = (file_path, directory_path) {
         execute_mode(

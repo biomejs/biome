@@ -63,6 +63,9 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
+#[cfg(feature = "schema")]
+use schemars::{gen::SchemaGenerator, schema::Schema, JsonSchema};
+use slotmap::{new_key_type, DenseSlotMap};
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
@@ -71,7 +74,7 @@ use tracing::debug;
 
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use crate::file_handlers::DocumentFileSource;
-use crate::settings::WorkspaceSettings;
+use crate::settings::Settings;
 
 mod client;
 mod server;
@@ -149,7 +152,7 @@ impl FileFeaturesResult {
 
     pub(crate) fn with_settings_and_language(
         mut self,
-        settings: &WorkspaceSettings,
+        settings: &Settings,
         file_source: &DocumentFileSource,
         path: &Path,
     ) -> Self {
@@ -405,7 +408,7 @@ pub struct UpdateSettingsParams {
     pub vcs_base_path: Option<PathBuf>,
     // @ematipico TODO: have a better data structure for this
     pub gitignore_matches: Vec<String>,
-    pub working_directory: Option<PathBuf>,
+    pub workspace_directory: Option<PathBuf>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -731,6 +734,14 @@ pub struct IsPathIgnoredParams {
     pub features: Vec<FeatureName>,
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct RegisterProjectFolderParams {
+    pub path: Option<PathBuf>,
+    pub set_as_current_workspace: bool,
+}
+
 pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Checks whether a certain feature is supported. There are different conditions:
     /// - Biome doesn't recognize a file, so it can't provide the feature;
@@ -757,6 +768,12 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Add a new project to the workspace
     fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError>;
+
+    /// Register a possible workspace folders. Returns the key of said workspace. Use this key when you want to switch to different workspaces.
+    fn register_project_folder(
+        &self,
+        params: RegisterProjectFolderParams,
+    ) -> Result<ProjectKey, WorkspaceError>;
 
     /// Sets the current project path
     fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError>;
@@ -982,5 +999,76 @@ impl<'app, W: Workspace + ?Sized> Drop for FileGuard<'app, W> {
 fn test_order() {
     for items in FileFeaturesResult::PROTECTED_FILES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+}
+
+new_key_type! {
+    pub struct ProjectKey;
+}
+
+#[cfg(feature = "schema")]
+impl JsonSchema for ProjectKey {
+    fn schema_name() -> String {
+        "ProjectKey".to_string()
+    }
+
+    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+        <String>::json_schema(gen)
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct WorkspaceData<T> {
+    /// [DenseSlotMap] is the slowest type in insertion/removal, but the fastest in iteration
+    ///
+    /// Users wouldn't change workspace folders very often,
+    paths: DenseSlotMap<ProjectKey, T>,
+}
+
+impl<T> WorkspaceData<T> {
+    /// Inserts an item
+    pub fn insert(&mut self, item: T) -> ProjectKey {
+        self.paths.insert(item)
+    }
+
+    /// Removes an item
+    pub fn remove(&mut self, key: ProjectKey) {
+        self.paths.remove(key);
+    }
+
+    pub fn get_value_by_key(&self, key: ProjectKey) -> Option<&T> {
+        self.paths.get(key)
+    }
+
+    pub fn get_mut(&mut self, key: ProjectKey) -> Option<&mut T> {
+        self.paths.get_mut(key)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.paths.is_empty()
+    }
+
+    pub fn iter(&self) -> WorkspaceDataIterator<'_, T> {
+        WorkspaceDataIterator::new(self)
+    }
+}
+
+pub struct WorkspaceDataIterator<'a, V> {
+    iterator: slotmap::dense::Iter<'a, ProjectKey, V>,
+}
+
+impl<'a, V> WorkspaceDataIterator<'a, V> {
+    fn new(data: &'a WorkspaceData<V>) -> Self {
+        Self {
+            iterator: data.paths.iter(),
+        }
+    }
+}
+
+impl<'a, V> Iterator for WorkspaceDataIterator<'a, V> {
+    type Item = (ProjectKey, &'a V);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iterator.next()
     }
 }

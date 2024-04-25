@@ -34,12 +34,12 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This let declares a variable which is never re-assigned.
+  × This let declares a variable that is only assigned once.
   
   > 1 │ let a = !b || !c
       │ ^^^
   
-  i 'a' is never re-assigned.
+  i 'a' is never reassigned.
   
   > 1 │ let a = !b || !c
       │     ^
