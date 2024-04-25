@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAny.js
+---
+# Input
+```jsx
+switch (a) {
+	case 1:
+		break;
+}
+
+```
+
+# Diagnostics
+```
+invalidAny.js:1:1 lint/nursery/useDefaultCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected a default case.
+  
+  > 1 │ switch (a) {
+      │ ^^^^^^^^^^^^
+  > 2 │ 	case 1:
+  > 3 │ 		break;
+  > 4 │ }
+      │ ^
+    5 │ 
+  
+  i The lack of a default clause can result in unexpected behaviors in your code.
+  
+  i Consider adding a default clause or a comment explicitly stating that the default clause is not required, following the regex `/.?/`.
+  
+
+```

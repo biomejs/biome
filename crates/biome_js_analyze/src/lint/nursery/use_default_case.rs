@@ -144,16 +144,16 @@ impl Rule for UseDefaultCase {
 
         Some(
             RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                "Expected a default case."
-            },
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "Expected a default case."
+                },
             )
             .note(markup! {
                 "The lack of a default clause can result in unexpected behaviors in your code."
             }).note(markup! {
-                "Consider adding a default clause or a comment explicitly stating that the default clause is not required, following the regex /" {comment_pattern} "/"
+                "Consider adding a default clause or a comment explicitly stating that the default clause is not required, following the regex `/" {comment_pattern} "/`."
             }),
         )
     }

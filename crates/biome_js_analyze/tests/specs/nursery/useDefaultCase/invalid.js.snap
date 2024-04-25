@@ -41,7 +41,7 @@ invalid.js:1:1 lint/nursery/useDefaultCase ━━━━━━━━━━━━�
   
   i The lack of a default clause can result in unexpected behaviors in your code.
   
-  i Consider adding a default clause or a comment explicitly stating that the default clause is not required, following the regex /^no default$/
+  i Consider adding a default clause or a comment explicitly stating that the default clause is not required, following the regex `/^no default$/`.
   
 
 ```
@@ -65,7 +65,7 @@ invalid.js:6:1 lint/nursery/useDefaultCase ━━━━━━━━━━━━�
   
   i The lack of a default clause can result in unexpected behaviors in your code.
   
-  i Consider adding a default clause or a comment explicitly stating that the default clause is not required, following the regex /^no default$/
+  i Consider adding a default clause or a comment explicitly stating that the default clause is not required, following the regex `/^no default$/`.
   
 
 ```
@@ -89,7 +89,7 @@ invalid.js:12:1 lint/nursery/useDefaultCase ━━━━━━━━━━━━
   
   i The lack of a default clause can result in unexpected behaviors in your code.
   
-  i Consider adding a default clause or a comment explicitly stating that the default clause is not required, following the regex /^no default$/
+  i Consider adding a default clause or a comment explicitly stating that the default clause is not required, following the regex `/^no default$/`.
   
 
 ```
