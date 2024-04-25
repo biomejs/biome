@@ -2699,13 +2699,13 @@ pub struct Nursery {
     #[doc = "Disallow the use of dependencies that aren't specified in the package.json."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_undeclared_dependencies: Option<RuleConfiguration<NoUndeclaredDependencies>>,
+    #[doc = "Disallow unknown CSS units."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_unknown_unit: Option<RuleConfiguration<NoUnknownUnit>>,
     #[doc = "Disallow initializing variables to undefined."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_undefined_initialization:
         Option<RuleConfiguration<NoUselessUndefinedInitialization>>,
-    #[doc = "Disallow unknown CSS units."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unknown_unit: Option<RuleConfiguration<NoUnknownUnit>>,
     #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_new_builtin: Option<RuleConfiguration<UseConsistentNewBuiltin>>,
@@ -2750,8 +2750,8 @@ impl Nursery {
         "noReactSpecificProps",
         "noRestrictedImports",
         "noUndeclaredDependencies",
-        "noUselessUndefinedInitialization",
         "noUnknownUnit",
+        "noUselessUndefinedInitialization",
         "useConsistentNewBuiltin",
         "useImportRestrictions",
         "useSortedClasses",
@@ -2802,6 +2802,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -2903,12 +2904,12 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
+        if let Some(rule) = self.no_unknown_unit.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_unknown_unit.as_ref() {
+        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
@@ -3017,12 +3018,12 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
+        if let Some(rule) = self.no_unknown_unit.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_unknown_unit.as_ref() {
+        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
@@ -3146,12 +3147,12 @@ impl Nursery {
                 .no_undeclared_dependencies
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noUselessUndefinedInitialization" => self
-            .no_useless_undefined_initialization
-            .as_ref()
-            .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownUnit" => self
                 .no_unknown_unit
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUselessUndefinedInitialization" => self
+                .no_useless_undefined_initialization
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useConsistentNewBuiltin" => self
