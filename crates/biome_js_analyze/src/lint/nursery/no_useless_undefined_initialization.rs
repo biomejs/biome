@@ -10,12 +10,13 @@ use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Disallow initializing variables to undefined.
+    /// Disallow initializing variables to `undefined`.
     ///
-    /// A variable that is declared and not initialized to any value automatically gets the value of undefined.
-    /// It’s considered a best practice to avoid initializing variables to undefined.
+    /// A variable that is declared and not initialized to any value automatically gets the value of `undefined`.
+    /// It’s considered a best practice to avoid initializing variables to `undefined`.
     ///
-    /// Source: https://eslint.org/docs/latest/rules/no-undef-init
+    /// Please note that any inline comments attached to the initialization value or variable will be removed on auto-fix.
+    /// Please be also aware that this differs from Eslint's behaviour and we are still discussing on how to properly handle this case.
     ///
     /// ## Examples
     ///
@@ -23,18 +24,24 @@ declare_rule! {
     ///
     /// ```js,expect_diagnostic
     /// var a = undefined;
-    ///
+    /// ```
+    /// ```js,expect_diagnostic
     /// let b = undefined, c = 1, d = undefined;
-    ///
+    /// ```
+    /// ```js,expect_diagnostic
     /// for (let i = 0; i < 100; i++) {
     /// 	let i = undefined;
     /// }
     /// ```
-    ///
+    /// ```js,expect_diagnostic
+    /// let f = /**/undefined/**/ ;
+    /// ```
     /// ### Valid
     ///
     /// ```js
     /// var a = 1;
+    /// ```
+    /// ```js
     /// class Foo {
     /// 	bar = undefined;
     /// }
@@ -44,7 +51,7 @@ declare_rule! {
         version: "next",
         name: "noUselessUndefinedInitialization",
         sources: &[RuleSource::Eslint("no-undef-init")],
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
         recommended: false,
     }
 }
@@ -115,11 +122,12 @@ impl Rule for NoUselessUndefinedInitialization {
             .and_then(|declarator| declarator.initializer())?;
 
         let mut mutation = declarators.begin();
+        // This will remove any comments attached to the initialization clause
         mutation.remove_node(initializer);
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
+            applicability: Applicability::MaybeIncorrect,
             message: markup! { "Remove undefined initialization" }.to_owned(),
             mutation,
         })
