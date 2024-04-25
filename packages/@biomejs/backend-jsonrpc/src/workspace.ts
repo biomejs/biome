@@ -21,7 +21,7 @@ export interface UpdateSettingsParams {
 	configuration: PartialConfiguration;
 	gitignore_matches: string[];
 	vcs_base_path?: string;
-	working_directory?: string;
+	workspace_directory?: string;
 }
 /**
  * The configuration that is contained inside the file `biome.json`
@@ -1729,6 +1729,11 @@ export type FilenameCase =
 	| "kebab-case"
 	| "PascalCase"
 	| "snake_case";
+export interface RegisterWorkspaceFoldersParams {
+	path?: string;
+	setAsCurrentWorkspace: boolean;
+}
+export type WorkspaceKey = string;
 export interface UpdateProjectParams {
 	path: BiomePath;
 }
@@ -2337,6 +2342,9 @@ export type Configuration = PartialConfiguration;
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<SupportsFeatureResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
+	registerWorkspaceFolder(
+		params: RegisterWorkspaceFoldersParams,
+	): Promise<WorkspaceKey>;
 	updateCurrentProject(params: UpdateProjectParams): Promise<void>;
 	openProject(params: OpenProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
@@ -2367,6 +2375,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		updateSettings(params) {
 			return transport.request("biome/update_settings", params);
+		},
+		registerWorkspaceFolder(params) {
+			return transport.request("biome/register_workspace_folder", params);
 		},
 		updateCurrentProject(params) {
 			return transport.request("biome/update_current_project", params);

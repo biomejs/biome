@@ -63,6 +63,8 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
+#[cfg(feature = "schema")]
+use schemars::{gen::SchemaGenerator, schema::Schema, JsonSchema};
 use slotmap::{new_key_type, DenseSlotMap};
 use std::collections::HashMap;
 use std::ffi::OsStr;
@@ -734,6 +736,7 @@ pub struct IsPathIgnoredParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct RegisterWorkspaceFoldersParams {
     pub path: Option<PathBuf>,
     pub set_as_current_workspace: bool,
@@ -1001,6 +1004,17 @@ fn test_order() {
 
 new_key_type! {
     pub struct WorkspaceKey;
+}
+
+#[cfg(feature = "schema")]
+impl JsonSchema for WorkspaceKey {
+    fn schema_name() -> String {
+        "WorkspaceKey".to_string()
+    }
+
+    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+        <String>::json_schema(gen)
+    }
 }
 
 #[derive(Debug, Default)]
