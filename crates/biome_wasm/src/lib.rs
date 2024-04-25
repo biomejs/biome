@@ -60,7 +60,7 @@ impl Workspace {
     pub fn register_workspace_folder(
         &self,
         params: IRegisterProjectFolderParams,
-    ) -> Result<IWorkspaceKey, Error> {
+    ) -> Result<IProjectKey, Error> {
         let params: RegisterProjectFolderParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
         let result = self
@@ -68,9 +68,7 @@ impl Workspace {
             .register_project_folder(params)
             .map_err(into_error)?;
 
-        to_value(&result)
-            .map(IWorkspaceKey::from)
-            .map_err(into_error)
+        to_value(&result).map(IProjectKey::from).map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = openFile)]

@@ -53,8 +53,7 @@ impl WorkspaceSettings {
     pub fn current_settings(&self) -> &Settings {
         let data = self
             .data
-            .paths
-            .get(self.current_workspace)
+            .get_value_by_key(self.current_workspace)
             .expect("You must have at least one workspace.");
         &data.settings
     }
@@ -76,7 +75,7 @@ impl WorkspaceSettings {
     /// Register a new project using its folder. Use [WorkspaceSettings::get_current_settings_mut] to retrieve
     /// its settings and change them.
     pub fn insert_project(&mut self, workspace_path: impl Into<PathBuf>) -> ProjectKey {
-        self.data.paths.insert(PathToSettings {
+        self.data.insert(PathToSettings {
             path: BiomePath::new(workspace_path.into()),
             settings: Settings::default(),
         })
@@ -86,10 +85,11 @@ impl WorkspaceSettings {
     pub fn get_settings_by_path(&self, path: &BiomePath) -> &Settings {
         debug_assert!(path.is_absolute(), "Workspaces paths must be absolutes.");
         debug_assert!(
-            !self.data.paths.is_empty(),
+            !self.data.is_empty(),
             "You must have at least one workspace."
         );
-        for (_, path_to_settings) in &self.data.paths {
+        let iter = self.data.iter();
+        for (_, path_to_settings) in iter {
             if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
                 return &path_to_settings.settings;
             }

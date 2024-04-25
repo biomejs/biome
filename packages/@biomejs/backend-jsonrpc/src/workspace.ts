@@ -1729,11 +1729,11 @@ export type FilenameCase =
 	| "kebab-case"
 	| "PascalCase"
 	| "snake_case";
-export interface RegisterWorkspaceFoldersParams {
+export interface RegisterProjectFolderParams {
 	path?: string;
 	setAsCurrentWorkspace: boolean;
 }
-export type WorkspaceKey = string;
+export type ProjectKey = string;
 export interface UpdateProjectParams {
 	path: BiomePath;
 }
@@ -2342,9 +2342,9 @@ export type Configuration = PartialConfiguration;
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<SupportsFeatureResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
-	registerWorkspaceFolder(
-		params: RegisterWorkspaceFoldersParams,
-	): Promise<WorkspaceKey>;
+	registerProjectFolder(
+		params: RegisterProjectFolderParams,
+	): Promise<ProjectKey>;
 	updateCurrentProject(params: UpdateProjectParams): Promise<void>;
 	openProject(params: OpenProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
@@ -2376,8 +2376,8 @@ export function createWorkspace(transport: Transport): Workspace {
 		updateSettings(params) {
 			return transport.request("biome/update_settings", params);
 		},
-		registerWorkspaceFolder(params) {
-			return transport.request("biome/register_workspace_folder", params);
+		registerProjectFolder(params) {
+			return transport.request("biome/register_project_folder", params);
 		},
 		updateCurrentProject(params) {
 			return transport.request("biome/update_current_project", params);

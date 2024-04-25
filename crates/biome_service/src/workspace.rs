@@ -1009,7 +1009,7 @@ new_key_type! {
 #[cfg(feature = "schema")]
 impl JsonSchema for ProjectKey {
     fn schema_name() -> String {
-        "WorkspaceKey".to_string()
+        "ProjectKey".to_string()
     }
 
     fn json_schema(gen: &mut SchemaGenerator) -> Schema {
@@ -1022,13 +1022,13 @@ pub struct WorkspaceData<T> {
     /// [DenseSlotMap] is the slowest type in insertion/removal, but the fastest in iteration
     ///
     /// Users wouldn't change workspace folders very often,
-    pub paths: DenseSlotMap<ProjectKey, T>,
+    paths: DenseSlotMap<ProjectKey, T>,
 }
 
 impl<T> WorkspaceData<T> {
     /// Inserts an item
-    pub fn insert(&mut self, item: impl Into<T>) {
-        self.paths.insert(Into::into(item));
+    pub fn insert(&mut self, item: T) -> ProjectKey {
+        self.paths.insert(item)
     }
 
     /// Removes an item
@@ -1042,5 +1042,33 @@ impl<T> WorkspaceData<T> {
 
     pub fn get_mut(&mut self, key: ProjectKey) -> Option<&mut T> {
         self.paths.get_mut(key)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.paths.is_empty()
+    }
+
+    pub fn iter(&self) -> WorkspaceDataIterator<'_, T> {
+        WorkspaceDataIterator::new(self)
+    }
+}
+
+pub struct WorkspaceDataIterator<'a, V> {
+    iterator: slotmap::dense::Iter<'a, ProjectKey, V>,
+}
+
+impl<'a, V> WorkspaceDataIterator<'a, V> {
+    fn new(data: &'a WorkspaceData<V>) -> Self {
+        Self {
+            iterator: data.paths.iter(),
+        }
+    }
+}
+
+impl<'a, V> Iterator for WorkspaceDataIterator<'a, V> {
+    type Item = (ProjectKey, &'a V);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iterator.next()
     }
 }
