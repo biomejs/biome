@@ -66,30 +66,23 @@ impl Rule for NoUselessUndefinedInitialization {
         }
 
         for declarator in node.declarators() {
-            let decl = match declarator {
-                Ok(item) => item,
-                _ => continue,
+            let Ok(decl) = declarator else { continue };
+
+            let Some(keyword) = decl
+                .initializer()
+                .map(|initializer| initializer.expression())
+                .and_then(|expression| expression.ok())
+                .and_then(|expression| expression.as_js_reference_identifier())
+            else {
+                continue;
             };
 
-            let initializer = match decl.initializer() {
-                Some(init) => init,
-                _ => continue,
-            };
-
-            let expression = match initializer.expression() {
-                Ok(expr) => expr,
-                _ => continue,
-            };
-
-            if let Some(keyword) = expression.as_js_reference_identifier() {
-                if keyword.is_undefined() {
-                    let decl_range = decl.range();
-                    let binding_name = match decl.id() {
-                        Ok(id) => id.text(),
-                        _ => continue,
-                    };
-                    signals.push((binding_name, decl_range));
-                }
+            if keyword.is_undefined() {
+                let decl_range = decl.range();
+                let Some(binding_name) = decl.id().ok().map(|id| id.text()) else {
+                    continue;
+                };
+                signals.push((binding_name, decl_range));
             }
         }
 
@@ -101,7 +94,7 @@ impl Rule for NoUselessUndefinedInitialization {
             rule_category!(),
             state.1,
             markup! {
-                "It's not necessary to initialize "<Emphasis>{state.0}</Emphasis>" to undefined"
+                "It's not necessary to initialize "<Emphasis>{state.0}</Emphasis>" to undefined."
             }).note("A variable that is declared and not initialized to any value automatically gets the value of undefined.")
         )
     }
@@ -109,22 +102,17 @@ impl Rule for NoUselessUndefinedInitialization {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let declarators = ctx.query().declarators();
 
-        let marked_binding = declarators.clone().into_iter().find(|el| {
-            let element = match el {
-                Ok(item) => item,
-                Err(_) => return false,
-            };
-
-            match element.id() {
-                Ok(id) => id.text() == state.0,
-                Err(_) => false,
-            }
-        })?;
-
-        let initializer = match marked_binding {
-            Ok(binding) => binding.initializer()?,
-            Err(_) => return None,
-        };
+        let initializer = declarators
+            .clone()
+            .into_iter()
+            .find(|el| {
+                el.as_ref()
+                    .ok()
+                    .and_then(|element| element.id().ok())
+                    .is_some_and(|id| id.text() == state.0)
+            })
+            .map(|decl| decl.ok())?
+            .and_then(|declarator| declarator.initializer())?;
 
         let mut mutation = declarators.begin();
         mutation.remove_node(initializer);
