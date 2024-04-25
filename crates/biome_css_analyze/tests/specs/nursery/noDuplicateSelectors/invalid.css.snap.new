@@ -1,0 +1,96 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 83
+expression: invalid.css
+---
+# Input
+```css
+.foo,
+.bar,
+.foo {
+    width: 12;
+}
+
+.foo {
+    width: 12;
+}
+
+
+.bar {
+    width: 12;
+}
+
+.foo {
+    width: 12;
+}
+
+.foo .bar {
+    width: 12;
+}
+
+.bar {
+    width: 12;
+}
+
+.foo .bar {
+    width: 12;
+}
+
+@media (min-width: 10px) {
+    .foo {
+        width: 12;
+    }
+
+    .foo {
+        width: 12;
+    }
+}
+
+.foo,
+.bar {
+    width: 12;
+}
+
+.bar,
+.foo {
+    width: 12;
+}
+
+a .foo,
+b+.bar {
+    width: 12;
+}
+
+b+.bar,
+a .foo {
+    width: 12;
+}
+
+a b {
+    width: 12;
+}
+
+a {
+    & b {
+        width: 12;
+    }
+}
+```
+
+# Diagnostics
+```
+invalid.css:3:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected duplicate selector:.foo
+  
+    1 │ .foo,
+    2 │ .bar,
+  > 3 │ .foo {
+      │ ^^^^
+    4 │     width: 12;
+    5 │ }
+  
+  i This note will give you more information.
+  
+
+```

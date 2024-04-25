@@ -1,0 +1,70 @@
+.foo,
+.bar,
+.foo {
+    width: 12;
+}
+
+.foo {
+    width: 12;
+}
+
+
+.bar {
+    width: 12;
+}
+
+.foo {
+    width: 12;
+}
+
+.foo .bar {
+    width: 12;
+}
+
+.bar {
+    width: 12;
+}
+
+.foo .bar {
+    width: 12;
+}
+
+@media (min-width: 10px) {
+    .foo {
+        width: 12;
+    }
+
+    .foo {
+        width: 12;
+    }
+}
+
+.foo,
+.bar {
+    width: 12;
+}
+
+.bar,
+.foo {
+    width: 12;
+}
+
+a .foo,
+b+.bar {
+    width: 12;
+}
+
+b+.bar,
+a .foo {
+    width: 12;
+}
+
+a b {
+    width: 12;
+}
+
+a {
+    & b {
+        width: 12;
+    }
+}

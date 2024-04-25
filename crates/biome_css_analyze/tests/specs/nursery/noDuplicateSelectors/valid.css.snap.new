@@ -1,0 +1,52 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 83
+expression: valid.css
+---
+# Input
+```css
+.foo {
+    width: 12;
+}
+
+@media (min-width: 10px) {
+    .foo {
+        width: 12;
+    }
+}
+
+/* 
+.foo {
+    .foo {
+        width: 12;
+    }
+}
+
+.foo {
+    width: 12;
+}
+
+.bar {
+    width: 12;
+}
+
+.foo .bar {
+    width: 12;
+}
+
+.bar .foo {
+    width: 12;
+}
+
+a b {
+    width: 12;
+}
+
+a {
+
+    & b,
+    & c {
+        width: 12;
+    }
+} */
+```
