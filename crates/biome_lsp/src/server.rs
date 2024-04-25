@@ -248,6 +248,14 @@ impl LanguageServer for LSPServer {
         self.is_initialized.store(true, Ordering::Relaxed);
 
         let server_capabilities = server_capabilities(&params.capabilities);
+        if params.root_path.is_some() {
+            warn!("The Biome Server was initialized with the deprecated `root_path` parameter: this is not supported, use `root_uri` instead");
+        }
+
+        if let Some(_folders) = &params.workspace_folders {
+            warn!("The Biome Server was initialized with the `workspace_folders` parameter: this is unsupported at the moment, use `root_uri` instead");
+        }
+
         self.session.initialize(
             params.capabilities,
             params.client_info.map(|client_info| ClientInformation {
@@ -255,15 +263,8 @@ impl LanguageServer for LSPServer {
                 version: client_info.version,
             }),
             params.root_uri,
+            params.workspace_folders,
         );
-
-        if params.root_path.is_some() {
-            warn!("The Biome Server was initialized with the deprecated `root_path` parameter: this is not supported, use `root_uri` instead");
-        }
-
-        if params.workspace_folders.is_some() {
-            warn!("The Biome Server was initialized with the `workspace_folders` parameter: this is unsupported at the moment, use `root_uri` instead");
-        }
 
         //
         let init = InitializeResult {
@@ -574,6 +575,7 @@ impl ServerFactory {
         workspace_method!(builder, file_features);
         workspace_method!(builder, is_path_ignored);
         workspace_method!(builder, update_settings);
+        workspace_method!(builder, register_project_folder);
         workspace_method!(builder, open_file);
         workspace_method!(builder, open_project);
         workspace_method!(builder, update_current_project);

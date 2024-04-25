@@ -170,6 +170,7 @@ schemars           = { version = "0.8.12" }
 serde              = { version = "1.0.198", features = ["derive"] }
 serde_json         = "1.0.116"
 similar            = "2.5.0"
+slotmap            = "1.0.7"
 smallvec           = { version = "1.10.0", features = ["union", "const_new"] }
 syn                = "1.0.109"
 tokio              = { version = "1.36.0" }

@@ -6,7 +6,7 @@ use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::{SyntaxNode, TextRange};
-use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
+use biome_service::settings::{ServiceLanguage, Settings};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default)]
@@ -27,7 +27,7 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
 
     fn to_language_settings<'a>(
         &self,
-        settings: &'a WorkspaceSettings,
+        settings: &'a Settings,
     ) -> &'a <Self::ServiceLanguage as ServiceLanguage>::FormatterSettings {
         &settings.languages.json.formatter
     }

@@ -4,7 +4,7 @@ use biome_parser::AnyParse;
 use biome_rowan::{SyntaxNode, TextRange};
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::settings::ServiceLanguage;
-use biome_service::settings::WorkspaceSettings;
+use biome_service::settings::Settings;
 
 pub mod check_reformat;
 pub mod diff_report;
@@ -25,7 +25,7 @@ pub trait TestFormatLanguage {
 
     fn to_language_settings<'a>(
         &self,
-        settings: &'a WorkspaceSettings,
+        settings: &'a Settings,
     ) -> &'a <Self::ServiceLanguage as ServiceLanguage>::FormatterSettings;
 
     fn format_node(
@@ -45,7 +45,7 @@ pub trait TestFormatLanguage {
 
     fn to_options(
         &self,
-        settings: &WorkspaceSettings,
+        settings: &Settings,
         file_source: &DocumentFileSource,
     ) -> <Self::ServiceLanguage as ServiceLanguage>::FormatOptions {
         let language_settings = self.to_language_settings(settings);
