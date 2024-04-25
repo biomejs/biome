@@ -908,26 +908,6 @@
 			},
 			"additionalProperties": false
 		},
-		"DefaultCaseConfiguration": {
-			"description": "Configuration for `useDefaultCase` rule.",
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": {
-					"$ref": "#/definitions/DefaultCaseOptions"
-				}
-			}
-		},
-		"DefaultCaseOptions": {
-			"description": "Options for the `useDefaultCase` rule",
-			"type": "object",
-			"properties": {
-				"commentPattern": {
-					"description": "Regular expression string to change the default comment test pattern (`^no default$`). The pattern is matched in a case-insensitive manner.",
-					"type": "string"
-				}
-			}
-		},
 		"DeprecatedHooksConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1607,8 +1587,7 @@
 				"useDefaultCase": {
 					"description": "Require default cases in switch statements.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "$ref": "#/definitions/DefaultCaseConfiguration" },
+						{ "$ref": "#/definitions/UseDefaultCaseConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1968,6 +1947,15 @@
 			"properties": {
 				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
 				"options": { "$ref": "#/definitions/RestrictedImportsOptions" }
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseDefaultCaseOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
+				"options": { "$ref": "#/definitions/UseDefaultCaseOptions" }
 			},
 			"additionalProperties": false
 		},
@@ -2837,6 +2825,23 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UseDefaultCaseConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseDefaultCaseOptions" }
+			]
+		},
+		"UseDefaultCaseOptions": {
+			"description": "Options for the rule `useDefaultCase`.",
+			"type": "object",
+			"properties": {
+				"commentPattern": {
+					"description": "Regular expression that filters the comment pattern to disable the rule.",
+					"type": ["string", "null"]
+				}
+			},
+			"additionalProperties": false
 		},
 		"UtilityClassSortingConfiguration": {
 			"anyOf": [

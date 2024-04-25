@@ -999,7 +999,7 @@ export interface Nursery {
 	/**
 	 * Require default cases in switch statements.
 	 */
-	useDefaultCase?: RuleConfiguration_for_Null;
+	useDefaultCase?: RuleConfiguration_for_UseDefaultCaseOptions;
 	/**
 	 * Disallow a missing generic family keyword within font families.
 	 */
@@ -1553,6 +1553,9 @@ export type RuleConfiguration_for_NoCssEmptyBlockOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
+export type RuleConfiguration_for_UseDefaultCaseOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseDefaultCaseOptions;
 export type RuleConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UtilityClassSortingOptions;
@@ -1596,6 +1599,10 @@ export interface RuleWithOptions_for_NoCssEmptyBlockOptions {
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	level: RulePlainConfiguration;
 	options: RestrictedImportsOptions;
+}
+export interface RuleWithOptions_for_UseDefaultCaseOptions {
+	level: RulePlainConfiguration;
+	options: UseDefaultCaseOptions;
 }
 export interface RuleWithOptions_for_UtilityClassSortingOptions {
 	level: RulePlainConfiguration;
@@ -1654,6 +1661,15 @@ export interface RestrictedImportsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	paths: {};
+}
+/**
+ * Options for the rule `useDefaultCase`.
+ */
+export interface UseDefaultCaseOptions {
+	/**
+	 * Regular expression that filters the comment pattern to disable the rule.
+	 */
+	commentPattern?: string;
 }
 export interface UtilityClassSortingOptions {
 	/**
