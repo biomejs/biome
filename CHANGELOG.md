@@ -37,6 +37,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Import sorting now adds spaces where needed ([#1665](https://github.com/biomejs/biome/issues/1665))
+  Contributed by @Conaclos
+
 ### CLI
 
 #### Bug fixes

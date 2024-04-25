@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: space.ts
+---
+# Input
+```ts
+import {type ContactOption, /* 1 */ loadStripe, /* 2 */ type StripeElementsOptions} from '@stripe/stripe-js';
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-import {type ContactOption, /* 1 */ loadStripe, /* 2 */ type StripeElementsOptions} from '@stripe/stripe-js';
+\ No newline at end of file
++import {type ContactOption, /* 1 */ type StripeElementsOptions, loadStripe /* 2 */ } from '@stripe/stripe-js';
+\ No newline at end of file
+
+```
