@@ -1,6 +1,6 @@
 use std::ops::Not;
 
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{JsLanguage, JsSwitchStatement};
@@ -73,6 +73,7 @@ declare_rule! {
     pub UseDefaultCase {
         version: "next",
         name: "useDefaultCase",
+        sources: &[RuleSource::Eslint("default-case")],
         recommended: false,
     }
 }
