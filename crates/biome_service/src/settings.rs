@@ -116,10 +116,6 @@ impl WorkspaceSettings {
     /// If there's a match, and the match **isn't** the current project, the function will mark the match as the current project.
     pub fn set_current_project(&mut self, path: &BiomePath) {
         debug_assert!(
-            path.is_absolute(),
-            "Workspaces paths must be absolutes {path:?}."
-        );
-        debug_assert!(
             !self.data.is_empty(),
             "You must have at least one workspace."
         );
