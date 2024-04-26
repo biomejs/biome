@@ -15,28 +15,99 @@ use biome_rowan::{AstNode, BatchMutationExt};
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Succinct description of the rule.
+    /// Enforce explicitly comparing the `length`, `size`, `byteLength` or `byteOffset` property of a value.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    /// This rule enforces a specific style length comparisons to make them more clear.
     ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding ESLint rule (if any):
-    ///
-    /// ## Examples
-    ///
+    /// ## Zero comparison examples
+    /// Enforce comparison with === 0 when checking for zero length.
+    /// 
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// const isEmpty = !foo.length;
     /// ```
-    ///
+    /// ```js,expect_diagnostic
+    /// const isEmpty = foo.length == 0;
+    /// ```
+    /// ```js,expect_diagnostic
+    /// const isEmpty = foo.length < 1;
+    /// ```
+    /// ```js,expect_diagnostic
+    /// const isEmpty = 0 === foo.length;
+    /// ```
+    /// ```js,expect_diagnostic
+    /// const isEmpty = 0 == foo.length;
+    /// ```
+    /// ```js,expect_diagnostic
+    /// const isEmpty = 1 > foo.length;
+    /// ```
+    /// ```js,expect_diagnostic
+    /// // Negative style is disallowed too
+    /// const isEmpty = !(foo.length > 0);
+    /// ```
+    /// ```js,expect_diagnostic
+    /// const isEmptySet = !foo.size;
+    /// ```
+    /// 
     /// ### Valid
     ///
     /// ```js
-    /// // var a = 1;
+    /// const isEmpty = foo.length === 0;
+    /// ```
+    /// 
+    /// ## Non-zero comparison examples
+    /// Enforce comparison with > 0 when checking for non-zero length.
+    /// 
+    /// ### Invalid    
+    /// ```js,expect_diagnostic
+    /// const isNotEmpty = foo.length !== 0;
+    /// ```
+    /// ```js,expect_diagnostic
+    /// const isNotEmpty = foo.length != 0;
+    /// ```
+    /// ```js,expect_diagnostic
+    /// const isNotEmpty = foo.length >= 1;
+    /// ```
+    /// ```js,expect_diagnostic
+    /// const isNotEmpty = 0 !== foo.length;
+    /// ```
+    /// ```js,expect_diagnostic
+    /// const isNotEmpty = 0 != foo.length;
+    /// ```
+    /// ```js,expect_diagnostic
+    /// const isNotEmpty = 1 <= foo.length;
+    /// ```
+    /// ```js,expect_diagnostic
+    /// const isNotEmpty = Boolean(foo.length);
+    /// ```
+    /// ```js,expect_diagnostic
+    /// // Negative style is disallowed too
+    /// const isNotEmpty = !(foo.length === 0);
+    /// ```
+    /// ```js,expect_diagnostic
+    /// if (foo.length || bar.length) {}
+    /// ```
+    /// ```js,expect_diagnostic
+    /// const biome = foo.length ? 1 : 2
+    /// ```
+    /// ```js,expect_diagnostic
+    /// while (foo.length) {}
+    /// ```
+    /// ```js,expect_diagnostic
+    /// do {} while (foo.length);
+    /// ```
+    /// ```js,expect_diagnostic
+    /// for (; foo.length; ) {};
+    /// ```
+    /// 
+    /// ### Valid
+    ///
+    /// ```js
+    /// const isNotEmpty = foo.length > 0;
+    /// ```
+    /// ```js
+    /// if (foo.length > 0 || bar.length > 0) {}
     /// ```
     ///
     pub UseExplicitLengthCheck {
