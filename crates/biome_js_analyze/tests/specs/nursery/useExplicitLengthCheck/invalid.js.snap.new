@@ -5,9 +5,17 @@ expression: invalid.js
 ---
 # Input
 ```jsx
-foo.length!=0
-/** A */ 0 /** B */ != /** D */ foo.length /** E */
-if (/** A */foo.size /** B */) {}
+foo.length && true
+Boolean(foo.length == 0);
+Boolean(foo.length != 0);
+
+
+
+!Boolean(!(Boolean(0 != foo.length)));
+// !(!(Boolean(Boolean(foo.length))))
+// foo.length && true
+// foo.length!=0
+// if (/** A */foo.size /** B */) {}
 // Boolean(foo.length)
 // new Boolean(foo.length)
 // !foo.length
@@ -16,6 +24,7 @@ if (/** A */foo.size /** B */) {}
 // true ? foo.length == 0 : 0
 
 // !!!(!!foo.length)
+
 ```
 
 # Diagnostics
@@ -24,58 +33,81 @@ invalid.js:1:1 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━�
 
   ! Use .length > 0 with .length is not zero.
   
-  > 1 │ foo.length!=0
-      │ ^^^^^^^^^^^^^
-    2 │ /** A */ 0 /** B */ != /** D */ foo.length /** E */
-    3 │ if (/** A */foo.size /** B */) {}
-  
-  i Unsafe fix: Add new keyword.
-  
-     1    │ - foo.length!=0
-        1 │ + foo.length·<·0
-     2  2 │   /** A */ 0 /** B */ != /** D */ foo.length /** E */
-     3  3 │   if (/** A */foo.size /** B */) {}
-  
-
-```
-
-```
-invalid.js:2:10 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use .length > 0 with .length is not zero.
-  
-    1 │ foo.length!=0
-  > 2 │ /** A */ 0 /** B */ != /** D */ foo.length /** E */
-      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ if (/** A */foo.size /** B */) {}
-    4 │ // Boolean(foo.length)
-  
-  i Unsafe fix: Add new keyword.
-  
-     1  1 │   foo.length!=0
-     2    │ - /**·A·*/·0·/**·B·*/·!=·/**·D·*/·foo.length·/**·E·*/
-        2 │ + /**·A·*/·0·/**·B·*/·>·foo.length·/**·E·*/
-     3  3 │   if (/** A */foo.size /** B */) {}
-     4  4 │   // Boolean(foo.length)
-  
-
-```
-
-```
-invalid.js:3:13 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use .size > 0 with .size is not zero.
-  
-    1 │ foo.length!=0
-    2 │ /** A */ 0 /** B */ != /** D */ foo.length /** E */
-  > 3 │ if (/** A */foo.size /** B */) {}
-      │             ^^^^^^^^
-    4 │ // Boolean(foo.length)
-    5 │ // new Boolean(foo.length)
+  > 1 │ foo.length && true
+      │ ^^^^^^^^^^
+    2 │ Boolean(foo.length == 0);
+    3 │ Boolean(foo.length != 0);
   
   i Unsafe fix: Replace with
   
-    3 │ if·(/**·A·*/foo.size·/**·B·*/·>·0)·{}
-      │                              ++++    
+    1 │ foo.length·>·0·&&·true
+      │            ++++       
+
+```
+
+```
+invalid.js:2:1 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    1 │ foo.length && true
+  > 2 │ Boolean(foo.length == 0);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ Boolean(foo.length != 0);
+    4 │ 
+  
+  i Unsafe fix: Replace with
+  
+     1  1 │   foo.length && true
+     2    │ - Boolean(foo.length·==·0);
+        2 │ + foo.length·===·0;
+     3  3 │   Boolean(foo.length != 0);
+     4  4 │   
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+    1 │ foo.length && true
+    2 │ Boolean(foo.length == 0);
+  > 3 │ Boolean(foo.length != 0);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Unsafe fix: Replace with
+  
+     1  1 │   foo.length && true
+     2  2 │   Boolean(foo.length == 0);
+     3    │ - Boolean(foo.length·!=·0);
+        3 │ + foo.length·>·0;
+     4  4 │   
+     5  5 │   
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+  > 7 │ !Boolean(!(Boolean(0 != foo.length)));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ // !(!(Boolean(Boolean(foo.length))))
+    9 │ // foo.length && true
+  
+  i Unsafe fix: Replace with
+  
+     5  5 │   
+     6  6 │   
+     7    │ - !Boolean(!(Boolean(0·!=·foo.length)));
+        7 │ + foo.length·>·0;
+     8  8 │   // !(!(Boolean(Boolean(foo.length))))
+     9  9 │   // foo.length && true
+  
 
 ```

@@ -4,14 +4,15 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_factory::make::{self, token};
+use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsConditionalExpression,
-    JsDoWhileStatement, JsForStatement, JsIfStatement, JsNewExpression, JsStaticMemberExpression,
-    JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, JsWhileStatement, T,
+    JsDoWhileStatement, JsForStatement, JsIfStatement, JsNewExpression,
+    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator,
+    JsWhileStatement, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast};
 
 use crate::JsRuleAction;
 
@@ -68,88 +69,51 @@ impl Rule for UseExplicitLengthCheck {
             return None;
         }
 
-        let syntax = node.syntax();
-        let parent_syntax = syntax.parent()?;
+        let member_expr_syntax = node.syntax();
+        let parent_syntax = member_expr_syntax.parent()?;
 
-        if is_in_boolean_context(syntax).is_some()
-            || is_boolean_call(&parent_syntax).unwrap_or(false)
+        if let Some((binary_expr, mut len_check, position)) = is_invalid_binary_expr_length_check(&parent_syntax) {
+            return get_boolean_ancestor(&binary_expr.syntax())
+                .map(|(expr, is_negative)| {
+                    if is_negative {
+                        len_check = len_check.opposite();
+                    }
+
+                    UseExplicitLengthCheckState {
+                        check: len_check,
+                        suggested_fix: LengthFix::ReplaceWhole(expr),
+                        member_name: member_name.to_owned(),
+                    }
+                })
+                .or_else(|| {
+                    Some(UseExplicitLengthCheckState {
+                        check: len_check,
+                        suggested_fix: LengthFix::ModifyBinaryExpression(
+                            binary_expr.clone(),
+                            position,
+                        ),
+                        member_name: member_name.to_owned(),
+                    })
+                });
+        }
+
+        if is_in_boolean_context(member_expr_syntax).unwrap_or(false)
             || is_boolean_constructor_call(&parent_syntax).unwrap_or(false)
+            || parent_syntax.kind() == JsSyntaxKind::JS_LOGICAL_EXPRESSION
         {
             return Some(UseExplicitLengthCheckState {
                 check: LengthCheck::NonZero,
-                suggested_fix: LengthFixKind::ReplaceWhole(AnyJsExpression::cast(syntax.clone())?),
+                suggested_fix: LengthFix::ReplaceWhole(AnyJsExpression::cast_ref(
+                    member_expr_syntax,
+                )?),
                 member_name,
             });
         }
 
-                    // || is_negation(&parent_syntax).is_some()
-
-        let parent_syntax = syntax.parent()?;
-        let binary_expr = match parent_syntax.kind() {
-            JsSyntaxKind::JS_BINARY_EXPRESSION => {
-                Some(JsBinaryExpression::cast_ref(&parent_syntax).unwrap())
-            }
-            _ => None,
-        }?;
-
-        let (member_position, literal) = extract_binary_position_and_literal(&binary_expr)?;
-
-        let condition = &(
-            member_position,
-            binary_expr.operator().ok()?,
-            literal.as_js_number_literal_expression()?.as_number()?,
-        );
-
-        let invalid_zero_len_checks = [
-            // `foo.length == 0`
-            (MemberPosition::Right, JsBinaryOperator::Equality, 0.0),
-            // `0 == foo.length`
-            (MemberPosition::Left, JsBinaryOperator::Equality, 0.0),
-            // `foo.length < 1`
-            (MemberPosition::Right, JsBinaryOperator::LessThan, 1.0),
-            // `1 > foo.length`
-            (MemberPosition::Left, JsBinaryOperator::GreaterThan, 1.0),
-        ];
-
-        if matches_numeric_binary_condition(condition, &invalid_zero_len_checks) {
+        if let Some((boolean_expr, is_negative)) = get_boolean_ancestor(&member_expr_syntax) {
             return Some(UseExplicitLengthCheckState {
-                check: LengthCheck::Zero,
-                suggested_fix: LengthFixKind::ModifyBinary(binary_expr, member_position),
-                member_name,
-            });
-        }
-
-        let invalid_non_zero_len_checks = [
-            // `foo.length !== 0`
-            (
-                MemberPosition::Right,
-                JsBinaryOperator::StrictInequality,
-                0.0,
-            ),
-            // `0 !== foo.length`
-            (
-                MemberPosition::Left,
-                JsBinaryOperator::StrictInequality,
-                0.0,
-            ),
-            // `foo.length != 0`
-            (MemberPosition::Right, JsBinaryOperator::Inequality, 0.0),
-            // `0 != foo.length`
-            (MemberPosition::Left, JsBinaryOperator::Inequality, 0.0),
-            // `foo.length >= 1`
-            (
-                MemberPosition::Right,
-                JsBinaryOperator::GreaterThanOrEqual,
-                1.0,
-            ),
-            // `1 <= foo.length`
-            (MemberPosition::Left, JsBinaryOperator::LessThanOrEqual, 1.0),
-        ];
-
-        if matches_numeric_binary_condition(condition, &invalid_non_zero_len_checks) {
-            return Some(UseExplicitLengthCheckState {
-                check: LengthCheck::NonZero,
-                suggested_fix: LengthFixKind::ModifyBinary(binary_expr, member_position),
+                check: LengthCheck::boolean_condition(is_negative),
+                suggested_fix: LengthFix::ReplaceWhole(boolean_expr),
                 member_name,
             });
         }
@@ -158,16 +122,14 @@ impl Rule for UseExplicitLengthCheck {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        // let node = ctx.query();
-
         let (code, type_text) = match state.check {
             LengthCheck::Zero => ("=== 0", "zero"),
             LengthCheck::NonZero => ("> 0", "not zero"),
         };
 
         let span = match &state.suggested_fix {
-            LengthFixKind::ReplaceWhole(node) => node.range(),
-            LengthFixKind::ModifyBinary(node, _) => node.range(),
+            LengthFix::ReplaceWhole(node) => node.range(),
+            LengthFix::ModifyBinaryExpression(node, _) => node.range(),
         };
 
         Some(RuleDiagnostic::new(
@@ -180,17 +142,18 @@ impl Rule for UseExplicitLengthCheck {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let member_expr = ctx.query();
         let mut mutation = ctx.root().begin();
 
         match &state.suggested_fix {
-            LengthFixKind::ReplaceWhole(node) => {
+            LengthFix::ReplaceWhole(node) => {
                 let operator_syntax = match state.check {
                     LengthCheck::Zero => T![===],
                     LengthCheck::NonZero => T![>],
                 };
 
                 let new_binary_expr = make::js_binary_expression(
-                    node.clone().into(),
+                    member_expr.clone().trim_trailing_trivia()?.into(),
                     make::token_decorated_with_space(operator_syntax),
                     AnyJsExpression::AnyJsLiteralExpression(
                         AnyJsLiteralExpression::JsNumberLiteralExpression(
@@ -199,7 +162,8 @@ impl Rule for UseExplicitLengthCheck {
                     ),
                 );
 
-                mutation.replace_node_discard_trivia::<AnyJsExpression>(node.clone().into(), new_binary_expr.into());
+                mutation
+                    .replace_node::<AnyJsExpression>(node.clone().into(), new_binary_expr.into());
 
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
@@ -208,7 +172,7 @@ impl Rule for UseExplicitLengthCheck {
                     mutation,
                 })
             }
-            LengthFixKind::ModifyBinary(binary_expr, member_position) => {
+            LengthFix::ModifyBinaryExpression(binary_expr, member_position) => {
                 let operator_syntax = match state.check {
                     LengthCheck::Zero => match member_position {
                         MemberPosition::Left => T![===],
@@ -247,7 +211,7 @@ const LENGTH_MEMBER_NAMES: &[&str] = &["byteLength", "byteOffset", "length", "si
 
 pub struct UseExplicitLengthCheckState {
     check: LengthCheck,
-    suggested_fix: LengthFixKind,
+    suggested_fix: LengthFix,
     member_name: String,
 }
 
@@ -257,14 +221,31 @@ enum MemberPosition {
     Right,
 }
 
+#[derive(PartialEq, Clone, Copy)]
 enum LengthCheck {
     Zero,
     NonZero,
 }
 
-enum LengthFixKind {
+impl LengthCheck {
+    fn opposite(&self) -> Self {
+        match self {
+            LengthCheck::Zero => LengthCheck::NonZero,
+            LengthCheck::NonZero => LengthCheck::Zero,
+        }
+    }
+    fn boolean_condition(is_negative: bool) -> Self {
+        if is_negative {
+            LengthCheck::Zero
+        } else {
+            LengthCheck::NonZero
+        }
+    }
+}
+
+enum LengthFix {
     ReplaceWhole(AnyJsExpression),
-    ModifyBinary(JsBinaryExpression, MemberPosition),
+    ModifyBinaryExpression(JsBinaryExpression, MemberPosition),
 }
 
 fn extract_binary_position_and_literal(
@@ -284,7 +265,6 @@ fn extract_binary_position_and_literal(
 }
 
 type NumericBinaryCondition = (MemberPosition, JsBinaryOperator, f64);
-
 fn matches_numeric_binary_condition(
     target_condition: &NumericBinaryCondition,
     conditions: &[NumericBinaryCondition],
@@ -292,6 +272,103 @@ fn matches_numeric_binary_condition(
     conditions
         .iter()
         .any(|condition| condition == target_condition)
+}
+
+fn is_invalid_binary_expr_length_check(
+    node: &JsSyntaxNode,
+) -> Option<(JsBinaryExpression, LengthCheck, MemberPosition)> {
+    let binary_expr = JsBinaryExpression::cast_ref(node)?;
+    let (member_position, literal) = extract_binary_position_and_literal(&binary_expr)?;
+
+    let condition = &(
+        member_position,
+        binary_expr.operator().ok()?,
+        literal.as_js_number_literal_expression()?.as_number()?,
+    );
+
+    let invalid_zero_len_checks = [
+        // `foo.length == 0`
+        (MemberPosition::Right, JsBinaryOperator::Equality, 0.0),
+        // `0 == foo.length`
+        (MemberPosition::Left, JsBinaryOperator::Equality, 0.0),
+        // `foo.length < 1`
+        (MemberPosition::Right, JsBinaryOperator::LessThan, 1.0),
+        // `1 > foo.length`
+        (MemberPosition::Left, JsBinaryOperator::GreaterThan, 1.0),
+    ];
+
+    if matches_numeric_binary_condition(condition, &invalid_zero_len_checks) {
+        return Some((binary_expr, LengthCheck::Zero, member_position));
+    }
+
+    let invalid_non_zero_len_checks = [
+        // `foo.length !== 0`
+        (
+            MemberPosition::Right,
+            JsBinaryOperator::StrictInequality,
+            0.0,
+        ),
+        // `0 !== foo.length`
+        (
+            MemberPosition::Left,
+            JsBinaryOperator::StrictInequality,
+            0.0,
+        ),
+        // `foo.length != 0`
+        (MemberPosition::Right, JsBinaryOperator::Inequality, 0.0),
+        // `0 != foo.length`
+        (MemberPosition::Left, JsBinaryOperator::Inequality, 0.0),
+        // `foo.length >= 1`
+        (
+            MemberPosition::Right,
+            JsBinaryOperator::GreaterThanOrEqual,
+            1.0,
+        ),
+        // `1 <= foo.length`
+        (MemberPosition::Left, JsBinaryOperator::LessThanOrEqual, 1.0),
+    ];
+
+    if matches_numeric_binary_condition(condition, &invalid_non_zero_len_checks) {
+        return Some((binary_expr, LengthCheck::NonZero, member_position));
+    }
+
+    None
+}
+
+/// Get the boolean ancestor of the node
+/// ## Example
+/// Includes following cases:
+/// - `Boolean(x)`
+/// - `!!x`
+/// - `!x`
+/// - `!(x)`
+/// - `!(!x)`
+/// and combination of them nested
+/// ```js
+/// !(Boolean(!(!x)))
+/// ```
+/// Returns ancestor expression and whether it is negated
+fn get_boolean_ancestor(node: &JsSyntaxNode) -> Option<(AnyJsExpression, bool)> {
+    let mut boolean_node = node.clone();
+    let mut current_node = node.parent()?;
+    let mut is_negative = false;
+
+    loop {
+        if let Some(expr) = is_boolean_call(&current_node) {
+            boolean_node = expr.syntax().clone();
+            current_node = boolean_node.parent()?;
+        } else if let Some(expr) = is_negation(&current_node) {
+            boolean_node = expr.syntax().clone();
+            current_node = boolean_node.parent()?;
+            is_negative = !is_negative;
+        } else if current_node.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
+            current_node = current_node.parent()?;
+        } else {
+            break;
+        }
+    }
+
+    return Some((AnyJsExpression::cast(boolean_node)?, is_negative));
 }
 
 /// Check if this node is in the position of `test` slot of parent syntax node.
@@ -347,60 +424,27 @@ fn is_boolean_constructor_call(node: &JsSyntaxNode) -> Option<bool> {
 /// ```js
 /// Boolean(x)
 /// ```
-fn is_boolean_call(node: &JsSyntaxNode) -> Option<bool> {
+fn is_boolean_call(node: &JsSyntaxNode) -> Option<JsCallExpression> {
     let expr = JsCallArgumentList::cast_ref(node)?
         .parent::<JsCallArguments>()?
         .parent::<JsCallExpression>()?;
-    Some(expr.has_callee("Boolean"))
-}
 
-/// Check if the SyntaxNode is a Negate Unary Expression
-/// ## Example
-/// ```js
-/// !!x
-/// ```
-fn is_negation(node: &JsSyntaxNode) -> Option<JsUnaryExpression> {
-    let unary_expr = JsUnaryExpression::cast_ref(node)?;
-    if unary_expr.operator().ok()? == JsUnaryOperator::LogicalNot {
-        Some(unary_expr)
+    if expr.has_callee("Boolean") {
+        Some(expr)
     } else {
         None
     }
 }
 
-
-/// Check if the SyntaxNode is a Double Negation. Including the edge case
+/// Check if the SyntaxNode is a Negate Unary Expression
+/// ## Example
 /// ```js
-/// !(!x)
+/// !x
 /// ```
-/// Return [Rule::State] `(JsAnyExpression, ExtraBooleanCastType)` if it is a DoubleNegation Expression
-///
-fn is_double_negation_ignore_parenthesis(
-    syntax: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>,
-) -> Option<(AnyJsExpression, ExtraBooleanCastType)> {
-    if let Some(negation_expr) = is_negation(syntax) {
-        let argument = negation_expr.argument().ok()?;
-        match argument {
-            AnyJsExpression::JsUnaryExpression(expr)
-                if expr.operator().ok()? == JsUnaryOperator::LogicalNot =>
-            {
-                expr.argument()
-                    .ok()
-                    .map(|argument| (argument, ExtraBooleanCastType::DoubleNegation))
-            }
-            // Check edge case `!(!xxx)`
-            AnyJsExpression::JsParenthesizedExpression(expr) => {
-                expr.expression().ok().and_then(|expr| {
-                    is_negation(expr.syntax()).and_then(|negation| {
-                        Some((
-                            negation.argument().ok()?,
-                            ExtraBooleanCastType::DoubleNegation,
-                        ))
-                    })
-                })
-            }
-            _ => None,
-        }
+fn is_negation(node: &JsSyntaxNode) -> Option<JsUnaryExpression> {
+    let unary_expr = JsUnaryExpression::cast_ref(node)?;
+    if unary_expr.operator().ok()? == JsUnaryOperator::LogicalNot {
+        Some(unary_expr)
     } else {
         None
     }

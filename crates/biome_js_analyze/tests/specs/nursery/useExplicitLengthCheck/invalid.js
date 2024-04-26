@@ -1,6 +1,14 @@
-foo.length!=0
-/** A */ 0 /** B */ != /** D */ foo.length /** E */
-if (/** A */foo.size /** B */) {}
+foo.length && true
+Boolean(foo.length == 0);
+Boolean(foo.length != 0);
+
+
+
+!Boolean(!(Boolean(0 != foo.length)));
+// !(!(Boolean(Boolean(foo.length))))
+// foo.length && true
+// foo.length!=0
+// if (/** A */foo.size /** B */) {}
 // Boolean(foo.length)
 // new Boolean(foo.length)
 // !foo.length
