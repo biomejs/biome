@@ -1591,6 +1591,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGenericFontNames": {
+					"description": "Disallow a missing generic family keyword within font families.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
 					"anyOf": [

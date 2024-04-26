@@ -2,12 +2,17 @@ use crate::keywords::{
     BASIC_KEYWORDS, FONT_FAMILY_KEYWORDS, FONT_SIZE_KEYWORDS, FONT_STRETCH_KEYWORDS,
     FONT_STYLE_KEYWORDS, FONT_VARIANTS_KEYWORDS, FONT_WEIGHT_ABSOLUTE_KEYWORDS,
     FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, LINE_HEIGHT_KEYWORDS,
+    SYSTEM_FAMILY_NAME_KEYWORDS,
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
 
 pub fn is_font_family_keyword(value: &str) -> bool {
     BASIC_KEYWORDS.contains(&value) || FONT_FAMILY_KEYWORDS.contains(&value)
+}
+
+pub fn is_system_family_name_keyword(value: &str) -> bool {
+    BASIC_KEYWORDS.contains(&value) || SYSTEM_FAMILY_NAME_KEYWORDS.contains(&value)
 }
 
 // check if the value is a shorthand keyword used in `font` property
@@ -27,7 +32,7 @@ pub fn is_css_variable(value: &str) -> bool {
     value.to_lowercase().starts_with("var(")
 }
 
-// Get the font-families within a `font` shorthand property value.
+/// Get the font-families within a `font` shorthand property value.
 pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue> {
     let mut font_families: Vec<AnyCssValue> = Vec::new();
     for v in value {

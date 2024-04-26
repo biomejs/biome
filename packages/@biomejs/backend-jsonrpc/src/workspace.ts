@@ -1001,6 +1001,10 @@ export interface Nursery {
 	 */
 	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow a missing generic family keyword within font families.
+	 */
+	useGenericFontNames?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
@@ -1987,6 +1991,7 @@ export type Category =
 	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noMisplacedAssertion"
+	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
@@ -1997,6 +2002,7 @@ export type Category =
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentNewBuiltin"
+	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"

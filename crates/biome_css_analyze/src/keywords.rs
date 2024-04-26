@@ -1,6 +1,7 @@
 pub const BASIC_KEYWORDS: [&str; 5] = ["initial", "inherit", "revert", "revert-layer", "unset"];
 
-pub const _SYSTEM_FONT_KEYWORDS: [&str; 6] = [
+// https://drafts.csswg.org/css-fonts/#system-family-name-value
+pub const SYSTEM_FAMILY_NAME_KEYWORDS: [&str; 6] = [
     "caption",
     "icon",
     "menu",
@@ -767,7 +768,7 @@ mod tests {
     #[test]
     fn test_function_keywords_sorted() {
         let mut sorted = FUNCTION_KEYWORDS.to_vec();
-        sorted.sort();
+        sorted.sort_unstable();
         assert_eq!(FUNCTION_KEYWORDS, sorted.as_slice());
     }
 

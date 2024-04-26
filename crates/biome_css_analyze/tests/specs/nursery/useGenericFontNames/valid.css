@@ -1,0 +1,25 @@
+a { font-family: "Lucida Grande", "Arial", sans-serif; }
+a { font: 1em "Lucida Grande", 'Arial', sans-serif; }
+a { font: 1em "Lucida Grande", 'Arial', "sans-serif", sans-serif; }
+a { font-family: Times, serif; }
+b { font-family: inherit; }
+b { font-family: inherit; }
+b { font-family: initial; }
+b { font-family: unset; }
+b { font-family: serif; }
+b { font-family: sans-serif; }
+b { font-family: Courier, monospace; }
+b { font: 1em/1.5 "Whatever Fanciness", cursive; }
+a { font-family: Helvetica Neue, sans-serif, Apple Color Emoji; }
+@font-face { font-family: Gentium; }
+@FONT-FACE { font-family: Gentium; }
+a { font: inherit; }
+a { font: caption; }
+a { font: icon; }
+a { font: menu; }
+a { font: message-box; }
+a { font: small-caption; }
+a { font: status-bar; }
+a { font-family: var(--font); }
+a { font-family: revert }
+a { font-family: revert-layer }

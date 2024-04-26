@@ -14,3 +14,5 @@ pub type NoUnknownFunction =
     <lint::nursery::no_unknown_function::NoUnknownFunction as biome_analyze::Rule>::Options;
 pub type NoUnknownUnit =
     <lint::nursery::no_unknown_unit::NoUnknownUnit as biome_analyze::Rule>::Options;
+pub type UseGenericFontNames =
+    <lint::nursery::use_generic_font_names::UseGenericFontNames as biome_analyze::Rule>::Options;
