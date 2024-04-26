@@ -244,7 +244,10 @@ pub enum ConfigurationPathHint {
     #[default]
     None,
 
-    Workspace(PathBuf),
+    /// Very similar to [ConfigurationPathHint::None]. However, the path provided by this variant
+    /// will be used as **working directory**, which means that all globs defined in the configuration
+    /// will use **this path** as base path.
+    FromWorkspace(PathBuf),
 
     /// The configuration path provided by the LSP, not having a configuration file is not an error.
     /// The path will always be a directory path.

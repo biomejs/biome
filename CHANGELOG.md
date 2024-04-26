@@ -19,6 +19,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Editors
 
+#### New features
+
+- Add support for LSP Workspaces
+
 ### Formatter
 
 ### JavaScript APIs
@@ -216,7 +220,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 - [noMisplacedAssertion](https://biomejs.dev/linter/rules/no-misplaced-assertion/) now allow these matchers
-  
+
   - `expect.any()`
   - `expect.anything()`
   - `expect.closeTo`

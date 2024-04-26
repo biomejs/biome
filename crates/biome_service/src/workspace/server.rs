@@ -4,8 +4,8 @@ use super::{
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams,
     ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
     PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RegisterProjectFolderParams,
-    RenameResult, SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateProjectParams,
-    UpdateSettingsParams,
+    RenameResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
+    UnregisterProjectFolderParams, UpdateProjectParams, UpdateSettingsParams,
 };
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
@@ -425,7 +425,7 @@ impl Workspace for WorkspaceServer {
         );
         let mut workspace = self.workspaces_mut();
 
-        workspace.as_mut().update_current_project(&params.path);
+        workspace.as_mut().set_current_project(&params.path);
 
         Ok(())
     }
@@ -456,6 +456,15 @@ impl Workspace for WorkspaceServer {
             workspace.as_mut().register_current_project(key);
         }
         Ok(key)
+    }
+
+    fn unregister_project_folder(
+        &self,
+        params: UnregisterProjectFolderParams,
+    ) -> Result<(), WorkspaceError> {
+        let mut workspace = self.workspaces_mut();
+        workspace.as_mut().remove_project(params.path.as_path());
+        Ok(())
     }
 
     fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
@@ -555,11 +564,6 @@ impl Workspace for WorkspaceServer {
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         let parse = self.get_parse(params.path.clone())?;
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
-        debug!(
-            "Current settings: formatter {:?} and linter {:?}",
-            self.settings().as_ref().formatter.enabled,
-            self.settings().as_ref().linter.enabled,
-        );
         let (diagnostics, errors, skipped_diagnostics) =
             if let Some(lint) = self.get_file_capabilities(&params.path).analyzer.lint {
                 info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {

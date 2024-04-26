@@ -9,7 +9,9 @@ use crate::{handlers, requests};
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, FileSystem, OsFileSystem, ROME_JSON};
-use biome_service::workspace::{RageEntry, RageParams, RageResult};
+use biome_service::workspace::{
+    RageEntry, RageParams, RageResult, RegisterProjectFolderParams, UnregisterProjectFolderParams,
+};
 use biome_service::{workspace, DynRef, Workspace};
 use futures::future::ready;
 use futures::FutureExt;
@@ -365,6 +367,47 @@ impl LanguageServer for LSPServer {
             .ok();
     }
 
+    async fn did_change_workspace_folders(&self, params: DidChangeWorkspaceFoldersParams) {
+        for removed in &params.event.removed {
+            if let Ok(project_path) = self.session.file_path(&removed.uri) {
+                let result = self
+                    .session
+                    .workspace
+                    .unregister_project_folder(UnregisterProjectFolderParams { path: project_path })
+                    .map_err(into_lsp_error);
+
+                if let Err(err) = result {
+                    error!("Failed to remove project from the workspace: {}", err);
+                    self.session
+                        .client
+                        .log_message(MessageType::ERROR, err)
+                        .await;
+                }
+            }
+        }
+
+        for added in &params.event.added {
+            if let Ok(project_path) = self.session.file_path(&added.uri) {
+                let result = self
+                    .session
+                    .workspace
+                    .register_project_folder(RegisterProjectFolderParams {
+                        path: Some(project_path.to_path_buf()),
+                        set_as_current_workspace: true,
+                    })
+                    .map_err(into_lsp_error);
+
+                if let Err(err) = result {
+                    error!("Failed to add project to the workspace: {}", err);
+                    self.session
+                        .client
+                        .log_message(MessageType::ERROR, err)
+                        .await;
+                }
+            }
+        }
+    }
+
     async fn code_action(&self, params: CodeActionParams) -> LspResult<Option<CodeActionResponse>> {
         biome_diagnostics::panic::catch_unwind(move || {
             handlers::analysis::code_actions(&self.session, params).map_err(into_lsp_error)
@@ -572,6 +615,7 @@ impl ServerFactory {
         workspace_method!(builder, is_path_ignored);
         workspace_method!(builder, update_settings);
         workspace_method!(builder, register_project_folder);
+        workspace_method!(builder, unregister_project_folder);
         workspace_method!(builder, open_file);
         workspace_method!(builder, open_project);
         workspace_method!(builder, update_current_project);

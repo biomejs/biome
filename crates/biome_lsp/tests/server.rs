@@ -28,7 +28,6 @@ use tower::{Service, ServiceExt};
 use tower_lsp::jsonrpc;
 use tower_lsp::jsonrpc::Response;
 use tower_lsp::lsp_types as lsp;
-use tower_lsp::lsp_types::DidCloseTextDocumentParams;
 use tower_lsp::lsp_types::DidOpenTextDocumentParams;
 use tower_lsp::lsp_types::DocumentFormattingParams;
 use tower_lsp::lsp_types::FormattingOptions;
@@ -45,6 +44,7 @@ use tower_lsp::lsp_types::VersionedTextDocumentIdentifier;
 use tower_lsp::lsp_types::WorkDoneProgressParams;
 use tower_lsp::lsp_types::{ClientCapabilities, CodeDescription, Url};
 use tower_lsp::lsp_types::{DidChangeConfigurationParams, DidChangeTextDocumentParams};
+use tower_lsp::lsp_types::{DidCloseTextDocumentParams, WorkspaceFolder};
 use tower_lsp::LspService;
 use tower_lsp::{jsonrpc::Request, lsp_types::InitializeParams};
 
@@ -150,11 +150,48 @@ impl Server {
                 InitializeParams {
                     process_id: None,
                     root_path: None,
-                    root_uri: Some(url!("")),
+                    root_uri: Some(url!("/")),
                     initialization_options: None,
                     capabilities: ClientCapabilities::default(),
                     trace: None,
                     workspace_folders: None,
+                    client_info: None,
+                    locale: None,
+                },
+            )
+            .await?
+            .context("initialize returned None")?;
+
+        Ok(())
+    }
+
+    /// It creates two workspaces, one at folder `test_one` and the other in `test_two`.
+    ///
+    /// Hence, the two roots will be `/workspace/test_one` and `/workspace/test_two`
+    // The `root_path` field is deprecated, but we still need to specify it
+    #[allow(deprecated)]
+    async fn initialize_workspaces(&mut self) -> Result<()> {
+        let _res: InitializeResult = self
+            .request(
+                "initialize",
+                "_init",
+                InitializeParams {
+                    process_id: None,
+                    root_path: None,
+                    root_uri: Some(url!("/")),
+                    initialization_options: None,
+                    capabilities: ClientCapabilities::default(),
+                    trace: None,
+                    workspace_folders: Some(vec![
+                        WorkspaceFolder {
+                            name: "test_one".to_string(),
+                            uri: url!("test_one"),
+                        },
+                        WorkspaceFolder {
+                            name: "test_two".to_string(),
+                            uri: url!("test_two"),
+                        },
+                    ]),
                     client_info: None,
                     locale: None,
                 },
@@ -435,7 +472,7 @@ async fn document_lifecycle() -> Result<()> {
             "biome/get_syntax_tree",
             "get_syntax_tree",
             GetSyntaxTreeParams {
-                path: BiomePath::new("document.js"),
+                path: BiomePath::new("/workspace/document.js"),
             },
         )
         .await?
@@ -1872,7 +1909,7 @@ isSpreadAssignment;
             "biome/get_file_content",
             "get_file_content",
             GetFileContentParams {
-                path: BiomePath::new("document.js"),
+                path: BiomePath::new("/workspace/document.js"),
             },
         )
         .await?
@@ -2190,6 +2227,125 @@ async fn server_shutdown() -> Result<()> {
 
     server.initialize().await?;
     server.initialized().await?;
+
+    let cancellation = factory.cancellation();
+    let cancellation = cancellation.notified();
+
+    server.biome_shutdown().await?;
+
+    cancellation.await;
+
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn multiple_projects() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create(None).into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize_workspaces().await?;
+    server.initialized().await?;
+
+    let config_only_formatter = r#"{
+        "linter": {
+            "enabled": false
+        },
+        "organizeImports": {
+            "enabled": false
+        }
+    }"#;
+    server
+        .open_named_document(config_only_formatter, url!("test_one/biome.json"), "json")
+        .await?;
+
+    let config_only_linter = r#"{
+        "formatter": {
+            "enabled": false
+        },
+        "organizeImports": {
+            "enabled": false
+        }
+    }"#;
+    server
+        .open_named_document(config_only_linter, url!("test_two/biome.json"), "json")
+        .await?;
+
+    // it should add a `;` but no diagnostics
+    let file_format_only = r#"debugger"#;
+    server
+        .open_named_document(file_format_only, url!("test_one/file.js"), "javascript")
+        .await?;
+
+    // it should raise a diagnostic, but no formatting
+    let file_lint_only = r#"debugger;\n"#;
+    server
+        .open_named_document(file_lint_only, url!("test_two/file.js"), "javascript")
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: url!("test_two/file.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_none(),
+        "We should not have any edits here, we call the project where formatting is disabled."
+    );
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: url!("test_one/file.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_some(),
+        "We should have any edits here, we call the project where formatting is enabled."
+    );
 
     let cancellation = factory.cancellation();
     let cancellation = cancellation.notified();

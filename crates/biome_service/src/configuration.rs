@@ -172,7 +172,7 @@ fn load_config(
         // Path hint from LSP is always the workspace root
         // we use it as the resolution base path.
         ConfigurationPathHint::FromLsp(ref path) => path.clone(),
-        ConfigurationPathHint::Workspace(ref path) => path.clone(),
+        ConfigurationPathHint::FromWorkspace(ref path) => path.clone(),
         // Path hint from user means the command is invoked from the CLI
         // So we use the working directory (CWD) as the resolution base path
         ConfigurationPathHint::FromUser(_) | ConfigurationPathHint::None => file_system
@@ -207,10 +207,8 @@ fn load_config(
     let configuration_directory = match base_path {
         ConfigurationPathHint::FromLsp(path) => path,
         ConfigurationPathHint::FromUser(path) => path,
-        ConfigurationPathHint::Workspace(path) => path,
-        ConfigurationPathHint::None => file_system
-            .working_directory()
-            .unwrap_or_else(|| PathBuf::new()),
+        ConfigurationPathHint::FromWorkspace(path) => path,
+        ConfigurationPathHint::None => file_system.working_directory().unwrap_or_default(),
     };
 
     // We first search for `biome.json` or `biome.jsonc` files

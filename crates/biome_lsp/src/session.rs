@@ -324,7 +324,7 @@ impl Session {
                 _ => None,
             };
 
-            let result = result
+            result
                 .diagnostics
                 .into_iter()
                 .filter_map(|d| {
@@ -342,9 +342,7 @@ impl Session {
                         }
                     }
                 })
-                .collect();
-
-            result
+                .collect()
         };
 
         tracing::Span::current().record("diagnostic_count", diagnostics.len());
@@ -420,38 +418,37 @@ impl Session {
             let base_path = ConfigurationPathHint::FromUser(config_path.clone());
             let status = self.load_biome_configuration_file(base_path).await;
             self.set_configuration_status(status);
-        } else {
-            if let Some(folders) = self.get_workspace_folders() {
-                info!("Detected workspace folder.");
-                self.set_configuration_status(ConfigurationStatus::Loading);
-                for folder in folders {
-                    info!("Attempt to load the configuration file in {:?}", folder.uri);
-                    let base_path = folder.uri.to_file_path();
-                    match base_path {
-                        Ok(base_path) => {
-                            let status = self
-                                .load_biome_configuration_file(ConfigurationPathHint::Workspace(
-                                    base_path,
-                                ))
-                                .await;
-                            self.set_configuration_status(status);
-                        }
-                        Err(_) => {
-                            error!(
-                                "The Workspace root URI {:?} could not be parsed as a filesystem path", folder.uri
-                            );
-                        }
+        } else if let Some(folders) = self.get_workspace_folders() {
+            info!("Detected workspace folder.");
+            self.set_configuration_status(ConfigurationStatus::Loading);
+            for folder in folders {
+                info!("Attempt to load the configuration file in {:?}", folder.uri);
+                let base_path = folder.uri.to_file_path();
+                match base_path {
+                    Ok(base_path) => {
+                        let status = self
+                            .load_biome_configuration_file(ConfigurationPathHint::FromWorkspace(
+                                base_path,
+                            ))
+                            .await;
+                        self.set_configuration_status(status);
+                    }
+                    Err(_) => {
+                        error!(
+                            "The Workspace root URI {:?} could not be parsed as a filesystem path",
+                            folder.uri
+                        );
                     }
                 }
-            } else {
-                let base_path = match self.base_path() {
-                    None => ConfigurationPathHint::default(),
-                    Some(path) => ConfigurationPathHint::FromLsp(path),
-                };
-                let status = self.load_biome_configuration_file(base_path).await;
-                self.set_configuration_status(status);
             }
-        };
+        } else {
+            let base_path = match self.base_path() {
+                None => ConfigurationPathHint::default(),
+                Some(path) => ConfigurationPathHint::FromLsp(path),
+            };
+            let status = self.load_biome_configuration_file(base_path).await;
+            self.set_configuration_status(status);
+        }
     }
 
     async fn load_biome_configuration_file(
@@ -481,11 +478,13 @@ impl Session {
 
                     match result {
                         Ok((vcs_base_path, gitignore_matches)) => {
-                            // We don't need the key for now, but will soon
-                            if let ConfigurationPathHint::Workspace(path) = &base_path {
+                            if let ConfigurationPathHint::FromWorkspace(path) = &base_path {
+                                // We don't need the key
                                 let _ = self.workspace.register_project_folder(
                                     RegisterProjectFolderParams {
                                         path: Some(path.clone()),
+                                        // This is naive, but we don't know if the user has a file already open or not, so we register every project as the current one.
+                                        // The correct one is actually set when the LSP calls `textDocument/didOpen`
                                         set_as_current_workspace: true,
                                     },
                                 );
@@ -497,15 +496,6 @@ impl Session {
                                     },
                                 );
                             }
-                            // match project_key {
-                            //     Ok(project_key) => {
-                            //         // to do something
-                            //     }
-                            //     Err(error) => {
-                            //         error!("Failed to set workspace settings: {}", error);
-                            //         return ConfigurationStatus::Error;
-                            //     }
-                            // }
                             let result = self.workspace.update_settings(UpdateSettingsParams {
                                 workspace_directory: fs.working_directory(),
                                 configuration,

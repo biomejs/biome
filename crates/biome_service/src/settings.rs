@@ -38,31 +38,32 @@ use std::{
 use tracing::debug;
 
 #[derive(Debug, Default)]
-pub struct PathToSettings {
+/// The information tracked for each project
+pub struct ProjectData {
+    /// The root path of the project. This path should be **absolute**.
     path: BiomePath,
+    /// The settings of the project, usually inferred from the configuration file e.g. `biome.json`.
     settings: Settings,
 }
 
 #[derive(Debug, Default)]
+/// Type that manages different projects inside the workspace.
 pub struct WorkspaceSettings {
-    data: WorkspaceData<PathToSettings>,
+    /// The data of the projects
+    data: WorkspaceData<ProjectData>,
+    /// The ID of the current project.
     current_project: ProjectKey,
 }
 
 impl WorkspaceSettings {
     /// Retrieves the settings of the current workspace folder
-    pub fn current_settings(&self) -> &Settings {
+    pub fn get_current_settings(&self) -> &Settings {
         debug!("Current key {:?}", self.current_project);
         let data = self
             .data
-            .get_value_by_key(self.current_project)
+            .get(self.current_project)
             .expect("You must have at least one workspace.");
         &data.settings
-    }
-
-    /// Register a new
-    pub fn register_current_project(&mut self, key: ProjectKey) {
-        self.current_project = key;
     }
 
     /// Retrieves a mutable reference of the settings of the current project
@@ -74,19 +75,46 @@ impl WorkspaceSettings {
             .settings
     }
 
-    /// Register a new project using its folder. Use [WorkspaceSettings::get_current_settings_mut] to retrieve
-    /// its settings and change them.
+    /// Register the current project using its unique key
+    pub fn register_current_project(&mut self, key: ProjectKey) {
+        self.current_project = key;
+    }
+
+    /// Insert a new project using its folder. Use [WorkspaceSettings::get_current_settings_mut] to retrieve
+    /// a mutable reference to its [Settings] and manipulate them.
     pub fn insert_project(&mut self, workspace_path: impl Into<PathBuf>) -> ProjectKey {
         let path = BiomePath::new(workspace_path.into());
         debug!("Insert workspace folder: {:?}", path);
-        self.data.insert(PathToSettings {
+        self.data.insert(ProjectData {
             path,
             settings: Settings::default(),
         })
     }
 
-    /// If updates the current
-    pub fn update_current_project(&mut self, path: &BiomePath) {
+    /// Remove a project using its folder.
+    pub fn remove_project(&mut self, workspace_path: &Path) {
+        let keys_to_remove = {
+            let mut data = vec![];
+            let iter = self.data.iter();
+
+            for (key, path_to_settings) in iter {
+                if path_to_settings.path.as_path() == workspace_path {
+                    data.push(key)
+                }
+            }
+
+            data
+        };
+
+        for key in keys_to_remove {
+            self.data.remove(key)
+        }
+    }
+
+    /// Checks if the current path belongs to a registered project.
+    ///
+    /// If there's a match, and the match **isn't** the current project, the function will mark the match as the current project.
+    pub fn set_current_project(&mut self, path: &BiomePath) {
         debug_assert!(
             path.is_absolute(),
             "Workspaces paths must be absolutes {path:?}."
@@ -101,11 +129,12 @@ impl WorkspaceSettings {
                 "Workspace path {:?}, file path {:?}",
                 path_to_settings.path, path
             );
-            if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
-                if key != self.current_project {
-                    debug!("Update workspace to {:?}", key);
-                    self.current_project = key;
-                }
+            if path.strip_prefix(path_to_settings.path.as_path()).is_ok()
+                && key != self.current_project
+            {
+                debug!("Update workspace to {:?}", key);
+                self.current_project = key;
+                break;
             }
         }
     }
@@ -582,7 +611,7 @@ impl<'a> SettingsHandle<'a> {
 
 impl<'a> AsRef<Settings> for SettingsHandle<'a> {
     fn as_ref(&self) -> &Settings {
-        self.inner.current_settings()
+        self.inner.get_current_settings()
     }
 }
 
@@ -597,9 +626,9 @@ impl<'a> SettingsHandle<'a> {
         L: ServiceLanguage,
     {
         L::resolve_format_options(
-            &self.inner.current_settings().formatter,
-            &self.inner.current_settings().override_settings,
-            &L::lookup_settings(&self.inner.current_settings().languages).formatter,
+            &self.inner.get_current_settings().formatter,
+            &self.inner.get_current_settings().override_settings,
+            &L::lookup_settings(&self.inner.get_current_settings().languages).formatter,
             path,
             file_source,
         )
