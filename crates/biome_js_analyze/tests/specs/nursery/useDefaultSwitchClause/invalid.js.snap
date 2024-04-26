@@ -25,7 +25,7 @@ invalid.js:1:1 lint/nursery/useDefaultSwitchClause ━━━━━━━━━�
       │ ^
     5 │ 
   
-  i The lack of a default clause can result in unexpected behaviors in your code.
+  i The lack of a default clause can be a possible omission.
   
   i Consider adding a default clause.
   
