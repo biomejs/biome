@@ -8,7 +8,9 @@ use biome_rowan::AstNode;
 declare_rule! {
     /// Require default cases in switch statements.
     ///
-    /// See https://eslint.org/docs/latest/rules/default-case
+    /// Some code conventions require that all switch statements have a default case. The thinking is that it’s better
+    /// to always explicitly state what the default behavior should be so that it’s clear whether or not the developer
+    /// forgot to include the default behavior by mistake.
     ///
     /// ## Examples
     ///
