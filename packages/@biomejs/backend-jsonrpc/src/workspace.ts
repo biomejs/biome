@@ -2358,7 +2358,7 @@ export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<SupportsFeatureResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
 	registerProjectFolder(
-		params: RegisterProjectFolderParams
+		params: RegisterProjectFolderParams,
 	): Promise<ProjectKey>;
 	updateCurrentProject(params: UpdateProjectParams): Promise<void>;
 	openProject(params: OpenProjectParams): Promise<void>;
@@ -2367,13 +2367,13 @@ export interface Workspace {
 	closeFile(params: CloseFileParams): Promise<void>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;
 	organizeImports(
-		params: OrganizeImportsParams
+		params: OrganizeImportsParams,
 	): Promise<OrganizeImportsResult>;
 	getFileContent(params: GetFileContentParams): Promise<string>;
 	getControlFlowGraph(params: GetControlFlowGraphParams): Promise<string>;
 	getFormatterIr(params: GetFormatterIRParams): Promise<string>;
 	pullDiagnostics(
-		params: PullDiagnosticsParams
+		params: PullDiagnosticsParams,
 	): Promise<PullDiagnosticsResult>;
 	pullActions(params: PullActionsParams): Promise<PullActionsResult>;
 	formatFile(params: FormatFileParams): Promise<Printed>;
