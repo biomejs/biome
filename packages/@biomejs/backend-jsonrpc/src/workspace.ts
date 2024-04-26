@@ -961,10 +961,6 @@ export interface Nursery {
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow a missing generic family keyword within font families.
-	 */
-	noMissingGenericFamilyKeyword?: RuleConfiguration_for_Null;
-	/**
 	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration_for_Null;
@@ -1000,6 +996,10 @@ export interface Nursery {
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
 	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow a missing generic family keyword within font families.
+	 */
+	useGenericFontNames?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -1997,6 +1997,7 @@ export type Category =
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentNewBuiltin"
+	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"

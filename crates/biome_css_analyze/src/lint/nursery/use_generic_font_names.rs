@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssAtRule, AnyCssGenericComponentValue, AnyCssValue, CssAtRule,
@@ -19,7 +19,7 @@ declare_rule! {
     ///
     /// This rule checks the font and font-family properties.
     /// The following special situations are ignored:
-    /// - Property with a keyword value such as `inherit`, `caption`.
+    /// - Property with a keyword value such as `inherit`, `initial`.
     /// - The last value being a CSS variable.
     /// - `font-family` property in an `@font-face` rule.
     ///
@@ -57,14 +57,15 @@ declare_rule! {
     /// @font-face { font-family: Gentium; }
     /// ```
     ///
-    pub NoMissingGenericFamilyKeyword {
+    pub UseGenericFontNames {
         version: "next",
-        name: "noMissingGenericFamilyKeyword",
-        recommended: false,
+        name: "useGenericFontNames",
+        recommended: true,
+        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword")],
     }
 }
 
-impl Rule for NoMissingGenericFamilyKeyword {
+impl Rule for UseGenericFontNames {
     type Query = Ast<CssGenericProperty>;
     type State = TextRange;
     type Signals = Option<Self::State>;
@@ -96,13 +97,7 @@ impl Rule for NoMissingGenericFamilyKeyword {
         let font_families = if is_font {
             find_font_family(properties)
         } else {
-            properties
-                .into_iter()
-                .filter_map(|v| match v {
-                    AnyCssGenericComponentValue::AnyCssValue(value) => Some(value),
-                    _ => None,
-                })
-                .collect()
+            collect_font_family_properties(properties)
         };
 
         if font_families.is_empty() {
@@ -136,7 +131,7 @@ impl Rule for NoMissingGenericFamilyKeyword {
             })
             .footer_list(
                 markup! {
-                    "for example:"
+                    "For examples and more information, see" <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/generic-family">" the MDN Web Docs"</Hyperlink>
                 },
                 &["serif", "sans-serif", "monospace", "etc."],
             ),
@@ -161,7 +156,15 @@ fn is_shorthand_font_property_with_keyword(properties: &CssGenericComponentValue
 }
 
 fn has_generic_font_family_property(nodes: &[AnyCssValue]) -> bool {
-    nodes
-        .iter()
-        .any(|n| is_font_family_keyword(&n.text()) || is_system_family_name_keyword(&n.text()))
+    nodes.iter().any(|n| is_font_family_keyword(&n.text()))
+}
+
+fn collect_font_family_properties(properties: CssGenericComponentValueList) -> Vec<AnyCssValue> {
+    properties
+        .into_iter()
+        .filter_map(|v| match v {
+            AnyCssGenericComponentValue::AnyCssValue(value) => Some(value),
+            _ => None,
+        })
+        .collect()
 }
