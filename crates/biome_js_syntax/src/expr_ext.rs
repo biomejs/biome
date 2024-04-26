@@ -6,16 +6,18 @@ use crate::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMemberName,
     AnyJsTemplateElement, JsArrayExpression, JsArrayHole, JsAssignmentExpression,
     JsBinaryExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsComputedMemberAssignment, JsComputedMemberExpression, JsLiteralMemberName,
-    JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression, JsObjectExpression,
-    JsPostUpdateExpression, JsReferenceIdentifier, JsRegexLiteralExpression,
-    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxToken, JsTemplateChunkElement,
-    JsTemplateExpression, JsUnaryExpression, OperatorPrecedence, TsStringLiteralType, T,
+    JsComputedMemberAssignment, JsComputedMemberExpression, JsConditionalExpression,
+    JsDoWhileStatement, JsForStatement, JsIfStatement, JsLiteralMemberName, JsLogicalExpression,
+    JsNewExpression, JsNumberLiteralExpression, JsObjectExpression, JsPostUpdateExpression,
+    JsReferenceIdentifier, JsRegexLiteralExpression, JsStaticMemberExpression,
+    JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement,
+    JsTemplateExpression, JsUnaryExpression, JsWhileStatement, OperatorPrecedence,
+    TsStringLiteralType, T,
 };
 use crate::{JsPreUpdateExpression, JsSyntaxKind::*};
 use biome_rowan::{
-    declare_node_union, AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxResult,
-    TextRange, TextSize, TokenText,
+    declare_node_union, AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxNodeCast,
+    SyntaxResult, TextRange, TextSize, TokenText,
 };
 use core::iter;
 
@@ -1833,6 +1835,88 @@ impl TsStringLiteralType {
     /// ```
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
         Ok(inner_string_text(&self.literal_token()?))
+    }
+}
+
+/// Check if the SyntaxNode is a Negate Unary Expression
+/// ## Example
+/// ```js
+/// !x
+/// ```
+pub fn is_negation(node: &JsSyntaxNode) -> Option<JsUnaryExpression> {
+    let unary_expr = JsUnaryExpression::cast_ref(node)?;
+    if unary_expr.operator().ok()? == JsUnaryOperator::LogicalNot {
+        Some(unary_expr)
+    } else {
+        None
+    }
+}
+
+/// Check if this node is in the position of `test` slot of parent syntax node.
+/// ## Example
+/// ```js
+/// if (!!x) {
+///     ^^^ this is a boolean context
+/// }
+/// ```
+pub fn is_in_boolean_context(node: &JsSyntaxNode) -> Option<bool> {
+    let parent = node.parent()?;
+    match parent.kind() {
+        JsSyntaxKind::JS_IF_STATEMENT => {
+            Some(parent.cast::<JsIfStatement>()?.test().ok()?.syntax() == node)
+        }
+        JsSyntaxKind::JS_DO_WHILE_STATEMENT => {
+            Some(parent.cast::<JsDoWhileStatement>()?.test().ok()?.syntax() == node)
+        }
+        JsSyntaxKind::JS_WHILE_STATEMENT => {
+            Some(parent.cast::<JsWhileStatement>()?.test().ok()?.syntax() == node)
+        }
+        JsSyntaxKind::JS_FOR_STATEMENT => {
+            Some(parent.cast::<JsForStatement>()?.test()?.syntax() == node)
+        }
+        JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => Some(
+            parent
+                .cast::<JsConditionalExpression>()?
+                .test()
+                .ok()?
+                .syntax()
+                == node,
+        ),
+        _ => None,
+    }
+}
+
+/// Checks if the node is a `Boolean` Constructor Call
+/// # Example
+/// ```js
+/// new Boolean(x);
+/// ```
+pub fn is_boolean_constructor_call(node: &JsSyntaxNode) -> Option<JsNewExpression> {
+    let expr = JsCallArgumentList::cast_ref(node)?
+        .parent::<JsCallArguments>()?
+        .parent::<JsNewExpression>()?;
+
+    if expr.has_callee("Boolean") {
+        Some(expr)
+    } else {
+        None
+    }
+}
+
+/// Check if the SyntaxNode is a `Boolean` Call Expression
+/// ## Example
+/// ```js
+/// Boolean(x)
+/// ```
+pub fn is_boolean_call(node: &JsSyntaxNode) -> Option<JsCallExpression> {
+    let expr = JsCallArgumentList::cast_ref(node)?
+        .parent::<JsCallArguments>()?
+        .parent::<JsCallExpression>()?;
+
+    if expr.has_callee("Boolean") {
+        Some(expr)
+    } else {
+        None
     }
 }
 

@@ -6,12 +6,11 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
+    is_boolean_call, is_boolean_constructor_call, is_in_boolean_context, is_negation,
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsConditionalExpression,
-    JsDoWhileStatement, JsForStatement, JsIfStatement, JsNewExpression, JsStaticMemberExpression,
-    JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, JsWhileStatement, T,
+    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
 
@@ -99,7 +98,7 @@ impl Rule for UseExplicitLengthCheck {
         }
 
         if is_in_boolean_context(member_expr_syntax).unwrap_or(false)
-            || is_boolean_constructor_call(&parent_syntax).unwrap_or(false)
+            || is_boolean_constructor_call(&parent_syntax).is_some()
             || parent_syntax.kind() == JsSyntaxKind::JS_LOGICAL_EXPRESSION
         {
             return Some(UseExplicitLengthCheckState {
@@ -369,85 +368,6 @@ fn get_boolean_ancestor(node: &JsSyntaxNode) -> Option<(AnyJsExpression, bool)> 
     }
 
     Some((AnyJsExpression::cast(boolean_node)?, is_negative))
-}
-
-/// Check if this node is in the position of `test` slot of parent syntax node.
-/// ## Example
-/// ```js
-/// if (!!x) {
-///     ^^^ this is a boolean context
-/// }
-/// ```
-fn is_in_boolean_context(node: &JsSyntaxNode) -> Option<bool> {
-    let parent = node.parent()?;
-    match parent.kind() {
-        JsSyntaxKind::JS_IF_STATEMENT => {
-            Some(parent.cast::<JsIfStatement>()?.test().ok()?.syntax() == node)
-        }
-        JsSyntaxKind::JS_DO_WHILE_STATEMENT => {
-            Some(parent.cast::<JsDoWhileStatement>()?.test().ok()?.syntax() == node)
-        }
-        JsSyntaxKind::JS_WHILE_STATEMENT => {
-            Some(parent.cast::<JsWhileStatement>()?.test().ok()?.syntax() == node)
-        }
-        JsSyntaxKind::JS_FOR_STATEMENT => {
-            Some(parent.cast::<JsForStatement>()?.test()?.syntax() == node)
-        }
-        JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => Some(
-            parent
-                .cast::<JsConditionalExpression>()?
-                .test()
-                .ok()?
-                .syntax()
-                == node,
-        ),
-        _ => None,
-    }
-}
-
-/// Checks if the node is a `Boolean` Constructor Call
-/// # Example
-/// ```js
-/// new Boolean(x);
-/// ```
-/// The checking algorithm of [JsNewExpression] is a little different from [JsCallExpression] due to
-/// two nodes have different shapes
-fn is_boolean_constructor_call(node: &JsSyntaxNode) -> Option<bool> {
-    let expr = JsCallArgumentList::cast_ref(node)?
-        .parent::<JsCallArguments>()?
-        .parent::<JsNewExpression>()?;
-    Some(expr.has_callee("Boolean"))
-}
-
-/// Check if the SyntaxNode is a `Boolean` Call Expression
-/// ## Example
-/// ```js
-/// Boolean(x)
-/// ```
-fn is_boolean_call(node: &JsSyntaxNode) -> Option<JsCallExpression> {
-    let expr = JsCallArgumentList::cast_ref(node)?
-        .parent::<JsCallArguments>()?
-        .parent::<JsCallExpression>()?;
-
-    if expr.has_callee("Boolean") {
-        Some(expr)
-    } else {
-        None
-    }
-}
-
-/// Check if the SyntaxNode is a Negate Unary Expression
-/// ## Example
-/// ```js
-/// !x
-/// ```
-fn is_negation(node: &JsSyntaxNode) -> Option<JsUnaryExpression> {
-    let unary_expr = JsUnaryExpression::cast_ref(node)?;
-    if unary_expr.operator().ok()? == JsUnaryOperator::LogicalNot {
-        Some(unary_expr)
-    } else {
-        None
-    }
 }
 
 #[test]
