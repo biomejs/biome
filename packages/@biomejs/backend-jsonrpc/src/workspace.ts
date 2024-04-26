@@ -909,6 +909,10 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Disallow Array constructors.
+	 */
+	noArrayConstructor?: RuleConfiguration_for_Null;
+	/**
 	 * WIP: This rule hasn't been implemented yet.
 	 */
 	noColorInvalidHex?: RuleConfiguration_for_Null;

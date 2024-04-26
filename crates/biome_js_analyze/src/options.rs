@@ -8,6 +8,8 @@ pub type NoApproximativeNumericConstant = < lint :: suspicious :: no_approximati
 pub type NoArguments = <lint::style::no_arguments::NoArguments as biome_analyze::Rule>::Options;
 pub type NoAriaHiddenOnFocusable = < lint :: a11y :: no_aria_hidden_on_focusable :: NoAriaHiddenOnFocusable as biome_analyze :: Rule > :: Options ;
 pub type NoAriaUnsupportedElements = < lint :: a11y :: no_aria_unsupported_elements :: NoAriaUnsupportedElements as biome_analyze :: Rule > :: Options ;
+pub type NoArrayConstructor =
+    <lint::nursery::no_array_constructor::NoArrayConstructor as biome_analyze::Rule>::Options;
 pub type NoArrayIndexKey =
     <lint::suspicious::no_array_index_key::NoArrayIndexKey as biome_analyze::Rule>::Options;
 pub type NoAssignInExpressions = < lint :: suspicious :: no_assign_in_expressions :: NoAssignInExpressions as biome_analyze :: Rule > :: Options ;

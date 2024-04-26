@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_group;
 
+pub mod no_array_constructor;
 pub mod no_console;
 pub mod no_constant_math_min_max_clamp;
 pub mod no_done_callback;
@@ -21,6 +22,7 @@ declare_group! {
     pub Nursery {
         name : "nursery" ,
         rules : [
+            self :: no_array_constructor :: NoArrayConstructor ,
             self :: no_console :: NoConsole ,
             self :: no_constant_math_min_max_clamp :: NoConstantMathMinMaxClamp ,
             self :: no_done_callback :: NoDoneCallback ,

@@ -1433,6 +1433,13 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
+				"noArrayConstructor": {
+					"description": "Disallow Array constructors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noColorInvalidHex": {
 					"description": "WIP: This rule hasn't been implemented yet.",
 					"anyOf": [
