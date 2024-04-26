@@ -8,9 +8,8 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsConditionalExpression,
-    JsDoWhileStatement, JsForStatement, JsIfStatement, JsNewExpression,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator,
-    JsWhileStatement, T,
+    JsDoWhileStatement, JsForStatement, JsIfStatement, JsNewExpression, JsStaticMemberExpression,
+    JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, JsWhileStatement, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast};
 
@@ -62,9 +61,9 @@ impl Rule for UseExplicitLengthCheck {
         let node = ctx.query();
         let member_name = node.member().ok()?.text();
 
-        if !LENGTH_MEMBER_NAMES
+        if LENGTH_MEMBER_NAMES
             .binary_search(&member_name.as_str())
-            .is_ok()
+            .is_err()
         {
             return None;
         }
@@ -72,8 +71,10 @@ impl Rule for UseExplicitLengthCheck {
         let member_expr_syntax = node.syntax();
         let parent_syntax = member_expr_syntax.parent()?;
 
-        if let Some((binary_expr, mut len_check, position)) = is_invalid_binary_expr_length_check(&parent_syntax) {
-            return get_boolean_ancestor(&binary_expr.syntax())
+        if let Some((binary_expr, mut len_check, position)) =
+            is_invalid_binary_expr_length_check(&parent_syntax)
+        {
+            return get_boolean_ancestor(binary_expr.syntax())
                 .map(|(expr, is_negative)| {
                     if is_negative {
                         len_check = len_check.opposite();
@@ -82,7 +83,7 @@ impl Rule for UseExplicitLengthCheck {
                     UseExplicitLengthCheckState {
                         check: len_check,
                         suggested_fix: LengthFix::ReplaceWhole(expr),
-                        member_name: member_name.to_owned(),
+                        member_name: member_name.clone(),
                     }
                 })
                 .or_else(|| {
@@ -92,7 +93,7 @@ impl Rule for UseExplicitLengthCheck {
                             binary_expr.clone(),
                             position,
                         ),
-                        member_name: member_name.to_owned(),
+                        member_name: member_name.clone(),
                     })
                 });
         }
@@ -110,7 +111,7 @@ impl Rule for UseExplicitLengthCheck {
             });
         }
 
-        if let Some((boolean_expr, is_negative)) = get_boolean_ancestor(&member_expr_syntax) {
+        if let Some((boolean_expr, is_negative)) = get_boolean_ancestor(member_expr_syntax) {
             return Some(UseExplicitLengthCheckState {
                 check: LengthCheck::boolean_condition(is_negative),
                 suggested_fix: LengthFix::ReplaceWhole(boolean_expr),
@@ -162,8 +163,7 @@ impl Rule for UseExplicitLengthCheck {
                     ),
                 );
 
-                mutation
-                    .replace_node::<AnyJsExpression>(node.clone().into(), new_binary_expr.into());
+                mutation.replace_node::<AnyJsExpression>(node.clone(), new_binary_expr.into());
 
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
@@ -368,7 +368,7 @@ fn get_boolean_ancestor(node: &JsSyntaxNode) -> Option<(AnyJsExpression, bool)> 
         }
     }
 
-    return Some((AnyJsExpression::cast(boolean_node)?, is_negative));
+    Some((AnyJsExpression::cast(boolean_node)?, is_negative))
 }
 
 /// Check if this node is in the position of `test` slot of parent syntax node.

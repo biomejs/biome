@@ -985,13 +985,13 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
-	 * Succinct description of the rule.
-	 */
-	useExplicitLengthCheck?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
 	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
+	/**
+	 * Succinct description of the rule.
+	 */
+	useExplicitLengthCheck?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */
