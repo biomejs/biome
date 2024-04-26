@@ -1587,7 +1587,7 @@
 				"useDefaultCase": {
 					"description": "Require default cases in switch statements.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseDefaultCaseConfiguration" },
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1947,15 +1947,6 @@
 			"properties": {
 				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
 				"options": { "$ref": "#/definitions/RestrictedImportsOptions" }
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseDefaultCaseOptions": {
-			"type": "object",
-			"required": ["level", "options"],
-			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/UseDefaultCaseOptions" }
 			},
 			"additionalProperties": false
 		},
@@ -2825,23 +2816,6 @@
 					"enum": ["all"]
 				}
 			]
-		},
-		"UseDefaultCaseConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseDefaultCaseOptions" }
-			]
-		},
-		"UseDefaultCaseOptions": {
-			"description": "Options for the rule `useDefaultCase`.",
-			"type": "object",
-			"properties": {
-				"commentPattern": {
-					"description": "Regular expression that filters the comment pattern to disable the rule.",
-					"type": ["string", "null"]
-				}
-			},
-			"additionalProperties": false
 		},
 		"UtilityClassSortingConfiguration": {
 			"anyOf": [
