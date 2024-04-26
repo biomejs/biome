@@ -1,0 +1,358 @@
+---
+source: crates/biome_graphql_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```graphql
+fragmen friendFields on User {
+  id
+  name
+}
+
+fragment friendFields User @deprecated {
+  id
+  name
+}
+
+fragment friendFields o User @deprecated {
+  id
+  name
+}
+
+```
+
+## AST
+
+```
+GraphqlRoot {
+    bom_token: missing (optional),
+    definitions: GraphqlDefinitionList [
+        GraphqlBogusDefinition {
+            items: [
+                GRAPHQL_NAME@0..8 "fragmen" [] [Whitespace(" ")],
+                GRAPHQL_NAME@8..21 "friendFields" [] [Whitespace(" ")],
+                ON_KW@21..24 "on" [] [Whitespace(" ")],
+                GRAPHQL_NAME@24..29 "User" [] [Whitespace(" ")],
+            ],
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@29..30 "{" [] [],
+            selections: GraphqlSelectionList [
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@30..35 "id" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    arguments: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@35..42 "name" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    arguments: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@42..44 "}" [Newline("\n")] [],
+        },
+        GraphqlFragmentDefinition {
+            fragment_token: FRAGMENT_KW@44..55 "fragment" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@55..68 "friendFields" [] [Whitespace(" ")],
+            },
+            type_condition: GraphqlTypeCondition {
+                on_token: missing (required),
+                ty: GraphqlNamedType {
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@68..73 "User" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            directives: GraphqlDirectiveList [
+                GraphqlDirective {
+                    at_token: AT@73..74 "@" [] [],
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@74..85 "deprecated" [] [Whitespace(" ")],
+                    },
+                    arguments: missing (optional),
+                },
+            ],
+            selection_set: GraphqlSelectionSet {
+                l_curly_token: L_CURLY@85..86 "{" [] [],
+                selections: GraphqlSelectionList [
+                    GraphqlField {
+                        alias: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@86..91 "id" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: missing (optional),
+                        directives: GraphqlDirectiveList [],
+                        selection_set: missing (optional),
+                    },
+                    GraphqlField {
+                        alias: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@91..98 "name" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: missing (optional),
+                        directives: GraphqlDirectiveList [],
+                        selection_set: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@98..100 "}" [Newline("\n")] [],
+            },
+        },
+        GraphqlFragmentDefinition {
+            fragment_token: FRAGMENT_KW@100..111 "fragment" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@111..124 "friendFields" [] [Whitespace(" ")],
+            },
+            type_condition: GraphqlTypeCondition {
+                on_token: missing (required),
+                ty: GraphqlNamedType {
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@124..126 "o" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            directives: GraphqlDirectiveList [],
+            selection_set: GraphqlSelectionSet {
+                l_curly_token: missing (required),
+                selections: GraphqlSelectionList [
+                    GraphqlField {
+                        alias: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@126..131 "User" [] [Whitespace(" ")],
+                        },
+                        arguments: missing (optional),
+                        directives: GraphqlDirectiveList [
+                            GraphqlDirective {
+                                at_token: AT@131..132 "@" [] [],
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@132..143 "deprecated" [] [Whitespace(" ")],
+                                },
+                                arguments: missing (optional),
+                            },
+                        ],
+                        selection_set: GraphqlSelectionSet {
+                            l_curly_token: L_CURLY@143..144 "{" [] [],
+                            selections: GraphqlSelectionList [
+                                GraphqlField {
+                                    alias: missing (optional),
+                                    name: GraphqlName {
+                                        value_token: GRAPHQL_NAME@144..149 "id" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    arguments: missing (optional),
+                                    directives: GraphqlDirectiveList [],
+                                    selection_set: missing (optional),
+                                },
+                                GraphqlField {
+                                    alias: missing (optional),
+                                    name: GraphqlName {
+                                        value_token: GRAPHQL_NAME@149..156 "name" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    arguments: missing (optional),
+                                    directives: GraphqlDirectiveList [],
+                                    selection_set: missing (optional),
+                                },
+                            ],
+                            r_curly_token: R_CURLY@156..158 "}" [Newline("\n")] [],
+                        },
+                    },
+                ],
+                r_curly_token: missing (required),
+            },
+        },
+    ],
+    eof_token: EOF@158..159 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRAPHQL_ROOT@0..159
+  0: (empty)
+  1: GRAPHQL_DEFINITION_LIST@0..158
+    0: GRAPHQL_BOGUS_DEFINITION@0..29
+      0: GRAPHQL_NAME@0..8 "fragmen" [] [Whitespace(" ")]
+      1: GRAPHQL_NAME@8..21 "friendFields" [] [Whitespace(" ")]
+      2: ON_KW@21..24 "on" [] [Whitespace(" ")]
+      3: GRAPHQL_NAME@24..29 "User" [] [Whitespace(" ")]
+    1: GRAPHQL_SELECTION_SET@29..44
+      0: L_CURLY@29..30 "{" [] []
+      1: GRAPHQL_SELECTION_LIST@30..42
+        0: GRAPHQL_FIELD@30..35
+          0: (empty)
+          1: GRAPHQL_NAME@30..35
+            0: GRAPHQL_NAME@30..35 "id" [Newline("\n"), Whitespace("  ")] []
+          2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@35..35
+          4: (empty)
+        1: GRAPHQL_FIELD@35..42
+          0: (empty)
+          1: GRAPHQL_NAME@35..42
+            0: GRAPHQL_NAME@35..42 "name" [Newline("\n"), Whitespace("  ")] []
+          2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@42..42
+          4: (empty)
+      2: R_CURLY@42..44 "}" [Newline("\n")] []
+    2: GRAPHQL_FRAGMENT_DEFINITION@44..100
+      0: FRAGMENT_KW@44..55 "fragment" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: GRAPHQL_NAME@55..68
+        0: GRAPHQL_NAME@55..68 "friendFields" [] [Whitespace(" ")]
+      2: GRAPHQL_TYPE_CONDITION@68..73
+        0: (empty)
+        1: GRAPHQL_NAMED_TYPE@68..73
+          0: GRAPHQL_NAME@68..73
+            0: GRAPHQL_NAME@68..73 "User" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@73..85
+        0: GRAPHQL_DIRECTIVE@73..85
+          0: AT@73..74 "@" [] []
+          1: GRAPHQL_NAME@74..85
+            0: GRAPHQL_NAME@74..85 "deprecated" [] [Whitespace(" ")]
+          2: (empty)
+      4: GRAPHQL_SELECTION_SET@85..100
+        0: L_CURLY@85..86 "{" [] []
+        1: GRAPHQL_SELECTION_LIST@86..98
+          0: GRAPHQL_FIELD@86..91
+            0: (empty)
+            1: GRAPHQL_NAME@86..91
+              0: GRAPHQL_NAME@86..91 "id" [Newline("\n"), Whitespace("  ")] []
+            2: (empty)
+            3: GRAPHQL_DIRECTIVE_LIST@91..91
+            4: (empty)
+          1: GRAPHQL_FIELD@91..98
+            0: (empty)
+            1: GRAPHQL_NAME@91..98
+              0: GRAPHQL_NAME@91..98 "name" [Newline("\n"), Whitespace("  ")] []
+            2: (empty)
+            3: GRAPHQL_DIRECTIVE_LIST@98..98
+            4: (empty)
+        2: R_CURLY@98..100 "}" [Newline("\n")] []
+    3: GRAPHQL_FRAGMENT_DEFINITION@100..158
+      0: FRAGMENT_KW@100..111 "fragment" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: GRAPHQL_NAME@111..124
+        0: GRAPHQL_NAME@111..124 "friendFields" [] [Whitespace(" ")]
+      2: GRAPHQL_TYPE_CONDITION@124..126
+        0: (empty)
+        1: GRAPHQL_NAMED_TYPE@124..126
+          0: GRAPHQL_NAME@124..126
+            0: GRAPHQL_NAME@124..126 "o" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@126..126
+      4: GRAPHQL_SELECTION_SET@126..158
+        0: (empty)
+        1: GRAPHQL_SELECTION_LIST@126..158
+          0: GRAPHQL_FIELD@126..158
+            0: (empty)
+            1: GRAPHQL_NAME@126..131
+              0: GRAPHQL_NAME@126..131 "User" [] [Whitespace(" ")]
+            2: (empty)
+            3: GRAPHQL_DIRECTIVE_LIST@131..143
+              0: GRAPHQL_DIRECTIVE@131..143
+                0: AT@131..132 "@" [] []
+                1: GRAPHQL_NAME@132..143
+                  0: GRAPHQL_NAME@132..143 "deprecated" [] [Whitespace(" ")]
+                2: (empty)
+            4: GRAPHQL_SELECTION_SET@143..158
+              0: L_CURLY@143..144 "{" [] []
+              1: GRAPHQL_SELECTION_LIST@144..156
+                0: GRAPHQL_FIELD@144..149
+                  0: (empty)
+                  1: GRAPHQL_NAME@144..149
+                    0: GRAPHQL_NAME@144..149 "id" [Newline("\n"), Whitespace("  ")] []
+                  2: (empty)
+                  3: GRAPHQL_DIRECTIVE_LIST@149..149
+                  4: (empty)
+                1: GRAPHQL_FIELD@149..156
+                  0: (empty)
+                  1: GRAPHQL_NAME@149..156
+                    0: GRAPHQL_NAME@149..156 "name" [Newline("\n"), Whitespace("  ")] []
+                  2: (empty)
+                  3: GRAPHQL_DIRECTIVE_LIST@156..156
+                  4: (empty)
+              2: R_CURLY@156..158 "}" [Newline("\n")] []
+        2: (empty)
+  2: EOF@158..159 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+fragment.graphql:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a definition but instead found 'fragmen friendFields on User'.
+  
+  > 1 │ fragmen friendFields on User {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │   id
+    3 │   name
+  
+  i Expected a definition here.
+  
+  > 1 │ fragmen friendFields on User {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │   id
+    3 │   name
+  
+fragment.graphql:6:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `on` but instead found `User`
+  
+    4 │ }
+    5 │ 
+  > 6 │ fragment friendFields User @deprecated {
+      │                       ^^^^
+    7 │   id
+    8 │   name
+  
+  i Remove User
+  
+fragment.graphql:11:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `on` but instead found `o`
+  
+     9 │ }
+    10 │ 
+  > 11 │ fragment friendFields o User @deprecated {
+       │                       ^
+    12 │   id
+    13 │   name
+  
+  i Remove o
+  
+fragment.graphql:11:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `User`
+  
+     9 │ }
+    10 │ 
+  > 11 │ fragment friendFields o User @deprecated {
+       │                         ^^^^
+    12 │   id
+    13 │   name
+  
+  i Remove User
+  
+fragment.graphql:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    13 │   name
+    14 │ }
+  > 15 │ 
+       │ 
+  
+  i the file ends here
+  
+    13 │   name
+    14 │ }
+  > 15 │ 
+       │ 
+  
+```

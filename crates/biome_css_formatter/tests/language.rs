@@ -6,7 +6,7 @@ use biome_formatter::{FormatResult, Formatted, Printed};
 use biome_formatter_test::TestFormatLanguage;
 use biome_parser::AnyParse;
 use biome_rowan::{SyntaxNode, TextRange};
-use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
+use biome_service::settings::{ServiceLanguage, Settings};
 
 #[derive(Default)]
 pub struct CssTestFormatLanguage {
@@ -26,7 +26,7 @@ impl TestFormatLanguage for CssTestFormatLanguage {
 
     fn to_language_settings<'a>(
         &self,
-        settings: &'a WorkspaceSettings,
+        settings: &'a Settings,
     ) -> &'a <Self::ServiceLanguage as ServiceLanguage>::FormatterSettings {
         &settings.languages.css.formatter
     }

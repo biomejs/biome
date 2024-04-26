@@ -15,7 +15,7 @@ use biome_service::configuration::{
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
-    SupportsFeatureParams, UpdateProjectParams,
+    RegisterProjectFolderParams, SupportsFeatureParams, UpdateProjectParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::Workspace;
@@ -32,9 +32,9 @@ use std::sync::RwLock;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
 use tower_lsp::lsp_types;
-use tower_lsp::lsp_types::Unregistration;
 use tower_lsp::lsp_types::Url;
 use tower_lsp::lsp_types::{MessageType, Registration};
+use tower_lsp::lsp_types::{Unregistration, WorkspaceFolder};
 use tracing::{debug, error, info};
 
 pub(crate) struct ClientInformation {
@@ -83,6 +83,8 @@ struct InitializeParams {
     client_capabilities: lsp_types::ClientCapabilities,
     client_information: Option<ClientInformation>,
     root_uri: Option<Url>,
+    #[allow(unused)]
+    workspace_folders: Option<Vec<WorkspaceFolder>>,
 }
 
 #[repr(u8)]
@@ -171,11 +173,13 @@ impl Session {
         client_capabilities: lsp_types::ClientCapabilities,
         client_information: Option<ClientInformation>,
         root_uri: Option<Url>,
+        workspace_folders: Option<Vec<WorkspaceFolder>>,
     ) {
         let result = self.initialize_params.set(InitializeParams {
             client_capabilities,
             client_information,
             root_uri,
+            workspace_folders,
         });
 
         if let Err(err) = result {
@@ -236,7 +240,7 @@ impl Session {
 
     /// Get a [`Document`] matching the provided [`lsp_types::Url`]
     ///
-    /// If document does not exist, result is [SessionError::DocumentNotFound]
+    /// If document does not exist, result is [WorkspaceError::NotFound]
     pub(crate) fn document(&self, url: &lsp_types::Url) -> Result<Document, WorkspaceError> {
         self.documents
             .read()
@@ -447,8 +451,15 @@ impl Session {
 
                     match result {
                         Ok((vcs_base_path, gitignore_matches)) => {
+                            // We don't need the key for now, but will soon
+                            let _ = self.workspace.register_project_folder(
+                                RegisterProjectFolderParams {
+                                    path: fs.working_directory(),
+                                    set_as_current_workspace: true,
+                                },
+                            );
                             let result = self.workspace.update_settings(UpdateSettingsParams {
-                                working_directory: fs.working_directory(),
+                                workspace_directory: fs.working_directory(),
                                 configuration,
                                 vcs_base_path,
                                 gitignore_matches,

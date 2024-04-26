@@ -1,6 +1,5 @@
 use biome_string_case::Case;
 use bpaf::Bpaf;
-use case::CaseExt;
 use std::str::FromStr;
 use xtask::project_root;
 
@@ -198,31 +197,33 @@ impl Rule for {rule_name_upper_camel} {{
 }
 
 pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
+    let rule_name_camel = Case::Camel.convert(rule_name);
     let rule_kind = kind.as_str();
     let crate_folder = project_root().join(format!("crates/biome_{rule_kind}_analyze"));
     let rule_folder = crate_folder.join("src/lint/nursery");
     let test_folder = crate_folder.join("tests/specs/nursery");
-    let rule_name_upper_camel = rule_name.to_camel();
-    let rule_name_snake = rule_name.to_snake();
-    let rule_name_lower_camel = rule_name_snake.to_camel_lowercase();
 
     // Generate rule code
     let code = generate_rule_template(
         &kind,
-        rule_name_upper_camel.as_str(),
-        rule_name_lower_camel.as_str(),
+        Case::Pascal.convert(rule_name).as_str(),
+        rule_name_camel.as_str(),
     );
-    let file_name = format!("{}/{rule_name_snake}.rs", rule_folder.display());
+    let file_name = format!(
+        "{}/{}.rs",
+        rule_folder.display(),
+        Case::Snake.convert(rule_name)
+    );
     std::fs::write(file_name, code).unwrap();
 
     let categories_path = "crates/biome_diagnostics_categories/src/categories.rs";
     let mut categories = std::fs::read_to_string(categories_path).unwrap();
 
-    if !categories.contains(&rule_name_lower_camel) {
-        let kebab_case_rule = Case::Kebab.convert(&rule_name_lower_camel);
+    if !categories.contains(&rule_name_camel) {
+        let kebab_case_rule = Case::Kebab.convert(&rule_name_camel);
         // We sort rules to reduce conflicts between contributions made in parallel.
         let rule_line = format!(
-            r#"    "lint/nursery/{rule_name_lower_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
+            r#"    "lint/nursery/{rule_name_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
         );
         let lint_start = "define_categories! {\n";
         let lint_end = "\n    ;\n";
@@ -239,11 +240,11 @@ pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
     }
 
     // Generate test code
-    let tests_path = format!("{}/{rule_name_lower_camel}", test_folder.display());
+    let tests_path = format!("{}/{rule_name_camel}", test_folder.display());
     let _ = std::fs::create_dir_all(tests_path);
 
     let test_file = format!(
-        "{}/{rule_name_lower_camel}/valid.{rule_kind}",
+        "{}/{rule_name_camel}/valid.{rule_kind}",
         test_folder.display()
     );
     if std::fs::File::open(&test_file).is_err() {
@@ -254,7 +255,7 @@ pub fn generate_new_lintrule(kind: RuleKind, rule_name: &str) {
     }
 
     let test_file = format!(
-        "{}/{rule_name_lower_camel}/invalid.{rule_kind}",
+        "{}/{rule_name_camel}/invalid.{rule_kind}",
         test_folder.display()
     );
     if std::fs::File::open(&test_file).is_err() {

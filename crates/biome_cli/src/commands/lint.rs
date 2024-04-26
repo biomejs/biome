@@ -13,7 +13,7 @@ use biome_deserialize::Merge;
 use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
-use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
+use biome_service::workspace::{FixFileMode, RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
 
 pub(crate) struct LintCommandPayload {
@@ -109,8 +109,16 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     session
         .app
         .workspace
+        .register_project_folder(RegisterProjectFolderParams {
+            path: session.app.fs.working_directory(),
+            set_as_current_workspace: true,
+        })?;
+
+    session
+        .app
+        .workspace
         .update_settings(UpdateSettingsParams {
-            working_directory: session.app.fs.working_directory(),
+            workspace_directory: session.app.fs.working_directory(),
             configuration: fs_configuration,
             vcs_base_path,
             gitignore_matches,

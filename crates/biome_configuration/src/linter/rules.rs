@@ -2757,6 +2757,7 @@ impl Nursery {
         "noEvolvingAny",
         "noFlatMapIdentity",
         "noImportantInKeyframe",
+        "noUnknownUnit",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
@@ -2768,6 +2769,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -3535,7 +3537,7 @@ pub struct Style {
     #[doc = "Require consistently using either T\\[] or Array\\<T>"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_array_type: Option<RuleConfiguration<UseConsistentArrayType>>,
-    #[doc = "Require const declarations for variables that are never reassigned after declared."]
+    #[doc = "Require const declarations for variables that are only assigned once."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_const: Option<RuleConfiguration<UseConst>>,
     #[doc = "Enforce default function parameters and optional function parameters to be last."]

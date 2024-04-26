@@ -5,7 +5,7 @@ publish = false
 version = "0.0.0"
 
 [dependencies]
-anyhow = "1.0.52"
+anyhow = "1.0.82"
 
 [lints]
 workspace = true

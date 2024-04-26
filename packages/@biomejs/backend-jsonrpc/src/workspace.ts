@@ -21,7 +21,7 @@ export interface UpdateSettingsParams {
 	configuration: PartialConfiguration;
 	gitignore_matches: string[];
 	vcs_base_path?: string;
-	working_directory?: string;
+	workspace_directory?: string;
 }
 /**
  * The configuration that is contained inside the file `biome.json`
@@ -166,8 +166,8 @@ If defined here, they should not emit diagnostics.
 	/**
 	 * Indicates the type of runtime or transformation used for interpreting JSX.
 	 */
-	jsx_runtime?: JsxRuntime;
-	organize_imports?: PartialJavascriptOrganizeImports;
+	jsxRuntime?: JsxRuntime;
+	organizeImports?: PartialJavascriptOrganizeImports;
 	/**
 	 * Parsing options
 	 */
@@ -359,7 +359,7 @@ export interface PartialJavascriptFormatter {
 /**
  * Indicates the type of runtime or transformation used for interpreting JSX.
  */
-export type JsxRuntime = "Transparent" | "ReactClassic";
+export type JsxRuntime = "transparent" | "reactClassic";
 export interface PartialJavascriptOrganizeImports {}
 /**
  * Options that changes how the JavaScript parser behaves
@@ -977,6 +977,10 @@ export interface Nursery {
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown CSS units.
+	 */
+	noUnknownUnit?: RuleConfiguration_for_Null;
+	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -984,6 +988,10 @@ export interface Nursery {
 	 * Succinct description of the rule.
 	 */
 	useExplicitLengthCheck?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
+	 */
+	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -1140,7 +1148,7 @@ export interface Style {
 	 */
 	useConsistentArrayType?: RuleConfiguration_for_ConsistentArrayTypeOptions;
 	/**
-	 * Require const declarations for variables that are never reassigned after declared.
+	 * Require const declarations for variables that are only assigned once.
 	 */
 	useConst?: RuleConfiguration_for_Null;
 	/**
@@ -1733,6 +1741,11 @@ export type FilenameCase =
 	| "kebab-case"
 	| "PascalCase"
 	| "snake_case";
+export interface RegisterProjectFolderParams {
+	path?: string;
+	setAsCurrentWorkspace: boolean;
+}
+export type ProjectKey = string;
 export interface UpdateProjectParams {
 	path: BiomePath;
 }
@@ -1970,8 +1983,10 @@ export type Category =
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
+	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useExplicitLengthCheck"
+	| "lint/nursery/useConsistentNewBuiltin"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
@@ -2342,6 +2357,9 @@ export type Configuration = PartialConfiguration;
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<SupportsFeatureResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
+	registerProjectFolder(
+		params: RegisterProjectFolderParams,
+	): Promise<ProjectKey>;
 	updateCurrentProject(params: UpdateProjectParams): Promise<void>;
 	openProject(params: OpenProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
@@ -2372,6 +2390,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		updateSettings(params) {
 			return transport.request("biome/update_settings", params);
+		},
+		registerProjectFolder(params) {
+			return transport.request("biome/register_project_folder", params);
 		},
 		updateCurrentProject(params) {
 			return transport.request("biome/update_current_project", params);

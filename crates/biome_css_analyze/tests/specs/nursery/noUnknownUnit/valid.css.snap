@@ -1,0 +1,78 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+a { line-height: 1; }
+a { color: #000; }
+a { font-size: 100%; }
+a { margin: 1em; }
+a { margin: 1Em; }
+a { margin: 1EM; }
+a { margin: 1ex; }
+a { margin: 1%; }
+a { margin: 1px; }
+a { margin: 1cm; }
+a { margin: 1mm; }
+a { margin: 1in; }
+a { margin: 1pt; }
+a { margin: 1pc; }
+a { margin: 1ch; }
+a { margin: 1rem; }
+a { margin: 1vh; }
+a { margin: 1vw; }
+a { margin: 1vmin; }
+a { margin: 1vmax; }
+a { font-size: .5rem; }
+a { font-size: 0.5rem; }
+a { margin: 1vmin 1vmax; }
+a { margin: 0 10em 5rem 2in; }
+a { background-position: top right, 1em 5vh; }
+a { top: calc(10em - 3em); }
+a { top: calc(10px*2); }
+a { top: calc(10px*2%*2); }
+a { top: calc(2*10px); }
+a { background-image: linear-gradient(to right, white calc(100% - 50em), silver); }
+a { transition-delay: 3s; }
+a { transition-delay: 300ms; }
+a { transform: rotate(90deg); }
+a { transform: rotate(100grad); }
+a { transform: rotate(0.25turn); }
+a { transform: rotate(1.5708rad); }
+a { grid-template-columns: repeat(12, 1fr); }
+a { width: 1e4px }
+a { width: 1E4px }
+a { width: 1e10; }
+a { flex: 0 9e9 auto; }
+a { color: green; }
+a { color: green10pix; }
+a { width: /* 100pix */ 1em; }
+a::before { content: "10pix"}
+a { font-size: $fs10pix; }
+a { font-size: @fs10pix; }
+a { font-size: var(--some-fs-10pix); }
+a { margin: url(13pix); }
+a { margin: uRl(13pix); }
+a { margin: URL(13pix); }
+a { margin10px: 10px; }
+a10pix { margin: 10px; }
+#a10pix { margin: 10px; }
+.a10pix { margin: 10px; }
+input[type=10pix] { margin: 10px; }
+a:hover10pix { margin: 10px; }
+a::before10pix { margin: 10px; }
+a { color: #1f1f1f; }
+@media (min-width: 10px) {}
+@media (min-width: 10px)\n  and (max-width: 20px) {}
+@import 'foo.css';
+a { background-image: image-set('img-1x.jpg' 1x, 'img-2x.jpg' 2x, 'img-3x.jpg' 3x) }
+a { background-image: -webkit-image-set('img-1x.jpg' 1x, 'img-2x.jpg' 2x) }
+a { background-image: url('first.png'), image-set(url('second.png') 1x), image-set(url('third.png') 1x) }
+a { background-image: url('first.png'), -webkit-image-set(url('second.png') 1x), -webkit-image-set(url('third.png') 1x) }
+a { background-image: image-set(url('first.png') calc(1x * 1), url('second.png') calc(1x + 0.5x)); }
+@media (resolution: 2x) {}
+@media ( resOLution:  2x) {}
+a { image-resolution: 1x; }
+a { width: 8ic; }
+```

@@ -6,7 +6,7 @@ use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::SyntaxNode;
-use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
+use biome_service::settings::{ServiceLanguage, Settings};
 use biome_text_size::TextRange;
 
 pub struct JsTestFormatLanguage {
@@ -36,7 +36,7 @@ impl TestFormatLanguage for JsTestFormatLanguage {
 
     fn to_language_settings<'a>(
         &self,
-        settings: &'a WorkspaceSettings,
+        settings: &'a Settings,
     ) -> &'a <Self::ServiceLanguage as ServiceLanguage>::FormatterSettings {
         &settings.languages.javascript.formatter
     }

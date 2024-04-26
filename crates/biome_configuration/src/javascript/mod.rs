@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(default, deny_unknown_fields))]
+#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct JavascriptConfiguration {
     /// Formatting options
     #[partial(type, bpaf(external(partial_javascript_formatter), optional))]
@@ -62,6 +62,7 @@ pub struct JavascriptParser {
     Bpaf, Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub enum JsxRuntime {
     /// Indicates a modern or native JSX environment, that doesn't require
     /// special handling by Biome.
