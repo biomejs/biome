@@ -39,15 +39,6 @@
 			]
 		},
 		{
-			"groupName": "Website",
-			"matchFileNames": [
-				"website/package.json"
-			],
-			"matchManagers": [
-				"npm"
-			]
-		},
-		{
 			"groupName": "@biomejs packages",
 			"matchFileNames": [
 				"packages/**"
