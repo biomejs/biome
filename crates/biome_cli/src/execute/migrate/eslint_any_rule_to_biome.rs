@@ -315,6 +315,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_block_statements.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "default-case" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_default_switch_clause
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "default-case-last" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
@@ -511,6 +521,11 @@ pub(crate) fn migrate_eslint_any_rule(
         "jsx-a11y/iframe-has-title" => {
             let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group.use_iframe_title.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "jsx-a11y/img-redundant-alt" => {
+            let group = rules.a11y.get_or_insert_with(Default::default);
+            let rule = group.no_redundant_alt.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "jsx-a11y/lang" => {
