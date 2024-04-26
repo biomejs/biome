@@ -2714,7 +2714,7 @@ pub struct Nursery {
     pub use_consistent_new_builtin: Option<RuleConfiguration<UseConsistentNewBuiltin>>,
     #[doc = "Require default cases in switch statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_default_case: Option<RuleConfiguration<UseDefaultCase>>,
+    pub use_default_switch_clause: Option<RuleConfiguration<UseDefaultSwitchClause>>,
     #[doc = "Disallow a missing generic family keyword within font families."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_generic_font_names: Option<RuleConfiguration<UseGenericFontNames>>,
@@ -2763,7 +2763,7 @@ impl Nursery {
         "noUselessUndefinedInitialization",
         "useArrayLiterals",
         "useConsistentNewBuiltin",
-        "useDefaultCase",
+        "useDefaultSwitchClause",
         "useGenericFontNames",
         "useImportRestrictions",
         "useSortedClasses",
@@ -2941,7 +2941,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_default_case.as_ref() {
+        if let Some(rule) = self.use_default_switch_clause.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
@@ -3070,7 +3070,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_default_case.as_ref() {
+        if let Some(rule) = self.use_default_switch_clause.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
@@ -3210,8 +3210,8 @@ impl Nursery {
                 .use_consistent_new_builtin
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "useDefaultCase" => self
-                .use_default_case
+            "useDefaultSwitchClause" => self
+                .use_default_switch_clause
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useGenericFontNames" => self

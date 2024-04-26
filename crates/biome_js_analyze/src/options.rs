@@ -262,9 +262,8 @@ pub type UseCollapsedElseIf =
 pub type UseConsistentArrayType = < lint :: style :: use_consistent_array_type :: UseConsistentArrayType as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentNewBuiltin = < lint :: nursery :: use_consistent_new_builtin :: UseConsistentNewBuiltin as biome_analyze :: Rule > :: Options ;
 pub type UseConst = <lint::style::use_const::UseConst as biome_analyze::Rule>::Options;
-pub type UseDefaultCase =
-    <lint::nursery::use_default_case::UseDefaultCase as biome_analyze::Rule>::Options;
 pub type UseDefaultParameterLast = < lint :: style :: use_default_parameter_last :: UseDefaultParameterLast as biome_analyze :: Rule > :: Options ;
+pub type UseDefaultSwitchClause = < lint :: nursery :: use_default_switch_clause :: UseDefaultSwitchClause as biome_analyze :: Rule > :: Options ;
 pub type UseDefaultSwitchClauseLast = < lint :: suspicious :: use_default_switch_clause_last :: UseDefaultSwitchClauseLast as biome_analyze :: Rule > :: Options ;
 pub type UseEnumInitializers =
     <lint::style::use_enum_initializers::UseEnumInitializers as biome_analyze::Rule>::Options;

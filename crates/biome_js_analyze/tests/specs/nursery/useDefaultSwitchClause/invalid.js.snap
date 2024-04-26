@@ -13,7 +13,7 @@ switch (a) {
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/useDefaultCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/nursery/useDefaultSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Expected a default case.
   

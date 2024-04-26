@@ -40,15 +40,15 @@ declare_rule! {
     /// switch (a) {
     /// }
     /// ```
-    pub UseDefaultCase {
+    pub UseDefaultSwitchClause {
         version: "next",
-        name: "useDefaultCase",
+        name: "useDefaultSwitchClause",
         sources: &[RuleSource::Eslint("default-case")],
         recommended: false,
     }
 }
 
-impl Rule for UseDefaultCase {
+impl Rule for UseDefaultSwitchClause {
     type Query = Ast<JsSwitchStatement>;
     type State = ();
     type Signals = Option<Self::State>;
