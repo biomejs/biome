@@ -11,7 +11,9 @@ use biome_fs::BiomePath;
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::settings::{ServiceLanguage, Settings};
-use biome_service::workspace::{DocumentFileSource, FeaturesBuilder, SupportsFeatureParams};
+use biome_service::workspace::{
+    DocumentFileSource, FeaturesBuilder, RegisterProjectFolderParams, SupportsFeatureParams,
+};
 use biome_service::App;
 use std::ops::Range;
 use std::path::{Path, PathBuf};
@@ -40,6 +42,12 @@ impl<'a> SpecTestFile<'a> {
             spec_input_file.display()
         );
 
+        app.workspace
+            .register_project_folder(RegisterProjectFolderParams {
+                set_as_current_workspace: true,
+                path: None,
+            })
+            .unwrap();
         let mut input_file = BiomePath::new(file_path);
         let can_format = app
             .workspace
