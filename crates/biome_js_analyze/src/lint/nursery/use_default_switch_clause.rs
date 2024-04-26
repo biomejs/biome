@@ -81,7 +81,7 @@ impl Rule for UseDefaultSwitchClause {
                 },
             )
             .note(markup! {
-                "The lack of a default clause can result in unexpected behaviors in your code."
+                "The lack of a default clause can be a possible omission."
             })
             .note(markup! {
                 "Consider adding a default clause."
