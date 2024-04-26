@@ -2705,6 +2705,13 @@ pub struct Nursery {
     #[doc = "Disallow unknown CSS units."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_unit: Option<RuleConfiguration<NoUnknownUnit>>,
+    #[doc = "Disallow initializing variables to undefined."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_useless_undefined_initialization:
+        Option<RuleConfiguration<NoUselessUndefinedInitialization>>,
+    #[doc = "Disallow Array constructors."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_array_literals: Option<RuleConfiguration<UseArrayLiterals>>,
     #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_new_builtin: Option<RuleConfiguration<UseConsistentNewBuiltin>>,
@@ -2751,6 +2758,8 @@ impl Nursery {
         "noUndeclaredDependencies",
         "noUnknownFunction",
         "noUnknownUnit",
+        "noUselessUndefinedInitialization",
+        "useArrayLiterals",
         "useConsistentNewBuiltin",
         "useImportRestrictions",
         "useSortedClasses",
@@ -2804,6 +2813,8 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -2915,19 +2926,29 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.use_consistent_new_builtin.as_ref() {
+        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_array_literals.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_consistent_new_builtin.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
+            }
+        }
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
         index_set
@@ -3029,19 +3050,29 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.use_consistent_new_builtin.as_ref() {
+        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_array_literals.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_consistent_new_builtin.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
+            }
+        }
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
         index_set
@@ -3154,6 +3185,14 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownUnit" => self
                 .no_unknown_unit
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUselessUndefinedInitialization" => self
+                .no_useless_undefined_initialization
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useArrayLiterals" => self
+                .use_array_literals
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useConsistentNewBuiltin" => self

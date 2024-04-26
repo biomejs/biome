@@ -1566,9 +1566,23 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessUndefinedInitialization": {
+					"description": "Disallow initializing variables to undefined.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useArrayLiterals": {
+					"description": "Disallow Array constructors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"useConsistentNewBuiltin": {
 					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
