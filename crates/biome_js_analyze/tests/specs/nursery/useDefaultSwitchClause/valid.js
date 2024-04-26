@@ -12,6 +12,3 @@ switch (a) {
 	default:
 		break;
 }
-
-switch (a) {
-}

@@ -19,7 +19,4 @@ switch (a) {
 		break;
 }
 
-switch (a) {
-}
-
 ```

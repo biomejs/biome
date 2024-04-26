@@ -9,6 +9,9 @@ switch (a) {
 		break;
 }
 
+switch (a) {
+}
+
 ```
 
 # Diagnostics
@@ -24,6 +27,27 @@ invalid.js:1:1 lint/nursery/useDefaultSwitchClause ━━━━━━━━━�
   > 4 │ }
       │ ^
     5 │ 
+    6 │ switch (a) {
+  
+  i The lack of a default clause can be a possible omission.
+  
+  i Consider adding a default clause.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useDefaultSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected a default switch clause.
+  
+    4 │ }
+    5 │ 
+  > 6 │ switch (a) {
+      │ ^^^^^^^^^^^^
+  > 7 │ }
+      │ ^
+    8 │ 
   
   i The lack of a default clause can be a possible omission.
   

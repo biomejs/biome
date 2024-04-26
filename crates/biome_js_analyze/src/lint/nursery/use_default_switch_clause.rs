@@ -37,11 +37,6 @@ declare_rule! {
     ///         break;
     /// }
     /// ```
-    ///
-    /// ```js
-    /// switch (a) {
-    /// }
-    /// ```
     pub UseDefaultSwitchClause {
         version: "next",
         name: "useDefaultSwitchClause",
@@ -59,16 +54,13 @@ impl Rule for UseDefaultSwitchClause {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let has_case_clauses = node.cases().into_iter().len() > 0;
         let is_missing_default_case = node
             .cases()
             .into_iter()
             .any(|clause| clause.as_js_default_clause().is_some())
             .not();
 
-        let is_valid = is_missing_default_case && has_case_clauses;
-
-        is_valid.then_some(())
+        is_missing_default_case.then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
