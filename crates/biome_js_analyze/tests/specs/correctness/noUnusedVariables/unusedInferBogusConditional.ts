@@ -1,0 +1,1 @@
+export type ToPascalCase<S extends string> = S extends `${infer Prefix}` ? : ;

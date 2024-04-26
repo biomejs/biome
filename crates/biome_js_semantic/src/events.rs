@@ -366,7 +366,12 @@ impl SemanticEventExtractor {
 
     fn enter_any_type(&mut self, node: &AnyTsType) {
         if node.in_conditional_true_type() {
-            self.push_conditional_true_scope(node);
+            self.push_scope(
+                node.syntax().text_range(),
+                ScopeHoisting::DontHoistDeclarationsToParent,
+                false,
+            );
+            self.push_infers_in_scope();
             return;
         }
         let node = node.syntax();
@@ -668,6 +673,14 @@ impl SemanticEventExtractor {
         ) {
             self.pop_scope(node.text_range());
         }
+        // FALLBACK
+        // If the conditional type has a bogus true type,
+        // then infer declarations was never pushed into any scope.
+        // To ensure that every declaration has a binding,
+        // we bind the declaration directly in the scope of the conditional type.
+        if matches!(node.kind(), JsSyntaxKind::TS_CONDITIONAL_TYPE) && !self.infers.is_empty() {
+            self.push_infers_in_scope()
+        }
     }
 
     /// Return any previous extracted [SemanticEvent].
@@ -676,13 +689,7 @@ impl SemanticEventExtractor {
         self.stash.pop_front()
     }
 
-    fn push_conditional_true_scope(&mut self, node: &AnyTsType) {
-        self.push_scope(
-            node.syntax().text_range(),
-            ScopeHoisting::DontHoistDeclarationsToParent,
-            false,
-        );
-
+    fn push_infers_in_scope(&mut self) {
         let infers = mem::take(&mut self.infers);
         for infer in infers {
             if let Ok(name_token) = infer.ident_token() {
