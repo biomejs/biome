@@ -101,7 +101,9 @@ export class Biome {
 	public static async create(options: BiomeCreate): Promise<Biome> {
 		const module = await loadModule(options.distribution);
 		const workspace = new module.Workspace();
-		return new Biome(module, workspace);
+		const biome = new Biome(module, workspace);
+		biome.registerProjectFolder();
+		return biome;
 	}
 
 	/**
@@ -126,10 +128,19 @@ export class Biome {
 			this.workspace.updateSettings({
 				configuration,
 				gitignore_matches: [],
+				workspace_directory: "./",
 			});
 		} catch (e) {
 			throw wrapError(e);
 		}
+	}
+
+	public registerProjectFolder(): void;
+	public registerProjectFolder(path?: string): void {
+		this.workspace.registerProjectFolder({
+			path,
+			setAsCurrentWorkspace: true,
+		});
 	}
 
 	private tryCatchWrapper<T>(func: () => T): T {

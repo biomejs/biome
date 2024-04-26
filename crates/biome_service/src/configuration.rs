@@ -1,4 +1,4 @@
-use crate::settings::WorkspaceSettings;
+use crate::settings::Settings;
 use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::CantLoadExtendFile;
@@ -316,8 +316,8 @@ pub fn create_config(
     Ok(())
 }
 
-/// Returns the rules applied to a specific [Path], given the [WorkspaceSettings]
-pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerRules {
+/// Returns the rules applied to a specific [Path], given the [Settings]
+pub fn to_analyzer_rules(settings: &Settings, path: &Path) -> AnalyzerRules {
     let linter_settings = &settings.linter;
     let overrides = &settings.override_settings;
     let mut analyzer_rules = AnalyzerRules::default();

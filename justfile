@@ -21,7 +21,7 @@ upgrade-tools:
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen-all:
   cargo run -p xtask_codegen -- all
-  cargo run -p xtask_codegen -- configuration
+  cargo codegen-configuration
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
   just gen-bindings
   just format

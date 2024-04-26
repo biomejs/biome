@@ -10,7 +10,7 @@ use biome_formatter::{FormatOptions, Printed};
 use biome_fs::BiomePath;
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};
-use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
+use biome_service::settings::{ServiceLanguage, Settings};
 use biome_service::workspace::{DocumentFileSource, FeaturesBuilder, SupportsFeatureParams};
 use biome_service::App;
 use std::ops::Range;
@@ -222,7 +222,7 @@ where
         if options_path.exists() {
             let mut options_path = BiomePath::new(&options_path);
 
-            let mut settings = WorkspaceSettings::default();
+            let mut settings = Settings::default();
             // SAFETY: we checked its existence already, we assume we have rights to read it
             let (test_options, diagnostics) = deserialize_from_str::<PartialConfiguration>(
                 options_path.get_buffer_from_file().as_str(),

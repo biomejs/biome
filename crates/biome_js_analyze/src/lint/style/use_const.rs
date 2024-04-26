@@ -1,4 +1,7 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{
+    services::{control_flow::AnyJsControlFlowRoot, semantic::Semantic},
+    JsRuleAction,
+};
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
@@ -11,7 +14,10 @@ use biome_js_syntax::*;
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
 declare_rule! {
-    /// Require `const` declarations for variables that are never reassigned after declared.
+    /// Require `const` declarations for variables that are only assigned once.
+    ///
+    /// Variables that are initialized and never reassigned and
+    /// variables that are only assigned once can be declared as `const`.
     ///
     /// ## Examples
     ///
@@ -37,6 +43,11 @@ declare_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
+    /// let a;
+    /// a = 0;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// let a = 3;
     /// {
     ///     let a = 4;
@@ -55,6 +66,12 @@ declare_rule! {
     /// ```js
     /// let a = 1, b = 2;
     /// b = 3;
+    /// ```
+    ///
+    /// ```js
+    /// let a;
+    /// a; // the variable is read before its assignement
+    /// a = 0;
     /// ```
     pub UseConst {
         version: "1.0.0",
@@ -87,9 +104,9 @@ impl Rule for UseConst {
         let declaration = ctx.query();
         let kind = declaration.kind_token().ok()?;
         let title_end = if state.can_be_const.len() == 1 {
-            "a variable which is never re-assigned."
+            "a variable that is only assigned once."
         } else {
-            "some variables which are never re-assigned."
+            "some variables that are only assigned once."
         };
         let mut diag = RuleDiagnostic::new(
             rule_category!(),
@@ -100,13 +117,22 @@ impl Rule for UseConst {
         );
 
         for binding in state.can_be_const.iter() {
-            let binding = binding.name_token().ok()?;
-            diag = diag.detail(
-                binding.text_trimmed_range(),
-                markup! {
-                    "'"{ binding.text_trimmed() }"' is never re-assigned."
-                },
-            );
+            let binding_name = binding.name_token().ok()?;
+            if let Some(write) = binding.all_writes(ctx.model()).next() {
+                diag = diag.detail(
+                    write.syntax().text_trimmed_range(),
+                    markup! {
+                        "'"{ binding_name.text_trimmed() }"' is only assigned here."
+                    },
+                );
+            } else {
+                diag = diag.detail(
+                    binding_name.text_trimmed_range(),
+                    markup! {
+                        "'"{ binding_name.text_trimmed() }"' is never reassigned."
+                    },
+                );
+            }
         }
 
         Some(diag)
@@ -188,17 +214,37 @@ fn check_binding_can_be_const(
         return writes.next().is_none().then_some(ConstCheckResult::Fix);
     }
 
-    // If no initializer and one assignment in same scope
-    let write = match (writes.next(), writes.next()) {
-        (Some(v), None) if v.scope() == binding.scope(model) => v,
-        _ => return None,
-    };
-
+    let binding_scope = binding.scope(model);
+    let write = writes.next()?;
+    // If teher are multiple assignement or the write is not in the same scope
+    if writes.next().is_some() || write.scope() != binding_scope {
+        return None;
+    }
     let host = write
         .syntax()
         .ancestors()
         .find_map(DestructuringHost::cast)?;
     if host.has_member_expr_assignment() || host.has_outer_variables(&write.scope()) {
+        return None;
+    }
+
+    let mut refs = binding.all_references(model);
+    // If a read precedes the write, don't report it.
+    // Ignore reads that are in an inner control flow root.
+    // For example, this ignores reads inside a function:
+    // ```js
+    // let v;
+    // function f() { v; }
+    // ```
+    let next_ref = refs.find(|x| {
+        x.is_write()
+            || !x
+                .scope()
+                .ancestors()
+                .take_while(|scope| scope != &binding_scope)
+                .any(|scope| AnyJsControlFlowRoot::can_cast(scope.syntax().kind()))
+    });
+    if matches!(next_ref, Some(next_ref) if next_ref.is_read()) {
         return None;
     }
 

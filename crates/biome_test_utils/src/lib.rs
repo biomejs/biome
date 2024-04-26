@@ -9,7 +9,7 @@ use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_project::PackageJson;
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
-use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
+use biome_service::settings::{ServiceLanguage, Settings};
 use json_comments::StripComments;
 use similar::TextDiff;
 use std::ffi::{c_int, OsStr};
@@ -67,7 +67,7 @@ pub fn create_analyzer_options(
             );
         } else {
             let configuration = deserialized.into_deserialized().unwrap_or_default();
-            let mut settings = WorkspaceSettings::default();
+            let mut settings = Settings::default();
             analyzer_configuration.preferred_quote = configuration
                 .javascript
                 .as_ref()

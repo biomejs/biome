@@ -114,7 +114,7 @@ where
     /// Push a change to replace the "prev_node" with "next_node".
     /// Trivia from "prev_node" is automatically copied to "next_node".
     ///
-    /// Changes to take effect must be commited.
+    /// Changes to take effect must be committed.
     pub fn replace_node<T>(&mut self, prev_node: T, next_node: T)
     where
         T: AstNode<Language = L>,
@@ -128,7 +128,7 @@ where
     /// Push a change to replace the "prev_token" with "next_token".
     /// Trivia from "prev_token" is automatically copied to "next_token".
     ///
-    /// Changes to take effect must be commited.
+    /// Changes to take effect must be committed.
     pub fn replace_token(&mut self, prev_token: SyntaxToken<L>, next_token: SyntaxToken<L>) {
         self.replace_element(prev_token.into(), next_token.into())
     }
@@ -136,7 +136,7 @@ where
     /// Push a change to replace the "prev_element" with "next_element".
     /// Trivia from "prev_element" is automatically copied to "next_element".
     ///
-    /// Changes to take effect must be commited.
+    /// Changes to take effect must be committed.
     pub fn replace_element(
         &mut self,
         prev_element: SyntaxElement<L>,
@@ -344,10 +344,10 @@ where
     /// To address this case at step 3, when we pop a new change to apply it, we actually aggregate all changes to the current
     /// parent together. This is done by the heap because we also sort by node and it's range.
     ///
-    /// Text range and text edit can be collected simultanously while committing if "with_text_range_and_edit" is true.
+    /// Text range and text edit can be collected simultaneously while committing if "with_text_range_and_edit" is true.
     /// They're directly calculated from the commit changes. So you can commit and get text range and text edit in one pass.
     ///
-    /// The calcultion of text range and text edit can be summarized as:
+    /// The calculation of text range and text edit can be summarized as:
     ///
     /// While we popping requested changes from the heap, collect the "deleted_text_range" and "optional_inserted_text"
     /// into an ordered vector "text_mutation_list" sorted by the "deleted_text_range". The reason behind it is that

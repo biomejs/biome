@@ -24,14 +24,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```diff
     import "z"
-    - import { D } from "d";
+  - import { D } from "d";
     import { C } from "c";
-    + import { D } from "d";
+  + import { D } from "d";
     import "y"
     import "x"
-    - import { B } from "b";
+  - import { B } from "b";
     import { A } from "a";
-    + import { B } from "b";
+  + import { B } from "b";
     import "w"
   ```
 
@@ -39,15 +39,45 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Bug fixes
+
+- `biome migrate eslint` now handles cyclic references.
+
+  Some plugins and configurations export objects with cyclic references.
+  This causes `biome migrate eslint` to fail or ignore them.
+  These edge cases are now handled correctly.
+
+  Contributed by @Conaclos
+
 ### Configuration
 
 ### Editors
 
 ### Formatter
 
+#### Bug fixes
+
+- Correctly handle placement of comments inside named import clauses. [#2566](https://github.com/biomejs/biome/pull/2566). Contributed by @ah-yu
+
 ### JavaScript APIs
 
 ### Linter
+
+#### Bug fixes
+
+- [useConst](https://biomejs.dev/linter/rules/use-const/) now ignores a variable that is read before its assignment.
+
+  Previously, the rule reported the following example:
+
+  ```js
+  let x;
+  x; // read
+  x = 0; // write
+  ```
+
+  It is now correctly ignored.
+
+  Contributed by @Conaclos
 
 ### Parser
 
@@ -66,6 +96,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add parentheses for the return expression that has leading multiline comments. [#2504](https://github.com/biomejs/biome/pull/2504). Contributed by @ah-yu
 
 - Correctly format dangling comments of continue statements. [#2555](https://github.com/biomejs/biome/pull/2555). Contributed by @ah-yu
+
+- Prevent comments from being eaten by the formatter [#2578](https://github.com/biomejs/biome/pull/2578). Now the comments won't be eaten for the following code:
+  ```js
+  console.log((a,b/* comment */));
+  ```
+  Contributed by @ah-yu
 
 ### Linter
 
