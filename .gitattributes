@@ -15,8 +15,6 @@ crates/biome_unicode_table/src/tables.rs linguist-generated=true text=auto eol=l
 packages/@biomejs/backend-jsonrpc/src/workspace.ts linguist-generated=true text=auto eol=lf
 packages/@biomejs/biome/configuration_schema.json linguist-generated=true text=auto eol=lf
 pnpm-lock.yaml linguist-generated=true text=auto eol=lf
-website/src/pages/lint/rules/**/*.md linguist-generated=true text=auto eol=lf
-website/src/components/generated/.astro linguist-generated=true text=auto eol=lf
 
 # Files with the language manually specified, sorted alphabetically.
 crates/biome_cli/tests/**/*.snap linguist-language=Markdown
