@@ -1,6 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -14,7 +14,6 @@ declare_rule! {
     ///
     /// A variable that is declared and not initialized to any value automatically gets the value of `undefined`.
     /// It’s considered a best practice to avoid initializing variables to `undefined`.
-    ///
     /// Please note that any inline comments attached to the initialization value or variable will be removed on auto-fix.
     /// Please be also aware that this differs from Eslint's behaviour and we are still discussing on how to properly handle this case.
     ///
@@ -51,6 +50,7 @@ declare_rule! {
         version: "next",
         name: "noUselessUndefinedInitialization",
         sources: &[RuleSource::Eslint("no-undef-init")],
+        source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Unsafe,
         recommended: false,
     }

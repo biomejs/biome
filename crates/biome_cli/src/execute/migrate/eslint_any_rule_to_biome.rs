@@ -966,6 +966,10 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "no-undef-init" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
             if !options.include_nursery {
                 return false;
             }
