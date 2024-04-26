@@ -75,17 +75,20 @@ impl Rule for NoUselessUndefinedInitialization {
         for declarator in node.declarators() {
             let Ok(decl) = declarator else { continue };
 
-            let Some(keyword) = decl
-                .initializer()
-                .map(|initializer| initializer.expression())
-                .and_then(|expression| expression.ok())
+            let Some(initializer) = decl.initializer() else {
+                continue;
+            };
+
+            let Some(keyword) = initializer
+                .expression()
+                .ok()
                 .and_then(|expression| expression.as_js_reference_identifier())
             else {
                 continue;
             };
 
             if keyword.is_undefined() {
-                let decl_range = decl.range();
+                let decl_range = initializer.range();
                 let Some(binding_name) = decl.id().ok().map(|id| id.text()) else {
                     continue;
                 };
@@ -121,14 +124,14 @@ impl Rule for NoUselessUndefinedInitialization {
             .map(|decl| decl.ok())?
             .and_then(|declarator| declarator.initializer())?;
 
-        let mut mutation = declarators.begin();
+        let mut mutation = ctx.root().begin();
         // This will remove any comments attached to the initialization clause
         mutation.remove_node(initializer);
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove undefined initialization" }.to_owned(),
+            message: markup! { "Remove undefined initialization." }.to_owned(),
             mutation,
         })
     }

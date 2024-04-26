@@ -1,5 +1,3 @@
-const inline1 = undefined,
-	inline2 = undefined;
 let test1,
 	test2 = undefined;
 var c = undefined,
