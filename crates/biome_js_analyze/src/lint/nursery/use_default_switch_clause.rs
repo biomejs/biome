@@ -6,9 +6,9 @@ use biome_js_syntax::JsSwitchStatement;
 use biome_rowan::AstNode;
 
 declare_rule! {
-    /// Require default cases in switch statements.
+    /// Require the default clause in switch statements.
     ///
-    /// Some code conventions require that all switch statements have a default case. The thinking is that it’s better
+    /// Some code conventions require that all switch statements have a default clause. The thinking is that it’s better
     /// to always explicitly state what the default behavior should be so that it’s clear whether or not the developer
     /// forgot to include the default behavior by mistake.
     ///
@@ -79,7 +79,7 @@ impl Rule for UseDefaultSwitchClause {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Expected a default case."
+                    "Expected a default switch clause."
                 },
             )
             .note(markup! {

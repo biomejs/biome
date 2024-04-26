@@ -15,7 +15,7 @@ switch (a) {
 ```
 invalid.js:1:1 lint/nursery/useDefaultSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Expected a default case.
+  ! Expected a default switch clause.
   
   > 1 │ switch (a) {
       │ ^^^^^^^^^^^^

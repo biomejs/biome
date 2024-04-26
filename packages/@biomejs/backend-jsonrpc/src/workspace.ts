@@ -997,7 +997,7 @@ export interface Nursery {
 	 */
 	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
 	/**
-	 * Require default cases in switch statements.
+	 * Require the default clause in switch statements.
 	 */
 	useDefaultSwitchClause?: RuleConfiguration_for_Null;
 	/**

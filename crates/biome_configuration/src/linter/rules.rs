@@ -2712,7 +2712,7 @@ pub struct Nursery {
     #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_new_builtin: Option<RuleConfiguration<UseConsistentNewBuiltin>>,
-    #[doc = "Require default cases in switch statements."]
+    #[doc = "Require the default clause in switch statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_default_switch_clause: Option<RuleConfiguration<UseDefaultSwitchClause>>,
     #[doc = "Disallow a missing generic family keyword within font families."]

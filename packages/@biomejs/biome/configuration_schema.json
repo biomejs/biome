@@ -1585,7 +1585,7 @@
 					]
 				},
 				"useDefaultSwitchClause": {
-					"description": "Require default cases in switch statements.",
+					"description": "Require the default clause in switch statements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
