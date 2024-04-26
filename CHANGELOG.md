@@ -68,6 +68,44 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- Fix [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) that missed redeclarations in functions ([#2394](https://github.com/biomejs/biome/issues/2394)).
+
+  The rule was not able to detected redeclaraions of a parameter or a type parameter in the function body.
+  The following two redeclarations are now reported:
+
+  ```ts
+  function f<T>(a) {
+    type T = number; // redeclaration
+    const a = 0; // redeclaration
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- Fix [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) that wrongly reported overloads in object types ([#2608](https://github.com/biomejs/biome/issues/2608)).
+
+  The rule no longer report redeclarations in the following code:
+
+  ```ts
+  type Overloads = {
+    ({ a }: { a: number }): number,
+    ({ a }: { a: string }): string,
+  };
+  ```
+
+  Contributed by @Conaclos
+
+- Fix [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) that didn't merge default function export declarations and types ([#2372](https://github.com/biomejs/biome/issues/2372)).
+
+  The following code is no longer reported as a redeclaration:
+
+  ```ts
+  interface Foo {}
+  export default function Foo() {}
+  ```
+
+  Contributed by @Conaclos
+
 - [useConst](https://biomejs.dev/linter/rules/use-const/) now ignores a variable that is read before its assignment.
 
   Previously, the rule reported the following example:

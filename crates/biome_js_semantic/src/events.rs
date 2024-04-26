@@ -289,6 +289,7 @@ impl SemanticEventExtractor {
     #[inline]
     pub fn enter(&mut self, node: &JsSyntaxNode) {
         // If you push a scope for a given node type, don't forget to also update `Self::leave`.
+        // You should also edit [SemanticModelBuilder::push_node].
         match node.kind() {
             JS_IDENTIFIER_BINDING | TS_IDENTIFIER_BINDING | TS_TYPE_PARAMETER_NAME => {
                 self.enter_identifier_binding(&AnyJsIdentifierBinding::unwrap_cast(node.clone()));
@@ -334,6 +335,7 @@ impl SemanticEventExtractor {
             | TS_TYPE_ALIAS_DECLARATION
             | TS_DECLARE_FUNCTION_DECLARATION
             | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
+            | TS_CALL_SIGNATURE_TYPE_MEMBER
             | TS_METHOD_SIGNATURE_CLASS_MEMBER
             | TS_METHOD_SIGNATURE_TYPE_MEMBER
             | TS_INDEX_SIGNATURE_CLASS_MEMBER
@@ -634,6 +636,7 @@ impl SemanticEventExtractor {
             | JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
             | TS_DECLARE_FUNCTION_DECLARATION
             | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
+            | TS_CALL_SIGNATURE_TYPE_MEMBER
             | TS_METHOD_SIGNATURE_CLASS_MEMBER
             | TS_METHOD_SIGNATURE_TYPE_MEMBER
             | TS_INDEX_SIGNATURE_CLASS_MEMBER
