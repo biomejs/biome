@@ -909,10 +909,6 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Disallow Array constructors.
-	 */
-	noArrayConstructor?: RuleConfiguration_for_Null;
-	/**
 	 * WIP: This rule hasn't been implemented yet.
 	 */
 	noColorInvalidHex?: RuleConfiguration_for_Null;
@@ -988,6 +984,10 @@ export interface Nursery {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Disallow Array constructors.
+	 */
+	useArrayLiterals?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
@@ -1965,7 +1965,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
-	| "lint/nursery/noArrayConstructor"
+	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
@@ -2358,7 +2358,7 @@ export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<SupportsFeatureResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
 	registerProjectFolder(
-		params: RegisterProjectFolderParams,
+		params: RegisterProjectFolderParams
 	): Promise<ProjectKey>;
 	updateCurrentProject(params: UpdateProjectParams): Promise<void>;
 	openProject(params: OpenProjectParams): Promise<void>;
@@ -2367,13 +2367,13 @@ export interface Workspace {
 	closeFile(params: CloseFileParams): Promise<void>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;
 	organizeImports(
-		params: OrganizeImportsParams,
+		params: OrganizeImportsParams
 	): Promise<OrganizeImportsResult>;
 	getFileContent(params: GetFileContentParams): Promise<string>;
 	getControlFlowGraph(params: GetControlFlowGraphParams): Promise<string>;
 	getFormatterIr(params: GetFormatterIRParams): Promise<string>;
 	pullDiagnostics(
-		params: PullDiagnosticsParams,
+		params: PullDiagnosticsParams
 	): Promise<PullDiagnosticsResult>;
 	pullActions(params: PullActionsParams): Promise<PullActionsResult>;
 	formatFile(params: FormatFileParams): Promise<Printed>;

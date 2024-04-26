@@ -2,7 +2,6 @@
 
 use biome_analyze::declare_group;
 
-pub mod no_array_constructor;
 pub mod no_console;
 pub mod no_constant_math_min_max_clamp;
 pub mod no_done_callback;
@@ -14,6 +13,7 @@ pub mod no_nodejs_modules;
 pub mod no_react_specific_props;
 pub mod no_restricted_imports;
 pub mod no_undeclared_dependencies;
+pub mod use_array_literals;
 pub mod use_consistent_new_builtin;
 pub mod use_import_restrictions;
 pub mod use_sorted_classes;
@@ -22,7 +22,6 @@ declare_group! {
     pub Nursery {
         name : "nursery" ,
         rules : [
-            self :: no_array_constructor :: NoArrayConstructor ,
             self :: no_console :: NoConsole ,
             self :: no_constant_math_min_max_clamp :: NoConstantMathMinMaxClamp ,
             self :: no_done_callback :: NoDoneCallback ,
@@ -34,6 +33,7 @@ declare_group! {
             self :: no_react_specific_props :: NoReactSpecificProps ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
+            self :: use_array_literals :: UseArrayLiterals ,
             self :: use_consistent_new_builtin :: UseConsistentNewBuiltin ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_sorted_classes :: UseSortedClasses ,

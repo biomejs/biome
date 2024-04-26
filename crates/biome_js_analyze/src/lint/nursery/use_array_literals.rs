@@ -41,16 +41,16 @@ declare_rule! {
     /// [0, 1, 2];
     /// ```
     ///
-    pub NoArrayConstructor {
+    pub UseArrayLiterals {
         version: "next",
-        name: "noArrayConstructor",
-        sources: &[RuleSource::Eslint("no-array-constructor")],
+        name: "useArrayLiterals",
+        sources: &[RuleSource::Eslint("use-array-literals")],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
 }
 
-impl Rule for NoArrayConstructor {
+impl Rule for UseArrayLiterals {
     type Query = Ast<JsExpressionStatement>;
     type State = ();
     type Signals = Option<Self::State>;

@@ -20,7 +20,7 @@ new Array(...args);
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/nursery/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use Array constructors.
   
@@ -37,7 +37,7 @@ invalid.js:1:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:3:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:1 lint/nursery/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use Array constructors.
   
@@ -56,7 +56,7 @@ invalid.js:3:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:5:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/nursery/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use Array constructors.
   
@@ -75,7 +75,7 @@ invalid.js:5:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:7:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/nursery/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use Array constructors.
   
@@ -94,7 +94,7 @@ invalid.js:7:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:9:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/nursery/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use Array constructors.
   
@@ -113,7 +113,7 @@ invalid.js:9:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:11:1 lint/nursery/noArrayConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/nursery/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use Array constructors.
   

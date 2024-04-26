@@ -1433,13 +1433,6 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"noArrayConstructor": {
-					"description": "Disallow Array constructors.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noColorInvalidHex": {
 					"description": "WIP: This rule hasn't been implemented yet.",
 					"anyOf": [
@@ -1569,6 +1562,13 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useArrayLiterals": {
+					"description": "Disallow Array constructors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"useConsistentNewBuiltin": {
 					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
