@@ -448,7 +448,14 @@ impl ImportNode {
                     // If the node we're attaching this separator to has no trailing trivia, just create a simple comma token
                     let last_trailing_trivia = match node.syntax().last_trailing_trivia() {
                         Some(trivia) if !trivia.is_empty() => trivia,
-                        _ => return make::token(T![,]),
+                        _ => {
+                            let sep = make::token(T![,]);
+                            return if node.syntax().has_leading_newline() {
+                                sep
+                            } else {
+                                sep.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+                            };
+                        }
                     };
 
                     // Otherwise we need to clone the trailing trivia from the node to the separator

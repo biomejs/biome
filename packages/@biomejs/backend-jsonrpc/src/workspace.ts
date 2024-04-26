@@ -981,13 +981,25 @@ export interface Nursery {
 	 */
 	noUnknownUnit?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow initializing variables to undefined.
+	 */
+	noUselessUndefinedInitialization?: RuleConfiguration_for_Null;
+	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
+	 * Disallow Array constructors.
+	 */
+	useArrayLiterals?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
 	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow a missing generic family keyword within font families.
+	 */
+	useGenericFontNames?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -1961,6 +1973,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
@@ -1974,14 +1987,17 @@ export type Category =
 	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noMisplacedAssertion"
+	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
+	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentNewBuiltin"
+	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"

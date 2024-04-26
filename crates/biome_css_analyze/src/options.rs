@@ -12,3 +12,5 @@ pub type NoDuplicateSelectorsKeyframeBlock = < lint :: nursery :: no_duplicate_s
 pub type NoImportantInKeyframe = < lint :: nursery :: no_important_in_keyframe :: NoImportantInKeyframe as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownUnit =
     <lint::nursery::no_unknown_unit::NoUnknownUnit as biome_analyze::Rule>::Options;
+pub type UseGenericFontNames =
+    <lint::nursery::use_generic_font_names::UseGenericFontNames as biome_analyze::Rule>::Options;

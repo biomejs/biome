@@ -1,0 +1,7 @@
+a { font-family: Arial; }
+a { font-family: 'Arial', "Lucida Grande", Arial; }
+a { fOnT-fAmIlY: '  Lucida Grande '; }
+a { font-family: Times; }
+a { FONT: italic 300 16px/30px Arial, " Arial"; }
+a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
+a { font: 1em Lucida Grande, Arial, "sans-serif" }
