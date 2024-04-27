@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -15,20 +14,26 @@ expression: snapshot
 ```
 JsonRoot {
     bom_token: missing (optional),
-    value: JsonObjectValue {
-        l_curly_token: L_CURLY@0..1 "{" [] [],
-        json_member_list: JsonMemberList [
-            JsonMember {
-                name: JsonMemberName {
-                    value_token: JSON_STRING_LITERAL@1..4 "\"a\"" [] [],
-                },
-                colon_token: COLON@4..5 ":" [] [],
-                value: JsonStringValue {
-                    value_token: JSON_STRING_LITERAL@5..7 "\"a" [] [],
-                },
+    value: JsonBogusValue {
+        items: [
+            L_CURLY@0..1 "{" [] [],
+            JsonBogus {
+                items: [
+                    JsonMember {
+                        name: JsonMemberName {
+                            value_token: JSON_STRING_LITERAL@1..4 "\"a\"" [] [],
+                        },
+                        colon_token: COLON@4..5 ":" [] [],
+                        value: missing (required),
+                    },
+                    JsonBogusValue {
+                        items: [
+                            ERROR_TOKEN@5..7 "\"a" [] [],
+                        ],
+                    },
+                ],
             },
         ],
-        r_curly_token: missing (required),
     },
     eof_token: EOF@7..7 "" [] [],
 }
@@ -39,16 +44,16 @@ JsonRoot {
 ```
 0: JSON_ROOT@0..7
   0: (empty)
-  1: JSON_OBJECT_VALUE@0..7
+  1: JSON_BOGUS_VALUE@0..7
     0: L_CURLY@0..1 "{" [] []
-    1: JSON_MEMBER_LIST@1..7
-      0: JSON_MEMBER@1..7
+    1: JSON_BOGUS@1..7
+      0: JSON_MEMBER@1..5
         0: JSON_MEMBER_NAME@1..4
           0: JSON_STRING_LITERAL@1..4 "\"a\"" [] []
         1: COLON@4..5 ":" [] []
-        2: JSON_STRING_VALUE@5..7
-          0: JSON_STRING_LITERAL@5..7 "\"a" [] []
-    2: (empty)
+        2: (empty)
+      1: JSON_BOGUS_VALUE@5..7
+        0: ERROR_TOKEN@5..7 "\"a" [] []
   2: EOF@7..7 "" [] []
 
 ```
@@ -81,5 +86,3 @@ object_unterminated-value.json:1:8 parse ━━━━━━━━━━━━━
       │        
   
 ```
-
-

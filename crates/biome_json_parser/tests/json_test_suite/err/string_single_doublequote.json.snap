@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -15,8 +14,10 @@ expression: snapshot
 ```
 JsonRoot {
     bom_token: missing (optional),
-    value: JsonStringValue {
-        value_token: JSON_STRING_LITERAL@0..1 "\"" [] [],
+    value: JsonBogusValue {
+        items: [
+            ERROR_TOKEN@0..1 "\"" [] [],
+        ],
     },
     eof_token: EOF@1..1 "" [] [],
 }
@@ -27,8 +28,8 @@ JsonRoot {
 ```
 0: JSON_ROOT@0..1
   0: (empty)
-  1: JSON_STRING_VALUE@0..1
-    0: JSON_STRING_LITERAL@0..1 "\"" [] []
+  1: JSON_BOGUS_VALUE@0..1
+    0: ERROR_TOKEN@0..1 "\"" [] []
   2: EOF@1..1 "" [] []
 
 ```
@@ -49,5 +50,3 @@ string_single_doublequote.json:1:1 parse ━━━━━━━━━━━━━
       │  
   
 ```
-
-

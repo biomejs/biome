@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/json/json5.json
 ---
-
 # Input
 
 ```json
@@ -415,19 +414,6 @@ json5.json:21:15 parse ━━━━━━━━━━━━━━━━━━━
   
   i Use double quotes to escape the string.
   
-json5.json:22:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × End of file expected
-  
-    20 │   '//': 'JSON5 strings',
-    21 │ singleQuotes: 'I can use "double quotes" here',
-  > 22 │   lineBreaks: "Look, Mom! \
-       │               ^^^^^^^^^^^^^
-    23 │ No \\n's!",
-    24 │ }
-  
-  i Use an array for a sequence of values: `[1, 2]`
-  
 json5.json:22:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid escape sequence
@@ -462,17 +448,6 @@ json5.json:22:15 parse ━━━━━━━━━━━━━━━━━━━
        │                            
   > 23 │ No \\n's!",
        │ 
-    24 │ }
-    25 │ ]
-  
-json5.json:23:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × String values must be double quoted.
-  
-    21 │ singleQuotes: 'I can use "double quotes" here',
-    22 │   lineBreaks: "Look, Mom! \
-  > 23 │ No \\n's!",
-       │ ^^
     24 │ }
     25 │ ]
   
@@ -520,21 +495,5 @@ json5.json:23:7 parse ━━━━━━━━━━━━━━━━━━━�
     25 │ ]
     26 │ 
   
-json5.json:24:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × End of file expected
-  
-    22 │   lineBreaks: "Look, Mom! \
-    23 │ No \\n's!",
-  > 24 │ }
-       │ ^
-  > 25 │ ]
-       │ ^
-    26 │ 
-  
-  i Use an array for a sequence of values: `[1, 2]`
-  
 
 ```
-
-
