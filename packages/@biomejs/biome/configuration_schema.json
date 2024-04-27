@@ -1591,6 +1591,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSemanticElements": {
+					"description": "Prefer using semantic element over role, since browsers now support semantic HTML element with the same meaning.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [

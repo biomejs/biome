@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+<>
+  <div role="button">...</div>
+  <div role="img">...</div>
+</>
+```
+
+# Diagnostics
+```
+invalid.js:2:3 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Role button should not be used as browsers now support semantic element with same meaning.
+  
+    1 │ <>
+  > 2 │   <div role="button">...</div>
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │   <div role="img">...</div>
+    4 │ </>
+  
+  i Prefer using <button> instead.
+  
+
+```
+
+```
+invalid.js:3:3 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Role img should not be used as browsers now support semantic element with same meaning.
+  
+    1 │ <>
+    2 │   <div role="button">...</div>
+  > 3 │   <div role="img">...</div>
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ </>
+  
+  i Prefer using <img> or <picture> instead.
+  
+
+```

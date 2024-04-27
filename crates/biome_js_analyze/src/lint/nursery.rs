@@ -17,6 +17,7 @@ pub mod no_useless_undefined_initialization;
 pub mod use_array_literals;
 pub mod use_consistent_new_builtin;
 pub mod use_import_restrictions;
+pub mod use_semantic_elements;
 pub mod use_sorted_classes;
 
 declare_group! {
@@ -38,6 +39,7 @@ declare_group! {
             self :: use_array_literals :: UseArrayLiterals ,
             self :: use_consistent_new_builtin :: UseConsistentNewBuiltin ,
             self :: use_import_restrictions :: UseImportRestrictions ,
+            self :: use_semantic_elements :: UseSemanticElements ,
             self :: use_sorted_classes :: UseSortedClasses ,
         ]
      }
