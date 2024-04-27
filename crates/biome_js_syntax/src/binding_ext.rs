@@ -137,6 +137,7 @@ impl AnyJsBindingDeclaration {
                 | AnyJsBindingDeclaration::TsModuleDeclaration(_)
                 | AnyJsBindingDeclaration::TsTypeParameter(_),
                 AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
                 | AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
                 | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
                 | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
