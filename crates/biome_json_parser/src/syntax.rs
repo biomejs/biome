@@ -80,6 +80,13 @@ fn parse_value(p: &mut JsonParser) -> ParsedSyntax {
             Present(m.complete(p, JSON_BOGUS_VALUE))
         }
 
+        ERROR_TOKEN => {
+            // An error is already emitted by the lexer.
+            let m = p.start();
+            p.bump(ERROR_TOKEN);
+            Present(m.complete(p, JSON_BOGUS_VALUE))
+        }
+
         _ => Absent,
     }
 }

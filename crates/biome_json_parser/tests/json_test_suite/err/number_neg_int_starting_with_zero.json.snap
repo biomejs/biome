@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -48,18 +47,6 @@ JsonRoot {
 ## Diagnostics
 
 ```
-number_neg_int_starting_with_zero.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an array, an object, or a literal but instead found '-012'.
-  
-  > 1 │ [-012]
-      │  ^^^^
-  
-  i Expected an array, an object, or a literal here.
-  
-  > 1 │ [-012]
-      │  ^^^^
-  
 number_neg_int_starting_with_zero.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The JSON standard doesn't allow octal number notation (numbers starting with zero)
@@ -68,5 +55,3 @@ number_neg_int_starting_with_zero.json:1:3 parse ━━━━━━━━━━�
       │   ^
   
 ```
-
-

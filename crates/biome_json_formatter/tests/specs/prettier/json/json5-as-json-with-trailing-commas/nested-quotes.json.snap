@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/json5-as-json-with-trailing-commas/nested-quotes.json
 ---
-
 # Input
 
 ```json
@@ -85,6 +84,19 @@ nested-quotes.json:4:5 parse ━━━━━━━━━━━━━━━━━
     6 │   },
   
   i Use double quotes to escape the string.
+  
+nested-quotes.json:4:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    2 │ "noSpace":true,
+    3 │   "quote": {
+  > 4 │     'singleQuote': 'exa"mple',
+      │                  ^^^^^^^^^^^^^
+    5 │                   "indented": true,
+    6 │   },
+  
+  i Use an array for a sequence of values: `[1, 2]`
   
 nested-quotes.json:4:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -234,5 +246,3 @@ nested-quotes.json:12:4 parse ━━━━━━━━━━━━━━━━�
   
 
 ```
-
-
