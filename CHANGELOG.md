@@ -52,6 +52,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Relative glob patterns are now correctly handled ([#2421](https://github.com/biomejs/biome/issues/2421)).
+
+  Biome relies on an internal fork of the [glob crate](https://crates.io/crates/glob).
+  This crate converts relative glob patterns into recursive glob patterns.
+  This means that `./file' is equivalent to `./**/file'.
+
+  This is surprising behavior and has been reported as a bug by our users.
+  Biome no longer converts relative glob patterns to recursive glob patterns.
+
+  Contributed by @Conaclos
+
 ### Configuration
 
 ### Editors
