@@ -324,38 +324,30 @@ fn generate_deserializable_struct(
         .fields
         .into_iter()
         .map(|field_data| {
-            let DeserializableFieldData { ident: field_ident, key, ty, .. } = field_data;
-
-            let is_optional = matches!(
-                &ty,
-                Type::Path(path) if path
-                    .path
-                    .segments
-                    .last()
-                    .is_some_and(|segment| segment.ident == "Option")
-            );
-
-            let deprecation_notice = field_data.deprecated.map(|deprecated| {
-                match deprecated {
-                    DeprecatedField::Message(message) => quote! {
-                        diagnostics.push(DeserializationDiagnostic::new_deprecated(
-                            key_text.text(),
-                            value.range()
-                        ).with_note(#message));
-                    },
-                    DeprecatedField::UseInstead(path) => quote! {
-                        diagnostics.push(DeserializationDiagnostic::new_deprecated_use_instead(
-                            &key_text,
-                            key.range(),
-                            #path,
-                        ));
-                    },
-                }
+            let DeserializableFieldData {
+                ident: field_ident,
+                key,
+                ..
+            } = field_data;
+            let deprecation_notice = field_data.deprecated.map(|deprecated| match deprecated {
+                DeprecatedField::Message(message) => quote! {
+                    diagnostics.push(DeserializationDiagnostic::new_deprecated(
+                        key_text.text(),
+                        value.range()
+                    ).with_note(#message));
+                },
+                DeprecatedField::UseInstead(path) => quote! {
+                    diagnostics.push(DeserializationDiagnostic::new_deprecated_use_instead(
+                        &key_text,
+                        key.range(),
+                        #path,
+                    ));
+                },
             });
 
             let name = match field_data.passthrough_name {
                 true => quote! { name },
-                false => quote! { &key_text }
+                false => quote! { &key_text },
             };
 
             let validate = field_data.validate.map(|path| {
@@ -364,40 +356,20 @@ fn generate_deserializable_struct(
                 }
             });
 
-            if is_optional {
-                let error_result = if field_data.bail_on_error || field_data.required {
-                    quote! { return None }
-                } else {
-                    quote! { None }
-                };
-
-                quote! {
-                    #key => {
-                        result.#field_ident = match Deserializable::deserialize(&value, #name, diagnostics)#validate {
-                            Some(value) => {
-                                #deprecation_notice
-                                Some(value)
-                            }
-                            None => #error_result,
-                        };
-                    }
-                }
+            let error_result = if field_data.bail_on_error || field_data.required {
+                quote! { return None, }
             } else {
-                let error_result = if field_data.bail_on_error || field_data.required {
-                    quote! { return None, }
-                } else {
-                    quote! { {} }
-                };
+                quote! { {} }
+            };
 
-                quote! {
-                    #key => {
-                        match Deserializable::deserialize(&value, #name, diagnostics)#validate {
-                            Some(value) => {
-                                #deprecation_notice
-                                result.#field_ident = value;
-                            }
-                            None => #error_result
+            quote! {
+                #key => {
+                    match Deserializable::deserialize(&value, #name, diagnostics)#validate {
+                        Some(value) => {
+                            #deprecation_notice
+                            result.#field_ident = value;
                         }
+                        None => #error_result
                     }
                 }
             }
