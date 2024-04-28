@@ -2,6 +2,8 @@ if (foo.bar && foo.bar.length) {}
 if (foo.length || foo.bar()) {}
 if (!!(!!foo.length)) {}
 if (!(foo.length === 0)) {}
+if (0 === foo.length) {}
+if (0 < foo.length) {}
 while (foo.length >= 1) {}
 do {} while (foo.length);
 for (let i = 0; (bar && !foo.length); i ++) {}
