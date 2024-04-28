@@ -7,6 +7,7 @@ declare_rule! {
     /// Disallow unnecessary concatenation of literals or template literals.
     ///
     /// This rule aims to flag the concatenation of 2 literals when they could be combined into a single literal. Literals can be strings or template literals.
+    /// Concatenation of multiple strings in different lines to prevent big line widths are allowed.
     ///
     /// ## Examples
     ///
@@ -48,6 +49,11 @@ declare_rule! {
     ///
     /// ```js
     /// const a = 'foo' + bar;
+    /// ```
+    ///
+    /// ```js
+    /// const a = 'foo' +
+    ///           'bar'
     /// ```
     pub NoUselessConcat {
         version: "next",
@@ -123,7 +129,7 @@ fn is_concatenation(binary_expression: &JsBinaryExpression) -> bool {
     is_plus_operator && is_string_expression
 }
 
-// Concatenation of strings in muliple lines to prevent big line widths
+/// Returns if the passed `JsBinaryExpression` has a multiline string concatenation
 fn is_stylistic_concatenation(binary_expression: &JsBinaryExpression) -> bool {
     let operator = binary_expression.operator().ok();
     let is_plus_operator = matches!(operator, Some(JsBinaryOperator::Plus));
