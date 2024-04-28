@@ -1886,23 +1886,6 @@ pub fn is_in_boolean_context(node: &JsSyntaxNode) -> Option<bool> {
     }
 }
 
-/// Checks if the node is a `Boolean` Constructor Call
-/// # Example
-/// ```js
-/// new Boolean(x);
-/// ```
-pub fn is_boolean_constructor_call(node: &JsSyntaxNode) -> Option<JsNewExpression> {
-    let expr = JsCallArgumentList::cast_ref(node)?
-        .parent::<JsCallArguments>()?
-        .parent::<JsNewExpression>()?;
-
-    if expr.has_callee("Boolean") {
-        Some(expr)
-    } else {
-        None
-    }
-}
-
 #[cfg(test)]
 mod test {
     use biome_js_factory::syntax::{JsCallExpression, JsTemplateExpression};

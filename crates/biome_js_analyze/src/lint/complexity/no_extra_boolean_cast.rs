@@ -5,7 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{
-    is_boolean_constructor_call, is_in_boolean_context, is_negation, AnyJsExpression,
+    is_in_boolean_context, is_negation, AnyJsExpression, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsNewExpression, JsSyntaxNode, JsUnaryOperator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
@@ -61,6 +61,23 @@ declare_rule! {
         sources: &[RuleSource::Eslint("no-extra-boolean-cast")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
+    }
+}
+
+/// Checks if the node is a `Boolean` Constructor Call
+/// # Example
+/// ```js
+/// new Boolean(x);
+/// ```
+pub fn is_boolean_constructor_call(node: &JsSyntaxNode) -> Option<JsNewExpression> {
+    let expr = JsCallArgumentList::cast_ref(node)?
+        .parent::<JsCallArguments>()?
+        .parent::<JsNewExpression>()?;
+
+    if expr.has_callee("Boolean") {
+        Some(expr)
+    } else {
+        None
     }
 }
 
