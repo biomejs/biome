@@ -244,3 +244,7 @@ type SuperLongTypeNameLoremIpsumLoremIpsumBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla =
 | Fooo1000
 | Baz2000
 | BarLoooooooooooooooooooooooooooooooooooooooooooooooooLong;
+
+type Foo = | ( /* A */ | A
+// B
+| B )
