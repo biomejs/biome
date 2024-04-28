@@ -1,3 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```jsx
 // Not length check
 if (foo.notLength) {}
 if (length) {}
@@ -42,3 +48,5 @@ if (foo.length === 0 || true) {}
 const x3 = foo.length || 2
 // TODO. Not supported yet.
 // const A_NUMBER = 2; const x = foo.length || A_NUMBER
+
+```

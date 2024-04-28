@@ -1,0 +1,844 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+if (foo.bar && foo.bar.length) {}
+if (foo.length || foo.bar()) {}
+if (!!(!!foo.length)) {}
+if (!(foo.length === 0)) {}
+while (foo.length >= 1) {}
+do {} while (foo.length);
+for (let i = 0; (bar && !foo.length); i ++) {}
+const isEmpty = foo.length < 1;
+bar(foo.length >= 1)
+bar(!foo.length || foo.length)
+const bar = void !foo.length;
+const isNotEmpty = Boolean(foo.length)
+const isNotEmpty1 = Boolean(foo.length || bar)
+const isEmpty1 = Boolean(!foo.length)
+const isEmpty2 = Boolean(foo.length === 0)
+const isNotEmpty2 = !Boolean(foo.length === 0)
+const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
+if (foo.size) {}
+if (foo.size && bar.length) {}
+// Space after keywords
+function foo() {return!foo.length}
+function foo() {throw!foo.length}
+async function foo() {await!foo.length}
+function * foo() {yield!foo.length}
+function * foo() {yield*!foo.length}
+delete!foo.length
+typeof!foo.length
+void!foo.length
+a instanceof!foo.length
+a in!foo.length
+export default!foo.length
+if(true){}else!foo.length
+do!foo.length;while(true) {}
+switch(foo){case!foo.length:{}}
+for(const a of!foo.length);
+for(const a in!foo.length);
+
+class A {
+    a() {
+        if (this.length) {};
+        while (!this.size || foo);
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:1:16 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+  > 1 │ if (foo.bar && foo.bar.length) {}
+      │                ^^^^^^^^^^^^^^
+    2 │ if (foo.length || foo.bar()) {}
+    3 │ if (!!(!!foo.length)) {}
+  
+  i Unsafe fix: Replace with
+  
+    1 │ if·(foo.bar·&&·foo.bar.length·>·0)·{}
+      │                              ++++    
+
+```
+
+```
+invalid.js:2:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+    1 │ if (foo.bar && foo.bar.length) {}
+  > 2 │ if (foo.length || foo.bar()) {}
+      │     ^^^^^^^^^^
+    3 │ if (!!(!!foo.length)) {}
+    4 │ if (!(foo.length === 0)) {}
+  
+  i Unsafe fix: Replace with
+  
+    2 │ if·(foo.length·>·0||·foo.bar())·{}
+      │                +++                
+
+```
+
+```
+invalid.js:3:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+    1 │ if (foo.bar && foo.bar.length) {}
+    2 │ if (foo.length || foo.bar()) {}
+  > 3 │ if (!!(!!foo.length)) {}
+      │     ^^^^^^^^^^^^^^^^
+    4 │ if (!(foo.length === 0)) {}
+    5 │ while (foo.length >= 1) {}
+  
+  i Unsafe fix: Replace with
+  
+     1  1 │   if (foo.bar && foo.bar.length) {}
+     2  2 │   if (foo.length || foo.bar()) {}
+     3    │ - if·(!!(!!foo.length))·{}
+        3 │ + if·(foo.length·>·0)·{}
+     4  4 │   if (!(foo.length === 0)) {}
+     5  5 │   while (foo.length >= 1) {}
+  
+
+```
+
+```
+invalid.js:5:8 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+    3 │ if (!!(!!foo.length)) {}
+    4 │ if (!(foo.length === 0)) {}
+  > 5 │ while (foo.length >= 1) {}
+      │        ^^^^^^^^^^^^^^^
+    6 │ do {} while (foo.length);
+    7 │ for (let i = 0; (bar && !foo.length); i ++) {}
+  
+  i Unsafe fix: Add new keyword.
+  
+     3  3 │   if (!!(!!foo.length)) {}
+     4  4 │   if (!(foo.length === 0)) {}
+     5    │ - while·(foo.length·>=·1)·{}
+        5 │ + while·(foo.length·<·1)·{}
+     6  6 │   do {} while (foo.length);
+     7  7 │   for (let i = 0; (bar && !foo.length); i ++) {}
+  
+
+```
+
+```
+invalid.js:6:14 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+    4 │ if (!(foo.length === 0)) {}
+    5 │ while (foo.length >= 1) {}
+  > 6 │ do {} while (foo.length);
+      │              ^^^^^^^^^^
+    7 │ for (let i = 0; (bar && !foo.length); i ++) {}
+    8 │ const isEmpty = foo.length < 1;
+  
+  i Unsafe fix: Replace with
+  
+    6 │ do·{}·while·(·foo.length·>·0);
+      │              +          ++++  
+
+```
+
+```
+invalid.js:7:25 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    5 │ while (foo.length >= 1) {}
+    6 │ do {} while (foo.length);
+  > 7 │ for (let i = 0; (bar && !foo.length); i ++) {}
+      │                         ^^^^^^^^^^^
+    8 │ const isEmpty = foo.length < 1;
+    9 │ bar(foo.length >= 1)
+  
+  i Unsafe fix: Replace with
+  
+     5  5 │   while (foo.length >= 1) {}
+     6  6 │   do {} while (foo.length);
+     7    │ - for·(let·i·=·0;·(bar·&&·!foo.length);·i·++)·{}
+        7 │ + for·(let·i·=·0;·(bar·&&·foo.length·===·0);·i·++)·{}
+     8  8 │   const isEmpty = foo.length < 1;
+     9  9 │   bar(foo.length >= 1)
+  
+
+```
+
+```
+invalid.js:8:17 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+     6 │ do {} while (foo.length);
+     7 │ for (let i = 0; (bar && !foo.length); i ++) {}
+   > 8 │ const isEmpty = foo.length < 1;
+       │                 ^^^^^^^^^^^^^^
+     9 │ bar(foo.length >= 1)
+    10 │ bar(!foo.length || foo.length)
+  
+  i Unsafe fix: Add new keyword.
+  
+     6  6 │   do {} while (foo.length);
+     7  7 │   for (let i = 0; (bar && !foo.length); i ++) {}
+     8    │ - const·isEmpty·=·foo.length·<·1;
+        8 │ + const·isEmpty·=·foo.length·===·1;
+     9  9 │   bar(foo.length >= 1)
+    10 10 │   bar(!foo.length || foo.length)
+  
+
+```
+
+```
+invalid.js:9:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+     7 │ for (let i = 0; (bar && !foo.length); i ++) {}
+     8 │ const isEmpty = foo.length < 1;
+   > 9 │ bar(foo.length >= 1)
+       │     ^^^^^^^^^^^^^^^
+    10 │ bar(!foo.length || foo.length)
+    11 │ const bar = void !foo.length;
+  
+  i Unsafe fix: Add new keyword.
+  
+     7  7 │   for (let i = 0; (bar && !foo.length); i ++) {}
+     8  8 │   const isEmpty = foo.length < 1;
+     9    │ - bar(foo.length·>=·1)
+        9 │ + bar(foo.length·<·1)
+    10 10 │   bar(!foo.length || foo.length)
+    11 11 │   const bar = void !foo.length;
+  
+
+```
+
+```
+invalid.js:10:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+     8 │ const isEmpty = foo.length < 1;
+     9 │ bar(foo.length >= 1)
+  > 10 │ bar(!foo.length || foo.length)
+       │     ^^^^^^^^^^^
+    11 │ const bar = void !foo.length;
+    12 │ const isNotEmpty = Boolean(foo.length)
+  
+  i Unsafe fix: Replace with
+  
+     8  8 │   const isEmpty = foo.length < 1;
+     9  9 │   bar(foo.length >= 1)
+    10    │ - bar(!foo.length·||·foo.length)
+       10 │ + bar(foo.length·===·0||·foo.length)
+    11 11 │   const bar = void !foo.length;
+    12 12 │   const isNotEmpty = Boolean(foo.length)
+  
+
+```
+
+```
+invalid.js:10:20 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+     8 │ const isEmpty = foo.length < 1;
+     9 │ bar(foo.length >= 1)
+  > 10 │ bar(!foo.length || foo.length)
+       │                    ^^^^^^^^^^
+    11 │ const bar = void !foo.length;
+    12 │ const isNotEmpty = Boolean(foo.length)
+  
+  i Unsafe fix: Replace with
+  
+    10 │ bar(!foo.length·||·foo.length·>·0)
+       │                              ++++ 
+
+```
+
+```
+invalid.js:11:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+     9 │ bar(foo.length >= 1)
+    10 │ bar(!foo.length || foo.length)
+  > 11 │ const bar = void !foo.length;
+       │                  ^^^^^^^^^^^
+    12 │ const isNotEmpty = Boolean(foo.length)
+    13 │ const isNotEmpty1 = Boolean(foo.length || bar)
+  
+  i Unsafe fix: Replace with
+  
+     9  9 │   bar(foo.length >= 1)
+    10 10 │   bar(!foo.length || foo.length)
+    11    │ - const·bar·=·void·!foo.length;
+       11 │ + const·bar·=·void··foo.length·===·0;
+    12 12 │   const isNotEmpty = Boolean(foo.length)
+    13 13 │   const isNotEmpty1 = Boolean(foo.length || bar)
+  
+
+```
+
+```
+invalid.js:12:20 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+    10 │ bar(!foo.length || foo.length)
+    11 │ const bar = void !foo.length;
+  > 12 │ const isNotEmpty = Boolean(foo.length)
+       │                    ^^^^^^^^^^^^^^^^^^^
+    13 │ const isNotEmpty1 = Boolean(foo.length || bar)
+    14 │ const isEmpty1 = Boolean(!foo.length)
+  
+  i Unsafe fix: Replace with
+  
+    10 10 │   bar(!foo.length || foo.length)
+    11 11 │   const bar = void !foo.length;
+    12    │ - const·isNotEmpty·=·Boolean(foo.length)
+       12 │ + const·isNotEmpty·=·foo.length·>·0
+    13 13 │   const isNotEmpty1 = Boolean(foo.length || bar)
+    14 14 │   const isEmpty1 = Boolean(!foo.length)
+  
+
+```
+
+```
+invalid.js:13:29 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+    11 │ const bar = void !foo.length;
+    12 │ const isNotEmpty = Boolean(foo.length)
+  > 13 │ const isNotEmpty1 = Boolean(foo.length || bar)
+       │                             ^^^^^^^^^^
+    14 │ const isEmpty1 = Boolean(!foo.length)
+    15 │ const isEmpty2 = Boolean(foo.length === 0)
+  
+  i Unsafe fix: Replace with
+  
+    13 │ const·isNotEmpty1·=·Boolean(foo.length·>·0||·bar)
+       │                                        +++       
+
+```
+
+```
+invalid.js:14:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    12 │ const isNotEmpty = Boolean(foo.length)
+    13 │ const isNotEmpty1 = Boolean(foo.length || bar)
+  > 14 │ const isEmpty1 = Boolean(!foo.length)
+       │                  ^^^^^^^^^^^^^^^^^^^^
+    15 │ const isEmpty2 = Boolean(foo.length === 0)
+    16 │ const isNotEmpty2 = !Boolean(foo.length === 0)
+  
+  i Unsafe fix: Replace with
+  
+    12 12 │   const isNotEmpty = Boolean(foo.length)
+    13 13 │   const isNotEmpty1 = Boolean(foo.length || bar)
+    14    │ - const·isEmpty1·=·Boolean(!foo.length)
+       14 │ + const·isEmpty1·=·foo.length·===·0
+    15 15 │   const isEmpty2 = Boolean(foo.length === 0)
+    16 16 │   const isNotEmpty2 = !Boolean(foo.length === 0)
+  
+
+```
+
+```
+invalid.js:18:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .size > 0 with .size is not zero.
+  
+    16 │ const isNotEmpty2 = !Boolean(foo.length === 0)
+    17 │ const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
+  > 18 │ if (foo.size) {}
+       │     ^^^^^^^^
+    19 │ if (foo.size && bar.length) {}
+    20 │ // Space after keywords
+  
+  i Unsafe fix: Replace with
+  
+    18 │ if·(foo.size·>·0)·{}
+       │             ++++    
+
+```
+
+```
+invalid.js:19:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .size > 0 with .size is not zero.
+  
+    17 │ const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
+    18 │ if (foo.size) {}
+  > 19 │ if (foo.size && bar.length) {}
+       │     ^^^^^^^^
+    20 │ // Space after keywords
+    21 │ function foo() {return!foo.length}
+  
+  i Unsafe fix: Replace with
+  
+    19 │ if·(foo.size·>·0&&·bar.length)·{}
+       │              +++                 
+
+```
+
+```
+invalid.js:19:17 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+    17 │ const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
+    18 │ if (foo.size) {}
+  > 19 │ if (foo.size && bar.length) {}
+       │                 ^^^^^^^^^^
+    20 │ // Space after keywords
+    21 │ function foo() {return!foo.length}
+  
+  i Unsafe fix: Replace with
+  
+    19 │ if·(foo.size·&&·bar.length·>·0)·{}
+       │                           ++++    
+
+```
+
+```
+invalid.js:21:23 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    19 │ if (foo.size && bar.length) {}
+    20 │ // Space after keywords
+  > 21 │ function foo() {return!foo.length}
+       │                       ^^^^^^^^^^^
+    22 │ function foo() {throw!foo.length}
+    23 │ async function foo() {await!foo.length}
+  
+  i Unsafe fix: Replace with
+  
+    19 19 │   if (foo.size && bar.length) {}
+    20 20 │   // Space after keywords
+    21    │ - function·foo()·{return!foo.length}
+       21 │ + function·foo()·{return·foo.length·===·0}
+    22 22 │   function foo() {throw!foo.length}
+    23 23 │   async function foo() {await!foo.length}
+  
+
+```
+
+```
+invalid.js:22:22 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    20 │ // Space after keywords
+    21 │ function foo() {return!foo.length}
+  > 22 │ function foo() {throw!foo.length}
+       │                      ^^^^^^^^^^^
+    23 │ async function foo() {await!foo.length}
+    24 │ function * foo() {yield!foo.length}
+  
+  i Unsafe fix: Replace with
+  
+    20 20 │   // Space after keywords
+    21 21 │   function foo() {return!foo.length}
+    22    │ - function·foo()·{throw!foo.length}
+       22 │ + function·foo()·{throw·foo.length·===·0}
+    23 23 │   async function foo() {await!foo.length}
+    24 24 │   function * foo() {yield!foo.length}
+  
+
+```
+
+```
+invalid.js:23:28 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    21 │ function foo() {return!foo.length}
+    22 │ function foo() {throw!foo.length}
+  > 23 │ async function foo() {await!foo.length}
+       │                            ^^^^^^^^^^^
+    24 │ function * foo() {yield!foo.length}
+    25 │ function * foo() {yield*!foo.length}
+  
+  i Unsafe fix: Replace with
+  
+    21 21 │   function foo() {return!foo.length}
+    22 22 │   function foo() {throw!foo.length}
+    23    │ - async·function·foo()·{await!foo.length}
+       23 │ + async·function·foo()·{await·foo.length·===·0}
+    24 24 │   function * foo() {yield!foo.length}
+    25 25 │   function * foo() {yield*!foo.length}
+  
+
+```
+
+```
+invalid.js:24:24 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    22 │ function foo() {throw!foo.length}
+    23 │ async function foo() {await!foo.length}
+  > 24 │ function * foo() {yield!foo.length}
+       │                        ^^^^^^^^^^^
+    25 │ function * foo() {yield*!foo.length}
+    26 │ delete!foo.length
+  
+  i Unsafe fix: Replace with
+  
+    22 22 │   function foo() {throw!foo.length}
+    23 23 │   async function foo() {await!foo.length}
+    24    │ - function·*·foo()·{yield!foo.length}
+       24 │ + function·*·foo()·{yieldfoo.length·===·0}
+    25 25 │   function * foo() {yield*!foo.length}
+    26 26 │   delete!foo.length
+  
+
+```
+
+```
+invalid.js:25:25 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    23 │ async function foo() {await!foo.length}
+    24 │ function * foo() {yield!foo.length}
+  > 25 │ function * foo() {yield*!foo.length}
+       │                         ^^^^^^^^^^^
+    26 │ delete!foo.length
+    27 │ typeof!foo.length
+  
+  i Unsafe fix: Replace with
+  
+    23 23 │   async function foo() {await!foo.length}
+    24 24 │   function * foo() {yield!foo.length}
+    25    │ - function·*·foo()·{yield*!foo.length}
+       25 │ + function·*·foo()·{yield*foo.length·===·0}
+    26 26 │   delete!foo.length
+    27 27 │   typeof!foo.length
+  
+
+```
+
+```
+invalid.js:26:7 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    24 │ function * foo() {yield!foo.length}
+    25 │ function * foo() {yield*!foo.length}
+  > 26 │ delete!foo.length
+       │       ^^^^^^^^^^^
+    27 │ typeof!foo.length
+    28 │ void!foo.length
+  
+  i Unsafe fix: Replace with
+  
+    24 24 │   function * foo() {yield!foo.length}
+    25 25 │   function * foo() {yield*!foo.length}
+    26    │ - delete!foo.length
+       26 │ + delete·foo.length·===·0
+    27 27 │   typeof!foo.length
+    28 28 │   void!foo.length
+  
+
+```
+
+```
+invalid.js:27:7 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    25 │ function * foo() {yield*!foo.length}
+    26 │ delete!foo.length
+  > 27 │ typeof!foo.length
+       │       ^^^^^^^^^^^
+    28 │ void!foo.length
+    29 │ a instanceof!foo.length
+  
+  i Unsafe fix: Replace with
+  
+    25 25 │   function * foo() {yield*!foo.length}
+    26 26 │   delete!foo.length
+    27    │ - typeof!foo.length
+       27 │ + typeof·foo.length·===·0
+    28 28 │   void!foo.length
+    29 29 │   a instanceof!foo.length
+  
+
+```
+
+```
+invalid.js:28:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    26 │ delete!foo.length
+    27 │ typeof!foo.length
+  > 28 │ void!foo.length
+       │     ^^^^^^^^^^^
+    29 │ a instanceof!foo.length
+    30 │ a in!foo.length
+  
+  i Unsafe fix: Replace with
+  
+    26 26 │   delete!foo.length
+    27 27 │   typeof!foo.length
+    28    │ - void!foo.length
+       28 │ + void·foo.length·===·0
+    29 29 │   a instanceof!foo.length
+    30 30 │   a in!foo.length
+  
+
+```
+
+```
+invalid.js:29:13 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    27 │ typeof!foo.length
+    28 │ void!foo.length
+  > 29 │ a instanceof!foo.length
+       │             ^^^^^^^^^^^
+    30 │ a in!foo.length
+    31 │ export default!foo.length
+  
+  i Unsafe fix: Replace with
+  
+    27 27 │   typeof!foo.length
+    28 28 │   void!foo.length
+    29    │ - a·instanceof!foo.length
+       29 │ + a·instanceof·foo.length·===·0
+    30 30 │   a in!foo.length
+    31 31 │   export default!foo.length
+  
+
+```
+
+```
+invalid.js:30:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    28 │ void!foo.length
+    29 │ a instanceof!foo.length
+  > 30 │ a in!foo.length
+       │     ^^^^^^^^^^^
+    31 │ export default!foo.length
+    32 │ if(true){}else!foo.length
+  
+  i Unsafe fix: Replace with
+  
+    28 28 │   void!foo.length
+    29 29 │   a instanceof!foo.length
+    30    │ - a·in!foo.length
+       30 │ + a·in·foo.length·===·0
+    31 31 │   export default!foo.length
+    32 32 │   if(true){}else!foo.length
+  
+
+```
+
+```
+invalid.js:31:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    29 │ a instanceof!foo.length
+    30 │ a in!foo.length
+  > 31 │ export default!foo.length
+       │               ^^^^^^^^^^^
+    32 │ if(true){}else!foo.length
+    33 │ do!foo.length;while(true) {}
+  
+  i Unsafe fix: Replace with
+  
+    29 29 │   a instanceof!foo.length
+    30 30 │   a in!foo.length
+    31    │ - export·default!foo.length
+       31 │ + export·default·foo.length·===·0
+    32 32 │   if(true){}else!foo.length
+    33 33 │   do!foo.length;while(true) {}
+  
+
+```
+
+```
+invalid.js:32:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    30 │ a in!foo.length
+    31 │ export default!foo.length
+  > 32 │ if(true){}else!foo.length
+       │               ^^^^^^^^^^^
+    33 │ do!foo.length;while(true) {}
+    34 │ switch(foo){case!foo.length:{}}
+  
+  i Unsafe fix: Replace with
+  
+    30 30 │   a in!foo.length
+    31 31 │   export default!foo.length
+    32    │ - if(true){}else!foo.length
+       32 │ + if(true){}elsefoo.length·===·0
+    33 33 │   do!foo.length;while(true) {}
+    34 34 │   switch(foo){case!foo.length:{}}
+  
+
+```
+
+```
+invalid.js:33:3 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    31 │ export default!foo.length
+    32 │ if(true){}else!foo.length
+  > 33 │ do!foo.length;while(true) {}
+       │   ^^^^^^^^^^^
+    34 │ switch(foo){case!foo.length:{}}
+    35 │ for(const a of!foo.length);
+  
+  i Unsafe fix: Replace with
+  
+    31 31 │   export default!foo.length
+    32 32 │   if(true){}else!foo.length
+    33    │ - do!foo.length;while(true)·{}
+       33 │ + dofoo.length·===·0;while(true)·{}
+    34 34 │   switch(foo){case!foo.length:{}}
+    35 35 │   for(const a of!foo.length);
+  
+
+```
+
+```
+invalid.js:34:17 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    32 │ if(true){}else!foo.length
+    33 │ do!foo.length;while(true) {}
+  > 34 │ switch(foo){case!foo.length:{}}
+       │                 ^^^^^^^^^^^
+    35 │ for(const a of!foo.length);
+    36 │ for(const a in!foo.length);
+  
+  i Unsafe fix: Replace with
+  
+    32 32 │   if(true){}else!foo.length
+    33 33 │   do!foo.length;while(true) {}
+    34    │ - switch(foo){case!foo.length:{}}
+       34 │ + switch(foo){case·foo.length·===·0:{}}
+    35 35 │   for(const a of!foo.length);
+    36 36 │   for(const a in!foo.length);
+  
+
+```
+
+```
+invalid.js:35:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    33 │ do!foo.length;while(true) {}
+    34 │ switch(foo){case!foo.length:{}}
+  > 35 │ for(const a of!foo.length);
+       │               ^^^^^^^^^^^
+    36 │ for(const a in!foo.length);
+    37 │ 
+  
+  i Unsafe fix: Replace with
+  
+    33 33 │   do!foo.length;while(true) {}
+    34 34 │   switch(foo){case!foo.length:{}}
+    35    │ - for(const·a·of!foo.length);
+       35 │ + for(const·a·of·foo.length·===·0);
+    36 36 │   for(const a in!foo.length);
+    37 37 │   
+  
+
+```
+
+```
+invalid.js:36:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 with .length is zero.
+  
+    34 │ switch(foo){case!foo.length:{}}
+    35 │ for(const a of!foo.length);
+  > 36 │ for(const a in!foo.length);
+       │               ^^^^^^^^^^^
+    37 │ 
+    38 │ class A {
+  
+  i Unsafe fix: Replace with
+  
+    34 34 │   switch(foo){case!foo.length:{}}
+    35 35 │   for(const a of!foo.length);
+    36    │ - for(const·a·in!foo.length);
+       36 │ + for(const·a·in·foo.length·===·0);
+    37 37 │   
+    38 38 │   class A {
+  
+
+```
+
+```
+invalid.js:40:13 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 with .length is not zero.
+  
+    38 │ class A {
+    39 │     a() {
+  > 40 │         if (this.length) {};
+       │             ^^^^^^^^^^^
+    41 │         while (!this.size || foo);
+    42 │     }
+  
+  i Unsafe fix: Replace with
+  
+    40 │ ········if·(this.length·>·0)·{};
+       │                        ++++     
+
+```
+
+```
+invalid.js:41:16 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .size === 0 with .size is zero.
+  
+    39 │     a() {
+    40 │         if (this.length) {};
+  > 41 │         while (!this.size || foo);
+       │                ^^^^^^^^^^
+    42 │     }
+    43 │ }
+  
+  i Unsafe fix: Replace with
+  
+    39 39 │       a() {
+    40 40 │           if (this.length) {};
+    41    │ - ········while·(!this.size·||·foo);
+       41 │ + ········while·(this.size·===·0||·foo);
+    42 42 │       }
+    43 43 │   }
+  
+
+```

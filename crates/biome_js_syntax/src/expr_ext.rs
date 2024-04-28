@@ -1903,23 +1903,6 @@ pub fn is_boolean_constructor_call(node: &JsSyntaxNode) -> Option<JsNewExpressio
     }
 }
 
-/// Check if the SyntaxNode is a `Boolean` Call Expression
-/// ## Example
-/// ```js
-/// Boolean(x)
-/// ```
-pub fn is_boolean_call(node: &JsSyntaxNode) -> Option<JsCallExpression> {
-    let expr = JsCallArgumentList::cast_ref(node)?
-        .parent::<JsCallArguments>()?
-        .parent::<JsCallExpression>()?;
-
-    if expr.has_callee("Boolean") {
-        Some(expr)
-    } else {
-        None
-    }
-}
-
 #[cfg(test)]
 mod test {
     use biome_js_factory::syntax::{JsCallExpression, JsTemplateExpression};
