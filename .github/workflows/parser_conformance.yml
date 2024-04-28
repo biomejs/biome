@@ -25,13 +25,13 @@ jobs:
 
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
       - name: Support longpaths
         run: git config core.longpaths true
 
       - name: Checkout PR Branch
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:
           submodules: recursive
 
@@ -52,7 +52,7 @@ jobs:
         run: cargo coverage --json > new_results.json
 
       - name: Checkout main Branch
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:
           clean: false
           ref: main

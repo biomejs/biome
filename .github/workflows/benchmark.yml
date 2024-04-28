@@ -33,7 +33,7 @@ jobs:
     steps:
 
       - name: Checkout PR Branch
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:
           ref: ${{ steps.sha.outputs.result }}
 
@@ -49,7 +49,7 @@ jobs:
         run: cargo codspeed build --features codspeed -p xtask_bench
 
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@1dbf41f0ae41cebfe61e084e535aebe533409b4d # v2
+        uses: CodSpeedHQ/action@ac302de34d7033a41328af8feef9994251c7bd1e # v2
         timeout-minutes: 30
         with:
           run: cargo codspeed run
