@@ -1001,6 +1001,10 @@ export interface Nursery {
 	 */
 	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
 	/**
+	 * Require the default clause in switch statements.
+	 */
+	useDefaultSwitchClause?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow a missing generic family keyword within font families.
 	 */
 	useGenericFontNames?: RuleConfiguration_for_Null;
@@ -2003,6 +2007,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentNewBuiltin"
 	| "lint/nursery/useGenericFontNames"
+	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"

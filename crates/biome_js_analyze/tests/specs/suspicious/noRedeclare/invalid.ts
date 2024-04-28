@@ -6,3 +6,7 @@ class C {
 }
 
 function f<T, T>() {}
+
+function g<T>() {
+    type T = number;
+}

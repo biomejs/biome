@@ -13,6 +13,9 @@ class C {
 
 function f<T, T>() {}
 
+function g<T>() {
+    type T = number;
+}
 ```
 
 # Diagnostics
@@ -45,21 +48,43 @@ invalid.ts:8:15 lint/suspicious/noRedeclare ━━━━━━━━━━━━
 
   ! Shouldn't redeclare 'T'. Consider to delete it or rename it.
   
-    6 │ }
-    7 │ 
-  > 8 │ function f<T, T>() {}
-      │               ^
-    9 │ 
+     6 │ }
+     7 │ 
+   > 8 │ function f<T, T>() {}
+       │               ^
+     9 │ 
+    10 │ function g<T>() {
   
   i 'T' is defined here:
   
-    6 │ }
-    7 │ 
-  > 8 │ function f<T, T>() {}
-      │            ^
-    9 │ 
+     6 │ }
+     7 │ 
+   > 8 │ function f<T, T>() {}
+       │            ^
+     9 │ 
+    10 │ function g<T>() {
   
 
 ```
 
+```
+invalid.ts:11:10 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Shouldn't redeclare 'T'. Consider to delete it or rename it.
+  
+    10 │ function g<T>() {
+  > 11 │     type T = number;
+       │          ^
+    12 │ }
+  
+  i 'T' is defined here:
+  
+     8 │ function f<T, T>() {}
+     9 │ 
+  > 10 │ function g<T>() {
+       │            ^
+    11 │     type T = number;
+    12 │ }
+  
+
+```
