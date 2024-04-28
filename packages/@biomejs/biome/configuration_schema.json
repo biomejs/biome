@@ -1584,8 +1584,22 @@
 						{ "type": "null" }
 					]
 				},
+				"useDefaultSwitchClause": {
+					"description": "Require the default clause in switch statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExplicitLengthCheck": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useGenericFontNames": {
+					"description": "Disallow a missing generic family keyword within font families.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

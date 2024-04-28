@@ -997,9 +997,17 @@ export interface Nursery {
 	 */
 	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Require the default clause in switch statements.
+	 */
+	useDefaultSwitchClause?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
 	 */
 	useExplicitLengthCheck?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow a missing generic family keyword within font families.
+	 */
+	useGenericFontNames?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */
