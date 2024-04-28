@@ -1,3 +1,0 @@
-[build]
-publish = "website/dist/"
-command = "npm i -g wasm-pack && pnpm --filter @biomejs/website run build:wasm && pnpm i --filter @biomejs/website --frozen-lockfile && pnpm --filter @biomejs/website run build:js"

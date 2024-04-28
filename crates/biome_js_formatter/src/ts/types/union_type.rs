@@ -37,10 +37,37 @@ impl FormatNodeRule<TsUnionType> for FormatTsUnionType {
             );
         }
 
-        let has_leading_comments = f.comments().has_leading_comments(node.syntax());
+        // Find the head of the nest union type chain
+        // ```js
+        // type Foo = | (| (A | B))
+        //                  ^^^^^
+        // ```
+        // If the current union type is `A | B`
+        // - `A | B` is the inner union type of `| (A | B)`
+        // - `| (A | B)` is the inner union type of `| (| (A | B))`
+        //
+        // So the head of the current nested union type chain is `| (| (A | B))`
+        // if we encounter a leading comment when navigating up the chain,
+        // we consider the current union type as having leading comments
+        let mut has_leading_comments = f.comments().has_leading_comments(node.syntax());
+        let mut union_type_at_top = node.clone();
+        while let Some(grand_parent) = union_type_at_top
+            .syntax()
+            .grand_parent()
+            .and_then(TsUnionType::cast)
+        {
+            if grand_parent.types().len() == 1 {
+                if f.comments().has_leading_comments(grand_parent.syntax()) {
+                    has_leading_comments = true;
+                }
+                union_type_at_top = grand_parent;
+            } else {
+                break;
+            }
+        }
 
         let should_indent = {
-            let parent_kind = node.syntax().parent().kind();
+            let parent_kind = union_type_at_top.syntax().parent().kind();
 
             // These parents have indent for their content, so we don't need to indent here
             !match parent_kind {

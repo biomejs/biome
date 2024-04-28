@@ -80,6 +80,13 @@ fn parse_value(p: &mut JsonParser) -> ParsedSyntax {
             Present(m.complete(p, JSON_BOGUS_VALUE))
         }
 
+        ERROR_TOKEN => {
+            // An error is already emitted by the lexer.
+            let m = p.start();
+            p.bump(ERROR_TOKEN);
+            Present(m.complete(p, JSON_BOGUS_VALUE))
+        }
+
         _ => Absent,
     }
 }
@@ -282,10 +289,10 @@ fn parse_member_name(p: &mut JsonParser) -> ParsedSyntax {
             p.bump(JSON_STRING_LITERAL);
             Present(m.complete(p, JSON_MEMBER_NAME))
         }
-        IDENT => {
+        IDENT | T![null] | T![true] | T![false] => {
             let m = p.start();
             p.error(p.err_builder("Property key must be double quoted", p.cur_range()));
-            p.bump(IDENT);
+            p.bump_remap(IDENT);
             Present(m.complete(p, JSON_MEMBER_NAME))
         }
         _ => Absent,

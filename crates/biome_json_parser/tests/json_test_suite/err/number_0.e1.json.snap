@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -48,18 +47,6 @@ JsonRoot {
 ## Diagnostics
 
 ```
-number_0.e1.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an array, an object, or a literal but instead found '0.e1'.
-  
-  > 1 │ [0.e1]
-      │  ^^^^
-  
-  i Expected an array, an object, or a literal here.
-  
-  > 1 │ [0.e1]
-      │  ^^^^
-  
 number_0.e1.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing fraction
@@ -70,5 +57,3 @@ number_0.e1.json:1:4 parse ━━━━━━━━━━━━━━━━━�
   i Remove the `.`
   
 ```
-
-

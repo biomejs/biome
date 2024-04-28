@@ -16,7 +16,7 @@ use biome_js_syntax::{
     JsPropertyClassMember, JsPropertyClassMemberFields, JsPropertyObjectMember, JsSyntaxKind,
     JsVariableDeclarator, TsIdentifierBinding, TsInitializedPropertySignatureClassMember,
     TsInitializedPropertySignatureClassMemberFields, TsPropertySignatureClassMember,
-    TsPropertySignatureClassMemberFields, TsTypeAliasDeclaration, TsTypeArguments,
+    TsPropertySignatureClassMemberFields, TsTypeAliasDeclaration, TsTypeArguments, TsUnionType,
 };
 use biome_js_syntax::{AnyJsLiteralExpression, JsUnaryExpression};
 use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
@@ -910,7 +910,26 @@ impl AnyJsAssignmentLike {
                     || should_break_after_operator(&initializer.expression()?, comments, f)?
             }
             RightAssignmentLike::AnyTsType(AnyTsType::TsUnionType(ty)) => {
-                comments.has_leading_comments(ty.syntax())
+                // Recursively checks if the union type is nested and identifies the innermost union type.
+                // If a leading comment is found while navigating to the inner union type,
+                // it is considered as having leading comments.
+                let mut union_type = ty.clone();
+                let mut has_leading_comments = comments.has_leading_comments(union_type.syntax());
+                while is_nested_union_type(&union_type)? && !has_leading_comments {
+                    if let Some(Ok(inner_union_type)) = union_type.types().last() {
+                        let inner_union_type = TsUnionType::cast_ref(inner_union_type.syntax());
+                        if let Some(inner_union_type) = inner_union_type {
+                            has_leading_comments =
+                                comments.has_leading_comments(inner_union_type.syntax());
+                            union_type = inner_union_type;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                has_leading_comments
             }
             right => comments.has_leading_own_line_comment(right.syntax()),
         };
@@ -1302,6 +1321,23 @@ fn is_complex_type_arguments(type_arguments: TsTypeArguments) -> SyntaxResult<bo
     // TODO: add here will_break logic
     // https://github.com/prettier/prettier/blob/a043ac0d733c4d53f980aa73807a63fc914f23bd/src/language-js/print/assignment.js#L454
 
+    Ok(false)
+}
+
+/// If a union type has only one type and it's a union type, then it's a nested union type
+/// ```js
+/// type A = | (A | B)
+///          ^^^^^^^^^^
+/// ```
+/// The final format will only keep the inner union type
+fn is_nested_union_type(union_type: &TsUnionType) -> SyntaxResult<bool> {
+    if union_type.types().len() == 1 {
+        let ty = union_type.types().first();
+        if let Some(ty) = ty {
+            let is_nested = TsUnionType::can_cast(ty?.syntax().kind());
+            return Ok(is_nested);
+        }
+    }
     Ok(false)
 }
 

@@ -2702,6 +2702,13 @@ pub struct Nursery {
     #[doc = "Disallow unknown CSS units."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_unit: Option<RuleConfiguration<NoUnknownUnit>>,
+    #[doc = "Disallow initializing variables to undefined."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_useless_undefined_initialization:
+        Option<RuleConfiguration<NoUselessUndefinedInitialization>>,
+    #[doc = "Disallow Array constructors."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_array_literals: Option<RuleConfiguration<UseArrayLiterals>>,
     #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_new_builtin: Option<RuleConfiguration<UseConsistentNewBuiltin>>,
@@ -2750,6 +2757,8 @@ impl Nursery {
         "noRestrictedImports",
         "noUndeclaredDependencies",
         "noUnknownUnit",
+        "noUselessUndefinedInitialization",
+        "useArrayLiterals",
         "useConsistentNewBuiltin",
         "useExplicitLengthCheck",
         "useImportRestrictions",
@@ -2766,6 +2775,7 @@ impl Nursery {
         "noFlatMapIdentity",
         "noImportantInKeyframe",
         "noUnknownUnit",
+        "useGenericFontNames",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
@@ -2778,6 +2788,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -2908,7 +2919,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.use_consistent_new_builtin.as_ref() {
+        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
@@ -3022,7 +3033,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.use_consistent_new_builtin.as_ref() {
+        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
@@ -3148,6 +3159,14 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownUnit" => self
                 .no_unknown_unit
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUselessUndefinedInitialization" => self
+                .no_useless_undefined_initialization
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useArrayLiterals" => self
+                .use_array_literals
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useConsistentNewBuiltin" => self

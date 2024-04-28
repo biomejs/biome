@@ -68,6 +68,50 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- [noDuplicateJsonKeys](https://biomejs.dev/linter/rules/no-duplicate-json-keys/) no longer crashes when a JSON file contains an unterminated string ([#2357](https://github.com/biomejs/biome/issues/2357)).
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) now reports redeclarations of parameters in a functions body ([#2394](https://github.com/biomejs/biome/issues/2394)).
+
+  The rule was unable to detect redeclarations of a parameter or type parameter in the function body.
+  The following two redeclarations are now reported:
+
+  ```ts
+  function f<T>(a) {
+    type T = number; // redeclaration
+    const a = 0; // redeclaration
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) no longer reports overloads in object types ([#2608](https://github.com/biomejs/biome/issues/2608)).
+
+  The rule no longer report redeclarations in the following code:
+
+  ```ts
+  type Overloads = {
+    ({ a }: { a: number }): number,
+    ({ a }: { a: string }): string,
+  };
+  ```
+
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) now merge default function export declarations and types ([#2372](https://github.com/biomejs/biome/issues/2372)).
+
+  The following code is no longer reported as a redeclaration:
+
+  ```ts
+  interface Foo {}
+  export default function Foo() {}
+  ```
+
+  Contributed by @Conaclos
+
+- [noUnusedVariables] no longer crash Biome when encountering a malformed conditional type ([#1695](https://github.com/biomejs/biome/issues/1695)).
+  Contributed by @Conaclos
+
 - [useConst](https://biomejs.dev/linter/rules/use-const/) now ignores a variable that is read before its assignment.
 
   Previously, the rule reported the following example:
@@ -82,7 +126,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- Fix [useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type/) that suggested invalid code fixes when parentheses are required ([#2595](https://github.com/biomejs/biome/issues/2595)).
+- [useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type/) now suggests correct code fixes when parentheses are required ([#2595](https://github.com/biomejs/biome/issues/2595)).
 
   Previously, the rule didn't add parentheses when they were needed.
   It now adds parentheses when the function signature is inside an array, a union, or an intersection.
@@ -94,7 +138,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- Fix [useTemplate](https://biomejs.dev/linter/rules/use-template/) that wrongly escaped strings in some edge cases ([#2580](https://github.com/biomejs/biome/issues/2580)).
+- [useTemplate](https://biomejs.dev/linter/rules/use-template/) now correctly escapes strings ([#2580](https://github.com/biomejs/biome/issues/2580)).
 
   Previously, the rule didn't correctly escape characters preceded by an escaped character.
 
@@ -123,6 +167,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   console.log((a,b/* comment */));
   ```
   Contributed by @ah-yu
+
+- Correctly format nested union type to avoid reformatting issue. [#2628](https://github.com/biomejs/biome/pull/2628). Contributed by @ah-yu
 
 ### Linter
 

@@ -4,7 +4,7 @@ use biome_analyze::{declare_rule, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::Scope;
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
-use biome_js_syntax::TextRange;
+use biome_js_syntax::{JsSyntaxKind, TextRange};
 use biome_rowan::AstNode;
 use rustc_hash::FxHashMap;
 
@@ -115,6 +115,37 @@ impl Rule for NoRedeclare {
 
 fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<Redeclaration>) {
     let mut declarations = FxHashMap::<String, (TextRange, AnyJsBindingDeclaration)>::default();
+    if scope.syntax().kind() == JsSyntaxKind::JS_FUNCTION_BODY {
+        // Handle cases where a variable/type redeclares a parameter or type parameter.
+        // For example:
+        //
+        // ```js
+        // function f<T>(a) { type T = number; const a = 0; }
+        // ```
+        //
+        // I previously tried to remove the JsFunctionBody scope
+        // to directly add declarations of the function body in the function scope.
+        // Unfortunately, this is not a good idea because variables and types outside the function
+        // can be referenced in the parameters and type parameters of the function,
+        // then shadowed in the function body.
+        // Thus, using a distinct scope for the function body and the function makes sense.
+        // For example:
+        //
+        // ```js
+        // type U = string;
+        // function g() {}
+        // function f<T = U>(h = g) { type U = number; function g() {}; }
+        // ```
+        if let Some(function_scope) = scope.parent() {
+            for binding in function_scope.bindings() {
+                let id_binding = binding.tree();
+                if let Some(decl) = id_binding.declaration() {
+                    let name = id_binding.text();
+                    declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
+                }
+            }
+        }
+    }
     for binding in scope.bindings() {
         let id_binding = binding.tree();
 

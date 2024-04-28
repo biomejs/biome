@@ -575,8 +575,7 @@ impl<'src> Lexer<'src> {
                             .with_detail(self.position..self.position + 1, "line breaks here");
 
                     self.diagnostics.push(unterminated);
-
-                    return JSON_STRING_LITERAL;
+                    return ERROR_TOKEN;
                 }
                 UNI => self.advance_char_unchecked(),
 
@@ -624,8 +623,7 @@ impl<'src> Lexer<'src> {
                             "file ends here",
                         );
                 self.diagnostics.push(unterminated);
-
-                JSON_STRING_LITERAL
+                ERROR_TOKEN
             }
             LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
         }
