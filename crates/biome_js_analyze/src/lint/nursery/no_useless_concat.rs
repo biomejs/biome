@@ -67,8 +67,9 @@ impl Rule for NoUselessConcat {
         let has_left_string_expression = is_string_expression(node.left().ok())
             || is_binary_expression_with_literal_string(node.left().ok())
             || is_parenthesized_concatenation(node.left().ok());
-        let has_string_concatenation = is_concatenation(node);
-        let has_useless_concat = has_string_concatenation && has_left_string_expression;
+        let has_useless_concat = has_left_string_expression
+            && is_concatenation(node)
+            && !is_stylistic_concatenation(node);
 
         has_useless_concat.then_some(())
     }
@@ -120,6 +121,33 @@ fn is_concatenation(binary_expression: &JsBinaryExpression) -> bool {
         || is_parenthesized_concatenation(binary_expression.right().ok());
 
     is_plus_operator && is_string_expression
+}
+
+// Concatenation of strings in muliple lines to prevent big line widths
+fn is_stylistic_concatenation(binary_expression: &JsBinaryExpression) -> bool {
+    let operator = binary_expression.operator().ok();
+    let is_plus_operator = matches!(operator, Some(JsBinaryOperator::Plus));
+    let has_newline_in_right = binary_expression.right().is_ok_and(|right| {
+        match (
+            right.as_any_js_literal_expression(),
+            right.as_js_template_expression(),
+        ) {
+            (Some(literal_expression), _) => literal_expression
+                .as_js_string_literal_expression()
+                .is_some_and(|string_literal_expression| {
+                    string_literal_expression
+                        .as_fields()
+                        .value_token
+                        .is_ok_and(|token| token.has_leading_newline())
+                }),
+            (_, Some(template_expression)) => template_expression
+                .l_tick_token()
+                .is_ok_and(|token| token.has_leading_newline()),
+            _ => false,
+        }
+    });
+
+    is_plus_operator && has_newline_in_right
 }
 
 fn is_parenthesized_concatenation(expression: Option<AnyJsExpression>) -> bool {
