@@ -165,6 +165,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
   Contributed by @ah-yu
 
+- Correctly format nested union type to avoid reformatting issue. [#2628](https://github.com/biomejs/biome/pull/2628). Contributed by @ah-yu
+
 ### Linter
 
 #### Bug fixes
