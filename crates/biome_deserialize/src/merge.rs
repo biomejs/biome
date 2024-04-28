@@ -10,10 +10,7 @@ pub trait Merge {
     fn merge_with(&mut self, other: Self);
 }
 
-impl<T> Merge for Option<T>
-where
-    T: Merge,
-{
+impl<T: Merge> Merge for Option<T> {
     fn merge_with(&mut self, other: Self) {
         if let Some(other) = other {
             match self.as_mut() {
