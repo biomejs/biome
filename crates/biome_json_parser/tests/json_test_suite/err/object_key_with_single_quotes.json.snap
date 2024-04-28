@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -28,11 +27,11 @@ JsonRoot {
                                 ],
                             },
                             COLON@4..6 ":" [] [Whitespace(" ")],
-                        ],
-                    },
-                    JsonBogusValue {
-                        items: [
-                            ERROR_TOKEN@6..13 "'value'" [] [],
+                            JsonBogusValue {
+                                items: [
+                                    ERROR_TOKEN@6..13 "'value'" [] [],
+                                ],
+                            },
                         ],
                     },
                 ],
@@ -52,12 +51,12 @@ JsonRoot {
   1: JSON_BOGUS_VALUE@0..14
     0: L_CURLY@0..1 "{" [] []
     1: JSON_BOGUS@1..13
-      0: JSON_BOGUS@1..6
+      0: JSON_BOGUS@1..13
         0: JSON_BOGUS@1..4
           0: IDENT@1..4 "key" [] []
         1: COLON@4..6 ":" [] [Whitespace(" ")]
-      1: JSON_BOGUS_VALUE@6..13
-        0: ERROR_TOKEN@6..13 "'value'" [] []
+        2: JSON_BOGUS_VALUE@6..13
+          0: ERROR_TOKEN@6..13 "'value'" [] []
     2: R_CURLY@13..14 "}" [] []
   2: EOF@14..14 "" [] []
 
@@ -83,5 +82,3 @@ object_key_with_single_quotes.json:1:7 parse ━━━━━━━━━━━�
   i Use double quotes to escape the string.
   
 ```
-
-

@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -21,6 +20,11 @@ JsonRoot {
             JsonBogusValue {
                 items: [
                     ERROR_TOKEN@1..2 "+" [] [],
+                ],
+            },
+            missing separator,
+            JsonBogusValue {
+                items: [
                     ERROR_TOKEN@2..3 "+" [] [],
                 ],
             },
@@ -43,11 +47,13 @@ JsonRoot {
   1: JSON_ARRAY_VALUE@0..8
     0: L_BRACK@0..1 "[" [] []
     1: JSON_ARRAY_ELEMENT_LIST@1..7
-      0: JSON_BOGUS_VALUE@1..3
+      0: JSON_BOGUS_VALUE@1..2
         0: ERROR_TOKEN@1..2 "+" [] []
-        1: ERROR_TOKEN@2..3 "+" [] []
       1: (empty)
-      2: JSON_NUMBER_VALUE@3..7
+      2: JSON_BOGUS_VALUE@2..3
+        0: ERROR_TOKEN@2..3 "+" [] []
+      3: (empty)
+      4: JSON_NUMBER_VALUE@3..7
         0: JSON_NUMBER_LITERAL@3..7 "1234" [] []
     2: R_BRACK@7..8 "]" [] []
   2: EOF@8..8 "" [] []
@@ -81,5 +87,3 @@ number_++.json:1:4 parse ━━━━━━━━━━━━━━━━━━�
   i Remove 1234
   
 ```
-
-

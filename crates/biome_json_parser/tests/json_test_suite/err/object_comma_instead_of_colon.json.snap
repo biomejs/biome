@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -15,26 +14,32 @@ expression: snapshot
 ```
 JsonRoot {
     bom_token: missing (optional),
-    value: JsonObjectValue {
-        l_curly_token: L_CURLY@0..1 "{" [] [],
-        json_member_list: JsonMemberList [
-            JsonMember {
-                name: JsonMemberName {
-                    value_token: JSON_STRING_LITERAL@1..4 "\"x\"" [] [],
-                },
-                colon_token: missing (required),
-                value: missing (required),
+    value: JsonBogusValue {
+        items: [
+            L_CURLY@0..1 "{" [] [],
+            JsonBogus {
+                items: [
+                    JsonMember {
+                        name: JsonMemberName {
+                            value_token: JSON_STRING_LITERAL@1..4 "\"x\"" [] [],
+                        },
+                        colon_token: missing (required),
+                        value: missing (required),
+                    },
+                    COMMA@4..6 "," [] [Whitespace(" ")],
+                    JsonBogus {
+                        items: [
+                            JsonBogus {
+                                items: [
+                                    IDENT@6..10 "null" [] [],
+                                ],
+                            },
+                        ],
+                    },
+                ],
             },
-            COMMA@4..6 "," [] [Whitespace(" ")],
-            JsonMember {
-                name: missing (required),
-                colon_token: missing (required),
-                value: JsonNullValue {
-                    value_token: NULL_KW@6..10 "null" [] [],
-                },
-            },
+            R_CURLY@10..11 "}" [] [],
         ],
-        r_curly_token: R_CURLY@10..11 "}" [] [],
     },
     eof_token: EOF@11..11 "" [] [],
 }
@@ -45,20 +50,18 @@ JsonRoot {
 ```
 0: JSON_ROOT@0..11
   0: (empty)
-  1: JSON_OBJECT_VALUE@0..11
+  1: JSON_BOGUS_VALUE@0..11
     0: L_CURLY@0..1 "{" [] []
-    1: JSON_MEMBER_LIST@1..10
+    1: JSON_BOGUS@1..10
       0: JSON_MEMBER@1..4
         0: JSON_MEMBER_NAME@1..4
           0: JSON_STRING_LITERAL@1..4 "\"x\"" [] []
         1: (empty)
         2: (empty)
       1: COMMA@4..6 "," [] [Whitespace(" ")]
-      2: JSON_MEMBER@6..10
-        0: (empty)
-        1: (empty)
-        2: JSON_NULL_VALUE@6..10
-          0: NULL_KW@6..10 "null" [] []
+      2: JSON_BOGUS@6..10
+        0: JSON_BOGUS@6..10
+          0: IDENT@6..10 "null" [] []
     2: R_CURLY@10..11 "}" [] []
   2: EOF@11..11 "" [] []
 
@@ -78,16 +81,18 @@ object_comma_instead_of_colon.json:1:5 parse ━━━━━━━━━━━�
   
 object_comma_instead_of_colon.json:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a property but instead found 'null'.
+  × Property key must be double quoted
   
   > 1 │ {"x", null}
       │       ^^^^
   
-  i Expected a property here.
+object_comma_instead_of_colon.json:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
   
   > 1 │ {"x", null}
-      │       ^^^^
+      │           ^
+  
+  i Remove }
   
 ```
-
-

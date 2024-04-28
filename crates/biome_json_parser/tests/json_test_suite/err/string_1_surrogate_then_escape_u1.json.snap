@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -48,18 +47,6 @@ JsonRoot {
 ## Diagnostics
 
 ```
-string_1_surrogate_then_escape_u1.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an array, an object, or a literal but instead found '"\uD800\u1"'.
-  
-  > 1 │ ["\uD800\u1"]
-      │  ^^^^^^^^^^^
-  
-  i Expected an array, an object, or a literal here.
-  
-  > 1 │ ["\uD800\u1"]
-      │  ^^^^^^^^^^^
-  
 string_1_surrogate_then_escape_u1.json:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid unicode sequence
@@ -75,5 +62,3 @@ string_1_surrogate_then_escape_u1.json:1:9 parse ━━━━━━━━━━�
   i A unicode escape sequence must consist of 4 hexadecimal numbers: `\uXXXX`, e.g. `\u002F' for '/'.
   
 ```
-
-

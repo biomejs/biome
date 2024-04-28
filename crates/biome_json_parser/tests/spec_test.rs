@@ -75,7 +75,6 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                 .clone()
                 .with_file_path(file_name)
                 .with_file_source_code(&content);
-
             formatter
                 .write_markup(markup! {
                     {PrintDiagnostic::verbose(&error)}
