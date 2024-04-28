@@ -997,6 +997,10 @@ export interface Nursery {
 	 */
 	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unnecessary concatenation of literals or template literals.
+	 */
+	noUselessConcat?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow initializing variables to undefined.
 	 */
 	noUselessUndefinedInitialization?: RuleConfiguration_for_Null;
@@ -2021,6 +2025,7 @@ export type Category =
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
+	| "lint/nursery/noUselessConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"

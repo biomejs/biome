@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+const a = "a" + "b";
+// const a = "a" + "b" + "c";
+// const a = foo + "a" + "b";
+// const a = "a" + "b" + "c";
+// const a = foo + "a" + ("b" + "c");
+// const a = `a` + "b";
+// const a = `a` + `b`;
+// const a = foo + `a` + `b`;
+
+```
+
+# Diagnostics
+```
+invalid.js:1:11 lint/nursery/noUselessConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Useless string concatenation.
+  
+  > 1 │ const a = "a" + "b";
+      │           ^^^^^^^^^
+    2 │ // const a = "a" + "b" + "c";
+    3 │ // const a = foo + "a" + "b";
+  
+  i This note will give you more information.
+  
+
+```
