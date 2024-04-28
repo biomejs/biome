@@ -185,7 +185,7 @@ fn convert_to_array_type(
                             JsSyntaxKind::TS_READONLY_MODIFIER,
                             "readonly ",
                             [],
-                            [TriviaPiece::new(TriviaPieceKind::Whitespace, 1)],
+                            [TriviaPiece::whitespace(1)],
                         );
 
                         // Modify `ReadonlyArray<ReadonlyArray<T>>` to `readonly (readonly T[])[]`

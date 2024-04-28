@@ -158,7 +158,7 @@ impl ExactSizeIterator for SyntaxTriviaPiecesIterator {}
 #[cfg(test)]
 mod tests {
     use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
-    use crate::{SyntaxNode, TriviaPiece, TriviaPieceKind};
+    use crate::{SyntaxNode, TriviaPiece};
 
     #[test]
     fn trivia_text() {
@@ -167,8 +167,8 @@ mod tests {
         builder.token_with_trivia(
             RawLanguageKind::WHITESPACE,
             "\t let \t\t",
-            &[TriviaPiece::new(TriviaPieceKind::Whitespace, 2)],
-            &[TriviaPiece::new(TriviaPieceKind::Whitespace, 3)],
+            &[TriviaPiece::whitespace(2)],
+            &[TriviaPiece::whitespace(3)],
         );
         builder.finish_node();
 
