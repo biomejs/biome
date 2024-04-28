@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, JsBinaryExpression};
-use biome_rowan::{AstNode, SyntaxError};
+use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsBinaryOperator};
+use biome_rowan::AstNode;
 
 declare_rule! {
     /// Disallow unnecessary concatenation of literals or template literals.
@@ -22,10 +22,6 @@ declare_rule! {
     ///
     /// ```js,expect_diagnostic
     /// const a = foo + "a" + "b";
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// const a = "a" + "b" + "c";
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -68,11 +64,11 @@ impl Rule for NoUselessConcat {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let left = node.left();
-        let right = node.right();
-        let has_string_concatenation = is_literal_string_expression(right);
-        let is_left_string_expression = is_literal_string_expression(left);
-        let has_useless_concat = has_string_concatenation && is_left_string_expression;
+        let has_left_string_expression = is_string_expression(node.left().ok())
+            || is_binary_expression_with_literal_string(node.left().ok())
+            || is_parenthesized_concatenation(node.left().ok());
+        let has_string_concatenation = is_concatenation(node);
+        let has_useless_concat = has_string_concatenation && has_left_string_expression;
 
         has_useless_concat.then_some(())
     }
@@ -94,9 +90,44 @@ impl Rule for NoUselessConcat {
     }
 }
 
-fn is_literal_string_expression(node: Result<AnyJsExpression, SyntaxError>) -> bool {
-    node.is_ok_and(|node| match node.as_any_js_literal_expression() {
-        Some(expression) => expression.as_js_string_literal_expression().is_some(),
-        None => false,
+fn is_string_expression(expression: Option<AnyJsExpression>) -> bool {
+    expression.is_some_and(|node| {
+        match (
+            node.as_any_js_literal_expression(),
+            node.as_js_template_expression(),
+        ) {
+            (Some(literal_expression), _) => literal_expression
+                .as_js_string_literal_expression()
+                .is_some(),
+            (_, Some(_template_expression)) => true,
+            _ => false,
+        }
     })
+}
+
+fn is_binary_expression_with_literal_string(expression: Option<AnyJsExpression>) -> bool {
+    if let Some(AnyJsExpression::JsBinaryExpression(binary_expression)) = expression {
+        return is_string_expression(binary_expression.right().ok());
+    }
+
+    false
+}
+
+fn is_concatenation(binary_expression: &JsBinaryExpression) -> bool {
+    let operator = binary_expression.operator().ok();
+    let is_plus_operator = matches!(operator, Some(JsBinaryOperator::Plus));
+    let is_string_expression = is_string_expression(binary_expression.right().ok())
+        || is_parenthesized_concatenation(binary_expression.right().ok());
+
+    is_plus_operator && is_string_expression
+}
+
+fn is_parenthesized_concatenation(expression: Option<AnyJsExpression>) -> bool {
+    if let Some(AnyJsExpression::JsParenthesizedExpression(parenthesized_expression)) = expression {
+        return is_binary_expression_with_literal_string(
+            parenthesized_expression.expression().ok(),
+        );
+    }
+
+    false
 }
