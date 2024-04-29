@@ -98,14 +98,7 @@ structure_open_object_with_key_open_string.json:3:5 parse ━━━━━━━�
       │     ^^
     4 │ }
   
-  i line breaks here
-  
-    1 │ {
-    2 │     "key": 0,
-  > 3 │     "a
-      │       
-  > 4 │ }
-      │ 
+  i The closing quote must be on the same line.
   
 structure_open_object_with_key_open_string.json:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

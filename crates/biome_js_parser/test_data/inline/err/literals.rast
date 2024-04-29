@@ -208,15 +208,7 @@ literals.js:3:1 parse ━━━━━━━━━━━━━━━━━━━�
     4 │ continues" // unterminated string literal
     5 │ 
   
-  i line breaks here
-  
-    1 │ 00, 012, 08, 091, 0789 // parser errors
-    2 │ 01n, 0_0, 01.2 // lexer errors
-  > 3 │ "test
-      │      
-  > 4 │ continues" // unterminated string literal
-      │ ^
-    5 │ 
+  i The closing quote must be on the same line.
   
 --
 literals.js:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -237,14 +229,7 @@ literals.js:4:10 parse ━━━━━━━━━━━━━━━━━━━
       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ 
   
-  i line breaks here
-  
-    2 │ 01n, 0_0, 01.2 // lexer errors
-    3 │ "test
-  > 4 │ continues" // unterminated string literal
-      │                                          
-  > 5 │ 
-      │ 
+  i The closing quote must be on the same line.
   
 --
 00, 012, 08, 091, 0789 // parser errors
