@@ -74,11 +74,7 @@ pub fn is_boolean_constructor_call(node: &JsSyntaxNode) -> Option<JsNewExpressio
         .parent::<JsCallArguments>()?
         .parent::<JsNewExpression>()?;
 
-    if expr.has_callee("Boolean") {
-        Some(expr)
-    } else {
-        None
-    }
+    expr.has_callee("Boolean").then_some(expr)
 }
 
 /// Check if the SyntaxNode is a `Boolean` Call Expression

@@ -141,10 +141,7 @@ impl Rule for UseExplicitLengthCheck {
         let node = ctx.query();
         let member_name = node.member().ok()?.text();
 
-        if LENGTH_MEMBER_NAMES
-            .binary_search(&member_name.as_str())
-            .is_err()
-        {
+        if !LENGTH_MEMBER_NAMES.contains(&member_name.as_str()) {
             return None;
         }
 
@@ -303,8 +300,8 @@ impl Rule for UseExplicitLengthCheck {
     }
 }
 
-/// Sorted list of length properties.
-const LENGTH_MEMBER_NAMES: &[&str] = &["byteLength", "byteOffset", "length", "size"];
+/// Sorted by how common they are in the wild
+const LENGTH_MEMBER_NAMES: &[&str] = &[ "length", "size", "byteLength", "byteOffset"];
 
 pub struct UseExplicitLengthCheckState {
     check: LengthCheck,
@@ -312,13 +309,12 @@ pub struct UseExplicitLengthCheckState {
     member_name: String,
 }
 
-#[derive(PartialEq, Clone, Copy)]
 enum MemberPosition {
     Left,
     Right,
 }
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(Clone, Copy)]
 enum LengthCheck {
     Zero,
     NonZero,
@@ -349,79 +345,52 @@ fn extract_binary_position_and_literal(
     }
 }
 
-type NumericBinaryCondition = (MemberPosition, JsBinaryOperator, f64);
-fn matches_numeric_binary_condition(
-    target_condition: &NumericBinaryCondition,
-    conditions: &[NumericBinaryCondition],
-) -> bool {
-    conditions
-        .iter()
-        .any(|condition| condition == target_condition)
-}
-
 fn is_invalid_binary_expr_length_check(
     node: &JsSyntaxNode,
 ) -> Option<(JsBinaryExpression, LengthCheck)> {
     let binary_expr = JsBinaryExpression::cast_ref(node)?;
+
     let (member_position, literal) = extract_binary_position_and_literal(&binary_expr)?;
+    let number = literal.as_js_number_literal_expression()?.as_number()?.round() as i64;
 
-    let condition = &(
-        member_position,
-        binary_expr.operator().ok()?,
-        literal.as_js_number_literal_expression()?.as_number()?,
-    );
-
-    let invalid_zero_len_checks = [
+    let length_check = match (member_position, binary_expr.operator().ok()?, number) {
+        // Zero length checks
+        // -------------------------
         // `foo.length == 0`
-        (MemberPosition::Right, JsBinaryOperator::Equality, 0.0),
+        (MemberPosition::Right, JsBinaryOperator::Equality, 0) |
         // `0 == foo.length`
-        (MemberPosition::Left, JsBinaryOperator::Equality, 0.0),
+        (MemberPosition::Left, JsBinaryOperator::Equality, 0) |
         // `foo.length < 1`
-        (MemberPosition::Right, JsBinaryOperator::LessThan, 1.0),
+        (MemberPosition::Right, JsBinaryOperator::LessThan, 1) |
         // `1 > foo.length`
-        (MemberPosition::Left, JsBinaryOperator::GreaterThan, 1.0),
+        (MemberPosition::Left, JsBinaryOperator::GreaterThan, 1) |
         // 0 === foo.length. Valid but we prefer right side to be a number
-        (MemberPosition::Left, JsBinaryOperator::StrictEquality, 0.0),
-    ];
-
-    if matches_numeric_binary_condition(condition, &invalid_zero_len_checks) {
-        return Some((binary_expr, LengthCheck::Zero));
-    }
-
-    let invalid_non_zero_len_checks = [
+        (MemberPosition::Left, JsBinaryOperator::StrictEquality, 0) => Some(LengthCheck::Zero),
+        // -------------------------
+        // Non-zero length checks
+        // -------------------------
         // `foo.length !== 0`
-        (
-            MemberPosition::Right,
-            JsBinaryOperator::StrictInequality,
-            0.0,
-        ),
+        (MemberPosition::Right, JsBinaryOperator::StrictInequality, 0) |
         // `0 !== foo.length`
-        (
-            MemberPosition::Left,
-            JsBinaryOperator::StrictInequality,
-            0.0,
-        ),
+        (MemberPosition::Left, JsBinaryOperator::StrictInequality, 0) |
         // `foo.length != 0`
-        (MemberPosition::Right, JsBinaryOperator::Inequality, 0.0),
+        (MemberPosition::Right, JsBinaryOperator::Inequality, 0) |
         // `0 != foo.length`
-        (MemberPosition::Left, JsBinaryOperator::Inequality, 0.0),
+        (MemberPosition::Left, JsBinaryOperator::Inequality, 0) |
         // `foo.length >= 1`
         (
             MemberPosition::Right,
             JsBinaryOperator::GreaterThanOrEqual,
-            1.0,
-        ),
+            1,
+        ) |
         // `1 <= foo.length`
-        (MemberPosition::Left, JsBinaryOperator::LessThanOrEqual, 1.0),
+        (MemberPosition::Left, JsBinaryOperator::LessThanOrEqual, 1) |
         // 0 < foo.length. Valid but we prefer right side to be a number
-        (MemberPosition::Left, JsBinaryOperator::LessThan, 0.0),
-    ];
+        (MemberPosition::Left, JsBinaryOperator::LessThan, 0) => Some(LengthCheck::NonZero),
+        _ => None,
+    }?;
 
-    if matches_numeric_binary_condition(condition, &invalid_non_zero_len_checks) {
-        return Some((binary_expr, LengthCheck::NonZero));
-    }
-
-    None
+    return Some((binary_expr, length_check));
 }
 
 /// Get the boolean ancestor of the node
@@ -497,11 +466,4 @@ fn does_unary_expr_needs_space(node: &JsSyntaxNode) -> bool {
             _ => None,
         })
         .is_some()
-}
-
-#[test]
-fn test_order() {
-    for items in LENGTH_MEMBER_NAMES.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
-    }
 }
