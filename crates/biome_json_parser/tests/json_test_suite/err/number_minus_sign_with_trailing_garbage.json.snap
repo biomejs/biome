@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -21,6 +20,11 @@ JsonRoot {
             JsonBogusValue {
                 items: [
                     ERROR_TOKEN@1..2 "-" [] [],
+                ],
+            },
+            missing separator,
+            JsonBogusValue {
+                items: [
                     IDENT@2..5 "foo" [] [],
                 ],
             },
@@ -39,9 +43,11 @@ JsonRoot {
   1: JSON_ARRAY_VALUE@0..6
     0: L_BRACK@0..1 "[" [] []
     1: JSON_ARRAY_ELEMENT_LIST@1..5
-      0: JSON_BOGUS_VALUE@1..5
+      0: JSON_BOGUS_VALUE@1..2
         0: ERROR_TOKEN@1..2 "-" [] []
-        1: IDENT@2..5 "foo" [] []
+      1: (empty)
+      2: JSON_BOGUS_VALUE@2..5
+        0: IDENT@2..5 "foo" [] []
     2: R_BRACK@5..6 "]" [] []
   2: EOF@6..6 "" [] []
 
@@ -57,6 +63,13 @@ number_minus_sign_with_trailing_garbage.json:1:2 parse ━━━━━━━━�
   > 1 │ [-foo]
       │  ^
   
+number_minus_sign_with_trailing_garbage.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `foo`
+  
+  > 1 │ [-foo]
+      │   ^^^
+  
+  i Remove foo
+  
 ```
-
-

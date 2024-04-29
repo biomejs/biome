@@ -8,7 +8,7 @@ pub(crate) fn load_config(specifier: &str) -> Result<Resolution, CliDiagnostic> 
     let content_output = Command::new("node")
         .arg("--eval")
         .arg(format!(
-            "import('{specifier}').then((c) => console.log(JSON.stringify(c.default)))"
+            "{UNCYCLE_FUNCTION} import('{specifier}').then((c) => console.log(JSON.stringify(uncycle(c.default))))"
         ))
         .output();
     match content_output {
@@ -28,9 +28,9 @@ pub(crate) fn load_config(specifier: &str) -> Result<Resolution, CliDiagnostic> 
             if !output.stderr.is_empty() {
                 // Try with `require` before giving up.
                 let output2 = Command::new("node")
-                    .arg("--print")
+                    .arg("--eval")
                     .arg(format!(
-                        "JSON.stringify(require('{specifier}'))"
+                        "{UNCYCLE_FUNCTION} console.log(JSON.stringify(uncycle(require('{specifier}'))))"
                     ))
                     .output();
                 if let Ok(output2) = output2 {
@@ -62,3 +62,20 @@ pub(crate) struct Resolution {
     /// File content in JSON
     pub(crate) content: String,
 }
+
+/// JavaScript function used to remove cyclic references.
+const UNCYCLE_FUNCTION: &str = "function uncycle(obj, seen = new Set()) {
+    seen.add(obj);
+    for (const [key, val] of Object.entries(obj)) {
+        if (val != null && typeof val == 'object') {
+            if (seen.has(val)) {
+                // Remove cycle
+                obj[key] = null;
+            } else {
+                uncycle(val, seen);
+            }
+        }
+    }
+    seen.delete(obj);
+    return obj;
+}";

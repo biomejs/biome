@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/range/template-literal.json
 ---
-
 # Input
 
 ```json
@@ -65,6 +64,18 @@ template-literal.json:2:4 parse ━━━━━━━━━━━━━━━━
     3 │ ''},
     4 │ {a:`a`,n:
   
+template-literal.json:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `a`
+  
+    1 │ [
+  > 2 │ {a:`a`,n:
+      │     ^
+    3 │ ''},
+    4 │ {a:`a`,n:
+  
+  i Remove a
+  
 template-literal.json:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character ```
@@ -120,6 +131,19 @@ template-literal.json:4:4 parse ━━━━━━━━━━━━━━━━
     5 │ ''}
     6 │ ]
   
+template-literal.json:4:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `a`
+  
+    2 │ {a:`a`,n:
+    3 │ ''},
+  > 4 │ {a:`a`,n:
+      │     ^
+    5 │ ''}
+    6 │ ]
+  
+  i Remove a
+  
 template-literal.json:4:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character ```
@@ -142,19 +166,6 @@ template-literal.json:4:8 parse ━━━━━━━━━━━━━━━━
     5 │ ''}
     6 │ ]
   
-template-literal.json:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × End of file expected
-  
-    2 │ {a:`a`,n:
-    3 │ ''},
-  > 4 │ {a:`a`,n:
-      │ ^^^^^^^^^
-    5 │ ''}
-    6 │ ]
-  
-  i Use an array for a sequence of values: `[1, 2]`
-  
 template-literal.json:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × JSON standard does not allow single quoted strings
@@ -170,5 +181,3 @@ template-literal.json:5:1 parse ━━━━━━━━━━━━━━━━
   
 
 ```
-
-

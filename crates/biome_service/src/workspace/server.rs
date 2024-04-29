@@ -2,22 +2,20 @@ use super::{
     ChangeFileParams, CloseFileParams, FeatureName, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams,
-    ParsePatternParams, ParsePatternResult, PatternId, PullActionsParams, PullActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RenameResult, SearchPatternParams, SearchResults,
-    SupportsFeatureParams, UpdateProjectParams, UpdateSettingsParams,
+    ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
+    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RegisterProjectFolderParams,
+    RenameResult, SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateProjectParams,
+    UpdateSettingsParams,
 };
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
+use crate::settings::{SettingsHandleMut, WorkspaceSettings, WorkspacesHandleMut};
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
     OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
 };
-use crate::{
-    file_handlers::Features,
-    settings::{SettingsHandle, WorkspaceSettings},
-    Workspace, WorkspaceError,
-};
+use crate::{file_handlers::Features, settings::SettingsHandle, Workspace, WorkspaceError};
 use biome_analyze::AnalysisFilter;
 use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
@@ -98,8 +96,18 @@ impl WorkspaceServer {
         }
     }
 
+    /// Provides a reference to the current settings
     fn settings(&self) -> SettingsHandle {
         SettingsHandle::new(&self.settings)
+    }
+
+    /// Provides a mutable reference to the current settings
+    fn settings_mut(&self) -> SettingsHandleMut {
+        SettingsHandleMut::new(&self.settings)
+    }
+
+    fn workspaces_mut(&self) -> WorkspacesHandleMut {
+        WorkspacesHandleMut::new(&self.settings)
     }
 
     /// Get the supported capabilities for a given file path
@@ -338,14 +346,14 @@ impl Workspace for WorkspaceServer {
                 let capabilities = self.get_file_capabilities(&params.path);
                 let language = DocumentFileSource::from_path(&params.path);
                 let path = params.path.as_path();
-                let settings = self.settings.read().unwrap();
+                let settings = self.settings();
                 let mut file_features = FileFeaturesResult::new();
                 let file_name = path.file_name().and_then(|s| s.to_str());
                 file_features = file_features
                     .with_capabilities(&capabilities)
-                    .with_settings_and_language(&settings, &language, path);
+                    .with_settings_and_language(settings.as_ref(), &language, path);
 
-                if settings.files.ignore_unknown
+                if settings.as_ref().files.ignore_unknown
                     && language == DocumentFileSource::Unknown
                     && self.get_file_source(&params.path) == DocumentFileSource::Unknown
                 {
@@ -386,11 +394,11 @@ impl Workspace for WorkspaceServer {
     /// by another thread having previously panicked while holding the lock
     #[tracing::instrument(level = "trace", skip(self))]
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
-        let mut settings = self.settings.write().unwrap();
+        let mut settings = self.settings_mut();
 
-        settings.merge_with_configuration(
+        settings.as_mut().merge_with_configuration(
             params.configuration,
-            params.working_directory,
+            params.workspace_directory,
             params.vcs_base_path,
             params.gitignore_matches.as_slice(),
         )?;
@@ -399,7 +407,6 @@ impl Workspace for WorkspaceServer {
         self.file_features.clear();
         Ok(())
     }
-
     /// Add a new file to the workspace
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
         let index = self.set_source(
@@ -419,7 +426,6 @@ impl Workspace for WorkspaceServer {
         );
         Ok(())
     }
-
     fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError> {
         let index = self.set_source(JsonFileSource::json().into());
         self.syntax.remove(&params.path);
@@ -433,6 +439,20 @@ impl Workspace for WorkspaceServer {
             },
         );
         Ok(())
+    }
+
+    fn register_project_folder(
+        &self,
+        params: RegisterProjectFolderParams,
+    ) -> Result<ProjectKey, WorkspaceError> {
+        let mut workspace = self.workspaces_mut();
+        let key = workspace
+            .as_mut()
+            .insert_project(params.path.unwrap_or_default());
+        if params.set_as_current_workspace {
+            workspace.as_mut().register_current_project(key);
+        }
+        Ok(key)
     }
 
     fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
@@ -586,8 +606,8 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
 
         let parse = self.get_parse(params.path.clone())?;
-        let settings = self.settings.read().unwrap();
-        let rules = settings.linter().rules.as_ref();
+        let settings = self.settings();
+        let rules = settings.as_ref().linter().rules.as_ref();
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
         let language = self.get_file_source(&params.path);
         Ok(code_actions(CodeActionsParams {
@@ -671,10 +691,10 @@ impl Workspace for WorkspaceServer {
             .analyzer
             .fix_all
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let settings = self.settings.read().unwrap();
+        let settings = self.settings();
         let parse = self.get_parse(params.path.clone())?;
         // Compute final rules (taking `overrides` into account)
-        let rules = settings.as_rules(params.path.as_path());
+        let rules = settings.as_ref().as_rules(params.path.as_path());
         let rule_filter_list = rules
             .as_ref()
             .map(|rules| rules.as_enabled_rules())

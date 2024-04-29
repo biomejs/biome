@@ -572,11 +572,9 @@ impl<'src> Lexer<'src> {
                 WHS if matches!(chr, b'\n' | b'\r') => {
                     let unterminated =
                         ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                            .with_detail(self.position..self.position + 1, "line breaks here");
-
+                            .with_hint("The closing quote must be on the same line.");
                     self.diagnostics.push(unterminated);
-
-                    return JSON_STRING_LITERAL;
+                    return ERROR_TOKEN;
                 }
                 UNI => self.advance_char_unchecked(),
 
@@ -624,8 +622,7 @@ impl<'src> Lexer<'src> {
                             "file ends here",
                         );
                 self.diagnostics.push(unterminated);
-
-                JSON_STRING_LITERAL
+                ERROR_TOKEN
             }
             LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
         }

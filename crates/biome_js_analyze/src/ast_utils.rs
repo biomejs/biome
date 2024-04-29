@@ -1,4 +1,4 @@
-use biome_js_syntax::{JsLanguage, JsSyntaxNode, JsSyntaxToken, TriviaPieceKind};
+use biome_js_syntax::{JsLanguage, JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::{AstNode, TriviaPiece};
 
 /// Add any leading and trailing trivia from given source node to the token.
@@ -36,7 +36,7 @@ fn add_leading_trivia(trivia: &mut Vec<TriviaPiece>, text: &mut String, node: &J
     };
     if !token.kind().is_punct() && token.trailing_trivia().pieces().next().is_none() {
         text.push(' ');
-        trivia.push(TriviaPiece::new(TriviaPieceKind::Whitespace, 1));
+        trivia.push(TriviaPiece::whitespace(1));
     }
 }
 
@@ -56,6 +56,6 @@ fn add_trailing_trivia(trivia: &mut Vec<TriviaPiece>, text: &mut String, node: &
     };
     if !token.kind().is_punct() && token.leading_trivia().pieces().next().is_none() {
         text.push(' ');
-        trivia.push(TriviaPiece::new(TriviaPieceKind::Whitespace, 1));
+        trivia.push(TriviaPiece::whitespace(1));
     }
 }

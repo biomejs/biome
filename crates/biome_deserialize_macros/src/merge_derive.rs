@@ -64,27 +64,11 @@ fn generate_merge_newtype(ident: Ident) -> TokenStream {
 }
 
 fn generate_merge_struct(ident: Ident, fields: Fields) -> TokenStream {
-    let merge_fields: Vec<_> = fields
-        .iter()
-        .filter_map(|field| field.ident.as_ref())
-        .map(|field_ident| {
-            quote! {
-                if let Some(other_value) = other.#field_ident {
-                    match self.#field_ident.as_mut() {
-                        Some(own_value) => biome_deserialize::Merge::merge_with(own_value, other_value),
-                        None => {
-                            self.#field_ident = Some(other_value);
-                        }
-                    }
-                }
-            }
-        })
-        .collect();
-
+    let field_idents = fields.into_iter().filter_map(|field| field.ident);
     quote! {
         impl biome_deserialize::Merge for #ident {
             fn merge_with(&mut self, other: Self) {
-                #( #merge_fields )*
+                #( biome_deserialize::Merge::merge_with(&mut self.#field_idents, other.#field_idents); )*
             }
         }
     }

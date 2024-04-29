@@ -24,20 +24,33 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```diff
     import "z"
-    - import { D } from "d";
+  - import { D } from "d";
     import { C } from "c";
-    + import { D } from "d";
+  + import { D } from "d";
     import "y"
     import "x"
-    - import { B } from "b";
+  - import { B } from "b";
     import { A } from "a";
-    + import { B } from "b";
+  + import { B } from "b";
     import "w"
   ```
 
   Contributed by @Conaclos
 
+- Import sorting now adds spaces where needed ([#1665](https://github.com/biomejs/biome/issues/1665))
+  Contributed by @Conaclos
+
 ### CLI
+
+#### Bug fixes
+
+- `biome migrate eslint` now handles cyclic references.
+
+  Some plugins and configurations export objects with cyclic references.
+  This causes `biome migrate eslint` to fail or ignore them.
+  These edge cases are now handled correctly.
+
+  Contributed by @Conaclos
 
 ### Configuration
 
@@ -53,7 +66,114 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### Bug fixes
+
+- [noDuplicateJsonKeys](https://biomejs.dev/linter/rules/no-duplicate-json-keys/) no longer crashes when a JSON file contains an unterminated string ([#2357](https://github.com/biomejs/biome/issues/2357)).
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) now reports redeclarations of parameters in a functions body ([#2394](https://github.com/biomejs/biome/issues/2394)).
+
+  The rule was unable to detect redeclarations of a parameter or type parameter in the function body.
+  The following two redeclarations are now reported:
+
+  ```ts
+  function f<T>(a) {
+    type T = number; // redeclaration
+    const a = 0; // redeclaration
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) no longer reports overloads in object types ([#2608](https://github.com/biomejs/biome/issues/2608)).
+
+  The rule no longer report redeclarations in the following code:
+
+  ```ts
+  type Overloads = {
+    ({ a }: { a: number }): number,
+    ({ a }: { a: string }): string,
+  };
+  ```
+
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) now merge default function export declarations and types ([#2372](https://github.com/biomejs/biome/issues/2372)).
+
+  The following code is no longer reported as a redeclaration:
+
+  ```ts
+  interface Foo {}
+  export default function Foo() {}
+  ```
+
+  Contributed by @Conaclos
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) no longer reports variable-only and type-only exports ([#2637](https://github.com/biomejs/biome/issues/2637)).
+  Contributed by @Conaclos
+
+- [noUnusedVariables] no longer crash Biome when encountering a malformed conditional type ([#1695](https://github.com/biomejs/biome/issues/1695)).
+  Contributed by @Conaclos
+
+- [useConst](https://biomejs.dev/linter/rules/use-const/) now ignores a variable that is read before its assignment.
+
+  Previously, the rule reported the following example:
+
+  ```js
+  let x;
+  x; // read
+  x = 0; // write
+  ```
+
+  It is now correctly ignored.
+
+  Contributed by @Conaclos
+
+- [useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type/) now suggests correct code fixes when parentheses are required ([#2595](https://github.com/biomejs/biome/issues/2595)).
+
+  Previously, the rule didn't add parentheses when they were needed.
+  It now adds parentheses when the function signature is inside an array, a union, or an intersection.
+
+  ```diff
+  - type Union = { (): number } | string;
+  + type Union = (() => number) | string;
+  ```
+
+  Contributed by @Conaclos
+
+- [useTemplate](https://biomejs.dev/linter/rules/use-template/) now correctly escapes strings ([#2580](https://github.com/biomejs/biome/issues/2580)).
+
+  Previously, the rule didn't correctly escape characters preceded by an escaped character.
+
+  Contributed by @Conaclos
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) no longer errors on `this` in JSX tags ([#2636](https://github.com/biomejs/biome/issues/2636)).
+
+  ```jsx
+  import { Component } from 'react';
+
+  export class MyComponent extends Component {
+    render() {
+      return <this.foo />;
+    }
+  }
+  ```
+
+  Contributed by @printfn
+
 ### Parser
+
+- The language parsers no longer panic on unterminated strings followed by a newline and a space ([#2606](https://github.com/biomejs/biome/issues/2606), [#2410](https://github.com/biomejs/biome/issues/2410)).
+
+  The following example is now parsed without making Biome panics:
+
+  ```
+  "
+   "
+  ```
+
+  Contributed by @Conaclos
+
 
 ## 1.7.1 (2024-04-22)
 
@@ -76,6 +196,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   console.log((a,b/* comment */));
   ```
   Contributed by @ah-yu
+
+- Correctly format nested union type to avoid reformatting issue. [#2628](https://github.com/biomejs/biome/pull/2628). Contributed by @ah-yu
 
 ### Linter
 

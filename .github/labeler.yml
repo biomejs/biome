@@ -69,11 +69,6 @@ A-Tooling:
     - xtask/**
     - crates/biome_ungrammar/**
 
-A-Website:
-- changed-files:
-  - any-glob-to-any-file:
-    - website/**
-
 A-LSP:
 - changed-files:
   - any-glob-to-any-file:

@@ -1,8 +1,6 @@
 use std::fmt::Display;
 
-use biome_js_syntax::{
-    AnyJsExpression, JsParenthesizedExpression, JsSyntaxKind, JsSyntaxToken, TriviaPieceKind,
-};
+use biome_js_syntax::{AnyJsExpression, JsParenthesizedExpression, JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::TriviaPiece;
 
 pub use crate::generated::node_factory::*;
@@ -92,8 +90,8 @@ pub fn token_decorated_with_space(kind: JsSyntaxKind) -> JsSyntaxToken {
         JsSyntaxToken::new_detached(
             kind,
             &format!(" {text} "),
-            [TriviaPiece::new(TriviaPieceKind::Whitespace, 1)],
-            [TriviaPiece::new(TriviaPieceKind::Whitespace, 1)],
+            [TriviaPiece::whitespace(1)],
+            [TriviaPiece::whitespace(1)],
         )
     } else {
         panic!("token kind {kind:?} cannot be transformed to text")

@@ -10,7 +10,6 @@ use biome_js_analyze::analyze;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::JsFormatLanguage;
 use biome_js_parser::parse;
-use biome_js_parser::parse;
 use biome_js_syntax::JsFileSource;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::JsonFormatLanguage;

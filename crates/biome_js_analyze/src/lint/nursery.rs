@@ -13,7 +13,10 @@ pub mod no_nodejs_modules;
 pub mod no_react_specific_props;
 pub mod no_restricted_imports;
 pub mod no_undeclared_dependencies;
+pub mod no_useless_undefined_initialization;
+pub mod use_array_literals;
 pub mod use_consistent_new_builtin;
+pub mod use_default_switch_clause;
 pub mod use_import_restrictions;
 pub mod use_sorted_classes;
 
@@ -32,7 +35,10 @@ declare_group! {
             self :: no_react_specific_props :: NoReactSpecificProps ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
+            self :: no_useless_undefined_initialization :: NoUselessUndefinedInitialization ,
+            self :: use_array_literals :: UseArrayLiterals ,
             self :: use_consistent_new_builtin :: UseConsistentNewBuiltin ,
+            self :: use_default_switch_clause :: UseDefaultSwitchClause ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_sorted_classes :: UseSortedClasses ,
         ]

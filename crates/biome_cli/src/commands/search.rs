@@ -8,7 +8,9 @@ use biome_deserialize::Merge;
 use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
-use biome_service::workspace::{ParsePatternParams, UpdateSettingsParams};
+use biome_service::workspace::{
+    ParsePatternParams, RegisterProjectFolderParams, UpdateSettingsParams,
+};
 use std::ffi::OsString;
 
 pub(crate) struct SearchCommandPayload {
@@ -59,8 +61,15 @@ pub(crate) fn search(
         configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
     let workspace = &session.app.workspace;
+    session
+        .app
+        .workspace
+        .register_project_folder(RegisterProjectFolderParams {
+            path: session.app.fs.working_directory(),
+            set_as_current_workspace: true,
+        })?;
     workspace.update_settings(UpdateSettingsParams {
-        working_directory: session.app.fs.working_directory(),
+        workspace_directory: session.app.fs.working_directory(),
         configuration,
         vcs_base_path,
         gitignore_matches,

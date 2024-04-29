@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -15,18 +14,19 @@ expression: snapshot
 ```
 JsonRoot {
     bom_token: missing (optional),
-    value: JsonObjectValue {
-        l_curly_token: L_CURLY@0..1 "{" [] [],
-        json_member_list: JsonMemberList [
-            JsonMember {
-                name: JsonMemberName {
-                    value_token: JSON_STRING_LITERAL@1..3 "\"a" [] [],
-                },
-                colon_token: missing (required),
-                value: missing (required),
+    value: JsonBogusValue {
+        items: [
+            L_CURLY@0..1 "{" [] [],
+            JsonBogus {
+                items: [
+                    JsonBogusValue {
+                        items: [
+                            ERROR_TOKEN@1..3 "\"a" [] [],
+                        ],
+                    },
+                ],
             },
         ],
-        r_curly_token: missing (required),
     },
     eof_token: EOF@3..3 "" [] [],
 }
@@ -37,15 +37,11 @@ JsonRoot {
 ```
 0: JSON_ROOT@0..3
   0: (empty)
-  1: JSON_OBJECT_VALUE@0..3
+  1: JSON_BOGUS_VALUE@0..3
     0: L_CURLY@0..1 "{" [] []
-    1: JSON_MEMBER_LIST@1..3
-      0: JSON_MEMBER@1..3
-        0: JSON_MEMBER_NAME@1..3
-          0: JSON_STRING_LITERAL@1..3 "\"a" [] []
-        1: (empty)
-        2: (empty)
-    2: (empty)
+    1: JSON_BOGUS@1..3
+      0: JSON_BOGUS_VALUE@1..3
+        0: ERROR_TOKEN@1..3 "\"a" [] []
   2: EOF@3..3 "" [] []
 
 ```
@@ -67,7 +63,7 @@ structure_open_object_open_string.json:1:2 parse ━━━━━━━━━━�
   
 structure_open_object_open_string.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `:` but instead the file ends
+  × expected `}` but instead the file ends
   
   > 1 │ {"a
       │    
@@ -78,5 +74,3 @@ structure_open_object_open_string.json:1:4 parse ━━━━━━━━━━�
       │    
   
 ```
-
-

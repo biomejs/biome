@@ -493,6 +493,16 @@ impl<T: Deserializable> Deserializable for Box<T> {
     }
 }
 
+impl<T: Deserializable> Deserializable for Option<T> {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        T::deserialize(value, name, diagnostics).map(Option::Some)
+    }
+}
+
 impl<T: Deserializable> Deserializable for Vec<T> {
     fn deserialize(
         value: &impl DeserializableValue,

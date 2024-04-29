@@ -36,6 +36,7 @@ pub const JSON_KINDS_SRC: KindsSrc = KindsSrc {
         "JSON_ARRAY_ELEMENT_LIST",
         // Bogus nodes
         "JSON_BOGUS",
+        "JSON_BOGUS_MEMBER_NAME",
         "JSON_BOGUS_VALUE",
     ],
 };
