@@ -144,6 +144,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) no longer errors on `this` in JSX tags ([#2636](https://github.com/biomejs/biome/issues/2636)).
+
+  ```jsx
+  import { Component } from 'react';
+
+  export class MyComponent extends Component {
+    render() {
+      return <this.foo />;
+    }
+  }
+  ```
+
+  Contributed by @printfn
+
 ### Parser
 
 ## 1.7.1 (2024-04-22)
