@@ -207,7 +207,7 @@ mod tests {
     use biome_diagnostics::{Diagnostic, Severity};
     use biome_rowan::{
         raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
-        AstNode, SyntaxNode, TextRange, TextSize, TriviaPiece, TriviaPieceKind,
+        AstNode, SyntaxNode, TextRange, TextSize, TriviaPiece,
     };
     use std::convert::Infallible;
 
@@ -250,10 +250,7 @@ mod tests {
             builder.token_with_trivia(
                 RawLanguageKind::STRING_TOKEN,
                 "//group\n\"warn_here\"",
-                &[
-                    TriviaPiece::new(TriviaPieceKind::SingleLineComment, 7),
-                    TriviaPiece::new(TriviaPieceKind::Newline, 1),
-                ],
+                &[TriviaPiece::single_line_comment(7), TriviaPiece::newline(1)],
                 &[],
             );
             builder.finish_node();
@@ -262,7 +259,7 @@ mod tests {
                 RawLanguageKind::SEMICOLON_TOKEN,
                 ";\n",
                 &[],
-                &[TriviaPiece::new(TriviaPieceKind::Newline, 1)],
+                &[TriviaPiece::newline(1)],
             );
 
             builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
@@ -270,8 +267,8 @@ mod tests {
                 RawLanguageKind::STRING_TOKEN,
                 "//group/rule\n\"warn_here\"",
                 &[
-                    TriviaPiece::new(TriviaPieceKind::SingleLineComment, 12),
-                    TriviaPiece::new(TriviaPieceKind::Newline, 1),
+                    TriviaPiece::single_line_comment(12),
+                    TriviaPiece::newline(1),
                 ],
                 &[],
             );
@@ -281,7 +278,7 @@ mod tests {
                 RawLanguageKind::SEMICOLON_TOKEN,
                 ";\n",
                 &[],
-                &[TriviaPiece::new(TriviaPieceKind::Newline, 1)],
+                &[TriviaPiece::newline(1)],
             );
 
             builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
@@ -289,8 +286,8 @@ mod tests {
                 RawLanguageKind::STRING_TOKEN,
                 "//unknown_group\n\"warn_here\"",
                 &[
-                    TriviaPiece::new(TriviaPieceKind::SingleLineComment, 15),
-                    TriviaPiece::new(TriviaPieceKind::Newline, 1),
+                    TriviaPiece::single_line_comment(15),
+                    TriviaPiece::newline(1),
                 ],
                 &[],
             );
@@ -300,7 +297,7 @@ mod tests {
                 RawLanguageKind::SEMICOLON_TOKEN,
                 ";\n",
                 &[],
-                &[TriviaPiece::new(TriviaPieceKind::Newline, 1)],
+                &[TriviaPiece::newline(1)],
             );
 
             builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
@@ -308,8 +305,8 @@ mod tests {
                 RawLanguageKind::STRING_TOKEN,
                 "//group/unknown_rule\n\"warn_here\"",
                 &[
-                    TriviaPiece::new(TriviaPieceKind::SingleLineComment, 20),
-                    TriviaPiece::new(TriviaPieceKind::Newline, 1),
+                    TriviaPiece::single_line_comment(20),
+                    TriviaPiece::newline(1),
                 ],
                 &[],
             );
@@ -319,17 +316,17 @@ mod tests {
                 RawLanguageKind::SEMICOLON_TOKEN,
                 ";\n",
                 &[],
-                &[TriviaPiece::new(TriviaPieceKind::Newline, 1)],
+                &[TriviaPiece::newline(1)],
             );
 
             builder.token_with_trivia(
                 RawLanguageKind::SEMICOLON_TOKEN,
                 "//group/rule\n;\n",
                 &[
-                    TriviaPiece::new(TriviaPieceKind::SingleLineComment, 12),
-                    TriviaPiece::new(TriviaPieceKind::Newline, 1),
+                    TriviaPiece::single_line_comment(12),
+                    TriviaPiece::newline(1),
                 ],
-                &[TriviaPiece::new(TriviaPieceKind::Newline, 1)],
+                &[TriviaPiece::newline(1)],
             );
 
             builder.finish_node();
