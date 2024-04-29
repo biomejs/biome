@@ -1,5 +1,5 @@
 use crate::{GritPattern, ParseError};
-use grit_core_patterns::pattern::patterns::Pattern;
+use grit_pattern_matcher::pattern::Pattern;
 
 pub fn parse_pattern(source: String) -> Result<GritPattern, ParseError> {
     Ok(GritPattern {

@@ -1,5 +1,5 @@
 use crate::{grit_context::GritQueryContext, grit_language::GritLanguage, grit_node::GritNode};
-use grit_core_patterns::{binding::Binding, constant::Constant};
+use grit_pattern_matcher::{binding::Binding, constant::Constant};
 use grit_util::{CodeRange, Range};
 use std::path::Path;
 
@@ -59,8 +59,8 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
     fn linearized_text(
         &self,
         _language: &GritLanguage,
-        _effects: &[grit_core_patterns::effects::Effect<'a, GritQueryContext>],
-        _files: &grit_core_patterns::pattern::state::FileRegistry<'a, GritQueryContext>,
+        _effects: &[grit_pattern_matcher::effects::Effect<'a, GritQueryContext>],
+        _files: &grit_pattern_matcher::pattern::FileRegistry<'a, GritQueryContext>,
         _memo: &mut std::collections::HashMap<grit_util::CodeRange, Option<String>>,
         _distributed_indent: Option<usize>,
         _logs: &mut grit_util::AnalysisLogs,
@@ -76,7 +76,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
         todo!()
     }
 
-    fn as_constant(&self) -> Option<&grit_core_patterns::constant::Constant> {
+    fn as_constant(&self) -> Option<&grit_pattern_matcher::constant::Constant> {
         todo!()
     }
 

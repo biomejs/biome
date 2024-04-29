@@ -12,14 +12,14 @@ repository.workspace = true
 version              = "0.0.1"
 
 [dependencies]
-anyhow             = "1.0.52"
-biome_console      = { workspace = true }
-biome_diagnostics  = { workspace = true }
-biome_grit_parser  = { workspace = true }
-grit-core-patterns = { git = "https://github.com/arendjr/gritql.git", branch = "grit-core-patterns-crate" }
-grit-util          = { git = "https://github.com/arendjr/gritql.git", branch = "grit-core-patterns-crate" }
-im                 = { version = "15.1.0" }
-serde              = { workspace = true, features = ["derive"] }
+anyhow               = "1.0.52"
+biome_console        = { workspace = true }
+biome_diagnostics    = { workspace = true }
+biome_grit_parser    = { workspace = true }
+grit-pattern-matcher = { git = "https://github.com/arendjr/gritql.git", branch = "trimmed-submodules" }
+grit-util            = { git = "https://github.com/arendjr/gritql.git", branch = "trimmed-submodules" }
+im                   = { version = "15.1.0" }
+serde                = { workspace = true, features = ["derive"] }
 
 [lints]
 workspace = true

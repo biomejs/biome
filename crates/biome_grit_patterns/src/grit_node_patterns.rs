@@ -2,10 +2,9 @@ use crate::grit_context::{GritExecContext, GritQueryContext};
 use crate::grit_node::GritNode;
 use crate::resolved_pattern::GritResolvedPattern;
 use anyhow::Result;
-use grit_core_patterns::pattern::ast_node_pattern::{AstLeafNodePattern, AstNodePattern};
-use grit_core_patterns::pattern::iter_pattern::PatternOrPredicate;
-use grit_core_patterns::pattern::patterns::{Matcher, PatternName};
-use grit_core_patterns::pattern::state::State;
+use grit_pattern_matcher::pattern::{
+    AstLeafNodePattern, AstNodePattern, Matcher, PatternName, PatternOrPredicate, State,
+};
 use grit_util::AnalysisLogs;
 
 #[derive(Clone, Debug)]

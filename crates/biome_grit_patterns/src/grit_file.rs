@@ -1,7 +1,7 @@
 use crate::grit_context::GritQueryContext;
 use crate::grit_language::GritLanguage;
 use crate::resolved_pattern::GritResolvedPattern;
-use grit_core_patterns::pattern::{resolved_pattern::File, state::FileRegistry};
+use grit_pattern_matcher::pattern::{File, FileRegistry};
 
 pub(crate) struct GritFile;
 

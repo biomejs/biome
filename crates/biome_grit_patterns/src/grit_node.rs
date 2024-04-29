@@ -5,14 +5,6 @@ use std::{borrow::Cow, str::Utf8Error};
 pub(crate) struct GritNode;
 
 impl GritAstNode for GritNode {
-    fn kind_id(&self) -> u16 {
-        todo!()
-    }
-
-    fn kind(&self) -> Cow<str> {
-        todo!()
-    }
-
     fn ancestors(&self) -> impl Iterator<Item = Self> {
         TodoIterator
     }

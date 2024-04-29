@@ -1,9 +1,9 @@
 use crate::grit_context::{GritExecContext, GritQueryContext};
 use crate::resolved_pattern::GritResolvedPattern;
 use anyhow::Result;
-use grit_core_patterns::pattern::dynamic_snippet::DynamicPattern;
-use grit_core_patterns::pattern::patterns::{CodeSnippet, Matcher, Pattern, PatternName};
-use grit_core_patterns::pattern::state::State;
+use grit_pattern_matcher::pattern::{
+    CodeSnippet, DynamicPattern, Matcher, Pattern, PatternName, State,
+};
 use grit_util::AnalysisLogs;
 
 #[derive(Clone, Debug)]

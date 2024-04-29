@@ -531,7 +531,7 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_grit_parser",
- "grit-core-patterns",
+ "grit-pattern-matcher",
  "grit-util",
  "im",
  "serde",
@@ -1817,9 +1817,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "grit-core-patterns"
+name = "grit-pattern-matcher"
 version = "0.1.0"
-source = "git+https://github.com/arendjr/gritql.git?branch=grit-core-patterns-crate#327c14897f18f339157165c69ddeba04c0285253"
+source = "git+https://github.com/arendjr/gritql.git?branch=trimmed-submodules#1bd04b1e8f57faea0b5cfd413a6847e40a8eeb6e"
 dependencies = [
  "anyhow",
  "elsa",
@@ -1833,7 +1833,7 @@ dependencies = [
 [[package]]
 name = "grit-util"
 version = "0.1.0"
-source = "git+https://github.com/arendjr/gritql.git?branch=grit-core-patterns-crate#327c14897f18f339157165c69ddeba04c0285253"
+source = "git+https://github.com/arendjr/gritql.git?branch=trimmed-submodules#1bd04b1e8f57faea0b5cfd413a6847e40a8eeb6e"
 dependencies = [
  "derive_builder",
  "once_cell",

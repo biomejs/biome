@@ -7,12 +7,10 @@ use crate::grit_node_patterns::{GritLeafNodePattern, GritNodePattern};
 use crate::grit_tree::GritTree;
 use crate::resolved_pattern::GritResolvedPattern;
 use anyhow::Result;
-use grit_core_patterns::context::{ExecContext, QueryContext};
-use grit_core_patterns::file_owners::FileOwners;
-use grit_core_patterns::pattern::{
-    call_built_in::CallBuiltIn, function_definition::GritFunctionDefinition,
-    pattern_definition::PatternDefinition, patterns::Pattern,
-    predicate_definition::PredicateDefinition, state::State,
+use grit_pattern_matcher::context::{ExecContext, QueryContext};
+use grit_pattern_matcher::file_owners::FileOwners;
+use grit_pattern_matcher::pattern::{
+    CallBuiltIn, GritFunctionDefinition, Pattern, PatternDefinition, PredicateDefinition, State,
 };
 use grit_util::AnalysisLogs;
 

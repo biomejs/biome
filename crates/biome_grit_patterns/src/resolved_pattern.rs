@@ -1,14 +1,12 @@
 use crate::grit_context::GritExecContext;
 use crate::{grit_binding::GritBinding, grit_context::GritQueryContext};
 use anyhow::Result;
-use grit_core_patterns::constant::Constant;
-use grit_core_patterns::effects::Effect;
-use grit_core_patterns::pattern::accessor::Accessor;
-use grit_core_patterns::pattern::dynamic_snippet::{DynamicPattern, DynamicSnippet};
-use grit_core_patterns::pattern::list_index::ListIndex;
-use grit_core_patterns::pattern::patterns::Pattern;
-use grit_core_patterns::pattern::resolved_pattern::{ResolvedPattern, ResolvedSnippet};
-use grit_core_patterns::pattern::state::{FilePtr, FileRegistry, State};
+use grit_pattern_matcher::constant::Constant;
+use grit_pattern_matcher::effects::Effect;
+use grit_pattern_matcher::pattern::{
+    Accessor, DynamicPattern, DynamicSnippet, FilePtr, FileRegistry, ListIndex, Pattern,
+    ResolvedPattern, ResolvedSnippet, State,
+};
 use grit_util::{AnalysisLogs, CodeRange, Range};
 use im::Vector;
 use std::borrow::Cow;
@@ -95,7 +93,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
         &mut self,
         _with: Self,
         _effects: &mut Vector<Effect<'a, GritQueryContext>>,
-        _language: &<GritQueryContext as grit_core_patterns::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
     ) -> anyhow::Result<()> {
         todo!()
     }
@@ -103,7 +101,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
     fn float(
         &self,
         _state: &FileRegistry<'a, GritQueryContext>,
-        _language: &<GritQueryContext as grit_core_patterns::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
     ) -> anyhow::Result<f64> {
         todo!()
     }
@@ -114,7 +112,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
 
     fn get_file(
         &self,
-    ) -> Option<&<GritQueryContext as grit_core_patterns::context::QueryContext>::File<'a>> {
+    ) -> Option<&<GritQueryContext as grit_pattern_matcher::context::QueryContext>::File<'a>> {
         todo!()
     }
 
@@ -169,14 +167,14 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
     fn is_truthy(
         &self,
         _state: &mut State<'a, GritQueryContext>,
-        _language: &<GritQueryContext as grit_core_patterns::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
     ) -> Result<bool> {
         todo!()
     }
 
     fn linearized_text(
         &self,
-        _language: &<GritQueryContext as grit_core_patterns::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
         _effects: &[Effect<'a, GritQueryContext>],
         _files: &FileRegistry<'a, GritQueryContext>,
         _memo: &mut HashMap<CodeRange, Option<String>>,
@@ -198,14 +196,14 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
         &mut self,
         _binding: &GritBinding,
         _is_first: bool,
-        _language: &<GritQueryContext as grit_core_patterns::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
     ) -> Result<()> {
         todo!()
     }
 
     fn position(
         &self,
-        _language: &<GritQueryContext as grit_core_patterns::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
     ) -> Option<Range> {
         todo!()
     }
@@ -220,8 +218,8 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
 
     fn text(
         &self,
-        _state: &grit_core_patterns::pattern::state::FileRegistry<'a, GritQueryContext>,
-        _language: &<GritQueryContext as grit_core_patterns::context::QueryContext>::Language<'a>,
+        _state: &grit_pattern_matcher::pattern::FileRegistry<'a, GritQueryContext>,
+        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
     ) -> Result<Cow<'a, str>> {
         todo!()
     }
