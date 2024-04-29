@@ -1552,6 +1552,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownFunction": {
+					"description": "Disallow unknown CSS value functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownUnit": {
 					"description": "Disallow unknown CSS units.",
 					"anyOf": [
