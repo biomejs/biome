@@ -32,9 +32,11 @@ function foo() {
     return /** Start */ globalThis.Object({ foo: 'bar' }) /** End */
 }
 
-new String()
-new Number()
 new Boolean()
+new BigInt()
+new Number()
+new String()
+new Symbol()
 new window.String(123)
 new globalThis.String()
 function foo() {
