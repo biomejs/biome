@@ -25,7 +25,7 @@ invalid.js:1:11 lint/nursery/noUselessConcat ━━━━━━━━━━━�
     2 │ const a = 'a' + 'b' + 'c'
     3 │ const a = foo + 'a' + 'b'
   
-  i This note will give you more information.
+  i Consider joining the strings as a single one to improve readability and runtime performance.
   
 
 ```
@@ -41,7 +41,7 @@ invalid.js:2:11 lint/nursery/noUselessConcat ━━━━━━━━━━━�
     3 │ const a = foo + 'a' + 'b'
     4 │ const a = (foo + 'a') + ('b' + 'c')
   
-  i This note will give you more information.
+  i Consider joining the strings as a single one to improve readability and runtime performance.
   
 
 ```
@@ -57,7 +57,7 @@ invalid.js:2:11 lint/nursery/noUselessConcat ━━━━━━━━━━━�
     3 │ const a = foo + 'a' + 'b'
     4 │ const a = (foo + 'a') + ('b' + 'c')
   
-  i This note will give you more information.
+  i Consider joining the strings as a single one to improve readability and runtime performance.
   
 
 ```
@@ -74,7 +74,7 @@ invalid.js:3:11 lint/nursery/noUselessConcat ━━━━━━━━━━━�
     4 │ const a = (foo + 'a') + ('b' + 'c')
     5 │ const a = `a` + 'b'
   
-  i This note will give you more information.
+  i Consider joining the strings as a single one to improve readability and runtime performance.
   
 
 ```
@@ -91,7 +91,7 @@ invalid.js:4:11 lint/nursery/noUselessConcat ━━━━━━━━━━━�
     5 │ const a = `a` + 'b'
     6 │ const a = `a` + `b`
   
-  i This note will give you more information.
+  i Consider joining the strings as a single one to improve readability and runtime performance.
   
 
 ```
@@ -108,7 +108,7 @@ invalid.js:4:26 lint/nursery/noUselessConcat ━━━━━━━━━━━�
     5 │ const a = `a` + 'b'
     6 │ const a = `a` + `b`
   
-  i This note will give you more information.
+  i Consider joining the strings as a single one to improve readability and runtime performance.
   
 
 ```
@@ -125,7 +125,7 @@ invalid.js:5:11 lint/nursery/noUselessConcat ━━━━━━━━━━━�
     6 │ const a = `a` + `b`
     7 │ const a = foo + `a` + `b`
   
-  i This note will give you more information.
+  i Consider joining the strings as a single one to improve readability and runtime performance.
   
 
 ```
@@ -142,7 +142,7 @@ invalid.js:6:11 lint/nursery/noUselessConcat ━━━━━━━━━━━�
     7 │ const a = foo + `a` + `b`
     8 │ 
   
-  i This note will give you more information.
+  i Consider joining the strings as a single one to improve readability and runtime performance.
   
 
 ```
@@ -158,7 +158,7 @@ invalid.js:7:11 lint/nursery/noUselessConcat ━━━━━━━━━━━�
       │           ^^^^^^^^^^^^^^^
     8 │ 
   
-  i This note will give you more information.
+  i Consider joining the strings as a single one to improve readability and runtime performance.
   
 
 ```

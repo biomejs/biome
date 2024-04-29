@@ -91,7 +91,7 @@ impl Rule for NoUselessConcat {
                 },
             )
             .note(markup! {
-                "This note will give you more information."
+                "Consider joining the strings as a single one to improve readability and runtime performance."
             }),
         )
     }
