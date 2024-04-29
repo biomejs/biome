@@ -1058,6 +1058,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_useless_catch.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-useless-concat" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_useless_concat.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-useless-constructor" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group

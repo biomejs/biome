@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsBinaryOperator};
 use biome_rowan::AstNode;
@@ -58,6 +58,7 @@ declare_rule! {
     pub NoUselessConcat {
         version: "next",
         name: "noUselessConcat",
+        sources: &[RuleSource::Eslint("no-useless-concat")],
         recommended: false,
     }
 }
