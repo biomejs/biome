@@ -531,6 +531,8 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_grit_parser",
+ "biome_grit_syntax",
+ "biome_rowan",
  "grit-pattern-matcher",
  "grit-util",
  "im",
