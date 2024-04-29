@@ -65,7 +65,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [nusery/noReactSpecificProps](https://biomejs.dev/linter/rules/no-react-specific-props/).
   Contributed by @marvin-j97
 
-- [noUselessUndefinedInitialization](https://biomejs.dev/linter/rules/no-useless-undefined-initialization/).
+- Add [noUselessUndefinedInitialization](https://biomejs.dev/linter/rules/no-useless-undefined-initialization/).
   Contributed by @lutaok
 
 - Add [nusery/useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/).
