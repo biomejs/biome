@@ -163,6 +163,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+- The language parsers no longer panic on unterminated strings followed by a newline and a space ([#2606](https://github.com/biomejs/biome/issues/2606), [#2410](https://github.com/biomejs/biome/issues/2410)).
+
+  The following example is now parsed without making Biome panics:
+
+  ```
+  "
+   "
+  ```
+
+  Contributed by @Conaclos
+
+
 ## 1.7.1 (2024-04-22)
 
 ### Editors
