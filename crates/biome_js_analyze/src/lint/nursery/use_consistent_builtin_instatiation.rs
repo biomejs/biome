@@ -98,7 +98,7 @@ declare_rule! {
     /// ```
     ///
     pub UseConsistentBuiltinInstatiation {
-        version: "next",
+        version: "1.7.2",
         name: "useConsistentBuiltinInstatiation",
         sources: &[
             RuleSource::EslintUnicorn("new-for-builtins"),

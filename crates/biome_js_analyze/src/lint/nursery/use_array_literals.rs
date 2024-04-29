@@ -42,7 +42,7 @@ declare_rule! {
     /// ```
     ///
     pub UseArrayLiterals {
-        version: "next",
+        version: "1.7.2",
         name: "useArrayLiterals",
         sources: &[RuleSource::Eslint("no-array-constructor")],
         recommended: false,

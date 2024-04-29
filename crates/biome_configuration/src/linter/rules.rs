@@ -2714,7 +2714,8 @@ pub struct Nursery {
     pub use_array_literals: Option<RuleConfiguration<UseArrayLiterals>>,
     #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_consistent_builtin_instatiation: Option<RuleConfiguration<UseConsistentBuiltinInstatiation>>,
+    pub use_consistent_builtin_instatiation:
+        Option<RuleConfiguration<UseConsistentBuiltinInstatiation>>,
     #[doc = "Require the default clause in switch statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_default_switch_clause: Option<RuleConfiguration<UseDefaultSwitchClause>>,

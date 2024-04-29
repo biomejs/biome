@@ -27,7 +27,7 @@ declare_rule! {
     /// <Hello class="Doe" />
     /// ```
  pub NoReactSpecificProps {
-        version: "next",
+        version: "1.7.2",
         name: "noReactSpecificProps",
         sources: &[RuleSource::EslintSolid("no-react-specific-props")],
         recommended: false,
