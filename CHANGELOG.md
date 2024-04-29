@@ -109,6 +109,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) no longer reports variable-only and type-only exports ([#2637](https://github.com/biomejs/biome/issues/2637)).
+  Contributed by @Conaclos
+
 - [noUnusedVariables] no longer crash Biome when encountering a malformed conditional type ([#1695](https://github.com/biomejs/biome/issues/1695)).
   Contributed by @Conaclos
 
