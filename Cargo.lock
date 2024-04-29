@@ -926,6 +926,7 @@ dependencies = [
  "biome_text_edit",
  "bpaf",
  "dashmap",
+ "getrandom 0.2.14",
  "ignore",
  "indexmap 1.9.3",
  "insta",
@@ -1763,8 +1764,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94b22e06ecb0110981051723910cbf0b5f5e09a2062dd7663334ee79a9d1286c"
 dependencies = [
  "cfg-if",
+ "js-sys",
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasm-bindgen",
 ]
 
 [[package]]

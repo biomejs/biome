@@ -44,6 +44,7 @@ biome_rowan              = { workspace = true, features = ["serde"] }
 biome_text_edit          = { workspace = true }
 bpaf                     = { workspace = true }
 dashmap                  = { workspace = true }
+getrandom                = { workspace = true, features = ["js"] }
 ignore                   = { workspace = true }
 indexmap                 = { workspace = true, features = ["serde"] }
 lazy_static              = { workspace = true }
