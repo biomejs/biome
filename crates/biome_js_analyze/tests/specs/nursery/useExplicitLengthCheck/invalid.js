@@ -2,10 +2,10 @@ if (foo.bar && foo.bar.length) {}
 if (foo.length || foo.bar()) {}
 if (!!(!!foo.length)) {}
 if (!(foo.length === 0)) {}
-if (0 === foo.length) {}
+if (/** 1 **/ 0 === foo.length /** 2 **/) {}
 if (0 < foo.length) {}
 while (foo.length >= 1) {}
-do {} while (foo.length);
+do {} while (/** 1 **/foo.length /** 2 **/);
 for (let i = 0; (bar && !foo.length); i ++) {}
 const isEmpty = foo.length < 1;
 bar(foo.length >= 1)
@@ -14,7 +14,7 @@ const bar = void !foo.length;
 const isNotEmpty = Boolean(foo.length)
 const isNotEmpty1 = Boolean(foo.length || bar)
 const isEmpty1 = Boolean(!foo.length)
-const isEmpty2 = Boolean(foo.length === 0)
+const isEmpty2 = Boolean(/** 1 **/foo.length === 0)
 const isNotEmpty2 = !Boolean(foo.length === 0)
 const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
 if (foo.size) {}

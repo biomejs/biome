@@ -8,10 +8,10 @@ if (foo.bar && foo.bar.length) {}
 if (foo.length || foo.bar()) {}
 if (!!(!!foo.length)) {}
 if (!(foo.length === 0)) {}
-if (0 === foo.length) {}
+if (/** 1 **/ 0 === foo.length /** 2 **/) {}
 if (0 < foo.length) {}
 while (foo.length >= 1) {}
-do {} while (foo.length);
+do {} while (/** 1 **/foo.length /** 2 **/);
 for (let i = 0; (bar && !foo.length); i ++) {}
 const isEmpty = foo.length < 1;
 bar(foo.length >= 1)
@@ -98,7 +98,7 @@ invalid.js:3:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━�
   > 3 │ if (!!(!!foo.length)) {}
       │     ^^^^^^^^^^^^^^^^
     4 │ if (!(foo.length === 0)) {}
-    5 │ if (0 === foo.length) {}
+    5 │ if (/** 1 **/ 0 === foo.length /** 2 **/) {}
   
   i Unsafe fix: Replace .length with .length > 0
   
@@ -107,20 +107,20 @@ invalid.js:3:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━�
      3    │ - if·(!!(!!foo.length))·{}
         3 │ + if·(foo.length·>·0)·{}
      4  4 │   if (!(foo.length === 0)) {}
-     5  5 │   if (0 === foo.length) {}
+     5  5 │   if (/** 1 **/ 0 === foo.length /** 2 **/) {}
   
 
 ```
 
 ```
-invalid.js:5:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
     3 │ if (!!(!!foo.length)) {}
     4 │ if (!(foo.length === 0)) {}
-  > 5 │ if (0 === foo.length) {}
-      │     ^^^^^^^^^^^^^^^^
+  > 5 │ if (/** 1 **/ 0 === foo.length /** 2 **/) {}
+      │               ^^^^^^^^^^^^^^^^
     6 │ if (0 < foo.length) {}
     7 │ while (foo.length >= 1) {}
   
@@ -128,8 +128,8 @@ invalid.js:5:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━�
   
      3  3 │   if (!!(!!foo.length)) {}
      4  4 │   if (!(foo.length === 0)) {}
-     5    │ - if·(0·===·foo.length)·{}
-        5 │ + if·(foo.length·===·0)·{}
+     5    │ - if·(/**·1·**/·0·===·foo.length·/**·2·**/)·{}
+        5 │ + if·(/**·1·**/·foo.length·/**·2·**/·===·0)·{}
      6  6 │   if (0 < foo.length) {}
      7  7 │   while (foo.length >= 1) {}
   
@@ -142,20 +142,20 @@ invalid.js:6:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━�
   ! Use .length > 0 when checking .length is not zero.
   
     4 │ if (!(foo.length === 0)) {}
-    5 │ if (0 === foo.length) {}
+    5 │ if (/** 1 **/ 0 === foo.length /** 2 **/) {}
   > 6 │ if (0 < foo.length) {}
       │     ^^^^^^^^^^^^^^
     7 │ while (foo.length >= 1) {}
-    8 │ do {} while (foo.length);
+    8 │ do {} while (/** 1 **/foo.length /** 2 **/);
   
   i Unsafe fix: Replace .length with .length > 0
   
      4  4 │   if (!(foo.length === 0)) {}
-     5  5 │   if (0 === foo.length) {}
+     5  5 │   if (/** 1 **/ 0 === foo.length /** 2 **/) {}
      6    │ - if·(0·<·foo.length)·{}
         6 │ + if·(foo.length·>·0)·{}
      7  7 │   while (foo.length >= 1) {}
-     8  8 │   do {} while (foo.length);
+     8  8 │   do {} while (/** 1 **/foo.length /** 2 **/);
   
 
 ```
@@ -165,41 +165,41 @@ invalid.js:7:8 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━�
 
   ! Use .length > 0 when checking .length is not zero.
   
-    5 │ if (0 === foo.length) {}
+    5 │ if (/** 1 **/ 0 === foo.length /** 2 **/) {}
     6 │ if (0 < foo.length) {}
   > 7 │ while (foo.length >= 1) {}
       │        ^^^^^^^^^^^^^^^
-    8 │ do {} while (foo.length);
+    8 │ do {} while (/** 1 **/foo.length /** 2 **/);
     9 │ for (let i = 0; (bar && !foo.length); i ++) {}
   
   i Unsafe fix: Replace .length with .length > 0
   
-     5  5 │   if (0 === foo.length) {}
+     5  5 │   if (/** 1 **/ 0 === foo.length /** 2 **/) {}
      6  6 │   if (0 < foo.length) {}
      7    │ - while·(foo.length·>=·1)·{}
         7 │ + while·(foo.length·>·0)·{}
-     8  8 │   do {} while (foo.length);
+     8  8 │   do {} while (/** 1 **/foo.length /** 2 **/);
      9  9 │   for (let i = 0; (bar && !foo.length); i ++) {}
   
 
 ```
 
 ```
-invalid.js:8:14 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:23 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
      6 │ if (0 < foo.length) {}
      7 │ while (foo.length >= 1) {}
-   > 8 │ do {} while (foo.length);
-       │              ^^^^^^^^^^
+   > 8 │ do {} while (/** 1 **/foo.length /** 2 **/);
+       │                       ^^^^^^^^^^
      9 │ for (let i = 0; (bar && !foo.length); i ++) {}
     10 │ const isEmpty = foo.length < 1;
   
   i Unsafe fix: Replace .length with .length > 0
   
-    8 │ do·{}·while·(·foo.length·>·0);
-      │              +          ++++  
+    8 │ do·{}·while·(/**·1·**/·foo.length·/**·2·**/·>·0);
+      │                       +                    ++++  
 
 ```
 
@@ -209,7 +209,7 @@ invalid.js:9:25 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
   ! Use .length === 0 when checking .length is zero.
   
      7 │ while (foo.length >= 1) {}
-     8 │ do {} while (foo.length);
+     8 │ do {} while (/** 1 **/foo.length /** 2 **/);
    > 9 │ for (let i = 0; (bar && !foo.length); i ++) {}
        │                         ^^^^^^^^^^^
     10 │ const isEmpty = foo.length < 1;
@@ -218,7 +218,7 @@ invalid.js:9:25 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
   i Unsafe fix: Replace .length with .length === 0
   
      7  7 │   while (foo.length >= 1) {}
-     8  8 │   do {} while (foo.length);
+     8  8 │   do {} while (/** 1 **/foo.length /** 2 **/);
      9    │ - for·(let·i·=·0;·(bar·&&·!foo.length);·i·++)·{}
         9 │ + for·(let·i·=·0;·(bar·&&·foo.length·===·0);·i·++)·{}
     10 10 │   const isEmpty = foo.length < 1;
@@ -232,7 +232,7 @@ invalid.js:10:17 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 
   ! Use .length === 0 when checking .length is zero.
   
-     8 │ do {} while (foo.length);
+     8 │ do {} while (/** 1 **/foo.length /** 2 **/);
      9 │ for (let i = 0; (bar && !foo.length); i ++) {}
   > 10 │ const isEmpty = foo.length < 1;
        │                 ^^^^^^^^^^^^^^
@@ -241,7 +241,7 @@ invalid.js:10:17 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
   
   i Unsafe fix: Replace .length with .length === 0
   
-     8  8 │   do {} while (foo.length);
+     8  8 │   do {} while (/** 1 **/foo.length /** 2 **/);
      9  9 │   for (let i = 0; (bar && !foo.length); i ++) {}
     10    │ - const·isEmpty·=·foo.length·<·1;
        10 │ + const·isEmpty·=·foo.length·===·0;

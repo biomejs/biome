@@ -254,7 +254,7 @@ impl Rule for UseExplicitLengthCheck {
         let mut new_node = new_binary_expr.into_syntax();
         let parent = state.node.syntax().parent()?;
         // In cases like `export default!foo.length` -> `export default foo.length === 0`
-        // We need to add a space between keyword and expression
+        // we need to add a space between keyword and expression
         if matches!(
             parent.kind(),
             JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
