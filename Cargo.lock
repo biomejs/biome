@@ -530,7 +530,6 @@ dependencies = [
  "anyhow",
  "biome_console",
  "biome_diagnostics",
- "biome_grit_parser",
  "grit-pattern-matcher",
  "grit-util",
  "im",
@@ -1822,7 +1821,8 @@ dependencies = [
 [[package]]
 name = "grit-pattern-matcher"
 version = "0.1.0"
-source = "git+https://github.com/arendjr/gritql.git?branch=trimmed-submodules#1bd04b1e8f57faea0b5cfd413a6847e40a8eeb6e"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77c0574d27418acbda6c6c10b85d496100e82eebc46b9533bf15f204792f11b8"
 dependencies = [
  "anyhow",
  "elsa",
@@ -1836,7 +1836,8 @@ dependencies = [
 [[package]]
 name = "grit-util"
 version = "0.1.0"
-source = "git+https://github.com/arendjr/gritql.git?branch=trimmed-submodules#1bd04b1e8f57faea0b5cfd413a6847e40a8eeb6e"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7fbccf24e380ffb524304fa7b1fbeaa0d021e281dcc931a098e1876f37adb4ef"
 dependencies = [
  "derive_builder",
  "once_cell",

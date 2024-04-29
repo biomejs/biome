@@ -15,9 +15,8 @@ version              = "0.0.1"
 anyhow               = "1.0.52"
 biome_console        = { workspace = true }
 biome_diagnostics    = { workspace = true }
-biome_grit_parser    = { workspace = true }
-grit-pattern-matcher = { git = "https://github.com/arendjr/gritql.git", branch = "trimmed-submodules" }
-grit-util            = { git = "https://github.com/arendjr/gritql.git", branch = "trimmed-submodules" }
+grit-pattern-matcher = { version = "0.1" }
+grit-util            = { version = "0.1" }
 im                   = { version = "15.1.0" }
 serde                = { workspace = true, features = ["derive"] }
 
