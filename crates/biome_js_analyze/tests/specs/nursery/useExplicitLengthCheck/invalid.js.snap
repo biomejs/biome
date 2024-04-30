@@ -20,7 +20,7 @@ const bar = void !foo.length;
 const isNotEmpty = Boolean(foo.length)
 const isNotEmpty1 = Boolean(foo.length || bar)
 const isEmpty1 = Boolean(!foo.length)
-const isEmpty2 = Boolean(foo.length === 0)
+const isEmpty2 = Boolean(/** 1 **/foo.length === 0)
 const isNotEmpty2 = !Boolean(foo.length === 0)
 const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
 if (foo.size) {}
@@ -108,6 +108,30 @@ invalid.js:3:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━�
         3 │ + if·(foo.length·>·0)·{}
      4  4 │   if (!(foo.length === 0)) {}
      5  5 │   if (/** 1 **/ 0 === foo.length /** 2 **/) {}
+  
+
+```
+
+```
+invalid.js:4:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 when checking .length is not zero.
+  
+    2 │ if (foo.length || foo.bar()) {}
+    3 │ if (!!(!!foo.length)) {}
+  > 4 │ if (!(foo.length === 0)) {}
+      │     ^^^^^^^^^^^^^^^^^^^
+    5 │ if (/** 1 **/ 0 === foo.length /** 2 **/) {}
+    6 │ if (0 < foo.length) {}
+  
+  i Unsafe fix: Replace .length with .length > 0
+  
+     2  2 │   if (foo.length || foo.bar()) {}
+     3  3 │   if (!!(!!foo.length)) {}
+     4    │ - if·(!(foo.length·===·0))·{}
+        4 │ + if·(foo.length·>·0)·{}
+     5  5 │   if (/** 1 **/ 0 === foo.length /** 2 **/) {}
+     6  6 │   if (0 < foo.length) {}
   
 
 ```
@@ -376,7 +400,7 @@ invalid.js:15:29 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
   > 15 │ const isNotEmpty1 = Boolean(foo.length || bar)
        │                             ^^^^^^^^^^
     16 │ const isEmpty1 = Boolean(!foo.length)
-    17 │ const isEmpty2 = Boolean(foo.length === 0)
+    17 │ const isEmpty2 = Boolean(/** 1 **/foo.length === 0)
   
   i Unsafe fix: Replace .length with .length > 0
   
@@ -394,7 +418,7 @@ invalid.js:16:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
     15 │ const isNotEmpty1 = Boolean(foo.length || bar)
   > 16 │ const isEmpty1 = Boolean(!foo.length)
        │                  ^^^^^^^^^^^^^^^^^^^^
-    17 │ const isEmpty2 = Boolean(foo.length === 0)
+    17 │ const isEmpty2 = Boolean(/** 1 **/foo.length === 0)
     18 │ const isNotEmpty2 = !Boolean(foo.length === 0)
   
   i Unsafe fix: Replace .length with .length === 0
@@ -403,9 +427,71 @@ invalid.js:16:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
     15 15 │   const isNotEmpty1 = Boolean(foo.length || bar)
     16    │ - const·isEmpty1·=·Boolean(!foo.length)
        16 │ + const·isEmpty1·=·foo.length·===·0
-    17 17 │   const isEmpty2 = Boolean(foo.length === 0)
+    17 17 │   const isEmpty2 = Boolean(/** 1 **/foo.length === 0)
     18 18 │   const isNotEmpty2 = !Boolean(foo.length === 0)
   
+
+```
+
+```
+invalid.js:17:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 when checking .length is zero.
+  
+    15 │ const isNotEmpty1 = Boolean(foo.length || bar)
+    16 │ const isEmpty1 = Boolean(!foo.length)
+  > 17 │ const isEmpty2 = Boolean(/** 1 **/foo.length === 0)
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ const isNotEmpty2 = !Boolean(foo.length === 0)
+    19 │ const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
+  
+  i Unsafe fix: Replace .length with .length === 0
+  
+    17 │ const·isEmpty2·=·Boolean(/**·1·**/foo.length·===·0)
+       │                  -----------------                -
+
+```
+
+```
+invalid.js:18:21 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length > 0 when checking .length is not zero.
+  
+    16 │ const isEmpty1 = Boolean(!foo.length)
+    17 │ const isEmpty2 = Boolean(/** 1 **/foo.length === 0)
+  > 18 │ const isNotEmpty2 = !Boolean(foo.length === 0)
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
+    20 │ if (foo.size) {}
+  
+  i Unsafe fix: Replace .length with .length > 0
+  
+    16 16 │   const isEmpty1 = Boolean(!foo.length)
+    17 17 │   const isEmpty2 = Boolean(/** 1 **/foo.length === 0)
+    18    │ - const·isNotEmpty2·=·!Boolean(foo.length·===·0)
+       18 │ + const·isNotEmpty2·=·foo.length·>·0
+    19 19 │   const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
+    20 20 │   if (foo.size) {}
+  
+
+```
+
+```
+invalid.js:19:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use .length === 0 when checking .length is zero.
+  
+    17 │ const isEmpty2 = Boolean(/** 1 **/foo.length === 0)
+    18 │ const isNotEmpty2 = !Boolean(foo.length === 0)
+  > 19 │ const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ if (foo.size) {}
+    21 │ if (foo.size && bar.length) {}
+  
+  i Unsafe fix: Replace .length with .length === 0
+  
+    19 │ const·isEmpty3·=·!Boolean(!Boolean(foo.length·===·0))
+       │                  ------------------                --
 
 ```
 

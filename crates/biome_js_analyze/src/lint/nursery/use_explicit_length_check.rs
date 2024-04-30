@@ -151,8 +151,8 @@ impl Rule for UseExplicitLengthCheck {
         let member_expr_syntax = node.syntax();
         let parent_syntax = member_expr_syntax.parent()?;
 
-        if let Some((binary_expr, mut len_check)) =
-            is_invalid_binary_expr_length_check(&parent_syntax)
+        if let Some((binary_expr, mut len_check, is_possibly_valid)) =
+            is_binary_expr_length_check(&parent_syntax)
         {
             return get_boolean_ancestor(binary_expr.syntax())
                 .map(|(expr, is_negative)| {
@@ -167,6 +167,11 @@ impl Rule for UseExplicitLengthCheck {
                     }
                 })
                 .or_else(|| {
+                    // Binary expression is valid and was not wrapped in a boolean ancestor
+                    if is_possibly_valid {
+                        return None;
+                    }
+
                     Some(UseExplicitLengthCheckState {
                         check: len_check,
                         node: AnyJsExpression::cast_ref(binary_expr.syntax())?,
@@ -301,7 +306,7 @@ impl Rule for UseExplicitLengthCheck {
 }
 
 /// Sorted by how common they are in the wild
-const LENGTH_MEMBER_NAMES: &[&str] = &[ "length", "size", "byteLength", "byteOffset"];
+const LENGTH_MEMBER_NAMES: &[&str] = &["length", "size", "byteLength", "byteOffset"];
 
 pub struct UseExplicitLengthCheckState {
     check: LengthCheck,
@@ -345,52 +350,52 @@ fn extract_binary_position_and_literal(
     }
 }
 
-fn is_invalid_binary_expr_length_check(
+fn is_binary_expr_length_check(
     node: &JsSyntaxNode,
-) -> Option<(JsBinaryExpression, LengthCheck)> {
+) -> Option<(JsBinaryExpression, LengthCheck, bool)> {
     let binary_expr = JsBinaryExpression::cast_ref(node)?;
 
     let (member_position, literal) = extract_binary_position_and_literal(&binary_expr)?;
-    let number = literal.as_js_number_literal_expression()?.as_number()?.round() as i64;
+    let number = literal
+        .as_js_number_literal_expression()?
+        .as_number()?
+        .round() as i64;
 
-    let length_check = match (member_position, binary_expr.operator().ok()?, number) {
+    let (length_check, is_valid) = match (member_position, binary_expr.operator().ok()?, number) {
         // Zero length checks
         // -------------------------
-        // `foo.length == 0`
-        (MemberPosition::Right, JsBinaryOperator::Equality, 0) |
-        // `0 == foo.length`
-        (MemberPosition::Left, JsBinaryOperator::Equality, 0) |
+        // `0 == foo.length` or `foo.length == 0`
+        (MemberPosition::Left | MemberPosition::Right, JsBinaryOperator::Equality, 0) |
         // `foo.length < 1`
         (MemberPosition::Right, JsBinaryOperator::LessThan, 1) |
         // `1 > foo.length`
         (MemberPosition::Left, JsBinaryOperator::GreaterThan, 1) |
-        // 0 === foo.length. Valid but we prefer right side to be a number
-        (MemberPosition::Left, JsBinaryOperator::StrictEquality, 0) => Some(LengthCheck::Zero),
+        // 0 === foo.length. We prefer right side to be a number
+        (MemberPosition::Left, JsBinaryOperator::StrictEquality, 0) => Some((LengthCheck::Zero, false)),
+        // `foo.length === 0`. Valid, but might still be wrapped in a boolean ancestor
+        (MemberPosition::Right, JsBinaryOperator::StrictEquality, 0) => Some((LengthCheck::Zero, true)),
         // -------------------------
         // Non-zero length checks
         // -------------------------
-        // `foo.length !== 0`
-        (MemberPosition::Right, JsBinaryOperator::StrictInequality, 0) |
-        // `0 !== foo.length`
-        (MemberPosition::Left, JsBinaryOperator::StrictInequality, 0) |
-        // `foo.length != 0`
-        (MemberPosition::Right, JsBinaryOperator::Inequality, 0) |
-        // `0 != foo.length`
-        (MemberPosition::Left, JsBinaryOperator::Inequality, 0) |
-        // `foo.length >= 1`
+        // `0 !== foo.length` or `foo.length !== 0` or
+        // `0 != foo.length` or `foo.length != 0`
         (
-            MemberPosition::Right,
-            JsBinaryOperator::GreaterThanOrEqual,
-            1,
+            MemberPosition::Left | MemberPosition::Right,
+            JsBinaryOperator::StrictInequality | JsBinaryOperator::Inequality,
+            0,
         ) |
+        // `foo.length >= 1`
+        (MemberPosition::Right, JsBinaryOperator::GreaterThanOrEqual, 1) |
         // `1 <= foo.length`
         (MemberPosition::Left, JsBinaryOperator::LessThanOrEqual, 1) |
-        // 0 < foo.length. Valid but we prefer right side to be a number
-        (MemberPosition::Left, JsBinaryOperator::LessThan, 0) => Some(LengthCheck::NonZero),
+        // 0 < foo.length. We prefer right side to be a number
+        (MemberPosition::Left, JsBinaryOperator::LessThan, 0) => Some((LengthCheck::NonZero, false)),
+        // `foo.length > 0`. Valid, but might still be wrapped in a boolean ancestor
+        (MemberPosition::Right, JsBinaryOperator::GreaterThan, 0) => Some((LengthCheck::NonZero, true)),
         _ => None,
     }?;
 
-    return Some((binary_expr, length_check));
+    Some((binary_expr, length_check, is_valid))
 }
 
 /// Get the boolean ancestor of the node
