@@ -126,10 +126,8 @@ impl Pattern {
         // eg. "./test" or ".\test"
         let is_relative = matches!(chars.get(..2), Some(['.', sep]) if path::is_separator(*sep));
         if is_relative {
-            // If a pattern starts with a relative prefix, strip it from the
-            // pattern and replace it with a "**" sequence
+            // If a pattern starts with a relative prefix, strip it from the pattern
             i += 2;
-            tokens.push(AnyRecursiveSequence);
         } else {
             // A pattern is absolute if it starts with a path separator, eg. "/home" or "\\?\C:\Users"
             let mut is_absolute = chars.first().map_or(false, |c| path::is_separator(*c));
@@ -862,11 +860,11 @@ mod test {
 
     #[test]
     fn test_pattern_relative() {
-        assert!(Pattern::new("./b").unwrap().matches_path(Path::new("a/b")));
+        assert!(!Pattern::new("./b").unwrap().matches_path(Path::new("a/b")));
         assert!(Pattern::new("b").unwrap().matches_path(Path::new("a/b")));
 
         if cfg!(windows) {
-            assert!(Pattern::new(".\\b")
+            assert!(!Pattern::new(".\\b")
                 .unwrap()
                 .matches_path(Path::new("a\\b")));
             assert!(Pattern::new("b").unwrap().matches_path(Path::new("a\\b")));
