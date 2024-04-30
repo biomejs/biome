@@ -402,6 +402,7 @@ fn parse_jsx_expression_child(p: &mut JsParser) -> ParsedSyntax {
 // <a.b.c.d></a.b.c.d>;
 // <a-b.c></a-b.c>;
 // <Abcd></Abcd>;
+// <this.foo></this.foo>;
 //
 // test_err jsx jsx_namespace_member_element_name
 // <namespace:a></namespace:a>;
@@ -409,9 +410,7 @@ fn parse_jsx_expression_child(p: &mut JsParser) -> ParsedSyntax {
 fn parse_jsx_any_element_name(p: &mut JsParser) -> ParsedSyntax {
     let name = parse_jsx_name_or_namespace(p);
     name.map(|mut name| {
-        if name.kind(p) == JSX_NAME && name.text(p) == "this" {
-            name.change_kind(p, JS_THIS_EXPRESSION)
-        } else if name.kind(p) == JSX_NAME && (p.at(T![.]) || !is_intrinsic_element(name.text(p))) {
+        if name.kind(p) == JSX_NAME && (p.at(T![.]) || !is_intrinsic_element(name.text(p))) {
             name.change_kind(p, JSX_REFERENCE_IDENTIFIER)
         } else if name.kind(p) == JSX_NAMESPACE_NAME && p.at(T![.]) {
             let error = p.err_builder(
@@ -467,6 +466,12 @@ fn parse_jsx_name_or_namespace(p: &mut JsParser) -> ParsedSyntax {
 }
 
 fn parse_jsx_name(p: &mut JsParser) -> ParsedSyntax {
+    if p.at(THIS_KW) {
+        let name = p.start();
+        p.bump(THIS_KW);
+        return Present(name.complete(p, JS_THIS_EXPRESSION));
+    }
+
     p.re_lex(JsReLexContext::JsxIdentifier);
 
     if p.at(JSX_IDENT) {

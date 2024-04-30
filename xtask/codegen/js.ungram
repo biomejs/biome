@@ -2294,12 +2294,14 @@ JsxNamespaceName =
 
 AnyJsxElementName =
 	JsxName
+	| JsThisExpression
 	| JsxReferenceIdentifier
 	| JsxMemberName
 	| JsxNamespaceName
 
 AnyJsxObjectName =
 	JsxReferenceIdentifier
+	| JsThisExpression
 	| JsxMemberName
 	| JsxNamespaceName
 

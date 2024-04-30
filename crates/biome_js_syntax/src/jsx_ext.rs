@@ -319,6 +319,7 @@ impl AnyJsxElementName {
             AnyJsxElementName::JsxName(name) => name.value_token().ok(),
             AnyJsxElementName::JsxNamespaceName(name) => name.name().ok()?.value_token().ok(),
             AnyJsxElementName::JsxReferenceIdentifier(name) => name.value_token().ok(),
+            AnyJsxElementName::JsThisExpression(name) => name.this_token().ok(),
         }
     }
 }

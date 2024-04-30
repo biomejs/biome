@@ -187,7 +187,9 @@ impl Rule for NoUselessFragments {
                     AnyJsxElementName::JsxReferenceIdentifier(identifier) => {
                         jsx_reference_identifier_is_fragment(&identifier, model)?
                     }
-                    AnyJsxElementName::JsxName(_) | AnyJsxElementName::JsxNamespaceName(_) => false,
+                    AnyJsxElementName::JsThisExpression(_)
+                    | AnyJsxElementName::JsxName(_)
+                    | AnyJsxElementName::JsxNamespaceName(_) => false,
                 };
 
                 if is_valid_react_fragment {

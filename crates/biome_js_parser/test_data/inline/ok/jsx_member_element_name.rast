@@ -126,15 +126,52 @@ JsModule {
             },
             semicolon_token: SEMICOLON@51..52 ";" [] [],
         },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@52..54 "<" [Newline("\n")] [],
+                        name: JsxMemberName {
+                            object: JsThisExpression {
+                                this_token: THIS_KW@54..58 "this" [] [],
+                            },
+                            dot_token: DOT@58..59 "." [] [],
+                            member: JsName {
+                                value_token: IDENT@59..62 "foo" [] [],
+                            },
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@62..63 ">" [] [],
+                    },
+                    children: JsxChildList [],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@63..64 "<" [] [],
+                        slash_token: SLASH@64..65 "/" [] [],
+                        name: JsxMemberName {
+                            object: JsThisExpression {
+                                this_token: THIS_KW@65..69 "this" [] [],
+                            },
+                            dot_token: DOT@69..70 "." [] [],
+                            member: JsName {
+                                value_token: IDENT@70..73 "foo" [] [],
+                            },
+                        },
+                        r_angle_token: R_ANGLE@73..74 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@74..75 ";" [] [],
+        },
     ],
-    eof_token: EOF@52..53 "" [Newline("\n")] [],
+    eof_token: EOF@75..76 "" [Newline("\n")] [],
 }
 
-0: JS_MODULE@0..53
+0: JS_MODULE@0..76
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..52
+  3: JS_MODULE_ITEM_LIST@0..75
     0: JS_EXPRESSION_STATEMENT@0..20
       0: JSX_TAG_EXPRESSION@0..19
         0: JSX_ELEMENT@0..19
@@ -221,4 +258,30 @@ JsModule {
               0: JSX_IDENT@46..50 "Abcd" [] []
             3: R_ANGLE@50..51 ">" [] []
       1: SEMICOLON@51..52 ";" [] []
-  4: EOF@52..53 "" [Newline("\n")] []
+    3: JS_EXPRESSION_STATEMENT@52..75
+      0: JSX_TAG_EXPRESSION@52..74
+        0: JSX_ELEMENT@52..74
+          0: JSX_OPENING_ELEMENT@52..63
+            0: L_ANGLE@52..54 "<" [Newline("\n")] []
+            1: JSX_MEMBER_NAME@54..62
+              0: JS_THIS_EXPRESSION@54..58
+                0: THIS_KW@54..58 "this" [] []
+              1: DOT@58..59 "." [] []
+              2: JS_NAME@59..62
+                0: IDENT@59..62 "foo" [] []
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@62..62
+            4: R_ANGLE@62..63 ">" [] []
+          1: JSX_CHILD_LIST@63..63
+          2: JSX_CLOSING_ELEMENT@63..74
+            0: L_ANGLE@63..64 "<" [] []
+            1: SLASH@64..65 "/" [] []
+            2: JSX_MEMBER_NAME@65..73
+              0: JS_THIS_EXPRESSION@65..69
+                0: THIS_KW@65..69 "this" [] []
+              1: DOT@69..70 "." [] []
+              2: JS_NAME@70..73
+                0: IDENT@70..73 "foo" [] []
+            3: R_ANGLE@73..74 ">" [] []
+      1: SEMICOLON@74..75 ";" [] []
+  4: EOF@75..76 "" [Newline("\n")] []
