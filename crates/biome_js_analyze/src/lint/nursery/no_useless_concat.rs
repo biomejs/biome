@@ -1,7 +1,17 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsBinaryOperator};
-use biome_rowan::AstNode;
+use biome_diagnostics::Applicability;
+use biome_js_factory::make::{
+    js_binary_expression, js_string_literal, js_string_literal_expression,
+};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
+};
+use biome_rowan::{AstNode, BatchMutationExt};
+
+use crate::JsRuleAction;
 
 declare_rule! {
     /// Disallow unnecessary concatenation of literals or template literals.
@@ -71,14 +81,15 @@ impl Rule for NoUselessConcat {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let has_left_string_expression = is_string_expression(node.left().ok())
-            || is_binary_expression_with_literal_string(node.left().ok())
-            || is_parenthesized_concatenation(node.left().ok());
-        let has_useless_concat = has_left_string_expression
-            && is_concatenation(node)
-            && !is_stylistic_concatenation(node);
+        let parent = node.parent();
+        let parent_binary_expression = get_parent_binary_expression(node);
 
-        has_useless_concat.then_some(())
+        // Prevent duplicated error reportings when the parent is an useless concatenation too, i.e.: "a" + "b" + "c"
+        if has_useless_concat(&parent) || has_useless_concat(&parent_binary_expression) {
+            return None;
+        }
+
+        has_useless_concat(&Some(node.clone())).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -95,6 +106,77 @@ impl Rule for NoUselessConcat {
                 "Consider joining the strings as a single one to improve readability and runtime performance."
             }),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let mut mutation = ctx.root().begin();
+        let left = node.left().ok();
+        let right = node.right().ok();
+        let left_string = extract_string_value(&left);
+        let right_string = extract_string_value(&right);
+
+        match (left, left_string, right_string) {
+            (_, Some(left_string_value), Some(right_string_value)) => {
+                let concatenated_string = left_string_value + right_string_value.as_str();
+                let string_literal_expression =
+                    js_string_literal_expression(js_string_literal(concatenated_string.as_str()));
+
+                mutation.replace_element(node.clone().into(), string_literal_expression.into());
+
+                Some(JsRuleAction {
+                    category: ActionCategory::QuickFix,
+                    applicability: Applicability::MaybeIncorrect,
+                    message: markup! { "Remove the useless concatenation" }.to_owned(),
+                    mutation,
+                })
+            }
+            (
+                Some(AnyJsExpression::JsBinaryExpression(left_binary_expression)),
+                None,
+                Some(right_string_value),
+            ) => {
+                if is_string_expression(left_binary_expression.right().ok()) {
+                    let value = extract_string_value(&left_binary_expression.right().ok()).unwrap();
+                    let concatenated_string = value + right_string_value.as_str();
+                    let string_literal_expression =
+                        AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(
+                            js_string_literal_expression(js_string_literal(&concatenated_string)),
+                        ));
+
+                    let left = left_binary_expression.left().ok()?;
+                    let operator = left_binary_expression.operator_token().ok()?;
+                    let binary_expression =
+                        js_binary_expression(left, operator, string_literal_expression);
+
+                    mutation.replace_element(node.clone().into(), binary_expression.into());
+                    return Some(JsRuleAction {
+                        category: ActionCategory::QuickFix,
+                        applicability: Applicability::MaybeIncorrect,
+                        message: markup! { "Remove the useless concatenation" }.to_owned(),
+                        mutation,
+                    });
+                }
+
+                None
+            }
+            _ => None,
+        }
+    }
+}
+
+fn has_useless_concat(node: &Option<JsBinaryExpression>) -> bool {
+    match node {
+        Some(node) => {
+            let has_left_string_expression = is_string_expression(node.left().ok())
+                || is_binary_expression_with_literal_string(node.left().ok())
+                || is_parenthesized_concatenation(node.left().ok());
+
+            return has_left_string_expression
+                && is_concatenation(node)
+                && !is_stylistic_concatenation(node);
+        }
+        None => false,
     }
 }
 
@@ -165,4 +247,42 @@ fn is_parenthesized_concatenation(expression: Option<AnyJsExpression>) -> bool {
     }
 
     false
+}
+
+fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> {
+    match expression {
+        Some(AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(string_literal_expression),
+        )) => string_literal_expression
+            .inner_string_text()
+            .map(|token_text| token_text.to_string())
+            .ok(),
+
+        Some(AnyJsExpression::JsBinaryExpression(binary_expression)) => {
+            match (
+                extract_string_value(&binary_expression.left().ok()),
+                extract_string_value(&binary_expression.right().ok()),
+            ) {
+                (Some(left_string), Some(right_string)) => {
+                    Some(left_string + right_string.as_str())
+                }
+                _ => None,
+            }
+        }
+        _ => None,
+    }
+}
+
+fn get_parent_binary_expression(node: &JsBinaryExpression) -> Option<JsBinaryExpression> {
+    let mut current_node = node.parent();
+
+    while current_node.is_some() {
+        if let Some(AnyJsExpression::JsBinaryExpression(binary_expression)) = current_node {
+            return Some(binary_expression);
+        } else if let Some(c) = current_node {
+            current_node = c.parent()
+        }
+    }
+
+    None
 }
