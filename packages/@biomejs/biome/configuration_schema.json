@@ -1388,6 +1388,10 @@
 			},
 			"additionalProperties": false
 		},
+		"MultilineBehavior": {
+			"type": "string",
+			"enum": ["ignore", "first", "last"]
+		},
 		"NamingConventionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1609,6 +1613,13 @@
 					"description": "Disallows package private imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useJsxSortProps": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseJsxSortPropsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1957,6 +1968,15 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseJsxSortPropsOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
+				"options": { "$ref": "#/definitions/UseJsxSortPropsOptions" }
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUtilityClassSortingOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -2050,6 +2070,10 @@
 			"additionalProperties": false
 		},
 		"Semicolons": { "type": "string", "enum": ["always", "asNeeded"] },
+		"ShorthandBehavior": {
+			"type": "string",
+			"enum": ["ignore", "first", "last"]
+		},
 		"StableHookResult": {
 			"oneOf": [
 				{
@@ -2823,6 +2847,23 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UseJsxSortPropsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseJsxSortPropsOptions" }
+			]
+		},
+		"UseJsxSortPropsOptions": {
+			"type": "object",
+			"properties": {
+				"callbacksLast": { "type": "boolean" },
+				"ignoreCase": { "type": "boolean" },
+				"multiline": { "$ref": "#/definitions/MultilineBehavior" },
+				"noSortAlphabetically": { "type": "boolean" },
+				"shorthand": { "$ref": "#/definitions/ShorthandBehavior" }
+			},
+			"additionalProperties": false
 		},
 		"UtilityClassSortingConfiguration": {
 			"anyOf": [

@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsorted.jsx
+---
+# Input
+```jsx
+<Hello lastName="Smith" firstName="John" />;
+
+```
+
+# Diagnostics
+```
+unsorted.jsx:1:8 lint/nursery/useJsxSortProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+  > 1 │ <Hello lastName="Smith" firstName="John" />;
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Use quick fix to sort them.
+  
+
+```
