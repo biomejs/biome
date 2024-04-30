@@ -22,7 +22,7 @@ invalid.css:3:2 lint/nursery/noDuplicateAtImportRules ━━━━━━━━�
       │  ^^^^^^^^^^^^^^^
     4 │ 
   
-  i Looks like you imported the same file twice. Consider removing one to get rid of this error!
+  i To fix this issue, remove one of the duplicated imports.
   
 
 ```

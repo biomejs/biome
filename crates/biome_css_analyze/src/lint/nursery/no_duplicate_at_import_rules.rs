@@ -46,7 +46,7 @@ declare_rule! {
     pub NoDuplicateAtImportRules {
         version: "next",
         name: "noDuplicateAtImportRules",
-        recommended: false,
+        recommended: true,
         sources: &[RuleSource::Stylelint("no-duplicate-at-import-rules")],
     }
 }
@@ -59,15 +59,20 @@ impl Rule for NoDuplicateAtImportRules {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        // let mut import_url_list = HashSet::new();
         let mut import_url_map: HashMap<String, HashSet<String>> = HashMap::new();
         for rule in node {
             match rule {
                 AnyCssRule::CssAtRule(item) => match item.rule().ok()? {
                     AnyCssAtRule::CssImportAtRule(import_rule) => {
-                        let import_url = import_rule.url().ok()?.text().to_lowercase();
+                        let import_url = import_rule
+                            .url()
+                            .ok()?
+                            .text()
+                            .to_lowercase()
+                            .replace("url(", "")
+                            .replace(')', "");
                         if let Some(media_query_set) = import_url_map.get_mut(&import_url) {
-                            // if the current import_rule has no media queries or there are no queries safed in the
+                            // if the current import_rule has no media queries or there are no queries saved in the
                             // media_query_set, this is always a duplicate
                             if import_rule.media().text().is_empty() || media_query_set.is_empty() {
                                 return Some(import_rule);
@@ -115,7 +120,7 @@ impl Rule for NoDuplicateAtImportRules {
                 },
             )
             .note(markup! {
-                    "Looks like you imported the same file twice. Consider removing one to get rid of this error!"
+                    "To fix this issue, remove one of the duplicated imports."
             }),
         )
     }
