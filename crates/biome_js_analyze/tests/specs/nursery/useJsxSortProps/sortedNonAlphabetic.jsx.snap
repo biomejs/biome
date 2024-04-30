@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: sortedNonAlphabetic.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<Hello
+  name="John"
+  tel={5555555}
+  classes={{
+    greetings: classes.greetings,
+  }}
+/>;
+
+<Hello
+  tel={5555555}
+  name="John"
+  classes={{
+    greetings: classes.greetings,
+  }}
+  validate
+  active
+	onClick={this._handleClick}
+	onChange={this._handleChange}
+/>;
+
+```

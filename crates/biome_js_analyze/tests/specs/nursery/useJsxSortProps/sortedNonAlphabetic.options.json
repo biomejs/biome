@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useJsxSortProps": {
+					"level": "error",
+					"options": {
+						"callbacksLast": true,
+						"multiline": "last",
+						"noSortAlphabetically": true,
+						"shorthand": "last"
+					}
+				}
+			}
+		}
+	}
+}

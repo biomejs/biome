@@ -1,0 +1,151 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsortedMultilineLast.jsx
+---
+# Input
+```jsx
+<Hello
+  name="John"
+  classes={{
+    greetings: classes.greetings,
+  }}
+  tel={5555555}
+/>;
+
+<Hello
+  name="John"
+  tel={5555555}
+  active
+  validate
+  classes={{
+    greetings: classes.greetings,
+  }}
+	onChange={this._handleChange}
+	onClick={this._handleClick}
+/>;
+
+<Hello
+  name="John"
+  tel={5555555}
+  active
+  validate
+  onChange={this._handleChange}
+  classes={{
+    greetings: classes.greetings,
+  }}
+  onClick={this._handleClick}
+/>;
+
+```
+
+# Diagnostics
+```
+unsortedMultilineLast.jsx:2:3 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+    1 │ <Hello
+  > 2 │   name="John"
+      │   ^^^^^^^^^^^
+  > 3 │   classes={{
+  > 4 │     greetings: classes.greetings,
+  > 5 │   }}
+  > 6 │   tel={5555555}
+      │   ^^^^^^^^^^^^^
+    7 │ />;
+    8 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+     1  1 │   <Hello
+     2  2 │     name="John"
+     3    │ - ··classes={{
+        3 │ + ··tel={5555555}
+        4 │ + ··classes={{
+     4  5 │       greetings: classes.greetings,
+     5    │ - ··}}
+     6    │ - ··tel={5555555}
+        6 │ + ··}}
+     7  7 │   />;
+     8  8 │   
+  
+
+```
+
+```
+unsortedMultilineLast.jsx:10:3 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+     9 │ <Hello
+  > 10 │   name="John"
+       │   ^^^^^^^^^^^
+  > 11 │   tel={5555555}
+        ...
+  > 17 │ 	onChange={this._handleChange}
+  > 18 │ 	onClick={this._handleClick}
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ />;
+    20 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    10 10 │     name="John"
+    11 11 │     tel={5555555}
+    12    │ - ··active
+    13    │ - ··validate
+    14    │ - ··classes={{
+       12 │ + ··classes={{
+    15 13 │       greetings: classes.greetings,
+    16 14 │     }}
+       15 │ + ··active
+       16 │ + ··validate
+    17 17 │   	onChange={this._handleChange}
+    18 18 │   	onClick={this._handleClick}
+  
+
+```
+
+```
+unsortedMultilineLast.jsx:22:3 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+    21 │ <Hello
+  > 22 │   name="John"
+       │   ^^^^^^^^^^^
+  > 23 │   tel={5555555}
+        ...
+  > 29 │   }}
+  > 30 │   onClick={this._handleClick}
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ />;
+    32 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    22 22 │     name="John"
+    23 23 │     tel={5555555}
+    24    │ - ··active
+    25    │ - ··validate
+    26    │ - ··onChange={this._handleChange}
+    27    │ - ··classes={{
+       24 │ + ··classes={{
+    28 25 │       greetings: classes.greetings,
+    29 26 │     }}
+    30    │ - ··onClick={this._handleClick}
+       27 │ + ··active
+       28 │ + ··validate
+       29 │ + ··onChange={this._handleChange}
+       30 │ + ··onClick={this._handleClick}
+    31 31 │   />;
+    32 32 │   
+  
+
+```

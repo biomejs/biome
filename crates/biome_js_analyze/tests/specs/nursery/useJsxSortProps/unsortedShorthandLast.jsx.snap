@@ -1,0 +1,130 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsortedShorthandLast.jsx
+---
+# Input
+```jsx
+<Hello validate name="John" tel={5555555} active />;
+<Hello active name="John" {...props} tel={5555555} validate multi />;
+<Hello name="John" onChange={this._handleChange} active {...props} tel={5555555} multi onClick={this._handleClick} validate />;
+
+```
+
+# Diagnostics
+```
+unsortedShorthandLast.jsx:1:8 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+  > 1 │ <Hello validate name="John" tel={5555555} active />;
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <Hello active name="John" {...props} tel={5555555} validate multi />;
+    3 │ <Hello name="John" onChange={this._handleChange} active {...props} tel={5555555} multi onClick={this._handleClick} validate />;
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1   │ - <Hello·validate·name="John"·tel={5555555}·active·/>;
+      1 │ + <Hello·name="John"·tel={5555555}·active·validate·/>;
+    2 2 │   <Hello active name="John" {...props} tel={5555555} validate multi />;
+    3 3 │   <Hello name="John" onChange={this._handleChange} active {...props} tel={5555555} multi onClick={this._handleClick} validate />;
+  
+
+```
+
+```
+unsortedShorthandLast.jsx:2:8 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+    1 │ <Hello validate name="John" tel={5555555} active />;
+  > 2 │ <Hello active name="John" {...props} tel={5555555} validate multi />;
+      │        ^^^^^^^^^^^^^^^^^^
+    3 │ <Hello name="John" onChange={this._handleChange} active {...props} tel={5555555} multi onClick={this._handleClick} validate />;
+    4 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1 1 │   <Hello validate name="John" tel={5555555} active />;
+    2   │ - <Hello·active·name="John"·{...props}·tel={5555555}·validate·multi·/>;
+      2 │ + <Hello·name="John"·active·{...props}·tel={5555555}·multi·validate·/>;
+    3 3 │   <Hello name="John" onChange={this._handleChange} active {...props} tel={5555555} multi onClick={this._handleClick} validate />;
+    4 4 │   
+  
+
+```
+
+```
+unsortedShorthandLast.jsx:2:38 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+    1 │ <Hello validate name="John" tel={5555555} active />;
+  > 2 │ <Hello active name="John" {...props} tel={5555555} validate multi />;
+      │                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <Hello name="John" onChange={this._handleChange} active {...props} tel={5555555} multi onClick={this._handleClick} validate />;
+    4 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1 1 │   <Hello validate name="John" tel={5555555} active />;
+    2   │ - <Hello·active·name="John"·{...props}·tel={5555555}·validate·multi·/>;
+      2 │ + <Hello·name="John"·active·{...props}·tel={5555555}·multi·validate·/>;
+    3 3 │   <Hello name="John" onChange={this._handleChange} active {...props} tel={5555555} multi onClick={this._handleClick} validate />;
+    4 4 │   
+  
+
+```
+
+```
+unsortedShorthandLast.jsx:3:8 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+    1 │ <Hello validate name="John" tel={5555555} active />;
+    2 │ <Hello active name="John" {...props} tel={5555555} validate multi />;
+  > 3 │ <Hello name="John" onChange={this._handleChange} active {...props} tel={5555555} multi onClick={this._handleClick} validate />;
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1 1 │   <Hello validate name="John" tel={5555555} active />;
+    2 2 │   <Hello active name="John" {...props} tel={5555555} validate multi />;
+    3   │ - <Hello·name="John"·onChange={this._handleChange}·active·{...props}·tel={5555555}·multi·onClick={this._handleClick}·validate·/>;
+      3 │ + <Hello·name="John"·active·onChange={this._handleChange}·{...props}·tel={5555555}·multi·validate·onClick={this._handleClick}·/>;
+    4 4 │   
+  
+
+```
+
+```
+unsortedShorthandLast.jsx:3:68 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+    1 │ <Hello validate name="John" tel={5555555} active />;
+    2 │ <Hello active name="John" {...props} tel={5555555} validate multi />;
+  > 3 │ <Hello name="John" onChange={this._handleChange} active {...props} tel={5555555} multi onClick={this._handleClick} validate />;
+      │                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1 1 │   <Hello validate name="John" tel={5555555} active />;
+    2 2 │   <Hello active name="John" {...props} tel={5555555} validate multi />;
+    3   │ - <Hello·name="John"·onChange={this._handleChange}·active·{...props}·tel={5555555}·multi·onClick={this._handleClick}·validate·/>;
+      3 │ + <Hello·name="John"·active·onChange={this._handleChange}·{...props}·tel={5555555}·multi·validate·onClick={this._handleClick}·/>;
+    4 4 │   
+  
+
+```

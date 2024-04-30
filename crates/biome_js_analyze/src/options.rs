@@ -292,6 +292,8 @@ pub type UseImportType =
 pub type UseIsArray = <lint::suspicious::use_is_array::UseIsArray as biome_analyze::Rule>::Options;
 pub type UseIsNan = <lint::correctness::use_is_nan::UseIsNan as biome_analyze::Rule>::Options;
 pub type UseJsxKeyInIterable = < lint :: correctness :: use_jsx_key_in_iterable :: UseJsxKeyInIterable as biome_analyze :: Rule > :: Options ;
+pub type UseJsxSortProps =
+    <lint::nursery::use_jsx_sort_props::UseJsxSortProps as biome_analyze::Rule>::Options;
 pub type UseKeyWithClickEvents =
     <lint::a11y::use_key_with_click_events::UseKeyWithClickEvents as biome_analyze::Rule>::Options;
 pub type UseKeyWithMouseEvents =

@@ -1,0 +1,106 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsortedCallbackLast.jsx
+---
+# Input
+```jsx
+<Hello onClick={this._handleClick} tel={5555555} />;
+<Hello onChange={this._handleChange} name="John" active {...props} onClick={this._handleClick} tel={5555555} />;
+<Hello onClick={this._handleClick} onChange={this._handleChange} name="John" active {...props} tel={5555555} />;
+
+```
+
+# Diagnostics
+```
+unsortedCallbackLast.jsx:1:8 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+  > 1 │ <Hello onClick={this._handleClick} tel={5555555} />;
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <Hello onChange={this._handleChange} name="John" active {...props} onClick={this._handleClick} tel={5555555} />;
+    3 │ <Hello onClick={this._handleClick} onChange={this._handleChange} name="John" active {...props} tel={5555555} />;
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1   │ - <Hello·onClick={this._handleClick}·tel={5555555}·/>;
+      1 │ + <Hello·tel={5555555}·onClick={this._handleClick}·/>;
+    2 2 │   <Hello onChange={this._handleChange} name="John" active {...props} onClick={this._handleClick} tel={5555555} />;
+    3 3 │   <Hello onClick={this._handleClick} onChange={this._handleChange} name="John" active {...props} tel={5555555} />;
+  
+
+```
+
+```
+unsortedCallbackLast.jsx:2:8 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+    1 │ <Hello onClick={this._handleClick} tel={5555555} />;
+  > 2 │ <Hello onChange={this._handleChange} name="John" active {...props} onClick={this._handleClick} tel={5555555} />;
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <Hello onClick={this._handleClick} onChange={this._handleChange} name="John" active {...props} tel={5555555} />;
+    4 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1 1 │   <Hello onClick={this._handleClick} tel={5555555} />;
+    2   │ - <Hello·onChange={this._handleChange}·name="John"·active·{...props}·onClick={this._handleClick}·tel={5555555}·/>;
+      2 │ + <Hello·active·name="John"·onChange={this._handleChange}·{...props}·tel={5555555}·onClick={this._handleClick}·/>;
+    3 3 │   <Hello onClick={this._handleClick} onChange={this._handleChange} name="John" active {...props} tel={5555555} />;
+    4 4 │   
+  
+
+```
+
+```
+unsortedCallbackLast.jsx:2:68 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+    1 │ <Hello onClick={this._handleClick} tel={5555555} />;
+  > 2 │ <Hello onChange={this._handleChange} name="John" active {...props} onClick={this._handleClick} tel={5555555} />;
+      │                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <Hello onClick={this._handleClick} onChange={this._handleChange} name="John" active {...props} tel={5555555} />;
+    4 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1 1 │   <Hello onClick={this._handleClick} tel={5555555} />;
+    2   │ - <Hello·onChange={this._handleChange}·name="John"·active·{...props}·onClick={this._handleClick}·tel={5555555}·/>;
+      2 │ + <Hello·active·name="John"·onChange={this._handleChange}·{...props}·tel={5555555}·onClick={this._handleClick}·/>;
+    3 3 │   <Hello onClick={this._handleClick} onChange={this._handleChange} name="John" active {...props} tel={5555555} />;
+    4 4 │   
+  
+
+```
+
+```
+unsortedCallbackLast.jsx:3:8 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+    1 │ <Hello onClick={this._handleClick} tel={5555555} />;
+    2 │ <Hello onChange={this._handleChange} name="John" active {...props} onClick={this._handleClick} tel={5555555} />;
+  > 3 │ <Hello onClick={this._handleClick} onChange={this._handleChange} name="John" active {...props} tel={5555555} />;
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1 1 │   <Hello onClick={this._handleClick} tel={5555555} />;
+    2 2 │   <Hello onChange={this._handleChange} name="John" active {...props} onClick={this._handleClick} tel={5555555} />;
+    3   │ - <Hello·onClick={this._handleClick}·onChange={this._handleChange}·name="John"·active·{...props}·tel={5555555}·/>;
+      3 │ + <Hello·active·name="John"·onChange={this._handleChange}·onClick={this._handleClick}·{...props}·tel={5555555}·/>;
+    4 4 │   
+  
+
+```

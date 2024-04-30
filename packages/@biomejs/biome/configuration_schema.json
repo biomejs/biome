@@ -1388,6 +1388,10 @@
 			},
 			"additionalProperties": false
 		},
+		"MultilineBehavior": {
+			"type": "string",
+			"enum": ["ignore", "first", "last"]
+		},
 		"NamingConventionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1612,6 +1616,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useJsxSortProps": {
+					"description": "Enforce props sorting in JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseJsxSortPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
@@ -1820,6 +1831,16 @@
 		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
+		"ReservedFirstBehavior": {
+			"anyOf": [
+				{ "type": "boolean" },
+				{ "type": "array", "items": { "$ref": "#/definitions/ReservedProps" } }
+			]
+		},
+		"ReservedProps": {
+			"type": "string",
+			"enum": ["children", "dangerouslySetInnerHTML", "key", "ref"]
+		},
 		"RestrictedGlobalsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1957,6 +1978,15 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseJsxSortPropsOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
+				"options": { "$ref": "#/definitions/UseJsxSortPropsOptions" }
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUtilityClassSortingOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -2050,6 +2080,10 @@
 			"additionalProperties": false
 		},
 		"Semicolons": { "type": "string", "enum": ["always", "asNeeded"] },
+		"ShorthandBehavior": {
+			"type": "string",
+			"enum": ["ignore", "first", "last"]
+		},
 		"StableHookResult": {
 			"oneOf": [
 				{
@@ -2823,6 +2857,24 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UseJsxSortPropsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseJsxSortPropsOptions" }
+			]
+		},
+		"UseJsxSortPropsOptions": {
+			"type": "object",
+			"properties": {
+				"callbacksLast": { "type": "boolean" },
+				"ignoreCase": { "type": "boolean" },
+				"multiline": { "$ref": "#/definitions/MultilineBehavior" },
+				"noSortAlphabetically": { "type": "boolean" },
+				"reservedFirst": { "$ref": "#/definitions/ReservedFirstBehavior" },
+				"shorthand": { "$ref": "#/definitions/ShorthandBehavior" }
+			},
+			"additionalProperties": false
 		},
 		"UtilityClassSortingConfiguration": {
 			"anyOf": [

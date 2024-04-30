@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: sortedMultilineFirst.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<Hello
+  classes={{
+    greetings: classes.greetings,
+  }}
+  name="John"
+  tel={5555555}
+/>;
+
+<Hello
+  active
+  validate
+  classes={{
+    greetings: classes.greetings,
+  }}
+  name="John"
+  tel={5555555}
+/>;
+
+```

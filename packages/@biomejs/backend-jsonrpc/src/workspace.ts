@@ -1013,6 +1013,10 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce props sorting in JSX elements.
+	 */
+	useJsxSortProps?: RuleConfiguration_for_UseJsxSortPropsOptions;
+	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleConfiguration_for_UtilityClassSortingOptions;
@@ -1557,6 +1561,9 @@ export type RuleConfiguration_for_NoCssEmptyBlockOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
+export type RuleConfiguration_for_UseJsxSortPropsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseJsxSortPropsOptions;
 export type RuleConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UtilityClassSortingOptions;
@@ -1600,6 +1607,10 @@ export interface RuleWithOptions_for_NoCssEmptyBlockOptions {
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	level: RulePlainConfiguration;
 	options: RestrictedImportsOptions;
+}
+export interface RuleWithOptions_for_UseJsxSortPropsOptions {
+	level: RulePlainConfiguration;
+	options: UseJsxSortPropsOptions;
 }
 export interface RuleWithOptions_for_UtilityClassSortingOptions {
 	level: RulePlainConfiguration;
@@ -1658,6 +1669,14 @@ export interface RestrictedImportsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	paths: {};
+}
+export interface UseJsxSortPropsOptions {
+	callbacksLast: boolean;
+	ignoreCase: boolean;
+	multiline: MultilineBehavior;
+	noSortAlphabetically: boolean;
+	reservedFirst: ReservedFirstBehavior;
+	shorthand: ShorthandBehavior;
 }
 export interface UtilityClassSortingOptions {
 	/**
@@ -1741,6 +1760,9 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult: StableHookResult;
 }
+export type MultilineBehavior = "ignore" | "first" | "last";
+export type ReservedFirstBehavior = boolean | ReservedProps[];
+export type ShorthandBehavior = "ignore" | "first" | "last";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 /**
@@ -1748,6 +1770,11 @@ export type FilenameCases = FilenameCase[];
  */
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
 export type StableHookResult = boolean | number[];
+export type ReservedProps =
+	| "children"
+	| "dangerouslySetInnerHTML"
+	| "key"
+	| "ref";
 /**
  * Supported cases for file names.
  */
@@ -1981,7 +2008,6 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
-	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
@@ -2002,13 +2028,15 @@ export type Category =
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
-	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noUnknownUnit"
+	| "lint/nursery/noUselessUndefinedInitialization"
+	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstatiation"
-	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useJsxSortProps"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
