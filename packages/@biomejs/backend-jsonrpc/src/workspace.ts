@@ -981,6 +981,10 @@ export interface Nursery {
 	 */
 	noUnknownFunction?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown pseudo-element selectors.
+	 */
+	noUnknownSelectorPseudoElement?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unknown CSS units.
 	 */
 	noUnknownUnit?: RuleConfiguration_for_Null;
@@ -1981,7 +1985,6 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
-	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
@@ -2002,12 +2005,14 @@ export type Category =
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
-	| "lint/nursery/noUselessUndefinedInitialization"
+	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
+	| "lint/nursery/noUselessUndefinedInitialization"
+	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentNewBuiltin"
-	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"

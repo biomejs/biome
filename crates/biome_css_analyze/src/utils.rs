@@ -1,11 +1,13 @@
 use crate::keywords::{
     BASIC_KEYWORDS, FONT_FAMILY_KEYWORDS, FONT_SIZE_KEYWORDS, FONT_STRETCH_KEYWORDS,
     FONT_STYLE_KEYWORDS, FONT_VARIANTS_KEYWORDS, FONT_WEIGHT_ABSOLUTE_KEYWORDS,
-    FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, LINE_HEIGHT_KEYWORDS,
-    SYSTEM_FAMILY_NAME_KEYWORDS,
+    FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS,
+    LINE_HEIGHT_KEYWORDS, SHADOW_TREE_PSEUDO_ELEMENTS, SYSTEM_FAMILY_NAME_KEYWORDS,
+    VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
+use regex::Regex;
 
 pub fn is_font_family_keyword(value: &str) -> bool {
     BASIC_KEYWORDS.contains(&value) || FONT_FAMILY_KEYWORDS.contains(&value)
@@ -108,4 +110,42 @@ pub fn is_function_keyword(value: &str) -> bool {
 /// Check if the value is a double-dashed custom function.
 pub fn is_custom_function(value: &str) -> bool {
     value.starts_with("--")
+}
+
+// Returns the vendor prefix extracted from an input string.
+pub fn vender_prefix(prop: &str) -> String {
+    let re = Regex::new(r"^(-\w+-)").unwrap();
+    let vendor_prefix = re
+        .captures(prop)
+        .map(|caps| caps[0].to_string())
+        .unwrap_or_default();
+
+    vendor_prefix
+}
+
+pub fn is_pseudo_elements(prop: &str) -> bool {
+    LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS.contains(&prop)
+        || VENDOR_SPECIFIC_PSEUDO_ELEMENTS.contains(&prop)
+        || SHADOW_TREE_PSEUDO_ELEMENTS.contains(&prop)
+        || [
+            "backdrop",
+            "content",
+            "cue",
+            "file-selector-button",
+            "grammar-error",
+            "highlight",
+            "marker",
+            "placeholder",
+            "selection",
+            "shadow",
+            "slotted",
+            "spelling-error",
+            "target-text",
+            "view-transition",
+            "view-transition-group",
+            "view-transition-image-pair",
+            "view-transition-new",
+            "view-transition-old",
+        ]
+        .contains(&prop)
 }
