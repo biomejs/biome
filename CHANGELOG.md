@@ -25,6 +25,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### New features
+
+- Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
+  Contributed by @minht11
+
 ### Parser
 
 
@@ -81,19 +86,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Add [nusery/noReactSpecificProps](https://biomejs.dev/linter/rules/no-react-specific-props/).
+- Add [nursery/noReactSpecificProps](https://biomejs.dev/linter/rules/no-react-specific-props/).
   Contributed by @marvin-j97
 
 - Add [noUselessUndefinedInitialization](https://biomejs.dev/linter/rules/no-useless-undefined-initialization/).
   Contributed by @lutaok
 
-- Add [nusery/useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/).
+- Add [nursery/useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/).
   Contributed by @Kazuhiro-Mimaki
 
-- Add [nusery/useConsistentBuiltinInstatiation](https://biomejs.dev/linter/rules/use-consistent-builtin-instatiation/).
+- Add [nursery/useConsistentBuiltinInstatiation](https://biomejs.dev/linter/rules/use-consistent-builtin-instatiation/).
   Contributed by @minht11
 
-- Add [nusery/useDefaultSwitchClause](https://biomejs.dev/linter/rules/use-default-switch-clause/).
+- Add [nursery/useDefaultSwitchClause](https://biomejs.dev/linter/rules/use-default-switch-clause/).
   Contributed by @michellocana
 
 #### Bug fixes
