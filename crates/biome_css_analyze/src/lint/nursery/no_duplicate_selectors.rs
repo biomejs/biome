@@ -1,12 +1,10 @@
-use std::borrow::Borrow;
-use std::hash::Hash;
-use std::{collections::HashSet, io};
-use std::{println, vec};
+use std::collections::HashSet;
+use std::vec;
 
 use biome_analyze::{AddVisitor, Phases, QueryMatch, Queryable, ServiceBag, Visitor, VisitorContext};
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_syntax::{AnyCssDeclarationOrRule, AnyCssRelativeSelector, AnyCssRule, AnyCssSelector, AnyCssSubSelector, CssBogus, CssComplexSelector, CssCompoundSelector, CssCustomIdentifier, CssDeclarationOrRuleBlock, CssIdentifier, CssLanguage, CssNestedQualifiedRule, CssQualifiedRule, CssRelativeSelector, CssRelativeSelectorList, CssRoot, CssRuleList, CssSelectorList, CssSyntaxElement, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRule, AnyCssSelector, CssComplexSelector, CssCompoundSelector, CssDeclarationOrRuleBlock, CssLanguage, CssNestedQualifiedRule, CssQualifiedRule, CssRelativeSelector, CssRuleList};
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
 
 declare_rule! {
@@ -21,219 +19,87 @@ declare_rule! {
 }
 
 #[derive(Default)]
-
-struct CssRuleSelectorListVisitor {
-    stack: (
-        Vec<AnyCssSelector>, 
-        Vec<Vec<AnyCssSelector>>, 
-        Vec<Vec<Vec<AnyCssSelector>>>
-    ), // Current group, total group, total for all rules
+struct DeclarationOrRuleBlockListVisitor {
+    stack: Vec<CssDeclarationOrRuleBlock>
 }
 
-impl Visitor for CssRuleSelectorListVisitor {
+impl Visitor for DeclarationOrRuleBlockListVisitor {
     type Language = CssLanguage;
 
     fn visit(
         &mut self,
         event: &WalkEvent<SyntaxNode<Self::Language>>,
-        mut ctx: VisitorContext<Self::Language>,
+        mut ctx: VisitorContext<Self::Language>
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                if let Some(node) = CssSelectorList::cast_ref(node) {
-                    // Push to the current group
-                    for selector in node {
-                        match selector {
-                            Ok(result) => {
-                                self.stack.0.push(result);
-                            },
-                            Err(_) => todo!(),
-                        }
-                    }
+                if let Some(node) = CssDeclarationOrRuleBlock::cast_ref(node) {
+                    self.stack.push(node);
                 }
-                if let Some(node) = CssRelativeSelector::cast_ref(node) {
-                    let selector = node.selector();
-                    match selector {
-                        Ok(result) => self.stack.0.push(result),
-                        Err(_) => todo!(),
-                    }
-                }
-                // Instead of a NQR we use a DRB because otherwise we will have dangling stack0
-                if let Some(_node) = CssDeclarationOrRuleBlock::cast_ref(node) {
-                    // Push the current group to the total group
-                    self.stack.1.push(self.stack.0.clone());
-                    self.stack.0.clear();
-                }
-            },
+            }
             WalkEvent::Leave(node) => {
-
-                // End of rule, clear the stack
-                if let Some(_node) = CssQualifiedRule::cast_ref(node) {
-                    self.stack.2.push(self.stack.1.clone());
-                    self.stack.1.clear();
-                    self.stack.0.clear();
-                }
-                if let Some(_node) = CssNestedQualifiedRule::cast_ref(node) {
-                    self.stack.2.push(self.stack.1.clone());
-                    // Clear the last group from the rule
-                    self.stack.1.pop();
-                }
                 if let Some(_node) = CssRuleList::cast_ref(node) {
-                    ctx.match_query(CssRuleSelectorList(self.stack.2.clone()));
+                    ctx.match_query(DeclarationOrRuleBlockList(self.stack.clone()));
+                    self.stack.clear();
                 }
-            },
+            }
         }
     }
-    
 }
 
-pub struct CssRuleSelectorList(Vec<Vec<Vec<AnyCssSelector>>>);
+pub struct DeclarationOrRuleBlockList(Vec<CssDeclarationOrRuleBlock>);
 
-impl QueryMatch for CssRuleSelectorList {
+impl QueryMatch for DeclarationOrRuleBlockList {
     fn text_range(&self) -> TextRange {
         todo!()
     }
 }
 
-impl Queryable for CssRuleSelectorList {
+impl Queryable for DeclarationOrRuleBlockList {
     type Input = Self;
+    type Output = Vec<CssDeclarationOrRuleBlock>;
     type Language = CssLanguage;
-    type Output = Vec<Vec<Vec<AnyCssSelector>>>;
     type Services = ();
 
     fn build_visitor(
         analyzer: &mut impl AddVisitor<Self::Language>,
-        _: &<Self::Language as Language>::Root,
+        _root: &<Self::Language as Language>::Root,
     ) {
-        // Register our custom visitor to run in the `Syntax` phase
-        analyzer.add_visitor(Phases::Syntax, CssRuleSelectorListVisitor::default);
+        analyzer.add_visitor(Phases::Syntax, DeclarationOrRuleBlockListVisitor::default);
     }
 
-    // Extract the output object from the input type
-    fn unwrap_match(services: &ServiceBag, query: &Self::Input) -> Self::Output {
+    fn unwrap_match(_services: &ServiceBag, query: &Self::Input) -> Self::Output {
         query.0.clone()
     }
-    
-
 }
 
 impl Rule for NoDuplicateSelectors {
-    type Query = CssRuleSelectorList;
-    type State = Vec<AnyCssSelector>;
-    type Signals = Option<Self::State>;
+    type Query = DeclarationOrRuleBlockList;
+    type State = SyntaxNode<CssLanguage>;
+    type Signals = Vec<Self::State>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let node = ctx.query();
+    fn run(ctx: &RuleContext<Self>) -> Vec<Self::State> {
+        let node_list = ctx.query();
 
-        println!("Run result:");
-        let mut temp_state: Vec<AnyCssSelector> = vec!();
-        for rule in node {
-            let mut paths:Vec<String> = vec!();
+        let mut select_list = HashSet::new();
+        let mut output: Vec<SyntaxNode<CssLanguage>> = vec!();
 
-            for group in rule {
-                let mut group = group.clone();
-                group.sort_by_key(|sel| sel.text());
-
-                if paths.len() == 0 {
-                    for selector in group.clone().into_iter() {
-                        // sort sub selectors
-                        match selector {
-                            AnyCssSelector::CssCompoundSelector(compound_selector) => {
-                                let mut prefix = String::new();
-
-                                if let Some(simple_selector) = compound_selector.simple_selector(){
-                                    prefix = simple_selector.text();
-                                }
-                                let text_list = compound_selector
-                                    .sub_selectors()
-                                    .into_iter()
-                                    .map(|sub_selector| { sub_selector.text() });
-                                let mut text_list: Vec<String> = text_list.collect();
-                                text_list.sort();
-    
-                                let final_path = prefix + &text_list.join("");
-                                if paths.contains(&final_path) {
-                                    temp_state.push(compound_selector.into());
-                                }
-                                paths.push(final_path)
-                            },
-                            AnyCssSelector::CssComplexSelector(complex_selector) => {
-                                // TODO: this is a brute force approach
-                                // We can do better to join based on whether there is a simple selector or not
-                                let complex_as_string = complex_selector.text();
-                                let mut complex_as_list: Vec<String> = complex_as_string.split(" ").map(|s| s.to_string()).collect();
-                                
-                                complex_as_list.sort();
-
-                                let final_path = complex_as_list.join(" ");
-                                if paths.contains(&final_path) {
-                                    temp_state.push(complex_selector.into());
-                                }
-                                paths.push(final_path);
-                            }, 
-                            _ => {
-                                paths.push(selector.text());
-                            }
-                        }
-                    }
-                } else {
-                    let path_clone = paths.clone();
-                    paths.clear();
-                    for path in path_clone {
-                        for selector in group.clone().into_iter() {   
-                            if let Some(compound_selector) = CssCompoundSelector::cast_ref(selector.syntax()) {
-                                // Handle sub selector sorting
-                                let mut prefix = "".to_string();
-                                if let Some(simple_selector) = compound_selector.simple_selector(){
-                                    prefix = simple_selector.text();
-                                }
-                                let text_list = compound_selector
-                                    .sub_selectors()
-                                    .into_iter()
-                                    .map(|sub_selector| { sub_selector.text() });
-                                let mut text_list: Vec<String> = text_list.collect();
-                                text_list.sort();
-                                // Handle the ampersand
-                                if let Some(_nesting_selector_token) = compound_selector.nesting_selector_token() {
-                                    let new_path = path.clone() + &prefix + &text_list.join("");
-                                    let final_path = new_path.replace("&","");
-                                    if paths.contains(&final_path) {
-                                        temp_state.push(selector.clone());
-                                    }
-                                    paths.push(final_path);
-                                    continue;
-                                }
-                                let final_path = path.clone() + " " + &prefix + &text_list.join("");
-                                if paths.contains(&final_path) {
-                                    temp_state.push(selector.clone());
-                                }
-                                paths.push(final_path);
-
-                                continue;
-                            } 
-                            // sort sub selectors
-
-                            let final_path = path.clone() + " " + &selector.text();
-                            if paths.contains(&final_path) {
-                                temp_state.push(selector.clone());
-                            }
-                            paths.push(final_path);
+        for node in node_list {
+            if let Some(this_rule) = node.syntax().parent() {
+                let handled_rule = handle_css_rule(this_rule);
+                for (selector_node, selector) in handled_rule {
+                    let resolved_selectors = resolve_nested_selectors(selector, node.clone());
+                    for resolved in resolved_selectors {
+                        if !select_list.insert(resolved) {
+                            output.push(selector_node.clone());
                         }
                     }
                 }
             }
-
-            for path in paths {
-                println!("{path}")
-            }
         }
 
-        if temp_state.len() != 0 {
-            return Some(temp_state);
-        }
-
-        None
+        output
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
@@ -241,21 +107,178 @@ impl Rule for NoDuplicateSelectors {
         // Read our guidelines to write great diagnostics:
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
-        for n in node.into_iter() {
-            let n_syn = n.clone().into_syntax();
-            return Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    n_syn.text_range(),
-                    markup! {
-                        "Unexpected duplicate selector" <Emphasis>{n_syn.to_string()}</Emphasis>
-                    },
-                )
-                .note(markup! {
-                        "This note will give you more information."
-                }),
-            )
-        }
-        None
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.text_range(),
+                markup! {
+                    "Duplicate selector."
+                },
+            ).note(markup! {
+                "Please fix it."
+            }),
+        )
     }
+}
+
+// TODO: need to handle AtRules etc.
+fn resolve_nested_selectors(selector: String, node: CssDeclarationOrRuleBlock) -> Vec<String> {
+    let mut parent_selectors: Vec<String> = vec!();
+
+    if let Some(this_rule) = node.syntax().parent() {
+        if let Some(_qualified_rule) = CssQualifiedRule::cast_ref(&this_rule) {
+            // Highest Level
+            return vec!(selector);
+        }
+        
+        let parent_node = get_parent_block(this_rule);
+
+        if let Some(parent_block) = parent_node.clone() {
+            if let Some(parent_node_parent) = parent_block.into_syntax().parent() {
+                if let Some(parent_rule) = CssQualifiedRule::cast_ref(&parent_node_parent) {
+                    for selector in parent_rule.prelude() {
+                        if let Ok(selector) = selector {
+                            parent_selectors.push(handle_css_selector(selector.into()));
+                        }
+                    }
+                }
+                if let Some(parent_rule) = CssNestedQualifiedRule::cast_ref(&parent_node_parent) {
+                    for selector in parent_rule.prelude() {
+                        if let Ok(selector) = selector {
+                            parent_selectors.push(handle_css_selector(selector.into()));
+                        }
+                    }
+                }
+            }
+
+            let resolved_selectors: Vec<String> = parent_selectors.iter().fold(vec!(), |result: Vec<String>, parent_selector|{
+                match &parent_node {
+                    Some(parent_node) => {
+                        if selector.contains("&") {
+                            let resolved_parent_selectors = resolve_nested_selectors(parent_selector.to_string(), parent_node.clone());
+                            let resolved = resolved_parent_selectors.into_iter().map(|newly_resolved|{
+                                // TODO: Need to handle the case where an equivalent is the result of an &
+                                // e.g. .a.c { &.b } == .a.b.c but the order will be a.c.b
+                                return selector.replace("&", &newly_resolved)
+                            }).collect();
+                            return [result, resolved].concat();
+                        } else {
+                            let combined_selectors = parent_selector.to_owned()+ " " + &selector;
+                            let resolved = resolve_nested_selectors(combined_selectors, parent_node.clone());
+                            return [result, resolved].concat();
+                        }
+                    }
+                    None => result,
+                }
+            });
+            return resolved_selectors
+        }
+    }
+    vec!(selector)
+}
+
+// This does not handle the highest level rules
+fn get_parent_block(this_rule: SyntaxNode<CssLanguage>) -> Option<CssDeclarationOrRuleBlock> {
+    if let Some(nested_qualified_rule) = CssNestedQualifiedRule::cast_ref(&this_rule) {
+        if let Some(rule_grand_parent) = nested_qualified_rule.syntax().grand_parent(){
+            if let Some(css_declaration_block) = CssDeclarationOrRuleBlock::cast_ref(&rule_grand_parent) {
+                return Some(css_declaration_block)
+            }
+        }
+    }
+    None
+}
+
+fn handle_css_rule(rule: SyntaxNode<CssLanguage>) -> Vec<(SyntaxNode<CssLanguage>, String)> {
+    let mut selector_list = vec!();
+    if let Some(any_css_rule) = AnyCssRule::cast_ref(&rule) {
+        match any_css_rule {
+            AnyCssRule::CssAtRule(_) => todo!(),
+            AnyCssRule::CssBogusRule(_) => todo!(),
+            AnyCssRule::CssNestedQualifiedRule(nested_qualified_rule) => {
+                for selector in nested_qualified_rule.prelude() {
+                    if let Ok(valid_selector) = selector {
+                        let selector_syntax = valid_selector.into_syntax();
+                        selector_list.push(
+                            (selector_syntax.clone(), handle_css_selector(selector_syntax))
+                        );
+                    }
+                }
+            },
+            AnyCssRule::CssQualifiedRule(qualified_rule) => {
+                for selector in qualified_rule.prelude() {
+                    if let Ok(valid_selector) = selector {
+                        let selector_syntax = valid_selector.into_syntax();
+                        selector_list.push(
+                            (selector_syntax.clone(), handle_css_selector(selector_syntax))
+                        );
+                    }
+                }
+            },
+        }
+    }
+    selector_list
+}
+
+fn handle_css_selector(selector: SyntaxNode<CssLanguage>) -> String {
+    if let Some(complex_selector) = CssComplexSelector::cast_ref(&selector) {
+        let mut resolved = complex_selector.text();
+        // This is to handle the special case of an empty combinator
+        // i.e. .foo .bar == .bar .foo
+        let mut left_right :Vec<String> = vec!();
+
+        if let Ok(left) = complex_selector.left() {
+            left_right.push(handle_css_selector(left.into_syntax()));
+        }
+        if let Ok(right) = complex_selector.right() {
+            left_right.push(handle_css_selector(right.into_syntax()));
+        }
+        if let Ok(combinator) = complex_selector.combinator() {
+            if combinator.text() == " " {
+                left_right.sort()
+            }
+            resolved = left_right.join(combinator.text());
+        }
+
+        return resolved
+    }
+    if let Some(relative_selector) = CssRelativeSelector::cast_ref(&selector) {
+        let mut resolved = String::new();
+        if let Some(combinator) = relative_selector.combinator() {
+            resolved.push_str(combinator.text());
+        }
+        if let Ok(selector) = relative_selector.selector(){
+            resolved.push_str(&handle_css_selector(selector.into()));
+        }
+        return resolved
+    }
+    if let Some(compound_selector) = CssCompoundSelector::cast_ref(&selector) {
+        return format_compound_selector(compound_selector)
+    }
+    if let Some(any) = AnyCssSelector::cast_ref(&selector) {
+        return any.text();
+    }
+    selector.to_string()
+}
+
+fn format_compound_selector (selector: CssCompoundSelector) -> String {
+    let nesting_selector_token = selector.nesting_selector_token();
+    let sub_selectors = selector.sub_selectors();
+    let simple_selector = selector.simple_selector();
+
+    let mut resolved = String::new();
+    if let Some(token) = nesting_selector_token {
+        resolved.push_str(&token.text().trim());
+    }
+    if let Some(selector) = simple_selector {
+        resolved.push_str(&selector.text());
+    }
+    let mut sub_selector_string: Vec<String> = sub_selectors.into_iter().map(|s|{
+        return s.text()
+    }).collect();
+    sub_selector_string.sort();
+    if sub_selector_string.len() > 0 {
+        resolved.push_str(&sub_selector_string.join(""));
+    }
+    return resolved
 }

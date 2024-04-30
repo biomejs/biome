@@ -40,3 +40,23 @@ a {
     }
 }
 ```
+
+# Diagnostics
+```
+valid.css:6:27 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    4 │ }
+    5 │ 
+  > 6 │ @media (min-width: 10px) {
+      │                           
+  > 7 │     .foo {
+      │     ^^^^^
+    8 │         width: 12;
+    9 │     }
+  
+  i Please fix it.
+  
+
+```
