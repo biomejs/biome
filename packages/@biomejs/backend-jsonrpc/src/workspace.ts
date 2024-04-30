@@ -2009,6 +2009,7 @@ export type Category =
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useConsistentBuiltinInstatiation"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useDefaultSwitchClause"
