@@ -929,7 +929,7 @@ export interface Nursery {
 	 */
 	noDoneCallback?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow duplicate @import rules.
 	 */
 	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
 	/**

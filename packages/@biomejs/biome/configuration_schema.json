@@ -1469,7 +1469,7 @@
 					]
 				},
 				"noDuplicateAtImportRules": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow duplicate @import rules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

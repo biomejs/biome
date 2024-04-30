@@ -2662,7 +2662,7 @@ pub struct Nursery {
     #[doc = "Disallow using a callback in asynchronous tests and hooks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_done_callback: Option<RuleConfiguration<NoDoneCallback>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow duplicate @import rules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_at_import_rules: Option<RuleConfiguration<NoDuplicateAtImportRules>>,
     #[doc = "Disallow duplicate conditions in if-else-if chains"]
