@@ -2728,6 +2728,9 @@ pub struct Nursery {
     #[doc = "Enforce the sorting of CSS utility classes."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_classes: Option<RuleConfiguration<UseSortedClasses>>,
+    #[doc = "Succinct description of the rule."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_throw_new_error: Option<RuleConfiguration<UseThrowNewError>>,
 }
 impl DeserializableValidator for Nursery {
     fn validate(
@@ -2772,6 +2775,7 @@ impl Nursery {
         "useGenericFontNames",
         "useImportRestrictions",
         "useSortedClasses",
+        "useThrowNewError",
     ];
     const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noCssEmptyBlock",
@@ -2828,6 +2832,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -2974,6 +2979,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
+            }
+        }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -3106,6 +3116,11 @@ impl Nursery {
         if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
+            }
+        }
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
         index_set
@@ -3246,6 +3261,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useSortedClasses" => self
                 .use_sorted_classes
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useThrowNewError" => self
+                .use_throw_new_error
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,

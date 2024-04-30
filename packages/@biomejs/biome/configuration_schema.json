@@ -1618,6 +1618,13 @@
 						{ "$ref": "#/definitions/UtilityClassSortingConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useThrowNewError": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false

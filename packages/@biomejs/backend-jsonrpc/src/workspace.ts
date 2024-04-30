@@ -1016,6 +1016,10 @@ export interface Nursery {
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleConfiguration_for_UtilityClassSortingOptions;
+	/**
+	 * Succinct description of the rule.
+	 */
+	useThrowNewError?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -1981,7 +1985,6 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
-	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
@@ -2002,14 +2005,17 @@ export type Category =
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
-	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noUnknownUnit"
+	| "lint/nursery/noUselessUndefinedInitialization"
+	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useThrowNewError"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
