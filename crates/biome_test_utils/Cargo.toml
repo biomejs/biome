@@ -24,7 +24,7 @@ biome_project       = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_service       = { workspace = true }
 countme             = { workspace = true, features = ["enable"] }
-json_comments       = "0.2.1"
+json_comments       = "0.2.2"
 serde_json          = { workspace = true }
 similar             = { workspace = true }
 

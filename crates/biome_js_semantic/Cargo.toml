@@ -13,7 +13,7 @@ version              = "0.5.7"
 [dependencies]
 biome_js_syntax = { workspace = true }
 biome_rowan     = { workspace = true }
-rust-lapper     = "1.0.1"
+rust-lapper     = "1.1.0"
 rustc-hash      = { workspace = true }
 
 [dev-dependencies]

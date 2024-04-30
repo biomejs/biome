@@ -17,12 +17,12 @@ biome_markup         = { workspace = true }
 biome_text_size      = { workspace = true }
 schemars             = { workspace = true, optional = true }
 serde                = { workspace = true, optional = true, features = ["derive"] }
-termcolor            = "1.1.2"
-unicode-segmentation = "1.10.1"
-unicode-width        = "0.1.9"
+termcolor            = { workspace = true }
+unicode-segmentation = "1.11.0"
+unicode-width        = { workspace = true }
 
 [dev-dependencies]
-trybuild = "1.0"
+trybuild = "1.0.91"
 
 [features]
 serde_markup = ["serde", "schemars"]
