@@ -271,7 +271,7 @@ fn compare_props(
 }
 
 fn is_shorthand(prop: &JsxAttribute) -> bool {
-    prop.initializer().is_some()
+    prop.initializer().is_none()
 }
 
 fn is_callback(prop: &JsxAttribute) -> bool {

@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsortedShorthandFirst.jsx
+---
+# Input
+```jsx
+<Hello name="John" tel={5555555} active validate />;
+<Hello validate active name="John" tel={5555555} />;
+
+```
+
+# Diagnostics
+```
+unsortedShorthandFirst.jsx:1:8 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+  > 1 │ <Hello name="John" tel={5555555} active validate />;
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <Hello validate active name="John" tel={5555555} />;
+    3 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1   │ - <Hello·name="John"·tel={5555555}·active·validate·/>;
+      1 │ + <Hello·active·validate·name="John"·tel={5555555}·/>;
+    2 2 │   <Hello validate active name="John" tel={5555555} />;
+    3 3 │   
+  
+
+```
+
+```
+unsortedShorthandFirst.jsx:2:8 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+    1 │ <Hello name="John" tel={5555555} active validate />;
+  > 2 │ <Hello validate active name="John" tel={5555555} />;
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1 1 │   <Hello name="John" tel={5555555} active validate />;
+    2   │ - <Hello·validate·active·name="John"·tel={5555555}·/>;
+      2 │ + <Hello·active·validate·name="John"·tel={5555555}·/>;
+    3 3 │   
+  
+
+```
