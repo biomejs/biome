@@ -176,7 +176,7 @@ impl Rule for NoMisplacedAssertion {
                 return None;
             }
 
-            let is_exeption = is_exception_for_expect(&node);
+            let is_exeption = is_exception_for_expect(node);
             let binding = model.binding(&assertion_call);
             if let Some(binding) = binding {
                 let ident = JsIdentifierBinding::cast_ref(binding.syntax())?;
