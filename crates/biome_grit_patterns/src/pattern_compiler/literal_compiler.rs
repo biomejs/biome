@@ -1,8 +1,11 @@
-use super::{compilation_context::CompilationContext, PatternCompiler};
+use super::{
+    compilation_context::NodeCompilationContext, list_compiler::ListCompiler,
+    map_compiler::MapCompiler,
+};
 use crate::{grit_context::GritQueryContext, CompileError};
-use biome_grit_syntax::{AnyGritListPattern, AnyGritLiteral, GritSyntaxKind};
+use biome_grit_syntax::{AnyGritLiteral, GritSyntaxKind};
 use grit_pattern_matcher::pattern::{
-    BooleanConstant, FloatConstant, IntConstant, List, Pattern, StringConstant,
+    BooleanConstant, FloatConstant, IntConstant, Pattern, StringConstant,
 };
 
 pub(crate) struct LiteralCompiler;
@@ -10,7 +13,7 @@ pub(crate) struct LiteralCompiler;
 impl LiteralCompiler {
     pub(crate) fn from_node_with_rhs(
         node: &AnyGritLiteral,
-        context: &mut CompilationContext,
+        context: &mut NodeCompilationContext,
         is_rhs: bool,
     ) -> Result<Pattern<GritQueryContext>, CompileError> {
         match node {
@@ -28,18 +31,12 @@ impl LiteralCompiler {
                     CompileError::LiteralOutOfRange(format!("Error parsing integer: {err}"))
                 })?,
             ))),
-            AnyGritLiteral::GritList(list) => {
-                let patterns = list
-                    .patterns()
-                    .into_iter()
-                    .map(|pattern| match pattern {
-                        Ok(pattern) => Ok(compile_list_pattern(&pattern, context, is_rhs)?),
-                        Err(error) => Err(CompileError::from(error)),
-                    })
-                    .collect::<Result<Vec<_>, _>>()?;
-                Ok(Pattern::List(Box::new(List::new(patterns))))
-            }
-            AnyGritLiteral::GritMap(_) => todo!(),
+            AnyGritLiteral::GritList(list) => Ok(Pattern::List(Box::new(
+                ListCompiler::from_node_with_rhs(list, context, is_rhs)?,
+            ))),
+            AnyGritLiteral::GritMap(map) => Ok(Pattern::Map(Box::new(
+                MapCompiler::from_node_with_rhs(map, context, is_rhs)?,
+            ))),
             AnyGritLiteral::GritStringLiteral(string) => {
                 let token = string.value_token()?;
                 let text = token.text_trimmed();
@@ -53,19 +50,6 @@ impl LiteralCompiler {
                 GritSyntaxKind::GRIT_BOGUS_LITERAL.into(),
             )),
         }
-    }
-}
-
-fn compile_list_pattern(
-    node: &AnyGritListPattern,
-    context: &mut CompilationContext,
-    is_rhs: bool,
-) -> Result<Pattern<GritQueryContext>, CompileError> {
-    match node {
-        AnyGritListPattern::AnyGritPattern(pattern) => {
-            PatternCompiler::from_node_with_rhs(pattern, context, is_rhs)
-        }
-        AnyGritListPattern::GritDotdotdot(_) => Ok(Pattern::Dots),
     }
 }
 

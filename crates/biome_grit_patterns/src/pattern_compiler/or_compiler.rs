@@ -1,4 +1,4 @@
-use super::{compilation_context::CompilationContext, PatternCompiler};
+use super::{compilation_context::NodeCompilationContext, PatternCompiler};
 use crate::{grit_context::GritQueryContext, CompileError};
 use biome_grit_syntax::GritPatternOr;
 use grit_pattern_matcher::pattern::Or;
@@ -8,7 +8,7 @@ pub(crate) struct OrCompiler;
 impl OrCompiler {
     pub(crate) fn from_node(
         node: &GritPatternOr,
-        context: &mut CompilationContext,
+        context: &mut NodeCompilationContext,
     ) -> Result<Or<GritQueryContext>, CompileError> {
         let patterns = node
             .patterns()

@@ -190,3 +190,7 @@ opt-level = "s"
 [profile.release.package.biome_wasm]
 debug     = false
 opt-level = 3
+
+[patch.crates-io]
+grit-pattern-matcher = { path = "../gritql/crates/grit-pattern-matcher" }
+grit-util            = { path = "../gritql/crates/grit-util" }

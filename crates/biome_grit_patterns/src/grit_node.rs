@@ -1,4 +1,4 @@
-use grit_util::{AstCursor, AstNode as GritAstNode, CodeRange, Range};
+use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
 use std::{borrow::Cow, str::Utf8Error};
 
 #[derive(Clone, Debug)]
@@ -37,7 +37,7 @@ impl GritAstNode for GritNode {
         todo!()
     }
 
-    fn range(&self) -> Range {
+    fn byte_range(&self) -> ByteRange {
         todo!()
     }
 

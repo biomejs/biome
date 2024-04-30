@@ -22,7 +22,7 @@ use biome_diagnostics::{
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName};
-use biome_grit_patterns::GritPattern;
+use biome_grit_patterns::GritQuery;
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
@@ -55,7 +55,7 @@ pub(super) struct WorkspaceServer {
     /// Stores the document sources used across the workspace
     file_sources: RwLock<IndexSet<DocumentFileSource>>,
     /// Stores patterns to search for.
-    patterns: DashMap<PatternId, GritPattern>,
+    patterns: DashMap<PatternId, GritQuery>,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross

@@ -1,4 +1,4 @@
-use super::{compilation_context::CompilationContext, PatternCompiler};
+use super::{compilation_context::NodeCompilationContext, PatternCompiler};
 use crate::{grit_context::GritQueryContext, CompileError};
 use biome_grit_syntax::GritPatternAny;
 use grit_pattern_matcher::pattern::Any;
@@ -8,7 +8,7 @@ pub(crate) struct AnyCompiler;
 impl AnyCompiler {
     pub(crate) fn from_node(
         node: &GritPatternAny,
-        context: &mut CompilationContext,
+        context: &mut NodeCompilationContext,
     ) -> Result<Any<GritQueryContext>, CompileError> {
         let patterns = node
             .patterns()

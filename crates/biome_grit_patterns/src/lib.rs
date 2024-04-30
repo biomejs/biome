@@ -1,3 +1,5 @@
+#![allow(dead_code)] // FIXME: Remove when more stuff is ready
+mod diagnostics;
 mod errors;
 mod grit_binding;
 mod grit_code_snippet;
@@ -6,17 +8,19 @@ mod grit_file;
 mod grit_language;
 mod grit_node;
 mod grit_node_patterns;
+mod grit_query;
 mod grit_tree;
-mod pattern;
 mod pattern_compiler;
 mod resolved_pattern;
+mod util;
+mod variables;
 
 use biome_grit_parser::parse_grit;
 pub use errors::*;
-pub use pattern::GritPattern;
+pub use grit_query::GritQuery;
 
 /// Compiles a Grit pattern from the given source string.
-pub fn compile_pattern(source: &str) -> Result<GritPattern, CompileError> {
+pub fn compile_pattern(source: &str) -> Result<GritQuery, CompileError> {
     let parsed = parse_grit(source);
-    GritPattern::from_node(parsed.tree())
+    GritQuery::from_node(parsed.tree())
 }

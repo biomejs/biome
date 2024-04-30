@@ -1,6 +1,6 @@
 use crate::{grit_context::GritQueryContext, grit_language::GritLanguage, grit_node::GritNode};
 use grit_pattern_matcher::{binding::Binding, constant::Constant};
-use grit_util::{CodeRange, Range};
+use grit_util::{ByteRange, CodeRange, Range};
 use std::path::Path;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -19,7 +19,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
         todo!()
     }
 
-    fn from_range(_range: Range, _source: &'a str) -> Self {
+    fn from_range(_range: ByteRange, _source: &'a str) -> Self {
         todo!()
     }
 
@@ -32,6 +32,10 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
     }
 
     fn position(&self, _language: &GritLanguage) -> Option<Range> {
+        todo!()
+    }
+
+    fn range(&self, _language: &GritLanguage) -> Option<ByteRange> {
         todo!()
     }
 
