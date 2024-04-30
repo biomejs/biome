@@ -161,6 +161,21 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @printfn
 
+- [noMisplacedAssertion](https://biomejs.dev/linter/rules/no-misplaced-assertion/) now allow these matchers
+  
+  - `expect.any()`
+  - `expect.anything()`
+  - `expect.closeTo`
+  - `expect.arrayContaining`
+  - `expect.objectContaining`
+  - `expect.stringContaining`
+  - `expect.stringMatching`
+  - `expect.extend`
+  - `expect.addEqualityTesters`
+  - `expect.addSnapshotSerializer`
+
+  Contributed by @fujiyamaorange
+
 ### Parser
 
 - The language parsers no longer panic on unterminated strings followed by a newline and a space ([#2606](https://github.com/biomejs/biome/issues/2606), [#2410](https://github.com/biomejs/biome/issues/2410)).
