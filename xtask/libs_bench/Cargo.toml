@@ -5,7 +5,7 @@ publish = false
 version = "0.0.0"
 
 [dependencies]
-regex = { version = "1.6.0" }
+regex = { workspace = true }
 
 [dev-dependencies]
 criterion    = "0.5.1"
