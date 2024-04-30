@@ -16,7 +16,7 @@ where
     L: Language,
 {
     /// It starts a [BatchMutation]
-    #[must_use = "This method consumes the node and return the BatchMutation api that returns the new SynytaxNode on commit"]
+    #[must_use = "This method consumes the node and return the BatchMutation api that returns the new SyntaxNode on commit"]
     fn begin(self) -> BatchMutation<L>;
 }
 
@@ -25,7 +25,7 @@ where
     L: Language,
     T: AstNode<Language = L>,
 {
-    #[must_use = "This method consumes the node and return the BatchMutation api that returns the new SynytaxNode on commit"]
+    #[must_use = "This method consumes the node and return the BatchMutation api that returns the new SyntaxNode on commit"]
     fn begin(self) -> BatchMutation<L> {
         BatchMutation::new(self.into_syntax())
     }
