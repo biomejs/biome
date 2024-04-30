@@ -1831,6 +1831,16 @@
 		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
+		"ReservedFirstBehavior": {
+			"anyOf": [
+				{ "type": "boolean" },
+				{ "type": "array", "items": { "$ref": "#/definitions/ReservedProps" } }
+			]
+		},
+		"ReservedProps": {
+			"type": "string",
+			"enum": ["children", "dangerouslySetInnerHTML", "key", "ref"]
+		},
 		"RestrictedGlobalsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2861,6 +2871,7 @@
 				"ignoreCase": { "type": "boolean" },
 				"multiline": { "$ref": "#/definitions/MultilineBehavior" },
 				"noSortAlphabetically": { "type": "boolean" },
+				"reservedFirst": { "$ref": "#/definitions/ReservedFirstBehavior" },
 				"shorthand": { "$ref": "#/definitions/ShorthandBehavior" }
 			},
 			"additionalProperties": false

@@ -1,6 +1,9 @@
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, VisitableType,
+};
 use biome_js_factory::make::jsx_attribute_list;
 use biome_rowan::BatchMutationExt;
-use std::cmp::Ordering;
+use std::{cmp::Ordering, str::FromStr};
 
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
@@ -11,7 +14,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{AnyJsxAttribute, JsxAttribute, JsxAttributeList};
 use biome_rowan::{AstNode, TextRange};
-use serde::{Deserialize, Serialize};
+use serde::{de::IntoDeserializer, Deserialize, Serialize};
 
 use crate::JsRuleAction;
 
@@ -122,7 +125,8 @@ pub struct UseJsxSortPropsOptions {
     ignore_case: bool,
     #[serde(default, skip_serializing_if = "is_default")]
     no_sort_alphabetically: bool,
-    // TODO: add reserved_first and locale options
+    #[serde(default, skip_serializing_if = "is_default")]
+    reserved_first: ReservedFirstBehavior,
 }
 
 #[derive(Clone, Debug, Default, Deserializable, Serialize, Deserialize, PartialEq, Eq)]
@@ -143,6 +147,53 @@ pub enum ShorthandBehavior {
     Ignore,
     First,
     Last,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+#[serde(untagged)]
+pub enum ReservedFirstBehavior {
+    Enabled(bool),
+    ReservedProps(Vec<ReservedProps>),
+}
+
+impl Default for ReservedFirstBehavior {
+    fn default() -> Self {
+        ReservedFirstBehavior::Enabled(false)
+    }
+}
+
+impl Deserializable for ReservedFirstBehavior {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        if value.visitable_type()? == VisitableType::ARRAY {
+            Deserializable::deserialize(value, name, diagnostics).map(Self::ReservedProps)
+        } else {
+            Deserializable::deserialize(value, name, diagnostics).map(Self::Enabled)
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserializable, Deserialize, PartialEq, Eq)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum ReservedProps {
+    Children,
+    DangerouslySetInnerHTML,
+    Key,
+    Ref,
+}
+
+impl FromStr for ReservedProps {
+    type Err = serde::de::value::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        <Self as Deserialize>::deserialize(s.into_deserializer())
+    }
 }
 
 fn is_default<T: Default + Eq>(value: &T) -> bool {
@@ -275,6 +326,24 @@ fn compare_props(
         };
         let (a_name, b_name) = (a_name.text(), b_name.text());
 
+        if options.reserved_first == ReservedFirstBehavior::Enabled(true) {
+            if is_reserved(a, None) && !is_reserved(b, None) {
+                return Ordering::Less;
+            }
+            if !is_reserved(a, None) && is_reserved(b, None) {
+                return Ordering::Greater;
+            }
+        }
+
+        if let ReservedFirstBehavior::ReservedProps(reserved) = &options.reserved_first {
+            if is_reserved(a, Some(reserved)) && !is_reserved(b, Some(reserved)) {
+                return Ordering::Less;
+            }
+            if !is_reserved(a, Some(reserved)) && is_reserved(b, Some(reserved)) {
+                return Ordering::Greater;
+            }
+        }
+
         if options.callbacks_last {
             if is_callback(a) && !is_callback(b) {
                 return Ordering::Greater;
@@ -329,6 +398,17 @@ fn compare_props(
         }
         a_name.cmp(&b_name)
     }
+}
+
+fn is_reserved(prop: &JsxAttribute, reserved: Option<&[ReservedProps]>) -> bool {
+    let Ok(prop_name) = prop.name() else {
+        return false;
+    };
+    let prop_name = prop_name.text();
+    let Ok(prop_name) = ReservedProps::from_str(&prop_name) else {
+        return false;
+    };
+    reserved.map_or(true, |reserved| reserved.contains(&prop_name))
 }
 
 fn is_shorthand(prop: &JsxAttribute) -> bool {

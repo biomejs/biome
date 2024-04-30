@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: sortedReservedFirstArray.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<Hello ref={johnRef} key={0} name="John" />
+
+```
