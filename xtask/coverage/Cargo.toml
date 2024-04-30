@@ -21,7 +21,7 @@ pico-args          = { version = "0.5.0", features = ["eq-separator"] }
 regex              = { workspace = true }
 serde              = { workspace = true, features = ["derive"] }
 serde_json         = { workspace = true }
-serde_yaml         = "0.9.33"
+serde_yaml         = "0.9.34"
 tracing            = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "std"] }
 walkdir            = "2.5.0"
