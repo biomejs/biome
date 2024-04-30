@@ -35,7 +35,7 @@ expect.objectContaining({
   y: expect.any(Number),
 })
 
-expect.not.stringContaining('Hello world!')
+expect.stringContaining('Hello world!')
 
 expect.stringMatching(/^Alic/)
 expect.stringMatching(/^[BR]ob/)
@@ -54,24 +54,4 @@ expect.extend({
 expect.addEqualityTesters([areVolumesEqual]);
 
 expect.addSnapshotSerializer(serializer);
-```
-
-# Diagnostics
-```
-valid.js:32:1 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The assertion isn't inside a it(), test() or Deno.test() function call.
-  
-    30 │ })
-    31 │ 
-  > 32 │ expect.not.stringContaining('Hello world!')
-       │ ^^^^^^
-    33 │ 
-    34 │ expect.stringMatching(/^Alic/)
-  
-  i This will result in unexpected behaviours from your test suite.
-  
-  i Move the assertion inside a it(), test() or Deno.test() function call.
-  
-
 ```

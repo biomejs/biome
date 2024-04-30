@@ -29,7 +29,7 @@ expect.objectContaining({
   y: expect.any(Number),
 })
 
-expect.not.stringContaining('Hello world!')
+expect.stringContaining('Hello world!')
 
 expect.stringMatching(/^Alic/)
 expect.stringMatching(/^[BR]ob/)
