@@ -1,0 +1,95 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsortedMultilineFirst.jsx
+---
+# Input
+```jsx
+<Hello
+  name="John"
+  classes={{
+    greetings: classes.greetings,
+  }}
+  tel={5555555}
+/>;
+
+<Hello
+  active
+  classes={{
+    greetings: classes.greetings,
+  }}
+  validate
+  name="John"
+  tel={5555555}
+/>;
+
+```
+
+# Diagnostics
+```
+unsortedMultilineFirst.jsx:2:3 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+    1 │ <Hello
+  > 2 │   name="John"
+      │   ^^^^^^^^^^^
+  > 3 │   classes={{
+  > 4 │     greetings: classes.greetings,
+  > 5 │   }}
+  > 6 │   tel={5555555}
+      │   ^^^^^^^^^^^^^
+    7 │ />;
+    8 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+     1  1 │   <Hello
+     2    │ - ··name="John"
+     3    │ - ··classes={{
+        2 │ + ··classes={{
+     4  3 │       greetings: classes.greetings,
+     5  4 │     }}
+     6    │ - ··tel={5555555}
+        5 │ + ··name="John"
+        6 │ + ··tel={5555555}
+     7  7 │   />;
+     8  8 │   
+  
+
+```
+
+```
+unsortedMultilineFirst.jsx:10:3 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These JSX props are not sorted.
+  
+     9 │ <Hello
+  > 10 │   active
+       │   ^^^^^^
+  > 11 │   classes={{
+        ...
+  > 15 │   name="John"
+  > 16 │   tel={5555555}
+       │   ^^^^^^^^^^^^^
+    17 │ />;
+    18 │ 
+  
+  i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+     9  9 │   <Hello
+    10 10 │     active
+    11    │ - ··classes={{
+       11 │ + ··validate
+       12 │ + ··classes={{
+    12 13 │       greetings: classes.greetings,
+    13 14 │     }}
+    14    │ - ··validate
+    15 15 │     name="John"
+    16 16 │     tel={5555555}
+  
+
+```
