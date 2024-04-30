@@ -1,11 +1,18 @@
+use biome_js_factory::make::jsx_attribute_list;
+use biome_rowan::BatchMutationExt;
 use std::cmp::Ordering;
 
-use biome_analyze::{context::RuleContext, declare_rule, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Applicability;
 use biome_js_syntax::{AnyJsxAttribute, JsxAttribute, JsxAttributeList};
 use biome_rowan::{AstNode, TextRange};
 use serde::{Deserialize, Serialize};
+
+use crate::JsRuleAction;
 
 declare_rule! {
     /// Succinct description of the rule.
@@ -128,6 +135,56 @@ impl Rule for UseJsxSortProps {
                 "Use quick fix to sort them."
             }),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+        let props = ctx.query().clone();
+        let options = ctx.options();
+        let mut non_spread_props: Option<Vec<_>> = None;
+        let mut new_props = Vec::new();
+        for prop in props.clone() {
+            match prop {
+                AnyJsxAttribute::JsxAttribute(attr) => {
+                    if let Some(non_spread_props) = &mut non_spread_props {
+                        non_spread_props.push(attr);
+                    } else {
+                        non_spread_props = Some(vec![attr]);
+                    }
+                }
+                AnyJsxAttribute::JsxSpreadAttribute(_) => {
+                    if let Some(mut non_spread_props) = non_spread_props.take() {
+                        non_spread_props.sort_by(compare_props(options));
+                        new_props.extend(
+                            non_spread_props
+                                .into_iter()
+                                .map(AnyJsxAttribute::JsxAttribute),
+                        );
+                    }
+                    non_spread_props = None;
+                    new_props.push(prop);
+                }
+            }
+        }
+        if let Some(mut non_spread_props) = non_spread_props {
+            non_spread_props.sort_by(compare_props(options));
+            new_props.extend(
+                non_spread_props
+                    .into_iter()
+                    .map(AnyJsxAttribute::JsxAttribute),
+            );
+        }
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node(props, jsx_attribute_list(new_props));
+
+        Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::Always,
+            message: markup! {
+                "Sort the JSX props."
+            }
+            .to_owned(),
+            mutation,
+        })
     }
 }
 

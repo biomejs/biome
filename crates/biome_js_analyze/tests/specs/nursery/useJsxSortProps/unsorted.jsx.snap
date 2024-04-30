@@ -10,7 +10,7 @@ expression: unsorted.jsx
 
 # Diagnostics
 ```
-unsorted.jsx:1:8 lint/nursery/useJsxSortProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:1:8 lint/nursery/useJsxSortProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! These JSX props are not sorted.
   
@@ -19,6 +19,12 @@ unsorted.jsx:1:8 lint/nursery/useJsxSortProps ━━━━━━━━━━━�
     2 │ 
   
   i Use quick fix to sort them.
+  
+  i Safe fix: Sort the JSX props.
+  
+    1   │ - <Hello·lastName="Smith"·firstName="John"·/>;
+      1 │ + <Hello·firstName="John"·lastName="Smith"·/>;
+    2 2 │   
   
 
 ```
