@@ -764,7 +764,7 @@ fn handle_if_statement_comment(
             && !comment.text_position().is_own_line()
             && comment.preceding_node().is_some()
         {
-            return CommentPlacement::dangling(consequent, comment);
+            return CommentPlacement::trailing(consequent, comment);
         }
 
         // ```javascript

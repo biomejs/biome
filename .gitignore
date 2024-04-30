@@ -23,3 +23,8 @@ crates/biome_js_formatter/report.*
 crates/biome_json_formatter/report.*
 crates/biome_json_formatter/report_incompatible.*
 .vercel
+
+# don't ignore any files inside prettier test specs
+!crates/biome_js_formatter/tests/specs/prettier/**/*
+!crates/biome_json_formatter/tests/specs/prettier/**/*
+!crates/biome_css_formatter/tests/specs/prettier/**/*

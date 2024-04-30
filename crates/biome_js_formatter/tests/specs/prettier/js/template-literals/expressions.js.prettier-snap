@@ -1,8 +1,6 @@
 const long1 = `long ${
   a.b //comment
-} long longlong ${a.b.c.d.e} long longlong ${a.b.c.d.e} long longlong ${
-  a.b.c.d.e
-} long long`;
+} long longlong ${a.b.c.d.e} long longlong ${a.b.c.d.e} long longlong ${a.b.c.d.e} long long`;
 const long2 = `long ${a.b.c.d.e} long longlong ${loooooooooooooooooong} long longlong ${loooooooooooooooooong} long longlong ${loooooooooooooooooong} long long`;
 
 const long3 = `long long long long long long long long long long long ${a.b.c.d.e} long long long long long long long long long long long long long`;
@@ -11,9 +9,7 @@ const description = `The value of the ${cssName} css of the ${this._name} elemen
 
 const foo = `such a long template string ${foo.bar.baz} that prettier will want to wrap it`;
 
-const shouldWrapForNow = `such a long template string ${
-  foo().bar.baz
-} that prettier will want to wrap it`;
+const shouldWrapForNow = `such a long template string ${foo().bar.baz} that prettier will want to wrap it`;
 
 const shouldNotWrap = `simple expressions should not break ${this} ${variable} ${a.b.c} ${this.b.c} ${a[b].c} ${a.b[c]} ${a.b["c"]} ${a?.b?.c}`;
 
@@ -32,9 +28,9 @@ function testing() {
   // faking some tabs since I can't paste my real code in
   if (true) {
     if (false) {
-      return `${
-        process.env.OPENID_URL
-      }/something/something/something?${Object.keys(p)
+      return `${process.env.OPENID_URL}/something/something/something?${Object.keys(
+        p,
+      )
         .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(p[k])}`)
         .join("&")}`;
     }

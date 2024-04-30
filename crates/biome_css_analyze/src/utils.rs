@@ -1,7 +1,8 @@
 use crate::keywords::{
     BASIC_KEYWORDS, FONT_FAMILY_KEYWORDS, FONT_SIZE_KEYWORDS, FONT_STRETCH_KEYWORDS,
     FONT_STYLE_KEYWORDS, FONT_VARIANTS_KEYWORDS, FONT_WEIGHT_ABSOLUTE_KEYWORDS,
-    FONT_WEIGHT_NUMERIC_KEYWORDS, LINE_HEIGHT_KEYWORDS, SYSTEM_FAMILY_NAME_KEYWORDS,
+    FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, LINE_HEIGHT_KEYWORDS,
+    SYSTEM_FAMILY_NAME_KEYWORDS,
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
@@ -95,4 +96,16 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
         }
     }
     font_families
+}
+
+/// Check if the value is a known CSS value function.
+pub fn is_function_keyword(value: &str) -> bool {
+    FUNCTION_KEYWORDS
+        .binary_search(&value.to_lowercase().as_str())
+        .is_ok()
+}
+
+/// Check if the value is a double-dashed custom function.
+pub fn is_custom_function(value: &str) -> bool {
+    value.starts_with("--")
 }

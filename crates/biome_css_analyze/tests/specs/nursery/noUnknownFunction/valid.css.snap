@@ -1,0 +1,20 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+a { transform: translate(1px); }
+a { transform: TRANSLATE(1px); }
+a { transform: --custom-function(1px); }
+a { transform: scale(0.5) translate(-100%, -100%); }
+a { animation-timeline: scroll(); }
+a { background: -webkit-gradient(linear, 0 50%, 0 100%, from(white), color-stop(0.5, yellow), to(red)); }
+a { height: calc(10px*(5*(10 - 5))); }
+a { top: anchor(bottom); }
+a { min-width: anchor-size(--button width); }
+a { transform: color.adjust(1px); transform: rgb(color.adjust(1px)); }
+a { color: light-dark(#777, #000); }
+a { offset-path: xywh(20px 30% 150% 200%); }
+a { animation-timing-function: linear(0, 0.25, 1); }
+```

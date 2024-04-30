@@ -1,0 +1,145 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: typescript/import-export/empty-import.ts
+---
+# Input
+
+```ts
+import type { } from '@types/googlemaps';
+import 'a';
+import /* comment */ 'a';
+import // comment
+'a';
+import type { /* comment */ } from 'a';
+import /* comment */ type {} from 'a';
+import type {} /* comment */ from 'a';
+import type {} from /* comment */ 'a';
+import /* comment */ type {/* comment */} /* comment */ from /* comment */ 'a';
+import type {
+  // comment
+} from 'a';
+import // comment
+type {} from 'a';
+import type {}
+// comment
+from 'a';
+import type {} from
+// comment
+'a';
+import type
+// comment
+{
+// comment
+}
+// comment
+from
+// comment
+'a';
+
+import // {} from
+'a';
+import  type {} from // comment ends with from
+'a';
+import type {} from /* comment ends with from */ 'a';
+import type {} from // comment not ends with from ___
+'a';
+import type {} from /* comment not ends with from ___ */ 'a';
+
+import // comment ends with from
+'a';
+import /* comment ends with from */ 'a';
+import // comment not ends with from ___
+'a';
+import /* comment not ends with from ___ */ 'a';
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,22 +3,24 @@
+ import /* comment */ "a";
+ import // comment
+ "a";
++import type {/* comment */} from "a";
++import /* comment */ type {} from "a";
++import type {} /* comment */ from "a";
+ import type {} from /* comment */ "a";
+-import type {} from /* comment */ "a";
+-import type {} from /* comment */ "a";
+-import type {} from /* comment */ "a";
+-import type {} from /* comment */ /* comment */ /* comment */ /* comment */ "a";
++import /* comment */ type {/* comment */} /* comment */ from /* comment */ "a";
++import type {
++  // comment
++} from "a";
++import // comment
++type {} from "a";
+ import type {} from // comment
+ "a";
+ import type {} from // comment
+ "a";
+-import type {} from // comment
+-"a";
+-import type {} from // comment
+-"a";
+-import type {} from // comment
+-// comment
+-// comment
++import type // comment
++{
++  // comment
++} from // comment
+ // comment
+ "a";
+ 
+```
+
+# Output
+
+```ts
+import type {} from "@types/googlemaps";
+import "a";
+import /* comment */ "a";
+import // comment
+"a";
+import type {/* comment */} from "a";
+import /* comment */ type {} from "a";
+import type {} /* comment */ from "a";
+import type {} from /* comment */ "a";
+import /* comment */ type {/* comment */} /* comment */ from /* comment */ "a";
+import type {
+  // comment
+} from "a";
+import // comment
+type {} from "a";
+import type {} from // comment
+"a";
+import type {} from // comment
+"a";
+import type // comment
+{
+  // comment
+} from // comment
+// comment
+"a";
+
+import // {} from
+"a";
+import type {} from // comment ends with from
+"a";
+import type {} from /* comment ends with from */ "a";
+import type {} from // comment not ends with from ___
+"a";
+import type {} from /* comment not ends with from ___ */ "a";
+
+import // comment ends with from
+"a";
+import /* comment ends with from */ "a";
+import // comment not ends with from ___
+"a";
+import /* comment not ends with from ___ */ "a";
+```

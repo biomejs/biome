@@ -1,5 +1,0 @@
-(seventeenfourcharacterssssssssssssssssssssssssssssssssssssssssssssssssssss)=>a?b:c;
-
-(seventeenfivecharactersssssssssssssssssssssssssssssssssssssssssssssssssssss)=>a?b:c;
-
-(seventeensixcharactersssssssssssssssssssssssssssssssssssssssssssssssssssssss)=>a?b:c;

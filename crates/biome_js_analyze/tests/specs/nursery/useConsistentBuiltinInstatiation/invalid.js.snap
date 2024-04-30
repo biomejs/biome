@@ -38,9 +38,11 @@ function foo() {
     return /** Start */ globalThis.Object({ foo: 'bar' }) /** End */
 }
 
-new String()
-new Number()
 new Boolean()
+new BigInt()
+new Number()
+new String()
+new Symbol()
 new window.String(123)
 new globalThis.String()
 function foo() {
@@ -50,7 +52,7 @@ function foo() {
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Object() instead of Object().
   
@@ -67,7 +69,7 @@ invalid.js:1:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:2:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Array() instead of Array().
   
@@ -85,7 +87,7 @@ invalid.js:2:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:3:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new ArrayBuffer() instead of ArrayBuffer().
   
@@ -104,7 +106,7 @@ invalid.js:3:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:4:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new BigInt64Array() instead of BigInt64Array().
   
@@ -123,7 +125,7 @@ invalid.js:4:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:5:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new BigUint64Array() instead of BigUint64Array().
   
@@ -142,7 +144,7 @@ invalid.js:5:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:6:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new DataView() instead of DataView().
   
@@ -161,7 +163,7 @@ invalid.js:6:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:7:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Date() instead of Date().
   
@@ -180,7 +182,7 @@ invalid.js:7:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:8:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error().
   
@@ -199,7 +201,7 @@ invalid.js:8:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:9:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Float32Array() instead of Float32Array().
   
@@ -218,7 +220,7 @@ invalid.js:9:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:10:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Float64Array() instead of Float64Array().
   
@@ -237,7 +239,7 @@ invalid.js:10:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:11:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Function() instead of Function().
   
@@ -256,7 +258,7 @@ invalid.js:11:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:12:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Int8Array() instead of Int8Array().
   
@@ -275,7 +277,7 @@ invalid.js:12:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:13:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Int16Array() instead of Int16Array().
   
@@ -294,7 +296,7 @@ invalid.js:13:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:14:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Int32Array() instead of Int32Array().
   
@@ -313,7 +315,7 @@ invalid.js:14:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:15:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Map() instead of Map().
   
@@ -332,7 +334,7 @@ invalid.js:15:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:16:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new WeakMap() instead of WeakMap().
   
@@ -351,7 +353,7 @@ invalid.js:16:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:17:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Set() instead of Set().
   
@@ -370,7 +372,7 @@ invalid.js:17:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:18:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new WeakSet() instead of WeakSet().
   
@@ -389,7 +391,7 @@ invalid.js:18:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:19:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Promise() instead of Promise().
   
@@ -408,7 +410,7 @@ invalid.js:19:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:20:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new RegExp() instead of RegExp().
   
@@ -427,7 +429,7 @@ invalid.js:20:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:21:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Uint8Array() instead of Uint8Array().
   
@@ -446,7 +448,7 @@ invalid.js:21:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:22:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Uint16Array() instead of Uint16Array().
   
@@ -465,7 +467,7 @@ invalid.js:22:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:23:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Uint32Array() instead of Uint32Array().
   
@@ -484,7 +486,7 @@ invalid.js:23:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:24:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Uint8ClampedArray() instead of Uint8ClampedArray().
   
@@ -503,7 +505,7 @@ invalid.js:24:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:25:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new SharedArrayBuffer() instead of SharedArrayBuffer().
   
@@ -522,7 +524,7 @@ invalid.js:25:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:26:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Proxy() instead of Proxy().
   
@@ -541,7 +543,7 @@ invalid.js:26:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:27:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new WeakRef() instead of WeakRef().
   
@@ -560,7 +562,7 @@ invalid.js:27:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:28:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new FinalizationRegistry() instead of FinalizationRegistry().
   
@@ -579,7 +581,7 @@ invalid.js:28:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:29:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:29:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Object() instead of Object().
   
@@ -598,7 +600,7 @@ invalid.js:29:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:30:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Object() instead of Object().
   
@@ -617,7 +619,7 @@ invalid.js:30:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:32:25 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:25 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Object() instead of Object().
   
@@ -636,113 +638,151 @@ invalid.js:32:25 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:35:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use String() instead of new String().
-  
-    33 │ }
-    34 │ 
-  > 35 │ new String()
-       │ ^^^^^^^^^^^^
-    36 │ new Number()
-    37 │ new Boolean()
-  
-  i Unsafe fix: Remove new keyword.
-  
-    35 │ new·String()
-       │ ----        
-
-```
-
-```
-invalid.js:36:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use Number() instead of new Number().
-  
-    35 │ new String()
-  > 36 │ new Number()
-       │ ^^^^^^^^^^^^
-    37 │ new Boolean()
-    38 │ new window.String(123)
-  
-  i Unsafe fix: Remove new keyword.
-  
-    36 │ new·Number()
-       │ ----        
-
-```
-
-```
-invalid.js:37:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:35:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Boolean() instead of new Boolean().
   
-    35 │ new String()
-    36 │ new Number()
-  > 37 │ new Boolean()
+    33 │ }
+    34 │ 
+  > 35 │ new Boolean()
        │ ^^^^^^^^^^^^^
-    38 │ new window.String(123)
-    39 │ new globalThis.String()
+    36 │ new BigInt()
+    37 │ new Number()
   
   i Unsafe fix: Remove new keyword.
   
-    37 │ new·Boolean()
+    35 │ new·Boolean()
        │ ----         
 
 ```
 
 ```
-invalid.js:38:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use String() instead of new String().
+  ! Use BigInt() instead of new BigInt().
   
-    36 │ new Number()
-    37 │ new Boolean()
-  > 38 │ new window.String(123)
-       │ ^^^^^^^^^^^^^^^^^^^^^^
-    39 │ new globalThis.String()
-    40 │ function foo() {
+    35 │ new Boolean()
+  > 36 │ new BigInt()
+       │ ^^^^^^^^^^^^
+    37 │ new Number()
+    38 │ new String()
   
   i Unsafe fix: Remove new keyword.
   
-    38 │ new·window.String(123)
+    36 │ new·BigInt()
+       │ ----        
+
+```
+
+```
+invalid.js:37:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Number() instead of new Number().
+  
+    35 │ new Boolean()
+    36 │ new BigInt()
+  > 37 │ new Number()
+       │ ^^^^^^^^^^^^
+    38 │ new String()
+    39 │ new Symbol()
+  
+  i Unsafe fix: Remove new keyword.
+  
+    37 │ new·Number()
+       │ ----        
+
+```
+
+```
+invalid.js:38:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    36 │ new BigInt()
+    37 │ new Number()
+  > 38 │ new String()
+       │ ^^^^^^^^^^^^
+    39 │ new Symbol()
+    40 │ new window.String(123)
+  
+  i Unsafe fix: Remove new keyword.
+  
+    38 │ new·String()
+       │ ----        
+
+```
+
+```
+invalid.js:39:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Symbol() instead of new Symbol().
+  
+    37 │ new Number()
+    38 │ new String()
+  > 39 │ new Symbol()
+       │ ^^^^^^^^^^^^
+    40 │ new window.String(123)
+    41 │ new globalThis.String()
+  
+  i Unsafe fix: Remove new keyword.
+  
+    39 │ new·Symbol()
+       │ ----        
+
+```
+
+```
+invalid.js:40:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    38 │ new String()
+    39 │ new Symbol()
+  > 40 │ new window.String(123)
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    41 │ new globalThis.String()
+    42 │ function foo() {
+  
+  i Unsafe fix: Remove new keyword.
+  
+    40 │ new·window.String(123)
        │ ----                  
 
 ```
 
 ```
-invalid.js:39:1 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:41:1 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use String() instead of new String().
   
-    37 │ new Boolean()
-    38 │ new window.String(123)
-  > 39 │ new globalThis.String()
+    39 │ new Symbol()
+    40 │ new window.String(123)
+  > 41 │ new globalThis.String()
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-    40 │ function foo() {
-    41 │     return /** Start */ new globalThis.String("foo") /** End */
+    42 │ function foo() {
+    43 │     return /** Start */ new globalThis.String("foo") /** End */
   
   i Unsafe fix: Remove new keyword.
   
-    39 │ new·globalThis.String()
+    41 │ new·globalThis.String()
        │ ----                   
 
 ```
 
 ```
-invalid.js:41:25 lint/nursery/useConsistentNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:25 lint/nursery/useConsistentBuiltinInstatiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use String() instead of new String().
   
-    39 │ new globalThis.String()
-    40 │ function foo() {
-  > 41 │     return /** Start */ new globalThis.String("foo") /** End */
+    41 │ new globalThis.String()
+    42 │ function foo() {
+  > 43 │     return /** Start */ new globalThis.String("foo") /** End */
        │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    42 │ }
+    44 │ }
   
   i Unsafe fix: Remove new keyword.
   
-    41 │ ····return·/**·Start·*/·new·globalThis.String("foo")·/**·End·*/
+    43 │ ····return·/**·Start·*/·new·globalThis.String("foo")·/**·End·*/
        │                         ----                                   
 
 ```

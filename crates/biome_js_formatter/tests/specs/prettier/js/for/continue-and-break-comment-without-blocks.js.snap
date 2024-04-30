@@ -1,0 +1,197 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/for/continue-and-break-comment-without-blocks.js
+---
+# Input
+
+```js
+for(;;) continue
+// comment
+;
+
+for (;;) break
+// comment
+;
+
+for (const f of []) continue
+// comment
+;
+
+for (const f of []) break
+// comment
+;
+
+for (const f in {}) continue
+// comment
+;
+
+for (const f in {}) break
+// comment
+;
+
+for(;;) continue // comment
+;
+
+for (;;) break // comment
+;
+
+for (const f of []) continue // comment
+;
+
+for (const f of []) break // comment
+;
+
+for (const f in {}) continue // comment
+;
+
+for (const f in {}) break // comment
+;
+
+for(;;) continue /* comment */
+;
+
+for (;;) break /* comment */
+;
+
+for (const f of []) continue /* comment */
+;
+
+for (const f of []) break /* comment */
+;
+
+for (const f in {}) continue /* comment */
+;
+
+for (const f in {}) break /* comment */
+;
+
+for(;;) continue
+/* comment */
+;
+
+for (;;) break
+/* comment */
+;
+
+for (const f of []) continue
+/* comment */
+;
+
+for (const f of []) break
+/* comment */
+;
+
+for (const f in {}) continue
+/* comment */
+;
+
+for (const f in {}) break
+/* comment */
+;
+
+label1: for (;;) continue label1 /* comment */
+;
+
+label1: for (;;) continue label1
+/* comment */
+;
+
+label1: for (;;) continue label1 // comment
+;
+
+label1: for (;;) continue label1
+// comment
+;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -58,7 +58,7 @@
+ for (const f in {}) break;
+ /* comment */
+ 
+-label1: for (;;) continue label1 /* comment */;
++label1: for (;;) continue label1; /* comment */
+ 
+ label1: for (;;) continue label1;
+ /* comment */
+```
+
+# Output
+
+```js
+for (;;) continue;
+// comment
+
+for (;;) break;
+// comment
+
+for (const f of []) continue;
+// comment
+
+for (const f of []) break;
+// comment
+
+for (const f in {}) continue;
+// comment
+
+for (const f in {}) break;
+// comment
+
+for (;;) continue; // comment
+
+for (;;) break; // comment
+
+for (const f of []) continue; // comment
+
+for (const f of []) break; // comment
+
+for (const f in {}) continue; // comment
+
+for (const f in {}) break; // comment
+
+for (;;) continue; /* comment */
+
+for (;;) break; /* comment */
+
+for (const f of []) continue; /* comment */
+
+for (const f of []) break; /* comment */
+
+for (const f in {}) continue; /* comment */
+
+for (const f in {}) break; /* comment */
+
+for (;;) continue;
+/* comment */
+
+for (;;) break;
+/* comment */
+
+for (const f of []) continue;
+/* comment */
+
+for (const f of []) break;
+/* comment */
+
+for (const f in {}) continue;
+/* comment */
+
+for (const f in {}) break;
+/* comment */
+
+label1: for (;;) continue label1; /* comment */
+
+label1: for (;;) continue label1;
+/* comment */
+
+label1: for (;;) continue label1; // comment
+
+label1: for (;;) continue label1;
+// comment
+```

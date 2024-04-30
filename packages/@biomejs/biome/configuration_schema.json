@@ -1552,6 +1552,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownFunction": {
+					"description": "Disallow unknown CSS value functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownUnit": {
 					"description": "Disallow unknown CSS units.",
 					"anyOf": [
@@ -1577,7 +1584,7 @@
 						{ "type": "null" }
 					]
 				},
-				"useConsistentNewBuiltin": {
+				"useConsistentBuiltinInstatiation": {
 					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },

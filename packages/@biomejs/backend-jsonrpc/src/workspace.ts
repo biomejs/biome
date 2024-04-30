@@ -977,6 +977,10 @@ export interface Nursery {
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown CSS value functions.
+	 */
+	noUnknownFunction?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unknown CSS units.
 	 */
 	noUnknownUnit?: RuleConfiguration_for_Null;
@@ -995,7 +999,7 @@ export interface Nursery {
 	/**
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
-	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
+	useConsistentBuiltinInstatiation?: RuleConfiguration_for_Null;
 	/**
 	 * Require the default clause in switch statements.
 	 */
@@ -2001,11 +2005,11 @@ export type Category =
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
+	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/useBiomeSuppressionComment"
-	| "lint/nursery/useExplicitLengthCheck"
-	| "lint/nursery/useConsistentNewBuiltin"
+	| "lint/nursery/useConsistentBuiltinInstatiation"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useImportRestrictions"

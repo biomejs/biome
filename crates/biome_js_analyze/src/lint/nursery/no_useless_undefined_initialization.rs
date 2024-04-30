@@ -25,7 +25,7 @@ declare_rule! {
     /// var a = undefined;
     /// ```
     /// ```js,expect_diagnostic
-    /// let b = undefined, c = 1, d = undefined;
+    /// let b = undefined, c = 1, d = 2;
     /// ```
     /// ```js,expect_diagnostic
     /// for (let i = 0; i < 100; i++) {
@@ -47,7 +47,7 @@ declare_rule! {
     /// ```
     ///
     pub NoUselessUndefinedInitialization {
-        version: "next",
+        version: "1.7.2",
         name: "noUselessUndefinedInitialization",
         sources: &[RuleSource::Eslint("no-undef-init")],
         source_kind: RuleSourceKind::Inspired,

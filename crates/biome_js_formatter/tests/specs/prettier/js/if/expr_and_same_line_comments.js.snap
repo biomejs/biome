@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/if/expr_and_same_line_comments.js
 ---
-
 # Input
 
 ```js
@@ -36,9 +35,8 @@ function a() {
   if (a) throw e; /* comment 6d */
   else return 2;
 
-  // TODO[@fisker]: fix this
-  // if (a) var a = 1; /* comment 6e */
-  // else return 2;
+  if (a) var a = 1; /* comment 6e */
+  else return 2;
 
   if (a) if (b); /* comment 6f */
   else return 2;
@@ -52,12 +50,12 @@ function a() {
 ```diff
 --- Prettier
 +++ Biome
-@@ -36,6 +36,6 @@
-   // else return 2;
+@@ -39,6 +39,6 @@
+   else return 2;
  
    if (a)
 -    if (b /* comment 6f */);
-+    if (b);/* comment 6f */
++    if (b); /* comment 6f */
      else return 2;
  }
 ```
@@ -65,16 +63,20 @@ function a() {
 # Output
 
 ```js
-if (a === 0) doSomething(); // comment A1
-else if (a === 1) doSomethingElse(); // comment B1
+if (a === 0)
+  doSomething(); // comment A1
+else if (a === 1)
+  doSomethingElse(); // comment B1
 else if (a === 2) doSomethingElse(); // comment C1
 
 if (a === 0) doSomething(); /* comment A2 */
 else if (a === 1) doSomethingElse(); /* comment B2 */
 else if (a === 2) doSomethingElse(); /* comment C2 */
 
-if (a === 0) expr; // comment A3
-else if (a === 1) expr; // comment B3
+if (a === 0)
+  expr; // comment A3
+else if (a === 1)
+  expr; // comment B3
 else if (a === 2) expr; // comment C3
 
 if (a === 0) expr; /* comment A4 */
@@ -89,30 +91,27 @@ else if (a === 2)
   looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong; // comment C5
 
 function a() {
-  if (a) return /* comment 6a */;
+  if (a) return; /* comment 6a */
   else return 2;
 
-  if (a) return 1 /* comment 6b */;
+  if (a) return 1; /* comment 6b */
   else return 2;
 
-  if (a) throw e /* comment 6d */;
+  if (a) throw e; /* comment 6d */
   else return 2;
 
-  // TODO[@fisker]: fix this
-  // if (a) var a = 1; /* comment 6e */
-  // else return 2;
+  if (a) var a = 1; /* comment 6e */
+  else return 2;
 
   if (a)
-    if (b);/* comment 6f */
+    if (b); /* comment 6f */
     else return 2;
 }
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-   18:   looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong; // comment A5
-   20:   looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong; // comment B5
-   22:   looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong; // comment C5
+   22:   looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong; // comment A5
+   24:   looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong; // comment B5
+   26:   looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong; // comment C5
 ```
-
-
