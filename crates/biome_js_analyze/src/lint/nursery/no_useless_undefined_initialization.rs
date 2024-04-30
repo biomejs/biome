@@ -47,7 +47,7 @@ declare_rule! {
     /// ```
     ///
     pub NoUselessUndefinedInitialization {
-        version: "next",
+        version: "1.7.2",
         name: "noUselessUndefinedInitialization",
         sources: &[RuleSource::Eslint("no-undef-init")],
         source_kind: RuleSourceKind::Inspired,

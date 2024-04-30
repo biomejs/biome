@@ -38,7 +38,7 @@ declare_rule! {
     /// }
     /// ```
     pub UseDefaultSwitchClause {
-        version: "next",
+        version: "1.7.2",
         name: "useDefaultSwitchClause",
         sources: &[RuleSource::Eslint("default-case")],
         recommended: false,

@@ -409,9 +409,7 @@ fn parse_jsx_expression_child(p: &mut JsParser) -> ParsedSyntax {
 fn parse_jsx_any_element_name(p: &mut JsParser) -> ParsedSyntax {
     let name = parse_jsx_name_or_namespace(p);
     name.map(|mut name| {
-        if name.kind(p) == JSX_NAME && name.text(p) == "this" {
-            name.change_kind(p, JS_THIS_EXPRESSION)
-        } else if name.kind(p) == JSX_NAME && (p.at(T![.]) || !is_intrinsic_element(name.text(p))) {
+        if name.kind(p) == JSX_NAME && (p.at(T![.]) || !is_intrinsic_element(name.text(p))) {
             name.change_kind(p, JSX_REFERENCE_IDENTIFIER)
         } else if name.kind(p) == JSX_NAMESPACE_NAME && p.at(T![.]) {
             let error = p.err_builder(
@@ -436,7 +434,7 @@ fn parse_jsx_any_element_name(p: &mut JsParser) -> ParsedSyntax {
 /// Tests if this is an intrinsic element name. Intrinsic elements are such elements
 /// that are built in, for example HTML elements. This implementation uses React's semantic
 /// and assumes that anything starting with a lower case character is an intrinsic element, and
-/// that custom components start with an upper case character.
+/// that custom components start with an uper case character.
 ///
 /// Resources: [TypeScript's documentation on intrinsic elements](https://www.typescriptlang.org/docs/handbook/jsx.html#intrinsic-elements)
 fn is_intrinsic_element(element_name: &str) -> bool {

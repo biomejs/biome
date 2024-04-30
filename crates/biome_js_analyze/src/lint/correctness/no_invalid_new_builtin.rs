@@ -52,8 +52,11 @@ declare_rule! {
     pub NoInvalidNewBuiltin {
         version: "1.3.0",
         name: "noInvalidNewBuiltin",
+        // TODO: Remove this source once `useConsistentBuiltinInstatiation` is stable
         sources: &[RuleSource::Eslint("no-new-native-nonconstructor")],
         recommended: true,
+        // TODO: Deprecate this source once `useConsistentBuiltinInstatiation` is stable
+        //deprecated: "Use the rule useConsistentBuiltinInstatiation instead.",
         fix_kind: FixKind::Unsafe,
     }
 }

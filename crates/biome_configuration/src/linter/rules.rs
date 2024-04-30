@@ -2714,7 +2714,8 @@ pub struct Nursery {
     pub use_array_literals: Option<RuleConfiguration<UseArrayLiterals>>,
     #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_consistent_new_builtin: Option<RuleConfiguration<UseConsistentNewBuiltin>>,
+    pub use_consistent_builtin_instatiation:
+        Option<RuleConfiguration<UseConsistentBuiltinInstatiation>>,
     #[doc = "Require the default clause in switch statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_default_switch_clause: Option<RuleConfiguration<UseDefaultSwitchClause>>,
@@ -2766,7 +2767,7 @@ impl Nursery {
         "noUnknownUnit",
         "noUselessUndefinedInitialization",
         "useArrayLiterals",
-        "useConsistentNewBuiltin",
+        "useConsistentBuiltinInstatiation",
         "useDefaultSwitchClause",
         "useGenericFontNames",
         "useImportRestrictions",
@@ -2948,7 +2949,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_consistent_new_builtin.as_ref() {
+        if let Some(rule) = self.use_consistent_builtin_instatiation.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
@@ -3082,7 +3083,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_consistent_new_builtin.as_ref() {
+        if let Some(rule) = self.use_consistent_builtin_instatiation.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
@@ -3227,8 +3228,8 @@ impl Nursery {
                 .use_array_literals
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "useConsistentNewBuiltin" => self
-                .use_consistent_new_builtin
+            "useConsistentBuiltinInstatiation" => self
+                .use_consistent_builtin_instatiation
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useDefaultSwitchClause" => self

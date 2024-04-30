@@ -32,9 +32,11 @@ function foo() {
     return new globalThis.Object()
 }
 
-String()
-Number()
 Boolean()
+BigInt()
+Number()
+String()
+Symbol()
 window.String()
 globalThis.String(123)
 function foo() {

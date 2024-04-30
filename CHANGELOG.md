@@ -9,7 +9,7 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## 1.7.2 (2024-04-30)
 
 ### Analyzer
 
@@ -52,19 +52,30 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-### Configuration
-
-### Editors
-
 ### Formatter
 
 #### Bug fixes
 
 - Correctly handle placement of comments inside named import clauses. [#2566](https://github.com/biomejs/biome/pull/2566). Contributed by @ah-yu
 
-### JavaScript APIs
-
 ### Linter
+
+#### New features
+
+- Add [nusery/noReactSpecificProps](https://biomejs.dev/linter/rules/no-react-specific-props/).
+  Contributed by @marvin-j97
+
+- Add [noUselessUndefinedInitialization](https://biomejs.dev/linter/rules/no-useless-undefined-initialization/).
+  Contributed by @lutaok
+
+- Add [nusery/useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/).
+  Contributed by @Kazuhiro-Mimaki
+
+- Add [nusery/useConsistentBuiltinInstatiation](https://biomejs.dev/linter/rules/use-consistent-builtin-instatiation/).
+  Contributed by @minht11
+
+- Add [nusery/useDefaultSwitchClause](https://biomejs.dev/linter/rules/use-default-switch-clause/).
+  Contributed by @michellocana
 
 #### Bug fixes
 
@@ -147,20 +158,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) no longer errors on `this` in JSX tags ([#2636](https://github.com/biomejs/biome/issues/2636)).
-
-  ```jsx
-  import { Component } from 'react';
-
-  export class MyComponent extends Component {
-    render() {
-      return <this.foo />;
-    }
-  }
-  ```
-
-  Contributed by @printfn
-
 - [noMisplacedAssertion](https://biomejs.dev/linter/rules/no-misplaced-assertion/) now allow these matchers
   
   - `expect.any()`
@@ -177,6 +174,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @fujiyamaorange
 
 ### Parser
+
+#### Bug fixes
 
 - The language parsers no longer panic on unterminated strings followed by a newline and a space ([#2606](https://github.com/biomejs/biome/issues/2606), [#2410](https://github.com/biomejs/biome/issues/2410)).
 
