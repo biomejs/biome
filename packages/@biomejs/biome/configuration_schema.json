@@ -1617,7 +1617,7 @@
 					]
 				},
 				"useJsxSortProps": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce props sorting in JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseJsxSortPropsConfiguration" },
 						{ "type": "null" }

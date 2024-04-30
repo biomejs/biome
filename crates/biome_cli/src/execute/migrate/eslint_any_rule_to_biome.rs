@@ -1196,6 +1196,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_useless_fragments.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "react/jsx-sort-props" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_jsx_sort_props.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "react/no-array-index-key" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group.no_array_index_key.get_or_insert(Default::default());

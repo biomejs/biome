@@ -2725,7 +2725,7 @@ pub struct Nursery {
     #[doc = "Disallows package private imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_import_restrictions: Option<RuleConfiguration<UseImportRestrictions>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Enforce props sorting in JSX elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_jsx_sort_props: Option<RuleConfiguration<UseJsxSortProps>>,
     #[doc = "Enforce the sorting of CSS utility classes."]
