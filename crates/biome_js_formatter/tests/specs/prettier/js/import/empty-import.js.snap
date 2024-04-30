@@ -1,0 +1,145 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/import/empty-import.js
+---
+# Input
+
+```js
+import { } from '@types/googlemaps';
+import 'a';
+import /* comment */ 'a';
+import // comment
+'a';
+import { /* comment */ } from 'a';
+import /* comment */ {} from 'a';
+import {} /* comment */ from 'a';
+import {} from /* comment */ 'a';
+import /* comment */ {/* comment */} /* comment */ from /* comment */ 'a';
+import {
+  // comment
+} from 'a';
+import // comment
+{} from 'a';
+import {}
+// comment
+from 'a';
+import {} from
+// comment
+'a';
+import
+// comment
+{
+// comment
+}
+// comment
+from
+// comment
+'a';
+
+import // {} from
+'a';
+import {} from // comment ends with from
+'a';
+import {} from /* comment ends with from */ 'a';
+import {} from // comment not ends with from ___
+'a';
+import {} from /* comment not ends with from ___ */ 'a';
+
+import // comment ends with from
+'a';
+import /* comment ends with from */ 'a';
+import // comment not ends with from ___
+'a';
+import /* comment not ends with from ___ */ 'a';
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,22 +3,24 @@
+ import /* comment */ "a";
+ import // comment
+ "a";
++import {/* comment */} from "a";
++import /* comment */ {} from "a";
++import {} /* comment */ from "a";
+ import {} from /* comment */ "a";
+-import {} from /* comment */ "a";
+-import {} from /* comment */ "a";
+-import {} from /* comment */ "a";
+-import {} from /* comment */ /* comment */ /* comment */ /* comment */ "a";
++import /* comment */ {/* comment */} /* comment */ from /* comment */ "a";
++import {
++  // comment
++} from "a";
++import // comment
++{} from "a";
+ import {} from // comment
+ "a";
+ import {} from // comment
+ "a";
+-import {} from // comment
+-"a";
+-import {} from // comment
+-"a";
+-import {} from // comment
+-// comment
+-// comment
++import // comment
++{
++  // comment
++} from // comment
+ // comment
+ "a";
+ 
+```
+
+# Output
+
+```js
+import {} from "@types/googlemaps";
+import "a";
+import /* comment */ "a";
+import // comment
+"a";
+import {/* comment */} from "a";
+import /* comment */ {} from "a";
+import {} /* comment */ from "a";
+import {} from /* comment */ "a";
+import /* comment */ {/* comment */} /* comment */ from /* comment */ "a";
+import {
+  // comment
+} from "a";
+import // comment
+{} from "a";
+import {} from // comment
+"a";
+import {} from // comment
+"a";
+import // comment
+{
+  // comment
+} from // comment
+// comment
+"a";
+
+import // {} from
+"a";
+import {} from // comment ends with from
+"a";
+import {} from /* comment ends with from */ "a";
+import {} from // comment not ends with from ___
+"a";
+import {} from /* comment not ends with from ___ */ "a";
+
+import // comment ends with from
+"a";
+import /* comment ends with from */ "a";
+import // comment not ends with from ___
+"a";
+import /* comment not ends with from ___ */ "a";
+```

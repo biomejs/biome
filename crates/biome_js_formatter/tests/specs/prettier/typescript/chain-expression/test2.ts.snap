@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: typescript/chain-expression/test2.ts
+---
+# Input
+
+```ts
+{{
+    const rotation1 = getTransformHandles(arrow, h.state.zoom, 'mouse')
+      .rotation!;
+    const rotation2 = getTransformHandles(arrow, h.state.zoom, 'mouse')
+      .rotation;
+    const rotation3 = getTransformHandles(arrow, h.state.zoom, 'mouse')
+      ?.rotation;
+}}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,7 @@
+ {
+   {
+-    const rotation1 = getTransformHandles(
+-      arrow,
+-      h.state.zoom,
+-      "mouse",
+-    ).rotation!;
++    const rotation1 = getTransformHandles(arrow, h.state.zoom, "mouse")
++      .rotation!;
+     const rotation2 = getTransformHandles(
+       arrow,
+       h.state.zoom,
+```
+
+# Output
+
+```ts
+{
+  {
+    const rotation1 = getTransformHandles(arrow, h.state.zoom, "mouse")
+      .rotation!;
+    const rotation2 = getTransformHandles(
+      arrow,
+      h.state.zoom,
+      "mouse",
+    ).rotation;
+    const rotation3 = getTransformHandles(
+      arrow,
+      h.state.zoom,
+      "mouse",
+    )?.rotation;
+  }
+}
+```

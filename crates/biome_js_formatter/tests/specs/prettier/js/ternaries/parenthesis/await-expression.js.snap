@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/ternaries/parenthesis/await-expression.js
+---
+# Input
+
+```js
+stopDirectory = await (useCache
+  ? memoizedFindProjectRoot
+  : findProjectRootWithoutCache)(path.dirname(path.resolve(filePath)));
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,3 +1,3 @@
+-stopDirectory = await (
+-  useCache ? memoizedFindProjectRoot : findProjectRootWithoutCache
+-)(path.dirname(path.resolve(filePath)));
++stopDirectory = await (useCache
++  ? memoizedFindProjectRoot
++  : findProjectRootWithoutCache)(path.dirname(path.resolve(filePath)));
+```
+
+# Output
+
+```js
+stopDirectory = await (useCache
+  ? memoizedFindProjectRoot
+  : findProjectRootWithoutCache)(path.dirname(path.resolve(filePath)));
+```
