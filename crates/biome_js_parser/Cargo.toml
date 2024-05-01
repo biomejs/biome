@@ -29,7 +29,7 @@ smallvec            = { workspace = true }
 tracing             = { workspace = true }
 
 [dev-dependencies]
-expect-test       = "1.2.2"
+expect-test       = "1.5.0"
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { workspace = true }

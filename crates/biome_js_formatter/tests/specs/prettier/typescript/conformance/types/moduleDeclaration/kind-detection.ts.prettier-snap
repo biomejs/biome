@@ -1,9 +1,1 @@
 declare namespace /* module */ A {}
-declare function /* module */ B();
-declare class /* module */ C {}
-declare enum /* module */ D {}
-declare interface /* module */ E {}
-declare type /* module */ F = {};
-declare var /* module */ G: number;
-declare let /* module */ H: number;
-declare const /* module */ I = 1;

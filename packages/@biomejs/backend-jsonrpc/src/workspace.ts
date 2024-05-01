@@ -1003,7 +1003,7 @@ export interface Nursery {
 	/**
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
-	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
+	useConsistentBuiltinInstatiation?: RuleConfiguration_for_Null;
 	/**
 	 * Require the default clause in switch statements.
 	 */
@@ -2010,9 +2010,9 @@ export type Category =
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
-	| "lint/nursery/useConsistentNewBuiltin"
-	| "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useConsistentBuiltinInstatiation"
 	| "lint/nursery/useGenericFontNames"
+    | "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
