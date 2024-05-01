@@ -26,7 +26,7 @@ use super::{
     is_at_definition,
 };
 
-const OPERATION_TYPE: TokenSet<GraphqlSyntaxKind> =
+pub(crate) const OPERATION_TYPE: TokenSet<GraphqlSyntaxKind> =
     token_set![T![query], T![mutation], T![subscription]];
 
 #[derive(Default)]
@@ -164,13 +164,10 @@ fn parse_field(p: &mut GraphqlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    // This is currently the only time we need to lookahead
-    // so there is no need to implement NthToken to use nth_at
-    let next_token = p.lookahead();
 
     // alias is optional, so if there is a colon, we parse it as an alias
     // otherwise we parse it as a normal field name
-    if next_token == T![:] {
+    if p.lookahead_at(T![:]) {
         let m = p.start();
 
         // name is checked for in `is_at_field`
@@ -279,7 +276,7 @@ fn is_at_selection_set(p: &GraphqlParser) -> bool {
 }
 
 #[inline]
-pub(crate) fn is_at_selection_set_end(p: &GraphqlParser) -> bool {
+pub(crate) fn is_at_selection_set_end(p: &mut GraphqlParser) -> bool {
     // stop at closing brace or at the start of a new definition
     p.at(T!['}']) || is_at_definition(p)
 }

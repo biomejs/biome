@@ -88,7 +88,7 @@ fn parse_argument(p: &mut GraphqlParser) -> ParsedSyntax {
 /// - Inside a selection set
 /// - In a directive
 #[inline]
-pub(crate) fn is_at_argument_list_end(p: &GraphqlParser<'_>) -> bool {
+pub(crate) fn is_at_argument_list_end(p: &mut GraphqlParser<'_>) -> bool {
     p.at(T![')'])
     // also handle the start of a selection set
     || is_at_selection_set_end(p)
