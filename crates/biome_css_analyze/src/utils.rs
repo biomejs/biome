@@ -7,7 +7,6 @@ use crate::keywords::{
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
-use regex::Regex;
 
 pub fn is_font_family_keyword(value: &str) -> bool {
     BASIC_KEYWORDS.contains(&value) || FONT_FAMILY_KEYWORDS.contains(&value)
@@ -114,13 +113,13 @@ pub fn is_custom_function(value: &str) -> bool {
 
 // Returns the vendor prefix extracted from an input string.
 pub fn vender_prefix(prop: &str) -> String {
-    let re = Regex::new(r"^(-\w+-)").unwrap();
-    let vendor_prefix = re
-        .captures(prop)
-        .map(|caps| caps[0].to_string())
-        .unwrap_or_default();
-
-    vendor_prefix
+    let prefixes = ["-webkit-", "-moz-", "-ms-", "-o-"];
+    for prefix in prefixes.iter() {
+        if prop.starts_with(prefix) {
+            return (*prefix).to_string();
+        }
+    }
+    String::new()
 }
 
 pub fn is_pseudo_elements(prop: &str) -> bool {
