@@ -1,4 +1,6 @@
-use crate::{grit_context::GritQueryContext, grit_language::GritLanguage, grit_node::GritNode};
+use crate::{
+    grit_context::GritQueryContext, grit_node::GritNode, grit_target_language::GritTargetLanguage,
+};
 use grit_pattern_matcher::{binding::Binding, constant::Constant};
 use grit_util::{ByteRange, CodeRange, Range};
 use std::path::Path;
@@ -31,23 +33,23 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
         todo!()
     }
 
-    fn position(&self, _language: &GritLanguage) -> Option<Range> {
+    fn position(&self, _language: &GritTargetLanguage) -> Option<Range> {
         todo!()
     }
 
-    fn range(&self, _language: &GritLanguage) -> Option<ByteRange> {
+    fn range(&self, _language: &GritTargetLanguage) -> Option<ByteRange> {
         todo!()
     }
 
-    fn code_range(&self, _language: &GritLanguage) -> Option<CodeRange> {
+    fn code_range(&self, _language: &GritTargetLanguage) -> Option<CodeRange> {
         todo!()
     }
 
-    fn is_equivalent_to(&self, _other: &Self, _language: &GritLanguage) -> bool {
+    fn is_equivalent_to(&self, _other: &Self, _language: &GritTargetLanguage) -> bool {
         todo!()
     }
 
-    fn is_suppressed(&self, _language: &GritLanguage, _current_name: Option<&str>) -> bool {
+    fn is_suppressed(&self, _language: &GritTargetLanguage, _current_name: Option<&str>) -> bool {
         todo!()
     }
 
@@ -55,14 +57,14 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
         &self,
         _text: &str,
         _is_first: bool,
-        _language: &GritLanguage,
+        _language: &GritTargetLanguage,
     ) -> Option<String> {
         todo!()
     }
 
     fn linearized_text(
         &self,
-        _language: &GritLanguage,
+        _language: &GritTargetLanguage,
         _effects: &[grit_pattern_matcher::effects::Effect<'a, GritQueryContext>],
         _files: &grit_pattern_matcher::pattern::FileRegistry<'a, GritQueryContext>,
         _memo: &mut std::collections::HashMap<grit_util::CodeRange, Option<String>>,
@@ -72,7 +74,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
         todo!()
     }
 
-    fn text(&self, _language: &GritLanguage) -> anyhow::Result<std::borrow::Cow<str>> {
+    fn text(&self, _language: &GritTargetLanguage) -> anyhow::Result<std::borrow::Cow<str>> {
         todo!()
     }
 
@@ -110,7 +112,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
 
     fn log_empty_field_rewrite_error(
         &self,
-        _language: &GritLanguage,
+        _language: &GritTargetLanguage,
         _logs: &mut grit_util::AnalysisLogs,
     ) -> anyhow::Result<()> {
         todo!()

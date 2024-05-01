@@ -1,9 +1,9 @@
 use crate::grit_binding::GritBinding;
 use crate::grit_code_snippet::GritCodeSnippet;
 use crate::grit_file::GritFile;
-use crate::grit_language::GritLanguage;
 use crate::grit_node::GritNode;
 use crate::grit_node_patterns::{GritLeafNodePattern, GritNodePattern};
+use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_tree::GritTree;
 use crate::resolved_pattern::GritResolvedPattern;
 use anyhow::Result;
@@ -25,7 +25,7 @@ impl QueryContext for GritQueryContext {
     type Binding<'a> = GritBinding;
     type CodeSnippet = GritCodeSnippet;
     type ResolvedPattern<'a> = GritResolvedPattern;
-    type Language<'a> = GritLanguage;
+    type Language<'a> = GritTargetLanguage;
     type File<'a> = GritFile;
     type Tree = GritTree;
 }
@@ -64,7 +64,7 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext {
         todo!()
     }
 
-    fn language(&self) -> &GritLanguage {
+    fn language(&self) -> &GritTargetLanguage {
         todo!()
     }
 

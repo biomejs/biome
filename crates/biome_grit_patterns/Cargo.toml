@@ -18,8 +18,8 @@ biome_diagnostics    = { workspace = true }
 biome_grit_parser    = { workspace = true }
 biome_grit_syntax    = { workspace = true }
 biome_rowan          = { workspace = true }
-grit-pattern-matcher = { version = "0.1" }
-grit-util            = { version = "0.1" }
+grit-pattern-matcher = { version = "0.2" }
+grit-util            = { version = "0.2" }
 im                   = { version = "15.1.0" }
 itertools            = "0.10.5"
 serde                = { workspace = true, features = ["derive"] }

@@ -1,5 +1,5 @@
 use crate::grit_context::GritQueryContext;
-use crate::grit_language::GritLanguage;
+use crate::grit_target_language::GritTargetLanguage;
 use crate::resolved_pattern::GritResolvedPattern;
 use grit_pattern_matcher::pattern::{File, FileRegistry};
 
@@ -13,7 +13,7 @@ impl<'a> File<'a, GritQueryContext> for GritFile {
     fn absolute_path(
         &self,
         _files: &FileRegistry<'a, GritQueryContext>,
-        _language: &GritLanguage,
+        _language: &GritTargetLanguage,
     ) -> anyhow::Result<GritResolvedPattern> {
         todo!()
     }

@@ -4,13 +4,11 @@
 
 #[macro_use]
 mod generated;
-mod pattern_ext;
 mod syntax_ext;
 mod syntax_node;
 
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use generated::*;
-pub use pattern_ext::*;
 pub use syntax_ext::*;
 pub use syntax_node::*;
 

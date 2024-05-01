@@ -1,9 +1,9 @@
 use crate::grit_node::GritNode;
 use grit_util::Language;
 
-pub(crate) struct GritLanguage;
+pub(crate) struct GritTargetLanguage;
 
-impl Language for GritLanguage {
+impl Language for GritTargetLanguage {
     type Node<'a> = GritNode;
 
     fn language_name(&self) -> &'static str {

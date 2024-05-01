@@ -21,10 +21,12 @@ macro_rules! create_scope {
     }};
 }
 
+mod accumulate_compiler;
 mod add_compiler;
 mod after_compiler;
 mod and_compiler;
 mod any_compiler;
+mod assignment_compiler;
 mod auto_wrap;
 mod before_compiler;
 mod bubble_compiler;
@@ -32,6 +34,7 @@ mod container_compiler;
 mod contains_compiler;
 mod divide_compiler;
 mod every_compiler;
+mod like_compiler;
 mod limit_compiler;
 mod list_compiler;
 mod list_index_compiler;
@@ -44,6 +47,8 @@ mod multiply_compiler;
 mod not_compiler;
 mod or_compiler;
 mod predicate_compiler;
+mod predicate_match_compiler;
+mod predicate_return_compiler;
 mod rewrite_compiler;
 mod sequential_compiler;
 mod some_compiler;
@@ -54,10 +59,12 @@ mod where_compiler;
 mod within_compiler;
 
 use self::{
-    add_compiler::AddCompiler, after_compiler::AfterCompiler, and_compiler::AndCompiler,
-    any_compiler::AnyCompiler, before_compiler::BeforeCompiler, bubble_compiler::BubbleCompiler,
-    compilation_context::NodeCompilationContext, contains_compiler::ContainsCompiler,
-    divide_compiler::DivideCompiler, every_compiler::EveryCompiler, limit_compiler::LimitCompiler,
+    accumulate_compiler::AccumulateCompiler, add_compiler::AddCompiler,
+    after_compiler::AfterCompiler, and_compiler::AndCompiler, any_compiler::AnyCompiler,
+    assignment_compiler::AssignmentCompiler, before_compiler::BeforeCompiler,
+    bubble_compiler::BubbleCompiler, compilation_context::NodeCompilationContext,
+    contains_compiler::ContainsCompiler, divide_compiler::DivideCompiler,
+    every_compiler::EveryCompiler, like_compiler::LikeCompiler, limit_compiler::LimitCompiler,
     list_index_compiler::ListIndexCompiler, literal_compiler::LiteralCompiler,
     map_accessor_compiler::MapAccessorCompiler, maybe_compiler::MaybeCompiler,
     modulo_compiler::ModuloCompiler, multiply_compiler::MultiplyCompiler,
@@ -104,7 +111,9 @@ impl PatternCompiler {
             AnyGritPattern::GritAddOperation(node) => Ok(Pattern::Add(Box::new(
                 AddCompiler::from_node(node, context)?,
             ))),
-            AnyGritPattern::GritAssignmentAsPattern(_) => todo!(),
+            AnyGritPattern::GritAssignmentAsPattern(node) => Ok(Pattern::Assignment(Box::new(
+                AssignmentCompiler::from_node(node, context)?,
+            ))),
             AnyGritPattern::GritBracketedPattern(node) => {
                 Self::from_node_with_rhs(&node.pattern()?, context, is_rhs)
             }
@@ -125,7 +134,9 @@ impl PatternCompiler {
             AnyGritPattern::GritFiles(node) => Ok(Pattern::Sequential(
                 SequentialCompiler::from_files_node(node, context)?,
             )),
-            AnyGritPattern::GritLike(_) => todo!(),
+            AnyGritPattern::GritLike(node) => Ok(Pattern::Like(Box::new(LikeCompiler::from_node(
+                node, context,
+            )?))),
             AnyGritPattern::GritListAccessor(node) => Ok(Pattern::ListIndex(Box::new(
                 ListIndexCompiler::from_node(node, context)?,
             ))),
@@ -139,7 +150,9 @@ impl PatternCompiler {
                 MultiplyCompiler::from_node(node, context)?,
             ))),
             AnyGritPattern::GritNodeLike(_) => todo!(),
-            AnyGritPattern::GritPatternAccumulate(_) => todo!(),
+            AnyGritPattern::GritPatternAccumulate(node) => Ok(Pattern::Accumulate(Box::new(
+                AccumulateCompiler::from_node(node, context)?,
+            ))),
             AnyGritPattern::GritPatternAfter(node) => Ok(Pattern::After(Box::new(
                 AfterCompiler::from_node(node, context)?,
             ))),

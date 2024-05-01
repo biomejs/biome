@@ -37,6 +37,9 @@ pub enum CompileError {
     /// If a function or bubble pattern has multiple parameters with the same name.
     DuplicateParameters,
 
+    /// Tried to declare or assign a Grit reserved metavariable.
+    ReservedMetavariable(String),
+
     /// When an unexpected node kind was discovered during compilation.
     UnexpectedKind(u16),
 

@@ -1825,7 +1825,7 @@ dependencies = [
 
 [[package]]
 name = "grit-pattern-matcher"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "elsa",
@@ -1838,7 +1838,7 @@ dependencies = [
 
 [[package]]
 name = "grit-util"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "derive_builder",
  "once_cell",
