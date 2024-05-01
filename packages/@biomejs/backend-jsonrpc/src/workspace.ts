@@ -2012,7 +2012,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstatiation"
 	| "lint/nursery/useGenericFontNames"
-    | "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
