@@ -17,28 +17,28 @@ impl LiteralCompiler {
         is_rhs: bool,
     ) -> Result<Pattern<GritQueryContext>, CompileError> {
         match node {
-            AnyGritLiteral::GritBooleanLiteral(bool) => Ok(Pattern::BooleanConstant(
-                BooleanConstant::new(bool.value()?.text_trimmed() == "true"),
+            AnyGritLiteral::GritBooleanLiteral(node) => Ok(Pattern::BooleanConstant(
+                BooleanConstant::new(node.value()?.text_trimmed() == "true"),
             )),
             AnyGritLiteral::GritCodeSnippet(_) => todo!(),
-            AnyGritLiteral::GritDoubleLiteral(double) => Ok(Pattern::FloatConstant(
-                FloatConstant::new(double.value_token()?.text_trimmed().parse().map_err(
-                    |err| CompileError::LiteralOutOfRange(format!("Error parsing double: {err}")),
-                )?),
+            AnyGritLiteral::GritDoubleLiteral(node) => Ok(Pattern::FloatConstant(
+                FloatConstant::new(node.value_token()?.text_trimmed().parse().map_err(|err| {
+                    CompileError::LiteralOutOfRange(format!("Error parsing double: {err}"))
+                })?),
             )),
-            AnyGritLiteral::GritIntLiteral(int) => Ok(Pattern::IntConstant(IntConstant::new(
-                int.value_token()?.text_trimmed().parse().map_err(|err| {
+            AnyGritLiteral::GritIntLiteral(node) => Ok(Pattern::IntConstant(IntConstant::new(
+                node.value_token()?.text_trimmed().parse().map_err(|err| {
                     CompileError::LiteralOutOfRange(format!("Error parsing integer: {err}"))
                 })?,
             ))),
-            AnyGritLiteral::GritList(list) => Ok(Pattern::List(Box::new(
-                ListCompiler::from_node_with_rhs(list, context, is_rhs)?,
+            AnyGritLiteral::GritList(node) => Ok(Pattern::List(Box::new(
+                ListCompiler::from_node_with_rhs(node, context, is_rhs)?,
             ))),
-            AnyGritLiteral::GritMap(map) => Ok(Pattern::Map(Box::new(
-                MapCompiler::from_node_with_rhs(map, context, is_rhs)?,
+            AnyGritLiteral::GritMap(node) => Ok(Pattern::Map(Box::new(
+                MapCompiler::from_node_with_rhs(node, context, is_rhs)?,
             ))),
-            AnyGritLiteral::GritStringLiteral(string) => {
-                let token = string.value_token()?;
+            AnyGritLiteral::GritStringLiteral(node) => {
+                let token = node.value_token()?;
                 let text = token.text_trimmed();
                 debug_assert!(text.len() >= 2, "Strings must have quotes");
                 Ok(Pattern::StringConstant(StringConstant::new(unescape(

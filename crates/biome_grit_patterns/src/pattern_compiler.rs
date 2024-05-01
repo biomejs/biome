@@ -1,11 +1,33 @@
 pub(crate) mod compilation_context;
 
+/// Creates a new scope within the given `context`.
+///
+/// This is implemented as a macro instead of method to avoid capturing the
+/// entire `context` instance, which would run afoul of the borrow-checking due
+/// to its mutable references.
+macro_rules! create_scope {
+    ($context: expr, $local_vars: expr) => {{
+        let scope_index = $context.vars_array.len();
+        $context.vars_array.push(Vec::new());
+        let context = crate::pattern_compiler::NodeCompilationContext {
+            compilation: $context.compilation,
+            vars: &mut $local_vars,
+            vars_array: $context.vars_array,
+            scope_index,
+            global_vars: $context.global_vars,
+            diagnostics: $context.diagnostics,
+        };
+        (scope_index, context)
+    }};
+}
+
 mod add_compiler;
 mod after_compiler;
 mod and_compiler;
 mod any_compiler;
 mod auto_wrap;
 mod before_compiler;
+mod bubble_compiler;
 mod container_compiler;
 mod contains_compiler;
 mod divide_compiler;
@@ -21,17 +43,19 @@ mod modulo_compiler;
 mod multiply_compiler;
 mod not_compiler;
 mod or_compiler;
+mod predicate_compiler;
 mod rewrite_compiler;
 mod sequential_compiler;
 mod some_compiler;
 mod step_compiler;
 mod subtract_compiler;
 mod variable_compiler;
+mod where_compiler;
 mod within_compiler;
 
 use self::{
     add_compiler::AddCompiler, after_compiler::AfterCompiler, and_compiler::AndCompiler,
-    any_compiler::AnyCompiler, before_compiler::BeforeCompiler,
+    any_compiler::AnyCompiler, before_compiler::BeforeCompiler, bubble_compiler::BubbleCompiler,
     compilation_context::NodeCompilationContext, contains_compiler::ContainsCompiler,
     divide_compiler::DivideCompiler, every_compiler::EveryCompiler, limit_compiler::LimitCompiler,
     list_index_compiler::ListIndexCompiler, literal_compiler::LiteralCompiler,
@@ -40,7 +64,7 @@ use self::{
     not_compiler::NotCompiler, or_compiler::OrCompiler, rewrite_compiler::RewriteCompiler,
     sequential_compiler::SequentialCompiler, some_compiler::SomeCompiler,
     subtract_compiler::SubtractCompiler, variable_compiler::VariableCompiler,
-    within_compiler::WithinCompiler,
+    where_compiler::WhereCompiler, within_compiler::WithinCompiler,
 };
 use crate::{grit_context::GritQueryContext, CompileError};
 use biome_grit_syntax::{AnyGritMaybeCurlyPattern, AnyGritPattern, GritSyntaxKind};
@@ -81,8 +105,12 @@ impl PatternCompiler {
                 AddCompiler::from_node(node, context)?,
             ))),
             AnyGritPattern::GritAssignmentAsPattern(_) => todo!(),
-            AnyGritPattern::GritBracketedPattern(_) => todo!(),
-            AnyGritPattern::GritBubble(_) => todo!(),
+            AnyGritPattern::GritBracketedPattern(node) => {
+                Self::from_node_with_rhs(&node.pattern()?, context, is_rhs)
+            }
+            AnyGritPattern::GritBubble(node) => Ok(Pattern::Bubble(Box::new(
+                BubbleCompiler::from_node(node, context)?,
+            ))),
             AnyGritPattern::GritDivOperation(node) => Ok(Pattern::Divide(Box::new(
                 DivideCompiler::from_node(node, context)?,
             ))),
@@ -143,7 +171,9 @@ impl PatternCompiler {
                 Ok(Pattern::Or(Box::new(OrCompiler::from_node(node, context)?)))
             }
             AnyGritPattern::GritPatternOrElse(_) => todo!(),
-            AnyGritPattern::GritPatternWhere(_) => todo!(),
+            AnyGritPattern::GritPatternWhere(node) => Ok(Pattern::Where(Box::new(
+                WhereCompiler::from_node(node, context)?,
+            ))),
             AnyGritPattern::GritRegexPattern(_) => todo!(),
             AnyGritPattern::GritRewrite(node) => Ok(Pattern::Rewrite(Box::new(
                 RewriteCompiler::from_node(node, context)?,

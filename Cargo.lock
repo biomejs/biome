@@ -536,6 +536,7 @@ dependencies = [
  "grit-pattern-matcher",
  "grit-util",
  "im",
+ "itertools",
  "serde",
 ]
 

@@ -34,6 +34,9 @@ pub enum CompileError {
     /// Used for missing syntax nodes.
     MissingSyntaxNode,
 
+    /// If a function or bubble pattern has multiple parameters with the same name.
+    DuplicateParameters,
+
     /// When an unexpected node kind was discovered during compilation.
     UnexpectedKind(u16),
 
