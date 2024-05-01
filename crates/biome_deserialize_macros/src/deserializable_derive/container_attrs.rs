@@ -1,11 +1,5 @@
 use std::str::FromStr;
 
-use quote::ToTokens;
-use syn::spanned::Spanned;
-use syn::{Attribute, Error, Lit, Meta, MetaNameValue, Path};
-
-use crate::util::parse_meta_list;
-
 /// Attributes for struct and enum.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub(crate) struct ContainerAttrs {
@@ -13,11 +7,11 @@ pub(crate) struct ContainerAttrs {
     /// Deserialize the given `from` type, then convert to the annotated type
     ///
     /// See also: <https://serde.rs/container-attrs.html#from>
-    pub from: Option<Path>,
+    pub from: Option<syn::Path>,
     /// Deserialize the given `try_from` type, then try converting to the annotated type
     ///
     /// See also: <https://serde.rs/container-attrs.html#try_from>
-    pub try_from: Option<Path>,
+    pub try_from: Option<syn::Path>,
     /// Ignore unknown fields in a struct upon deserialization.
     pub unknown_fields: Option<UnknownFields>,
 }
@@ -42,82 +36,48 @@ impl FromStr for UnknownFields {
     }
 }
 
-impl TryFrom<&Vec<Attribute>> for ContainerAttrs {
-    type Error = Error;
+impl TryFrom<&Vec<syn::Attribute>> for ContainerAttrs {
+    type Error = syn::Error;
 
-    fn try_from(attrs: &Vec<Attribute>) -> Result<Self, Self::Error> {
+    fn try_from(attrs: &Vec<syn::Attribute>) -> Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
-            if attr.path.is_ident("deserializable") {
-                parse_meta_list(&attr.parse_meta()?, |meta| {
-                    match meta {
-                        Meta::Path(path) if path.is_ident("with_validator") => {
-                            opts.with_validator = true
+            if attr.path().is_ident("deserializable") {
+                attr.parse_nested_meta(|meta| {
+                    let name = meta.path.require_ident()?;
+                    if name == "with_validator" {
+                        opts.with_validator = true
+                    } else if name == "from" {
+                        opts.from = Some(meta.value()?.parse::<syn::LitStr>()?.parse()?);
+                    } else if name == "try_from" {
+                        opts.try_from = Some(meta.value()?.parse::<syn::LitStr>()?.parse()?);
+                    } else if name == "unknown_fields" {
+                        let lit: syn::LitStr = meta.value()?.parse()?;
+                        match UnknownFields::from_str(&lit.value()) {
+                            Ok(value) => opts.unknown_fields = Some(value),
+                            Err(error) => return Err(meta.error(error)),
                         }
-                        Meta::NameValue(MetaNameValue {
-                            path,
-                            lit: Lit::Str(s),
-                            ..
-                        }) if path.is_ident("from") => opts.from = Some(s.parse()?),
-                        Meta::NameValue(MetaNameValue {
-                            path,
-                            lit: Lit::Str(s),
-                            ..
-                        }) if path.is_ident("try_from") => opts.try_from = Some(s.parse()?),
-                        Meta::NameValue(MetaNameValue {
-                            path,
-                            lit: Lit::Str(s),
-                            ..
-                        }) if path.is_ident("unknown_fields") => {
-                            match UnknownFields::from_str(&s.value()) {
-                                Ok(value) => opts.unknown_fields = Some(value),
-                                Err(error) => return Err(Error::new(meta.span(), error)),
-                            }
-                        }
-                        _ => {
-                            let meta_str = meta.to_token_stream().to_string();
-                            return Err(Error::new(
-                                meta.span(),
-                                format_args!("Unexpected attribute: {meta_str}"),
-                            ));
-                        }
-                    }
-                    if opts.from.is_some() && opts.try_from.is_some() {
-                        return Err(Error::new(
-                            meta.span(),
-                            "You cannot specify both `from` and `try_from`",
-                        ));
+                    } else {
+                        return Err(meta.error("Unknown attribute"));
                     }
                     Ok(())
                 })?;
-            } else if attr.path.is_ident("serde") {
-                parse_meta_list(&attr.parse_meta()?, |meta| {
-                    match meta {
-                        Meta::Path(path) if path.is_ident("deny_unknown_fields") => {
-                            if opts.unknown_fields.is_none() {
-                                opts.unknown_fields = Some(UnknownFields::Deny);
-                            }
+            } else if attr.path().is_ident("serde") {
+                attr.parse_nested_meta(|meta| {
+                    if meta.path.is_ident("from") {
+                        opts.from = Some(meta.value()?.parse::<syn::LitStr>()?.parse()?);
+                    } else if meta.path.is_ident("try_from") {
+                        opts.try_from = Some(meta.value()?.parse::<syn::LitStr>()?.parse()?);
+                    } else if meta.path.is_ident("deny_unknown_fields") {
+                        if opts.unknown_fields.is_none() {
+                            opts.unknown_fields = Some(UnknownFields::Deny);
                         }
-                        Meta::NameValue(MetaNameValue {
-                            path,
-                            lit: Lit::Str(s),
-                            ..
-                        }) => {
-                            if opts.from.is_none() && path.is_ident("from") {
-                                opts.from = Some(s.parse()?);
-                            } else if opts.try_from.is_none() && path.is_ident("try_from") {
-                                opts.try_from = Some(s.parse()?);
-                            } else {
-                                // Don't fail on unrecognized Serde attrs
-                            }
-                        }
-                        _ => {
-                            // Don't fail on unrecognized Serde attrs
-                        }
+                    } else {
+                        // Don't fail on unrecognized Serde attrs
                     }
                     Ok(())
                 })
-                .ok();
+                .ok(); // Don't fail for serde attrs parsing
             }
         }
         Ok(opts)

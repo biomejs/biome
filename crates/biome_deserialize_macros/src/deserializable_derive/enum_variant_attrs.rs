@@ -1,9 +1,3 @@
-use quote::ToTokens;
-use syn::spanned::Spanned;
-use syn::{Attribute, Error, Lit, Meta, MetaNameValue};
-
-use crate::util::parse_meta_list;
-
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct EnumVariantAttrs {
     /// Optional name to use in the serialized format.
@@ -12,45 +6,32 @@ pub struct EnumVariantAttrs {
     pub rename: Option<String>,
 }
 
-impl TryFrom<&Vec<Attribute>> for EnumVariantAttrs {
-    type Error = Error;
+impl TryFrom<&Vec<syn::Attribute>> for EnumVariantAttrs {
+    type Error = syn::Error;
 
-    fn try_from(attrs: &Vec<Attribute>) -> Result<Self, Self::Error> {
+    fn try_from(attrs: &Vec<syn::Attribute>) -> Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
-            if attr.path.is_ident("deserializable") {
-                parse_meta_list(&attr.parse_meta()?, |meta| {
-                    match meta {
-                        Meta::NameValue(MetaNameValue {
-                            path,
-                            lit: Lit::Str(s),
-                            ..
-                        }) if path.is_ident("rename") => opts.rename = Some(s.value()),
-                        val => {
-                            let val_str = val.to_token_stream().to_string();
-                            return Err(Error::new(
-                                val.span(),
-                                format_args!("Unexpected attribute: {val_str}"),
-                            ));
-                        }
+            if attr.path().is_ident("deserializable") {
+                attr.parse_nested_meta(|meta| {
+                    let name = meta.path.require_ident()?;
+                    if name == "rename" {
+                        opts.rename = Some(meta.value()?.parse::<syn::LitStr>()?.value());
+                    } else {
+                        return Err(meta.error("Unknown attribute"));
                     }
                     Ok(())
                 })?;
-            } else if attr.path.is_ident("serde") {
-                parse_meta_list(&attr.parse_meta()?, |meta| {
-                    match meta {
-                        Meta::NameValue(MetaNameValue {
-                            path,
-                            lit: Lit::Str(s),
-                            ..
-                        }) if opts.rename.is_none() && path.is_ident("rename") => {
-                            opts.rename = Some(s.value())
-                        }
-                        _ => {} // Don't fail on unrecognized Serde attrs
+            } else if attr.path().is_ident("serde") {
+                attr.parse_nested_meta(|meta| {
+                    if meta.path.is_ident("rename") {
+                        opts.rename = Some(meta.value()?.parse::<syn::LitStr>()?.value());
+                    } else {
+                        // Don't fail on unrecognized Serde attrs
                     }
                     Ok(())
                 })
-                .ok();
+                .ok(); // Don't fail for serde attrs parsing
             }
         }
         Ok(opts)

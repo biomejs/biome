@@ -1,9 +1,7 @@
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use std::collections::HashSet;
-use syn::{parse_quote, AttrStyle, Attribute, Error, Lit, Meta, MetaNameValue, Path, Type};
-
-use crate::util::parse_meta_list;
+use syn::{parse_quote, AttrStyle, Attribute, MetaNameValue, Path, Type};
 
 #[derive(Clone, Debug)]
 pub struct Attrs {
@@ -28,28 +26,28 @@ impl Default for Attrs {
 }
 
 impl TryFrom<&Vec<Attribute>> for Attrs {
-    type Error = Error;
+    type Error = syn::Error;
 
-    fn try_from(attrs: &Vec<Attribute>) -> Result<Self, Self::Error> {
+    fn try_from(attrs: &Vec<syn::Attribute>) -> Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
-            if attr.path.is_ident("partial") {
-                parse_meta_list(&attr.parse_meta()?, |meta| {
-                    match meta {
-                        Meta::List(_) if meta.path().is_ident("derive") => {
-                            parse_meta_list(meta, |meta| {
-                                opts.derives.insert(meta.path().clone());
-                                Ok(())
-                            })?;
-                        }
-                        _ => {
-                            opts.nested_attrs.push(meta.into_token_stream());
-                        }
+            if attr.path().is_ident("partial") {
+                let nested = attr.parse_args_with(
+                    syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+                )?;
+                for meta in nested {
+                    if meta.path().is_ident("derive") {
+                        let meta = meta.require_list()?;
+                        meta.parse_nested_meta(|meta| {
+                            opts.derives.insert(meta.path);
+                            Ok(())
+                        })?;
+                    } else {
+                        opts.nested_attrs.push(meta.into_token_stream());
                     }
-                    Ok(())
-                })?;
-            } else if attr.style == AttrStyle::Outer && attr.path.is_ident("doc") {
-                opts.doc_lines.push(attr.tokens.clone());
+                }
+            } else if attr.style == AttrStyle::Outer && attr.path().is_ident("doc") {
+                opts.doc_lines.push(attr.into_token_stream());
             }
         }
         Ok(opts)
@@ -58,38 +56,46 @@ impl TryFrom<&Vec<Attribute>> for Attrs {
 
 #[derive(Clone, Debug, Default)]
 pub struct FieldAttrs {
-    pub ty: Option<PartialType>,
+    pub use_type: Option<PartialType>,
     pub doc_lines: Vec<TokenStream>,
     pub nested_attrs: Vec<TokenStream>,
 }
 
 impl TryFrom<&Vec<Attribute>> for FieldAttrs {
-    type Error = Error;
+    type Error = syn::Error;
 
-    fn try_from(attrs: &Vec<Attribute>) -> Result<Self, Self::Error> {
+    fn try_from(attrs: &Vec<syn::Attribute>) -> Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
-            if attr.path.is_ident("partial") {
-                parse_meta_list(&attr.parse_meta()?, |meta| {
+            if attr.path().is_ident("partial") {
+                let nested = attr.parse_args_with(
+                    syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+                )?;
+                for meta in nested {
                     match meta {
-                        syn::Meta::Path(path) if opts.ty.is_none() && path.is_ident("type") => {
-                            opts.ty = Some(PartialType::Prefixed);
+                        syn::Meta::Path(path)
+                            if opts.use_type.is_none() && path.is_ident("use_type") =>
+                        {
+                            opts.use_type = Some(PartialType::Prefixed);
                         }
                         syn::Meta::NameValue(MetaNameValue {
                             path,
-                            lit: Lit::Str(s),
+                            value:
+                                syn::Expr::Lit(syn::ExprLit {
+                                    lit: syn::Lit::Str(s),
+                                    ..
+                                }),
                             ..
-                        }) if opts.ty.is_none() && path.is_ident("type") => {
-                            opts.ty = Some(PartialType::Literal(s.parse()?));
+                        }) if opts.use_type.is_none() && path.is_ident("use_type") => {
+                            opts.use_type = Some(PartialType::Literal(s.parse()?));
                         }
                         _ => {
                             opts.nested_attrs.push(meta.into_token_stream());
                         }
                     }
-                    Ok(())
-                })?;
-            } else if attr.style == AttrStyle::Outer && attr.path.is_ident("doc") {
-                opts.doc_lines.push(attr.tokens.clone());
+                }
+            } else if attr.style == AttrStyle::Outer && attr.path().is_ident("doc") {
+                opts.doc_lines.push(attr.into_token_stream());
             }
         }
         Ok(opts)

@@ -90,7 +90,7 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
     let derives = input.attrs.derives.iter();
 
     let doc_lines = input.attrs.doc_lines.iter().map(|tokens| {
-        quote! { #[doc #tokens] }
+        quote! { #tokens }
     });
 
     let attrs = input.attrs.nested_attrs.iter().map(|nested| {
@@ -104,10 +104,10 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
              ident, attrs, ty, ..
          }| {
             let doc_lines = attrs.doc_lines.iter().map(|tokens| {
-                quote! { #[doc #tokens] }
+                quote! { #tokens }
             });
 
-            let ty = match attrs.ty.as_ref() {
+            let ty = match attrs.use_type.as_ref() {
                 Some(PartialType::Literal(ty)) => ty.clone(),
                 Some(PartialType::Prefixed) => {
                     let mut ty = ty.clone();

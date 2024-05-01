@@ -11,11 +11,11 @@ use serde::{Deserialize, Serialize};
 #[partial(serde(default, deny_unknown_fields))]
 pub struct CssConfiguration {
     /// Parsing options
-    #[partial(type, bpaf(external(partial_css_parser), optional))]
+    #[partial(use_type, bpaf(external(partial_css_parser), optional))]
     pub parser: CssParser,
 
     /// Formatting options
-    #[partial(type, bpaf(external(partial_css_formatter), optional))]
+    #[partial(use_type, bpaf(external(partial_css_formatter), optional))]
     pub formatter: CssFormatter,
 }
 
