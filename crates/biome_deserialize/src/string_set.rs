@@ -12,6 +12,7 @@ use std::str::FromStr;
 
 #[derive(Clone, Default, Debug, Deserializable, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct StringSet(IndexSet<String>);
 
 impl StringSet {

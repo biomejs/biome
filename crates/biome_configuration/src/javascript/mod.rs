@@ -17,11 +17,11 @@ use serde::{Deserialize, Serialize};
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct JavascriptConfiguration {
     /// Formatting options
-    #[partial(type, bpaf(external(partial_javascript_formatter), optional))]
+    #[partial(use_type, bpaf(external(partial_javascript_formatter), optional))]
     pub formatter: JavascriptFormatter,
 
     /// Parsing options
-    #[partial(type, bpaf(external(partial_javascript_parser), optional))]
+    #[partial(use_type, bpaf(external(partial_javascript_parser), optional))]
     pub parser: JavascriptParser,
 
     /// A list of global bindings that should be ignored by the analyzers
@@ -34,7 +34,10 @@ pub struct JavascriptConfiguration {
     #[partial(bpaf(hide))]
     pub jsx_runtime: JsxRuntime,
 
-    #[partial(type, bpaf(external(partial_javascript_organize_imports), optional))]
+    #[partial(
+        use_type,
+        bpaf(external(partial_javascript_organize_imports), optional)
+    )]
     pub organize_imports: JavascriptOrganizeImports,
 }
 

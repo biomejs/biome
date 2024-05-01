@@ -10,18 +10,17 @@ use biome_string_case::Case;
 use proc_macro2::{Ident, TokenStream};
 use proc_macro_error::*;
 use quote::quote;
-use syn::{Data, GenericParam, Generics, Path, Type};
 
 pub(crate) struct DeriveInput {
     pub ident: Ident,
-    pub generics: Generics,
+    pub generics: syn::Generics,
     pub data: DeserializableData,
 }
 
 impl DeriveInput {
     pub fn parse(input: syn::DeriveInput) -> Self {
         let attrs =
-            ContainerAttrs::try_from(&input.attrs).expect("Could not parse field attributes");
+            ContainerAttrs::try_from(&input.attrs).expect("Could not parse container attributes");
         let data = if let ContainerAttrs {
             with_validator,
             from: Some(from),
@@ -44,7 +43,7 @@ impl DeriveInput {
             })
         } else {
             match input.data {
-                Data::Enum(data) => {
+                syn::Data::Enum(data) => {
                     let variants = data
                     .variants
                     .into_iter()
@@ -69,7 +68,7 @@ impl DeriveInput {
                         with_validator: attrs.with_validator,
                     })
                 }
-                Data::Struct(data) => {
+                syn::Data::Struct(data) => {
                     if data.fields.iter().all(|field| field.ident.is_some()) {
                         let fields = data
                             .fields
@@ -96,7 +95,6 @@ impl DeriveInput {
                                 }
                             })
                             .collect();
-
                         DeserializableData::Struct(DeserializableStructData {
                             fields,
                             with_validator: attrs.with_validator,
@@ -157,13 +155,13 @@ pub struct DeserializableStructData {
 
 #[derive(Debug)]
 pub struct DeserializableFromData {
-    pub from: Path,
+    pub from: syn::Path,
     pub with_validator: bool,
 }
 
 #[derive(Debug)]
 pub struct DeserializableTryFromData {
-    pub try_from: Path,
+    pub try_from: syn::Path,
     pub with_validator: bool,
 }
 
@@ -171,17 +169,17 @@ pub struct DeserializableTryFromData {
 pub struct DeserializableFieldData {
     bail_on_error: bool,
     deprecated: Option<DeprecatedField>,
-    ident: Ident,
+    ident: syn::Ident,
     key: String,
     passthrough_name: bool,
     required: bool,
-    ty: Type,
-    validate: Option<Path>,
+    ty: syn::Type,
+    validate: Option<syn::Path>,
 }
 
 #[derive(Debug)]
 pub struct DeserializableVariantData {
-    ident: Ident,
+    ident: syn::Ident,
     key: String,
 }
 
@@ -207,7 +205,7 @@ pub(crate) fn generate_deserializable(input: DeriveInput) -> TokenStream {
 
 fn generate_deserializable_enum(
     ident: Ident,
-    generics: Generics,
+    generics: syn::Generics,
     data: DeserializableEnumData,
 ) -> TokenStream {
     let allowed_variants: Vec<_> = data
@@ -269,7 +267,7 @@ fn generate_deserializable_enum(
 
 fn generate_deserializable_newtype(
     ident: Ident,
-    generics: Generics,
+    generics: syn::Generics,
     data: DeserializableNewtypeData,
 ) -> TokenStream {
     let validator = if data.with_validator {
@@ -302,7 +300,7 @@ fn generate_deserializable_newtype(
 
 fn generate_deserializable_struct(
     ident: Ident,
-    generics: Generics,
+    generics: syn::Generics,
     data: DeserializableStructData,
 ) -> TokenStream {
     let allowed_keys: Vec<_> = data
@@ -485,7 +483,7 @@ fn generate_deserializable_struct(
 
 fn generate_deserializable_from(
     ident: Ident,
-    generics: Generics,
+    generics: syn::Generics,
     data: DeserializableFromData,
 ) -> TokenStream {
     let trait_bounds = generate_trait_bounds(&generics);
@@ -518,7 +516,7 @@ fn generate_deserializable_from(
 
 fn generate_deserializable_try_from(
     ident: Ident,
-    generics: Generics,
+    generics: syn::Generics,
     data: DeserializableTryFromData,
 ) -> TokenStream {
     let trait_bounds = generate_trait_bounds(&generics);
@@ -558,12 +556,12 @@ fn generate_deserializable_try_from(
     }
 }
 
-fn generate_generics_without_trait_bounds(generics: &Generics) -> TokenStream {
+fn generate_generics_without_trait_bounds(generics: &syn::Generics) -> TokenStream {
     if generics.params.is_empty() {
         quote! {}
     } else {
         let params = generics.params.iter().map(|param| match param {
-            GenericParam::Type(ty) => {
+            syn::GenericParam::Type(ty) => {
                 let attrs = ty
                     .attrs
                     .iter()
@@ -579,12 +577,12 @@ fn generate_generics_without_trait_bounds(generics: &Generics) -> TokenStream {
     }
 }
 
-fn generate_trait_bounds(generics: &Generics) -> TokenStream {
+fn generate_trait_bounds(generics: &syn::Generics) -> TokenStream {
     if generics.params.is_empty() {
         quote! {}
     } else {
         let params = generics.params.iter().map(|param| match param {
-            GenericParam::Type(ty) => {
+            syn::GenericParam::Type(ty) => {
                 let ident = &ty.ident;
                 let bounds = &ty.bounds;
                 if bounds.is_empty() {
@@ -601,9 +599,9 @@ fn generate_trait_bounds(generics: &Generics) -> TokenStream {
     }
 }
 
-fn generate_generics_tuple(generics: &Generics) -> TokenStream {
+fn generate_generics_tuple(generics: &syn::Generics) -> TokenStream {
     let params = generics.params.iter().map(|param| match param {
-        GenericParam::Type(ty) => {
+        syn::GenericParam::Type(ty) => {
             let ident = &ty.ident;
             quote! { #ident }
         }

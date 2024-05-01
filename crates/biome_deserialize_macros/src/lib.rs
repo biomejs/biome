@@ -1,10 +1,10 @@
 mod deserializable_derive;
 mod merge_derive;
 mod partial_derive;
-mod util;
 
 use proc_macro::TokenStream;
 use proc_macro_error::*;
+use quote::ToTokens;
 use syn::{parse_macro_input, DeriveInput};
 
 /// Derives the [biome_deserialize::Deserializable] trait for a custom enum or
@@ -401,10 +401,10 @@ pub fn derive_mergeable(input: TokenStream) -> TokenStream {
 /// #[derive(Clone, Default, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 /// #[partial(derive(Clone, Deserializable, Eq, Merge, PartialEq))]
 /// pub struct CssConfiguration {
-///     #[partial(type)]
+///     #[partial(use_type)]
 ///     pub parser: CssParser,
 ///
-///     #[partial(type)]
+///     #[partial(use_type)]
 ///     pub formatter: CssFormatter,
 /// }
 /// ```
@@ -414,18 +414,18 @@ pub fn derive_mergeable(input: TokenStream) -> TokenStream {
 /// all the fields of a partial struct are automatically annotated with
 /// `#[serde(skip_serializing_if = "Option::is_none")]`.
 ///
-/// ### `#[partial(type)]`
+/// ### `#[partial(use_type)]`
 ///
 /// If one of the fields of a partial struct uses a type that itself also has
 /// a derived partial struct, you can tell the macro to use that type instead
-/// using the `#[partial(type)]`.
+/// using the `#[partial(use_type)]`.
 ///
 /// In the example above, where `CssConfiguration` has a field of type
 /// `CssParser`, this will make sure the `PartialCssConfiguration` uses
 /// `PartialCssParser` instead.
 ///
 /// If you need to use a fully custom in the partial struct instead, you can do
-/// so using `#[partial(type = "MyPartialType")]`.
+/// so using `#[partial(use_type = "MyPartialType")]`.
 #[proc_macro_derive(Partial, attributes(partial))]
 #[proc_macro_error]
 pub fn derive_partial(input: TokenStream) -> TokenStream {
@@ -440,4 +440,23 @@ pub fn derive_partial(input: TokenStream) -> TokenStream {
     }
 
     TokenStream::from(tokens)
+}
+
+#[test]
+fn valid_syntax() {
+    //derive_deserializable(
+    //    quote::quote!(
+    //        #[serde(deny_unknown_fields)]
+    //        struct {
+    //            att: bool,
+    //        }
+    //    ).into(),
+    //);
+    let x: DeriveInput = syn::parse_quote!(
+        #[drive(Deserializable)]
+        #[serde(deny_unknown_fields)]
+        struct {
+            att: bool,
+        }
+    );
 }

@@ -1,9 +1,3 @@
-use quote::ToTokens;
-use syn::spanned::Spanned;
-use syn::{Attribute, Error, Lit, Meta, MetaNameValue, Path};
-
-use crate::util::parse_meta_list;
-
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct StructFieldAttrs {
     /// If `true`, bails on deserializing the entire struct if validation for
@@ -34,7 +28,7 @@ pub struct StructFieldAttrs {
     pub required: bool,
 
     /// Optional validation function to be called on the field value.
-    pub validate: Option<Path>,
+    pub validate: Option<syn::Path>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -46,103 +40,55 @@ pub enum DeprecatedField {
     UseInstead(String),
 }
 
-impl TryFrom<&Vec<Attribute>> for StructFieldAttrs {
-    type Error = Error;
+impl TryFrom<&Vec<syn::Attribute>> for StructFieldAttrs {
+    type Error = syn::Error;
 
-    fn try_from(attrs: &Vec<Attribute>) -> Result<Self, Self::Error> {
+    fn try_from(attrs: &Vec<syn::Attribute>) -> Result<Self, Self::Error> {
         let mut opts = Self::default();
         for attr in attrs {
-            if attr.path.is_ident("deserializable") {
-                parse_meta_list(&attr.parse_meta()?, |meta| {
-                    match meta {
-                        Meta::Path(path) => {
-                            if path.is_ident("required") {
-                                opts.required = true;
-                            } else if path.is_ident("passthrough_name") {
-                                opts.passthrough_name = true;
-                            } else if path.is_ident("bail_on_error") {
-                                opts.bail_on_error = true;
+            if attr.path().is_ident("deserializable") {
+                attr.parse_nested_meta(|meta| {
+                    let Ok(name) = meta.path.require_ident() else {
+                        panic!("HERE {:?}", meta.path);
+                    };
+                    if name == "required" {
+                        opts.required = true;
+                    } else if name == "passthrough_name" {
+                        opts.passthrough_name = true;
+                    } else if name == "bail_on_error" {
+                        opts.bail_on_error = true;
+                    } else if name == "rename" {
+                        opts.rename = Some(meta.value()?.parse::<syn::LitStr>()?.value());
+                    } else if name == "validate" {
+                        opts.validate = Some(meta.value()?.parse::<syn::LitStr>()?.parse()?);
+                    } else if name == "deprecated" {
+                        meta.parse_nested_meta(|meta| {
+                            let name = meta.path.require_ident()?;
+                            let value = meta.value()?.parse::<syn::LitStr>()?.value();
+                            if name == "use_instead" {
+                                opts.deprecated = Some(DeprecatedField::UseInstead(value));
+                            } else if name == "message" {
+                                opts.deprecated = Some(DeprecatedField::Message(value));
                             } else {
-                                let path_str = path.to_token_stream().to_string();
-                                return Err(Error::new(
-                                    path.span(),
-                                    format_args!("Unexpected attribute: {path_str}"),
-                                ));
+                                return Err(meta.error("Unknown attribute"));
                             }
-                        }
-                        Meta::NameValue(MetaNameValue {
-                            path,
-                            lit: Lit::Str(s),
-                            ..
-                        }) => {
-                            if path.is_ident("rename") {
-                                opts.rename = Some(s.value())
-                            } else if path.is_ident("validate") {
-                                opts.validate = Some(s.parse()?)
-                            }
-                        }
-                        Meta::List(_) if meta.path().is_ident("deprecated") => {
-                            let mut deprecated = None;
-                            parse_meta_list(meta, |meta| {
-                                let Meta::NameValue(MetaNameValue {
-                                    path,
-                                    lit: Lit::Str(s),
-                                    ..
-                                }) = meta
-                                else {
-                                    let meta_text = meta.to_token_stream().to_string();
-                                    return Err(Error::new(
-                                        meta.span(),
-                                        format_args!("Unexpected attribute: {meta_text}"),
-                                    ));
-                                };
-                                deprecated = if deprecated.is_some() {
-                                    return Err(Error::new(
-                                        meta.span(),
-                                        "Only one attribute expected inside deprecated()",
-                                    ));
-                                } else if path.is_ident("message") {
-                                    Some(DeprecatedField::Message(s.value()))
-                                } else if path.is_ident("use_instead") {
-                                    Some(DeprecatedField::UseInstead(s.value()))
-                                } else {
-                                    let path_text = path.to_token_stream().to_string();
-                                    return Err(Error::new(
-                                        path.span(),
-                                        format_args!(
-                                            "Unexpected attribute inside deprecated(): {path_text}"
-                                        ),
-                                    ));
-                                };
-                                Ok(())
-                            })?;
-                            opts.deprecated = deprecated;
-                        }
-                        _ => {
-                            let meta_text = meta.to_token_stream().to_string();
-                            return Err(Error::new(
-                                meta.span(),
-                                format_args!("Unexpected attribute: {meta_text}"),
-                            ));
-                        }
+                            Ok(())
+                        })?;
+                    } else {
+                        return Err(meta.error("Unknown attribute"));
                     }
                     Ok(())
                 })?;
-            } else if attr.path.is_ident("serde") {
-                parse_meta_list(&attr.parse_meta()?, |meta| {
-                    match meta {
-                        Meta::NameValue(MetaNameValue {
-                            path,
-                            lit: Lit::Str(s),
-                            ..
-                        }) if opts.rename.is_none() && path.is_ident("rename") => {
-                            opts.rename = Some(s.value())
-                        }
-                        _ => {} // Don't fail on unrecognized Serde attrs
+            } else if attr.path().is_ident("serde") {
+                attr.parse_nested_meta(|meta| {
+                    if meta.path.is_ident("rename") {
+                        opts.rename = Some(meta.value()?.parse::<syn::LitStr>()?.value());
+                    } else {
+                        // Don't fail on unrecognized Serde attrs
                     }
                     Ok(())
                 })
-                .ok();
+                .ok(); // Don't fail for serde attrs parsing
             }
         }
         Ok(opts)

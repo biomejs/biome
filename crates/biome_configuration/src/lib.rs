@@ -67,38 +67,41 @@ pub struct Configuration {
     pub schema: String,
 
     /// The configuration of the VCS integration
-    #[partial(type, bpaf(external(partial_vcs_configuration), optional, hide_usage))]
+    #[partial(
+        use_type,
+        bpaf(external(partial_vcs_configuration), optional, hide_usage)
+    )]
     pub vcs: VcsConfiguration,
 
     /// The configuration of the filesystem
     #[partial(
-        type,
+        use_type,
         bpaf(external(partial_files_configuration), optional, hide_usage)
     )]
     pub files: FilesConfiguration,
 
     /// The configuration of the formatter
-    #[partial(type, bpaf(external(partial_formatter_configuration), optional))]
+    #[partial(use_type, bpaf(external(partial_formatter_configuration), optional))]
     pub formatter: FormatterConfiguration,
 
     /// The configuration of the import sorting
-    #[partial(type, bpaf(external(partial_organize_imports), optional))]
+    #[partial(use_type, bpaf(external(partial_organize_imports), optional))]
     pub organize_imports: OrganizeImports,
 
     /// The configuration for the linter
-    #[partial(type, bpaf(external(partial_linter_configuration), optional))]
+    #[partial(use_type, bpaf(external(partial_linter_configuration), optional))]
     pub linter: LinterConfiguration,
 
     /// Specific configuration for the JavaScript language
-    #[partial(type, bpaf(external(partial_javascript_configuration), optional))]
+    #[partial(use_type, bpaf(external(partial_javascript_configuration), optional))]
     pub javascript: JavascriptConfiguration,
 
     /// Specific configuration for the Json language
-    #[partial(type, bpaf(external(partial_json_configuration), optional))]
+    #[partial(use_type, bpaf(external(partial_json_configuration), optional))]
     pub json: JsonConfiguration,
 
     /// Specific configuration for the Css language
-    #[partial(type, bpaf(external(partial_css_configuration), optional, hide))]
+    #[partial(use_type, bpaf(external(partial_css_configuration), optional, hide))]
     pub css: CssConfiguration,
 
     /// A list of paths to other JSON files, used to extends the current configuration.

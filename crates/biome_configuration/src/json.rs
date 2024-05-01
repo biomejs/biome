@@ -12,11 +12,11 @@ use serde::{Deserialize, Serialize};
 #[partial(serde(default, deny_unknown_fields))]
 pub struct JsonConfiguration {
     /// Parsing options
-    #[partial(type, bpaf(external(partial_json_parser), optional))]
+    #[partial(use_type, bpaf(external(partial_json_parser), optional))]
     pub parser: JsonParser,
 
     /// Formatting options
-    #[partial(type, bpaf(external(partial_json_formatter), optional))]
+    #[partial(use_type, bpaf(external(partial_json_formatter), optional))]
     pub formatter: JsonFormatter,
 }
 
