@@ -14,7 +14,7 @@ expression: invalidMultipleMedia.css
 ```
 invalidMultipleMedia.css:3:2 lint/nursery/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate @import rule.
+  ! Each @import should be unique unless differing by media queries.
   
     1 │ @import url("a.css") tv, projection;
     2 │ @import url("a.css") mobile;
@@ -22,7 +22,7 @@ invalidMultipleMedia.css:3:2 lint/nursery/noDuplicateAtImportRules ━━━━�
       │  ^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
   
-  i To fix this issue, remove one of the duplicated imports.
+  i Consider removing one of the duplicated imports.
   
 
 ```

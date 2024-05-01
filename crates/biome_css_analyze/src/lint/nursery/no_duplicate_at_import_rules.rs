@@ -116,11 +116,11 @@ impl Rule for NoDuplicateAtImportRules {
                 rule_category!(),
                 span,
                 markup! {
-                    "Duplicate @import rule."
+                    "Each "<Emphasis>"@import"</Emphasis>" should be unique unless differing by media queries."
                 },
             )
             .note(markup! {
-                    "To fix this issue, remove one of the duplicated imports."
+                    "Consider removing one of the duplicated imports."
             }),
         )
     }

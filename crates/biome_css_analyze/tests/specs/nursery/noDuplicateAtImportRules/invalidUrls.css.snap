@@ -13,14 +13,14 @@ expression: invalidUrls.css
 ```
 invalidUrls.css:2:2 lint/nursery/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate @import rule.
+  ! Each @import should be unique unless differing by media queries.
   
     1 │ @import url("c.css");
   > 2 │ @import url("c.css");
       │  ^^^^^^^^^^^^^^^^^^^^
     3 │ 
   
-  i To fix this issue, remove one of the duplicated imports.
+  i Consider removing one of the duplicated imports.
   
 
 ```
