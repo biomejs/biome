@@ -2,8 +2,8 @@ use crate::keywords::{
     BASIC_KEYWORDS, FONT_FAMILY_KEYWORDS, FONT_SIZE_KEYWORDS, FONT_STRETCH_KEYWORDS,
     FONT_STYLE_KEYWORDS, FONT_VARIANTS_KEYWORDS, FONT_WEIGHT_ABSOLUTE_KEYWORDS,
     FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS,
-    LINE_HEIGHT_KEYWORDS, SHADOW_TREE_PSEUDO_ELEMENTS, SYSTEM_FAMILY_NAME_KEYWORDS,
-    VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
+    LINE_HEIGHT_KEYWORDS, OTHER_PSEUDO_ELEMENTS, SHADOW_TREE_PSEUDO_ELEMENTS,
+    SYSTEM_FAMILY_NAME_KEYWORDS, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
@@ -126,25 +126,5 @@ pub fn is_pseudo_elements(prop: &str) -> bool {
     LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS.contains(&prop)
         || VENDOR_SPECIFIC_PSEUDO_ELEMENTS.contains(&prop)
         || SHADOW_TREE_PSEUDO_ELEMENTS.contains(&prop)
-        || [
-            "backdrop",
-            "content",
-            "cue",
-            "file-selector-button",
-            "grammar-error",
-            "highlight",
-            "marker",
-            "placeholder",
-            "selection",
-            "shadow",
-            "slotted",
-            "spelling-error",
-            "target-text",
-            "view-transition",
-            "view-transition-group",
-            "view-transition-image-pair",
-            "view-transition-new",
-            "view-transition-old",
-        ]
-        .contains(&prop)
+        || OTHER_PSEUDO_ELEMENTS.contains(&prop)
 }

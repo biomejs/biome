@@ -834,6 +834,27 @@ pub const VENDOR_SPECIFIC_PSEUDO_ELEMENTS: [&str; 66] = [
 
 pub const SHADOW_TREE_PSEUDO_ELEMENTS: [&str; 1] = ["part"];
 
+pub const OTHER_PSEUDO_ELEMENTS: [&str; 18] = [
+    "backdrop",
+    "content",
+    "cue",
+    "file-selector-button",
+    "grammar-error",
+    "highlight",
+    "marker",
+    "placeholder",
+    "selection",
+    "shadow",
+    "slotted",
+    "spelling-error",
+    "target-text",
+    "view-transition",
+    "view-transition-group",
+    "view-transition-image-pair",
+    "view-transition-new",
+    "view-transition-old",
+];
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
