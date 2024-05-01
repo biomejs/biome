@@ -65,6 +65,12 @@ impl<'source> GraphqlTokenSource<'source> {
         }
     }
 
+    // We mostly look ahead by one token
+    // so there is no need to implement NthToken to use nth_at
+    pub fn lookahead_at(&mut self, kind: GraphqlSyntaxKind) -> bool {
+        self.lookahead() == kind
+    }
+
     #[must_use]
     fn next_non_trivia_token(&mut self, first_token: bool) -> NonTriviaToken {
         let mut non_trivia_token = NonTriviaToken::default();

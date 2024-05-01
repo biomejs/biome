@@ -74,12 +74,7 @@ string_unescaped_newline.json:1:2 parse ━━━━━━━━━━━━━�
       │  ^^^^
     2 │ line"]
   
-  i line breaks here
-  
-  > 1 │ ["new
-      │      
-  > 2 │ line"]
-      │ 
+  i The closing quote must be on the same line.
   
 string_unescaped_newline.json:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -171,6 +171,15 @@ enum BindingName {
     Type(TokenText),
     Value(TokenText),
 }
+impl BindingName {
+    /// Turn a type into a value and a value into a type.
+    fn dual(self) -> Self {
+        match self {
+            BindingName::Type(name) => BindingName::Value(name),
+            BindingName::Value(name) => BindingName::Type(name),
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 struct BindingInfo {
@@ -798,13 +807,17 @@ impl SemanticEventExtractor {
                     };
                     self.stash.push_back(event);
                 }
+            } else if references.iter().all(|r| matches!(r, Reference::Export(_)))
+                && self.bindings.get(&name.clone().dual()).is_some()
+            {
+                // Don't report an export that exports at least a binding.
             } else if let Some(parent) = self.scopes.last_mut() {
                 // ... if not, promote these references to the parent scope ...
                 let parent_references = parent.references.entry(name).or_default();
                 parent_references.append(&mut references);
             } else {
                 // ... or raise UnresolvedReference if this is the global scope.
-                let dual_binding = self.dual_binding_info(name).cloned();
+                let dual_binding = self.bindings.get(&name.dual()).cloned();
                 for reference in references {
                     match reference {
                         Reference::Export(_) if dual_binding.is_some() => {
@@ -848,14 +861,6 @@ impl SemanticEventExtractor {
             range,
             scope_id: scope.scope_id,
         });
-    }
-
-    fn dual_binding_info(&self, binding_name: BindingName) -> Option<&BindingInfo> {
-        let dual_binding_name = match binding_name {
-            BindingName::Type(name) => BindingName::Value(name),
-            BindingName::Value(name) => BindingName::Type(name),
-        };
-        self.bindings.get(&dual_binding_name)
     }
 
     fn current_scope_mut(&mut self) -> &mut Scope {

@@ -13,6 +13,30 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### Bug fixes
+
+- Fix typo by renaming `useConsistentBuiltinInstatiation` to `useConsistentBuiltinInstantiation`
+  Contributed by @minht11
+
+### Parser
+
+
+## 1.7.2 (2024-04-30)
+
+### Analyzer
+
 #### Bug fixes
 
 - Import sorting now ignores side effect imports ([#817](https://github.com/biomejs/biome/issues/817)).
@@ -52,19 +76,30 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-### Configuration
-
-### Editors
-
 ### Formatter
 
 #### Bug fixes
 
 - Correctly handle placement of comments inside named import clauses. [#2566](https://github.com/biomejs/biome/pull/2566). Contributed by @ah-yu
 
-### JavaScript APIs
-
 ### Linter
+
+#### New features
+
+- Add [nursery/noReactSpecificProps](https://biomejs.dev/linter/rules/no-react-specific-props/).
+  Contributed by @marvin-j97
+
+- Add [noUselessUndefinedInitialization](https://biomejs.dev/linter/rules/no-useless-undefined-initialization/).
+  Contributed by @lutaok
+
+- Add [nursery/useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/).
+  Contributed by @Kazuhiro-Mimaki
+
+- Add [nursery/useConsistentBuiltinInstatiation](https://biomejs.dev/linter/rules/use-consistent-builtin-instantiation/).
+  Contributed by @minht11
+
+- Add [nursery/useDefaultSwitchClause](https://biomejs.dev/linter/rules/use-default-switch-clause/).
+  Contributed by @michellocana
 
 #### Bug fixes
 
@@ -109,6 +144,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) no longer reports variable-only and type-only exports ([#2637](https://github.com/biomejs/biome/issues/2637)).
+  Contributed by @Conaclos
+
 - [noUnusedVariables] no longer crash Biome when encountering a malformed conditional type ([#1695](https://github.com/biomejs/biome/issues/1695)).
   Contributed by @Conaclos
 
@@ -144,7 +182,36 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noMisplacedAssertion](https://biomejs.dev/linter/rules/no-misplaced-assertion/) now allow these matchers
+  
+  - `expect.any()`
+  - `expect.anything()`
+  - `expect.closeTo`
+  - `expect.arrayContaining`
+  - `expect.objectContaining`
+  - `expect.stringContaining`
+  - `expect.stringMatching`
+  - `expect.extend`
+  - `expect.addEqualityTesters`
+  - `expect.addSnapshotSerializer`
+
+  Contributed by @fujiyamaorange
+
 ### Parser
+
+#### Bug fixes
+
+- The language parsers no longer panic on unterminated strings followed by a newline and a space ([#2606](https://github.com/biomejs/biome/issues/2606), [#2410](https://github.com/biomejs/biome/issues/2410)).
+
+  The following example is now parsed without making Biome panics:
+
+  ```
+  "
+   "
+  ```
+
+  Contributed by @Conaclos
+
 
 ## 1.7.1 (2024-04-22)
 

@@ -1,0 +1,80 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```json
+'
+ '
+```
+
+
+## AST
+
+```
+JsonRoot {
+    bom_token: missing (optional),
+    value: JsonArrayValue {
+        l_brack_token: missing (required),
+        elements: JsonArrayElementList [
+            JsonBogusValue {
+                items: [
+                    ERROR_TOKEN@0..1 "'" [] [],
+                ],
+            },
+            missing separator,
+            JsonBogusValue {
+                items: [
+                    ERROR_TOKEN@1..4 "'" [Newline("\n"), Whitespace(" ")] [],
+                ],
+            },
+        ],
+        r_brack_token: missing (required),
+    },
+    eof_token: EOF@4..4 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..4
+  0: (empty)
+  1: JSON_ARRAY_VALUE@0..4
+    0: (empty)
+    1: JSON_ARRAY_ELEMENT_LIST@0..4
+      0: JSON_BOGUS_VALUE@0..1
+        0: ERROR_TOKEN@0..1 "'" [] []
+      1: (empty)
+      2: JSON_BOGUS_VALUE@1..4
+        0: ERROR_TOKEN@1..4 "'" [Newline("\n"), Whitespace(" ")] []
+    2: (empty)
+  2: EOF@4..4 "" [] []
+
+```
+
+## Diagnostics
+
+```
+issue2606.json:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+  > 1 │ '
+      │ ^
+    2 │  '
+  
+  i The closing quote must be on the same line.
+  
+issue2606.json:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × JSON standard does not allow single quoted strings
+  
+    1 │ '
+  > 2 │  '
+      │  ^
+  
+  i Use double quotes to escape the string.
+  
+```

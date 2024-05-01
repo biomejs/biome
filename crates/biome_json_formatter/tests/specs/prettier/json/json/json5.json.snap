@@ -644,16 +644,7 @@ json5.json:22:15 parse ━━━━━━━━━━━━━━━━━━━
     23 │ No \\n's!",
     24 │ }
   
-  i line breaks here
-  
-    20 │   '//': 'JSON5 strings',
-    21 │ singleQuotes: 'I can use "double quotes" here',
-  > 22 │   lineBreaks: "Look, Mom! \
-       │                            
-  > 23 │ No \\n's!",
-       │ 
-    24 │ }
-    25 │ ]
+  i The closing quote must be on the same line.
   
 json5.json:23:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -688,16 +679,7 @@ json5.json:23:7 parse ━━━━━━━━━━━━━━━━━━━�
     24 │ }
     25 │ ]
   
-  i line breaks here
-  
-    21 │ singleQuotes: 'I can use "double quotes" here',
-    22 │   lineBreaks: "Look, Mom! \
-  > 23 │ No \\n's!",
-       │            
-  > 24 │ }
-       │ 
-    25 │ ]
-    26 │ 
+  i The closing quote must be on the same line.
   
 
 ```

@@ -260,7 +260,7 @@ pub type UseButtonType =
 pub type UseCollapsedElseIf =
     <lint::style::use_collapsed_else_if::UseCollapsedElseIf as biome_analyze::Rule>::Options;
 pub type UseConsistentArrayType = < lint :: style :: use_consistent_array_type :: UseConsistentArrayType as biome_analyze :: Rule > :: Options ;
-pub type UseConsistentNewBuiltin = < lint :: nursery :: use_consistent_new_builtin :: UseConsistentNewBuiltin as biome_analyze :: Rule > :: Options ;
+pub type UseConsistentBuiltinInstantiation = < lint :: nursery :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation as biome_analyze :: Rule > :: Options ;
 pub type UseConst = <lint::style::use_const::UseConst as biome_analyze::Rule>::Options;
 pub type UseDefaultParameterLast = < lint :: style :: use_default_parameter_last :: UseDefaultParameterLast as biome_analyze :: Rule > :: Options ;
 pub type UseDefaultSwitchClause = < lint :: nursery :: use_default_switch_clause :: UseDefaultSwitchClause as biome_analyze :: Rule > :: Options ;

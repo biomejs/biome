@@ -32,6 +32,7 @@ jobs:
             perf
             refactor
             release
+            revert
             test
           # Configure that a scope must always be provided.
           requireScope: false

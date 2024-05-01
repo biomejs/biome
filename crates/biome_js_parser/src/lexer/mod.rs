@@ -800,7 +800,7 @@ impl<'src> JsLexer<'src> {
                     let unterminated =
                         ParseDiagnostic::new("unterminated string literal", start..self.position)
                             .with_detail(start..self.position, "")
-                            .with_detail(self.position..self.position + 2, "line breaks here");
+                            .with_hint("The closing quote must be on the same line.");
                     self.push_diagnostic(unterminated);
                     return false;
                 }

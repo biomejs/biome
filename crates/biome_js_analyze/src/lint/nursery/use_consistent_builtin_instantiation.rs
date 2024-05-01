@@ -11,12 +11,12 @@ use biome_js_syntax::{
 use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt, TriviaPieceKind};
 
 declare_rule! {
-    /// Enforce the use of new for all builtins, except `String`, `Number`, `Boolean`, `Symbol` and `BigInt`.
+    /// Enforce the use of `new` for all builtins, except `String`, `Number`, `Boolean`, `Symbol` and `BigInt`.
     ///
     /// `new Builtin()` and `Builtin()` work the same, but new should be preferred for consistency with other constructors.
     /// Enforces the use of new for following builtins:
     ///
-    /// - Object
+    /// - AggregateError
     /// - Array
     /// - ArrayBuffer
     /// - BigInt64Array
@@ -24,39 +24,44 @@ declare_rule! {
     /// - DataView
     /// - Date
     /// - Error
+    /// - EvalError
+    /// - FinalizationRegistry
     /// - Float32Array
     /// - Float64Array
     /// - Function
-    /// - Int8Array
     /// - Int16Array
     /// - Int32Array
+    /// - Int8Array
     /// - Map
-    /// - WeakMap
-    /// - Set
-    /// - WeakSet
+    /// - Object
     /// - Promise
+    /// - Proxy
+    /// - RangeError
+    /// - ReferenceError
     /// - RegExp
-    /// - Uint8Array
+    /// - Set
+    /// - SharedArrayBuffer
+    /// - SyntaxError
+    /// - TypeError
+    /// - URIError
     /// - Uint16Array
     /// - Uint32Array
+    /// - Uint8Array
     /// - Uint8ClampedArray
-    /// - SharedArrayBuffer
-    /// - Proxy
+    /// - WeakMap
     /// - WeakRef
-    /// - FinalizationRegistry
+    /// - WeakSet
     ///
     /// Disallows the use of new for following builtins:
     ///
-    /// - String
-    /// - Number
-    /// - Boolean
-    ///
-    /// These builtins are handled by [noInvalidBuiltin](https://biomejs.dev/linter/rules/no-invalid-new-builtin/) rule:
-    ///
-    /// - Symbol
     /// - BigInt
+    /// - Boolean
+    /// - Number
+    /// - String
+    /// - Symbol
     ///
-    /// > These should not use new as that would create object wrappers for the primitive values, which is not what you want. However, without new they can be useful for coercing a value to that type.
+    /// > These should not use `new` as that would create object wrappers for the primitive values, which is not what you want.
+    /// > However, without `new` they can be useful for coercing a value to that type.
     ///
     /// ## Examples
     ///
@@ -92,18 +97,23 @@ declare_rule! {
     /// ]);
     /// ```
     ///
-    pub UseConsistentNewBuiltin {
-        version: "next",
-        name: "useConsistentNewBuiltin",
-        sources: &[RuleSource::EslintUnicorn("new-for-builtins"), RuleSource::Eslint("no-new-wrappers")],
+    pub UseConsistentBuiltinInstantiation {
+        version: "1.7.2",
+        name: "useConsistentBuiltinInstantiation",
+        sources: &[
+            RuleSource::EslintUnicorn("new-for-builtins"),
+            RuleSource::Eslint("no-new-wrappers"),
+            // TODO: Add this source once `noInvalidNewBuiltin` is deprecated
+            //RuleSource::Eslint("no-new-native-nonconstructor")
+        ],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
 }
 
-impl Rule for UseConsistentNewBuiltin {
+impl Rule for UseConsistentBuiltinInstantiation {
     type Query = Semantic<JsNewOrCallExpression>;
-    type State = UseConsistentNewBuiltinState;
+    type State = UseConsistentBuiltinInstantiationState;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -120,7 +130,7 @@ impl Rule for UseConsistentNewBuiltin {
             .is_ok()
         {
             return ctx.model().binding(&reference).is_none().then_some(
-                UseConsistentNewBuiltinState {
+                UseConsistentBuiltinInstantiationState {
                     name: name_text.to_string(),
                     creation_rule,
                 },
@@ -185,6 +195,7 @@ impl Rule for UseConsistentNewBuiltin {
 
 /// Sorted array of builtins that require new keyword.
 const BUILTINS_REQUIRING_NEW: &[&str] = &[
+    "AggregateError",
     "Array",
     "ArrayBuffer",
     "BigInt64Array",
@@ -192,6 +203,7 @@ const BUILTINS_REQUIRING_NEW: &[&str] = &[
     "DataView",
     "Date",
     "Error",
+    "EvalError",
     "FinalizationRegistry",
     "Float32Array",
     "Float64Array",
@@ -203,9 +215,14 @@ const BUILTINS_REQUIRING_NEW: &[&str] = &[
     "Object",
     "Promise",
     "Proxy",
+    "RangeError",
+    "ReferenceError",
     "RegExp",
     "Set",
     "SharedArrayBuffer",
+    "SyntaxError",
+    "TypeError",
+    "URIError",
     "Uint16Array",
     "Uint32Array",
     "Uint8Array",
@@ -216,7 +233,7 @@ const BUILTINS_REQUIRING_NEW: &[&str] = &[
 ];
 
 /// Sorted array of builtins that should not use new keyword.
-const BUILTINS_NOT_REQUIRING_NEW: &[&str] = &["Boolean", "Number", "String"];
+const BUILTINS_NOT_REQUIRING_NEW: &[&str] = &["BigInt", "Boolean", "Number", "String", "Symbol"];
 
 enum BuiltinCreationRule {
     MustUseNew,
@@ -232,7 +249,7 @@ impl BuiltinCreationRule {
     }
 }
 
-pub struct UseConsistentNewBuiltinState {
+pub struct UseConsistentBuiltinInstantiationState {
     name: String,
     creation_rule: BuiltinCreationRule,
 }
