@@ -5,7 +5,8 @@
 		"before 9am on monday"
 	],
 	"extends": [
-		"config:best-practices"
+		"config:best-practices",
+		"helpers:pinGitHubActionDigestsToSemver"
 	],
 	"rangeStrategy": "bump",
 	"lockFileMaintenance": {
