@@ -34,7 +34,7 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// throw lib.TypeError();
     /// ```
-    /// 
+    ///
     /// ### Valid
     ///
     /// ```js

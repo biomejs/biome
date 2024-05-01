@@ -1017,7 +1017,7 @@ export interface Nursery {
 	 */
 	useSortedClasses?: RuleConfiguration_for_UtilityClassSortingOptions;
 	/**
-	 * Succinct description of the rule.
+	 * Require new when throwing an error
 	 */
 	useThrowNewError?: RuleConfiguration_for_Null;
 }
@@ -2010,7 +2010,6 @@ export type Category =
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
-	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"

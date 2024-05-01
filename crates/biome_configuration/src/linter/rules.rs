@@ -2728,7 +2728,7 @@ pub struct Nursery {
     #[doc = "Enforce the sorting of CSS utility classes."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_classes: Option<RuleConfiguration<UseSortedClasses>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Require new when throwing an error"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_throw_new_error: Option<RuleConfiguration<UseThrowNewError>>,
 }
