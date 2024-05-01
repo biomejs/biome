@@ -52,15 +52,9 @@ declare_node_union! {
     pub ReactComponentExpression = JsxTagExpression | JsCallExpression
 }
 
-#[derive(Debug)]
-pub enum UseJsxKeyInIterableState {
-    MissingKeyProps(TextRange),
-    CantDetermineJSXProp(TextRange),
-}
-
 impl Rule for UseJsxKeyInIterable {
     type Query = Semantic<UseJsxKeyInIterableQuery>;
-    type State = UseJsxKeyInIterableState;
+    type State = TextRange;
     type Signals = Vec<Self::State>;
     type Options = ();
 
@@ -77,38 +71,19 @@ impl Rule for UseJsxKeyInIterable {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        match state {
-            UseJsxKeyInIterableState::MissingKeyProps(state) => {
-                let diagnostic = RuleDiagnostic::new(
-                    rule_category!(),
-                    state,
-                    markup! {
-                        "Missing "<Emphasis>"key"</Emphasis>" property for this element in iterable."
-                    },
-                )
-                .note(markup! {
-                    "The order of the items may change, and having a key can help React identify which item was moved."
-                }).note(markup! {
-                    "Check the "<Hyperlink href="https://react.dev/learn/rendering-lists#why-does-react-need-keys">"React documentation"</Hyperlink>". "
-                });
-                Some(diagnostic)
-            }
-            UseJsxKeyInIterableState::CantDetermineJSXProp(state) => {
-                let diagnostic = RuleDiagnostic::new(
-                    rule_category!(),
-                    state,
-                    markup! {
-                        "Cannot determine whether this child has the required "<Emphasis>"key"</Emphasis>" prop."
-                    },
-                )
-                .note(markup! {
-                    "Either return a JSX expression, or suppress this instance if you determine it is safe."
-                }).note(markup! {
-                    "Check the "<Hyperlink href="https://react.dev/learn/rendering-lists#why-does-react-need-keys">"React documentation for why a key prop is required"</Hyperlink>". "
-                });
-                Some(diagnostic)
-            }
-        }
+        let diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            state,
+            markup! {
+                "Missing "<Emphasis>"key"</Emphasis>" property for this element in iterable."
+            },
+        )
+        .note(markup! {
+            "The order of the items may change, and having a key can help React identify which item was moved."
+        }).note(markup! {
+            "Check the "<Hyperlink href="https://react.dev/learn/rendering-lists#why-does-react-need-keys">"React documentation"</Hyperlink>". "
+        });
+        Some(diagnostic)
     }
 }
 
@@ -119,10 +94,7 @@ impl Rule for UseJsxKeyInIterable {
 /// ```js
 /// [<h1></h1>, <h1></h1>]
 /// ```
-fn handle_collections(
-    node: &JsArrayExpression,
-    model: &SemanticModel,
-) -> Vec<UseJsxKeyInIterableState> {
+fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<TextRange> {
     let is_inside_jsx = node.parent::<JsxExpressionChild>().is_some();
     node.elements()
         .iter()
@@ -133,6 +105,7 @@ fn handle_collections(
             let node = AnyJsExpression::cast(node.into_syntax())?;
             handle_potential_react_component(node, model, is_inside_jsx)
         })
+        .flatten()
         .collect()
 }
 
@@ -143,10 +116,7 @@ fn handle_collections(
 /// ```js
 /// data.map(x => <h1>{x}</h1>)
 /// ```
-fn handle_iterators(
-    node: &JsCallExpression,
-    model: &SemanticModel,
-) -> Option<Vec<UseJsxKeyInIterableState>> {
+fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Vec<TextRange>> {
     let callee = node.callee().ok()?;
     let member_expression = AnyJsMemberExpression::cast(callee.into_syntax())?;
     let arguments = node.arguments().ok()?;
@@ -198,6 +168,7 @@ fn handle_iterators(
                     let returned_value = statement.argument()?;
                     handle_potential_react_component(returned_value, model, is_inside_jsx)
                 })
+                .flatten()
                 .collect::<Vec<_>>();
 
             Some(res)
@@ -207,7 +178,6 @@ fn handle_iterators(
             match body {
                 AnyJsFunctionBody::AnyJsExpression(expr) => {
                     handle_potential_react_component(expr, model, is_inside_jsx)
-                        .map(|state| vec![state])
                 }
                 AnyJsFunctionBody::JsFunctionBody(body) => {
                     let res = body
@@ -218,6 +188,7 @@ fn handle_iterators(
                             let returned_value = statement.argument()?;
                             handle_potential_react_component(returned_value, model, is_inside_jsx)
                         })
+                        .flatten()
                         .collect::<Vec<_>>();
                     Some(res)
                 }
@@ -231,19 +202,20 @@ fn handle_potential_react_component(
     node: AnyJsExpression,
     model: &SemanticModel,
     is_inside_jsx: bool,
-) -> Option<UseJsxKeyInIterableState> {
+) -> Option<Vec<TextRange>> {
     let node = unwrap_parenthesis(node)?;
+
     if is_inside_jsx {
         if let Some(node) = ReactComponentExpression::cast_ref(node.syntax()) {
             let range = handle_react_component(node, model)?;
-            Some(UseJsxKeyInIterableState::MissingKeyProps(range))
+            Some(vec![range])
         } else {
-            Some(UseJsxKeyInIterableState::CantDetermineJSXProp(node.range()))
+            None
         }
     } else {
         let range =
             handle_react_component(ReactComponentExpression::cast_ref(node.syntax())?, model)?;
-        Some(UseJsxKeyInIterableState::MissingKeyProps(range))
+        Some(vec![range])
     }
 }
 

@@ -46,3 +46,9 @@ React.Children.map(c => React.cloneElement(c, {key: c}));
 (<h1>{data.map(c => (<h1 key={c}></h1>))}</h1>)
 
 (<h1>{data.map(c => {return (<h1 key={c}></h1>)})}</h1>)
+
+<>{data.reduce((total, next) => total + next, 0)}</>
+
+<>{data.reduce((a, b) => Math.max(a, b), 0)}</>
+
+<>{data.reduce((a, b) => a > b ? a : b, 0)}</>
