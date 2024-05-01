@@ -167,15 +167,11 @@ impl Rule for NoUselessConcat {
 }
 
 fn has_useless_concat(node: &JsBinaryExpression) -> bool {
-    let has_left_string_expression = is_string_expression(node.left().ok())
-        || is_binary_expression_with_literal_string(node.left().ok())
-        || is_parenthesized_concatenation(node.left().ok());
-
-    has_left_string_expression && is_concatenation(node) && !is_stylistic_concatenation(node)
+    is_concatenation(node) && !is_stylistic_concatenation(node)
 }
 
-fn is_string_expression(expression: Option<AnyJsExpression>) -> bool {
-    expression.is_some_and(|node| {
+fn is_string_expression(expression: &Option<AnyJsExpression>) -> bool {
+    expression.as_ref().is_some_and(|node| {
         match (
             node.as_any_js_literal_expression(),
             node.as_js_template_expression(),
@@ -189,19 +185,50 @@ fn is_string_expression(expression: Option<AnyJsExpression>) -> bool {
     })
 }
 
-fn is_binary_expression_with_literal_string(expression: Option<AnyJsExpression>) -> bool {
+fn is_numeric_expression(expression: &Option<AnyJsExpression>) -> bool {
+    expression
+        .as_ref()
+        .is_some_and(|node| match node.as_any_js_literal_expression() {
+            Some(literal_expression) => literal_expression
+                .as_js_number_literal_expression()
+                .is_some(),
+            _ => false,
+        })
+}
+
+fn is_binary_expression_with_literal_string(expression: &Option<AnyJsExpression>) -> bool {
     if let Some(AnyJsExpression::JsBinaryExpression(binary_expression)) = expression {
-        return is_string_expression(binary_expression.right().ok());
+        return is_string_expression(&binary_expression.right().ok());
     }
 
     false
 }
 
 fn is_concatenation(binary_expression: &JsBinaryExpression) -> bool {
+    let left = binary_expression.left().ok();
+    let right = binary_expression.right().ok();
+    let has_left_string_expression = is_string_expression(&left)
+        || is_binary_expression_with_literal_string(&left)
+        || is_parenthesized_concatenation(&left);
+    let has_right_string_expression = is_string_expression(&right)
+        || is_binary_expression_with_literal_string(&right)
+        || is_parenthesized_concatenation(&right);
+    let has_left_numeric_expression = is_numeric_expression(&left);
+    let has_right_numeric_expression = is_numeric_expression(&right);
     let operator = binary_expression.operator().ok();
+
     let is_plus_operator = matches!(operator, Some(JsBinaryOperator::Plus));
-    let is_string_expression = is_string_expression(binary_expression.right().ok())
-        || is_parenthesized_concatenation(binary_expression.right().ok());
+    let is_string_expression = match (
+        has_left_string_expression,
+        has_left_numeric_expression,
+        has_right_string_expression,
+        has_right_numeric_expression,
+    ) {
+        (true, _, true, _) => true,     // "a" + "b"
+        (false, true, true, _) => true, // 1 + "a"
+        (true, _, false, true) => true, // "a" + 1
+        _ => false,
+    };
 
     is_plus_operator && is_string_expression
 }
@@ -233,10 +260,10 @@ fn is_stylistic_concatenation(binary_expression: &JsBinaryExpression) -> bool {
     is_plus_operator && has_newline_in_right
 }
 
-fn is_parenthesized_concatenation(expression: Option<AnyJsExpression>) -> bool {
+fn is_parenthesized_concatenation(expression: &Option<AnyJsExpression>) -> bool {
     if let Some(AnyJsExpression::JsParenthesizedExpression(parenthesized_expression)) = expression {
         return is_binary_expression_with_literal_string(
-            parenthesized_expression.expression().ok(),
+            &parenthesized_expression.expression().ok(),
         );
     }
 
@@ -251,6 +278,12 @@ fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> 
             .inner_string_text()
             .map(|token_text| token_text.to_string())
             .ok(),
+
+        Some(AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsNumberLiteralExpression(number_literal_expression),
+        )) => number_literal_expression
+            .as_number()
+            .map(|number_value| number_value.to_string()),
 
         Some(AnyJsExpression::JsBinaryExpression(binary_expression)) => {
             match (
@@ -315,7 +348,7 @@ fn concat_binary_expression(
 ) -> JsBinaryExpression {
     let current_right = left_binary_expression.right().ok();
 
-    if is_string_expression(current_right) {
+    if is_string_expression(&current_right) {
         let value = extract_string_value(&left_binary_expression.right().ok()).unwrap();
         let concatenated_string = value + right_string_value;
         let string_literal_expression =

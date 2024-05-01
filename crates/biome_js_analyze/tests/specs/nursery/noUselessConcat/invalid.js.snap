@@ -16,6 +16,10 @@ const a = 'a' + `b`
 const a = `a` + 'b'
 const a = `a` + `b`
 const a = foo + `a` + `b`
+const a = 'a' + 1
+const a = 1 + '1'
+const a = 1 + `1`
+const a = `1` + 1
 
 ```
 
@@ -284,7 +288,7 @@ invalid.js:11:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
   > 11 │ const a = `a` + `b`
        │           ^^^^^^^^^
     12 │ const a = foo + `a` + `b`
-    13 │ 
+    13 │ const a = 'a' + 1
   
   i Consider joining the strings as a single one to improve readability and runtime performance.
   
@@ -295,7 +299,7 @@ invalid.js:11:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
     11    │ - const·a·=·`a`·+·`b`
        11 │ + const·a·=·"ab"
     12 12 │   const a = foo + `a` + `b`
-    13 13 │   
+    13 13 │   const a = 'a' + 1
   
 
 ```
@@ -309,7 +313,8 @@ invalid.js:12:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
     11 │ const a = `a` + `b`
   > 12 │ const a = foo + `a` + `b`
        │           ^^^^^^^^^^^^^^^
-    13 │ 
+    13 │ const a = 'a' + 1
+    14 │ const a = 1 + '1'
   
   i Consider joining the strings as a single one to improve readability and runtime performance.
   
@@ -319,7 +324,110 @@ invalid.js:12:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
     11 11 │   const a = `a` + `b`
     12    │ - const·a·=·foo·+·`a`·+·`b`
        12 │ + const·a·=·foo·+·"ab"
-    13 13 │   
+    13 13 │   const a = 'a' + 1
+    14 14 │   const a = 1 + '1'
+  
+
+```
+
+```
+invalid.js:13:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Useless string concatenation.
+  
+    11 │ const a = `a` + `b`
+    12 │ const a = foo + `a` + `b`
+  > 13 │ const a = 'a' + 1
+       │           ^^^^^^^
+    14 │ const a = 1 + '1'
+    15 │ const a = 1 + `1`
+  
+  i Consider joining the strings as a single one to improve readability and runtime performance.
+  
+  i Unsafe fix: Remove the useless concatenation
+  
+    11 11 │   const a = `a` + `b`
+    12 12 │   const a = foo + `a` + `b`
+    13    │ - const·a·=·'a'·+·1
+       13 │ + const·a·=·"a1"
+    14 14 │   const a = 1 + '1'
+    15 15 │   const a = 1 + `1`
+  
+
+```
+
+```
+invalid.js:14:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Useless string concatenation.
+  
+    12 │ const a = foo + `a` + `b`
+    13 │ const a = 'a' + 1
+  > 14 │ const a = 1 + '1'
+       │           ^^^^^^^
+    15 │ const a = 1 + `1`
+    16 │ const a = `1` + 1
+  
+  i Consider joining the strings as a single one to improve readability and runtime performance.
+  
+  i Unsafe fix: Remove the useless concatenation
+  
+    12 12 │   const a = foo + `a` + `b`
+    13 13 │   const a = 'a' + 1
+    14    │ - const·a·=·1·+·'1'
+       14 │ + const·a·=·"11"
+    15 15 │   const a = 1 + `1`
+    16 16 │   const a = `1` + 1
+  
+
+```
+
+```
+invalid.js:15:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Useless string concatenation.
+  
+    13 │ const a = 'a' + 1
+    14 │ const a = 1 + '1'
+  > 15 │ const a = 1 + `1`
+       │           ^^^^^^^
+    16 │ const a = `1` + 1
+    17 │ 
+  
+  i Consider joining the strings as a single one to improve readability and runtime performance.
+  
+  i Unsafe fix: Remove the useless concatenation
+  
+    13 13 │   const a = 'a' + 1
+    14 14 │   const a = 1 + '1'
+    15    │ - const·a·=·1·+·`1`
+       15 │ + const·a·=·"11"
+    16 16 │   const a = `1` + 1
+    17 17 │   
+  
+
+```
+
+```
+invalid.js:16:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Useless string concatenation.
+  
+    14 │ const a = 1 + '1'
+    15 │ const a = 1 + `1`
+  > 16 │ const a = `1` + 1
+       │           ^^^^^^^
+    17 │ 
+  
+  i Consider joining the strings as a single one to improve readability and runtime performance.
+  
+  i Unsafe fix: Remove the useless concatenation
+  
+    14 14 │   const a = 1 + '1'
+    15 15 │   const a = 1 + `1`
+    16    │ - const·a·=·`1`·+·1
+       16 │ + const·a·=·"11"
+    17 17 │   
   
 
 ```
