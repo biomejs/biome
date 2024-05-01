@@ -117,7 +117,7 @@ impl Rule for NoUselessConcat {
         let left_string = extract_string_value(&left);
         let right_string = extract_string_value(&right);
 
-        match (left, left_string, right_string) {
+        let fix_result = match (left, left_string, right_string) {
             // Handle simple concatenations like "a" + "b"
             (_, Some(left_string_value), Some(right_string_value)) => {
                 let concatenated_string = left_string_value + right_string_value.as_str();
@@ -125,13 +125,7 @@ impl Rule for NoUselessConcat {
                     js_string_literal_expression(js_string_literal(concatenated_string.as_str()));
 
                 mutation.replace_element(node.clone().into(), string_literal_expression.into());
-
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Remove the useless concatenation" }.to_owned(),
-                    mutation,
-                })
+                Some(())
             }
             // Handle nested concatenations like "a" + "b" + "c"
             (
@@ -143,15 +137,32 @@ impl Rule for NoUselessConcat {
                     concat_binary_expression(&left_binary_expression, right_string_value.as_str());
 
                 mutation.replace_element(node.clone().into(), binary_expression.into());
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Remove the useless concatenation" }.to_owned(),
-                    mutation,
-                })
+                Some(())
             }
+            // Handle concatenations where the left part is a parenthesized expression, like ("a" + "b") + "c"
+            (
+                Some(AnyJsExpression::JsParenthesizedExpression(left_parenthesized_expression)),
+                _,
+                Some(right_string),
+            ) => match left_parenthesized_expression.expression() {
+                Ok(AnyJsExpression::JsBinaryExpression(left_binary_expression)) => {
+                    let binary_expression =
+                        concat_binary_expression(&left_binary_expression, right_string.as_str());
+
+                    mutation.replace_element(node.clone().into(), binary_expression.into());
+                    Some(())
+                }
+                _ => None,
+            },
             _ => None,
-        }
+        };
+
+        fix_result.and(Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message: markup! { "Remove the useless concatenation" }.to_owned(),
+            mutation,
+        }))
     }
 }
 
@@ -251,6 +262,10 @@ fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> 
                 }
                 _ => None,
             }
+        }
+
+        Some(AnyJsExpression::JsParenthesizedExpression(parenthesized_expression)) => {
+            extract_string_value(&parenthesized_expression.expression().ok())
         }
         _ => None,
     }
