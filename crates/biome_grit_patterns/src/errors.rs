@@ -40,6 +40,9 @@ pub enum CompileError {
     /// Tried to declare or assign a Grit reserved metavariable.
     ReservedMetavariable(String),
 
+    /// When an unsupported node kind was discovered during compilation.
+    UnsupportedKind(u16),
+
     /// When an unexpected node kind was discovered during compilation.
     UnexpectedKind(u16),
 

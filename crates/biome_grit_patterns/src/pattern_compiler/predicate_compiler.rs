@@ -1,13 +1,14 @@
 use super::{
     accumulate_compiler::PrAccumulateCompiler, and_compiler::PrAndCompiler,
     any_compiler::PrAnyCompiler, assignment_compiler::PrAssignmentCompiler,
-    compilation_context::NodeCompilationContext, maybe_compiler::PrMaybeCompiler,
+    compilation_context::NodeCompilationContext, equal_compiler::PrEqualCompiler,
+    if_compiler::PrIfCompiler, match_compiler::PrMatchCompiler, maybe_compiler::PrMaybeCompiler,
     not_compiler::PrNotCompiler, or_compiler::PrOrCompiler,
-    predicate_match_compiler::PrMatchCompiler, predicate_return_compiler::PrReturnCompiler,
-    rewrite_compiler::PrRewriteCompiler,
+    predicate_return_compiler::PrReturnCompiler, rewrite_compiler::PrRewriteCompiler,
 };
 use crate::{grit_context::GritQueryContext, CompileError};
 use biome_grit_syntax::{AnyGritPredicate, GritSyntaxKind};
+use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::Predicate;
 
 pub(crate) struct PredicateCompiler;
@@ -38,12 +39,24 @@ impl PredicateCompiler {
                 PrAssignmentCompiler::from_node(node, context)?,
             ))),
             AnyGritPredicate::GritPredicateCall(_) => todo!(),
-            AnyGritPredicate::GritPredicateEqual(_) => todo!(),
-            AnyGritPredicate::GritPredicateGreater(_) => todo!(),
-            AnyGritPredicate::GritPredicateGreaterEqual(_) => todo!(),
-            AnyGritPredicate::GritPredicateIfElse(_) => todo!(),
-            AnyGritPredicate::GritPredicateLess(_) => todo!(),
-            AnyGritPredicate::GritPredicateLessEqual(_) => todo!(),
+            AnyGritPredicate::GritPredicateEqual(node) => Ok(Predicate::Equal(Box::new(
+                PrEqualCompiler::from_node(node, context)?,
+            ))),
+            AnyGritPredicate::GritPredicateGreater(node) => {
+                Err(CompileError::UnsupportedKind(node.syntax().kind().into())) // Not supported by Grit either.
+            }
+            AnyGritPredicate::GritPredicateGreaterEqual(node) => {
+                Err(CompileError::UnsupportedKind(node.syntax().kind().into())) // Not supported by Grit either.
+            }
+            AnyGritPredicate::GritPredicateIfElse(node) => Ok(Predicate::If(Box::new(
+                PrIfCompiler::from_node(node, context)?,
+            ))),
+            AnyGritPredicate::GritPredicateLess(node) => {
+                Err(CompileError::UnsupportedKind(node.syntax().kind().into())) // Not supported by Grit either.
+            }
+            AnyGritPredicate::GritPredicateLessEqual(node) => {
+                Err(CompileError::UnsupportedKind(node.syntax().kind().into())) // Not supported by Grit either.
+            }
             AnyGritPredicate::GritPredicateMatch(node) => Ok(Predicate::Match(Box::new(
                 PrMatchCompiler::from_node(node, context)?,
             ))),
@@ -53,7 +66,9 @@ impl PredicateCompiler {
             AnyGritPredicate::GritPredicateNot(node) => Ok(Predicate::Not(Box::new(
                 PrNotCompiler::from_node(node, context)?,
             ))),
-            AnyGritPredicate::GritPredicateNotEqual(_) => todo!(),
+            AnyGritPredicate::GritPredicateNotEqual(node) => {
+                Err(CompileError::UnsupportedKind(node.syntax().kind().into())) // Not supported by Grit either.
+            }
             AnyGritPredicate::GritPredicateOr(node) => Ok(Predicate::Or(Box::new(
                 PrOrCompiler::from_node(node, context)?,
             ))),

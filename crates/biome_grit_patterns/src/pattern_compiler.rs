@@ -26,6 +26,7 @@ mod add_compiler;
 mod after_compiler;
 mod and_compiler;
 mod any_compiler;
+mod as_compiler;
 mod assignment_compiler;
 mod auto_wrap;
 mod before_compiler;
@@ -33,7 +34,10 @@ mod bubble_compiler;
 mod container_compiler;
 mod contains_compiler;
 mod divide_compiler;
+mod equal_compiler;
 mod every_compiler;
+mod if_compiler;
+mod includes_compiler;
 mod like_compiler;
 mod limit_compiler;
 mod list_compiler;
@@ -41,16 +45,17 @@ mod list_index_compiler;
 mod literal_compiler;
 mod map_accessor_compiler;
 mod map_compiler;
+mod match_compiler;
 mod maybe_compiler;
 mod modulo_compiler;
 mod multiply_compiler;
 mod not_compiler;
 mod or_compiler;
 mod predicate_compiler;
-mod predicate_match_compiler;
 mod predicate_return_compiler;
 mod rewrite_compiler;
 mod sequential_compiler;
+mod snippet_compiler;
 mod some_compiler;
 mod step_compiler;
 mod subtract_compiler;
@@ -64,7 +69,8 @@ use self::{
     assignment_compiler::AssignmentCompiler, before_compiler::BeforeCompiler,
     bubble_compiler::BubbleCompiler, compilation_context::NodeCompilationContext,
     contains_compiler::ContainsCompiler, divide_compiler::DivideCompiler,
-    every_compiler::EveryCompiler, like_compiler::LikeCompiler, limit_compiler::LimitCompiler,
+    every_compiler::EveryCompiler, if_compiler::IfCompiler, includes_compiler::IncludesCompiler,
+    like_compiler::LikeCompiler, limit_compiler::LimitCompiler,
     list_index_compiler::ListIndexCompiler, literal_compiler::LiteralCompiler,
     map_accessor_compiler::MapAccessorCompiler, maybe_compiler::MaybeCompiler,
     modulo_compiler::ModuloCompiler, multiply_compiler::MultiplyCompiler,
@@ -75,6 +81,7 @@ use self::{
 };
 use crate::{grit_context::GritQueryContext, CompileError};
 use biome_grit_syntax::{AnyGritMaybeCurlyPattern, AnyGritPattern, GritSyntaxKind};
+use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::{DynamicPattern, DynamicSnippet, DynamicSnippetPart, Pattern};
 
 pub(crate) struct PatternCompiler;
@@ -169,8 +176,12 @@ impl PatternCompiler {
             AnyGritPattern::GritPatternContains(node) => Ok(Pattern::Contains(Box::new(
                 ContainsCompiler::from_node(node, context)?,
             ))),
-            AnyGritPattern::GritPatternIfElse(_) => todo!(),
-            AnyGritPattern::GritPatternIncludes(_) => todo!(),
+            AnyGritPattern::GritPatternIfElse(node) => {
+                Ok(Pattern::If(Box::new(IfCompiler::from_node(node, context)?)))
+            }
+            AnyGritPattern::GritPatternIncludes(node) => Ok(Pattern::Includes(Box::new(
+                IncludesCompiler::from_node(node, context)?,
+            ))),
             AnyGritPattern::GritPatternLimit(node) => Ok(Pattern::Limit(Box::new(
                 LimitCompiler::from_node(node, context)?,
             ))),
@@ -183,7 +194,9 @@ impl PatternCompiler {
             AnyGritPattern::GritPatternOr(node) => {
                 Ok(Pattern::Or(Box::new(OrCompiler::from_node(node, context)?)))
             }
-            AnyGritPattern::GritPatternOrElse(_) => todo!(),
+            AnyGritPattern::GritPatternOrElse(node) => {
+                Err(CompileError::UnsupportedKind(node.syntax().kind().into()))
+            }
             AnyGritPattern::GritPatternWhere(node) => Ok(Pattern::Where(Box::new(
                 WhereCompiler::from_node(node, context)?,
             ))),

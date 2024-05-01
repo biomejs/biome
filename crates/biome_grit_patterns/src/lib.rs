@@ -15,12 +15,17 @@ mod resolved_pattern;
 mod util;
 mod variables;
 
-use biome_grit_parser::parse_grit;
 pub use errors::*;
 pub use grit_query::GritQuery;
+pub use grit_target_language::GritTargetLanguage;
+
+use biome_grit_parser::parse_grit;
 
 /// Compiles a Grit pattern from the given source string.
-pub fn compile_pattern(source: &str) -> Result<GritQuery, CompileError> {
+pub fn compile_pattern(
+    source: &str,
+    language: GritTargetLanguage,
+) -> Result<GritQuery, CompileError> {
     let parsed = parse_grit(source);
-    GritQuery::from_node(parsed.tree())
+    GritQuery::from_node(parsed.tree(), language)
 }

@@ -1,8 +1,29 @@
+use biome_grit_syntax::GritSyntaxNode;
 use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
-use std::{borrow::Cow, str::Utf8Error};
+use std::{borrow::Cow, ops::Deref, str::Utf8Error};
 
 #[derive(Clone, Debug)]
-pub(crate) struct GritNode;
+pub struct GritNode(GritSyntaxNode);
+
+impl Deref for GritNode {
+    type Target = GritSyntaxNode;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl From<GritSyntaxNode> for GritNode {
+    fn from(value: GritSyntaxNode) -> Self {
+        Self(value)
+    }
+}
+
+impl From<&GritSyntaxNode> for GritNode {
+    fn from(value: &GritSyntaxNode) -> Self {
+        Self(value.clone())
+    }
+}
 
 impl GritAstNode for GritNode {
     fn ancestors(&self) -> impl Iterator<Item = Self> {

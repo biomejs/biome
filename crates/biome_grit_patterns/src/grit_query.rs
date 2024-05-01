@@ -1,5 +1,6 @@
 use crate::diagnostics::CompilerDiagnostic;
 use crate::grit_context::{GritExecContext, GritQueryContext};
+use crate::grit_target_language::GritTargetLanguage;
 use crate::pattern_compiler::PatternCompiler;
 use crate::pattern_compiler::{
     compilation_context::CompilationContext, compilation_context::NodeCompilationContext,
@@ -38,8 +39,8 @@ impl GritQuery {
             .execute(&binding, &mut state, &context, &mut logs)
     }
 
-    pub fn from_node(root: GritRoot) -> Result<Self, CompileError> {
-        let context = CompilationContext::new_anonymous();
+    pub fn from_node(root: GritRoot, lang: GritTargetLanguage) -> Result<Self, CompileError> {
+        let context = CompilationContext::new_anonymous(lang);
 
         let mut vars_array = Vec::new();
         let mut global_vars = BTreeMap::new();

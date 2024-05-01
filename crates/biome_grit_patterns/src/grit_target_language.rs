@@ -1,7 +1,8 @@
 use crate::grit_node::GritNode;
 use grit_util::Language;
 
-pub(crate) struct GritTargetLanguage;
+#[derive(Clone, Copy)]
+pub struct GritTargetLanguage;
 
 impl Language for GritTargetLanguage {
     type Node<'a> = GritNode;

@@ -1,12 +1,15 @@
 use biome_rowan::TextRange;
 use grit_pattern_matcher::pattern::VariableSourceLocations;
 
-use crate::diagnostics::CompilerDiagnostic;
+use crate::{diagnostics::CompilerDiagnostic, grit_target_language::GritTargetLanguage};
 use std::{collections::BTreeMap, path::Path};
 
 pub(crate) struct CompilationContext<'a> {
     /// Path of the source file being compiled.
     pub source_path: Option<&'a Path>,
+
+    /// The target language being matched on.
+    pub lang: GritTargetLanguage,
 
     pub pattern_definition_info: BTreeMap<String, DefinitionInfo>,
     pub predicate_definition_info: BTreeMap<String, DefinitionInfo>,
@@ -14,15 +17,16 @@ pub(crate) struct CompilationContext<'a> {
 }
 
 impl<'a> CompilationContext<'a> {
-    pub(crate) fn new(source_path: &'a Path) -> Self {
-        let mut this = Self::new_anonymous();
+    pub(crate) fn new(source_path: &'a Path, lang: GritTargetLanguage) -> Self {
+        let mut this = Self::new_anonymous(lang);
         this.source_path = Some(source_path);
         this
     }
 
-    pub(crate) fn new_anonymous() -> Self {
+    pub(crate) fn new_anonymous(lang: GritTargetLanguage) -> Self {
         Self {
             source_path: None,
+            lang,
             pattern_definition_info: Default::default(),
             predicate_definition_info: Default::default(),
             function_definition_info: Default::default(),

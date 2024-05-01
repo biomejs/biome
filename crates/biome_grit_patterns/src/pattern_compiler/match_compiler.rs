@@ -32,7 +32,9 @@ fn compile_match_subject(
         AnyGritPredicateMatchSubject::AnyGritLiteral(literal) => {
             // FIXME: The grammar says literals are supported here, but the
             //        Grit reference compiler doesn't accept them either.
-            Err(CompileError::UnexpectedKind(literal.syntax().kind().into()))
+            Err(CompileError::UnsupportedKind(
+                literal.syntax().kind().into(),
+            ))
         }
     }
 }
