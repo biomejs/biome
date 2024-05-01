@@ -104,7 +104,7 @@ impl Rule for NoUselessConcat {
                 },
             )
             .note(markup! {
-                "Consider joining the strings as a single one to improve readability and runtime performance."
+                "Consider turn the expression into a single string to improve readability and runtime performance."
             }),
         )
     }
@@ -114,6 +114,11 @@ impl Rule for NoUselessConcat {
         let mut mutation = ctx.root().begin();
         let left = node.left().ok();
         let right = node.right().ok();
+
+        if is_numeric_calculation(&left) || is_numeric_calculation(&right) {
+            return None;
+        }
+
         let left_string = extract_string_value(&left);
         let right_string = extract_string_value(&right);
 
@@ -186,14 +191,24 @@ fn is_string_expression(expression: &Option<AnyJsExpression>) -> bool {
 }
 
 fn is_numeric_expression(expression: &Option<AnyJsExpression>) -> bool {
-    expression
-        .as_ref()
-        .is_some_and(|node| match node.as_any_js_literal_expression() {
-            Some(literal_expression) => literal_expression
-                .as_js_number_literal_expression()
-                .is_some(),
-            _ => false,
-        })
+    match expression.as_ref() {
+        Some(AnyJsExpression::AnyJsLiteralExpression(literal_expression)) => matches!(
+            literal_expression,
+            AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+        ),
+
+        _ => false,
+    }
+}
+
+fn is_numeric_calculation(expression: &Option<AnyJsExpression>) -> bool {
+    match expression.as_ref() {
+        Some(AnyJsExpression::JsBinaryExpression(binary_expression)) => {
+            is_numeric_expression(&binary_expression.left().ok())
+                && is_numeric_expression(&binary_expression.right().ok())
+        }
+        _ => false,
+    }
 }
 
 fn is_binary_expression_with_literal_string(expression: &Option<AnyJsExpression>) -> bool {
@@ -213,8 +228,9 @@ fn is_concatenation(binary_expression: &JsBinaryExpression) -> bool {
     let has_right_string_expression = is_string_expression(&right)
         || is_binary_expression_with_literal_string(&right)
         || is_parenthesized_concatenation(&right);
-    let has_left_numeric_expression = is_numeric_expression(&left);
-    let has_right_numeric_expression = is_numeric_expression(&right);
+    let has_left_numeric_expression = is_numeric_expression(&left) || is_numeric_calculation(&left);
+    let has_right_numeric_expression =
+        is_numeric_expression(&right) || is_numeric_calculation(&right);
     let operator = binary_expression.operator().ok();
 
     let is_plus_operator = matches!(operator, Some(JsBinaryOperator::Plus));

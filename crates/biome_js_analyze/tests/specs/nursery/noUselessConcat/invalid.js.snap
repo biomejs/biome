@@ -20,6 +20,7 @@ const a = 'a' + 1
 const a = 1 + '1'
 const a = 1 + `1`
 const a = `1` + 1
+const a = 1 + 1 + ""
 
 ```
 
@@ -34,7 +35,7 @@ invalid.js:1:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
     2 │ const a = 'a' + 'b' + 'c'
     3 │ const a = 'a' + ('b' + 'c')
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -57,7 +58,7 @@ invalid.js:2:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
     3 │ const a = 'a' + ('b' + 'c')
     4 │ const a = ('a' + 'b') + 'c'
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -82,7 +83,7 @@ invalid.js:3:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
     4 │ const a = ('a' + 'b') + 'c'
     5 │ const a = foo + 'a' + 'b'
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -108,7 +109,7 @@ invalid.js:4:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
     5 │ const a = foo + 'a' + 'b'
     6 │ const a = foo + 'a' + 'b' + 'c'
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -134,7 +135,7 @@ invalid.js:5:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
     6 │ const a = foo + 'a' + 'b' + 'c'
     7 │ const a = (foo + 'a') + ('b' + 'c')
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -160,7 +161,7 @@ invalid.js:6:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
     7 │ const a = (foo + 'a') + ('b' + 'c')
     8 │ const a = ((foo + 'a') + ('b' + 'c') + 1)
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -186,7 +187,7 @@ invalid.js:7:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
     8 │ const a = ((foo + 'a') + ('b' + 'c') + 1)
     9 │ const a = 'a' + `b`
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -212,7 +213,7 @@ invalid.js:8:12 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
      9 │ const a = 'a' + `b`
     10 │ const a = `a` + 'b'
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -238,7 +239,7 @@ invalid.js:9:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
     10 │ const a = `a` + 'b'
     11 │ const a = `a` + `b`
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -264,7 +265,7 @@ invalid.js:10:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
     11 │ const a = `a` + `b`
     12 │ const a = foo + `a` + `b`
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -290,7 +291,7 @@ invalid.js:11:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
     12 │ const a = foo + `a` + `b`
     13 │ const a = 'a' + 1
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -316,7 +317,7 @@ invalid.js:12:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
     13 │ const a = 'a' + 1
     14 │ const a = 1 + '1'
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -342,7 +343,7 @@ invalid.js:13:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
     14 │ const a = 1 + '1'
     15 │ const a = 1 + `1`
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -368,7 +369,7 @@ invalid.js:14:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
     15 │ const a = 1 + `1`
     16 │ const a = `1` + 1
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -392,9 +393,9 @@ invalid.js:15:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
   > 15 │ const a = 1 + `1`
        │           ^^^^^^^
     16 │ const a = `1` + 1
-    17 │ 
+    17 │ const a = 1 + 1 + ""
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -403,7 +404,7 @@ invalid.js:15:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
     15    │ - const·a·=·1·+·`1`
        15 │ + const·a·=·"11"
     16 16 │   const a = `1` + 1
-    17 17 │   
+    17 17 │   const a = 1 + 1 + ""
   
 
 ```
@@ -417,9 +418,10 @@ invalid.js:16:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
     15 │ const a = 1 + `1`
   > 16 │ const a = `1` + 1
        │           ^^^^^^^
-    17 │ 
+    17 │ const a = 1 + 1 + ""
+    18 │ 
   
-  i Consider joining the strings as a single one to improve readability and runtime performance.
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
   i Unsafe fix: Remove the useless concatenation
   
@@ -427,7 +429,24 @@ invalid.js:16:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━
     15 15 │   const a = 1 + `1`
     16    │ - const·a·=·`1`·+·1
        16 │ + const·a·=·"11"
-    17 17 │   
+    17 17 │   const a = 1 + 1 + ""
+    18 18 │   
+  
+
+```
+
+```
+invalid.js:17:11 lint/nursery/noUselessConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Useless string concatenation.
+  
+    15 │ const a = 1 + `1`
+    16 │ const a = `1` + 1
+  > 17 │ const a = 1 + 1 + ""
+       │           ^^^^^^^^^^
+    18 │ 
+  
+  i Consider turn the expression into a single string to improve readability and runtime performance.
   
 
 ```
