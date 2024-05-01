@@ -12,9 +12,10 @@ const a = foo + 'a' + 'b'
 const a = foo + 'a' + 'b' + 'c'
 const a = (foo + 'a') + ('b' + 'c')
 const a = ((foo + 'a') + ('b' + 'c') + 1)
-// const a = `a` + 'b'
-// const a = `a` + `b`
-// const a = foo + `a` + `b`
+const a = 'a' + `b`
+const a = `a` + 'b'
+const a = `a` + `b`
+const a = foo + `a` + `b`
 
 ```
 
@@ -179,7 +180,7 @@ invalid.js:7:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
   > 7 │ const a = (foo + 'a') + ('b' + 'c')
       │           ^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ const a = ((foo + 'a') + ('b' + 'c') + 1)
-    9 │ // const a = `a` + 'b'
+    9 │ const a = 'a' + `b`
   
   i Consider joining the strings as a single one to improve readability and runtime performance.
   
@@ -190,7 +191,7 @@ invalid.js:7:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
      7    │ - const·a·=·(foo·+·'a')·+·('b'·+·'c')
         7 │ + const·a·=·foo·+·"abc"
      8  8 │   const a = ((foo + 'a') + ('b' + 'c') + 1)
-     9  9 │   // const a = `a` + 'b'
+     9  9 │   const a = 'a' + `b`
   
 
 ```
@@ -204,8 +205,8 @@ invalid.js:8:12 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
      7 │ const a = (foo + 'a') + ('b' + 'c')
    > 8 │ const a = ((foo + 'a') + ('b' + 'c') + 1)
        │            ^^^^^^^^^^^^^^^^^^^^^^^^^
-     9 │ // const a = `a` + 'b'
-    10 │ // const a = `a` + `b`
+     9 │ const a = 'a' + `b`
+    10 │ const a = `a` + 'b'
   
   i Consider joining the strings as a single one to improve readability and runtime performance.
   
@@ -215,8 +216,110 @@ invalid.js:8:12 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━�
      7  7 │   const a = (foo + 'a') + ('b' + 'c')
      8    │ - const·a·=·((foo·+·'a')·+·('b'·+·'c')·+·1)
         8 │ + const·a·=·(foo·+·"abc"·+·1)
-     9  9 │   // const a = `a` + 'b'
-    10 10 │   // const a = `a` + `b`
+     9  9 │   const a = 'a' + `b`
+    10 10 │   const a = `a` + 'b'
+  
+
+```
+
+```
+invalid.js:9:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Useless string concatenation.
+  
+     7 │ const a = (foo + 'a') + ('b' + 'c')
+     8 │ const a = ((foo + 'a') + ('b' + 'c') + 1)
+   > 9 │ const a = 'a' + `b`
+       │           ^^^^^^^^^
+    10 │ const a = `a` + 'b'
+    11 │ const a = `a` + `b`
+  
+  i Consider joining the strings as a single one to improve readability and runtime performance.
+  
+  i Unsafe fix: Remove the useless concatenation
+  
+     7  7 │   const a = (foo + 'a') + ('b' + 'c')
+     8  8 │   const a = ((foo + 'a') + ('b' + 'c') + 1)
+     9    │ - const·a·=·'a'·+·`b`
+        9 │ + const·a·=·"ab"
+    10 10 │   const a = `a` + 'b'
+    11 11 │   const a = `a` + `b`
+  
+
+```
+
+```
+invalid.js:10:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Useless string concatenation.
+  
+     8 │ const a = ((foo + 'a') + ('b' + 'c') + 1)
+     9 │ const a = 'a' + `b`
+  > 10 │ const a = `a` + 'b'
+       │           ^^^^^^^^^
+    11 │ const a = `a` + `b`
+    12 │ const a = foo + `a` + `b`
+  
+  i Consider joining the strings as a single one to improve readability and runtime performance.
+  
+  i Unsafe fix: Remove the useless concatenation
+  
+     8  8 │   const a = ((foo + 'a') + ('b' + 'c') + 1)
+     9  9 │   const a = 'a' + `b`
+    10    │ - const·a·=·`a`·+·'b'
+       10 │ + const·a·=·"ab"
+    11 11 │   const a = `a` + `b`
+    12 12 │   const a = foo + `a` + `b`
+  
+
+```
+
+```
+invalid.js:11:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Useless string concatenation.
+  
+     9 │ const a = 'a' + `b`
+    10 │ const a = `a` + 'b'
+  > 11 │ const a = `a` + `b`
+       │           ^^^^^^^^^
+    12 │ const a = foo + `a` + `b`
+    13 │ 
+  
+  i Consider joining the strings as a single one to improve readability and runtime performance.
+  
+  i Unsafe fix: Remove the useless concatenation
+  
+     9  9 │   const a = 'a' + `b`
+    10 10 │   const a = `a` + 'b'
+    11    │ - const·a·=·`a`·+·`b`
+       11 │ + const·a·=·"ab"
+    12 12 │   const a = foo + `a` + `b`
+    13 13 │   
+  
+
+```
+
+```
+invalid.js:12:11 lint/nursery/noUselessConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Useless string concatenation.
+  
+    10 │ const a = `a` + 'b'
+    11 │ const a = `a` + `b`
+  > 12 │ const a = foo + `a` + `b`
+       │           ^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Consider joining the strings as a single one to improve readability and runtime performance.
+  
+  i Unsafe fix: Remove the useless concatenation
+  
+    10 10 │   const a = `a` + 'b'
+    11 11 │   const a = `a` + `b`
+    12    │ - const·a·=·foo·+·`a`·+·`b`
+       12 │ + const·a·=·foo·+·"ab"
+    13 13 │   
   
 
 ```

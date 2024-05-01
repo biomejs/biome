@@ -267,6 +267,30 @@ fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> 
         Some(AnyJsExpression::JsParenthesizedExpression(parenthesized_expression)) => {
             extract_string_value(&parenthesized_expression.expression().ok())
         }
+
+        Some(AnyJsExpression::JsTemplateExpression(template_expression)) => {
+            let is_useless_template_literal = template_expression
+                .elements()
+                .into_iter()
+                .all(|element| element.as_js_template_chunk_element().is_some());
+
+            if is_useless_template_literal {
+                let concatenated_string = template_expression.elements().into_iter().fold(
+                    String::new(),
+                    |acc, element| {
+                        if let Some(chunk) = element.as_js_template_chunk_element() {
+                            return acc + chunk.text().as_str();
+                        }
+                        acc
+                    },
+                );
+
+                return Some(concatenated_string);
+            }
+
+            None
+        }
+
         _ => None,
     }
 }
