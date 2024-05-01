@@ -158,7 +158,7 @@ crossbeam          = "0.8.4"
 dashmap            = "5.4.0"
 getrandom          = "0.2.14"
 ignore             = "0.4.21"
-indexmap           = "1.9.3"
+indexmap           = { version = "2.2.6", features = ["serde"] }
 insta              = "1.38.0"
 lazy_static        = "1.4.0"
 oxc_resolver       = "1.4.0"
