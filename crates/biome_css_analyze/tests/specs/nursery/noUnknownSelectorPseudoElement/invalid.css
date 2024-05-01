@@ -4,4 +4,5 @@ a::pSeUdO { }
 a::PSEUDO { }
 a::element { }
 a:hover::element { }
-a,\nb > .foo::error { }
+a,
+b > .foo::error { }

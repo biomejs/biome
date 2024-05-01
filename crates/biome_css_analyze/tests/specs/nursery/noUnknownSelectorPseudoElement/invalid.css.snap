@@ -10,7 +10,8 @@ a::pSeUdO { }
 a::PSEUDO { }
 a::element { }
 a:hover::element { }
-a,\nb > .foo::error { }
+a,
+b > .foo::error { }
 
 ```
 
@@ -118,7 +119,7 @@ invalid.css:5:4 lint/nursery/noUnknownSelectorPseudoElement ━━━━━━�
   > 5 │ a::element { }
       │    ^^^^^^^
     6 │ a:hover::element { }
-    7 │ a,\nb > .foo::error { }
+    7 │ a,
   
   i See MDN web docs for more details.
   
@@ -141,8 +142,8 @@ invalid.css:6:10 lint/nursery/noUnknownSelectorPseudoElement ━━━━━━�
     5 │ a::element { }
   > 6 │ a:hover::element { }
       │          ^^^^^^^
-    7 │ a,\nb > .foo::error { }
-    8 │ 
+    7 │ a,
+    8 │ b > .foo::error { }
   
   i See MDN web docs for more details.
   
@@ -157,15 +158,15 @@ invalid.css:6:10 lint/nursery/noUnknownSelectorPseudoElement ━━━━━━�
 ```
 
 ```
-invalid.css:7:15 lint/nursery/noUnknownSelectorPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:8:11 lint/nursery/noUnknownSelectorPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-elements: error
   
-    5 │ a::element { }
     6 │ a:hover::element { }
-  > 7 │ a,\nb > .foo::error { }
-      │               ^^^^^
-    8 │ 
+    7 │ a,
+  > 8 │ b > .foo::error { }
+      │           ^^^^^
+    9 │ 
   
   i See MDN web docs for more details.
   
