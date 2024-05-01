@@ -97,9 +97,9 @@ declare_rule! {
     /// ]);
     /// ```
     ///
-    pub UseConsistentBuiltinInstatiation {
+    pub UseConsistentBuiltinInstantiation {
         version: "1.7.2",
-        name: "useConsistentBuiltinInstatiation",
+        name: "useConsistentBuiltinInstantiation",
         sources: &[
             RuleSource::EslintUnicorn("new-for-builtins"),
             RuleSource::Eslint("no-new-wrappers"),
@@ -111,9 +111,9 @@ declare_rule! {
     }
 }
 
-impl Rule for UseConsistentBuiltinInstatiation {
+impl Rule for UseConsistentBuiltinInstantiation {
     type Query = Semantic<JsNewOrCallExpression>;
-    type State = UseConsistentBuiltinInstatiationState;
+    type State = UseConsistentBuiltinInstantiationState;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -130,7 +130,7 @@ impl Rule for UseConsistentBuiltinInstatiation {
             .is_ok()
         {
             return ctx.model().binding(&reference).is_none().then_some(
-                UseConsistentBuiltinInstatiationState {
+                UseConsistentBuiltinInstantiationState {
                     name: name_text.to_string(),
                     creation_rule,
                 },
@@ -249,7 +249,7 @@ impl BuiltinCreationRule {
     }
 }
 
-pub struct UseConsistentBuiltinInstatiationState {
+pub struct UseConsistentBuiltinInstantiationState {
     name: String,
     creation_rule: BuiltinCreationRule,
 }

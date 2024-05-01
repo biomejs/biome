@@ -28,6 +28,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
+
+#### Bug fixes
+
+- Fix typo by renaming `useConsistentBuiltinInstatiation` to `useConsistentBuiltinInstantiation`
   Contributed by @minht11
 
 ### Parser
@@ -95,7 +99,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [nursery/useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/).
   Contributed by @Kazuhiro-Mimaki
 
-- Add [nursery/useConsistentBuiltinInstatiation](https://biomejs.dev/linter/rules/use-consistent-builtin-instatiation/).
+- Add [nursery/useConsistentBuiltinInstatiation](https://biomejs.dev/linter/rules/use-consistent-builtin-instantiation/).
   Contributed by @minht11
 
 - Add [nursery/useDefaultSwitchClause](https://biomejs.dev/linter/rules/use-default-switch-clause/).

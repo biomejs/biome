@@ -135,7 +135,7 @@ define_categories! {
     "lint/nursery/noUnknownUnit": "https://biomejs.dev/linter/rules/no-unknown-unit",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useExplicitLengthCheck": "https://biomejs.dev/linter/rules/use-explicit-length-check",
-    "lint/nursery/useConsistentBuiltinInstatiation": "https://biomejs.dev/linter/rules/use-consistent-new-builtin",
+    "lint/nursery/useConsistentBuiltinInstantiation": "https://biomejs.dev/linter/rules/use-consistent-new-builtin",
     "lint/nursery/useGenericFontNames": "https://biomejs.dev/linter/rules/use-generic-font-names",
     "lint/nursery/useDefaultSwitchClause": "https://biomejs.dev/linter/rules/use-default-switch-clause",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
