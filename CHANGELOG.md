@@ -25,6 +25,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### New features
+
+- Add [nursery/useThrowNewError](https://biomejs.dev/linter/rules/use-throw-new-error/).
+  Contributed by @minht11
+
 #### Bug fixes
 
 - Fix typo by renaming `useConsistentBuiltinInstatiation` to `useConsistentBuiltinInstantiation`
