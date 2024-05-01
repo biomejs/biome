@@ -36,7 +36,7 @@ declare_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// const a = foo + "a" + ("b" + "c");
+    /// const a = (foo + "a") + ("b" + "c");
     /// ```
     ///
     /// ### Valid
@@ -81,15 +81,16 @@ impl Rule for NoUselessConcat {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let parent = node.parent();
         let parent_binary_expression = get_parent_binary_expression(node);
 
         // Prevent duplicated error reportings when the parent is an useless concatenation too, i.e.: "a" + "b" + "c"
-        if has_useless_concat(&parent) || has_useless_concat(&parent_binary_expression) {
+        if parent_binary_expression.is_some()
+            && has_useless_concat(&parent_binary_expression.unwrap())
+        {
             return None;
         }
 
-        has_useless_concat(&Some(node.clone())).then_some(())
+        has_useless_concat(node).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -117,6 +118,7 @@ impl Rule for NoUselessConcat {
         let right_string = extract_string_value(&right);
 
         match (left, left_string, right_string) {
+            // Handle simple concatenations like "a" + "b"
             (_, Some(left_string_value), Some(right_string_value)) => {
                 let concatenated_string = left_string_value + right_string_value.as_str();
                 let string_literal_expression =
@@ -131,53 +133,34 @@ impl Rule for NoUselessConcat {
                     mutation,
                 })
             }
+            // Handle nested concatenations like "a" + "b" + "c"
             (
                 Some(AnyJsExpression::JsBinaryExpression(left_binary_expression)),
                 None,
                 Some(right_string_value),
             ) => {
-                if is_string_expression(left_binary_expression.right().ok()) {
-                    let value = extract_string_value(&left_binary_expression.right().ok()).unwrap();
-                    let concatenated_string = value + right_string_value.as_str();
-                    let string_literal_expression =
-                        AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(
-                            js_string_literal_expression(js_string_literal(&concatenated_string)),
-                        ));
+                let binary_expression =
+                    concat_binary_expression(&left_binary_expression, right_string_value.as_str());
 
-                    let left = left_binary_expression.left().ok()?;
-                    let operator = left_binary_expression.operator_token().ok()?;
-                    let binary_expression =
-                        js_binary_expression(left, operator, string_literal_expression);
-
-                    mutation.replace_element(node.clone().into(), binary_expression.into());
-                    return Some(JsRuleAction {
-                        category: ActionCategory::QuickFix,
-                        applicability: Applicability::MaybeIncorrect,
-                        message: markup! { "Remove the useless concatenation" }.to_owned(),
-                        mutation,
-                    });
-                }
-
-                None
+                mutation.replace_element(node.clone().into(), binary_expression.into());
+                Some(JsRuleAction {
+                    category: ActionCategory::QuickFix,
+                    applicability: Applicability::MaybeIncorrect,
+                    message: markup! { "Remove the useless concatenation" }.to_owned(),
+                    mutation,
+                })
             }
             _ => None,
         }
     }
 }
 
-fn has_useless_concat(node: &Option<JsBinaryExpression>) -> bool {
-    match node {
-        Some(node) => {
-            let has_left_string_expression = is_string_expression(node.left().ok())
-                || is_binary_expression_with_literal_string(node.left().ok())
-                || is_parenthesized_concatenation(node.left().ok());
+fn has_useless_concat(node: &JsBinaryExpression) -> bool {
+    let has_left_string_expression = is_string_expression(node.left().ok())
+        || is_binary_expression_with_literal_string(node.left().ok())
+        || is_parenthesized_concatenation(node.left().ok());
 
-            return has_left_string_expression
-                && is_concatenation(node)
-                && !is_stylistic_concatenation(node);
-        }
-        None => false,
-    }
+    has_left_string_expression && is_concatenation(node) && !is_stylistic_concatenation(node)
 }
 
 fn is_string_expression(expression: Option<AnyJsExpression>) -> bool {
@@ -285,4 +268,34 @@ fn get_parent_binary_expression(node: &JsBinaryExpression) -> Option<JsBinaryExp
     }
 
     None
+}
+
+fn concat_binary_expression(
+    left_binary_expression: &JsBinaryExpression,
+    right_string_value: &str,
+) -> JsBinaryExpression {
+    let current_right = left_binary_expression.right().ok();
+
+    if is_string_expression(current_right) {
+        let value = extract_string_value(&left_binary_expression.right().ok()).unwrap();
+        let concatenated_string = value + right_string_value;
+        let string_literal_expression =
+            AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(
+                js_string_literal_expression(js_string_literal(&concatenated_string)),
+            ));
+
+        let left = left_binary_expression.left().unwrap();
+        let operator = left_binary_expression.operator_token().unwrap();
+        let binary_expression =
+            js_binary_expression(left.clone(), operator, string_literal_expression);
+
+        return match left {
+            AnyJsExpression::JsBinaryExpression(binary_expression) => {
+                concat_binary_expression(&binary_expression, concatenated_string.as_str())
+            }
+            _ => binary_expression,
+        };
+    }
+
+    left_binary_expression.clone()
 }
