@@ -1,6 +1,6 @@
 use crate::grit_context::GritQueryContext;
 use grit_pattern_matcher::pattern::{VariableContent, VariableSourceLocations};
-use grit_util::VariableMatch;
+use grit_util::VariableBinding;
 use im::{vector, Vector};
 
 /// List of all variable locations in a query.
@@ -17,13 +17,13 @@ impl VariableLocations {
         Self(locations)
     }
 
-    pub(crate) fn compiled_vars(&self) -> Vec<VariableMatch> {
+    pub(crate) fn compiled_vars(&self) -> Vec<VariableBinding> {
         let mut variables = Vec::new();
         for (i, scope) in self.0.iter().enumerate() {
             for (j, var) in scope.iter().enumerate() {
                 if var.file.is_empty() {
                     let name = &var.name;
-                    variables.push(VariableMatch {
+                    variables.push(VariableBinding {
                         name: name.to_owned(),
                         scoped_name: format!("{i}_{j}_{name}"),
                         ranges: var.locations.iter().copied().collect(),
