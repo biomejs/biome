@@ -24,7 +24,7 @@ biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_service       = { workspace = true }
 insta               = { workspace = true, features = ["glob"] }
-serde               = { version = "1", features = ["derive"] }
+serde               = { workspace = true, features = ["derive"] }
 serde_json          = { workspace = true }
 similar             = { workspace = true }
 similar-asserts     = "1.5.0"

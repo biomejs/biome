@@ -14,7 +14,7 @@ version              = "0.0.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow              = "1.0.52"
+anyhow              = { workspace = true }
 biome_analyze       = { workspace = true }
 biome_configuration = { workspace = true }
 biome_console       = { workspace = true }
@@ -23,7 +23,7 @@ biome_fs            = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_service       = { workspace = true }
 biome_text_edit     = { workspace = true }
-futures             = "0.3"
+futures             = "0.3.30"
 rustc-hash          = { workspace = true }
 serde               = { workspace = true, features = ["derive"] }
 serde_json          = { workspace = true }

@@ -5,7 +5,7 @@ publish = false
 version = "0.0.0"
 
 [dependencies]
-anyhow         = "1.0.82"
+anyhow         = { workspace = true }
 bpaf           = { workspace = true, features = ["derive"] }
 git2           = { version = "0.18.3", default-features = false }
 proc-macro2    = { workspace = true, features = ["span-locations"] }
