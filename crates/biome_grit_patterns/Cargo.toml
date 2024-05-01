@@ -12,7 +12,7 @@ repository.workspace = true
 version              = "0.0.1"
 
 [dependencies]
-anyhow               = "1.0.52"
+anyhow               = { workspace = true }
 biome_console        = { workspace = true }
 biome_diagnostics    = { workspace = true }
 grit-pattern-matcher = { version = "0.1" }
