@@ -336,7 +336,7 @@ pub struct FixAllParams<'a> {
     pub(crate) document_file_source: DocumentFileSource,
 }
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 /// The list of capabilities that are available for a language
 pub struct Capabilities {
     pub(crate) parser: ParserCapabilities,
@@ -354,7 +354,7 @@ pub struct ParseResult {
 type Parse =
     fn(&BiomePath, DocumentFileSource, &str, SettingsHandle, &mut NodeCache) -> ParseResult;
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct ParserCapabilities {
     /// Parse a file
     pub(crate) parse: Option<Parse>,
@@ -365,7 +365,7 @@ type DebugControlFlow = fn(AnyParse, TextSize) -> String;
 type DebugFormatterIR =
     fn(&BiomePath, &DocumentFileSource, AnyParse, SettingsHandle) -> Result<String, WorkspaceError>;
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct DebugCapabilities {
     /// Prints the syntax tree
     pub(crate) debug_syntax_tree: Option<DebugSyntaxTree>,
@@ -407,7 +407,7 @@ type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
 type OrganizeImports = fn(AnyParse) -> Result<OrganizeImportsResult, WorkspaceError>;
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct AnalyzerCapabilities {
     /// It lints a file
     pub(crate) lint: Option<Lint>,
@@ -442,7 +442,7 @@ type FormatOnType = fn(
     TextSize,
 ) -> Result<Printed, WorkspaceError>;
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub(crate) struct FormatterCapabilities {
     /// It formats a file
     pub(crate) format: Option<Format>,

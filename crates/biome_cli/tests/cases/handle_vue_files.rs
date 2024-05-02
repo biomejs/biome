@@ -1,6 +1,6 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
-use biome_console::BufferConsole;
+use crate::snap_test::{assert_cli_snapshot, assert_file_contents, markup_to_string, SnapshotPayload};
+use biome_console::{BufferConsole, markup};
 use biome_fs::MemoryFileSystem;
 use biome_service::DynRef;
 use bpaf::Args;
@@ -55,6 +55,14 @@ a == b;
 delete a.c;
 
 var foo: string = "";
+</script>
+<template></template>"#;
+
+const VUE_TS_FILE_LINTED: &str = r#"<script setup lang="ts">
+a === b;
+a.c = undefined;
+
+const foo = "";
 </script>
 <template></template>"#;
 
@@ -519,6 +527,46 @@ fn sorts_imports_write() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "sorts_imports_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_stdin_apply_unsafe_successfully() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    console
+        .in_buffer
+        .push(VUE_TS_FILE_NOT_LINTED.to_string());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), "--apply", ("--stdin-file-path"), ("file.vue")].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let message = console
+        .out_buffer
+        .first()
+        .expect("Console should have written a message");
+
+    let content = markup_to_string(markup! {
+        {message.content}
+    });
+
+    assert_eq!(
+        content,
+        VUE_TS_FILE_LINTED
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_stdin_apply_unsafe_successfully",
         fs,
         console,
         result,

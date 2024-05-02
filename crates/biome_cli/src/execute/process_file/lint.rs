@@ -35,8 +35,6 @@ pub(crate) fn lint_with_guard<'ctx>(
                 });
 
                 let mut output = fix_result.code;
-                eprintln!("input: {:?}", input);
-                eprintln!("output: {:?}", output);
 
                 match workspace_file.as_extension() {
                     Some("astro") => {

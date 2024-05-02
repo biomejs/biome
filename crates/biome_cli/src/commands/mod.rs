@@ -514,7 +514,6 @@ pub(crate) fn get_stdin(
 ) -> Result<Option<Stdin>, CliDiagnostic> {
     let stdin = if let Some(stdin_file_path) = stdin_file_path {
         let input_code = console.read();
-        eprintln!("console.read(): {:?}", console.read());
         if let Some(input_code) = input_code {
             let path = PathBuf::from(stdin_file_path);
             Some((path, input_code).into())

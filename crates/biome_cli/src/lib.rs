@@ -66,7 +66,6 @@ impl<'app> CliSession<'app> {
 
     /// Main function to run Biome CLI
     pub fn run(self, command: BiomeCommand) -> Result<(), CliDiagnostic> {
-        eprintln!("{:?}", command);
         let has_metrics = command.has_metrics();
         if has_metrics {
             crate::metrics::init_metrics();

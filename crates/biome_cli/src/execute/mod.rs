@@ -349,7 +349,6 @@ pub fn execute_mode(
     // don't do any traversal if there's some content coming from stdin
     if let Some(stdin) = execution.as_stdin_file() {
         let biome_path = BiomePath::new(stdin.as_path());
-        eprintln!("biome_path: {:?}", biome_path);
         std_in::run(
             session,
             &execution,

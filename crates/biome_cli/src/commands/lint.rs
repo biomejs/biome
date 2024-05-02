@@ -106,8 +106,6 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
 
     let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "lint")?;
 
-    eprintln!("{:?}", stdin);
-
     session
         .app
         .workspace

@@ -235,7 +235,7 @@ fn lint_and_fix_astro_files() {
         ),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_file_contents(&fs, astro_file_path, ASTRO_FILE_DEBUGGER_AFTER);
 
@@ -345,7 +345,7 @@ fn does_not_throw_parse_error_for_return() {
 }
 
 #[test]
-fn check_stdin_apply_successfully() {
+fn check_stdin_apply_unsafe_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -359,7 +359,7 @@ fn check_stdin_apply_successfully() {
         Args::from([("lint"), "--apply-unsafe", ("--stdin-file-path"), ("file.astro")].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     let message = console
         .out_buffer
@@ -377,59 +377,9 @@ fn check_stdin_apply_successfully() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "check_stdin_apply_successfully",
+        "check_stdin_apply_unsafe_successfully",
         fs,
         console,
         result,
     ));
 }
-//
-// #[test]
-// fn check_stdin_apply_unsafe_successfully() {
-//     let mut fs = MemoryFileSystem::default();
-//     let mut console = BufferConsole::default();
-//
-//     console.in_buffer.push(
-//         "import zod from 'zod'; import _ from 'lodash'; function f() {var x = 1; return{x}} class Foo {}"
-//             .to_string(),
-//     );
-//
-//     let result = run_cli(
-//         DynRef::Borrowed(&mut fs),
-//         &mut console,
-//         Args::from(
-//             [
-//                 ("check"),
-//                 "--organize-imports-enabled=true",
-//                 "--apply-unsafe",
-//                 ("--stdin-file-path"),
-//                 ("mock.js"),
-//             ]
-//                 .as_slice(),
-//         ),
-//     );
-//
-//     assert!(result.is_ok(), "run_cli returned {result:?}");
-//
-//     let message = console
-//         .out_buffer
-//         .first()
-//         .expect("Console should have written a message");
-//
-//     let content = markup_to_string(markup! {
-//         {message.content}
-//     });
-//
-//     assert_eq!(
-//         content,
-//         "import _ from \"lodash\";\nimport zod from \"zod\";\nfunction f() {\n\tconst x = 1;\n\treturn { x };\n}\nclass Foo {}\n"
-//     );
-//
-//     assert_cli_snapshot(SnapshotPayload::new(
-//         module_path!(),
-//         "check_stdin_apply_unsafe_successfully",
-//         fs,
-//         console,
-//         result,
-//     ));
-// }
