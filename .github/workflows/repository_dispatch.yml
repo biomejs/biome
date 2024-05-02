@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  BIOME_WEBSITE_REPO: biomejs/website
+  BIOME_WEBSITE_REPO: Sec-ant/website
   BIOME_PUSH_ON_MAIN_EVENT_TYPE: biome-push-on-main-event
 
 jobs:
