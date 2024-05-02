@@ -14,6 +14,7 @@ use biome_service::workspace::{
 };
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 
 pub(crate) fn run<'a>(
     session: CliSession,
@@ -67,6 +68,7 @@ pub(crate) fn run<'a>(
     } else if mode.is_check() || mode.is_lint() {
         let mut diagnostics = Vec::new();
         let mut new_content = Cow::Borrowed(content);
+        eprintln!("new_content (Cow::Borrowed(content)): {:?}", new_content);
 
         workspace.open_file(OpenFileParams {
             path: biome_path.clone(),
@@ -105,14 +107,33 @@ pub(crate) fn run<'a>(
                     path: biome_path.clone(),
                     should_format: mode.is_check() && file_features.supports_format(),
                 })?;
-                if fix_file_result.code != new_content {
+                eprintln!("fix_file_result, {:?}", fix_file_result);
+                eprintln!("fix_file_result.code, {:?}", fix_file_result.code);
+
+                let mut output = fix_file_result.code.clone();
+                match biome_path.extension_as_str() {
+                    "astro" => {
+                        output = AstroFileHandler::output(content, output.as_str());
+                    }
+                    "vue" => {
+                        output = VueFileHandler::output(content, output.as_str());
+                    }
+                    "svelte" => {
+                        output = SvelteFileHandler::output(content, output.as_str());
+                    }
+                    _ => {}
+                }
+                eprintln!("output: {:?}", output);
+
+                if output != new_content {
+                    eprintln!("fix_file_result.code != new_content");
                     version += 1;
                     workspace.change_file(ChangeFileParams {
-                        content: fix_file_result.code.clone(),
+                        content: output.clone(),
                         path: biome_path.clone(),
                         version,
                     })?;
-                    new_content = Cow::Owned(fix_file_result.code);
+                    new_content = Cow::Owned(output);
                 }
             }
 
@@ -133,11 +154,13 @@ pub(crate) fn run<'a>(
         }
 
         if !mode.is_check_apply_unsafe() {
+            eprintln!("if !mode.is_check_apply_unsafe()");
             let result = workspace.pull_diagnostics(PullDiagnosticsParams {
                 categories: RuleCategories::LINT | RuleCategories::SYNTAX,
                 path: biome_path.clone(),
                 max_diagnostics: mode.max_diagnostics.into(),
             })?;
+            eprintln!("result: {:?}", result);
             diagnostics.extend(result.diagnostics);
         }
 
@@ -163,11 +186,14 @@ pub(crate) fn run<'a>(
 
         match new_content {
             Cow::Borrowed(original_content) => {
+                eprintln!("new_content is original_content!");
                 console.append(markup! {
                     {original_content}
                 });
             }
             Cow::Owned(new_content) => {
+                eprintln!("new_content is new_content!");
+                eprintln!("new_content: {:?}", new_content);
                 console.append(markup! {
                     {new_content}
                 });

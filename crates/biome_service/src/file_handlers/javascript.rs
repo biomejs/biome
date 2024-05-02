@@ -549,7 +549,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     else {
         return Err(extension_error(biome_path));
     };
+    eprintln!("file_source: {:?}", file_source);
     let mut tree: AnyJsRoot = parse.tree();
+    eprintln!("tree: {:?}", tree);
     let mut actions = Vec::new();
 
     filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;

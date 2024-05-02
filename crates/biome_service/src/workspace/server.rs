@@ -686,6 +686,7 @@ impl Workspace for WorkspaceServer {
 
     fn fix_file(&self, params: super::FixFileParams) -> Result<FixFileResult, WorkspaceError> {
         let capabilities = self.get_file_capabilities(&params.path);
+        eprintln!("capabilities: {:?}", capabilities);
 
         let fix_all = capabilities
             .analyzer
@@ -704,6 +705,16 @@ impl Workspace for WorkspaceServer {
         let filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
         let language = self.get_file_source(&params.path);
+        eprintln!("parse, {:?}", parse.has_errors());
+        eprintln!("path, {:?}", params.path);
+        eprintln!("rules: {:?}", rules);
+        eprintln!("fix_file_mode: {:?}", params.fix_file_mode);
+        eprintln!("filter: {:?}", filter);
+        eprintln!("settings: {:?}", self.settings());
+        eprintln!("should_format: {:?}", params.should_format);
+        eprintln!("biome_path: {:?}", params.path);
+        eprintln!("manifest: {:?}", manifest);
+        eprintln!("language: {:?}", language);
         fix_all(FixAllParams {
             parse,
             rules: rules.as_ref().map(|x| x.borrow()),

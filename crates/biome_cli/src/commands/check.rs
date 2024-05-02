@@ -76,6 +76,8 @@ pub(crate) fn check(
     )?;
     resolve_manifest(&session)?;
 
+    eprintln!("{:?}", loaded_configuration);
+
     let LoadedConfiguration {
         configuration: mut fs_configuration,
         directory_path: configuration_path,
@@ -123,6 +125,8 @@ pub(crate) fn check(
         fs_configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
     let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "check")?;
+
+    eprintln!("{:?}", stdin);
 
     if let Some(_paths) =
         get_files_to_process(since, changed, staged, &session.app.fs, &fs_configuration)?
