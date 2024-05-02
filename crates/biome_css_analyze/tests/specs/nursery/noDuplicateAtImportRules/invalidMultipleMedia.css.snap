@@ -1,0 +1,28 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidMultipleMedia.css
+---
+# Input
+```css
+@import url("a.css") tv, projection;
+@import url("a.css") mobile;
+@import url("a.css") tv;
+
+```
+
+# Diagnostics
+```
+invalidMultipleMedia.css:3:2 lint/nursery/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Each @import should be unique unless differing by media queries.
+  
+    1 │ @import url("a.css") tv, projection;
+    2 │ @import url("a.css") mobile;
+  > 3 │ @import url("a.css") tv;
+      │  ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Consider removing one of the duplicated imports.
+  
+
+```
