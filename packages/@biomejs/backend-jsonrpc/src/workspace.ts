@@ -985,6 +985,10 @@ export interface Nursery {
 	 */
 	noUnknownFunction?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown pseudo-element selectors.
+	 */
+	noUnknownSelectorPseudoElement?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unknown CSS units.
 	 */
 	noUnknownUnit?: RuleConfiguration_for_Null;
@@ -2006,6 +2010,7 @@ export type Category =
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
+	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/useArrayLiterals"

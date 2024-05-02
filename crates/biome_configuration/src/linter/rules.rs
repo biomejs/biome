@@ -2705,6 +2705,10 @@ pub struct Nursery {
     #[doc = "Disallow unknown CSS value functions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_function: Option<RuleConfiguration<NoUnknownFunction>>,
+    #[doc = "Disallow unknown pseudo-element selectors."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_unknown_selector_pseudo_element:
+        Option<RuleConfiguration<NoUnknownSelectorPseudoElement>>,
     #[doc = "Disallow unknown CSS units."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_unit: Option<RuleConfiguration<NoUnknownUnit>>,
@@ -2768,6 +2772,7 @@ impl Nursery {
         "noRestrictedImports",
         "noUndeclaredDependencies",
         "noUnknownFunction",
+        "noUnknownSelectorPseudoElement",
         "noUnknownUnit",
         "noUselessUndefinedInitialization",
         "useArrayLiterals",
@@ -2789,6 +2794,7 @@ impl Nursery {
         "noFlatMapIdentity",
         "noImportantInKeyframe",
         "noUnknownFunction",
+        "noUnknownSelectorPseudoElement",
         "noUnknownUnit",
         "useGenericFontNames",
     ];
@@ -2805,7 +2811,8 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -2835,6 +2842,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -2946,44 +2954,49 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_unknown_unit.as_ref() {
+        if let Some(rule) = self.no_unknown_selector_pseudo_element.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
+        if let Some(rule) = self.no_unknown_unit.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_array_literals.as_ref() {
+        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_consistent_builtin_instantiation.as_ref() {
+        if let Some(rule) = self.use_array_literals.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_default_switch_clause.as_ref() {
+        if let Some(rule) = self.use_consistent_builtin_instantiation.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_generic_font_names.as_ref() {
+        if let Some(rule) = self.use_default_switch_clause.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_generic_font_names.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
         index_set
@@ -3085,44 +3098,49 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_unknown_unit.as_ref() {
+        if let Some(rule) = self.no_unknown_selector_pseudo_element.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
+        if let Some(rule) = self.no_unknown_unit.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_array_literals.as_ref() {
+        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_consistent_builtin_instantiation.as_ref() {
+        if let Some(rule) = self.use_array_literals.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_default_switch_clause.as_ref() {
+        if let Some(rule) = self.use_consistent_builtin_instantiation.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_generic_font_names.as_ref() {
+        if let Some(rule) = self.use_default_switch_clause.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_generic_font_names.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
         index_set
@@ -3235,6 +3253,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownFunction" => self
                 .no_unknown_function
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUnknownSelectorPseudoElement" => self
+                .no_unknown_selector_pseudo_element
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownUnit" => self

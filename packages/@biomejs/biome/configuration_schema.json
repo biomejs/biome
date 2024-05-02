@@ -1566,6 +1566,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownSelectorPseudoElement": {
+					"description": "Disallow unknown pseudo-element selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownUnit": {
 					"description": "Disallow unknown CSS units.",
 					"anyOf": [
