@@ -2289,6 +2289,8 @@ async fn multiple_projects() -> Result<()> {
         .open_named_document(file_lint_only, url!("test_two/file.js"), "javascript")
         .await?;
 
+    let _ = sleep(Duration::from_secs(1));
+
     let res: Option<Vec<TextEdit>> = server
         .request(
             "textDocument/formatting",
