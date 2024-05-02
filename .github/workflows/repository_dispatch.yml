@@ -1,13 +1,16 @@
-name: Repository dispatch on main
+name: Repository dispatch
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
 
 env:
-  BIOME_WEBSITE_REPO: biomejs/website
+  BIOME_WEBSITE_REPO: Sec-ant/website
   BIOME_PUSH_ON_MAIN_EVENT_TYPE: biome-push-on-main-event
+  BIOME_PULL_REQUEST_EVENT_TYPE: biome-pull-request-event
 
 jobs:
   repository-dispatch:
@@ -21,6 +24,14 @@ jobs:
           token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
           repository: ${{ env.BIOME_WEBSITE_REPO }}
           event-type: ${{ env.BIOME_PUSH_ON_MAIN_EVENT_TYPE }}
+          client-payload: '{"event": ${{ toJson(github.event) }}}'
+      - name: Dispatch event on pull request
+        if: ${{ github.event_name == 'pull_request'}}
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
+          repository: ${{ env.BIOME_WEBSITE_REPO }}
+          event-type: ${{ env.BIOME_PULL_REQUEST_EVENT_TYPE }}
           client-payload: '{"event": ${{ toJson(github.event) }}}'
       # For testing only, the payload is mocked
       - name: Dispatch event on workflow dispatch

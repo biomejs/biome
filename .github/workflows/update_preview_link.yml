@@ -1,0 +1,28 @@
+name: Update preview link
+on:
+  repository_dispatch:
+    types: [biome-forward-preview-link-event]
+
+jobs:
+  update-preview-link:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: "update-preview-link-${{ github.event.client_payload.pr_number }}"
+      cancel-in-progress: true
+    steps:
+      - name: Find comment
+        uses: peter-evans/find-comment@v3
+        id: fc
+        with:
+          issue-number: ${{ github.event.client_payload.pr_number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "Forwarded from [biomejs/website]"
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.client_payload.pr_number }}
+          body: |
+            Forwarded from [biomejs/website](${{ github.event.client_payload.html_url }}):
+            ${{ github.event.client_payload.body }}
+          edit-mode: replace
