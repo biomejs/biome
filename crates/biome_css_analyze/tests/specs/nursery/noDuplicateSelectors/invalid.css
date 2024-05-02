@@ -1,48 +1,51 @@
-/* Duplication of single selectors in a rule's selector list */
-.alpha,
-.beta,
-.alpha {
-    width: 12;
-}
+/* duplicate within one rule's selector list */
+a, a {}
 
-/* Duplication of selector lists within the style sheet */
-/* Duplication is found even if the selectors have different ordering */
-.foo .bar {
-    width: 12;
-}
+/* duplicate within one rule's selector list. multiline */
+b,
+b {}
 
-.bar .foo {
-    width: 12;
-}
+/* duplicate within one rule's selector list. multiline */
+c,
+d,
+d {}
 
-a .can,
-b+.dle {
-    width: 12;
-}
+/* duplicated selectors within one rule's selector list. 3 duplicates */
+.e,
+.e,
+.e {}
 
-b+.dle,
-a .can {
-    width: 12;
-}
+/* duplicate simple selectors with another rule between */
+f {} g {} f {}
 
-/* Duplication within @ rule */
-@media (min-width: 10px) {
-    .foo {
-        width: 12;
-    }
+/* duplicate simple selectors with another rule between */
+h {}
+i {}
+h {}
 
-    .foo {
-        width: 12;
-    }
-}
+/* duplicate selector lists with different order */
+j, k {} j, k {}
 
-/* Duplication when the net result of nesting is the same */
-a b {
-    width: 12;
-}
+/* duplicate selectors with multiple components */
+m n {}
+m n {}
 
-a {
-    & b {
-        width: 12;
-    }
-}
+/* essentially duplicate selector lists with varied spacing */
+.foo   p, q > .bar,
+baz {}
+  #baz,
+  .foo     p,q>.bar {}
+
+/* duplicate within a media query, in the same rule */
+s {}
+@media print { s, s {} }
+
+/* duplicate within a media query, in different rules */
+t {}
+@media print { t {} t {} }
+
+/* duplicate caused by nesting */
+v w {} v { w {} }
+
+/* duplicate caused by &-parent selector */
+x { & {} }

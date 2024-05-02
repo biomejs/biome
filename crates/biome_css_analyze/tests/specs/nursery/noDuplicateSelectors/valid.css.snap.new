@@ -5,56 +5,241 @@ expression: valid.css
 ---
 # Input
 ```css
-/* Same selector with different parent nodes are allowed */
-.foo {
-    width: 12;
-}
+/* no duplicates */
+a {} b {} c {} d, e, f {}
 
-@media (min-width: 10px) {
-    .foo {
-        width: 12;
-    }
-}
+/* duplicate inside media query */
+g {}
+@media print { g {} }	
 
-.bar {
-    .bar {
-        width: 12;
-    }
-}
+/* duplicate inside keyframes */
+@keyframes h { 0% {} }
+@keyframes h { 0% {} }
 
-/* Same selector in a different list */
-.foo .bar {
-    width: 12;
-}
+/* duplicates inside nested rules */
+i { i { i {} } }
 
-/* Net list is different */
-a b {
-    width: 12;
-}
+/* selectors using parts of other selectors */
+.foo .bar {}
+.foo {}
+.bar {}
+.bar .foo {}
 
-a {
+/* selectors reused in other non-equivalent selector lists */
+j {} j, k {}
 
-    & b,
-    & c {
-        width: 12;
-    }
-}
+/* nested resolution */
+m n { top: 0; } m { n, p { color: pink; } }	
+
+@mixin abc { &:hover {} } @mixin xyz { &:hover {} }
+
+/* pass if default setting i.e. disallowInList: false */
+ul, ol {} ul {}
+
+/* attribute selector */
+[disabled].goo, [disabled] .goo {}
+
 ```
 
 # Diagnostics
 ```
-valid.css:6:27 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+valid.css:6:16 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate selector.
   
-    4 │ }
-    5 │ 
-  > 6 │ @media (min-width: 10px) {
-      │                           
-  > 7 │     .foo {
-      │     ^^^^^
-    8 │         width: 12;
-    9 │     }
+    4 │ /* duplicate inside media query */
+    5 │ g {}
+  > 6 │ @media print { g {} }→ 
+      │                ^^
+    7 │ 
+    8 │ /* duplicate inside keyframes */
+  
+  i Please fix it.
+  
+
+```
+
+```
+valid.css:13:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    12 │ /* duplicates inside nested rules */
+  > 13 │ i { i { i {} } }
+       │     ^^
+    14 │ 
+    15 │ /* selectors using parts of other selectors */
+  
+  i Please fix it.
+  
+
+```
+
+```
+valid.css:16:13 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    15 │ /* selectors using parts of other selectors */
+  > 16 │ .foo .bar {}
+       │             
+  > 17 │ .foo {}
+       │ ^^^^^
+    18 │ .bar {}
+    19 │ .bar .foo {}
+  
+  i Please fix it.
+  
+
+```
+
+```
+valid.css:17:8 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    15 │ /* selectors using parts of other selectors */
+    16 │ .foo .bar {}
+  > 17 │ .foo {}
+       │        
+  > 18 │ .bar {}
+       │ ^^^^^
+    19 │ .bar .foo {}
+    20 │ 
+  
+  i Please fix it.
+  
+
+```
+
+```
+valid.css:18:8 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    16 │ .foo .bar {}
+    17 │ .foo {}
+  > 18 │ .bar {}
+       │        
+  > 19 │ .bar .foo {}
+       │ ^^^^
+    20 │ 
+    21 │ /* selectors reused in other non-equivalent selector lists */
+  
+  i Please fix it.
+  
+
+```
+
+```
+valid.css:19:6 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    17 │ .foo {}
+    18 │ .bar {}
+  > 19 │ .bar .foo {}
+       │      ^^^^^
+    20 │ 
+    21 │ /* selectors reused in other non-equivalent selector lists */
+  
+  i Please fix it.
+  
+
+```
+
+```
+valid.css:22:6 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    21 │ /* selectors reused in other non-equivalent selector lists */
+  > 22 │ j {} j, k {}
+       │      ^
+    23 │ 
+    24 │ /* nested resolution */
+  
+  i Please fix it.
+  
+
+```
+
+```
+valid.css:25:17 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    24 │ /* nested resolution */
+  > 25 │ m n { top: 0; } m { n, p { color: pink; } }→ 
+       │                 ^^
+    26 │ 
+    27 │ @mixin abc { &:hover {} } @mixin xyz { &:hover {} }
+  
+  i Please fix it.
+  
+
+```
+
+```
+valid.css:25:21 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    24 │ /* nested resolution */
+  > 25 │ m n { top: 0; } m { n, p { color: pink; } }→ 
+       │                     ^
+    26 │ 
+    27 │ @mixin abc { &:hover {} } @mixin xyz { &:hover {} }
+  
+  i Please fix it.
+  
+
+```
+
+```
+valid.css:27:28 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    25 │ m n { top: 0; } m { n, p { color: pink; } }→ 
+    26 │ 
+  > 27 │ @mixin abc { &:hover {} } @mixin xyz { &:hover {} }
+       │                            ^^^^^
+    28 │ 
+    29 │ /* pass if default setting i.e. disallowInList: false */
+  
+  i Please fix it.
+  
+
+```
+
+```
+valid.css:27:40 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    25 │ m n { top: 0; } m { n, p { color: pink; } }→ 
+    26 │ 
+  > 27 │ @mixin abc { &:hover {} } @mixin xyz { &:hover {} }
+       │                                        ^^^^^^^^
+    28 │ 
+    29 │ /* pass if default setting i.e. disallowInList: false */
+  
+  i Please fix it.
+  
+
+```
+
+```
+valid.css:30:11 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    29 │ /* pass if default setting i.e. disallowInList: false */
+  > 30 │ ul, ol {} ul {}
+       │           ^^^
+    31 │ 
+    32 │ /* attribute selector */
   
   i Please fix it.
   

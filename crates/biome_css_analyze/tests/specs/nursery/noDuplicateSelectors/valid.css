@@ -1,34 +1,33 @@
-/* Same selector with different parent nodes are allowed */
-.foo {
-    width: 12;
-}
+/* no duplicates */
+a {} b {} c {} d, e, f {}
 
-@media (min-width: 10px) {
-    .foo {
-        width: 12;
-    }
-}
+/* duplicate inside media query */
+g {}
+@media print { g {} }	
 
-.bar {
-    .bar {
-        width: 12;
-    }
-}
+/* duplicate inside keyframes */
+@keyframes h { 0% {} }
+@keyframes h { 0% {} }
 
-/* Same selector in a different list */
-.foo .bar {
-    width: 12;
-}
+/* duplicates inside nested rules */
+i { i { i {} } }
 
-/* Net list is different */
-a b {
-    width: 12;
-}
+/* selectors using parts of other selectors */
+.foo .bar {}
+.foo {}
+.bar {}
+.bar .foo {}
 
-a {
+/* selectors reused in other non-equivalent selector lists */
+j {} j, k {}
 
-    & b,
-    & c {
-        width: 12;
-    }
-}
+/* nested resolution */
+m n { top: 0; } m { n, p { color: pink; } }	
+
+@mixin abc { &:hover {} } @mixin xyz { &:hover {} }
+
+/* pass if default setting i.e. disallowInList: false */
+ul, ol {} ul {}
+
+/* attribute selector */
+[disabled].goo, [disabled] .goo {}

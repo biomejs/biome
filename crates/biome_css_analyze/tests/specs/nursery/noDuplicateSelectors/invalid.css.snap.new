@@ -5,70 +5,70 @@ expression: invalid.css
 ---
 # Input
 ```css
-/* Duplication of single selectors in a rule's selector list */
-.alpha,
-.beta,
-.alpha {
-    width: 12;
-}
+/* duplicate within one rule's selector list */
+a, a {}
 
-/* Duplication of selector lists within the style sheet */
-/* Duplication is found even if the selectors have different ordering */
-.foo .bar {
-    width: 12;
-}
+/* duplicate within one rule's selector list. multiline */
+b,
+b {}
 
-.bar .foo {
-    width: 12;
-}
+/* duplicate within one rule's selector list. multiline */
+c,
+d,
+d {}
 
-a .can,
-b+.dle {
-    width: 12;
-}
+/* duplicated selectors within one rule's selector list. 3 duplicates */
+.e,
+.e,
+.e {}
 
-b+.dle,
-a .can {
-    width: 12;
-}
+/* duplicate simple selectors with another rule between */
+f {} g {} f {}
 
-/* Duplication within @ rule */
-@media (min-width: 10px) {
-    .foo {
-        width: 12;
-    }
+/* duplicate simple selectors with another rule between */
+h {}
+i {}
+h {}
 
-    .foo {
-        width: 12;
-    }
-}
+/* duplicate selector lists with different order */
+j, k {} j, k {}
 
-/* Duplication when the net result of nesting is the same */
-a b {
-    width: 12;
-}
+/* duplicate selectors with multiple components */
+m n {}
+m n {}
 
-a {
-    & b {
-        width: 12;
-    }
-}
+/* essentially duplicate selector lists with varied spacing */
+.foo   p, q > .bar,
+baz {}
+  #baz,
+  .foo     p,q>.bar {}
+
+/* duplicate within a media query, in the same rule */
+s {}
+@media print { s, s {} }
+
+/* duplicate within a media query, in different rules */
+t {}
+@media print { t {} t {} }
+
+/* duplicate caused by nesting */
+v w {} v { w {} }
+
+/* duplicate caused by &-parent selector */
+x { & {} }
 ```
 
 # Diagnostics
 ```
-invalid.css:3:7 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate selector.
   
-    1 │ /* Duplication of single selectors in a rule's selector list */
-    2 │ .alpha,
-  > 3 │ .beta,
-      │       
-  > 4 │ .alpha {
-      │ ^^^^^^^
-    5 │     width: 12;
-    6 │ }
+    1 │ /* duplicate within one rule's selector list */
+  > 2 │ a, a {}
+      │    ^^
+    3 │ 
+    4 │ /* duplicate within one rule's selector list. multiline */
   
   i Please fix it.
   
@@ -76,19 +76,17 @@ invalid.css:3:7 lint/nursery/noDuplicateSelectors ━━━━━━━━━━
 ```
 
 ```
-invalid.css:12:2 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate selector.
   
-    10 │ .foo .bar {
-    11 │     width: 12;
-  > 12 │ }
-       │  
-  > 13 │ 
-  > 14 │ .bar .foo {
-       │ ^^^^^^^^^^
-    15 │     width: 12;
-    16 │ }
+    4 │ /* duplicate within one rule's selector list. multiline */
+  > 5 │ b,
+      │   
+  > 6 │ b {}
+      │ ^^
+    7 │ 
+    8 │ /* duplicate within one rule's selector list. multiline */
   
   i Please fix it.
   
@@ -96,19 +94,18 @@ invalid.css:12:2 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 
 ```
-invalid.css:21:2 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:10:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate selector.
   
-    19 │ b+.dle {
-    20 │     width: 12;
-  > 21 │ }
-       │  
-  > 22 │ 
-  > 23 │ b+.dle,
-       │ ^^^^^^
-    24 │ a .can {
-    25 │     width: 12;
+     8 │ /* duplicate within one rule's selector list. multiline */
+     9 │ c,
+  > 10 │ d,
+       │   
+  > 11 │ d {}
+       │ ^^
+    12 │ 
+    13 │ /* duplicated selectors within one rule's selector list. 3 duplicates */
   
   i Please fix it.
   
@@ -116,18 +113,175 @@ invalid.css:21:2 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 
 ```
-invalid.css:23:8 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:14:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate selector.
   
-    21 │ }
-    22 │ 
-  > 23 │ b+.dle,
+    13 │ /* duplicated selectors within one rule's selector list. 3 duplicates */
+  > 14 │ .e,
+       │    
+  > 15 │ .e,
+       │ ^^
+    16 │ .e {}
+    17 │ 
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:15:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    13 │ /* duplicated selectors within one rule's selector list. 3 duplicates */
+    14 │ .e,
+  > 15 │ .e,
+       │    
+  > 16 │ .e {}
+       │ ^^^
+    17 │ 
+    18 │ /* duplicate simple selectors with another rule between */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:19:11 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    18 │ /* duplicate simple selectors with another rule between */
+  > 19 │ f {} g {} f {}
+       │           ^^
+    20 │ 
+    21 │ /* duplicate simple selectors with another rule between */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:23:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    21 │ /* duplicate simple selectors with another rule between */
+    22 │ h {}
+  > 23 │ i {}
+       │     
+  > 24 │ h {}
+       │ ^^
+    25 │ 
+    26 │ /* duplicate selector lists with different order */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:27:9 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    26 │ /* duplicate selector lists with different order */
+  > 27 │ j, k {} j, k {}
+       │         ^
+    28 │ 
+    29 │ /* duplicate selectors with multiple components */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:27:12 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    26 │ /* duplicate selector lists with different order */
+  > 27 │ j, k {} j, k {}
+       │            ^^
+    28 │ 
+    29 │ /* duplicate selectors with multiple components */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:30:7 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    29 │ /* duplicate selectors with multiple components */
+  > 30 │ m n {}
+       │       
+  > 31 │ m n {}
+       │ ^
+    32 │ 
+    33 │ /* essentially duplicate selector lists with varied spacing */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:30:7 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    29 │ /* duplicate selectors with multiple components */
+  > 30 │ m n {}
+       │       
+  > 31 │ m n {}
+       │ ^^^^
+    32 │ 
+    33 │ /* essentially duplicate selector lists with varied spacing */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:31:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    29 │ /* duplicate selectors with multiple components */
+    30 │ m n {}
+  > 31 │ m n {}
+       │   ^^
+    32 │ 
+    33 │ /* essentially duplicate selector lists with varied spacing */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:36:8 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    34 │ .foo   p, q > .bar,
+    35 │ baz {}
+  > 36 │   #baz,
        │        
-  > 24 │ a .can {
-       │ ^^^^^^^
-    25 │     width: 12;
-    26 │ }
+  > 37 │   .foo     p,q>.bar {}
+       │   ^^^^
+    38 │ 
+    39 │ /* duplicate within a media query, in the same rule */
   
   i Please fix it.
   
@@ -135,19 +289,184 @@ invalid.css:23:8 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 
 ```
-invalid.css:32:6 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:37:12 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate selector.
   
-    30 │     .foo {
-    31 │         width: 12;
-  > 32 │     }
-       │      
-  > 33 │ 
-  > 34 │     .foo {
-       │     ^^^^^
-    35 │         width: 12;
-    36 │     }
+    35 │ baz {}
+    36 │   #baz,
+  > 37 │   .foo     p,q>.bar {}
+       │            ^
+    38 │ 
+    39 │ /* duplicate within a media query, in the same rule */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:37:14 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    35 │ baz {}
+    36 │   #baz,
+  > 37 │   .foo     p,q>.bar {}
+       │              ^
+    38 │ 
+    39 │ /* duplicate within a media query, in the same rule */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:37:16 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    35 │ baz {}
+    36 │   #baz,
+  > 37 │   .foo     p,q>.bar {}
+       │                ^^^^^
+    38 │ 
+    39 │ /* duplicate within a media query, in the same rule */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:41:16 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    39 │ /* duplicate within a media query, in the same rule */
+    40 │ s {}
+  > 41 │ @media print { s, s {} }
+       │                ^
+    42 │ 
+    43 │ /* duplicate within a media query, in different rules */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:41:19 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    39 │ /* duplicate within a media query, in the same rule */
+    40 │ s {}
+  > 41 │ @media print { s, s {} }
+       │                   ^^
+    42 │ 
+    43 │ /* duplicate within a media query, in different rules */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:41:19 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    39 │ /* duplicate within a media query, in the same rule */
+    40 │ s {}
+  > 41 │ @media print { s, s {} }
+       │                   ^^
+    42 │ 
+    43 │ /* duplicate within a media query, in different rules */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:45:16 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    43 │ /* duplicate within a media query, in different rules */
+    44 │ t {}
+  > 45 │ @media print { t {} t {} }
+       │                ^^
+    46 │ 
+    47 │ /* duplicate caused by nesting */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:45:21 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    43 │ /* duplicate within a media query, in different rules */
+    44 │ t {}
+  > 45 │ @media print { t {} t {} }
+       │                     ^^
+    46 │ 
+    47 │ /* duplicate caused by nesting */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:45:21 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    43 │ /* duplicate within a media query, in different rules */
+    44 │ t {}
+  > 45 │ @media print { t {} t {} }
+       │                     ^^
+    46 │ 
+    47 │ /* duplicate caused by nesting */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:48:8 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    47 │ /* duplicate caused by nesting */
+  > 48 │ v w {} v { w {} }
+       │        ^^
+    49 │ 
+    50 │ /* duplicate caused by &-parent selector */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:48:12 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    47 │ /* duplicate caused by nesting */
+  > 48 │ v w {} v { w {} }
+       │            ^^
+    49 │ 
+    50 │ /* duplicate caused by &-parent selector */
   
   i Please fix it.
   
