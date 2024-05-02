@@ -1468,6 +1468,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateAtImportRules": {
+					"description": "Disallow duplicate @import rules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateElseIf": {
 					"description": "Disallow duplicate conditions in if-else-if chains",
 					"anyOf": [

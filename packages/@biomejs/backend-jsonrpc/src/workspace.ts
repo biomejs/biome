@@ -929,6 +929,10 @@ export interface Nursery {
 	 */
 	noDoneCallback?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate @import rules.
+	 */
+	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
@@ -1990,6 +1994,7 @@ export type Category =
 	| "lint/nursery/noConstantMathMinMaxClamp"
 	| "lint/nursery/noCssEmptyBlock"
 	| "lint/nursery/noDoneCallback"
+	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
@@ -2011,8 +2016,8 @@ export type Category =
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
-	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"

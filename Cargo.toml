@@ -65,11 +65,12 @@ float_cmp_const                 = "warn"
 get_unwrap                      = "warn"
 infinite_loop                   = "warn"
 lossy_float_literal             = "warn"
-mem_forget                      = "warn"
 rc_buffer                       = "warn"
 rc_mutex                        = "warn"
 rest_pat_in_fully_bound_structs = "warn"
 verbose_file_reads              = "warn"
+# https://github.com/rustwasm/wasm-bindgen/issues/3944
+#mem_forget                      = "warn"
 
 [workspace.package]
 authors    = ["Biome Developers and Contributors"]
@@ -149,6 +150,7 @@ biome_ungrammar      = { path = "./crates/biome_ungrammar" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
+anyhow             = "1.0.82"
 bitflags           = "2.5.0"
 bpaf               = { version = "0.9.9", features = ["derive"] }
 countme            = "3.0.1"
@@ -156,7 +158,7 @@ crossbeam          = "0.8.4"
 dashmap            = "5.4.0"
 getrandom          = "0.2.14"
 ignore             = "0.4.21"
-indexmap           = "1.9.3"
+indexmap           = { version = "2.2.6", features = ["serde"] }
 insta              = "1.38.0"
 lazy_static        = "1.4.0"
 oxc_resolver       = "1.4.0"

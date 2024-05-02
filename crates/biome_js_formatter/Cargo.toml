@@ -38,7 +38,7 @@ countme              = { workspace = true, features = ["enable"] }
 iai                  = "0.1.1"
 quickcheck           = { workspace = true }
 quickcheck_macros    = { workspace = true }
-serde                = { version = "1", features = ["derive"] }
+serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
 

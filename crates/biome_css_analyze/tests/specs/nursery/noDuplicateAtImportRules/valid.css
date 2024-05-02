@@ -1,0 +1,9 @@
+/* should not generate diagnostics */
+@import "a.css";
+@import "b.css";
+
+@import url("c.css");
+@import url("d.css");
+
+@import url("e.css") tv;
+@import url("e.css") projection;
