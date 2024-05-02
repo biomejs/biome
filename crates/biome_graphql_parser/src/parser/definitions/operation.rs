@@ -167,7 +167,7 @@ fn parse_field(p: &mut GraphqlParser) -> ParsedSyntax {
 
     // alias is optional, so if there is a colon, we parse it as an alias
     // otherwise we parse it as a normal field name
-    if p.lookahead_at(T![:]) {
+    if p.nth_at(1, T![:]) {
         let m = p.start();
 
         // name is checked for in `is_at_field`

@@ -272,7 +272,7 @@ fn is_at_list(p: &GraphqlParser) -> bool {
 fn is_at_list_end(p: &mut GraphqlParser) -> bool {
     p.at(T![']'])
     // at next argument
-    || p.lookahead() == T![:]
+    || p.nth_at(1, T![:])
     // value is only used in argument
     || is_at_argument_list_end(p)
 }

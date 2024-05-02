@@ -108,7 +108,7 @@ fn parse_root_operation_type_definition(p: &mut GraphqlParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn is_at_schema_definition(p: &mut GraphqlParser<'_>) -> bool {
-    p.at(T![schema]) || (is_at_string(p) && p.lookahead_at(T![schema]))
+    p.at(T![schema]) || (is_at_string(p) && p.nth_at(1, T![schema]))
 }
 
 #[inline]
@@ -117,7 +117,7 @@ fn is_at_root_operation_type_definition(p: &mut GraphqlParser<'_>) -> bool {
         // missing operation type
         || p.at(T![:])
         // there is likely a typo in the operation type
-        || p.lookahead_at(T![:])
+        || p.nth_at(1, T![:])
 }
 
 /// To prevent a missing closing brace from causing the parser to include the next definition
@@ -136,5 +136,5 @@ fn is_at_root_operation_type_definition_end(p: &mut GraphqlParser<'_>) -> bool {
     p.at(T!['}'])
         || (!p.at_ts(OPERATION_TYPE) && is_at_definition(p))
         // start of a new operation definition
-        || (p.at_ts(OPERATION_TYPE) && !p.lookahead_at(T![:]))
+        || (p.at_ts(OPERATION_TYPE) && !p.nth_at(1, T![:]))
 }
