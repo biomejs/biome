@@ -3,7 +3,7 @@ use crate::keywords::{
     FONT_STYLE_KEYWORDS, FONT_VARIANTS_KEYWORDS, FONT_WEIGHT_ABSOLUTE_KEYWORDS,
     FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS,
     LINE_HEIGHT_KEYWORDS, OTHER_PSEUDO_ELEMENTS, SHADOW_TREE_PSEUDO_ELEMENTS,
-    SYSTEM_FAMILY_NAME_KEYWORDS, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
+    SYSTEM_FAMILY_NAME_KEYWORDS, VENDER_PREFIXES, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
@@ -113,8 +113,7 @@ pub fn is_custom_function(value: &str) -> bool {
 
 // Returns the vendor prefix extracted from an input string.
 pub fn vender_prefix(prop: &str) -> String {
-    let prefixes = ["-webkit-", "-moz-", "-ms-", "-o-"];
-    for prefix in prefixes.iter() {
+    for prefix in VENDER_PREFIXES.iter() {
         if prop.starts_with(prefix) {
             return (*prefix).to_string();
         }

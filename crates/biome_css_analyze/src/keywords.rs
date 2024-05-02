@@ -855,6 +855,8 @@ pub const OTHER_PSEUDO_ELEMENTS: [&str; 18] = [
     "view-transition-old",
 ];
 
+pub const VENDER_PREFIXES: [&str; 4] = ["-webkit-", "-moz-", "-ms-", "-o-"];
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
