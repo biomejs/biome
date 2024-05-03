@@ -1,6 +1,6 @@
 use biome_diagnostics::adapters::{IoError, StdError};
 use biome_diagnostics::{
-    Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Severity, Visit,
+    Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Visit,
 };
 use biome_text_edit::TextEdit;
 use std::io;
@@ -80,19 +80,6 @@ impl Advices for ContentDiffAdvice {
         let diff = TextEdit::from_unicode_words(&self.old, &self.new);
         visitor.record_diff(&diff)
     }
-}
-
-#[derive(Debug, Diagnostic)]
-pub(crate) struct TraversalDiagnostic<'a> {
-    #[location(resource)]
-    pub(crate) file_name: Option<&'a str>,
-    #[severity]
-    pub(crate) severity: Severity,
-    #[category]
-    pub(crate) category: &'static Category,
-    #[message]
-    #[description]
-    pub(crate) message: &'a str,
 }
 
 #[derive(Debug, Diagnostic)]
