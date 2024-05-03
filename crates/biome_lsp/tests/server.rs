@@ -20,7 +20,6 @@ use serde_json::{from_value, to_value};
 use std::any::type_name;
 use std::collections::HashMap;
 use std::fmt::Display;
-use std::path::PathBuf;
 use std::slice;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -2289,8 +2288,6 @@ async fn multiple_projects() -> Result<()> {
     server
         .open_named_document(file_lint_only, url!("test_two/file.js"), "javascript")
         .await?;
-
-    let _ = sleep(Duration::from_secs(1));
 
     let res: Option<Vec<TextEdit>> = server
         .request(
