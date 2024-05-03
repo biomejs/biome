@@ -1,6 +1,8 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, assert_file_contents, markup_to_string, SnapshotPayload};
-use biome_console::{BufferConsole, markup};
+use crate::snap_test::{
+    assert_cli_snapshot, assert_file_contents, markup_to_string, SnapshotPayload,
+};
+use biome_console::{markup, BufferConsole};
 use biome_fs::MemoryFileSystem;
 use biome_service::DynRef;
 use bpaf::Args;
@@ -570,14 +572,12 @@ fn format_stdin_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(VUE_TS_FILE_UNFORMATTED.to_string());
+    console.in_buffer.push(VUE_TS_FILE_UNFORMATTED.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), ("--stdin-file-path"), ("file.vue")].as_slice()),
+        Args::from(["format", "--stdin-file-path", "file.vue"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -591,10 +591,7 @@ fn format_stdin_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        VUE_TS_FILE_FORMATTED
-    );
+    assert_eq!(content, VUE_TS_FILE_FORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -610,14 +607,12 @@ fn format_stdin_write_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(VUE_TS_FILE_UNFORMATTED.to_string());
+    console.in_buffer.push(VUE_TS_FILE_UNFORMATTED.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), "--write", ("--stdin-file-path"), ("file.vue")].as_slice()),
+        Args::from(["format", "--write", "--stdin-file-path", "file.vue"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -631,10 +626,7 @@ fn format_stdin_write_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        VUE_TS_FILE_FORMATTED
-    );
+    assert_eq!(content, VUE_TS_FILE_FORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -650,14 +642,12 @@ fn lint_stdin_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(VUE_TS_FILE_NOT_LINTED.to_string());
+    console.in_buffer.push(VUE_TS_FILE_NOT_LINTED.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("lint"), ("--stdin-file-path"), ("file.svelte")].as_slice()),
+        Args::from(["lint", "--stdin-file-path", "file.svelte"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -671,10 +661,7 @@ fn lint_stdin_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        VUE_TS_FILE_NOT_LINTED
-    );
+    assert_eq!(content, VUE_TS_FILE_NOT_LINTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -690,14 +677,12 @@ fn lint_stdin_apply_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(VUE_TS_FILE_NOT_LINTED.to_string());
+    console.in_buffer.push(VUE_TS_FILE_NOT_LINTED.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("lint"), "--apply", ("--stdin-file-path"), ("file.svelte")].as_slice()),
+        Args::from(["lint", "--apply", "--stdin-file-path", "file.svelte"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -711,10 +696,7 @@ fn lint_stdin_apply_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        VUE_TS_FILE_SAFE_LINTED
-    );
+    assert_eq!(content, VUE_TS_FILE_SAFE_LINTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -725,20 +707,17 @@ fn lint_stdin_apply_successfully() {
     ));
 }
 
-
 #[test]
 fn lint_stdin_apply_unsafe_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(VUE_TS_FILE_NOT_LINTED.to_string());
+    console.in_buffer.push(VUE_TS_FILE_NOT_LINTED.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("lint"), "--apply-unsafe", ("--stdin-file-path"), ("file.svelte")].as_slice()),
+        Args::from(["lint", "--apply-unsafe", "--stdin-file-path", "file.svelte"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -752,10 +731,7 @@ fn lint_stdin_apply_unsafe_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        VUE_TS_FILE_UNSAFE_LINTED
-    );
+    assert_eq!(content, VUE_TS_FILE_UNSAFE_LINTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -771,14 +747,12 @@ fn check_stdin_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(VUE_TS_FILE_CHECK_BEFORE.to_string());
+    console.in_buffer.push(VUE_TS_FILE_CHECK_BEFORE.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("check"), ("--stdin-file-path"), ("file.vue")].as_slice()),
+        Args::from(["check", "--stdin-file-path", "file.vue"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -792,10 +766,7 @@ fn check_stdin_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        VUE_TS_FILE_CHECK_BEFORE
-    );
+    assert_eq!(content, VUE_TS_FILE_CHECK_BEFORE);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -811,20 +782,12 @@ fn check_stdin_apply_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(VUE_TS_FILE_CHECK_BEFORE.to_string());
+    console.in_buffer.push(VUE_TS_FILE_CHECK_BEFORE.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--apply",
-                "--stdin-file-path",
-                "file.vue"
-            ].as_slice()),
+        Args::from(["check", "--apply", "--stdin-file-path", "file.vue"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -838,10 +801,7 @@ fn check_stdin_apply_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        VUE_TS_FILE_CHECK_APPLY_AFTER
-    );
+    assert_eq!(content, VUE_TS_FILE_CHECK_APPLY_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -852,20 +812,17 @@ fn check_stdin_apply_successfully() {
     ));
 }
 
-
 #[test]
 fn check_stdin_apply_unsafe_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(VUE_TS_FILE_CHECK_BEFORE.to_string());
+    console.in_buffer.push(VUE_TS_FILE_CHECK_BEFORE.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("check"), "--apply-unsafe", ("--stdin-file-path"), ("file.vue")].as_slice()),
+        Args::from(["check", "--apply-unsafe", "--stdin-file-path", "file.vue"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -879,10 +836,7 @@ fn check_stdin_apply_unsafe_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        VUE_TS_FILE_CHECK_APPLY_UNSAFE_AFTER
-    );
+    assert_eq!(content, VUE_TS_FILE_CHECK_APPLY_UNSAFE_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

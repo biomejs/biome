@@ -7,6 +7,7 @@ use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::BiomePath;
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     ChangeFileParams, DropPatternParams, FeaturesBuilder, FixFileParams, FormatFileParams,
     OpenFileParams, OrganizeImportsParams, PullDiagnosticsParams, RuleCategories,
@@ -14,7 +15,6 @@ use biome_service::workspace::{
 };
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
-use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 
 pub(crate) fn run<'a>(
     session: CliSession,
@@ -52,13 +52,15 @@ pub(crate) fn run<'a>(
                 content: content.into(),
                 document_file_source: None,
             })?;
-            let printed = workspace.format_file(FormatFileParams { path: biome_path.clone() })?;
+            let printed = workspace.format_file(FormatFileParams {
+                path: biome_path.clone(),
+            })?;
 
             let output = match biome_path.extension_as_str() {
                 "astro" => AstroFileHandler::output(content, printed.into_code().as_str()),
                 "vue" => VueFileHandler::output(content, printed.into_code().as_str()),
                 "svelte" => SvelteFileHandler::output(content, printed.into_code().as_str()),
-                _ => printed.into_code()
+                _ => printed.into_code(),
             };
             console.append(markup! {
                 {output}
@@ -113,10 +115,12 @@ pub(crate) fn run<'a>(
                     should_format: mode.is_check() && file_features.supports_format(),
                 })?;
                 let output = match biome_path.extension_as_str() {
-                    "astro" => AstroFileHandler::output(&new_content, fix_file_result.code.as_str()),
+                    "astro" => {
+                        AstroFileHandler::output(&new_content, fix_file_result.code.as_str())
+                    }
                     "vue" => VueFileHandler::output(&content, fix_file_result.code.as_str()),
                     "svelte" => SvelteFileHandler::output(&content, fix_file_result.code.as_str()),
-                    _ => fix_file_result.code
+                    _ => fix_file_result.code,
                 };
                 if output != new_content {
                     version += 1;
@@ -137,7 +141,7 @@ pub(crate) fn run<'a>(
                     "astro" => AstroFileHandler::output(&new_content, result.code.as_str()),
                     "vue" => VueFileHandler::output(&content, result.code.as_str()),
                     "svelte" => SvelteFileHandler::output(&content, result.code.as_str()),
-                    _ => result.code
+                    _ => result.code,
                 };
                 if output != new_content {
                     version += 1;
@@ -168,7 +172,7 @@ pub(crate) fn run<'a>(
                 "astro" => AstroFileHandler::output(&new_content, printed.into_code().as_str()),
                 "vue" => VueFileHandler::output(&new_content, printed.into_code().as_str()),
                 "svelte" => SvelteFileHandler::output(&new_content, printed.into_code().as_str()),
-                _ => printed.into_code()
+                _ => printed.into_code(),
             };
             if mode.is_check_apply() || mode.is_check_apply_unsafe() {
                 if output != new_content {

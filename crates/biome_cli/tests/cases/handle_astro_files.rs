@@ -1,6 +1,8 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, assert_file_contents, markup_to_string, SnapshotPayload};
-use biome_console::{BufferConsole, markup};
+use crate::snap_test::{
+    assert_cli_snapshot, assert_file_contents, markup_to_string, SnapshotPayload,
+};
+use biome_console::{markup, BufferConsole};
 use biome_fs::MemoryFileSystem;
 use biome_service::DynRef;
 use bpaf::Args;
@@ -134,7 +136,7 @@ fn format_astro_files_write() {
                 "--write",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -168,7 +170,7 @@ fn format_empty_astro_files_write() {
                 "--write",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -267,7 +269,7 @@ fn lint_and_fix_astro_files() {
                 "--apply-unsafe",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -302,7 +304,7 @@ fn sorts_imports_check() {
                 "--linter-enabled=false",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -338,7 +340,7 @@ fn sorts_imports_write() {
                 "--apply",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
@@ -385,14 +387,12 @@ fn format_stdin_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(ASTRO_FILE_UNFORMATTED.to_string());
+    console.in_buffer.push(ASTRO_FILE_UNFORMATTED.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), ("--stdin-file-path"), ("file.astro")].as_slice()),
+        Args::from(["format", "--stdin-file-path", "file.astro"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -406,10 +406,7 @@ fn format_stdin_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        ASTRO_FILE_FORMATTED
-    );
+    assert_eq!(content, ASTRO_FILE_FORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -425,14 +422,12 @@ fn format_stdin_write_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(ASTRO_FILE_UNFORMATTED.to_string());
+    console.in_buffer.push(ASTRO_FILE_UNFORMATTED.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), "--write", ("--stdin-file-path"), ("file.astro")].as_slice()),
+        Args::from(["format", "--write", "--stdin-file-path", "file.astro"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -446,10 +441,7 @@ fn format_stdin_write_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        ASTRO_FILE_FORMATTED
-    );
+    assert_eq!(content, ASTRO_FILE_FORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -472,7 +464,7 @@ fn lint_stdin_successfully() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("lint"), ("--stdin-file-path"), ("file.astro")].as_slice()),
+        Args::from(["lint", "--stdin-file-path", "file.astro"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -486,10 +478,7 @@ fn lint_stdin_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        ASTRO_FILE_USELESS_RENAME_BEFORE
-    );
+    assert_eq!(content, ASTRO_FILE_USELESS_RENAME_BEFORE);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -512,7 +501,7 @@ fn lint_stdin_apply_successfully() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("lint"), "--apply", ("--stdin-file-path"), ("file.astro")].as_slice()),
+        Args::from(["lint", "--apply", "--stdin-file-path", "file.astro"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -526,10 +515,7 @@ fn lint_stdin_apply_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        ASTRO_FILE_USELESS_RENAME_AFTER
-    );
+    assert_eq!(content, ASTRO_FILE_USELESS_RENAME_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -539,7 +525,6 @@ fn lint_stdin_apply_successfully() {
         result,
     ));
 }
-
 
 #[test]
 fn lint_stdin_apply_unsafe_successfully() {
@@ -553,7 +538,7 @@ fn lint_stdin_apply_unsafe_successfully() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("lint"), "--apply-unsafe", ("--stdin-file-path"), ("file.astro")].as_slice()),
+        Args::from(["lint", "--apply-unsafe", "--stdin-file-path", "file.astro"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -567,10 +552,7 @@ fn lint_stdin_apply_unsafe_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        ASTRO_FILE_DEBUGGER_AFTER
-    );
+    assert_eq!(content, ASTRO_FILE_DEBUGGER_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -586,14 +568,12 @@ fn check_stdin_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(ASTRO_FILE_CHECK_BEFORE.to_string());
+    console.in_buffer.push(ASTRO_FILE_CHECK_BEFORE.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("check"), ("--stdin-file-path"), ("file.astro")].as_slice()),
+        Args::from(["check", "--stdin-file-path", "file.astro"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -607,10 +587,7 @@ fn check_stdin_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        ASTRO_FILE_CHECK_BEFORE
-    );
+    assert_eq!(content, ASTRO_FILE_CHECK_BEFORE);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -626,20 +603,12 @@ fn check_stdin_apply_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(ASTRO_FILE_CHECK_BEFORE.to_string());
+    console.in_buffer.push(ASTRO_FILE_CHECK_BEFORE.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--apply",
-                "--stdin-file-path",
-                "file.astro"
-            ].as_slice()),
+        Args::from(["check", "--apply", "--stdin-file-path", "file.astro"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -653,10 +622,7 @@ fn check_stdin_apply_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        ASTRO_FILE_CHECK_APPLY_AFTER
-    );
+    assert_eq!(content, ASTRO_FILE_CHECK_APPLY_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -667,20 +633,17 @@ fn check_stdin_apply_successfully() {
     ));
 }
 
-
 #[test]
 fn check_stdin_apply_unsafe_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    console
-        .in_buffer
-        .push(ASTRO_FILE_CHECK_BEFORE.to_string());
+    console.in_buffer.push(ASTRO_FILE_CHECK_BEFORE.to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("check"), "--apply-unsafe", ("--stdin-file-path"), ("file.astro")].as_slice()),
+        Args::from(["check", "--apply-unsafe", "--stdin-file-path", "file.astro"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -694,10 +657,7 @@ fn check_stdin_apply_unsafe_successfully() {
         {message.content}
     });
 
-    assert_eq!(
-        content,
-        ASTRO_FILE_CHECK_APPLY_UNSAFE_AFTER
-    );
+    assert_eq!(content, ASTRO_FILE_CHECK_APPLY_UNSAFE_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
