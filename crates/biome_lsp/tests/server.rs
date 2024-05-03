@@ -20,6 +20,7 @@ use serde_json::{from_value, to_value};
 use std::any::type_name;
 use std::collections::HashMap;
 use std::fmt::Display;
+use std::path::PathBuf;
 use std::slice;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -472,7 +473,7 @@ async fn document_lifecycle() -> Result<()> {
             "biome/get_syntax_tree",
             "get_syntax_tree",
             GetSyntaxTreeParams {
-                path: BiomePath::new("/workspace/document.js"),
+                path: BiomePath::new(PathBuf::from("/").join("workspace").join("document.js")),
             },
         )
         .await?
@@ -1909,7 +1910,7 @@ isSpreadAssignment;
             "biome/get_file_content",
             "get_file_content",
             GetFileContentParams {
-                path: BiomePath::new("/workspace/document.js"),
+                path: BiomePath::new(PathBuf::from("/").join("workspace").join("document.js")),
             },
         )
         .await?

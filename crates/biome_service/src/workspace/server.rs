@@ -524,7 +524,6 @@ impl Workspace for WorkspaceServer {
     }
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
-        dbg!("FILE CONTENT", &params, &self.documents);
         let document = self
             .documents
             .get(&params.path)
