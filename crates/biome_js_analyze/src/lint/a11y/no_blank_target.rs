@@ -112,10 +112,13 @@ impl Rule for NoBlankTarget {
             let prev_jsx_attribute = rel_attribute.initializer()?.value().ok()?;
             let prev_jsx_string = prev_jsx_attribute.as_jsx_string()?;
             let new_text = format!(
-                "\"noreferrer {}\"",
+                "noreferrer {}",
                 prev_jsx_string.inner_string_text().ok()?.text()
             );
-            mutation.replace_node(prev_jsx_string.clone(), jsx_string(jsx_ident(&new_text)));
+            mutation.replace_node(
+                prev_jsx_string.clone(),
+                jsx_string(jsx_string_literal(new_text.trim_end())),
+            );
 
             (markup! {
                 "Add the "<Emphasis>"\"noreferrer\""</Emphasis>" to the existing attribute."

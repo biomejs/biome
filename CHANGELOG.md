@@ -27,6 +27,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- [noBlankTarget](https://biomejs.dev/linter/rules/no-blank-target/) no longer hangs when applying a code fix ([#2675](https://github.com/biomejs/biome/issues/2675)).
+
+  Previously, the following code made Biome hangs when applying a code fix.
+
+  ```jsx
+  <a href="https://example.com" rel="" target="_blank"></a>
+  ```
+
+  Contributed by @Conaclos
+
 - [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) no longer panics on conditional type ([#2659](https://github.com/biomejs/biome/issues/2659)).
 
   This is a regression introduced by [#2394](https://github.com/biomejs/biome/issues/2394).
