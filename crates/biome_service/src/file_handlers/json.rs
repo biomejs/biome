@@ -1,4 +1,4 @@
-use super::{CodeActionsParams, DocumentFileSource, ExtensionHandler, Mime, ParseResult};
+use super::{CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult};
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
@@ -107,14 +107,6 @@ impl ServiceLanguage for JsonLanguage {
 pub(crate) struct JsonFileHandler;
 
 impl ExtensionHandler for JsonFileHandler {
-    fn mime(&self) -> super::Mime {
-        Mime::Json
-    }
-
-    fn may_use_tabs(&self) -> bool {
-        true
-    }
-
     fn capabilities(&self) -> Capabilities {
         Capabilities {
             parser: ParserCapabilities { parse: Some(parse) },

@@ -299,30 +299,6 @@ impl biome_console::fmt::Display for DocumentFileSource {
     }
 }
 
-pub(crate) enum Mime {
-    Javascript,
-    Json,
-    Css,
-    Text,
-}
-
-impl std::fmt::Display for Mime {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Mime::Css => write!(f, "text/css"),
-            Mime::Json => write!(f, "application/json"),
-            Mime::Javascript => write!(f, "application/javascript"),
-            Mime::Text => write!(f, "text/plain"),
-        }
-    }
-}
-
-impl biome_console::fmt::Display for Mime {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::io::Result<()> {
-        write!(f, "{self}")
-    }
-}
-
 pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) rules: Option<&'a Rules>,
@@ -454,24 +430,9 @@ pub(crate) struct FormatterCapabilities {
 
 /// Main trait to use to add a new language to Biome
 pub(crate) trait ExtensionHandler {
-    /// MIME types used to identify a certain language
-    fn mime(&self) -> Mime;
-
-    /// A file that can support tabs inside its content
-    fn may_use_tabs(&self) -> bool {
-        true
-    }
-
     /// Capabilities that can applied to a file
     fn capabilities(&self) -> Capabilities {
         Capabilities::default()
-    }
-
-    /// How a file should be treated. Usually an asset doesn't posses a parser.
-    ///
-    /// An image should me parked as asset.
-    fn is_asset(&self) -> bool {
-        false
     }
 }
 

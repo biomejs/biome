@@ -808,7 +808,7 @@ impl SemanticEventExtractor {
                     self.stash.push_back(event);
                 }
             } else if references.iter().all(|r| matches!(r, Reference::Export(_)))
-                && self.bindings.get(&name.clone().dual()).is_some()
+                && self.bindings.contains_key(&name.clone().dual())
             {
                 // Don't report an export that exports at least a binding.
             } else if let Some(parent) = self.scopes.last_mut() {

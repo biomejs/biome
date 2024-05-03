@@ -14,6 +14,7 @@ unused_macro_rules                     = "warn"
 
 [workspace.lints.clippy]
 cargo_common_metadata   = "allow"
+empty_docs              = "allow" # there are some false positives inside biome_wasm
 multiple_crate_versions = "allow"
 
 # pedantic

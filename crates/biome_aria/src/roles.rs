@@ -951,6 +951,7 @@ impl<'a> AriaRoles {
             "listitem" => &ListItemRole as &dyn AriaRoleDefinition,
             "log" => &LogRole as &dyn AriaRoleDefinition,
             "main" => &MainRole as &dyn AriaRoleDefinition,
+            "mark" => &MarkRole as &dyn AriaRoleDefinition,
             "marquee" => &MarqueeRole as &dyn AriaRoleDefinition,
             "math" => &MathRole as &dyn AriaRoleDefinition,
             "menu" => &MenuRole as &dyn AriaRoleDefinition,
