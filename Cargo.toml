@@ -1,7 +1,7 @@
 [workspace]
 # Use the newer version of the cargo resolver
 # https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
-members  = ["crates/*", "xtask/bench", "xtask/codegen", "xtask/coverage", "xtask/libs_bench", "xtask/contributors"]
+members  = ["crates/*", "xtask/bench", "xtask/codegen", "xtask/coverage", "xtask/libs_bench"]
 resolver = "2"
 
 [workspace.lints.rust]
@@ -162,7 +162,7 @@ ignore             = "0.4.21"
 indexmap           = { version = "2.2.6", features = ["serde"] }
 insta              = "1.38.0"
 lazy_static        = "1.4.0"
-oxc_resolver       = "1.4.0"
+oxc_resolver       = "1.7.0"
 proc-macro2        = "1.0.81"
 quickcheck         = "1.0.3"
 quickcheck_macros  = "1.0.0"
