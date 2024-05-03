@@ -39,7 +39,7 @@ m n {}
 
 /* essentially duplicate selector lists with varied spacing */
 .foo   p, q > .bar,
-baz {}
+#baz {}
   #baz,
   .foo     p,q>.bar {}
 
@@ -212,6 +212,26 @@ invalid.css:30:7 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
        │ ^^^^
     32 │ 
     33 │ /* essentially duplicate selector lists with varied spacing */
+  
+  i Please fix it.
+  
+
+```
+
+```
+invalid.css:35:8 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector.
+  
+    33 │ /* essentially duplicate selector lists with varied spacing */
+    34 │ .foo   p, q > .bar,
+  > 35 │ #baz {}
+       │        
+  > 36 │   #baz,
+  > 37 │   .foo     p,q>.bar {}
+       │   ^^^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ /* duplicate within a media query, in the same rule */
   
   i Please fix it.
   

@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 use std::vec;
 
-use biome_analyze::{Ast, VisitorContext};
+use biome_analyze::Ast;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
-use biome_css_syntax::{kind, AnyCssAtRule, AnyCssRelativeSelector, AnyCssRule, AnyCssSelector, AnyCssSubSelector, CssComplexSelector, CssMediaAtRule, CssRelativeSelector, CssRelativeSelectorList, CssRoot, CssRuleList, CssSelectorList, CssSyntaxKind, CssSyntaxNode};
-use biome_rowan::{AstNode, Language, SyntaxKindSet, SyntaxNodeCast};
+use biome_css_syntax::{AnyCssAtRule, AnyCssRelativeSelector, AnyCssRule, AnyCssSelector, CssComplexSelector, CssRelativeSelector, CssRelativeSelectorList, CssRuleList, CssSelectorList, CssSyntaxNode};
+use biome_rowan::{AstNode, SyntaxNodeCast};
 
 use serde::{Deserialize, Serialize};
 
@@ -49,7 +49,7 @@ impl Rule for NoDuplicateSelectors {
         let mut resolved_list = HashSet::new();
         let mut output: Vec<CssSyntaxNode> = vec!();
 
-        if (options.disallow_in_list) {
+        if options.disallow_in_list {
             let selectors = node
             .syntax()
             .descendants()
@@ -81,10 +81,11 @@ impl Rule for NoDuplicateSelectors {
 
                 let mut selector_text = String::new();
                 if let Some(selector) = CssRelativeSelector::cast_ref(&selector){
-                    selector_text = selector.clone().text()
+                    selector_text = selector.clone().text();
                 }
                 if let Some(selector) = AnyCssSelector::cast_ref(&selector){
-                    selector_text = selector.clone().text()
+                    // TODO: test if this needs to be normalized
+                    selector_text = selector.clone().text();
                 }
                 let resolved = resolve_nested_selectors(selector_text, this_rule);
 
@@ -120,10 +121,11 @@ impl Rule for NoDuplicateSelectors {
                     .into_iter()
                     .filter_map(|child|{
                         if let Some(selector) = AnyCssSelector::cast_ref(&child) {
-                            if !this_list_resolved_list.insert(selector.text()) {
+                            let selector_text = normalize_complex_selector(selector);
+                            if !this_list_resolved_list.insert(selector_text.clone()) {
                                 output.push(child.clone());
                             }
-                            return Some(selector.text());
+                            return Some(selector_text);
                         } else if let Some(selector) = AnyCssRelativeSelector::cast_ref(&child) {
                             if !this_list_resolved_list.insert(selector.text()) {
                                 output.push(child.clone());
@@ -262,3 +264,21 @@ fn get_parent_rule(this_rule: CssSyntaxNode) -> Option<CssSyntaxNode> {
     return None
 }
 
+fn normalize_complex_selector(selector: AnyCssSelector) -> String {
+    let mut selector_text = String::new();
+
+    if let Some(complex_selector) = CssComplexSelector::cast_ref(&selector.clone().into_syntax()) {
+        if let Ok(left) = complex_selector.left() {
+            selector_text.push_str(&left.text());
+        }
+        if let Ok(combinator) = complex_selector.combinator() {
+            let combinator = combinator.text_trimmed();
+            selector_text.push_str(combinator);
+        }
+        if let Ok(right) = complex_selector.right() {
+            selector_text.push_str(&right.text());
+        }
+        return selector_text
+    }
+    return selector.text();
+}

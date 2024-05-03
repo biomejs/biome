@@ -32,7 +32,7 @@ m n {}
 
 /* essentially duplicate selector lists with varied spacing */
 .foo   p, q > .bar,
-baz {}
+#baz {}
   #baz,
   .foo     p,q>.bar {}
 
