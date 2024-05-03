@@ -24,7 +24,7 @@ i {}
 h {}
 
 /* duplicate selector lists with different order */
-j, k {} j, k {}
+j, k {} k, j {}
 
 /* duplicate selectors with multiple components */
 m n {}
@@ -42,7 +42,7 @@ s {}
 
 /* duplicate within a media query, in different rules */
 t {}
-@media print { t {} t {} }
+@media screen and (min-width: 900px) { t {} t {} }
 
 /* duplicate caused by nesting */
 v w {} v { w {} }
