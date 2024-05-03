@@ -1668,6 +1668,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useImportExtensions": {
+					"description": "Require import extensions for relative imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
 					"anyOf": [

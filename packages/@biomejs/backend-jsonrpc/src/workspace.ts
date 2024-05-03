@@ -1045,6 +1045,10 @@ export interface Nursery {
 	 */
 	useGenericFontNames?: RuleConfiguration_for_Null;
 	/**
+	 * Require import extensions for relative imports.
+	 */
+	useImportExtensions?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
@@ -2057,6 +2061,7 @@ export type Category =
 	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
+	| "lint/nursery/useImportExtensions"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useThrowNewError"

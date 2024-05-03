@@ -146,6 +146,7 @@ define_categories! {
     "lint/nursery/useExplicitLengthCheck": "https://biomejs.dev/linter/rules/use-explicit-length-check",
     "lint/nursery/useFocusableInteractive": "https://biomejs.dev/linter/rules/use-focusable-interactive",
     "lint/nursery/useGenericFontNames": "https://biomejs.dev/linter/rules/use-generic-font-names",
+    "lint/nursery/useImportExtensions": "https://biomejs.dev/linter/rules/use-import-extensions",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useThrowNewError": "https://biomejs.dev/linter/rules/use-throw-new-error",

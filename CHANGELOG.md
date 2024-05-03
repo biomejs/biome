@@ -45,6 +45,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add [nursery/useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/).
+  Contributed by @minht11
+
 - Add [nursery/useThrowNewError](https://biomejs.dev/linter/rules/use-throw-new-error/).
   Contributed by @minht11
 
@@ -98,8 +101,8 @@ z.object({})
 
 #### New features
 
-- Add [nursery/noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/).
 - Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
+  Contributed by @minht11
 
 - `useExhaustiveDependencies` now recognizes (some) dependencies that change on
   every render ([#2374](https://github.com/biomejs/biome/issues/2374)).
