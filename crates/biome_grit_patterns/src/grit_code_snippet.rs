@@ -7,7 +7,10 @@ use grit_pattern_matcher::pattern::{
 use grit_util::AnalysisLogs;
 
 #[derive(Clone, Debug)]
-pub(crate) struct GritCodeSnippet;
+pub(crate) struct GritCodeSnippet {
+    pub(crate) source: String,
+    pub(crate) dynamic_snippet: Option<DynamicPattern<GritQueryContext>>,
+}
 
 impl CodeSnippet<GritQueryContext> for GritCodeSnippet {
     fn patterns(&self) -> impl Iterator<Item = &Pattern<GritQueryContext>> {
