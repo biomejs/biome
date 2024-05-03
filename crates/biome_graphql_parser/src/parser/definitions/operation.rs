@@ -3,12 +3,11 @@ use crate::parser::{
     directive::{is_at_directive, DirectiveList},
     is_at_name,
     parse_error::{
-        expected_any_selection, expected_name, expected_type, expected_value,
-        expected_variable_definition,
+        expected_any_selection, expected_name, expected_type, expected_variable_definition,
     },
     parse_name,
     r#type::parse_type,
-    value::parse_value,
+    value::parse_default_value,
     variable::{is_at_variable, parse_variable},
     GraphqlParser,
 };
@@ -246,18 +245,6 @@ fn parse_variable_definition(p: &mut GraphqlParser) -> ParsedSyntax {
     DirectiveList.parse_list(p);
 
     Present(m.complete(p, GRAPHQL_VARIABLE_DEFINITION))
-}
-
-#[inline]
-fn parse_default_value(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !p.at(T![=]) {
-        return Absent;
-    }
-
-    let m = p.start();
-    p.bump(T![=]);
-    parse_value(p).or_add_diagnostic(p, expected_value);
-    Present(m.complete(p, GRAPHQL_DEFAULT_VALUE))
 }
 
 #[inline]

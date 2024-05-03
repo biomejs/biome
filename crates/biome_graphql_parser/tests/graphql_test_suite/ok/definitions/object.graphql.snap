@@ -1,0 +1,905 @@
+---
+source: crates/biome_graphql_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```graphql
+type Person {
+  name: String
+  age: Int
+  picture: Url
+}
+
+type Person @deprecated {
+  name: String
+}
+
+type Person implements Character @deprecated {
+  name: String
+}
+
+type Person implements Character {
+  name: String
+}
+
+type Person
+
+type Person implements Character
+
+type Person @deprecated
+
+type Person implements Character @deprecated
+
+type Person implements Character & Character1 @deprecated
+
+type Person {
+  name(start_with: String): String
+  "filder by age" age: Int @deprecated
+  picture(size: Int = 0): Url
+  height("filter by height" greater_than: Int @deprecated): Int
+  weight("filter by weight" greater_than: Int = 0 @deprecated): Int
+}
+
+
+```
+
+## AST
+
+```
+GraphqlRoot {
+    bom_token: missing (optional),
+    definitions: GraphqlDefinitionList [
+        GraphqlObjectTypeDefinition {
+            description: missing (optional),
+            type_token: TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@5..12 "Person" [] [Whitespace(" ")],
+            },
+            implements: missing (optional),
+            directives: GraphqlDirectiveList [],
+            fields: GraphqlFieldsDefinition {
+                l_curly_token: L_CURLY@12..13 "{" [] [],
+                fields: GraphqlFieldDefinitionList [
+                    GraphqlFieldDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@13..20 "name" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: missing (optional),
+                        colon_token: COLON@20..22 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@22..28 "String" [] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                    GraphqlFieldDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@28..34 "age" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: missing (optional),
+                        colon_token: COLON@34..36 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@36..39 "Int" [] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                    GraphqlFieldDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@39..49 "picture" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: missing (optional),
+                        colon_token: COLON@49..51 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@51..54 "Url" [] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: R_CURLY@54..56 "}" [Newline("\n")] [],
+            },
+        },
+        GraphqlObjectTypeDefinition {
+            description: missing (optional),
+            type_token: TYPE_KW@56..63 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@63..70 "Person" [] [Whitespace(" ")],
+            },
+            implements: missing (optional),
+            directives: GraphqlDirectiveList [
+                GraphqlDirective {
+                    at_token: AT@70..71 "@" [] [],
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@71..82 "deprecated" [] [Whitespace(" ")],
+                    },
+                    arguments: missing (optional),
+                },
+            ],
+            fields: GraphqlFieldsDefinition {
+                l_curly_token: L_CURLY@82..83 "{" [] [],
+                fields: GraphqlFieldDefinitionList [
+                    GraphqlFieldDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@83..90 "name" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: missing (optional),
+                        colon_token: COLON@90..92 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@92..98 "String" [] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: R_CURLY@98..100 "}" [Newline("\n")] [],
+            },
+        },
+        GraphqlObjectTypeDefinition {
+            description: missing (optional),
+            type_token: TYPE_KW@100..107 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@107..114 "Person" [] [Whitespace(" ")],
+            },
+            implements: GraphqlImplementsInterfaces {
+                implements_token: IMPLEMENTS_KW@114..125 "implements" [] [Whitespace(" ")],
+                amp_token: missing (optional),
+                interfaces: GraphqlImplementsInterfaceList [
+                    GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@125..135 "Character" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+            },
+            directives: GraphqlDirectiveList [
+                GraphqlDirective {
+                    at_token: AT@135..136 "@" [] [],
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@136..147 "deprecated" [] [Whitespace(" ")],
+                    },
+                    arguments: missing (optional),
+                },
+            ],
+            fields: GraphqlFieldsDefinition {
+                l_curly_token: L_CURLY@147..148 "{" [] [],
+                fields: GraphqlFieldDefinitionList [
+                    GraphqlFieldDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@148..155 "name" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: missing (optional),
+                        colon_token: COLON@155..157 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@157..163 "String" [] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: R_CURLY@163..165 "}" [Newline("\n")] [],
+            },
+        },
+        GraphqlObjectTypeDefinition {
+            description: missing (optional),
+            type_token: TYPE_KW@165..172 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@172..179 "Person" [] [Whitespace(" ")],
+            },
+            implements: GraphqlImplementsInterfaces {
+                implements_token: IMPLEMENTS_KW@179..190 "implements" [] [Whitespace(" ")],
+                amp_token: missing (optional),
+                interfaces: GraphqlImplementsInterfaceList [
+                    GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@190..200 "Character" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+            },
+            directives: GraphqlDirectiveList [],
+            fields: GraphqlFieldsDefinition {
+                l_curly_token: L_CURLY@200..201 "{" [] [],
+                fields: GraphqlFieldDefinitionList [
+                    GraphqlFieldDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@201..208 "name" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: missing (optional),
+                        colon_token: COLON@208..210 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@210..216 "String" [] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: R_CURLY@216..218 "}" [Newline("\n")] [],
+            },
+        },
+        GraphqlObjectTypeDefinition {
+            description: missing (optional),
+            type_token: TYPE_KW@218..225 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@225..231 "Person" [] [],
+            },
+            implements: missing (optional),
+            directives: GraphqlDirectiveList [],
+            fields: missing (optional),
+        },
+        GraphqlObjectTypeDefinition {
+            description: missing (optional),
+            type_token: TYPE_KW@231..238 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@238..245 "Person" [] [Whitespace(" ")],
+            },
+            implements: GraphqlImplementsInterfaces {
+                implements_token: IMPLEMENTS_KW@245..256 "implements" [] [Whitespace(" ")],
+                amp_token: missing (optional),
+                interfaces: GraphqlImplementsInterfaceList [
+                    GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@256..265 "Character" [] [],
+                        },
+                    },
+                ],
+            },
+            directives: GraphqlDirectiveList [],
+            fields: missing (optional),
+        },
+        GraphqlObjectTypeDefinition {
+            description: missing (optional),
+            type_token: TYPE_KW@265..272 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@272..279 "Person" [] [Whitespace(" ")],
+            },
+            implements: missing (optional),
+            directives: GraphqlDirectiveList [
+                GraphqlDirective {
+                    at_token: AT@279..280 "@" [] [],
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@280..290 "deprecated" [] [],
+                    },
+                    arguments: missing (optional),
+                },
+            ],
+            fields: missing (optional),
+        },
+        GraphqlObjectTypeDefinition {
+            description: missing (optional),
+            type_token: TYPE_KW@290..297 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@297..304 "Person" [] [Whitespace(" ")],
+            },
+            implements: GraphqlImplementsInterfaces {
+                implements_token: IMPLEMENTS_KW@304..315 "implements" [] [Whitespace(" ")],
+                amp_token: missing (optional),
+                interfaces: GraphqlImplementsInterfaceList [
+                    GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@315..325 "Character" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+            },
+            directives: GraphqlDirectiveList [
+                GraphqlDirective {
+                    at_token: AT@325..326 "@" [] [],
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@326..336 "deprecated" [] [],
+                    },
+                    arguments: missing (optional),
+                },
+            ],
+            fields: missing (optional),
+        },
+        GraphqlObjectTypeDefinition {
+            description: missing (optional),
+            type_token: TYPE_KW@336..343 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@343..350 "Person" [] [Whitespace(" ")],
+            },
+            implements: GraphqlImplementsInterfaces {
+                implements_token: IMPLEMENTS_KW@350..361 "implements" [] [Whitespace(" ")],
+                amp_token: missing (optional),
+                interfaces: GraphqlImplementsInterfaceList [
+                    GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@361..371 "Character" [] [Whitespace(" ")],
+                        },
+                    },
+                    AMP@371..373 "&" [] [Whitespace(" ")],
+                    GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@373..384 "Character1" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+            },
+            directives: GraphqlDirectiveList [
+                GraphqlDirective {
+                    at_token: AT@384..385 "@" [] [],
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@385..395 "deprecated" [] [],
+                    },
+                    arguments: missing (optional),
+                },
+            ],
+            fields: missing (optional),
+        },
+        GraphqlObjectTypeDefinition {
+            description: missing (optional),
+            type_token: TYPE_KW@395..402 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@402..409 "Person" [] [Whitespace(" ")],
+            },
+            implements: missing (optional),
+            directives: GraphqlDirectiveList [],
+            fields: GraphqlFieldsDefinition {
+                l_curly_token: L_CURLY@409..410 "{" [] [],
+                fields: GraphqlFieldDefinitionList [
+                    GraphqlFieldDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@410..417 "name" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: GraphqlArgumentsDefinition {
+                            l_paren_token: L_PAREN@417..418 "(" [] [],
+                            arguments: GraphqlArgumentDefinitionList [
+                                GraphqlInputValueDefinition {
+                                    description: missing (optional),
+                                    name: GraphqlName {
+                                        value_token: GRAPHQL_NAME@418..428 "start_with" [] [],
+                                    },
+                                    colon_token: COLON@428..430 ":" [] [Whitespace(" ")],
+                                    ty: GraphqlNamedType {
+                                        name: GraphqlName {
+                                            value_token: GRAPHQL_NAME@430..436 "String" [] [],
+                                        },
+                                    },
+                                    default: missing (optional),
+                                    directives: GraphqlDirectiveList [],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@436..437 ")" [] [],
+                        },
+                        colon_token: COLON@437..439 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@439..445 "String" [] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                    GraphqlFieldDefinition {
+                        description: GraphqlDescription {
+                            graphql_string_value: GraphqlStringValue {
+                                graphql_string_literal_token: GRAPHQL_STRING_LITERAL@445..464 "\"filder by age\"" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                            },
+                        },
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@464..467 "age" [] [],
+                        },
+                        arguments: missing (optional),
+                        colon_token: COLON@467..469 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@469..473 "Int" [] [Whitespace(" ")],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [
+                            GraphqlDirective {
+                                at_token: AT@473..474 "@" [] [],
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@474..484 "deprecated" [] [],
+                                },
+                                arguments: missing (optional),
+                            },
+                        ],
+                    },
+                    GraphqlFieldDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@484..494 "picture" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: GraphqlArgumentsDefinition {
+                            l_paren_token: L_PAREN@494..495 "(" [] [],
+                            arguments: GraphqlArgumentDefinitionList [
+                                GraphqlInputValueDefinition {
+                                    description: missing (optional),
+                                    name: GraphqlName {
+                                        value_token: GRAPHQL_NAME@495..499 "size" [] [],
+                                    },
+                                    colon_token: COLON@499..501 ":" [] [Whitespace(" ")],
+                                    ty: GraphqlNamedType {
+                                        name: GraphqlName {
+                                            value_token: GRAPHQL_NAME@501..505 "Int" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    default: GraphqlDefaultValue {
+                                        eq_token: EQ@505..507 "=" [] [Whitespace(" ")],
+                                        value: GraphqlIntValue {
+                                            graphql_int_literal_token: GRAPHQL_INT_LITERAL@507..508 "0" [] [],
+                                        },
+                                    },
+                                    directives: GraphqlDirectiveList [],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@508..509 ")" [] [],
+                        },
+                        colon_token: COLON@509..511 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@511..514 "Url" [] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                    GraphqlFieldDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@514..523 "height" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: GraphqlArgumentsDefinition {
+                            l_paren_token: L_PAREN@523..524 "(" [] [],
+                            arguments: GraphqlArgumentDefinitionList [
+                                GraphqlInputValueDefinition {
+                                    description: GraphqlDescription {
+                                        graphql_string_value: GraphqlStringValue {
+                                            graphql_string_literal_token: GRAPHQL_STRING_LITERAL@524..543 "\"filter by height\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    name: GraphqlName {
+                                        value_token: GRAPHQL_NAME@543..555 "greater_than" [] [],
+                                    },
+                                    colon_token: COLON@555..557 ":" [] [Whitespace(" ")],
+                                    ty: GraphqlNamedType {
+                                        name: GraphqlName {
+                                            value_token: GRAPHQL_NAME@557..561 "Int" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    default: missing (optional),
+                                    directives: GraphqlDirectiveList [
+                                        GraphqlDirective {
+                                            at_token: AT@561..562 "@" [] [],
+                                            name: GraphqlName {
+                                                value_token: GRAPHQL_NAME@562..572 "deprecated" [] [],
+                                            },
+                                            arguments: missing (optional),
+                                        },
+                                    ],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@572..573 ")" [] [],
+                        },
+                        colon_token: COLON@573..575 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@575..578 "Int" [] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                    GraphqlFieldDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@578..587 "weight" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: GraphqlArgumentsDefinition {
+                            l_paren_token: L_PAREN@587..588 "(" [] [],
+                            arguments: GraphqlArgumentDefinitionList [
+                                GraphqlInputValueDefinition {
+                                    description: GraphqlDescription {
+                                        graphql_string_value: GraphqlStringValue {
+                                            graphql_string_literal_token: GRAPHQL_STRING_LITERAL@588..607 "\"filter by weight\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    name: GraphqlName {
+                                        value_token: GRAPHQL_NAME@607..619 "greater_than" [] [],
+                                    },
+                                    colon_token: COLON@619..621 ":" [] [Whitespace(" ")],
+                                    ty: GraphqlNamedType {
+                                        name: GraphqlName {
+                                            value_token: GRAPHQL_NAME@621..625 "Int" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    default: GraphqlDefaultValue {
+                                        eq_token: EQ@625..627 "=" [] [Whitespace(" ")],
+                                        value: GraphqlIntValue {
+                                            graphql_int_literal_token: GRAPHQL_INT_LITERAL@627..629 "0" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    directives: GraphqlDirectiveList [
+                                        GraphqlDirective {
+                                            at_token: AT@629..630 "@" [] [],
+                                            name: GraphqlName {
+                                                value_token: GRAPHQL_NAME@630..640 "deprecated" [] [],
+                                            },
+                                            arguments: missing (optional),
+                                        },
+                                    ],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@640..641 ")" [] [],
+                        },
+                        colon_token: COLON@641..643 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@643..646 "Int" [] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: R_CURLY@646..648 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@648..650 "" [Newline("\n"), Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRAPHQL_ROOT@0..650
+  0: (empty)
+  1: GRAPHQL_DEFINITION_LIST@0..648
+    0: GRAPHQL_OBJECT_TYPE_DEFINITION@0..56
+      0: (empty)
+      1: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      2: GRAPHQL_NAME@5..12
+        0: GRAPHQL_NAME@5..12 "Person" [] [Whitespace(" ")]
+      3: (empty)
+      4: GRAPHQL_DIRECTIVE_LIST@12..12
+      5: GRAPHQL_FIELDS_DEFINITION@12..56
+        0: L_CURLY@12..13 "{" [] []
+        1: GRAPHQL_FIELD_DEFINITION_LIST@13..54
+          0: GRAPHQL_FIELD_DEFINITION@13..28
+            0: (empty)
+            1: GRAPHQL_NAME@13..20
+              0: GRAPHQL_NAME@13..20 "name" [Newline("\n"), Whitespace("  ")] []
+            2: (empty)
+            3: COLON@20..22 ":" [] [Whitespace(" ")]
+            4: GRAPHQL_NAMED_TYPE@22..28
+              0: GRAPHQL_NAME@22..28
+                0: GRAPHQL_NAME@22..28 "String" [] []
+            5: GRAPHQL_DIRECTIVE_LIST@28..28
+          1: GRAPHQL_FIELD_DEFINITION@28..39
+            0: (empty)
+            1: GRAPHQL_NAME@28..34
+              0: GRAPHQL_NAME@28..34 "age" [Newline("\n"), Whitespace("  ")] []
+            2: (empty)
+            3: COLON@34..36 ":" [] [Whitespace(" ")]
+            4: GRAPHQL_NAMED_TYPE@36..39
+              0: GRAPHQL_NAME@36..39
+                0: GRAPHQL_NAME@36..39 "Int" [] []
+            5: GRAPHQL_DIRECTIVE_LIST@39..39
+          2: GRAPHQL_FIELD_DEFINITION@39..54
+            0: (empty)
+            1: GRAPHQL_NAME@39..49
+              0: GRAPHQL_NAME@39..49 "picture" [Newline("\n"), Whitespace("  ")] []
+            2: (empty)
+            3: COLON@49..51 ":" [] [Whitespace(" ")]
+            4: GRAPHQL_NAMED_TYPE@51..54
+              0: GRAPHQL_NAME@51..54
+                0: GRAPHQL_NAME@51..54 "Url" [] []
+            5: GRAPHQL_DIRECTIVE_LIST@54..54
+        2: R_CURLY@54..56 "}" [Newline("\n")] []
+    1: GRAPHQL_OBJECT_TYPE_DEFINITION@56..100
+      0: (empty)
+      1: TYPE_KW@56..63 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@63..70
+        0: GRAPHQL_NAME@63..70 "Person" [] [Whitespace(" ")]
+      3: (empty)
+      4: GRAPHQL_DIRECTIVE_LIST@70..82
+        0: GRAPHQL_DIRECTIVE@70..82
+          0: AT@70..71 "@" [] []
+          1: GRAPHQL_NAME@71..82
+            0: GRAPHQL_NAME@71..82 "deprecated" [] [Whitespace(" ")]
+          2: (empty)
+      5: GRAPHQL_FIELDS_DEFINITION@82..100
+        0: L_CURLY@82..83 "{" [] []
+        1: GRAPHQL_FIELD_DEFINITION_LIST@83..98
+          0: GRAPHQL_FIELD_DEFINITION@83..98
+            0: (empty)
+            1: GRAPHQL_NAME@83..90
+              0: GRAPHQL_NAME@83..90 "name" [Newline("\n"), Whitespace("  ")] []
+            2: (empty)
+            3: COLON@90..92 ":" [] [Whitespace(" ")]
+            4: GRAPHQL_NAMED_TYPE@92..98
+              0: GRAPHQL_NAME@92..98
+                0: GRAPHQL_NAME@92..98 "String" [] []
+            5: GRAPHQL_DIRECTIVE_LIST@98..98
+        2: R_CURLY@98..100 "}" [Newline("\n")] []
+    2: GRAPHQL_OBJECT_TYPE_DEFINITION@100..165
+      0: (empty)
+      1: TYPE_KW@100..107 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@107..114
+        0: GRAPHQL_NAME@107..114 "Person" [] [Whitespace(" ")]
+      3: GRAPHQL_IMPLEMENTS_INTERFACES@114..135
+        0: IMPLEMENTS_KW@114..125 "implements" [] [Whitespace(" ")]
+        1: (empty)
+        2: GRAPHQL_IMPLEMENTS_INTERFACE_LIST@125..135
+          0: GRAPHQL_NAMED_TYPE@125..135
+            0: GRAPHQL_NAME@125..135
+              0: GRAPHQL_NAME@125..135 "Character" [] [Whitespace(" ")]
+      4: GRAPHQL_DIRECTIVE_LIST@135..147
+        0: GRAPHQL_DIRECTIVE@135..147
+          0: AT@135..136 "@" [] []
+          1: GRAPHQL_NAME@136..147
+            0: GRAPHQL_NAME@136..147 "deprecated" [] [Whitespace(" ")]
+          2: (empty)
+      5: GRAPHQL_FIELDS_DEFINITION@147..165
+        0: L_CURLY@147..148 "{" [] []
+        1: GRAPHQL_FIELD_DEFINITION_LIST@148..163
+          0: GRAPHQL_FIELD_DEFINITION@148..163
+            0: (empty)
+            1: GRAPHQL_NAME@148..155
+              0: GRAPHQL_NAME@148..155 "name" [Newline("\n"), Whitespace("  ")] []
+            2: (empty)
+            3: COLON@155..157 ":" [] [Whitespace(" ")]
+            4: GRAPHQL_NAMED_TYPE@157..163
+              0: GRAPHQL_NAME@157..163
+                0: GRAPHQL_NAME@157..163 "String" [] []
+            5: GRAPHQL_DIRECTIVE_LIST@163..163
+        2: R_CURLY@163..165 "}" [Newline("\n")] []
+    3: GRAPHQL_OBJECT_TYPE_DEFINITION@165..218
+      0: (empty)
+      1: TYPE_KW@165..172 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@172..179
+        0: GRAPHQL_NAME@172..179 "Person" [] [Whitespace(" ")]
+      3: GRAPHQL_IMPLEMENTS_INTERFACES@179..200
+        0: IMPLEMENTS_KW@179..190 "implements" [] [Whitespace(" ")]
+        1: (empty)
+        2: GRAPHQL_IMPLEMENTS_INTERFACE_LIST@190..200
+          0: GRAPHQL_NAMED_TYPE@190..200
+            0: GRAPHQL_NAME@190..200
+              0: GRAPHQL_NAME@190..200 "Character" [] [Whitespace(" ")]
+      4: GRAPHQL_DIRECTIVE_LIST@200..200
+      5: GRAPHQL_FIELDS_DEFINITION@200..218
+        0: L_CURLY@200..201 "{" [] []
+        1: GRAPHQL_FIELD_DEFINITION_LIST@201..216
+          0: GRAPHQL_FIELD_DEFINITION@201..216
+            0: (empty)
+            1: GRAPHQL_NAME@201..208
+              0: GRAPHQL_NAME@201..208 "name" [Newline("\n"), Whitespace("  ")] []
+            2: (empty)
+            3: COLON@208..210 ":" [] [Whitespace(" ")]
+            4: GRAPHQL_NAMED_TYPE@210..216
+              0: GRAPHQL_NAME@210..216
+                0: GRAPHQL_NAME@210..216 "String" [] []
+            5: GRAPHQL_DIRECTIVE_LIST@216..216
+        2: R_CURLY@216..218 "}" [Newline("\n")] []
+    4: GRAPHQL_OBJECT_TYPE_DEFINITION@218..231
+      0: (empty)
+      1: TYPE_KW@218..225 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@225..231
+        0: GRAPHQL_NAME@225..231 "Person" [] []
+      3: (empty)
+      4: GRAPHQL_DIRECTIVE_LIST@231..231
+      5: (empty)
+    5: GRAPHQL_OBJECT_TYPE_DEFINITION@231..265
+      0: (empty)
+      1: TYPE_KW@231..238 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@238..245
+        0: GRAPHQL_NAME@238..245 "Person" [] [Whitespace(" ")]
+      3: GRAPHQL_IMPLEMENTS_INTERFACES@245..265
+        0: IMPLEMENTS_KW@245..256 "implements" [] [Whitespace(" ")]
+        1: (empty)
+        2: GRAPHQL_IMPLEMENTS_INTERFACE_LIST@256..265
+          0: GRAPHQL_NAMED_TYPE@256..265
+            0: GRAPHQL_NAME@256..265
+              0: GRAPHQL_NAME@256..265 "Character" [] []
+      4: GRAPHQL_DIRECTIVE_LIST@265..265
+      5: (empty)
+    6: GRAPHQL_OBJECT_TYPE_DEFINITION@265..290
+      0: (empty)
+      1: TYPE_KW@265..272 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@272..279
+        0: GRAPHQL_NAME@272..279 "Person" [] [Whitespace(" ")]
+      3: (empty)
+      4: GRAPHQL_DIRECTIVE_LIST@279..290
+        0: GRAPHQL_DIRECTIVE@279..290
+          0: AT@279..280 "@" [] []
+          1: GRAPHQL_NAME@280..290
+            0: GRAPHQL_NAME@280..290 "deprecated" [] []
+          2: (empty)
+      5: (empty)
+    7: GRAPHQL_OBJECT_TYPE_DEFINITION@290..336
+      0: (empty)
+      1: TYPE_KW@290..297 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@297..304
+        0: GRAPHQL_NAME@297..304 "Person" [] [Whitespace(" ")]
+      3: GRAPHQL_IMPLEMENTS_INTERFACES@304..325
+        0: IMPLEMENTS_KW@304..315 "implements" [] [Whitespace(" ")]
+        1: (empty)
+        2: GRAPHQL_IMPLEMENTS_INTERFACE_LIST@315..325
+          0: GRAPHQL_NAMED_TYPE@315..325
+            0: GRAPHQL_NAME@315..325
+              0: GRAPHQL_NAME@315..325 "Character" [] [Whitespace(" ")]
+      4: GRAPHQL_DIRECTIVE_LIST@325..336
+        0: GRAPHQL_DIRECTIVE@325..336
+          0: AT@325..326 "@" [] []
+          1: GRAPHQL_NAME@326..336
+            0: GRAPHQL_NAME@326..336 "deprecated" [] []
+          2: (empty)
+      5: (empty)
+    8: GRAPHQL_OBJECT_TYPE_DEFINITION@336..395
+      0: (empty)
+      1: TYPE_KW@336..343 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@343..350
+        0: GRAPHQL_NAME@343..350 "Person" [] [Whitespace(" ")]
+      3: GRAPHQL_IMPLEMENTS_INTERFACES@350..384
+        0: IMPLEMENTS_KW@350..361 "implements" [] [Whitespace(" ")]
+        1: (empty)
+        2: GRAPHQL_IMPLEMENTS_INTERFACE_LIST@361..384
+          0: GRAPHQL_NAMED_TYPE@361..371
+            0: GRAPHQL_NAME@361..371
+              0: GRAPHQL_NAME@361..371 "Character" [] [Whitespace(" ")]
+          1: AMP@371..373 "&" [] [Whitespace(" ")]
+          2: GRAPHQL_NAMED_TYPE@373..384
+            0: GRAPHQL_NAME@373..384
+              0: GRAPHQL_NAME@373..384 "Character1" [] [Whitespace(" ")]
+      4: GRAPHQL_DIRECTIVE_LIST@384..395
+        0: GRAPHQL_DIRECTIVE@384..395
+          0: AT@384..385 "@" [] []
+          1: GRAPHQL_NAME@385..395
+            0: GRAPHQL_NAME@385..395 "deprecated" [] []
+          2: (empty)
+      5: (empty)
+    9: GRAPHQL_OBJECT_TYPE_DEFINITION@395..648
+      0: (empty)
+      1: TYPE_KW@395..402 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@402..409
+        0: GRAPHQL_NAME@402..409 "Person" [] [Whitespace(" ")]
+      3: (empty)
+      4: GRAPHQL_DIRECTIVE_LIST@409..409
+      5: GRAPHQL_FIELDS_DEFINITION@409..648
+        0: L_CURLY@409..410 "{" [] []
+        1: GRAPHQL_FIELD_DEFINITION_LIST@410..646
+          0: GRAPHQL_FIELD_DEFINITION@410..445
+            0: (empty)
+            1: GRAPHQL_NAME@410..417
+              0: GRAPHQL_NAME@410..417 "name" [Newline("\n"), Whitespace("  ")] []
+            2: GRAPHQL_ARGUMENTS_DEFINITION@417..437
+              0: L_PAREN@417..418 "(" [] []
+              1: GRAPHQL_ARGUMENT_DEFINITION_LIST@418..436
+                0: GRAPHQL_INPUT_VALUE_DEFINITION@418..436
+                  0: (empty)
+                  1: GRAPHQL_NAME@418..428
+                    0: GRAPHQL_NAME@418..428 "start_with" [] []
+                  2: COLON@428..430 ":" [] [Whitespace(" ")]
+                  3: GRAPHQL_NAMED_TYPE@430..436
+                    0: GRAPHQL_NAME@430..436
+                      0: GRAPHQL_NAME@430..436 "String" [] []
+                  4: (empty)
+                  5: GRAPHQL_DIRECTIVE_LIST@436..436
+              2: R_PAREN@436..437 ")" [] []
+            3: COLON@437..439 ":" [] [Whitespace(" ")]
+            4: GRAPHQL_NAMED_TYPE@439..445
+              0: GRAPHQL_NAME@439..445
+                0: GRAPHQL_NAME@439..445 "String" [] []
+            5: GRAPHQL_DIRECTIVE_LIST@445..445
+          1: GRAPHQL_FIELD_DEFINITION@445..484
+            0: GRAPHQL_DESCRIPTION@445..464
+              0: GRAPHQL_STRING_VALUE@445..464
+                0: GRAPHQL_STRING_LITERAL@445..464 "\"filder by age\"" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: GRAPHQL_NAME@464..467
+              0: GRAPHQL_NAME@464..467 "age" [] []
+            2: (empty)
+            3: COLON@467..469 ":" [] [Whitespace(" ")]
+            4: GRAPHQL_NAMED_TYPE@469..473
+              0: GRAPHQL_NAME@469..473
+                0: GRAPHQL_NAME@469..473 "Int" [] [Whitespace(" ")]
+            5: GRAPHQL_DIRECTIVE_LIST@473..484
+              0: GRAPHQL_DIRECTIVE@473..484
+                0: AT@473..474 "@" [] []
+                1: GRAPHQL_NAME@474..484
+                  0: GRAPHQL_NAME@474..484 "deprecated" [] []
+                2: (empty)
+          2: GRAPHQL_FIELD_DEFINITION@484..514
+            0: (empty)
+            1: GRAPHQL_NAME@484..494
+              0: GRAPHQL_NAME@484..494 "picture" [Newline("\n"), Whitespace("  ")] []
+            2: GRAPHQL_ARGUMENTS_DEFINITION@494..509
+              0: L_PAREN@494..495 "(" [] []
+              1: GRAPHQL_ARGUMENT_DEFINITION_LIST@495..508
+                0: GRAPHQL_INPUT_VALUE_DEFINITION@495..508
+                  0: (empty)
+                  1: GRAPHQL_NAME@495..499
+                    0: GRAPHQL_NAME@495..499 "size" [] []
+                  2: COLON@499..501 ":" [] [Whitespace(" ")]
+                  3: GRAPHQL_NAMED_TYPE@501..505
+                    0: GRAPHQL_NAME@501..505
+                      0: GRAPHQL_NAME@501..505 "Int" [] [Whitespace(" ")]
+                  4: GRAPHQL_DEFAULT_VALUE@505..508
+                    0: EQ@505..507 "=" [] [Whitespace(" ")]
+                    1: GRAPHQL_INT_VALUE@507..508
+                      0: GRAPHQL_INT_LITERAL@507..508 "0" [] []
+                  5: GRAPHQL_DIRECTIVE_LIST@508..508
+              2: R_PAREN@508..509 ")" [] []
+            3: COLON@509..511 ":" [] [Whitespace(" ")]
+            4: GRAPHQL_NAMED_TYPE@511..514
+              0: GRAPHQL_NAME@511..514
+                0: GRAPHQL_NAME@511..514 "Url" [] []
+            5: GRAPHQL_DIRECTIVE_LIST@514..514
+          3: GRAPHQL_FIELD_DEFINITION@514..578
+            0: (empty)
+            1: GRAPHQL_NAME@514..523
+              0: GRAPHQL_NAME@514..523 "height" [Newline("\n"), Whitespace("  ")] []
+            2: GRAPHQL_ARGUMENTS_DEFINITION@523..573
+              0: L_PAREN@523..524 "(" [] []
+              1: GRAPHQL_ARGUMENT_DEFINITION_LIST@524..572
+                0: GRAPHQL_INPUT_VALUE_DEFINITION@524..572
+                  0: GRAPHQL_DESCRIPTION@524..543
+                    0: GRAPHQL_STRING_VALUE@524..543
+                      0: GRAPHQL_STRING_LITERAL@524..543 "\"filter by height\"" [] [Whitespace(" ")]
+                  1: GRAPHQL_NAME@543..555
+                    0: GRAPHQL_NAME@543..555 "greater_than" [] []
+                  2: COLON@555..557 ":" [] [Whitespace(" ")]
+                  3: GRAPHQL_NAMED_TYPE@557..561
+                    0: GRAPHQL_NAME@557..561
+                      0: GRAPHQL_NAME@557..561 "Int" [] [Whitespace(" ")]
+                  4: (empty)
+                  5: GRAPHQL_DIRECTIVE_LIST@561..572
+                    0: GRAPHQL_DIRECTIVE@561..572
+                      0: AT@561..562 "@" [] []
+                      1: GRAPHQL_NAME@562..572
+                        0: GRAPHQL_NAME@562..572 "deprecated" [] []
+                      2: (empty)
+              2: R_PAREN@572..573 ")" [] []
+            3: COLON@573..575 ":" [] [Whitespace(" ")]
+            4: GRAPHQL_NAMED_TYPE@575..578
+              0: GRAPHQL_NAME@575..578
+                0: GRAPHQL_NAME@575..578 "Int" [] []
+            5: GRAPHQL_DIRECTIVE_LIST@578..578
+          4: GRAPHQL_FIELD_DEFINITION@578..646
+            0: (empty)
+            1: GRAPHQL_NAME@578..587
+              0: GRAPHQL_NAME@578..587 "weight" [Newline("\n"), Whitespace("  ")] []
+            2: GRAPHQL_ARGUMENTS_DEFINITION@587..641
+              0: L_PAREN@587..588 "(" [] []
+              1: GRAPHQL_ARGUMENT_DEFINITION_LIST@588..640
+                0: GRAPHQL_INPUT_VALUE_DEFINITION@588..640
+                  0: GRAPHQL_DESCRIPTION@588..607
+                    0: GRAPHQL_STRING_VALUE@588..607
+                      0: GRAPHQL_STRING_LITERAL@588..607 "\"filter by weight\"" [] [Whitespace(" ")]
+                  1: GRAPHQL_NAME@607..619
+                    0: GRAPHQL_NAME@607..619 "greater_than" [] []
+                  2: COLON@619..621 ":" [] [Whitespace(" ")]
+                  3: GRAPHQL_NAMED_TYPE@621..625
+                    0: GRAPHQL_NAME@621..625
+                      0: GRAPHQL_NAME@621..625 "Int" [] [Whitespace(" ")]
+                  4: GRAPHQL_DEFAULT_VALUE@625..629
+                    0: EQ@625..627 "=" [] [Whitespace(" ")]
+                    1: GRAPHQL_INT_VALUE@627..629
+                      0: GRAPHQL_INT_LITERAL@627..629 "0" [] [Whitespace(" ")]
+                  5: GRAPHQL_DIRECTIVE_LIST@629..640
+                    0: GRAPHQL_DIRECTIVE@629..640
+                      0: AT@629..630 "@" [] []
+                      1: GRAPHQL_NAME@630..640
+                        0: GRAPHQL_NAME@630..640 "deprecated" [] []
+                      2: (empty)
+              2: R_PAREN@640..641 ")" [] []
+            3: COLON@641..643 ":" [] [Whitespace(" ")]
+            4: GRAPHQL_NAMED_TYPE@643..646
+              0: GRAPHQL_NAME@643..646
+                0: GRAPHQL_NAME@643..646 "Int" [] []
+            5: GRAPHQL_DIRECTIVE_LIST@646..646
+        2: R_CURLY@646..648 "}" [Newline("\n")] []
+  2: EOF@648..650 "" [Newline("\n"), Newline("\n")] []
+
+```

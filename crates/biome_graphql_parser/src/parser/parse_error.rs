@@ -38,6 +38,10 @@ pub(crate) fn expected_object_field(p: &GraphqlParser, range: TextRange) -> Pars
     expected_node("object field", range, p)
 }
 
+pub(crate) fn expected_field_definition(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("field definition", range, p)
+}
+
 pub(crate) fn expected_argument(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("argument", range, p)
 }

@@ -100,6 +100,18 @@ impl ParseNodeList for ObjectValueMemberList {
 }
 
 #[inline]
+pub(crate) fn parse_default_value(p: &mut GraphqlParser) -> ParsedSyntax {
+    if !p.at(T![=]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![=]);
+    parse_value(p).or_add_diagnostic(p, expected_value);
+    Present(m.complete(p, GRAPHQL_DEFAULT_VALUE))
+}
+
+#[inline]
 pub(crate) fn parse_value(p: &mut GraphqlParser) -> ParsedSyntax {
     if is_at_variable(p) {
         parse_variable(p)
