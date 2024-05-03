@@ -1,13 +1,15 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsStatement, JsLabeledStatement};
+use biome_js_syntax::{AnyJsStatement, JsFileSource, JsLabeledStatement};
 
 declare_rule! {
     /// Disallow labeled statements that are not loops.
     ///
     /// Labeled statements in JavaScript are used in conjunction with `break` and `continue` to control flow around multiple loops.
     /// Their use for other statements is suspicious and unfamiliar.
+    ///
+    /// The rule ignores reactive Svelte statements in Svelte components.
     ///
     /// ## Examples
     ///
@@ -47,6 +49,12 @@ declare_rule! {
     ///     }
     /// }
     /// ```
+    ///
+    /// ```svelte
+    /// <script>
+    /// $: { /* reactive block */ }
+    /// </script>
+    /// ```
     pub NoConfusingLabels {
         version: "1.0.0",
         name: "noConfusingLabels",
@@ -64,6 +72,16 @@ impl Rule for NoConfusingLabels {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let labeled_stmt = ctx.query();
+        let label = labeled_stmt.label_token().ok()?;
+        let label = label.text_trimmed();
+        if label == "$"
+            && ctx
+                .source_type::<JsFileSource>()
+                .as_embedding_kind()
+                .is_svelte()
+        {
+            return None;
+        }
         match labeled_stmt.body().ok()? {
             AnyJsStatement::JsDoWhileStatement(_)
             | AnyJsStatement::JsForInStatement(_)
