@@ -1,0 +1,95 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Input messages
+
+```block
+<script setup lang="ts">
+a == b;
+delete a.c;
+
+var foo: string = "";
+</script>
+<template></template>
+```
+
+# Emitted Messages
+
+```block
+<script setup lang="ts">
+a == b;
+delete a.c;
+
+var foo: string = "";
+</script>
+<template></template>
+```
+
+```block
+file.svelte lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use === instead of ==
+  
+  i == is only allowed when comparing against null
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    1 │ a·===·b;
+      │     +   
+
+```
+
+```block
+file.svelte lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the delete operator which can impact performance.
+  
+  i Unsafe fix: Use an undefined assignment instead.
+  
+    1 1 │   a == b;
+    2   │ - delete·a.c;
+      2 │ + a.c·=·undefined;
+    3 3 │   
+    4 4 │   var foo: string = "";
+  
+
+```
+
+```block
+file.svelte lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This type annotation is trivially inferred from its initialization.
+  
+  i Safe fix: Remove the type annotation.
+  
+    2 2 │   delete a.c;
+    3 3 │   
+    4   │ - var·foo:·string·=·"";
+      4 │ + var·foo·=·"";
+    5 5 │   
+  
+
+```
+
+```block
+file.svelte lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use let or const instead of var.
+  
+  i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
+  
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'const' instead.
+  
+    2 2 │   delete a.c;
+    3 3 │   
+    4   │ - var·foo:·string·=·"";
+      4 │ + const·foo:·string·=·"";
+    5 5 │   
+  
+
+```

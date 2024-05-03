@@ -6,10 +6,10 @@ expression: content
 
 ```block
 <script setup lang="ts">
-import {      Button  as Button  }   from  "./components/Button.vue"   ;
-import *     as         vueUse  from  "vue-use"   ;
-
+a == b;
 delete a.c;
+
+var foo: string = "";
 </script>
 <template></template>
 ```
@@ -18,10 +18,10 @@ delete a.c;
 
 ```block
 <script setup lang="ts">
-import * as vueUse from "vue-use";
-import { Button } from "./components/Button.vue";
-
+a === b;
 a.c = undefined;
+
+const foo = "";
 </script>
 <template></template>
 ```

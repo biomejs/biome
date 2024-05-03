@@ -6,10 +6,8 @@ expression: content
 
 ```block
 <script setup lang="ts">
-import {      Button  as Button  }   from  "./components/Button.vue"   ;
-import *     as         vueUse  from  "vue-use"   ;
-
-delete a.c;
+import     { type     something } from "file.vue";
+const hello  :      string      = "world";
 </script>
 <template></template>
 ```
@@ -18,10 +16,8 @@ delete a.c;
 
 ```block
 <script setup lang="ts">
-import * as vueUse from "vue-use";
-import { Button } from "./components/Button.vue";
-
-a.c = undefined;
+import { type something } from "file.vue";
+const hello: string = "world";
 </script>
 <template></template>
 ```
