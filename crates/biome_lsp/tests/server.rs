@@ -63,7 +63,6 @@ macro_rules! url {
     };
 }
 
-
 struct Server {
     service: Timeout<LspService<LSPServer>>,
 }
