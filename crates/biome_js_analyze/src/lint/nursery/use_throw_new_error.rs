@@ -1,5 +1,3 @@
-use std::ops::Not;
-
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
@@ -11,15 +9,15 @@ use biome_js_syntax::{
     AnyJsExpression, JsCallExpression, JsNewExpression, JsParenthesizedExpression, JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
-use lazy_static::lazy_static;
-use regex::Regex;
 
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Require new when throwing an error
+    /// Require `new` when throwing an error.
     ///
     /// While it's possible to create a new error without using the new keyword, it's better to be explicit.
+    ///
+    /// Rule matches errors when their name ends with the word "Error" and the first character is uppercase.
     ///
     /// ## Examples
     ///
@@ -65,26 +63,36 @@ impl Rule for UseThrowNewError {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if is_in_throw_statement(node.clone()).not() {
+        if !is_in_throw_statement(node) {
             return None;
         }
 
         let callee = &node.callee().ok()?.omit_parentheses();
         let name = match callee {
-            AnyJsExpression::JsIdentifierExpression(ident_expr) => Some(ident_expr.text()),
-            AnyJsExpression::JsStaticMemberExpression(member_expr) => {
-                let member_expr = member_expr.member().ok()?.text();
-
-                Some(member_expr)
-            }
+            AnyJsExpression::JsIdentifierExpression(ident_expr) => Some(
+                ident_expr
+                    .name()
+                    .ok()?
+                    .value_token()
+                    .ok()?
+                    .token_text_trimmed(),
+            ),
+            AnyJsExpression::JsStaticMemberExpression(member_expr) => Some(
+                member_expr
+                    .member()
+                    .ok()?
+                    .value_token()
+                    .ok()?
+                    .token_text_trimmed(),
+            ),
             _ => None,
         }?;
 
-        if ERROR_CONSTRUCTOR_REGEX.is_match(&name).not() {
-            return None;
+        if name.ends_with("Error") && name.chars().next()?.is_uppercase() {
+            return Some(());
         }
 
-        Some(())
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -115,10 +123,6 @@ impl Rule for UseThrowNewError {
     }
 }
 
-lazy_static! {
-    static ref ERROR_CONSTRUCTOR_REGEX: Regex = Regex::new(r#"^(?:[A-Z][\da-z]*)*Error$"#).unwrap();
-}
-
 fn does_member_contains_call_expression(expr: &AnyJsExpression) -> Option<bool> {
     let mut current_node = expr.clone();
 
@@ -135,12 +139,14 @@ fn does_member_contains_call_expression(expr: &AnyJsExpression) -> Option<bool> 
     }
 }
 
-fn convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option<JsNewExpression> {
+pub(crate) fn convert_call_expression_to_new_expression(
+    expr: &JsCallExpression,
+) -> Option<JsNewExpression> {
     let mut callee = expr.callee().ok()?;
     let leading_trivia_pieces = callee.syntax().first_leading_trivia()?.pieces();
 
     // To use `new` keyword, we need to wrap the callee in parentheses if it contains a call expression.
-    // Example: `new foo.bar()` -> `new (foo.bar())`
+    // Example: `foo().bar()` -> `new (foo().bar())`
     if !JsParenthesizedExpression::can_cast(callee.syntax().kind())
         && does_member_contains_call_expression(&callee).is_some()
     {
@@ -165,16 +171,10 @@ fn convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option<
 }
 
 /// Checks if the given expression is inside a `throw` statement.
-fn is_in_throw_statement(expr: JsCallExpression) -> bool {
-    let mut current_expr = expr.into_syntax();
-
-    while let Some(parent) = current_expr.parent() {
-        match parent.kind() {
-            JsSyntaxKind::JS_THROW_STATEMENT => return true,
-            JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => current_expr = parent,
-            _ => return false,
-        }
-    }
-
-    false
+fn is_in_throw_statement(expr: &JsCallExpression) -> bool {
+    expr.syntax()
+        .ancestors()
+        .skip(1)
+        .find(|ancestor| ancestor.kind() != JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION)
+        .is_some_and(|ancestor| ancestor.kind() == JsSyntaxKind::JS_THROW_STATEMENT)
 }

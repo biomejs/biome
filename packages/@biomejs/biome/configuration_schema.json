@@ -1634,7 +1634,7 @@
 					]
 				},
 				"useThrowNewError": {
-					"description": "Require new when throwing an error",
+					"description": "Require new when throwing an error.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -1025,7 +1025,7 @@ export interface Nursery {
 	 */
 	useSortedClasses?: RuleConfiguration_for_UtilityClassSortingOptions;
 	/**
-	 * Require new when throwing an error
+	 * Require new when throwing an error.
 	 */
 	useThrowNewError?: RuleConfiguration_for_Null;
 }
@@ -2018,12 +2018,9 @@ export type Category =
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/useArrayLiterals"
-	| "lint/nursery/noUselessUndefinedInitialization"
-	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useDefaultSwitchClause"
-	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
