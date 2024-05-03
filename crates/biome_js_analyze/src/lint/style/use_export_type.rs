@@ -8,7 +8,8 @@ use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExportNamedSpecifier, JsExportNamedClause, JsFileSource, T};
 use biome_rowan::{
-    trim_leading_trivia_pieces, AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind,
+    chain_trivia_pieces, trim_leading_trivia_pieces, AstNode, AstSeparatedList, BatchMutationExt,
+    TriviaPieceKind,
 };
 
 declare_rule! {
@@ -106,11 +107,11 @@ impl Rule for UseExportType {
             }
         }
         if exports_only_types {
-            Some(ExportTypeFix::GroupTypeExports)
+            Some(ExportTypeFix::UseExportType)
         } else if specifiers_requiring_type_marker.is_empty() {
             None
         } else {
-            Some(ExportTypeFix::AddInlineType(
+            Some(ExportTypeFix::AddInlineTypeQualifiers(
                 specifiers_requiring_type_marker,
             ))
         }
@@ -119,13 +120,13 @@ impl Rule for UseExportType {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let range = ctx.query().range();
         let (diagnostic_range, diagnostic_message) = match state {
-            ExportTypeFix::GroupTypeExports => (
+            ExportTypeFix::UseExportType => (
                 range,
                 markup! {
                     "All exports are only types and should thus use "<Emphasis>"export type"</Emphasis>"."
                 },
             ),
-            ExportTypeFix::AddInlineType(specifiers) => {
+            ExportTypeFix::AddInlineTypeQualifiers(specifiers) => {
                 let range = specifiers
                     .iter()
                     .map(|x| x.range())
@@ -152,17 +153,18 @@ impl Rule for UseExportType {
         let export_named_clause = ctx.query();
         let mut mutation = ctx.root().begin();
         let diagnostic = match state {
-            ExportTypeFix::GroupTypeExports => {
+            ExportTypeFix::UseExportType => {
                 let specifier_list = export_named_clause.specifiers();
                 let mut new_specifiers = Vec::new();
                 for specifier in specifier_list.iter().filter_map(|x| x.ok()) {
                     if let Some(type_token) = specifier.type_token() {
-                        let mut new_specifier = specifier.with_type_token(None);
-                        if type_token.has_trailing_comments() {
-                            new_specifier = new_specifier.prepend_trivia_pieces(
+                        let new_specifier = specifier
+                            .with_type_token(None)
+                            .trim_leading_trivia()?
+                            .prepend_trivia_pieces(chain_trivia_pieces(
+                                type_token.leading_trivia().pieces(),
                                 trim_leading_trivia_pieces(type_token.trailing_trivia().pieces()),
-                            )?;
-                        }
+                            ))?;
                         new_specifiers.push(new_specifier);
                     } else {
                         new_specifiers.push(specifier)
@@ -193,7 +195,7 @@ impl Rule for UseExportType {
                     mutation,
                 }
             }
-            ExportTypeFix::AddInlineType(specifiers) => {
+            ExportTypeFix::AddInlineTypeQualifiers(specifiers) => {
                 for specifier in specifiers {
                     mutation.replace_node(
                         specifier.clone(),
@@ -227,6 +229,6 @@ pub enum ExportTypeFix {
     /**
      * Group inline type exports such as `export { type A, type B }` into `export type { A, B }`.
      */
-    GroupTypeExports,
-    AddInlineType(Vec<AnyJsExportNamedSpecifier>),
+    UseExportType,
+    AddInlineTypeQualifiers(Vec<AnyJsExportNamedSpecifier>),
 }

@@ -34,6 +34,22 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useExportType](https://biomejs.dev/linter/rules/use-export-type/) no longer removes leading comments ([#2685](https://github.com/biomejs/biome/issues/2685)).
+
+  Previously, `useExportType` removed leading comments when it factorized the `type` qualifier.
+  It now provides a code fix that preserves the leading comments:
+
+  ```diff
+  - export {
+  + export type {
+      /**leading comment*/
+  -   type T
+  +   T
+    }
+  ```
+
+  Contributed by @Conaclos
+
 - Fix typo by renaming `useConsistentBuiltinInstatiation` to `useConsistentBuiltinInstantiation`
   Contributed by @minht11
 
