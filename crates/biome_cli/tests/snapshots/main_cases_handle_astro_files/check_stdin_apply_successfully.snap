@@ -1,0 +1,65 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Input messages
+
+```block
+---
+import {a as a} from 'mod';
+import {    something } from "file.astro";
+debugger;
+statement ( ) ;
+var foo: string = "";
+---
+<div></div>
+```
+
+# Emitted Messages
+
+```block
+---
+import { something } from "file.astro";
+import { a } from "mod";
+debugger;
+statement();
+var foo = "";
+---
+<div></div>
+```
+
+```block
+file.astro lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+  i Unsafe fix: Remove debugger statement
+  
+    2 2 │   import { something } from "file.astro";
+    3 3 │   import { a } from "mod";
+    4   │ - debugger;
+    5 4 │   statement();
+    6 5 │   var foo = "";
+  
+
+```
+
+```block
+file.astro lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use let or const instead of var.
+  
+  i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
+  
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'const' instead.
+  
+    4 4 │   debugger;
+    5 5 │   statement();
+    6   │ - var·foo·=·"";
+      6 │ + const·foo·=·"";
+    7 7 │   
+  
+
+```
