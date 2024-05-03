@@ -59,4 +59,6 @@ React.Children.map(c => React.cloneElement(c, {key: c}));
 
 <>{data.reduce((a, b) => a > b ? a : b, 0)}</>
 
+<>{data.map(a => a > 4 ? <h1 key={a}>{a}</h1> : <h2 key={a}>{a}</h2>)}</>
+
 ```
