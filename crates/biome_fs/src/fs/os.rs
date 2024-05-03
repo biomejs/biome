@@ -33,7 +33,7 @@ impl OsFileSystem {
             working_directory: Some(working_directory),
             configuration_resolver: AssertUnwindSafe(Resolver::new(ResolveOptions {
                 condition_names: vec!["node".to_string(), "import".to_string()],
-                extensions: vec!["*.json".to_string(), "*.jsonc".to_string()],
+                extensions: vec![".json".to_string(), ".jsonc".to_string()],
                 ..ResolveOptions::default()
             })),
         }
