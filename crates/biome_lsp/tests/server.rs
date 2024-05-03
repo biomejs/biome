@@ -63,16 +63,6 @@ macro_rules! url {
     };
 }
 
-/// Creates an absolute [PathBuf] by prefixing them with `/workspace` depending on the OS
-macro_rules! absolute_path {
-    ($path:literal) => {
-        if cfg!(windows) {
-            PathBuf::from(concat!("z%3A/workspace/", $path))
-        } else {
-            PathBuf::from(concat!("/workspace/", $path))
-        }
-    };
-}
 
 struct Server {
     service: Timeout<LspService<LSPServer>>,
@@ -484,7 +474,7 @@ async fn document_lifecycle() -> Result<()> {
             "biome/get_syntax_tree",
             "get_syntax_tree",
             GetSyntaxTreeParams {
-                path: BiomePath::new(absolute_path!("document.js")),
+                path: BiomePath::new(url!("document.js").to_file_path().unwrap()),
             },
         )
         .await?
@@ -1921,7 +1911,7 @@ isSpreadAssignment;
             "biome/get_file_content",
             "get_file_content",
             GetFileContentParams {
-                path: BiomePath::new(absolute_path!("document.js")),
+                path: BiomePath::new(url!("document.js").to_file_path().unwrap()),
             },
         )
         .await?
