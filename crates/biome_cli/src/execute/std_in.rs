@@ -119,7 +119,9 @@ pub(crate) fn run<'a>(
                         AstroFileHandler::output(&new_content, fix_file_result.code.as_str())
                     }
                     "vue" => VueFileHandler::output(&new_content, fix_file_result.code.as_str()),
-                    "svelte" => SvelteFileHandler::output(&new_content, fix_file_result.code.as_str()),
+                    "svelte" => {
+                        SvelteFileHandler::output(&new_content, fix_file_result.code.as_str())
+                    }
                     _ => fix_file_result.code,
                 };
                 if output != new_content {
